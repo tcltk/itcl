@@ -1668,12 +1668,13 @@ fi
 # versions have bugs in the pkg_mkIndex routine.
 #--------------------------------------------------------------------
 
-for ac_prog in tclsh8.2${EXEEXT} tclsh82${EXEEXT} tclsh82d${EXEEXT} tclsh${EXEEXT}
+
+    for ac_prog in tclsh8.2${EXEEXT} tclsh82d${EXEEXT} tclsh82${EXEEXT} tclsh${EXEEXT}
 do
 # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
 echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
-echo "configure:1677: checking for $ac_word" >&5
+echo "configure:1678: checking for $ac_word" >&5
 if eval "test \"`echo '$''{'ac_cv_path_TCLSH_PROG'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -1710,10 +1711,10 @@ done
 test -n "$TCLSH_PROG" || TCLSH_PROG=":"
 
 
-if test "x${TCLSH_PROG}" = "x:" ; then
-    echo "configure: warning: No tclsh executable found.  You will have to build the pkgIndex.tcl file manually." 1>&2
-fi
-
+    if test "x${TCLSH_PROG}" = "x:" ; then
+	echo "configure: warning: No tclsh executable found.  You will have to build the pkgIndex.tcl file manually." 1>&2
+    fi
+    
 
 
 #--------------------------------------------------------------------
