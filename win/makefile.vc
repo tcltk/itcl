@@ -5,7 +5,7 @@
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 # 
 # Copyright (c) 1993-1998 Lucent Technologies, Inc.
-# RCS: $Id: makefile.vc,v 1.27 2003/12/24 01:09:56 davygrvy Exp $
+# RCS: $Id: makefile.vc,v 1.28 2004/02/12 18:10:14 davygrvy Exp $
 #------------------------------------------------------------------------------
 #  Do not modify this file!
 #------------------------------------------------------------------------------
@@ -60,7 +60,7 @@ ITCLSTUBLIBNAME	= $(STUBPREFIX)$(ITCL_VERSION).lib
 ITCLSTUBLIB	= "$(OUT_DIR)\$(ITCLSTUBLIBNAME)"
 !else
 ITCLSTUBLIBNAME	=
-ITCLSTUBLIB	= ""
+ITCLSTUBLIB	= 
 TCLSTUBLIB	= $(TCLIMPLIB)
 !endif
 
@@ -239,7 +239,7 @@ install-binaries :
 	if not exist "$(SCRIPT_INSTALL_DIR)" mkdir "$(SCRIPT_INSTALL_DIR)"
 	if not exist "$(INCLUDE_INSTALL_DIR)" mkdir "$(INCLUDE_INSTALL_DIR)"
 	copy $(ITCLLIB) "$(SCRIPT_INSTALL_DIR)"
-!if exist($(ITCLSTUBLIB))
+!if $(ITCLSTUBLIB) != ""
 	copy $(ITCLSTUBLIB) "$(LIB_INSTALL_DIR)"
 !endif
 	copy $(ROOT)\generic\itcl.h "$(INCLUDE_INSTALL_DIR)"
@@ -267,7 +267,10 @@ install-binaries :
 	echo unset add>> "$(SCRIPT_INSTALL_DIR)\pkgIndex.tcl"
 
 test :
-	$(TCLSH) ..\tests\all.tcl $(TESTFLAGS)
+	$(TCLSH) ..\tests\all.tcl $(TESTFLAGS) -loadfile <<
+	set env(ITCL_LIBRARY) [file normalize [file join $(MAKEDIR:\=/) .. library]]
+	load [file normalize $(ITCLLIB:\=/)]
+<<
 
 
 #---------------------------------------------------------------------
