@@ -42,7 +42,7 @@
  *       modified for Stubs 5/20/1999 by 
  *           David Gravereaux <davygrvy@bigfoot.com>
  *
- *     RCS:  $Id: itcl.h,v 1.8 2000/04/19 06:51:04 mmc Exp $
+ *     RCS:  $Id: itcl.h,v 1.9 2000/07/06 06:43:29 mmc Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -66,7 +66,7 @@
 #endif
 
 #define ITCL_VERSION "3.2"
-#define ITCL_PATCH_LEVEL "3.2a1"
+#define ITCL_PATCH_LEVEL "3.2.0"
 #define ITCL_MAJOR_VERSION 3
 #define ITCL_MINOR_VERSION 2
 #define ITCL_RELEASE_LEVEL 0

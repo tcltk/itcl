@@ -23,7 +23,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itcl_class.c,v 1.3 1998/08/11 14:40:39 welch Exp $
+ *     RCS:  $Id: itcl_class.c,v 1.4 2000/07/06 06:43:29 mmc Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -1004,6 +1004,9 @@ Itcl_ClassVarResolver(interp, name, context, flags, rPtr)
                                *   in interp if anything goes wrong */
     Tcl_Var *rPtr;            /* returns: resolved variable */
 {
+    Interp *iPtr = (Interp *) interp;
+    CallFrame *varFramePtr = iPtr->varFramePtr;
+
     ItclClass *cdefn = (ItclClass*)context->clientData;
     ItclObject *contextObj;
     Tcl_CallFrame *framePtr;
@@ -1018,6 +1021,57 @@ Itcl_ClassVarResolver(interp, name, context, flags, rPtr)
      */
     if (flags & TCL_GLOBAL_ONLY) {
         return TCL_CONTINUE;
+    }
+
+    /*
+     *  See if this is a formal parameter in the current proc scope.
+     *  If so, that variable has precedence.  Look it up and return
+     *  it here.  This duplicates some of the functionality of
+     *  TclLookupVar, but we return it here (instead of returning
+     *  TCL_CONTINUE) to avoid looking it up again later.
+     */
+    if (varFramePtr && varFramePtr->isProcCallFrame
+        && strstr(name,"::") == NULL) {
+
+        Proc *procPtr = varFramePtr->procPtr;
+
+        /*
+         *  Search through compiled locals first...
+         */
+        if (procPtr) {
+            int localCt = procPtr->numCompiledLocals;
+            CompiledLocal *localPtr = procPtr->firstLocalPtr;
+            Var *localVarPtr = varFramePtr->compiledLocals;
+            int nameLen = strlen(name);
+            int i;
+
+            for (i=0; i < localCt; i++) {
+                if (!TclIsVarTemporary(localPtr)) {
+                    register char *localName = localVarPtr->name;
+                    if ((name[0] == localName[0])
+                            && (nameLen == localPtr->nameLength)
+                            && (strcmp(name, localName) == 0)) {
+                        *rPtr = (Tcl_Var)localVarPtr;
+                        return TCL_OK;
+                    }
+                }
+                localVarPtr++;
+                localPtr = localPtr->nextPtr;
+            }
+        }
+
+        /*
+         *  If it's not a compiled local, then look in the frame's
+         *  var hash table next.  This variable may have been
+         *  created on the fly.
+         */
+        if (varFramePtr->varTablePtr != NULL) {
+            entry = Tcl_FindHashEntry(varFramePtr->varTablePtr, name);
+            if (entry != NULL) {
+                *rPtr = (Tcl_Var)Tcl_GetHashValue(entry);
+                return TCL_OK;
+            }
+        }
     }
 
     /*

@@ -21,7 +21,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itcl_cmds.c,v 1.8 2000/04/19 06:51:04 mmc Exp $
+ *     RCS:  $Id: itcl_cmds.c,v 1.9 2000/07/06 06:43:29 mmc Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -416,11 +416,11 @@ ItclDelObjectInfo(cdata)
  * ------------------------------------------------------------------------
  *  Itcl_FindClassesCmd()
  *
- *  Part of the "::info" ensemble.  Invoked by Tcl whenever the user
- *  issues an "info classes" command to query the list of classes
- *  in the current namespace.  Handles the following syntax:
+ *  Invoked by Tcl whenever the user issues an "itcl::find classes"
+ *  command to query the list of known classes.  Handles the following
+ *  syntax:
  *
- *    info classes ?<pattern>?
+ *    find classes ?<pattern>?
  *
  *  Returns TCL_OK/TCL_ERROR to indicate success/failure.
  * ------------------------------------------------------------------------
@@ -543,11 +543,11 @@ Itcl_FindClassesCmd(clientData, interp, objc, objv)
  * ------------------------------------------------------------------------
  *  Itcl_FindObjectsCmd()
  *
- *  Part of the "::info" ensemble.  Invoked by Tcl whenever the user
- *  issues an "info objects" command to query the list of known objects.
- *  Handles the following syntax:
+ *  Invoked by Tcl whenever the user issues an "itcl::find objects"
+ *  command to query the list of known objects.  Handles the following
+ *  syntax:
  *
- *    info objects ?-class <className>? ?-isa <className>? ?<pattern>?
+ *    find objects ?-class <className>? ?-isa <className>? ?<pattern>?
  *
  *  Returns TCL_OK/TCL_ERROR to indicate success/failure.
  * ------------------------------------------------------------------------
@@ -609,6 +609,16 @@ Itcl_FindObjectsCmd(clientData, interp, objc, objv)
                 return TCL_ERROR;
             }
             pos++;
+        }
+
+        /*
+         * Last token? Take it as the pattern, even if it starts
+         * with a "-".  This allows us to match object names that
+         * start with "-".
+         */
+        else if (pos == objc-1 && !pattern) {
+            pattern = token;
+            forceFullNames = (strstr(pattern, "::") != NULL);
         }
         else {
             break;

@@ -22,7 +22,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itcl_objects.c,v 1.2 1998/08/11 14:40:43 welch Exp $
+ *     RCS:  $Id: itcl_objects.c,v 1.3 2000/07/06 06:43:30 mmc Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -98,9 +98,13 @@ Itcl_CreateObject(interp, name, cdefn, objc, objv, roPtr)
 
     /*
      *  If installing an object access command will clobber another
-     *  command, signal an error.
+     *  command, signal an error.  Be careful to look for the object
+     *  only in the current namespace context.  Otherwise, we might
+     *  find a global command, but that wouldn't be clobbered!
      */
-    cmd = Tcl_FindCommand(interp, name, (Tcl_Namespace*)NULL, /* flags */ 0);
+    cmd = Tcl_FindCommand(interp, name, (Tcl_Namespace*)NULL,
+        TCL_NAMESPACE_ONLY);
+
     if (cmd != NULL && !Itcl_IsStub(cmd)) {
         Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
             "command \"", name, "\" already exists in namespace \"",

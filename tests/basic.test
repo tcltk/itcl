@@ -6,7 +6,7 @@
 #            mmclennan@lucent.com
 #            http://www.tcltk.com/itcl
 #
-#      RCS:  $Id: basic.test,v 1.3 2000/06/01 20:34:34 wart Exp $
+#      RCS:  $Id: basic.test,v 1.4 2000/07/06 06:43:30 mmc Exp $
 # ----------------------------------------------------------------------
 #            Copyright (c) 1993-1998  Lucent Technologies, Inc.
 # ======================================================================
@@ -90,6 +90,11 @@ test basic-1.10 {objects can be destroyed by deleting their access command} {
     itcl::find objects x
 } {}
 
+test basic-1.11 {find command supports object names starting with -} {
+    Counter -foo
+    itcl::find objects -class Counter -foo
+} {-foo}
+
 # ----------------------------------------------------------------------
 #  #auto names
 # ----------------------------------------------------------------------
@@ -144,7 +149,7 @@ test basic-3.6 {configure actually changes public variable} {
 
 test basic-3.7 {class procs can be accessed} {
     Counter::num
-} {6}
+} {7}
 
 test basic-3.8 {obsolete syntax is no longer allowed} {
     list [catch "Counter :: num" msg] $msg

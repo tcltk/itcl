@@ -7,7 +7,7 @@
 # Copyright (c) 1998-2000 by Ajuba Solutions
 # All rights reserved.
 # 
-# RCS: @(#) $Id: all.tcl,v 1.1 2000/06/06 00:05:01 wart Exp $
+# RCS: @(#) $Id: all.tcl,v 1.2 2000/07/06 06:43:30 mmc Exp $
 
 package require tcltest
 namespace import -force ::tcltest::*
@@ -31,7 +31,13 @@ if {[info exists flag(-exedir)]} {
 }
 
 set ::tcltest::testSingleFile false
-set ::tcltest::testsDirectory [file dir [info script]]
+
+# use [pwd] trick to expand relative file paths to absolute paths - MMc
+set cwd [pwd]
+cd [file dirname [info script]]
+set ::tcltest::testsDirectory [pwd]
+cd $cwd
+
 set logfile [file join $::tcltest::temporaryDirectory Log.txt]
 
 puts stdout "Using interp: $shell"

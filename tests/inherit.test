@@ -6,7 +6,7 @@
 #            mmclennan@lucent.com
 #            http://www.tcltk.com/itcl
 #
-#      RCS:  $Id: inherit.test,v 1.3 2000/06/01 20:34:35 wart Exp $
+#      RCS:  $Id: inherit.test,v 1.4 2000/07/06 06:43:30 mmc Exp $
 # ----------------------------------------------------------------------
 #            Copyright (c) 1993-1998  Lucent Technologies, Inc.
 # ======================================================================
@@ -424,7 +424,7 @@ test inherit-5.9 {find objects: -isa and name qualifiers} {
 } {test_cd_foo0 test_cd_foobar0 test_cd_mongrel0}
 
 test inherit-5.10 {find objects: usage errors} {
-    list [catch {itcl::find objects -xyzzy} msg] $msg
+    list [catch {itcl::find objects -xyzzy value} msg] $msg
 } {1 {wrong # args: should be "itcl::find objects ?-class className? ?-isa className? ?pattern?"}}
 
 eval namespace delete [itcl::find classes test_cd_*]
@@ -492,13 +492,16 @@ test inherit-6.8 {"previous" command no longer exists} {
 } {1 {invalid command name "previous"}}
 
 test inherit-6.9 {errors are detected and reported across class boundaries} {
+    #
+    # NOTE: For tcl8.2.3 and earlier the stack trace will have
+    #       'invoked from within "eval $args"' for the first eval
+    #       statement.  For later versions, it does not.  Use
+    #       string match to reduce the sensitivity to that.
+    #
     list [catch {
         test_cd_mongrel0 do test_cd_foobar0 do error "test" "some error"
-    } msg] $msg [set ::errorInfo]
-} {1 test {some error
-    ("eval" body line 1)
-    invoked from within
-"eval $args"
+    } msg] $msg [string match {some error
+    ("eval" body line 1)*
     (object "::test_cd_foobar0" method "::test_cd_foobar::do" body line 1)
     invoked from within
 "test_cd_foobar0 do error test {some error}"
@@ -507,7 +510,8 @@ test inherit-6.9 {errors are detected and reported across class boundaries} {
 "eval $args"
     (object "::test_cd_mongrel0" method "::test_cd_mongrel::do" body line 1)
     invoked from within
-"test_cd_mongrel0 do test_cd_foobar0 do error "test" "some error""}}
+"test_cd_mongrel0 do test_cd_foobar0 do error "test" "some error""} [set ::errorInfo]]
+} {1 test 1}
 
 test inherit-6.10 {errors codes are preserved across class boundaries} {
     list [catch {
