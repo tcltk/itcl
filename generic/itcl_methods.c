@@ -23,7 +23,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itcl_methods.c,v 1.6 2001/05/22 23:48:58 davygrvy Exp $
+ *     RCS:  $Id: itcl_methods.c,v 1.7 2001/10/25 22:02:02 hobbs Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -1338,7 +1338,7 @@ Itcl_GetMemberFuncUsage(mfunc, contextObj, objPtr)
     Tcl_Obj *objPtr;            /* returns: string showing usage */
 {
     int argcount;
-    CONST char *name;
+    char *name;
     CompiledLocal *arglist, *argPtr;
     Tcl_HashEntry *entry;
     ItclMemberFunc *mf;
@@ -1365,25 +1365,22 @@ Itcl_GetMemberFuncUsage(mfunc, contextObj, objPtr)
                 Tcl_GetCommandFullName(contextObj->classDefn->interp,
                     contextObj->classDefn->accessCmd, objPtr);
                 Tcl_AppendToObj(objPtr, " ", -1);
-                name = Tcl_GetCommandName(contextObj->classDefn->interp,
-                    contextObj->accessCmd);
+                name = (char *) Tcl_GetCommandName(
+		    contextObj->classDefn->interp, contextObj->accessCmd);
                 Tcl_AppendToObj(objPtr, name, -1);
             } else {
                 Tcl_AppendToObj(objPtr, mfunc->member->fullname, -1);
             }
-        }
-        else if (contextObj && contextObj->accessCmd) {
-            name = Tcl_GetCommandName(contextObj->classDefn->interp,
+        } else if (contextObj && contextObj->accessCmd) {
+            name = (char *) Tcl_GetCommandName(contextObj->classDefn->interp,
                 contextObj->accessCmd);
             Tcl_AppendStringsToObj(objPtr, name, " ", mfunc->member->name,
                 (char*)NULL);
-        }
-        else {
+        } else {
             Tcl_AppendStringsToObj(objPtr, "<object> ", mfunc->member->name,
                 (char*)NULL);
         }
-    }
-    else {
+    } else {
         Tcl_AppendToObj(objPtr, mfunc->member->fullname, -1);
     }
 
