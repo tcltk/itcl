@@ -39,7 +39,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itclInt.h,v 1.8 2001/09/16 15:02:41 davygrvy Exp $
+ *     RCS:  $Id: itclInt.h,v 1.9 2003/12/17 02:25:37 davygrvy Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -255,15 +255,11 @@ typedef struct ItclContext {
  */
 
 #undef  assert
-#ifdef  NDEBUG
+#ifndef  DEBUG
 #define assert(EX) ((void)0)
 #else
-#if defined(__STDC__)
-#define assert(EX) (void)((EX) || (Itcl_Assert(#EX, __FILE__, __LINE__), 0))
-#else
-#define assert(EX) (void)((EX) || (Itcl_Assert("EX", __FILE__, __LINE__), 0))
-#endif  /* __STDC__ */
-#endif  /* NDEBUG */
+#define assert(EX) (void)((EX) || (Itcl_Assert(STRINGIFY(EX), __FILE__, __LINE__), 0))
+#endif  /* DEBUG */
 
 #undef TCL_STORAGE_CLASS
 #define TCL_STORAGE_CLASS DLLIMPORT

@@ -23,7 +23,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itcl_methods.c,v 1.8 2002/03/03 01:57:10 andreas_kupries Exp $
+ *     RCS:  $Id: itcl_methods.c,v 1.9 2003/12/17 02:25:37 davygrvy Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -294,9 +294,9 @@ int
 Itcl_CreateMethod(interp, cdefn, name, arglist, body)
     Tcl_Interp* interp;  /* interpreter managing this action */
     ItclClass *cdefn;    /* class definition */
-    char* name;          /* name of new method */
-    char* arglist;       /* space-separated list of arg names */
-    char* body;          /* body of commands for the method */
+    CONST char* name;    /* name of new method */
+    CONST char* arglist; /* space-separated list of arg names */
+    CONST char* body;    /* body of commands for the method */
 {
     ItclMemberFunc *mfunc;
     Tcl_DString buffer;
@@ -345,7 +345,7 @@ Itcl_CreateMethod(interp, cdefn, name, arglist, body)
  *
  *  Installs a class proc into the namespace associated with a class.
  *  If another command with the same name is already installed, then
- *  it is overwritten.  Returns TCL_OK on success, or TCL_ERROR (along
+ *  it is overwritten.  Returns TCL_OK on success, or TCL_ERROR  (along
  *  with an error message in the specified interp) if anything goes
  *  wrong.
  * ------------------------------------------------------------------------
@@ -354,9 +354,9 @@ int
 Itcl_CreateProc(interp, cdefn, name, arglist, body)
     Tcl_Interp* interp;  /* interpreter managing this action */
     ItclClass *cdefn;    /* class definition */
-    char* name;          /* name of new proc */
-    char* arglist;       /* space-separated list of arg names */
-    char* body;          /* body of commands for the proc */
+    CONST char* name;    /* name of new proc */
+    CONST char* arglist; /* space-separated list of arg names */
+    CONST char* body;    /* body of commands for the proc */
 {
     ItclMemberFunc *mfunc;
     Tcl_DString buffer;
@@ -423,9 +423,9 @@ int
 Itcl_CreateMemberFunc(interp, cdefn, name, arglist, body, mfuncPtr)
     Tcl_Interp* interp;            /* interpreter managing this action */
     ItclClass *cdefn;              /* class definition */
-    char* name;                    /* name of new member */
-    char* arglist;                 /* space-separated list of arg names */
-    char* body;                    /* body of commands for the method */
+    CONST char* name;              /* name of new member */
+    CONST char* arglist;           /* space-separated list of arg names */
+    CONST char* body;              /* body of commands for the method */
     ItclMemberFunc** mfuncPtr;     /* returns: pointer to new method defn */
 {
     int newEntry;
@@ -518,8 +518,8 @@ int
 Itcl_ChangeMemberFunc(interp, mfunc, arglist, body)
     Tcl_Interp* interp;            /* interpreter managing this action */
     ItclMemberFunc* mfunc;         /* command member being changed */
-    char* arglist;                 /* space-separated list of arg names */
-    char* body;                    /* body of commands for the method */
+    CONST char* arglist;           /* space-separated list of arg names */
+    CONST char* body;              /* body of commands for the method */
 {
     ItclMemberCode *mcode = NULL;
     Tcl_Obj *objPtr;
@@ -579,7 +579,7 @@ Itcl_ChangeMemberFunc(interp, mfunc, arglist, body)
  */
 void
 Itcl_DeleteMemberFunc(cdata)
-    char* cdata;  /* pointer to member function definition */
+    CONST char* cdata;  /* pointer to member function definition */
 {
     ItclMemberFunc* mfunc = (ItclMemberFunc*)cdata;
 
@@ -618,8 +618,8 @@ int
 Itcl_CreateMemberCode(interp, cdefn, arglist, body, mcodePtr)
     Tcl_Interp* interp;            /* interpreter managing this action */
     ItclClass *cdefn;              /* class containing this member */
-    char* arglist;                 /* space-separated list of arg names */
-    char* body;                    /* body of commands for the method */
+    CONST char* arglist;           /* space-separated list of arg names */
+    CONST char* body;              /* body of commands for the method */
     ItclMemberCode** mcodePtr;     /* returns: pointer to new implementation */
 {
     int argc;
@@ -745,7 +745,7 @@ Itcl_CreateMemberCode(interp, cdefn, arglist, body, mcodePtr)
  */
 void
 Itcl_DeleteMemberCode(cdata)
-    char* cdata;  /* pointer to member function definition */
+    CONST char* cdata;  /* pointer to member function definition */
 {
     ItclMemberCode* mcode = (ItclMemberCode*)cdata;
 
@@ -1050,7 +1050,7 @@ evalMemberCodeDone:
 int
 Itcl_CreateArgList(interp, decl, argcPtr, argPtr)
     Tcl_Interp* interp;       /* interpreter managing this function */
-    char* decl;               /* string representing argument list */
+    CONST char* decl;         /* string representing argument list */
     int* argcPtr;             /* returns number of args in argument list */
     CompiledLocal** argPtr;   /* returns pointer to parsed argument list */
 {
@@ -1142,8 +1142,8 @@ Itcl_CreateArgList(interp, decl, argcPtr, argPtr)
  */
 CompiledLocal*
 Itcl_CreateArg(name, init)
-    char* name;     /* name of new argument */
-    char* init;     /* initial value */
+    CONST char* name;     /* name of new argument */
+    CONST char* init;     /* initial value */
 {
     CompiledLocal *localPtr = NULL;
     int nameLen;
@@ -2357,7 +2357,7 @@ Itcl_ConstructBase(interp, contextObj, contextClass)
 int
 Itcl_InvokeMethodIfExists(interp, name, contextClass, contextObj, objc, objv)
     Tcl_Interp *interp;       /* interpreter */
-    char *name;               /* name of desired method */
+    CONST char *name;         /* name of desired method */
     ItclClass *contextClass;  /* current class being constructed */
     ItclObject *contextObj;   /* object being constructed */
     int objc;                 /* number of arguments */

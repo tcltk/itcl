@@ -21,7 +21,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itcl_util.c,v 1.7 2002/03/03 01:57:11 andreas_kupries Exp $
+ *     RCS:  $Id: itcl_util.c,v 1.8 2003/12/17 02:25:37 davygrvy Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -82,15 +82,12 @@ typedef struct InterpState {
 
 void
 Itcl_Assert(testExpr, fileName, lineNumber)
-    char *testExpr;   /* string representing test expression */
-    char *fileName;   /* file name containing this call */
-    int lineNumber;   /* line number containing this call */
+    CONST char *testExpr;   /* string representing test expression */
+    CONST char *fileName;   /* file name containing this call */
+    int lineNumber;	    /* line number containing this call */
 {
-#ifndef NDEBUG
-    fprintf(stderr, "Assertion failed: \"%s\" (line %d of %s)",
-        testExpr, lineNumber, fileName);
-    abort();
-#endif
+    Tcl_Panic("Itcl Assertion failed: \"%s\" (line %d of %s)",
+	testExpr, lineNumber, fileName);
 }
 
 
@@ -1149,12 +1146,12 @@ Itcl_GetTrueNamespace(interp, info)
  */
 void
 Itcl_ParseNamespPath(name, buffer, head, tail)
-    char *name;          /* path name to class member */
+    CONST char *name;    /* path name to class member */
     Tcl_DString *buffer; /* dynamic string buffer (uninitialized) */
     char **head;         /* returns "namesp::namesp::namesp" part */
     char **tail;         /* returns "element" part */
 {
-    register char *sep;
+    register char *sep, *newname;
 
     Tcl_DStringInit(buffer);
 
@@ -1164,12 +1161,12 @@ Itcl_ParseNamespPath(name, buffer, head, tail)
      *  scope qualifier.
      */
     Tcl_DStringAppend(buffer, name, -1);
-    name = Tcl_DStringValue(buffer);
+    newname = Tcl_DStringValue(buffer);
 
-    for (sep=name; *sep != '\0'; sep++)
+    for (sep=newname; *sep != '\0'; sep++)
         ;
 
-    while (--sep > name) {
+    while (--sep > newname) {
         if (*sep == ':' && *(sep-1) == ':') {
             break;
         }
@@ -1180,20 +1177,20 @@ Itcl_ParseNamespPath(name, buffer, head, tail)
      *  up until the head is found.  This supports the Tcl namespace
      *  behavior, which allows names like "foo:::bar".
      */
-    if (sep > name) {
+    if (sep > newname) {
         *tail = sep+1;
-        while (sep > name && *(sep-1) == ':') {
+        while (sep > newname && *(sep-1) == ':') {
             sep--;
         }
         *sep = '\0';
-        *head = name;
+        *head = newname;
     }
 
     /*
      *  No :: separators--the whole name is treated as a tail.
      */
     else {
-        *tail = name;
+        *tail = newname;
         *head = NULL;
     }
 }
@@ -1218,16 +1215,16 @@ Itcl_ParseNamespPath(name, buffer, head, tail)
  */
 int
 Itcl_DecodeScopedCommand(interp, name, rNsPtr, rCmdPtr)
-    Tcl_Interp *interp;      /* current interpreter */
-    char *name;              /* string to be decoded */
-    Tcl_Namespace **rNsPtr;  /* returns: namespace for scoped value */
-    char **rCmdPtr;          /* returns: simple command word */
+    Tcl_Interp *interp;		/* current interpreter */
+    char *name;		/* string to be decoded */
+    Tcl_Namespace **rNsPtr;	/* returns: namespace for scoped value */
+    char **rCmdPtr;		/* returns: simple command word */
 {
     Tcl_Namespace *nsPtr = NULL;
     char *cmdName = name;
     int len = strlen(name);
 
-    char *pos;
+    CONST char *pos;
     int listc, result;
     char **listv;
 
@@ -1373,7 +1370,7 @@ Itcl_EvalArgs(interp, objc, objv)
 Tcl_Obj*
 Itcl_CreateArgs(interp, string, objc, objv)
     Tcl_Interp *interp;      /* current interpreter */
-    char *string;            /* first command word */
+    CONST char *string;      /* first command word */
     int objc;                /* number of arguments */
     Tcl_Obj *CONST objv[];   /* argument objects */
 {

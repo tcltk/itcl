@@ -22,7 +22,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itcl_objects.c,v 1.9 2002/08/11 03:44:30 davygrvy Exp $
+ *     RCS:  $Id: itcl_objects.c,v 1.10 2003/12/17 02:25:37 davygrvy Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -73,7 +73,7 @@ static void ItclCreateObjVar _ANSI_ARGS_((Tcl_Interp *interp,
 int
 Itcl_CreateObject(interp, name, cdefn, objc, objv, roPtr)
     Tcl_Interp *interp;      /* interpreter mananging new object */
-    char* name;              /* name of new object */
+    CONST char* name;        /* name of new object */
     ItclClass *cdefn;        /* class for new object */
     int objc;                /* number of arguments */
     Tcl_Obj *CONST objv[];   /* argument objects */
@@ -490,7 +490,7 @@ ItclDestructBase(interp, contextObj, contextClass, flags)
 int
 Itcl_FindObject(interp, name, roPtr)
     Tcl_Interp *interp;      /* interpreter containing this object */
-    char *name;              /* name of the object */
+    CONST char *name;        /* name of the object */
     ItclObject **roPtr;      /* returns: object data or NULL */
 {
     Tcl_Namespace *contextNs = NULL;
@@ -707,7 +707,7 @@ Itcl_HandleInstance(clientData, interp, objc, objv)
 CONST char*
 Itcl_GetInstanceVar(interp, name, contextObj, contextClass)
     Tcl_Interp *interp;       /* current interpreter */
-    char *name;               /* name of desired instance variable */
+    CONST char *name;         /* name of desired instance variable */
     ItclObject *contextObj;   /* current object */
     ItclClass *contextClass;  /* name is interpreted in this scope */
 {

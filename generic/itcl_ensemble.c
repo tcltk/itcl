@@ -23,7 +23,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itcl_ensemble.c,v 1.8 2002/03/03 01:57:10 andreas_kupries Exp $
+ *     RCS:  $Id: itcl_ensemble.c,v 1.9 2003/12/17 02:25:37 davygrvy Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -105,7 +105,7 @@ static int CreateEnsemble _ANSI_ARGS_((Tcl_Interp *interp,
     Ensemble *parentEnsData, char *ensName));
 
 static int AddEnsemblePart _ANSI_ARGS_((Tcl_Interp *interp,
-    Ensemble* ensData, char* partName, char* usageInfo,
+    Ensemble* ensData, CONST char* partName, CONST char* usageInfo,
     Tcl_ObjCmdProc *objProc, ClientData clientData,
     Tcl_CmdDeleteProc *deleteProc, EnsemblePart **rVal));
 
@@ -115,15 +115,15 @@ static int FindEnsemble _ANSI_ARGS_((Tcl_Interp *interp, char **nameArgv,
     int nameArgc, Ensemble** ensDataPtr));
 
 static int CreateEnsemblePart _ANSI_ARGS_((Tcl_Interp *interp,
-    Ensemble *ensData, char* partName, EnsemblePart **ensPartPtr));
+    Ensemble *ensData, CONST char* partName, EnsemblePart **ensPartPtr));
 
 static void DeleteEnsemblePart _ANSI_ARGS_((EnsemblePart *ensPart));
 
 static int FindEnsemblePart _ANSI_ARGS_((Tcl_Interp *interp,
-    Ensemble *ensData, char* partName, EnsemblePart **rensPart));
+    Ensemble *ensData, CONST char* partName, EnsemblePart **rensPart));
 
 static int FindEnsemblePartIndex _ANSI_ARGS_((Ensemble *ensData,
-    char *partName, int *posPtr));
+    CONST char *partName, int *posPtr));
 
 static void ComputeMinChars _ANSI_ARGS_((Ensemble *ensData, int pos));
 
@@ -209,7 +209,7 @@ Itcl_EnsembleInit(interp)
 int
 Itcl_CreateEnsemble(interp, ensName)
     Tcl_Interp *interp;            /* interpreter to be updated */
-    char* ensName;                 /* name of the new ensemble */
+    CONST char* ensName;           /* name of the new ensemble */
 {
     char **nameArgv = NULL;
     int nameArgc;
@@ -310,9 +310,9 @@ Itcl_AddEnsemblePart(interp, ensName, partName, usageInfo,
     objProc, clientData, deleteProc)
 
     Tcl_Interp *interp;            /* interpreter to be updated */
-    char* ensName;                 /* ensemble containing this part */
-    char* partName;                /* name of the new part */
-    char* usageInfo;               /* usage info for argument list */
+    CONST char* ensName;           /* ensemble containing this part */
+    CONST char* partName;          /* name of the new part */
+    CONST char* usageInfo;         /* usage info for argument list */
     Tcl_ObjCmdProc *objProc;       /* handling procedure for part */
     ClientData clientData;         /* client data associated with part */
     Tcl_CmdDeleteProc *deleteProc; /* procedure used to destroy client data */
@@ -389,8 +389,8 @@ ensPartFail:
 int
 Itcl_GetEnsemblePart(interp, ensName, partName, infoPtr)
     Tcl_Interp *interp;            /* interpreter to be updated */
-    char *ensName;                 /* ensemble containing the part */
-    char *partName;                /* name of the desired part */
+    CONST char *ensName;           /* ensemble containing the part */
+    CONST char *partName;          /* name of the desired part */
     Tcl_CmdInfo *infoPtr;          /* returns: info associated with part */
 {
     char **nameArgv = NULL;
@@ -501,7 +501,7 @@ Itcl_IsEnsemble(infoPtr)
 int
 Itcl_GetEnsembleUsage(interp, ensName, objPtr)
     Tcl_Interp *interp;    /* interpreter containing the ensemble */
-    char *ensName;         /* name of the ensemble */
+    CONST char *ensName;         /* name of the ensemble */
     Tcl_Obj *objPtr;       /* returns: summary of usage info */
 {
     char **nameArgv = NULL;
@@ -853,8 +853,8 @@ AddEnsemblePart(interp, ensData, partName, usageInfo,
 
     Tcl_Interp *interp;            /* interpreter to be updated */
     Ensemble* ensData;             /* ensemble that will contain this part */
-    char* partName;                /* name of the new part */
-    char* usageInfo;               /* usage info for argument list */
+    CONST char* partName;          /* name of the new part */
+    CONST char* usageInfo;         /* usage info for argument list */
     Tcl_ObjCmdProc *objProc;       /* handling procedure for part */
     ClientData clientData;         /* client data associated with part */
     Tcl_CmdDeleteProc *deleteProc; /* procedure used to destroy client data */
@@ -1041,7 +1041,7 @@ static int
 CreateEnsemblePart(interp, ensData, partName, ensPartPtr)
     Tcl_Interp *interp;          /* interpreter containing the ensemble */
     Ensemble *ensData;           /* ensemble being modified */
-    char* partName;              /* name of the new part */
+    CONST char* partName;        /* name of the new part */
     EnsemblePart **ensPartPtr;   /* returns: new ensemble part */
 {
     int i, pos, size;
@@ -1187,7 +1187,7 @@ static int
 FindEnsemblePart(interp, ensData, partName, rensPart)
     Tcl_Interp *interp;       /* interpreter containing the ensemble */
     Ensemble *ensData;        /* ensemble being searched */
-    char* partName;           /* name of the desired part */
+    CONST char* partName;     /* name of the desired part */
     EnsemblePart **rensPart;  /* returns:  pointer to the desired part */
 {
     int pos = 0;
@@ -1302,7 +1302,7 @@ FindEnsemblePart(interp, ensData, partName, rensPart)
 static int
 FindEnsemblePartIndex(ensData, partName, posPtr)
     Ensemble *ensData;        /* ensemble being searched */
-    char *partName;           /* name of desired part */
+    CONST char *partName;     /* name of desired part */
     int *posPtr;              /* returns: index for part */
 {
     int pos = 0;

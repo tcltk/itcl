@@ -23,7 +23,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itcl_class.c,v 1.13 2002/08/12 23:17:17 andreas_kupries Exp $
+ *     RCS:  $Id: itcl_class.c,v 1.14 2003/12/17 02:25:37 davygrvy Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -68,7 +68,7 @@ extern int itclCompatFlags;
 int
 Itcl_CreateClass(interp, path, info, rPtr)
     Tcl_Interp* interp;      /* interpreter that will contain new class */
-    char* path;              /* name of new class */
+    CONST char* path;              /* name of new class */
     ItclObjectInfo *info;    /* info for all known objects */
     ItclClass **rPtr;        /* returns: pointer to class definition */
 {
@@ -658,7 +658,7 @@ Itcl_IsClass(cmd)
 ItclClass*
 Itcl_FindClass(interp, path, autoload)
     Tcl_Interp* interp;      /* interpreter containing class */
-    char* path;              /* path name for class */
+    CONST char* path;              /* path name for class */
 {
     Tcl_Namespace* classNs;
 
@@ -723,7 +723,7 @@ Itcl_FindClass(interp, path, autoload)
 Tcl_Namespace*
 Itcl_FindClassNamespace(interp, path)
     Tcl_Interp* interp;        /* interpreter containing class */
-    char* path;                /* path name for class */
+    CONST char* path;                /* path name for class */
 {
     Tcl_Namespace* contextNs = Tcl_GetCurrentNamespace(interp);
     Tcl_Namespace* classNs;
@@ -1684,7 +1684,7 @@ Itcl_DeleteVarDefn(vdefn)
 CONST char*
 Itcl_GetCommonVar(interp, name, contextClass)
     Tcl_Interp *interp;        /* current interpreter */
-    char *name;                /* name of desired instance variable */
+    CONST char *name;                /* name of desired instance variable */
     ItclClass *contextClass;   /* name is interpreted in this scope */
 {
     CONST char *val = NULL;
@@ -1720,7 +1720,7 @@ ItclMember*
 Itcl_CreateMember(interp, cdefn, name)
     Tcl_Interp* interp;            /* interpreter managing this action */
     ItclClass *cdefn;              /* class definition */
-    char* name;              /* name of new member */
+    CONST char* name;              /* name of new member */
 {
     ItclMember *memPtr;
     int fullsize;
