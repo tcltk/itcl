@@ -248,7 +248,9 @@ fi
 # link against the non-stubbed Tcl library.
 #--------------------------------------------------------------------
 
-AC_DEFINE(USE_TCL_STUBS)
+if test "${SHARED_BUILD}" = "1" ; then
+    AC_DEFINE(USE_TCL_STUBS)
+fi
 
 #--------------------------------------------------------------------
 # This macro generates a line to use when building a library.  It
