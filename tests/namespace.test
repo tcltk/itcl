@@ -6,14 +6,19 @@
 #            mmclennan@lucent.com
 #            http://www.tcltk.com/itcl
 #
-#      RCS:  $Id: namespace.test,v 1.2 2000/04/19 06:51:05 mmc Exp $
+#      RCS:  $Id: namespace.test,v 1.3 2000/06/01 20:34:35 wart Exp $
 # ----------------------------------------------------------------------
 #            Copyright (c) 1993-1998  Lucent Technologies, Inc.
 # ======================================================================
 # See the file "license.terms" for information on usage and
 # redistribution of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 
+package require tcltest
+namespace import -force ::tcltest::*
+
 if {[string compare test [info procs test]] == 1} then {source defs}
+
+package require Itcl
 
 # ----------------------------------------------------------------------
 #  Classes within namespaces
@@ -72,3 +77,6 @@ test namespace-1.5 {can find classes wrapped in a namespace} {
 } {0 ::test_ns_1::c 0 ::test_ns_1::c}
 
 namespace delete test_ns_1 test_ns_2
+
+::tcltest::cleanupTests
+return

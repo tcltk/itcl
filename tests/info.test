@@ -6,14 +6,19 @@
 #            mmclennan@lucent.com
 #            http://www.tcltk.com/itcl
 #
-#      RCS:  $Id: info.test,v 1.3 2000/04/19 06:51:05 mmc Exp $
+#      RCS:  $Id: info.test,v 1.4 2000/06/01 20:34:35 wart Exp $
 # ----------------------------------------------------------------------
 #            Copyright (c) 1993-1998  Lucent Technologies, Inc.
 # ======================================================================
 # See the file "license.terms" for information on usage and
 # redistribution of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 
+package require tcltest
+namespace import -force ::tcltest::*
+
 if {[string compare test [info procs test]] == 1} then {source defs}
+
+package require Itcl
 
 # ----------------------------------------------------------------------
 #  Class definition with one of everything
@@ -382,3 +387,6 @@ test info-5.2 {info exists} {
 #  Clean up
 # ----------------------------------------------------------------------
 itcl::delete class test_info test_info_base
+
+::tcltest::cleanupTests
+return

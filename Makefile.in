@@ -11,7 +11,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: Makefile.in,v 1.7 2000/04/19 06:51:03 mmc Exp $
+# RCS: @(#) $Id: Makefile.in,v 1.8 2000/06/01 20:34:34 wart Exp $
 
 #========================================================================
 # Edit the following few lines when writing a new extension
@@ -291,7 +291,9 @@ install-doc: doc
 	    $(INSTALL_DATA) $$i $(mandir)/mann ; \
 	    done
 
-test:
+test: $(TCLSH_PROG)
+	$(TCLSH_PROG) `@CYGPATH@ $(srcdir)/tests/all.tcl` \
+		-exedir `@CYGPATH@ $(bindir)` $(TESTFLAGS)
 
 depend:
 
