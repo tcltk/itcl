@@ -11,7 +11,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: Makefile.in,v 1.5 1999/09/14 00:01:22 wart Exp $
+# RCS: @(#) $Id: Makefile.in,v 1.6 2000/03/17 22:09:05 wart Exp $
 
 #========================================================================
 # Edit the following few lines when writing a new extension
@@ -92,10 +92,10 @@ OBJECTS = $(itcl_OBJECTS) $(itclstub_OBJECTS)
 #========================================================================
 
 itcl_LIB_FILE = @itcl_LIB_FILE@
-$(itcl_LIB_FILE)_OBJECTS = $(itcl_OBJECTS)
+@itcl_LIB_FILE@_OBJECTS = $(itcl_OBJECTS)
 
 itclstub_LIB_FILE = @itclstub_LIB_FILE@
-$(itclstub_LIB_FILE)_OBJECTS = $(itclstub_OBJECTS)
+@itclstub_LIB_FILE@_OBJECTS = $(itclstub_OBJECTS)
 
 #========================================================================
 # This is a list of header files to be installed
@@ -213,7 +213,7 @@ LDFLAGS = $(LDFLAGS_DEFAULT)
 
 INCLUDES = @TCL_INCLUDES@ @ITCL_INCLUDES@
 
-EXTRA_CFLAGS = $(AC_FLAGS) $(PROTO_FLAGS) $(MEM_DEBUG_FLAGS) $(NO_DEPRECATED_FLAGS)
+EXTRA_CFLAGS = $(AC_FLAGS) $(PROTO_FLAGS) $(MEM_DEBUG_FLAGS) $(NO_DEPRECATED_FLAGS) $(TCL_EXTRA_CFLAGS)
 
 DEFS = @DEFS@ $(EXTRA_CFLAGS) -DITCL_LIBRARY=\"$(ITCL_LIBRARY)\"
 
