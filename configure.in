@@ -284,7 +284,7 @@ case "`uname -s`" in
 	;;
     *)
 	if test "${SHARED_BUILD}" = "1" ; then
-	    SHLIB_LD_LIBS="${TCL_STUB_LIB_SPEC}"
+	    SHLIB_LD_LIBS="${TCL_BUILD_STUB_LIB_SPEC}"
 	    eval "${PACKAGE}_LIB_FILE=lib${PACKAGE}${SHARED_LIB_SUFFIX}"
 	    RANLIB=:
 	else
