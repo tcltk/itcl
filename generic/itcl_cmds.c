@@ -21,7 +21,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itcl_cmds.c,v 1.23 2003/12/23 06:58:27 davygrvy Exp $
+ *     RCS:  $Id: itcl_cmds.c,v 1.24 2004/11/23 21:48:43 davygrvy Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -128,11 +128,11 @@ Initialize(interp)
     ItclObjectInfo *info;
 
 #ifndef USE_TCL_STUBS
-    if (Tcl_PkgRequire(interp, "Tcl", TCL_VERSION, 0) == NULL) {
+    if (Tcl_PkgRequire(interp, "Tcl", TCL_VERSION, 1) == NULL) {
       return TCL_ERROR;
     }
 #else
-    if (Tcl_InitStubs(interp, "8.1", 0) == NULL) {
+    if (Tcl_InitStubs(interp, TCL_VERSION, 1) == NULL) {
       return TCL_ERROR;
     }
 #endif
@@ -148,10 +148,8 @@ Initialize(interp)
     /*
      *  Set the compatability options.  Stubs allows us to load into many
      *  version of the Tcl core.  Some problems have crept-in, and we need
-     *  to adapt dynamically regarding use of some internal structures that
-     *  have changed since 8.1.0
-     *
-     *  TODO: make a TIP for exporting a Tcl_CommandIsDeleted function in the core.
+     *  to adapt dynamically regarding use of some internal structures and
+     *  functions that have changed (or have been added) since 8.1.0
      */
 #if TCL_DOES_STUBS
     if (itclCompatFlags == -1) {
@@ -160,8 +158,11 @@ Initialize(interp)
 	itclCompatFlags = 0;
 	Tcl_GetVersion(&maj, &min, &ptch, &type);
 
+	/* ver >= 8.4a1 */
 	if ((maj == 8) && (min >= 4)) {
-	    itclCompatFlags = ITCL_COMPAT_USECMDFLAGS;
+	    /* TODO: make a TIP for exporting a Tcl_CommandIsDeleted
+	     * function in the core. */
+	    itclCompatFlags |= ITCL_COMPAT_USECMDFLAGS;
 	}
     }
 #else

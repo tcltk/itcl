@@ -21,7 +21,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itcl_util.c,v 1.13 2004/09/21 22:47:43 davygrvy Exp $
+ *     RCS:  $Id: itcl_util.c,v 1.14 2004/11/23 21:48:45 davygrvy Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -750,6 +750,10 @@ Itcl_SaveInterpState(interp, status)
     InterpState *info;
     CONST char *val;
 
+#ifndef ERR_IN_PROGRESS  /* this disappeared in 8.5a2 */
+    return (Itcl_InterpState) Tcl_SaveInterpState(interp, status);
+#endif
+
     info = (InterpState*)ckalloc(sizeof(InterpState));
     info->validate = TCL_STATE_VALID;
     info->status = status;
@@ -767,7 +771,11 @@ Itcl_SaveInterpState(interp, status)
     /*
      *  If an error is in progress, preserve its state.
      */
+#ifdef ERR_IN_PROGRESS   /* this disappeared in 8.5a2 */
     if ((iPtr->flags & ERR_IN_PROGRESS) != 0) {
+#else
+    if (iPtr->errorInfo != NULL) {
+#endif
         val = Tcl_GetVar(interp, "errorInfo", TCL_GLOBAL_ONLY);
         if (val) {
             info->errorInfo = ckalloc((unsigned)(strlen(val)+1));
@@ -808,9 +816,12 @@ Itcl_RestoreInterpState(interp, state)
     Tcl_Interp* interp;       /* interpreter being modified */
     Itcl_InterpState state;   /* token representing interpreter state */
 {
-    Interp *iPtr = (Interp*)interp;
     InterpState *info = (InterpState*)state;
     int status;
+
+#ifndef ERR_IN_PROGRESS  /* this disappeared in 8.5a2 */
+    return Tcl_RestoreInterpState(interp, (Tcl_InterpState)state);
+#endif
 
     if (info->validate != TCL_STATE_VALID) {
         Tcl_Panic("bad token in Itcl_RestoreInterpState");
@@ -864,6 +875,11 @@ Itcl_DiscardInterpState(state)
     Itcl_InterpState state;  /* token representing interpreter state */
 {
     InterpState *info = (InterpState*)state;
+
+#ifndef ERR_IN_PROGRESS  /* this disappeared in 8.5a2 */
+    Tcl_DiscardInterpState((Tcl_InterpState)state);
+    return;
+#endif
 
     if (info->validate != TCL_STATE_VALID) {
         Tcl_Panic("bad token in Itcl_DiscardInterpState");
