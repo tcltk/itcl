@@ -21,7 +21,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itcl_cmds.c,v 1.18 2002/08/11 03:45:00 davygrvy Exp $
+ *     RCS:  $Id: itcl_cmds.c,v 1.19 2003/12/17 02:10:46 davygrvy Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -575,7 +575,11 @@ Itcl_FindClassesCmd(clientData, interp, objc, objv)
 			(!pattern || Tcl_StringMatch(cmdName, pattern))) {
                     Tcl_ListObjAppendElement((Tcl_Interp*)NULL,
                         Tcl_GetObjResult(interp), objPtr);
-                }
+                } else {
+		    /* if not appended to the result, free objPtr. */
+		    Tcl_DecrRefCount(objPtr);
+		}
+
             }
             entry = Tcl_NextHashEntry(&place);
         }
