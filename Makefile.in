@@ -12,7 +12,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: Makefile.in,v 1.23 2004/08/17 17:38:40 hobbs Exp $
+# RCS: @(#) $Id: Makefile.in,v 1.24 2004/08/17 17:47:18 hobbs Exp $
 
 #========================================================================
 # The names of the source files is defined in the configure script.
@@ -199,10 +199,12 @@ install-libraries: libraries
 install-doc: doc
 	@mkdir -p $(DESTDIR)$(mandir)/mann
 	@echo "Installing man pages in $(DESTDIR)$(mandir)"
-	@for i in $(srcdir)/doc/*.n; do \
+	@cd $(srcdir)/doc; for i in *.n; do \
 	    echo "Installing $$i"; \
 	    rm -f $(DESTDIR)$(mandir)/mann/`basename $$i`; \
-	    $(INSTALL_DATA) $$i $(DESTDIR)$(mandir)/mann ; \
+	    sed -e '/man\.macros/r man.macros' -e '/man\.macros/d' \
+		$$i > $(DESTDIR)$(mandir)/mann/$$i; \
+	    chmod 444 $(DESTDIR)$(mandir)/mann/$$i; \
 	done
 
 test: binaries libraries
