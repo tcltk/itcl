@@ -21,7 +21,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itcl_util.c,v 1.9 2003/12/17 02:54:39 davygrvy Exp $
+ *     RCS:  $Id: itcl_util.c,v 1.10 2003/12/22 19:50:31 davygrvy Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -1218,7 +1218,7 @@ Itcl_DecodeScopedCommand(interp, name, rNsPtr, rCmdPtr)
     Tcl_Interp *interp;		/* current interpreter */
     CONST char *name;		/* string to be decoded */
     Tcl_Namespace **rNsPtr;	/* returns: namespace for scoped value */
-    char **rCmdPtr;	/* returns: simple command word */
+    char **rCmdPtr;		/* returns: simple command word */
 {
     Tcl_Namespace *nsPtr = NULL;
     char *cmdName;
@@ -1252,7 +1252,7 @@ Itcl_DecodeScopedCommand(interp, name, rNsPtr, rCmdPtr)
                     if (!nsPtr) {
                         result = TCL_ERROR;
                     } else {
-			ckfree((char*)cmdName);
+			ckfree(cmdName);
                         cmdName = ckalloc((unsigned)(strlen(listv[3])+1));
                         strcpy(cmdName, listv[3]);
                     }
@@ -1311,7 +1311,7 @@ Itcl_EvalArgs(interp, objc, objv)
     cmdPtr = (Command*)cmd;
 
     cmdlinec = objc;
-    cmdlinev = (Tcl_Obj**)objv;
+    cmdlinev = (Tcl_Obj	**) objv;
 
     /*
      * If the command is still not found, handle it with the
@@ -1325,16 +1325,13 @@ Itcl_EvalArgs(interp, objc, objv)
             Tcl_ResetResult(interp);
             Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
                 "invalid command name \"",
-                Tcl_GetStringFromObj(objv[0], (int*)NULL), "\"",
-                (char*)NULL);
+                Tcl_GetStringFromObj(objv[0], NULL), "\"", NULL);
             return TCL_ERROR;
         }
         cmdPtr = (Command*)cmd;
 
         cmdlinePtr = Itcl_CreateArgs(interp, "unknown", objc, objv);
-
-        (void) Tcl_ListObjGetElements((Tcl_Interp*)NULL, cmdlinePtr,
-            &cmdlinec, &cmdlinev);
+        Tcl_ListObjGetElements(NULL, cmdlinePtr, &cmdlinec, &cmdlinev);
     }
 
     /*

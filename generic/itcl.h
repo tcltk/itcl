@@ -39,7 +39,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itcl.h,v 1.22 2003/12/17 02:15:31 davygrvy Exp $
+ *     RCS:  $Id: itcl.h,v 1.23 2003/12/22 19:50:31 davygrvy Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -137,6 +137,20 @@
 #	define TCL_EXTERN(RTYPE) TCL_EXTRNC TCL_STORAGE_CLASS RTYPE
 #   endif
 #endif
+
+
+/*
+ * Starting from 8.4 core, Tcl API is CONST'ified.  Our API is always
+ * CONST, but we need to build with Tcl when it isn't CONST and fake
+ * it when needed with <= 8.3
+ *
+ * http://wiki.tcl.tk/3669
+ */
+
+#ifndef CONST84
+#   define CONST84
+#endif
+
 
 /*
  * Protection levels:

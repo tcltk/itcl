@@ -23,7 +23,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itcl_methods.c,v 1.9 2003/12/17 02:25:37 davygrvy Exp $
+ *     RCS:  $Id: itcl_methods.c,v 1.10 2003/12/22 19:50:31 davygrvy Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -331,8 +331,8 @@ Itcl_CreateMethod(interp, cdefn, name, arglist, body)
     name = Tcl_DStringValue(&buffer);
 
     Itcl_PreserveData((ClientData)mfunc);
-    mfunc->accessCmd = Tcl_CreateObjCommand(interp, name, Itcl_ExecMethod,
-        (ClientData)mfunc, Itcl_ReleaseData);
+    mfunc->accessCmd = Tcl_CreateObjCommand(interp, (CONST84 char *)name,
+	Itcl_ExecMethod, (ClientData)mfunc, Itcl_ReleaseData);
 
     Tcl_DStringFree(&buffer);
     return TCL_OK;
@@ -396,8 +396,8 @@ Itcl_CreateProc(interp, cdefn, name, arglist, body)
     name = Tcl_DStringValue(&buffer);
 
     Itcl_PreserveData((ClientData)mfunc);
-    mfunc->accessCmd = Tcl_CreateObjCommand(interp, name, Itcl_ExecProc,
-        (ClientData)mfunc, Itcl_ReleaseData);
+    mfunc->accessCmd = Tcl_CreateObjCommand(interp, (CONST84 char *)name,
+	Itcl_ExecProc, (ClientData)mfunc, Itcl_ReleaseData);
 
     Tcl_DStringFree(&buffer);
     return TCL_OK;

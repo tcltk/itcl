@@ -23,7 +23,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itcl_class.c,v 1.14 2003/12/17 02:25:37 davygrvy Exp $
+ *     RCS:  $Id: itcl_class.c,v 1.15 2003/12/22 19:50:31 davygrvy Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -67,10 +67,10 @@ extern int itclCompatFlags;
  */
 int
 Itcl_CreateClass(interp, path, info, rPtr)
-    Tcl_Interp* interp;      /* interpreter that will contain new class */
-    CONST char* path;              /* name of new class */
-    ItclObjectInfo *info;    /* info for all known objects */
-    ItclClass **rPtr;        /* returns: pointer to class definition */
+    Tcl_Interp* interp;		/* interpreter that will contain new class */
+    CONST char* path;		/* name of new class */
+    ItclObjectInfo *info;	/* info for all known objects */
+    ItclClass **rPtr;		/* returns: pointer to class definition */
 {
     char *head, *tail;
     Tcl_DString buffer;
@@ -89,8 +89,8 @@ Itcl_CreateClass(interp, path, info, rPtr)
      *  We'll just replace the namespace data below with the
      *  proper class data.
      */
-    classNs = Tcl_FindNamespace(interp, path, (Tcl_Namespace*)NULL,
-        /* flags */ 0);
+    classNs = Tcl_FindNamespace(interp, (CONST84 char *)path,
+	    (Tcl_Namespace*)NULL, /* flags */ 0);
 
     if (classNs != NULL && Itcl_IsClassNamespace(classNs)) {
         Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
@@ -105,8 +105,8 @@ Itcl_CreateClass(interp, path, info, rPtr)
      *  usual Tcl commands from being clobbered when a programmer
      *  makes a bogus call like "class info".
      */
-    cmd = Tcl_FindCommand(interp, path, (Tcl_Namespace*)NULL,
-        /* flags */ TCL_NAMESPACE_ONLY);
+    cmd = Tcl_FindCommand(interp, (CONST84 char *)path,
+	    (Tcl_Namespace*)NULL, /* flags */ TCL_NAMESPACE_ONLY);
 
     if (cmd != NULL && !Itcl_IsStub(cmd)) {
         Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
@@ -181,7 +181,7 @@ Itcl_CreateClass(interp, path, info, rPtr)
     Itcl_PreserveData((ClientData)cdPtr);
 
     if (classNs == NULL) {
-        classNs = Tcl_CreateNamespace(interp, path,
+        classNs = Tcl_CreateNamespace(interp, (CONST84 char *)path,
             (ClientData)cdPtr, ItclDestroyClassNamesp);
     }
     else {
@@ -734,8 +734,8 @@ Itcl_FindClassNamespace(interp, path)
      *  see if it's the current namespace, and try the global
      *  namespace as well.
      */
-    classNs = Tcl_FindNamespace(interp, path, (Tcl_Namespace*)NULL,
-        /* flags */ 0);
+    classNs = Tcl_FindNamespace(interp, (CONST84 char *)path,
+	    (Tcl_Namespace*)NULL, /* flags */ 0);
 
     if ( !classNs && contextNs->parentPtr != NULL &&
          (*path != ':' || *(path+1) != ':') ) {
@@ -1700,7 +1700,7 @@ Itcl_GetCommonVar(interp, name, contextClass)
                  contextClass->namesp, /*isProcCallFrame*/ 0);
 
     if (result == TCL_OK) {
-        val = Tcl_GetVar2(interp, name, (char*)NULL, 0);
+        val = Tcl_GetVar2(interp, (CONST84 char *)name, (char*)NULL, 0);
         Tcl_PopCallFrame(interp);
     }
     return val;

@@ -22,7 +22,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itcl_objects.c,v 1.11 2003/12/17 03:01:17 davygrvy Exp $
+ *     RCS:  $Id: itcl_objects.c,v 1.12 2003/12/22 19:50:31 davygrvy Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -102,8 +102,8 @@ Itcl_CreateObject(interp, name, cdefn, objc, objv, roPtr)
      *  only in the current namespace context.  Otherwise, we might
      *  find a global command, but that wouldn't be clobbered!
      */
-    cmd = Tcl_FindCommand(interp, name, (Tcl_Namespace*)NULL,
-        TCL_NAMESPACE_ONLY);
+    cmd = Tcl_FindCommand(interp, (CONST84 char *)name,
+	(Tcl_Namespace*)NULL, TCL_NAMESPACE_ONLY);
 
     if (cmd != NULL && !Itcl_IsStub(cmd)) {
         Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
@@ -735,7 +735,8 @@ Itcl_GetInstanceVar(interp, name, contextObj, contextClass)
         return NULL;
     }
 
-    val = Tcl_GetVar2(interp, name, (char*)NULL, TCL_LEAVE_ERR_MSG);
+    val = Tcl_GetVar2(interp, (CONST84 char *)name, (char*)NULL,
+	    TCL_LEAVE_ERR_MSG);
     Itcl_PopContext(interp, &context);
 
     return val;
@@ -871,7 +872,7 @@ ItclTraceThisVar(cdata, interp, name1, name2, flags)
         }
 
         objName = Tcl_GetString(objPtr);
-        Tcl_SetVar(interp, name1, objName, 0);
+        Tcl_SetVar(interp, (CONST84 char *)name1, objName, 0);
 
         Tcl_DecrRefCount(objPtr);
         return NULL;
