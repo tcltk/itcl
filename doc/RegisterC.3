@@ -4,7 +4,7 @@
 '\" See the file "license.terms" for information on usage and redistribution
 '\" of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 '\"
-'\" RCS: $Id: RegisterC.3,v 1.1 2004/09/19 19:19:11 davygrvy Exp $
+'\" RCS: $Id: RegisterC.3,v 1.2 2004/09/20 21:24:11 davygrvy Exp $
 '\"
 .so man.macros
 .TH Itcl_RegisterC 3 3.0 itcl "[incr\ Tcl] Library Procedures"
@@ -66,6 +66,45 @@ this procedure returns an error.
 .PP
 Returns TCL_OK on success, or TCL_ERROR (along with an error message
 in interp->result) if anything goes wrong.
+.PP
+C procedures can be integrated into an \fB[incr\ Tcl]\fR class
+definition to implement methods, procs, and the "config" code
+for public variables.  Any body that starts with "\fB@\fR"
+is treated as the symbolic name for a C procedure.
+.PP
+Symbolic names are established by registering procedures via
+\fBItcl_RegisterC()\fR.  This is usually done in the \fBTcl_AppInit()\fR
+procedure, which is automatically called when the interpreter starts up.
+In the following example, the procedure \fCMy_FooCmd()\fR is registered
+with the symbolic name "foo".  This procedure can be referenced in
+the \fBbody\fR command as "\fC@foo\fR".
+.CS
+int
+Tcl_AppInit(interp)
+    Tcl_Interp *interp;     /* Interpreter for application. */
+{
+    if (Itcl_Init(interp) == TCL_ERROR) {
+        return TCL_ERROR;
+    }
+
+    if (Itcl_RegisterC(interp, "foo", My_FooCmd) != TCL_OK) {
+        return TCL_ERROR;
+    }
+}
+.CE
+C procedures are implemented just like ordinary Tcl commands.
+See the \fBCrtCommand\fR man page for details.  Within the procedure,
+class data members can be accessed like ordinary variables
+using \fBTcl_SetVar()\fR, \fBTcl_GetVar()\fR, \fBTcl_TraceVar()\fR,
+etc.  Class methods and procs can be executed like ordinary commands
+using \fBTcl_Eval()\fR.  \fB[incr\ Tcl]\fR makes this possible by
+automatically setting up the context before executing the C procedure.
+.PP
+This scheme provides a natural migration path for code development.
+Classes can be developed quickly using Tcl code to implement the
+bodies.  An entire application can be built and tested.  When
+necessary, individual bodies can be implemented with C code to
+improve performance.
 
 .SH "SEE ALSO"
 Tcl_CreateCommand, Tcl_CreateObjCommand
