@@ -5,7 +5,7 @@
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 # 
 # Copyright (c) 1993-1998 Lucent Technologies, Inc.
-# RCS: $Id: makefile.vc,v 1.5 2001/04/08 03:07:30 davygrvy Exp $
+# RCS: $Id: makefile.vc,v 1.6 2001/04/12 16:07:08 davygrvy Exp $
 ######################################################################
 # All needed information is derived from running vcvars32.bat
 #
@@ -40,18 +40,22 @@ OUT_DIR		= $(TMP_DIR)
 
 PKGINDEX	= "$(TMP_DIR)\pkgIndex.tcl"
 
-ITCLDLLNAME	= $(NAMEPREFIX)$(ITCL_VERSION)$(DBGX)
-ITCLLIB		= "$(OUT_DIR)\$(ITCLDLLNAME).lib"
-ITCLDLL		= "$(OUT_DIR)\$(ITCLDLLNAME).dll"
-#ITCLSH		= "$(OUT_DIR)\$(NAMEPREFIX)sh$(VERSION)$(DBGX).exe"
+!if $(STATIC_BUILD)
+ITCLOUTNAME	= $(NAMEPREFIX)$(ITCL_VERSION)s$(DBGX)
+ITCLTARGET	= "$(OUT_DIR)\$(ITCLOUTNAME).lib"
+!else
+ITCLOUTNAME	= $(NAMEPREFIX)$(ITCL_VERSION)$(DBGX)
+ITCLIMPLIB	= "$(OUT_DIR)\$(ITCLOUTNAME).lib"
+ITCLTARGET	= "$(OUT_DIR)\$(ITCLOUTNAME).dll"
+!endif
 
 !if $(ISTCLINSTALL)
 TCLSTUBLIB	= "$(TCLROOT)\lib\tclstub$(TCL_VERSION).lib"
-TCLLIB		= "$(TCLROOT)\lib\tcl$(TCL_VERSION)$(DBGX).lib"
+TCLIMPLIB	= "$(TCLROOT)\lib\tcl$(TCL_VERSION)$(DBGX).lib"
 TCLSH		= "$(TCLROOT)\bin\tclsh$(TCL_VERSION)$(DBGX).exe"
 !else
 TCLSTUBLIB	= "$(TCLROOT)\win\Release\tclstub$(TCL_VERSION).lib"
-TCLLIB		= "$(TCLROOT)\win\$(OUT_DIR)\tcl$(TCL_VERSION)$(DBGX).lib"
+TCLIMPLIB	= "$(TCLROOT)\win\$(OUT_DIR)\tcl$(TCL_VERSION)$(DBGX).lib"
 TCLSH		= "$(TCLROOT)\win\$(OUT_DIR)\tclsh$(TCL_VERSION)$(DBGX).exe"
 !endif
 
@@ -90,9 +94,6 @@ ITCLSTUBOBJS = \
 WINDIR		= $(ROOT)\win
 GENERICDIR	= $(ROOT)\generic
 
-ITCL_INCLUDES	= -I$(WINDIR) -I$(GENERICDIR) -I$(TCLROOT)\generic
-ITCL_DEFINES	= -DBUILD_itcl $(DEBUGDEFINES) -DTCL_THREADS=1
-
 ######################################################################
 # Link flags
 ######################################################################
@@ -106,12 +107,10 @@ ldebug = -release -opt:ref
 # declarations common to all linker options
 lcommon = -nologo -link50compat -machine:$(MACHINE)
 
-conlflags = $(lcommon) -subsystem:console
-guilflags = $(lcommon) -subsystem:windows
-dlllflags = $(lcommon) -subsystem:windows -dll
+ITCL_LFLAGS = $(lcommon) -subsystem:windows -dll
 
 !if $(USE_TCL_STUBS) == 0
-ITCL_LLIBS	= $(TCLLIB)
+ITCL_LLIBS	= $(TCLIMPLIB)
 !else
 ITCL_LLIBS	= $(TCLSTUBLIB)
 !endif
@@ -134,13 +133,21 @@ cdebug = -Od -Z7 -WX
 # declarations common to all compiler options
 ccommon = -nologo -c -W3 -YX -Fp$(TMP_DIR)\ 
 
-!if $(STATIC_BUILD)
+!if $(STATIC_BUILD) && $(NOMSVCRT)
 crt	= -MT$(DBGX)
 !else
 crt	= -MD$(DBGX)
 !endif
 
-ITCL_EXE_CFLAGS	= $(ccommon) $(cdebug) $(crt) $(ITCL_INCLUDES) $(ITCL_DEFINES)
+!if $(ISTCLINSTALL)
+TCL_INCLUDES	= -I$(TCLROOT)\include
+!else
+TCL_INCLUDES	= -I$(TCLROOT)\generic
+!endif
+
+ITCL_INCLUDES	= -I$(WINDIR) -I$(GENERICDIR)
+ITCL_DEFINES	= -DBUILD_itcl $(DEBUGDEFINES) -DTCL_THREADS=1
+ITCL_EXE_CFLAGS	= $(ccommon) $(cdebug) $(crt) $(TCL_INCLUDES) $(ITCL_INCLUDES) $(ITCL_DEFINES)
 
 !if $(USE_TCL_STUBS) == 0
 ITCL_CFLAGS	= $(ITCL_EXE_CFLAGS)
@@ -152,16 +159,22 @@ ITCL_CFLAGS	= $(ITCL_EXE_CFLAGS) -DUSE_TCL_STUBS
 # Project specific targets
 ######################################################################
 
-all :     setup $(ITCLDLL) $(ITCLSTUBLIB)
-release : setup $(ITCLDLL) $(ITCLSTUBLIB)
-test :    setup $(ITCLDLL) $(ITCLSTUBLIB) $(PKGINDEX)
-	-@copy $(TCLDLL) $(TMP_DIR)
-	$(TCLSH) <<
-cd ../tests
-lappend auto_path ../win/$(TMP_DIR)
-set env(ITCL_LIBRARY) ../library
-source all
-<<
+all :     setup $(ITCLTARGET) $(ITCLSTUBLIB)
+release : setup $(ITCLTARGET) $(ITCLSTUBLIB)
+
+!if $(STATIC_BUILD)
+test :
+	@echo test target not supported for a static library.
+!else
+#test :    setup $(ITCLTARGET) $(ITCLSTUBLIB) $(PKGINDEX)
+#	-@copy $(TCLDLL) $(TMP_DIR)
+#	$(TCLSH) <<
+#cd ../tests
+#lappend auto_path ../win/$(TMP_DIR)
+#set env(ITCL_LIBRARY) ../library
+#source all
+#<<
+!endif
 
 $(PKGINDEX) :
 	-@copy pkgIndex.tcl $@
@@ -173,15 +186,14 @@ setup :
 	@if not exist $(OUT_DIR)\nul mkdir $(OUT_DIR) &\
 		echo Created directory '$(OUT_DIR)'
 
+$(ITCLTARGET): $(ITCLOBJS)
 !if $(STATIC_BUILD)
-$(ITCLDLL): $(ITCLOBJS)
 	$(lib32) -nologo -machine:$(MACHINE) -out:$@ @<<
 !else
-$(ITCLDLL): $(ITCLOBJS)
-	$(link32) $(ldebug) $(dlllflags) -out:$@ $(ITCL_LLIBS) @<<
+	$(link32) $(ITCL_LFLAGS) -out:$@ $(ITCL_LLIBS) @<<
+!endif
 		$(ITCLOBJS)
 <<
-!endif
 
 !if $(DEBUG) == 0
 $(ITCLSTUBLIB) : $(ITCLSTUBOBJS)
@@ -248,15 +260,6 @@ $<
 {$(GENERICDIR)}.c{$(TMP_DIR)}.obj :
 !else
 {$(GENERICDIR)}.c{$(TMP_DIR)}.obj ::
-!endif
-	$(cc32) -DDLL_BUILD $(ITCL_CFLAGS) -Fo$(TMP_DIR)\ @<<
-$<
-<<
-
-!if $(_NMAKE_VER) < 162
-{$(ROOT)\compat}.c{$(TMP_DIR)}.obj :
-!else
-{$(ROOT)\compat}.c{$(TMP_DIR)}.obj ::
 !endif
 	$(cc32) -DDLL_BUILD $(ITCL_CFLAGS) -Fo$(TMP_DIR)\ @<<
 $<
