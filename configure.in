@@ -327,4 +327,4 @@ SC_PROG_TCLSH
 #--------------------------------------------------------------------
 
 AC_OUTPUT([Makefile \
-	pkgIndex.tcl])
+	pkgIndex.tcl itclConfig.sh])
