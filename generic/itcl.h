@@ -39,7 +39,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itcl.h,v 1.26 2003/12/23 10:21:04 davygrvy Exp $
+ *     RCS:  $Id: itcl.h,v 1.27 2003/12/23 10:28:04 davygrvy Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -214,7 +214,7 @@ typedef struct Itcl_InterpState_ *Itcl_InterpState;
 
 TCL_EXTERNC CONST char *
 	Itcl_InitStubs _ANSI_ARGS_((Tcl_Interp *interp,
-			    char *version, int exact));
+			    CONST char *version, int exact));
 #else
 #define Itcl_InitStubs(interp, version, exact) \
       Tcl_PkgRequire(interp, "Itcl", version, exact)
