@@ -11,7 +11,7 @@
  * See the file "license.terms" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS:
+ * RCS: $Id: itclIntDecls.h,v 1.2 2000/08/04 22:11:50 davidg Exp $
  */
 
 #ifndef _ITCLINTDECLS
