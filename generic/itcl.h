@@ -42,7 +42,7 @@
  *       modified for Stubs 5/20/1999 by 
  *           David Gravereaux <davygrvy@bigfoot.com>
  *
- *     RCS:  $Id: itcl.h,v 1.6 1999/05/24 21:10:44 redman Exp $
+ *     RCS:  $Id: itcl.h,v 1.7 1999/05/25 17:28:58 redman Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -52,9 +52,6 @@
 #ifndef ITCL_H
 #define ITCL_H
 
-#ifndef USE_TCL_STUBS
-#define USE_TCL_STUBS
-#endif
 #include "tcl.h"
 
 #undef TCL_STORAGE_CLASS

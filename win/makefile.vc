@@ -4,7 +4,7 @@
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 # 
 # Copyright (c) 1993-1998 Lucent Technologies, Inc.
-# RCS: $Id: makefile.vc,v 1.3 1999/05/24 21:10:46 redman Exp $
+# RCS: $Id: makefile.vc,v 1.4 1999/05/25 17:28:58 redman Exp $
 
 # Does not depend on the presence of any environment variables in
 # order to compile itcl; all needed information is derived from 
@@ -95,8 +95,10 @@ GENERICDIR    = $(ROOT)\generic
 ITCL_INCLUDES    = -I$(WINDIR) -I$(GENERICDIR) -I$(TCLDIR)\generic
 ITCL_DEFINES    = -D__WIN32__ -DBUILD_itcl $(DEBUGDEFINES)
 
-ITCL_CFLAGS    = $(cdebug) $(cflags) $(cvarsdll) $(include32) \
+ITCL_EXE_CFLAGS    = $(cdebug) $(cflags) $(cvarsdll) $(include32) \
             $(ITCL_INCLUDES) $(ITCL_DEFINES)
+
+ITCL_CFLAGS    = $(ITCL_EXE_CFLAGS) -DUSE_TCL_STUBS
 
 ######################################################################
 # Link flags
@@ -189,8 +191,8 @@ CON_CFLAGS    = $(cdebug) $(cflags) $(cvars) $(include32) -DCONSOLE
 # Project specific targets
 ######################################################################
 
-release:    setup $(ITCLDLL) $(ITCLSTUBLIB)
-all:        setup $(ITCLDLL) $(ITCLSTUBLIB)
+release:    setup $(ITCLDLL) $(ITCLSTUBLIB) $(ITCLSH)
+all:        setup $(ITCLDLL) $(ITCLSTUBLIB) $(ITCLSH)
 test:        setup $(ITCLDLL) $(ITCLSTUBLIB) $(PKGINDEX)
     -@copy $(TCLDLL) $(TMPDIR)
     $(TCLSH) <<
@@ -207,7 +209,7 @@ setup:
     if not exist $(TMPDIR) mkdir $(TMPDIR)
     if not exist $(OUTDIR) mkdir $(OUTDIR)
 
-#$(ITCLLIB): $(ITCLDLL)
+$(ITCLLIB): $(ITCLDLL)
 
 $(ITCLDLL): $(ITCLOBJS) $(TMPDIR)\itclvc.def $(TMPDIR)\itcl.res
     set LIB=$(TOOLS32)\lib
@@ -219,10 +221,10 @@ $(ITCLDLL): $(ITCLOBJS) $(TMPDIR)\itclvc.def $(TMPDIR)\itcl.res
 $(ITCLSTUBLIB): $(ITCLSTUBOBJS)
     $(lib32) -nologo -out:$@ $(ITCLSTUBOBJS)
 
-#$(ITCLSH): $(ITCLSHOBJS) $(ITCLSTUBLIB) $(TCLSTUBLIB) $(TMPDIR)\itclsh.res
-#    set LIB=$(TOOLS32)\lib
-#    $(link32) $(ldebug) $(conlflags) $(TMPDIR)\itclsh.res -stack:2300000 \
-#        -out:$@ $(conlibsdll) $(ITCLSTUBLIB) $(TCLSTUBLIB) $(ITCLSHOBJS)
+$(ITCLSH): $(ITCLSHOBJS) $(ITCLSTUBLIB) $(TCLSTUBLIB) $(TMPDIR)\itclsh.res
+    set LIB=$(TOOLS32)\lib
+    $(link32) $(ldebug) $(conlflags) $(TMPDIR)\itclsh.res -stack:2300000 \
+        -out:$@ $(conlibsdll) $(ITCLLIB) $(TCLLIB) $(ITCLSHOBJS)
 
 $(TMPDIR)\itclvc.def: $(DUMPEXTS) $(ITCLOBJS)
     $(DUMPEXTS) -o $@ $(ITCLDLLNAME) @<<
@@ -259,7 +261,7 @@ genstubs:
 #
 
 $(TMPDIR)\tclAppInit.obj : $(WINDIR)\tclAppInit.c
-    $(cc32) -DUSE_TCL_STUBS  -DUSE_ITCL_STUBS $(ITCL_CFLAGS) -Fo$@ $?
+    $(cc32) $(ITCL_EXE_CFLAGS) -Fo$@ $?
 
 # The following object is part of the stub library and should not
 # be built as DLL objects but none of the symbols should be exported
