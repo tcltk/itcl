@@ -23,7 +23,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itcl_ensemble.c,v 1.3 1999/05/24 21:10:45 redman Exp $
+ *     RCS:  $Id: itcl_ensemble.c,v 1.4 2000/12/12 13:59:48 smithc Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -819,7 +819,11 @@ CreateEnsemble(interp, parentEnsData, ensName)
     cmdPtr->clientData = NULL;
     cmdPtr->deleteProc = DeleteEnsemble;
     cmdPtr->deleteData = cmdPtr->objClientData;
-    cmdPtr->deleted = 0;
+    #if (TCL_MAJOR_VERSION == 8) && (TCL_MINOR_VERSION < 4)
+      cmdPtr->deleted = 0;
+    #else
+      cmdPtr->flags = 0;
+    #endif
     cmdPtr->importRefPtr = NULL;
 
     ensPart->cmdPtr = cmdPtr;
@@ -896,7 +900,11 @@ AddEnsemblePart(interp, ensData, partName, usageInfo,
     cmdPtr->clientData = NULL;
     cmdPtr->deleteProc = deleteProc;
     cmdPtr->deleteData = (ClientData)clientData;
-    cmdPtr->deleted = 0;
+    #if (TCL_MAJOR_VERSION == 8) && (TCL_MINOR_VERSION < 4)
+      cmdPtr->deleted = 0;
+    #else
+      cmdPtr->flags = 0;
+    #endif
     cmdPtr->importRefPtr = NULL;
 
     ensPart->cmdPtr = cmdPtr;
