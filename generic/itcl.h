@@ -42,7 +42,7 @@
  *       modified for Stubs 5/20/1999 by 
  *           David Gravereaux <davygrvy@pobox.com>
  *
- *     RCS:  $Id: itcl.h,v 1.17 2001/11/24 22:55:56 davygrvy Exp $
+ *     RCS:  $Id: itcl.h,v 1.18 2002/01/11 07:25:29 davygrvy Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -86,7 +86,10 @@
 #ifndef TCL_EXTERN
 #   undef DLLIMPORT
 #   undef DLLEXPORT
-#   if (defined(__WIN32__) && (defined(_MSC_VER) || (__BORLANDC__ >= 0x0550) || (defined(__GNUC__) && defined(__declspec)))) \
+#   if defined(STATIC_BUILD)
+#	define DLLIMPORT
+#	define DLLEXPORT
+#   elif (defined(__WIN32__) && (defined(_MSC_VER) || (__BORLANDC__ >= 0x0550) || (defined(__GNUC__) && defined(__declspec)))) \
 	    || (defined(MAC_TCL) && FUNCTION_DECLSPEC)
 #	define DLLIMPORT __declspec(dllimport)
 #	define DLLEXPORT __declspec(dllexport)
