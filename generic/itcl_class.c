@@ -23,7 +23,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itcl_class.c,v 1.1 1998/07/27 18:41:44 stanton Exp $
+ *     RCS:  $Id: itcl_class.c,v 1.2 1998/08/07 12:09:52 stanton Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -33,6 +33,16 @@
 #include "itclInt.h"
 
 /*
+ * This structure is a subclass of Tcl_ResolvedVarInfo that contains the
+ * ItclVarLookup info needed at runtime.
+ */
+
+typedef struct ItclResolvedVarInfo {
+    Tcl_ResolvedVarInfo vinfo;	/* This must be the first element. */
+    ItclVarLookup *vlookup;	/* Pointer to lookup info. */
+} ItclResolvedVarInfo;
+
+/*
  *  FORWARD DECLARATIONS
  */
 static void ItclDestroyClass _ANSI_ARGS_((ClientData cdata));
@@ -40,7 +50,7 @@ static void ItclDestroyClassNamesp _ANSI_ARGS_((ClientData cdata));
 static void ItclFreeClass _ANSI_ARGS_((char* cdata));
 
 static Tcl_Var ItclClassRuntimeVarResolver _ANSI_ARGS_((
-    Tcl_Interp *interp, ClientData clientData));
+    Tcl_Interp *interp, Tcl_ResolvedVarInfo *vinfoPtr));
 
 
 /*
@@ -1077,7 +1087,7 @@ Itcl_ClassCompiledVarResolver(interp, name, length, context, rPtr)
     char* name;                 /* name of the variable being accessed */
     int length;                 /* number of characters in name */
     Tcl_Namespace *context;     /* namespace performing the resolution */
-    Tcl_ResolvedVarInfo *rPtr;  /* returns: info that makes it possible to
+    Tcl_ResolvedVarInfo **rPtr; /* returns: info that makes it possible to
                                  *   resolve the variable at runtime */
 {
     ItclClass *cdefn = (ItclClass*)context->clientData;
@@ -1124,9 +1134,11 @@ Itcl_ClassCompiledVarResolver(interp, name, length, context, rPtr)
      *  plug in the appropriate variable for the current object
      *  context.
      */
-    rPtr->identity = (ClientData)vlookup;
-    rPtr->fetchProc = ItclClassRuntimeVarResolver;
-    rPtr->deleteProc = NULL;
+
+    (*rPtr) = (Tcl_ResolvedVarInfo *) ckalloc(sizeof(ItclResolvedVarInfo));
+    (*rPtr)->fetchProc = ItclClassRuntimeVarResolver;
+    (*rPtr)->deleteProc = NULL;
+    ((ItclResolvedVarInfo*)(*rPtr))->vlookup = vlookup;
 
     return TCL_OK;
 }
@@ -1143,11 +1155,11 @@ Itcl_ClassCompiledVarResolver(interp, name, length, context, rPtr)
  * ------------------------------------------------------------------------
  */
 static Tcl_Var
-ItclClassRuntimeVarResolver(interp, clientData)
-    Tcl_Interp *interp;       /* current interpreter */
-    ClientData clientData;    /* ItclVarLookup representation for variable */
+ItclClassRuntimeVarResolver(interp, resVarInfo)
+    Tcl_Interp *interp;		/* current interpreter */
+    Tcl_ResolvedVarInfo *resVarInfo; /* ItclVarLookup representation for variable */
 {
-    ItclVarLookup *vlookup = (ItclVarLookup*)clientData;
+    ItclVarLookup *vlookup = ((ItclResolvedVarInfo*)resVarInfo)->vlookup;
 
     Tcl_CallFrame *framePtr;
     ItclClass *cdefn;
