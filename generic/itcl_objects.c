@@ -22,7 +22,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itcl_objects.c,v 1.4 2001/05/11 14:39:55 andreas_kupries Exp $
+ *     RCS:  $Id: itcl_objects.c,v 1.5 2001/05/22 15:32:47 davygrvy Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -261,9 +261,15 @@ Itcl_CreateObject(interp, name, cdefn, objc, objv, roPtr)
     newObj->constructed = NULL;
 
     /*
-     *  Add it to the list of all known objects.
+     *  Add it to the list of all known objects. The only
+     *  tricky thing to watch out for is the case where the
+     *  object deleted itself inside its own constructor.
+     *  In that case, we don't want to add the object to
+     *  the list of valid objects. We can determine that
+     *  the object deleted itself by checking to see if
+     *  its accessCmd member is NULL.
      */
-    if (result == TCL_OK) {
+    if (result == TCL_OK && (newObj->accessCmd != NULL))  {
         entry = Tcl_CreateHashEntry(&cdefnPtr->info->objects,
             (char*)newObj->accessCmd, &newEntry);
 
