@@ -5,7 +5,7 @@
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 # 
 # Copyright (c) 1993-1998 Lucent Technologies, Inc.
-# RCS: $Id: makefile.vc,v 1.14 2002/04/20 06:23:09 davygrvy Exp $
+# RCS: $Id: makefile.vc,v 1.15 2002/04/25 20:36:54 davygrvy Exp $
 #------------------------------------------------------------------------------
 #  Do not modify this file!
 #------------------------------------------------------------------------------
@@ -206,7 +206,7 @@ install-binaries :
 	copy $(ROOT)\generic\itcl.h "$(INCLUDE_INSTALL_DIR)"
 	copy $(ROOT)\generic\itclDecls.h "$(INCLUDE_INSTALL_DIR)"
 	copy $(ROOT)\library\*.* "$(SCRIPT_INSTALL_DIR)"
-	echo package ifneeded Itcl $(ITCL_DOTVERSION) [list load [file join $$dir $(ITCLLIBNAME).dll] Itcl] > \
+	echo package ifneeded Itcl $(ITCL_DOTVERSION) [list load [file join $$dir $(ITCLLIBNAME)] Itcl] > \
 		"$(SCRIPT_INSTALL_DIR)\pkgIndex.tcl"
 
 test :
