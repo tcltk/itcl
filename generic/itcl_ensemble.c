@@ -23,7 +23,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itcl_ensemble.c,v 1.1 1998/07/27 18:41:46 stanton Exp $
+ *     RCS:  $Id: itcl_ensemble.c,v 1.2 1998/08/07 12:10:22 stanton Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -1933,7 +1933,7 @@ Itcl_EnsPartCmd(clientData, interp, objc, objv)
          localPtr != NULL;
          localPtr=localPtr->nextPtr) {
 
-        if (localPtr->isArg) {
+        if (TclIsVarArgument(localPtr)) {
             varArgs = 0;
             if (strcmp(localPtr->name, "args") == 0) {
                 varArgs = 1;
