@@ -23,7 +23,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itcl_class.c,v 1.6 2001/04/07 07:20:53 davygrvy Exp $
+ *     RCS:  $Id: itcl_class.c,v 1.7 2001/05/17 19:57:11 andreas_kupries Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -296,12 +296,24 @@ Itcl_DeleteClass(interp, cdefnPtr)
     entry = Tcl_FirstHashEntry(&cdefnPtr->info->objects, &place);
     while (entry) {
         contextObj = (ItclObject*)Tcl_GetHashValue(entry);
+
         if (contextObj->classDefn == cdefnPtr) {
             if (Itcl_DeleteObject(interp, contextObj) != TCL_OK) {
                 cdPtr = cdefnPtr;
                 goto deleteClassFail;
             }
+
+	    /*
+	     * Fix 227804: Whenever an object to delete was found we
+	     * have to reset the search to the beginning as the
+	     * current entry in the search was deleted and accessing it
+	     * is therefore not allowed anymore.
+	     */
+
+	    entry = Tcl_FirstHashEntry(&cdefnPtr->info->objects, &place);
+	    continue;
         }
+
         entry = Tcl_NextHashEntry(&place);
     }
 
@@ -400,6 +412,15 @@ ItclDestroyClassNamesp(cdata)
         contextObj = (ItclObject*)Tcl_GetHashValue(entry);
         if (contextObj->classDefn == cdefnPtr) {
             Tcl_DeleteCommandFromToken(cdefnPtr->interp, contextObj->accessCmd);
+	    /*
+	     * Fix 227804: Whenever an object to delete was found we
+	     * have to reset the search to the beginning as the
+	     * current entry in the search was deleted and accessing it
+	     * is therefore not allowed anymore.
+	     */
+
+	    entry = Tcl_FirstHashEntry(&cdefnPtr->info->objects, &place);
+	    continue;
         }
         entry = Tcl_NextHashEntry(&place);
     }

@@ -21,7 +21,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itcl_cmds.c,v 1.11 2001/04/07 07:20:53 davygrvy Exp $
+ *     RCS:  $Id: itcl_cmds.c,v 1.12 2001/05/17 19:57:11 andreas_kupries Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -415,7 +415,15 @@ ItclDelObjectInfo(cdata)
     while (entry) {
         contextObj = (ItclObject*)Tcl_GetHashValue(entry);
         Tcl_DeleteCommandFromToken(info->interp, contextObj->accessCmd);
-        entry = Tcl_NextHashEntry(&place);
+	    /*
+	     * Fix 227804: Whenever an object to delete was found we
+	     * have to reset the search to the beginning as the
+	     * current entry in the search was deleted and accessing it
+	     * is therefore not allowed anymore.
+	     */
+
+	    entry = Tcl_FirstHashEntry(&info->objects, &place);
+	    /*entry = Tcl_NextHashEntry(&place);*/
     }
     Tcl_DeleteHashTable(&info->objects);
 
