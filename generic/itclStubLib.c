@@ -10,7 +10,7 @@
  * See the file "license.terms" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: 
+ * RCS: $Id: itclStubLib.c,v 1.3 2000/08/04 19:19:11 davidg Exp $
  */
 
 /*
@@ -27,13 +27,6 @@
 
 #include "itclInt.h"
 
-/*
- * Ensure that Itcl_InitStubs is built as an exported symbol.  The other stub
- * functions should be built as non-exported symbols.
- */
-
-#undef TCL_STORAGE_CLASS
-#define TCL_STORAGE_CLASS DLLEXPORT
 
 ItclStubs *itclStubsPtr;
 ItclIntStubs *itclIntStubsPtr;
@@ -56,10 +49,6 @@ ItclIntStubs *itclIntStubsPtr;
  *
  *----------------------------------------------------------------------
  */
-
-#ifdef Itcl_InitStubs
-#undef Itcl_InitStubs
-#endif
 
 char *
 Itcl_InitStubs (interp, version, exact)
