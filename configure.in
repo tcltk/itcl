@@ -225,6 +225,11 @@ AC_SUBST(itcl_STUB_LIB_SPEC)
 AC_SUBST(itcl_BUILD_STUB_LIB_PATH)
 AC_SUBST(itcl_STUB_LIB_PATH)
 
+# itcl_SRC_DIR must be a fully qualified path
+eval itcl_SRC_DIR="$srcdir"
+itcl_SRC_DIR=`cd "${itcl_SRC_DIR}"; pwd`
+AC_SUBST(itcl_SRC_DIR)
+
 #--------------------------------------------------------------------
 # Finally, substitute all of the various values into the Makefile.
 #--------------------------------------------------------------------
