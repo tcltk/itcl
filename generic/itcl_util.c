@@ -21,7 +21,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itcl_util.c,v 1.3 2000/06/16 22:22:17 matt Exp $
+ *     RCS:  $Id: itcl_util.c,v 1.4 2001/04/08 06:17:33 davygrvy Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -52,7 +52,7 @@ typedef struct ItclPreservedData {
 } ItclPreservedData;
 
 static Tcl_HashTable *ItclPreservedList = NULL;
-
+TCL_DECLARE_MUTEX(ItclPreservedListLock)
 
 /*
  *  This structure is used to take a snapshot of the interpreter
@@ -556,6 +556,7 @@ Itcl_EventuallyFree(cdata, fproc)
      *  If a list has not yet been created to manage bits of
      *  preserved data, then create it.
      */
+    Tcl_MutexLock(&ItclPreservedListLock);
     if (!ItclPreservedList) {
         ItclPreservedList = (Tcl_HashTable*)ckalloc(
             (unsigned)sizeof(Tcl_HashTable)
@@ -591,6 +592,7 @@ Itcl_EventuallyFree(cdata, fproc)
         Tcl_DeleteHashEntry(entry);
         ckfree((char*)chunk);
     }
+    Tcl_MutexUnlock(&ItclPreservedListLock);
 }
 
 /*
@@ -624,6 +626,7 @@ Itcl_PreserveData(cdata)
      *  If a list has not yet been created to manage bits of
      *  preserved data, then create it.
      */
+    Tcl_MutexLock(&ItclPreservedListLock);
     if (!ItclPreservedList) {
         ItclPreservedList = (Tcl_HashTable*)ckalloc(
             (unsigned)sizeof(Tcl_HashTable)
@@ -657,6 +660,7 @@ Itcl_PreserveData(cdata)
     if (chunk->usage >= 0) {
         chunk->usage++;
     }
+    Tcl_MutexUnlock(&ItclPreservedListLock);
 }
 
 /*
@@ -688,10 +692,12 @@ Itcl_ReleaseData(cdata)
      *  decrement its usage count.
      */
     entry = NULL;
+    Tcl_MutexLock(&ItclPreservedListLock);
     if (ItclPreservedList) {
         entry = Tcl_FindHashEntry(ItclPreservedList,(char*)cdata);
     }
     if (!entry) {
+	Tcl_MutexUnlock(&ItclPreservedListLock);
         panic("Itcl_ReleaseData can't find reference for 0x%x", cdata);
     }
 
@@ -713,6 +719,7 @@ Itcl_ReleaseData(cdata)
         Tcl_DeleteHashEntry(entry);
         ckfree((char*)chunk);
     }
+    Tcl_MutexUnlock(&ItclPreservedListLock);
 }
 
 

@@ -23,7 +23,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itcl_ensemble.c,v 1.5 2001/04/07 07:20:53 davygrvy Exp $
+ *     RCS:  $Id: itcl_ensemble.c,v 1.6 2001/04/08 06:17:33 davygrvy Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -91,11 +91,6 @@ Tcl_ObjType itclEnsInvocType = {
     SetEnsInvocFromAny                  /* setFromAnyProc */
 };
 
-/*
- *  Boolean flag indicating whether or not the "ensemble" object
- *  type has been registered with the Tcl compiler.
- */
-static int ensInitialized = 0;
 
 /*
  *  Forward declarations for the procedures used in this file.
@@ -166,9 +161,8 @@ int
 Itcl_EnsembleInit(interp)
     Tcl_Interp *interp;         /* interpreter being initialized */
 {
-    if (!ensInitialized) {
+    if (Tcl_GetObjType(itclEnsInvocType.name) == NULL) {
         Tcl_RegisterObjType(&itclEnsInvocType);
-        ensInitialized = 1;
     }
 
     Tcl_CreateObjCommand(interp, "::itcl::ensemble",
