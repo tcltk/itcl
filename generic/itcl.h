@@ -39,7 +39,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itcl.h,v 1.1 1998/07/27 18:41:43 stanton Exp $
+ *     RCS:  $Id: itcl.h,v 1.2 1998/07/29 15:03:18 escoffon Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -50,6 +50,11 @@
 #define ITCL_H
 
 #include "tcl.h"
+
+#ifdef BUILD_itcl
+# undef EXPORT
+# define EXPORT DLLEXPORT
+#endif
 
 #define ITCL_VERSION "3.0"
 #define ITCL_PATCH_LEVEL "3.0.1"
@@ -173,6 +178,9 @@ EXTERN int Itcl_RestoreInterpState _ANSI_ARGS_((Tcl_Interp* interp,
     Itcl_InterpState state));
 EXTERN void Itcl_DiscardInterpState _ANSI_ARGS_((Itcl_InterpState state));
 
-
 #endif /* RESOURCE INCLUDED */
+
+#undef EXPORT
+#define EXPORT DLLIMPORT
+
 #endif /* ITCL_H */
