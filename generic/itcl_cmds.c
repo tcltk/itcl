@@ -21,7 +21,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itcl_cmds.c,v 1.1 1998/07/27 18:41:45 stanton Exp $
+ *     RCS:  $Id: itcl_cmds.c,v 1.2 1998/07/28 18:16:11 stanton Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -37,16 +37,6 @@ static void ItclDelObjectInfo _ANSI_ARGS_((char* cdata));
 static int Initialize _ANSI_ARGS_((Tcl_Interp *interp));
 
 /*
- * Default directory in which to look for libraries:
- */
-
-#ifndef ITCL_LIBRARY
-#define ITCL_LIBRARY ""
-#endif
-
-static char defaultLibraryDir[200] = ITCL_LIBRARY;
-
-/*
  * The following string is the startup script executed in new
  * interpreters.  It locates the Tcl code in the [incr Tcl] library
  * directory and loads it in.
@@ -59,21 +49,26 @@ namespace eval ::itcl {\n\
         variable library\n\
         variable version\n\
         rename _find_init {}\n\
-        if {[catch {uplevel #0 source -rsrc itcl}] == 0} {\n\
-            return\n\
-        }\n\
-        set dirs {}\n\
-        if [info exists env(ITCL_LIBRARY)] {\n\
-            lappend dirs $env(ITCL_LIBRARY)\n\
-        }\n\
-        lappend dirs [file join [file dirname $tcl_library] itcl$version]\n\
-        set bindir [file dirname [info nameofexecutable]]\n\
-        lappend dirs [file join $bindir .. lib itcl$version]\n\
-        lappend dirs [file join $bindir .. library]\n\
-        lappend dirs [file join $bindir .. .. itcl$version library]\n\
+	if {[info exists library]} {\n\
+	    lappend dirs $library\n\
+	} else {\n\
+	    if {[catch {uplevel #0 source -rsrc itcl}] == 0} {\n\
+		return\n\
+	    }\n\
+	    set dirs {}\n\
+	    if {[info exists env(ITCL_LIBRARY)]} {\n\
+		lappend dirs $env(ITCL_LIBRARY)\n\
+	    }\n\
+	    lappend dirs [file join [file dirname $tcl_library] itcl$version]\n\
+	    set bindir [file dirname [info nameofexecutable]]\n\
+	    lappend dirs [file join $bindir .. lib itcl$version]\n\
+	    lappend dirs [file join $bindir .. library]\n\
+	    lappend dirs [file join $bindir .. .. itcl$version library]\n\
+	}\n\
         foreach i $dirs {\n\
             set library $i\n\
-            if {[catch {uplevel #0 [list source [file join $i itcl.tcl]]}] == 0} {\n\
+	    set itclfile [file join $i itcl.tcl]\n\
+            if {![catch {uplevel #0 [list source $itclfile]} msg]} {\n\
                 return\n\
             }\n\
         }\n\
@@ -276,13 +271,8 @@ Initialize(interp)
     }
 
     /*
-     *  Set up the variables containing library/version info.
+     *  Set up the variables containing version info.
      */
-    libDir = Tcl_GetVar(interp, "::itcl::library", TCL_NAMESPACE_ONLY);
-    if (libDir == NULL) {
-	Tcl_SetVar(interp, "::itcl::library", defaultLibraryDir,
-            TCL_NAMESPACE_ONLY);
-    }
 
     Tcl_SetVar(interp, "::itcl::patchLevel", ITCL_PATCH_LEVEL,
         TCL_NAMESPACE_ONLY);
