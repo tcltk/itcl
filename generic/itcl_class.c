@@ -23,7 +23,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itcl_class.c,v 1.12 2002/08/11 03:44:30 davygrvy Exp $
+ *     RCS:  $Id: itcl_class.c,v 1.13 2002/08/12 23:17:17 andreas_kupries Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -398,9 +398,15 @@ ItclDestroyClassNamesp(cdata)
     elem = Itcl_FirstListElem(&cdefnPtr->derived);
     while (elem) {
         cdPtr = (ItclClass*)Itcl_GetListValue(elem);
-        elem = Itcl_NextListElem(elem);  /* advance here--elem will go away */
-
         Tcl_DeleteNamespace(cdPtr->namesp);
+
+	/* As the first namespace is now destroyed we have to get the
+         * new first element of the hash table. We cannot go to the
+         * next element from the current one, because the current one
+         * is deleted. itcl Patch #593112, for Bug #577719.
+	 */
+
+        elem = Itcl_FirstListElem(&cdefnPtr->derived);
     }
 
     /*
