@@ -12,7 +12,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: Makefile.in,v 1.22 2004/08/10 20:58:44 hobbs Exp $
+# RCS: @(#) $Id: Makefile.in,v 1.23 2004/08/17 17:38:40 hobbs Exp $
 
 #========================================================================
 # The names of the source files is defined in the configure script.
@@ -251,7 +251,7 @@ $(PKG_STUB_LIB_FILE): $(PKG_STUB_OBJECTS)
 # As necessary, add $(srcdir):$(srcdir)/compat:....
 #========================================================================
 
-VPATH = $(srcdir)/generic:$(srcdir)/win:$(srcdir)/unix
+VPATH = $(srcdir)/unix:$(srcdir)/generic:$(srcdir)/win
 
 .c.$(OBJEXT):
 	$(COMPILE) -c `@CYGPATH@ $<` -o $@
