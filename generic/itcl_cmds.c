@@ -21,7 +21,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itcl_cmds.c,v 1.15 2002/01/10 11:43:37 davygrvy Exp $
+ *     RCS:  $Id: itcl_cmds.c,v 1.16 2002/04/20 06:01:11 davygrvy Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -246,6 +246,28 @@ Initialize(interp)
         return TCL_ERROR;
     }
     Itcl_PreserveData((ClientData)info);
+
+    /*
+     *  Create the "itcl::is" command to test object
+     *  and classes existence.
+     */
+    if (Itcl_CreateEnsemble(interp, "::itcl::is") != TCL_OK) {
+        return TCL_ERROR;
+    }
+    if (Itcl_AddEnsemblePart(interp, "::itcl::is",
+            "class", "name", Itcl_IsClassCmd,
+            (ClientData)info, Itcl_ReleaseData) != TCL_OK) {
+        return TCL_ERROR;
+    }
+    Itcl_PreserveData((ClientData)info);
+
+    if (Itcl_AddEnsemblePart(interp, "::itcl::is",
+            "object", "?-class classname? name", Itcl_IsObjectCmd,
+            (ClientData)info, Itcl_ReleaseData) != TCL_OK) {
+        return TCL_ERROR;
+    }
+    Itcl_PreserveData((ClientData)info);
+
 
     /*
      *  Add "code" and "scope" commands for handling scoped values.
@@ -1450,3 +1472,186 @@ ItclDeleteStub(cdata)
 {
     /* do nothing */
 }
+
+
+/*
+ * ------------------------------------------------------------------------
+ *  Itcl_IsObjectCmd()
+ *
+ *  Invoked by Tcl whenever the user issues an "itcl::is object"
+ *  command to test whether the argument is an object or not.
+ *  syntax:
+ *
+ *    itcl::is object ?-class classname? commandname
+ *
+ *  Returns 1 if it is an object, 0 otherwise
+ * ------------------------------------------------------------------------
+ */
+int
+Itcl_IsObjectCmd(clientData, interp, objc, objv)
+    ClientData clientData;   /* class/object info */
+    Tcl_Interp *interp;      /* current interpreter */
+    int objc;                /* number of arguments */
+    Tcl_Obj *CONST objv[];   /* argument objects */
+{
+
+    int             classFlag = 0;
+    int             idx = 0;
+    char            *name;
+    char            *cname;
+    char            *cmdName;
+    char            *token;
+    Tcl_Command     cmd;
+    Command         *cmdPtr;
+    Tcl_Namespace   *contextNs = NULL;
+    ItclClass       *classDefn = NULL;
+    ItclObject      *contextObj;
+
+    /*
+     *    Handle the arguments.
+     *    objc needs to be either:
+     *        2    itcl::is object commandname
+     *        4    itcl::is object -class classname commandname
+     */
+    if (objc != 2 && objc != 4) {
+        Tcl_WrongNumArgs(interp, 1, objv, "?-class classname? commandname");
+        return TCL_ERROR;
+    }
+
+    /*
+     *    Parse the command args. Look for the -class
+     *    keyword.
+     */
+    for (idx=1; idx < objc; idx++) {
+        token = Tcl_GetString(objv[idx]);
+
+        if (strcmp(token,"-class") == 0) {
+            cname = Tcl_GetString(objv[idx+1]);
+            classDefn = Itcl_FindClass(interp, cname, /* no autoload */ 0);
+
+            if (classDefn == NULL) {
+                    return TCL_ERROR;
+            }
+
+            idx++;
+            classFlag = 1;
+        } else {
+            name = Tcl_GetString(objv[idx]);
+        }
+
+    } /* end for objc loop */
+        
+
+    /*
+     *  The object name may be a scoped value of the form
+     *  "namespace inscope <namesp> <command>".  If it is,
+     *  decode it.
+     */
+    if (Itcl_DecodeScopedCommand(interp, name, &contextNs, &cmdName)
+        != TCL_OK) {
+        return TCL_ERROR;
+    }
+
+    cmd = Tcl_FindCommand(interp, cmdName, contextNs, /* flags */ 0);
+
+    /*
+     *    Need the NULL test, or the test will fail if cmd is NULL
+     */
+    if (cmd == NULL || ! Itcl_IsObject(cmd)) {
+        Tcl_SetObjResult(interp, Tcl_NewBooleanObj(0));
+        return TCL_OK;
+    }
+
+    /*
+     *    Handle the case when the -class flag is given
+     */
+    if (classFlag) {
+        cmdPtr = (Command*)cmd;
+        contextObj = (ItclObject*)cmdPtr->objClientData;
+
+        if (! Itcl_ObjectIsa(contextObj, classDefn)) {
+
+            Tcl_SetObjResult(interp, Tcl_NewBooleanObj(0));
+            return TCL_OK;
+        }
+
+    }
+
+    /*
+     *    Got this far, so assume that it is a valid object
+     */
+    Tcl_SetObjResult(interp, Tcl_NewBooleanObj(1));
+
+    if (cmdName != name) {
+        ckfree(cmdName);
+    }
+
+    return TCL_OK;
+}
+
+
+
+/*
+ * ------------------------------------------------------------------------
+ *  Itcl_IsClassCmd()
+ *
+ *  Invoked by Tcl whenever the user issues an "itcl::is class"
+ *  command to test whether the argument is an itcl class or not
+ *  syntax:
+ *
+ *    itcl::is class commandname
+ *
+ *  Returns 1 if it is a class, 0 otherwise
+ * ------------------------------------------------------------------------
+ */
+int
+Itcl_IsClassCmd(clientData, interp, objc, objv)
+    ClientData clientData;   /* class/object info */
+    Tcl_Interp *interp;      /* current interpreter */
+    int objc;                /* number of arguments */
+    Tcl_Obj *CONST objv[];   /* argument objects */
+{
+
+    char           *cname;
+    char           *name;
+    ItclClass      *classDefn = NULL;
+    Tcl_Namespace  *contextNs = NULL;
+
+    /*
+     *    Need itcl::is class classname
+     */
+    if (objc != 2) {
+        Tcl_WrongNumArgs(interp, 1, objv, "commandname");
+        return TCL_ERROR;
+    }
+
+    name = Tcl_GetString(objv[1]);
+
+    /*
+     *    The object name may be a scoped value of the form
+     *    "namespace inscope <namesp> <command>".  If it is,
+     *    decode it.
+     */
+    if (Itcl_DecodeScopedCommand(interp, name, &contextNs, &cname) != TCL_OK) {
+        return TCL_ERROR;
+    }
+
+    classDefn = Itcl_FindClass(interp, cname, /* no autoload */ 0);
+
+    /*
+     *    If classDefn is NULL, then it wasn't found, hence it
+     *    isn't a class
+     */
+    if (classDefn != NULL) {
+        Tcl_SetObjResult(interp, Tcl_NewBooleanObj(1));
+    } else {
+        Tcl_SetObjResult(interp, Tcl_NewBooleanObj(0));
+    }
+
+    if (cname != name) {
+        ckfree(cname);
+    }
+
+    return TCL_OK;
+
+} /* end Itcl_IsClassCmd function */

@@ -6,7 +6,7 @@
 #            mmclennan@lucent.com
 #            http://www.tcltk.com/itcl
 #
-#      RCS:  $Id: basic.test,v 1.4 2000/07/06 06:43:30 mmc Exp $
+#      RCS:  $Id: basic.test,v 1.5 2002/04/20 06:01:30 davygrvy Exp $
 # ----------------------------------------------------------------------
 #            Copyright (c) 1993-1998  Lucent Technologies, Inc.
 # ======================================================================
@@ -94,6 +94,33 @@ test basic-1.11 {find command supports object names starting with -} {
     Counter -foo
     itcl::find objects -class Counter -foo
 } {-foo}
+test basic-1.12 {is command with class argument} {
+    itcl::is class Counter
+} {1}
+
+test basic-1.13 {is command with class argument (global namespace)} {
+    itcl::is class ::Counter
+} {1}
+
+test basic-1.14 {is command with class argument (wrapped in code command)} {
+    itcl::is class [itcl::code Counter]
+} {1}
+
+test basic-1.14 {is command with class argument (class does not exist)} {
+    itcl::is class Count
+} {0}
+
+test basic-1.15 {is command with object argument} {
+    itcl::is object -foo
+} {1}
+
+test basic-1.16 {is command with object argument (object does not exist)} {
+    itcl::is object xxx
+} {0}
+
+test basic-1.15 {is command with object argument (with code command)} {
+    itcl::is object [itcl::code -- -foo]
+} {1}
 
 # ----------------------------------------------------------------------
 #  #auto names

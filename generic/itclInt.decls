@@ -9,7 +9,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 # 
-# RCS: @(#) $Id: itclInt.decls,v 1.4 2002/04/20 05:34:33 davygrvy Exp $
+# RCS: @(#) $Id: itclInt.decls,v 1.5 2002/04/20 06:01:11 davygrvy Exp $
 
 library itcl
 
@@ -497,4 +497,13 @@ declare 114 generic {
 }
 declare 115 generic {
     void Itcl_Assert (char *testExpr, char *fileName, int lineNum)
+}
+
+declare 116 generic {
+    int Itcl_IsObjectCmd (ClientData clientData, Tcl_Interp *interp, \
+    int objc, Tcl_Obj *CONST objv[])
+}
+declare 117 generic {
+    int Itcl_IsClassCmd (ClientData clientData, Tcl_Interp *interp, \
+    int objc, Tcl_Obj *CONST objv[])
 }

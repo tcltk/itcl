@@ -8,7 +8,7 @@
  * See the file "license.terms" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: $Id: itclStubInit.c,v 1.2 2000/08/04 22:11:50 davidg Exp $
+ * RCS: $Id: itclStubInit.c,v 1.3 2002/04/20 06:01:11 davygrvy Exp $
  */
 
 #include "itclInt.h"
@@ -145,6 +145,8 @@ ItclIntStubs itclIntStubs = {
     _Tcl_ActivateCallFrame, /* 113 */
     _TclNewVar, /* 114 */
     Itcl_Assert, /* 115 */
+    Itcl_IsObjectCmd, /* 116 */
+    Itcl_IsClassCmd, /* 117 */
 };
 
 static ItclStubHooks itclStubHooks = {
