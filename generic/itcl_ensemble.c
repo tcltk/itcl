@@ -23,7 +23,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itcl_ensemble.c,v 1.6 2001/04/08 06:17:33 davygrvy Exp $
+ *     RCS:  $Id: itcl_ensemble.c,v 1.7 2001/10/25 22:01:48 hobbs Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -798,29 +798,22 @@ CreateEnsemble(interp, parentEnsData, ensName)
         return TCL_ERROR;
     }
 
-    ensData->cmd = parentEnsData->cmd;
-    ensData->parent = ensPart;
+    ensData->cmd		= parentEnsData->cmd;
+    ensData->parent		= ensPart;
 
-    cmdPtr = (Command*)ckalloc(sizeof(Command));
-    cmdPtr->hPtr = NULL;
-    cmdPtr->nsPtr = ((Command*)ensData->cmd)->nsPtr;
-    cmdPtr->refCount = 0;
-    cmdPtr->cmdEpoch = 0;
-    cmdPtr->compileProc = NULL;
-    cmdPtr->objProc = HandleEnsemble;
-    cmdPtr->objClientData = (ClientData)ensData;
-    cmdPtr->proc = NULL;
-    cmdPtr->clientData = NULL;
-    cmdPtr->deleteProc = DeleteEnsemble;
-    cmdPtr->deleteData = cmdPtr->objClientData;
-    #if (TCL_MAJOR_VERSION == 8) && (TCL_MINOR_VERSION < 4)
-      cmdPtr->deleted = 0;
-    #else
-      cmdPtr->flags = 0;
-    #endif
-    cmdPtr->importRefPtr = NULL;
+    /*
+     * Initialize non-NULL data only.  This allows us to handle the
+     * structure differences between versions better.
+     */
+    cmdPtr			= (Command *) ckalloc(sizeof(Command));
+    memset((VOID *) cmdPtr, 0, sizeof(Command));
+    cmdPtr->nsPtr		= ((Command *) ensData->cmd)->nsPtr;
+    cmdPtr->objProc		= HandleEnsemble;
+    cmdPtr->objClientData	= (ClientData)ensData;
+    cmdPtr->deleteProc		= DeleteEnsemble;
+    cmdPtr->deleteData		= cmdPtr->objClientData;
 
-    ensPart->cmdPtr = cmdPtr;
+    ensPart->cmdPtr		= cmdPtr;
 
     return TCL_OK;
 }
@@ -882,27 +875,20 @@ AddEnsemblePart(interp, ensData, partName, usageInfo,
         strcpy(ensPart->usage, usageInfo);
     }
 
-    cmdPtr = (Command*)ckalloc(sizeof(Command));
-    cmdPtr->hPtr = NULL;
-    cmdPtr->nsPtr = ((Command*)ensData->cmd)->nsPtr;
-    cmdPtr->refCount = 0;
-    cmdPtr->cmdEpoch = 0;
-    cmdPtr->compileProc = NULL;
-    cmdPtr->objProc = objProc;
-    cmdPtr->objClientData = (ClientData)clientData;
-    cmdPtr->proc = NULL;
-    cmdPtr->clientData = NULL;
-    cmdPtr->deleteProc = deleteProc;
-    cmdPtr->deleteData = (ClientData)clientData;
-#if (TCL_MAJOR_VERSION == 8) && (TCL_MINOR_VERSION < 4)
-    cmdPtr->deleted = 0;
-#else
-    cmdPtr->flags = 0;
-#endif
-    cmdPtr->importRefPtr = NULL;
+    /*
+     * Initialize non-NULL data only.  This allows us to handle the
+     * structure differences between versions better.
+     */
+    cmdPtr			= (Command *) ckalloc(sizeof(Command));
+    memset((VOID *) cmdPtr, 0, sizeof(Command));
+    cmdPtr->nsPtr		= ((Command *) ensData->cmd)->nsPtr;
+    cmdPtr->objProc		= objProc;
+    cmdPtr->objClientData	= (ClientData)clientData;
+    cmdPtr->deleteProc		= deleteProc;
+    cmdPtr->deleteData		= (ClientData)clientData;
 
-    ensPart->cmdPtr = cmdPtr;
-    *rVal = ensPart;
+    ensPart->cmdPtr		= cmdPtr;
+    *rVal			= ensPart;
 
     return TCL_OK;
 }
