@@ -22,7 +22,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itcl_bicmds.c,v 1.1 1998/07/27 18:41:44 stanton Exp $
+ *     RCS:  $Id: itcl_bicmds.c,v 1.2 1998/08/07 12:09:26 stanton Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -1558,7 +1558,7 @@ Itcl_BiInfoArgsCmd(dummy, interp, objc, objv)
         for (localPtr = procPtr->firstLocalPtr;
              localPtr != NULL;
              localPtr = localPtr->nextPtr) {
-            if (localPtr->isArg) {
+            if (TclIsVarArgument(localPtr)) {
                 Tcl_ListObjAppendElement(interp, objPtr,
                     Tcl_NewStringObj(localPtr->name, -1));
             }
