@@ -21,7 +21,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itcl_cmds.c,v 1.19 2003/12/17 02:10:46 davygrvy Exp $
+ *     RCS:  $Id: itcl_cmds.c,v 1.20 2003/12/17 03:01:17 davygrvy Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -1592,10 +1592,7 @@ Itcl_IsObjectCmd(clientData, interp, objc, objv)
      *    Got this far, so assume that it is a valid object
      */
     Tcl_SetObjResult(interp, Tcl_NewBooleanObj(1));
-
-    if (cmdName != name) {
-        ckfree(cmdName);
-    }
+    ckfree(cmdName);
 
     return TCL_OK;
 }
@@ -1659,9 +1656,7 @@ Itcl_IsClassCmd(clientData, interp, objc, objv)
         Tcl_SetObjResult(interp, Tcl_NewBooleanObj(0));
     }
 
-    if (cname != name) {
-        ckfree(cname);
-    }
+    ckfree(cname);
 
     return TCL_OK;
 

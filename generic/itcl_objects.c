@@ -22,7 +22,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itcl_objects.c,v 1.10 2003/12/17 02:25:37 davygrvy Exp $
+ *     RCS:  $Id: itcl_objects.c,v 1.11 2003/12/17 03:01:17 davygrvy Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -522,9 +522,8 @@ Itcl_FindObject(interp, name, roPtr)
         *roPtr = NULL;
     }
 
-    if (cmdName != name) {
-        ckfree(cmdName);
-    }
+    ckfree(cmdName);
+
     return TCL_OK;
 }
 
