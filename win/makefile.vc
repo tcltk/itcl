@@ -5,7 +5,7 @@
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 # 
 # Copyright (c) 1993-1998 Lucent Technologies, Inc.
-# RCS: $Id: makefile.vc,v 1.11 2001/05/23 00:00:20 davygrvy Exp $
+# RCS: $Id: makefile.vc,v 1.12 2001/05/23 00:32:09 davygrvy Exp $
 ######################################################################
 # All needed information is derived from running vcvars32.bat
 #
@@ -93,6 +93,7 @@ ITCLSTUBOBJS = \
 
 WINDIR		= $(ROOT)\win
 GENERICDIR	= $(ROOT)\generic
+RCDIR		= $(ROOT)\win\rc
 
 ######################################################################
 # Link flags
@@ -274,7 +275,7 @@ $<
 <<
 
 {$(RCDIR)}.rc{$(TMP_DIR)}.res :
-	$(rc32) -fo $@ -r -i $(GENERICDIR) -i $(WINDIR) -i $(TCLROOT)\generic $(ITCL_DEFINES) $<
+	$(rc32) -fo $@ $(ITCL_INCLUDES) $(TCL_INCLUDES) $(ITCL_DEFINES) $<
 
 ######################################################################
 # Clean up
