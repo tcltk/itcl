@@ -6,7 +6,7 @@
 #            mmclennan@lucent.com
 #            http://www.tcltk.com/itcl
 #
-#      RCS:  $Id: info.test,v 1.4 2000/06/01 20:34:35 wart Exp $
+#      RCS:  $Id: info.test,v 1.5 2000/07/07 12:27:37 csmith Exp $
 # ----------------------------------------------------------------------
 #            Copyright (c) 1993-1998  Lucent Technologies, Inc.
 # ======================================================================
@@ -93,6 +93,10 @@ test basic-1.3 {info: errors trigger usage info} {
   info inherit
   info variable ?name? ?-protection? ?-type? ?-name? ?-init? ?-value? ?-config?
 ...and others described on the man page}}
+
+test info-1.4 {info: info class works on class itself} {
+    namespace eval test_info { info class }
+} {::test_info}
 
 # ----------------------------------------------------------------------
 #  Data members
