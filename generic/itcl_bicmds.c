@@ -22,7 +22,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itcl_bicmds.c,v 1.4 2000/07/07 12:29:21 csmith Exp $
+ *     RCS:  $Id: itcl_bicmds.c,v 1.5 2001/05/22 15:36:52 davygrvy Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -847,7 +847,9 @@ Itcl_BiInfoClassCmd(dummy, interp, objc, objv)
       contextNs = contextClass->namesp;
     }
 
-    if (contextNs->parentPtr == activeNs) {
+    if (!contextNs) {
+        name = activeNs->fullName;
+    } else if (contextNs->parentPtr == activeNs) {
         name = contextNs->name;
     } else {
         name = contextNs->fullName;
