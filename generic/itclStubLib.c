@@ -10,7 +10,7 @@
  * See the file "license.terms" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: $Id: itclStubLib.c,v 1.4 2000/08/07 20:01:52 welch Exp $
+ * RCS: $Id: itclStubLib.c,v 1.5 2001/04/07 07:20:53 davygrvy Exp $
  */
 
 /*
@@ -65,7 +65,7 @@ Itcl_InitStubs (interp, version, exact)
 {
     char *actualVersion;
     
-    actualVersion = Tcl_PkgRequireEx(interp, "Itcl", version, exact,
+    actualVersion = (char *) Tcl_PkgRequireEx(interp, "Itcl", version, exact,
         (ClientData *) &itclStubsPtr);
 
     if (actualVersion == NULL) {

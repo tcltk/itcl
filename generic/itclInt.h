@@ -39,7 +39,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itclInt.h,v 1.6 1999/05/24 21:10:44 redman Exp $
+ *     RCS:  $Id: itclInt.h,v 1.7 2001/04/07 07:20:53 davygrvy Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -238,6 +238,13 @@ typedef struct ItclContext {
     Var localStorage[20];     /* default storage for compiled locals */
 } ItclContext;
 
+/*
+ *  Compatibility flags.  Used to support small "hacks".  These are stored
+ *  in the global variable named itclCompatFlags.
+ */
+#define ITCL_COMPAT_USECMDFLAGS 0x0001	/* Tcl8.4a1 introduced a different Command
+					 * structure, and we need to adapt
+					 * dynamically */
 
 #include "itclIntDecls.h"
 

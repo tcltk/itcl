@@ -21,7 +21,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itcl_cmds.c,v 1.10 2000/08/18 01:46:08 davidg Exp $
+ *     RCS:  $Id: itcl_cmds.c,v 1.11 2001/04/07 07:20:53 davygrvy Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -103,6 +103,9 @@ static char safeInitScript[] =
 
 extern ItclStubs itclStubs;
 
+
+int itclCompatFlags = -1;
+
 
 /*
  * ------------------------------------------------------------------------
@@ -138,6 +141,26 @@ Initialize(interp)
         Tcl_SetResult(interp, "already installed: [incr Tcl]", TCL_STATIC);
         return TCL_ERROR;
     }
+
+    /*
+     *  Set the compatability options.  Stubs allows us to load into many
+     *  version of the Tcl core.  Some problems have crept-in, and we need
+     *  to adapt dynamically regarding use of some internal structures that
+     *  have changed since 8.1.0
+     *
+     *  TODO: make a TIP for exporting a Tcl_CommandIsDeleted function in the core.
+     */
+    if (itclCompatFlags == -1) {
+	int maj, min, ptch, type;
+
+	itclCompatFlags = 0;
+	Tcl_GetVersion(&maj, &min, &ptch, &type);
+
+	if ((maj == 8) && (min >= 4)) {
+	    itclCompatFlags = ITCL_COMPAT_USECMDFLAGS;
+	}
+    }
+
 
     /*
      *  Initialize the ensemble package first, since we need this
@@ -439,7 +462,7 @@ Itcl_FindClassesCmd(clientData, interp, objc, objv)
 
     char *pattern;
     char *name;
-    int i, newEntry, handledActiveNs;
+    int newEntry, handledActiveNs;
     Tcl_HashTable unique;
     Tcl_HashEntry *entry;
     Tcl_HashSearch place;
@@ -568,7 +591,7 @@ Itcl_FindObjectsCmd(clientData, interp, objc, objv)
     ItclClass *isaDefn = NULL;
 
     char *name, *token;
-    int i, pos, newEntry, match, handledActiveNs;
+    int pos, newEntry, match, handledActiveNs;
     ItclObject *contextObj;
     Tcl_HashTable unique;
     Tcl_HashEntry *entry;
