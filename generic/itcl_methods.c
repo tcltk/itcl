@@ -23,7 +23,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itcl_methods.c,v 1.1 1998/07/27 18:41:47 stanton Exp $
+ *     RCS:  $Id: itcl_methods.c,v 1.2 1998/08/07 12:11:01 stanton Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -1159,9 +1159,7 @@ Itcl_CreateArg(name, init)
     localPtr->nextPtr = NULL;
     localPtr->nameLength = nameLen;
     localPtr->frameIndex = 0;  /* set this later */
-    localPtr->isArg  = 1;
-    localPtr->isTemp = 0;
-    localPtr->flags  = VAR_SCALAR;
+    localPtr->flags  = VAR_SCALAR | VAR_ARGUMENT;
     localPtr->resolveInfo = NULL;
 
     if (init != NULL) {
@@ -1600,9 +1598,6 @@ Itcl_PushContext(interp, member, contextClass, contextObj, contextPtr)
     int result, localCt, newEntry;
     ItclMemberCode *mcode;
     Proc *procPtr;
-    CompiledLocal *localPtr;
-    Var *varPtr, *resolvedVarPtr;
-    Tcl_ResolvedVarInfo *resVarInfo;
     Tcl_HashEntry *entry;
 
     /*
@@ -1656,57 +1651,21 @@ Itcl_PushContext(interp, member, contextClass, contextObj, contextPtr)
             );
         }
 
-        /*
-         *  Initialize the array of local variables.
-         *  Class variables will have special resolution rules.
-         *  In that case, we call their "resolver" procs to get our
-         *  hands on the variable, and we make the compiled local a
-         *  link to the real variable.
-         */
-        varPtr = contextPtr->compiledLocals;
-        for (localPtr=procPtr->firstLocalPtr;
-             localPtr != NULL;
-             localPtr=localPtr->nextPtr) {
+	/*
+	 * Initialize and resolve compiled variable references.
+         * Class variables will have special resolution rules.
+         * In that case, we call their "resolver" procs to get our
+         * hands on the variable, and we make the compiled local a
+         * link to the real variable.
+	 */
 
-            resVarInfo = localPtr->resolveInfo;
-            resolvedVarPtr = NULL;
-
-            if (resVarInfo && resVarInfo->fetchProc) {
-                resolvedVarPtr = (Var*) (*resVarInfo->fetchProc)(interp,
-                    resVarInfo->identity);
-            }
-
-            if (resolvedVarPtr) {
-                varPtr->name = localPtr->name;  /* null if temp var */
-                varPtr->nsPtr = NULL;
-                varPtr->hPtr = NULL;
-                varPtr->refCount = 0;
-                varPtr->tracePtr = NULL;
-                varPtr->searchPtr = NULL;
-                varPtr->flags = 0;
-                TclSetVarLink(varPtr);
-                varPtr->value.linkPtr = resolvedVarPtr;
-                resolvedVarPtr->refCount++;
-            }
-            else {
-                varPtr->value.objPtr = NULL;
-                varPtr->name = localPtr->name;
-                varPtr->nsPtr = NULL;
-                varPtr->hPtr = NULL;
-                varPtr->refCount = 0;
-                varPtr->tracePtr = NULL;
-                varPtr->searchPtr = NULL;
-                varPtr->flags = (localPtr->flags | VAR_UNDEFINED);
-            }
-            varPtr++;
-        }
-
-        /*
-         *  Plug the local variables into the call frame.
-         */
         framePtr->procPtr = procPtr;
         framePtr->numCompiledLocals = localCt;
         framePtr->compiledLocals = contextPtr->compiledLocals;
+
+	TclInitCompiledLocals(interp, framePtr,
+		(Namespace*)contextClass->namesp);
+
     }
     return result;
 }
@@ -1884,12 +1843,12 @@ Itcl_AssignArgs(interp, objc, objv, mfunc)
          argsLeft > 0;
          argPtr=argPtr->nextPtr, argsLeft--, varPtr++, objv++, objc--)
     {
-        if (!argPtr->isArg) {
+        if (!TclIsVarArgument(argPtr)) {
             panic("local variable %s is not argument but should be",
                 argPtr->name);
             return TCL_ERROR;
         }
-        if (argPtr->isTemp) {
+        if (TclIsVarTemporary(argPtr)) {
             panic("local variable is temporary but should be an argument");
             return TCL_ERROR;
         }
