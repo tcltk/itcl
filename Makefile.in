@@ -11,7 +11,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: Makefile.in,v 1.14 2000/08/07 20:01:48 welch Exp $
+# RCS: @(#) $Id: Makefile.in,v 1.15 2001/05/29 15:51:16 andreas_kupries Exp $
 
 #========================================================================
 # Edit the following few lines when writing a new extension
@@ -292,7 +292,7 @@ install-doc: doc
 	@for i in $(srcdir)/doc/*.n; \
 	    do \
 	    echo "Installing $$i"; \
-	    rm -f $(mandir)/mann/$$i; \
+	    rm -f $(mandir)/mann/`basename $$i`; \
 	    $(INSTALL_DATA) $$i $(mandir)/mann ; \
 	    done
 
