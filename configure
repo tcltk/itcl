@@ -3444,19 +3444,18 @@ if test "${TCL_LIB_VERSIONS_OK}" = "ok"; then
 else
     eval itcl_LIB_FLAG="-litcl`echo ${VERSION} | tr -d .`${DBGX}"
 fi
-itcl_BUILD_LIB_SPEC="-L\"$(${CYGPATH} `pwd`)\" ${itcl_LIB_FLAG}"
-itcl_LIB_SPEC="-L\"`${CYGPATH} ${pkglibdir}`\" ${itcl_LIB_FLAG}"
+itcl_BUILD_LIB_SPEC="-L`pwd` ${itcl_LIB_FLAG}"
+itcl_LIB_SPEC="-L${pkglibdir} ${itcl_LIB_FLAG}"
 
 if test "${TCL_LIB_VERSIONS_OK}" = "ok"; then
     eval itcl_STUB_LIB_FLAG="-litclstub${VERSION}${DBGX}"
 else
     eval itcl_STUB_LIB_FLAG="-litclstub`echo ${VERSION} | tr -d .`${DBGX}"
 fi
-
-itcl_BUILD_STUB_LIB_SPEC="-L\"$(${CYGPATH} `pwd`)\" ${itcl_STUB_LIB_FLAG}"
-itcl_STUB_LIB_SPEC="-L\"`${CYGPATH} ${pkglibdir}`\" ${itcl_STUB_LIB_FLAG}"
-itcl_BUILD_STUB_LIB_PATH="\"$(${CYGPATH} `pwd`/${itclstub_LIB_FILE})\""
-itcl_STUB_LIB_PATH="\"`${CYGPATH} ${pkglibdir}/${itclstub_LIB_FILE}`\""
+itcl_BUILD_STUB_LIB_SPEC="-L`pwd` ${itcl_STUB_LIB_FLAG}"
+itcl_STUB_LIB_SPEC="-L${pkglibdir} ${itcl_STUB_LIB_FLAG}"
+itcl_BUILD_STUB_LIB_PATH="`pwd`/${itclstub_LIB_FILE}"
+itcl_STUB_LIB_PATH="${pkglibdir}/${itclstub_LIB_FILE}"
 
 
 
