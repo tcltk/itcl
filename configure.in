@@ -99,7 +99,7 @@ AC_EXEEXT
 case "`uname -s`" in
     *win32* | *WIN32* | *CYGWIN_NT*)
 	CYGPATH="cygpath -w"
-	RELPATH=".. bin"
+	RELPATH=".. .. bin"
     ;;
     *)
 	CYGPATH=echo

@@ -1115,7 +1115,7 @@ ac_exeext=$EXEEXT
 case "`uname -s`" in
     *win32* | *WIN32* | *CYGWIN_NT*)
 	CYGPATH="cygpath -w"
-	RELPATH=".. bin"
+	RELPATH=".. .. bin"
     ;;
     *)
 	CYGPATH=echo
@@ -1272,6 +1272,7 @@ echo "configure:1245: checking for existence of $TCL_BIN_DIR/tclConfig.sh" >&5
     
     
     
+    
 
 
 #--------------------------------------------------------------------
@@ -1288,7 +1289,7 @@ echo "configure:1245: checking for existence of $TCL_BIN_DIR/tclConfig.sh" >&5
 #SC_PUBLIC_TCL_HEADERS
 
     echo $ac_n "checking for Tcl private include files""... $ac_c" 1>&6
-echo "configure:1292: checking for Tcl private include files" >&5
+echo "configure:1293: checking for Tcl private include files" >&5
 
     case "`uname -s`" in
 	*win32* | *WIN32* | *CYGWIN_NT*)
@@ -1374,7 +1375,7 @@ esac
 
 
     echo $ac_n "checking for building with threads""... $ac_c" 1>&6
-echo "configure:1378: checking for building with threads" >&5
+echo "configure:1379: checking for building with threads" >&5
     # Check whether --enable-threads or --disable-threads was given.
 if test "${enable_threads+set}" = set; then
   enableval="$enable_threads"
@@ -1401,7 +1402,7 @@ EOF
 		;;
 	    *)
 		echo $ac_n "checking for pthread_mutex_init in -lpthread""... $ac_c" 1>&6
-echo "configure:1405: checking for pthread_mutex_init in -lpthread" >&5
+echo "configure:1406: checking for pthread_mutex_init in -lpthread" >&5
 ac_lib_var=`echo pthread'_'pthread_mutex_init | sed 'y%./+-%__p_%'`
 if eval "test \"`echo '$''{'ac_cv_lib_$ac_lib_var'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
@@ -1409,7 +1410,7 @@ else
   ac_save_LIBS="$LIBS"
 LIBS="-lpthread  $LIBS"
 cat > conftest.$ac_ext <<EOF
-#line 1413 "configure"
+#line 1414 "configure"
 #include "confdefs.h"
 /* Override any gcc2 internal prototype to avoid an error.  */
 /* We use char because int might match the return type of a gcc2
@@ -1420,7 +1421,7 @@ int main() {
 pthread_mutex_init()
 ; return 0; }
 EOF
-if { (eval echo configure:1424: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
+if { (eval echo configure:1425: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
   rm -rf conftest*
   eval "ac_cv_lib_$ac_lib_var=yes"
 else
@@ -1466,7 +1467,7 @@ fi
 
 
     echo $ac_n "checking how to build libraries""... $ac_c" 1>&6
-echo "configure:1470: checking how to build libraries" >&5
+echo "configure:1471: checking how to build libraries" >&5
     # Check whether --enable-shared or --disable-shared was given.
 if test "${enable_shared+set}" = set; then
   enableval="$enable_shared"
@@ -1533,7 +1534,7 @@ SHLIB_CFLAGS=${TCL_SHLIB_CFLAGS}
     esac
 
     echo $ac_n "checking for build with symbols""... $ac_c" 1>&6
-echo "configure:1537: checking for build with symbols" >&5
+echo "configure:1538: checking for build with symbols" >&5
     # Check whether --enable-symbols or --disable-symbols was given.
 if test "${enable_symbols+set}" = set; then
   enableval="$enable_symbols"
@@ -1676,12 +1677,12 @@ fi
 #--------------------------------------------------------------------
 
 
-    for ac_prog in tclsh8.2${EXEEXT} tclsh82d${EXEEXT} tclsh82${EXEEXT} tclsh${EXEEXT}
+    for ac_prog in tclsh8.2${EXEEXT} tclsh82${EXEEXT} tclsh82d${EXEEXT} tclsh${EXEEXT}
 do
 # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
 echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
-echo "configure:1685: checking for $ac_word" >&5
+echo "configure:1686: checking for $ac_word" >&5
 if eval "test \"`echo '$''{'ac_cv_path_TCLSH_PROG'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -1694,7 +1695,7 @@ else
   ;;
   *)
   IFS="${IFS= 	}"; ac_save_ifs="$IFS"; IFS=":"
-  ac_dummy="${exec_prefix}:${prefix}/bin:${TCL_BIN_DIR}/../bin:${PATH}"
+  ac_dummy="${exec_prefix}/bin:${prefix}/bin:${TCL_BIN_DIR}:${TCL_BIN_DIR}/../bin:${PATH}"
   for ac_dir in $ac_dummy; do 
     test -z "$ac_dir" && ac_dir=.
     if test -f $ac_dir/$ac_word; then
@@ -1890,6 +1891,7 @@ s%@ITCL_GENERIC_DIR_NATIVE@%$ITCL_GENERIC_DIR_NATIVE%g
 s%@ITCL_WIN_DIR_NATIVE@%$ITCL_WIN_DIR_NATIVE%g
 s%@ITCL_UNIX_DIR_NATIVE@%$ITCL_UNIX_DIR_NATIVE%g
 s%@ITCL_INCLUDES@%$ITCL_INCLUDES%g
+s%@TCL_DBGX@%$TCL_DBGX%g
 s%@TCL_BIN_DIR@%$TCL_BIN_DIR%g
 s%@TCL_SRC_DIR@%$TCL_SRC_DIR%g
 s%@TCL_LIB_FILE@%$TCL_LIB_FILE%g
@@ -1921,7 +1923,6 @@ s%@STLIB_LD@%$STLIB_LD%g
 s%@SHLIB_LD@%$SHLIB_LD%g
 s%@SHLIB_CFLAGS@%$SHLIB_CFLAGS%g
 s%@SHLIB_LDFLAGS@%$SHLIB_LDFLAGS%g
-s%@TCL_DBGX@%$TCL_DBGX%g
 s%@CFLAGS_DEFAULT@%$CFLAGS_DEFAULT%g
 s%@LDFLAGS_DEFAULT@%$LDFLAGS_DEFAULT%g
 s%@MAKE_LIB@%$MAKE_LIB%g
