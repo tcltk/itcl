@@ -1,0 +1,3 @@
+# Tcl package index file, version 1.0
+
+package ifneeded Itcl @VERSION@ [list load "@itcl_LIB_FILE@" Itcl]

@@ -11,7 +11,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: Makefile.in,v 1.4 1999/09/10 23:57:01 wart Exp $
+# RCS: @(#) $Id: Makefile.in,v 1.5 1999/09/14 00:01:22 wart Exp $
 
 #========================================================================
 # Edit the following few lines when writing a new extension
@@ -219,7 +219,6 @@ DEFS = @DEFS@ $(EXTRA_CFLAGS) -DITCL_LIBRARY=\"$(ITCL_LIBRARY)\"
 
 ACLOCAL_M4 = $(srcdir)/aclocal.m4
 mkinstalldirs = $(SHELL) $(top_srcdir)/../config/mkinstalldirs
-CONFIG_CLEAN_FILES = mkIndex.tcl
 
 CPPFLAGS = @CPPFLAGS@
 LIBS = @LIBS@
@@ -437,7 +436,7 @@ install-lib-binaries: installdirs
 	    $(RANLIB) $(DESTDIR)$(bindir)/$$p; \
 	  else :; fi; \
 	done
-	$(TCLSH_PROG) mkIndex.tcl $(itcl_LIB_FILE)
+	$(INSTALL_DATA) pkgIndex.tcl $(pkglibdir)
 
 #========================================================================
 # Install binary executables (e.g. .exe files)
@@ -475,6 +474,7 @@ installdirs:
 	$(mkinstalldirs)  $(DESTDIR)$(libdir)
 	$(mkinstalldirs)  $(DESTDIR)$(bindir)
 	$(mkinstalldirs)  $(DESTDIR)$(pkglibdir)
+	$(mkinstalldirs)  $(ITCL_LIBRARY)
 
 .PHONY: all binaries clean depend distclean doc install installdirs \
 libraries test
