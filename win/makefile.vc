@@ -5,7 +5,7 @@
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 # 
 # Copyright (c) 1993-1998 Lucent Technologies, Inc.
-# RCS: $Id: makefile.vc,v 1.10 2001/05/22 23:57:10 davygrvy Exp $
+# RCS: $Id: makefile.vc,v 1.11 2001/05/23 00:00:20 davygrvy Exp $
 ######################################################################
 # All needed information is derived from running vcvars32.bat
 #
@@ -150,13 +150,13 @@ crt	= -MD$(DBGX)
 !endif
 
 !if $(ISTCLINSTALL)
-TCL_INCLUDES	= -I$(TCLROOT)\include
+TCL_INCLUDES	= -I"$(TCLROOT)\include"
 !else
-TCL_INCLUDES	= -I$(TCLROOT)\generic
+TCL_INCLUDES	= -I"$(TCLROOT)\generic"
 !endif
 
 ITCL_INCLUDES	= -I$(WINDIR) -I$(GENERICDIR)
-ITCL_DEFINES	= -DBUILD_itcl $(DEBUGDEFINES) -DTCL_THREADS=1
+ITCL_DEFINES	= -DBUILD_itcl -DTCL_THREADS=1
 ITCL_EXE_CFLAGS	= $(ccommon) $(cdebug) $(crt) $(cdll) $(ITCL_INCLUDES) \
 		$(ITCL_DEFINES) $(TCL_INCLUDES)
 
