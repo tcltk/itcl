@@ -21,7 +21,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itcl_cmds.c,v 1.2 1998/07/28 18:16:11 stanton Exp $
+ *     RCS:  $Id: itcl_cmds.c,v 1.3 1998/08/07 12:10:06 stanton Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -119,7 +119,6 @@ Initialize(interp)
     Tcl_CmdInfo cmdInfo;
     Tcl_Namespace *itclNs;
     ItclObjectInfo *info;
-    char *libDir;
 
     if (Tcl_PkgRequire(interp, "Tcl", TCL_VERSION, 1) == NULL) {
 	return TCL_ERROR;
