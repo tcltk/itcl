@@ -12,7 +12,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: Makefile.in,v 1.20 2002/08/11 03:45:30 davygrvy Exp $
+# RCS: @(#) $Id: Makefile.in,v 1.21 2004/04/29 17:29:11 davygrvy Exp $
 
 #========================================================================
 # Edit the following few lines when writing a new extension
@@ -266,7 +266,7 @@ install-doc: doc
 	done
 
 test: binaries libraries
-	$(TCLSH) `@CYGPATH@ $(srcdir)/tests/all.tcl` $(TESTFLAGS)
+	$(TCLSH) `@CYGPATH@ $(srcdir)/tests/all.tcl` -load "package require Itcl" $(TESTFLAGS)
 
 shell: binaries libraries
 	@$(TCLSH) $(SCRIPT)
