@@ -23,7 +23,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itcl_class.c,v 1.11 2002/04/20 05:34:32 davygrvy Exp $
+ *     RCS:  $Id: itcl_class.c,v 1.12 2002/08/11 03:44:30 davygrvy Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -1053,7 +1053,7 @@ Itcl_ClassCmdResolver(interp, name, context, flags, rPtr)
 int
 Itcl_ClassVarResolver(interp, name, context, flags, rPtr)
     Tcl_Interp *interp;       /* current interpreter */
-    char* name;               /* name of the variable being accessed */
+    CONST char* name;	      /* name of the variable being accessed */
     Tcl_Namespace *context;   /* namespace performing the resolution */
     int flags;                /* TCL_LEAVE_ERR_MSG => leave error messages
                                *   in interp if anything goes wrong */
@@ -1206,7 +1206,7 @@ Itcl_ClassVarResolver(interp, name, context, flags, rPtr)
 int
 Itcl_ClassCompiledVarResolver(interp, name, length, context, rPtr)
     Tcl_Interp *interp;         /* current interpreter */
-    char* name;                 /* name of the variable being accessed */
+    CONST char* name;                 /* name of the variable being accessed */
     int length;                 /* number of characters in name */
     Tcl_Namespace *context;     /* namespace performing the resolution */
     Tcl_ResolvedVarInfo **rPtr; /* returns: info that makes it possible to

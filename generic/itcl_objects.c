@@ -22,7 +22,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itcl_objects.c,v 1.8 2002/04/20 06:20:43 davygrvy Exp $
+ *     RCS:  $Id: itcl_objects.c,v 1.9 2002/08/11 03:44:30 davygrvy Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -38,7 +38,7 @@ static void ItclReportObjectUsage _ANSI_ARGS_((Tcl_Interp *interp,
     ItclObject* obj));
 
 static char* ItclTraceThisVar _ANSI_ARGS_((ClientData cdata,
-    Tcl_Interp *interp, char *name1, CONST char *name2, int flags));
+    Tcl_Interp *interp, CONST char *name1, CONST char *name2, int flags));
 
 static void ItclDestroyObject _ANSI_ARGS_((ClientData cdata));
 static void ItclFreeObject _ANSI_ARGS_((char* cdata));
@@ -851,7 +851,7 @@ static char*
 ItclTraceThisVar(cdata, interp, name1, name2, flags)
     ClientData cdata;	    /* object instance data */
     Tcl_Interp *interp;	    /* interpreter managing this variable */
-    char *name1;	    /* variable name */
+    CONST char *name1;	    /* variable name */
     CONST char *name2;	    /* unused */
     int flags;		    /* flags indicating read/write */
 {
@@ -871,7 +871,7 @@ ItclTraceThisVar(cdata, interp, name1, name2, flags)
                 contextObj->accessCmd, objPtr);
         }
 
-        objName = Tcl_GetStringFromObj(objPtr, (int*)NULL);
+        objName = Tcl_GetString(objPtr);
         Tcl_SetVar(interp, name1, objName, 0);
 
         Tcl_DecrRefCount(objPtr);
@@ -1144,7 +1144,7 @@ ItclCreateObjVar(interp, vdefn, contextObj)
 int
 Itcl_ScopedVarResolver(interp, name, contextNs, flags, rPtr)
     Tcl_Interp *interp;        /* current interpreter */
-    char *name;                /* variable name being resolved */
+    CONST char *name;                /* variable name being resolved */
     Tcl_Namespace *contextNs;  /* current namespace context */
     int flags;                 /* TCL_LEAVE_ERR_MSG => leave error message */
     Tcl_Var *rPtr;             /* returns: resolved variable */

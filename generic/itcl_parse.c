@@ -37,7 +37,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itcl_parse.c,v 1.5 2002/03/03 01:57:10 andreas_kupries Exp $
+ *     RCS:  $Id: itcl_parse.c,v 1.6 2002/08/11 03:44:30 davygrvy Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -1013,7 +1013,7 @@ Itcl_ClassCommonCmd(clientData, interp, objc, objv)
 int
 Itcl_ParseVarResolver(interp, name, contextNs, flags, rPtr)
     Tcl_Interp *interp;        /* current interpreter */
-    char* name;                /* name of the variable being accessed */
+    CONST char* name;                /* name of the variable being accessed */
     Tcl_Namespace *contextNs;  /* namespace context */
     int flags;                 /* TCL_GLOBAL_ONLY => global variable
                                 * TCL_NAMESPACE_ONLY => namespace variable */

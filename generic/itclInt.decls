@@ -9,7 +9,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 # 
-# RCS: @(#) $Id: itclInt.decls,v 1.5 2002/04/20 06:01:11 davygrvy Exp $
+# RCS: @(#) $Id: itclInt.decls,v 1.6 2002/08/11 03:44:30 davygrvy Exp $
 
 library itcl
 
@@ -156,11 +156,11 @@ declare 35 generic {
         Tcl_Namespace *context, int flags, Tcl_Command *rPtr)
 }
 declare 36 generic {
-    int Itcl_ClassVarResolver (Tcl_Interp *interp, char* name, \
+    int Itcl_ClassVarResolver (Tcl_Interp *interp, CONST char* name, \
         Tcl_Namespace *context, int flags, Tcl_Var *rPtr)
 }
 declare 37 generic {
-    int Itcl_ClassCompiledVarResolver (Tcl_Interp *interp, char* name, \
+    int Itcl_ClassCompiledVarResolver (Tcl_Interp *interp, CONST char* name, \
         int length, Tcl_Namespace *context, Tcl_ResolvedVarInfo **rPtr)
 }
 declare 38 generic {
@@ -210,7 +210,7 @@ declare 48 generic {
         ItclObject *contextObj, ItclClass *contextClass)
 }
 declare 49 generic {
-    int Itcl_ScopedVarResolver (Tcl_Interp *interp, char *name, \
+    int Itcl_ScopedVarResolver (Tcl_Interp *interp, CONST char *name, \
         Tcl_Namespace *contextNs, int flags, Tcl_Var *rPtr)
 }
 
@@ -360,7 +360,7 @@ declare 84 generic {
         int objc, Tcl_Obj *CONST objv[])
 }
 declare 85 generic {
-    int Itcl_ParseVarResolver (Tcl_Interp *interp, char* name, \
+    int Itcl_ParseVarResolver (Tcl_Interp *interp, CONST char* name, \
         Tcl_Namespace *contextNs, int flags, Tcl_Var* rPtr)
 }
 
@@ -473,12 +473,13 @@ declare 109 generic {
 #  Commands provided for backward compatibility
 #
 
-declare 110 generic {
-    int Itcl_OldInit (Tcl_Interp* interp, ItclObjectInfo* info)
-}
-declare 111 generic {
-    int Itcl_InstallOldBiMethods (Tcl_Interp *interp, ItclClass *cdefn)
-}
+# not used anymore (3.3)
+#declare 110 generic {
+#    int Itcl_OldInit (Tcl_Interp* interp, ItclObjectInfo* info)
+#}
+#declare 111 generic {
+#    int Itcl_InstallOldBiMethods (Tcl_Interp *interp, ItclClass *cdefn)
+#}
 
 
 #
