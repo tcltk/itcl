@@ -39,7 +39,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itclInt.h,v 1.2 1998/07/29 15:06:41 escoffon Exp $
+ *     RCS:  $Id: itclInt.h,v 1.3 1998/08/04 13:30:58 escoffon Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -53,8 +53,8 @@
 #include "tclInt.h"
 
 #ifdef BUILD_itcl
-# undef EXPORT
-# define EXPORT DLLEXPORT
+# undef TCL_STORAGE_CLASS
+# define TCL_STORAGE_CLASS DLLEXPORT
 #endif
 
 /*
@@ -523,7 +523,7 @@ EXTERN Tcl_CallFrame* _Tcl_ActivateCallFrame _ANSI_ARGS_((Tcl_Interp *interp,
     Tcl_CallFrame *framePtr));
 EXTERN Var* _TclNewVar _ANSI_ARGS_((void));
 
-#undef EXPORT
-#define EXPORT DLLIMPORT
+#undef TCL_STORAGE_CLASS
+#define TCL_STORAGE_CLASS DLLIMPORT
 
 #endif /* ITCLINT_H */
