@@ -1,0 +1,147 @@
+# Visual C++ 4.0 makefile
+#
+# Copyright (c) 1993-1996 Lucent Technologies
+#
+# See the file "license.terms" for information on usage and redistribution
+# of this file, and for a DISCLAIMER OF ALL WARRANTIES.
+
+#
+# Project directories
+#
+# ROOT    = top of source tree
+#
+# TMPDIR  = location where .obj files should be stored during build
+#
+
+!include "..\..\Makefile.vc"
+
+ROOT		= ..
+TMPDIR		= .
+TARGET_LIB_ITCL = $(TARGET_LIB)\Itcl2.2
+TARGET_DOC_ITCL	= $(TARGET_DOC)\Itcl
+
+# Comment the following line to compile with symbols
+NODEBUG=1
+
+# uncomment the following two lines to compile with TCL_MEM_DEBUG
+#DEBUGDEFINES	= -DTCL_MEM_DEBUG
+
+WINDIR         	= $(ROOT)\win
+GENERICDIR	= $(ROOT)\generic
+
+TCL_INCLUDES	= -I$(WINDIR) -I$(GENERICDIR) -I$(TCLDIR)\generic
+
+TCL_DEFINES	= -D__WIN32__ -DUSE_TCLALLOC=0 $(DEBUGDEFINES) -Dtry=__try \
+	-Dexcept=__except
+
+ITCLSHOBJS = \
+	$(TMPDIR)\tclAppInit.obj
+
+ITCLOBJS = \
+	$(TMPDIR)\itcl_bicmds.obj \
+	$(TMPDIR)\itcl_class.obj \
+	$(TMPDIR)\itcl_cmds.obj \
+	$(TMPDIR)\itcl_linkage.obj \
+	$(TMPDIR)\itcl_methods.obj \
+	$(TMPDIR)\itcl_objects.obj \
+	$(TMPDIR)\itcl_obsolete.obj \
+	$(TMPDIR)\itcl_parse.obj \
+	$(TMPDIR)\itcl_util.obj \
+	$(TMPDIR)\dllEntryPoint.obj
+
+DUMPEXTS = $(TCLLIBDIR)\dumpexts.exe
+ITCLSH = itclsh.exe
+ITCLTEST = itcltest.exe
+
+CPU		   = i386
+INCLUDE		= $(TOOLS32)\include
+!include <ntwin32.mak>
+
+TCL_CFLAGS		= $(cdebug) $(cflags) $(cvarsdll) $(include32) $(TCL_INCLUDES) $(TCL_DEFINES)
+CON_CFLAGS		= $(cdebug) $(cflags) $(cvars) $(include32) -DCONSOLE
+DOS_CFLAGS		= $(cdebug) $(cflags) $(include16) -AL
+DLL16_CFLAGS	= $(cdebug) $(cflags) $(include16) -ALw
+
+#
+# Targets
+#
+
+release:  $(ITCLDLL) $(ITCLSH)
+all:	    $(ITCLDLL) $(ITCLSH)
+test:	    $(ITCLSH)
+	$(CP) $(TCLLIBDIR)\*.dll
+	$(ITCLSH) <<
+		cd ../tests
+		source all
+<<
+
+install: all
+	$(MKDIR) "$(TARGET_ROOT)"
+	$(MKDIR) "$(TARGET_BIN)"
+	$(MKDIR) "$(TARGET_LIB_ROOT)"
+	$(MKDIR) "$(TARGET_LIB)"
+	$(MKDIR) "$(TARGET_LIB_ITCL)"
+	$(MKDIR) "$(TARGET_INCLUDE_ROOT)"
+	$(MKDIR) "$(TARGET_INCLUDE)"
+	$(MKDIR) "$(TARGET_DOC)"
+	$(MKDIR) "$(TARGET_DOC_ITCL)"
+	$(CP) $(TMPDIR)\$(ITCLSH) "$(TARGET_BIN)"
+	$(CP) $(TMPDIR)\$(ITCLDLL) "$(TARGET_BIN)"
+	$(CP) $(ROOT)\generic\itcl.h "$(TARGET_INCLUDE)"
+	$(CP) $(ROOT)\library\*.* "$(TARGET_LIB_ITCL)"
+	$(CP) $(ROOT)\win\*.tcl "$(TARGET_LIB_ITCL)"
+	$(CP) $(ROOT)\..\html\Itcl\*.* "$(TARGET_DOC_ITCL)"
+
+$(ITCLDLL): $(ITCLOBJS) $(TCLLIBDIR)\$(TCLLIB) $(TMPDIR)\itclvc.def $(TMPDIR)\itcl.res
+	set LIB=$(TOOLS32)\lib
+	$(link32) $(linkdebug) $(dlllflags) -def:$(TMPDIR)\itclvc.def \
+		-out:$@ $(TMPDIR)\itcl.res $(guilibsdll) @<<
+$(ITCLOBJS) $(TCLLIBDIR)\$(TCLLIB)
+<<
+
+$(ITCLSH): $(ITCLSHOBJS) $(ITCLLIB) $(TCLLIBDIR)\$(TCLLIB) $(TMPDIR)\itclsh.res
+	set LIB=$(TOOLS32)\lib
+	$(link32) $(linkdebug) $(conlflags) $(TMPDIR)\itclsh.res \
+		-out:$@ $(conlibsdll) $(ITCLLIB) $(TCLLIBDIR)\$(TCLLIB) $(ITCLSHOBJS)
+
+$(ITCLTEST): $(ITCLTESTOBJS) $(ITCLLIB) $(TCLLIBDIR)\$(TCLLIB) $(TMPDIR)\itclsh.res
+	set LIB=$(TOOLS32)\lib
+	$(link32) $(linkdebug) $(conlflags) $(TMPDIR)\itclsh.res \
+		 -out:$@ $(conlibsdll) $(ITCLLIB) $(TCLLIBDIR)\$(TCLLIB) $(ITCLTESTOBJS)
+
+#
+# Special case object file targets
+#
+
+$(TMPDIR)\itclvc.def: $(DUMPEXTS) $(ITCLOBJS)
+	$(DUMPEXTS) -o $@ $(ITCLDLL) @<<
+$(ITCLOBJS)
+<<
+
+$(TMPDIR)\testMain.obj: $(WINDIR)\tclAppInit.c
+	$(cc32) $(TCL_CFLAGS) -DTCL_TEST -Fo$(TMPDIR)\testMain.obj $?
+
+#
+# Implicit rules
+#
+
+{$(WINDIR)}.c{$(TMPDIR)}.obj:
+    $(cc32) $(TCL_CFLAGS) -Fo$(TMPDIR)\ $<
+
+{$(GENERICDIR)}.c{$(TMPDIR)}.obj:
+    $(cc32) $(TCL_CFLAGS) -Fo$(TMPDIR)\ $<
+
+{$(ROOT)\compat}.c{$(TMPDIR)}.obj:
+    $(cc32) $(TCL_CFLAGS) -Fo$(TMPDIR)\ $<
+
+{$(WINDIR)}.rc{$(TMPDIR)}.res:
+	$(rc32) -fo $@ -r -i $(GENERICDIR) -i $(WINDIR) -i $(TCLDIR)\generic $(TCL_DEFINES) $<
+
+clean:
+	-@$(RM) *.exe
+	-@$(RM) *.lib
+	-@$(RM) *.dll
+	-@$(RM) *.res
+	-@$(RM) itclvc.def
+	-@$(RM) $(TMPDIR)\*.obj
+	-@$(RM) *.exp

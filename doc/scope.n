@@ -1,0 +1,71 @@
+'\"
+'\" Copyright (c) 1993-1998  Lucent Technologies, Inc.
+'\"
+'\" See the file "license.terms" for information on usage and redistribution
+'\" of this file, and for a DISCLAIMER OF ALL WARRANTIES.
+'\"
+'\" RCS: $Id: scope.n,v 1.1 1998/07/27 18:42:03 stanton Exp $
+'\"
+.so man.macros
+.TH scope n "" Tcl "Tcl With Namespaces"
+.BS
+'\" Note:  do not modify the .SH NAME line immediately below!
+.SH NAME
+scope \- capture the namespace context for a variable
+.SH SYNOPSIS
+\fBscope \fIstring\fR
+.BE
+
+.SH DESCRIPTION
+.PP
+Creates a scoped value for the specified \fIstring\fR, which is
+usually a variable name.  A scoped value is a list with three
+elements:  the "\fC@scope\fR" keyword, a namespace context,
+and the value \fIstring\fR.  For example, the command
+.CS
+namespace foo {
+    scope "x"
+}
+.CE
+produces the scoped value:
+.CS
+@scope ::foo x
+.CE
+Note that the \fBscope\fR command captures the current namespace
+context.  If the \fIstring\fR is itself a scoped value, then the
+current context is ignored and the \fIstring\fR is returned directly.
+.PP
+Ordinary variable names refer to variables in the global namespace.
+A scoped value captures a variable name together with its namespace
+context in a way that allows it to be referenced properly later.
+It is needed, for example, to wrap up variable names when a Tk
+widget is used within a namespace:
+.CS
+namespace foo {
+    private variable mode 1
+
+    radiobutton .rb1 -text "Mode #1" \
+        -variable [scope mode] -value 1
+    pack .rb1
+
+    radiobutton .rb2 -text "Mode #2" \
+        -variable [scope mode] -value 2
+    pack .rb2
+}
+.CE
+Radiobuttons \fC.rb1\fR and \fC.rb2\fR interact via the variable
+"mode" contained in the namespace "foo".  The \fBscope\fR command
+guarantees this by creating the variable name "\fC@scope ::foo mode\fR".
+.PP
+Scoped variables can be used anywhere that an ordinary variable name
+is recognized.  For example, the following statements are allowed:
+.CS
+set {@scope ::foo mode} 3
+puts "value = ${@scope ::foo mode}"
+.CE
+Note that scoped variables by-pass the usual protection mechanisms;
+the name "\fC@scope ::foo mode\fR" can be used in any namespace
+context to access the "foo::mode" variable, even though it is private.
+
+.SH KEYWORDS
+code, namespace, private, protected, public
