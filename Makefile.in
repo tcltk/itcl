@@ -12,7 +12,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: Makefile.in,v 1.25 2005/03/19 01:47:06 hobbs Exp $
+# RCS: @(#) $Id: Makefile.in,v 1.26 2005/03/25 19:37:40 dgp Exp $
 
 #========================================================================
 # The names of the source files is defined in the configure script.
@@ -140,7 +140,7 @@ PKG_CFLAGS	= @PKG_CFLAGS@
 DEFS		= @DEFS@ $(PKG_CFLAGS) \
 		  -DITCL_LIBRARY=\"$(pkglibdir)\" -DUSE_NON_CONST
 
-CONFIG_CLEAN_FILES = Makefile
+CONFIG_CLEAN_FILES = @CONFIG_CLEAN_FILES@ Makefile itclConfig.sh pkgIndex.tcl
 
 CPPFLAGS	= @CPPFLAGS@
 LIBS		= @PKG_LIBS@ @LIBS@
