@@ -21,7 +21,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itcl_util.c,v 1.5 2001/05/22 23:47:18 davygrvy Exp $
+ *     RCS:  $Id: itcl_util.c,v 1.6 2001/09/06 21:42:12 davygrvy Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -585,11 +585,13 @@ Itcl_EventuallyFree(cdata, fproc)
      *  If the usage count is zero, then delete the data now.
      */
     if (chunk->usage == 0) {
-        chunk->usage = -1;  /* cannot preserve/release anymore */
+	chunk->usage = -1;  /* cannot preserve/release anymore */
 
-        (*chunk->fproc)((char*)chunk->data);
-        Tcl_DeleteHashEntry(entry);
-        ckfree((char*)chunk);
+	Tcl_MutexUnlock(&ItclPreservedListLock);
+	(*chunk->fproc)((char*)chunk->data);
+	Tcl_MutexLock(&ItclPreservedListLock);
+	Tcl_DeleteHashEntry(entry);
+	ckfree((char*)chunk);
     }
     Tcl_MutexUnlock(&ItclPreservedListLock);
 }
@@ -710,9 +712,11 @@ Itcl_ReleaseData(cdata)
     chunk = (ItclPreservedData*)Tcl_GetHashValue(entry);
     if (chunk->usage > 0 && --chunk->usage == 0) {
 
-        if (chunk->fproc) {
-            chunk->usage = -1;  /* cannot preserve/release anymore */
-            (*chunk->fproc)((char*)chunk->data);
+	if (chunk->fproc) {
+	    chunk->usage = -1;  /* cannot preserve/release anymore */
+	    Tcl_MutexUnlock(&ItclPreservedListLock);
+	    (*chunk->fproc)((char*)chunk->data);
+	    Tcl_MutexLock(&ItclPreservedListLock);
         }
 
         Tcl_DeleteHashEntry(entry);
