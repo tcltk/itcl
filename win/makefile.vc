@@ -5,7 +5,7 @@
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 # 
 # Copyright (c) 1993-1998 Lucent Technologies, Inc.
-# RCS: $Id: makefile.vc,v 1.30 2004/04/29 17:40:44 davygrvy Exp $
+# RCS: $Id: makefile.vc,v 1.31 2004/09/21 22:51:38 davygrvy Exp $
 #------------------------------------------------------------------------------
 #  Do not modify this file!
 #------------------------------------------------------------------------------
@@ -172,7 +172,7 @@ crt = -MT$(DBGX)
 !if $(TCLINSTALL)
 TCL_INCLUDES	= -I"$(TCLDIR)\include"
 !else
-TCL_INCLUDES	= -I"$(TCLDIR)\generic"
+TCL_INCLUDES	= -I"$(TCLDIR)\generic" -I"$(TCLDIR)\win"
 !endif
 
 ITCL_INCLUDES	= -I$(WINDIR) -I$(GENERICDIR)
