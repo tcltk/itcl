@@ -5,7 +5,7 @@
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 # 
 # Copyright (c) 1993-1998 Lucent Technologies, Inc.
-# RCS: $Id: makefile.vc,v 1.25 2003/12/23 09:31:58 davygrvy Exp $
+# RCS: $Id: makefile.vc,v 1.26 2003/12/23 09:56:36 davygrvy Exp $
 #------------------------------------------------------------------------------
 #  Do not modify this file!
 #------------------------------------------------------------------------------
@@ -306,11 +306,7 @@ $<
 <<
 
 {$(RCDIR)}.rc{$(TMP_DIR)}.res :
-	$(rc32) -fo $@ $(ITCL_INCLUDES) $(TCL_INCLUDES) $(ITCL_DEFINES) \
-!if $(DEBUG)
-		-d DEBUG \
-!endif
-		$<
+	$(rc32) -fo $@ -DDEBUG=$(DEBUG) $(ITCL_INCLUDES) $(TCL_INCLUDES) $(ITCL_DEFINES) $<
 
 #---------------------------------------------------------------------
 # Generate the windows help files.
