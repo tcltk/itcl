@@ -39,7 +39,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itclInt.h,v 1.10 2003/12/23 03:11:04 davygrvy Exp $
+ *     RCS:  $Id: itclInt.h,v 1.11 2003/12/23 06:58:27 davygrvy Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -104,6 +104,9 @@
 	(tclIntStubsPtr->tcl_GetCommandFullName)
 #endif
 
+#define TCL_DOES_STUBS \
+    (TCL_MAJOR_VERSION > 8 || TCL_MAJOR_VERSION == 8 && (TCL_MINOR_VERSION > 1 || \
+    (TCL_MINOR_VERSION == 1 && TCL_RELEASE_LEVEL == TCL_FINAL_RELEASE)))
 
 /*
  *  Common info for managing all known objects.
