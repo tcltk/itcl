@@ -57,6 +57,10 @@ ItclIntStubs *itclIntStubsPtr;
  *----------------------------------------------------------------------
  */
 
+#ifdef Itcl_InitStubs
+#undef Itcl_InitStubs
+#endif
+
 char *
 Itcl_InitStubs (interp, version, exact)
     Tcl_Interp *interp;
