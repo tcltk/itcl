@@ -37,7 +37,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itcl_parse.c,v 1.3 2000/01/03 15:54:03 csmith Exp $
+ *     RCS:  $Id: itcl_parse.c,v 1.4 2000/01/03 15:56:48 csmith Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -56,9 +56,6 @@ typedef struct ProtectionCmdInfo {
 
 /*
  *  FORWARD DECLARATIONS
- *    (This line added to fix a Windows NT/95 crashing problem where
- *    you could build with debugging on, load the Itcl package, and
- *    press the X in the upper right hand corner.  Found by Mo Dejong.)
  */
 static void ItclFreeParserCommandData _ANSI_ARGS_((char* cdata));
 
