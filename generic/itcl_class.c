@@ -23,7 +23,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itcl_class.c,v 1.10 2002/03/03 01:57:10 andreas_kupries Exp $
+ *     RCS:  $Id: itcl_class.c,v 1.11 2002/04/20 05:34:32 davygrvy Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -933,12 +933,12 @@ Itcl_HandleClass(clientData, interp, objc, objv)
  */
 int
 Itcl_ClassCmdResolver(interp, name, context, flags, rPtr)
-    Tcl_Interp *interp;       /* current interpreter */
-    char* name;               /* name of the command being accessed */
-    Tcl_Namespace *context;   /* namespace performing the resolution */
-    int flags;                /* TCL_LEAVE_ERR_MSG => leave error messages
-                               *   in interp if anything goes wrong */
-    Tcl_Command *rPtr;        /* returns: resolved command */
+    Tcl_Interp *interp;		/* current interpreter */
+    CONST char* name;		/* name of the command being accessed */
+    Tcl_Namespace *context;	/* namespace performing the resolution */
+    int flags;			/* TCL_LEAVE_ERR_MSG => leave error messages
+				 *   in interp if anything goes wrong */
+    Tcl_Command *rPtr;		/* returns: resolved command */
 {
     ItclClass *cdefn = (ItclClass*)context->clientData;
 

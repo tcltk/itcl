@@ -22,7 +22,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itcl_objects.c,v 1.6 2002/03/03 01:57:10 andreas_kupries Exp $
+ *     RCS:  $Id: itcl_objects.c,v 1.7 2002/04/20 05:34:32 davygrvy Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -192,7 +192,7 @@ Itcl_CreateObject(interp, name, cdefn, objc, objv, roPtr)
                 if (cdPtr == cdefnPtr) {
                     ItclCreateObjVar(interp, vdefn, newObj);
                     Tcl_SetVar2(interp, "this", (char*)NULL, "", 0);
-                    Tcl_TraceVar2(interp, "this", (char*)NULL,
+                    Tcl_TraceVar2(interp, "this", NULL,
                         TCL_TRACE_READS|TCL_TRACE_WRITES, ItclTraceThisVar,
                         (ClientData)newObj);
                 }
