@@ -11,7 +11,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 # 
-# RCS: @(#) $Id: itclInt.decls,v 1.7 2003/12/17 02:25:37 davygrvy Exp $
+# RCS: @(#) $Id: itclInt.decls,v 1.8 2003/12/17 02:54:39 davygrvy Exp $
 
 library itcl
 
@@ -63,7 +63,7 @@ declare 11 generic {
         char **head, char **tail)
 }
 declare 12 generic {
-    int Itcl_DecodeScopedCommand (Tcl_Interp *interp, char *name, \
+    int Itcl_DecodeScopedCommand (Tcl_Interp *interp, CONST char *name, \
         Tcl_Namespace **rNsPtr, char **rCmdPtr)
 }
 declare 13 generic {

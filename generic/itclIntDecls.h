@@ -9,7 +9,7 @@
  * See the file "license.terms" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: $Id: itclIntDecls.h,v 1.10 2003/12/17 02:25:37 davygrvy Exp $
+ * RCS: $Id: itclIntDecls.h,v 1.11 2003/12/17 02:54:39 davygrvy Exp $
  */
 
 #ifndef _ITCLINTDECLS
@@ -64,7 +64,7 @@ EXTERN void		Itcl_ParseNamespPath _ANSI_ARGS_((CONST char * name,
 				char ** tail));
 /* 12 */
 EXTERN int		Itcl_DecodeScopedCommand _ANSI_ARGS_((
-				Tcl_Interp * interp, char * name, 
+				Tcl_Interp * interp, CONST char * name, 
 				Tcl_Namespace ** rNsPtr, char ** rCmdPtr));
 /* 13 */
 EXTERN int		Itcl_EvalArgs _ANSI_ARGS_((Tcl_Interp * interp, 
@@ -466,7 +466,7 @@ typedef struct ItclIntStubs {
     int (*itcl_CanAccessFunc) _ANSI_ARGS_((ItclMemberFunc* mfunc, Tcl_Namespace* fromNsPtr)); /* 9 */
     Tcl_Namespace* (*itcl_GetTrueNamespace) _ANSI_ARGS_((Tcl_Interp * interp, ItclObjectInfo * info)); /* 10 */
     void (*itcl_ParseNamespPath) _ANSI_ARGS_((CONST char * name, Tcl_DString * buffer, char ** head, char ** tail)); /* 11 */
-    int (*itcl_DecodeScopedCommand) _ANSI_ARGS_((Tcl_Interp * interp, char * name, Tcl_Namespace ** rNsPtr, char ** rCmdPtr)); /* 12 */
+    int (*itcl_DecodeScopedCommand) _ANSI_ARGS_((Tcl_Interp * interp, CONST char * name, Tcl_Namespace ** rNsPtr, char ** rCmdPtr)); /* 12 */
     int (*itcl_EvalArgs) _ANSI_ARGS_((Tcl_Interp * interp, int objc, Tcl_Obj *CONST objv[])); /* 13 */
     Tcl_Obj* (*itcl_CreateArgs) _ANSI_ARGS_((Tcl_Interp * interp, CONST char * string, int objc, Tcl_Obj *CONST objv[])); /* 14 */
     int (*itcl_PushContext) _ANSI_ARGS_((Tcl_Interp * interp, ItclMember * member, ItclClass * contextClass, ItclObject * contextObj, ItclContext * contextPtr)); /* 15 */

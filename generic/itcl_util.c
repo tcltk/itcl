@@ -21,7 +21,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itcl_util.c,v 1.8 2003/12/17 02:25:37 davygrvy Exp $
+ *     RCS:  $Id: itcl_util.c,v 1.9 2003/12/17 02:54:39 davygrvy Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -1216,17 +1216,19 @@ Itcl_ParseNamespPath(name, buffer, head, tail)
 int
 Itcl_DecodeScopedCommand(interp, name, rNsPtr, rCmdPtr)
     Tcl_Interp *interp;		/* current interpreter */
-    char *name;		/* string to be decoded */
+    CONST char *name;		/* string to be decoded */
     Tcl_Namespace **rNsPtr;	/* returns: namespace for scoped value */
-    char **rCmdPtr;		/* returns: simple command word */
+    char **rCmdPtr;	/* returns: simple command word */
 {
     Tcl_Namespace *nsPtr = NULL;
-    char *cmdName = name;
+    char *cmdName;
     int len = strlen(name);
-
     CONST char *pos;
     int listc, result;
     char **listv;
+
+    cmdName = ckalloc((unsigned)strlen(name)+1);
+    strcpy(cmdName, name);
 
     if ((*name == 'n') && (len > 17) && (strncmp(name, "namespace", 9) == 0)) {
 	for (pos = (name + 9);  (*pos == ' ');  pos++) {
@@ -1243,15 +1245,14 @@ Itcl_DecodeScopedCommand(interp, name, rNsPtr, rCmdPtr)
                         "namespace inscope namesp command\"",
                         (char*)NULL);
                     result = TCL_ERROR;
-                }
-                else {
+                } else {
                     nsPtr = Tcl_FindNamespace(interp, listv[2],
                         (Tcl_Namespace*)NULL, TCL_LEAVE_ERR_MSG);
 
                     if (!nsPtr) {
                         result = TCL_ERROR;
-                    }
-                    else {
+                    } else {
+			ckfree((char*)cmdName);
                         cmdName = ckalloc((unsigned)(strlen(listv[3])+1));
                         strcpy(cmdName, listv[3]);
                     }
