@@ -144,11 +144,13 @@ AC_SUBST(PLATFORM_OBJECTS)
 AC_SUBST(PLATFORM_DIR)
 
 #--------------------------------------------------------------------
-# Check whether --enable-threads or --disable-threads was given.
-# So far only Tcl responds to this one.
+# We need to enable the threading macros found in tcl.h and tclInt.h.
+# The use of the threading features is determined by the core the
+# extension is loaded into, but we need to compile with these macros
+# turned on.
 #--------------------------------------------------------------------
 
-TEA_ENABLE_THREADS
+AC_DEFINE(TCL_THREADS)
 
 #--------------------------------------------------------------------
 # The statement below defines a collection of symbols related to
