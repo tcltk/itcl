@@ -12,7 +12,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: Makefile.in,v 1.19 2002/04/04 05:40:29 hobbs Exp $
+# RCS: @(#) $Id: Makefile.in,v 1.20 2002/08/11 03:45:30 davygrvy Exp $
 
 #========================================================================
 # Edit the following few lines when writing a new extension
@@ -41,7 +41,6 @@ itcl_SOURCES	= $(GENERIC_DIR)/itclStubInit.c \
 	$(GENERIC_DIR)/itcl_methods.c \
 	$(GENERIC_DIR)/itcl_migrate.c \
 	$(GENERIC_DIR)/itcl_objects.c \
-	$(GENERIC_DIR)/itcl_obsolete.c \
 	$(GENERIC_DIR)/itcl_parse.c \
 	$(GENERIC_DIR)/itcl_util.c \
 	@PLATFORM_SOURCES@
@@ -67,7 +66,6 @@ itcl_OBJECTS	= itclStubInit.$(OBJEXT) \
 	itcl_methods.$(OBJEXT) \
 	itcl_migrate.$(OBJEXT) \
 	itcl_objects.$(OBJEXT) \
-	itcl_obsolete.$(OBJEXT) \
 	itcl_parse.$(OBJEXT) \
 	itcl_util.$(OBJEXT) \
 	@PLATFORM_OBJECTS@
