@@ -9,7 +9,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 # 
-# RCS: @(#) $Id: itclInt.decls,v 1.1 1999/05/24 21:10:44 redman Exp $
+# RCS: @(#) $Id: itclInt.decls,v 1.2 2001/05/22 01:35:38 davygrvy Exp $
 
 library itcl
 
@@ -152,7 +152,7 @@ declare 34 generic {
         int objc, Tcl_Obj *CONST objv[])
 }
 declare 35 generic {
-    int Itcl_ClassCmdResolver (Tcl_Interp *interp, char* name, \
+    int Itcl_ClassCmdResolver (Tcl_Interp *interp, CONST char* name, \
         Tcl_Namespace *context, int flags, Tcl_Command *rPtr)
 }
 declare 36 generic {
