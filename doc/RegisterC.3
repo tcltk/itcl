@@ -4,7 +4,7 @@
 '\" See the file "license.terms" for information on usage and redistribution
 '\" of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 '\"
-'\" RCS: $Id: RegisterC.3,v 1.2 2004/09/20 21:24:11 davygrvy Exp $
+'\" RCS: $Id: RegisterC.3,v 1.3 2004/09/25 22:50:43 davygrvy Exp $
 '\"
 .so man.macros
 .TH Itcl_RegisterC 3 3.0 itcl "[incr\ Tcl] Library Procedures"
@@ -105,6 +105,9 @@ Classes can be developed quickly using Tcl code to implement the
 bodies.  An entire application can be built and tested.  When
 necessary, individual bodies can be implemented with C code to
 improve performance.
+.PP
+See the Archetype class in \fB[incr\ Tk]\fR for an example of how this
+C linking method is used.
 
 .SH "SEE ALSO"
 Tcl_CreateCommand, Tcl_CreateObjCommand
