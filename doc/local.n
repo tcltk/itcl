@@ -4,7 +4,7 @@
 '\" See the file "license.terms" for information on usage and redistribution
 '\" of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 '\"
-'\" RCS: $Id: local.n,v 1.1 1998/07/27 18:42:03 stanton Exp $
+'\" RCS: $Id: local.n,v 1.2 2004/08/31 18:40:16 davygrvy Exp $
 '\"
 .so man.macros
 .TH local n "" itcl "[incr\ Tcl]"
@@ -37,7 +37,7 @@ procedure exits.  The \fBputs\fR statements included in the
 constructor/destructor show the object coming and going
 as the procedure is called.
 .CS
-class counter {
+itcl::class counter {
     private variable count 0
     constructor {} {
         puts "created: $this"
@@ -68,7 +68,7 @@ puts "test: $result"
 set result [test 10]
 puts "test: $result"
 
-puts "objects: [info objects]"
+puts "objects: [itcl::find objects *]"
 .CE
 
 .SH KEYWORDS

@@ -4,7 +4,7 @@
 '\" See the file "license.terms" for information on usage and redistribution
 '\" of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 '\"
-'\" RCS: $Id: is.n,v 1.3 2002/04/25 22:27:31 davygrvy Exp $
+'\" RCS: $Id: is.n,v 1.4 2004/08/31 18:40:16 davygrvy Exp $
 '\"
 .so man.macros
 .TH is n 3.3 itcl "[incr\ Tcl]"
@@ -55,10 +55,10 @@ So, if \fBc\fR is an object in the class \fBC\fR, in namespace N then
 these are the possibilities (all return 1):
 .CS
 set obj [N::C c]
-is object N::c
-is object c
-is object $obj
-is object [code c]
+itcl::is object N::c
+itcl::is object c
+itcl::is object $obj
+itcl::is object [itcl::code c]
 .CE
 
 .SH KEYWORDS
