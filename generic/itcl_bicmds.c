@@ -22,7 +22,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itcl_bicmds.c,v 1.2 1998/08/07 12:09:26 stanton Exp $
+ *     RCS:  $Id: itcl_bicmds.c,v 1.3 1998/08/11 14:40:38 welch Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -815,6 +815,11 @@ Itcl_BiInfoClassCmd(dummy, interp, objc, objv)
 
     char *name;
 
+    if (objc != 1) {
+        Tcl_WrongNumArgs(interp, 1, objv, NULL);
+        return TCL_ERROR;
+    }
+
     /*
      *  If this command is not invoked within a class namespace,
      *  signal an error.
@@ -873,6 +878,11 @@ Itcl_BiInfoInheritCmd(dummy, interp, objc, objv)
     ItclClass *cdefn;
     Itcl_ListElem *elem;
     Tcl_Obj *listPtr, *objPtr;
+
+    if (objc != 1) {
+        Tcl_WrongNumArgs(interp, 1, objv, NULL);
+        return TCL_ERROR;
+    }
 
     /*
      *  If this command is not invoked within a class namespace,
@@ -937,6 +947,11 @@ Itcl_BiInfoHeritageCmd(dummy, interp, objc, objv)
     ItclHierIter hier;
     Tcl_Obj *listPtr, *objPtr;
     ItclClass *cdefn;
+
+    if (objc != 1) {
+        Tcl_WrongNumArgs(interp, 1, objv, NULL);
+        return TCL_ERROR;
+    }
 
     /*
      *  If this command is not invoked within a class namespace,
@@ -1454,6 +1469,11 @@ Itcl_BiInfoBodyCmd(dummy, interp, objc, objv)
     Tcl_HashEntry *entry;
     Tcl_Obj *objPtr;
 
+    if (objc != 2) {
+        Tcl_WrongNumArgs(interp, 1, objv, "function");
+        return TCL_ERROR;
+    }
+
     /*
      *  If this command is not invoked within a class namespace,
      *  then treat the procedure name as a normal Tcl procedure.
@@ -1535,6 +1555,11 @@ Itcl_BiInfoArgsCmd(dummy, interp, objc, objv)
     ItclMemberCode *mcode;
     Tcl_HashEntry *entry;
     Tcl_Obj *objPtr;
+
+    if (objc != 2) {
+        Tcl_WrongNumArgs(interp, 1, objv, "function");
+        return TCL_ERROR;
+    }
 
     name = Tcl_GetStringFromObj(objv[1], (int*)NULL);
 

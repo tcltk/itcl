@@ -22,7 +22,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itcl_objects.c,v 1.1 1998/07/27 18:41:48 stanton Exp $
+ *     RCS:  $Id: itcl_objects.c,v 1.2 1998/08/11 14:40:43 welch Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -101,7 +101,7 @@ Itcl_CreateObject(interp, name, cdefn, objc, objv, roPtr)
      *  command, signal an error.
      */
     cmd = Tcl_FindCommand(interp, name, (Tcl_Namespace*)NULL, /* flags */ 0);
-    if (cmd != NULL) {
+    if (cmd != NULL && !Itcl_IsStub(cmd)) {
         Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
             "command \"", name, "\" already exists in namespace \"",
             Tcl_GetCurrentNamespace(interp)->fullName, "\"",

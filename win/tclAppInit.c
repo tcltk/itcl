@@ -5,21 +5,27 @@
  *	procedure for Tcl applications (without Tk).  Note that this
  *	program must be built in Win32 console mode to work properly.
  *
- * Copyright (c) 1993 The Regents of the University of California.
  * Copyright (c) 1996 by Sun Microsystems, Inc.
  *
  * See the file "license.terms" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * SCCS: @(#) tclAppInit.c 1.6 96/03/26 13:49:02
+ * SCCS: @(#) tclAppInit.c 1.12 97/04/30 11:04:50
  */
 
-#include "tcl.h"
+/* include tclInt.h for access to namespace API */
+#include "tclInt.h"
+
 #include "itcl.h"
 #include <windows.h>
 #include <locale.h>
 
-EXTERN int		Itcl_Init _ANSI_ARGS_((Tcl_Interp *interp));
+#ifdef TCL_TEST
+EXTERN int		Tcltest_Init _ANSI_ARGS_((Tcl_Interp *interp));
+EXTERN int		TclObjTest_Init _ANSI_ARGS_((Tcl_Interp *interp));
+#endif /* TCL_TEST */
+
+static void		setargv _ANSI_ARGS_((int *argcPtr, char ***argvPtr));
 
 
 /*
@@ -44,68 +50,30 @@ main(argc, argv)
     int argc;			/* Number of command-line arguments. */
     char **argv;		/* Values of command-line arguments. */
 {
-    char *args = GetCommandLine();
-    char **argvlist, *p;
-    int size, i;
+    char *p;
+    char buffer[MAX_PATH];
 
     /*
-     * Set up the default locale to be Windows ANSI character set.
+     * Set up the default locale to be standard "C" locale so parsing
+     * is performed correctly.
      */
 
-    setlocale(LC_ALL, "");
+    setlocale(LC_ALL, "C");
+
+    setargv(&argc, &argv);
 
     /*
-     * Precompute an overly pessimistic guess at the number of arguments
-     * in the command line by counting non-space spans.
+     * Replace argv[0] with full pathname of executable, and forward
+     * slashes substituted for backslashes.
      */
 
-    for (size = 2, p = args; *p != '\0'; p++) {
-	if (isspace(*p)) {
-	    size++;
-	    while (isspace(*p)) {
-		p++;
-	    }
-	    if (*p == '\0') {
-		break;
-	    }
+    GetModuleFileName(NULL, buffer, sizeof(buffer));
+    argv[0] = buffer;
+    for (p = buffer; *p != '\0'; p++) {
+	if (*p == '\\') {
+	    *p = '/';
 	}
     }
-    argvlist = (char **) ckalloc((unsigned) (size * sizeof(char *)));
-    argv = argvlist;
-
-    /*
-     * Parse the Windows command line string.  If an argument begins with a
-     * double quote, then spaces are considered part of the argument until the
-     * next double quote.  The argument terminates at the second quote.  Note
-     * that this is different from the usual Unix semantics.
-     */
-
-    for (i = 0, p = args; *p != '\0'; i++) {
-	while (isspace(*p)) {
-	    p++;
-	}
-	if (*p == '\0') {
-	    break;
-	}
-	if (*p == '"') {
-	    p++;
-	    argv[i] = p;
-	    while ((*p != '\0') && (*p != '"')) {
-		p++;
-	    }
-	} else {
-	    argv[i] = p;
-	    while (*p != '\0' && !isspace(*p)) {
-		p++;
-	    }
-	}
-	if (*p != '\0') {
-	    *p = '\0';
-	    p++;
-	}
-    }
-    argv[i] = NULL;
-    argc = i;
 
     Tcl_Main(argc, argv, Tcl_AppInit);
     return 0;			/* Needed only to prevent compiler warning. */
@@ -139,6 +107,17 @@ Tcl_AppInit(interp)
 	return TCL_ERROR;
     }
 
+#ifdef TCL_TEST
+    if (Tcltest_Init(interp) == TCL_ERROR) {
+	return TCL_ERROR;
+    }
+    Tcl_StaticPackage(interp, "Tcltest", Tcltest_Init,
+            (Tcl_PackageInitProc *) NULL);
+    if (TclObjTest_Init(interp) == TCL_ERROR) {
+	return TCL_ERROR;
+    }
+#endif /* TCL_TEST */
+
     /*
      * Call the init procedures for included packages.  Each call should
      * look like this:
@@ -149,11 +128,24 @@ Tcl_AppInit(interp)
      *
      * where "Mod" is the name of the module.
      */
-
     if (Itcl_Init(interp) == TCL_ERROR) {
-	return TCL_ERROR;
+        return TCL_ERROR;
     }
     Tcl_StaticPackage(interp, "Itcl", Itcl_Init, Itcl_SafeInit);
+
+    /*
+     *  This is itclsh, so import all [incr Tcl] commands by
+     *  default into the global namespace.  Fix up the autoloader
+     *  to do the same.
+     */
+    if (Tcl_Import(interp, Tcl_GetGlobalNamespace(interp),
+            "::itcl::*", /* allowOverwrite */ 1) != TCL_OK) {
+        return TCL_ERROR;
+    }
+
+    if (Tcl_Eval(interp, "auto_mkindex_parser::slavehook { _%@namespace import -force ::itcl::* }") != TCL_OK) {
+        return TCL_ERROR;
+    }
 
     /*
      * Call Tcl_CreateCommand for application-specific commands, if
@@ -167,6 +159,122 @@ Tcl_AppInit(interp)
      * then no user-specific startup file will be run under any conditions.
      */
 
-    Tcl_SetVar(interp, "tcl_rcFileName", "~/itclsh.rc", TCL_GLOBAL_ONLY);
+    Tcl_SetVar(interp, "tcl_rcFileName", "~/itclshrc.tcl", TCL_GLOBAL_ONLY);
     return TCL_OK;
+}
+
+/*
+ *-------------------------------------------------------------------------
+ *
+ * setargv --
+ *
+ *	Parse the Windows command line string into argc/argv.  Done here
+ *	because we don't trust the builtin argument parser in crt0.  
+ *	Windows applications are responsible for breaking their command
+ *	line into arguments.
+ *
+ *	2N backslashes + quote -> N backslashes + begin quoted string
+ *	2N + 1 backslashes + quote -> literal
+ *	N backslashes + non-quote -> literal
+ *	quote + quote in a quoted string -> single quote
+ *	quote + quote not in quoted string -> empty string
+ *	quote -> begin quoted string
+ *
+ * Results:
+ *	Fills argcPtr with the number of arguments and argvPtr with the
+ *	array of arguments.
+ *
+ * Side effects:
+ *	Memory allocated.
+ *
+ *--------------------------------------------------------------------------
+ */
+
+static void
+setargv(argcPtr, argvPtr)
+    int *argcPtr;		/* Filled with number of argument strings. */
+    char ***argvPtr;		/* Filled with argument strings (malloc'd). */
+{
+    char *cmdLine, *p, *arg, *argSpace;
+    char **argv;
+    int argc, size, inquote, copy, slashes;
+    
+    cmdLine = GetCommandLine();
+
+    /*
+     * Precompute an overly pessimistic guess at the number of arguments
+     * in the command line by counting non-space spans.
+     */
+
+    size = 2;
+    for (p = cmdLine; *p != '\0'; p++) {
+	if (isspace(*p)) {
+	    size++;
+	    while (isspace(*p)) {
+		p++;
+	    }
+	    if (*p == '\0') {
+		break;
+	    }
+	}
+    }
+    argSpace = (char *) ckalloc((unsigned) (size * sizeof(char *) 
+	    + strlen(cmdLine) + 1));
+    argv = (char **) argSpace;
+    argSpace += size * sizeof(char *);
+    size--;
+
+    p = cmdLine;
+    for (argc = 0; argc < size; argc++) {
+	argv[argc] = arg = argSpace;
+	while (isspace(*p)) {
+	    p++;
+	}
+	if (*p == '\0') {
+	    break;
+	}
+
+	inquote = 0;
+	slashes = 0;
+	while (1) {
+	    copy = 1;
+	    while (*p == '\\') {
+		slashes++;
+		p++;
+	    }
+	    if (*p == '"') {
+		if ((slashes & 1) == 0) {
+		    copy = 0;
+		    if ((inquote) && (p[1] == '"')) {
+			p++;
+			copy = 1;
+		    } else {
+			inquote = !inquote;
+		    }
+                }
+                slashes >>= 1;
+            }
+
+            while (slashes) {
+		*arg = '\\';
+		arg++;
+		slashes--;
+	    }
+
+	    if ((*p == '\0') || (!inquote && isspace(*p))) {
+		break;
+	    }
+	    if (copy != 0) {
+		*arg = *p;
+		arg++;
+	    }
+	    p++;
+        }
+	*arg = '\0';
+	argSpace = arg + 1;
+    }
+    argv[argc] = NULL;
+
+    *argcPtr = argc;
+    *argvPtr = argv;
 }

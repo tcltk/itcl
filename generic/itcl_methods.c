@@ -23,7 +23,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itcl_methods.c,v 1.2 1998/08/07 12:11:01 stanton Exp $
+ *     RCS:  $Id: itcl_methods.c,v 1.3 1998/08/11 14:40:42 welch Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -756,6 +756,8 @@ Itcl_DeleteMemberCode(cdata)
     if (mcode->procPtr) {
         ckfree((char*) mcode->procPtr->cmdPtr);
 
+        /* don't free compiled locals -- that is handled by arglist above */
+
         if (mcode->procPtr->bodyPtr) {
             Tcl_DecrRefCount(mcode->procPtr->bodyPtr);
         }
@@ -1192,6 +1194,14 @@ Itcl_DeleteArgList(arglist)
     for (localPtr=arglist; localPtr; localPtr=next) {
         if (localPtr->defValuePtr != NULL) {
             Tcl_DecrRefCount(localPtr->defValuePtr);
+        }
+        if (localPtr->resolveInfo) {
+            if (localPtr->resolveInfo->deleteProc) {
+                localPtr->resolveInfo->deleteProc(localPtr->resolveInfo);
+            } else {
+                ckfree((char*)localPtr->resolveInfo);
+            }
+            localPtr->resolveInfo = NULL;
         }
         next = localPtr->nextPtr;
         ckfree((char*)localPtr);
@@ -1651,21 +1661,20 @@ Itcl_PushContext(interp, member, contextClass, contextObj, contextPtr)
             );
         }
 
-	/*
-	 * Initialize and resolve compiled variable references.
+        /*
+         * Initialize and resolve compiled variable references.
          * Class variables will have special resolution rules.
          * In that case, we call their "resolver" procs to get our
          * hands on the variable, and we make the compiled local a
          * link to the real variable.
-	 */
+         */
 
         framePtr->procPtr = procPtr;
         framePtr->numCompiledLocals = localCt;
         framePtr->compiledLocals = contextPtr->compiledLocals;
 
-	TclInitCompiledLocals(interp, framePtr,
-		(Namespace*)contextClass->namesp);
-
+        TclInitCompiledLocals(interp, framePtr,
+            (Namespace*)contextClass->namesp);
     }
     return result;
 }

@@ -23,7 +23,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itcl_class.c,v 1.2 1998/08/07 12:09:52 stanton Exp $
+ *     RCS:  $Id: itcl_class.c,v 1.3 1998/08/11 14:40:39 welch Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -36,10 +36,9 @@
  * This structure is a subclass of Tcl_ResolvedVarInfo that contains the
  * ItclVarLookup info needed at runtime.
  */
-
 typedef struct ItclResolvedVarInfo {
-    Tcl_ResolvedVarInfo vinfo;	/* This must be the first element. */
-    ItclVarLookup *vlookup;	/* Pointer to lookup info. */
+    Tcl_ResolvedVarInfo vinfo;        /* This must be the first element. */
+    ItclVarLookup *vlookup;           /* Pointer to lookup info. */
 } ItclResolvedVarInfo;
 
 /*
@@ -81,16 +80,19 @@ Itcl_CreateClass(interp, path, info, rPtr)
     int newEntry;
 
     /*
-     *  Make sure that a namespace with the given name does not
-     *  already exist in the current namespace context.
+     *  Make sure that a class with the given name does not
+     *  already exist in the current namespace context.  If a
+     *  namespace exists, that's okay.  It may have been created
+     *  to contain stubs during a "namespace import" operation.
+     *  We'll just replace the namespace data below with the
+     *  proper class data.
      */
     classNs = Tcl_FindNamespace(interp, path, (Tcl_Namespace*)NULL,
         /* flags */ 0);
 
-    if (classNs) {
+    if (classNs != NULL && Itcl_IsClassNamespace(classNs)) {
         Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
-            (Itcl_IsClassNamespace(classNs)) ? "class" : "namespace",
-            " \"", path, "\" already exists",
+            "class \"", path, "\" already exists",
             (char*)NULL);
         return TCL_ERROR;
     }
@@ -104,7 +106,7 @@ Itcl_CreateClass(interp, path, info, rPtr)
     cmd = Tcl_FindCommand(interp, path, (Tcl_Namespace*)NULL,
         /* flags */ TCL_NAMESPACE_ONLY);
 
-    if (cmd != NULL) {
+    if (cmd != NULL && !Itcl_IsStub(cmd)) {
         Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
             "command \"", path, "\" already exists",
             (char*)NULL);
@@ -170,12 +172,23 @@ Itcl_CreateClass(interp, path, info, rPtr)
 
     /*
      *  Create a namespace to represent the class.  Add the class
-     *  definition info as client data for the namespace.
+     *  definition info as client data for the namespace.  If the
+     *  namespace already exists, then replace any existing client
+     *  data with the class data.
      */
     Itcl_PreserveData((ClientData)cdPtr);
 
-    classNs = Tcl_CreateNamespace(interp, path,
-        (ClientData)cdPtr, ItclDestroyClassNamesp);
+    if (classNs == NULL) {
+        classNs = Tcl_CreateNamespace(interp, path,
+            (ClientData)cdPtr, ItclDestroyClassNamesp);
+    }
+    else {
+        if (classNs->clientData && classNs->deleteProc) {
+            (*classNs->deleteProc)(classNs->clientData);
+        }
+        classNs->clientData = (ClientData)cdPtr;
+        classNs->deleteProc = ItclDestroyClassNamesp;
+    }
 
     Itcl_EventuallyFree((ClientData)cdPtr, ItclFreeClass);
 
@@ -1134,7 +1147,6 @@ Itcl_ClassCompiledVarResolver(interp, name, length, context, rPtr)
      *  plug in the appropriate variable for the current object
      *  context.
      */
-
     (*rPtr) = (Tcl_ResolvedVarInfo *) ckalloc(sizeof(ItclResolvedVarInfo));
     (*rPtr)->fetchProc = ItclClassRuntimeVarResolver;
     (*rPtr)->deleteProc = NULL;
@@ -1156,8 +1168,9 @@ Itcl_ClassCompiledVarResolver(interp, name, length, context, rPtr)
  */
 static Tcl_Var
 ItclClassRuntimeVarResolver(interp, resVarInfo)
-    Tcl_Interp *interp;		/* current interpreter */
-    Tcl_ResolvedVarInfo *resVarInfo; /* ItclVarLookup representation for variable */
+    Tcl_Interp *interp;               /* current interpreter */
+    Tcl_ResolvedVarInfo *resVarInfo;  /* contains ItclVarLookup rep
+                                       * for variable */
 {
     ItclVarLookup *vlookup = ((ItclResolvedVarInfo*)resVarInfo)->vlookup;
 

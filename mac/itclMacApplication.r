@@ -46,21 +46,21 @@ resource 'vers' (1) {
 	ITCL_MAJOR_VERSION, MINOR_VERSION,
 	RELEASE_LEVEL, 0x00, verUS,
 	ITCL_PATCH_LEVEL,
-	ITCL_PATCH_LEVEL ", by Michael McLennan © Lucent Technologies"
+	ITCL_PATCH_LEVEL ", by Michael McLennan © Lucent Technologies, Inc."
 };
 
 resource 'vers' (2) {
 	ITCL_MAJOR_VERSION, MINOR_VERSION,
 	RELEASE_LEVEL, 0x00, verUS,
 	ITCL_PATCH_LEVEL,
-	"Itcl Shell " ITCL_PATCH_LEVEL " © 1996"
+	"Itcl Shell " ITCL_PATCH_LEVEL " © 1993-1998"
 };
 
 #define ITCL_APP_CREATOR 'ITcL'
 
 type ITCL_APP_CREATOR as 'STR ';
 resource ITCL_APP_CREATOR (0, purgeable) {
-	"Itcl Shell " ITCL_PATCH_LEVEL " © 1996"
+	"Itcl Shell " ITCL_PATCH_LEVEL " © 1993-1998"
 };
 
 /*

@@ -24,7 +24,6 @@
 #define RESOURCE_INCLUDED
 #include "tcl.h"
 #include "itcl.h"
-#include "itclPatch.h"
 
 #if (TCL_RELEASE_LEVEL == 0)
 #   define RELEASE_LEVEL alpha
@@ -44,14 +43,14 @@ resource 'vers' (1) {
 	ITCL_MAJOR_VERSION, MINOR_VERSION,
 	RELEASE_LEVEL, 0x00, verUS,
 	ITCL_PATCH_LEVEL,
-	ITCL_PATCH_LEVEL ", by Michael McLennan © Lucent Technologies"
+	ITCL_PATCH_LEVEL ", by Michael McLennan © Lucent Technologies, Inc."
 };
 
 resource 'vers' (2) {
 	ITCL_MAJOR_VERSION, MINOR_VERSION,
 	RELEASE_LEVEL, 0x00, verUS,
 	ITCL_PATCH_LEVEL,
-	"Itcl Shell " ITCL_PATCH_LEVEL " © 1996"
+	"Itcl Shell " ITCL_PATCH_LEVEL " © 1993-1998"
 };
 
 
@@ -100,7 +99,7 @@ resource 'FREF' (TCL_LIBRARY_RESOURCES, purgeable)
 
 type ITCL_CREATOR as 'STR ';
 resource ITCL_CREATOR (0, purgeable) {
-	"Itcl Library " ITCL_PATCH_LEVEL " © 1996"
+	"Itcl Library " ITCL_PATCH_LEVEL " © 1993-1998"
 };
 
 /*
@@ -129,7 +128,7 @@ resource 'kind' (TCL_LIBRARY_RESOURCES, "Itcl kind", purgeable) {
 resource 'STR ' (-16397, purgeable) {
 	"Itcl Library\n\n"
 	"This is one of the libraries needed to run the Itcl flavor of the Tool Command Language programs. "
-	"To work properly, it should be placed in the ÔTool Command LanguageÕ folder "
+	"To work properly, it should be placed in the ŒTool Command Language¹ folder "
 	"within the Extensions folder."
 };
 
@@ -149,7 +148,7 @@ resource 'STR ' (-16397, purgeable) {
 
 data 'TEXT' (ITCL_LIBRARY_RESOURCES+1,"pkgIndex",purgeable, preload) {
 	"# Tcl package index file, version 1.0\n"
-	"package ifneeded Itcl 2.2 [list load [file join $dir itcl2.2[info sharedlibextension]] Itcl]\n"
+	"package ifneeded Itcl 3.0 [list load [file join $dir itcl30[info sharedlibextension]] Itcl]\n"
 };
 
 

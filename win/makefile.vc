@@ -1,38 +1,58 @@
-# Visual C++ 4.0 makefile
-#
-# Copyright (c) 1993-1996 Lucent Technologies
+# Visual C++ 2.x and 4.0 makefile
 #
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
+# 
+# Copyright (c) 1993-1998 Lucent Technologies, Inc.
+# RCS: $Id: makefile.vc,v 1.2 1998/08/11 14:40:51 welch Exp $
 
+# Does not depend on the presence of any environment variables in
+# order to compile itcl; all needed information is derived from 
+# location of the compiler directories.
 #
-# Project directories
-#
+# NOTE: Be sure to modify the "makefile.vc" file in the toplevel directory
+#   for the itcl distribution.  Include the location of your VC++ development
+#   tools and the installation directory.
+
+!include "..\..\makefile.vc"
+
+
 # ROOT    = top of source tree
-#
 # TMPDIR  = location where .obj files should be stored during build
-#
-
-!include "..\..\Makefile.vc"
 
 ROOT		= ..
-TMPDIR		= .
-TARGET_LIB_ITCL = $(TARGET_LIB)\Itcl2.2
-TARGET_DOC_ITCL	= $(TARGET_DOC)\Itcl
 
-# Comment the following line to compile with symbols
-NODEBUG=1
+######################################################################
+# Do not modify below this line
+######################################################################
 
-# uncomment the following two lines to compile with TCL_MEM_DEBUG
-#DEBUGDEFINES	= -DTCL_MEM_DEBUG
+NAMEPREFIX = itcl
+DOTVERSION = 3.0
+VERSION = 30
 
-WINDIR         	= $(ROOT)\win
-GENERICDIR	= $(ROOT)\generic
+BINROOT		= .
+!IF "$(NODEBUG)" == "1"
+TMPDIR		= $(BINROOT)\Release
+DBGX		=
+!ELSE
+TMPDIR		= $(BINROOT)\Debug
+DBGX		= d
+!ENDIF
+OUTDIR		= $(TMPDIR)
 
-TCL_INCLUDES	= -I$(WINDIR) -I$(GENERICDIR) -I$(TCLDIR)\generic
+ITCLLIB		= $(OUTDIR)\$(NAMEPREFIX)$(VERSION)$(DBGX).lib
+ITCLDLLNAME	= $(NAMEPREFIX)$(VERSION)$(DBGX).dll
+ITCLDLL		= $(OUTDIR)\$(ITCLDLLNAME)
+ITCLSH		= $(OUTDIR)\$(NAMEPREFIX)sh$(VERSION)$(DBGX).exe
+DUMPEXTS 	= $(TMPDIR)\dumpexts.exe
 
-TCL_DEFINES	= -D__WIN32__ -DUSE_TCLALLOC=0 $(DEBUGDEFINES) -Dtry=__try \
-	-Dexcept=__except
+TCLLIB		= $(TCLDIR)\win\$(OUTDIR)\tcl80$(DBGX).lib
+TCLDLL		= $(TCLDIR)\win\$(OUTDIR)\tcl80$(DBGX).dll
+
+LIB_INSTALL_DIR	= $(INSTALLDIR)\lib
+BIN_INSTALL_DIR	= $(INSTALLDIR)\bin
+SCRIPT_INSTALL_DIR	= $(INSTALLDIR)\lib\itcl$(DOTVERSION)
+INCLUDE_INSTALL_DIR	= $(INSTALLDIR)\include
 
 ITCLSHOBJS = \
 	$(TMPDIR)\tclAppInit.obj
@@ -41,7 +61,9 @@ ITCLOBJS = \
 	$(TMPDIR)\itcl_bicmds.obj \
 	$(TMPDIR)\itcl_class.obj \
 	$(TMPDIR)\itcl_cmds.obj \
+	$(TMPDIR)\itcl_ensemble.obj \
 	$(TMPDIR)\itcl_linkage.obj \
+	$(TMPDIR)\itcl_migrate.obj \
 	$(TMPDIR)\itcl_methods.obj \
 	$(TMPDIR)\itcl_objects.obj \
 	$(TMPDIR)\itcl_obsolete.obj \
@@ -49,99 +71,195 @@ ITCLOBJS = \
 	$(TMPDIR)\itcl_util.obj \
 	$(TMPDIR)\dllEntryPoint.obj
 
-DUMPEXTS = $(TCLLIBDIR)\dumpexts.exe
-ITCLSH = itclsh.exe
-ITCLTEST = itcltest.exe
+cc32		= $(TOOLS32)\bin\cl.exe
+link32		= $(TOOLS32)\bin\link.exe
+rc32		= $(TOOLS32_rc)\bin\rc.exe
+include32	= -I$(TOOLS32)\include
 
-CPU		   = i386
-INCLUDE		= $(TOOLS32)\include
-!include <ntwin32.mak>
+WINDIR          = $(ROOT)\win
+GENERICDIR	= $(ROOT)\generic
 
-TCL_CFLAGS		= $(cdebug) $(cflags) $(cvarsdll) $(include32) $(TCL_INCLUDES) $(TCL_DEFINES)
-CON_CFLAGS		= $(cdebug) $(cflags) $(cvars) $(include32) -DCONSOLE
-DOS_CFLAGS		= $(cdebug) $(cflags) $(include16) -AL
-DLL16_CFLAGS	= $(cdebug) $(cflags) $(include16) -ALw
+ITCL_INCLUDES	= -I$(WINDIR) -I$(GENERICDIR) -I$(TCLDIR)\generic
+ITCL_DEFINES	= -D__WIN32__ -DBUILD_itcl $(DEBUGDEFINES)
 
-#
-# Targets
-#
+ITCL_CFLAGS	= $(cdebug) $(cflags) $(cvarsdll) $(include32) \
+			$(ITCL_INCLUDES) $(ITCL_DEFINES)
 
-release:  $(ITCLDLL) $(ITCLSH)
-all:	    $(ITCLDLL) $(ITCLSH)
-test:	    $(ITCLSH)
-	$(CP) $(TCLLIBDIR)\*.dll
+######################################################################
+# Link flags
+######################################################################
+
+!IF "$(NODEBUG)" == "1"
+ldebug = /RELEASE
+!ELSE
+ldebug = -debug:full -debugtype:cv
+!ENDIF
+
+# declarations common to all linker options
+lcommon = /NODEFAULTLIB /RELEASE /NOLOGO
+
+# declarations for use on Intel i386, i486, and Pentium systems
+!IF "$(MACHINE)" == "IX86"
+DLLENTRY = @12
+lflags   = $(lcommon) /MACHINE:$(MACHINE)
+!ELSE
+lflags   = $(lcommon) /MACHINE:$(MACHINE)
+!ENDIF
+
+conlflags = $(lflags) -subsystem:console -entry:mainCRTStartup
+guilflags = $(lflags) -subsystem:windows -entry:WinMainCRTStartup
+dlllflags = $(lflags) -entry:_DllMainCRTStartup$(DLLENTRY) -dll
+
+!IF "$(MACHINE)" == "PPC"
+libc = libc.lib
+libcdll = crtdll.lib
+!ELSE
+libc = libc.lib oldnames.lib
+libcdll = msvcrt.lib oldnames.lib
+!ENDIF
+
+baselibs   = kernel32.lib $(optlibs) advapi32.lib user32.lib
+winlibs    = $(baselibs) gdi32.lib comdlg32.lib winspool.lib
+
+guilibs	   = $(libc) $(winlibs)
+conlibs	   = $(libc) $(baselibs)
+guilibsdll = $(libcdll) $(winlibs)
+conlibsdll = $(libcdll) $(baselibs)
+
+######################################################################
+# Compile flags
+######################################################################
+
+!IF "$(NODEBUG)" == "1"
+!IF "$(MACHINE)" == "ALPHA"
+# MSVC on Alpha doesn't understand -Ot
+cdebug = -O2i -Gs -GD
+!ELSE
+cdebug = -Oti -Gs -GD
+!ENDIF
+!ELSE
+cdebug = -Z7 -Od -WX
+!ENDIF
+
+# declarations common to all compiler options
+ccommon = -c -W3 -nologo -YX -Fp$(TMPDIR)\ -Dtry=__try -Dexcept=__except
+
+!IF "$(MACHINE)" == "IX86"
+cflags = $(ccommon) -D_X86_=1
+!ELSE
+!IF "$(MACHINE)" == "MIPS"
+cflags = $(ccommon) -D_MIPS_=1
+!ELSE
+!IF "$(MACHINE)" == "PPC"
+cflags = $(ccommon) -D_PPC_=1
+!ELSE
+!IF "$(MACHINE)" == "ALPHA"
+cflags = $(ccommon) -D_ALPHA_=1
+!ENDIF
+!ENDIF
+!ENDIF
+!ENDIF
+
+cvars      = -DWIN32 -D_WIN32
+cvarsmt    = $(cvars) -D_MT
+cvarsdll   = $(cvarsmt) -D_DLL
+
+!IF "$(NODEBUG)" == "1"
+cvarsdll   = $(cvars) -MD
+!ELSE
+cvarsdll   = $(cvars) -MDd
+!ENDIF
+
+CON_CFLAGS	= $(cdebug) $(cflags) $(cvars) $(include32) -DCONSOLE
+
+######################################################################
+# Project specific targets
+######################################################################
+
+release:    setup $(ITCLSH)
+all:	    setup $(ITCLSH)
+test:	    setup $(ITCLSH)
+	-@copy $(TCLDLL) $(TMPDIR)
 	$(ITCLSH) <<
 		cd ../tests
 		source all
 <<
 
-install: all
-	$(MKDIR) "$(TARGET_ROOT)"
-	$(MKDIR) "$(TARGET_BIN)"
-	$(MKDIR) "$(TARGET_LIB_ROOT)"
-	$(MKDIR) "$(TARGET_LIB)"
-	$(MKDIR) "$(TARGET_LIB_ITCL)"
-	$(MKDIR) "$(TARGET_INCLUDE_ROOT)"
-	$(MKDIR) "$(TARGET_INCLUDE)"
-	$(MKDIR) "$(TARGET_DOC)"
-	$(MKDIR) "$(TARGET_DOC_ITCL)"
-	$(CP) $(TMPDIR)\$(ITCLSH) "$(TARGET_BIN)"
-	$(CP) $(TMPDIR)\$(ITCLDLL) "$(TARGET_BIN)"
-	$(CP) $(ROOT)\generic\itcl.h "$(TARGET_INCLUDE)"
-	$(CP) $(ROOT)\library\*.* "$(TARGET_LIB_ITCL)"
-	$(CP) $(ROOT)\win\*.tcl "$(TARGET_LIB_ITCL)"
-	$(CP) $(ROOT)\..\html\Itcl\*.* "$(TARGET_DOC_ITCL)"
+setup:
+	if not exist $(TMPDIR) mkdir $(TMPDIR)
+	if not exist $(OUTDIR) mkdir $(OUTDIR)
 
-$(ITCLDLL): $(ITCLOBJS) $(TCLLIBDIR)\$(TCLLIB) $(TMPDIR)\itclvc.def $(TMPDIR)\itcl.res
+$(ITCLLIB): $(ITCLDLL)
+
+$(ITCLDLL): $(ITCLOBJS) $(TCLLIB) $(TMPDIR)\itclvc.def $(TMPDIR)\itcl.res
 	set LIB=$(TOOLS32)\lib
-	$(link32) $(linkdebug) $(dlllflags) -def:$(TMPDIR)\itclvc.def \
+	$(link32) $(ldebug) $(dlllflags) -def:$(TMPDIR)\itclvc.def \
 		-out:$@ $(TMPDIR)\itcl.res $(guilibsdll) @<<
-$(ITCLOBJS) $(TCLLIBDIR)\$(TCLLIB)
+$(ITCLOBJS) $(TCLLIB)
 <<
 
-$(ITCLSH): $(ITCLSHOBJS) $(ITCLLIB) $(TCLLIBDIR)\$(TCLLIB) $(TMPDIR)\itclsh.res
+$(ITCLSH): $(ITCLSHOBJS) $(ITCLLIB) $(TCLLIB) $(TMPDIR)\itclsh.res
 	set LIB=$(TOOLS32)\lib
-	$(link32) $(linkdebug) $(conlflags) $(TMPDIR)\itclsh.res \
-		-out:$@ $(conlibsdll) $(ITCLLIB) $(TCLLIBDIR)\$(TCLLIB) $(ITCLSHOBJS)
+	$(link32) $(ldebug) $(conlflags) $(TMPDIR)\itclsh.res -stack:2300000 \
+		-out:$@ $(conlibsdll) $(ITCLLIB) $(TCLLIB) $(ITCLSHOBJS)
 
-$(ITCLTEST): $(ITCLTESTOBJS) $(ITCLLIB) $(TCLLIBDIR)\$(TCLLIB) $(TMPDIR)\itclsh.res
+$(TMPDIR)\itclvc.def: $(DUMPEXTS) $(ITCLOBJS)
+	$(DUMPEXTS) -o $@ $(ITCLDLLNAME) @<<
+$(ITCLOBJS)
+<<
+
+$(DUMPEXTS): $(TCLDIR)\win\winDumpExts.c
+	$(cc32) $(CON_CFLAGS) -Fo$(TMPDIR)\ $?
 	set LIB=$(TOOLS32)\lib
-	$(link32) $(linkdebug) $(conlflags) $(TMPDIR)\itclsh.res \
-		 -out:$@ $(conlibsdll) $(ITCLLIB) $(TCLLIBDIR)\$(TCLLIB) $(ITCLTESTOBJS)
+	$(link32) $(ldebug) $(conlflags) $(guilibs) -out:$@ \
+		$(TMPDIR)\winDumpExts.obj 
+
+install: all
+	if not exist $(INSTALLDIR) mkdir $(INSTALLDIR)
+	if not exist $(BIN_INSTALL_DIR) mkdir $(BIN_INSTALL_DIR)
+	if not exist $(LIB_INSTALL_DIR) mkdir $(LIB_INSTALL_DIR)
+	if not exist $(SCRIPT_INSTALL_DIR) mkdir $(SCRIPT_INSTALL_DIR)
+	if not exist $(INCLUDE_INSTALL_DIR) mkdir $(INCLUDE_INSTALL_DIR)
+	copy $(ITCLSH) "$(BIN_INSTALL_DIR)"
+	copy $(ITCLDLL) "$(BIN_INSTALL_DIR)"
+	copy $(ROOT)\generic\itcl.h "$(INCLUDE_INSTALL_DIR)"
+	copy $(ROOT)\library\*.* "$(SCRIPT_INSTALL_DIR)"
+	copy $(ROOT)\win\*.tcl "$(SCRIPT_INSTALL_DIR)"
 
 #
 # Special case object file targets
 #
 
-$(TMPDIR)\itclvc.def: $(DUMPEXTS) $(ITCLOBJS)
-	$(DUMPEXTS) -o $@ $(ITCLDLL) @<<
-$(ITCLOBJS)
-<<
-
-$(TMPDIR)\testMain.obj: $(WINDIR)\tclAppInit.c
-	$(cc32) $(TCL_CFLAGS) -DTCL_TEST -Fo$(TMPDIR)\testMain.obj $?
+$(TMPDIR)\tclAppInit.obj : $(WINDIR)\tclAppInit.c
+	$(cc32) -DBUILD_tcl $(ITCL_CFLAGS) -Fo$@ $?
 
 #
 # Implicit rules
 #
 
 {$(WINDIR)}.c{$(TMPDIR)}.obj:
-    $(cc32) $(TCL_CFLAGS) -Fo$(TMPDIR)\ $<
+    $(cc32) -DDLL_BUILD $(ITCL_CFLAGS) -Fo$(TMPDIR)\ $<
 
 {$(GENERICDIR)}.c{$(TMPDIR)}.obj:
-    $(cc32) $(TCL_CFLAGS) -Fo$(TMPDIR)\ $<
+    $(cc32) -DDLL_BUILD $(ITCL_CFLAGS) -Fo$(TMPDIR)\ $<
 
 {$(ROOT)\compat}.c{$(TMPDIR)}.obj:
-    $(cc32) $(TCL_CFLAGS) -Fo$(TMPDIR)\ $<
+    $(cc32) -DDLL_BUILD $(ITCL_CFLAGS) -Fo$(TMPDIR)\ $<
 
 {$(WINDIR)}.rc{$(TMPDIR)}.res:
-	$(rc32) -fo $@ -r -i $(GENERICDIR) -i $(WINDIR) -i $(TCLDIR)\generic $(TCL_DEFINES) $<
+	$(rc32) -fo $@ -r -i $(GENERICDIR) -i $(WINDIR) -i $(TCLDIR)\generic -D__WIN32__ \
+		$(ITCL_DEFINES) $<
 
 clean:
-	-@$(RM) *.exe
-	-@$(RM) *.lib
-	-@$(RM) *.dll
-	-@$(RM) *.res
-	-@$(RM) itclvc.def
-	-@$(RM) $(TMPDIR)\*.obj
-	-@$(RM) *.exp
+	-@del $(OUTDIR)\*.exp
+	-@del $(OUTDIR)\*.lib
+	-@del $(OUTDIR)\*.dll
+	-@del $(OUTDIR)\*.exe
+	-@del $(OUTDIR)\*.pdb
+	-@del $(TMPDIR)\*.pch
+	-@del $(TMPDIR)\*.obj
+	-@del $(TMPDIR)\*.res
+	-@del $(TMPDIR)\*.def
+	-@del $(TMPDIR)\*.exe
+	-@rmdir $(OUTDIR)
+	-@rmdir $(TMPDIR)

@@ -9,7 +9,7 @@
 #            mmclennan@lucent.com
 #            http://www.tcltk.com/itcl
 #
-#      RCS:  $Id: itcl.tcl,v 1.1 1998/07/27 18:42:06 stanton Exp $
+#      RCS:  $Id: itcl.tcl,v 1.2 1998/08/11 14:40:44 welch Exp $
 # ----------------------------------------------------------------------
 #            Copyright (c) 1993-1998  Lucent Technologies, Inc.
 # ======================================================================
@@ -106,5 +106,35 @@ foreach cmd {public protected private} {
     auto_mkindex_parser::command $cmd {args} {
         variable parser
         $parser eval $args
+    }
+}
+
+# ----------------------------------------------------------------------
+# auto_import
+# ----------------------------------------------------------------------
+# This procedure overrides the usual "auto_import" function in the
+# Tcl library.  It is invoked during "namespace import" to make see
+# if the imported commands reside in an autoloaded library.  If so,
+# stubs are created to represent the commands.  Executing a stub
+# later on causes the real implementation to be autoloaded.
+#
+# Arguments -
+# pattern	The pattern of commands being imported (like "foo::*")
+#               a canonical namespace as returned by [namespace current]
+
+proc auto_import {pattern} {
+    global auto_index
+
+    set ns [uplevel namespace current]
+    set patternList [auto_qualify $pattern $ns]
+
+    auto_load_index
+
+    foreach pattern $patternList {
+        foreach name [array names auto_index $pattern] {
+            if {"" == [info commands $name]} {
+                ::itcl::import::stub create $name
+            }
+        }
     }
 }

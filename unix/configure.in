@@ -3,12 +3,12 @@ dnl	generate the file "configure", which is run during [incr Tcl]
 dnl installation to configure the system for the local environment.
 
 AC_INIT(../generic/itcl.h)
-# RCS: $Id: configure.in,v 1.1 1998/07/27 18:41:55 stanton Exp $
+# RCS: $Id: configure.in,v 1.2 1998/08/11 14:40:49 welch Exp $
 
 ITCL_VERSION=3.0
 ITCL_MAJOR_VERSION=3
 ITCL_MINOR_VERSION=0
-ITCL_RELEASE_LEVEL=1
+ITCL_RELEASE_LEVEL=0
 VERSION=${ITCL_VERSION}
 
 AC_CONFIG_AUX_DIR(../../config)
@@ -139,7 +139,7 @@ if test "$ok" = "yes"; then
     SHLIB_CFLAGS="${SHLIB_CFLAGS}"
     eval "ITCL_LIB_FILE=libitcl${VERSION}${SHLIB_SUFFIX}"
     ITCL_PKG_FILE="[[file join [file dirname \$dir] ${ITCL_LIB_FILE}]]"
-    MAKE_LIB="\${SHLIB_LD} -o ${ITCL_LIB_FILE} \${OBJS} ${SHLIB_LD_LIBS}"
+    MAKE_LIB="\$(SHLIB_LD) -o ${ITCL_LIB_FILE} \$(OBJS) ${SHLIB_LD_LIBS} \$(LD_SEARCH_FLAGS)"
     RANLIB=":"
 else
     SHLIB_CFLAGS=""
@@ -173,6 +173,7 @@ AC_SUBST(LD_SEARCH_FLAGS)
 
 AC_SUBST(TCL_VERSION)
 AC_SUBST(TCL_SRC_DIR)
+AC_SUBST(TCL_LIB_DIR)
 AC_SUBST(TCL_LIB_SPEC)
 AC_SUBST(TCL_LIB_FLAG)
 AC_SUBST(TCL_DBGX)

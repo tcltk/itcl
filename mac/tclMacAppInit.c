@@ -4,18 +4,22 @@
  *	Provides a version of the Tcl_AppInit procedure for the example shell.
  *
  * Copyright (c) 1993-1994 Lockheed Missle & Space Company, AI Center
- * Copyright (c) 1995-1996 Sun Microsystems, Inc.
+ * Copyright (c) 1995-1997 Sun Microsystems, Inc.
  *
  * See the file "license.terms" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * SCCS: @(#) tclMacAppInit.c 1.15 96/09/05 18:26:31
+ * SCCS: @(#) tclMacAppInit.c 1.20 97/07/28 11:03:58
  */
 
-#include "tcl.h"
+/* include tclInt.h for access to namespace API */
+#include "tclInt.h"
+
 #include "tclInt.h"
 #include "tclPort.h"
+#include "tclMac.h"
 #include "tclMacInt.h"
+
 #include "itcl.h"
 
 #if defined(THINK_C)
@@ -26,6 +30,7 @@ short InstallConsole _ANSI_ARGS_((short fd));
 #endif
 
 #ifdef TCL_TEST
+EXTERN int		TclObjTest_Init _ANSI_ARGS_((Tcl_Interp *interp));
 EXTERN int		Tcltest_Init _ANSI_ARGS_((Tcl_Interp *interp));
 #endif /* TCL_TEST */
 
@@ -55,9 +60,9 @@ static int		MacintoshInit _ANSI_ARGS_((void));
  */
 
 void
-main(argc, argv)
-    int argc;				/* Number of arguments. */
-    char **argv;			/* Array of argument strings. */
+main(
+    int argc,				/* Number of arguments. */
+    char **argv)			/* Array of argument strings. */
 {
     char *newArgv[2];
     
@@ -66,7 +71,7 @@ main(argc, argv)
     }
 
     argc = 1;
-    newArgv[0] = "tclsh";
+    newArgv[0] = "itclsh";
     newArgv[1] = NULL;
     Tcl_Main(argc, newArgv, Tcl_AppInit);
 }
@@ -91,8 +96,8 @@ main(argc, argv)
  */
 
 int
-Tcl_AppInit(interp)
-    Tcl_Interp *interp;		/* Interpreter for application. */
+Tcl_AppInit(
+    Tcl_Interp *interp)		/* Interpreter for application. */
 {
     if (Tcl_Init(interp) == TCL_ERROR) {
 	return TCL_ERROR;
@@ -100,6 +105,11 @@ Tcl_AppInit(interp)
 
 #ifdef TCL_TEST
     if (Tcltest_Init(interp) == TCL_ERROR) {
+	return TCL_ERROR;
+    }
+    Tcl_StaticPackage(interp, "Tcltest", Tcltest_Init,
+            (Tcl_PackageInitProc *) NULL);
+    if (TclObjTest_Init(interp) == TCL_ERROR) {
 	return TCL_ERROR;
     }
 #endif /* TCL_TEST */
@@ -114,11 +124,24 @@ Tcl_AppInit(interp)
      *
      * where "Mod" is the name of the module.
      */
-
     if (Itcl_Init(interp) == TCL_ERROR) {
-	return TCL_ERROR;
+        return TCL_ERROR;
     }
     Tcl_StaticPackage(interp, "Itcl", Itcl_Init, Itcl_SafeInit);
+
+    /*
+     *  This is itclsh, so import all [incr Tcl] commands by
+     *  default into the global namespace.  Fix up the autoloader
+     *  to do the same.
+     */
+    if (Tcl_Import(interp, Tcl_GetGlobalNamespace(interp),
+            "::itcl::*", /* allowOverwrite */ 1) != TCL_OK) {
+        return TCL_ERROR;
+    }
+
+    if (Tcl_Eval(interp, "auto_mkindex_parser::slavehook { _%@namespace import -force ::itcl::* }") != TCL_OK) {
+        return TCL_ERROR;
+    }
 
     /*
      * Call Tcl_CreateCommand for application-specific commands, if
@@ -135,10 +158,9 @@ Tcl_AppInit(interp)
      * may also used.  (I highly recommend using the resource method.)
      */
 
-    Tcl_Eval(interp, "source -rsrc {itclshrc}");
-    Tcl_ResetResult(interp);
-
+    Tcl_SetVar(interp, "tcl_rcRsrcName", "itclshrc", TCL_GLOBAL_ONLY);
     /* Tcl_SetVar(interp, "tcl_rcFileName", "~/.itclshrc", TCL_GLOBAL_ONLY); */
+
     return TCL_OK;
 }
 
@@ -164,12 +186,11 @@ Tcl_AppInit(interp)
 static int
 MacintoshInit()
 {
-	/* Itcl seems to be unstable, so I am trying increasing the stack to fix it...
-		JCI - 3/28/97
-	*/
-	SetApplLimit(GetApplLimit() - 64000);
-	MaxApplZone();
-	
+#if GENERATING68K && !GENERATINGCFM
+    SetApplLimit(GetApplLimit() - (TCL_MAC_68K_STACK_GROWTH));
+#endif
+    MaxApplZone();
+
 #if defined(THINK_C)
 
     /* Set options for Think C console package */
@@ -199,7 +220,7 @@ MacintoshInit()
 		
 #endif
 
-    TclMacSetEventProc((TclMacConvertEventPtr) SIOUXHandleOneEvent);
+    Tcl_MacSetEventProc((Tcl_MacConvertEventPtr) SIOUXHandleOneEvent);
     
     /* No problems with initialization */
     return TCL_OK;

@@ -5,35 +5,39 @@
  *	procedure for Tcl applications (without Tk).
  *
  * Copyright (c) 1993 The Regents of the University of California.
- * Copyright (c) 1994-1995 Sun Microsystems, Inc.
+ * Copyright (c) 1994-1997 Sun Microsystems, Inc.
  *
  * See the file "license.terms" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
+ *
+ * SCCS: @(#) tclAppInit.c 1.20 97/03/24 14:29:43
  */
 
-static char sccsid[] = "@(#) tclAppInit.c 1.13 95/06/08 10:55:54";
-
-#include "tclInt.h"
-#include "itcl.h"
-
-#ifdef	__cplusplus
-extern "C" {
+#ifdef TCL_XT_TEST
+#include <X11/Intrinsic.h>
 #endif
 
-extern int		Itcl_Init _ANSI_ARGS_((Tcl_Interp *interp));
+/* include tclInt.h for access to namespace API */
+#include "tclInt.h"
+
+#include "itcl.h"
 
 /*
  * The following variable is a special hack that is needed in order for
  * Sun shared libraries to be used for Tcl.
  */
 
-extern int matherr _ANSI_ARGS_((void));
-static int (*dummyMathPtr) _ANSI_ARGS_((void)) = matherr;
+extern int matherr();
+int *tclDummyMathPtr = (int *) matherr;
 
-#ifdef	__cplusplus
-}
+
+#ifdef TCL_TEST
+EXTERN int		TclObjTest_Init _ANSI_ARGS_((Tcl_Interp *interp));
+EXTERN int		Tcltest_Init _ANSI_ARGS_((Tcl_Interp *interp));
+#endif /* TCL_TEST */
+#ifdef TCL_XT_TEST
+EXTERN int		Tclxttest_Init _ANSI_ARGS_((Tcl_Interp *interp));
 #endif
-
 
 /*
  *----------------------------------------------------------------------
@@ -57,6 +61,9 @@ main(argc, argv)
     int argc;			/* Number of command-line arguments. */
     char **argv;		/* Values of command-line arguments. */
 {
+#ifdef TCL_XT_TEST
+    XtToolkitInitialize();
+#endif
     Tcl_Main(argc, argv, Tcl_AppInit);
     return 0;			/* Needed only to prevent compiler warning. */
 }
@@ -88,6 +95,22 @@ Tcl_AppInit(interp)
 	return TCL_ERROR;
     }
 
+#ifdef TCL_TEST
+#ifdef TCL_XT_TEST
+     if (Tclxttest_Init(interp) == TCL_ERROR) {
+	 return TCL_ERROR;
+     }
+#endif
+    if (Tcltest_Init(interp) == TCL_ERROR) {
+	return TCL_ERROR;
+    }
+    Tcl_StaticPackage(interp, "Tcltest", Tcltest_Init,
+            (Tcl_PackageInitProc *) NULL);
+    if (TclObjTest_Init(interp) == TCL_ERROR) {
+	return TCL_ERROR;
+    }
+#endif /* TCL_TEST */
+
     /*
      * Call the init procedures for included packages.  Each call should
      * look like this:
@@ -99,7 +122,7 @@ Tcl_AppInit(interp)
      * where "Mod" is the name of the module.
      */
     if (Itcl_Init(interp) == TCL_ERROR) {
-	return TCL_ERROR;
+        return TCL_ERROR;
     }
     Tcl_StaticPackage(interp, "Itcl", Itcl_Init, Itcl_SafeInit);
 
@@ -113,7 +136,7 @@ Tcl_AppInit(interp)
         return TCL_ERROR;
     }
 
-    if (Tcl_Eval(interp, "auto_mkindex_parser::slavehook { _%@namespace import -force itcl::* }") != TCL_OK) {
+    if (Tcl_Eval(interp, "auto_mkindex_parser::slavehook { _%@namespace import -force ::itcl::* }") != TCL_OK) {
         return TCL_ERROR;
     }
 

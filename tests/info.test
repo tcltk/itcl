@@ -6,7 +6,7 @@
 #            mmclennan@lucent.com
 #            http://www.tcltk.com/itcl
 #
-#      RCS:  $Id: info.test,v 1.1 1998/07/27 18:41:09 stanton Exp $
+#      RCS:  $Id: info.test,v 1.2 1998/08/11 14:40:48 welch Exp $
 # ----------------------------------------------------------------------
 #            Copyright (c) 1993-1998  Lucent Technologies, Inc.
 # ======================================================================
@@ -316,31 +316,53 @@ test info-3.13 {flag syntax errors} {
 #  Other object-related queries
 # ----------------------------------------------------------------------
 
-test info-4.1 {query most-specific class} {
+test info-4.1a {query class (wrong # args)} {
+    list [catch {ti info class x} result] $result
+} {1 {wrong # args: should be "info class"}}
+
+test info-4.1b {query most-specific class} {
     list [ti info class] [ti do info class]
 } {::test_info ::test_info}
 
-test info-4.2 {query inheritance info} {
+test info-4.2a {query inheritance info (wrong # args)} {
+    list [catch {ti info inherit x} result] $result
+} {1 {wrong # args: should be "info inherit"}}
+
+test info-4.2b {query inheritance info} {
     list [ti info inherit] [ti do info inherit]
 } {::test_info_base {}}
 
-test info-4.3 {query heritage info} {
+test info-4.3a {query heritage info (wrong # args)} {
+    list [catch {ti info heritage x} result] $result
+} {1 {wrong # args: should be "info heritage"}}
+
+test info-4.3b {query heritage info} {
     list [ti info heritage] [ti do info heritage]
 } {{::test_info ::test_info_base} ::test_info_base}
 
-test info-4.4a {query argument list} {
+test info-4.4a {query argument list (wrong # args)} {
+    list [catch {ti info args} result] $result \
+         [catch {ti info args x y} result] $result
+} {1 {wrong # args: should be "info args function"} 1 {wrong # args: should be "info args function"}}
+
+test info-4.4b {query argument list} {
     ti info args prim
 } {x y z}
 
-test info-4.4b {query argument list (undefined)} {
+test info-4.4c {query argument list (undefined)} {
     ti info args uninitm
 } {<undefined>}
 
-test info-4.5a {query body} {
+test info-4.5a {query body (wrong # args)} {
+    list [catch {ti info body} result] $result \
+         [catch {ti info body x y} result] $result
+} {1 {wrong # args: should be "info body function"} 1 {wrong # args: should be "info body function"}}
+
+test info-4.5b {query body} {
     ti info body prim
 } {return "private method"}
 
-test info-4.5b {query body (undefined)} {
+test info-4.5c {query body (undefined)} {
     ti info body uninitm
 } {<undefined>}
 

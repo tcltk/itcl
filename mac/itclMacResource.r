@@ -46,14 +46,14 @@ resource 'vers' (1) {
 	ITCL_MAJOR_VERSION, MINOR_VERSION,
 	RELEASE_LEVEL, 0x00, verUS,
 	ITCL_PATCH_LEVEL,
-	ITCL_PATCH_LEVEL ", by Michael McLennan © Lucent Technologies"
+	ITCL_PATCH_LEVEL ", by Michael McLennan © Lucent Technologies, Inc."
 };
 
 resource 'vers' (2) {
 	ITCL_MAJOR_VERSION, MINOR_VERSION,
 	RELEASE_LEVEL, 0x00, verUS,
 	ITCL_PATCH_LEVEL,
-	"Simple Itcl Shell " ITCL_PATCH_LEVEL " © 1996"
+	"Simple Itcl Shell " ITCL_PATCH_LEVEL " © 1993-1998"
 };
 
 #define TCL_LIBRARY_RESOURCES 1000

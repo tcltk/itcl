@@ -21,7 +21,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itcl_cmds.c,v 1.3 1998/08/07 12:10:06 stanton Exp $
+ *     RCS:  $Id: itcl_cmds.c,v 1.4 1998/08/11 14:40:41 welch Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -35,6 +35,9 @@
  */
 static void ItclDelObjectInfo _ANSI_ARGS_((char* cdata));
 static int Initialize _ANSI_ARGS_((Tcl_Interp *interp));
+static int ItclHandleStubCmd _ANSI_ARGS_((ClientData clientData,
+    Tcl_Interp *interp, int objc, Tcl_Obj *CONST objv[]));
+static void ItclDeleteStub _ANSI_ARGS_((ClientData cdata));
 
 /*
  * The following string is the startup script executed in new
@@ -49,25 +52,27 @@ namespace eval ::itcl {\n\
         variable library\n\
         variable version\n\
         rename _find_init {}\n\
-	if {[info exists library]} {\n\
-	    lappend dirs $library\n\
-	} else {\n\
-	    if {[catch {uplevel #0 source -rsrc itcl}] == 0} {\n\
-		return\n\
-	    }\n\
-	    set dirs {}\n\
-	    if {[info exists env(ITCL_LIBRARY)]} {\n\
-		lappend dirs $env(ITCL_LIBRARY)\n\
-	    }\n\
-	    lappend dirs [file join [file dirname $tcl_library] itcl$version]\n\
-	    set bindir [file dirname [info nameofexecutable]]\n\
-	    lappend dirs [file join $bindir .. lib itcl$version]\n\
-	    lappend dirs [file join $bindir .. library]\n\
-	    lappend dirs [file join $bindir .. .. itcl$version library]\n\
-	}\n\
+        if {[info exists library]} {\n\
+            lappend dirs $library\n\
+        } else {\n\
+            if {[catch {uplevel #0 source -rsrc itcl}] == 0} {\n\
+                return\n\
+            }\n\
+            set dirs {}\n\
+            if {[info exists env(ITCL_LIBRARY)]} {\n\
+                lappend dirs $env(ITCL_LIBRARY)\n\
+            }\n\
+            lappend dirs [file join [file dirname $tcl_library] itcl$version]\n\
+            set bindir [file dirname [info nameofexecutable]]\n\
+            lappend dirs [file join $bindir .. lib itcl$version]\n\
+            lappend dirs [file join $bindir .. library]\n\
+            lappend dirs [file join $bindir .. .. library]\n\
+            lappend dirs [file join $bindir .. .. itcl library]\n\
+            lappend dirs [file join $bindir .. .. .. itcl library]\n\
+        }\n\
         foreach i $dirs {\n\
             set library $i\n\
-	    set itclfile [file join $i itcl.tcl]\n\
+            set itclfile [file join $i itcl.tcl]\n\
             if {![catch {uplevel #0 [list source $itclfile]} msg]} {\n\
                 return\n\
             }\n\
@@ -225,6 +230,23 @@ Initialize(interp)
 
     Tcl_CreateObjCommand(interp, "::itcl::scope", Itcl_ScopeCmd,
         (ClientData)NULL, (Tcl_CmdDeleteProc*)NULL);
+
+    /*
+     *  Add commands for handling import stubs at the Tcl level.
+     */
+    if (Itcl_CreateEnsemble(interp, "::itcl::import::stub") != TCL_OK) {
+        return TCL_ERROR;
+    }
+    if (Itcl_AddEnsemblePart(interp, "::itcl::import::stub",
+            "create", "name", Itcl_StubCreateCmd,
+            (ClientData)NULL, (Tcl_CmdDeleteProc*)NULL) != TCL_OK) {
+        return TCL_ERROR;
+    }
+    if (Itcl_AddEnsemblePart(interp, "::itcl::import::stub",
+            "exists", "name", Itcl_StubExistsCmd,
+            (ClientData)NULL, (Tcl_CmdDeleteProc*)NULL) != TCL_OK) {
+        return TCL_ERROR;
+    }
 
     /*
      *  Install a variable resolution procedure to handle scoped
@@ -1146,4 +1168,214 @@ Itcl_CodeCmd(dummy, interp, objc, objv)
 
     Tcl_SetObjResult(interp, listPtr);
     return TCL_OK;
+}
+
+
+/*
+ * ------------------------------------------------------------------------
+ *  Itcl_StubCreateCmd()
+ *
+ *  Invoked by Tcl whenever the user issues a "stub create" command to
+ *  create an autoloading stub for imported commands.  Handles the
+ *  following syntax:
+ *
+ *    stub create <name>
+ *
+ *  Creates a command called <name>.  Executing this command will cause
+ *  the real command <name> to be autoloaded.
+ * ------------------------------------------------------------------------
+ */
+int
+Itcl_StubCreateCmd(clientData, interp, objc, objv)
+    ClientData clientData;   /* not used */
+    Tcl_Interp *interp;      /* current interpreter */
+    int objc;                /* number of arguments */
+    Tcl_Obj *CONST objv[];   /* argument objects */
+{
+    char *cmdName;
+    Command *cmdPtr;
+
+    if (objc != 2) {
+        Tcl_WrongNumArgs(interp, 1, objv, "name");
+        return TCL_ERROR;
+    }
+    cmdName = Tcl_GetStringFromObj(objv[1], (int*)NULL);
+
+    /*
+     *  Create a stub command with the characteristic ItclDeleteStub
+     *  procedure.  That way, we can recognize this command later
+     *  on as a stub.  Save the cmd token as client data, so we can
+     *  get the full name of this command later on.
+     */
+    cmdPtr = (Command *) Tcl_CreateObjCommand(interp, cmdName,
+        ItclHandleStubCmd, (ClientData)NULL,
+        (Tcl_CmdDeleteProc*)ItclDeleteStub);
+
+    cmdPtr->objClientData = (ClientData) cmdPtr;
+
+    return TCL_OK;
+}
+
+
+/*
+ * ------------------------------------------------------------------------
+ *  Itcl_StubExistsCmd()
+ *
+ *  Invoked by Tcl whenever the user issues a "stub exists" command to
+ *  see if an existing command is an autoloading stub.  Handles the
+ *  following syntax:
+ *
+ *    stub exists <name>
+ *
+ *  Looks for a command called <name> and checks to see if it is an
+ *  autoloading stub.  Returns a boolean result.
+ * ------------------------------------------------------------------------
+ */
+int
+Itcl_StubExistsCmd(clientData, interp, objc, objv)
+    ClientData clientData;   /* not used */
+    Tcl_Interp *interp;      /* current interpreter */
+    int objc;                /* number of arguments */
+    Tcl_Obj *CONST objv[];   /* argument objects */
+{
+    char *cmdName;
+    Tcl_Command cmd;
+
+    if (objc != 2) {
+        Tcl_WrongNumArgs(interp, 1, objv, "name");
+        return TCL_ERROR;
+    }
+    cmdName = Tcl_GetStringFromObj(objv[1], (int*)NULL);
+
+    cmd = Tcl_FindCommand(interp, cmdName, (Tcl_Namespace*)NULL, 0);
+
+    if (cmd != NULL && Itcl_IsStub(cmd)) {
+        Tcl_SetIntObj(Tcl_GetObjResult(interp), 1);
+    } else {
+        Tcl_SetIntObj(Tcl_GetObjResult(interp), 0);
+    }
+    return TCL_OK;
+}
+
+
+/*
+ * ------------------------------------------------------------------------
+ *  Itcl_IsStub()
+ *
+ *  Checks the given Tcl command to see if it represents an autoloading
+ *  stub created by the "stub create" command.  Returns non-zero if
+ *  the command is indeed a stub.
+ * ------------------------------------------------------------------------
+ */
+int
+Itcl_IsStub(cmd)
+    Tcl_Command cmd;         /* command being tested */
+{
+    Command *cmdPtr = (Command*)cmd;
+
+    /*
+     *  This may be an imported command, but don't try to get the
+     *  original.  Just check to see if this particular command
+     *  is a stub.  If we really want the original command, we'll
+     *  find it at a higher level.
+     */
+    if (cmdPtr->deleteProc == ItclDeleteStub) {
+        return 1;
+    }
+    return 0;
+}
+
+
+/*
+ * ------------------------------------------------------------------------
+ *  ItclHandleStubCmd()
+ *
+ *  Invoked by Tcl to handle commands created by "stub create".
+ *  Calls "auto_load" with the full name of the current command to
+ *  trigger autoloading of the real implementation.  Then, calls the
+ *  command to handle its function.  If successful, this command
+ *  returns TCL_OK along with the result from the real implementation
+ *  of this command.  Otherwise, it returns TCL_ERROR, along with an
+ *  error message in the interpreter.
+ * ------------------------------------------------------------------------
+ */
+static int
+ItclHandleStubCmd(clientData, interp, objc, objv)
+    ClientData clientData;   /* command token for this stub */
+    Tcl_Interp *interp;      /* current interpreter */
+    int objc;                /* number of arguments */
+    Tcl_Obj *CONST objv[];   /* argument objects */
+{
+    Tcl_Command cmd = (Tcl_Command) clientData;
+
+    int result, loaded;
+    char *cmdName;
+    int cmdlinec;
+    Tcl_Obj **cmdlinev;
+    Tcl_Obj *objAutoLoad[2], *objPtr, *cmdNamePtr, *cmdlinePtr;
+
+    cmdNamePtr = Tcl_NewStringObj((char*)NULL, 0);
+    Tcl_GetCommandFullName(interp, cmd, cmdNamePtr);
+    Tcl_IncrRefCount(cmdNamePtr);
+    cmdName = Tcl_GetStringFromObj(cmdNamePtr, (int*)NULL);
+
+    /*
+     *  Try to autoload the real command for this stub.
+     */
+    objAutoLoad[0] = Tcl_NewStringObj("::auto_load", -1);
+    Tcl_IncrRefCount(objAutoLoad[0]);
+    objAutoLoad[1] = cmdNamePtr;
+    Tcl_IncrRefCount(objAutoLoad[1]);
+
+    result = Itcl_EvalArgs(interp, 2, objAutoLoad);
+
+    Tcl_DecrRefCount(objAutoLoad[0]);
+    Tcl_DecrRefCount(objAutoLoad[1]);
+
+    if (result != TCL_OK) {
+        Tcl_DecrRefCount(cmdNamePtr);
+        return TCL_ERROR;
+    }
+
+    objPtr = Tcl_GetObjResult(interp);
+    result = Tcl_GetIntFromObj(interp, objPtr, &loaded);
+    if (result != TCL_OK || !loaded) {
+        Tcl_ResetResult(interp);
+        Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+            "can't autoload \"", cmdName, "\"", (char*)NULL);
+        Tcl_DecrRefCount(cmdNamePtr);
+        return TCL_ERROR;
+    }
+
+    /*
+     *  At this point, the real implementation has been loaded.
+     *  Invoke the command again with the arguments passed in.
+     */
+    cmdlinePtr = Itcl_CreateArgs(interp, cmdName, objc-1, objv+1);
+
+    (void) Tcl_ListObjGetElements((Tcl_Interp*)NULL, cmdlinePtr,
+        &cmdlinec, &cmdlinev);
+
+    Tcl_ResetResult(interp);
+    result = Itcl_EvalArgs(interp, cmdlinec, cmdlinev);
+    Tcl_DecrRefCount(cmdlinePtr);
+
+    return result;
+}
+
+
+/*
+ * ------------------------------------------------------------------------
+ *  ItclDeleteStub()
+ *
+ *  Invoked by Tcl whenever a stub command is deleted.  This procedure
+ *  does nothing, but its presence identifies a command as a stub.
+ * ------------------------------------------------------------------------
+ */
+/* ARGSUSED */
+static void
+ItclDeleteStub(cdata)
+    ClientData cdata;      /* not used */
+{
+    /* do nothing */
 }

@@ -39,7 +39,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itclInt.h,v 1.4 1998/08/07 12:08:54 stanton Exp $
+ *     RCS:  $Id: itclInt.h,v 1.5 1998/08/11 14:40:37 welch Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -319,6 +319,12 @@ EXTERN int Itcl_ScopeCmd _ANSI_ARGS_((ClientData clientData,
     Tcl_Interp *interp, int objc, Tcl_Obj *CONST objv[]));
 EXTERN int Itcl_CodeCmd _ANSI_ARGS_((ClientData clientData,
     Tcl_Interp *interp, int objc, Tcl_Obj *CONST objv[]));
+EXTERN int Itcl_StubCreateCmd _ANSI_ARGS_((ClientData clientData,
+    Tcl_Interp *interp, int objc, Tcl_Obj *CONST objv[]));
+EXTERN int Itcl_StubExistsCmd _ANSI_ARGS_((ClientData clientData,
+    Tcl_Interp *interp, int objc, Tcl_Obj *CONST objv[]));
+EXTERN int Itcl_IsStub _ANSI_ARGS_((Tcl_Command cmd));
+
 
 /*
  *  Functions for manipulating classes
