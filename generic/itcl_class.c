@@ -23,7 +23,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itcl_class.c,v 1.17 2004/12/11 20:02:31 davygrvy Exp $
+ *     RCS:  $Id: itcl_class.c,v 1.18 2004/12/14 08:16:23 davygrvy Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -915,9 +915,7 @@ Itcl_HandleClass(clientData, interp, objc, objv)
         objc-2, objv+2, &newObj);
 
     if (result == TCL_OK) {
-	Tcl_Obj *name = Tcl_NewObj();
-	Tcl_GetCommandFullName(interp, newObj->accessCmd, name);
-        Tcl_SetObjResult(interp, name);
+        Tcl_SetObjResult(interp, Tcl_NewStringObj(objName, -1));
     }
 
     Tcl_DStringFree(&buffer);
