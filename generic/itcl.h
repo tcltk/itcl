@@ -42,7 +42,7 @@
  *       modified for Stubs 5/20/1999 by 
  *           David Gravereaux <davygrvy@bigfoot.com>
  *
- *     RCS:  $Id: itcl.h,v 1.9 2000/07/06 06:43:29 mmc Exp $
+ *     RCS:  $Id: itcl.h,v 1.10 2000/08/02 02:09:37 davidg Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -146,6 +146,20 @@ typedef struct Itcl_InterpState_ *Itcl_InterpState;
 /*
  * Public functions that are not accessible via the stubs table.
  */
+
+EXTERN char *		Itcl_InitStubs _ANSI_ARGS_((Tcl_Interp *interp,
+			    char *version, int exact));
+
+#ifndef USE_ITCL_STUBS
+
+/*
+ * When not using stubs, make it a macro.
+ */
+
+#define Itcl_InitStubs(interp, version, exact) \
+    Tcl_PkgRequire(interp, "Itcl", version, exact)
+
+#endif
 
 
 #endif /* RESOURCE INCLUDED */
