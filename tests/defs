@@ -81,6 +81,10 @@ if {[info commands memory] == ""} {
 #			'echo' etc available.
 
 catch {unset testConfig}
+
+package require Itcl
+namespace import itcl::*
+
 if {$tcl_platform(platform) == "unix"} {
     set testConfig(unixOnly) 1
     set testConfig(tempNotPc) 1

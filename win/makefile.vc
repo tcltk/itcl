@@ -4,7 +4,7 @@
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 # 
 # Copyright (c) 1993-1998 Lucent Technologies, Inc.
-# RCS: $Id: makefile.vc,v 1.2 1998/08/11 14:40:51 welch Exp $
+# RCS: $Id: makefile.vc,v 1.3 1999/05/24 21:10:46 redman Exp $
 
 # Does not depend on the presence of any environment variables in
 # order to compile itcl; all needed information is derived from 
@@ -20,70 +20,83 @@
 # ROOT    = top of source tree
 # TMPDIR  = location where .obj files should be stored during build
 
-ROOT		= ..
+ROOT        = ..
 
 ######################################################################
 # Do not modify below this line
 ######################################################################
 
 NAMEPREFIX = itcl
-DOTVERSION = 3.0
-VERSION = 30
+DOTVERSION = 3.1
+VERSION = 31
+STUBPREFIX = $(NAMEPREFIX)stub
 
-BINROOT		= .
+BINROOT        = .
 !IF "$(NODEBUG)" == "1"
-TMPDIR		= $(BINROOT)\Release
-DBGX		=
+TMPNAME       = Release
+DBGX        =
 !ELSE
-TMPDIR		= $(BINROOT)\Debug
-DBGX		= d
+TMPNAME       = Debug
+DBGX        = d
 !ENDIF
-OUTDIR		= $(TMPDIR)
+TMPDIR        = $(BINROOT)\$(TMPNAME)
+OUTDIR        = $(TMPDIR)
 
-ITCLLIB		= $(OUTDIR)\$(NAMEPREFIX)$(VERSION)$(DBGX).lib
-ITCLDLLNAME	= $(NAMEPREFIX)$(VERSION)$(DBGX).dll
-ITCLDLL		= $(OUTDIR)\$(ITCLDLLNAME)
-ITCLSH		= $(OUTDIR)\$(NAMEPREFIX)sh$(VERSION)$(DBGX).exe
-DUMPEXTS 	= $(TMPDIR)\dumpexts.exe
+PKGINDEX       = $(TMPDIR)\pkgIndex.tcl
 
-TCLLIB		= $(TCLDIR)\win\$(OUTDIR)\tcl80$(DBGX).lib
-TCLDLL		= $(TCLDIR)\win\$(OUTDIR)\tcl80$(DBGX).dll
+ITCLLIB        = $(OUTDIR)\$(NAMEPREFIX)$(VERSION)$(DBGX).lib
+ITCLDLLNAME    = $(NAMEPREFIX)$(VERSION)$(DBGX).dll
+ITCLDLL        = $(OUTDIR)\$(ITCLDLLNAME)
+ITCLSH        = $(OUTDIR)\$(NAMEPREFIX)sh$(VERSION)$(DBGX).exe
+DUMPEXTS     = $(TMPDIR)\dumpexts.exe
 
-LIB_INSTALL_DIR	= $(INSTALLDIR)\lib
-BIN_INSTALL_DIR	= $(INSTALLDIR)\bin
-SCRIPT_INSTALL_DIR	= $(INSTALLDIR)\lib\itcl$(DOTVERSION)
-INCLUDE_INSTALL_DIR	= $(INSTALLDIR)\include
+TCLLIB        = $(TCLDIR)\win\$(OUTDIR)\tcl81$(DBGX).lib
+TCLSTUBLIB    = $(TCLDIR)\win\$(OUTDIR)\tclstub81$(DBGX).lib
+TCLDLL        = $(TCLDIR)\win\$(OUTDIR)\tcl81$(DBGX).dll
+
+ITCLSTUBLIBNAME = $(STUBPREFIX)$(VERSION)$(DBGX).lib
+ITCLSTUBLIB     = $(OUTDIR)\$(ITCLSTUBLIBNAME)
+
+LIB_INSTALL_DIR    = $(INSTALLDIR)\lib
+BIN_INSTALL_DIR    = $(INSTALLDIR)\bin
+SCRIPT_INSTALL_DIR    = $(INSTALLDIR)\lib\itcl$(DOTVERSION)
+INCLUDE_INSTALL_DIR    = $(INSTALLDIR)\include
 
 ITCLSHOBJS = \
-	$(TMPDIR)\tclAppInit.obj
+    $(TMPDIR)\tclAppInit.obj
 
 ITCLOBJS = \
-	$(TMPDIR)\itcl_bicmds.obj \
-	$(TMPDIR)\itcl_class.obj \
-	$(TMPDIR)\itcl_cmds.obj \
-	$(TMPDIR)\itcl_ensemble.obj \
-	$(TMPDIR)\itcl_linkage.obj \
-	$(TMPDIR)\itcl_migrate.obj \
-	$(TMPDIR)\itcl_methods.obj \
-	$(TMPDIR)\itcl_objects.obj \
-	$(TMPDIR)\itcl_obsolete.obj \
-	$(TMPDIR)\itcl_parse.obj \
-	$(TMPDIR)\itcl_util.obj \
-	$(TMPDIR)\dllEntryPoint.obj
+    $(TMPDIR)\itclStubInit.obj \
+    $(TMPDIR)\itcl_bicmds.obj \
+    $(TMPDIR)\itcl_class.obj \
+    $(TMPDIR)\itcl_cmds.obj \
+    $(TMPDIR)\itcl_ensemble.obj \
+    $(TMPDIR)\itcl_linkage.obj \
+    $(TMPDIR)\itcl_migrate.obj \
+    $(TMPDIR)\itcl_methods.obj \
+    $(TMPDIR)\itcl_objects.obj \
+    $(TMPDIR)\itcl_obsolete.obj \
+    $(TMPDIR)\itcl_parse.obj \
+    $(TMPDIR)\itcl_util.obj \
+    $(TMPDIR)\dllEntryPoint.obj
 
-cc32		= $(TOOLS32)\bin\cl.exe
-link32		= $(TOOLS32)\bin\link.exe
-rc32		= $(TOOLS32_rc)\bin\rc.exe
-include32	= -I$(TOOLS32)\include
+ITCLSTUBOBJS = \
+    $(TMPDIR)\itclStubLib.obj
+
+cc32        = $(TOOLS32)\bin\cl.exe
+link32      = $(TOOLS32)\bin\link.exe
+rc32        = $(TOOLS32_rc)\bin\rc.exe
+include32   = -I$(TOOLS32)\include
+lib32       = "$(TOOLS32)\bin\lib.exe"
 
 WINDIR          = $(ROOT)\win
-GENERICDIR	= $(ROOT)\generic
+GENERICDIR    = $(ROOT)\generic
 
-ITCL_INCLUDES	= -I$(WINDIR) -I$(GENERICDIR) -I$(TCLDIR)\generic
-ITCL_DEFINES	= -D__WIN32__ -DBUILD_itcl $(DEBUGDEFINES)
+ITCL_INCLUDES    = -I$(WINDIR) -I$(GENERICDIR) -I$(TCLDIR)\generic
+ITCL_DEFINES    = -D__WIN32__ -DBUILD_itcl $(DEBUGDEFINES)
 
-ITCL_CFLAGS	= $(cdebug) $(cflags) $(cvarsdll) $(include32) \
-			$(ITCL_INCLUDES) $(ITCL_DEFINES)
+ITCL_CFLAGS    = $(cdebug) $(cflags) $(cvarsdll) $(include32) \
+            $(ITCL_INCLUDES) $(ITCL_DEFINES)
 
 ######################################################################
 # Link flags
@@ -121,8 +134,8 @@ libcdll = msvcrt.lib oldnames.lib
 baselibs   = kernel32.lib $(optlibs) advapi32.lib user32.lib
 winlibs    = $(baselibs) gdi32.lib comdlg32.lib winspool.lib
 
-guilibs	   = $(libc) $(winlibs)
-conlibs	   = $(libc) $(baselibs)
+guilibs       = $(libc) $(winlibs)
+conlibs       = $(libc) $(baselibs)
 guilibsdll = $(libcdll) $(winlibs)
 conlibsdll = $(libcdll) $(baselibs)
 
@@ -170,68 +183,89 @@ cvarsdll   = $(cvars) -MD
 cvarsdll   = $(cvars) -MDd
 !ENDIF
 
-CON_CFLAGS	= $(cdebug) $(cflags) $(cvars) $(include32) -DCONSOLE
+CON_CFLAGS    = $(cdebug) $(cflags) $(cvars) $(include32) -DCONSOLE
 
 ######################################################################
 # Project specific targets
 ######################################################################
 
-release:    setup $(ITCLSH)
-all:	    setup $(ITCLSH)
-test:	    setup $(ITCLSH)
-	-@copy $(TCLDLL) $(TMPDIR)
-	$(ITCLSH) <<
-		cd ../tests
-		source all
+release:    setup $(ITCLDLL) $(ITCLSTUBLIB)
+all:        setup $(ITCLDLL) $(ITCLSTUBLIB)
+test:        setup $(ITCLDLL) $(ITCLSTUBLIB) $(PKGINDEX)
+    -@copy $(TCLDLL) $(TMPDIR)
+    $(TCLSH) <<
+        cd ../tests
+	lappend auto_path ../win/$(TMPNAME)
+	set env(ITCL_LIBRARY) ../library
+        source all
 <<
+
+$(PKGINDEX):
+    -@copy pkgIndex.tcl $@
 
 setup:
-	if not exist $(TMPDIR) mkdir $(TMPDIR)
-	if not exist $(OUTDIR) mkdir $(OUTDIR)
+    if not exist $(TMPDIR) mkdir $(TMPDIR)
+    if not exist $(OUTDIR) mkdir $(OUTDIR)
 
-$(ITCLLIB): $(ITCLDLL)
+#$(ITCLLIB): $(ITCLDLL)
 
-$(ITCLDLL): $(ITCLOBJS) $(TCLLIB) $(TMPDIR)\itclvc.def $(TMPDIR)\itcl.res
-	set LIB=$(TOOLS32)\lib
-	$(link32) $(ldebug) $(dlllflags) -def:$(TMPDIR)\itclvc.def \
-		-out:$@ $(TMPDIR)\itcl.res $(guilibsdll) @<<
-$(ITCLOBJS) $(TCLLIB)
+$(ITCLDLL): $(ITCLOBJS) $(TMPDIR)\itclvc.def $(TMPDIR)\itcl.res
+    set LIB=$(TOOLS32)\lib
+    $(link32) $(ldebug) $(dlllflags) -def:$(TMPDIR)\itclvc.def \
+        -out:$@ $(TMPDIR)\itcl.res $(guilibsdll) $(TCLSTUBLIB) @<<
+		$(ITCLOBJS)
 <<
 
-$(ITCLSH): $(ITCLSHOBJS) $(ITCLLIB) $(TCLLIB) $(TMPDIR)\itclsh.res
-	set LIB=$(TOOLS32)\lib
-	$(link32) $(ldebug) $(conlflags) $(TMPDIR)\itclsh.res -stack:2300000 \
-		-out:$@ $(conlibsdll) $(ITCLLIB) $(TCLLIB) $(ITCLSHOBJS)
+$(ITCLSTUBLIB): $(ITCLSTUBOBJS)
+    $(lib32) -nologo -out:$@ $(ITCLSTUBOBJS)
+
+#$(ITCLSH): $(ITCLSHOBJS) $(ITCLSTUBLIB) $(TCLSTUBLIB) $(TMPDIR)\itclsh.res
+#    set LIB=$(TOOLS32)\lib
+#    $(link32) $(ldebug) $(conlflags) $(TMPDIR)\itclsh.res -stack:2300000 \
+#        -out:$@ $(conlibsdll) $(ITCLSTUBLIB) $(TCLSTUBLIB) $(ITCLSHOBJS)
 
 $(TMPDIR)\itclvc.def: $(DUMPEXTS) $(ITCLOBJS)
-	$(DUMPEXTS) -o $@ $(ITCLDLLNAME) @<<
+    $(DUMPEXTS) -o $@ $(ITCLDLLNAME) @<<
 $(ITCLOBJS)
 <<
 
 $(DUMPEXTS): $(TCLDIR)\win\winDumpExts.c
-	$(cc32) $(CON_CFLAGS) -Fo$(TMPDIR)\ $?
-	set LIB=$(TOOLS32)\lib
-	$(link32) $(ldebug) $(conlflags) $(guilibs) -out:$@ \
-		$(TMPDIR)\winDumpExts.obj 
+    $(cc32) $(CON_CFLAGS) -Fo$(TMPDIR)\ $?
+    set LIB=$(TOOLS32)\lib
+    $(link32) $(ldebug) $(conlflags) $(guilibs) -out:$@ \
+        $(TMPDIR)\winDumpExts.obj 
 
 install: all
-	if not exist $(INSTALLDIR) mkdir $(INSTALLDIR)
-	if not exist $(BIN_INSTALL_DIR) mkdir $(BIN_INSTALL_DIR)
-	if not exist $(LIB_INSTALL_DIR) mkdir $(LIB_INSTALL_DIR)
-	if not exist $(SCRIPT_INSTALL_DIR) mkdir $(SCRIPT_INSTALL_DIR)
-	if not exist $(INCLUDE_INSTALL_DIR) mkdir $(INCLUDE_INSTALL_DIR)
-	copy $(ITCLSH) "$(BIN_INSTALL_DIR)"
-	copy $(ITCLDLL) "$(BIN_INSTALL_DIR)"
-	copy $(ROOT)\generic\itcl.h "$(INCLUDE_INSTALL_DIR)"
-	copy $(ROOT)\library\*.* "$(SCRIPT_INSTALL_DIR)"
-	copy $(ROOT)\win\*.tcl "$(SCRIPT_INSTALL_DIR)"
+    if not exist $(INSTALLDIR) mkdir $(INSTALLDIR)
+    if not exist $(BIN_INSTALL_DIR) mkdir $(BIN_INSTALL_DIR)
+    if not exist $(LIB_INSTALL_DIR) mkdir $(LIB_INSTALL_DIR)
+    if not exist $(SCRIPT_INSTALL_DIR) mkdir $(SCRIPT_INSTALL_DIR)
+    if not exist $(INCLUDE_INSTALL_DIR) mkdir $(INCLUDE_INSTALL_DIR)
+    copy $(ITCLSH) "$(BIN_INSTALL_DIR)"
+    copy $(ITCLDLL) "$(BIN_INSTALL_DIR)"
+    copy $(ROOT)\generic\itcl.h "$(INCLUDE_INSTALL_DIR)"
+    copy $(ROOT)\library\*.* "$(SCRIPT_INSTALL_DIR)"
+    copy $(ROOT)\win\*.tcl "$(SCRIPT_INSTALL_DIR)"
+
+#
+# Regenerate the stubs files.
+#
+genstubs:
+    $(TCLSH) $(TCLDIR)\tools\genStubs.tcl $(GENERICDIR) \
+        $(GENERICDIR)\itcl.decls $(GENERICDIR)\itclInt.decls
 
 #
 # Special case object file targets
 #
 
 $(TMPDIR)\tclAppInit.obj : $(WINDIR)\tclAppInit.c
-	$(cc32) -DBUILD_tcl $(ITCL_CFLAGS) -Fo$@ $?
+    $(cc32) -DUSE_TCL_STUBS  -DUSE_ITCL_STUBS $(ITCL_CFLAGS) -Fo$@ $?
+
+# The following object is part of the stub library and should not
+# be built as DLL objects but none of the symbols should be exported
+
+$(TMPDIR)\itclStubLib.obj : $(GENERICDIR)\itclStubLib.c
+    $(cc32) -DSTATIC_BUILD $(ITCL_CFLAGS) -Fo$@ $?
 
 #
 # Implicit rules
@@ -247,19 +281,19 @@ $(TMPDIR)\tclAppInit.obj : $(WINDIR)\tclAppInit.c
     $(cc32) -DDLL_BUILD $(ITCL_CFLAGS) -Fo$(TMPDIR)\ $<
 
 {$(WINDIR)}.rc{$(TMPDIR)}.res:
-	$(rc32) -fo $@ -r -i $(GENERICDIR) -i $(WINDIR) -i $(TCLDIR)\generic -D__WIN32__ \
-		$(ITCL_DEFINES) $<
+    $(rc32) -fo $@ -r -i $(GENERICDIR) -i $(WINDIR) -i $(TCLDIR)\generic -D__WIN32__ \
+        $(ITCL_DEFINES) $<
 
 clean:
-	-@del $(OUTDIR)\*.exp
-	-@del $(OUTDIR)\*.lib
-	-@del $(OUTDIR)\*.dll
-	-@del $(OUTDIR)\*.exe
-	-@del $(OUTDIR)\*.pdb
-	-@del $(TMPDIR)\*.pch
-	-@del $(TMPDIR)\*.obj
-	-@del $(TMPDIR)\*.res
-	-@del $(TMPDIR)\*.def
-	-@del $(TMPDIR)\*.exe
-	-@rmdir $(OUTDIR)
-	-@rmdir $(TMPDIR)
+    -@del $(OUTDIR)\*.exp
+    -@del $(OUTDIR)\*.lib
+    -@del $(OUTDIR)\*.dll
+    -@del $(OUTDIR)\*.exe
+    -@del $(OUTDIR)\*.pdb
+    -@del $(TMPDIR)\*.pch
+    -@del $(TMPDIR)\*.obj
+    -@del $(TMPDIR)\*.res
+    -@del $(TMPDIR)\*.def
+    -@del $(TMPDIR)\*.exe
+    -@rmdir $(OUTDIR)
+    -@rmdir $(TMPDIR)

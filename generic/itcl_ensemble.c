@@ -23,7 +23,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itcl_ensemble.c,v 1.2 1998/08/07 12:10:22 stanton Exp $
+ *     RCS:  $Id: itcl_ensemble.c,v 1.3 1999/05/24 21:10:45 redman Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -1626,7 +1626,7 @@ Itcl_EnsembleCmd(clientData, interp, objc, objv)
      *  another "ensemble" command.  Use the current ensemble as
      *  the parent, and find or create an ensemble part within it.
      */
-    ensName = TclGetStringFromObj(objv[1], (int*)NULL);
+    ensName = Tcl_GetStringFromObj(objv[1], (int*)NULL);
 
     if (ensData) {
         if (FindEnsemblePart(interp, ensData, ensName, &ensPart) != TCL_OK) {
@@ -1693,6 +1693,7 @@ Itcl_EnsembleCmd(clientData, interp, objc, objv)
     }
     else if (objc > 3) {
         objPtr = Tcl_NewListObj(objc-2, objv+2);
+        Tcl_IncrRefCount(objPtr);  /* stop Eval trashing it */
         status = Tcl_EvalObj(ensInfo->parser, objPtr);
         Tcl_DecrRefCount(objPtr);  /* we're done with the object */
     }
@@ -2103,6 +2104,7 @@ DupEnsInvocInternalRep(srcPtr, copyPtr)
 
     if (prevArgObj) {
         objPtr = Tcl_DuplicateObj(prevArgObj);
+        Tcl_IncrRefCount(objPtr);
         copyPtr->internalRep.twoPtrValue.ptr2 = (VOID *) objPtr;
     }
 }
@@ -2154,7 +2156,7 @@ SetEnsInvocFromAny(interp, objPtr)
      *  keep the string around as if it were the command line
      *  invocation.
      */
-    argObj = Tcl_NewStringObj(name, -1);
+    argObj = Tcl_NewStringObj(name, length);
 
     /*
      *  Free the old representation and install a new one.

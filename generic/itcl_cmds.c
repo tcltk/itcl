@@ -21,7 +21,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itcl_cmds.c,v 1.4 1998/08/11 14:40:41 welch Exp $
+ *     RCS:  $Id: itcl_cmds.c,v 1.5 1999/05/24 21:10:45 redman Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -101,6 +101,8 @@ static char safeInitScript[] =
     return $ptr\n\
 }";
 
+extern ItclStubs itclStubs;
+
 
 /*
  * ------------------------------------------------------------------------
@@ -125,9 +127,9 @@ Initialize(interp)
     Tcl_Namespace *itclNs;
     ItclObjectInfo *info;
 
-    if (Tcl_PkgRequire(interp, "Tcl", TCL_VERSION, 1) == NULL) {
+    if (Tcl_InitStubs(interp, "8.0", 0) == NULL) {
 	return TCL_ERROR;
-    }
+    };
 
     /*
      *  See if [incr Tcl] is already installed.
@@ -304,7 +306,8 @@ Initialize(interp)
     /*
      *  Package is now loaded.
      */
-    if (Tcl_PkgProvide(interp, "Itcl", ITCL_VERSION) != TCL_OK) {
+    if (Tcl_PkgProvideEx(interp, "Itcl", ITCL_VERSION,
+            (ClientData) &itclStubs) != TCL_OK) {
 	return TCL_ERROR;
     }
     return TCL_OK;
