@@ -22,7 +22,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itcl_objects.c,v 1.7 2002/04/20 05:34:32 davygrvy Exp $
+ *     RCS:  $Id: itcl_objects.c,v 1.8 2002/04/20 06:20:43 davygrvy Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -38,7 +38,7 @@ static void ItclReportObjectUsage _ANSI_ARGS_((Tcl_Interp *interp,
     ItclObject* obj));
 
 static char* ItclTraceThisVar _ANSI_ARGS_((ClientData cdata,
-    Tcl_Interp *interp, char *name1, char *name2, int flags));
+    Tcl_Interp *interp, char *name1, CONST char *name2, int flags));
 
 static void ItclDestroyObject _ANSI_ARGS_((ClientData cdata));
 static void ItclFreeObject _ANSI_ARGS_((char* cdata));
@@ -849,11 +849,11 @@ ItclReportObjectUsage(interp, contextObj)
 /* ARGSUSED */
 static char*
 ItclTraceThisVar(cdata, interp, name1, name2, flags)
-    ClientData cdata;        /* object instance data */
-    Tcl_Interp *interp;      /* interpreter managing this variable */
-    char *name1;             /* variable name */
-    char *name2;             /* unused */
-    int flags;               /* flags indicating read/write */
+    ClientData cdata;	    /* object instance data */
+    Tcl_Interp *interp;	    /* interpreter managing this variable */
+    char *name1;	    /* variable name */
+    CONST char *name2;	    /* unused */
+    int flags;		    /* flags indicating read/write */
 {
     ItclObject *contextObj = (ItclObject*)cdata;
     char *objName;
