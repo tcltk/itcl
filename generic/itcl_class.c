@@ -23,7 +23,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itcl_class.c,v 1.4 2000/07/06 06:43:29 mmc Exp $
+ *     RCS:  $Id: itcl_class.c,v 1.5 2000/12/12 13:59:18 smithc Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -960,17 +960,40 @@ Itcl_ClassCmdResolver(interp, name, context, flags, rPtr)
      *    it--as it is being resolved again by the compiler.
      */
     cmdPtr = (Command*)mfunc->accessCmd;
-    if (!cmdPtr || cmdPtr->deleted) {
-        mfunc->accessCmd = NULL;
+    
+    /*
+     * The following #if is needed so itcl can be compiled with
+     * all versions of Tcl.  The integer "deleted" was renamed to
+     * "flags" in tcl8.4a2.  This #if is also found in itcl_ensemble.c
+     *
+     */
+    #if (TCL_MAJOR_VERSION == 8) && (TCL_MINOR_VERSION < 4)
+      if (!cmdPtr || cmdPtr->deleted) {
 
-        if ((flags & TCL_LEAVE_ERR_MSG) != 0) {
-            Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
-                "can't access \"", name, "\": deleted or redefined\n",
-                "(use the \"body\" command to redefine methods/procs)",
-                (char*)NULL);
-        }
-        return TCL_ERROR;   /* disallow access! */
-    }
+          mfunc->accessCmd = NULL;
+
+          if ((flags & TCL_LEAVE_ERR_MSG) != 0) {
+              Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+                  "can't access \"", name, "\": deleted or redefined\n",
+                  "(use the \"body\" command to redefine methods/procs)",
+                  (char*)NULL);
+          }
+          return TCL_ERROR;   /* disallow access! */
+      }
+    #else
+      if (!cmdPtr || cmdPtr->flags) {
+
+          mfunc->accessCmd = NULL;
+
+          if ((flags & TCL_LEAVE_ERR_MSG) != 0) {
+              Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+                  "can't access \"", name, "\": deleted or redefined\n",
+                  "(use the \"body\" command to redefine methods/procs)",
+                  (char*)NULL);
+          }
+          return TCL_ERROR;   /* disallow access! */
+      }
+    #endif
 
     *rPtr = mfunc->accessCmd;
     return TCL_OK;
