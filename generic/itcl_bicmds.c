@@ -22,7 +22,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itcl_bicmds.c,v 1.8 2004/11/15 20:10:48 davygrvy Exp $
+ *     RCS:  $Id: itcl_bicmds.c,v 1.9 2005/02/10 23:20:28 hobbs Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -488,7 +488,7 @@ Itcl_BiConfigureCmd(clientData, interp, objc, objv)
          *    set up for public variable access.
          */
         mcode = member->code;
-        if (mcode && mcode->procPtr->bodyPtr) {
+        if (mcode && Itcl_IsMemberCodeImplemented(mcode)) {
 
             uplevelFramePtr = _Tcl_GetCallFrame(interp, 1);
             oldFramePtr = _Tcl_ActivateCallFrame(interp, uplevelFramePtr);
@@ -1132,7 +1132,7 @@ Itcl_BiInfoFunctionCmd(dummy, interp, objc, objv)
                     break;
 
                 case BIfBodyIdx:
-                    if (mcode && mcode->procPtr->bodyPtr) {
+                    if (mcode && Itcl_IsMemberCodeImplemented(mcode)) {
                         objPtr = mcode->procPtr->bodyPtr;
                     } else {
                         objPtr = Tcl_NewStringObj("<undefined>", -1);
@@ -1333,7 +1333,7 @@ Itcl_BiInfoVariableCmd(dummy, interp, objc, objv)
         for (i=0 ; i < objc; i++) {
             switch (ivlist[i]) {
                 case BIvConfigIdx:
-                    if (member->code && member->code->procPtr->bodyPtr) {
+                    if (member->code && Itcl_IsMemberCodeImplemented(member->code)) {
                         objPtr = member->code->procPtr->bodyPtr;
                     } else {
                         objPtr = Tcl_NewStringObj("", -1);
@@ -1525,7 +1525,7 @@ Itcl_BiInfoBodyCmd(dummy, interp, objc, objv)
     /*
      *  Return a string describing the implementation.
      */
-    if (mcode && mcode->procPtr->bodyPtr) {
+    if (mcode && Itcl_IsMemberCodeImplemented(mcode)) {
         objPtr = mcode->procPtr->bodyPtr;
     } else {
         objPtr = Tcl_NewStringObj("<undefined>", -1);

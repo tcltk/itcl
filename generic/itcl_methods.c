@@ -23,7 +23,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itcl_methods.c,v 1.12 2003/12/24 01:09:56 davygrvy Exp $
+ *     RCS:  $Id: itcl_methods.c,v 1.13 2005/02/10 23:20:28 hobbs Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -669,10 +669,11 @@ Itcl_CreateMemberCode(interp, cdefn, arglist, body, mcodePtr)
 
     if (body) {
         procPtr->bodyPtr = Tcl_NewStringObj((CONST84 char *)body, -1);
-        Tcl_IncrRefCount(procPtr->bodyPtr);
     } else {
-        procPtr->bodyPtr = NULL;
+        procPtr->bodyPtr = Tcl_NewStringObj((CONST84 char *)"", -1);
+        mcode->flags |= ITCL_IMPLEMENT_NONE;
     }
+    Tcl_IncrRefCount(procPtr->bodyPtr);
 
     /*
      *  Plug the argument list into the "compiled locals" list.
@@ -695,7 +696,7 @@ Itcl_CreateMemberCode(interp, cdefn, arglist, body, mcodePtr)
      *  as a symbolic name for a C procedure.
      */
     if (body == NULL) {
-        mcode->flags |= ITCL_IMPLEMENT_NONE;
+        /* No-op */
     }
     else if (*body == '@') {
         Tcl_CmdProc *argCmdProc;
@@ -790,6 +791,7 @@ Itcl_GetMemberCode(interp, member)
     ItclMember* member;        /* member containing code body */
 {
     ItclMemberCode *mcode = member->code;
+    assert(mcode != NULL);
 
     int result;
 
@@ -797,7 +799,8 @@ Itcl_GetMemberCode(interp, member)
      *  If the implementation has not yet been defined, try to
      *  autoload it now.
      */
-    if ((mcode->flags & ITCL_IMPLEMENT_NONE) != 0) {
+
+    if (!Itcl_IsMemberCodeImplemented(mcode)) {
         result = Tcl_VarEval(interp, "::auto_load ", member->fullname,
             (char*)NULL);
 
@@ -820,8 +823,9 @@ Itcl_GetMemberCode(interp, member)
      *    the member and look at the current code pointer again.
      */
     mcode = member->code;
+    assert(mcode != NULL);
 
-    if ((mcode->flags & ITCL_IMPLEMENT_NONE) != 0) {
+    if (!Itcl_IsMemberCodeImplemented(mcode)) {
         Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
             "member function \"", member->fullname,
             "\" is not defined and cannot be autoloaded",
@@ -1669,6 +1673,24 @@ Itcl_PushContext(interp, member, contextClass, contextObj, contextPtr)
         framePtr->procPtr = procPtr;
         framePtr->numCompiledLocals = localCt;
         framePtr->compiledLocals = contextPtr->compiledLocals;
+
+        /*
+         * Invoking TclInitCompiledLocals with a framePtr->procPtr->bodyPtr
+         * that is not a compiled byte code type leads to a crash. So
+         * make sure that the body is compiled here. This needs to
+         * be done even if the body of the Itcl method is not implemented
+         * as a Tcl proc or has no implementation. The empty string should
+         * have been defined as the body if no implementation was defined.
+         */
+        assert(mcode->procPtr->bodyPtr != NULL);
+
+        result = TclProcCompileProc(interp, mcode->procPtr,
+            mcode->procPtr->bodyPtr, (Namespace*)member->classDefn->namesp,
+            "body for", member->fullname);
+
+        if (result != TCL_OK) {
+            return result;
+        }
 
         TclInitCompiledLocals(interp, framePtr,
             (Namespace*)contextClass->namesp);

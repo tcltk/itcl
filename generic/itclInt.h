@@ -39,7 +39,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itclInt.h,v 1.13 2004/02/12 20:04:35 davygrvy Exp $
+ *     RCS:  $Id: itclInt.h,v 1.14 2005/02/10 23:20:27 hobbs Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -219,6 +219,9 @@ typedef struct ItclMemberCode {
     ClientData clientData;      /* client data for C implementations */
 
 } ItclMemberCode;
+
+#define Itcl_IsMemberCodeImplemented(mcode) \
+    (((mcode)->flags & ITCL_IMPLEMENT_NONE) == 0)
 
 /*
  *  Basic representation for class members (commands/variables)
