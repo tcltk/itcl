@@ -1677,50 +1677,34 @@ fi
 #--------------------------------------------------------------------
 
 
-    for ac_prog in tclsh8.2${EXEEXT} tclsh82${EXEEXT} tclsh82d${EXEEXT} tclsh${EXEEXT}
-do
-# Extract the first word of "$ac_prog", so it can be a program name with args.
-set dummy $ac_prog; ac_word=$2
-echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
-echo "configure:1686: checking for $ac_word" >&5
-if eval "test \"`echo '$''{'ac_cv_path_TCLSH_PROG'+set}'`\" = set"; then
+    echo $ac_n "checking for tclsh""... $ac_c" 1>&6
+echo "configure:1682: checking for tclsh" >&5
+
+    if eval "test \"`echo '$''{'ac_cv_path_tclsh'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
-  case "$TCLSH_PROG" in
-  /*)
-  ac_cv_path_TCLSH_PROG="$TCLSH_PROG" # Let the user override the test with a path.
-  ;;
-  ?:/*)			 
-  ac_cv_path_TCLSH_PROG="$TCLSH_PROG" # Let the user override the test with a dos path.
-  ;;
-  *)
-  IFS="${IFS= 	}"; ac_save_ifs="$IFS"; IFS=":"
-  ac_dummy="${exec_prefix}/bin:${prefix}/bin:${TCL_BIN_DIR}:${TCL_BIN_DIR}/../bin:${PATH}"
-  for ac_dir in $ac_dummy; do 
-    test -z "$ac_dir" && ac_dir=.
-    if test -f $ac_dir/$ac_word; then
-      ac_cv_path_TCLSH_PROG="$ac_dir/$ac_word"
-      break
-    fi
-  done
-  IFS="$ac_save_ifs"
-  ;;
-esac
-fi
-TCLSH_PROG="$ac_cv_path_TCLSH_PROG"
-if test -n "$TCLSH_PROG"; then
-  echo "$ac_t""$TCLSH_PROG" 1>&6
-else
-  echo "$ac_t""no" 1>&6
+  
+	search_path=`echo ${exec_prefix}/bin:${prefix}/bin:${TCL_BIN_DIR}:${TCL_BIN_DIR}/../bin:${PATH} | sed -e 's/:/ /g'`
+	for dir in $search_path ; do
+	    for j in `ls -r $dir/tclsh[8-9]* 2> /dev/null \
+		    ls -r $dir/tclsh* 2> /dev/null` ; do
+		if test x"$ac_cv_path_tclsh" = x ; then
+		    if test -f "$j" ; then
+			ac_cv_path_tclsh=$j
+			break
+		    fi
+		fi
+	    done
+	done
+    
 fi
 
-test -n "$TCLSH_PROG" && break
-done
-test -n "$TCLSH_PROG" || TCLSH_PROG=":"
 
-
-    if test "x${TCLSH_PROG}" = "x:" ; then
-	echo "configure: warning: No tclsh executable found.  You will have to build the pkgIndex.tcl file manually." 1>&2
+    if test -f "$ac_cv_path_tclsh" ; then
+	TCLSH_PROG=$ac_cv_path_tclsh
+	echo "$ac_t""$TCLSH_PROG" 1>&6
+    else
+	{ echo "configure: error: No tclsh found in PATH:  $search_path" 1>&2; exit 1; }
     fi
     
 
