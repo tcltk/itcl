@@ -39,7 +39,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itclInt.h,v 1.7 2001/04/07 07:20:53 davygrvy Exp $
+ *     RCS:  $Id: itclInt.h,v 1.8 2001/09/16 15:02:41 davygrvy Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -49,8 +49,8 @@
 #ifndef ITCLINT_H
 #define ITCLINT_H
 
-#include "itcl.h"
 #include "tclInt.h"
+#include "itcl.h"
 
 #ifdef BUILD_itcl
 # undef TCL_STORAGE_CLASS

@@ -42,7 +42,7 @@
  *       modified for Stubs 5/20/1999 by 
  *           David Gravereaux <davygrvy@bigfoot.com>
  *
- *     RCS:  $Id: itcl.h,v 1.15 2001/05/25 00:12:29 davygrvy Exp $
+ *     RCS:  $Id: itcl.h,v 1.16 2001/09/16 15:02:41 davygrvy Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -53,17 +53,6 @@
 #define ITCL_H
 
 #include "tcl.h"
-
-#undef TCL_STORAGE_CLASS
-#ifdef BUILD_itcl
-# define TCL_STORAGE_CLASS DLLEXPORT
-#else
-# ifdef USE_ITCL_STUBS
-#  define TCL_STORAGE_CLASS
-# else
-#  define TCL_STORAGE_CLASS DLLIMPORT
-# endif
-#endif
 
 #define ITCL_VERSION "3.2"
 #define ITCL_PATCH_LEVEL "3.2.1"
@@ -79,6 +68,27 @@
  */
 
 #ifndef RC_INVOKED
+
+#undef TCL_STORAGE_CLASS
+#ifdef BUILD_itcl
+# define TCL_STORAGE_CLASS DLLEXPORT
+#else
+# ifdef USE_ITCL_STUBS
+#  define TCL_STORAGE_CLASS
+# else
+#  define TCL_STORAGE_CLASS DLLIMPORT
+# endif
+#endif
+
+#ifndef TCL_NEWEXTERN
+#   ifdef __cplusplus
+#	define OLDEXTERN extern "C" TCL_STORAGE_CLASS
+#   else
+#	define OLDEXTERN extern TCL_STORAGE_CLASS
+#   endif
+#   undef EXTERN
+#   define EXTERN(a) OLDEXTERN a
+#endif
 
 /*
  * Protection levels:
