@@ -11,7 +11,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: Makefile.in,v 1.6 2000/03/17 22:09:05 wart Exp $
+# RCS: @(#) $Id: Makefile.in,v 1.7 2000/04/19 06:51:03 mmc Exp $
 
 #========================================================================
 # Edit the following few lines when writing a new extension
@@ -432,8 +432,8 @@ install-lib-binaries: installdirs
 	done
 	@list='$(lib_BINARIES)'; for p in $$list; do \
 	  if test -f $$p; then \
-	    echo " $(RANLIB) $(DESTDIR)$(bindir)/$$p"; \
-	    $(RANLIB) $(DESTDIR)$(bindir)/$$p; \
+	    echo " $(RANLIB) $(DESTDIR)$(libdir)/$$p"; \
+	    $(RANLIB) $(DESTDIR)$(libdir)/$$p; \
 	  else :; fi; \
 	done
 	$(INSTALL_DATA) pkgIndex.tcl $(pkglibdir)

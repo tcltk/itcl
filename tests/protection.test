@@ -6,7 +6,7 @@
 #            mmclennan@lucent.com
 #            http://www.tcltk.com/itcl
 #
-#      RCS:  $Id: protection.test,v 1.1 1998/07/27 18:41:16 stanton Exp $
+#      RCS:  $Id: protection.test,v 1.2 2000/04/19 06:51:05 mmc Exp $
 # ----------------------------------------------------------------------
 #            Copyright (c) 1993-1998  Lucent Technologies, Inc.
 # ======================================================================
@@ -294,7 +294,7 @@ test protect-2.23 {*cannot* access non-overloaded private method from base class
   test_pr_derived0 prom
   test_pr_derived0 pubm}}
 
-eval namespace delete [find classes test_pr*]
+eval namespace delete [itcl::find classes test_pr*]
 
 # ----------------------------------------------------------------------
 #  Access restrictions don't mess up "info"
@@ -367,4 +367,4 @@ test protect-3.13 {private base class commons can be accessed from class} {
     } msg] $msg
 } {0 {private common ::test_info_base::pribc pribc-value pribc-value}}
 
-eval namespace delete [find classes test_info*]
+eval namespace delete [itcl::find classes test_info*]

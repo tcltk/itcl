@@ -6,7 +6,7 @@
 #            mmclennan@lucent.com
 #            http://www.tcltk.com/itcl
 #
-#      RCS:  $Id: namespace.test,v 1.1 1998/07/27 18:41:16 stanton Exp $
+#      RCS:  $Id: namespace.test,v 1.2 2000/04/19 06:51:05 mmc Exp $
 # ----------------------------------------------------------------------
 #            Copyright (c) 1993-1998  Lucent Technologies, Inc.
 # ======================================================================
@@ -20,7 +20,7 @@ if {[string compare test [info procs test]] == 1} then {source defs}
 # ----------------------------------------------------------------------
 test namespace-1.1 {same class name can be used in different namespaces} {
     namespace eval test_ns_1 {
-        class Counter {
+        itcl::class Counter {
             variable num 0
             method ++ {{by 1}} {
                 incr num $by
@@ -32,7 +32,7 @@ test namespace-1.1 {same class name can be used in different namespaces} {
         }
     }
     namespace eval test_ns_2 {
-        class Counter {
+        itcl::class Counter {
             variable num 0
             method ++ {{by 2}} {
                 if {$num == 0} {
@@ -67,8 +67,8 @@ test namespace-1.4 {create an object in another namespace} {
 } {c 1 2 4 8}
 
 test namespace-1.5 {can find classes wrapped in a namespace} {
-    list [catch {test_ns_1::c do find objects -isa Counter} msg] $msg \
-         [catch {test_ns_1::c do find objects -class Counter} msg] $msg
-} {0 {} 0 {}}
+    list [catch {test_ns_1::c do itcl::find objects -isa Counter} msg] $msg \
+         [catch {test_ns_1::c do itcl::find objects -class Counter} msg] $msg
+} {0 ::test_ns_1::c 0 ::test_ns_1::c}
 
 namespace delete test_ns_1 test_ns_2

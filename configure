@@ -562,7 +562,7 @@ ac_configure=$ac_aux_dir/configure # This should be Cygnus configure.
 PACKAGE=itcl
 
 MAJOR_VERSION=3
-MINOR_VERSION=1
+MINOR_VERSION=2
 PATCHLEVEL=.0
 
 VERSION=${MAJOR_VERSION}.${MINOR_VERSION}

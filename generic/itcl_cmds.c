@@ -21,7 +21,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itcl_cmds.c,v 1.7 2000/03/28 19:11:11 csmith Exp $
+ *     RCS:  $Id: itcl_cmds.c,v 1.8 2000/04/19 06:51:04 mmc Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -439,11 +439,11 @@ Itcl_FindClassesCmd(clientData, interp, objc, objv)
 
     char *pattern;
     char *name;
-    int i, nsearch, newEntry;
+    int i, newEntry, handledActiveNs;
     Tcl_HashTable unique;
     Tcl_HashEntry *entry;
     Tcl_HashSearch place;
-    Tcl_Namespace *search[2];
+    Itcl_Stack search;
     Tcl_Command cmd, originalCmd;
     Namespace *nsPtr;
     Tcl_Obj *listPtr, *objPtr;
@@ -461,22 +461,25 @@ Itcl_FindClassesCmd(clientData, interp, objc, objv)
     }
 
     /*
-     *  Search through all commands in the current namespace and
-     *  in the global namespace.  If we find any commands that
+     *  Search through all commands in the current namespace first,
+     *  in the global namespace next, then in all child namespaces
+     *  in this interpreter.  If we find any commands that
      *  represent classes, report them.
      */
     listPtr = Tcl_NewListObj(0, (Tcl_Obj* CONST*)NULL);
 
-    nsearch = 0;
-    search[nsearch++] = activeNs;
-    if (activeNs != globalNs) {
-        search[nsearch++] = globalNs;
-    }
+    Itcl_InitStack(&search);
+    Itcl_PushStack((ClientData)globalNs, &search);
+    Itcl_PushStack((ClientData)activeNs, &search);  /* last in, first out! */
 
     Tcl_InitHashTable(&unique, TCL_ONE_WORD_KEYS);
 
-    for (i=0; i < nsearch; i++) {
-        nsPtr = (Namespace*)search[i];
+    handledActiveNs = 0;
+    while (Itcl_GetStackSize(&search) > 0) {
+        nsPtr = (Namespace*)Itcl_PopStack(&search);
+        if (nsPtr == (Namespace*)activeNs && handledActiveNs) {
+            continue;
+        }
 
         entry = Tcl_FirstHashEntry(&nsPtr->cmdTable, &place);
         while (entry) {
@@ -516,8 +519,20 @@ Itcl_FindClassesCmd(clientData, interp, objc, objv)
             }
             entry = Tcl_NextHashEntry(&place);
         }
+        handledActiveNs = 1;  /* don't process the active namespace twice */
+
+        /*
+         *  Push any child namespaces onto the stack and continue
+         *  the search in those namespaces.
+         */
+        entry = Tcl_FirstHashEntry(&nsPtr->childTable, &place);
+        while (entry != NULL) {
+            Itcl_PushStack(Tcl_GetHashValue(entry), &search);
+            entry = Tcl_NextHashEntry(&place);
+        }
     }
     Tcl_DeleteHashTable(&unique);
+    Itcl_DeleteStack(&search);
 
     Tcl_SetObjResult(interp, listPtr);
     return TCL_OK;
@@ -553,12 +568,12 @@ Itcl_FindObjectsCmd(clientData, interp, objc, objv)
     ItclClass *isaDefn = NULL;
 
     char *name, *token;
-    int i, pos, nsearch, newEntry, match;
+    int i, pos, newEntry, match, handledActiveNs;
     ItclObject *contextObj;
     Tcl_HashTable unique;
     Tcl_HashEntry *entry;
     Tcl_HashSearch place;
-    Tcl_Namespace *search[2];
+    Itcl_Stack search;
     Tcl_Command cmd, originalCmd;
     Namespace *nsPtr;
     Command *cmdPtr;
@@ -607,22 +622,25 @@ Itcl_FindObjectsCmd(clientData, interp, objc, objv)
     }
 
     /*
-     *  Search through all commands in the current namespace and
-     *  in the global namespace.  If we find any commands that
+     *  Search through all commands in the current namespace first,
+     *  in the global namespace next, then in all child namespaces
+     *  in this interpreter.  If we find any commands that
      *  represent objects, report them.
      */
     listPtr = Tcl_NewListObj(0, (Tcl_Obj* CONST*)NULL);
 
-    nsearch = 0;
-    search[nsearch++] = activeNs;
-    if (activeNs != globalNs) {
-        search[nsearch++] = globalNs;
-    }
+    Itcl_InitStack(&search);
+    Itcl_PushStack((ClientData)globalNs, &search);
+    Itcl_PushStack((ClientData)activeNs, &search);  /* last in, first out! */
 
     Tcl_InitHashTable(&unique, TCL_ONE_WORD_KEYS);
 
-    for (i=0; i < nsearch; i++) {
-        nsPtr = (Namespace*)search[i];
+    handledActiveNs = 0;
+    while (Itcl_GetStackSize(&search) > 0) {
+        nsPtr = (Namespace*)Itcl_PopStack(&search);
+        if (nsPtr == (Namespace*)activeNs && handledActiveNs) {
+            continue;
+        }
 
         entry = Tcl_FirstHashEntry(&nsPtr->cmdTable, &place);
         while (entry) {
@@ -684,8 +702,20 @@ Itcl_FindObjectsCmd(clientData, interp, objc, objv)
             }
             entry = Tcl_NextHashEntry(&place);
         }
+        handledActiveNs = 1;  /* don't process the active namespace twice */
+
+        /*
+         *  Push any child namespaces onto the stack and continue
+         *  the search in those namespaces.
+         */
+        entry = Tcl_FirstHashEntry(&nsPtr->childTable, &place);
+        while (entry != NULL) {
+            Itcl_PushStack(Tcl_GetHashValue(entry), &search);
+            entry = Tcl_NextHashEntry(&place);
+        }
     }
     Tcl_DeleteHashTable(&unique);
+    Itcl_DeleteStack(&search);
 
     Tcl_SetObjResult(interp, listPtr);
     return TCL_OK;

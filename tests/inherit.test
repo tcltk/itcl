@@ -6,7 +6,7 @@
 #            mmclennan@lucent.com
 #            http://www.tcltk.com/itcl
 #
-#      RCS:  $Id: inherit.test,v 1.1 1998/07/27 18:41:11 stanton Exp $
+#      RCS:  $Id: inherit.test,v 1.2 2000/04/19 06:51:05 mmc Exp $
 # ----------------------------------------------------------------------
 #            Copyright (c) 1993-1998  Lucent Technologies, Inc.
 # ======================================================================
@@ -99,7 +99,7 @@ test inherit-1.2 {constructors should be invoked in the proper order} {
 
 test inherit-1.3 {destructors should be invoked in the proper order} {
     set ::test_cd_watch ""
-    list [delete object test_cd_mongrel0] [set ::test_cd_watch]
+    list [itcl::delete object test_cd_mongrel0] [set ::test_cd_watch]
 } {{} {{mongrel destruct} {foobar destruct} {foo destruct} {bar destruct} {geek destruct}}}
 
 test inherit-1.4 {constructors are optional} {
@@ -109,7 +109,7 @@ test inherit-1.4 {constructors are optional} {
 
 test inherit-1.5 {destructors are optional} {
     set ::test_cd_watch ""
-    list [delete object test_cd_none0] [set ::test_cd_watch]
+    list [itcl::delete object test_cd_none0] [set ::test_cd_watch]
 } {{} {{bar destruct} {geek destruct}}}
 
 test inherit-1.6 {construction ok if constructors are missing} {
@@ -119,13 +119,13 @@ test inherit-1.6 {construction ok if constructors are missing} {
 
 test inherit-1.7 {destruction ok if destructors are missing} {
     set ::test_cd_watch ""
-    list [delete object test_cd_skip0] [set ::test_cd_watch]
+    list [itcl::delete object test_cd_skip0] [set ::test_cd_watch]
 } {{} {{skip destruct} {bar destruct} {geek destruct}}}
 
 test inherit-1.8 {errors during construction are cleaned up and reported} {
     global errorInfo test_cd_watch
     set test_cd_watch ""
-    body test_cd_bar::constructor {args} {error "bar: failed"}
+    itcl::body test_cd_bar::constructor {args} {error "bar: failed"}
     list [catch {test_cd_mongrel #auto bob} msg] $msg \
         $errorInfo $test_cd_watch
 } {1 {bar: failed} {bar: failed
@@ -144,24 +144,24 @@ test inherit-1.8 {errors during construction are cleaned up and reported} {
 
 test inherit-1.9 {errors during destruction prevent object delete} {
     global errorInfo test_cd_watch
-    body test_cd_bar::constructor {args} {return "bar: $args"}
-    body test_cd_bar::destructor {} {error "bar: failed"}
+    itcl::body test_cd_bar::constructor {args} {return "bar: $args"}
+    itcl::body test_cd_bar::destructor {} {error "bar: failed"}
     test_cd_mongrel mongrel1 ted
     set test_cd_watch ""
-    list [catch {delete object mongrel1} msg] $msg \
-        $errorInfo $test_cd_watch [find objects mongrel*]
+    list [catch {itcl::delete object mongrel1} msg] $msg \
+        $errorInfo $test_cd_watch [itcl::find objects mongrel*]
 } {1 {bar: failed} {bar: failed
     while executing
 "error "bar: failed""
     while deleting object "::mongrel1" in ::test_cd_bar::destructor (body line 1)
     invoked from within
-"delete object mongrel1"} {{mongrel destruct} {foobar destruct} {foo destruct}} mongrel1}
+"itcl::delete object mongrel1"} {{mongrel destruct} {foobar destruct} {foo destruct}} mongrel1}
 
 test inherit-1.10 {errors during destruction prevent class delete} {
-    list [catch {delete class test_cd_foo} msg] $msg
+    list [catch {itcl::delete class test_cd_foo} msg] $msg
 } {1 {bar: failed}}
 
-eval namespace delete [find classes test_cd_*]
+eval namespace delete [itcl::find classes test_cd_*]
 
 # ----------------------------------------------------------------------
 #  Test data member access and scoping
@@ -213,7 +213,7 @@ test inherit-2.4 {methods have access to shadowed data members} {
          [test_cd_mongrel0 test_cd_mongrel::do set test_cd_bar::x]
 } {foo-x foo-x bar-x foo-x bar-x}
 
-eval namespace delete [find classes test_cd_*]
+eval namespace delete [itcl::find classes test_cd_*]
 
 # ----------------------------------------------------------------------
 #  Test public variables and "configure" method
@@ -291,7 +291,7 @@ test inherit-3.8 {"cget" does proper name resolution} {
          [test_cd_mongrel0 cget -test_cd_mongrel::x]
 } {one two three one}
 
-eval namespace delete [find classes test_cd_*]
+eval namespace delete [itcl::find classes test_cd_*]
 
 # ----------------------------------------------------------------------
 #  Test inheritance info
@@ -355,7 +355,7 @@ test inherit-4.7 {built-in "isa" method works within methods} {
 } {1 1 1 1 1}
 
 test inherit-4.8 {built-in "isa" method recognizes bad classes} {
-    class test_cd_other {}
+    itcl::class test_cd_other {}
     test_cd_mongrel0 isa test_cd_other
 } {0}
 
@@ -363,7 +363,7 @@ test inherit-4.9 {built-in "isa" method recognizes bad classes} {
     list [catch {test_cd_mongrel0 isa test_cd_bogus} msg] $msg
 } {1 {class "test_cd_bogus" not found in context "::test_cd_foo"}}
 
-eval namespace delete [find classes test_cd_*]
+eval namespace delete [itcl::find classes test_cd_*]
 
 # ----------------------------------------------------------------------
 #  Test "find objects"
@@ -391,38 +391,38 @@ test inherit-5.2 {create objects for info tests} {
 } {test_cd_foo0 test_cd_foo1 test_cd_foobar0 test_cd_geek0 test_cd_mongrel0}
 
 test inherit-5.3 {find objects: -class qualifier} {
-    lsort [find objects -class test_cd_foo]
+    lsort [itcl::find objects -class test_cd_foo]
 } {test_cd_foo0 test_cd_foo1}
 
 test inherit-5.4 {find objects: -class qualifier} {
-    lsort [find objects -class test_cd_mongrel]
+    lsort [itcl::find objects -class test_cd_mongrel]
 } {test_cd_mongrel0}
 
 test inherit-5.5 {find objects: -isa qualifier} {
-    lsort [find objects -isa test_cd_foo]
+    lsort [itcl::find objects -isa test_cd_foo]
 } {test_cd_foo0 test_cd_foo1 test_cd_foobar0 test_cd_mongrel0}
 
 test inherit-5.6 {find objects: -isa qualifier} {
-    lsort [find objects -isa test_cd_mongrel]
+    lsort [itcl::find objects -isa test_cd_mongrel]
 } {test_cd_mongrel0}
 
 test inherit-5.7 {find objects: name qualifier} {
-    lsort [find objects test_cd_foo*]
+    lsort [itcl::find objects test_cd_foo*]
 } {test_cd_foo0 test_cd_foo1 test_cd_foobar0}
 
 test inherit-5.8 {find objects: -class and -isa qualifiers} {
-    lsort [find objects -isa test_cd_foo -class test_cd_foobar]
+    lsort [itcl::find objects -isa test_cd_foo -class test_cd_foobar]
 } {test_cd_foobar0}
 
 test inherit-5.9 {find objects: -isa and name qualifiers} {
-    lsort [find objects -isa test_cd_foo *0]
+    lsort [itcl::find objects -isa test_cd_foo *0]
 } {test_cd_foo0 test_cd_foobar0 test_cd_mongrel0}
 
 test inherit-5.10 {find objects: usage errors} {
-    list [catch {find objects -xyzzy} msg] $msg
-} {1 {wrong # args: should be "find objects ?-class className? ?-isa className? ?pattern?"}}
+    list [catch {itcl::find objects -xyzzy} msg] $msg
+} {1 {wrong # args: should be "itcl::find objects ?-class className? ?-isa className? ?pattern?"}}
 
-eval namespace delete [find classes test_cd_*]
+eval namespace delete [itcl::find classes test_cd_*]
 
 # ----------------------------------------------------------------------
 #  Test method scoping and execution
@@ -516,7 +516,7 @@ test inherit-6.11 {multi-value error codes are preserved across class boundaries
     } msg] $msg [set ::errorCode]
 } {1 test {CODE BLUE 123}}
 
-eval namespace delete [find classes test_cd_*]
+eval namespace delete [itcl::find classes test_cd_*]
 
 # ----------------------------------------------------------------------
 #  Test inheritance errors
@@ -563,14 +563,14 @@ test inherit-7.4 {cannot have more than one inherit statement} {
 #  Multiple base class error detection
 # ----------------------------------------------------------------------
 test inherit-8.1 {cannot inherit from the same base class more than once} {
-    class test_mi_base {}
-    class test_mi_foo {inherit test_mi_base}
-    class test_mi_bar {inherit test_mi_base}
+    itcl::class test_mi_base {}
+    itcl::class test_mi_foo {inherit test_mi_base}
+    itcl::class test_mi_bar {inherit test_mi_base}
     list [catch {
-        class test_mi_foobar {inherit test_mi_foo test_mi_bar}
+        itcl::class test_mi_foobar {inherit test_mi_foo test_mi_bar}
     } msg] $msg
 } {1 {class "::test_mi_foobar" inherits base class "::test_mi_base" more than once:
   test_mi_foobar->test_mi_foo->test_mi_base
   test_mi_foobar->test_mi_bar->test_mi_base}}
 
-delete class test_mi_base
+itcl::delete class test_mi_base

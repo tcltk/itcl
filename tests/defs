@@ -83,7 +83,6 @@ if {[info commands memory] == ""} {
 catch {unset testConfig}
 
 package require Itcl
-namespace import -force itcl::*
 
 if {$tcl_platform(platform) == "unix"} {
     set testConfig(unixOnly) 1
