@@ -1113,7 +1113,7 @@ ac_exeext=$EXEEXT
 #--------------------------------------------------------------------
 
 case "`uname -s`" in
-    *win32* | *WIN32* | *CYGWIN_NT*)
+    *win32* | *WIN32* | *CYGWIN_NT*|*CYGWIN_98*|*CYGWIN_95*)
 	CYGPATH="cygpath -w"
 	RELPATH=".. .. bin"
     ;;
@@ -1135,7 +1135,7 @@ ITCL_WIN_DIR_NATIVE=`${CYGPATH} ${srcdir}/win`
 ITCL_UNIX_DIR_NATIVE=`${CYGPATH} ${srcdir}/unix`
 
 case "`uname -s`" in
-    *win32* | *WIN32* | *CYGWIN_NT*)
+    *win32* | *WIN32* | *CYGWIN_NT*|*CYGWIN_98*|*CYGWIN_95*)
 	ITCL_PLATFORM_DIR_NATIVE=${ITCL_WIN_DIR_NATIVE}
     ;;
     *)
@@ -1345,7 +1345,7 @@ echo "configure:1293: checking for Tcl private include files" >&5
 #--------------------------------------------------------------------
 
 case "`uname -s`" in
-    *win32* | *WIN32* | *CYGWIN_NT*)
+    *win32* | *WIN32* | *CYGWIN_NT*|*CYGWIN_98*|*CYGWIN_95*)
 	cat >> confdefs.h <<\EOF
 #define BUILD_itcl 1
 EOF
@@ -1623,7 +1623,7 @@ eval "UNSHARED_LIB_SUFFIX=${TCL_UNSHARED_LIB_SUFFIX}"
 #--------------------------------------------------------------------
 
 case "`uname -s`" in
-    *win32* | *WIN32* | *CYGWIN_NT*)
+    *win32* | *WIN32* | *CYGWIN_NT*|*CYGWIN_98*|*CYGWIN_95*)
 	if test "${SHARED_BUILD}" = "1" ; then
 	    SHLIB_LD_LIBS="\"`cygpath -w ${TCL_BIN_DIR}/${TCL_STUB_LIB_FILE}`\" ${TCL_SHLIB_LD_LIBS}"
 	    eval "${PACKAGE}_LIB_FILE=${PACKAGE}${SHARED_LIB_SUFFIX}"
