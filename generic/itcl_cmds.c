@@ -21,7 +21,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itcl_cmds.c,v 1.17 2002/04/25 20:44:22 davygrvy Exp $
+ *     RCS:  $Id: itcl_cmds.c,v 1.18 2002/08/11 03:45:00 davygrvy Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -315,14 +315,6 @@ Initialize(interp)
      *  are automatically built into class definitions.
      */
     if (Itcl_BiInit(interp) != TCL_OK) {
-        return TCL_ERROR;
-    }
-
-    /*
-     *  Install stuff needed for backward compatibility with previous
-     *  version of [incr Tcl].
-     */
-    if (Itcl_OldInit(interp, info) != TCL_OK) {
         return TCL_ERROR;
     }
 
