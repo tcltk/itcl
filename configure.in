@@ -90,18 +90,25 @@ AC_EXEEXT
 # the win subdirectory.  Hence the different usages of SRC_DIR below.
 #
 # This must be done before calling SC_PUBLIC_TCL_HEADERS
+#
+# RELPATH is used to locate binary extensions relative to the lib directory.
+# It is only needed if mkIndex.tcl can't generate an installed pkgIndex.tcl
+# file for you.
 #--------------------------------------------------------------------
 
 case "`uname -s`" in
     *win32* | *WIN32* | *CYGWIN_NT*)
 	CYGPATH="cygpath -w"
+	RELPATH=".. bin"
     ;;
     *)
 	CYGPATH=echo
+	RELPATH=..
     ;;
 esac
 
 AC_SUBST(CYGPATH)
+AC_SUBST(RELPATH)
 
 #--------------------------------------------------------------------
 # Includes for this package
