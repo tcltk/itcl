@@ -39,7 +39,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itcl.h,v 1.28 2003/12/24 01:09:55 davygrvy Exp $
+ *     RCS:  $Id: itcl.h,v 1.29 2004/08/10 20:58:44 hobbs Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -64,11 +64,11 @@
 
 #define ITCL_MAJOR_VERSION	3
 #define ITCL_MINOR_VERSION	3
-#define ITCL_RELEASE_LEVEL	TCL_BETA_RELEASE
-#define ITCL_RELEASE_SERIAL	1
+#define ITCL_RELEASE_LEVEL	TCL_FINAL_RELEASE
+#define ITCL_RELEASE_SERIAL	0
 
 #define ITCL_VERSION		"3.3"
-#define ITCL_PATCH_LEVEL	"3.3b1"
+#define ITCL_PATCH_LEVEL	"3.3.0"
 
 /* 
  * A special definition used to allow this header file to be included 
