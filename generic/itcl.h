@@ -42,7 +42,7 @@
  *       modified for Stubs 5/20/1999 by 
  *           David Gravereaux <davygrvy@bigfoot.com>
  *
- *     RCS:  $Id: itcl.h,v 1.13 2000/09/23 01:16:36 davidg Exp $
+ *     RCS:  $Id: itcl.h,v 1.14 2001/05/22 06:18:54 davygrvy Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -78,7 +78,7 @@
  * and procedure declarations, that occur below.
  */
 
-#ifndef RESOURCE_INCLUDED
+#ifndef RC_INVOKED
 
 /*
  * Protection levels:
@@ -167,7 +167,7 @@ char *	Itcl_InitStubs _ANSI_ARGS_((Tcl_Interp *interp,
  */
 
 
-#endif /* RESOURCE INCLUDED */
+#endif /* RC_INVOKED */
 
 #undef TCL_STORAGE_CLASS
 #define TCL_STORAGE_CLASS DLLIMPORT
