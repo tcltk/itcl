@@ -5,7 +5,7 @@
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 # 
 # Copyright (c) 1993-1998 Lucent Technologies, Inc.
-# RCS: $Id: makefile.vc,v 1.22 2003/12/23 05:45:56 davygrvy Exp $
+# RCS: $Id: makefile.vc,v 1.23 2003/12/23 05:48:53 davygrvy Exp $
 #------------------------------------------------------------------------------
 #  Do not modify this file!
 #------------------------------------------------------------------------------
@@ -373,7 +373,7 @@ close $$f
 set f [open {$(DOC_INSTALL_DIR:\=/)/tcl$(TCL_VERSION).cnt} a]
 puts $$f {:Include $(HLPBASE).cnt}
 close $$f
-<<keep
+<<
 	start /wait winhlp32 -g $(DOC_INSTALL_DIR)\tcl$(TCL_VERSION).hlp
 !endif
 
