@@ -5,7 +5,7 @@
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 # 
 # Copyright (c) 1993-1998 Lucent Technologies, Inc.
-# RCS: $Id: makefile.vc,v 1.7 2001/05/22 01:56:32 davygrvy Exp $
+# RCS: $Id: makefile.vc,v 1.8 2001/05/22 03:36:41 davygrvy Exp $
 ######################################################################
 # All needed information is derived from running vcvars32.bat
 #
@@ -265,7 +265,7 @@ $<
 $<
 <<
 
-{$(WINDIR)\rc}.rc{$(TMP_DIR)}.res :
+{$(RCDIR)}.rc{$(TMP_DIR)}.res :
 	$(rc32) -fo $@ -r -i $(GENERICDIR) -i $(WINDIR) -i $(TCLROOT)\generic $(ITCL_DEFINES) $<
 
 ######################################################################
