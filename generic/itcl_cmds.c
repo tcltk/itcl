@@ -21,7 +21,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itcl_cmds.c,v 1.16 2002/04/20 06:01:11 davygrvy Exp $
+ *     RCS:  $Id: itcl_cmds.c,v 1.17 2002/04/25 20:44:22 davygrvy Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -333,8 +333,23 @@ Initialize(interp)
     itclNs = Tcl_FindNamespace(interp, "::itcl", (Tcl_Namespace*)NULL,
         TCL_LEAVE_ERR_MSG);
 
+    /*
+     *  This was changed from a glob export (itcl::*) to explicit
+     *  command exports, so that the itcl::is command can *not* be
+     *  exported. This is done for concern that the itcl::is command
+     *  imported might be confusing ("is").
+     */   
     if (!itclNs ||
-        Tcl_Export(interp, itclNs, "*", /* resetListFirst */ 1) != TCL_OK) {
+	    (Tcl_Export(interp, itclNs, "body", /* reset */ 1) != TCL_OK) ||
+	    (Tcl_Export(interp, itclNs, "class", 0) != TCL_OK) ||
+	    (Tcl_Export(interp, itclNs, "code", 0) != TCL_OK) ||
+	    (Tcl_Export(interp, itclNs, "configbody", 0) != TCL_OK) ||
+	    (Tcl_Export(interp, itclNs, "delete", 0) != TCL_OK) ||
+	    (Tcl_Export(interp, itclNs, "delete_helper", 0) != TCL_OK) ||
+	    (Tcl_Export(interp, itclNs, "ensemble", 0) != TCL_OK) ||
+	    (Tcl_Export(interp, itclNs, "find", 0) != TCL_OK) ||
+	    (Tcl_Export(interp, itclNs, "local", 0) != TCL_OK) ||
+	    (Tcl_Export(interp, itclNs, "scope", 0) != TCL_OK)) {
         return TCL_ERROR;
     }
 
