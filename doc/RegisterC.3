@@ -4,23 +4,26 @@
 '\" See the file "license.terms" for information on usage and redistribution
 '\" of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 '\"
-'\" RCS: $Id: RegisterC.3,v 1.3 2004/09/25 22:50:43 davygrvy Exp $
+'\" RCS: $Id: RegisterC.3,v 1.4 2004/09/26 00:50:44 davygrvy Exp $
 '\"
 .so man.macros
 .TH Itcl_RegisterC 3 3.0 itcl "[incr\ Tcl] Library Procedures"
 .BS
 '\" Note:  do not modify the .SH NAME line immediately below!
 .SH NAME
-Itcl_RegisterC, Itcl_RegisterObjC \- Associate a symbolic name with a C procedure.
+Itcl_RegisterC, Itcl_RegisterObjC, Itcl_FindC \- Associate a symbolic name with a C procedure.
 .SH SYNOPSIS
 .nf
 \fB#include <itcl.h>\fR
 .sp
 int
-\fBItcl_RegisterC\fR(\fIinterp, cmdName, proc, clientData, deleteProc\fR)
+\fBItcl_RegisterC\fR(\fIinterp, cmdName, argProc, clientData, deleteProc\fR)
 .sp
 int
 \fBItcl_RegisterObjC\fR(\fIinterp, cmdName, objProc, clientData, deleteProc\fR)
+.sp
+int
+\fBItcl_FindC\fR(\fIinterp, cmdName, argProcPtr, objProcPtr, cDataPtr\fR)
 .SH ARGUMENTS
 .AP Tcl_Interp *interp in
 Interpreter in which to create new command.
@@ -28,14 +31,18 @@ Interpreter in which to create new command.
 .AP "CONST char" *cmdName in
 .VE
 Name of command.
-.AP Tcl_CmdProc *proc in
-Implementation of new command:  \fIproc\fR will be called whenever
-\fIcmdName\fR is invoked as a command.
+.AP Tcl_CmdProc *argProc in
+Implementation of new command:  \argProc\fR will be called whenever
+.AP Tcl_CmdProc **argProcPtr in/out
+The Tcl_CmdProc * to receive the pointer.
 .AP Tcl_ObjCmdProc *objProc in
 Implementation of the new command: \fIobjProc\fR will be called whenever
-\fIcmdName\fR is invoked as a command.
+.AP Tcl_ObjCmdProc **objProcPtr in/out
+The Tcl_ObjCmdProc * to receive the pointer.
 .AP ClientData clientData in
 Arbitrary one-word value to pass to \fIproc\fR and \fIdeleteProc\fR.
+.AP ClientData *cDataPtr in/out
+The ClientData to receive the pointer.
 .AP Tcl_CmdDeleteProc *deleteProc in
 Procedure to call before \fIcmdName\fR is deleted from the interpreter;
 allows for command-specific cleanup.  If NULL, then no procedure is
