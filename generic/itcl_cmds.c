@@ -21,7 +21,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itcl_cmds.c,v 1.20 2003/12/17 03:01:17 davygrvy Exp $
+ *     RCS:  $Id: itcl_cmds.c,v 1.21 2003/12/22 20:21:28 davygrvy Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -130,7 +130,7 @@ Initialize(interp)
     Tcl_Namespace *itclNs;
     ItclObjectInfo *info;
 
-    if (Tcl_InitStubs(interp, "8.1", 0) == NULL) {
+    if (Tcl_InitStubs(interp, TCL_VERSION, 0) == NULL) {
 	return TCL_ERROR;
     };
 
