@@ -22,7 +22,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itcl_objects.c,v 1.3 2000/07/06 06:43:30 mmc Exp $
+ *     RCS:  $Id: itcl_objects.c,v 1.4 2001/05/11 14:39:55 andreas_kupries Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -238,9 +238,16 @@ Itcl_CreateObject(interp, name, cdefn, objc, objv, roPtr)
     if (result != TCL_OK) {
         istate = Itcl_SaveInterpState(interp, result);
 
-        Tcl_DeleteCommandFromToken(interp, newObj->accessCmd);
-        newObj->accessCmd = NULL;
-
+	/* Bug 227824.
+	 * The constructor may destroy the object, possibly indirectly
+	 * through the destruction of the main widget in the iTk
+	 * megawidget it tried to construct. If this happens we must
+	 * not try to destroy the access command a second time.
+	 */
+	if (newObj->accessCmd != (Tcl_Command) NULL) {
+	    Tcl_DeleteCommandFromToken(interp, newObj->accessCmd);
+	    newObj->accessCmd = NULL;
+	}
         result = Itcl_RestoreInterpState(interp, istate);
     }
 
@@ -658,6 +665,16 @@ Itcl_HandleInstance(clientData, interp, objc, objv)
 
     framePtr = &context.frame;
     Itcl_PushStack((ClientData)framePtr, &info->transparentFrames);
+
+    /* Bug 227824
+     * The tcl core will blow up in 'TclLookupVar' if we don't reset
+     * the 'isProcCallFrame'. This happens because without the
+     * callframe refered to by 'framePtr' will be inconsistent
+     * ('isProcCallFrame' set, but 'procPtr' not set).
+     */
+    if (*token == 'i' && strcmp(token,"info") == 0) {
+        framePtr->isProcCallFrame = 0;
+    }
 
     result = Itcl_EvalArgs(interp, objc-1, objv+1);
 
