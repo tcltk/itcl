@@ -809,12 +809,12 @@ echo "configure:747: checking for existence of $TCL_BIN_DIR/tclConfig.sh" >&5
 
     # Should be AC_MSG_NOTICE, but that requires autoconf 2.50
     if test "${prefix}" = "NONE"; then
+	prefix_default=yes
 	if test x"${TCL_PREFIX}" != x; then
 	    echo "configure: warning: --prefix defaulting to TCL_PREFIX ${TCL_PREFIX}" 1>&2
 	    prefix=${TCL_PREFIX}
 	else
 	    prefix=/usr/local
-	    prefix_default=yes
 	fi
     fi
     if test "${exec_prefix}" = "NONE" -a x"${prefix_default}" = x"yes" ; then
