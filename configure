@@ -307,7 +307,7 @@ ac_includes_default="\
 # include <unistd.h>
 #endif"
 
-ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS CYGPATH EXEEXT PKG_LIB_FILE PKG_STUB_LIB_FILE PKG_STUB_SOURCES PKG_STUB_OBJECTS PKG_TCL_SOURCES PKG_HEADERS PKG_INCLUDES PKG_LIBS PKG_CFLAGS TCL_VERSION TCL_BIN_DIR TCL_SRC_DIR TCL_LIB_FILE TCL_LIB_FLAG TCL_LIB_SPEC TCL_STUB_LIB_FILE TCL_STUB_LIB_FLAG TCL_STUB_LIB_SPEC TCL_LIBS TCL_DEFS TCL_EXTRA_CFLAGS TCL_LD_FLAGS TCL_SHLIB_LD_LIBS CC CFLAGS LDFLAGS CPPFLAGS ac_ct_CC OBJEXT CPP INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA SET_MAKE RANLIB ac_ct_RANLIB EGREP MATH_LIBS PKG_SOURCES PKG_OBJECTS CLEANFILES TCL_TOP_DIR_NATIVE TCL_GENERIC_DIR_NATIVE TCL_UNIX_DIR_NATIVE TCL_WIN_DIR_NATIVE TCL_BMAP_DIR_NATIVE TCL_TOOL_DIR_NATIVE TCL_PLATFORM_DIR_NATIVE TCL_INCLUDES SHARED_BUILD AR LIBOBJS DL_LIBS CFLAGS_DEBUG CFLAGS_OPTIMIZE CFLAGS_WARNING STLIB_LD SHLIB_LD SHLIB_CFLAGS SHLIB_LD_FLAGS SHLIB_LD_LIBS LDFLAGS_DEBUG LDFLAGS_OPTIMIZE LD_LIBRARY_PATH_VAR TCL_DBGX CFLAGS_DEFAULT LDFLAGS_DEFAULT MAKE_LIB MAKE_SHARED_LIB MAKE_STATIC_LIB MAKE_STUB_LIB RANLIB_STUB itcl_STUB_LIB_FILE itcl_LIB_FILE TCLSH_PROG itcl_BUILD_LIB_SPEC itcl_LIB_SPEC itcl_BUILD_STUB_LIB_SPEC itcl_STUB_LIB_SPEC itcl_BUILD_STUB_LIB_PATH itcl_STUB_LIB_PATH itcl_SRC_DIR LTLIBOBJS'
+ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS CYGPATH EXEEXT PKG_LIB_FILE PKG_STUB_LIB_FILE PKG_STUB_SOURCES PKG_STUB_OBJECTS PKG_TCL_SOURCES PKG_HEADERS PKG_INCLUDES PKG_LIBS PKG_CFLAGS TCL_VERSION TCL_BIN_DIR TCL_SRC_DIR TCL_LIB_FILE TCL_LIB_FLAG TCL_LIB_SPEC TCL_STUB_LIB_FILE TCL_STUB_LIB_FLAG TCL_STUB_LIB_SPEC TCL_LIBS TCL_DEFS TCL_EXTRA_CFLAGS TCL_LD_FLAGS TCL_SHLIB_LD_LIBS CC CFLAGS LDFLAGS CPPFLAGS ac_ct_CC OBJEXT CPP INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA SET_MAKE RANLIB ac_ct_RANLIB EGREP MATH_LIBS PKG_SOURCES PKG_OBJECTS CLEANFILES TCL_TOP_DIR_NATIVE TCL_GENERIC_DIR_NATIVE TCL_UNIX_DIR_NATIVE TCL_WIN_DIR_NATIVE TCL_BMAP_DIR_NATIVE TCL_TOOL_DIR_NATIVE TCL_PLATFORM_DIR_NATIVE TCL_INCLUDES SHARED_BUILD AR CELIB_DIR LIBOBJS DL_LIBS CFLAGS_DEBUG CFLAGS_OPTIMIZE CFLAGS_WARNING STLIB_LD SHLIB_LD SHLIB_CFLAGS SHLIB_LD_FLAGS SHLIB_LD_LIBS LDFLAGS_DEBUG LDFLAGS_OPTIMIZE LD_LIBRARY_PATH_VAR TCL_DBGX CFLAGS_DEFAULT LDFLAGS_DEFAULT MAKE_LIB MAKE_SHARED_LIB MAKE_STATIC_LIB MAKE_STUB_LIB RANLIB_STUB itcl_STUB_LIB_FILE itcl_LIB_FILE TCLSH_PROG itcl_BUILD_LIB_SPEC itcl_LIB_SPEC itcl_BUILD_STUB_LIB_SPEC itcl_STUB_LIB_SPEC itcl_BUILD_STUB_LIB_PATH itcl_STUB_LIB_PATH itcl_SRC_DIR LTLIBOBJS'
 ac_subst_files=''
 
 # Initialize some variables set by options.
@@ -6285,20 +6285,27 @@ echo "${ECHO_T}found $CELIB_DIR" >&6
 		    doWince="300,ARM,ARM,Pocket PC 2002"
 		fi
 		eval `echo $doWince | awk -F "," '{ \
-		    if (length($1)) { printf "CEVERSION=%s\n", $1 }; \
-		    if (length($2)) { printf "TARGETCPU=%s\n", toupper($2) }; \
-		    if (length($3)) { printf "ARCH=%s\n", toupper($3) }; \
-		    if (length($4)) { printf "PLATFORM=%s\n", $4 }; \
+		    if (length($1)) { printf "CEVERSION=\"%s\"\n", $1; \
+		      if ($1 >= 400) { printf "PLATFORM=\"Pocket PC 2003\"\n" } }; \
+		    if (length($2)) { printf "TARGETCPU=\"%s\"\n", toupper($2) }; \
+		    if (length($3)) { printf "ARCH=\"%s\"\n", toupper($3) }; \
+		    if (length($4)) { printf "PLATFORM=\"%s\"\n", $4 }; \
 		    }'`
 		OSVERSION=WCE$CEVERSION;
 		if test "x${ARCH}" = "x" ; then
 	            ARCH=$TARGETCPU;  # could be ARM MIPS SH3 X86 X86EM ...
 		fi
-		if test "x${WCEROOT}" = "x" ; then
-		    WCEROOT="C:/Program Files/Microsoft eMbedded Tools"
+	    	if test "x${WCEROOT}" = "x" ; then
+			WCEROOT="C:/Program Files/Microsoft eMbedded C++ 4.0"
+		    if test ! -d "${WCEROOT}" ; then
+			WCEROOT="C:/Program Files/Microsoft eMbedded Tools"
+		    fi
 		fi
 		if test "x${SDKROOT}" = "x" ; then
-		    SDKROOT="C:/Windows CE Tools"
+		    SDKROOT="C:/Program Files/Windows CE Tools"
+		    if test ! -d "${SDKROOT}" ; then
+			SDKROOT="C:/Windows CE Tools"
+		    fi
 		fi
 		# In order to work in the tortured autoconf environment,
 		# we need to ensure that this path has no spaces
@@ -6313,6 +6320,9 @@ echo "$as_me: error: could not find PocketPC SDK or target compiler to enable Wi
 		    doWince="no"
 		else
 		    CEINCLUDE=`cygpath -w -s "${SDKROOT}/${OSVERSION}/${PLATFORM}/include" | sed -e 's!\\\!/!g'`
+		    if test -d "${CEINCLUDE}/${TARGETCPU}" ; then
+			CEINCLUDE="${CEINCLUDE}/${TARGETCPU}"
+		    fi
 		    CELIBPATH=`cygpath -w -s "${SDKROOT}/${OSVERSION}/${PLATFORM}/Lib/${TARGETCPU}" | sed -e 's!\\\!/!g'`
     		fi
 	    fi
@@ -6338,14 +6348,16 @@ echo "$as_me: error: could not find PocketPC SDK or target compiler to enable Wi
 		    CFLAGS_DEBUG="-nologo -Zi -Od -W3 ${runtime}d"
 		    CFLAGS_OPTIMIZE="-nologo -O2 -Gs -W2 ${runtime}"
 		elif test "$doWince" != "no" ; then
+		    CEBINROOT="${WCEROOT}/EVC/${OSVERSION}/bin"
 		    if test "${TARGETCPU}" = "X86"; then
-			CC="${WCEROOT}/EVC/${OSVERSION}/bin/cl.exe -I\"${CELIB_DIR}/inc\" -I\"${CEINCLUDE}\""
+			CC="${CEBINROOT}/cl.exe"
 		    else
-			CC="${WCEROOT}/EVC/${OSVERSION}/bin/cl${TARGETCPU}.exe -I\"${CELIB_DIR}/inc\" -I\"${CEINCLUDE}\""
+			CC="${CEBINROOT}/cl${ARCH}.exe"
 		    fi
+		    CC="${CC} -I\"${CELIB_DIR}/inc\" -I\"${CEINCLUDE}\""
 		    RC="${WCEROOT}/Common/EVC/bin/rc.exe"
-		    cpulower=`echo ${TARGETCPU} | awk '{print tolower($0)}'`
-		    defs="${TARGETCPU} _${TARGETCPU}_ ${cpulower} _${cpulower}_ POCKET_SIZE PALM_SIZE _MT _DLL _WINDOWS"
+		    arch=`echo ${ARCH} | awk '{print tolower($0)}'`
+		    defs="${ARCH} _${ARCH}_ ${arch} PALM_SIZE _MT _DLL _WINDOWS"
 		    for i in $defs ; do
 			cat >>confdefs.h <<_ACEOF
 #define $i 1
@@ -6362,9 +6374,11 @@ _ACEOF
 
 		    CFLAGS_DEBUG="-nologo -Zi -Od"
 		    CFLAGS_OPTIMIZE="-nologo -Ox"
-		    lflags="-MACHINE:${TARGETCPU} -LIBPATH:\"${CELIBPATH}\" -subsystem:windowsce,3.00"
-		    STLIB_LD="${WCEROOT}/EVC/${OSVERSION}/bin/lib.exe -nologo ${lflags}"
-		    LINKBIN="${WCEROOT}/EVC/${OSVERSION}/bin/link.exe ${lflags}"
+		    lversion=`echo ${CEVERSION} | sed -e 's/\(.\)\(..\)/\1\.\2/'`
+		    lflags="-MACHINE:${ARCH} -LIBPATH:\"${CELIBPATH}\" -subsystem:windowsce,${lversion}"
+		    STLIB_LD="${CEBINROOT}/lib.exe -nologo ${lflags}"
+		    LINKBIN="${CEBINROOT}/link.exe ${lflags}"
+
 		else
 		    RC="rc"
 		    STLIB_LD="lib -nologo"
@@ -9427,6 +9441,7 @@ s,@TCL_PLATFORM_DIR_NATIVE@,$TCL_PLATFORM_DIR_NATIVE,;t t
 s,@TCL_INCLUDES@,$TCL_INCLUDES,;t t
 s,@SHARED_BUILD@,$SHARED_BUILD,;t t
 s,@AR@,$AR,;t t
+s,@CELIB_DIR@,$CELIB_DIR,;t t
 s,@LIBOBJS@,$LIBOBJS,;t t
 s,@DL_LIBS@,$DL_LIBS,;t t
 s,@CFLAGS_DEBUG@,$CFLAGS_DEBUG,;t t
