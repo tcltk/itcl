@@ -42,7 +42,7 @@
  *       modified for Stubs 5/20/1999 by 
  *           David Gravereaux <davygrvy@pobox.com>
  *
- *     RCS:  $Id: itcl.h,v 1.18 2002/01/11 07:25:29 davygrvy Exp $
+ *     RCS:  $Id: itcl.h,v 1.19 2002/01/16 22:29:41 andreas_kupries Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -101,6 +101,7 @@
 #	define DLLIMPORT
 #	define DLLEXPORT
 #   endif
+
     /*
      * Make sure name mangling won't happen when the c++ language extensions
      * are used.
