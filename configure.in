@@ -288,7 +288,7 @@ eval "UNSHARED_LIB_SUFFIX=${TCL_UNSHARED_LIB_SUFFIX}"
 case "`uname -s`" in
     *win32* | *WIN32* | *CYGWIN_NT*|*CYGWIN_98*|*CYGWIN_95*)
 	if test "${SHARED_BUILD}" = "1" ; then
-	    SHLIB_LD_LIBS="\"`cygpath -w ${TCL_BIN_DIR}/${TCL_STUB_LIB_FILE}`\" ${TCL_SHLIB_LD_LIBS}"
+	    SHLIB_LD_LIBS="${SHLIB_LD_LIBS} \"`cygpath -w ${TCL_BIN_DIR}/${TCL_STUB_LIB_FILE}`\""
 	    eval "${PACKAGE}_LIB_FILE=${PACKAGE}${SHARED_LIB_SUFFIX}"
 	    RANLIB=:
 	else
@@ -298,7 +298,7 @@ case "`uname -s`" in
 	;;
     *)
 	if test "${SHARED_BUILD}" = "1" ; then
-	    SHLIB_LD_LIBS="${TCL_BUILD_STUB_LIB_SPEC}"
+	    SHLIB_LD_LIBS="${SHLIB_LD_LIBS} ${TCL_BUILD_STUB_LIB_SPEC}"
 	    eval "${PACKAGE}_LIB_FILE=lib${PACKAGE}${SHARED_LIB_SUFFIX}"
 	    RANLIB=:
 	else
