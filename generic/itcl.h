@@ -39,7 +39,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itcl.h,v 1.24 2003/12/23 03:11:04 davygrvy Exp $
+ *     RCS:  $Id: itcl.h,v 1.25 2003/12/23 05:22:45 davygrvy Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -96,32 +96,33 @@
 #ifndef TCL_EXTERN
 #   undef DLLIMPORT
 #   undef DLLEXPORT
+#   ifdef __cplusplus
+#	define TCL_EXTERNC extern "C"
+#   else
+#	define TCL_EXTERNC extern
+#   endif
 #   if defined(STATIC_BUILD)
 #	define DLLIMPORT
 #	define DLLEXPORT
-#   elif (defined(__WIN32__) && (defined(_MSC_VER) || (__BORLANDC__ >= 0x0550) || (defined(__GNUC__) && defined(__declspec)))) || (defined(MAC_TCL) && FUNCTION_DECLSPEC)
+#	define TCL_EXTERN(RTYPE) TCL_EXTERNC RTYPE
+#   elif (defined(__WIN32__) && ( \
+	    defined(_MSC_VER) || (__BORLANDC__ >= 0x0550) || \
+	    defined(__LCC__) || defined(__WATCOMC__) || \
+	    (defined(__GNUC__) && defined(__declspec)) \
+	)) || (defined(MAC_TCL) && FUNCTION_DECLSPEC)
 #	define DLLIMPORT __declspec(dllimport)
 #	define DLLEXPORT __declspec(dllexport)
+#	define TCL_EXTERN(RTYPE) TCL_EXTERNC TCL_STORAGE_CLASS RTYPE
 #   elif defined(__BORLANDC__)
-#	define OLDBORLAND 1
 #	define DLLIMPORT __import
 #	define DLLEXPORT __export
+    /* Pre-5.5 Borland requires the attributes be placed after the */
+    /* return type instead. */
+#	define TCL_EXTERN(RTYPE) TCL_EXTERNC RTYPE TCL_STORAGE_CLASS
 #   else
 #	define DLLIMPORT
 #	define DLLEXPORT
-#   endif
-    /* Avoid name mangling from C++ compilers. */
-#   ifdef __cplusplus
-#	define TCL_EXTRNC extern "C"
-#   else
-#	define TCL_EXTRNC extern
-#   endif
-    /* Pre-5.5 Borland requires the attributes be placed after the */
-    /* return type. */
-#   ifdef OLDBORLAND
-#	define TCL_EXTERN(RTYPE) TCL_EXTRNC RTYPE TCL_STORAGE_CLASS
-#   else
-#	define TCL_EXTERN(RTYPE) TCL_EXTRNC TCL_STORAGE_CLASS RTYPE
+#	define TCL_EXTERN(RTYPE) TCL_EXTERNC TCL_STORAGE_CLASS RTYPE
 #   endif
 #endif
 
@@ -222,7 +223,7 @@ typedef struct Itcl_InterpState_ *Itcl_InterpState;
 
 #ifdef USE_ITCL_STUBS
 
-TCL_EXTRNC CONST char *
+TCL_EXTERNC CONST char *
 	Itcl_InitStubs _ANSI_ARGS_((Tcl_Interp *interp,
 			    char *version, int exact));
 #else

@@ -5,7 +5,7 @@
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 # 
 # Copyright (c) 1993-1998 Lucent Technologies, Inc.
-# RCS: $Id: makefile.vc,v 1.20 2003/12/23 04:16:27 davygrvy Exp $
+# RCS: $Id: makefile.vc,v 1.21 2003/12/23 05:22:45 davygrvy Exp $
 #------------------------------------------------------------------------------
 #  Do not modify this file!
 #------------------------------------------------------------------------------
@@ -93,6 +93,7 @@ GENERICDIR	= $(ROOT)\generic
 DOCDIR		= $(ROOT)\doc
 RCDIR		= $(ROOT)\win\rc
 WINDIR		= $(ROOT)\win
+TOOLSDIR	= ..\..\tools
 
 #---------------------------------------------------------------------
 # Link flags
@@ -253,7 +254,7 @@ genstubs:
 !if $(TCLINSTALL)
 	@echo Need the source distribution to regenerate the Stubs table.
 !else
-	$(TCLSH) $(TCLDIR)\tools\genStubs.tcl $(GENERICDIR) \
+	$(TCLSH) $(TOOLSDIR)\genStubs.tcl $(GENERICDIR) \
         	$(GENERICDIR)\$(PROJECT).decls $(GENERICDIR)\$(PROJECT)Int.decls
 !endif
 
@@ -347,7 +348,7 @@ $(MAN2TCL): $(TCLTOOLSDIR)\$$(@B).c
 	$(cc32) -nologo -G4 -ML -O2 -Fo$(@D)\ $(TCLTOOLSDIR)\$(@B).c -link -out:$@
 
 $(HELPRTF): $(MAN2TCL) $(MAN2HELP) $(MAN2HELP2) $(INDEX)
-	$(TCLSH) $(MAN2HELP:\=/) -bitmap $(BMP_NOPATH) $(PROJECT) $(ITCL_VERSION) $(DOCDIR:\=/)
+	$(TCLSH) $(MAN2HELP) -bitmap $(BMP_NOPATH) $(PROJECT) $(ITCL_VERSION) $(DOCDIR:\=/)
 
 install-docs:
 !if exist($(HELPFILE))
