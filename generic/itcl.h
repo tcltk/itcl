@@ -39,10 +39,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *       modified for Stubs 5/20/1999 by 
- *           David Gravereaux <davygrvy@pobox.com>
- *
- *     RCS:  $Id: itcl.h,v 1.21 2002/08/11 03:40:02 davygrvy Exp $
+ *     RCS:  $Id: itcl.h,v 1.22 2003/12/17 02:15:31 davygrvy Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -54,11 +51,37 @@
 
 #include "tcl.h"
 
-#define ITCL_VERSION "3.3"
-#define ITCL_PATCH_LEVEL "3.3.0"
-#define ITCL_MAJOR_VERSION 3
-#define ITCL_MINOR_VERSION 3
-#define ITCL_RELEASE_LEVEL 0
+#define ITCL_MAJOR_VERSION	3
+#define ITCL_MINOR_VERSION	3
+#define ITCL_RELEASE_LEVEL	TCL_ALPHA_RELEASE
+#define ITCL_RELEASE_SERIAL	1
+
+#define ITCL_VERSION	   STRINGIFY(JOIN(ITCL_MAJOR_VERSION,JOIN(.,ITCL_MINOR_VERSION)))
+
+#if	ITCL_RELEASE_LEVEL == TCL_ALPHA_RELEASE
+#	define ITCL_PATCH_LEVEL \
+		STRINGIFY( \
+			JOIN(JOIN(ITCL_MAJOR_VERSION, \
+			JOIN(., ITCL_MINOR_VERSION)), \
+			JOIN(a, ITCL_RELEASE_SERIAL)))
+
+#elif	ITCL_RELEASE_LEVEL == TCL_BETA_RELEASE
+#	define ITCL_PATCH_LEVEL \
+		STRINGIFY( \
+			JOIN(JOIN(ITCL_MAJOR_VERSION, \
+			JOIN(., ITCL_MINOR_VERSION)), \
+			JOIN(b, ITCL_RELEASE_SERIAL)))
+
+#elif	ITCL_RELEASE_LEVEL == TCL_FINAL_RELEASE
+#	define ITCL_PATCH_LEVEL \
+		STRINGIFY( \
+			JOIN(JOIN(ITCL_MAJOR_VERSION, \
+			JOIN(., ITCL_MINOR_VERSION)), \
+			JOIN(., ITCL_RELEASE_SERIAL)))
+
+#else
+#	error bad release level used.
+#endif
 
 /* 
  * A special definition used to allow this header file to be included 
@@ -89,11 +112,7 @@
 #   if defined(STATIC_BUILD)
 #	define DLLIMPORT
 #	define DLLEXPORT
-#   elif (defined(__WIN32__) && \
-		(defined(_MSC_VER) || \
-		(__BORLANDC__ >= 0x0550) || \
-		(defined(__GNUC__) && defined(__declspec)))) \
-	    || (defined(MAC_TCL) && FUNCTION_DECLSPEC)
+#   elif (defined(__WIN32__) && (defined(_MSC_VER) || (__BORLANDC__ >= 0x0550) || (defined(__GNUC__) && defined(__declspec)))) || (defined(MAC_TCL) && FUNCTION_DECLSPEC)
 #	define DLLIMPORT __declspec(dllimport)
 #	define DLLEXPORT __declspec(dllexport)
 #   elif defined(__BORLANDC__)
