@@ -5,7 +5,7 @@
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 # 
 # Copyright (c) 1993-1998 Lucent Technologies, Inc.
-# RCS: $Id: makefile.vc,v 1.19 2003/12/23 03:11:27 davygrvy Exp $
+# RCS: $Id: makefile.vc,v 1.20 2003/12/23 04:16:27 davygrvy Exp $
 #------------------------------------------------------------------------------
 #  Do not modify this file!
 #------------------------------------------------------------------------------
@@ -19,14 +19,26 @@ Please `cd` to its location first.
 
 PROJECT	= itcl
 !include "..\..\rules.vc"
-!include "..\..\pkg.vc"
-
 
 !if $(TCLINSTALL)
 !message *** Warning: [Incr Tcl] requires the source distribution of Tcl to build from,
 !message ***    at this time, sorry.  Please set the TCLDIR macro to point to the
 !message ***    sources.
 !endif
+
+!if [nmakehlp -g ..\generic\itcl.h ITCL_VERSION] == 33
+ITCL_DOTVERSION	= 3.3
+!elseif [nmakehlp -g ..\generic\itcl.h ITCL_VERSION] == 34
+ITCL_DOTVERSION	= 3.4
+!elseif [nmakehlp -g ..\generic\itcl.h ITCL_VERSION] == 35
+ITCL_DOTVERSION	= 3.5
+!elseif [nmakehlp -g ..\generic\itcl.h ITCL_VERSION] == 0
+MSG =^
+Can't get version string from ..\generic\itcl.h
+!error $(MSG)
+!endif
+ITCL_VERSION	= $(ITCL_DOTVERSION:.=)
+
 
 BINROOT		= .
 ROOT		= ..
