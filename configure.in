@@ -172,12 +172,6 @@ TEA_CONFIG_CFLAGS
 
 TEA_ENABLE_SYMBOLS
 
-if test "${SHARED_BUILD}" = "1" ; then
-    CFLAGS="${CFLAGS} \${CFLAGS_DEFAULT} \${CFLAGS_WARNING} \${SHLIB_CFLAGS}"
-else
-    CFLAGS="${CFLAGS} \${CFLAGS_DEFAULT} \${CFLAGS_WARNING}"
-fi
-
 #--------------------------------------------------------------------
 # Everyone should be linking against the Tcl stub library.  If you
 # can't for some reason, remove this definition.  If you aren't using
