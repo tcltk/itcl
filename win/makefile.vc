@@ -5,7 +5,7 @@
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 # 
 # Copyright (c) 1993-1998 Lucent Technologies, Inc.
-# RCS: $Id: makefile.vc,v 1.28 2004/02/12 18:10:14 davygrvy Exp $
+# RCS: $Id: makefile.vc,v 1.29 2004/02/12 20:22:26 davygrvy Exp $
 #------------------------------------------------------------------------------
 #  Do not modify this file!
 #------------------------------------------------------------------------------
@@ -239,7 +239,7 @@ install-binaries :
 	if not exist "$(SCRIPT_INSTALL_DIR)" mkdir "$(SCRIPT_INSTALL_DIR)"
 	if not exist "$(INCLUDE_INSTALL_DIR)" mkdir "$(INCLUDE_INSTALL_DIR)"
 	copy $(ITCLLIB) "$(SCRIPT_INSTALL_DIR)"
-!if $(ITCLSTUBLIB) != ""
+!if ""$(ITCLSTUBLIB)"" != """"
 	copy $(ITCLSTUBLIB) "$(LIB_INSTALL_DIR)"
 !endif
 	copy $(ROOT)\generic\itcl.h "$(INCLUDE_INSTALL_DIR)"
@@ -310,7 +310,8 @@ $<
 <<
 
 {$(RCDIR)}.rc{$(TMP_DIR)}.res :
-	$(rc32) -fo $@ -DDEBUG=$(DEBUG) $(ITCL_INCLUDES) $(TCL_INCLUDES) $(ITCL_DEFINES) $<
+	$(rc32) -fo $@ -d DEBUG=$(DEBUG) -d UNCHECKED=$(UNCHECKED) \
+		$(ITCL_INCLUDES) $(TCL_INCLUDES) $(ITCL_DEFINES) $<
 
 #---------------------------------------------------------------------
 # Generate the windows help files.
