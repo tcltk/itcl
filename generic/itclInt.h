@@ -39,7 +39,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itclInt.h,v 1.1 1998/07/27 18:41:43 stanton Exp $
+ *     RCS:  $Id: itclInt.h,v 1.2 1998/07/29 15:06:41 escoffon Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -52,6 +52,11 @@
 #include "itcl.h"
 #include "tclInt.h"
 
+#ifdef BUILD_itcl
+# undef EXPORT
+# define EXPORT DLLEXPORT
+#endif
+
 /*
  * Since the Tcl/Tk distribution doesn't perform any asserts,
  * dynamic loading can fail to find the __assert function.
@@ -61,7 +66,7 @@
 #ifdef  NDEBUG
 #define assert(EX) ((void)0)
 #else
-extern void Itcl_Assert _ANSI_ARGS_((char *testExpr, char *fileName, int lineNum)
+EXTERN void Itcl_Assert _ANSI_ARGS_((char *testExpr, char *fileName, int lineNum)
 );
 #if defined(__STDC__)
 #define assert(EX) (void)((EX) || (Itcl_Assert(#EX, __FILE__, __LINE__), 0))
@@ -518,5 +523,7 @@ EXTERN Tcl_CallFrame* _Tcl_ActivateCallFrame _ANSI_ARGS_((Tcl_Interp *interp,
     Tcl_CallFrame *framePtr));
 EXTERN Var* _TclNewVar _ANSI_ARGS_((void));
 
+#undef EXPORT
+#define EXPORT DLLIMPORT
 
 #endif /* ITCLINT_H */
