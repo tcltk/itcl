@@ -39,7 +39,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itcl.h,v 1.25 2003/12/23 05:22:45 davygrvy Exp $
+ *     RCS:  $Id: itcl.h,v 1.26 2003/12/23 10:21:04 davygrvy Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -139,17 +139,6 @@
 #   define CONST84
 #endif
 
-/*
- * Some backward compatability adjustments.
- */
-
-#if TCL_MAJOR_VERSION == 8 && TCL_MINOR_VERSION == 0
-#   define Tcl_GetString(obj)	Tcl_GetStringFromObj((obj), NULL)
-#   define TCL_DECLARE_MUTEX(mutexVar)
-#   define Tcl_MutexLock(mutexVar)
-#   define Tcl_MutexUnlock(mutexVar)
-#   define Tcl_Panic panic
-#endif
 
 /*
  * Protection levels:

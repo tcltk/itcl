@@ -39,7 +39,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itclInt.h,v 1.11 2003/12/23 06:58:27 davygrvy Exp $
+ *     RCS:  $Id: itclInt.h,v 1.12 2003/12/23 10:21:04 davygrvy Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -104,9 +104,22 @@
 	(tclIntStubsPtr->tcl_GetCommandFullName)
 #endif
 
+/*
+ * Some backward compatability adjustments.
+ */
+
+#if TCL_MAJOR_VERSION == 8 && TCL_MINOR_VERSION == 0
+#   define Tcl_GetString(obj)	Tcl_GetStringFromObj((obj), NULL)
+#   define TCL_DECLARE_MUTEX(mutexVar)
+#   define Tcl_MutexLock(mutexVar)
+#   define Tcl_MutexUnlock(mutexVar)
+#   define Tcl_Panic panic
+#endif
+
 #define TCL_DOES_STUBS \
     (TCL_MAJOR_VERSION > 8 || TCL_MAJOR_VERSION == 8 && (TCL_MINOR_VERSION > 1 || \
     (TCL_MINOR_VERSION == 1 && TCL_RELEASE_LEVEL == TCL_FINAL_RELEASE)))
+
 
 /*
  *  Common info for managing all known objects.
