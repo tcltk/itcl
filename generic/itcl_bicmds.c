@@ -22,7 +22,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itcl_bicmds.c,v 1.7 2003/12/23 03:11:04 davygrvy Exp $
+ *     RCS:  $Id: itcl_bicmds.c,v 1.8 2004/11/15 20:10:48 davygrvy Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -589,13 +589,9 @@ Itcl_BiCgetCmd(clientData, interp, objc, objv)
         contextObj, contextObj->classDefn);
 
     if (val) {
-	/*
-	 * Casting away CONST of val is safe because TCL_VOLATILE
-	 * guranatees CONST treatment.
-	 */
-        Tcl_SetResult(interp, (char *) val, TCL_VOLATILE);
+        Tcl_SetObjResult(interp, Tcl_NewStringObj(val, -1));
     } else {
-        Tcl_SetResult(interp, "<undefined>", TCL_STATIC);
+        Tcl_SetObjResult(interp, Tcl_NewStringObj("<undefined>", -1));
     }
     return TCL_OK;
 }
@@ -830,12 +826,10 @@ Itcl_BiInfoClassCmd(dummy, interp, objc, objv)
      *  signal an error.
      */
     if (Itcl_GetContext(interp, &contextClass, &contextObj) != TCL_OK) {
-        name = Tcl_GetStringFromObj(objv[0], (int*)NULL);
-        Tcl_ResetResult(interp);
-        Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
-            "\nget info like this instead: ",
-            "\n  namespace eval className { info ", name, "... }",
-            (char*)NULL);
+	Tcl_Obj *msg = Tcl_NewStringObj("\nget info like this instead: " \
+		"\n  namespace eval className { info ", -1);
+	Tcl_AppendStringsToObj(msg, Tcl_GetString(objv[0]), "... }", NULL);
+        Tcl_SetObjResult(interp, msg);
         return TCL_ERROR;
     }
 
@@ -860,7 +854,7 @@ Itcl_BiInfoClassCmd(dummy, interp, objc, objv)
         name = contextNs->fullName;
     }
 
-    Tcl_SetResult(interp, name, TCL_VOLATILE);
+    Tcl_SetObjResult(interp, Tcl_NewStringObj(name, -1));
     return TCL_OK;
 }
 
