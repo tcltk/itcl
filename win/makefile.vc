@@ -5,7 +5,7 @@
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 # 
 # Copyright (c) 1993-1998 Lucent Technologies, Inc.
-# RCS: $Id: makefile.vc,v 1.17 2002/09/29 20:03:57 davygrvy Exp $
+# RCS: $Id: makefile.vc,v 1.18 2002/09/29 20:16:33 davygrvy Exp $
 #------------------------------------------------------------------------------
 #  Do not modify this file!
 #------------------------------------------------------------------------------
@@ -102,6 +102,10 @@ lflags	= $(lflags) -ws:aggressive
 
 ITCL_LFLAGS = $(lflags) -subsystem:windows -dll
 
+!if exist("$(TCLDIR)\win\coffbase.txt")
+ITCL_DLLBASE	= -base:@$(TCLDIR)\win\coffbase.txt,itcl
+!endif
+
 #---------------------------------------------------------------------
 # Compile flags
 #---------------------------------------------------------------------
@@ -184,7 +188,7 @@ $(ITCLLIB): $(ITCLOBJS)
 $(ITCLOBJS)
 <<
 !else
-	$(link32) $(ITCL_LFLAGS) -base:@$(TCLDIR)\win\coffbase.txt,itcl \
+	$(link32) $(ITCL_LFLAGS) $(ITCL_DLLBASE) \
 	    -out:$@ $(TCLSTUBLIB) @<<
 $(ITCLOBJS)
 <<
