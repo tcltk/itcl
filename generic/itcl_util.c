@@ -21,7 +21,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itcl_util.c,v 1.2 1998/08/07 12:11:08 stanton Exp $
+ *     RCS:  $Id: itcl_util.c,v 1.3 2000/06/16 22:22:17 matt Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -80,7 +80,6 @@ typedef struct InterpState {
  *  message and abruptly exits.
  * ------------------------------------------------------------------------
  */
-#ifndef NDEBUG
 
 void
 Itcl_Assert(testExpr, fileName, lineNumber)
@@ -88,12 +87,13 @@ Itcl_Assert(testExpr, fileName, lineNumber)
     char *fileName;   /* file name containing this call */
     int lineNumber;   /* line number containing this call */
 {
+#ifndef NDEBUG
     fprintf(stderr, "Assertion failed: \"%s\" (line %d of %s)",
         testExpr, lineNumber, fileName);
     abort();
+#endif
 }
 
-#endif
 
 
 /*
