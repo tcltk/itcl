@@ -5,7 +5,7 @@
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 # 
 # Copyright (c) 1993-1998 Lucent Technologies, Inc.
-# RCS: $Id: makefile.vc,v 1.23 2003/12/23 05:48:53 davygrvy Exp $
+# RCS: $Id: makefile.vc,v 1.24 2003/12/23 08:02:33 davygrvy Exp $
 #------------------------------------------------------------------------------
 #  Do not modify this file!
 #------------------------------------------------------------------------------
@@ -46,7 +46,12 @@ STUBPREFIX	= $(PROJECT)stub
 
 PKGINDEX	= "$(TMP_DIR)\pkgIndex.tcl"
 
+!if $(TCL_DOES_STUBS)
 ITCLLIBNAME	= $(PROJECT)$(ITCL_VERSION)$(SUFX).$(EXT)
+!else
+ITCLLIBNAME	= $(PROJECT)$(ITCL_VERSION)80$(SUFX).$(EXT)
+!endif
+
 ITCLLIB		= "$(OUT_DIR)\$(ITCLLIBNAME)"
 ITCLIMPLIB	= "$(OUT_DIR)\$(PROJECT)$(ITCL_VERSION)$(SUFX).lib"
 
