@@ -8,7 +8,7 @@
  * See the file "license.terms" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: $Id: itclStubInit.c,v 1.3 2002/04/20 06:01:11 davygrvy Exp $
+ * RCS: $Id: itclStubInit.c,v 1.4 2002/08/11 03:43:46 davygrvy Exp $
  */
 
 #include "itclInt.h"
@@ -139,8 +139,8 @@ ItclIntStubs itclIntStubs = {
     Itcl_EnsembleCmd, /* 107 */
     Itcl_EnsPartCmd, /* 108 */
     Itcl_EnsembleErrorCmd, /* 109 */
-    Itcl_OldInit, /* 110 */
-    Itcl_InstallOldBiMethods, /* 111 */
+    NULL, /* 110 */
+    NULL, /* 111 */
     _Tcl_GetCallFrame, /* 112 */
     _Tcl_ActivateCallFrame, /* 113 */
     _TclNewVar, /* 114 */

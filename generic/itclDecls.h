@@ -6,7 +6,7 @@
  * See the file "license.terms" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: $Id: itclDecls.h,v 1.6 2002/04/20 06:01:11 davygrvy Exp $
+ * RCS: $Id: itclDecls.h,v 1.7 2002/08/11 03:43:46 davygrvy Exp $
  */
 
 #ifndef _ITCLDECLS
@@ -135,13 +135,7 @@ typedef struct ItclStubs {
     void (*itcl_DiscardInterpState) _ANSI_ARGS_((Itcl_InterpState state)); /* 25 */
 } ItclStubs;
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-extern ItclStubs *itclStubsPtr;
-#ifdef __cplusplus
-}
-#endif
+TCL_EXTRNC ItclStubs *itclStubsPtr;
 
 #if defined(USE_ITCL_STUBS) && !defined(USE_ITCL_STUB_PROCS)
 
