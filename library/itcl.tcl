@@ -9,7 +9,7 @@
 #            mmclennan@lucent.com
 #            http://www.tcltk.com/itcl
 #
-#      RCS:  $Id: itcl.tcl,v 1.2 1998/08/11 14:40:44 welch Exp $
+#      RCS:  $Id: itcl.tcl,v 1.3 2000/03/28 19:12:42 csmith Exp $
 # ----------------------------------------------------------------------
 #            Copyright (c) 1993-1998  Lucent Technologies, Inc.
 # ======================================================================
@@ -27,7 +27,7 @@
 #  alive until a procedure exits.
 # ----------------------------------------------------------------------
 proc ::itcl::local {class name args} {
-    set ptr [uplevel eval [list $class $name] $args]
+    set ptr [uplevel [list $class $name] $args]
     uplevel [list set itcl-local-$ptr $ptr]
     set cmd [uplevel namespace which -command $ptr]
     uplevel [list trace variable itcl-local-$ptr u \
