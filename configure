@@ -1686,7 +1686,7 @@ else
   ;;
   *)
   IFS="${IFS= 	}"; ac_save_ifs="$IFS"; IFS=":"
-  ac_dummy="${exec_prefix}:${PATH}"
+  ac_dummy="${exec_prefix}:${prefix}/bin:${TCL_BIN_DIR}/../bin:${PATH}"
   for ac_dir in $ac_dummy; do 
     test -z "$ac_dir" && ac_dir=.
     if test -f $ac_dir/$ac_word; then
