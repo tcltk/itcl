@@ -23,7 +23,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itcl_methods.c,v 1.13 2005/02/10 23:20:28 hobbs Exp $
+ *     RCS:  $Id: itcl_methods.c,v 1.14 2005/02/11 17:15:14 hobbs Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -790,10 +790,9 @@ Itcl_GetMemberCode(interp, member)
     Tcl_Interp* interp;        /* interpreter managing this action */
     ItclMember* member;        /* member containing code body */
 {
+    int result;
     ItclMemberCode *mcode = member->code;
     assert(mcode != NULL);
-
-    int result;
 
     /*
      *  If the implementation has not yet been defined, try to
