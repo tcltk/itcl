@@ -12,7 +12,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: Makefile.in,v 1.18 2002/04/01 21:26:31 hobbs Exp $
+# RCS: @(#) $Id: Makefile.in,v 1.19 2002/04/04 05:40:29 hobbs Exp $
 
 #========================================================================
 # Edit the following few lines when writing a new extension
@@ -94,8 +94,6 @@ GENERIC_HDRS	= \
 # have been added to the configure script.
 #========================================================================
 
-ITCL_LIBRARY		= $(prefix)/lib/itcl$(VERSION)
-
 ITCL_GENERIC_DIR_NATIVE	= @ITCL_GENERIC_DIR_NATIVE@
 ITCL_UNIX_DIR_NATIVE	= @ITCL_UNIX_DIR_NATIVE@
 ITCL_WIN_DIR_NATIVE	= @ITCL_WIN_DIR_NATIVE@
@@ -172,14 +170,23 @@ TCL_TOP_DIR_NATIVE = @TCL_TOP_DIR_NATIVE@
 # Not used, but retained for reference of what libs Tcl required
 TCL_LIBS	= @TCL_LIBS@
 
+#========================================================================
+# TCLLIBPATH seeds the auto_path in Tcl's init.tcl so we can test our
+# package without installing.  The other environment variables allow us
+# to test against an uninstalled Tcl.  Add special env vars that you
+# require for testing here (like TCLX_LIBRARY).
+#========================================================================
+
 EXTRA_PATH	= $(top_builddir):$(TCL_BIN_DIR)
-TCLSH_PROG	= TCL_LIBRARY=`@CYGPATH@ $(TCL_SRC_DIR)/library` \
+TCLSH_ENV	= TCL_LIBRARY=`@CYGPATH@ $(TCL_SRC_DIR)/library` \
+		  ITCL_LIBRARY=`@CYGPATH@ $(srcdir)/library` \
 		  LD_LIBRARY_PATH="$(EXTRA_PATH):$(LD_LIBRARY_PATH)" \
 		  LIBPATH="$(EXTRA_PATH):${LIBPATH}" \
 		  SHLIB_PATH="$(EXTRA_PATH):${SHLIB_PATH}" \
-		  TCLLIBPATH="$(top_builddir)" \
 		  PATH="$(EXTRA_PATH):$(PATH)" \
-		  @TCLSH_PROG@
+		  TCLLIBPATH="$(top_builddir)"
+TCLSH_PROG	= @TCLSH_PROG@
+TCLSH		= $(TCLSH_ENV) $(TCLSH_PROG)
 
 ITCL_INCLUDES	= @ITCL_INCLUDES@
 INCLUDES	= @TCL_INCLUDES@ @ITCL_INCLUDES@
@@ -187,7 +194,7 @@ INCLUDES	= @TCL_INCLUDES@ @ITCL_INCLUDES@
 EXTRA_CFLAGS	= $(AC_FLAGS) $(MEM_DEBUG_FLAGS) @EXTRA_CFLAGS@
 
 DEFS		= @DEFS@ $(TCL_DEFS) $(EXTRA_CFLAGS) \
-		  -DITCL_LIBRARY=\"$(ITCL_LIBRARY)\" -DUSE_NON_CONST
+		  -DITCL_LIBRARY=\"$(pkglibdir)\" -DUSE_NON_CONST
 
 CONFIG_CLEAN_FILES = Makefile
 
@@ -233,16 +240,17 @@ install-binaries: binaries install-lib-binaries install-bin-binaries
 #========================================================================
 
 install-libraries: libraries
-	mkdir -p $(includedir)
-	@echo "Installing header files in $(includedir)"
+	@mkdir -p $(DESTDIR)$(includedir)
+	@echo "Installing header files in $(DESTDIR)$(includedir)"
 	@for i in $(GENERIC_HDRS) ; do \
 	    echo "Installing $$i" ; \
-	    $(INSTALL_DATA) $$i $(includedir) ; \
+	    $(INSTALL_DATA) $$i $(DESTDIR)$(includedir) ; \
 	done;
-	@echo "Installing library files in $(ITCL_LIBRARY)"
+	@mkdir -p $(DESTDIR)$(pkglibdir)
+	@echo "Installing library files in $(DESTDIR)$(pkglibdir)"
 	@for i in $(srcdir)/library/*.tcl ; do \
 	    echo "Installing $$i" ; \
-	    $(INSTALL_DATA) $$i $(ITCL_LIBRARY) ; \
+	    $(INSTALL_DATA) $$i $(DESTDIR)$(pkglibdir) ; \
 	done;
 
 #========================================================================
@@ -251,18 +259,22 @@ install-libraries: libraries
 #========================================================================
 
 install-doc: doc
-	mkdir -p $(mandir)/mann
-	@echo "Installing man pages in $(mandir)"
-	@for i in $(srcdir)/doc/*.n; \
-	    do \
+	@mkdir -p $(DESTDIR)$(mandir)/mann
+	@echo "Installing man pages in $(DESTDIR)$(mandir)"
+	@for i in $(srcdir)/doc/*.n; do \
 	    echo "Installing $$i"; \
-	    rm -f $(mandir)/mann/`basename $$i`; \
-	    $(INSTALL_DATA) $$i $(mandir)/mann ; \
-	    done
+	    rm -f $(DESTDIR)$(mandir)/mann/`basename $$i`; \
+	    $(INSTALL_DATA) $$i $(DESTDIR)$(mandir)/mann ; \
+	done
 
 test: binaries libraries
-	ITCL_LIBRARY=`@CYGPATH@ $(srcdir)/library` \
-	$(TCLSH_PROG) `@CYGPATH@ $(srcdir)/tests/all.tcl` $(TESTFLAGS)
+	$(TCLSH) `@CYGPATH@ $(srcdir)/tests/all.tcl` $(TESTFLAGS)
+
+shell: binaries libraries
+	@$(TCLSH) $(SCRIPT)
+
+gdb:
+	$(TCLSH_ENV) gdb $(TCLSH_PROG) $(SCRIPT)
 
 depend:
 
@@ -292,35 +304,23 @@ $($(PACKAGE)stub_LIB_FILE): $($(PACKAGE)stub_OBJECTS)
 
 #========================================================================
 # We need to enumerate the list of .c to .o lines here.
-# Unfortunately, there does not seem to be any other way to do this
-# in a Makefile-independent way.  We can't use VPATH because it picks up
-# object files that may be located in the source directory.
 #
 # In the following lines, $(srcdir) refers to the toplevel directory
 # containing your extension.  If your sources are in a subdirectory,
 # you will have to modify the paths to reflect this:
 #
-# exampleA.$(OBJEXT): $(srcdir)/src/win/exampleA.c
-# 	$(COMPILE) -c `@CYGPATH@ $(srcdir)/src/win/exampleA.c` -o $@
+# exampleA.$(OBJEXT): $(srcdir)/generic/exampleA.c
+# 	$(COMPILE) -c `@CYGPATH@ $(srcdir)/generic/exampleA.c` -o $@
+#
+# Setting the VPATH variable to a list of paths will cause the makefile
+# to look into these paths when resolving .c to .obj dependencies.
+# As necessary, add $(srcdir):$(srcdir)/compat:....
 #========================================================================
+
+VPATH = $(srcdir)/generic:$(PLATFORM_DIR)
 
 dllEntryPoint.$(OBJEXT): $(WIN_DIR)/dllEntryPoint.c
 	$(COMPILE) -c `@CYGPATH@ $(WIN_DIR)/dllEntryPoint.c` -o $@
-
-tclAppInit.$(OBJEXT): $(PLATFORM_DIR)/tclAppInit.c
-	$(COMPILE) -c `@CYGPATH@ $(PLATFORM_DIR)/tclAppInit.c` -o $@
-
-itclStubInit.$(OBJEXT): $(GENERIC_DIR)/itclStubInit.c
-	$(COMPILE) -c `@CYGPATH@ $(GENERIC_DIR)/itclStubInit.c` -o $@
-
-itclStubLib.$(OBJEXT): $(GENERIC_DIR)/itclStubLib.c
-	$(COMPILE) -c `@CYGPATH@ $(GENERIC_DIR)/itclStubLib.c` -o $@
-
-itcl_bicmds.$(OBJEXT): $(GENERIC_DIR)/itcl_bicmds.c
-	$(COMPILE) -c `@CYGPATH@ $(GENERIC_DIR)/itcl_bicmds.c` -o $@
-
-itcl_class.$(OBJEXT): $(GENERIC_DIR)/itcl_class.c
-	$(COMPILE) -c `@CYGPATH@ $(GENERIC_DIR)/itcl_class.c` -o $@
 
 itcl_cmds.$(OBJEXT): $(GENERIC_DIR)/itcl_cmds.c Makefile
 	$(COMPILE) -c `@CYGPATH@ $(GENERIC_DIR)/itcl_cmds.c` -o $@
@@ -328,27 +328,8 @@ itcl_cmds.$(OBJEXT): $(GENERIC_DIR)/itcl_cmds.c Makefile
 itcl_ensemble.$(OBJEXT): $(GENERIC_DIR)/itcl_ensemble.c Makefile
 	$(COMPILE) -c `@CYGPATH@ $(GENERIC_DIR)/itcl_ensemble.c` -o $@
 
-itcl_linkage.$(OBJEXT): $(GENERIC_DIR)/itcl_linkage.c
-	$(COMPILE) -c `@CYGPATH@ $(GENERIC_DIR)/itcl_linkage.c` -o $@
-
-itcl_methods.$(OBJEXT): $(GENERIC_DIR)/itcl_methods.c
-	$(COMPILE) -c `@CYGPATH@ $(GENERIC_DIR)/itcl_methods.c` -o $@
-
-itcl_migrate.$(OBJEXT): $(GENERIC_DIR)/itcl_migrate.c
-	$(COMPILE) -c `@CYGPATH@ $(GENERIC_DIR)/itcl_migrate.c` -o $@
-
-itcl_objects.$(OBJEXT): $(GENERIC_DIR)/itcl_objects.c
-	$(COMPILE) -c `@CYGPATH@ $(GENERIC_DIR)/itcl_objects.c` -o $@
-
-itcl_obsolete.$(OBJEXT): $(GENERIC_DIR)/itcl_obsolete.c
-	$(COMPILE) -c `@CYGPATH@ $(GENERIC_DIR)/itcl_obsolete.c` -o $@
-
-itcl_parse.$(OBJEXT): $(GENERIC_DIR)/itcl_parse.c
-	$(COMPILE) -c `@CYGPATH@ $(GENERIC_DIR)/itcl_parse.c` -o $@
-
-itcl_util.$(OBJEXT): $(GENERIC_DIR)/itcl_util.c
-	$(COMPILE) -c `@CYGPATH@ $(GENERIC_DIR)/itcl_util.c` -o $@
-
+.c.$(OBJEXT):
+	$(COMPILE) -c `@CYGPATH@ $<` -o $@
 
 #========================================================================
 # End of user-definable section
@@ -382,7 +363,8 @@ distclean: clean
 # You should not have to modify this target.
 #========================================================================
 
-install-lib-binaries: installdirs
+install-lib-binaries:
+	@mkdir -p $(DESTDIR)$(pkglibdir)
 	@list='$(lib_BINARIES)'; for p in $$list; do \
 	  if test -f $$p; then \
 	    echo " $(INSTALL_PROGRAM) $$p $(DESTDIR)$(pkglibdir)/$$p"; \
@@ -399,8 +381,8 @@ install-lib-binaries: installdirs
 	    fi; \
 	  fi; \
 	done
-	$(INSTALL_DATA) pkgIndex.tcl $(pkglibdir)
-	$(INSTALL_DATA) itclConfig.sh $(libdir)
+	$(INSTALL_DATA) pkgIndex.tcl $(DESTDIR)$(pkglibdir)
+	$(INSTALL_DATA) itclConfig.sh $(DESTDIR)$(libdir)
 
 #========================================================================
 # Install binary executables (e.g. .exe files)
@@ -408,7 +390,8 @@ install-lib-binaries: installdirs
 # You should not have to modify this target.
 #========================================================================
 
-install-bin-binaries: installdirs
+install-bin-binaries:
+	@mkdir -p $(DESTDIR)$(bindir)
 	@list='$(bin_BINARIES)'; for p in $$list; do \
 	  if test -f $$p; then \
 	    echo " $(INSTALL_PROGRAM) $$p $(DESTDIR)$(bindir)/$$p"; \
@@ -423,18 +406,14 @@ Makefile: $(srcdir)/Makefile.in  $(top_builddir)/config.status
 	  && CONFIG_FILES=$@ CONFIG_HEADERS= $(SHELL) ./config.status
 
 uninstall-binaries:
-	list='$(BINARIES)'; for p in $$list; do \
-	  rm -f $(DESTDIR)$(libdir)/$$p; \
+	list='$(lib_BINARIES)'; for p in $$list; do \
+	  rm -f $(DESTDIR)$(pkglibdir)/$$p; \
+	done
+	list='$(bin_BINARIES)'; for p in $$list; do \
+	  rm -f $(DESTDIR)$(bindir)/$$p; \
 	done
 
-installdirs:
-	mkdir -p  $(DESTDIR)$(libdir)
-	mkdir -p  $(DESTDIR)$(bindir)
-	mkdir -p  $(DESTDIR)$(pkglibdir)
-	mkdir -p  $(ITCL_LIBRARY)
-
-.PHONY: all binaries clean depend distclean doc install installdirs \
-libraries test
+.PHONY: all binaries clean depend distclean doc install libraries test
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
