@@ -21,7 +21,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itcl_cmds.c,v 1.13 2001/05/22 01:50:21 davygrvy Exp $
+ *     RCS:  $Id: itcl_cmds.c,v 1.14 2001/10/25 01:19:25 hobbs Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -598,8 +598,8 @@ Itcl_FindObjectsCmd(clientData, interp, objc, objv)
     ItclClass *classDefn = NULL;
     ItclClass *isaDefn = NULL;
 
-    char *name, *token;
-    CONST char *cmdName;
+    char *name = NULL, *token = NULL;
+    CONST char *cmdName = NULL;
     int pos, newEntry, match, handledActiveNs;
     ItclObject *contextObj;
     Tcl_HashTable unique;
@@ -709,7 +709,7 @@ Itcl_FindObjectsCmd(clientData, interp, objc, objv)
 
                     objPtr = Tcl_NewStringObj((char*)NULL, 0);
                     Tcl_GetCommandFullName(interp, cmd, objPtr);
-                    name = Tcl_GetStringFromObj(objPtr, (int*)NULL);
+		    cmdName = Tcl_GetStringFromObj(objPtr, (int*)NULL);
                 } else {
                     cmdName = Tcl_GetCommandName(interp, cmd);
                     objPtr = Tcl_NewStringObj(cmdName, -1);
@@ -718,7 +718,8 @@ Itcl_FindObjectsCmd(clientData, interp, objc, objv)
                 Tcl_CreateHashEntry(&unique, (char*)cmd, &newEntry);
 
                 match = 0;
-                if (newEntry && (!pattern || Tcl_StringMatch(name, pattern))) {
+		if (newEntry &&
+			(!pattern || Tcl_StringMatch(cmdName, pattern))) {
                     if (!classDefn || (contextObj->classDefn == classDefn)) {
                         if (!isaDefn) {
                             match = 1;
