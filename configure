@@ -1802,7 +1802,7 @@ fi
 		fi
 		# In order to work in the tortured autoconf environment,
 		# we need to ensure that this path has no spaces
-		MSSDK=$(cygpath -w -s "$MSSDK" | sed -e 's!\\!/!g')
+		MSSDK=`cygpath -w -s "$MSSDK" | sed -e 's!\\\!/!g'`
 		if test ! -d "${MSSDK}/bin/win64" ; then
 		    echo "configure: warning: "could not find 64-bit SDK to enable 64bit mode"" 1>&2
 		    do64bit="no"
