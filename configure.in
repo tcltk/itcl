@@ -1,3 +1,4 @@
+#!/bin/bash -norc
 #--------------------------------------------------------------------
 # Sample configure.in for Tcl Extensions.  The only places you should
 # need to modify this file are marked by the string __CHANGE__
@@ -32,7 +33,6 @@ PATCHLEVEL=.1
 VERSION=${MAJOR_VERSION}.${MINOR_VERSION}
 NODOT_VERSION=${MAJOR_VERSION}${MINOR_VERSION}
 
-
 AC_SUBST(PACKAGE)
 AC_SUBST(VERSION)
 
@@ -53,6 +53,8 @@ fi
 if test "${exec_prefix}" = "NONE"; then
     exec_prefix=$prefix
 fi
+# libdir must be a fully qualified path and (not ${exec_prefix}/lib)
+eval libdir="$libdir"
 
 #--------------------------------------------------------------------
 # Check whether --enable-gcc or --disable-gcc was given.  Do this 
@@ -91,35 +93,19 @@ AC_OBJEXT
 AC_EXEEXT
 
 #--------------------------------------------------------------------
-# "cygpath" is used on windows to generate native path names for include
-# files.
-# These variables should only be used with the compiler and linker since
-# they generate native path names.
-#
+# Call SC_TEA_INIT as the first SC_ macro to set up initial vars
+# This will define a ${TEA_PLATFORM} variable == "unix" or "windows".
+#--------------------------------------------------------------------
+
+SC_TEA_INIT
+
+#--------------------------------------------------------------------
 # Unix tclConfig.sh points SRC_DIR at the top-level directory of
 # the Tcl sources, while the Windows tclConfig.sh points SRC_DIR at
 # the win subdirectory.  Hence the different usages of SRC_DIR below.
 #
 # This must be done before calling SC_PUBLIC_TCL_HEADERS
-#
-# RELPATH is used to locate binary extensions relative to the lib directory.
-# It is only needed if mkIndex.tcl can't generate an installed pkgIndex.tcl
-# file for you.
 #--------------------------------------------------------------------
-
-case "`uname -s`" in
-    *win32* | *WIN32* | *CYGWIN_NT*|*CYGWIN_98*|*CYGWIN_95*)
-	AC_CHECK_PROG(CYGPATH, cygpath, cygpath -w, echo)
-	RELPATH=".. .. bin"
-    ;;
-    *)
-	CYGPATH=echo
-	RELPATH=..
-    ;;
-esac
-
-AC_SUBST(CYGPATH)
-AC_SUBST(RELPATH)
 
 #--------------------------------------------------------------------
 # Includes for this package
@@ -129,14 +115,11 @@ ITCL_GENERIC_DIR_NATIVE=`${CYGPATH} ${srcdir}/generic`
 ITCL_WIN_DIR_NATIVE=`${CYGPATH} ${srcdir}/win`
 ITCL_UNIX_DIR_NATIVE=`${CYGPATH} ${srcdir}/unix`
 
-case "`uname -s`" in
-    *win32* | *WIN32* | *CYGWIN_NT*|*CYGWIN_98*|*CYGWIN_95*)
-	ITCL_PLATFORM_DIR_NATIVE=${ITCL_WIN_DIR_NATIVE}
-    ;;
-    *)
-	ITCL_PLATFORM_DIR_NATIVE=${ITCL_UNIX_DIR_NATIVE}
-    ;;
-esac
+if test "${TEA_PLATFORM}" = "windows" ; then
+    ITCL_PLATFORM_DIR_NATIVE=${ITCL_WIN_DIR_NATIVE}
+else
+    ITCL_PLATFORM_DIR_NATIVE=${ITCL_UNIX_DIR_NATIVE}
+fi
 
 ITCL_INCLUDES="-I\"${ITCL_GENERIC_DIR_NATIVE}\" -I\"${ITCL_PLATFORM_DIR_NATIVE}\""
 
@@ -183,21 +166,18 @@ SC_PRIVATE_TCL_HEADERS
 # your system.
 #--------------------------------------------------------------------
 
-case "`uname -s`" in
-    *win32* | *WIN32* | *CYGWIN_NT*|*CYGWIN_98*|*CYGWIN_95*)
-	AC_DEFINE(BUILD_itcl)
-	CLEANFILES="*.lib *.dll *.exp *.ilk *.pdb vc50.pch"
-	PLATFORM_SOURCES='$(WIN_SOURCES)'
-	PLATFORM_OBJECTS='$(WIN_OBJECTS)'
-	PLATFORM_DIR='$(WIN_DIR)'
-    ;;
-    *)
-	CLEANFILES=
-	PLATFORM_SOURCES='$(UNIX_SOURCES)'
-	PLATFORM_OBJECTS='$(UNIX_OBJECTS)'
-	PLATFORM_DIR='$(UNIX_DIR)'
-    ;;
-esac
+if test "${TEA_PLATFORM}" = "windows" ; then
+    AC_DEFINE(BUILD_itcl)
+    CLEANFILES="*.lib *.dll *.exp *.ilk *.pdb vc*.pch"
+    PLATFORM_SOURCES='$(WIN_SOURCES)'
+    PLATFORM_OBJECTS='$(WIN_OBJECTS)'
+    PLATFORM_DIR='$(WIN_DIR)'
+else
+    CLEANFILES=
+    PLATFORM_SOURCES='$(UNIX_SOURCES)'
+    PLATFORM_OBJECTS='$(UNIX_OBJECTS)'
+    PLATFORM_DIR='$(UNIX_DIR)'
+fi
 
 AC_SUBST(CLEANFILES)
 AC_SUBST(PLATFORM_SOURCES)
@@ -221,26 +201,10 @@ SC_ENABLE_SHARED
 #--------------------------------------------------------------------
 # This macro figures out what flags to use with the compiler/linker
 # when building shared/static debug/optimized objects.  This information
-# is all taken from the tclConfig.sh file.
+# can be taken from the tclConfig.sh file, but this figures it all out.
 #--------------------------------------------------------------------
 
-#CC=${TCL_CC}
-#CFLAGS_DEBUG=${TCL_CFLAGS_DEBUG}
-#CFLAGS_OPTIMIZE=${TCL_CFLAGS_OPTIMIZE}
-#LDFLAGS_DEBUG=${TCL_LDFLAGS_DEBUG}
-#LDFLAGS_OPTIMIZE=${TCL_LDFLAGS_OPTIMIZE}
-#SHLIB_LD=${TCL_SHLIB_LD}
-#STLIB_LD=${TCL_STLIB_LD}
-#SHLIB_CFLAGS=${TCL_SHLIB_CFLAGS}
-
 SC_CONFIG_CFLAGS
-
-AC_SUBST(CFLAGS_DEBUG)
-AC_SUBST(CFLAGS_OPTIMIZE)
-AC_SUBST(STLIB_LD)
-AC_SUBST(SHLIB_LD)
-AC_SUBST(SHLIB_CFLAGS)
-AC_SUBST(SHLIB_LDFLAGS)
 
 #--------------------------------------------------------------------
 # Set the default compiler switches based on the --enable-symbols 
@@ -275,40 +239,6 @@ fi
 SC_MAKE_LIB
 
 #--------------------------------------------------------------------
-# eval these two values to dereference the ${DBGX} variable.
-#--------------------------------------------------------------------
-
-eval "SHARED_LIB_SUFFIX=${TCL_SHARED_LIB_SUFFIX}"
-eval "UNSHARED_LIB_SUFFIX=${TCL_UNSHARED_LIB_SUFFIX}"
-
-#--------------------------------------------------------------------
-# Shared libraries and static libraries have different names.
-#--------------------------------------------------------------------
-
-case "`uname -s`" in
-    *win32* | *WIN32* | *CYGWIN_NT*|*CYGWIN_98*|*CYGWIN_95*)
-	if test "${SHARED_BUILD}" = "1" ; then
-	    SHLIB_LD_LIBS="${SHLIB_LD_LIBS} \"`cygpath -w ${TCL_BIN_DIR}/${TCL_STUB_LIB_FILE}`\""
-	    eval "${PACKAGE}_LIB_FILE=${PACKAGE}${SHARED_LIB_SUFFIX}"
-	    RANLIB=:
-	else
-	    eval "${PACKAGE}_LIB_FILE=${PACKAGE}${UNSHARED_LIB_SUFFIX}"
-	fi
-	eval "${PACKAGE}stub_LIB_FILE=${PACKAGE}stub${UNSHARED_LIB_SUFFIX}"
-	;;
-    *)
-	if test "${SHARED_BUILD}" = "1" ; then
-	    SHLIB_LD_LIBS="${SHLIB_LD_LIBS} ${TCL_BUILD_STUB_LIB_SPEC}"
-	    eval "${PACKAGE}_LIB_FILE=lib${PACKAGE}${SHARED_LIB_SUFFIX}"
-	    RANLIB=:
-	else
-	    eval "${PACKAGE}_LIB_FILE=lib${PACKAGE}${UNSHARED_LIB_SUFFIX}"
-	fi
-	eval "${PACKAGE}stub_LIB_FILE=lib${PACKAGE}stub${UNSHARED_LIB_SUFFIX}"
-	;;
-esac
-
-#--------------------------------------------------------------------
 # __CHANGE__
 # Change the name from exampeA_LIB_FILE to match your package name.
 # Use the stub_LIB_FILE substitution if your package creates a stub
@@ -317,7 +247,6 @@ esac
 
 AC_SUBST(itclstub_LIB_FILE)
 AC_SUBST(itcl_LIB_FILE)
-AC_SUBST(SHLIB_LD_LIBS)
 
 #--------------------------------------------------------------------
 # Cache the stub library name so that the itk configure script can pick
@@ -337,8 +266,42 @@ AC_CACHE_VAL(ac_cv_itclstub_LIB_FILE, ac_cv_itclstub_LIB_FILE=${itclstub_LIB_FIL
 SC_PROG_TCLSH
 
 #--------------------------------------------------------------------
+# These are for itclConfig.sh
+#--------------------------------------------------------------------
+
+pkglibdir=${libdir}/${PACKAGE}${VERSION}
+if test "${TCL_LIB_VERSIONS_OK}" = "ok"; then
+    eval itcl_LIB_FLAG="-litcl${VERSION}${DBGX}"
+else
+    eval itcl_LIB_FLAG="-litcl`echo ${VERSION} | tr -d .`${DBGX}"
+fi
+itcl_BUILD_LIB_SPEC="-L\"$(${CYGPATH} `pwd`)\" ${itcl_LIB_FLAG}"
+itcl_LIB_SPEC="-L\"`${CYGPATH} ${pkglibdir}`\" ${itcl_LIB_FLAG}"
+
+if test "${TCL_LIB_VERSIONS_OK}" = "ok"; then
+    eval itcl_STUB_LIB_FLAG="-litclstub${VERSION}${DBGX}"
+else
+    eval itcl_STUB_LIB_FLAG="-litclstub`echo ${VERSION} | tr -d .`${DBGX}"
+fi
+
+itcl_BUILD_STUB_LIB_SPEC="-L\"$(${CYGPATH} `pwd`)\" ${itcl_STUB_LIB_FLAG}"
+itcl_STUB_LIB_SPEC="-L\"`${CYGPATH} ${pkglibdir}`\" ${itcl_STUB_LIB_FLAG}"
+itcl_BUILD_STUB_LIB_PATH="\"$(${CYGPATH} `pwd`/${itclstub_LIB_FILE})\""
+itcl_STUB_LIB_PATH="\"`${CYGPATH} ${pkglibdir}/${itclstub_LIB_FILE}`\""
+
+AC_SUBST(itcl_BUILD_LIB_SPEC)
+AC_SUBST(itcl_LIB_SPEC)
+AC_SUBST(itcl_BUILD_STUB_LIB_SPEC)
+AC_SUBST(itcl_STUB_LIB_SPEC)
+AC_SUBST(itcl_BUILD_STUB_LIB_PATH)
+AC_SUBST(itcl_STUB_LIB_PATH)
+
+AC_SUBST(MAJOR_VERSION)
+AC_SUBST(MINOR_VERSION)
+AC_SUBST(PATCHLEVEL)
+
+#--------------------------------------------------------------------
 # Finally, substitute all of the various values into the Makefile.
 #--------------------------------------------------------------------
 
-AC_OUTPUT([Makefile \
-	pkgIndex.tcl itclConfig.sh])
+AC_OUTPUT([Makefile pkgIndex.tcl itclConfig.sh])

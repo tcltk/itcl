@@ -10,7 +10,7 @@
  * See the file "license.terms" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: $Id: itclStubLib.c,v 1.6 2001/05/25 00:12:29 davygrvy Exp $
+ * RCS: $Id: itclStubLib.c,v 1.7 2002/03/29 04:43:49 hobbs Exp $
  */
 
 /*
@@ -56,6 +56,10 @@ ItclIntStubs *itclIntStubsPtr;
  *
  *----------------------------------------------------------------------
  */
+
+#ifdef Itcl_InitStubs
+#undef Itcl_InitStubs
+#endif
 
 CONST char *
 Itcl_InitStubs (interp, version, exact)
