@@ -23,7 +23,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itcl_methods.c,v 1.3 1998/08/11 14:40:42 welch Exp $
+ *     RCS:  $Id: itcl_methods.c,v 1.4 2001/05/22 01:52:51 davygrvy Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -1339,7 +1339,7 @@ Itcl_GetMemberFuncUsage(mfunc, contextObj, objPtr)
     Tcl_Obj *objPtr;            /* returns: string showing usage */
 {
     int argcount;
-    char *name;
+    CONST char *name;
     CompiledLocal *arglist, *argPtr;
     Tcl_HashEntry *entry;
     ItclMemberFunc *mf;

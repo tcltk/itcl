@@ -21,7 +21,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itcl_cmds.c,v 1.12 2001/05/17 19:57:11 andreas_kupries Exp $
+ *     RCS:  $Id: itcl_cmds.c,v 1.13 2001/05/22 01:50:21 davygrvy Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -469,7 +469,7 @@ Itcl_FindClassesCmd(clientData, interp, objc, objv)
     int forceFullNames = 0;
 
     char *pattern;
-    char *name;
+    CONST char *name;
     int newEntry, handledActiveNs;
     Tcl_HashTable unique;
     Tcl_HashEntry *entry;
@@ -599,6 +599,7 @@ Itcl_FindObjectsCmd(clientData, interp, objc, objv)
     ItclClass *isaDefn = NULL;
 
     char *name, *token;
+    CONST char *cmdName;
     int pos, newEntry, match, handledActiveNs;
     ItclObject *contextObj;
     Tcl_HashTable unique;
@@ -710,8 +711,8 @@ Itcl_FindObjectsCmd(clientData, interp, objc, objv)
                     Tcl_GetCommandFullName(interp, cmd, objPtr);
                     name = Tcl_GetStringFromObj(objPtr, (int*)NULL);
                 } else {
-                    name = Tcl_GetCommandName(interp, cmd);
-                    objPtr = Tcl_NewStringObj(name, -1);
+                    cmdName = Tcl_GetCommandName(interp, cmd);
+                    objPtr = Tcl_NewStringObj(cmdName, -1);
                 }
 
                 Tcl_CreateHashEntry(&unique, (char*)cmd, &newEntry);
