@@ -11,7 +11,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: Makefile.in,v 1.8 2000/06/01 20:34:34 wart Exp $
+# RCS: @(#) $Id: Makefile.in,v 1.9 2000/06/22 00:08:13 wart Exp $
 
 #========================================================================
 # Edit the following few lines when writing a new extension
@@ -102,7 +102,8 @@ itclstub_LIB_FILE = @itclstub_LIB_FILE@
 #========================================================================
 
 GENERIC_HDRS= \
-	$(srcdir)/generic/itcl.h
+	$(srcdir)/generic/itcl.h \
+	$(srcdir)/generic/itclDecls.h
 
 #========================================================================
 # Add additional lines to handle any additional AC_SUBST cases that
