@@ -10,7 +10,7 @@
  * See the file "license.terms" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: $Id: itclStubLib.c,v 1.3 2000/08/04 19:19:11 davidg Exp $
+ * RCS: $Id: itclStubLib.c,v 1.4 2000/08/07 20:01:52 welch Exp $
  */
 
 /*
@@ -25,12 +25,19 @@
 #endif
 #undef USE_TCL_STUB_PROCS
 
-#include "itclInt.h"
+/*
+ * This ensures that the Itcl_InitStubs has a prototype in
+ * itcl.h and is not the macro that turns it into Tcl_PkgRequire
+ */
 
+#ifndef USE_ITCL_STUBS
+#define USE_ITCL_STUBS
+#endif
+
+#include "itclInt.h"
 
 ItclStubs *itclStubsPtr;
 ItclIntStubs *itclIntStubsPtr;
-
 
 /*
  *----------------------------------------------------------------------

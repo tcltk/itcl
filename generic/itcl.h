@@ -42,7 +42,7 @@
  *       modified for Stubs 5/20/1999 by 
  *           David Gravereaux <davygrvy@bigfoot.com>
  *
- *     RCS:  $Id: itcl.h,v 1.11 2000/08/04 19:19:11 davidg Exp $
+ *     RCS:  $Id: itcl.h,v 1.12 2000/08/07 20:01:52 welch Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -145,15 +145,19 @@ typedef struct Itcl_InterpState_ *Itcl_InterpState;
 
 
 /*
- *  This function is contained in the itclstub static library
+ * Itcl_InitStubs is used by extensions like Itk that can be linked
+ * against the itcl stubs library.  If we are not using stubs
+ * then this reduces to package require.
  */
 
 #ifdef USE_ITCL_STUBS
 
-char *		Itcl_InitStubs _ANSI_ARGS_((Tcl_Interp *interp,
+char *	Itcl_InitStubs _ANSI_ARGS_((Tcl_Interp *interp,
 			    char *version, int exact));
+#else
+#define Itcl_InitStubs(interp, version, exact) \
+      Tcl_PkgRequire(interp, "Itcl", version, exact)
 #endif
-
 
 /*
  * Public functions that are not accessible via the stubs table.

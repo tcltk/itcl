@@ -11,7 +11,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: Makefile.in,v 1.13 2000/08/07 04:24:18 welch Exp $
+# RCS: @(#) $Id: Makefile.in,v 1.14 2000/08/07 20:01:48 welch Exp $
 
 #========================================================================
 # Edit the following few lines when writing a new extension
@@ -80,8 +80,8 @@ GENERIC_OBJECTS = itclStubInit.$(OBJEXT) \
 	itcl_util.$(OBJEXT)
 PLATFORM_OBJECTS = @PLATFORM_OBJECTS@
 itclstub_OBJECTS = itclStubLib.$(OBJEXT)
-itcl_OBJECTS = $(PLATFORM_OBJECTS) $(GENERIC_OBJECTS) $(itclstub_OBJECTS)
-OBJECTS = $(itcl_OBJECTS)
+itcl_OBJECTS = $(PLATFORM_OBJECTS) $(GENERIC_OBJECTS)
+OBJECTS = $(itcl_OBJECTS) $(itclstub_OBJECTS)
 
 #========================================================================
 # The substitution of "exampleA_LIB_FILE" into the variable name below
