@@ -5,7 +5,7 @@
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 # 
 # Copyright (c) 1993-1998 Lucent Technologies, Inc.
-# RCS: $Id: makefile.vc,v 1.16 2002/08/11 03:45:20 davygrvy Exp $
+# RCS: $Id: makefile.vc,v 1.17 2002/09/29 20:03:57 davygrvy Exp $
 #------------------------------------------------------------------------------
 #  Do not modify this file!
 #------------------------------------------------------------------------------
@@ -144,7 +144,7 @@ ITCL_INCLUDES	= -I$(WINDIR) -I$(GENERICDIR)
 ITCL_DEFINES	= -DBUILD_itcl -DTCL_THREADS=1
 ITCL_EXE_CFLAGS	= $(cdebug) $(cflags) $(crt) $(ITCL_INCLUDES) $(ITCL_DEFINES) $(TCL_INCLUDES)
 
-### By convention, static build do not use Stubs.  This is just a practice,
+### By convention, static builds do not use Stubs.  This is just a practice,
 ### not a technical limitation.
 !if $(STATIC_BUILD)
 ITCL_CFLAGS	= $(ITCL_EXE_CFLAGS) -DSTATIC_BUILD
@@ -184,7 +184,8 @@ $(ITCLLIB): $(ITCLOBJS)
 $(ITCLOBJS)
 <<
 !else
-	$(link32) $(ITCL_LFLAGS) -out:$@ $(TCLSTUBLIB) @<<
+	$(link32) $(ITCL_LFLAGS) -base:@$(TCLDIR)\win\coffbase.txt,itcl \
+	    -out:$@ $(TCLSTUBLIB) @<<
 $(ITCLOBJS)
 <<
 	-@del $*.exp
