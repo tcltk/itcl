@@ -39,7 +39,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itclInt.h,v 1.3 1998/08/04 13:30:58 escoffon Exp $
+ *     RCS:  $Id: itclInt.h,v 1.4 1998/08/07 12:08:54 stanton Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -336,7 +336,7 @@ EXTERN int Itcl_ClassCmdResolver _ANSI_ARGS_((Tcl_Interp *interp,
 EXTERN int Itcl_ClassVarResolver _ANSI_ARGS_((Tcl_Interp *interp,
     char* name, Tcl_Namespace *context, int flags, Tcl_Var *rPtr));
 EXTERN int Itcl_ClassCompiledVarResolver _ANSI_ARGS_((Tcl_Interp *interp,
-    char* name, int length, Tcl_Namespace *context, Tcl_ResolvedVarInfo *rPtr));
+    char* name, int length, Tcl_Namespace *context, Tcl_ResolvedVarInfo **rPtr));
 EXTERN void Itcl_BuildVirtualTables _ANSI_ARGS_((ItclClass* cdefnPtr));
 EXTERN int Itcl_CreateVarDefn _ANSI_ARGS_((Tcl_Interp *interp,
     ItclClass* cdefn, char* name, char* init, char* config,
