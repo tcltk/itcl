@@ -21,7 +21,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itcl_util.c,v 1.12 2003/12/24 01:09:56 davygrvy Exp $
+ *     RCS:  $Id: itcl_util.c,v 1.13 2004/09/21 22:47:43 davygrvy Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -829,10 +829,7 @@ Itcl_RestoreInterpState(interp, state)
     }
 
     if (info->errorCode) {
-        (void) Tcl_SetVar2(interp, "errorCode", (char*)NULL,
-            info->errorCode, TCL_GLOBAL_ONLY);
-        iPtr->flags |= ERROR_CODE_SET;
-
+        Tcl_SetObjErrorCode(interp, Tcl_NewStringObj(info->errorCode, -1));
         ckfree(info->errorCode);
     }
 
