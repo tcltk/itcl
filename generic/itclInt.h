@@ -39,7 +39,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itclInt.h,v 1.12 2003/12/23 10:21:04 davygrvy Exp $
+ *     RCS:  $Id: itclInt.h,v 1.13 2004/02/12 20:04:35 davygrvy Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -59,9 +59,9 @@
 
 /*
  * Fix Tcl bug #803489 the right way.  We need to always use the old Stub
- * slot positions, not the new broken ones.  I do like that these functions
- * have moved to the public space, but the slot change is the killer and is
- * the painful side affect.
+ * slot positions, not the new broken ones part of TIP 127.  I do like
+ * that these functions have moved to the public space (about time), but
+ * the slot change is the killer and is the painful side affect.
  */
 
 #if defined(USE_TCL_STUBS) && \
