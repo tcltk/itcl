@@ -21,7 +21,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itcl_cmds.c,v 1.6 1999/05/25 01:35:01 redman Exp $
+ *     RCS:  $Id: itcl_cmds.c,v 1.7 2000/03/28 19:11:11 csmith Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -94,7 +94,7 @@ namespace eval ::itcl {\n\
 
 static char safeInitScript[] =
 "proc ::itcl::local {class name args} {\n\
-    set ptr [uplevel eval [list $class $name] $args]\n\
+    set ptr [uplevel [list $class $name] $args]\n\
     uplevel [list set itcl-local-$ptr $ptr]\n\
     set cmd [uplevel namespace which -command $ptr]\n\
     uplevel [list trace variable itcl-local-$ptr u \"::itcl::delete object $cmd; list\"]\n\
