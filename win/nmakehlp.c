@@ -9,7 +9,7 @@
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
  * ----------------------------------------------------------------------------
- * RCS: @(#) $Id: nmakehlp.c,v 1.2 2003/12/23 03:07:34 davygrvy Exp $
+ * RCS: @(#) $Id: nmakehlp.c,v 1.3 2003/12/23 04:01:22 davygrvy Exp $
  * ----------------------------------------------------------------------------
  */
 #include <windows.h>
@@ -308,16 +308,17 @@ IsIn (const char *string, const char *substring)
 }
 
 /*
- *  Find a specified #define.
+ *  Find a specified #define by name.
  *
  *  If the line is '#define TCL_VERSION "8.5"', it returns
  *  85 as the result.
  */
+
 int
 GrepForDefine (const char *file, const char *string)
 {
     FILE *f;
-    char s1[50], s2[50], s3[50];
+    char s1[51], s2[51], s3[51];
     int r = 0;
     double d1;
 
@@ -327,10 +328,10 @@ GrepForDefine (const char *file, const char *string)
     }
 
     do {
-	r = fscanf(f, "%s", s1);
+	r = fscanf(f, "%50s", s1);
 	if (r == 1 && !strcmp(s1, "#define")) {
 	    /* get next two words */
-	    r = fscanf(f, "%s %s", s2, s3);
+	    r = fscanf(f, "%50s %50s", s2, s3);
 	    if (r != 2) continue;
 	    /* is the first word what we're looking for? */
 	    if (!strcmp(s2, string)) {
