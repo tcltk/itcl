@@ -11,7 +11,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: Makefile.in,v 1.10 2000/06/22 06:13:43 welch Exp $
+# RCS: @(#) $Id: Makefile.in,v 1.11 2000/07/23 20:29:33 wart Exp $
 
 #========================================================================
 # Edit the following few lines when writing a new extension
@@ -423,16 +423,16 @@ install-lib-binaries: installdirs
 	  if test -f $$p; then \
 	    ext=`echo $$p|sed -e "s/.*\.//"`; \
 	    if test "x$$ext" = "xdll"; then \
-	        echo " $(INSTALL_DATA) $$p $(DESTDIR)$(bindir)/$$p"; \
-	        $(INSTALL_DATA) $$p $(DESTDIR)$(bindir)/$$p; \
+	        echo " $(INSTALL_PROGRAM) $$p $(DESTDIR)$(bindir)/$$p"; \
+	        $(INSTALL_PROGRAM) $$p $(DESTDIR)$(bindir)/$$p; \
 		lib=`basename $$p|sed -e 's/.[^.]*$$//'`.lib; \
 		if test -f $$lib; then \
-		    echo " $(INSTALL_DATA) $$lib $(DESTDIR)$(libdir)/$$lib"; \
-	            $(INSTALL_DATA) $$lib $(DESTDIR)$(libdir)/$$lib; \
+		    echo " $(INSTALL_PROGRAM) $$lib $(DESTDIR)$(libdir)/$$lib"; \
+	            $(INSTALL_PROGRAM) $$lib $(DESTDIR)$(libdir)/$$lib; \
 		fi; \
 	    else \
-		echo " $(INSTALL_DATA) $$p $(DESTDIR)$(libdir)/$$p"; \
-	        $(INSTALL_DATA) $$p $(DESTDIR)$(libdir)/$$p; \
+		echo " $(INSTALL_PROGRAM) $$p $(DESTDIR)$(libdir)/$$p"; \
+	        $(INSTALL_PROGRAM) $$p $(DESTDIR)$(libdir)/$$p; \
 	    fi; \
 	  else :; fi; \
 	done
