@@ -39,7 +39,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itcl.h,v 1.4 1998/08/11 14:40:37 welch Exp $
+ *     RCS:  $Id: itcl.h,v 1.5 1998/08/20 21:56:41 welch Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -57,7 +57,7 @@
 #endif
 
 #define ITCL_VERSION "3.0"
-#define ITCL_PATCH_LEVEL "3.0"
+#define ITCL_PATCH_LEVEL "3.0.1"
 #define ITCL_MAJOR_VERSION 3
 #define ITCL_MINOR_VERSION 0
 #define ITCL_RELEASE_LEVEL 0
