@@ -22,7 +22,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itcl_bicmds.c,v 1.6 2002/03/03 01:57:10 andreas_kupries Exp $
+ *     RCS:  $Id: itcl_bicmds.c,v 1.7 2003/12/23 03:11:04 davygrvy Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -660,7 +660,7 @@ ItclReportPublicOpt(interp, vdefn, contextObj)
         contextObj->classDefn);
 
     if (val) {
-        objPtr = Tcl_NewStringObj(val, -1);
+        objPtr = Tcl_NewStringObj((CONST84 char *)val, -1);
     } else {
         objPtr = Tcl_NewStringObj("<undefined>", -1);
     }
@@ -1375,13 +1375,13 @@ Itcl_BiInfoVariableCmd(dummy, interp, objc, objv)
 
                 case BIvProtectIdx:
                     val = Itcl_ProtectionStr(member->protection);
-                    objPtr = Tcl_NewStringObj(val, -1);
+                    objPtr = Tcl_NewStringObj((CONST84 char *)val, -1);
                     break;
 
                 case BIvTypeIdx:
                     val = ((member->flags & ITCL_COMMON) != 0)
                         ? "common" : "variable";
-                    objPtr = Tcl_NewStringObj(val, -1);
+                    objPtr = Tcl_NewStringObj((CONST84 char *)val, -1);
                     break;
 
                 case BIvValueIdx:
@@ -1405,7 +1405,7 @@ Itcl_BiInfoVariableCmd(dummy, interp, objc, objv)
                     if (val == NULL) {
                         val = "<undefined>";
                     }
-                    objPtr = Tcl_NewStringObj(val, -1);
+                    objPtr = Tcl_NewStringObj((CONST84 char *)val, -1);
                     break;
             }
 

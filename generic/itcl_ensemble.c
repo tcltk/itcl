@@ -23,7 +23,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itcl_ensemble.c,v 1.9 2003/12/17 02:25:37 davygrvy Exp $
+ *     RCS:  $Id: itcl_ensemble.c,v 1.10 2003/12/23 03:11:04 davygrvy Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -219,7 +219,8 @@ Itcl_CreateEnsemble(interp, ensName)
     /*
      *  Split the ensemble name into its path components.
      */
-    if (Tcl_SplitList(interp, ensName, &nameArgc, &nameArgv) != TCL_OK) {
+    if (Tcl_SplitList(interp, (CONST84 char *)ensName, &nameArgc,
+	    &nameArgv) != TCL_OK) {
         goto ensCreateFail;
     }
     if (nameArgc < 1) {
@@ -326,7 +327,8 @@ Itcl_AddEnsemblePart(interp, ensName, partName, usageInfo,
     /*
      *  Parse the ensemble name and look for a containing ensemble.
      */
-    if (Tcl_SplitList(interp, ensName, &nameArgc, &nameArgv) != TCL_OK) {
+    if (Tcl_SplitList(interp, (CONST84 char *)ensName, &nameArgc,
+	    &nameArgv) != TCL_OK) {
         goto ensPartFail;
     }
     if (FindEnsemble(interp, nameArgv, nameArgc, &ensData) != TCL_OK) {
@@ -407,7 +409,8 @@ Itcl_GetEnsemblePart(interp, ensName, partName, infoPtr)
      */
     state = Itcl_SaveInterpState(interp, TCL_OK);
 
-    if (Tcl_SplitList(interp, ensName, &nameArgc, &nameArgv) != TCL_OK) {
+    if (Tcl_SplitList(interp, (CONST84 char *)ensName, &nameArgc,
+	    &nameArgv) != TCL_OK) {
         goto ensGetFail;
     }
     if (FindEnsemble(interp, nameArgv, nameArgc, &ensData) != TCL_OK) {
@@ -516,7 +519,8 @@ Itcl_GetEnsembleUsage(interp, ensName, objPtr)
      */
     state = Itcl_SaveInterpState(interp, TCL_OK);
 
-    if (Tcl_SplitList(interp, ensName, &nameArgc, &nameArgv) != TCL_OK) {
+    if (Tcl_SplitList(interp, (CONST84 char *)ensName, &nameArgc,
+	    &nameArgv) != TCL_OK) {
         goto ensUsageFail;
     }
     if (FindEnsemble(interp, nameArgv, nameArgc, &ensData) != TCL_OK) {
@@ -1697,7 +1701,7 @@ Itcl_EnsembleCmd(clientData, interp, objc, objv)
             (char*)NULL, TCL_GLOBAL_ONLY);
 
         if (errInfo) {
-            Tcl_AddObjErrorInfo(interp, errInfo, -1);
+            Tcl_AddObjErrorInfo(interp, (CONST84 char *)errInfo, -1);
         }
 
         if (objc == 3) {

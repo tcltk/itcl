@@ -22,7 +22,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itcl_objects.c,v 1.12 2003/12/22 19:50:31 davygrvy Exp $
+ *     RCS:  $Id: itcl_objects.c,v 1.13 2003/12/23 03:11:04 davygrvy Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -1175,7 +1175,8 @@ Itcl_ScopedVarResolver(interp, name, contextNs, flags, rPtr)
         errs = NULL;
     }
 
-    if (Tcl_SplitList(errs, name, &namec, &namev) != TCL_OK) {
+    if (Tcl_SplitList(errs, (CONST84 char *)name, &namec, &namev)
+	    != TCL_OK) {
         return TCL_ERROR;
     }
     if (namec != 3) {

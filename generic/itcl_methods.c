@@ -23,7 +23,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itcl_methods.c,v 1.10 2003/12/22 19:50:31 davygrvy Exp $
+ *     RCS:  $Id: itcl_methods.c,v 1.11 2003/12/23 03:11:04 davygrvy Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -668,7 +668,7 @@ Itcl_CreateMemberCode(interp, cdefn, arglist, body, mcodePtr)
     procPtr->cmdPtr->nsPtr = (Namespace*)cdefn->namesp;
 
     if (body) {
-        procPtr->bodyPtr = Tcl_NewStringObj(body, -1);
+        procPtr->bodyPtr = Tcl_NewStringObj((CONST84 char *)body, -1);
         Tcl_IncrRefCount(procPtr->bodyPtr);
     } else {
         procPtr->bodyPtr = NULL;
@@ -1064,7 +1064,8 @@ Itcl_CreateArgList(interp, decl, argcPtr, argPtr)
     *argcPtr = 0;
 
     if (decl) {
-        if (Tcl_SplitList(interp, decl, &argc, &argv) != TCL_OK) {
+        if (Tcl_SplitList(interp, (CONST84 char *)decl, &argc, &argv)
+		!= TCL_OK) {
             return TCL_ERROR;
         }
 
@@ -1164,7 +1165,7 @@ Itcl_CreateArg(name, init)
     localPtr->resolveInfo = NULL;
 
     if (init != NULL) {
-        localPtr->defValuePtr = Tcl_NewStringObj(init, -1);
+        localPtr->defValuePtr = Tcl_NewStringObj((CONST84 char *)init, -1);
         Tcl_IncrRefCount(localPtr->defValuePtr);
     } else {
         localPtr->defValuePtr = NULL;

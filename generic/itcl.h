@@ -39,7 +39,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itcl.h,v 1.23 2003/12/22 19:50:31 davygrvy Exp $
+ *     RCS:  $Id: itcl.h,v 1.24 2003/12/23 03:11:04 davygrvy Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -51,37 +51,24 @@
 
 #include "tcl.h"
 
+#ifndef TCL_ALPHA_RELEASE
+#   define TCL_ALPHA_RELEASE	0
+#endif
+#ifndef TCL_BETA_RELEASE
+#   define TCL_BETA_RELEASE	1
+#endif
+#ifndef TCL_FINAL_RELEASE
+#   define TCL_FINAL_RELEASE	2
+#endif
+
+
 #define ITCL_MAJOR_VERSION	3
 #define ITCL_MINOR_VERSION	3
-#define ITCL_RELEASE_LEVEL	TCL_ALPHA_RELEASE
+#define ITCL_RELEASE_LEVEL	TCL_BETA_RELEASE
 #define ITCL_RELEASE_SERIAL	1
 
-#define ITCL_VERSION	   STRINGIFY(JOIN(ITCL_MAJOR_VERSION,JOIN(.,ITCL_MINOR_VERSION)))
-
-#if	ITCL_RELEASE_LEVEL == TCL_ALPHA_RELEASE
-#	define ITCL_PATCH_LEVEL \
-		STRINGIFY( \
-			JOIN(JOIN(ITCL_MAJOR_VERSION, \
-			JOIN(., ITCL_MINOR_VERSION)), \
-			JOIN(a, ITCL_RELEASE_SERIAL)))
-
-#elif	ITCL_RELEASE_LEVEL == TCL_BETA_RELEASE
-#	define ITCL_PATCH_LEVEL \
-		STRINGIFY( \
-			JOIN(JOIN(ITCL_MAJOR_VERSION, \
-			JOIN(., ITCL_MINOR_VERSION)), \
-			JOIN(b, ITCL_RELEASE_SERIAL)))
-
-#elif	ITCL_RELEASE_LEVEL == TCL_FINAL_RELEASE
-#	define ITCL_PATCH_LEVEL \
-		STRINGIFY( \
-			JOIN(JOIN(ITCL_MAJOR_VERSION, \
-			JOIN(., ITCL_MINOR_VERSION)), \
-			JOIN(., ITCL_RELEASE_SERIAL)))
-
-#else
-#	error bad release level used.
-#endif
+#define ITCL_VERSION		"3.3"
+#define ITCL_PATCH_LEVEL	"3.3b1"
 
 /* 
  * A special definition used to allow this header file to be included 
@@ -140,9 +127,9 @@
 
 
 /*
- * Starting from 8.4 core, Tcl API is CONST'ified.  Our API is always
- * CONST, but we need to build with Tcl when it isn't CONST and fake
- * it when needed with <= 8.3
+ * Starting from the 8.4 core, Tcl API is CONST'ified.  Our API is always
+ * CONST, but we need to build with Tcl when it isn't CONST and fake it
+ * when needed with <= 8.3
  *
  * http://wiki.tcl.tk/3669
  */
@@ -151,6 +138,17 @@
 #   define CONST84
 #endif
 
+/*
+ * Some backward compatability adjustments.
+ */
+
+#if TCL_MAJOR_VERSION == 8 && TCL_MINOR_VERSION == 0
+#   define Tcl_GetString(obj)	Tcl_GetStringFromObj((obj), NULL)
+#   define TCL_DECLARE_MUTEX(mutexVar)
+#   define Tcl_MutexLock(mutexVar)
+#   define Tcl_MutexUnlock(mutexVar)
+#   define Tcl_Panic panic
+#endif
 
 /*
  * Protection levels:

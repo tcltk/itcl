@@ -21,7 +21,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itcl_util.c,v 1.10 2003/12/22 19:50:31 davygrvy Exp $
+ *     RCS:  $Id: itcl_util.c,v 1.11 2003/12/23 03:11:04 davygrvy Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -1237,7 +1237,8 @@ Itcl_DecodeScopedCommand(interp, name, rNsPtr, rCmdPtr)
 	if ((*pos == 'i') && ((pos + 7) <= (name + len))
 	        && (strncmp(pos, "inscope", 7) == 0)) {
 
-            result = Tcl_SplitList(interp, name, &listc, &listv);
+            result = Tcl_SplitList(interp, (CONST84 char *)name, &listc,
+		    &listv);
             if (result == TCL_OK) {
                 if (listc != 4) {
                     Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
@@ -1377,7 +1378,7 @@ Itcl_CreateArgs(interp, string, objc, objv)
 
     listPtr = Tcl_NewListObj(0, (Tcl_Obj**)NULL);
     Tcl_ListObjAppendElement((Tcl_Interp*)NULL, listPtr,
-        Tcl_NewStringObj(string, -1));
+        Tcl_NewStringObj((CONST84 char *)string, -1));
 
     for (i=0; i < objc; i++) {
         Tcl_ListObjAppendElement((Tcl_Interp*)NULL, listPtr, objv[i]);

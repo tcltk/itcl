@@ -21,7 +21,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itcl_cmds.c,v 1.21 2003/12/22 20:21:28 davygrvy Exp $
+ *     RCS:  $Id: itcl_cmds.c,v 1.22 2003/12/23 03:11:04 davygrvy Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -29,6 +29,11 @@
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  */
 #include "itclInt.h"
+
+#define TCL_DOES_STUBS \
+    (TCL_MAJOR_VERSION > 8 || TCL_MAJOR_VERSION == 8 && (TCL_MINOR_VERSION > 1 || \
+    (TCL_MINOR_VERSION == 1 && TCL_RELEASE_LEVEL == TCL_FINAL_RELEASE)))
+
 
 /*
  *  FORWARD DECLARATIONS
@@ -101,9 +106,6 @@ static char safeInitScript[] =
     return $ptr\n\
 }";
 
-extern ItclStubs itclStubs;
-
-
 int itclCompatFlags = -1;
 
 
@@ -130,9 +132,15 @@ Initialize(interp)
     Tcl_Namespace *itclNs;
     ItclObjectInfo *info;
 
-    if (Tcl_InitStubs(interp, TCL_VERSION, 0) == NULL) {
-	return TCL_ERROR;
-    };
+#ifndef USE_TCL_STUBS
+    if (Tcl_PkgRequire(interp, "Tcl", TCL_VERSION, 0) == NULL) {
+      return TCL_ERROR;
+    }
+#else
+    if (Tcl_InitStubs(interp, "8.1", 0) == NULL) {
+      return TCL_ERROR;
+    }
+#endif
 
     /*
      *  See if [incr Tcl] is already installed.
@@ -150,6 +158,7 @@ Initialize(interp)
      *
      *  TODO: make a TIP for exporting a Tcl_CommandIsDeleted function in the core.
      */
+#if TCL_DOES_STUBS
     if (itclCompatFlags == -1) {
 	int maj, min, ptch, type;
 
@@ -160,6 +169,9 @@ Initialize(interp)
 	    itclCompatFlags = ITCL_COMPAT_USECMDFLAGS;
 	}
     }
+#else
+    itclCompatFlags = 0;
+#endif
 
 
     /*
@@ -358,10 +370,20 @@ Initialize(interp)
     /*
      *  Package is now loaded.
      */
-    if (Tcl_PkgProvideEx(interp, "Itcl", ITCL_VERSION,
-            (ClientData) &itclStubs) != TCL_OK) {
+#if TCL_DOES_STUBS
+    {
+	extern ItclStubs itclStubs;
+	if (Tcl_PkgProvideEx(interp, "Itcl", ITCL_VERSION,
+		(ClientData)&itclStubs) != TCL_OK) {
+	    return TCL_ERROR;
+	}
+    }
+#else
+    if (Tcl_PkgProvide(interp, "Itcl", ITCL_VERSION) != TCL_OK) {
 	return TCL_ERROR;
     }
+#endif
+
     return TCL_OK;
 }
 
@@ -563,7 +585,7 @@ Itcl_FindClassesCmd(clientData, interp, objc, objv)
                     cmdName = Tcl_GetString(objPtr);
                 } else {
                     cmdName = Tcl_GetCommandName(interp, cmd);
-                    objPtr = Tcl_NewStringObj(cmdName, -1);
+                    objPtr = Tcl_NewStringObj((CONST84 char *)cmdName, -1);
                 }
 
                 if (originalCmd) {
@@ -572,9 +594,10 @@ Itcl_FindClassesCmd(clientData, interp, objc, objv)
                 Tcl_CreateHashEntry(&unique, (char*)cmd, &newEntry);
 
                 if (newEntry &&
-			(!pattern || Tcl_StringMatch(cmdName, pattern))) {
+			(!pattern || Tcl_StringMatch((CONST84 char *)cmdName,
+			pattern))) {
                     Tcl_ListObjAppendElement((Tcl_Interp*)NULL,
-                        Tcl_GetObjResult(interp), objPtr);
+			    Tcl_GetObjResult(interp), objPtr);
                 } else {
 		    /* if not appended to the result, free objPtr. */
 		    Tcl_DecrRefCount(objPtr);
@@ -743,14 +766,15 @@ Itcl_FindObjectsCmd(clientData, interp, objc, objv)
 		    cmdName = Tcl_GetString(objPtr);
                 } else {
                     cmdName = Tcl_GetCommandName(interp, cmd);
-                    objPtr = Tcl_NewStringObj(cmdName, -1);
+                    objPtr = Tcl_NewStringObj((CONST84 char *)cmdName, -1);
                 }
 
                 Tcl_CreateHashEntry(&unique, (char*)cmd, &newEntry);
 
                 match = 0;
 		if (newEntry &&
-			(!pattern || Tcl_StringMatch(cmdName, pattern))) {
+			(!pattern || Tcl_StringMatch((CONST84 char *)cmdName,
+			pattern))) {
                     if (!classDefn || (contextObj->classDefn == classDefn)) {
                         if (!isaDefn) {
                             match = 1;
