@@ -1562,7 +1562,6 @@ echo "${ECHO_T}file not found" >&6
 
 
 
-    #AC_SUBST(TCL_DBGX)
 
 
 
@@ -6135,10 +6134,11 @@ fi
     ECHO_VERSION='`echo ${PACKAGE_VERSION}`'
     TCL_LIB_VERSIONS_OK=ok
     CFLAGS_DEBUG=-g
-    CFLAGS_OPTIMIZE=-O
     if test "$GCC" = "yes" ; then
+	CFLAGS_OPTIMIZE=-O2
 	CFLAGS_WARNING="-Wall -Wno-implicit-int"
     else
+	CFLAGS_OPTIMIZE=-O
 	CFLAGS_WARNING=""
     fi
     TCL_NEEDS_EXP_FILE=0
@@ -6346,7 +6346,7 @@ echo "$as_me: error: could not find PocketPC SDK or target compiler to enable Wi
 		    export STLIB_LD="${MSSDK}/bin/win64/lib.exe -nologo ${lflags}"
 		    export LINKBIN="${MSSDK}/bin/win64/link.exe ${lflags}"
 		    CFLAGS_DEBUG="-nologo -Zi -Od -W3 ${runtime}d"
-		    CFLAGS_OPTIMIZE="-nologo -O2 -Gs -W2 ${runtime}"
+		    CFLAGS_OPTIMIZE="-nologo -O2 -W2 ${runtime}"
 		elif test "$doWince" != "no" ; then
 		    CEBINROOT="${WCEROOT}/EVC/${OSVERSION}/bin"
 		    if test "${TARGETCPU}" = "X86"; then
@@ -6381,10 +6381,10 @@ _ACEOF
 
 		else
 		    RC="rc"
-		    STLIB_LD="lib -nologo"
-    		    LINKBIN="link -link50compat"
+		    STLIB_LD="link -lib -nologo"
+    		    LINKBIN="link"
 		    CFLAGS_DEBUG="-nologo -Z7 -Od -W3 -WX ${runtime}d"
-		    CFLAGS_OPTIMIZE="-nologo -O2 -Gs -GD -W2 ${runtime}"
+		    CFLAGS_OPTIMIZE="-nologo -O2 -W2 ${runtime}"
 		fi
 	    fi
 
@@ -6392,15 +6392,14 @@ _ACEOF
 		# mingw gcc mode
 		RC="windres"
 		CFLAGS_DEBUG="-g"
-		CFLAGS_OPTIMIZE="-O2"
+		CFLAGS_OPTIMIZE="-O2 -fomit-frame-pointer"
 		SHLIB_LD="$CC -shared"
-		UNSHARED_LIB_SUFFIX='${TCL_TRIM_DOTS}\$\{DBGX\}.a'
+		UNSHARED_LIB_SUFFIX='${TCL_TRIM_DOTS}.a'
 		LDFLAGS_CONSOLE="-wl,--subsystem,console ${lflags}"
 		LDFLAGS_WINDOW="-wl,--subsystem,windows ${lflags}"
 	    else
 		SHLIB_LD="${LINKBIN} -dll -nologo"
-		UNSHARED_LIB_SUFFIX='${TCL_TRIM_DOTS}\$\{DBGX\}.lib'
-		CFLAGS="$CFLAGS -YX"
+		UNSHARED_LIB_SUFFIX='${TCL_TRIM_DOTS}.lib'
 		PATHTYPE=-w
 		# For information on what debugtype is most useful, see:
 		# http://msdn.microsoft.com/library/en-us/dnvc60/html/gendepdebug.asp
@@ -6418,7 +6417,7 @@ _ACEOF
 
 	    SHLIB_LD_LIBS='${LIBS}'
 	    SHLIB_SUFFIX=".dll"
-	    SHARED_LIB_SUFFIX='${TCL_TRIM_DOTS}\$\{DBGX\}.dll'
+	    SHARED_LIB_SUFFIX='${TCL_TRIM_DOTS}.dll'
 
 	    TCL_LIB_VERSIONS_OK=nodots
 	    # Bogus to avoid getting this turned off
@@ -6478,7 +6477,7 @@ echo "$as_me: WARNING: \"64bit mode not supported with GCC on $system\"" >&2;}
 		DL_LIBS="-ldl"
 		LD_SEARCH_FLAGS='-L${LIB_RUNTIME_DIR}'
 		TCL_NEEDS_EXP_FILE=1
-		TCL_EXPORT_FILE_SUFFIX='${PACKAGE_VERSION}\$\{DBGX\}.exp'
+		TCL_EXPORT_FILE_SUFFIX='${PACKAGE_VERSION}.exp'
 	    fi
 
 	    # On AIX <=v4 systems, libbsd.a has to be linked in to support
@@ -6790,7 +6789,7 @@ fi
 	    DL_LIBS=""
 	    LDFLAGS="$LDFLAGS -Wl,-D,08000000"
 	    LD_SEARCH_FLAGS='-L${LIB_RUNTIME_DIR}'
-	    SHARED_LIB_SUFFIX='${PACKAGE_VERSION}\$\{DBGX\}.a'
+	    SHARED_LIB_SUFFIX='${PACKAGE_VERSION}.a'
 	    ;;
 	IRIX-5.*)
 	    SHLIB_CFLAGS=""
@@ -6853,7 +6852,7 @@ echo "$as_me: WARNING: 64bit mode not supported by gcc" >&2;}
 	    SHLIB_LD_LIBS='${LIBS}'
 	    SHLIB_SUFFIX=".so"
 
-	    CFLAGS_OPTIMIZE=-O2
+	    CFLAGS_OPTIMIZE="-O2 -fomit-frame-pointer"
 	    # egcs-2.91.66 on Redhat Linux 6.0 generates lots of warnings
 	    # when you inline the string and math operations.  Turn this off to
 	    # get rid of the warnings.
@@ -7356,11 +7355,11 @@ if (eval "$ac_cpp conftest.$ac_ext") 2>&5 |
   $EGREP "yes" >/dev/null 2>&1; then
   echo "$as_me:$LINENO: result: yes" >&5
 echo "${ECHO_T}yes" >&6
-		    SHARED_LIB_SUFFIX='${TCL_TRIM_DOTS}\$\{DBGX\}.so'
+		    SHARED_LIB_SUFFIX='${TCL_TRIM_DOTS}.so'
 else
   echo "$as_me:$LINENO: result: no" >&5
 echo "${ECHO_T}no" >&6
-		    SHARED_LIB_SUFFIX='${TCL_TRIM_DOTS}\$\{DBGX\}.so.1.0'
+		    SHARED_LIB_SUFFIX='${TCL_TRIM_DOTS}.so.1.0'
 
 fi
 rm -f conftest*
@@ -7375,7 +7374,7 @@ else
 		DL_OBJS="tclLoadAout.o"
 		DL_LIBS=""
 		LD_SEARCH_FLAGS='-L${LIB_RUNTIME_DIR}'
-		SHARED_LIB_SUFFIX='${TCL_TRIM_DOTS}\$\{DBGX\}.a'
+		SHARED_LIB_SUFFIX='${TCL_TRIM_DOTS}.a'
 
 fi
 
@@ -7383,7 +7382,7 @@ fi
 
 	    # FreeBSD doesn't handle version numbers with dots.
 
-	    UNSHARED_LIB_SUFFIX='${TCL_TRIM_DOTS}\$\{DBGX\}.a'
+	    UNSHARED_LIB_SUFFIX='${TCL_TRIM_DOTS}.a'
 	    TCL_LIB_VERSIONS_OK=nodots
 	    ;;
 	OpenBSD-*)
@@ -7412,18 +7411,18 @@ if (eval "$ac_cpp conftest.$ac_ext") 2>&5 |
   $EGREP "yes" >/dev/null 2>&1; then
   echo "$as_me:$LINENO: result: yes" >&5
 echo "${ECHO_T}yes" >&6
-		SHARED_LIB_SUFFIX='${TCL_TRIM_DOTS}\$\{DBGX\}.so.1.0'
+		SHARED_LIB_SUFFIX='${TCL_TRIM_DOTS}.so.1.0'
 else
   echo "$as_me:$LINENO: result: no" >&5
 echo "${ECHO_T}no" >&6
-		SHARED_LIB_SUFFIX='${TCL_TRIM_DOTS}\$\{DBGX\}.so.1.0'
+		SHARED_LIB_SUFFIX='${TCL_TRIM_DOTS}.so.1.0'
 
 fi
 rm -f conftest*
 
 
 	    # OpenBSD doesn't do version numbers with dots.
-	    UNSHARED_LIB_SUFFIX='${TCL_TRIM_DOTS}\$\{DBGX\}.a'
+	    UNSHARED_LIB_SUFFIX='${TCL_TRIM_DOTS}.a'
 	    TCL_LIB_VERSIONS_OK=nodots
 	    ;;
 	FreeBSD-*)
@@ -7445,8 +7444,8 @@ rm -f conftest*
 	    case $system in
 	    FreeBSD-3.*)
 	    	# FreeBSD-3 doesn't handle version numbers with dots.
-	    	UNSHARED_LIB_SUFFIX='${TCL_TRIM_DOTS}\$\{DBGX\}.a'
-	    	SHARED_LIB_SUFFIX='${TCL_TRIM_DOTS}\$\{DBGX\}.so'
+	    	UNSHARED_LIB_SUFFIX='${TCL_TRIM_DOTS}.a'
+	    	SHARED_LIB_SUFFIX='${TCL_TRIM_DOTS}.so'
 	    	TCL_LIB_VERSIONS_OK=nodots
 		;;
 	    esac
@@ -7599,8 +7598,8 @@ _ACEOF
 	    # requires an extra version number at the end of .so file names.
 	    # So, the library has to have a name like libtcl75.so.1.0
 
-	    SHARED_LIB_SUFFIX='${TCL_TRIM_DOTS}\$\{DBGX\}.so.1.0'
-	    UNSHARED_LIB_SUFFIX='${TCL_TRIM_DOTS}\$\{DBGX\}.a'
+	    SHARED_LIB_SUFFIX='${TCL_TRIM_DOTS}.so.1.0'
+	    UNSHARED_LIB_SUFFIX='${TCL_TRIM_DOTS}.a'
 	    TCL_LIB_VERSIONS_OK=nodots
 	    ;;
 	SunOS-5.[0-6]*)
@@ -8019,10 +8018,10 @@ fi;
     fi
 
     if test "$SHARED_LIB_SUFFIX" = "" ; then
-	SHARED_LIB_SUFFIX='${PACKAGE_VERSION}\$\{DBGX\}${SHLIB_SUFFIX}'
+	SHARED_LIB_SUFFIX='${PACKAGE_VERSION}${SHLIB_SUFFIX}'
     fi
     if test "$UNSHARED_LIB_SUFFIX" = "" ; then
-	UNSHARED_LIB_SUFFIX='${PACKAGE_VERSION}\$\{DBGX\}.a'
+	UNSHARED_LIB_SUFFIX='${PACKAGE_VERSION}.a'
     fi
 
 
@@ -8506,11 +8505,7 @@ echo "${ECHO_T}${tcl_cv_type_off64_t}" >&6
 
 
 
-    if test "${TEA_PLATFORM}" = "windows" ; then
-	tcl_dbgx=d
-    else
-	tcl_dbgx=g
-    fi
+    DBGX=""
 
     echo "$as_me:$LINENO: checking for build with symbols" >&5
 echo $ECHO_N "checking for build with symbols... $ECHO_C" >&6
@@ -8524,15 +8519,11 @@ fi;
     if test "$tcl_ok" = "no"; then
 	CFLAGS_DEFAULT="${CFLAGS_OPTIMIZE}"
 	LDFLAGS_DEFAULT="${LDFLAGS_OPTIMIZE}"
-	DBGX=""
-	TCL_DBGX=""
 	echo "$as_me:$LINENO: result: no" >&5
 echo "${ECHO_T}no" >&6
     else
 	CFLAGS_DEFAULT="${CFLAGS_DEBUG}"
 	LDFLAGS_DEFAULT="${LDFLAGS_DEBUG}"
-	DBGX=${tcl_dbgx}
-	TCL_DBGX=${tcl_dbgx}
 	if test "$tcl_ok" = "yes"; then
 	    echo "$as_me:$LINENO: result: yes (standard debugging)" >&5
 echo "${ECHO_T}yes (standard debugging)" >&6
@@ -8603,8 +8594,8 @@ fi
 
     #--------------------------------------------------------------------
     # Shared libraries and static libraries have different names.
-    # Use the double eval to make sure the ${DBGX} in the suffix is
-    # substituted.
+    # Use the double eval to make sure any variables in the suffix is
+    # substituted. (@@@ Might not be necessary anymore)
     #--------------------------------------------------------------------
 
     RANLIB_STUB="${RANLIB}"
