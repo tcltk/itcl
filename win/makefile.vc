@@ -5,7 +5,7 @@
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 # 
 # Copyright (c) 1993-1998 Lucent Technologies, Inc.
-# RCS: $Id: makefile.vc,v 1.29 2004/02/12 20:22:26 davygrvy Exp $
+# RCS: $Id: makefile.vc,v 1.30 2004/04/29 17:40:44 davygrvy Exp $
 #------------------------------------------------------------------------------
 #  Do not modify this file!
 #------------------------------------------------------------------------------
@@ -190,26 +190,20 @@ ITCL_CFLAGS	= $(ITCL_EXE_CFLAGS)
 !endif
 
 #---------------------------------------------------------------------
+# TclTest flags
+#---------------------------------------------------------------------
+
+!if "$(TESTPAT)" != ""
+TESTFLAGS = -file $(TESTPAT)
+!endif
+
+#---------------------------------------------------------------------
 # Project specific targets
 #---------------------------------------------------------------------
 
 all :     setup $(ITCLLIB) $(ITCLSTUBLIB)
 release : setup $(ITCLLIB) $(ITCLSTUBLIB)
 install : install-binaries install-docs
-
-!if $(STATIC_BUILD)
-test :
-	@echo test target not supported for a static library.
-!else
-#test :    setup $(ITCLLIB) $(ITCLSTUBLIB) $(PKGINDEX)
-#	-@copy $(TCLDLL) $(TMP_DIR)
-#	$(TCLSH) <<
-#cd ../tests
-#lappend auto_path ../win/$(TMP_DIR)
-#set env(ITCL_LIBRARY) ../library
-#source all
-#<<
-!endif
 
 setup :
 	@if not exist $(TMP_DIR)\nul mkdir $(TMP_DIR)
@@ -266,12 +260,16 @@ install-binaries :
 	echo }>> "$(SCRIPT_INSTALL_DIR)\pkgIndex.tcl"
 	echo unset add>> "$(SCRIPT_INSTALL_DIR)\pkgIndex.tcl"
 
+!if $(STATIC_BUILD)
 test :
+	@echo test target not supported for a static library.
+!else
+test : setup $(ITCLLIB) $(ITCLSTUBLIB)
 	$(TCLSH) ..\tests\all.tcl $(TESTFLAGS) -loadfile <<
 	set env(ITCL_LIBRARY) [file normalize [file join $(MAKEDIR:\=/) .. library]]
-	load [file normalize $(ITCLLIB:\=/)]
-<<
-
+	load [file normalize [file join $(MAKEDIR:\=/) $(ITCLLIB:\=/)]]
+<<keep
+!endif
 
 #---------------------------------------------------------------------
 # Regenerate the stubs files.
