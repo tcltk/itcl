@@ -37,7 +37,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itcl_parse.c,v 1.4 2000/01/03 15:56:48 csmith Exp $
+ *     RCS:  $Id: itcl_parse.c,v 1.5 2002/03/03 01:57:10 andreas_kupries Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -960,10 +960,10 @@ Itcl_ClassCommonCmd(clientData, interp, objc, objv)
     Itcl_BuildVirtualTables(cdefnPtr);
 
     if (init) {
-        init = Tcl_SetVar(interp, vdefn->member->name, init,
+        CONST char *val = Tcl_SetVar(interp, vdefn->member->name, init,
             TCL_NAMESPACE_ONLY);
 
-        if (!init) {
+        if (!val) {
             Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
                 "cannot initialize common variable \"",
                 vdefn->member->name, "\"",

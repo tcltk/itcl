@@ -9,7 +9,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 # 
-# RCS: @(#) $Id: itclInt.decls,v 1.2 2001/05/22 01:35:38 davygrvy Exp $
+# RCS: @(#) $Id: itclInt.decls,v 1.3 2002/03/03 01:57:10 andreas_kupries Exp $
 
 library itcl
 
@@ -152,7 +152,7 @@ declare 34 generic {
         int objc, Tcl_Obj *CONST objv[])
 }
 declare 35 generic {
-    int Itcl_ClassCmdResolver (Tcl_Interp *interp, CONST char* name, \
+    int Itcl_ClassCmdResolver (Tcl_Interp *interp, char* name, \
         Tcl_Namespace *context, int flags, Tcl_Command *rPtr)
 }
 declare 36 generic {
@@ -174,7 +174,7 @@ declare 40 generic {
     void Itcl_DeleteVarDefn (ItclVarDefn *vdefn)
 }
 declare 41 generic {
-    char* Itcl_GetCommonVar (Tcl_Interp *interp, char *name, \
+    CONST char* Itcl_GetCommonVar (Tcl_Interp *interp, char *name, \
         ItclClass *contextClass)
 }
 declare 42 generic {
@@ -206,7 +206,7 @@ declare 47 generic {
         int objc, Tcl_Obj *CONST objv[])
 }
 declare 48 generic {
-    char* Itcl_GetInstanceVar (Tcl_Interp *interp, char *name, \
+    CONST char* Itcl_GetInstanceVar (Tcl_Interp *interp, char *name, \
         ItclObject *contextObj, ItclClass *contextClass)
 }
 declare 49 generic {

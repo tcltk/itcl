@@ -22,7 +22,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itcl_bicmds.c,v 1.5 2001/05/22 15:36:52 davygrvy Exp $
+ *     RCS:  $Id: itcl_bicmds.c,v 1.6 2002/03/03 01:57:10 andreas_kupries Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -323,7 +323,8 @@ Itcl_BiConfigureCmd(clientData, interp, objc, objv)
     ItclObject *contextObj;
 
     int i, result;
-    char *token, *lastval;
+    CONST char *lastval;
+    char *token;
     ItclClass *cdPtr;
     Tcl_HashSearch place;
     Tcl_HashEntry *entry;
@@ -546,7 +547,7 @@ Itcl_BiCgetCmd(clientData, interp, objc, objv)
     ItclClass *contextClass;
     ItclObject *contextObj;
 
-    char *name, *val;
+    CONST char *name, *val;
     ItclVarLookup *vlookup;
     Tcl_HashEntry *entry;
 
@@ -588,7 +589,11 @@ Itcl_BiCgetCmd(clientData, interp, objc, objv)
         contextObj, contextObj->classDefn);
 
     if (val) {
-        Tcl_SetResult(interp, val, TCL_VOLATILE);
+	/*
+	 * Casting away CONST of val is safe because TCL_VOLATILE
+	 * guranatees CONST treatment.
+	 */
+        Tcl_SetResult(interp, (char *) val, TCL_VOLATILE);
     } else {
         Tcl_SetResult(interp, "<undefined>", TCL_STATIC);
     }
@@ -615,7 +620,7 @@ ItclReportPublicOpt(interp, vdefn, contextObj)
     ItclVarDefn *vdefn;      /* public variable to be reported */
     ItclObject *contextObj;  /* object containing this variable */
 {
-    char *val;
+    CONST char *val;
     ItclClass *cdefnPtr;
     Tcl_HashEntry *entry;
     ItclVarLookup *vlookup;
@@ -1247,7 +1252,7 @@ Itcl_BiInfoVariableCmd(dummy, interp, objc, objv)
     ItclObject *contextObj;
 
     int i, result;
-    char *val, *name;
+    CONST char *val, *name;
     ItclClass *cdefn;
     Tcl_HashSearch place;
     Tcl_HashEntry *entry;

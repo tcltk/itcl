@@ -23,7 +23,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itcl_ensemble.c,v 1.7 2001/10/25 22:01:48 hobbs Exp $
+ *     RCS:  $Id: itcl_ensemble.c,v 1.8 2002/03/03 01:57:10 andreas_kupries Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -1693,7 +1693,7 @@ Itcl_EnsembleCmd(clientData, interp, objc, objv)
      *  Otherwise, the offending command is reported twice.
      */
     if (status == TCL_ERROR) {
-        char *errInfo = Tcl_GetVar2(ensInfo->parser, "::errorInfo",
+        CONST char *errInfo = Tcl_GetVar2(ensInfo->parser, "::errorInfo",
             (char*)NULL, TCL_GLOBAL_ONLY);
 
         if (errInfo) {

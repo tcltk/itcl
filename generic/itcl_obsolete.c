@@ -38,7 +38,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itcl_obsolete.c,v 1.1 1998/07/27 18:41:48 stanton Exp $
+ *     RCS:  $Id: itcl_obsolete.c,v 1.2 2002/03/03 01:57:10 andreas_kupries Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -800,10 +800,10 @@ ItclOldCommonCmd(clientData, interp, objc, objv)
     Itcl_BuildVirtualTables(cdefnPtr);
 
     if (init) {
-        init = Tcl_SetVar(interp, vdefn->member->name, init,
+        CONST char *val = Tcl_SetVar(interp, vdefn->member->name, init,
             TCL_NAMESPACE_ONLY);
 
-        if (!init) {
+        if (!val) {
             Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
                 "cannot initialize common variable \"",
                 vdefn->member->name, "\"",
@@ -1433,7 +1433,7 @@ ItclOldBiInfoPublicsCmd(dummy, interp, objc, objv)
     int varCheck = 0;
     int varValue = 0;
 
-    char *token, *val;
+    CONST char *token, *val;
     ItclClass *contextClass;
     ItclObject *contextObj;
 
@@ -1616,7 +1616,7 @@ ItclOldBiInfoProtectedsCmd(dummy, interp, objc, objv)
     int varInit = 0;
     int varValue = 0;
 
-    char *token, *val;
+    CONST char *token, *val;
     ItclClass *contextClass;
     ItclObject *contextObj;
 
@@ -1808,7 +1808,7 @@ ItclOldBiInfoCommonsCmd(dummy, interp, objc, objv)
     int varInit = 0;
     int varValue = 0;
 
-    char *token, *val;
+    CONST char *token, *val;
     ItclClass *contextClass;
     ItclObject *contextObj;
 

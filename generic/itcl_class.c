@@ -23,7 +23,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itcl_class.c,v 1.9 2001/05/22 01:35:38 davygrvy Exp $
+ *     RCS:  $Id: itcl_class.c,v 1.10 2002/03/03 01:57:10 andreas_kupries Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -934,7 +934,7 @@ Itcl_HandleClass(clientData, interp, objc, objv)
 int
 Itcl_ClassCmdResolver(interp, name, context, flags, rPtr)
     Tcl_Interp *interp;       /* current interpreter */
-    CONST char* name;               /* name of the command being accessed */
+    char* name;               /* name of the command being accessed */
     Tcl_Namespace *context;   /* namespace performing the resolution */
     int flags;                /* TCL_LEAVE_ERR_MSG => leave error messages
                                *   in interp if anything goes wrong */
@@ -1675,13 +1675,13 @@ Itcl_DeleteVarDefn(vdefn)
  *  anything goes wrong, this returns NULL.
  * ------------------------------------------------------------------------
  */
-char*
+CONST char*
 Itcl_GetCommonVar(interp, name, contextClass)
     Tcl_Interp *interp;        /* current interpreter */
     char *name;                /* name of desired instance variable */
     ItclClass *contextClass;   /* name is interpreted in this scope */
 {
-    char *val = NULL;
+    CONST char *val = NULL;
     int result;
     Tcl_CallFrame frame;
 
@@ -1714,7 +1714,7 @@ ItclMember*
 Itcl_CreateMember(interp, cdefn, name)
     Tcl_Interp* interp;            /* interpreter managing this action */
     ItclClass *cdefn;              /* class definition */
-    char* name;                    /* name of new member */
+    char* name;              /* name of new member */
 {
     ItclMember *memPtr;
     int fullsize;

@@ -23,7 +23,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itcl_methods.c,v 1.7 2001/10/25 22:02:02 hobbs Exp $
+ *     RCS:  $Id: itcl_methods.c,v 1.8 2002/03/03 01:57:10 andreas_kupries Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -2168,7 +2168,7 @@ ItclHandleConfig(interp, argc, vars, vals, contextObj)
     int result = TCL_OK;
 
     int i;
-    char *val;
+    CONST char *val;
     Tcl_DString lastval;
     ItclContext context;
     Tcl_CallFrame *oldFramePtr, *uplevelFramePtr;

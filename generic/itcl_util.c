@@ -21,7 +21,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itcl_util.c,v 1.6 2001/09/06 21:42:12 davygrvy Exp $
+ *     RCS:  $Id: itcl_util.c,v 1.7 2002/03/03 01:57:11 andreas_kupries Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -751,7 +751,7 @@ Itcl_SaveInterpState(interp, status)
     Interp *iPtr = (Interp*)interp;
 
     InterpState *info;
-    char *val;
+    CONST char *val;
 
     info = (InterpState*)ckalloc(sizeof(InterpState));
     info->validate = TCL_STATE_VALID;

@@ -22,7 +22,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itcl_objects.c,v 1.5 2001/05/22 15:32:47 davygrvy Exp $
+ *     RCS:  $Id: itcl_objects.c,v 1.6 2002/03/03 01:57:10 andreas_kupries Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -704,7 +704,7 @@ Itcl_HandleInstance(clientData, interp, objc, objv)
  *  anything goes wrong, this returns NULL.
  * ------------------------------------------------------------------------
  */
-char*
+CONST char*
 Itcl_GetInstanceVar(interp, name, contextObj, contextClass)
     Tcl_Interp *interp;       /* current interpreter */
     char *name;               /* name of desired instance variable */
@@ -712,7 +712,7 @@ Itcl_GetInstanceVar(interp, name, contextObj, contextClass)
     ItclClass *contextClass;  /* name is interpreted in this scope */
 {
     ItclContext context;
-    char *val;
+    CONST char *val;
 
     /*
      *  Make sure that the current namespace context includes an

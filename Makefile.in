@@ -11,7 +11,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: Makefile.in,v 1.15 2001/05/29 15:51:16 andreas_kupries Exp $
+# RCS: @(#) $Id: Makefile.in,v 1.16 2002/03/03 01:57:10 andreas_kupries Exp $
 
 #========================================================================
 # Edit the following few lines when writing a new extension
@@ -220,7 +220,7 @@ INCLUDES = @TCL_INCLUDES@ @ITCL_INCLUDES@
 
 EXTRA_CFLAGS = $(AC_FLAGS) $(PROTO_FLAGS) $(MEM_DEBUG_FLAGS) $(NO_DEPRECATED_FLAGS) $(TCL_EXTRA_CFLAGS)
 
-DEFS = @DEFS@ $(EXTRA_CFLAGS) -DITCL_LIBRARY=\"$(ITCL_LIBRARY)\"
+DEFS = @DEFS@ $(EXTRA_CFLAGS) -DITCL_LIBRARY=\"$(ITCL_LIBRARY)\" -DUSE_NON_CONST
 
 ACLOCAL_M4 = $(srcdir)/aclocal.m4
 mkinstalldirs = $(SHELL) $(top_srcdir)/../config/mkinstalldirs
