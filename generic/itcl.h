@@ -42,7 +42,7 @@
  *       modified for Stubs 5/20/1999 by 
  *           David Gravereaux <davygrvy@bigfoot.com>
  *
- *     RCS:  $Id: itcl.h,v 1.14 2001/05/22 06:18:54 davygrvy Exp $
+ *     RCS:  $Id: itcl.h,v 1.15 2001/05/25 00:12:29 davygrvy Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -66,10 +66,10 @@
 #endif
 
 #define ITCL_VERSION "3.2"
-#define ITCL_PATCH_LEVEL "3.2.0"
+#define ITCL_PATCH_LEVEL "3.2.1"
 #define ITCL_MAJOR_VERSION 3
 #define ITCL_MINOR_VERSION 2
-#define ITCL_RELEASE_LEVEL 0
+#define ITCL_RELEASE_LEVEL 1
 
 /* 
  * A special definition used to allow this header file to be included 
@@ -155,7 +155,7 @@ typedef struct Itcl_InterpState_ *Itcl_InterpState;
 #ifdef __cplusplus
 extern "C"
 #endif
-char *	Itcl_InitStubs _ANSI_ARGS_((Tcl_Interp *interp,
+CONST char *	Itcl_InitStubs _ANSI_ARGS_((Tcl_Interp *interp,
 			    char *version, int exact));
 #else
 #define Itcl_InitStubs(interp, version, exact) \
