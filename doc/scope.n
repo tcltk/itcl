@@ -4,10 +4,10 @@
 '\" See the file "license.terms" for information on usage and redistribution
 '\" of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 '\"
-'\" RCS: $Id: scope.n,v 1.4 1998/08/11 14:40:36 welch Exp $
+'\" RCS: $Id: scope.n,v 1.5 1998/08/23 16:32:23 stanton Exp $
 '\"
 .so man.macros
-.TH scope n "" Tcl "[incr\ Tcl]"
+.TH scope n "" itcl "[incr\ Tcl]"
 .BS
 '\" Note:  do not modify the .SH NAME line immediately below!
 .SH NAME
