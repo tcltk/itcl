@@ -6,7 +6,7 @@
 #            mmclennan@lucent.com
 #            http://www.tcltk.com/itcl
 #
-#      RCS:  $Id: basic.test,v 1.6 2004/02/12 18:09:50 davygrvy Exp $
+#      RCS:  $Id: basic.test,v 1.7 2004/09/21 23:18:36 davygrvy Exp $
 # ----------------------------------------------------------------------
 #            Copyright (c) 1993-1998  Lucent Technologies, Inc.
 # ======================================================================
@@ -324,7 +324,7 @@ test basic-6.2 {test array access for instance variables} {
 
 test basic-6.3 {test array access for commons} {
     lsort [test_arrays0 do array get colors]
-} {#0000ff #00ff00 #ff0000 blue green red}
+} [list #0000ff #00ff00 #ff0000 blue green red]
 
 test basic-6.4 {test array access for instance variables via "upvar"} {
     test_arrays0 do test_arrays_get nums
