@@ -5,7 +5,7 @@
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 # 
 # Copyright (c) 1993-1998 Lucent Technologies, Inc.
-# RCS: $Id: makefile.vc,v 1.8 2001/05/22 03:36:41 davygrvy Exp $
+# RCS: $Id: makefile.vc,v 1.9 2001/05/22 22:42:06 davygrvy Exp $
 ######################################################################
 # All needed information is derived from running vcvars32.bat
 #
@@ -122,13 +122,23 @@ ITCL_LLIBS	= $(TCLSTUBLIB)
 !IF $(DEBUG) == 0
 !IF "$(MACHINE)" == "ALPHA"
 # MSVC on Alpha doesn't understand -Ot
-cdebug = -O2i -Gs -GD
+cdebug = -O2i
 !ELSE
-cdebug = -Ox -GD -G5
+cdebug = -Ox
 !ENDIF
 !ELSE
-cdebug = -Od -Z7 -WX
+!if $(MSDEV_VER) < 6
+cdebug = -Zi -Od -WX
+!else
+cdebug = -ZI -Od -WX
+!endif
 !ENDIF
+
+!if $(STATIC_BUILD)
+cdll	=
+!else
+cdll	= -GD
+!endif
 
 # declarations common to all compiler options
 ccommon = -nologo -c -W3 -YX -Fp$(TMP_DIR)\ 
@@ -147,7 +157,8 @@ TCL_INCLUDES	= -I$(TCLROOT)\generic
 
 ITCL_INCLUDES	= -I$(WINDIR) -I$(GENERICDIR)
 ITCL_DEFINES	= -DBUILD_itcl $(DEBUGDEFINES) -DTCL_THREADS=1
-ITCL_EXE_CFLAGS	= $(ccommon) $(cdebug) $(crt) $(TCL_INCLUDES) $(ITCL_INCLUDES) $(ITCL_DEFINES)
+ITCL_EXE_CFLAGS	= $(ccommon) $(cdebug) $(crt) $(cdll) $(TCL_INCLUDES) \
+		$(ITCL_INCLUDES) $(ITCL_DEFINES)
 
 !if $(USE_TCL_STUBS) == 0
 ITCL_CFLAGS	= $(ITCL_EXE_CFLAGS)
@@ -208,12 +219,12 @@ install : all
 	if not exist "$(LIB_INSTALL_DIR)" mkdir "$(LIB_INSTALL_DIR)"
 	if not exist "$(SCRIPT_INSTALL_DIR)" mkdir "$(SCRIPT_INSTALL_DIR)"
 	if not exist "$(INCLUDE_INSTALL_DIR)" mkdir "$(INCLUDE_INSTALL_DIR)"
-	copy $(ITCLDLL) "$(SCRIPT_INSTALL_DIR)"
+	copy $(ITCLTARGET) "$(SCRIPT_INSTALL_DIR)"
 	-copy $(ITCLSTUBLIB) "$(LIB_INSTALL_DIR)"
 	copy $(ROOT)\generic\itcl.h "$(INCLUDE_INSTALL_DIR)"
 	copy $(ROOT)\generic\itclDecls.h "$(INCLUDE_INSTALL_DIR)"
 	copy $(ROOT)\library\*.* "$(SCRIPT_INSTALL_DIR)"
-	echo package ifneeded Itcl $(ITCL_DOTVERSION) [list load [file join $$dir $(ITCLDLLNAME).dll] Itcl] > \
+	echo package ifneeded Itcl $(ITCL_DOTVERSION) [list load [file join $$dir $(ITCLOUTNAME).dll] Itcl] > \
 		"$(SCRIPT_INSTALL_DIR)\pkgIndex.tcl"
 
 ######################################################################
@@ -230,9 +241,6 @@ genstubs:
 ######################################################################
 # Special case object file targets
 ######################################################################
-
-#$(TMP_DIR)\tclAppInit.obj : $(WINDIR)\tclAppInit.c
-#	$(cc32) -DSTATIC_BUILD $(ITCL_EXE_CFLAGS) -Fo$@ $?
 
 # The following object is part of the stub library and should not
 # be built as DLL objects but none of the symbols should be exported
