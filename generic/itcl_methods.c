@@ -23,7 +23,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itcl_methods.c,v 1.11 2003/12/23 03:11:04 davygrvy Exp $
+ *     RCS:  $Id: itcl_methods.c,v 1.12 2003/12/24 01:09:56 davygrvy Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -1003,7 +1003,7 @@ Itcl_EvalMemberCode(interp, mfunc, member, contextObj, objc, objv)
         result = Tcl_EvalObj(interp, mcode->procPtr->bodyPtr);
     }
     else {
-        panic("itcl: bad implementation flag for %s", member->fullname);
+        Tcl_Panic("itcl: bad implementation flag for %s", member->fullname);
     }
 
     /*
@@ -1850,12 +1850,12 @@ Itcl_AssignArgs(interp, objc, objv, mfunc)
          argPtr=argPtr->nextPtr, argsLeft--, varPtr++, objv++, objc--)
     {
         if (!TclIsVarArgument(argPtr)) {
-            panic("local variable %s is not argument but should be",
+            Tcl_Panic("local variable %s is not argument but should be",
                 argPtr->name);
             return TCL_ERROR;
         }
         if (TclIsVarTemporary(argPtr)) {
-            panic("local variable is temporary but should be an argument");
+            Tcl_Panic("local variable is temporary but should be an argument");
             return TCL_ERROR;
         }
 

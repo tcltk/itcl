@@ -5,7 +5,7 @@
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 # 
 # Copyright (c) 1993-1998 Lucent Technologies, Inc.
-# RCS: $Id: makefile.vc,v 1.26 2003/12/23 09:56:36 davygrvy Exp $
+# RCS: $Id: makefile.vc,v 1.27 2003/12/24 01:09:56 davygrvy Exp $
 #------------------------------------------------------------------------------
 #  Do not modify this file!
 #------------------------------------------------------------------------------
@@ -60,7 +60,7 @@ ITCLSTUBLIBNAME	= $(STUBPREFIX)$(ITCL_VERSION).lib
 ITCLSTUBLIB	= "$(OUT_DIR)\$(ITCLSTUBLIBNAME)"
 !else
 ITCLSTUBLIBNAME	=
-ITCLSTUBLIB	=
+ITCLSTUBLIB	= ""
 TCLSTUBLIB	= $(TCLIMPLIB)
 !endif
 
@@ -225,7 +225,6 @@ $(ITCLOBJS)
 $(ITCLOBJS)
 <<
 	-@del $*.exp
-	-@del $*.lib
 !endif
 
 !if $(TCL_DOES_STUBS)
@@ -240,7 +239,9 @@ install-binaries :
 	if not exist "$(SCRIPT_INSTALL_DIR)" mkdir "$(SCRIPT_INSTALL_DIR)"
 	if not exist "$(INCLUDE_INSTALL_DIR)" mkdir "$(INCLUDE_INSTALL_DIR)"
 	copy $(ITCLLIB) "$(SCRIPT_INSTALL_DIR)"
-	-copy $(ITCLSTUBLIB) "$(LIB_INSTALL_DIR)"
+!if exist($(ITCLSTUBLIB))
+	copy $(ITCLSTUBLIB) "$(LIB_INSTALL_DIR)"
+!endif
 	copy $(ROOT)\generic\itcl.h "$(INCLUDE_INSTALL_DIR)"
 	copy $(ROOT)\generic\itclDecls.h "$(INCLUDE_INSTALL_DIR)"
 	copy $(ROOT)\library\*.* "$(SCRIPT_INSTALL_DIR)"

@@ -39,7 +39,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itcl.h,v 1.27 2003/12/23 10:28:04 davygrvy Exp $
+ *     RCS:  $Id: itcl.h,v 1.28 2003/12/24 01:09:55 davygrvy Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -116,8 +116,8 @@
 #   elif defined(__BORLANDC__)
 #	define DLLIMPORT __import
 #	define DLLEXPORT __export
-    /* Pre-5.5 Borland requires the attributes be placed after the */
-    /* return type instead. */
+	/* Pre-5.5 Borland requires the attributes be placed after the */
+	/* return type instead. */
 #	define TCL_EXTERN(RTYPE) TCL_EXTERNC RTYPE TCL_STORAGE_CLASS
 #   else
 #	define DLLIMPORT

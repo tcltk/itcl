@@ -23,7 +23,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itcl_ensemble.c,v 1.10 2003/12/23 03:11:04 davygrvy Exp $
+ *     RCS:  $Id: itcl_ensemble.c,v 1.11 2003/12/24 01:09:56 davygrvy Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -1630,7 +1630,7 @@ Itcl_EnsembleCmd(clientData, interp, objc, objv)
             }
             if (FindEnsemblePart(interp, ensData, ensName, &ensPart)
                 != TCL_OK) {
-                panic("Itcl_EnsembleCmd: can't create ensemble");
+                Tcl_Panic("Itcl_EnsembleCmd: can't create ensemble");
             }
         }
 

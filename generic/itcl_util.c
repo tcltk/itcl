@@ -21,7 +21,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itcl_util.c,v 1.11 2003/12/23 03:11:04 davygrvy Exp $
+ *     RCS:  $Id: itcl_util.c,v 1.12 2003/12/24 01:09:56 davygrvy Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -696,7 +696,7 @@ Itcl_ReleaseData(cdata)
     }
     if (!entry) {
 	Tcl_MutexUnlock(&ItclPreservedListLock);
-        panic("Itcl_ReleaseData can't find reference for 0x%x", cdata);
+        Tcl_Panic("Itcl_ReleaseData can't find reference for 0x%x", cdata);
     }
 
     /*
@@ -813,7 +813,7 @@ Itcl_RestoreInterpState(interp, state)
     int status;
 
     if (info->validate != TCL_STATE_VALID) {
-        panic("bad token in Itcl_RestoreInterpState");
+        Tcl_Panic("bad token in Itcl_RestoreInterpState");
     }
     Tcl_ResetResult(interp);
 
@@ -869,7 +869,7 @@ Itcl_DiscardInterpState(state)
     InterpState *info = (InterpState*)state;
 
     if (info->validate != TCL_STATE_VALID) {
-        panic("bad token in Itcl_DiscardInterpState");
+        Tcl_Panic("bad token in Itcl_DiscardInterpState");
     }
 
     if (info->errorInfo) {
