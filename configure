@@ -6351,13 +6351,12 @@ echo $ECHO_N "checking for tclsh... $ECHO_C" >&6
   echo $ECHO_N "(cached) $ECHO_C" >&6
 else
 
-	if test "${TEA_PLATFORM}" = "windows" -a "$do64bit_ok" = "yes" \
-		-o "$doWince" != "no" ; then
-	    # A Windows cross-compile build - restrict target tclsh
+	search_path=`echo ${PATH} | sed -e 's/:/ /g'`
+	if test "${TEA_PLATFORM}" != "windows" -o \
+		\( "$do64bit_ok" = "no" -a "$doWince" = "no" \) ; then
+	    # Do not allow target tclsh in known cross-compile builds,
 	    # as we need one we can run on this system
-	    search_path=`echo ${PATH} | sed -e 's/:/ /g'`
-	else
-	    search_path=`echo ${TCL_BIN_DIR}:${TCL_BIN_DIR}/../bin:${exec_prefix}/bin:${prefix}/bin:${PATH} | sed -e 's/:/ /g'`
+	    search_path="${TCL_BIN_DIR} ${TCL_BIN_DIR}/../bin ${exec_prefix}/bin ${prefix}/bin ${search_path}"
 	fi
 	for dir in $search_path ; do
 	    for j in `ls -r $dir/tclsh[8-9]*${EXEEXT} 2> /dev/null` \
@@ -7234,7 +7233,6 @@ fi
 	    if test "$GCC" = "yes" ; then
 		SHLIB_LD="gcc -shared"
 		SHLIB_LD_LIBS='${LIBS}'
-		LD_SEARCH_FLAGS=''
 	    fi
 
 	    # Users may want PA-RISC 1.1/2.0 portable code - needs HP cc
@@ -7250,7 +7248,6 @@ fi
 			    do64bit_ok=yes
 			    SHLIB_LD="${CC} -shared"
 			    SHLIB_LD_LIBS='${LIBS}'
-			    LD_SEARCH_FLAGS=''
 			    ;;
 			*)
 			    { echo "$as_me:$LINENO: WARNING: \"64bit mode not supported with GCC on $system\"" >&5
@@ -9399,13 +9396,12 @@ echo $ECHO_N "checking for tclsh... $ECHO_C" >&6
   echo $ECHO_N "(cached) $ECHO_C" >&6
 else
 
-	if test "${TEA_PLATFORM}" = "windows" -a "$do64bit_ok" = "yes" \
-		-o "$doWince" != "no" ; then
-	    # A Windows cross-compile build - restrict target tclsh
+	search_path=`echo ${PATH} | sed -e 's/:/ /g'`
+	if test "${TEA_PLATFORM}" != "windows" -o \
+		\( "$do64bit_ok" = "no" -a "$doWince" = "no" \) ; then
+	    # Do not allow target tclsh in known cross-compile builds,
 	    # as we need one we can run on this system
-	    search_path=`echo ${PATH} | sed -e 's/:/ /g'`
-	else
-	    search_path=`echo ${TCL_BIN_DIR}:${TCL_BIN_DIR}/../bin:${exec_prefix}/bin:${prefix}/bin:${PATH} | sed -e 's/:/ /g'`
+	    search_path="${TCL_BIN_DIR} ${TCL_BIN_DIR}/../bin ${exec_prefix}/bin ${prefix}/bin ${search_path}"
 	fi
 	for dir in $search_path ; do
 	    for j in `ls -r $dir/tclsh[8-9]*${EXEEXT} 2> /dev/null` \
