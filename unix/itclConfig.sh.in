@@ -28,6 +28,17 @@ ITCL_BUILD_LIB_SPEC='@ITCL_BUILD_LIB_SPEC@'
 # installed directory.
 ITCL_LIB_SPEC='@ITCL_LIB_SPEC@'
 
+# The name of the Itcl stub library (a .a file):
+ITCL_STUB_LIB_FILE=@ITCL_STUB_LIB_FILE@
+
+# String to pass to linker to pick up the Itcl stub library from its
+# build directory.
+ITCL_BUILD_STUB_LIB_SPEC='@ITCL_BUILD_STUB_LIB_SPEC@'
+
+# String to pass to linker to pick up the Itcl stub library from its
+# installed directory.
+ITCL_STUB_LIB_SPEC='@ITCL_STUB_LIB_SPEC@'
+
 # Location of the top-level source directories from which [incr Tcl]
 # was built.  This is the directory that contains generic, unix, etc.
 # If [incr Tcl] was compiled in a different place than the directory

@@ -3,7 +3,7 @@ dnl	generate the file "configure", which is run during [incr Tcl]
 dnl installation to configure the system for the local environment.
 
 AC_INIT(../generic/itcl.h)
-# RCS: $Id: configure.in,v 1.2 1998/08/11 14:40:49 welch Exp $
+# RCS: $Id: configure.in,v 1.3 1999/05/25 01:35:19 redman Exp $
 
 ITCL_VERSION=3.0
 ITCL_MAJOR_VERSION=3
@@ -52,10 +52,10 @@ fi
 #--------------------------------------------------------------------
 
 AC_ARG_WITH(tcl, [  --with-tcl=DIR          use Tcl 8.0 binaries from DIR],
-        itcl_search=$withval, itcl_search=`cd ../../..; ls -d \`pwd\`/tcl8.0*/unix`)
+        itcl_search=$withval, itcl_search=`cd ../../..; ls -d \`pwd\`/tcl8.*/unix`)
 
 TCL_LIB_DIR=""
-for dir in $exec_prefix/lib $itcl_search ; do
+for dir in $itcl_search $exec_prefix/lib ; do
     if test -r $dir/tclConfig.sh; then
         TCL_LIB_DIR=$dir
         break
@@ -89,6 +89,7 @@ LD_SEARCH_FLAGS=$TCL_LD_SEARCH_FLAGS
 #--------------------------------------------------------------------
 
 if test ! -d "$TCL_SRC_DIR"; then
+   echo $TCL_LIB_DIR
     AC_MSG_ERROR(Can't find Tcl source directory "$TCL_SRC_DIR".  Itcl can't be built without this directory.)
 fi
 
@@ -109,7 +110,7 @@ if test -z "$CFLAGS" ; then
     CFLAGS="-O"
 fi
 if test "$itcl_cv_prog_gcc" = "yes" ; then
-    CFLAGS="$CFLAGS -Wshadow -Wtraditional -Wall"
+    CFLAGS="$CFLAGS -Wall -Wconversion -Wno-implicit-int"
 fi
 
 AC_MSG_CHECKING([default compiler flags])
@@ -131,22 +132,28 @@ fi
 
 AC_ARG_ENABLE(shared,
     [  --enable-shared         build libitcl as a shared library],
-    [ok=$enableval], [ok=no])
+    [ok=$enableval], [ok=yes])
 if test "$ok" = "yes"; then
     if test ${TCL_SHARED_BUILD} = 0; then
         AC_MSG_ERROR(Tcl was not built with --enable-shared, so you can't use shared libraries.)
     fi
     SHLIB_CFLAGS="${SHLIB_CFLAGS}"
+    TCL_STUB_FLAGS=-DUSE_TCL_STUBS
     eval "ITCL_LIB_FILE=libitcl${VERSION}${SHLIB_SUFFIX}"
     ITCL_PKG_FILE="[[file join [file dirname \$dir] ${ITCL_LIB_FILE}]]"
-    MAKE_LIB="\$(SHLIB_LD) -o ${ITCL_LIB_FILE} \$(OBJS) ${SHLIB_LD_LIBS} \$(LD_SEARCH_FLAGS)"
+    MAKE_LIB="\$(SHLIB_LD) -o ${ITCL_LIB_FILE} \$(OBJS) ${SHLIB_LD_LIBS}"
     RANLIB=":"
 else
     SHLIB_CFLAGS=""
+    TCL_STUB_FLAGS=""
     eval "ITCL_LIB_FILE=libitcl${VERSION}.a"
     ITCL_PKG_FILE=""
     MAKE_LIB="ar cr ${ITCL_LIB_FILE} \${OBJS}"
 fi
+
+eval "STUB_LIB_FILE=libitclstub${TCL_UNSHARED_LIB_SUFFIX}"
+MAKE_STUB_LIB="ar cr \${ITCL_STUB_LIB_FILE} \${ITCL_STUB_LIB_OBJS}"
+ITCL_STUB_LIB_FILE=${STUB_LIB_FILE}
 
 # Note:  in the following variable, it's important to use the absolute
 # path name of the Tcl directory rather than "..":  this is because
@@ -161,10 +168,14 @@ else
     ITCL_LIB_SPEC="-L${exec_prefix}/lib -litcl`echo ${VERSION} | tr -d .`"
 fi
 
+ITCL_BUILD_STUB_LIB_SPEC="-L`pwd` -litclstub${VERSION}"
+ITCL_STUB_LIB_SPEC="-L${exec_prefix}/lib -litclstub${VERSION}"
+
 AC_SUBST(CFLAGS)
 AC_SUBST(DL_LIBS)
 AC_SUBST(LD_FLAGS)
 AC_SUBST(MAKE_LIB)
+AC_SUBST(MAKE_STUB_LIB)
 AC_SUBST(SHLIB_CFLAGS)
 AC_SUBST(SHLIB_LD)
 AC_SUBST(SHLIB_LD_LIBS)
@@ -175,7 +186,10 @@ AC_SUBST(TCL_VERSION)
 AC_SUBST(TCL_SRC_DIR)
 AC_SUBST(TCL_LIB_DIR)
 AC_SUBST(TCL_LIB_SPEC)
+AC_SUBST(TCL_BUILD_STUB_LIB_SPEC)
+AC_SUBST(TCL_BUILD_LIB_SPEC)
 AC_SUBST(TCL_LIB_FLAG)
+AC_SUBST(TCL_STUB_FLAGS)
 AC_SUBST(TCL_DBGX)
 AC_SUBST(TCL_DEFS)
 AC_SUBST(TCL_LIBS)
@@ -189,8 +203,11 @@ AC_SUBST(ITCL_MINOR_VERSION)
 AC_SUBST(ITCL_RELEASE_LEVEL)
 
 AC_SUBST(ITCL_BUILD_LIB_SPEC)
+AC_SUBST(ITCL_BUILD_STUB_LIB_SPEC)
 AC_SUBST(ITCL_LIB_FILE)
+AC_SUBST(ITCL_STUB_LIB_FILE)
 AC_SUBST(ITCL_LIB_SPEC)
+AC_SUBST(ITCL_STUB_LIB_SPEC)
 AC_SUBST(ITCL_PKG_FILE)
 AC_SUBST(ITCL_SRC_DIR)
 
