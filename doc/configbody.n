@@ -4,16 +4,16 @@
 '\" See the file "license.terms" for information on usage and redistribution
 '\" of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 '\"
-'\" RCS: $Id: configbody.n,v 1.2 2004/08/31 18:40:16 davygrvy Exp $
+'\" RCS: $Id: configbody.n,v 1.3 2004/09/19 19:19:11 davygrvy Exp $
 '\"
 .so man.macros
-.TH configbody n 3.0 itcl "[incr\ Tcl]"
+.TH configbody n 3.0 itcl "[incr\ Tcl] Commands"
 .BS
 '\" Note:  do not modify the .SH NAME line immediately below!
 .SH NAME
 configbody \- change the "config" code for a public variable
 .SH SYNOPSIS
-\fBconfigbody \fIclassName\fB::\fIvarName body\fR
+\fBitcl::configbody \fIclassName\fB::\fIvarName body\fR
 .BE
 
 .SH DESCRIPTION

@@ -1,0 +1,75 @@
+'\"
+'\" Copyright (c) 1993-1998  Lucent Technologies, Inc.
+'\"
+'\" See the file "license.terms" for information on usage and redistribution
+'\" of this file, and for a DISCLAIMER OF ALL WARRANTIES.
+'\"
+'\" RCS: $Id: RegisterC.3,v 1.1 2004/09/19 19:19:11 davygrvy Exp $
+'\"
+.so man.macros
+.TH Itcl_RegisterC 3 3.0 itcl "[incr\ Tcl] Library Procedures"
+.BS
+'\" Note:  do not modify the .SH NAME line immediately below!
+.SH NAME
+Itcl_RegisterC, Itcl_RegisterObjC \- Associate a symbolic name with a C procedure.
+.SH SYNOPSIS
+.nf
+\fB#include <itcl.h>\fR
+.sp
+int
+\fBItcl_RegisterC\fR(\fIinterp, cmdName, proc, clientData, deleteProc\fR)
+.sp
+int
+\fBItcl_RegisterObjC\fR(\fIinterp, cmdName, objProc, clientData, deleteProc\fR)
+.SH ARGUMENTS
+.AP Tcl_Interp *interp in
+Interpreter in which to create new command.
+.VS 8.4
+.AP "CONST char" *cmdName in
+.VE
+Name of command.
+.AP Tcl_CmdProc *proc in
+Implementation of new command:  \fIproc\fR will be called whenever
+\fIcmdName\fR is invoked as a command.
+.AP Tcl_ObjCmdProc *objProc in
+Implementation of the new command: \fIobjProc\fR will be called whenever
+\fIcmdName\fR is invoked as a command.
+.AP ClientData clientData in
+Arbitrary one-word value to pass to \fIproc\fR and \fIdeleteProc\fR.
+.AP Tcl_CmdDeleteProc *deleteProc in
+Procedure to call before \fIcmdName\fR is deleted from the interpreter;
+allows for command-specific cleanup.  If NULL, then no procedure is
+called before the command is deleted.
+.BE
+
+.SH DESCRIPTION
+.PP
+Used to associate a symbolic name with an (argc,argv) C procedure
+that handles a Tcl command.  Procedures that are registered in this
+manner can be referenced in the body of an [incr Tcl] class
+definition to specify C procedures to acting as methods/procs.
+Usually invoked in an initialization routine for an extension,
+called out in Tcl_AppInit() at the start of an application.
+.PP
+Each symbolic procedure can have an arbitrary client data value
+associated with it.  This value is passed into the command
+handler whenever it is invoked.
+.PP
+A symbolic procedure name can be used only once for a given style
+(arg/obj) handler.  If the name is defined with an arg-style
+handler, it can be redefined with an obj-style handler; or if
+the name is defined with an obj-style handler, it can be redefined
+with an arg-style handler.  In either case, any previous client
+data is discarded and the new client data is remembered.  However,
+if a name is redefined to a different handler of the same style,
+this procedure returns an error.
+.PP
+Returns TCL_OK on success, or TCL_ERROR (along with an error message
+in interp->result) if anything goes wrong.
+
+.SH "SEE ALSO"
+Tcl_CreateCommand, Tcl_CreateObjCommand
+
+.SH KEYWORDS
+class, object
+
