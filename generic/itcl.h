@@ -42,7 +42,7 @@
  *       modified for Stubs 5/20/1999 by 
  *           David Gravereaux <davygrvy@pobox.com>
  *
- *     RCS:  $Id: itcl.h,v 1.20 2002/04/20 06:09:57 davygrvy Exp $
+ *     RCS:  $Id: itcl.h,v 1.21 2002/08/11 03:40:02 davygrvy Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -89,7 +89,10 @@
 #   if defined(STATIC_BUILD)
 #	define DLLIMPORT
 #	define DLLEXPORT
-#   elif (defined(__WIN32__) && (defined(_MSC_VER) || (__BORLANDC__ >= 0x0550) || (defined(__GNUC__) && defined(__declspec)))) \
+#   elif (defined(__WIN32__) && \
+		(defined(_MSC_VER) || \
+		(__BORLANDC__ >= 0x0550) || \
+		(defined(__GNUC__) && defined(__declspec)))) \
 	    || (defined(MAC_TCL) && FUNCTION_DECLSPEC)
 #	define DLLIMPORT __declspec(dllimport)
 #	define DLLEXPORT __declspec(dllexport)
@@ -101,23 +104,18 @@
 #	define DLLIMPORT
 #	define DLLEXPORT
 #   endif
-
-    /*
-     * Make sure name mangling won't happen when the c++ language extensions
-     * are used.
-     */
+    /* Avoid name mangling from C++ compilers. */
 #   ifdef __cplusplus
-#	define TCL_CPP "C"
+#	define TCL_EXTRNC extern "C"
 #   else
-#	define TCL_CPP
+#	define TCL_EXTRNC extern
 #   endif
-    /*
-     * Borland requires the attributes be placed after the return type.
-     */
+    /* Pre-5.5 Borland requires the attributes be placed after the */
+    /* return type. */
 #   ifdef OLDBORLAND
-#	define TCL_EXTERN(rtnType) extern TCL_CPP rtnType TCL_STORAGE_CLASS
+#	define TCL_EXTERN(RTYPE) TCL_EXTRNC RTYPE TCL_STORAGE_CLASS
 #   else
-#	define TCL_EXTERN(rtnType) extern TCL_CPP TCL_STORAGE_CLASS rtnType
+#	define TCL_EXTERN(RTYPE) TCL_EXTRNC TCL_STORAGE_CLASS RTYPE
 #   endif
 #endif
 
@@ -193,8 +191,8 @@ typedef struct Itcl_InterpState_ *Itcl_InterpState;
 
 #ifdef USE_ITCL_STUBS
 
-extern TCL_CPP
-CONST char *	Itcl_InitStubs _ANSI_ARGS_((Tcl_Interp *interp,
+TCL_EXTRNC CONST char *
+	Itcl_InitStubs _ANSI_ARGS_((Tcl_Interp *interp,
 			    char *version, int exact));
 #else
 #define Itcl_InitStubs(interp, version, exact) \
