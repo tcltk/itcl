@@ -21,7 +21,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itcl_util.c,v 1.1 1998/07/27 18:41:50 stanton Exp $
+ *     RCS:  $Id: itcl_util.c,v 1.2 1998/08/07 12:11:08 stanton Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -30,10 +30,6 @@
  */
 #include "itclInt.h"
 #include "tclCompile.h"
-
-#ifndef lint
-static char rcsid[] = "$Id: itcl_util.c,v 1.1 1998/07/27 18:41:50 stanton Exp $";
-#endif
 
 /*
  *  POOL OF LIST ELEMENTS FOR LINKED LIST
