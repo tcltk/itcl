@@ -23,7 +23,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itcl_class.c,v 1.7 2001/05/17 19:57:11 andreas_kupries Exp $
+ *     RCS:  $Id: itcl_class.c,v 1.8 2001/05/18 20:02:42 andreas_kupries Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -860,6 +860,8 @@ Itcl_HandleClass(clientData, interp, objc, objv)
                  *  incrementing a counter until a valid name is found.
                  */
                 do {
+		    Tcl_CmdInfo dummy;
+
                     sprintf(unique,"%.200s%d", cdefnPtr->name,
                         cdefnPtr->unique++);
                     unique[0] = tolower(unique[0]);
@@ -870,10 +872,16 @@ Itcl_HandleClass(clientData, interp, objc, objv)
                     Tcl_DStringAppend(&buffer, start+5, -1);
 
                     objName = Tcl_DStringValue(&buffer);
-                    if (Itcl_FindObject(interp, objName, &newObj) != TCL_OK) {
+
+		    /*
+		     * [Fix 227811] Check for any command with the
+		     * given name, not only objects.
+		     */
+
+                    if (Tcl_GetCommandInfo (interp, objName, &dummy) == 0) {
                         break;  /* if an error is found, bail out! */
                     }
-                } while (newObj != NULL);
+                } while (1);
 
                 *start = tmp;       /* undo null-termination */
                 objName = Tcl_DStringValue(&buffer);
