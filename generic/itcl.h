@@ -42,7 +42,7 @@
  *       modified for Stubs 5/20/1999 by 
  *           David Gravereaux <davygrvy@pobox.com>
  *
- *     RCS:  $Id: itcl.h,v 1.19 2002/01/16 22:29:41 andreas_kupries Exp $
+ *     RCS:  $Id: itcl.h,v 1.20 2002/04/20 06:09:57 davygrvy Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -54,11 +54,11 @@
 
 #include "tcl.h"
 
-#define ITCL_VERSION "3.2"
-#define ITCL_PATCH_LEVEL "3.2.1"
+#define ITCL_VERSION "3.3"
+#define ITCL_PATCH_LEVEL "3.3.0"
 #define ITCL_MAJOR_VERSION 3
-#define ITCL_MINOR_VERSION 2
-#define ITCL_RELEASE_LEVEL 1
+#define ITCL_MINOR_VERSION 3
+#define ITCL_RELEASE_LEVEL 0
 
 /* 
  * A special definition used to allow this header file to be included 
