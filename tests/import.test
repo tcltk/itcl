@@ -6,7 +6,7 @@
 #            mmclennan@lucent.com
 #            http://www.tcltk.com/itcl
 #
-#      RCS:  $Id: import.test,v 1.4 2004/02/12 18:26:18 davygrvy Exp $
+#      RCS:  $Id: import.test,v 1.5 2004/02/13 20:50:29 davygrvy Exp $
 # ----------------------------------------------------------------------
 #            Copyright (c) 1993-1998  Lucent Technologies, Inc.
 # ======================================================================
@@ -40,16 +40,15 @@ test import-1.3 {"stub exists" requires one argument} {
 } {1 {wrong # args: should be "itcl::import::stub exists name"} 1 {wrong # args: should be "itcl::import::stub exists name"}}
 
 set interp [interp create]
-$interp eval {
-    package require tcltest 2.1
-    ::tcltest::loadTestedCommands
+$interp eval [subst {
+    [::tcltest::configure -load]
     proc auto_load {cmd {namespace {}}} {
         global debug
         proc $cmd {args} [format {return "%s: $args"} $cmd]
         append debug "(auto_load: $cmd)"
         return 1
     }
-}
+}]
 
 test import-1.4 {"stub create" creates a stub that triggers autoloading} {
     $interp eval {
@@ -89,14 +88,13 @@ catch {interp delete $interp}
 #  Test "itcl::import::stub" command
 # ----------------------------------------------------------------------
 set interp [interp create]
-$interp eval {
-    package require tcltest 2.1
-    ::tcltest::loadTestedCommands
+$interp eval [subst {
+    [::tcltest::configure -load]
     proc auto_load {cmd {namespace {}}} {
         proc $cmd {args} [format {return "%s: $args"} $cmd]
         return 1
     }
-}
+}]
 
 test import-2.1 {initialize some commands for autoloading} {
     $interp eval {
