@@ -42,7 +42,7 @@
  *       modified for Stubs 5/20/1999 by 
  *           David Gravereaux <davygrvy@bigfoot.com>
  *
- *     RCS:  $Id: itcl.h,v 1.12 2000/08/07 20:01:52 welch Exp $
+ *     RCS:  $Id: itcl.h,v 1.13 2000/09/23 01:16:36 davidg Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -152,6 +152,9 @@ typedef struct Itcl_InterpState_ *Itcl_InterpState;
 
 #ifdef USE_ITCL_STUBS
 
+#ifdef __cplusplus
+extern "C"
+#endif
 char *	Itcl_InitStubs _ANSI_ARGS_((Tcl_Interp *interp,
 			    char *version, int exact));
 #else
