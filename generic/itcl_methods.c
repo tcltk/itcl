@@ -23,7 +23,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itcl_methods.c,v 1.4 2001/05/22 01:52:51 davygrvy Exp $
+ *     RCS:  $Id: itcl_methods.c,v 1.5 2001/05/22 23:47:18 davygrvy Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -31,7 +31,7 @@
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  */
 #include "itclInt.h"
-#include "tclCompile.h"
+//#include "tclCompile.h"
 
 /*
  *  FORWARD DECLARATIONS

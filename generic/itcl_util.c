@@ -21,7 +21,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itcl_util.c,v 1.4 2001/04/08 06:17:33 davygrvy Exp $
+ *     RCS:  $Id: itcl_util.c,v 1.5 2001/05/22 23:47:18 davygrvy Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -29,7 +29,6 @@
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  */
 #include "itclInt.h"
-#include "tclCompile.h"
 
 /*
  *  POOL OF LIST ELEMENTS FOR LINKED LIST
