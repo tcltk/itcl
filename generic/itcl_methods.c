@@ -23,7 +23,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itcl_methods.c,v 1.14 2005/02/11 17:15:14 hobbs Exp $
+ *     RCS:  $Id: itcl_methods.c,v 1.15 2006/03/01 11:39:55 davygrvy Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -1019,7 +1019,7 @@ Itcl_EvalMemberCode(interp, mfunc, member, contextObj, objc, objv)
          contextObj->destructed) {
 
         Tcl_CreateHashEntry(contextObj->destructed,
-            member->classDefn->name, &newEntry);
+            member->classDefn->fullname, &newEntry);
     }
     if ((member->flags & ITCL_CONSTRUCTOR) && contextObj &&
          contextObj->constructed) {

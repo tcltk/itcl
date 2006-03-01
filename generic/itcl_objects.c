@@ -22,7 +22,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itcl_objects.c,v 1.13 2003/12/23 03:11:04 davygrvy Exp $
+ *     RCS:  $Id: itcl_objects.c,v 1.14 2006/03/01 11:39:55 davygrvy Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -440,7 +440,7 @@ ItclDestructBase(interp, contextObj, contextClass, flags)
      *  Look for a destructor in this class, and if found,
      *  invoke it.
      */
-    if (!Tcl_FindHashEntry(contextObj->destructed, contextClass->name)) {
+    if (!Tcl_FindHashEntry(contextObj->destructed, contextClass->fullname)) {
 
         result = Itcl_InvokeMethodIfExists(interp, "destructor",
             contextClass, contextObj, 0, (Tcl_Obj* CONST*)NULL);
