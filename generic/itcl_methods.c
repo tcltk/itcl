@@ -23,7 +23,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itcl_methods.c,v 1.15 2006/03/01 11:39:55 davygrvy Exp $
+ *     RCS:  $Id: itcl_methods.c,v 1.16 2006/06/02 19:50:59 hobbs Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -750,13 +750,16 @@ Itcl_DeleteMemberCode(cdata)
 {
     ItclMemberCode* mcode = (ItclMemberCode*)cdata;
 
+    /*
+     * Free the argument list.  If empty, free the compiled locals, if any.
+     */
     if (mcode->arglist) {
         Itcl_DeleteArgList(mcode->arglist);
+    } else if (mcode->procPtr->firstLocalPtr) {
+	Itcl_DeleteArgList(mcode->procPtr->firstLocalPtr);
     }
     if (mcode->procPtr) {
         ckfree((char*) mcode->procPtr->cmdPtr);
-
-        /* don't free compiled locals -- that is handled by arglist above */
 
         if (mcode->procPtr->bodyPtr) {
             Tcl_DecrRefCount(mcode->procPtr->bodyPtr);
