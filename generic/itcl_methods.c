@@ -23,7 +23,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itcl_methods.c,v 1.16 2006/06/02 19:50:59 hobbs Exp $
+ *     RCS:  $Id: itcl_methods.c,v 1.17 2006/06/06 22:37:55 hobbs Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -755,9 +755,10 @@ Itcl_DeleteMemberCode(cdata)
      */
     if (mcode->arglist) {
         Itcl_DeleteArgList(mcode->arglist);
-    } else if (mcode->procPtr->firstLocalPtr) {
+    } else if (mcode->procPtr && mcode->procPtr->firstLocalPtr) {
 	Itcl_DeleteArgList(mcode->procPtr->firstLocalPtr);
     }
+
     if (mcode->procPtr) {
         ckfree((char*) mcode->procPtr->cmdPtr);
 
