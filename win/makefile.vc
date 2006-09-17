@@ -5,7 +5,7 @@
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 # 
 # Copyright (c) 1993-1998 Lucent Technologies, Inc.
-# RCS: $Id: makefile.vc,v 1.32 2004/09/24 22:45:02 davygrvy Exp $
+# RCS: $Id: makefile.vc,v 1.33 2006/09/17 01:07:45 davygrvy Exp $
 #------------------------------------------------------------------------------
 #  Do not modify this file!
 #------------------------------------------------------------------------------
@@ -67,7 +67,7 @@ TCLSTUBLIB	= $(TCLIMPLIB)
 BIN_INSTALL_DIR		= $(_INSTALLDIR)\bin
 DOC_INSTALL_DIR		= $(_INSTALLDIR)\doc
 LIB_INSTALL_DIR		= $(_INSTALLDIR)\lib
-SCRIPT_INSTALL_DIR	= $(_INSTALLDIR)\lib\itcl$(ITCL_DOTVERSION)
+SCRIPT_INSTALL_DIR	= $(_INSTALLDIR)\lib\$(PROJECT)$(ITCL_DOTVERSION)
 INCLUDE_INSTALL_DIR	= $(_INSTALLDIR)\include
 
 ITCLOBJS = \
@@ -182,11 +182,11 @@ ITCL_EXE_CFLAGS	= $(cdebug) $(cflags) $(crt) $(ITCL_INCLUDES) $(ITCL_DEFINES) $(
 ### By convention, static builds do not use Stubs.  This is just a practice,
 ### not a technical limitation.
 !if $(STATIC_BUILD)
-ITCL_CFLAGS	= $(ITCL_EXE_CFLAGS) -DSTATIC_BUILD
+ITCL_CFLAGS	= $(ITCL_EXE_CFLAGS) -DSTATIC_BUILD $(OPTDEFINES)
 !elseif $(TCL_DOES_STUBS)
-ITCL_CFLAGS	= $(ITCL_EXE_CFLAGS) -DUSE_TCL_STUBS
+ITCL_CFLAGS	= $(ITCL_EXE_CFLAGS) -DUSE_TCL_STUBS $(OPTDEFINES)
 !else
-ITCL_CFLAGS	= $(ITCL_EXE_CFLAGS)
+ITCL_CFLAGS	= $(ITCL_EXE_CFLAGS) $(OPTDEFINES)
 !endif
 
 #---------------------------------------------------------------------
