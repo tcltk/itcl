@@ -21,7 +21,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itcl_cmds.c,v 1.25 2005/03/25 21:08:03 hobbs Exp $
+ *     RCS:  $Id: itcl_cmds.c,v 1.26 2007/02/15 23:31:44 hobbs Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -135,11 +135,11 @@ Initialize(interp)
     ItclObjectInfo *info;
 
 #ifndef USE_TCL_STUBS
-    if (Tcl_PkgRequire(interp, "Tcl", TCL_VERSION, 1) == NULL) {
+    if (Tcl_PkgRequire(interp, "Tcl", TCL_VERSION, 0) == NULL) {
       return TCL_ERROR;
     }
 #else
-    if (Tcl_InitStubs(interp, TCL_VERSION, 1) == NULL) {
+    if (Tcl_InitStubs(interp, TCL_VERSION, 0) == NULL) {
       return TCL_ERROR;
     }
 #endif
@@ -175,7 +175,6 @@ Initialize(interp)
 #else
     itclCompatFlags = 0;
 #endif
-
 
     /*
      *  Initialize the ensemble package first, since we need this
