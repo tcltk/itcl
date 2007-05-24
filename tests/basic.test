@@ -6,7 +6,7 @@
 #            mmclennan@lucent.com
 #            http://www.tcltk.com/itcl
 #
-#      RCS:  $Id: basic.test,v 1.10 2007/05/24 22:54:34 hobbs Exp $
+#      RCS:  $Id: basic.test,v 1.11 2007/05/24 23:04:11 hobbs Exp $
 # ----------------------------------------------------------------------
 #            Copyright (c) 1993-1998  Lucent Technologies, Inc.
 # ======================================================================
@@ -110,19 +110,19 @@ test basic-1.14 {is command with class argument (wrapped in code command)} {
     itcl::is class [itcl::code Counter]
 } {1}
 
-test basic-1.14 {is command with class argument (class does not exist)} {
+test basic-1.15 {is command with class argument (class does not exist)} {
     itcl::is class Count
 } {0}
 
-test basic-1.15 {is command with object argument} {
+test basic-1.16 {is command with object argument} {
     itcl::is object -foo
 } {1}
 
-test basic-1.16 {is command with object argument (object does not exist)} {
+test basic-1.17 {is command with object argument (object does not exist)} {
     itcl::is object xxx
 } {0}
 
-test basic-1.15 {is command with object argument (with code command)} {
+test basic-1.18 {is command with object argument (with code command)} {
     itcl::is object [itcl::code -- -foo]
 } {1}
 

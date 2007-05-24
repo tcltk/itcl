@@ -21,7 +21,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itcl_cmds.c,v 1.28 2007/05/24 22:12:55 hobbs Exp $
+ *     RCS:  $Id: itcl_cmds.c,v 1.29 2007/05/24 23:04:10 hobbs Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -314,7 +314,8 @@ Initialize(interp)
      *  values everywhere within the interpreter.
      */
     Tcl_AddInterpResolvers(interp, "itcl", (Tcl_ResolveCmdProc*)NULL,
-        Itcl_ScopedVarResolver, (Tcl_ResolveCompiledVarProc*)NULL);
+	    (Tcl_ResolveVarProc*)Itcl_ScopedVarResolver,
+	    (Tcl_ResolveCompiledVarProc*)NULL);
 
     /*
      *  Install the "itcl::parser" namespace used to parse the
@@ -1521,7 +1522,7 @@ ItclDeleteStub(cdata)
  *
  *    itcl::is object ?-class classname? commandname
  *
- *  Returns 1 if it is an object, 0 otherwise
+ *  Sets interp result to 1 if it is an object, 0 otherwise
  * ------------------------------------------------------------------------
  */
 int
@@ -1534,7 +1535,7 @@ Itcl_IsObjectCmd(clientData, interp, objc, objv)
 
     int             classFlag = 0;
     int             idx = 0;
-    char            *name;
+    char            *name = "";
     char            *cname;
     char            *cmdName;
     char            *token;
@@ -1577,7 +1578,6 @@ Itcl_IsObjectCmd(clientData, interp, objc, objv)
         }
 
     } /* end for objc loop */
-        
 
     /*
      *  The object name may be a scoped value of the form
@@ -1635,7 +1635,7 @@ Itcl_IsObjectCmd(clientData, interp, objc, objv)
  *
  *    itcl::is class commandname
  *
- *  Returns 1 if it is a class, 0 otherwise
+ *  Sets interp result to 1 if it is a class, 0 otherwise
  * ------------------------------------------------------------------------
  */
 int

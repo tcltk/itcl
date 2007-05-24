@@ -23,7 +23,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itcl_class.c,v 1.21 2007/05/24 22:47:45 hobbs Exp $
+ *     RCS:  $Id: itcl_class.c,v 1.22 2007/05/24 23:04:10 hobbs Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -212,8 +212,10 @@ Itcl_CreateClass(interp, path, info, rPtr)
      *  so that members are accessed according to the rules for
      *  [incr Tcl].
      */
-    Tcl_SetNamespaceResolvers(classNs, Itcl_ClassCmdResolver,
-        Itcl_ClassVarResolver, Itcl_ClassCompiledVarResolver);
+    Tcl_SetNamespaceResolvers(classNs,
+	    (Tcl_ResolveCmdProc*)Itcl_ClassCmdResolver,
+	    (Tcl_ResolveVarProc*)Itcl_ClassVarResolver,
+	    (Tcl_ResolveCompiledVarProc*)Itcl_ClassCompiledVarResolver);
 
     /*
      *  Add the built-in "this" variable to the list of data members.
@@ -657,8 +659,9 @@ Itcl_IsClass(cmd)
  */
 ItclClass*
 Itcl_FindClass(interp, path, autoload)
-    Tcl_Interp* interp;      /* interpreter containing class */
-    CONST char* path;              /* path name for class */
+    Tcl_Interp* interp;		/* interpreter containing class */
+    CONST char* path;		/* path name for class */
+    int autoload;		/* should class be loaded */
 {
     Tcl_Namespace* classNs;
 
@@ -1613,12 +1616,11 @@ Itcl_CreateVarDefn(interp, cdefn, name, init, config, vdefnPtr)
             return TCL_ERROR;
         }
         Itcl_PreserveData((ClientData)mcode);
-        Itcl_EventuallyFree((ClientData)mcode, Itcl_DeleteMemberCode);
+        Itcl_EventuallyFree((ClientData)mcode, (Tcl_FreeProc*) Itcl_DeleteMemberCode);
     }
     else {
         mcode = NULL;
     }
-        
 
     /*
      *  If everything looks good, create the variable definition.

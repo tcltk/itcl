@@ -23,7 +23,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itcl_methods.c,v 1.19 2007/05/24 22:12:55 hobbs Exp $
+ *     RCS:  $Id: itcl_methods.c,v 1.20 2007/05/24 23:04:10 hobbs Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -116,15 +116,6 @@ Itcl_BodyCmd(dummy, interp, objc, objv)
      *  even those in a base class.  Make sure that the class
      *  containing the method definition is the requested class.
      */
-    if (objc != 4) {
-        token = Tcl_GetStringFromObj(objv[0], (int*)NULL);
-        Tcl_AppendResult(interp,
-            "wrong # args: should be \"",
-            token, " class::func arglist body\"",
-            (char*)NULL);
-        status = TCL_ERROR;
-        goto bodyCmdDone;
-    }
 
     mfunc = NULL;
     entry = Tcl_FindHashEntry(&cdefn->resolveCmds, tail);
@@ -265,7 +256,7 @@ Itcl_ConfigBodyCmd(dummy, interp, objc, objv)
     }
 
     Itcl_PreserveData((ClientData)mcode);
-    Itcl_EventuallyFree((ClientData)mcode, Itcl_DeleteMemberCode);
+    Itcl_EventuallyFree((ClientData)mcode, (Tcl_FreeProc*) Itcl_DeleteMemberCode);
 
     if (member->code) {
         Itcl_ReleaseData((ClientData)member->code);
@@ -458,7 +449,7 @@ Itcl_CreateMemberFunc(interp, cdefn, name, arglist, body, mfuncPtr)
         return TCL_ERROR;
     }
     Itcl_PreserveData((ClientData)mcode);
-    Itcl_EventuallyFree((ClientData)mcode, Itcl_DeleteMemberCode);
+    Itcl_EventuallyFree((ClientData)mcode, (Tcl_FreeProc*) Itcl_DeleteMemberCode);
 
     /*
      *  Allocate a member function definition and return.
@@ -491,7 +482,7 @@ Itcl_CreateMemberFunc(interp, cdefn, name, arglist, body, mfuncPtr)
 
     Tcl_SetHashValue(entry, (ClientData)mfunc);
     Itcl_PreserveData((ClientData)mfunc);
-    Itcl_EventuallyFree((ClientData)mfunc, Itcl_DeleteMemberFunc);
+    Itcl_EventuallyFree((ClientData)mfunc, (Tcl_FreeProc*) Itcl_DeleteMemberFunc);
 
     *mfuncPtr = mfunc;
     return TCL_OK;
@@ -560,7 +551,7 @@ Itcl_ChangeMemberFunc(interp, mfunc, arglist, body)
      *  Free up the old implementation and install the new one.
      */
     Itcl_PreserveData((ClientData)mcode);
-    Itcl_EventuallyFree((ClientData)mcode, Itcl_DeleteMemberCode);
+    Itcl_EventuallyFree((ClientData)mcode, (Tcl_FreeProc*) Itcl_DeleteMemberCode);
 
     Itcl_ReleaseData((ClientData)mfunc->member->code);
     mfunc->member->code = mcode;
