@@ -6,7 +6,7 @@
 #            mmclennan@lucent.com
 #            http://www.tcltk.com/itcl
 #
-#      RCS:  $Id: basic.test,v 1.9 2007/05/24 22:52:44 hobbs Exp $
+#      RCS:  $Id: basic.test,v 1.10 2007/05/24 22:54:34 hobbs Exp $
 # ----------------------------------------------------------------------
 #            Copyright (c) 1993-1998  Lucent Technologies, Inc.
 # ======================================================================
@@ -145,6 +145,36 @@ test basic-2.4 {"#auto" is smart enough to skip names that are taken} {
     Counter counter3
     Counter #auto
 } {counter4}
+
+test basic-2.5 {"#auto" with :: at front of name} {
+    itcl::class AutoCheck {}
+    set result [AutoCheck ::#auto]
+    rename AutoCheck {}
+    set result
+} {::autoCheck0}
+
+test basic-2.6 {"#auto" with :: at front of name inside method} {
+    itcl::class AutoCheck {
+        proc new {} {
+            return [AutoCheck ::#auto]
+        }
+    }
+    set result [AutoCheck::new]
+    rename AutoCheck {}
+    set result
+} {::autoCheck0}
+
+test basic-2.7 {"#auto" with :: at front of name inside method inside namespace} {
+    namespace eval AutoCheckNs {}
+    itcl::class AutoCheckNs::AutoCheck {
+        proc new {} {
+            return [AutoCheckNs::AutoCheck ::#auto]
+        }
+    }
+    set result [AutoCheckNs::AutoCheck::new]
+    namespace delete AutoCheckNs
+    set result
+} {::autoCheck0}
 
 # ----------------------------------------------------------------------
 #  Simple object use
