@@ -21,7 +21,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itcl_util.c,v 1.14 2004/11/23 21:48:45 davygrvy Exp $
+ *     RCS:  $Id: itcl_util.c,v 1.15 2007/05/24 21:40:23 hobbs Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -1099,7 +1099,7 @@ Itcl_GetTrueNamespace(interp, info)
     ItclObjectInfo *info;      /* object info associated with interp */
 {
     int i, transparent;
-    Tcl_CallFrame *framePtr, *transFramePtr;
+    Itcl_CallFrame *framePtr, *transFramePtr;
     Tcl_Namespace *contextNs;
 
     /*
@@ -1110,7 +1110,7 @@ Itcl_GetTrueNamespace(interp, info)
 
     framePtr = _Tcl_GetCallFrame(interp, 0);
     for (i = Itcl_GetStackSize(&info->transparentFrames)-1; i >= 0; i--) {
-        transFramePtr = (Tcl_CallFrame*)
+        transFramePtr = (Itcl_CallFrame*)
             Itcl_GetStackValue(&info->transparentFrames, i);
 
         if (framePtr == transFramePtr) {

@@ -22,7 +22,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itcl_objects.c,v 1.14 2006/03/01 11:39:55 davygrvy Exp $
+ *     RCS:  $Id: itcl_objects.c,v 1.15 2007/05/24 21:40:23 hobbs Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -605,7 +605,7 @@ Itcl_HandleInstance(clientData, interp, objc, objv)
     ItclMemberFunc *mfunc;
     ItclObjectInfo *info;
     ItclContext context;
-    CallFrame *framePtr;
+    ItclCallFrame *framePtr;
 
     if (objc < 2) {
         Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),

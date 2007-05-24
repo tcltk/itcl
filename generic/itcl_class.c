@@ -23,7 +23,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itcl_class.c,v 1.18 2004/12/14 08:16:23 davygrvy Exp $
+ *     RCS:  $Id: itcl_class.c,v 1.19 2007/05/24 21:40:23 hobbs Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -794,7 +794,7 @@ Itcl_HandleClass(clientData, interp, objc, objv)
     char *token, *objName, tmp, *start, *pos, *match;
 
     ItclObject *newObj;
-    Tcl_CallFrame frame;
+    Itcl_CallFrame frame;
 
     /*
      *  If the command is invoked without an object name, then do nothing.
@@ -818,7 +818,7 @@ Itcl_HandleClass(clientData, interp, objc, objv)
     if ((*token == ':') && (strcmp(token,"::") == 0) && (objc > 2)) {
         if ((cdefnPtr->flags & ITCL_OLD_STYLE) != 0) {
 
-            result = Tcl_PushCallFrame(interp, &frame,
+            result = Tcl_PushCallFrame(interp, (Tcl_CallFrame *) &frame,
                  cdefnPtr->namesp, /* isProcCallFrame */ 0);
 
             if (result != TCL_OK) {
@@ -1066,11 +1066,11 @@ Itcl_ClassVarResolver(interp, name, context, flags, rPtr)
     Tcl_Var *rPtr;            /* returns: resolved variable */
 {
     Interp *iPtr = (Interp *) interp;
-    CallFrame *varFramePtr = iPtr->varFramePtr;
+    ItclCallFrame *varFramePtr = (ItclCallFrame *) iPtr->varFramePtr;
 
     ItclClass *cdefn = (ItclClass*)context->clientData;
     ItclObject *contextObj;
-    Tcl_CallFrame *framePtr;
+    Itcl_CallFrame *framePtr;
     Tcl_HashEntry *entry;
     ItclVarLookup *vlookup;
 
@@ -1289,7 +1289,7 @@ ItclClassRuntimeVarResolver(interp, resVarInfo)
 {
     ItclVarLookup *vlookup = ((ItclResolvedVarInfo*)resVarInfo)->vlookup;
 
-    Tcl_CallFrame *framePtr;
+    Itcl_CallFrame *framePtr;
     ItclClass *cdefn;
     ItclObject *contextObj;
     Tcl_HashEntry *entry;
@@ -1689,14 +1689,14 @@ Itcl_GetCommonVar(interp, name, contextClass)
 {
     CONST char *val = NULL;
     int result;
-    Tcl_CallFrame frame;
+    Itcl_CallFrame frame;
 
     /*
      *  Activate the namespace for the given class.  That installs
      *  the appropriate name resolution rules and by-passes any
      *  security restrictions.
      */
-    result = Tcl_PushCallFrame(interp, &frame,
+    result = Tcl_PushCallFrame(interp, (Tcl_CallFrame *) &frame,
                  contextClass->namesp, /*isProcCallFrame*/ 0);
 
     if (result == TCL_OK) {

@@ -12,7 +12,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itcl_migrate.c,v 1.2 2003/12/24 01:09:56 davygrvy Exp $
+ *     RCS:  $Id: itcl_migrate.c,v 1.3 2007/05/24 21:40:23 hobbs Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -40,7 +40,7 @@
  *
  *----------------------------------------------------------------------
  */
-Tcl_CallFrame*
+Itcl_CallFrame*
 _Tcl_GetCallFrame(interp, level)
     Tcl_Interp *interp;  /* interpreter being queried */
     int level;           /* number of levels up in the call stack (>= 0) */
@@ -57,7 +57,7 @@ _Tcl_GetCallFrame(interp, level)
         framePtr = framePtr->callerVarPtr;
         level--;
     }
-    return (Tcl_CallFrame*)framePtr;
+    return (Itcl_CallFrame *) framePtr;
 }
 
 
@@ -86,10 +86,10 @@ _Tcl_GetCallFrame(interp, level)
  *
  *----------------------------------------------------------------------
  */
-Tcl_CallFrame*
+Itcl_CallFrame*
 _Tcl_ActivateCallFrame(interp, framePtr)
     Tcl_Interp *interp;        /* interpreter being queried */
-    Tcl_CallFrame *framePtr;   /* call frame to be activated */
+    Itcl_CallFrame *framePtr;   /* call frame to be activated */
 {
     Interp *iPtr = (Interp*)interp;
     CallFrame *oldFramePtr;
@@ -97,7 +97,7 @@ _Tcl_ActivateCallFrame(interp, framePtr)
     oldFramePtr = iPtr->varFramePtr;
     iPtr->varFramePtr = (CallFrame *) framePtr;
 
-    return (Tcl_CallFrame *) oldFramePtr;
+    return (Itcl_CallFrame *) oldFramePtr;
 }
 
 /*

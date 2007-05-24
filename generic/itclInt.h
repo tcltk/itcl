@@ -39,7 +39,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itclInt.h,v 1.14 2005/02/10 23:20:27 hobbs Exp $
+ *     RCS:  $Id: itclInt.h,v 1.15 2007/05/24 21:40:23 hobbs Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -102,6 +102,49 @@
 #   undef Tcl_GetCommandFullName
 #   define Tcl_GetCommandFullName \
 	(tclIntStubsPtr->tcl_GetCommandFullName)
+
+/*
+ * Use 8.5+ CallFrame
+ */
+#define ItclCallFrame CallFrame
+#define Itcl_CallFrame Tcl_CallFrame
+
+#else
+
+/*
+ * Redefine CallFrame to account for extra ClientData in 8.5.
+ * Make sure that standard CallFrame comes first.
+ */
+typedef struct ItclCallFrame {
+    Namespace *nsPtr;
+    int isProcCallFrame;
+    int objc;
+    Tcl_Obj *CONST *objv;
+    struct CallFrame *callerPtr;
+    struct CallFrame *callerVarPtr;
+    int level;
+    Proc *procPtr;
+    Tcl_HashTable *varTablePtr;
+    int numCompiledLocals;
+    Var* compiledLocals;
+    ClientData clientData;
+} ItclCallFrame;
+
+typedef struct Itcl_CallFrame {
+    Tcl_Namespace *nsPtr;
+    int dummy1;
+    int dummy2;
+    char *dummy3;
+    char *dummy4;
+    char *dummy5;
+    int dummy6;
+    char *dummy7;
+    char *dummy8;
+    int dummy9;
+    char *dummy10;
+    char *dummy11;
+} Itcl_CallFrame;
+
 #endif
 
 /*
@@ -299,7 +342,7 @@ typedef struct ItclVarLookup {
  */
 typedef struct ItclContext {
     ItclClass *classDefn;     /* class definition */
-    CallFrame frame;          /* call frame for object context */
+    ItclCallFrame frame;      /* call frame for object context */
     Var *compiledLocals;      /* points to storage for compiled locals */
     Var localStorage[20];     /* default storage for compiled locals */
 } ItclContext;

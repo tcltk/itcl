@@ -22,7 +22,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itcl_bicmds.c,v 1.9 2005/02/10 23:20:28 hobbs Exp $
+ *     RCS:  $Id: itcl_bicmds.c,v 1.10 2007/05/24 21:40:23 hobbs Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -336,7 +336,7 @@ Itcl_BiConfigureCmd(clientData, interp, objc, objv)
     Tcl_Obj *resultPtr, *objPtr;
     Tcl_DString buffer;
     ItclContext context;
-    Tcl_CallFrame *oldFramePtr, *uplevelFramePtr;
+    Itcl_CallFrame *oldFramePtr, *uplevelFramePtr;
 
     /*
      *  Make sure that this command is being invoked in the proper
@@ -703,7 +703,7 @@ Itcl_BiChainCmd(dummy, interp, objc, objv)
     Tcl_HashEntry *entry;
     ItclMemberFunc *mfunc;
     Tcl_DString buffer;
-    CallFrame *framePtr;
+    ItclCallFrame *framePtr;
     Tcl_Obj *cmdlinePtr, **newobjv;
 
     /*
@@ -723,7 +723,7 @@ Itcl_BiChainCmd(dummy, interp, objc, objv)
      *  If it cannot be determined, do nothing.  Otherwise, trim
      *  off any leading path names.
      */
-    framePtr = (CallFrame*) _Tcl_GetCallFrame(interp, 0);
+    framePtr = (ItclCallFrame*) _Tcl_GetCallFrame(interp, 0);
     if (!framePtr || !framePtr->objv) {
         return TCL_OK;
     }

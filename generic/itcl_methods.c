@@ -23,7 +23,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itcl_methods.c,v 1.17 2006/06/06 22:37:55 hobbs Exp $
+ *     RCS:  $Id: itcl_methods.c,v 1.18 2007/05/24 21:40:23 hobbs Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -892,13 +892,13 @@ Itcl_EvalMemberCode(interp, mfunc, member, contextObj, objc, objv)
     Tcl_Obj *CONST objv[];    /* argument objects */
 {
     int result = TCL_OK;
-    Tcl_CallFrame *oldFramePtr = NULL;
+    Itcl_CallFrame *oldFramePtr = NULL;
 
     int i, transparent, newEntry;
     ItclObjectInfo *info;
     ItclMemberCode *mcode;
     ItclContext context;
-    Tcl_CallFrame *framePtr, *transFramePtr;
+    Itcl_CallFrame *framePtr, *transFramePtr;
 
     /*
      *  If this code does not have an implementation yet, then
@@ -929,7 +929,7 @@ Itcl_EvalMemberCode(interp, mfunc, member, contextObj, objc, objv)
     info = member->classDefn->info;
     framePtr = _Tcl_GetCallFrame(interp, 0);
     for (i = Itcl_GetStackSize(&info->transparentFrames)-1; i >= 0; i--) {
-        transFramePtr = (Tcl_CallFrame*)
+        transFramePtr = (Itcl_CallFrame*)
             Itcl_GetStackValue(&info->transparentFrames, i);
 
         if (framePtr == transFramePtr) {
@@ -1607,7 +1607,7 @@ Itcl_PushContext(interp, member, contextClass, contextObj, contextPtr)
     ItclObject *contextObj;   /* object context, or NULL */
     ItclContext *contextPtr;  /* storage space for class/object context */
 {
-    CallFrame *framePtr = &contextPtr->frame;
+    ItclCallFrame *framePtr = &contextPtr->frame;
 
     int result, localCt, newEntry;
     ItclMemberCode *mcode;
@@ -1695,7 +1695,7 @@ Itcl_PushContext(interp, member, contextClass, contextObj, contextPtr)
             return result;
         }
 
-        TclInitCompiledLocals(interp, framePtr,
+        TclInitCompiledLocals(interp, (CallFrame *) framePtr,
             (Namespace*)contextClass->namesp);
     }
     return result;
@@ -1716,7 +1716,7 @@ Itcl_PopContext(interp, contextPtr)
     Tcl_Interp *interp;       /* interpreter managing this body of code */
     ItclContext *contextPtr;  /* storage space for class/object context */
 {
-    Tcl_CallFrame *framePtr;
+    Itcl_CallFrame *framePtr;
     ItclObjectInfo *info;
     ItclObject *contextObj;
     Tcl_HashEntry *entry;
@@ -1773,7 +1773,7 @@ Itcl_GetContext(interp, cdefnPtr, odefnPtr)
 {
     Tcl_Namespace *activeNs = Tcl_GetCurrentNamespace(interp);
     ItclObjectInfo *info;
-    Tcl_CallFrame *framePtr;
+    Itcl_CallFrame *framePtr;
     Tcl_HashEntry *entry;
 
     /*
@@ -1848,12 +1848,12 @@ Itcl_AssignArgs(interp, objc, objv, mfunc)
     ItclClass *contextClass;
     ItclObject *contextObj;
     CompiledLocal *argPtr;
-    CallFrame *framePtr;
+    ItclCallFrame *framePtr;
     Var *varPtr;
     Tcl_Obj *objPtr, *listPtr;
     char *value;
 
-    framePtr = (CallFrame*) _Tcl_GetCallFrame(interp, 0);
+    framePtr = (ItclCallFrame *) _Tcl_GetCallFrame(interp, 0);
     framePtr->objc = objc;
     framePtr->objv = objv;  /* ref counts for args are incremented below */
 
@@ -2197,7 +2197,7 @@ ItclHandleConfig(interp, argc, vars, vals, contextObj)
     CONST char *val;
     Tcl_DString lastval;
     ItclContext context;
-    Tcl_CallFrame *oldFramePtr, *uplevelFramePtr;
+    Itcl_CallFrame *oldFramePtr, *uplevelFramePtr;
 
     Tcl_DStringInit(&lastval);
 

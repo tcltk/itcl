@@ -11,7 +11,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 # 
-# RCS: @(#) $Id: itclInt.decls,v 1.8 2003/12/17 02:54:39 davygrvy Exp $
+# RCS: @(#) $Id: itclInt.decls,v 1.9 2007/05/24 21:40:23 hobbs Exp $
 
 library itcl
 
@@ -490,11 +490,11 @@ declare 109 generic {
 #
 
 declare 112 generic {
-    Tcl_CallFrame* _Tcl_GetCallFrame (Tcl_Interp *interp, int level)
+    Itcl_CallFrame* _Tcl_GetCallFrame (Tcl_Interp *interp, int level)
 }
 declare 113 generic {
-    Tcl_CallFrame* _Tcl_ActivateCallFrame (Tcl_Interp *interp, \
-        Tcl_CallFrame *framePtr)
+    Itcl_CallFrame* _Tcl_ActivateCallFrame (Tcl_Interp *interp, \
+        Itcl_CallFrame *framePtr)
 }
 declare 114 generic {
     Var* _TclNewVar (void)

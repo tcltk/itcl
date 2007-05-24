@@ -37,7 +37,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itcl_parse.c,v 1.7 2004/11/15 20:14:07 davygrvy Exp $
+ *     RCS:  $Id: itcl_parse.c,v 1.8 2007/05/24 21:40:23 hobbs Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -197,7 +197,7 @@ Itcl_ClassCmd(clientData, interp, objc, objv)
     char *className;
     Tcl_Namespace *parserNs;
     ItclClass *cdefnPtr;
-    Tcl_CallFrame frame;
+    Itcl_CallFrame frame;
 
     if (objc != 3) {
         Tcl_WrongNumArgs(interp, 1, objv, "name { definition }");
@@ -251,7 +251,7 @@ Itcl_ClassCmd(clientData, interp, objc, objv)
      */
     Itcl_PushStack((ClientData)cdefnPtr, &info->cdefnStack);
 
-    result = Tcl_PushCallFrame(interp, &frame, parserNs,
+    result = Tcl_PushCallFrame(interp, (Tcl_CallFrame *) &frame, parserNs,
         /* isProcCallFrame */ 0);
 
     if (result == TCL_OK) {
@@ -318,7 +318,7 @@ Itcl_ClassInheritCmd(clientData, interp, objc, objv)
     ItclClass *cdPtr, *baseCdefnPtr, *badCdPtr;
     ItclHierIter hier;
     Itcl_Stack stack;
-    Tcl_CallFrame frame;
+    Itcl_CallFrame frame;
 
     if (objc < 2) {
         Tcl_WrongNumArgs(interp, 1, objv, "class ?class...?");
@@ -350,8 +350,8 @@ Itcl_ClassInheritCmd(clientData, interp, objc, objv)
     /*
      *  Validate each base class and add it to the "bases" list.
      */
-    result = Tcl_PushCallFrame(interp, &frame, cdefnPtr->namesp->parentPtr,
-        /* isProcCallFrame */ 0);
+    result = Tcl_PushCallFrame(interp, (Tcl_CallFrame *) &frame,
+	    cdefnPtr->namesp->parentPtr, /* isProcCallFrame */ 0);
 
     if (result != TCL_OK) {
         return TCL_ERROR;

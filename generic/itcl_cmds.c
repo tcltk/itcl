@@ -21,7 +21,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itcl_cmds.c,v 1.26 2007/02/15 23:31:44 hobbs Exp $
+ *     RCS:  $Id: itcl_cmds.c,v 1.27 2007/05/24 21:40:23 hobbs Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -1039,7 +1039,7 @@ Itcl_ScopeCmd(dummy, interp, objc, objv)
     ItclClass *contextClass;
     ItclObject *contextObj;
     ItclObjectInfo *info;
-    Tcl_CallFrame *framePtr;
+    Itcl_CallFrame *framePtr;
     Tcl_HashEntry *entry;
     ItclVarLookup *vlookup;
     Tcl_Obj *objPtr;
