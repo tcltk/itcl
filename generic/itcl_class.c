@@ -23,7 +23,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itcl_class.c,v 1.20 2007/05/24 22:12:55 hobbs Exp $
+ *     RCS:  $Id: itcl_class.c,v 1.21 2007/05/24 22:47:45 hobbs Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -738,7 +738,7 @@ Itcl_FindClassNamespace(interp, path)
 	    (Tcl_Namespace*)NULL, /* flags */ 0);
 
     if ( !classNs && contextNs->parentPtr != NULL &&
-         (*path != ':' || *(path+1) != ':') ) {
+         !(*path == ':' && *(path+1) == ':') ) {
 
         if (strcmp(contextNs->name, path) == 0) {
             classNs = contextNs;
