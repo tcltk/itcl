@@ -6,7 +6,7 @@
 #            mmclennan@lucent.com
 #            http://www.tcltk.com/itcl
 #
-#      RCS:  $Id: basic.test,v 1.8 2004/12/14 08:13:58 davygrvy Exp $
+#      RCS:  $Id: basic.test,v 1.9 2007/05/24 22:52:44 hobbs Exp $
 # ----------------------------------------------------------------------
 #            Copyright (c) 1993-1998  Lucent Technologies, Inc.
 # ======================================================================
@@ -19,6 +19,10 @@ if {[lsearch [namespace children] ::tcltest] == -1} {
 }
 
 ::tcltest::loadTestedCommands
+
+test basic-1.0 {empty string as class name should fail but not crash} {
+    list [catch {itcl::class "" {}} err] $err
+} {1 {invalid class name ""}}
 
 # ----------------------------------------------------------------------
 #  Simple class definition

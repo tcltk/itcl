@@ -37,7 +37,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itcl_parse.c,v 1.9 2007/05/24 22:12:55 hobbs Exp $
+ *     RCS:  $Id: itcl_parse.c,v 1.10 2007/05/24 22:52:44 hobbs Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -193,7 +193,7 @@ Itcl_ClassCmd(clientData, interp, objc, objv)
 {
     ItclObjectInfo* info = (ItclObjectInfo*)clientData;
 
-    int result;
+    int result, len;
     char *className;
     Tcl_Namespace *parserNs;
     ItclClass *cdefnPtr;
@@ -203,7 +203,11 @@ Itcl_ClassCmd(clientData, interp, objc, objv)
         Tcl_WrongNumArgs(interp, 1, objv, "name { definition }");
         return TCL_ERROR;
     }
-    className = Tcl_GetStringFromObj(objv[1], (int*)NULL);
+    className = Tcl_GetStringFromObj(objv[1], &len);
+    if (len == 0) {
+        Tcl_AppendResult(interp, "invalid class name \"\"", (char *) NULL);
+        return TCL_ERROR;
+    }
 
     /*
      *  Find the namespace to use as a parser for the class definition.
@@ -312,7 +316,7 @@ Itcl_ClassInheritCmd(clientData, interp, objc, objv)
     ItclObjectInfo *info = (ItclObjectInfo*)clientData;
     ItclClass *cdefnPtr = (ItclClass*)Itcl_PeekStack(&info->cdefnStack);
 
-    int result, i, newEntry;
+    int result, i, newEntry = 1;
     char *token;
     Itcl_ListElem *elem, *elem2;
     ItclClass *cdPtr, *baseCdefnPtr, *badCdPtr;
