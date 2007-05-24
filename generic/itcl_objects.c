@@ -22,7 +22,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itcl_objects.c,v 1.15 2007/05/24 21:40:23 hobbs Exp $
+ *     RCS:  $Id: itcl_objects.c,v 1.16 2007/05/24 22:12:55 hobbs Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -106,10 +106,10 @@ Itcl_CreateObject(interp, name, cdefn, objc, objv, roPtr)
 	(Tcl_Namespace*)NULL, TCL_NAMESPACE_ONLY);
 
     if (cmd != NULL && !Itcl_IsStub(cmd)) {
-        Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
-            "command \"", name, "\" already exists in namespace \"",
-            Tcl_GetCurrentNamespace(interp)->fullName, "\"",
-            (char*)NULL);
+        Tcl_AppendResult(interp,
+		"command \"", name, "\" already exists in namespace \"",
+		Tcl_GetCurrentNamespace(interp)->fullName, "\"",
+		(char*) NULL);
         return TCL_ERROR;
     }
 
@@ -122,10 +122,10 @@ Itcl_CreateObject(interp, name, cdefn, objc, objv, roPtr)
         parentNs = Itcl_FindClassNamespace(interp, head);
 
         if (!parentNs) {
-            Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
-                "namespace \"", head, "\" not found in context \"",
-                Tcl_GetCurrentNamespace(interp)->fullName, "\"",
-                (char*)NULL);
+            Tcl_AppendResult(interp,
+		    "namespace \"", head, "\" not found in context \"",
+		    Tcl_GetCurrentNamespace(interp)->fullName, "\"",
+		    (char *) NULL);
             Tcl_DStringFree(&buffer);
             return TCL_ERROR;
         }
@@ -376,9 +376,9 @@ Itcl_DestructObject(interp, contextObj, flags)
      */
     if (contextObj->destructed) {
         if ((flags & ITCL_IGNORE_ERRS) == 0) {
-            Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
-                "can't delete an object while it is being destructed",
-                (char*)NULL);
+            Tcl_AppendResult(interp,
+		    "can't delete an object while it is being destructed",
+		    (char*)NULL);
             return TCL_ERROR;
         }
         return TCL_OK;
@@ -608,9 +608,9 @@ Itcl_HandleInstance(clientData, interp, objc, objv)
     ItclCallFrame *framePtr;
 
     if (objc < 2) {
-        Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
-            "wrong # args: should be one of...",
-            (char*)NULL);
+        Tcl_AppendResult(interp,
+		"wrong # args: should be one of...",
+		(char *) NULL);
         ItclReportObjectUsage(interp, contextObj);
         return TCL_ERROR;
     }
@@ -641,9 +641,9 @@ Itcl_HandleInstance(clientData, interp, objc, objv)
     }
 
     if ( !mfunc && (*token != 'i' || strcmp(token,"info") != 0) ) {
-        Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
-            "bad option \"", token, "\": should be one of...",
-            (char*)NULL);
+        Tcl_AppendResult(interp,
+		"bad option \"", token, "\": should be one of...",
+		(char*)NULL);
         ItclReportObjectUsage(interp, contextObj);
         return TCL_ERROR;
     }
@@ -719,9 +719,9 @@ Itcl_GetInstanceVar(interp, name, contextObj, contextClass)
      */
     if (contextObj == NULL) {
         Tcl_ResetResult(interp);
-        Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
-            "cannot access object-specific info without an object context",
-            (char*)NULL);
+        Tcl_SetResult(interp,
+		"cannot access object-specific info without an object context",
+		TCL_STATIC);
         return NULL;
     }
 
@@ -1181,10 +1181,10 @@ Itcl_ScopedVarResolver(interp, name, contextNs, flags, rPtr)
     }
     if (namec != 3) {
         if (errs) {
-            Tcl_AppendStringsToObj(Tcl_GetObjResult(errs),
-                "scoped variable \"", name, "\" is malformed: ",
-                "should be: @itcl object variable",
-                (char*)NULL);
+            Tcl_AppendResult(errs,
+		    "scoped variable \"", name, "\" is malformed: ",
+		    "should be: @itcl object variable",
+		    (char*) NULL);
         }
         ckfree((char*)namev);
         return TCL_ERROR;
@@ -1196,7 +1196,7 @@ Itcl_ScopedVarResolver(interp, name, contextNs, flags, rPtr)
      */
     if (!Tcl_GetCommandInfo(interp, namev[1], &cmdInfo)) {
         if (errs) {
-            Tcl_AppendStringsToObj(Tcl_GetObjResult(errs),
+            Tcl_AppendResult(errs,
                 "can't resolve scoped variable \"", name, "\": ",
                 "can't find object ", namev[1],
                 (char*)NULL);
@@ -1213,7 +1213,7 @@ Itcl_ScopedVarResolver(interp, name, contextNs, flags, rPtr)
     entry = Tcl_FindHashEntry(&contextObj->classDefn->resolveVars, namev[2]);
     if (!entry) {
         if (errs) {
-            Tcl_AppendStringsToObj(Tcl_GetObjResult(errs),
+            Tcl_AppendResult(errs,
                 "can't resolve scoped variable \"", name, "\": ",
                 "no such data member ", namev[2],
                 (char*)NULL);

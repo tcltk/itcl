@@ -21,7 +21,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itcl_util.c,v 1.15 2007/05/24 21:40:23 hobbs Exp $
+ *     RCS:  $Id: itcl_util.c,v 1.16 2007/05/24 22:12:55 hobbs Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -1254,7 +1254,7 @@ Itcl_DecodeScopedCommand(interp, name, rNsPtr, rCmdPtr)
 		    &listv);
             if (result == TCL_OK) {
                 if (listc != 4) {
-                    Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+                    Tcl_AppendResult(interp,
                         "malformed command \"", name, "\": should be \"",
                         "namespace inscope namesp command\"",
                         (char*)NULL);
@@ -1337,7 +1337,7 @@ Itcl_EvalArgs(interp, objc, objv)
 
         if (cmd == NULL) {
             Tcl_ResetResult(interp);
-            Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+            Tcl_AppendResult(interp,
                 "invalid command name \"",
                 Tcl_GetStringFromObj(objv[0], NULL), "\"", NULL);
             return TCL_ERROR;

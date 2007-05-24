@@ -23,7 +23,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itcl_methods.c,v 1.18 2007/05/24 21:40:23 hobbs Exp $
+ *     RCS:  $Id: itcl_methods.c,v 1.19 2007/05/24 22:12:55 hobbs Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -81,7 +81,7 @@ Itcl_BodyCmd(dummy, interp, objc, objv)
 
     if (objc != 4) {
         token = Tcl_GetStringFromObj(objv[0], (int*)NULL);
-        Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+        Tcl_AppendResult(interp,
             "wrong # args: should be \"",
             token, " class::func arglist body\"",
             (char*)NULL);
@@ -97,7 +97,7 @@ Itcl_BodyCmd(dummy, interp, objc, objv)
     Itcl_ParseNamespPath(token, &buffer, &head, &tail);
 
     if (!head || *head == '\0') {
-        Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+        Tcl_AppendResult(interp,
             "missing class specifier for body declaration \"", token, "\"",
             (char*)NULL);
         status = TCL_ERROR;
@@ -118,7 +118,7 @@ Itcl_BodyCmd(dummy, interp, objc, objv)
      */
     if (objc != 4) {
         token = Tcl_GetStringFromObj(objv[0], (int*)NULL);
-        Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+        Tcl_AppendResult(interp,
             "wrong # args: should be \"",
             token, " class::func arglist body\"",
             (char*)NULL);
@@ -136,7 +136,7 @@ Itcl_BodyCmd(dummy, interp, objc, objv)
     }
 
     if (mfunc == NULL) {
-        Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+        Tcl_AppendResult(interp,
             "function \"", tail, "\" is not defined in class \"",
             cdefn->fullname, "\"",
             (char*)NULL);
@@ -208,7 +208,7 @@ Itcl_ConfigBodyCmd(dummy, interp, objc, objv)
     Itcl_ParseNamespPath(token, &buffer, &head, &tail);
 
     if (!head || *head == '\0') {
-        Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+        Tcl_AppendResult(interp,
             "missing class specifier for body declaration \"", token, "\"",
             (char*)NULL);
         status = TCL_ERROR;
@@ -237,7 +237,7 @@ Itcl_ConfigBodyCmd(dummy, interp, objc, objv)
     }
 
     if (vlookup == NULL) {
-        Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+        Tcl_AppendResult(interp,
             "option \"", tail, "\" is not defined in class \"",
             cdefn->fullname, "\"",
             (char*)NULL);
@@ -247,7 +247,7 @@ Itcl_ConfigBodyCmd(dummy, interp, objc, objv)
     member = vlookup->vdefn->member;
 
     if (member->protection != ITCL_PUBLIC) {
-        Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+        Tcl_AppendResult(interp,
             "option \"", member->fullname,
             "\" is not a public configuration option",
             (char*)NULL);
@@ -306,7 +306,7 @@ Itcl_CreateMethod(interp, cdefn, name, arglist, body)
      *  goofy like a "::" scope qualifier.
      */
     if (strstr(name,"::")) {
-        Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+        Tcl_AppendResult(interp,
             "bad method name \"", name, "\"",
             (char*)NULL);
         return TCL_ERROR;
@@ -366,7 +366,7 @@ Itcl_CreateProc(interp, cdefn, name, arglist, body)
      *  goofy like a "::" scope qualifier.
      */
     if (strstr(name,"::")) {
-        Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+        Tcl_AppendResult(interp,
             "bad proc name \"", name, "\"",
             (char*)NULL);
         return TCL_ERROR;
@@ -441,7 +441,7 @@ Itcl_CreateMemberFunc(interp, cdefn, name, arglist, body, mfuncPtr)
     entry = Tcl_CreateHashEntry(&cdefn->functions, name, &newEntry);
 
     if (!newEntry) {
-        Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+        Tcl_AppendResult(interp,
             "\"", name, "\" already defined in class \"",
             cdefn->fullname, "\"",
             (char*)NULL);
@@ -545,7 +545,7 @@ Itcl_ChangeMemberFunc(interp, mfunc, arglist, body)
         objPtr = Itcl_ArgList(mfunc->argcount, mfunc->arglist);
         Tcl_IncrRefCount(objPtr);
 
-        Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+        Tcl_AppendResult(interp,
             "argument list changed for function \"",
             mfunc->member->fullname, "\": should be \"",
             Tcl_GetStringFromObj(objPtr, (int*)NULL), "\"",
@@ -704,7 +704,7 @@ Itcl_CreateMemberCode(interp, cdefn, arglist, body, mcodePtr)
         ClientData cdata;
 
         if (!Itcl_FindC(interp, body+1, &argCmdProc, &objCmdProc, &cdata)) {
-            Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+            Tcl_AppendResult(interp,
                 "no registered C procedure with name \"", body+1, "\"",
                 (char*)NULL);
             Itcl_DeleteMemberCode((char*)mcode);
@@ -829,7 +829,7 @@ Itcl_GetMemberCode(interp, member)
     assert(mcode != NULL);
 
     if (!Itcl_IsMemberCodeImplemented(mcode)) {
-        Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+        Tcl_AppendResult(interp,
             "member function \"", member->fullname,
             "\" is not defined and cannot be autoloaded",
             (char*)NULL);
@@ -1090,14 +1090,14 @@ Itcl_CreateArgList(interp, decl, argcPtr, argPtr)
                     status = TCL_ERROR;
                 }
                 else if (fargc > 2) {
-                    Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+                    Tcl_AppendResult(interp,
                         "too many fields in argument specifier \"",
                         argv[i], "\"",
                         (char*)NULL);
                     status = TCL_ERROR;
                 }
                 else if (strstr(fargv[0],"::")) {
-                    Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+                    Tcl_AppendResult(interp,
                         "bad argument name \"", fargv[0], "\"",
                         (char*)NULL);
                     status = TCL_ERROR;
@@ -1470,7 +1470,7 @@ Itcl_ExecMethod(clientData, interp, objc, objv)
         return TCL_ERROR;
     }
     if (contextObj == NULL) {
-        Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+        Tcl_AppendResult(interp,
             "cannot access object-specific info without an object context",
             (char*)NULL);
         return TCL_ERROR;
@@ -1485,7 +1485,7 @@ Itcl_ExecMethod(clientData, interp, objc, objv)
             contextClass->info);
 
         if (!Itcl_CanAccessFunc(mfunc, contextNs)) {
-            Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+            Tcl_AppendResult(interp,
                 "can't access \"", member->fullname, "\": ",
                 Itcl_ProtectionStr(member->protection), " function",
                 (char*)NULL);
@@ -1563,7 +1563,7 @@ Itcl_ExecProc(clientData, interp, objc, objv)
             mfunc->member->classDefn->info);
 
         if (!Itcl_CanAccessFunc(mfunc, contextNs)) {
-            Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+            Tcl_AppendResult(interp,
                 "can't access \"", member->fullname, "\": ",
                 Itcl_ProtectionStr(member->protection), " function",
                 (char*)NULL);
@@ -1804,7 +1804,7 @@ Itcl_GetContext(interp, cdefnPtr, odefnPtr)
     /*
      *  If there is no class/object context, return an error message.
      */
-    Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+    Tcl_AppendResult(interp,
         "namespace \"", activeNs->fullName, "\" is not a class namespace",
         (char*)NULL);
 
@@ -1916,7 +1916,7 @@ Itcl_AssignArgs(interp, objc, objv, mfunc)
              *  the use of the "config" argument.
              */
             if ((mfunc->member->flags & ITCL_OLD_STYLE) == 0) {
-                Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+                Tcl_AppendResult(interp,
                     "\"config\" argument is an anachronism\n",
                     "[incr Tcl] no longer supports the \"config\" argument.\n",
                     "Instead, use the \"args\" argument and then use the\n",
@@ -2025,7 +2025,7 @@ Itcl_AssignArgs(interp, objc, objv, mfunc)
                 Itcl_GetMemberFuncUsage(mfunc, contextObj, objPtr);
                 Tcl_AppendToObj(objPtr, "\"", -1);
             } else {
-                Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+                Tcl_AppendResult(interp,
                     "no value given for parameter \"", argPtr->name, "\"",
                     (char*)NULL);
             }
@@ -2041,7 +2041,7 @@ Itcl_AssignArgs(interp, objc, objv, mfunc)
             Itcl_GetMemberFuncUsage(mfunc, contextObj, objPtr);
             Tcl_AppendToObj(objPtr, "\"", -1);
         } else {
-            Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+            Tcl_AppendResult(interp,
                 "too many arguments",
                 (char*)NULL);
         }
@@ -2128,7 +2128,7 @@ ItclParseConfig(interp, objc, objv, contextObj, rargc, rvars, rvals)
          */
         varName = Tcl_GetStringFromObj(*objv, (int*)NULL);
         if (*varName != '-') {
-            Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+            Tcl_AppendResult(interp,
                 "syntax error in config assignment \"",
                 varName, "\": should be \"-variable value\"",
                 (char*)NULL);
@@ -2136,7 +2136,7 @@ ItclParseConfig(interp, objc, objv, contextObj, rargc, rvars, rvals)
             break;
         }
         else if (objc-- <= 0) {
-            Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+            Tcl_AppendResult(interp,
                 "syntax error in config assignment \"",
                 varName, "\": should be \"-variable value\" (missing value)",
                 (char*)NULL);
@@ -2157,7 +2157,7 @@ ItclParseConfig(interp, objc, objv, contextObj, rargc, rvars, rvals)
             objv += 2;
         }
         else {
-            Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+            Tcl_AppendResult(interp,
                 "syntax error in config assignment \"",
                 varName, "\": unrecognized variable",
                 (char*)NULL);

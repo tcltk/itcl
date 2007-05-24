@@ -23,7 +23,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itcl_class.c,v 1.19 2007/05/24 21:40:23 hobbs Exp $
+ *     RCS:  $Id: itcl_class.c,v 1.20 2007/05/24 22:12:55 hobbs Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -93,7 +93,7 @@ Itcl_CreateClass(interp, path, info, rPtr)
 	    (Tcl_Namespace*)NULL, /* flags */ 0);
 
     if (classNs != NULL && Itcl_IsClassNamespace(classNs)) {
-        Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+        Tcl_AppendResult(interp,
             "class \"", path, "\" already exists",
             (char*)NULL);
         return TCL_ERROR;
@@ -109,12 +109,12 @@ Itcl_CreateClass(interp, path, info, rPtr)
 	    (Tcl_Namespace*)NULL, /* flags */ TCL_NAMESPACE_ONLY);
 
     if (cmd != NULL && !Itcl_IsStub(cmd)) {
-        Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+        Tcl_AppendResult(interp,
             "command \"", path, "\" already exists",
             (char*)NULL);
 
         if (strstr(path,"::") == NULL) {
-            Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+            Tcl_AppendResult(interp,
                 " in namespace \"",
                 Tcl_GetCurrentNamespace(interp)->fullName, "\"",
                 (char*)NULL);
@@ -131,7 +131,7 @@ Itcl_CreateClass(interp, path, info, rPtr)
     Itcl_ParseNamespPath(path, &buffer, &head, &tail);
 
     if (strstr(tail,".")) {
-        Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+        Tcl_AppendResult(interp,
             "bad class name \"", tail, "\"",
             (char*)NULL);
         Tcl_DStringFree(&buffer);
@@ -834,7 +834,7 @@ Itcl_HandleClass(clientData, interp, objc, objv)
          *  If this is not an old-style class, then return an error
          *  describing the syntax change.
          */
-        Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+        Tcl_AppendResult(interp,
             "syntax \"class :: proc\" is an anachronism\n",
             "[incr Tcl] no longer supports this syntax.\n",
             "Instead, remove the spaces from your procedure invocations:\n",
@@ -979,7 +979,7 @@ Itcl_ClassCmdResolver(interp, name, context, flags, rPtr)
         if (!Itcl_CanAccessFunc(mfunc, context)) {
 
             if ((flags & TCL_LEAVE_ERR_MSG) != 0) {
-                Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+                Tcl_AppendResult(interp,
                     "can't access \"", name, "\": ",
                     Itcl_ProtectionStr(mfunc->member->protection),
                     " variable",
@@ -1025,7 +1025,7 @@ Itcl_ClassCmdResolver(interp, name, context, flags, rPtr)
 	mfunc->accessCmd = NULL;
 
 	if ((flags & TCL_LEAVE_ERR_MSG) != 0) {
-	    Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+	    Tcl_AppendResult(interp,
 		"can't access \"", name, "\": deleted or redefined\n",
 		"(use the \"body\" command to redefine methods/procs)",
 		(char*)NULL);
@@ -1594,7 +1594,7 @@ Itcl_CreateVarDefn(interp, cdefn, name, init, config, vdefnPtr)
      */
     entry = Tcl_CreateHashEntry(&cdefn->variables, name, &newEntry);
     if (!newEntry) {
-        Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+        Tcl_AppendResult(interp,
             "variable name \"", name, "\" already defined in class \"",
             cdefn->fullname, "\"",
             (char*)NULL);

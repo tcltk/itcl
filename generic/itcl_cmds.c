@@ -21,7 +21,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itcl_cmds.c,v 1.27 2007/05/24 21:40:23 hobbs Exp $
+ *     RCS:  $Id: itcl_cmds.c,v 1.28 2007/05/24 22:12:55 hobbs Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -979,7 +979,7 @@ Itcl_DelObjectCmd(clientData, interp, objc, objv)
         }
 
         if (contextObj == NULL) {
-            Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+            Tcl_AppendResult(interp,
                 "object \"", name, "\" not found",
                 (char*)NULL);
             return TCL_ERROR;
@@ -1093,7 +1093,7 @@ Itcl_ScopeCmd(dummy, interp, objc, objv)
 
         entry = Tcl_FindHashEntry(&contextClass->resolveVars, token);
         if (!entry) {
-            Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+            Tcl_AppendResult(interp,
                 "variable \"", token, "\" not found in class \"",
                 contextClass->fullname, "\"",
                 (char*)NULL);
@@ -1123,7 +1123,7 @@ Itcl_ScopeCmd(dummy, interp, objc, objv)
 
         entry = Tcl_FindHashEntry(&info->contextFrames, (char*)framePtr);
         if (!entry) {
-            Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+            Tcl_AppendResult(interp,
                 "can't scope variable \"", token,
                 "\": missing object context\"",
                 (char*)NULL);
@@ -1169,7 +1169,7 @@ Itcl_ScopeCmd(dummy, interp, objc, objv)
             TCL_NAMESPACE_ONLY);
 
         if (!var) {
-            Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+            Tcl_AppendResult(interp,
                 "variable \"", token, "\" not found in namespace \"",
                 contextNs->fullName, "\"",
                 (char*)NULL);
@@ -1257,7 +1257,7 @@ Itcl_CodeCmd(dummy, interp, objc, objv)
             break;
         }
         else {
-            Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+            Tcl_AppendResult(interp,
                 "bad option \"", token, "\": should be -namespace or --",
                 (char*)NULL);
             return TCL_ERROR;
@@ -1471,7 +1471,7 @@ ItclHandleStubCmd(clientData, interp, objc, objv)
     result = Tcl_GetIntFromObj(interp, objPtr, &loaded);
     if (result != TCL_OK || !loaded) {
         Tcl_ResetResult(interp);
-        Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+        Tcl_AppendResult(interp,
             "can't autoload \"", cmdName, "\"", (char*)NULL);
         Tcl_DecrRefCount(cmdNamePtr);
         return TCL_ERROR;
