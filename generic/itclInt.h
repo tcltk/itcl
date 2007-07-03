@@ -39,7 +39,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itclInt.h,v 1.15 2007/05/24 21:40:23 hobbs Exp $
+ *     RCS:  $Id: itclInt.h,v 1.16 2007/07/03 23:11:24 hobbs Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -354,6 +354,7 @@ typedef struct ItclContext {
 #define ITCL_COMPAT_USECMDFLAGS 0x0001	/* Tcl8.4a1 introduced a different Command
 					 * structure, and we need to adapt
 					 * dynamically */
+#define ITCL_COMPAT_USE_ISTATE_API 0x2  /* Tcl 8.5a2 added interp state APIs */
 
 #include "itclIntDecls.h"
 

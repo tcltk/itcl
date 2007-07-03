@@ -21,7 +21,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itcl_util.c,v 1.16 2007/05/24 22:12:55 hobbs Exp $
+ *     RCS:  $Id: itcl_util.c,v 1.17 2007/07/03 23:11:24 hobbs Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -69,6 +69,8 @@ typedef struct InterpState {
 
 #define TCL_STATE_VALID 0x01233210  /* magic bit pattern for validation */
 
+/* Use for interp state APIs */
+extern int itclCompatFlags;
 
 
 /*
@@ -750,8 +752,20 @@ Itcl_SaveInterpState(interp, status)
     InterpState *info;
     CONST char *val;
 
-#ifndef ERR_IN_PROGRESS  /* this disappeared in 8.5a2 */
+    /*
+     * ERR_IN_PROGRESS was replaced by new APIs in 8.5a2.  Call them if they
+     * are available, or somehow magic them in from the stubs table.
+     * Tcl_ChannelThreadActionProc is a stubs slot higher than the APIs we
+     * need, so its existence indicates slot-y goodness.
+     */
+#ifndef ERR_IN_PROGRESS
     return (Itcl_InterpState) Tcl_SaveInterpState(interp, status);
+#elif defined(USE_TCL_STUBS) && defined(Tcl_ChannelThreadActionProc)
+    if (itclCompatFlags & ITCL_COMPAT_USE_ISTATE_API) {
+	Itcl_InterpState (*tcl_SaveInterpState)(Tcl_Interp *, int) =
+	    (Itcl_InterpState (*)(Tcl_Interp *, int)) tclStubsPtr->reserved535;
+	return (*tcl_SaveInterpState)(interp, status);
+    }
 #endif
 
     info = (InterpState*)ckalloc(sizeof(InterpState));
@@ -819,8 +833,19 @@ Itcl_RestoreInterpState(interp, state)
     InterpState *info = (InterpState*)state;
     int status;
 
-#ifndef ERR_IN_PROGRESS  /* this disappeared in 8.5a2 */
+    /*
+     * ERR_IN_PROGRESS was replaced by new APIs in 8.5a2.  Call them if they
+     * are available, or somehow magic them in from the stubs table.
+     * Tcl_ChannelThreadActionProc is a stubs slot higher than the APIs we
+     * need, so its existence indicates slot-y goodness.
+     */
+#ifndef ERR_IN_PROGRESS
     return Tcl_RestoreInterpState(interp, (Tcl_InterpState)state);
+#elif defined(USE_TCL_STUBS) && defined(Tcl_ChannelThreadActionProc)
+    if (itclCompatFlags & ITCL_COMPAT_USE_ISTATE_API) {
+	int (*tcl_RestoreInterpState)() = (int (*)()) tclStubsPtr->reserved536;
+ 	return (*tcl_RestoreInterpState)(interp, state);
+    }
 #endif
 
     if (info->validate != TCL_STATE_VALID) {
@@ -876,9 +901,22 @@ Itcl_DiscardInterpState(state)
 {
     InterpState *info = (InterpState*)state;
 
-#ifndef ERR_IN_PROGRESS  /* this disappeared in 8.5a2 */
+    /*
+     * ERR_IN_PROGRESS was replaced by new APIs in 8.5a2.  Call them if they
+     * are available, or somehow magic them in from the stubs table.
+     * Tcl_ChannelThreadActionProc is a stubs slot higher than the APIs we
+     * need, so its existence indicates slot-y goodness.
+     */
+#ifndef ERR_IN_PROGRESS
     Tcl_DiscardInterpState((Tcl_InterpState)state);
     return;
+#elif defined(USE_TCL_STUBS) && defined(Tcl_ChannelThreadActionProc)
+    if (itclCompatFlags & ITCL_COMPAT_USE_ISTATE_API) {
+	void (* tcl_DiscardInterpState)() = (void (*)())
+	    tclStubsPtr->reserved537;
+	(*tcl_DiscardInterpState)(state);
+	return;
+    }
 #endif
 
     if (info->validate != TCL_STATE_VALID) {

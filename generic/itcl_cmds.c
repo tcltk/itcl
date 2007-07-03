@@ -21,7 +21,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itcl_cmds.c,v 1.29 2007/05/24 23:04:10 hobbs Exp $
+ *     RCS:  $Id: itcl_cmds.c,v 1.30 2007/07/03 23:11:24 hobbs Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -171,6 +171,12 @@ Initialize(interp)
 	     * function in the core. */
 	    itclCompatFlags |= ITCL_COMPAT_USECMDFLAGS;
 	}
+#if USE_TCL_STUBS
+	if ((maj == 8) && (min > 4) &&
+		((type > TCL_ALPHA_RELEASE) || (ptch > 2))) {
+	    itclCompatFlags |= ITCL_COMPAT_USE_ISTATE_API;
+	}
+#endif
     }
 #else
     itclCompatFlags = 0;
