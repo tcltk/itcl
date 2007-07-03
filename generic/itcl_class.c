@@ -23,7 +23,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itcl_class.c,v 1.22 2007/05/24 23:04:10 hobbs Exp $
+ *     RCS:  $Id: itcl_class.c,v 1.23 2007/07/03 20:46:44 hobbs Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -792,9 +792,8 @@ Itcl_HandleClass(clientData, interp, objc, objv)
     ItclClass *cdefnPtr = (ItclClass*)clientData;
     int result = TCL_OK;
 
-    char unique[256];    /* buffer used for unique part of object names */
     Tcl_DString buffer;  /* buffer used to build object names */
-    char *token, *objName, tmp, *start, *pos, *match;
+    char *token, *objName, *match;
 
     ItclObject *newObj;
     Itcl_CallFrame frame;
@@ -854,60 +853,47 @@ Itcl_HandleClass(clientData, interp, objc, objv)
      *  a uniquely generated string based on the class name.
      */
     Tcl_DStringInit(&buffer);
-    objName = NULL;
+    objName = token;
+    match = strstr(token, "#auto");
+    if (match != NULL) {
+	int len;
+	char unique[TCL_INTEGER_SPACE]; /* for unique part of object names */
+	Tcl_CmdInfo dummy;
+	Tcl_UniChar ch;
 
-    match = "#auto";
-    start = token;
-    for (pos=start; *pos != '\0'; pos++) {
-        if (*pos == *match) {
-            if (*(++match) == '\0') {
-                tmp = *start;
-                *start = '\0';  /* null-terminate first part */
+	Tcl_DStringAppend(&buffer, token, (match - token));
 
-                /*
-                 *  Substitute a unique part in for "#auto", and keep
-                 *  incrementing a counter until a valid name is found.
-                 */
-                do {
-		    Tcl_CmdInfo dummy;
+	/*
+	 * Only lowercase the first char of $class, per itcl #auto semantics
+	 */
+	len = Tcl_UtfToUniChar(cdefnPtr->name, &ch);
+	ch = Tcl_UniCharToLower(ch);
+	Tcl_UniCharToUtfDString(&ch, 1, &buffer);
+	Tcl_DStringAppend(&buffer, cdefnPtr->name + len, -1);
 
-                    sprintf(unique,"%.200s%d", cdefnPtr->name,
-                        cdefnPtr->unique++);
-                    unique[0] = tolower(unique[0]);
+	/*
+	 *  Substitute a unique part in for "#auto", and keep
+	 *  incrementing a counter until a valid name is found.
+	 */
+	len = Tcl_DStringLength(&buffer);
+	do {
+	    sprintf(unique, "%d", cdefnPtr->unique++);
 
-                    Tcl_DStringTrunc(&buffer, 0);
-                    Tcl_DStringAppend(&buffer, token, -1);
-                    Tcl_DStringAppend(&buffer, unique, -1);
-                    Tcl_DStringAppend(&buffer, start+5, -1);
+	    Tcl_DStringTrunc(&buffer, len);
+	    Tcl_DStringAppend(&buffer, unique, -1);
+	    Tcl_DStringAppend(&buffer, match+5, -1);
 
-                    objName = Tcl_DStringValue(&buffer);
+	    objName = Tcl_DStringValue(&buffer);
 
-		    /*
-		     * [Fix 227811] Check for any command with the
-		     * given name, not only objects.
-		     */
+	    /*
+	     * [Fix 227811] Check for any command with the given name, not
+	     * only objects.
+	     */
 
-                    if (Tcl_GetCommandInfo (interp, objName, &dummy) == 0) {
-                        break;  /* if an error is found, bail out! */
-                    }
-                } while (1);
-
-                *start = tmp;       /* undo null-termination */
-                objName = Tcl_DStringValue(&buffer);
-                break;              /* object name is ready to go! */
-            }
-        }
-        else {
-            match = "#auto";
-            pos = start++;
-        }
-    }
-
-    /*
-     *  If "#auto" was not found, then just use object name as-is.
-     */
-    if (objName == NULL) {
-        objName = token;
+	    if (Tcl_GetCommandInfo (interp, objName, &dummy) == 0) {
+		break;  /* if an error is found, bail out! */
+	    }
+	} while (1);
     }
 
     /*
