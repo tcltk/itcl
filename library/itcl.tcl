@@ -9,7 +9,7 @@
 #            mmclennan@lucent.com
 #            http://www.tcltk.com/itcl
 #
-#      RCS:  $Id: itcl.tcl,v 1.6 2007/06/10 19:35:45 hobbs Exp $
+#      RCS:  $Id: itcl.tcl,v 1.7 2007/07/05 00:23:10 hobbs Exp $
 # ----------------------------------------------------------------------
 #            Copyright (c) 1993-1998  Lucent Technologies, Inc.
 # ======================================================================
@@ -95,11 +95,13 @@ foreach cmd {itcl::configbody configbody} {
 # USAGE:  ensemble name ?body?
 # Adds an entry to the auto index list for the given ensemble name.
 #
-auto_mkindex_parser::command itcl::ensemble {name {body ""}} {
-    variable index
-    variable scriptFile
-    append index "set [list auto_index([fullname $name])]"
-    append index " \[list source \[file join \$dir [list $scriptFile]\]\]\n"
+foreach cmd {itcl::ensemble ensemble} {
+    auto_mkindex_parser::command $cmd {name {body ""}} {
+	variable index
+	variable scriptFile
+	append index "set [list auto_index([fullname $name])]"
+	append index " \[list source \[file join \$dir [list $scriptFile]\]\]\n"
+    }
 }
 
 #
