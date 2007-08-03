@@ -37,7 +37,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itcl_parse.c,v 1.10 2007/05/24 22:52:44 hobbs Exp $
+ *     RCS:  $Id: itcl_parse.c,v 1.11 2007/08/03 18:56:47 msofer Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -939,14 +939,21 @@ Itcl_ClassCommonCmd(clientData, interp, objc, objv)
     entry = Tcl_CreateHashEntry(&nsPtr->varTable,
         vdefn->member->name, &newEntry);
 
-    varPtr = _TclNewVar();
-    varPtr->hPtr = entry;
-    varPtr->nsPtr = nsPtr;
-    varPtr->flags |= VAR_NAMESPACE_VAR;
-    varPtr->refCount++;    /* one use by namespace */
+    if (newEntry) {
+	varPtr = _TclNewVar();
+	varPtr->hPtr = entry;
+	varPtr->nsPtr = nsPtr;
+	Tcl_SetHashValue(entry, varPtr);
+    } else {
+	varPtr = (Var *) Tcl_GetHashValue(entry);
+    }
+    
+    if (!(varPtr->flags & VAR_NAMESPACE_VAR)) {
+	varPtr->flags |= VAR_NAMESPACE_VAR;
+	varPtr->refCount++;    /* one use by namespace */
+    }
     varPtr->refCount++;    /* another use by class */
 
-    Tcl_SetHashValue(entry, varPtr);
 
     /*
      *  TRICKY NOTE:  Make sure to rebuild the virtual tables for this
