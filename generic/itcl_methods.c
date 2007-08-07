@@ -23,7 +23,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itcl_methods.c,v 1.20 2007/05/24 23:04:10 hobbs Exp $
+ *     RCS:  $Id: itcl_methods.c,v 1.21 2007/08/07 20:05:30 msofer Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -797,7 +797,6 @@ Itcl_GetMemberCode(interp, member)
     if (!Itcl_IsMemberCodeImplemented(mcode)) {
         result = Tcl_VarEval(interp, "::auto_load ", member->fullname,
             (char*)NULL);
-
         if (result != TCL_OK) {
             char msg[256];
             sprintf(msg, "\n    (while autoloading code for \"%.100s\")",
@@ -833,7 +832,6 @@ Itcl_GetMemberCode(interp, member)
      */
     if ((member->flags & ITCL_CONSTRUCTOR) != 0 &&
         (member->classDefn->initCode != NULL)) {
-
         result = TclProcCompileProc(interp, mcode->procPtr,
             member->classDefn->initCode, (Namespace*)member->classDefn->namesp,
             "initialization code for", member->fullname);
@@ -1159,7 +1157,7 @@ Itcl_CreateArg(name, init)
     localPtr->nextPtr = NULL;
     localPtr->nameLength = nameLen;
     localPtr->frameIndex = 0;  /* set this later */
-    localPtr->flags  = VAR_SCALAR | VAR_ARGUMENT;
+    ItclInitVarArgument(localPtr);
     localPtr->resolveInfo = NULL;
 
     if (init != NULL) {
@@ -1646,29 +1644,6 @@ Itcl_PushContext(interp, member, contextClass, contextObj, contextPtr)
         procPtr = mcode->procPtr;
 
         /*
-         *  If there are too many compiled locals to fit in the default
-         *  storage space for the context, then allocate more space.
-         */
-        localCt = procPtr->numCompiledLocals;
-        if (localCt > sizeof(contextPtr->localStorage)/sizeof(Var)) {
-            contextPtr->compiledLocals = (Var*)ckalloc(
-                (unsigned)(localCt * sizeof(Var))
-            );
-        }
-
-        /*
-         * Initialize and resolve compiled variable references.
-         * Class variables will have special resolution rules.
-         * In that case, we call their "resolver" procs to get our
-         * hands on the variable, and we make the compiled local a
-         * link to the real variable.
-         */
-
-        framePtr->procPtr = procPtr;
-        framePtr->numCompiledLocals = localCt;
-        framePtr->compiledLocals = contextPtr->compiledLocals;
-
-        /*
          * Invoking TclInitCompiledLocals with a framePtr->procPtr->bodyPtr
          * that is not a compiled byte code type leads to a crash. So
          * make sure that the body is compiled here. This needs to
@@ -1685,6 +1660,29 @@ Itcl_PushContext(interp, member, contextClass, contextObj, contextPtr)
         if (result != TCL_OK) {
             return result;
         }
+
+        /*
+         *  If there are too many compiled locals to fit in the default
+         *  storage space for the context, then allocate more space.
+         */
+        localCt = procPtr->numCompiledLocals;
+        if (localCt > sizeof(contextPtr->localStorage)/itclVarLocalSize) {
+            contextPtr->compiledLocals = (Var*)ckalloc(
+                (unsigned)(localCt * itclVarLocalSize)
+            );
+        }
+
+        /*
+         * Initialize and resolve compiled variable references.
+         * Class variables will have special resolution rules.
+         * In that case, we call their "resolver" procs to get our
+         * hands on the variable, and we make the compiled local a
+         * link to the real variable.
+         */
+
+        framePtr->procPtr = procPtr;
+        framePtr->numCompiledLocals = localCt;
+        framePtr->compiledLocals = contextPtr->compiledLocals;
 
         TclInitCompiledLocals(interp, (CallFrame *) framePtr,
             (Namespace*)contextClass->namesp);
@@ -1863,7 +1861,7 @@ Itcl_AssignArgs(interp, objc, objv, mfunc)
 
     for (argsLeft=mcode->argcount, argPtr=mcode->arglist, objv++, objc--;
          argsLeft > 0;
-         argPtr=argPtr->nextPtr, argsLeft--, varPtr++, objv++, objc--)
+         argPtr=argPtr->nextPtr, argsLeft--, ItclNextLocal(varPtr), objv++, objc--)
     {
         if (!TclIsVarArgument(argPtr)) {
             Tcl_Panic("local variable %s is not argument but should be",
@@ -1884,9 +1882,9 @@ Itcl_AssignArgs(interp, objc, objv, mfunc)
             if (objc < 0) objc = 0;
 
             listPtr = Tcl_NewListObj(objc, objv);
-            varPtr->value.objPtr = listPtr;
+            ItclVarObjValue(varPtr) = listPtr;
             Tcl_IncrRefCount(listPtr); /* local var is a reference */
-            varPtr->flags &= ~VAR_UNDEFINED;
+	    ItclClearVarUndefined(varPtr);
             objc = 0;
 
             break;
@@ -1942,9 +1940,9 @@ Itcl_AssignArgs(interp, objc, objv, mfunc)
                     Tcl_ListObjAppendElement(interp, listPtr, objPtr);
                 }
 
-                varPtr->value.objPtr = listPtr;
+                ItclVarObjValue(varPtr) = listPtr;
                 Tcl_IncrRefCount(listPtr); /* local var is a reference */
-                varPtr->flags &= ~VAR_UNDEFINED;
+		ItclClearVarUndefined(varPtr);
 
                 objc = 0;  /* all remaining args handled */
             }
@@ -1982,15 +1980,15 @@ Itcl_AssignArgs(interp, objc, objv, mfunc)
                     Tcl_ListObjAppendElement(interp, listPtr, objPtr);
                 }
 
-                varPtr->value.objPtr = listPtr;
+                ItclVarObjValue(varPtr) = listPtr;
                 Tcl_IncrRefCount(listPtr); /* local var is a reference */
-                varPtr->flags &= ~VAR_UNDEFINED;
+		ItclClearVarUndefined(varPtr);
             }
             else {
                 objPtr = Tcl_NewStringObj("", 0);
-                varPtr->value.objPtr = objPtr;
+                ItclVarObjValue(varPtr) = objPtr;
                 Tcl_IncrRefCount(objPtr); /* local var is a reference */
-                varPtr->flags &= ~VAR_UNDEFINED;
+		ItclClearVarUndefined(varPtr);
             }
         }
 
@@ -1999,14 +1997,14 @@ Itcl_AssignArgs(interp, objc, objv, mfunc)
          */
         else if (objc > 0) {          /* take next arg as value */
             objPtr = *objv;
-            varPtr->value.objPtr = objPtr;
-            varPtr->flags &= ~VAR_UNDEFINED;
+            ItclVarObjValue(varPtr) = objPtr;
+	    ItclClearVarUndefined(varPtr);
             Tcl_IncrRefCount(objPtr);  /* local var is a reference */
         }
         else if (argPtr->defValuePtr) {    /* ...or use default value */
             objPtr = argPtr->defValuePtr;
-            varPtr->value.objPtr = objPtr;
-            varPtr->flags &= ~VAR_UNDEFINED;
+            ItclVarObjValue(varPtr) = objPtr;
+	    ItclClearVarUndefined(varPtr);
             Tcl_IncrRefCount(objPtr);  /* local var is a reference */
         }
         else {

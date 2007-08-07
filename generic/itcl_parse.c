@@ -37,7 +37,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itcl_parse.c,v 1.11 2007/08/03 18:56:47 msofer Exp $
+ *     RCS:  $Id: itcl_parse.c,v 1.12 2007/08/07 20:05:30 msofer Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -896,7 +896,6 @@ Itcl_ClassCommonCmd(clientData, interp, objc, objv)
     int newEntry;
     char *name, *init;
     ItclVarDefn *vdefn;
-    Tcl_HashEntry *entry;
     Namespace *nsPtr;
     Var *varPtr;
 
@@ -936,23 +935,16 @@ Itcl_ClassCommonCmd(clientData, interp, objc, objv)
      *  the virtual tables below.
      */
     nsPtr = (Namespace*)cdefnPtr->namesp;
-    entry = Tcl_CreateHashEntry(&nsPtr->varTable,
+    varPtr = ItclVarHashCreateVar(&nsPtr->varTable,
         vdefn->member->name, &newEntry);
 
-    if (newEntry) {
-	varPtr = _TclNewVar();
-	varPtr->hPtr = entry;
+#if ITCL_TCL_PRE_8_5
+    if (newEntry && itclOldRuntime) {
 	varPtr->nsPtr = nsPtr;
-	Tcl_SetHashValue(entry, varPtr);
-    } else {
-	varPtr = (Var *) Tcl_GetHashValue(entry);
     }
-    
-    if (!(varPtr->flags & VAR_NAMESPACE_VAR)) {
-	varPtr->flags |= VAR_NAMESPACE_VAR;
-	varPtr->refCount++;    /* one use by namespace */
-    }
-    varPtr->refCount++;    /* another use by class */
+#endif
+    TclSetVarNamespaceVar(varPtr);
+    ItclVarRefCount(varPtr)++;    /* another use by class */
 
 
     /*

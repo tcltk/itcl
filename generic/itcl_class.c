@@ -23,7 +23,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itcl_class.c,v 1.23 2007/07/03 20:46:44 hobbs Exp $
+ *     RCS:  $Id: itcl_class.c,v 1.24 2007/08/07 20:05:29 msofer Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -486,14 +486,12 @@ ItclFreeClass(cdata)
 {
     ItclClass *cdefnPtr = (ItclClass*)cdata;
 
-    int newEntry;
     Itcl_ListElem *elem;
     Tcl_HashSearch place;
-    Tcl_HashEntry *entry, *hPtr;
+    Tcl_HashEntry *entry;
     ItclVarDefn *vdefn;
     ItclVarLookup *vlookup;
-    Var *varPtr;
-    Tcl_HashTable varTable;
+    VarInHash *varPtr;
 
     /*
      *  Tear down the list of derived classes.  This list should
@@ -512,7 +510,6 @@ ItclFreeClass(cdata)
      *  appear multiple times in the table (for x, foo::x, etc.)
      *  so each one has a reference count.
      */
-    Tcl_InitHashTable(&varTable, TCL_STRING_KEYS);
 
     entry = Tcl_FirstHashEntry(&cdefnPtr->resolveVars, &place);
     while (entry) {
@@ -526,19 +523,20 @@ ItclFreeClass(cdata)
              */
             if ( (vlookup->vdefn->member->flags & ITCL_COMMON) != 0 &&
                  vlookup->vdefn->member->classDefn == cdefnPtr ) {
-                varPtr = (Var*)vlookup->var.common;
-                if (--varPtr->refCount == 0) {
-                    hPtr = Tcl_CreateHashEntry(&varTable,
-                        vlookup->vdefn->member->fullname, &newEntry);
-                    Tcl_SetHashValue(hPtr, (ClientData) varPtr);
+                varPtr = (VarInHash*)vlookup->var.common;
+                if (--ItclVarRefCount(varPtr) == 0) {
+		    /*
+		     * This is called after the namespace is already gone: the
+		     * variable is already unset and ready to be freed.
+		     */
+		    
+		    ckfree((char *)varPtr);
                 }
             }
             ckfree((char*)vlookup);
         }
         entry = Tcl_NextHashEntry(&place);
     }
-
-    TclDeleteVars((Interp*)cdefnPtr->interp, &varTable);
     Tcl_DeleteHashTable(&cdefnPtr->resolveVars);
 
     /*
@@ -1097,7 +1095,7 @@ Itcl_ClassVarResolver(interp, name, context, flags, rPtr)
 
             for (i=0; i < localCt; i++) {
                 if (!TclIsVarTemporary(localPtr)) {
-                    register char *localName = localVarPtr->name;
+                    register char *localName = localPtr->name;
                     if ((name[0] == localName[0])
                             && (nameLen == localPtr->nameLength)
                             && (strcmp(name, localName) == 0)) {
@@ -1105,7 +1103,7 @@ Itcl_ClassVarResolver(interp, name, context, flags, rPtr)
                         return TCL_OK;
                     }
                 }
-                localVarPtr++;
+                ItclNextLocal(localVarPtr);
                 localPtr = localPtr->nextPtr;
             }
         }
@@ -1116,9 +1114,8 @@ Itcl_ClassVarResolver(interp, name, context, flags, rPtr)
          *  created on the fly.
          */
         if (varFramePtr->varTablePtr != NULL) {
-            entry = Tcl_FindHashEntry(varFramePtr->varTablePtr, name);
-            if (entry != NULL) {
-                *rPtr = (Tcl_Var)Tcl_GetHashValue(entry);
+	    *rPtr = (Tcl_Var) ItclVarHashFindVar(varFramePtr->varTablePtr, name);
+	    if (*rPtr) {
                 return TCL_OK;
             }
         }
@@ -1348,7 +1345,7 @@ void
 Itcl_BuildVirtualTables(cdefnPtr)
     ItclClass* cdefnPtr;       /* class definition being updated */
 {
-    Tcl_HashEntry *entry, *hPtr;
+    Tcl_HashEntry *entry;
     Tcl_HashSearch place;
     ItclVarLookup *vlookup;
     ItclVarDefn *vdefn;
@@ -1416,10 +1413,8 @@ Itcl_BuildVirtualTables(cdefnPtr)
              */
             if ((vdefn->member->flags & ITCL_COMMON) != 0) {
                 nsPtr = (Namespace*)cdPtr->namesp;
-                hPtr = Tcl_FindHashEntry(&nsPtr->varTable, vdefn->member->name);
-                assert(hPtr != NULL);
-
-                vlookup->var.common = (Tcl_Var)Tcl_GetHashValue(hPtr);
+                vlookup->var.common = (Tcl_Var) ItclVarHashFindVar(&nsPtr->varTable, vdefn->member->name);
+                assert(vlookup->var.common  != NULL);
             }
             else {
                 /*

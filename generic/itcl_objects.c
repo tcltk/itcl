@@ -22,7 +22,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itcl_objects.c,v 1.16 2007/05/24 22:12:55 hobbs Exp $
+ *     RCS:  $Id: itcl_objects.c,v 1.17 2007/08/07 20:05:30 msofer Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -1072,22 +1072,26 @@ ItclCreateObjVar(interp, vdefn, contextObj)
     ItclContext context;
 
     varPtr = _TclNewVar();
-    varPtr->name = vdefn->member->name;
-    varPtr->nsPtr = (Namespace*)vdefn->member->classDefn->namesp;
+#if ITCL_TCL_PRE_8_5
+    if (itclOldRuntime) {    
+	varPtr->name = vdefn->member->name;
+	varPtr->nsPtr = (Namespace*)vdefn->member->classDefn->namesp;
 
-    /*
-     *  NOTE:  Tcl reports a "dangling upvar" error for variables
-     *         with a null "hPtr" field.  Put something non-zero
-     *         in here to keep Tcl_SetVar2() happy.  The only time
-     *         this field is really used is it remove a variable
-     *         from the hash table that contains it in CleanupVar,
-     *         but since these variables are protected by their
-     *         higher refCount, they will not be deleted by CleanupVar
-     *         anyway.  These variables are unset and removed in
-     *         ItclFreeObject().
-     */
-    varPtr->hPtr = (Tcl_HashEntry*)0x1;
-    varPtr->refCount = 1;  /* protect from being deleted */
+	/*
+	 *  NOTE:  Tcl reports a "dangling upvar" error for variables
+	 *         with a null "hPtr" field.  Put something non-zero
+	 *         in here to keep Tcl_SetVar2() happy.  The only time
+	 *         this field is really used is it remove a variable
+	 *         from the hash table that contains it in CleanupVar,
+	 *         but since these variables are protected by their
+	 *         higher refCount, they will not be deleted by CleanupVar
+	 *         anyway.  These variables are unset and removed in
+	 *         ItclFreeObject().
+	 */
+	varPtr->hPtr = (Tcl_HashEntry*)0x1;
+	ItclVarRefCount(varPtr) = 1;  /* protect from being deleted */
+    }
+#endif
 
     /*
      *  Install the new variable in the object's data array.

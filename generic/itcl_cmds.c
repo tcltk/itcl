@@ -21,7 +21,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itcl_cmds.c,v 1.30 2007/07/03 23:11:24 hobbs Exp $
+ *     RCS:  $Id: itcl_cmds.c,v 1.31 2007/08/07 20:05:30 msofer Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -110,6 +110,14 @@ static char safeInitScript[] =
 
 int itclCompatFlags = -1;
 
+#if ITCL_TCL_PRE_8_5
+int itclVarFlagOffset; 
+int itclVarRefCountOffset;
+int itclVarInHashSize;
+int itclVarLocalSize;
+int itclVarValueOffset;
+#endif
+
 
 /*
  * ------------------------------------------------------------------------
@@ -176,11 +184,30 @@ Initialize(interp)
 		((type > TCL_ALPHA_RELEASE) || (ptch > 2))) {
 	    itclCompatFlags |= ITCL_COMPAT_USE_ISTATE_API;
 	}
-#endif
-    }
 #else
     itclCompatFlags = 0;
 #endif
+
+#if ITCL_TCL_PRE_8_5
+#if USE_TCL_STUBS
+	if ((maj == 8) && (min < 5)) {
+#endif
+	    itclVarFlagOffset     = ItclOffset(Var, flags);
+	    itclVarRefCountOffset = ItclOffset(Var, refCount);
+	    itclVarValueOffset    = ItclOffset(Var, value);
+	    itclVarInHashSize     = sizeof(Var);
+	    itclVarLocalSize	  = sizeof(Var);
+#if USE_TCL_STUBS
+	} else {
+	    itclVarFlagOffset     = ItclOffset(ItclShortVar, flags);
+	    itclVarRefCountOffset = ItclOffset(ItclVarInHash, refCount);
+	    itclVarValueOffset    = ItclOffset(ItclShortVar, value);
+	    itclVarInHashSize     = sizeof(ItclVarInHash);
+	    itclVarLocalSize	  = sizeof(ItclShortVar);  
+	}
+#endif
+#endif
+    }
 
     /*
      *  Initialize the ensemble package first, since we need this
@@ -189,7 +216,8 @@ Initialize(interp)
     if (Itcl_EnsembleInit(interp) != TCL_OK) {
         return TCL_ERROR;
     }
-
+#endif
+    
     /*
      *  Create the top-level data structure for tracking objects.
      *  Store this as "associated data" for easy access, but link

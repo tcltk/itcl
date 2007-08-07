@@ -21,7 +21,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itcl_util.c,v 1.17 2007/07/03 23:11:24 hobbs Exp $
+ *     RCS:  $Id: itcl_util.c,v 1.18 2007/08/07 20:05:30 msofer Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -68,9 +68,6 @@ typedef struct InterpState {
 } InterpState;
 
 #define TCL_STATE_VALID 0x01233210  /* magic bit pattern for validation */
-
-/* Use for interp state APIs */
-extern int itclCompatFlags;
 
 
 /*
