@@ -9,13 +9,13 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itclInt.h,v 1.17.2.2 2007/09/07 21:19:41 wiede Exp $
+ * RCS: @(#) $Id: itclInt.h,v 1.17.2.3 2007/09/07 21:49:03 wiede Exp $
  */
 
 #include <string.h>
 #include <ctype.h>
 #include <tcl.h>
-#include "../oo/generic/tclOO.h"
+#include "../../oo/generic/tclOO.h"
 #include "itclMigrate2TclCore.h"
 #include "itclNeededFromTclOO.h"
 #include "itcl.h"

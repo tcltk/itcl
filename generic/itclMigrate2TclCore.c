@@ -9,15 +9,15 @@
  * ========================================================================
  *  AUTHOR:  Arnulf Wiedemann
  *
- *     RCS:  $Id: itclMigrate2TclCore.c,v 1.1.2.1 2007/09/07 21:19:42 wiede Exp $
+ *     RCS:  $Id: itclMigrate2TclCore.c,v 1.1.2.2 2007/09/07 21:49:05 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
  * See the file "license.terms" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  */
-#include "../head/generic/tcl.h"
-#include "../head/generic/tclInt.h"
+#include <tcl.h>
+#include <tclInt.h>
 #include "itclMigrate2TclCore.h"
 
 int

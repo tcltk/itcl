@@ -8,10 +8,10 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itcl2TclOO.c,v 1.1.2.1 2007/09/07 21:19:40 wiede Exp $
+ * RCS: @(#) $Id: itcl2TclOO.c,v 1.1.2.2 2007/09/07 21:49:05 wiede Exp $
  */
 
-#include "../oo/generic/tclOOInt.h"
+#include "../../oo/generic/tclOOInt.h"
 #define _TCLOOINT_H
 #include "itclInt.h"
 
