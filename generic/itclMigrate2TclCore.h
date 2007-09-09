@@ -38,28 +38,10 @@ EXTERN Tcl_Var Tcl_FindNamespaceVar (Tcl_Interp * interp,
 /* these functions DO NOT exist and are not published */
 typedef struct Tcl_Proc_ *Tcl_Proc;
 
-#ifdef NOTDEF
-typedef struct Tcl_CallFrameInfo {
-    Tcl_Namespace *nsPtr;
-    int flags;
-    int objc;
-    Tcl_Obj *CONST *objv;
-    Tcl_CallFrame CONST *callerPtr;
-    Tcl_CallFrame CONST *callerVarPtr;
-    int level;
-    Tcl_Proc procPtr;
-    ClientData clientData;
-#ifdef ARNULF_FOR_ITCL_CODE
-    Tcl_Resolve *resolvePtr;
-#endif
-} Tcl_CallFrameInfo;
-#endif
-
 typedef void (*Tcl_ProcErrorProc)(Tcl_Interp *interp, Tcl_Obj *procNameObj);
 
 #define Tcl_GetOriginalCommand _Tcl_GetOriginalCommand
 #define Tcl_GetNamespaceCommandTable _Tcl_GetNamespaceCommandTable
-#define Tcl_GetNamespaceVariableTable _Tcl_GetNamespaceVariableTable
 #define Tcl_GetNamespaceChildTable _Tcl_GetNamespaceChildTable
 #define Tcl_InitRewriteEnsemble _Tcl_InitRewriteEnsemble
 #define Tcl_ResetRewriteEnsemble _Tcl_ResetRewriteEnsemble
@@ -88,8 +70,6 @@ EXTERN int _Tcl_SetNamespaceResolver(Tcl_Namespace *nsPtr,
         Tcl_Resolve *resolvePtr);
 EXTERN int _Tcl_InvokeNamespaceProc(Tcl_Interp *interp, Tcl_Proc proc,
         Tcl_Namespace *nsPtr, Tcl_Obj *namePtr, int objc, Tcl_Obj *const *objv);
-EXTERN int Tcl_NewNamespaceVars(Tcl_Interp *interp, Tcl_Namespace *nsPtr,
-        int argc, char *argv[]);
 EXTERN Tcl_Var Tcl_NewNamespaceVar(Tcl_Interp *interp, Tcl_Namespace *nsPtr,
 	const char *varName);
 EXTERN int Itcl_IsCallFrameArgument(Tcl_Interp *interp, const char *name);

@@ -8,7 +8,7 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itclNeededFromTclOO.c,v 1.1.2.3 2007/09/09 11:04:19 wiede Exp $
+ * RCS: @(#) $Id: itclNeededFromTclOO.c,v 1.1.2.4 2007/09/09 20:53:47 wiede Exp $
  */
 
 #include <tclOOInt.h>
@@ -96,21 +96,4 @@ _Tcl_NewProcClassMethod(
         *clientData2 = pmPtr;
     }
     return (Tcl_Method)method;
-}
-
-/*
- * ----------------------------------------------------------------------
- *
- * _Tcl_ProcPtrFromPM --
- *
- *	Get The ProcPtr from a struct ProcedureMethod
- *
- * ----------------------------------------------------------------------
- */
-
-ClientData
-_Tcl_ProcPtrFromPM(
-    ClientData *clientData)
-{
-    return ((ProcedureMethod *)clientData)->procPtr;
 }

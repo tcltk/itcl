@@ -9,7 +9,7 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itclBase.c,v 1.1.2.3 2007/09/09 13:38:40 wiede Exp $
+ * RCS: @(#) $Id: itclBase.c,v 1.1.2.4 2007/09/09 20:53:47 wiede Exp $
  */
 
 #include <stdlib.h>
@@ -84,7 +84,78 @@ static char safeInitScript[] =
     return $ptr\n\
 }";
 
+static char *clazzClassScript = "set itclClass [::oo::class create ::itcl::clazz]; \
+    ::oo::define $itclClass superclass ::oo::class";
 
+
+static char *clazzUnknownBody = "\n\
+    set mySelf [::oo::Helpers::self]\n\
+    if {[::itcl::is class $mySelf]} {\n\
+        set namespace [uplevel 1 namespace current]\n\
+        set my_namespace $namespace\n\
+        if {$my_namespace ne \"::\"} {\n\
+            set my_namespace ${my_namespace}::\n\
+        }\n\
+        set my_class [::itcl::find classes ${my_namespace}$m]\n\
+        if {[string length $my_class] > 0} {\n\
+            # class already exists, it is a redefinition, so delete old class first\n\
+	    ::itcl::delete class $my_class\n\
+        }\n\
+        set cmd [uplevel 1 ::info command ${my_namespace}$m]\n\
+        if {[string length $cmd] > 0} {\n\
+            error \"command \\\"$m\\\" already exists in namespace \\\"$namespace\\\"\"\n\
+        }\n\
+    } \n\
+    set myns [uplevel namespace current]\n\
+    if {$myns ne \"::\"} {\n\
+       set myns ${myns}::\n\
+    }\n\
+    set myObj [lindex [::info level 0] 0]\n\
+    set cmd [list uplevel 1 ::itcl::parser::handleClass $myObj $mySelf $m {*}[list $args]]\n\
+    if {[catch {\n\
+        eval $cmd\n\
+    } obj errInfo]} {\n\
+	return -code error -errorinfo $::errorInfo $obj\n\
+    }\n\
+    set body [list {set obj [lindex [::info level 0] 0]}]\n\
+    set part {return [::itcl::methodset::objectUnknownCommand [self]}\n\
+    append part \" ${myns}::$obj \"\n\
+    append part {{*}$args]}\n\
+    lappend body $part\n\
+    catch {\n\
+        # just in case object has been destructed during construction\n\
+    ::oo::define ${myns}::$obj method unknown {args} \"[join $body \n]\"\n\
+    ::oo::define ${myns}::$obj export unknown\n\
+    }\n\
+    return $obj\n\
+";
+
+
+/*
+ * ------------------------------------------------------------------------
+ *  AddClassUnknowMethod()
+ *
+ * ------------------------------------------------------------------------
+ */
+static int
+AddClassUnknowMethod(
+    Tcl_Interp *interp,
+    ItclObjectInfo *infoPtr,
+    Tcl_Class clsPtr)
+{
+    ClientData pmPtr;
+    Tcl_Obj *namePtr = Tcl_NewStringObj("unknown", -1);
+    Tcl_IncrRefCount(namePtr);
+    Tcl_Obj *argumentPtr = Tcl_NewStringObj("m args", -1);
+    Tcl_IncrRefCount(argumentPtr);
+    Tcl_Obj *bodyPtr = Tcl_NewStringObj(clazzUnknownBody, -1);
+    ClientData tmPtr = (ClientData)Itcl_NewProcClassMethod(interp,
+        clsPtr, NULL, NULL, NULL, NULL, namePtr, argumentPtr, bodyPtr, &pmPtr);
+    if (tmPtr == NULL) {
+        Tcl_Panic("cannot add class method unknown");
+    }
+    return TCL_OK;
+}
 
 /*
  * ------------------------------------------------------------------------
@@ -190,6 +261,21 @@ opt = atoi(res_option);
         (Tcl_InterpDeleteProc*)NULL, (ClientData)infoPtr);
 
     Itcl_PreserveData((ClientData)infoPtr);
+
+    /* first create the Itcl base class as root of itcl classes */
+    if (Tcl_Eval(interp, clazzClassScript) != TCL_OK) {
+        Tcl_Panic("cannot create Itcl root class ::itcl::clazz");
+    }
+    Tcl_Obj *objPtr = Tcl_NewStringObj("::itcl::clazz", -1);
+    infoPtr->clazzObjectPtr = Tcl_GetObjectFromObj(interp, objPtr);
+    if (infoPtr->clazzObjectPtr == NULL) {
+        Tcl_AppendResult(interp,
+                "ITCL: cannot get Object for ::itcl::clazz for class \"",
+                "::itcl::clazz", "\"", NULL);
+        return TCL_ERROR;
+    }
+    infoPtr->clazzClassPtr = Tcl_GetObjectAsClass(infoPtr->clazzObjectPtr);
+    AddClassUnknowMethod(interp, infoPtr, infoPtr->clazzClassPtr);
 
     /*
      *  Initialize the ensemble package first, since we need this

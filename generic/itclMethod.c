@@ -25,7 +25,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclMethod.c,v 1.1.2.3 2007/09/09 13:38:40 wiede Exp $
+ *     RCS:  $Id: itclMethod.c,v 1.1.2.4 2007/09/09 20:53:47 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -582,10 +582,8 @@ Itcl_ChangeMemberFunc(
 	    imPtr->iclsPtr->classPtr, ItclCheckCallMethod, ItclAfterCallMethod,
 	    ItclProcErrorProc, imPtr, imPtr->namePtr, mcode->argumentPtr,
 	    mcode->bodyPtr, &pmPtr);
-        Tcl_Proc procPtr;
-        procPtr = Tcl_ProcPtrFromPM(pmPtr);
         hPtr = Tcl_CreateHashEntry(&imPtr->iclsPtr->infoPtr->procMethods,
-                (char *)procPtr, &isNewEntry);
+                (char *)imPtr->tmPtr, &isNewEntry);
         if (isNewEntry) {
             Tcl_SetHashValue(hPtr, imPtr);
         }
@@ -1283,8 +1281,14 @@ Itcl_ExecMethod(
 	    int canAccess = 0;
 	    ItclMemberFunc *imPtr2 = NULL;
             Tcl_HashEntry *hPtr;
+	    Tcl_ObjectContext context;
+	    context = Itcl_GetCallFrameClientData(interp);
+if (context == NULL) {
+fprintf(stderr, "context == NULL 1\n");
+return TCL_ERROR;
+}
 	    hPtr = Tcl_FindHashEntry(&imPtr->iclsPtr->infoPtr->procMethods,
-	            (char *)Itcl_GetCallFrameProc(interp));
+	            (char *)Tcl_ObjectContextMethod(context));
 	    if (hPtr != NULL) {
 		/* needed for test protect-2.5 */
 	        imPtr2 = Tcl_GetHashValue(hPtr);
@@ -1374,8 +1378,17 @@ Itcl_ExecProc(
 	    int canAccess = 0;
 	    ItclMemberFunc *imPtr2 = NULL;
             Tcl_HashEntry *hPtr;
+	    Tcl_ObjectContext context;
+	    context = Itcl_GetCallFrameClientData(interp);
+            if (context == NULL) {
+                Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+                        "can't access \"", Tcl_GetString(imPtr->fullNamePtr),
+			"\": ", Itcl_ProtectionStr(imPtr->protection),
+			" function", (char*)NULL);
+                return TCL_ERROR;
+            }
 	    hPtr = Tcl_FindHashEntry(&imPtr->iclsPtr->infoPtr->procMethods,
-	            (char *)Itcl_GetCallFrameProc(interp));
+	            (char *)Tcl_ObjectContextMethod(context));
 	    if (hPtr != NULL) {
 	        imPtr2 = Tcl_GetHashValue(hPtr);
 	    }

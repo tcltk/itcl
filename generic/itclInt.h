@@ -9,7 +9,7 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itclInt.h,v 1.17.2.5 2007/09/09 13:38:40 wiede Exp $
+ * RCS: @(#) $Id: itclInt.h,v 1.17.2.6 2007/09/09 20:53:47 wiede Exp $
  */
 
 #include <string.h>
@@ -118,6 +118,8 @@ typedef struct ItclObjectInfo {
     Tcl_ObjectMetadataType *object_meta_type;
                                     /* type for getting the Itcl object info
                                      * from a TclOO Tcl_Object */
+    Tcl_Object clazzObjectPtr;      /* the root object of Itcl */
+    Tcl_Class clazzClassPtr;        /* the root class of Itcl */
     struct EnsembleInfo *ensembleInfo;
 } ItclObjectInfo;
 

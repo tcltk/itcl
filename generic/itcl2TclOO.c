@@ -8,33 +8,12 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itcl2TclOO.c,v 1.1.2.3 2007/09/09 11:04:05 wiede Exp $
+ * RCS: @(#) $Id: itcl2TclOO.c,v 1.1.2.4 2007/09/09 20:53:47 wiede Exp $
  */
 
 #include <tclOOInt.h>
 #define _TCLOOINT_H
 #include "itclInt.h"
-
-static void
-ItclMethodErrorHandler(
-    Tcl_Interp *interp,
-    Tcl_Obj *methodNameObj)
-{
-fprintf(stderr, "ItclMethodErrorHandler called!%s\n", Tcl_GetString(methodNameObj));
-fprintf(stderr, "RES!%s!\n", Tcl_GetStringResult(interp));
-}
-
-Tcl_Obj *
-ItclGfivProc(
-    ClientData clientData)
-{
-    Tcl_Obj *objPtr;
-
-fprintf(stderr, "ItclGfivProc called\n");
-    objPtr = Tcl_NewStringObj("ITCLGFVI", -1);
-    Tcl_IncrRefCount(objPtr);
-    return objPtr;
-}
 
 int
 Itcl_InvokeProcedureMethod(
@@ -106,8 +85,7 @@ Itcl_InvokeProcedureMethod(
      * name is passed as an argument.
      */
 
-    result = TclObjInterpProcCore(interp, mPtr->namePtr, 1,
-            ItclMethodErrorHandler);
+    result = TclObjInterpProcCore(interp, mPtr->namePtr, 1, ItclProcErrorProc);
 
 done:
     return result;
@@ -192,7 +170,6 @@ Itcl_NewProcClassMethod(
     result = Tcl_NewProcClassMethod(interp, clsPtr, preCallPtr, postCallPtr,
            errProc, clientData, nameObj, argsObj, bodyObj,
            PUBLIC_METHOD | USE_DECLARER_NS, clientData2);
-//    ItclSetErrProc(clientData2, clientData);
     return result;
 }
 
@@ -221,5 +198,3 @@ Itcl_NewProcMethod(
     return Tcl_NewProcMethod(interp, oPtr, nameObj, argsObj, bodyObj,
            PUBLIC_METHOD | USE_DECLARER_NS, clientData);
 }
-
-

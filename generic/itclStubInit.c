@@ -1,5 +1,5 @@
 /*
- * $Id: itclStubInit.c,v 1.4.2.3 2007/09/09 11:04:20 wiede Exp $
+ * $Id: itclStubInit.c,v 1.4.2.4 2007/09/09 20:53:47 wiede Exp $
  *
  * This file is (mostly) automatically generated from itcl.decls.
  * It is compiled and linked in with the itcl package proper.
@@ -179,7 +179,7 @@ ItclIntStubs itclIntStubs = {
     ItclEnsembleSubCmd, /* 161 */
     Itcl_GetUplevelNamespace, /* 162 */
     Itcl_GetCallFrameClientData, /* 163 */
-    Itcl_GetCallFrameProc, /* 164 */
+    0, /* 164 */
     Itcl_SetCallFrameNamespace, /* 165 */
     Itcl_GetCallFrameObjc, /* 166 */
     Itcl_GetCallFrameObjv, /* 167 */

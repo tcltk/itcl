@@ -1,5 +1,5 @@
 /*
- * $Id: itclIntDecls.h,v 1.13.2.3 2007/09/09 11:04:14 wiede Exp $
+ * $Id: itclIntDecls.h,v 1.13.2.4 2007/09/09 20:53:47 wiede Exp $
  *
  * This file is (mostly) automatically generated from itcl.decls.
  */
@@ -23,7 +23,7 @@ extern const char *Itcl_InitStubs(
 /* !BEGIN!: Do not edit below this line. */
 
 #define ITCLINT_STUBS_EPOCH 0
-#define ITCLINT_STUBS_REVISION 131
+#define ITCLINT_STUBS_REVISION 130
 
 #if !defined(USE_ITCL_STUBS)
 
@@ -452,8 +452,7 @@ ITCLAPI Tcl_Namespace *	 Itcl_GetUplevelNamespace (Tcl_Interp * interp,
 				int level);
 /* 163 */
 ITCLAPI ClientData	Itcl_GetCallFrameClientData (Tcl_Interp * interp);
-/* 164 */
-ITCLAPI Tcl_Proc	Itcl_GetCallFrameProc (Tcl_Interp * interp);
+/* Slot 164 is reserved */
 /* 165 */
 ITCLAPI int		Itcl_SetCallFrameNamespace (Tcl_Interp * interp, 
 				Tcl_Namespace * nsPtr);
@@ -634,7 +633,7 @@ typedef struct ItclIntStubs {
     int (*itclEnsembleSubCmd) (ClientData clientData, Tcl_Interp * interp, const char * ensembleName, int objc, Tcl_Obj *const * objv, const char * functionName); /* 161 */
     Tcl_Namespace * (*itcl_GetUplevelNamespace) (Tcl_Interp * interp, int level); /* 162 */
     ClientData (*itcl_GetCallFrameClientData) (Tcl_Interp * interp); /* 163 */
-    Tcl_Proc (*itcl_GetCallFrameProc) (Tcl_Interp * interp); /* 164 */
+    void (*reserved164)(void);
     int (*itcl_SetCallFrameNamespace) (Tcl_Interp * interp, Tcl_Namespace * nsPtr); /* 165 */
     int (*itcl_GetCallFrameObjc) (Tcl_Interp * interp); /* 166 */
     Tcl_Obj * const * (*itcl_GetCallFrameObjv) (Tcl_Interp * interp); /* 167 */
@@ -1121,10 +1120,7 @@ extern const ItclIntStubs *itclIntStubsPtr;
 #define Itcl_GetCallFrameClientData \
 	(itclIntStubsPtr->itcl_GetCallFrameClientData) /* 163 */
 #endif
-#ifndef Itcl_GetCallFrameProc
-#define Itcl_GetCallFrameProc \
-	(itclIntStubsPtr->itcl_GetCallFrameProc) /* 164 */
-#endif
+/* Slot 164 is reserved */
 #ifndef Itcl_SetCallFrameNamespace
 #define Itcl_SetCallFrameNamespace \
 	(itclIntStubsPtr->itcl_SetCallFrameNamespace) /* 165 */

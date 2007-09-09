@@ -39,7 +39,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclParse.c,v 1.1.2.3 2007/09/09 13:38:41 wiede Exp $
+ *     RCS:  $Id: itclParse.c,v 1.1.2.4 2007/09/09 20:53:47 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -413,64 +413,62 @@ Itcl_ClassCmd(
     Itcl_BuildVirtualTables(iclsPtr);
 
     /* make the methods and procs known to TclOO */
-    ItclMemberFunc *mPtr;
+    ItclMemberFunc *imPtr;
     Tcl_DStringInit(&buffer);
-    FOREACH_HASH_VALUE(mPtr, &iclsPtr->functions) {
-        if (!(mPtr->flags & ITCL_IMPLEMENT_NONE)) {
-	    argumentPtr = mPtr->codePtr->argumentPtr;
-	    bodyPtr = mPtr->codePtr->bodyPtr;
-	    if (mPtr->codePtr->flags & ITCL_BUILTIN) {
+    FOREACH_HASH_VALUE(imPtr, &iclsPtr->functions) {
+        if (!(imPtr->flags & ITCL_IMPLEMENT_NONE)) {
+	    argumentPtr = imPtr->codePtr->argumentPtr;
+	    bodyPtr = imPtr->codePtr->bodyPtr;
+	    if (imPtr->codePtr->flags & ITCL_BUILTIN) {
 //FIX ME MEMORY leak!!
 	        argumentPtr = Tcl_NewStringObj("args", -1);
 		int isDone;
 		isDone = 0;
 	        bodyPtr = Tcl_NewStringObj("return [uplevel 0 ", -1);
-		if (strcmp(Tcl_GetString(mPtr->codePtr->bodyPtr),
+		if (strcmp(Tcl_GetString(imPtr->codePtr->bodyPtr),
 		        "@itcl-builtin-cget") == 0) {
 		    Tcl_AppendToObj(bodyPtr, "::itcl::builtin::cget", -1);
 		    isDone = 1;
 		}
-		if (strcmp(Tcl_GetString(mPtr->codePtr->bodyPtr),
+		if (strcmp(Tcl_GetString(imPtr->codePtr->bodyPtr),
 		        "@itcl-builtin-configure") == 0) {
 		    Tcl_AppendToObj(bodyPtr, "::itcl::builtin::configure", -1);
 		    isDone = 1;
 		}
-		if (strcmp(Tcl_GetString(mPtr->codePtr->bodyPtr),
+		if (strcmp(Tcl_GetString(imPtr->codePtr->bodyPtr),
 		        "@itcl-builtin-info") == 0) {
 		    Tcl_AppendToObj(bodyPtr, "::itcl::builtin::Info", -1);
 		    isDone = 1;
 		}
-		if (strcmp(Tcl_GetString(mPtr->codePtr->bodyPtr),
+		if (strcmp(Tcl_GetString(imPtr->codePtr->bodyPtr),
 		        "@itcl-builtin-isa") == 0) {
 		    Tcl_AppendToObj(bodyPtr, "::itcl::builtin::isa", -1);
 		    isDone = 1;
 		}
 		if (!isDone) {
 		    Tcl_AppendToObj(bodyPtr,
-		            Tcl_GetString(mPtr->codePtr->bodyPtr), -1);
+		            Tcl_GetString(imPtr->codePtr->bodyPtr), -1);
                 }
 	        Tcl_AppendToObj(bodyPtr, " {*}[list $args]]", -1);
 	    }
 	    ClientData pmPtr;
-	    mPtr->tmPtr = (ClientData)Itcl_NewProcClassMethod(interp,
+	    imPtr->tmPtr = (ClientData)Itcl_NewProcClassMethod(interp,
 	        iclsPtr->classPtr, ItclCheckCallMethod, ItclAfterCallMethod,
-                ItclProcErrorProc, mPtr, mPtr->namePtr, argumentPtr,
+                ItclProcErrorProc, imPtr, imPtr->namePtr, argumentPtr,
 		bodyPtr, &pmPtr);
-            Tcl_Proc procPtr;
-	    procPtr = Tcl_ProcPtrFromPM(pmPtr);
 	    hPtr2 = Tcl_CreateHashEntry(&iclsPtr->infoPtr->procMethods,
-	            (char *)procPtr, &isNewEntry);
+	            (char *)imPtr->tmPtr, &isNewEntry);
 	    if (isNewEntry) {
-	        Tcl_SetHashValue(hPtr2, mPtr);
+	        Tcl_SetHashValue(hPtr2, imPtr);
 	    }
-	    if ((mPtr->flags & ITCL_COMMON) == 0) {
-	        mPtr->accessCmd = Tcl_CreateObjCommand(interp,
-		        Tcl_GetString(mPtr->fullNamePtr),
-		        Itcl_ExecMethod, mPtr, Itcl_ReleaseData);
+	    if ((imPtr->flags & ITCL_COMMON) == 0) {
+	        imPtr->accessCmd = Tcl_CreateObjCommand(interp,
+		        Tcl_GetString(imPtr->fullNamePtr),
+		        Itcl_ExecMethod, imPtr, Itcl_ReleaseData);
 	    } else {
-	        mPtr->accessCmd = Tcl_CreateObjCommand(interp,
-		        Tcl_GetString(mPtr->fullNamePtr),
-			Itcl_ExecProc, mPtr, Itcl_ReleaseData);
+	        imPtr->accessCmd = Tcl_CreateObjCommand(interp,
+		        Tcl_GetString(imPtr->fullNamePtr),
+			Itcl_ExecProc, imPtr, Itcl_ReleaseData);
 	    }
             Tcl_DStringInit(&buffer);
         }

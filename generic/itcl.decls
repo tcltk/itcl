@@ -1,5 +1,5 @@
 # -*- tcl -*-
-# $Id: itcl.decls,v 1.3.2.2 2007/09/07 21:19:41 wiede Exp $
+# $Id: itcl.decls,v 1.3.2.3 2007/09/09 20:53:47 wiede Exp $
 
 # public API
 library itcl
@@ -518,9 +518,6 @@ declare 162 current {
 }
 declare 163 current {
     ClientData Itcl_GetCallFrameClientData(Tcl_Interp *interp)
-}
-declare 164 current {
-    Tcl_Proc Itcl_GetCallFrameProc(Tcl_Interp *interp)
 }
 declare 165 current {
     int Itcl_SetCallFrameNamespace(Tcl_Interp *interp, Tcl_Namespace *nsPtr)

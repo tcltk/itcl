@@ -9,7 +9,7 @@
  * ========================================================================
  *  AUTHOR:  Arnulf Wiedemann
  *
- *     RCS:  $Id: itclMigrate2TclCore.c,v 1.1.2.4 2007/09/09 11:36:37 wiede Exp $
+ *     RCS:  $Id: itclMigrate2TclCore.c,v 1.1.2.5 2007/09/09 20:53:47 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -207,33 +207,6 @@ _Tcl_InvokeNamespaceProc(
 
 }
 
-int
-Tcl_NewNamespaceVars(
-    Tcl_Interp *interp,
-    Tcl_Namespace *nsPtr,
-    int argc,
-    char *argv[])
-{
-    const char *tail;
-    Var *varPtr = NULL;
-    int i;
-    int new;
-
-    if (nsPtr == NULL) {
-        return TCL_ERROR;
-    }
-    for (i=0;i<argc;i++) {
-        tail = argv[i];
-        if (tail == NULL) {
-            continue;
-        }
-	varPtr = TclVarHashCreateVar(&((Namespace *)nsPtr)->varTable,
-	    tail, &new);
-        TclSetVarNamespaceVar(varPtr);
-    }
-    return TCL_OK;
-}
-
 Tcl_Var
 Tcl_NewNamespaceVar(
     Tcl_Interp *interp,
@@ -281,17 +254,6 @@ Itcl_GetCallFrameClientData(
         return NULL;
     }
     return framePtr->clientData;
-}
-
-Tcl_Proc
-Itcl_GetCallFrameProc(
-    Tcl_Interp *interp)
-{
-    CallFrame *framePtr = ((Interp *)interp)->framePtr;
-    if (framePtr == NULL) {
-        return NULL;
-    }
-    return (Tcl_Proc)framePtr->procPtr;
 }
 
 int

@@ -25,7 +25,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclClass.c,v 1.1.2.3 2007/09/09 13:38:40 wiede Exp $
+ *     RCS:  $Id: itclClass.c,v 1.1.2.4 2007/09/09 20:53:47 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -63,6 +63,13 @@ void Itcl_DeleteMemberFunc (char *cdata) {
 
 static Tcl_NamespaceDeleteProc* _TclOONamespaceDeleteProc = NULL;
 
+
+/*
+ * ------------------------------------------------------------------------
+ *  ClassNamespaceDeleted()
+ *
+ * ------------------------------------------------------------------------
+ */
 static char *
 ClassNamespaceDeleted(
     ClientData clientData,
@@ -119,7 +126,6 @@ Itcl_CreateClass(
     Tcl_Command cmd;
     Tcl_CmdInfo cmdInfo;
     Tcl_Namespace *classNs;
-    Tcl_Object clazzObjectPtr;
     Tcl_Object oPtr;
     Tcl_Obj *nameObjPtr;
     Tcl_Obj *namePtr;
@@ -253,14 +259,6 @@ Itcl_CreateClass(
      */
     Itcl_PreserveData((ClientData)iclsPtr);
 
-    Tcl_Obj *objPtr = Tcl_NewStringObj("::itcl::clazz", -1);
-    clazzObjectPtr = Tcl_GetObjectFromObj(interp, objPtr);
-    if (clazzObjectPtr == NULL) {
-        Tcl_AppendResult(interp,
-                "ITCL: cannot get Object for ::itcl::clazz for class \"",
-                path, "\"", NULL);
-        return TCL_ERROR;
-    }
     nameObjPtr = Tcl_NewStringObj("", 0);
     if ((path[0] != ':') && (path[1] != ':')) {
         Tcl_Namespace *currNsPtr = Tcl_GetCurrentNamespace(interp);
@@ -277,8 +275,8 @@ Itcl_CreateClass(
             Tcl_DeleteCommandFromToken(interp, oldCmd);
         }
     }
-    oPtr = Tcl_NewObjectInstance(interp,
-            Tcl_GetObjectAsClass(clazzObjectPtr), path, path, 0, NULL, 0);
+    oPtr = Tcl_NewObjectInstance(interp, infoPtr->clazzClassPtr,
+            path, path, 0, NULL, 0);
     if (oPtr == NULL) {
         Tcl_AppendResult(interp,
                 "ITCL: cannot create Tcl_NewObjectInstance for class \"",
