@@ -1,3 +1,18 @@
+proc ::tryHandleClass {myObj mySelf m args} {
+#if {[catch [list 
+return [::itcl::parser::handleClass $myObj $mySelf $m {*}[list $args]]
+#] msg errInfo]} {
+#puts stderr "111!$msg!"
+#puts stderr "EI2!$msg!$errInfo![dict get $errInfo -errorinfo]!"
+#puts stderr "EI2!$msg![dict get $errInfo -errorinfo]!"
+#return -code error -errorInfo [dict get $errInfo -errorinfo]
+#    return -code error $msg
+#} else {
+#puts stderr "222!$msg!"
+#    return $msg
+#}
+#puts stderr "333"
+}
 # ========================== class method unknown ==========================
 
 ::oo::define $itclClass method unknown {m args} {
@@ -29,7 +44,13 @@ puts stderr "::itcl::delete class $my_class"
        set myns ${myns}::
     }
     set myObj [lindex [::info level 0] 0]
-    set obj [uplevel 1 ::itcl::parser::handleClass $myObj $mySelf $m {*}[list $args]]
+    set cmd [list uplevel 1 ::itcl::parser::handleClass $myObj $mySelf $m {*}[list $args]]
+    if {[catch {
+        eval $cmd
+    } obj errInfo]} {
+	return -code error -errorinfo $::errorInfo $obj
+    }
+#    set obj [uplevel 1 ::tryHandleClass $myObj $mySelf $m {*}[list $args]]
     set body [list {set obj [lindex [::info level 0] 0]}]
     set part {return [::itcl::methodset::objectUnknownCommand [self]}
     append part " ${myns}::$obj "
