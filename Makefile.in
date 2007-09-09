@@ -232,7 +232,7 @@ pkgIndex.tcl: Makefile
 	@( \
 	echo 'if {[catch {package require Tcl $(TCL_VERSION_REQ)}]} return'; \
 	echo 'package ifneeded $(PACKAGE_NAME) $(PACKAGE_VERSION) \
-	    [list source [file join $$dir itclBase.tcl]] ' \
+	    [list load [file join $$dir $(PKG_LIB_FILE)] Itcl] ' \
 	) > pkgIndex.tcl
 Makefile: $(SRC_DIR)/Makefile.in $(top_builddir)/config.status
 	cd $(top_builddir) \
