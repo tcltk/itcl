@@ -24,7 +24,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclBuiltin.c,v 1.1.2.2 2007/09/09 11:04:07 wiede Exp $
+ *     RCS:  $Id: itclBuiltin.c,v 1.1.2.3 2007/09/09 13:38:40 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -52,16 +52,6 @@ static BiMethod BiMethodList[] = {
                    "@itcl-builtin-info",  Itcl_BiInfoCmd },
     { "isa",       "className",
                    "@itcl-builtin-isa",  Itcl_BiIsaCmd },
-};
-static BiMethod _BiMethodList[] = {
-    { "cget",      "-option",
-                   "::itcl::builtin::cget",  Itcl_BiCgetCmd },
-    { "configure", "?-option? ?value -option value...?",
-                   "::itcl::builtin::configure",  Itcl_BiConfigureCmd },
-    { "info",      "???",
-                   "::itcl::builtin::info",  Itcl_BiInfoCmd },
-    { "isa",       "className",
-                   "::itcl::builtin::isa",  Itcl_BiIsaCmd },
 };
 static int BiMethodListLen = sizeof(BiMethodList)/sizeof(BiMethod);
 
@@ -494,7 +484,7 @@ Itcl_BiConfigureCmd(
          */
         mcode = ivPtr->codePtr;
         if (mcode && Itcl_IsMemberCodeImplemented(mcode)) {
-	    if (!ivPtr->iclsPtr->info->useOldResolvers) {
+	    if (!ivPtr->iclsPtr->infoPtr->useOldResolvers) {
                 Itcl_SetCallFrameResolver(interp, contextIoPtr->resolvePtr);
             }
 	    Tcl_Namespace *saveNsPtr = Tcl_GetCurrentNamespace(interp);
@@ -801,9 +791,9 @@ Itcl_BiChainCmd(
 
 	    if (imPtr->flags & ITCL_CONSTRUCTOR) {
 	        Tcl_SetStringObj(newobjv[0], Tcl_GetCommandName(interp,
-		        contextIclsPtr->info->currIoPtr->accessCmd), -1);
+		        contextIclsPtr->infoPtr->currIoPtr->accessCmd), -1);
 	        result = Itcl_EvalMemberCode(interp, imPtr,
-		        imPtr->iclsPtr->info->currIoPtr, objc-1, newobjv+1);
+		        imPtr->iclsPtr->infoPtr->currIoPtr, objc-1, newobjv+1);
 	    } else {
 	        result = Itcl_EvalMemberCode(interp, imPtr, contextIoPtr,
 		        objc-1, newobjv+1);

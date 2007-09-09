@@ -24,7 +24,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclInfo.c,v 1.1.2.2 2007/09/09 11:04:13 wiede Exp $
+ *     RCS:  $Id: itclInfo.c,v 1.1.2.3 2007/09/09 13:38:40 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -289,7 +289,7 @@ Itcl_BiInfoClassCmd(
     } else {
         assert(contextIclsPtr != NULL);
         assert(contextIclsPtr->namesp != NULL);
-        if (contextIclsPtr->info->useOldResolvers) {
+        if (contextIclsPtr->infoPtr->useOldResolvers) {
             contextNs = Itcl_GetUplevelNamespace(interp, 1);
         } else {
             contextNs = contextIclsPtr->namesp;
@@ -377,11 +377,11 @@ Itcl_BiInfoInheritCmd(
     contextIclsPtr = imPtr->iclsPtr;
     Tcl_Namespace *upNsPtr;
     upNsPtr = Itcl_GetUplevelNamespace(interp, 1);
-    if (imPtr->iclsPtr->info->useOldResolvers) {
+    if (imPtr->iclsPtr->infoPtr->useOldResolvers) {
         if (contextIoPtr != NULL) {
             if (upNsPtr != contextIclsPtr->namesp) {
 		Tcl_HashEntry *hPtr;
-		hPtr = Tcl_FindHashEntry(&imPtr->iclsPtr->info->namespaceClasses, (char *)upNsPtr);
+		hPtr = Tcl_FindHashEntry(&imPtr->iclsPtr->infoPtr->namespaceClasses, (char *)upNsPtr);
 		if (hPtr != NULL) {
 		    contextIclsPtr = Tcl_GetHashValue(hPtr);
 		} else {
@@ -480,11 +480,11 @@ Itcl_BiInfoHeritageCmd(
     contextIclsPtr = imPtr->iclsPtr;
     Tcl_Namespace *upNsPtr;
     upNsPtr = Itcl_GetUplevelNamespace(interp, 1);
-    if (contextIclsPtr->info->useOldResolvers) {
+    if (contextIclsPtr->infoPtr->useOldResolvers) {
         if (contextIoPtr != NULL) {
             if (upNsPtr != contextIclsPtr->namesp) {
 	        Tcl_HashEntry *hPtr;
-	        hPtr = Tcl_FindHashEntry(&imPtr->iclsPtr->info->namespaceClasses, (char *)upNsPtr);
+	        hPtr = Tcl_FindHashEntry(&imPtr->iclsPtr->infoPtr->namespaceClasses, (char *)upNsPtr);
 	        if (hPtr != NULL) {
 	            contextIclsPtr = Tcl_GetHashValue(hPtr);
 	        } else {

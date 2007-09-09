@@ -24,7 +24,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclObject.c,v 1.1.2.2 2007/09/09 11:04:19 wiede Exp $
+ *     RCS:  $Id: itclObject.c,v 1.1.2.3 2007/09/09 13:38:41 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -170,7 +170,7 @@ ItclCreateObject(
 
     Tcl_InitHashTable(&ioPtr->objectVariables, TCL_ONE_WORD_KEYS);
     Tcl_InitHashTable(&ioPtr->contextCache, TCL_ONE_WORD_KEYS);
-    Tcl_ObjectSetMetadata(ioPtr->oPtr, iclsPtr->info->object_meta_type,
+    Tcl_ObjectSetMetadata(ioPtr->oPtr, iclsPtr->infoPtr->object_meta_type,
             ioPtr);
 
     Itcl_PreserveData((ClientData)ioPtr);  /* while we're using this... */
@@ -200,7 +200,7 @@ ItclCreateObject(
      *  not called out explicitly in "initCode" code fragments are
      *  invoked implicitly without arguments.
      */
-    iclsPtr->info->currIoPtr = ioPtr;
+    iclsPtr->infoPtr->currIoPtr = ioPtr;
     result = Itcl_InvokeMethodIfExists(interp, "constructor",
         iclsPtr, ioPtr, objc, objv);
 
@@ -241,7 +241,7 @@ ItclCreateObject(
      *  Destroy the "constructed" table in the object data, since
      *  it is no longer needed.
      */
-    iclsPtr->info->currIoPtr = NULL;
+    iclsPtr->infoPtr->currIoPtr = NULL;
     Tcl_DeleteHashTable(ioPtr->constructed);
     ckfree((char*)ioPtr->constructed);
     ioPtr->constructed = NULL;
@@ -256,7 +256,7 @@ ItclCreateObject(
      *  its accessCmd member is NULL.
      */
     if (result == TCL_OK && (ioPtr->accessCmd != NULL))  {
-        entry = Tcl_CreateHashEntry(&iclsPtr->info->objects,
+        entry = Tcl_CreateHashEntry(&iclsPtr->infoPtr->objects,
             (char*)ioPtr->accessCmd, &newEntry);
 
         Tcl_SetHashValue(entry, (ClientData)ioPtr);
@@ -425,7 +425,7 @@ Itcl_DeleteObject(
     /*
      *  Remove the object from the global list.
      */
-    entry = Tcl_FindHashEntry(&iclsPtr->info->objects,
+    entry = Tcl_FindHashEntry(&iclsPtr->infoPtr->objects,
         (char*)contextIoPtr->accessCmd);
 
     if (entry) {
@@ -1015,7 +1015,7 @@ ItclDestroyObject(
      *  won't work properly.
      */
     if (contextIoPtr->accessCmd != NULL) {
-        entry = Tcl_FindHashEntry(&iclsPtr->info->objects,
+        entry = Tcl_FindHashEntry(&iclsPtr->infoPtr->objects,
             (char*)contextIoPtr->accessCmd);
 
         if (entry) {

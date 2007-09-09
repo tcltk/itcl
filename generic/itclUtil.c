@@ -23,7 +23,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclUtil.c,v 1.1.2.2 2007/09/09 11:04:22 wiede Exp $
+ *     RCS:  $Id: itclUtil.c,v 1.1.2.3 2007/09/09 13:38:41 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -678,24 +678,24 @@ Itcl_Protection(interp, newLevel)
     int newLevel;        /* new protection level or 0 */
 {
     int oldVal;
-    ItclObjectInfo *info;
+    ItclObjectInfo *infoPtr;
 
     /*
      *  If a new level was specified, then set the protection level.
      *  In any case, return the protection level as it stands right now.
      */
-    info = (ItclObjectInfo*) Tcl_GetAssocData(interp, ITCL_INTERP_DATA,
+    infoPtr = (ItclObjectInfo*) Tcl_GetAssocData(interp, ITCL_INTERP_DATA,
         (Tcl_InterpDeleteProc**)NULL);
 
-    assert(info != NULL);
-    oldVal = info->protection;
+    assert(infoPtr != NULL);
+    oldVal = infoPtr->protection;
 
     if (newLevel != 0) {
         assert(newLevel == ITCL_PUBLIC ||
             newLevel == ITCL_PROTECTED ||
             newLevel == ITCL_PRIVATE ||
             newLevel == ITCL_DEFAULT_PROTECT);
-        info->protection = newLevel;
+        infoPtr->protection = newLevel;
     }
     return oldVal;
 }
@@ -813,7 +813,7 @@ Itcl_CanAccess2(
 
     if (Itcl_IsClassNamespace(fromNsPtr)) {
         fromIclsPtr =  (ItclClass*)Tcl_ObjectGetMetadata(fromNsPtr->clientData,
-	        iclsPtr->info->class_meta_type);
+	        iclsPtr->infoPtr->class_meta_type);
 	if (fromIclsPtr == NULL) {
 	   return 0;
 	}
@@ -893,7 +893,7 @@ Itcl_CanAccessFunc(
         Tcl_HashEntry *hPtr;
 
         iclsPtr = imPtr->iclsPtr;
-	hPtr = Tcl_FindHashEntry(&iclsPtr->info->namespaceClasses,
+	hPtr = Tcl_FindHashEntry(&iclsPtr->infoPtr->namespaceClasses,
 	        (char *)fromNsPtr);
 	if (hPtr == NULL) {
 	    return 0;

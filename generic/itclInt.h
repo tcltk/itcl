@@ -9,7 +9,7 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itclInt.h,v 1.17.2.4 2007/09/09 11:04:14 wiede Exp $
+ * RCS: @(#) $Id: itclInt.h,v 1.17.2.5 2007/09/09 13:38:40 wiede Exp $
  */
 
 #include <string.h>
@@ -137,7 +137,9 @@ typedef struct ItclClass {
     Tcl_Namespace *namesp;        /* namespace representing class scope */
     Tcl_Command accessCmd;        /* access command for creating instances */
 
-    struct ItclObjectInfo *info;  /* info about all known objects */
+    struct ItclObjectInfo *infoPtr;
+                                  /* info about all known objects
+				   * and other stuff like stacks */
     Itcl_List bases;              /* list of base classes */
     Itcl_List derived;            /* list of all derived classes */
     Tcl_HashTable heritage;       /* table of all base classes.  Look up

@@ -20,7 +20,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itclResolve.c,v 1.1.2.2 2007/09/09 11:04:20 wiede Exp $
+ *     RCS:  $Id: itclResolve.c,v 1.1.2.3 2007/09/09 13:38:41 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -488,7 +488,7 @@ ItclClassRuntimeVarResolver(
      */
 
     ItclCallContext *callContextPtr;
-    callContextPtr = Itcl_PeekStack(&iclsPtr->info->contextStack);
+    callContextPtr = Itcl_PeekStack(&iclsPtr->infoPtr->contextStack);
     if (callContextPtr == NULL) {
         return NULL;
     }
@@ -582,8 +582,8 @@ Itcl_ParseVarResolver(
                                 * TCL_NAMESPACE_ONLY => namespace variable */
     Tcl_Var* rPtr)             /* returns: Tcl_Var for desired variable */
 {
-    ItclObjectInfo *info = (ItclObjectInfo*)contextNs->clientData;
-    ItclClass *iclsPtr = (ItclClass*)Itcl_PeekStack(&info->clsStack);
+    ItclObjectInfo *infoPtr = (ItclObjectInfo*)contextNs->clientData;
+    ItclClass *iclsPtr = (ItclClass*)Itcl_PeekStack(&infoPtr->clsStack);
 
     Tcl_HashEntry *hPtr;
     ItclVarLookup *vlookup;

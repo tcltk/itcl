@@ -23,7 +23,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclCmd.c,v 1.1.2.2 2007/09/09 11:04:08 wiede Exp $
+ *     RCS:  $Id: itclCmd.c,v 1.1.2.3 2007/09/09 13:38:40 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -524,7 +524,7 @@ Itcl_ScopeCmd(
     ItclClass *contextIclsPtr;
     ItclObject *contextIoPtr;
     Tcl_HashEntry *entry;
-    ItclObjectInfo *info;
+    ItclObjectInfo *infoPtr;
     ItclVarLookup *vlookup;
 
     ItclShowArgs(2, "Itcl_ScopeCmd", objc, objv);
@@ -574,8 +574,8 @@ Itcl_ScopeCmd(
     contextIoPtr = NULL;
     contextIclsPtr = NULL;
     oPtr = NULL;
-    info = Tcl_GetAssocData(interp, ITCL_INTERP_DATA, &procPtr);
-    hPtr = Tcl_FindHashEntry(&info->namespaceClasses, (char *)contextNsPtr);
+    infoPtr = Tcl_GetAssocData(interp, ITCL_INTERP_DATA, &procPtr);
+    hPtr = Tcl_FindHashEntry(&infoPtr->namespaceClasses, (char *)contextNsPtr);
     if (hPtr != NULL) {
         contextIclsPtr = (ItclClass *)Tcl_GetHashValue(hPtr);
     }
@@ -612,14 +612,14 @@ Itcl_ScopeCmd(
          *  If this is not a common variable, then we better have
          *  an object context.  Return the name "@itcl object variable".
          */
-        info = contextIclsPtr->info;
+        infoPtr = contextIclsPtr->infoPtr;
 	ClientData clientData;
         clientData = Itcl_GetCallFrameClientData(interp);
         if (clientData != NULL) {
             oPtr = Tcl_ObjectContextObject((Tcl_ObjectContext)clientData);
             if (oPtr != NULL) {
                 contextIoPtr = (ItclObject*)Tcl_ObjectGetMetadata(
-	                oPtr, info->object_meta_type);
+	                oPtr, infoPtr->object_meta_type);
 	    }
         }
 

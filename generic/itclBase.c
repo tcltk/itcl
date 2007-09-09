@@ -9,7 +9,7 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itclBase.c,v 1.1.2.2 2007/09/09 11:04:06 wiede Exp $
+ * RCS: @(#) $Id: itclBase.c,v 1.1.2.3 2007/09/09 13:38:40 wiede Exp $
  */
 
 #include <stdlib.h>
@@ -118,7 +118,7 @@ Initialize (
 {
     Tcl_Namespace *nsPtr;
     Tcl_Namespace *itclNs;
-    ItclObjectInfo *info;
+    ItclObjectInfo *infoPtr;
 
     if (Tcl_InitStubs(interp, TCL_VERSION, 0) == NULL) {
         return TCL_ERROR;
@@ -149,31 +149,31 @@ Initialize (
      *  Store this as "associated data" for easy access, but link
      *  it to the itcl namespace for ownership.
      */
-    info = (ItclObjectInfo*)ckalloc(sizeof(ItclObjectInfo));
-    info->interp = interp;
-    info->class_meta_type = (Tcl_ObjectMetadataType *)ckalloc(
+    infoPtr = (ItclObjectInfo*)ckalloc(sizeof(ItclObjectInfo));
+    infoPtr->interp = interp;
+    infoPtr->class_meta_type = (Tcl_ObjectMetadataType *)ckalloc(
             sizeof(Tcl_ObjectMetadataType));
-    info->class_meta_type->version = TCL_OO_METADATA_VERSION_CURRENT;
-    info->class_meta_type->name = "ItclClass";
-    info->class_meta_type->deleteProc = Itcl_DeleteObjectMetadata;
-    info->class_meta_type->cloneProc = NULL;
-    info->object_meta_type = (Tcl_ObjectMetadataType *)ckalloc(
+    infoPtr->class_meta_type->version = TCL_OO_METADATA_VERSION_CURRENT;
+    infoPtr->class_meta_type->name = "ItclClass";
+    infoPtr->class_meta_type->deleteProc = Itcl_DeleteObjectMetadata;
+    infoPtr->class_meta_type->cloneProc = NULL;
+    infoPtr->object_meta_type = (Tcl_ObjectMetadataType *)ckalloc(
             sizeof(Tcl_ObjectMetadataType));
-    info->object_meta_type->version = TCL_OO_METADATA_VERSION_CURRENT;
-    info->object_meta_type->name = "ItclObject";
-    info->object_meta_type->deleteProc = Itcl_DeleteObjectMetadata;
-    info->object_meta_type->cloneProc = NULL;
-    Tcl_InitHashTable(&info->objects, TCL_ONE_WORD_KEYS);
-    Tcl_InitObjHashTable(&info->classes);
-    Tcl_InitHashTable(&info->namespaceClasses, TCL_ONE_WORD_KEYS);
-    Tcl_InitHashTable(&info->procMethods, TCL_ONE_WORD_KEYS);
-    info->ensembleInfo = (EnsembleInfo *)ckalloc(sizeof(EnsembleInfo));
-    memset(info->ensembleInfo, 0, sizeof(EnsembleInfo));
-    Tcl_InitHashTable(&info->ensembleInfo->ensembles, TCL_ONE_WORD_KEYS);
-    Tcl_InitHashTable(&info->ensembleInfo->subEnsembles, TCL_ONE_WORD_KEYS);
-    info->ensembleInfo->numEnsembles = 0;
-    info->protection = ITCL_DEFAULT_PROTECT;
-    info->currIoPtr = NULL;
+    infoPtr->object_meta_type->version = TCL_OO_METADATA_VERSION_CURRENT;
+    infoPtr->object_meta_type->name = "ItclObject";
+    infoPtr->object_meta_type->deleteProc = Itcl_DeleteObjectMetadata;
+    infoPtr->object_meta_type->cloneProc = NULL;
+    Tcl_InitHashTable(&infoPtr->objects, TCL_ONE_WORD_KEYS);
+    Tcl_InitObjHashTable(&infoPtr->classes);
+    Tcl_InitHashTable(&infoPtr->namespaceClasses, TCL_ONE_WORD_KEYS);
+    Tcl_InitHashTable(&infoPtr->procMethods, TCL_ONE_WORD_KEYS);
+    infoPtr->ensembleInfo = (EnsembleInfo *)ckalloc(sizeof(EnsembleInfo));
+    memset(infoPtr->ensembleInfo, 0, sizeof(EnsembleInfo));
+    Tcl_InitHashTable(&infoPtr->ensembleInfo->ensembles, TCL_ONE_WORD_KEYS);
+    Tcl_InitHashTable(&infoPtr->ensembleInfo->subEnsembles, TCL_ONE_WORD_KEYS);
+    infoPtr->ensembleInfo->numEnsembles = 0;
+    infoPtr->protection = ITCL_DEFAULT_PROTECT;
+    infoPtr->currIoPtr = NULL;
 char *res_option = getenv("ITCL_USE_OLD_RESOLVERS");
 int opt;
 if (res_option == NULL) {
@@ -181,15 +181,15 @@ opt = 1;
 } else {
 opt = atoi(res_option);
 }
-    info->useOldResolvers = opt;
-    Itcl_InitStack(&info->clsStack);
-    Itcl_InitStack(&info->contextStack);
-    Itcl_InitStack(&info->constructorStack);
+    infoPtr->useOldResolvers = opt;
+    Itcl_InitStack(&infoPtr->clsStack);
+    Itcl_InitStack(&infoPtr->contextStack);
+    Itcl_InitStack(&infoPtr->constructorStack);
 
     Tcl_SetAssocData(interp, ITCL_INTERP_DATA,
-        (Tcl_InterpDeleteProc*)NULL, (ClientData)info);
+        (Tcl_InterpDeleteProc*)NULL, (ClientData)infoPtr);
 
-    Itcl_PreserveData((ClientData)info);
+    Itcl_PreserveData((ClientData)infoPtr);
 
     /*
      *  Initialize the ensemble package first, since we need this
@@ -200,7 +200,7 @@ opt = atoi(res_option);
         return TCL_ERROR;
     }
 
-    Itcl_ParseInit(interp, info);
+    Itcl_ParseInit(interp, infoPtr);
 
     /*
      *  Create "itcl::builtin" namespace for commands that

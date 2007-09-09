@@ -25,7 +25,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclMethod.c,v 1.1.2.2 2007/09/09 11:04:15 wiede Exp $
+ *     RCS:  $Id: itclMethod.c,v 1.1.2.3 2007/09/09 13:38:40 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -584,7 +584,7 @@ Itcl_ChangeMemberFunc(
 	    mcode->bodyPtr, &pmPtr);
         Tcl_Proc procPtr;
         procPtr = Tcl_ProcPtrFromPM(pmPtr);
-        hPtr = Tcl_CreateHashEntry(&imPtr->iclsPtr->info->procMethods,
+        hPtr = Tcl_CreateHashEntry(&imPtr->iclsPtr->infoPtr->procMethods,
                 (char *)procPtr, &isNewEntry);
         if (isNewEntry) {
             Tcl_SetHashValue(hPtr, imPtr);
@@ -898,7 +898,7 @@ Itcl_EvalMemberCode(
             ((mcode->flags & ITCL_IMPLEMENT_ARGCMD) != 0)) {
 	Tcl_Namespace *callerNsPtr;
 	callerNsPtr = Tcl_GetCurrentNamespace(interp);
-//	Itcl_PushStack(callerNsPtr, &imPtr->iclsPtr->info->namespaceStack);
+//	Itcl_PushStack(callerNsPtr, &imPtr->iclsPtr->infoPtr->namespaceStack);
 	Itcl_SetCallFrameNamespace(interp, imPtr->iclsPtr->namesp);
 
         if ((mcode->flags & ITCL_IMPLEMENT_OBJCMD) != 0) {
@@ -919,7 +919,7 @@ Itcl_EvalMemberCode(
 	    }
         }
 //	Itcl_SetCallFrameNamespace(interp,
-//	Itcl_PopStack(&imPtr->iclsPtr->info->namespaceStack));
+//	Itcl_PopStack(&imPtr->iclsPtr->infoPtr->namespaceStack));
     } else {
         if ((mcode->flags & ITCL_IMPLEMENT_TCL) != 0) {
 	    if (imPtr->flags & (ITCL_CONSTRUCTOR | ITCL_DESTRUCTOR)) {
@@ -1115,7 +1115,7 @@ Itcl_GetContext(
     *ioPtrPtr = callContextPtr->ioPtr;
     if ((*ioPtrPtr == NULL) && ((*iclsPtrPtr)->namesp != NULL)) {
         /* maybe we are in a constructor try currIoPtr */
-        *ioPtrPtr = (*iclsPtrPtr)->info->currIoPtr;
+        *ioPtrPtr = (*iclsPtrPtr)->infoPtr->currIoPtr;
     }
     return TCL_OK;
 }
@@ -1283,7 +1283,7 @@ Itcl_ExecMethod(
 	    int canAccess = 0;
 	    ItclMemberFunc *imPtr2 = NULL;
             Tcl_HashEntry *hPtr;
-	    hPtr = Tcl_FindHashEntry(&imPtr->iclsPtr->info->procMethods,
+	    hPtr = Tcl_FindHashEntry(&imPtr->iclsPtr->infoPtr->procMethods,
 	            (char *)Itcl_GetCallFrameProc(interp));
 	    if (hPtr != NULL) {
 		/* needed for test protect-2.5 */
@@ -1374,7 +1374,7 @@ Itcl_ExecProc(
 	    int canAccess = 0;
 	    ItclMemberFunc *imPtr2 = NULL;
             Tcl_HashEntry *hPtr;
-	    hPtr = Tcl_FindHashEntry(&imPtr->iclsPtr->info->procMethods,
+	    hPtr = Tcl_FindHashEntry(&imPtr->iclsPtr->infoPtr->procMethods,
 	            (char *)Itcl_GetCallFrameProc(interp));
 	    if (hPtr != NULL) {
 	        imPtr2 = Tcl_GetHashValue(hPtr);
@@ -1455,7 +1455,7 @@ Itcl_ConstructBase(
      *    for the constructor.  The "initCode" makes sense right
      *    now--just before the body of the constructor is executed.
      */
-    Itcl_PushStack(contextClass, &contextClass->info->constructorStack);
+    Itcl_PushStack(contextClass, &contextClass->infoPtr->constructorStack);
     if (contextClass->initCode) {
         /*
          *  Prepend the method name to the list of arguments.
@@ -1480,7 +1480,7 @@ Itcl_ConstructBase(
         Tcl_AppendToObj(newObjv[1], "___constructor_init", -1);
         Tcl_IncrRefCount(newObjv[1]);
         memcpy(newObjv+2, objv+2, (objc-2)*sizeof(Tcl_Obj *));
-        result = Itcl_PublicObjectCmd(contextClass->info->currIoPtr->oPtr,
+        result = Itcl_PublicObjectCmd(contextClass->infoPtr->currIoPtr->oPtr,
 	        interp, contextClass->classPtr, cmdlinec, cmdlinev);
         Tcl_DecrRefCount(newObjv[1]);
         Tcl_DecrRefCount(newObjv[0]);
@@ -1533,7 +1533,7 @@ Itcl_ConstructBase(
         }
         elem = Itcl_PrevListElem(elem);
     }
-    Itcl_PopStack(&contextClass->info->constructorStack);
+    Itcl_PopStack(&contextClass->infoPtr->constructorStack);
     return TCL_OK;
 }
 
@@ -1657,7 +1657,7 @@ Itcl_CmdAliasProc(
         ioPtr = NULL;
         iclsPtr = resolveInfoPtr->iclsPtr;
     }
-    infoPtr = iclsPtr->info;
+    infoPtr = iclsPtr->infoPtr;
     hPtr = Tcl_FindHashEntry(&infoPtr->namespaceClasses, (char *)nsPtr);
     if (hPtr == NULL) {
 	return NULL;
@@ -1727,7 +1727,7 @@ Itcl_VarAliasProc(
         ioPtr = NULL;
         iclsPtr = resolveInfoPtr->iclsPtr;
     }
-    infoPtr = iclsPtr->info;
+    infoPtr = iclsPtr->infoPtr;
     hPtr = Tcl_FindHashEntry(&infoPtr->namespaceClasses, (char *)nsPtr);
     if (hPtr != NULL) {
         iclsPtr = Tcl_GetHashValue(hPtr);
@@ -1786,7 +1786,7 @@ ItclCheckCallProc(
     ItclMemberFunc *imPtr;
 
     imPtr = (ItclMemberFunc *)clientData;
-    if (!imPtr->iclsPtr->info->useOldResolvers) {
+    if (!imPtr->iclsPtr->infoPtr->useOldResolvers) {
         Itcl_SetCallFrameResolver(interp, imPtr->iclsPtr->resolvePtr);
     }
     result = TCL_OK;
@@ -1826,7 +1826,7 @@ ItclCheckCallMethod(
     hPtr = NULL;
     imPtr = (ItclMemberFunc *)clientData;
     if (imPtr->flags & ITCL_CONSTRUCTOR) {
-        ioPtr = imPtr->iclsPtr->info->currIoPtr;
+        ioPtr = imPtr->iclsPtr->infoPtr->currIoPtr;
     } else {
 	if (contextPtr == NULL) {
 	    Tcl_AppendResult(interp,
@@ -1836,7 +1836,7 @@ ItclCheckCallMethod(
 	}
         oPtr = Tcl_ObjectContextObject(contextPtr);
 	ioPtr = Tcl_ObjectGetMetadata(oPtr,
-	        imPtr->iclsPtr->info->object_meta_type);
+	        imPtr->iclsPtr->infoPtr->object_meta_type);
     }
     if ((imPtr->codePtr != NULL) &&
             (imPtr->codePtr->flags & ITCL_IMPLEMENT_NONE)) {
@@ -1929,11 +1929,11 @@ ItclCheckCallMethod(
     if (isNew) {
         Tcl_SetHashValue(hPtr, callContextPtr);
     }
-    Itcl_PushStack(callContextPtr, &imPtr->iclsPtr->info->contextStack);
+    Itcl_PushStack(callContextPtr, &imPtr->iclsPtr->infoPtr->contextStack);
 
     ioPtr->flags |= ITCL_OBJECT_NO_VARNS_DELETE;
     imPtr->iclsPtr->flags |= ITCL_CLASS_NO_VARNS_DELETE;
-    if (!imPtr->iclsPtr->info->useOldResolvers) {
+    if (!imPtr->iclsPtr->infoPtr->useOldResolvers) {
         Itcl_SetCallFrameResolver(interp, ioPtr->resolvePtr);
     }
     result = TCL_OK;
@@ -1969,7 +1969,7 @@ ItclAfterCallMethod(
     oPtr = NULL;
     imPtr = (ItclMemberFunc *)clientData;
 
-    callContextPtr = Itcl_PopStack(&imPtr->iclsPtr->info->contextStack);
+    callContextPtr = Itcl_PopStack(&imPtr->iclsPtr->infoPtr->contextStack);
     /*
      *  If this is a constructor or destructor, and if it is being
      *  invoked at the appropriate time, keep track of which methods
@@ -2061,12 +2061,12 @@ ItclProcErrorProc(
             if (isFirstLoop) {
 	        isFirstLoop = 0;
                 constructorStackSize = Itcl_GetStackSize(
-		        &imPtr->iclsPtr->info->constructorStack);
+		        &imPtr->iclsPtr->infoPtr->constructorStack);
 	        constructorStackIndex = constructorStackSize;
 	        currIclsPtr = imPtr->iclsPtr;
 	    } else {
 	        currIclsPtr = (ItclClass *)Itcl_GetStackValue(
-	                &imPtr->iclsPtr->info->constructorStack,
+	                &imPtr->iclsPtr->infoPtr->constructorStack,
 		        constructorStackIndex);
             }
 	    if (upNsPtr == currIclsPtr->namesp) {

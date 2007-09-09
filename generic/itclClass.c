@@ -25,7 +25,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclClass.c,v 1.1.2.2 2007/09/09 11:04:07 wiede Exp $
+ *     RCS:  $Id: itclClass.c,v 1.1.2.3 2007/09/09 13:38:40 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -107,11 +107,11 @@ ClassNamespaceDeleted(
  * ------------------------------------------------------------------------
  */
 int
-Itcl_CreateClass(interp, path, info, rPtr)
-    Tcl_Interp* interp;		/* interpreter that will contain new class */
-    CONST char* path;		/* name of new class */
-    ItclObjectInfo *info;	/* info for all known objects */
-    ItclClass **rPtr;		/* returns: pointer to class definition */
+Itcl_CreateClass(
+    Tcl_Interp* interp,		/* interpreter that will contain new class */
+    CONST char* path,		/* name of new class */
+    ItclObjectInfo *infoPtr,	/* info for all known objects */
+    ItclClass **rPtr)		/* returns: pointer to class definition */
 {
     char *head;
     char *tail;
@@ -201,8 +201,8 @@ Itcl_CreateClass(interp, path, info, rPtr)
     iclsPtr->name = NULL;
     iclsPtr->fullname = NULL;
     iclsPtr->interp = interp;
-    iclsPtr->info = info;
-    Itcl_PreserveData((ClientData)info);
+    iclsPtr->infoPtr = infoPtr;
+    Itcl_PreserveData((ClientData)infoPtr);
     iclsPtr->namesp = NULL;
     iclsPtr->accessCmd = NULL;
     iclsPtr->constructor = NULL;
@@ -285,7 +285,7 @@ Itcl_CreateClass(interp, path, info, rPtr)
                 Tcl_GetString(iclsPtr->fullname), "\"", NULL);
        return TCL_ERROR;
     }
-    Tcl_ObjectSetMetadata((Tcl_Object) oPtr, info->class_meta_type, iclsPtr);
+    Tcl_ObjectSetMetadata((Tcl_Object) oPtr, infoPtr->class_meta_type, iclsPtr);
     iclsPtr->classPtr = Tcl_GetObjectAsClass(oPtr);
     iclsPtr->oPtr = oPtr;
     Tcl_ObjectSetMapCmdNameProc(iclsPtr->oPtr, ItclMapCmdNameProc);
@@ -316,7 +316,7 @@ Itcl_CreateClass(interp, path, info, rPtr)
         return TCL_ERROR;
     }
 
-    if (iclsPtr->info->useOldResolvers) {
+    if (iclsPtr->infoPtr->useOldResolvers) {
         Tcl_SetNamespaceResolvers(classNs,
                 (Tcl_ResolveCmdProc*)Itcl_ClassCmdResolver,
                 (Tcl_ResolveVarProc*)Itcl_ClassVarResolver,
@@ -333,21 +333,21 @@ Itcl_CreateClass(interp, path, info, rPtr)
     iclsPtr->fullname = Tcl_NewStringObj(classNs->fullName, -1);
     Tcl_IncrRefCount(iclsPtr->fullname);
 
-    entry = Tcl_CreateHashEntry(&info->classes, (char *)iclsPtr->fullname,
+    entry = Tcl_CreateHashEntry(&infoPtr->classes, (char *)iclsPtr->fullname,
             &newEntry);
     if (entry == NULL) {
 	Tcl_AppendResult(interp,
-	        "ITCL: cannot create hash entry in info->classes for class \"",
+	        "ITCL: cannot create hash entry in infoPtr->classes for class \"",
 		Tcl_GetString(iclsPtr->fullname), "\"", NULL);
 	return TCL_ERROR;
     }
     Tcl_SetHashValue(entry, (ClientData)iclsPtr);
 
-    entry = Tcl_CreateHashEntry(&info->namespaceClasses, (char *)classNs,
+    entry = Tcl_CreateHashEntry(&infoPtr->namespaceClasses, (char *)classNs,
             &newEntry);
     if (entry == NULL) {
 	Tcl_AppendResult(interp,
-	        "ITCL: cannot create hash entry in info->namespaceClasses",
+	        "ITCL: cannot create hash entry in infoPtr->namespaceClasses",
 		" for class \"", 
 		Tcl_GetString(iclsPtr->fullname), "\"", NULL);
 	return TCL_ERROR;
@@ -485,7 +485,7 @@ Itcl_DeleteClass(
      *  destroyed above, when derived classes were destroyed.
      *  Destroy objects and report any errors.
      */
-    entry = Tcl_FirstHashEntry(&iclsPtr->info->objects, &place);
+    entry = Tcl_FirstHashEntry(&iclsPtr->infoPtr->objects, &place);
     while (entry) {
         contextIoPtr = (ItclObject*)Tcl_GetHashValue(entry);
 
@@ -502,7 +502,7 @@ Itcl_DeleteClass(
 	     * is therefore not allowed anymore.
 	     */
 
-	    entry = Tcl_FirstHashEntry(&iclsPtr->info->objects, &place);
+	    entry = Tcl_FirstHashEntry(&iclsPtr->infoPtr->objects, &place);
 	    continue;
         }
 
@@ -616,7 +616,7 @@ ItclDestroyClassNamesp(
      *  Scan through and find all objects that belong to this class.
      *  Destroy them quietly by deleting their access command.
      */
-    entry = Tcl_FirstHashEntry(&iclsPtr->info->objects, &place);
+    entry = Tcl_FirstHashEntry(&iclsPtr->infoPtr->objects, &place);
     while (entry) {
         contextObj = (ItclObject*)Tcl_GetHashValue(entry);
         if (contextObj->iclsPtr == iclsPtr) {
@@ -628,7 +628,7 @@ ItclDestroyClassNamesp(
 	     * is therefore not allowed anymore.
 	     */
 
-	    entry = Tcl_FirstHashEntry(&iclsPtr->info->objects, &place);
+	    entry = Tcl_FirstHashEntry(&iclsPtr->infoPtr->objects, &place);
 	    continue;
         }
         entry = Tcl_NextHashEntry(&place);
@@ -790,7 +790,7 @@ ItclFreeClass(cdata)
         Tcl_DecrRefCount(iclsPtr->initCode);
     }
 
-    Itcl_ReleaseData((ClientData)iclsPtr->info);
+    Itcl_ReleaseData((ClientData)iclsPtr->infoPtr);
 
     ckfree(iclsPtr->name);
     ckfree(iclsPtr->fullname);
@@ -886,10 +886,10 @@ Itcl_FindClass(interp, path, autoload)
     classNs = Itcl_FindClassNamespace(interp, path);
 
     if (classNs && Itcl_IsClassNamespace(classNs)) {
-	ItclObjectInfo *info;
-	info = Tcl_GetAssocData(interp, ITCL_INTERP_DATA, NULL);
+	ItclObjectInfo *infoPtr;
+	infoPtr = Tcl_GetAssocData(interp, ITCL_INTERP_DATA, NULL);
         return (ItclClass*)Tcl_ObjectGetMetadata(classNs->clientData,
-	        info->class_meta_type);
+	        infoPtr->class_meta_type);
     }
 
     /*

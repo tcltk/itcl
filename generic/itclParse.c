@@ -39,7 +39,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclParse.c,v 1.1.2.2 2007/09/09 11:04:19 wiede Exp $
+ *     RCS:  $Id: itclParse.c,v 1.1.2.3 2007/09/09 13:38:41 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -53,7 +53,7 @@
  */
 typedef struct ProtectionCmdInfo {
     int pLevel;               /* protection level */
-    ItclObjectInfo *info;     /* info regarding all known objects */
+    ItclObjectInfo *infoPtr;  /* info regarding all known objects */
 } ProtectionCmdInfo;
 
 /*
@@ -109,12 +109,12 @@ static const struct {
  * ------------------------------------------------------------------------
  */
 int
-Itcl_ParseInit(interp, info)
-    Tcl_Interp *interp;     /* interpreter to be updated */
-    ItclObjectInfo *info;   /* info regarding all known objects and classes */
+Itcl_ParseInit(
+    Tcl_Interp *interp,     /* interpreter to be updated */
+    ItclObjectInfo *infoPtr) /* info regarding all known objects and classes */
 {
     Tcl_Namespace *parserNs;
-    ProtectionCmdInfo *pInfo;
+    ProtectionCmdInfo *pInfoPtr;
     Tcl_DString buffer;
     int i;
 
@@ -123,7 +123,7 @@ Itcl_ParseInit(interp, info)
      *  definitions.
      */
     parserNs = Tcl_CreateNamespace(interp, "::itcl::parser",
-        (ClientData)info, Itcl_ReleaseData);
+        (ClientData)infoPtr, Itcl_ReleaseData);
 
     if (!parserNs) {
         Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
@@ -131,7 +131,7 @@ Itcl_ParseInit(interp, info)
             (char*)NULL);
         return TCL_ERROR;
     }
-    Itcl_PreserveData((ClientData)info);
+    Itcl_PreserveData((ClientData)infoPtr);
 
     /*
      *  Add commands for parsing class definitions.
@@ -141,18 +141,18 @@ Itcl_ParseInit(interp, info)
         Tcl_DStringAppend(&buffer, "::itcl::parser::", 16);
         Tcl_DStringAppend(&buffer, parseCmds[i].name, -1);
         Tcl_CreateObjCommand(interp, Tcl_DStringValue(&buffer),
-                parseCmds[i].objProc, (ClientData) info, NULL);
+                parseCmds[i].objProc, (ClientData) infoPtr, NULL);
         Tcl_DStringFree(&buffer);
     }
 
     for (i=0 ; protectionCmds[i].name ; i++) {
         Tcl_DStringAppend(&buffer, "::itcl::parser::", 16);
         Tcl_DStringAppend(&buffer, protectionCmds[i].name, -1);
-        pInfo = (ProtectionCmdInfo*)ckalloc(sizeof(ProtectionCmdInfo));
-        pInfo->pLevel = protectionCmds[i].protection;
-        pInfo->info = info;
+        pInfoPtr = (ProtectionCmdInfo*)ckalloc(sizeof(ProtectionCmdInfo));
+        pInfoPtr->pLevel = protectionCmds[i].protection;
+        pInfoPtr->infoPtr = infoPtr;
         Tcl_CreateObjCommand(interp, Tcl_DStringValue(&buffer),
-                protectionCmds[i].objProc, (ClientData) pInfo,
+                protectionCmds[i].objProc, (ClientData) pInfoPtr,
 		(Tcl_CmdDeleteProc*) ItclFreeParserCommandData);
         Tcl_DStringFree(&buffer);
     }
@@ -162,15 +162,15 @@ Itcl_ParseInit(interp, info)
      *  to control access to "common" data members while parsing
      *  the class definition.
      */
-    if (info->useOldResolvers) {
+    if (infoPtr->useOldResolvers) {
         ItclSetParserResolver(parserNs);
     }
     /*
      *  Install the "class" command for defining new classes.
      */
     Tcl_CreateObjCommand(interp, "::itcl::class", Itcl_ClassCmd,
-        (ClientData)info, Itcl_ReleaseData);
-    Itcl_PreserveData((ClientData)info);
+        (ClientData)infoPtr, Itcl_ReleaseData);
+    Itcl_PreserveData((ClientData)infoPtr);
 
     Tcl_CreateObjCommand(interp, "::itcl::body", Itcl_BodyCmd,
         (ClientData)NULL, (Tcl_CmdDeleteProc*)NULL);
@@ -178,7 +178,7 @@ Itcl_ParseInit(interp, info)
     Tcl_CreateObjCommand(interp, "::itcl::configbody", Itcl_ConfigBodyCmd,
         (ClientData)NULL, (Tcl_CmdDeleteProc*)NULL);
 
-    Itcl_EventuallyFree((ClientData)info, ItclDelObjectInfo);
+    Itcl_EventuallyFree((ClientData)infoPtr, ItclDelObjectInfo);
 
     /*
      *  Create the "itcl::find" command for high-level queries.
@@ -189,18 +189,18 @@ Itcl_ParseInit(interp, info)
     if (Itcl_AddEnsemblePart(interp, "::itcl::find",
             "classes", "?pattern?",
             Itcl_FindClassesCmd,
-            (ClientData)info, Itcl_ReleaseData) != TCL_OK) {
+            (ClientData)infoPtr, Itcl_ReleaseData) != TCL_OK) {
         return TCL_ERROR;
     }
-    Itcl_PreserveData((ClientData)info);
+    Itcl_PreserveData((ClientData)infoPtr);
 
     if (Itcl_AddEnsemblePart(interp, "::itcl::find",
             "objects", "?-class className? ?-isa className? ?pattern?",
             Itcl_FindObjectsCmd,
-            (ClientData)info, Itcl_ReleaseData) != TCL_OK) {
+            (ClientData)infoPtr, Itcl_ReleaseData) != TCL_OK) {
         return TCL_ERROR;
     }
-    Itcl_PreserveData((ClientData)info);
+    Itcl_PreserveData((ClientData)infoPtr);
 
 
     /*
@@ -213,18 +213,18 @@ Itcl_ParseInit(interp, info)
     if (Itcl_AddEnsemblePart(interp, "::itcl::delete",
             "class", "name ?name...?",
             Itcl_DelClassCmd,
-            (ClientData)info, Itcl_ReleaseData) != TCL_OK) {
+            (ClientData)infoPtr, Itcl_ReleaseData) != TCL_OK) {
         return TCL_ERROR;
     }
-    Itcl_PreserveData((ClientData)info);
+    Itcl_PreserveData((ClientData)infoPtr);
 
     if (Itcl_AddEnsemblePart(interp, "::itcl::delete",
             "object", "name ?name...?",
             Itcl_DelObjectCmd,
-            (ClientData)info, Itcl_ReleaseData) != TCL_OK) {
+            (ClientData)infoPtr, Itcl_ReleaseData) != TCL_OK) {
         return TCL_ERROR;
     }
-    Itcl_PreserveData((ClientData)info);
+    Itcl_PreserveData((ClientData)infoPtr);
 
     /*
      *  Create the "itcl::is" command to test object
@@ -235,17 +235,17 @@ Itcl_ParseInit(interp, info)
     }
     if (Itcl_AddEnsemblePart(interp, "::itcl::is",
             "class", "name", Itcl_IsClassCmd,
-            (ClientData)info, Itcl_ReleaseData) != TCL_OK) {
+            (ClientData)infoPtr, Itcl_ReleaseData) != TCL_OK) {
         return TCL_ERROR;
     }
-    Itcl_PreserveData((ClientData)info);
+    Itcl_PreserveData((ClientData)infoPtr);
 
     if (Itcl_AddEnsemblePart(interp, "::itcl::is",
             "object", "?-class classname? name", Itcl_IsObjectCmd,
-            (ClientData)info, Itcl_ReleaseData) != TCL_OK) {
+            (ClientData)infoPtr, Itcl_ReleaseData) != TCL_OK) {
         return TCL_ERROR;
     }
-    Itcl_PreserveData((ClientData)info);
+    Itcl_PreserveData((ClientData)infoPtr);
 
 
     /*
@@ -310,7 +310,7 @@ Itcl_ClassCmd(
     int objc,                /* number of arguments */
     Tcl_Obj *CONST objv[])   /* argument objects */
 {
-    ItclObjectInfo* info = (ItclObjectInfo*)clientData;
+    ItclObjectInfo* infoPtr = (ItclObjectInfo*)clientData;
 
     int result;
     char *className;
@@ -349,7 +349,7 @@ Itcl_ClassCmd(
     /*
      *  Try to create the specified class and its namespace.
      */
-    if (Itcl_CreateClass(interp, className, info, &iclsPtr) != TCL_OK) {
+    if (Itcl_CreateClass(interp, className, infoPtr, &iclsPtr) != TCL_OK) {
         return TCL_ERROR;
     }
 
@@ -375,7 +375,7 @@ Itcl_ClassCmd(
      *  becomes the current context for all commands in the parser.
      *  Activate the parser and evaluate the class definition.
      */
-    Itcl_PushStack((ClientData)iclsPtr, &info->clsStack);
+    Itcl_PushStack((ClientData)iclsPtr, &infoPtr->clsStack);
 
     result = Tcl_PushCallFrame(interp, &frame, parserNs,
         /* isProcCallFrame */ 0);
@@ -385,7 +385,7 @@ Itcl_ClassCmd(
         result = Tcl_EvalObj(interp, objv[2]);
         Tcl_PopCallFrame(interp);
     }
-    Itcl_PopStack(&info->clsStack);
+    Itcl_PopStack(&infoPtr->clsStack);
 
     if (result != TCL_OK) {
         char msg[256];
@@ -458,7 +458,7 @@ Itcl_ClassCmd(
 		bodyPtr, &pmPtr);
             Tcl_Proc procPtr;
 	    procPtr = Tcl_ProcPtrFromPM(pmPtr);
-	    hPtr2 = Tcl_CreateHashEntry(&iclsPtr->info->procMethods,
+	    hPtr2 = Tcl_CreateHashEntry(&iclsPtr->infoPtr->procMethods,
 	            (char *)procPtr, &isNewEntry);
 	    if (isNewEntry) {
 	        Tcl_SetHashValue(hPtr2, mPtr);
@@ -502,8 +502,8 @@ Itcl_ClassInheritCmd(
     Tcl_Obj *CONST objv[])   /* argument objects */
 {
     ItclShowArgs(2, "Itcl_InheritCmd", objc, objv);
-    ItclObjectInfo *info = (ItclObjectInfo*)clientData;
-    ItclClass *iclsPtr = (ItclClass*)Itcl_PeekStack(&info->clsStack);
+    ItclObjectInfo *infoPtr = (ItclObjectInfo*)clientData;
+    ItclClass *iclsPtr = (ItclClass*)Itcl_PeekStack(&infoPtr->clsStack);
 
     int result;
     int i;
@@ -841,8 +841,8 @@ Itcl_ClassConstructorCmd(
     Tcl_Obj *CONST objv[])   /* argument objects */
 {
     ItclShowArgs(2, "Itcl_ClassConstructorCmd", objc, objv);
-    ItclObjectInfo *info = (ItclObjectInfo*)clientData;
-    ItclClass *iclsPtr = (ItclClass*)Itcl_PeekStack(&info->clsStack);
+    ItclObjectInfo *infoPtr = (ItclObjectInfo*)clientData;
+    ItclClass *iclsPtr = (ItclClass*)Itcl_PeekStack(&infoPtr->clsStack);
 
     Tcl_Obj *namePtr;
     char *arglist;
@@ -910,8 +910,8 @@ Itcl_ClassDestructorCmd(
     Tcl_Obj *CONST objv[])   /* argument objects */
 {
     ItclShowArgs(2, "Itcl_ClassDestructorCmd", objc, objv);
-    ItclObjectInfo *info = (ItclObjectInfo*)clientData;
-    ItclClass *iclsPtr = (ItclClass*)Itcl_PeekStack(&info->clsStack);
+    ItclObjectInfo *infoPtr = (ItclObjectInfo*)clientData;
+    ItclClass *iclsPtr = (ItclClass*)Itcl_PeekStack(&infoPtr->clsStack);
 
     Tcl_Obj *namePtr;
     char *body;
@@ -959,8 +959,8 @@ Itcl_ClassMethodCmd(
     Tcl_Obj *CONST objv[])   /* argument objects */
 {
     ItclShowArgs(2, "Itcl_ClassMethodCmd", objc, objv);
-    ItclObjectInfo *info = (ItclObjectInfo*)clientData;
-    ItclClass *iclsPtr = (ItclClass*)Itcl_PeekStack(&info->clsStack);
+    ItclObjectInfo *infoPtr = (ItclObjectInfo*)clientData;
+    ItclClass *iclsPtr = (ItclClass*)Itcl_PeekStack(&infoPtr->clsStack);
 
     Tcl_Obj *namePtr;
     char *arglist;
@@ -1010,8 +1010,8 @@ Itcl_ClassProcCmd(
     Tcl_Obj *CONST objv[])   /* argument objects */
 {
     ItclShowArgs(2, "Itcl_ClassProcCmd", objc, objv);
-    ItclObjectInfo *info = (ItclObjectInfo*)clientData;
-    ItclClass *iclsPtr = (ItclClass*)Itcl_PeekStack(&info->clsStack);
+    ItclObjectInfo *infoPtr = (ItclObjectInfo*)clientData;
+    ItclClass *iclsPtr = (ItclClass*)Itcl_PeekStack(&infoPtr->clsStack);
 
     Tcl_Obj *namePtr;
     char *arglist;
@@ -1060,8 +1060,8 @@ Itcl_ClassVariableCmd(
     Tcl_Obj *CONST objv[])   /* argument objects */
 {
     ItclShowArgs(2, "Itcl_ClassVariableCmd", objc, objv);
-    ItclObjectInfo *info = (ItclObjectInfo*)clientData;
-    ItclClass *iclsPtr = (ItclClass*)Itcl_PeekStack(&info->clsStack);
+    ItclObjectInfo *infoPtr = (ItclObjectInfo*)clientData;
+    ItclClass *iclsPtr = (ItclClass*)Itcl_PeekStack(&infoPtr->clsStack);
 
     int pLevel;
     ItclVariable *ivPtr;
@@ -1134,8 +1134,8 @@ Itcl_ClassCommonCmd(
     Tcl_Obj *CONST objv[])   /* argument objects */
 {
     ItclShowArgs(2, "Itcl_ClassCommonCmd", objc, objv);
-    ItclObjectInfo *info = (ItclObjectInfo*)clientData;
-    ItclClass *iclsPtr = (ItclClass*)Itcl_PeekStack(&info->clsStack);
+    ItclObjectInfo *infoPtr = (ItclObjectInfo*)clientData;
+    ItclClass *iclsPtr = (ItclClass*)Itcl_PeekStack(&infoPtr->clsStack);
 
     Tcl_Namespace *commonNsPtr;
     Tcl_DString buffer;
@@ -1281,7 +1281,7 @@ static void
 ItclDelObjectInfo(
     char* cdata)    /* client data for class command */
 {
-    ItclObjectInfo *info = (ItclObjectInfo*)cdata;
+    ItclObjectInfo *infoPtr = (ItclObjectInfo*)cdata;
 
     ItclObject *contextObj;
     Tcl_HashSearch place;
@@ -1291,10 +1291,10 @@ ItclDelObjectInfo(
      *  Destroy all known objects by deleting their access
      *  commands.
      */
-    entry = Tcl_FirstHashEntry(&info->objects, &place);
+    entry = Tcl_FirstHashEntry(&infoPtr->objects, &place);
     while (entry) {
         contextObj = (ItclObject*)Tcl_GetHashValue(entry);
-        Tcl_DeleteCommandFromToken(info->interp, contextObj->accessCmd);
+        Tcl_DeleteCommandFromToken(infoPtr->interp, contextObj->accessCmd);
 	    /*
 	     * Fix 227804: Whenever an object to delete was found we
 	     * have to reset the search to the beginning as the
@@ -1302,14 +1302,14 @@ ItclDelObjectInfo(
 	     * is therefore not allowed anymore.
 	     */
 
-	    entry = Tcl_FirstHashEntry(&info->objects, &place);
+	    entry = Tcl_FirstHashEntry(&infoPtr->objects, &place);
 	    /*entry = Tcl_NextHashEntry(&place);*/
     }
-    Tcl_DeleteHashTable(&info->objects);
+    Tcl_DeleteHashTable(&infoPtr->objects);
 
-    Itcl_DeleteStack(&info->clsStack);
+    Itcl_DeleteStack(&infoPtr->clsStack);
 // FIX ME !!!
 // free class_meta_type and object_meta_type
-    ckfree((char*)info);
+    ckfree((char*)infoPtr);
 }
 
