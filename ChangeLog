@@ -1,0 +1,7 @@
+2007-09-09 Arnulf P. Wiedemann <wiede@users.sf.net>
+    * beautifying and fixes for stack backtrace handling
+    * too many files to list here (nearly all)
+2007-09-08 Arnulf P. Wiedemann <wiede@users.sf.net>
+    * all new modules insatlled and added
+This is the ChangeLog file for itcl-ng
+it is here as Itcl and itcl-ng will be different modules in the future
