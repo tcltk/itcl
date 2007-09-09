@@ -9,7 +9,7 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itclHelpers.c,v 1.1.2.1 2007/09/07 21:19:41 wiede Exp $
+ * RCS: @(#) $Id: itclHelpers.c,v 1.1.2.2 2007/09/09 11:04:09 wiede Exp $
  */
 
 #include "itclInt.h"

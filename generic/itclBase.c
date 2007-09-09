@@ -9,7 +9,7 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itclBase.c,v 1.1.2.1 2007/09/07 21:19:41 wiede Exp $
+ * RCS: @(#) $Id: itclBase.c,v 1.1.2.2 2007/09/09 11:04:06 wiede Exp $
  */
 
 #include <stdlib.h>
@@ -184,6 +184,7 @@ opt = atoi(res_option);
     info->useOldResolvers = opt;
     Itcl_InitStack(&info->clsStack);
     Itcl_InitStack(&info->contextStack);
+    Itcl_InitStack(&info->constructorStack);
 
     Tcl_SetAssocData(interp, ITCL_INTERP_DATA,
         (Tcl_InterpDeleteProc*)NULL, (ClientData)info);

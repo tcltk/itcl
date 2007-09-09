@@ -1,5 +1,5 @@
 /*
- * $Id: itclDecls.h,v 1.9.2.2 2007/09/07 21:19:41 wiede Exp $
+ * $Id: itclDecls.h,v 1.9.2.3 2007/09/09 11:04:08 wiede Exp $
  *
  * This file is (mostly) automatically generated from itcl.decls.
  */

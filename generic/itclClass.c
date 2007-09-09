@@ -25,7 +25,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclClass.c,v 1.1.2.1 2007/09/07 21:19:41 wiede Exp $
+ *     RCS:  $Id: itclClass.c,v 1.1.2.2 2007/09/09 11:04:07 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -253,9 +253,6 @@ Itcl_CreateClass(interp, path, info, rPtr)
      */
     Itcl_PreserveData((ClientData)iclsPtr);
 
-#ifdef NOTDEF
-    if (classNs == NULL) {
-#endif
     Tcl_Obj *objPtr = Tcl_NewStringObj("::itcl::clazz", -1);
     clazzObjectPtr = Tcl_GetObjectFromObj(interp, objPtr);
     if (clazzObjectPtr == NULL) {
@@ -1154,6 +1151,9 @@ Itcl_HandleClass(
     }
 
     Tcl_DStringFree(&buffer);
+    if (result == TCL_ERROR) {
+        return Itcl_ProcessReturn(interp, result, 2, NULL);
+    }
     return result;
 }
 
@@ -1189,7 +1189,7 @@ Itcl_BuildVirtualTables(
     Tcl_HashSearch place;
     ItclVarLookup *vlookup;
     ItclVariable *ivPtr;
-    ItclMemberFunc *mfunc;
+    ItclMemberFunc *imPtr;
     ItclHierIter hier;
     ItclClass *iclsPtr2;
     Tcl_Namespace* nsPtr;
@@ -1342,7 +1342,7 @@ Itcl_BuildVirtualTables(
     while (iclsPtr2 != NULL) {
         entry = Tcl_FirstHashEntry(&iclsPtr2->functions, &place);
         while (entry) {
-            mfunc = (ItclMemberFunc*)Tcl_GetHashValue(entry);
+            imPtr = (ItclMemberFunc*)Tcl_GetHashValue(entry);
 
             /*
              *  Create all possible names for this function and enter
@@ -1354,7 +1354,7 @@ Itcl_BuildVirtualTables(
              *     ...
              */
             Tcl_DStringSetLength(&buffer, 0);
-            Tcl_DStringAppend(&buffer, Tcl_GetString(mfunc->namePtr), -1);
+            Tcl_DStringAppend(&buffer, Tcl_GetString(imPtr->namePtr), -1);
             nsPtr = iclsPtr2->namesp;
 
             while (1) {
@@ -1362,7 +1362,7 @@ Itcl_BuildVirtualTables(
                     Tcl_DStringValue(&buffer), &newEntry);
 
                 if (newEntry) {
-                    Tcl_SetHashValue(entry, (ClientData)mfunc);
+                    Tcl_SetHashValue(entry, (ClientData)imPtr);
                 }
 
                 if (nsPtr == NULL) {

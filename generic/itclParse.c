@@ -39,7 +39,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclParse.c,v 1.1.2.1 2007/09/07 21:19:42 wiede Exp $
+ *     RCS:  $Id: itclParse.c,v 1.1.2.2 2007/09/09 11:04:19 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -454,7 +454,7 @@ Itcl_ClassCmd(
 	    ClientData pmPtr;
 	    mPtr->tmPtr = (ClientData)Itcl_NewProcClassMethod(interp,
 	        iclsPtr->classPtr, ItclCheckCallMethod, ItclAfterCallMethod,
-                mPtr, mPtr->namePtr, argumentPtr,
+                ItclProcErrorProc, mPtr, mPtr->namePtr, argumentPtr,
 		bodyPtr, &pmPtr);
             Tcl_Proc procPtr;
 	    procPtr = Tcl_ProcPtrFromPM(pmPtr);

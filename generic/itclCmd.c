@@ -23,7 +23,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclCmd.c,v 1.1.2.1 2007/09/07 21:19:41 wiede Exp $
+ *     RCS:  $Id: itclCmd.c,v 1.1.2.2 2007/09/09 11:04:08 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------

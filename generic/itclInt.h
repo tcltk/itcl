@@ -9,13 +9,13 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itclInt.h,v 1.17.2.3 2007/09/07 21:49:03 wiede Exp $
+ * RCS: @(#) $Id: itclInt.h,v 1.17.2.4 2007/09/09 11:04:14 wiede Exp $
  */
 
 #include <string.h>
 #include <ctype.h>
 #include <tcl.h>
-#include "../../oo/generic/tclOO.h"
+#include <tclOO.h>
 #include "itclMigrate2TclCore.h"
 #include "itclNeededFromTclOO.h"
 #include "itcl.h"
@@ -108,6 +108,7 @@ typedef struct ItclObjectInfo {
     Itcl_Stack clsStack;            /* stack of class definitions currently
                                      * being parsed */
     Itcl_Stack contextStack;        /* stack of call contexts */
+    Itcl_Stack constructorStack;    /* stack of constructor calls */
     struct ItclObject *currIoPtr;   /* object currently being constructed
                                      * set only during calling of constructors
 				     * otherwise NULL */
@@ -381,6 +382,7 @@ MODULE_SCOPE int Itcl_ClassCompiledVarResolver(Tcl_Interp *interp,
         CONST char* name, int length, Tcl_Namespace *nsPtr,
         struct Tcl_ResolvedVarInfo **rPtr);
 MODULE_SCOPE int ItclSetParserResolver(Tcl_Namespace *nsPtr);
+MODULE_SCOPE void ItclProcErrorProc(Tcl_Interp *interp, Tcl_Obj *procNameObj);
 
 #include "itcl2TclOO.h"
 

@@ -20,8 +20,9 @@ EXTERN Tcl_Method _Tcl_NewProcMethod(Tcl_Interp *interp,
         int flags, ClientData *clientData);
 EXTERN Tcl_Method _Tcl_NewProcClassMethod(Tcl_Interp *interp, Tcl_Class clsPtr,
         TclOO_PreCallProc preCallPtr, TclOO_PostCallProc postCallPtr,
-        ClientData clientData, Tcl_Obj *nameObj, Tcl_Obj *argsObj,
-        Tcl_Obj *bodyObj,  int flags, ClientData *clientData2);
+        Tcl_ProcErrorProc errProc, ClientData clientData, Tcl_Obj *nameObj,
+	Tcl_Obj *argsObj, Tcl_Obj *bodyObj,  int flags,
+	ClientData *clientData2);
 
 EXTERN ClientData _Tcl_ProcPtrFromPM(ClientData clientData);
 

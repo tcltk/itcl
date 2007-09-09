@@ -24,7 +24,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclBuiltin.c,v 1.1.2.1 2007/09/07 21:19:41 wiede Exp $
+ *     RCS:  $Id: itclBuiltin.c,v 1.1.2.2 2007/09/09 11:04:07 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -91,20 +91,6 @@ Itcl_BiInit(
     Tcl_Namespace *itclBiNs;
     Tcl_DString buffer;
     int i;
-
-#ifdef NOTDEF
-    /*
-     *  Declare all of the built-in methods as C procedures.
-     */
-    for (i=0; i < BiMethodListLen; i++) {
-        if (Itcl_RegisterObjC(interp,
-                BiMethodList[i].registration+1, BiMethodList[i].proc,
-                (ClientData)NULL, (Tcl_CmdDeleteProc*)NULL) != TCL_OK) {
-
-            return TCL_ERROR;
-        }
-    }
-#endif
 
     /*
      *  "::itcl::builtin" commands.
@@ -727,7 +713,7 @@ Itcl_BiChainCmd(
     ItclClass *iclsPtr;
     ItclHierIter hier;
     Tcl_HashEntry *entry;
-    ItclMemberFunc *mfunc;
+    ItclMemberFunc *imPtr;
     Tcl_DString buffer;
     Tcl_Obj *cmdlinePtr;
     Tcl_Obj **newobjv;
@@ -800,26 +786,26 @@ Itcl_BiChainCmd(
     while ((iclsPtr = Itcl_AdvanceHierIter(&hier)) != NULL) {
         entry = Tcl_FindHashEntry(&iclsPtr->functions, (char *)objPtr);
         if (entry) {
-            mfunc = (ItclMemberFunc*)Tcl_GetHashValue(entry);
+            imPtr = (ItclMemberFunc*)Tcl_GetHashValue(entry);
 
             /*
              *  NOTE:  Avoid the usual "virtual" behavior of
              *         methods by passing the full name as
              *         the command argument.
              */
-            cmdlinePtr = Itcl_CreateArgs(interp, Tcl_GetString(mfunc->fullNamePtr),
+            cmdlinePtr = Itcl_CreateArgs(interp, Tcl_GetString(imPtr->fullNamePtr),
                 objc-1, objv+1);
 
             (void) Tcl_ListObjGetElements((Tcl_Interp*)NULL, cmdlinePtr,
                 &objc, &newobjv);
 
-	    if (mfunc->flags & ITCL_CONSTRUCTOR) {
+	    if (imPtr->flags & ITCL_CONSTRUCTOR) {
 	        Tcl_SetStringObj(newobjv[0], Tcl_GetCommandName(interp,
 		        contextIclsPtr->info->currIoPtr->accessCmd), -1);
-	        result = Itcl_EvalMemberCode(interp, mfunc,
-		        mfunc->iclsPtr->info->currIoPtr, objc-1, newobjv+1);
+	        result = Itcl_EvalMemberCode(interp, imPtr,
+		        imPtr->iclsPtr->info->currIoPtr, objc-1, newobjv+1);
 	    } else {
-	        result = Itcl_EvalMemberCode(interp, mfunc, contextIoPtr,
+	        result = Itcl_EvalMemberCode(interp, imPtr, contextIoPtr,
 		        objc-1, newobjv+1);
             }
 

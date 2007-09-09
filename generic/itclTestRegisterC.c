@@ -19,10 +19,10 @@ cArgFunc(
 {
     int i;
 
-    fprintf(stderr, "cArgFunc called:\n");
-    for(i = 0; i<argc;i++) {
-        fprintf(stderr, "arg:%d:%s:\n", i, argv[i]);
-    }
+fprintf(stderr, "cArgFunc called:\n");
+for(i = 0; i<argc;i++) {
+    fprintf(stderr, "arg:%d:%s:\n", i, argv[i]);
+}
     return TCL_OK;
 }
 

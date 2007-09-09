@@ -24,7 +24,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclObject.c,v 1.1.2.1 2007/09/07 21:19:42 wiede Exp $
+ *     RCS:  $Id: itclObject.c,v 1.1.2.2 2007/09/09 11:04:19 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -838,7 +838,7 @@ ItclReportObjectUsage(
     Itcl_ListElem *elem;
     Tcl_HashEntry *entry;
     Tcl_HashSearch place;
-    ItclMemberFunc *mfunc;
+    ItclMemberFunc *imPtr;
     ItclMemberFunc *cmpFunc;
     Tcl_Obj *resultPtr;
 
@@ -851,52 +851,52 @@ ItclReportObjectUsage(
     entry = Tcl_FirstHashEntry(&iclsPtr->resolveCmds, &place);
     while (entry) {
         name  = Tcl_GetHashKey(&iclsPtr->resolveCmds, entry);
-        mfunc = (ItclMemberFunc*)Tcl_GetHashValue(entry);
+        imPtr = (ItclMemberFunc*)Tcl_GetHashValue(entry);
 
-        if (strstr(name,"::") || (mfunc->flags & ignore) != 0) {
-            mfunc = NULL;
+        if (strstr(name,"::") || (imPtr->flags & ignore) != 0) {
+            imPtr = NULL;
         } else {
-	    if (mfunc->protection != ITCL_PUBLIC) {
+	    if (imPtr->protection != ITCL_PUBLIC) {
 		if (contextNsPtr != NULL) {
-                    if (!Itcl_CanAccessFunc(mfunc, contextNsPtr)) {
-                        mfunc = NULL;
+                    if (!Itcl_CanAccessFunc(imPtr, contextNsPtr)) {
+                        imPtr = NULL;
                     }
                 }
 	    }
         }
-        if ((mfunc != NULL) && (mfunc->codePtr != NULL)) {
-	    if (mfunc->codePtr->flags & ITCL_BUILTIN) {
+        if ((imPtr != NULL) && (imPtr->codePtr != NULL)) {
+	    if (imPtr->codePtr->flags & ITCL_BUILTIN) {
 	        char *body;
-	        if (mfunc->codePtr != NULL) {
-	            body = Tcl_GetString(mfunc->codePtr->bodyPtr);
+	        if (imPtr->codePtr != NULL) {
+	            body = Tcl_GetString(imPtr->codePtr->bodyPtr);
 	            if ((*body == '@') &&
 		            (strcmp(body, "@itcl-builtin-info") == 0)) {
-	                mfunc = NULL;
+	                imPtr = NULL;
 	            }
 	        }
 	    }
 	}
 
-        if (mfunc) {
+        if (imPtr) {
             elem = Itcl_FirstListElem(&cmdList);
             while (elem) {
                 cmpFunc = (ItclMemberFunc*)Itcl_GetListValue(elem);
-                cmp = strcmp(Tcl_GetString(mfunc->namePtr),
+                cmp = strcmp(Tcl_GetString(imPtr->namePtr),
 		        Tcl_GetString(cmpFunc->namePtr));
                 if (cmp < 0) {
-                    Itcl_InsertListElem(elem, (ClientData)mfunc);
-                    mfunc = NULL;
+                    Itcl_InsertListElem(elem, (ClientData)imPtr);
+                    imPtr = NULL;
                     break;
                 } else {
 		    if (cmp == 0) {
-                        mfunc = NULL;
+                        imPtr = NULL;
                         break;
 		    }
                 }
                 elem = Itcl_NextListElem(elem);
             }
-            if (mfunc) {
-                Itcl_AppendList(&cmdList, (ClientData)mfunc);
+            if (imPtr) {
+                Itcl_AppendList(&cmdList, (ClientData)imPtr);
             }
         }
         entry = Tcl_NextHashEntry(&place);
@@ -908,9 +908,9 @@ ItclReportObjectUsage(
     resultPtr = Tcl_GetObjResult(interp);
     elem = Itcl_FirstListElem(&cmdList);
     while (elem) {
-        mfunc = (ItclMemberFunc*)Itcl_GetListValue(elem);
+        imPtr = (ItclMemberFunc*)Itcl_GetListValue(elem);
         Tcl_AppendToObj(resultPtr, "\n  ", -1);
-        Itcl_GetMemberFuncUsage(mfunc, contextIoPtr, resultPtr);
+        Itcl_GetMemberFuncUsage(imPtr, contextIoPtr, resultPtr);
 
         elem = Itcl_NextListElem(elem);
     }
@@ -1090,7 +1090,7 @@ ItclObjectCmd(
     int objc,
     Tcl_Obj *const *objv)
 {
-    ItclMemberFunc *mFunc;
+    ItclMemberFunc *imPtr;
     ItclClass *iclsPtr;
     Itcl_ListElem *elem;
     ItclClass *basePtr;
@@ -1107,8 +1107,8 @@ ItclObjectCmd(
 
     incr = 0;
     isDirectCall = 0;
-    mFunc = (ItclMemberFunc *)clientData;
-    iclsPtr = mFunc->iclsPtr;
+    imPtr = (ItclMemberFunc *)clientData;
+    iclsPtr = imPtr->iclsPtr;
     if ((oPtr == NULL) && (clsPtr == NULL)) {
          isDirectCall = 1;
     }
@@ -1116,10 +1116,10 @@ ItclObjectCmd(
 	ClientData clientData;
 	clientData = Itcl_GetCallFrameClientData(interp);
 	if (clientData == NULL) {
-	    if ((mFunc->flags & ITCL_COMMON)
-	            || ((mFunc->codePtr != NULL)
-		        && (mFunc->codePtr->flags &ITCL_BUILTIN))) {
-	        result = Itcl_InvokeProcedureMethod(mFunc->tmPtr, interp,
+	    if ((imPtr->flags & ITCL_COMMON)
+	            || ((imPtr->codePtr != NULL)
+		        && (imPtr->codePtr->flags &ITCL_BUILTIN))) {
+	        result = Itcl_InvokeProcedureMethod(imPtr->tmPtr, interp,
 		        ItclCheckCallProc, objc, objv);
                 return result;
 	    }

@@ -24,7 +24,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclInfo.c,v 1.1.2.1 2007/09/07 21:19:41 wiede Exp $
+ *     RCS:  $Id: itclInfo.c,v 1.1.2.2 2007/09/09 11:04:13 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -468,11 +468,6 @@ Itcl_BiInfoHeritageCmd(
             (char*)NULL);
         return TCL_ERROR;
     }
-#ifdef NOTDEF
-    if (contextIoPtr != NULL) {
-        contextIclsPtr = contextIoPtr->iclsPtr;
-    }
-#endif
 
     /*
      *  Traverse through the derivation hierarchy and return
@@ -579,7 +574,7 @@ Itcl_BiInfoFunctionCmd(
     char *val;
     Tcl_HashSearch place;
     Tcl_HashEntry *entry;
-    ItclMemberFunc *mfunc;
+    ItclMemberFunc *imPtr;
     ItclMemberCode *mcode;
     ItclHierIter hier;
 
@@ -627,8 +622,8 @@ Itcl_BiInfoFunctionCmd(
             return TCL_ERROR;
         }
 
-        mfunc = (ItclMemberFunc*)Tcl_GetHashValue(entry);
-        mcode = mfunc->codePtr;
+        imPtr = (ItclMemberFunc*)Tcl_GetHashValue(entry);
+        mcode = imPtr->codePtr;
 
         /*
          *  By default, return everything.
@@ -660,17 +655,17 @@ Itcl_BiInfoFunctionCmd(
             switch (iflist[i]) {
                 case BIfArgsIdx:
                     if (mcode && mcode->argListPtr) {
-			if (mfunc->usagePtr == NULL) {
+			if (imPtr->usagePtr == NULL) {
                             objPtr = mcode->usagePtr;
 			} else {
-                            objPtr = mfunc->usagePtr;
+                            objPtr = imPtr->usagePtr;
 		        }
                     } else {
-		        if ((mfunc->flags & ITCL_ARG_SPEC) != 0) {
-			    if (mfunc->usagePtr == NULL) {
+		        if ((imPtr->flags & ITCL_ARG_SPEC) != 0) {
+			    if (imPtr->usagePtr == NULL) {
                                 objPtr = mcode->usagePtr;
 			    } else {
-			        objPtr = mfunc->usagePtr;
+			        objPtr = imPtr->usagePtr;
 			    }
                         } else {
                             objPtr = Tcl_NewStringObj("<undefined>", -1);
@@ -687,16 +682,16 @@ Itcl_BiInfoFunctionCmd(
                     break;
 
                 case BIfNameIdx:
-                    objPtr = mfunc->fullNamePtr;
+                    objPtr = imPtr->fullNamePtr;
                     break;
 
                 case BIfProtectIdx:
-                    val = Itcl_ProtectionStr(mfunc->protection);
+                    val = Itcl_ProtectionStr(imPtr->protection);
                     objPtr = Tcl_NewStringObj(val, -1);
                     break;
 
                 case BIfTypeIdx:
-                    val = ((mfunc->flags & ITCL_COMMON) != 0)
+                    val = ((imPtr->flags & ITCL_COMMON) != 0)
                         ? "proc" : "method";
                     objPtr = Tcl_NewStringObj(val, -1);
                     break;
@@ -722,14 +717,14 @@ Itcl_BiInfoFunctionCmd(
             while (entry) {
 	        int useIt = 1;
 
-                mfunc = (ItclMemberFunc*)Tcl_GetHashValue(entry);
-		if (mfunc->codePtr && (mfunc->codePtr->flags & ITCL_BUILTIN)) {
-		    if (strcmp(Tcl_GetString(mfunc->namePtr), "info") == 0) {
+                imPtr = (ItclMemberFunc*)Tcl_GetHashValue(entry);
+		if (imPtr->codePtr && (imPtr->codePtr->flags & ITCL_BUILTIN)) {
+		    if (strcmp(Tcl_GetString(imPtr->namePtr), "info") == 0) {
 		        useIt = 0;
 		    }
 		}
 		if (useIt) {
-                    objPtr = mfunc->fullNamePtr;
+                    objPtr = imPtr->fullNamePtr;
                     Tcl_ListObjAppendElement((Tcl_Interp*)NULL,
 		            resultPtr, objPtr);
                 }
@@ -1155,7 +1150,7 @@ Itcl_BiInfoBodyCmd(
     Tcl_Obj *CONST objv[])   /* argument objects */
 {
     char *name;
-    ItclMemberFunc *mfunc;
+    ItclMemberFunc *imPtr;
     ItclMemberCode *mcode;
     Tcl_HashEntry *entry;
     Tcl_Obj *objPtr;
@@ -1219,8 +1214,8 @@ Itcl_BiInfoBodyCmd(
         return TCL_ERROR;
     }
 
-    mfunc = (ItclMemberFunc*)Tcl_GetHashValue(entry);
-    mcode = mfunc->codePtr;
+    imPtr = (ItclMemberFunc*)Tcl_GetHashValue(entry);
+    mcode = imPtr->codePtr;
 
     /*
      *  Return a string describing the implementation.
@@ -1254,7 +1249,7 @@ Itcl_BiInfoArgsCmd(
     Tcl_Obj *CONST objv[])   /* argument objects */
 {
     char *name;
-    ItclMemberFunc *mfunc;
+    ItclMemberFunc *imPtr;
     ItclMemberCode *mcode;
     Tcl_HashEntry *entry;
     Tcl_Obj *objPtr;
@@ -1329,17 +1324,17 @@ Itcl_BiInfoArgsCmd(
         return TCL_ERROR;
     }
 
-    mfunc = (ItclMemberFunc*)Tcl_GetHashValue(entry);
-    mcode = mfunc->codePtr;
+    imPtr = (ItclMemberFunc*)Tcl_GetHashValue(entry);
+    mcode = imPtr->codePtr;
 
     /*
      *  Return a string describing the argument list.
      */
     if (mcode && mcode->argListPtr != NULL) {
-        objPtr = mfunc->usagePtr;
+        objPtr = imPtr->usagePtr;
     } else {
-        if ((mfunc->flags & ITCL_ARG_SPEC) != 0) {
-            objPtr = mfunc->usagePtr;
+        if ((imPtr->flags & ITCL_ARG_SPEC) != 0) {
+            objPtr = imPtr->usagePtr;
         } else {
             objPtr = Tcl_NewStringObj("<undefined>", -1);
         }

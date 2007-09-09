@@ -23,7 +23,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclUtil.c,v 1.1.2.1 2007/09/07 21:19:43 wiede Exp $
+ *     RCS:  $Id: itclUtil.c,v 1.1.2.2 2007/09/09 11:04:22 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -843,10 +843,10 @@ Itcl_CanAccess2(
  */
 int
 Itcl_CanAccess(
-    ItclMemberFunc* mFunc,     /* class member being tested */
+    ItclMemberFunc* imPtr,     /* class member being tested */
     Tcl_Namespace* fromNsPtr)  /* namespace requesting access */
 {
-    return Itcl_CanAccess2(mFunc->iclsPtr, mFunc->protection, fromNsPtr);
+    return Itcl_CanAccess2(imPtr->iclsPtr, imPtr->protection, fromNsPtr);
 }
 
 
@@ -866,7 +866,7 @@ Itcl_CanAccess(
  */
 int
 Itcl_CanAccessFunc(
-    ItclMemberFunc* mfunc,     /* member function being tested */
+    ItclMemberFunc* imPtr,     /* member function being tested */
     Tcl_Namespace* fromNsPtr)  /* namespace requesting access */
 {
     ItclClass *iclsPtr;
@@ -877,7 +877,7 @@ Itcl_CanAccessFunc(
     /*
      *  Apply the usual rules first.
      */
-    if (Itcl_CanAccess(mfunc, fromNsPtr)) {
+    if (Itcl_CanAccess(imPtr, fromNsPtr)) {
         return 1;
     }
 
@@ -888,11 +888,11 @@ Itcl_CanAccessFunc(
      *  is one, then this method overrides it, and the base class
      *  has access.
      */
-    if ((mfunc->flags & ITCL_COMMON) == 0 &&
+    if ((imPtr->flags & ITCL_COMMON) == 0 &&
             Itcl_IsClassNamespace(fromNsPtr)) {
         Tcl_HashEntry *hPtr;
 
-        iclsPtr = mfunc->iclsPtr;
+        iclsPtr = imPtr->iclsPtr;
 	hPtr = Tcl_FindHashEntry(&iclsPtr->info->namespaceClasses,
 	        (char *)fromNsPtr);
 	if (hPtr == NULL) {
@@ -902,7 +902,7 @@ Itcl_CanAccessFunc(
 
         if (Tcl_FindHashEntry(&iclsPtr->heritage, (char*)fromIclsPtr)) {
             entry = Tcl_FindHashEntry(&fromIclsPtr->resolveCmds,
-                Tcl_GetString(mfunc->namePtr));
+                Tcl_GetString(imPtr->namePtr));
 
             if (entry) {
                 ovlfunc = (ItclMemberFunc*)Tcl_GetHashValue(entry);

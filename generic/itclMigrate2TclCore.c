@@ -9,7 +9,7 @@
  * ========================================================================
  *  AUTHOR:  Arnulf Wiedemann
  *
- *     RCS:  $Id: itclMigrate2TclCore.c,v 1.1.2.2 2007/09/07 21:49:05 wiede Exp $
+ *     RCS:  $Id: itclMigrate2TclCore.c,v 1.1.2.3 2007/09/09 11:04:16 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -19,67 +19,6 @@
 #include <tcl.h>
 #include <tclInt.h>
 #include "itclMigrate2TclCore.h"
-
-int
-_Tcl_GetCallFrameInfo(
-    Tcl_Interp *interp,          /* Interpreter in which to look for */
-    const Tcl_CallFrame *framePtr, /* if NULL use framePtr from interp */
-    Tcl_CallFrameInfo *infoPtr)  /* Where to store information */
-{
-    CallFrame *myFramePtr = (CallFrame *)framePtr;
-
-    if (infoPtr == NULL) {
-        return TCL_ERROR;
-    }
-    if (myFramePtr == NULL) {
-        if (interp == NULL) {
-            return TCL_ERROR;
-        }
-        myFramePtr = ((Interp *)interp)->varFramePtr;
-    }
-    infoPtr->nsPtr = (Tcl_Namespace *)myFramePtr->nsPtr;
-    infoPtr->flags = myFramePtr->isProcCallFrame;
-    infoPtr->objc = myFramePtr->objc;
-    infoPtr->objv = myFramePtr->objv;
-    infoPtr->callerPtr = (Tcl_CallFrame *)myFramePtr->callerPtr;
-    infoPtr->callerVarPtr = (Tcl_CallFrame *)myFramePtr->callerVarPtr;
-    infoPtr->level = myFramePtr->level;
-    infoPtr->procPtr = (Tcl_Proc)myFramePtr->procPtr;
-    infoPtr->clientData = myFramePtr->clientData;
-#ifdef ARNULF_FOR_ITCL_CODE
-    infoPtr->resolvePtr = myFramePtr->resolvePtr;
-#endif
-    return TCL_OK;
-}
-
-int
-_Tcl_SetCallFrameInfo(
-    Tcl_Interp *interp,          /* Interpreter in which to look for */
-    Tcl_CallFrame *framePtr,     /* if NULL use framePtr from interp */
-    CONST Tcl_CallFrameInfo *infoPtr)  /* Where to find information */
-{
-    CallFrame *myFramePtr = (CallFrame *)framePtr;
-
-    if (infoPtr == NULL) {
-        return TCL_ERROR;
-    }
-    if (myFramePtr == NULL) {
-        if (interp == NULL) {
-            return TCL_ERROR;
-        }
-        myFramePtr = ((Interp *)interp)->varFramePtr;
-    }
-    myFramePtr->nsPtr = (Namespace *)infoPtr->nsPtr;
-    myFramePtr->isProcCallFrame = infoPtr->flags;
-    myFramePtr->objc = infoPtr->objc;
-    myFramePtr->objv = infoPtr->objv ;
-    myFramePtr->procPtr = (Proc *)infoPtr->procPtr;
-    myFramePtr->clientData = infoPtr->clientData;
-#ifdef ARNULF_FOR_ITCL_CODE
-    myFramePtr->resolvePtr = infoPtr->resolvePtr;
-#endif
-    return TCL_OK;
-}
 
 Tcl_Command
 _Tcl_GetOriginalCommand(
@@ -202,7 +141,7 @@ ItclMethodErrorHandler(
     Tcl_Interp *interp,
     Tcl_Obj *methodNameObj)
 {
-//fprintf(stderr, "ItclMethodErrorHandler called!%s\n", Tcl_GetString(methodNameObj));
+fprintf(stderr, "ItclMethodErrorHandler called!%s\n", Tcl_GetString(methodNameObj));
 }
 
 int
@@ -228,7 +167,6 @@ _Tcl_InvokeNamespaceProc(
     cmd.clientData = NULL;
     procPtr->cmdPtr = &cmd;
 
-//fprintf(stderr, "PROC!%p!%p!\n", procPtr, procPtr->bodyPtr);
     result = TclProcCompileProc(interp, procPtr,
             procPtr->bodyPtr, (Namespace *) nsPtr, "body of method",
             Tcl_GetString(namePtr));
@@ -253,7 +191,6 @@ _Tcl_InvokeNamespaceProc(
     framePtr->objv = objv;
     framePtr->procPtr = procPtr;
 
-//fprintf(stderr, "PROC2!%p!%s!\n", procPtr, Tcl_GetString(procPtr->bodyPtr));
     /*
      * Now invoke the body of the method. Note that we need to take special
      * action when doing unknown processing to ensure that the missing method
@@ -420,4 +357,28 @@ Itcl_IsCallFrameArgument(
         }            
     }
     return 0;
+}
+
+int
+Itcl_ProcessReturn(
+    Tcl_Interp *interp,
+    int code,
+    int level,
+    Tcl_Obj *returnOpts)
+{
+    Interp *iPtr = (Interp *) interp;
+    if (level != 0) {
+        iPtr->returnLevel = level;
+        iPtr->returnCode = code;
+        return TCL_RETURN;
+    }
+    return TCL_ERROR;
+}
+
+int
+ItclGetInterpErrorLine(
+    Tcl_Interp *interp)
+{
+    Interp *iPtr = (Interp *) interp;
+    return iPtr->errorLine;
 }

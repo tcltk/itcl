@@ -8,136 +8,20 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itcl2TclOO.c,v 1.1.2.2 2007/09/07 21:49:05 wiede Exp $
+ * RCS: @(#) $Id: itcl2TclOO.c,v 1.1.2.3 2007/09/09 11:04:05 wiede Exp $
  */
 
-#include "../../oo/generic/tclOOInt.h"
+#include <tclOOInt.h>
 #define _TCLOOINT_H
 #include "itclInt.h"
-
-#define LIMIT 60
-#define ELLIPSIFY(str,len) \
-	((len) > LIMIT ? LIMIT : (len)), (str), ((len) > LIMIT ? "..." : "")
-
-static void
-MethodErrorHandler(
-    Tcl_Interp *interp,
-    Tcl_Obj *methodNameObj)
-{
-    int nameLen, objectNameLen;
-    CallContext *contextPtr = ((Interp *) interp)->varFramePtr->clientData;
-    Method *mPtr = contextPtr->callChain[contextPtr->index].mPtr;
-    const char *objectName, *kindName, *methodName =
-	    Tcl_GetStringFromObj(mPtr->namePtr, &nameLen);
-    Object *declarerPtr;
-
-    if (mPtr->declaringObjectPtr != NULL) {
-	declarerPtr = mPtr->declaringObjectPtr;
-	kindName = "object";
-    } else {
-	if (mPtr->declaringClassPtr == NULL) {
-	    Tcl_Panic("method not declared in class or object");
-	}
-	declarerPtr = mPtr->declaringClassPtr->thisPtr;
-	kindName = "class";
-    }
-
-    kindName = "while constructing object ";
-    objectName = Tcl_GetStringFromObj(TclOOObjectName(interp, declarerPtr),
-	    &objectNameLen);
-    Tcl_Obj *objPtr;
-    objPtr = Tcl_NewObj();
-    Tcl_GetCommandFullName(interp, contextPtr->oPtr->command, objPtr);
-    Tcl_IncrRefCount(objPtr);
-    Tcl_AppendObjToErrorInfo(interp, Tcl_ObjPrintf(
-	    "\n    %s\"%s\" in \"%.*s%s::%.*s%s\" (body line %d)",
-	    kindName, Tcl_GetString(objPtr),
-	    ELLIPSIFY(objectName, objectNameLen),
-	    ELLIPSIFY(methodName, nameLen), interp->errorLine));
-    Tcl_DecrRefCount(objPtr);
-}
-
-static void
-ConstructorErrorHandler(
-    Tcl_Interp *interp,
-    Tcl_Obj *methodNameObj)
-{
-    CallContext *contextPtr = ((Interp *) interp)->varFramePtr->clientData;
-    Method *mPtr = contextPtr->callChain[contextPtr->index].mPtr;
-    Object *declarerPtr;
-    const char *objectName, *kindName;
-    int objectNameLen;
-
-    if (interp->errorLine == 0xDEADBEEF) {
-	/*
-	 * Horrible hack to deal with certain constructors that must not add
-	 * information to the error trace.
-	 */
-
-	return;
-    }
-
-    if (mPtr->declaringObjectPtr != NULL) {
-	declarerPtr = mPtr->declaringObjectPtr;
-	kindName = "object";
-    } else {
-	if (mPtr->declaringClassPtr == NULL) {
-	    Tcl_Panic("method not declared in class or object");
-	}
-	declarerPtr = mPtr->declaringClassPtr->thisPtr;
-	kindName = "class";
-    }
-
-    kindName = "while constructing object ";
-    objectName = Tcl_GetStringFromObj(TclOOObjectName(interp, declarerPtr),
-	    &objectNameLen);
-    Tcl_Obj *objPtr;
-    objPtr = Tcl_NewObj();
-    Tcl_GetCommandFullName(interp, contextPtr->oPtr->command, objPtr);
-    Tcl_IncrRefCount(objPtr);
-    Tcl_AppendObjToErrorInfo(interp, Tcl_ObjPrintf(
-	    "\n    %s\"%s\" in %.*s%s::constructor (body line %d)",
-	    kindName, Tcl_GetString(objPtr),
-	    ELLIPSIFY(objectName, objectNameLen), interp->errorLine));
-    Tcl_DecrRefCount(objPtr);
-}
-
-static void
-DestructorErrorHandler(
-    Tcl_Interp *interp,
-    Tcl_Obj *methodNameObj)
-{
-    CallContext *contextPtr = ((Interp *) interp)->varFramePtr->clientData;
-    Method *mPtr = contextPtr->callChain[contextPtr->index].mPtr;
-    Object *declarerPtr;
-    const char *objectName, *kindName;
-    int objectNameLen;
-
-    if (mPtr->declaringObjectPtr != NULL) {
-	declarerPtr = mPtr->declaringObjectPtr;
-	kindName = "object";
-    } else {
-	if (mPtr->declaringClassPtr == NULL) {
-	    Tcl_Panic("method not declared in class or object");
-	}
-	declarerPtr = mPtr->declaringClassPtr->thisPtr;
-	kindName = "class";
-    }
-
-    objectName = Tcl_GetStringFromObj(TclOOObjectName(interp, declarerPtr),
-	    &objectNameLen);
-    Tcl_AppendObjToErrorInfo(interp, Tcl_ObjPrintf(
-	    "\n    (%s \"%.*s%s\" destructor line %d)", kindName,
-	    ELLIPSIFY(objectName, objectNameLen), interp->errorLine));
-}
 
 static void
 ItclMethodErrorHandler(
     Tcl_Interp *interp,
     Tcl_Obj *methodNameObj)
 {
-//fprintf(stderr, "ItclMethodErrorHandler called!%s\n", Tcl_GetString(methodNameObj));
-//fprintf(stderr, "RES!%s!\n", Tcl_GetStringResult(interp));
+fprintf(stderr, "ItclMethodErrorHandler called!%s\n", Tcl_GetString(methodNameObj));
+fprintf(stderr, "RES!%s!\n", Tcl_GetStringResult(interp));
 }
 
 Tcl_Obj *
@@ -146,28 +30,10 @@ ItclGfivProc(
 {
     Tcl_Obj *objPtr;
 
+fprintf(stderr, "ItclGfivProc called\n");
     objPtr = Tcl_NewStringObj("ITCLGFVI", -1);
     Tcl_IncrRefCount(objPtr);
     return objPtr;
-}
-
-void
-ItclSetErrProc(
-    ClientData *clientData,
-    ItclMemberFunc *mPtr)
-{
-    ProcedureMethod *pmPtr = *((ProcedureMethod **)clientData);
-
-    if (mPtr->flags & ITCL_CONSTRUCTOR) {
-        pmPtr->errProc = ConstructorErrorHandler;
-    }
-    if (mPtr->flags & ITCL_DESTRUCTOR) {
-        pmPtr->errProc = DestructorErrorHandler;
-    }
-    if ((mPtr->flags & (ITCL_CONSTRUCTOR | ITCL_DESTRUCTOR)) == 0) {
-        pmPtr->errProc = MethodErrorHandler;
-    }
-    pmPtr->gfivProc = ItclGfivProc;
 }
 
 int
@@ -244,7 +110,6 @@ Itcl_InvokeProcedureMethod(
             ItclMethodErrorHandler);
 
 done:
-//fprintf(stderr, "IIPM!%s!%s!\n", Tcl_GetString(mPtr->namePtr), Tcl_GetStringResult(interp));
     return result;
 }
 
@@ -309,6 +174,7 @@ Itcl_NewProcClassMethod(
     Tcl_Class clsPtr,		/* The class to modify. */
     TclOO_PreCallProc preCallPtr,
     TclOO_PostCallProc postCallPtr,
+    Tcl_ProcErrorProc errProc,
     ClientData clientData,
     Tcl_Obj *nameObj,		/* The name of the method, which may be NULL;
 				 * if so, up to caller to manage storage
@@ -324,9 +190,9 @@ Itcl_NewProcClassMethod(
     Tcl_Method result;
 
     result = Tcl_NewProcClassMethod(interp, clsPtr, preCallPtr, postCallPtr,
-           clientData, nameObj, argsObj, bodyObj,
+           errProc, clientData, nameObj, argsObj, bodyObj,
            PUBLIC_METHOD | USE_DECLARER_NS, clientData2);
-    ItclSetErrProc(clientData2, clientData);
+//    ItclSetErrProc(clientData2, clientData);
     return result;
 }
 

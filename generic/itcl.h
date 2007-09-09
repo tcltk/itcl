@@ -13,7 +13,7 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itcl.h,v 1.31.2.2 2007/09/07 21:19:41 wiede Exp $
+ * RCS: @(#) $Id: itcl.h,v 1.31.2.3 2007/09/09 11:04:05 wiede Exp $
  */
 
 /*

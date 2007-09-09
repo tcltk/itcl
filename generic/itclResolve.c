@@ -12,10 +12,7 @@
  *  object-oriented paradigm, leading to code that is easier to
  *  understand and maintain.
  *
- *  These procedures handle class definitions.  Classes are composed of
- *  data members (public/protected/common) and the member functions
- *  (methods/procs) that operate on them.  Each class has its own
- *  namespace which manages the class scope.
+ *  These procedures handle command and variable resolution
  *
  * ========================================================================
  *  AUTHOR:  Michael J. McLennan
@@ -23,7 +20,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itclResolve.c,v 1.1.2.1 2007/09/07 21:19:42 wiede Exp $
+ *     RCS:  $Id: itclResolve.c,v 1.1.2.2 2007/09/09 11:04:20 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -118,7 +115,7 @@ Itcl_ClassCmdResolver(
     ItclObjectInfo *infoPtr;
 
     Tcl_HashEntry *hPtr;
-    ItclMemberFunc *mfunc;
+    ItclMemberFunc *imPtr;
     int isCmdDeleted;
 
     infoPtr = (ItclObjectInfo *)Tcl_GetAssocData(interp,
@@ -138,7 +135,7 @@ Itcl_ClassCmdResolver(
         return TCL_CONTINUE;
     }
 
-    mfunc = (ItclMemberFunc*)Tcl_GetHashValue(hPtr);
+    imPtr = (ItclMemberFunc*)Tcl_GetHashValue(hPtr);
 
 
     /*
@@ -149,14 +146,14 @@ Itcl_ClassCmdResolver(
      *    the current context.  If the current call frame is
      *    "transparent", this handles it properly.
      */
-    if (mfunc->protection != ITCL_PUBLIC) {
+    if (imPtr->protection != ITCL_PUBLIC) {
         nsPtr = Tcl_GetCurrentNamespace(interp);
-        if (!Itcl_CanAccessFunc(mfunc, nsPtr)) {
+        if (!Itcl_CanAccessFunc(imPtr, nsPtr)) {
 
             if ((flags & TCL_LEAVE_ERR_MSG) != 0) {
                 Tcl_AppendResult(interp,
                     "can't access \"", name, "\": ",
-                    Itcl_ProtectionStr(mfunc->protection),
+                    Itcl_ProtectionStr(imPtr->protection),
                     " variable",
                     (char*)NULL);
             }
@@ -183,10 +180,10 @@ Itcl_ClassCmdResolver(
      */
 /* FIX ME !!! */
 isCmdDeleted = 0;
-//    isCmdDeleted = (!mfunc->accessCmd || mfunc->accessCmd->flags);
+//    isCmdDeleted = (!imPtr->accessCmd || imPtr->accessCmd->flags);
 
     if (isCmdDeleted) {
-	mfunc->accessCmd = NULL;
+	imPtr->accessCmd = NULL;
 
 	if ((flags & TCL_LEAVE_ERR_MSG) != 0) {
 	    Tcl_AppendResult(interp,
@@ -197,7 +194,7 @@ isCmdDeleted = 0;
 	return TCL_ERROR;   /* disallow access! */
     }
 
-    *rPtr = mfunc->accessCmd;
+    *rPtr = imPtr->accessCmd;
     return TCL_OK;
 }
 

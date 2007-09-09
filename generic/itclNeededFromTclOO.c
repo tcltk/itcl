@@ -8,10 +8,12 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itclNeededFromTclOO.c,v 1.1.2.2 2007/09/07 21:49:05 wiede Exp $
+ * RCS: @(#) $Id: itclNeededFromTclOO.c,v 1.1.2.3 2007/09/09 11:04:19 wiede Exp $
  */
 
-#include "../../oo/generic/tclOOInt.h"
+#include <tclOOInt.h>
+
+typedef void (*Tcl_ProcErrorProc)(Tcl_Interp *interp, Tcl_Obj *procNameObj);
 
 
 /*
@@ -66,6 +68,7 @@ _Tcl_NewProcClassMethod(
     Tcl_Class clsPtr,		/* The class to modify. */
     TclOO_PreCallProc preCallPtr,
     TclOO_PostCallProc postCallPtr,
+    Tcl_ProcErrorProc errProc,
     ClientData clientData,
     Tcl_Obj *nameObj,		/* The name of the method, which may be NULL;
 				 * if so, up to caller to manage storage
@@ -87,6 +90,7 @@ _Tcl_NewProcClassMethod(
     pmPtr->flags = flags & USE_DECLARER_NS;
     pmPtr->preCallProc = preCallPtr;
     pmPtr->postCallProc = postCallPtr;
+    pmPtr->errProc = errProc;
     pmPtr->clientData = clientData;
     if (clientData2 != NULL) {
         *clientData2 = pmPtr;
