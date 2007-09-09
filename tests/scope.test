@@ -6,7 +6,7 @@
 #            mmclennan@lucent.com
 #            http://www.tcltk.com/itcl
 #
-#      RCS:  $Id: scope.test,v 1.4 2004/02/12 18:09:50 davygrvy Exp $
+#      RCS:  $Id: scope.test,v 1.4.2.1 2007/09/09 11:36:38 wiede Exp $
 # ----------------------------------------------------------------------
 #            Copyright (c) 1993-1998  Lucent Technologies, Inc.
 # ======================================================================
@@ -142,7 +142,7 @@ test scope-3.2 {code command captures only class context} {
 test scope-3.3 {scope command captures class and object context} {
     list [test_scope0 mcontext itcl::scope priv] \
          [test_scope::pcontext itcl::scope pric]
-} {{@itcl ::test_scope0 ::test_scope::priv} ::test_scope::pric}
+} {::itcl::variables::test_scope0::test_scope::priv ::itcl::variables::test_scope::pric}
 
 test scope-3.4 {scope command must recognize variable} {
     list [catch {test_scope0 mcontext itcl::scope xyzzy} msg] $msg
@@ -186,7 +186,7 @@ test scope-3.8 {scope command allows access to slots in an array} {
          [catch {test_scope0 mcontext itcl::scope varray(1)} msg] $msg \
          [catch {test_scope::pcontext itcl::scope carray(0)} msg] $msg \
          [catch {test_scope::pcontext itcl::scope carray(1)} msg] $msg
-} {0 {@itcl ::test_scope0 ::test_scope::varray(0)} 0 {@itcl ::test_scope0 ::test_scope::varray(1)} 0 ::test_scope::carray(0) 0 ::test_scope::carray(1)}
+} {0 ::itcl::variables::test_scope0::test_scope::varray(0) 0 ::itcl::variables::test_scope0::test_scope::varray(1) 0 ::itcl::variables::test_scope::carray(0) 0 ::itcl::variables::test_scope::carray(1)}
 
 itcl::delete class test_scope
 

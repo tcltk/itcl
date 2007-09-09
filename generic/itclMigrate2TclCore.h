@@ -1,3 +1,23 @@
+#ifndef ITCL_USE_MODIFIED_TCL_H
+/* this is just to provide the definition. This struct is only used if
+ * infoPtr->useOldResolvers == 0 which is not the default
+ */
+#define FRAME_HAS_RESOLVER 0x100
+struct Tcl_Resolve;
+typedef Tcl_Command (Tcl_CmdAliasProc)(Tcl_Interp *interp,
+        Tcl_Namespace *nsPtr, CONST char *cmdName,
+        ClientData clientData);
+typedef Tcl_Var (Tcl_VarAliasProc)(Tcl_Interp *interp,
+        Tcl_Namespace *nsPtr, CONST char *varName,
+        ClientData clientData);
+
+typedef struct Tcl_Resolve {
+    Tcl_VarAliasProc *varProcPtr;
+    Tcl_CmdAliasProc *cmdProcPtr;
+    ClientData clientData;
+} Tcl_Resolve;
+#endif
+
 /* missing functions for Itcl to avoid including of tclInt.h */
 
 #ifndef _TCLINT

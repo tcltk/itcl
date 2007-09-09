@@ -9,7 +9,7 @@
  * ========================================================================
  *  AUTHOR:  Arnulf Wiedemann
  *
- *     RCS:  $Id: itclMigrate2TclCore.c,v 1.1.2.3 2007/09/09 11:04:16 wiede Exp $
+ *     RCS:  $Id: itclMigrate2TclCore.c,v 1.1.2.4 2007/09/09 11:36:37 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -34,8 +34,10 @@ Itcl_SetCallFrameResolver(
 {
     CallFrame *framePtr = ((Interp *)interp)->framePtr;
     if (framePtr != NULL) {
+#ifdef ITCL_USE_MODIFIED_TCL_H
         framePtr->isProcCallFrame |= FRAME_HAS_RESOLVER;
 	framePtr->resolvePtr = resolvePtr;
+#endif
         return TCL_OK;
     }
     return TCL_ERROR;
@@ -125,7 +127,9 @@ _Tcl_SetNamespaceResolver(
     if (nsPtr == NULL) {
         return TCL_ERROR;
     }
+#ifdef ITCL_USE_MODIFIED_TCL_H
     ((Namespace *)nsPtr)->resolvePtr = resolvePtr;
+#endif
     return TCL_OK;
 }
 
