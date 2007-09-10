@@ -9,7 +9,7 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itclInt.h,v 1.17.2.6 2007/09/09 20:53:47 wiede Exp $
+ * RCS: @(#) $Id: itclInt.h,v 1.17.2.7 2007/09/10 15:42:35 wiede Exp $
  */
 
 #include <string.h>
@@ -72,8 +72,8 @@
 
 #define ALLOC_CHUNK 8
 
-#define ITCL_VARIABLES_NAMESPACE "::itcl::variables"
-#define ITCL_COMMANDS_NAMESPACE "::itcl::commands"
+#define ITCL_VARIABLES_NAMESPACE "::itcl::internal::variables"
+#define ITCL_COMMANDS_NAMESPACE "::itcl::internal::commands"
 
 typedef struct ItclFoundation {
     Itcl_Stack methodCallStack;

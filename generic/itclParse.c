@@ -39,7 +39,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclParse.c,v 1.1.2.4 2007/09/09 20:53:47 wiede Exp $
+ *     RCS:  $Id: itclParse.c,v 1.1.2.5 2007/09/10 15:42:35 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -256,6 +256,70 @@ Itcl_ParseInit(
 
     Tcl_CreateObjCommand(interp, "::itcl::scope", Itcl_ScopeCmd,
         (ClientData)NULL, (Tcl_CmdDeleteProc*)NULL);
+
+    /*
+     *  Add the "filter" commands (add/delete)
+     */
+    if (Itcl_CreateEnsemble(interp, "::itcl::filter") != TCL_OK) {
+        return TCL_ERROR;
+    }
+    if (Itcl_AddEnsemblePart(interp, "::itcl::filter",
+            "add", "objectOrClass filter ? ... ?", Itcl_FilterAddCmd,
+            (ClientData)infoPtr, Itcl_ReleaseData) != TCL_OK) {
+        return TCL_ERROR;
+    }
+    Itcl_PreserveData((ClientData)infoPtr);
+
+    if (Itcl_AddEnsemblePart(interp, "::itcl::filter",
+            "delete", "objectOrClass filter ? ... ?", Itcl_FilterDeleteCmd,
+            (ClientData)infoPtr, Itcl_ReleaseData) != TCL_OK) {
+        return TCL_ERROR;
+    }
+    Itcl_PreserveData((ClientData)infoPtr);
+
+    /*
+     *  Add the "forward" commands (add/delete)
+     */
+    if (Itcl_CreateEnsemble(interp, "::itcl::forward") != TCL_OK) {
+        return TCL_ERROR;
+    }
+    if (Itcl_AddEnsemblePart(interp, "::itcl::forward",
+            "add", "objectOrClass srcCommand targetCommand ? options ... ?",
+	    Itcl_ForwardAddCmd, (ClientData)infoPtr,
+	    Itcl_ReleaseData) != TCL_OK) {
+        return TCL_ERROR;
+    }
+    Itcl_PreserveData((ClientData)infoPtr);
+
+    if (Itcl_AddEnsemblePart(interp, "::itcl::forward",
+            "delete", "objectOrClass targetCommand ? ... ?",
+	    Itcl_ForwardDeleteCmd, (ClientData)infoPtr,
+	    Itcl_ReleaseData) != TCL_OK) {
+        return TCL_ERROR;
+    }
+    Itcl_PreserveData((ClientData)infoPtr);
+
+    /*
+     *  Add the "mixin" (add/delete) commands.
+     */
+    if (Itcl_CreateEnsemble(interp, "::itcl::mixin") != TCL_OK) {
+        return TCL_ERROR;
+    }
+    if (Itcl_AddEnsemblePart(interp, "::itcl::mixin",
+            "add", "objectOrClass class ? class ... ?",
+	    Itcl_MixinAddCmd, (ClientData)infoPtr,
+	    Itcl_ReleaseData) != TCL_OK) {
+        return TCL_ERROR;
+    }
+    Itcl_PreserveData((ClientData)infoPtr);
+
+    if (Itcl_AddEnsemblePart(interp, "::itcl::mixin",
+            "delete", "objectOrClass class ? class ... ?",
+	    Itcl_MixinDeleteCmd, (ClientData)infoPtr,
+	    Itcl_ReleaseData) != TCL_OK) {
+        return TCL_ERROR;
+    }
+    Itcl_PreserveData((ClientData)infoPtr);
 
     /*
      *  Add commands for handling import stubs at the Tcl level.

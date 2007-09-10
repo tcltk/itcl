@@ -1,5 +1,5 @@
 /*
- * $Id: itclStubInit.c,v 1.4.2.4 2007/09/09 20:53:47 wiede Exp $
+ * $Id: itclStubInit.c,v 1.4.2.5 2007/09/10 15:42:35 wiede Exp $
  *
  * This file is (mostly) automatically generated from itcl.decls.
  * It is compiled and linked in with the itcl package proper.
@@ -155,12 +155,12 @@ ItclIntStubs itclIntStubs = {
     0, /* 137 */
     0, /* 138 */
     0, /* 139 */
-    0, /* 140 */
-    0, /* 141 */
-    0, /* 142 */
-    0, /* 143 */
-    0, /* 144 */
-    0, /* 145 */
+    Itcl_FilterAddCmd, /* 140 */
+    Itcl_FilterDeleteCmd, /* 141 */
+    Itcl_ForwardAddCmd, /* 142 */
+    Itcl_ForwardDeleteCmd, /* 143 */
+    Itcl_MixinAddCmd, /* 144 */
+    Itcl_MixinDeleteCmd, /* 145 */
     0, /* 146 */
     0, /* 147 */
     0, /* 148 */

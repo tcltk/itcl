@@ -23,7 +23,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclCmd.c,v 1.1.2.3 2007/09/09 13:38:40 wiede Exp $
+ *     RCS:  $Id: itclCmd.c,v 1.1.2.4 2007/09/10 15:42:34 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -974,3 +974,190 @@ Itcl_IsClassCmd(
     return TCL_OK;
 
 } /* end Itcl_IsClassCmd function */
+
+/*
+ * ------------------------------------------------------------------------
+ *  Itcl_FilterCmd()
+ *
+ *  Used to add a filter command to an object which is called just before
+ *  a method/proc of a class is executed
+ *
+ *  Returns TCL_OK/TCL_ERROR to indicate success/failure.
+ * ------------------------------------------------------------------------
+ */
+/* ARGSUSED */
+int
+Itcl_FilterAddCmd(
+    ClientData dummy,        /* unused */
+    Tcl_Interp *interp,      /* current interpreter */
+    int objc,                /* number of arguments */
+    Tcl_Obj *CONST objv[])   /* argument objects */
+{
+    Tcl_Obj **newObjv;
+    int result;
+
+    ItclShowArgs(1, "Itcl_FilterCmd", objc, objv);
+//    Tcl_Namespace *contextNs = Tcl_GetCurrentNamespace(interp);
+/* FIX ME need to change the chain command to do the same here as the TclOO next command !! */
+    newObjv = (Tcl_Obj **)ckalloc(sizeof(Tcl_Obj *)*(objc+1));
+    newObjv[0] = Tcl_NewStringObj("::oo::define", -1);
+    Tcl_IncrRefCount(newObjv[0]);
+    newObjv[1] = objv[1];
+    newObjv[2] = Tcl_NewStringObj("filter", -1);
+    Tcl_IncrRefCount(newObjv[2]);
+    memcpy(newObjv+3, objv+2, sizeof(Tcl_Obj *)*(objc-2));
+    ItclShowArgs(1, "Itcl_FilterAddCmd2", objc+1, newObjv);
+    result = Tcl_EvalObjv(interp, objc+1, newObjv, 0);
+    Tcl_DecrRefCount(newObjv[0]);
+    Tcl_DecrRefCount(newObjv[2]);
+
+    return result;
+}
+
+/*
+ * ------------------------------------------------------------------------
+ *  Itcl_FilterDeleteCmd()
+ *
+ *  used to delete filter commands of a class or object
+ *
+ *  Returns TCL_OK/TCL_ERROR to indicate success/failure.
+ * ------------------------------------------------------------------------
+ */
+/* ARGSUSED */
+int
+Itcl_FilterDeleteCmd(
+    ClientData dummy,        /* unused */
+    Tcl_Interp *interp,      /* current interpreter */
+    int objc,                /* number of arguments */
+    Tcl_Obj *CONST objv[])   /* argument objects */
+{
+    ItclShowArgs(1, "Itcl_FilterDeleteCmd", objc, objv);
+//    Tcl_Namespace *contextNs = Tcl_GetCurrentNamespace(interp);
+
+    Tcl_AppendResult(interp, "::itcl::filter delete command not yet implemented", NULL);
+    return TCL_ERROR;
+}
+
+/*
+ * ------------------------------------------------------------------------
+ *  Itcl_ForwardAddCmd()
+ *
+ *  Used to similar to iterp alias to forward the call of a method 
+ *  to another method within the class
+ *
+ *  Returns TCL_OK/TCL_ERROR to indicate success/failure.
+ * ------------------------------------------------------------------------
+ */
+/* ARGSUSED */
+int
+Itcl_ForwardAddCmd(
+    ClientData dummy,        /* unused */
+    Tcl_Interp *interp,      /* current interpreter */
+    int objc,                /* number of arguments */
+    Tcl_Obj *CONST objv[])   /* argument objects */
+{
+    Tcl_Obj **newObjv;
+    int result;
+
+    ItclShowArgs(1, "Itcl_ForwardAddCmd", objc, objv);
+//    Tcl_Namespace *contextNs = Tcl_GetCurrentNamespace(interp);
+    newObjv = (Tcl_Obj **)ckalloc(sizeof(Tcl_Obj *)*(objc+1));
+    newObjv[0] = Tcl_NewStringObj("::oo::define", -1);
+    Tcl_IncrRefCount(newObjv[0]);
+    newObjv[1] = objv[1];
+    newObjv[2] = Tcl_NewStringObj("forward", -1);
+    Tcl_IncrRefCount(newObjv[2]);
+    memcpy(newObjv+3, objv+2, sizeof(Tcl_Obj *)*(objc-2));
+    ItclShowArgs(1, "Itcl_ForwardAddCmd2", objc+1, newObjv);
+    result = Tcl_EvalObjv(interp, objc+1, newObjv, 0);
+    Tcl_DecrRefCount(newObjv[0]);
+    Tcl_DecrRefCount(newObjv[2]);
+
+    return result;
+}
+
+/*
+ * ------------------------------------------------------------------------
+ *  Itcl_ForwardDeleteCmd()
+ *
+ *  used to delete forwarded commands of a class or object
+ *
+ *  Returns TCL_OK/TCL_ERROR to indicate success/failure.
+ * ------------------------------------------------------------------------
+ */
+/* ARGSUSED */
+int
+Itcl_ForwardDeleteCmd(
+    ClientData dummy,        /* unused */
+    Tcl_Interp *interp,      /* current interpreter */
+    int objc,                /* number of arguments */
+    Tcl_Obj *CONST objv[])   /* argument objects */
+{
+    ItclShowArgs(1, "Itcl_ForwardDeleteCmd", objc, objv);
+//    Tcl_Namespace *contextNs = Tcl_GetCurrentNamespace(interp);
+
+    Tcl_AppendResult(interp, "::itcl::forward delete command not yet implemented", NULL);
+    return TCL_ERROR;
+}
+
+/*
+ * ------------------------------------------------------------------------
+ *  Itcl_MixinAddCmd()
+ *
+ *  Used to add the methods of a class to another class without heritance
+ *
+ *  Returns TCL_OK/TCL_ERROR to indicate success/failure.
+ * ------------------------------------------------------------------------
+ */
+/* ARGSUSED */
+int
+Itcl_MixinAddCmd(
+    ClientData dummy,        /* unused */
+    Tcl_Interp *interp,      /* current interpreter */
+    int objc,                /* number of arguments */
+    Tcl_Obj *CONST objv[])   /* argument objects */
+{
+    Tcl_Obj **newObjv;
+    int result;
+
+    ItclShowArgs(1, "Itcl_MixinAddCmd", objc, objv);
+//    Tcl_Namespace *contextNs = Tcl_GetCurrentNamespace(interp);
+    newObjv = (Tcl_Obj **)ckalloc(sizeof(Tcl_Obj *)*(objc+1));
+    newObjv[0] = Tcl_NewStringObj("::oo::define", -1);
+    Tcl_IncrRefCount(newObjv[0]);
+    newObjv[1] = objv[1];
+    newObjv[2] = Tcl_NewStringObj("mixin", -1);
+    Tcl_IncrRefCount(newObjv[2]);
+    memcpy(newObjv+3, objv+2, sizeof(Tcl_Obj *)*(objc-2));
+    ItclShowArgs(1, "Itcl_MixinAddCmd2", objc+1, newObjv);
+    result = Tcl_EvalObjv(interp, objc+1, newObjv, 0);
+    Tcl_DecrRefCount(newObjv[0]);
+    Tcl_DecrRefCount(newObjv[2]);
+
+    return result;
+}
+
+/*
+ * ------------------------------------------------------------------------
+ *  Itcl_MixinDeleteCmd()
+ *
+ *  Used to delete the methods of a class to another class without heritance
+ *
+ *  Returns TCL_OK/TCL_ERROR to indicate success/failure.
+ * ------------------------------------------------------------------------
+ */
+/* ARGSUSED */
+int
+Itcl_MixinDeleteCmd(
+    ClientData dummy,        /* unused */
+    Tcl_Interp *interp,      /* current interpreter */
+    int objc,                /* number of arguments */
+    Tcl_Obj *CONST objv[])   /* argument objects */
+{
+    ItclShowArgs(1, "Itcl_MixinDeleteCmd", objc, objv);
+//    Tcl_Namespace *contextNs = Tcl_GetCurrentNamespace(interp);
+
+    Tcl_AppendResult(interp, "::itcl::mixin delete command not yet implemented", NULL);
+    return TCL_ERROR;
+}
+

@@ -1,5 +1,5 @@
 # -*- tcl -*-
-# $Id: itcl.decls,v 1.3.2.3 2007/09/09 20:53:47 wiede Exp $
+# $Id: itcl.decls,v 1.3.2.4 2007/09/10 15:42:34 wiede Exp $
 
 # public API
 library itcl
@@ -482,6 +482,35 @@ declare 116 current {
 declare 117 current {
     int Itcl_IsClassCmd (ClientData clientData, Tcl_Interp *interp, \
     int objc, Tcl_Obj *CONST objv[])
+}
+
+#
+#  new commands to use TclOO functionality
+#
+
+declare 140 current {
+    int Itcl_FilterAddCmd (ClientData clientData, Tcl_Interp *interp, \
+        int objc, Tcl_Obj *CONST objv[])
+}
+declare 141 current {
+    int Itcl_FilterDeleteCmd (ClientData clientData, Tcl_Interp *interp, \
+        int objc, Tcl_Obj *CONST objv[])
+}
+declare 142 current {
+    int Itcl_ForwardAddCmd (ClientData clientData, Tcl_Interp *interp, \
+        int objc, Tcl_Obj *CONST objv[])
+}
+declare 143 current {
+    int Itcl_ForwardDeleteCmd (ClientData clientData, Tcl_Interp *interp, \
+        int objc, Tcl_Obj *CONST objv[])
+}
+declare 144 current {
+    int Itcl_MixinAddCmd (ClientData clientData, Tcl_Interp *interp, \
+        int objc, Tcl_Obj *CONST objv[])
+}
+declare 145 current {
+    int Itcl_MixinDeleteCmd (ClientData clientData, Tcl_Interp *interp, \
+        int objc, Tcl_Obj *CONST objv[])
 }
 
 #

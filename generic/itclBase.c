@@ -9,7 +9,7 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itclBase.c,v 1.1.2.4 2007/09/09 20:53:47 wiede Exp $
+ * RCS: @(#) $Id: itclBase.c,v 1.1.2.5 2007/09/10 15:42:34 wiede Exp $
  */
 
 #include <stdlib.h>
@@ -317,8 +317,11 @@ opt = atoi(res_option);
             (Tcl_Export(interp, itclNs, "delete", 0) != TCL_OK) ||
             (Tcl_Export(interp, itclNs, "delete_helper", 0) != TCL_OK) ||
             (Tcl_Export(interp, itclNs, "ensemble", 0) != TCL_OK) ||
+            (Tcl_Export(interp, itclNs, "filter", 0) != TCL_OK) ||
             (Tcl_Export(interp, itclNs, "find", 0) != TCL_OK) ||
+            (Tcl_Export(interp, itclNs, "forward", 0) != TCL_OK) ||
             (Tcl_Export(interp, itclNs, "local", 0) != TCL_OK) ||
+            (Tcl_Export(interp, itclNs, "mixin", 0) != TCL_OK) ||
             (Tcl_Export(interp, itclNs, "scope", 0) != TCL_OK)) {
         return TCL_ERROR;
     }

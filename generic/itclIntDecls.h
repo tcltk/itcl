@@ -1,5 +1,5 @@
 /*
- * $Id: itclIntDecls.h,v 1.13.2.4 2007/09/09 20:53:47 wiede Exp $
+ * $Id: itclIntDecls.h,v 1.13.2.5 2007/09/10 15:42:35 wiede Exp $
  *
  * This file is (mostly) automatically generated from itcl.decls.
  */
@@ -23,7 +23,7 @@ extern const char *Itcl_InitStubs(
 /* !BEGIN!: Do not edit below this line. */
 
 #define ITCLINT_STUBS_EPOCH 0
-#define ITCLINT_STUBS_REVISION 130
+#define ITCLINT_STUBS_REVISION 136
 
 #if !defined(USE_ITCL_STUBS)
 
@@ -407,12 +407,30 @@ ITCLAPI int		Itcl_IsClassCmd (ClientData clientData,
 /* Slot 137 is reserved */
 /* Slot 138 is reserved */
 /* Slot 139 is reserved */
-/* Slot 140 is reserved */
-/* Slot 141 is reserved */
-/* Slot 142 is reserved */
-/* Slot 143 is reserved */
-/* Slot 144 is reserved */
-/* Slot 145 is reserved */
+/* 140 */
+ITCLAPI int		Itcl_FilterAddCmd (ClientData clientData, 
+				Tcl_Interp * interp, int objc, 
+				Tcl_Obj *CONST objv[]);
+/* 141 */
+ITCLAPI int		Itcl_FilterDeleteCmd (ClientData clientData, 
+				Tcl_Interp * interp, int objc, 
+				Tcl_Obj *CONST objv[]);
+/* 142 */
+ITCLAPI int		Itcl_ForwardAddCmd (ClientData clientData, 
+				Tcl_Interp * interp, int objc, 
+				Tcl_Obj *CONST objv[]);
+/* 143 */
+ITCLAPI int		Itcl_ForwardDeleteCmd (ClientData clientData, 
+				Tcl_Interp * interp, int objc, 
+				Tcl_Obj *CONST objv[]);
+/* 144 */
+ITCLAPI int		Itcl_MixinAddCmd (ClientData clientData, 
+				Tcl_Interp * interp, int objc, 
+				Tcl_Obj *CONST objv[]);
+/* 145 */
+ITCLAPI int		Itcl_MixinDeleteCmd (ClientData clientData, 
+				Tcl_Interp * interp, int objc, 
+				Tcl_Obj *CONST objv[]);
 /* Slot 146 is reserved */
 /* Slot 147 is reserved */
 /* Slot 148 is reserved */
@@ -609,12 +627,12 @@ typedef struct ItclIntStubs {
     void (*reserved137)(void);
     void (*reserved138)(void);
     void (*reserved139)(void);
-    void (*reserved140)(void);
-    void (*reserved141)(void);
-    void (*reserved142)(void);
-    void (*reserved143)(void);
-    void (*reserved144)(void);
-    void (*reserved145)(void);
+    int (*itcl_FilterAddCmd) (ClientData clientData, Tcl_Interp * interp, int objc, Tcl_Obj *CONST objv[]); /* 140 */
+    int (*itcl_FilterDeleteCmd) (ClientData clientData, Tcl_Interp * interp, int objc, Tcl_Obj *CONST objv[]); /* 141 */
+    int (*itcl_ForwardAddCmd) (ClientData clientData, Tcl_Interp * interp, int objc, Tcl_Obj *CONST objv[]); /* 142 */
+    int (*itcl_ForwardDeleteCmd) (ClientData clientData, Tcl_Interp * interp, int objc, Tcl_Obj *CONST objv[]); /* 143 */
+    int (*itcl_MixinAddCmd) (ClientData clientData, Tcl_Interp * interp, int objc, Tcl_Obj *CONST objv[]); /* 144 */
+    int (*itcl_MixinDeleteCmd) (ClientData clientData, Tcl_Interp * interp, int objc, Tcl_Obj *CONST objv[]); /* 145 */
     void (*reserved146)(void);
     void (*reserved147)(void);
     void (*reserved148)(void);
@@ -1072,12 +1090,30 @@ extern const ItclIntStubs *itclIntStubsPtr;
 /* Slot 137 is reserved */
 /* Slot 138 is reserved */
 /* Slot 139 is reserved */
-/* Slot 140 is reserved */
-/* Slot 141 is reserved */
-/* Slot 142 is reserved */
-/* Slot 143 is reserved */
-/* Slot 144 is reserved */
-/* Slot 145 is reserved */
+#ifndef Itcl_FilterAddCmd
+#define Itcl_FilterAddCmd \
+	(itclIntStubsPtr->itcl_FilterAddCmd) /* 140 */
+#endif
+#ifndef Itcl_FilterDeleteCmd
+#define Itcl_FilterDeleteCmd \
+	(itclIntStubsPtr->itcl_FilterDeleteCmd) /* 141 */
+#endif
+#ifndef Itcl_ForwardAddCmd
+#define Itcl_ForwardAddCmd \
+	(itclIntStubsPtr->itcl_ForwardAddCmd) /* 142 */
+#endif
+#ifndef Itcl_ForwardDeleteCmd
+#define Itcl_ForwardDeleteCmd \
+	(itclIntStubsPtr->itcl_ForwardDeleteCmd) /* 143 */
+#endif
+#ifndef Itcl_MixinAddCmd
+#define Itcl_MixinAddCmd \
+	(itclIntStubsPtr->itcl_MixinAddCmd) /* 144 */
+#endif
+#ifndef Itcl_MixinDeleteCmd
+#define Itcl_MixinDeleteCmd \
+	(itclIntStubsPtr->itcl_MixinDeleteCmd) /* 145 */
+#endif
 /* Slot 146 is reserved */
 /* Slot 147 is reserved */
 /* Slot 148 is reserved */
