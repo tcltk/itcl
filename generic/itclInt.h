@@ -9,7 +9,7 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itclInt.h,v 1.17.2.7 2007/09/10 15:42:35 wiede Exp $
+ * RCS: @(#) $Id: itclInt.h,v 1.17.2.8 2007/09/15 11:56:11 wiede Exp $
  */
 
 #include <string.h>
@@ -48,6 +48,7 @@
 #endif  /* DEBUG */
 
 #define ITCL_INTERP_DATA "itcl_data"
+#define ITCL_TK_VERSION "8.5"
 
 /*
  * Convenience macros for iterating through hash tables. FOREACH_HASH_DECLS
@@ -92,9 +93,25 @@ typedef struct ItclArgList {
  *  clientData in the "itcl" namespace.  It is also accessible
  *  as associated data via the key ITCL_INTERP_DATA.
  */
+struct ItclClass;
 struct ItclObject;
 struct ItclMemberFunc;
 struct EnsembleInfo;
+struct ItclDelegatedOptionInfo;
+struct ItclDelegatedMethodInfo;
+
+typedef int (*InstHullAndOptions)(Tcl_Interp *interp,
+        struct ItclObject *ioPtr, struct ItclClass *iclsPtr, int objc,
+	Tcl_Obj *const *objv, int *newObjc, Tcl_Obj **newObjv);
+typedef int (*InitObjectOptions)(Tcl_Interp *interp,
+        struct ItclObject *ioPtr, struct ItclClass *iclsPtr, const char *name);
+
+typedef struct ItclWidgetInfo {
+    InitObjectOptions initObjectOpts;
+    InstHullAndOptions instHullAndOpts;
+    Tcl_ObjCmdProc *widgetConfigure;
+    Tcl_ObjCmdProc *widgetCget;
+} ItclWidgetInfo;
 
 typedef struct ItclObjectInfo {
     Tcl_Interp *interp;             /* interpreter that manages this info */
@@ -121,6 +138,10 @@ typedef struct ItclObjectInfo {
     Tcl_Object clazzObjectPtr;      /* the root object of Itcl */
     Tcl_Class clazzClassPtr;        /* the root class of Itcl */
     struct EnsembleInfo *ensembleInfo;
+    ItclWidgetInfo *windgetInfoPtr; /* contains function pointers to be called
+                                     * when constructing an ItclWidget object */
+    int tkInitted;                  /* if package Tk has already been loaded */
+    int buildingWidget;             /* set if in construction of a widget */
 } ItclObjectInfo;
 
 typedef struct EnsembleInfo {
@@ -151,10 +172,24 @@ typedef struct ItclClass {
     Tcl_Obj *initCode;            /* initialization code for new objs */
     Tcl_HashTable variables;      /* definitions for all data members
                                      in this class.  Look up simple string
-                                     names and get back ItclVarDefn* ptrs */
+                                     names and get back ItclVariable* ptrs */
+    Tcl_HashTable options;        /* definitions for all option members
+                                     in this class.  Look up simple string
+                                     names and get back ItclOption* ptrs */
+    Tcl_HashTable components;     /* definitions for all component members
+                                     in this class.  Look up simple string
+                                     names and get back ItclComponent* ptrs */
     Tcl_HashTable functions;      /* definitions for all member functions
                                      in this class.  Look up simple string
                                      names and get back ItclMemberFunc* ptrs */
+    Tcl_HashTable delegatedOptions; /* definitions for all delegated options
+                                     in this class.  Look up simple string
+                                     names and get back
+				     ItclDelegatedOptionInfo * ptrs */
+    Tcl_HashTable delegatedMethods; /* definitions for all delegated methods
+                                     in this class.  Look up simple string
+                                     names and get back
+				     ItclDelegatedMethodInfo * ptrs */
     int numInstanceVars;          /* number of instance vars in variables
                                      table */
     Tcl_HashTable classCommons;   /* used for storing variable namespace string for Tcl_Resolve */
@@ -168,12 +203,21 @@ typedef struct ItclClass {
     struct ItclMemberFunc *constructorInit;  /* the class constructor init code or NULL */
     Tcl_Resolve *resolvePtr;
     Tcl_Object oPtr;		  /* TclOO class object */
+    Tcl_Object *widgetClass;      /* class name for widget if class is an
+                                   * ::itcl::widget */
     Tcl_Class  classPtr;          /* TclOO class */
     int numCommons;               /* number of commons in this class */
     int numVariables;             /* number of variables in this class */
     int unique;                   /* unique number for #auto generation */
     int flags;                    /* maintains class status */
 } ItclClass;
+
+#define ITCL_IS_CLASS		0x01000
+#define ITCL_IS_WIDGET		0x02000
+#define ITCL_IS_WIDGETADAPTOR	0x04000
+#define ITCL_IS_TYPE		0x08000
+#define ITCL_WIDGET_IS_FRAME	0x10000
+#define ITCL_WIDGET_IS_TOPLEVEL	0x20000
 
 typedef struct ItclHierIter {
     ItclClass *current;           /* current position in hierarchy */
@@ -260,6 +304,8 @@ typedef struct ItclMemberCode {
 #define ITCL_CONINIT           0x400  /* non-zero => is a constructor
                                        * init code */
 #define ITCL_BUILTIN           0x800  /* non-zero => built-in method */
+#define ITCL_OPTION_READONLY   0x1000 /* non-zero => readonly */
+#define ITCL_COMPONENT         0x2000 /* non-zero => component */
 
 /*
  *  Representation of member functions in an [incr Tcl] class.
@@ -287,15 +333,60 @@ typedef struct ItclMemberFunc {
  *  Instance variables.
  */
 typedef struct ItclVariable {
-    Tcl_Obj* namePtr;           /* member name */
-    Tcl_Obj* fullNamePtr;       /* member name with "class::" qualifier */
-    ItclClass* iclsPtr;         /* class containing this member */
+    Tcl_Obj *namePtr;           /* member name */
+    Tcl_Obj *fullNamePtr;       /* member name with "class::" qualifier */
+    ItclClass *iclsPtr;         /* class containing this member */
     int protection;             /* protection level */
     int flags;                  /* flags describing member (see below) */
     ItclMemberCode *codePtr;    /* code associated with member */
-    Tcl_Obj* init;              /* initial value */
+    Tcl_Obj *init;              /* initial value */
 } ItclVariable;
 
+
+/*
+ *  Instance components.
+ */
+typedef struct ItclComponent {
+    Tcl_Obj *namePtr;           /* member name */
+    ItclVariable *ivPtr;        /* variable for this component */
+    int flags;
+} ItclComponent;
+
+#define ITCL_COMPONENT_INHERIT	0x01
+/*
+ *  Instance options.
+ */
+typedef struct ItclOption {
+    Tcl_Obj *namePtr;           /* member name */
+    Tcl_Obj *fullNamePtr;       /* member name with "class::" qualifier */
+    Tcl_Obj *resourceNamePtr;
+    Tcl_Obj *classNamePtr;
+    ItclClass *iclsPtr;         /* class containing this member */
+    int protection;             /* protection level */
+    int flags;                  /* flags describing member (see below) */
+    ItclMemberCode *codePtr;    /* code associated with member */
+    Tcl_Obj *init;              /* initial value */
+    Tcl_Obj *defaultValuePtr;
+    Tcl_Obj *cgetMethodPtr;
+    Tcl_Obj *configureMethodPtr;
+    Tcl_Obj *validateMethodPtr;
+} ItclOption;
+
+typedef struct ItclDelegatedOption {
+    Tcl_Obj *namePtr;
+    Tcl_Obj *resourceNamePtr;
+    Tcl_Obj *classNamePtr;
+    ItclComponent *icPtr;
+    Tcl_Obj *asScript;
+    Tcl_Obj *exceptionsScript;
+} ItclDelegatedOption;
+
+typedef struct ItclDelegatedMethod {
+    Tcl_Obj *namePtr;
+    ItclComponent *icPtr;
+    Tcl_Obj *asScript;
+    Tcl_Obj *exceptionsScript;
+} ItclDelegatedMethod;
 
 typedef struct IctlVarTraceInfo {
     int flags;
@@ -387,6 +478,26 @@ MODULE_SCOPE int Itcl_ClassCompiledVarResolver(Tcl_Interp *interp,
         struct Tcl_ResolvedVarInfo **rPtr);
 MODULE_SCOPE int ItclSetParserResolver(Tcl_Namespace *nsPtr);
 MODULE_SCOPE void ItclProcErrorProc(Tcl_Interp *interp, Tcl_Obj *procNameObj);
+MODULE_SCOPE int ItclClassBaseCmd(ClientData clientData, Tcl_Interp *interp,
+	int flags, int objc, Tcl_Obj *CONST objv[], ItclClass **iclsPtrPtr);
+MODULE_SCOPE int Itcl_BiInstallHullCmd (ClientData clientData,
+        Tcl_Interp *interp, int objc, Tcl_Obj *CONST objv[]);
+MODULE_SCOPE int Itcl_CreateOption (Tcl_Interp *interp, ItclClass *iclsPtr,
+        Tcl_Obj *name, const char *resourceName, const char *className, 
+	char *init, char *config, ItclOption **ioptPtr);
+MODULE_SCOPE int ItclInitObjectOptions(Tcl_Interp *interp, ItclObject *ioPtr,
+        ItclClass *iclsPtr, const char *name);
+MODULE_SCOPE int InstallHullAndOptions(Tcl_Interp *interp, ItclObject *ioPtr,
+        ItclClass *iclsPtr, int objc, Tcl_Obj * const objv[],
+	int *newObjc, Tcl_Obj **newObjv);
+MODULE_SCOPE const char* Itcl_SetInstanceVar(Tcl_Interp *interp,
+        const char *name, const char *name2, const char *value,
+	ItclObject *contextIoPtr, ItclClass *contextIclsPtr);
+MODULE_SCOPE Tcl_Obj * ItclCapitalize(const char *str);
+MODULE_SCOPE int ItclWidgetConfigure(ClientData clientData, Tcl_Interp *interp,
+        int objc, Tcl_Obj *CONST objv[]);
+MODULE_SCOPE int ItclWidgetCget(ClientData clientData, Tcl_Interp *interp,
+        int objc, Tcl_Obj *CONST objv[]);
 
 #include "itcl2TclOO.h"
 

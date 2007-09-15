@@ -9,7 +9,7 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itclHelpers.c,v 1.1.2.2 2007/09/09 11:04:09 wiede Exp $
+ * RCS: @(#) $Id: itclHelpers.c,v 1.1.2.3 2007/09/15 11:56:11 wiede Exp $
  */
 
 #include "itclInt.h"
@@ -376,6 +376,13 @@ ItclEnsembleSubCmd(
     return result;
 }
 
+
+/*
+ * ------------------------------------------------------------------------
+ *  ItclTraceUnsetVar()
+ * ------------------------------------------------------------------------
+ */
+
 char *
 ItclTraceUnsetVar(
     ClientData clientData,
@@ -407,4 +414,25 @@ ItclTraceUnsetVar(
 	}
     }
     return NULL;
+}
+
+/*
+ * ------------------------------------------------------------------------
+ *  ItclCapitalize()
+ * ------------------------------------------------------------------------
+ */
+
+Tcl_Obj *
+ItclCapitalize(
+    const char *str)
+{
+    Tcl_Obj *objPtr;
+    char buf[2];
+    
+    sprintf(buf, "%c", toupper(*str));
+    buf[1] = '\0';
+    objPtr = Tcl_NewStringObj(buf, -1);
+    Tcl_AppendToObj(objPtr, str+1, -1);
+    Tcl_IncrRefCount(objPtr);
+    return objPtr;
 }

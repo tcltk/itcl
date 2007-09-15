@@ -25,7 +25,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclClass.c,v 1.1.2.4 2007/09/09 20:53:47 wiede Exp $
+ *     RCS:  $Id: itclClass.c,v 1.1.2.5 2007/09/15 11:56:11 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -131,7 +131,7 @@ Itcl_CreateClass(
     Tcl_Obj *namePtr;
     ItclClass *iclsPtr;
     ItclVariable *ivPtr;
-    Tcl_HashEntry *entry;
+    Tcl_HashEntry *hPtr;
     int newEntry;
 
     /*
@@ -217,6 +217,10 @@ Itcl_CreateClass(
 
     Tcl_InitObjHashTable(&iclsPtr->variables);
     Tcl_InitObjHashTable(&iclsPtr->functions);
+    Tcl_InitObjHashTable(&iclsPtr->options);
+    Tcl_InitObjHashTable(&iclsPtr->components);
+    Tcl_InitObjHashTable(&iclsPtr->delegatedOptions);
+    Tcl_InitObjHashTable(&iclsPtr->delegatedMethods);
 
     iclsPtr->numInstanceVars = 0;
     Tcl_InitHashTable(&iclsPtr->classCommons, TCL_ONE_WORD_KEYS);
@@ -331,30 +335,30 @@ Itcl_CreateClass(
     iclsPtr->fullname = Tcl_NewStringObj(classNs->fullName, -1);
     Tcl_IncrRefCount(iclsPtr->fullname);
 
-    entry = Tcl_CreateHashEntry(&infoPtr->classes, (char *)iclsPtr->fullname,
+    hPtr = Tcl_CreateHashEntry(&infoPtr->classes, (char *)iclsPtr->fullname,
             &newEntry);
-    if (entry == NULL) {
+    if (hPtr == NULL) {
 	Tcl_AppendResult(interp,
 	        "ITCL: cannot create hash entry in infoPtr->classes for class \"",
 		Tcl_GetString(iclsPtr->fullname), "\"", NULL);
 	return TCL_ERROR;
     }
-    Tcl_SetHashValue(entry, (ClientData)iclsPtr);
+    Tcl_SetHashValue(hPtr, (ClientData)iclsPtr);
 
-    entry = Tcl_CreateHashEntry(&infoPtr->namespaceClasses, (char *)classNs,
+    hPtr = Tcl_CreateHashEntry(&infoPtr->namespaceClasses, (char *)classNs,
             &newEntry);
-    if (entry == NULL) {
+    if (hPtr == NULL) {
 	Tcl_AppendResult(interp,
 	        "ITCL: cannot create hash entry in infoPtr->namespaceClasses",
 		" for class \"", 
 		Tcl_GetString(iclsPtr->fullname), "\"", NULL);
 	return TCL_ERROR;
     }
-    Tcl_SetHashValue(entry, (ClientData)iclsPtr);
+    Tcl_SetHashValue(hPtr, (ClientData)iclsPtr);
 
     /*
      * now build the namespace for the common private and protected variables
-     * publci variables go directly to the class namespace
+     * public variables go directly to the class namespace
      */
     Tcl_DStringInit(&buffer);
     Tcl_DStringAppend(&buffer, ITCL_VARIABLES_NAMESPACE, -1);
@@ -381,8 +385,8 @@ Itcl_CreateClass(
     ivPtr->protection = ITCL_PROTECTED;  /* always "protected" */
     ivPtr->flags |= ITCL_THIS_VAR;       /* mark as "this" variable */
 
-    entry = Tcl_CreateHashEntry(&iclsPtr->variables, (char *)namePtr, &newEntry);
-    Tcl_SetHashValue(entry, (ClientData)ivPtr);
+    hPtr = Tcl_CreateHashEntry(&iclsPtr->variables, (char *)namePtr, &newEntry);
+    Tcl_SetHashValue(hPtr, (ClientData)ivPtr);
 
     /*
      *  Create a command in the current namespace to manage the class:
@@ -455,7 +459,7 @@ Itcl_DeleteClass(
 
     Itcl_ListElem *elem;
     ItclObject *contextIoPtr;
-    Tcl_HashEntry *entry;
+    Tcl_HashEntry *hPtr;
     Tcl_HashSearch place;
     Tcl_DString buffer;
 
@@ -483,9 +487,9 @@ Itcl_DeleteClass(
      *  destroyed above, when derived classes were destroyed.
      *  Destroy objects and report any errors.
      */
-    entry = Tcl_FirstHashEntry(&iclsPtr->infoPtr->objects, &place);
-    while (entry) {
-        contextIoPtr = (ItclObject*)Tcl_GetHashValue(entry);
+    hPtr = Tcl_FirstHashEntry(&iclsPtr->infoPtr->objects, &place);
+    while (hPtr) {
+        contextIoPtr = (ItclObject*)Tcl_GetHashValue(hPtr);
 
         if (contextIoPtr->iclsPtr == iclsPtr) {
             if (Itcl_DeleteObject(interp, contextIoPtr) != TCL_OK) {
@@ -500,11 +504,11 @@ Itcl_DeleteClass(
 	     * is therefore not allowed anymore.
 	     */
 
-	    entry = Tcl_FirstHashEntry(&iclsPtr->infoPtr->objects, &place);
+	    hPtr = Tcl_FirstHashEntry(&iclsPtr->infoPtr->objects, &place);
 	    continue;
         }
 
-        entry = Tcl_NextHashEntry(&place);
+        hPtr = Tcl_NextHashEntry(&place);
     }
 
     /*
@@ -579,11 +583,12 @@ ItclDestroyClassNamesp(
 {
     ItclClass *iclsPtr = (ItclClass*)cdata;
     ItclObject *contextObj;
-    Itcl_ListElem *elem, *belem;
+    Itcl_ListElem *elem;
+    Itcl_ListElem *belem;
     ItclClass *iclsPtr2;
     ItclClass *basePtr;
     ItclClass *derivedPtr;
-    Tcl_HashEntry *entry;
+    Tcl_HashEntry *hPtr;
     Tcl_HashSearch place;
 
     /*
@@ -614,9 +619,9 @@ ItclDestroyClassNamesp(
      *  Scan through and find all objects that belong to this class.
      *  Destroy them quietly by deleting their access command.
      */
-    entry = Tcl_FirstHashEntry(&iclsPtr->infoPtr->objects, &place);
-    while (entry) {
-        contextObj = (ItclObject*)Tcl_GetHashValue(entry);
+    hPtr = Tcl_FirstHashEntry(&iclsPtr->infoPtr->objects, &place);
+    while (hPtr) {
+        contextObj = (ItclObject*)Tcl_GetHashValue(hPtr);
         if (contextObj->iclsPtr == iclsPtr) {
             Tcl_DeleteCommandFromToken(iclsPtr->interp, contextObj->accessCmd);
 	    /*
@@ -626,10 +631,10 @@ ItclDestroyClassNamesp(
 	     * is therefore not allowed anymore.
 	     */
 
-	    entry = Tcl_FirstHashEntry(&iclsPtr->infoPtr->objects, &place);
+	    hPtr = Tcl_FirstHashEntry(&iclsPtr->infoPtr->objects, &place);
 	    continue;
         }
-        entry = Tcl_NextHashEntry(&place);
+        hPtr = Tcl_NextHashEntry(&place);
     }
 
     /*
@@ -1183,7 +1188,7 @@ void
 Itcl_BuildVirtualTables(
     ItclClass* iclsPtr)       /* class definition being updated */
 {
-    Tcl_HashEntry *entry;
+    Tcl_HashEntry *hPtr;
     Tcl_HashSearch place;
     ItclVarLookup *vlookup;
     ItclVariable *ivPtr;
@@ -1200,13 +1205,13 @@ Itcl_BuildVirtualTables(
     /*
      *  Clear the variable resolution table.
      */
-    entry = Tcl_FirstHashEntry(&iclsPtr->resolveVars, &place);
-    while (entry) {
-        vlookup = (ItclVarLookup*)Tcl_GetHashValue(entry);
+    hPtr = Tcl_FirstHashEntry(&iclsPtr->resolveVars, &place);
+    while (hPtr) {
+        vlookup = (ItclVarLookup*)Tcl_GetHashValue(hPtr);
         if (--vlookup->usage == 0) {
             ckfree((char*)vlookup);
         }
-        entry = Tcl_NextHashEntry(&place);
+        hPtr = Tcl_NextHashEntry(&place);
     }
     Tcl_DeleteHashTable(&iclsPtr->resolveVars);
     Tcl_InitHashTable(&iclsPtr->resolveVars, TCL_STRING_KEYS);
@@ -1227,9 +1232,9 @@ Itcl_BuildVirtualTables(
     Itcl_InitHierIter(&hier, iclsPtr);
     iclsPtr2 = Itcl_AdvanceHierIter(&hier);
     while (iclsPtr2 != NULL) {
-        entry = Tcl_FirstHashEntry(&iclsPtr2->variables, &place);
-        while (entry) {
-            ivPtr = (ItclVariable*)Tcl_GetHashValue(entry);
+        hPtr = Tcl_FirstHashEntry(&iclsPtr2->variables, &place);
+        while (hPtr) {
+            ivPtr = (ItclVariable*)Tcl_GetHashValue(hPtr);
 
             vlookup = (ItclVarLookup*)ckalloc(sizeof(ItclVarLookup));
             vlookup->ivPtr = ivPtr;
@@ -1286,16 +1291,16 @@ Itcl_BuildVirtualTables(
             nsPtr = iclsPtr2->namesp;
 
             while (1) {
-                entry = Tcl_CreateHashEntry(&iclsPtr->resolveVars,
+                hPtr = Tcl_CreateHashEntry(&iclsPtr->resolveVars,
                     Tcl_DStringValue(&buffer), &newEntry);
 
                 if (newEntry) {
-                    Tcl_SetHashValue(entry, (ClientData)vlookup);
+                    Tcl_SetHashValue(hPtr, (ClientData)vlookup);
                     vlookup->usage++;
 
                     if (!vlookup->leastQualName) {
                         vlookup->leastQualName =
-                            Tcl_GetHashKey(&iclsPtr->resolveVars, entry);
+                            Tcl_GetHashKey(&iclsPtr->resolveVars, hPtr);
                     }
                 }
 
@@ -1318,7 +1323,7 @@ Itcl_BuildVirtualTables(
             if (vlookup->usage == 0) {
                 ckfree((char*)vlookup);
             }
-            entry = Tcl_NextHashEntry(&place);
+            hPtr = Tcl_NextHashEntry(&place);
         }
         iclsPtr2 = Itcl_AdvanceHierIter(&hier);
     }
@@ -1338,9 +1343,9 @@ Itcl_BuildVirtualTables(
     Itcl_InitHierIter(&hier, iclsPtr);
     iclsPtr2 = Itcl_AdvanceHierIter(&hier);
     while (iclsPtr2 != NULL) {
-        entry = Tcl_FirstHashEntry(&iclsPtr2->functions, &place);
-        while (entry) {
-            imPtr = (ItclMemberFunc*)Tcl_GetHashValue(entry);
+        hPtr = Tcl_FirstHashEntry(&iclsPtr2->functions, &place);
+        while (hPtr) {
+            imPtr = (ItclMemberFunc*)Tcl_GetHashValue(hPtr);
 
             /*
              *  Create all possible names for this function and enter
@@ -1356,11 +1361,11 @@ Itcl_BuildVirtualTables(
             nsPtr = iclsPtr2->namesp;
 
             while (1) {
-                entry = Tcl_CreateHashEntry(&iclsPtr->resolveCmds,
+                hPtr = Tcl_CreateHashEntry(&iclsPtr->resolveCmds,
                     Tcl_DStringValue(&buffer), &newEntry);
 
                 if (newEntry) {
-                    Tcl_SetHashValue(entry, (ClientData)imPtr);
+                    Tcl_SetHashValue(hPtr, (ClientData)imPtr);
                 }
 
                 if (nsPtr == NULL) {
@@ -1375,7 +1380,7 @@ Itcl_BuildVirtualTables(
 
                 nsPtr = nsPtr->parentPtr;
             }
-            entry = Tcl_NextHashEntry(&place);
+            hPtr = Tcl_NextHashEntry(&place);
         }
         iclsPtr2 = Itcl_AdvanceHierIter(&hier);
     }
@@ -1412,13 +1417,13 @@ Itcl_CreateVariable(
     int newEntry;
     ItclVariable *ivPtr;
     ItclMemberCode *mcode;
-    Tcl_HashEntry *entry;
+    Tcl_HashEntry *hPtr;
 
     /*
      *  Add this variable to the variable table for the class.
      *  Make sure that the variable name does not already exist.
      */
-    entry = Tcl_CreateHashEntry(&iclsPtr->variables, (char *)namePtr, &newEntry);
+    hPtr = Tcl_CreateHashEntry(&iclsPtr->variables, (char *)namePtr, &newEntry);
     if (!newEntry) {
         Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
             "variable name \"", Tcl_GetString(namePtr),
@@ -1436,7 +1441,7 @@ Itcl_CreateVariable(
     if (config) {
         if (Itcl_CreateMemberCode(interp, iclsPtr, (char*)NULL, config,
                 &mcode) != TCL_OK) {
-            Tcl_DeleteHashEntry(entry);
+            Tcl_DeleteHashEntry(hPtr);
             return TCL_ERROR;
         }
         Itcl_PreserveData((ClientData)mcode);
@@ -1472,7 +1477,7 @@ Itcl_CreateVariable(
         ivPtr->init = NULL;
     }
 
-    Tcl_SetHashValue(entry, (ClientData)ivPtr);
+    Tcl_SetHashValue(hPtr, (ClientData)ivPtr);
 
     *ivPtrPtr = ivPtr;
     return TCL_OK;
@@ -1502,6 +1507,104 @@ Itcl_DeleteVariable(ivPtr)
         Tcl_DecrRefCount(ivPtr->init);
     }
     ckfree((char*)ivPtr);
+}
+
+/*
+ * ------------------------------------------------------------------------
+ *  Itcl_CreateOption()
+ *
+ *  Creates a new class option definition.  If this is a public
+ *  option, it may have a bit of "config" code that is used to
+ *  update the object whenever the option is modified via the
+ *  built-in "configure" method.
+ *
+ *  Returns TCL_ERROR along with an error message in the specified
+ *  interpreter if anything goes wrong.  Otherwise, this returns
+ *  TCL_OK and a pointer to the new option definition in "ioptPtr".
+ * ------------------------------------------------------------------------
+ */
+int
+Itcl_CreateOption(
+    Tcl_Interp *interp,       /* interpreter managing this transaction */
+    ItclClass* iclsPtr,       /* class containing this variable */
+    Tcl_Obj* namePtr,         /* option name */
+    const char *resourceName, /* resource name */
+    const char *className,    /* class name */
+    char* init,               /* initial value */
+    char* config,             /* code invoked when variable is configured */
+    ItclOption** ioptPtrPtr)  /* returns: new option definition */
+{
+    int newEntry;
+    ItclOption *ioptPtr;
+    ItclMemberCode *mcode;
+    Tcl_HashEntry *hPtr;
+
+    /*
+     *  Add this option to the options table for the class.
+     *  Make sure that the option name does not already exist.
+     */
+    hPtr = Tcl_CreateHashEntry(&iclsPtr->options, (char *)namePtr, &newEntry);
+    if (!newEntry) {
+        Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+            "option name \"", Tcl_GetString(namePtr),
+	    "\" already defined in class \"",
+            iclsPtr->fullname, "\"",
+            (char*)NULL);
+        return TCL_ERROR;
+    }
+    Tcl_IncrRefCount(namePtr);
+
+    /*
+     *  If this option has some "config" code, try to capture
+     *  its implementation.
+     */
+    if (config) {
+        if (Itcl_CreateMemberCode(interp, iclsPtr, (char*)NULL, config,
+                &mcode) != TCL_OK) {
+            Tcl_DeleteHashEntry(hPtr);
+            return TCL_ERROR;
+        }
+        Itcl_PreserveData((ClientData)mcode);
+        Itcl_EventuallyFree((ClientData)mcode, Itcl_DeleteMemberCode);
+    } else {
+        mcode = NULL;
+    }
+        
+
+    /*
+     *  If everything looks good, create the variable definition.
+     */
+    ioptPtr = (ItclOption*)ckalloc(sizeof(ItclOption));
+    memset(ioptPtr, 0, sizeof(ItclOption));
+    ioptPtr->iclsPtr      = iclsPtr;
+    ioptPtr->protection   = Itcl_Protection(interp, 0);
+    ioptPtr->codePtr      = mcode;
+    ioptPtr->namePtr      = namePtr;
+    Tcl_IncrRefCount(ioptPtr->namePtr);
+    ioptPtr->resourceNamePtr = Tcl_NewStringObj(resourceName, -1);
+    Tcl_IncrRefCount(ioptPtr->resourceNamePtr);
+    ioptPtr->classNamePtr = Tcl_NewStringObj(className, -1);
+    Tcl_IncrRefCount(ioptPtr->classNamePtr);
+    ioptPtr->fullNamePtr = Tcl_NewStringObj(Tcl_GetString(iclsPtr->fullname), -1);
+    Tcl_AppendToObj(ioptPtr->fullNamePtr, "::", 2);
+    Tcl_AppendToObj(ioptPtr->fullNamePtr, Tcl_GetString(namePtr), -1);
+    Tcl_IncrRefCount(ioptPtr->fullNamePtr);
+
+    if (ioptPtr->protection == ITCL_DEFAULT_PROTECT) {
+        ioptPtr->protection = ITCL_PROTECTED;
+    }
+
+    if (init) {
+        ioptPtr->init = Tcl_NewStringObj(init, -1);
+        Tcl_IncrRefCount(ioptPtr->init);
+    } else {
+        ioptPtr->init = NULL;
+    }
+
+    Tcl_SetHashValue(hPtr, (ClientData)ioptPtr);
+
+    *ioptPtrPtr = ioptPtr;
+    return TCL_OK;
 }
 
 

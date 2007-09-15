@@ -24,7 +24,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclObject.c,v 1.1.2.3 2007/09/09 13:38:41 wiede Exp $
+ *     RCS:  $Id: itclObject.c,v 1.1.2.4 2007/09/15 11:56:11 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -47,7 +47,6 @@ static int ItclDestructBase(Tcl_Interp *interp, ItclObject *contextObj,
 
 static int ItclInitObjectVariables(Tcl_Interp *interp, ItclObject *ioPtr,
         ItclClass *iclsPtr, const char *name);
-
 
 
 /*
@@ -110,11 +109,17 @@ ItclCreateObject(
 
     Tcl_DString buffer;
     Tcl_CmdInfo cmdInfo;
-    ItclObject *ioPtr;
     Tcl_HashEntry *entry;
-    int newEntry;
+    ItclObjectInfo *infoPtr;
+    ItclObject *ioPtr;
     Itcl_InterpState istate;
+    Tcl_Obj **newObjv;
+    int newObjc;
+    int newEntry;
 
+    /* just init for the cas of none ItclWidget objects */
+    newObjc = objc;
+    newObjv = (Tcl_Obj **)objv;
     /*
      *  Create a new object and initialize it.
      */
@@ -133,8 +138,67 @@ ItclCreateObject(
      */
     Itcl_PreserveData((ClientData)ioPtr);
 
+    ioPtr->namePtr = Tcl_NewStringObj(name, -1);
+    Tcl_IncrRefCount(ioPtr->namePtr);
+    Tcl_DStringInit(&buffer);
+    Tcl_DStringAppend(&buffer, ITCL_VARIABLES_NAMESPACE, -1);
+    Tcl_DStringAppend(&buffer, "::", 2);
+    Tcl_DStringAppend(&buffer, Tcl_GetString(ioPtr->namePtr), -1);
+    ioPtr->varNsNamePtr = Tcl_NewStringObj(Tcl_DStringValue(&buffer), -1);
+    Tcl_IncrRefCount(ioPtr->varNsNamePtr);
+    Tcl_DStringFree(&buffer);
+
+    Tcl_InitHashTable(&ioPtr->objectVariables, TCL_ONE_WORD_KEYS);
+    Tcl_InitHashTable(&ioPtr->contextCache, TCL_ONE_WORD_KEYS);
+
+    Itcl_PreserveData((ClientData)ioPtr);  /* while we're using this... */
+    Itcl_EventuallyFree((ClientData)ioPtr, ItclFreeObject);
+
+    /*
+     *  Install the class namespace and object context so that
+     *  the object's data members can be initialized via simple
+     *  "set" commands.
+     */
+
+    /* first create the object's class variables namespaces
+     * and set all the init values for variables
+     */
+
+    if (ItclInitObjectVariables(interp, ioPtr, iclsPtr, name) != TCL_OK) {
+	Tcl_AppendResult(interp, "error in ItclInitObjectVariables", NULL);
+        return TCL_ERROR;
+    }
+
+    infoPtr = iclsPtr->infoPtr;
+    infoPtr->currIoPtr = ioPtr;
+    if (infoPtr->windgetInfoPtr != NULL) {
+        if (iclsPtr->flags & (ITCL_IS_WIDGET|ITCL_IS_WIDGETADAPTOR)) {
+            /* 
+             * set all the init values for options
+             */
+
+	    if (infoPtr->windgetInfoPtr->initObjectOpts != NULL) {
+	        if (infoPtr->windgetInfoPtr->initObjectOpts(interp, ioPtr,
+		        iclsPtr, name)  != TCL_OK) {
+	            Tcl_AppendResult(interp, "error in ItclInitObjectOptions",
+		            NULL);
+                    return TCL_ERROR;
+                }
+            }
+        }
+        if (iclsPtr->flags & ITCL_IS_WIDGET) {
+	    if (infoPtr->windgetInfoPtr->instHullAndOpts != NULL) {
+                if (infoPtr->windgetInfoPtr->instHullAndOpts(interp, ioPtr,
+		        iclsPtr, objc, objv, &newObjc, newObjv) != TCL_OK) {
+	            return TCL_ERROR;
+	        }
+	    }
+        }
+    }
+
+
     ioPtr->oPtr = Tcl_NewObjectInstance(interp, iclsPtr->classPtr, name,
-            iclsPtr->namesp->fullName, /* objc */-1, objv, /* skip */0);
+            iclsPtr->namesp->fullName, /* objc */-1, NULL, /* skip */0);
     if (ioPtr->oPtr == NULL) {
 	// NEED TO FREE STUFF HERE !! 
         return TCL_ERROR;
@@ -155,41 +219,17 @@ ItclCreateObject(
     resolveInfoPtr->flags = ITCL_RESOLVE_OBJECT;
     resolveInfoPtr->ioPtr = ioPtr;
     ioPtr->resolvePtr->clientData = resolveInfoPtr;
-    ioPtr->namePtr = Tcl_NewStringObj(Tcl_GetCommandName(interp,
-            ioPtr->accessCmd), -1);
-    Tcl_IncrRefCount(ioPtr->namePtr);
+//    ioPtr->namePtr = Tcl_NewStringObj(Tcl_GetCommandName(interp,
+//            ioPtr->accessCmd), -1);
+//    Tcl_IncrRefCount(ioPtr->namePtr);
     Tcl_TraceCommand(interp, Tcl_GetString(ioPtr->namePtr),
             TCL_TRACE_RENAME|TCL_TRACE_DELETE, ObjectRenamedTrace, ioPtr);
-    Tcl_DStringInit(&buffer);
-    Tcl_DStringAppend(&buffer, ITCL_VARIABLES_NAMESPACE, -1);
-    Tcl_DStringAppend(&buffer, "::", 2);
-    Tcl_DStringAppend(&buffer, Tcl_GetString(ioPtr->namePtr), -1);
-    ioPtr->varNsNamePtr = Tcl_NewStringObj(Tcl_DStringValue(&buffer), -1);
-    Tcl_IncrRefCount(ioPtr->varNsNamePtr);
-    Tcl_DStringFree(&buffer);
 
-    Tcl_InitHashTable(&ioPtr->objectVariables, TCL_ONE_WORD_KEYS);
-    Tcl_InitHashTable(&ioPtr->contextCache, TCL_ONE_WORD_KEYS);
+
+
+
     Tcl_ObjectSetMetadata(ioPtr->oPtr, iclsPtr->infoPtr->object_meta_type,
             ioPtr);
-
-    Itcl_PreserveData((ClientData)ioPtr);  /* while we're using this... */
-    Itcl_EventuallyFree((ClientData)ioPtr, ItclFreeObject);
-
-    /*
-     *  Install the class namespace and object context so that
-     *  the object's data members can be initialized via simple
-     *  "set" commands.
-     */
-
-    /* first create the object's class variables namespaces
-     * and set all the init values */
-
-    if (ItclInitObjectVariables(interp, ioPtr, iclsPtr, name) != TCL_OK) {
-	Tcl_AppendResult(interp, "error in ItclInitObjectVariables", NULL);
-        return TCL_ERROR;
-    }
-
 
     /*
      *  Now construct the object.  Look for a constructor in the
@@ -200,9 +240,8 @@ ItclCreateObject(
      *  not called out explicitly in "initCode" code fragments are
      *  invoked implicitly without arguments.
      */
-    iclsPtr->infoPtr->currIoPtr = ioPtr;
     result = Itcl_InvokeMethodIfExists(interp, "constructor",
-        iclsPtr, ioPtr, objc, objv);
+        iclsPtr, ioPtr, newObjc, newObjv);
 
     /*
      *  If there is no constructor, construct the base classes
@@ -211,7 +250,7 @@ ItclCreateObject(
      */
     Tcl_Obj *objPtr = Tcl_NewStringObj("constructor", -1);
     if (Tcl_FindHashEntry(&iclsPtr->functions, (char *)objPtr) == NULL) {
-        result = Itcl_ConstructBase(interp, ioPtr, iclsPtr, objc, objv);
+        result = Itcl_ConstructBase(interp, ioPtr, iclsPtr, newObjc, newObjv);
     }
 
     /*
@@ -770,7 +809,7 @@ Itcl_ObjectIsa(
 CONST char*
 Itcl_GetInstanceVar(
     Tcl_Interp *interp,        /* current interpreter */
-    CONST char *name,          /* name of desired instance variable */
+    const char *name,          /* name of desired instance variable */
     ItclObject *contextIoPtr,  /* current object */
     ItclClass *contextIclsPtr) /* name is interpreted in this scope */
 {
@@ -807,6 +846,67 @@ Itcl_GetInstanceVar(
 	Tcl_PushCallFrame(interp, framePtr, nsPtr, /*isProcCallFrame*/0);
         val = Tcl_GetVar2(interp, (CONST84 char *)name, (char*)NULL,
 	        TCL_LEAVE_ERR_MSG);
+        Tcl_PopCallFrame(interp);
+    }
+
+    return val;
+}
+
+/*
+ * ------------------------------------------------------------------------
+ *  Itcl_SetInstanceVar()
+ *
+ *  Sets the current value for an object data member.  The member
+ *  name is interpreted with respect to the given class scope, which
+ *  is usually the most-specific class for the object.
+ *
+ *  If successful, this procedure returns a pointer to a string value
+ *  which remains alive until the variable changes it value.  If
+ *  anything goes wrong, this returns NULL.
+ * ------------------------------------------------------------------------
+ */
+CONST char*
+Itcl_SetInstanceVar(
+    Tcl_Interp *interp,        /* current interpreter */
+    const char *name,          /* name of desired instance variable */
+    const char *name2,         /* array member or NULL */
+    const char *value,         /* the value to set */
+    ItclObject *contextIoPtr,  /* current object */
+    ItclClass *contextIclsPtr) /* name is interpreted in this scope */
+{
+    Tcl_CallFrame frame;
+    Tcl_CallFrame *framePtr;
+    Tcl_Namespace *nsPtr;
+    Tcl_DString buffer;
+    CONST char *val;
+
+    /*
+     *  Make sure that the current namespace context includes an
+     *  object that is being manipulated.
+     */
+    if (contextIoPtr == NULL) {
+        Tcl_ResetResult(interp);
+        Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+            "cannot access object-specific info without an object context",
+            (char*)NULL);
+        return NULL;
+    }
+
+    /*
+     *  Install the object context and access the data member
+     *  like any other variable.
+     */
+    Tcl_DStringInit(&buffer);
+    Tcl_DStringAppend(&buffer, Tcl_GetString(contextIoPtr->varNsNamePtr), -1);
+    Tcl_DStringAppend(&buffer, Tcl_GetString(contextIclsPtr->fullname), -1);
+    nsPtr = Tcl_FindNamespace(interp, Tcl_DStringValue(&buffer), NULL, 0);
+    Tcl_DStringFree(&buffer);
+    val = NULL;
+    if (nsPtr != NULL) {
+	framePtr = &frame;
+	Tcl_PushCallFrame(interp, framePtr, nsPtr, /*isProcCallFrame*/0);
+        val = Tcl_SetVar2(interp, (CONST84 char *)name, (char*)name2,
+	        value, TCL_LEAVE_ERR_MSG);
         Tcl_PopCallFrame(interp);
     }
 

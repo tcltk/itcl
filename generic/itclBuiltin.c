@@ -24,7 +24,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclBuiltin.c,v 1.1.2.3 2007/09/09 13:38:40 wiede Exp $
+ *     RCS:  $Id: itclBuiltin.c,v 1.1.2.4 2007/09/15 11:56:11 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -132,7 +132,6 @@ Itcl_BiInit(
             Tcl_SetEnsembleMappingDict(NULL, infoCmd, mapDict);
         }
     }
-
 
     return TCL_OK;
 }
@@ -347,6 +346,14 @@ Itcl_BiConfigureCmd(
         contextIclsPtr = contextIoPtr->iclsPtr;
     }
 
+    if (!(contextIclsPtr->flags & ITCL_IS_CLASS)) {
+	ItclWidgetInfo *iwInfoPtr;
+	iwInfoPtr = contextIclsPtr->infoPtr->windgetInfoPtr;
+        if (iwInfoPtr != NULL) {
+	    return iwInfoPtr->widgetConfigure(contextIclsPtr, interp,
+	            objc, objv);
+	}
+    }
     /*
      *  HANDLE:  configure
      */
@@ -568,6 +575,14 @@ Itcl_BiCgetCmd(
         contextIclsPtr = contextIoPtr->iclsPtr;
     }
 
+    if (!(contextIclsPtr->flags &ITCL_IS_CLASS)) {
+	ItclWidgetInfo *iwInfoPtr;
+	iwInfoPtr = contextIclsPtr->infoPtr->windgetInfoPtr;
+        if (iwInfoPtr != NULL) {
+	    return iwInfoPtr->widgetConfigure(contextIclsPtr, interp,
+	            objc, objv);
+	}
+    }
     name = Tcl_GetString(objv[1]);
 
     vlookup = NULL;

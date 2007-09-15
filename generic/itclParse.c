@@ -39,7 +39,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclParse.c,v 1.1.2.5 2007/09/10 15:42:35 wiede Exp $
+ *     RCS:  $Id: itclParse.c,v 1.1.2.6 2007/09/15 11:56:11 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -70,8 +70,10 @@ Tcl_ObjCmdProc Itcl_ClassInheritCmd;
 Tcl_ObjCmdProc Itcl_ClassMethodCmd;
 Tcl_ObjCmdProc Itcl_ClassProcCmd;
 Tcl_ObjCmdProc Itcl_ClassVariableCmd;
-
 Tcl_ObjCmdProc Itcl_ClassProtectionCmd;
+Tcl_ObjCmdProc Itcl_TypeCmdStart;
+Tcl_ObjCmdProc Itcl_WidgetCmdStart;
+Tcl_ObjCmdProc Itcl_WidgetAdaptorCmdStart;
 
 static const struct {
     const char *name;
@@ -80,11 +82,11 @@ static const struct {
     {"common", Itcl_ClassCommonCmd},
     {"constructor", Itcl_ClassConstructorCmd},
     {"destructor", Itcl_ClassDestructorCmd},
-    {"handleClass", Itcl_HandleClass},
     {"inherit", Itcl_ClassInheritCmd},
     {"method", Itcl_ClassMethodCmd},
     {"proc", Itcl_ClassProcCmd},
     {"variable", Itcl_ClassVariableCmd},
+    {"handleClass", Itcl_HandleClass},
     {NULL, NULL}
 };
 
@@ -338,6 +340,17 @@ Itcl_ParseInit(
         return TCL_ERROR;
     }
 
+    Tcl_CreateObjCommand(interp, "::itcl::type", Itcl_TypeCmdStart,
+        (ClientData)infoPtr, (Tcl_CmdDeleteProc*)NULL);
+    Itcl_PreserveData((ClientData)infoPtr);
+
+    Tcl_CreateObjCommand(interp, "::itcl::widget", Itcl_WidgetCmdStart,
+        (ClientData)infoPtr, (Tcl_CmdDeleteProc*)NULL);
+    Itcl_PreserveData((ClientData)infoPtr);
+
+    Tcl_CreateObjCommand(interp, "::itcl::widgetadaptor", Itcl_WidgetAdaptorCmdStart,
+        (ClientData)infoPtr, (Tcl_CmdDeleteProc*)NULL);
+    Itcl_PreserveData((ClientData)infoPtr);
     return TCL_OK;
 }
 
@@ -374,6 +387,28 @@ Itcl_ClassCmd(
     int objc,                /* number of arguments */
     Tcl_Obj *CONST objv[])   /* argument objects */
 {
+    ItclClass *iclsPtr;
+
+    return ItclClassBaseCmd(clientData, interp, ITCL_IS_CLASS, objc, objv,
+            &iclsPtr);
+}
+
+/*
+ * ------------------------------------------------------------------------
+ *  ItclClassBaseCmd()
+ *
+ * ------------------------------------------------------------------------
+ */
+int
+ItclClassBaseCmd(
+    ClientData clientData,   /* info for all known objects */
+    Tcl_Interp *interp,      /* current interpreter */
+    int flags,               /* flags: ITCL_IS_CLASS, ITCL_IS_TYPE,
+                              * ITCL_IS_WIDGET or ITCL_IS_WIDGETADAPTOR */
+    int objc,                /* number of arguments */
+    Tcl_Obj *CONST objv[],   /* argument objects */
+    ItclClass **iclsPtrPtr)  /* for returning iclsPtr */
+{
     ItclObjectInfo* infoPtr = (ItclObjectInfo*)clientData;
 
     int result;
@@ -388,11 +423,14 @@ Itcl_ClassCmd(
     Tcl_HashEntry *hPtr2;
     int isNewEntry;
 
+    if (iclsPtrPtr != NULL) {
+        *iclsPtrPtr = NULL;
+    }
     if (objc != 3) {
         Tcl_WrongNumArgs(interp, 1, objv, "name { definition }");
         return TCL_ERROR;
     }
-    ItclShowArgs(2, "Itcl_ClassCmd", objc, objv);
+    ItclShowArgs(2, "ItclClassBaseCmd", objc, objv);
     className = Tcl_GetString(objv[1]);
 
     /*
@@ -416,6 +454,7 @@ Itcl_ClassCmd(
     if (Itcl_CreateClass(interp, className, infoPtr, &iclsPtr) != TCL_OK) {
         return TCL_ERROR;
     }
+    iclsPtr->flags = flags;
 
     /*
      *  Import the built-in commands from the itcl::builtin namespace.
@@ -540,6 +579,9 @@ Itcl_ClassCmd(
     Tcl_DStringFree(&buffer);
 
     Tcl_ResetResult(interp);
+    if (iclsPtrPtr != NULL) {
+        *iclsPtrPtr = iclsPtr;
+    }
     return TCL_OK;
 }
 
@@ -1374,4 +1416,78 @@ ItclDelObjectInfo(
 // free class_meta_type and object_meta_type
     ckfree((char*)infoPtr);
 }
-
+
+/*
+ * ------------------------------------------------------------------------
+ *  Itcl_TypeCmdStart()
+ *
+ *  that is just a dummy command to load package ItclWidget
+ *  and then to resend the command and execute it in that package
+ *  package ItclWidget is renaming the Tcl command!!
+ *
+ * ------------------------------------------------------------------------
+ */
+int
+Itcl_TypeCmdStart(
+    ClientData clientData,   /* info for all known objects */
+    Tcl_Interp *interp,      /* current interpreter */
+    int objc,                /* number of arguments */
+    Tcl_Obj *CONST objv[])   /* argument objects */
+{
+    ItclShowArgs(0, "Itcl_TypeCmdStart", objc, objv);
+    const char *res = Tcl_PkgRequire(interp, "ItclWidget", "4.0", 0);
+    if (res == NULL) {
+        return TCL_ERROR;
+    }
+    return Tcl_EvalObjv(interp, objc, objv, 0);
+}
+
+/*
+ * ------------------------------------------------------------------------
+ *  Itcl_WidgetCmdStart()
+ *
+ *  that is just a dummy command to load package ItclWidget
+ *  and then to resend the command and execute it in that package
+ *  package ItclWidget is renaming the Tcl command!!
+ *
+ * ------------------------------------------------------------------------
+ */
+int
+Itcl_WidgetCmdStart(
+    ClientData clientData,   /* info for all known objects */
+    Tcl_Interp *interp,      /* current interpreter */
+    int objc,                /* number of arguments */
+    Tcl_Obj *CONST objv[])   /* argument objects */
+{
+    ItclShowArgs(0, "Itcl_WidgetCmdStart", objc, objv);
+    const char *res = Tcl_PkgRequire(interp, "ItclWidget", "4.0", 0);
+    if (res == NULL) {
+        return TCL_ERROR;
+    }
+    return Tcl_EvalObjv(interp, objc, objv, 0);
+}
+
+/*
+ * ------------------------------------------------------------------------
+ *  Itcl_WidgetadaptorCmdStart()
+ *
+ *  that is just a dummy command to load package ItclWidget
+ *  and then to resend the command and execute it in that package
+ *  package ItclWidget is renaming the Tcl command!!
+ *
+ * ------------------------------------------------------------------------
+ */
+int
+Itcl_WidgetAdaptorCmdStart(
+    ClientData clientData,   /* info for all known objects */
+    Tcl_Interp *interp,      /* current interpreter */
+    int objc,                /* number of arguments */
+    Tcl_Obj *CONST objv[])   /* argument objects */
+{
+    ItclShowArgs(0, "Itcl_WidgetAdaptorCmdStart", objc, objv);
+    const char *res = Tcl_PkgRequire(interp, "ItclWidget", "4.0", 0);
+    if (res == NULL) {
+        return TCL_ERROR;
+    }
+    return Tcl_EvalObjv(interp, objc, objv, 0);
+}

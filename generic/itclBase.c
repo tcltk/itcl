@@ -9,7 +9,7 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itclBase.c,v 1.1.2.5 2007/09/10 15:42:34 wiede Exp $
+ * RCS: @(#) $Id: itclBase.c,v 1.1.2.6 2007/09/15 11:56:11 wiede Exp $
  */
 
 #include <stdlib.h>
@@ -245,6 +245,9 @@ Initialize (
     infoPtr->ensembleInfo->numEnsembles = 0;
     infoPtr->protection = ITCL_DEFAULT_PROTECT;
     infoPtr->currIoPtr = NULL;
+    infoPtr->windgetInfoPtr = NULL;
+    infoPtr->tkInitted = 0;
+    infoPtr->buildingWidget = 0;
 char *res_option = getenv("ITCL_USE_OLD_RESOLVERS");
 int opt;
 if (res_option == NULL) {

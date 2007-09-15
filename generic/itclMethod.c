@@ -25,7 +25,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclMethod.c,v 1.1.2.4 2007/09/09 20:53:47 wiede Exp $
+ *     RCS:  $Id: itclMethod.c,v 1.1.2.5 2007/09/15 11:56:11 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -683,6 +683,9 @@ Itcl_CreateMemberCode(
 	        isDone = 1;
 	    }
 	    if (strcmp(body, "@itcl-builtin-isa") == 0) {
+	        isDone = 1;
+	    }
+	    if (strcmp(body, "@itcl-builtin-installhull") == 0) {
 	        isDone = 1;
 	    }
 	    if (!isDone) {

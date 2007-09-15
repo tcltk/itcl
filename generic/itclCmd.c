@@ -23,7 +23,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclCmd.c,v 1.1.2.4 2007/09/10 15:42:34 wiede Exp $
+ *     RCS:  $Id: itclCmd.c,v 1.1.2.5 2007/09/15 11:56:11 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -1160,4 +1160,3 @@ Itcl_MixinDeleteCmd(
     Tcl_AppendResult(interp, "::itcl::mixin delete command not yet implemented", NULL);
     return TCL_ERROR;
 }
-
