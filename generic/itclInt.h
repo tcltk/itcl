@@ -9,7 +9,7 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itclInt.h,v 1.17.2.9 2007/09/15 20:44:04 wiede Exp $
+ * RCS: @(#) $Id: itclInt.h,v 1.17.2.10 2007/09/15 23:51:14 wiede Exp $
  */
 
 #include <string.h>
@@ -203,7 +203,7 @@ typedef struct ItclClass {
     struct ItclMemberFunc *constructorInit;  /* the class constructor init code or NULL */
     Tcl_Resolve *resolvePtr;
     Tcl_Object oPtr;		  /* TclOO class object */
-    Tcl_Object *widgetClass;      /* class name for widget if class is an
+    Tcl_Obj *widgetClassPtr;      /* class name for widget if class is an
                                    * ::itcl::widget */
     Tcl_Class  classPtr;          /* TclOO class */
     int numCommons;               /* number of commons in this class */
@@ -382,14 +382,14 @@ typedef struct ItclDelegatedOption {
     Tcl_Obj *classNamePtr;
     ItclComponent *icPtr;
     Tcl_Obj *asScript;
-    Tcl_Obj *exceptionsScript;
+    Tcl_HashTable exceptions;
 } ItclDelegatedOption;
 
 typedef struct ItclDelegatedMethod {
     Tcl_Obj *namePtr;
     ItclComponent *icPtr;
     Tcl_Obj *asScript;
-    Tcl_Obj *exceptionsScript;
+    Tcl_HashTable exceptions;
 } ItclDelegatedMethod;
 
 typedef struct IctlVarTraceInfo {

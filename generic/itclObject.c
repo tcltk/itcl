@@ -24,7 +24,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclObject.c,v 1.1.2.5 2007/09/15 20:44:04 wiede Exp $
+ *     RCS:  $Id: itclObject.c,v 1.1.2.6 2007/09/15 23:51:14 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -36,7 +36,7 @@
 /*
  *  FORWARD DECLARATIONS
  */
-static const char* ItclTraceThisVar(ClientData cdata, Tcl_Interp *interp,
+static char* ItclTraceThisVar(ClientData cdata, Tcl_Interp *interp,
 	CONST char *name1, CONST char *name2, int flags);
 
 static void ItclDestroyObject(ClientData clientData);
@@ -1047,7 +1047,7 @@ ItclReportObjectUsage(
  * ------------------------------------------------------------------------
  */
 /* ARGSUSED */
-static const char*
+static char*
 ItclTraceThisVar(
     ClientData cdata,	    /* object instance data */
     Tcl_Interp *interp,	    /* interpreter managing this variable */

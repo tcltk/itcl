@@ -6,7 +6,7 @@
  * ========================================================================
  *  Author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclWidgetObject.c,v 1.1.2.2 2007/09/15 20:44:04 wiede Exp $
+ *     RCS:  $Id: itclWidgetObject.c,v 1.1.2.3 2007/09/15 23:51:14 wiede Exp $
  * ========================================================================
  *           Copyright (c) 2007 Arnulf Wiedemann
  * ------------------------------------------------------------------------
@@ -65,7 +65,7 @@ HullAndOptionsInstall(
     int result;
     int i;
 
-    ItclShowArgs(0, "HullAndOptionsINstall", objc, objv);
+    ItclShowArgs(0, "HullAndOptionsInstall", objc, objv);
     
     Tcl_DStringInit(&buffer),
     Tcl_DStringAppend(&buffer, ITCL_VARIABLES_NAMESPACE, -1);
@@ -81,7 +81,7 @@ HullAndOptionsInstall(
         Tcl_DStringAppend(&buffer2, Tcl_GetString(ioptPtr->namePtr)+1, -1);
         
     }
-    widgetClassPtr = NULL;
+    widgetClassPtr = iclsPtr->widgetClassPtr;
     foundWclass = 0;
     iclsPtr->infoPtr->buildingWidget = 1;
     iclsPtr->infoPtr->currIoPtr = ioPtr;

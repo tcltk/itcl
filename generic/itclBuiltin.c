@@ -24,7 +24,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclBuiltin.c,v 1.1.2.5 2007/09/15 20:44:04 wiede Exp $
+ *     RCS:  $Id: itclBuiltin.c,v 1.1.2.6 2007/09/15 23:51:14 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -306,22 +306,22 @@ Itcl_BiConfigureCmd(
     ItclClass *contextIclsPtr;
     ItclObject *contextIoPtr;
 
-    int i;
-    int result;
-    CONST char *lastval;
-    char *token;
-    char *varName;
-    ItclClass *iclsPtr;
-    Tcl_HashSearch place;
-    Tcl_HashEntry *entry;
-    ItclVariable *ivPtr;
-    ItclVarLookup *vlookup;
-    ItclMemberCode *mcode;
-    ItclHierIter hier;
     Tcl_Obj *resultPtr;
     Tcl_Obj *objPtr;
     Tcl_DString buffer;
     Tcl_DString buffer2;
+    Tcl_HashSearch place;
+    Tcl_HashEntry *entry;
+    ItclClass *iclsPtr;
+    ItclVariable *ivPtr;
+    ItclVarLookup *vlookup;
+    ItclMemberCode *mcode;
+    ItclHierIter hier;
+    CONST char *lastval;
+    char *token;
+    char *varName;
+    int i;
+    int result;
 
     ItclShowArgs(0, "Itcl_BiConfigureCmd", objc, objv);
     vlookup = NULL;
@@ -355,8 +355,11 @@ fprintf(stderr, "CIP!%p!0x%08x\n", contextIclsPtr, contextIclsPtr->flags);
 	ItclWidgetInfo *iwInfoPtr;
 	iwInfoPtr = contextIclsPtr->infoPtr->windgetInfoPtr;
         if (iwInfoPtr != NULL) {
-	    return iwInfoPtr->widgetConfigure(contextIclsPtr, interp,
+	    result = iwInfoPtr->widgetConfigure(contextIclsPtr, interp,
 	            objc, objv);
+	    if (result != TCL_CONTINUE) {
+	        return result;
+	    }
 	}
     }
     /*
@@ -552,10 +555,11 @@ Itcl_BiCgetCmd(
     ItclClass *contextIclsPtr;
     ItclObject *contextIoPtr;
 
+    Tcl_HashEntry *entry;
+    ItclVarLookup *vlookup;
     CONST char *name;
     CONST char *val;
-    ItclVarLookup *vlookup;
-    Tcl_HashEntry *entry;
+    int result;
 
     ItclShowArgs(2,"Itcl_BiCgetCmd", objc, objv);
     /*
@@ -584,8 +588,11 @@ Itcl_BiCgetCmd(
 	ItclWidgetInfo *iwInfoPtr;
 	iwInfoPtr = contextIclsPtr->infoPtr->windgetInfoPtr;
         if (iwInfoPtr != NULL) {
-	    return iwInfoPtr->widgetConfigure(contextIclsPtr, interp,
+	    result = iwInfoPtr->widgetCget(contextIclsPtr, interp,
 	            objc, objv);
+	    if (result != TCL_CONTINUE) {
+	        return result;
+	    }
 	}
     }
     name = Tcl_GetString(objv[1]);

@@ -9,7 +9,7 @@
  * ========================================================================
  *  Author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclWidgetBuiltin.c,v 1.1.2.2 2007/09/15 20:44:04 wiede Exp $
+ *     RCS:  $Id: itclWidgetBuiltin.c,v 1.1.2.3 2007/09/15 23:51:14 wiede Exp $
  * ========================================================================
  *           Copyright (c) 2007 Arnulf Wiedemann
  * ------------------------------------------------------------------------
@@ -303,78 +303,6 @@ Itcl_BiHullInstallCmd(
 
 /*
  * ------------------------------------------------------------------------
- *  ItclReportPublicOpt()
- *
- *  Returns information about a public variable formatted as a
- *  configuration option:
- *
- *    -<varName> <initVal> <currentVal>
- *
- *  Used by Itcl_BiConfigureCmd() to report configuration options.
- *  Returns a Tcl_Obj containing the information.
- * ------------------------------------------------------------------------
- */
-static Tcl_Obj*
-ItclReportPublicOpt(
-    Tcl_Interp *interp,      /* interpreter containing the object */
-    ItclVariable *ivPtr,     /* public variable to be reported */
-    ItclObject *contextIoPtr) /* object containing this variable */
-{
-    CONST char *val;
-    ItclClass *iclsPtr;
-    Tcl_HashEntry *hPtr;
-    ItclVarLookup *vlookup;
-    Tcl_DString optName;
-    Tcl_Obj *listPtr;
-    Tcl_Obj *objPtr;
-
-    listPtr = Tcl_NewListObj(0, (Tcl_Obj**)NULL);
-
-    /*
-     *  Determine how the option name should be reported.
-     *  If the simple name can be used to find it in the virtual
-     *  data table, then use the simple name.  Otherwise, this
-     *  is a shadowed variable; use the full name.
-     */
-    Tcl_DStringInit(&optName);
-    Tcl_DStringAppend(&optName, "-", -1);
-
-    iclsPtr = (ItclClass*)contextIoPtr->iclsPtr;
-    hPtr = Tcl_FindHashEntry(&iclsPtr->resolveVars,
-            Tcl_GetString(ivPtr->fullNamePtr));
-    assert(hPtr != NULL);
-    vlookup = (ItclVarLookup*)Tcl_GetHashValue(hPtr);
-    Tcl_DStringAppend(&optName, vlookup->leastQualName, -1);
-
-    objPtr = Tcl_NewStringObj(Tcl_DStringValue(&optName), -1);
-    Tcl_ListObjAppendElement((Tcl_Interp*)NULL, listPtr, objPtr);
-    Tcl_DStringFree(&optName);
-
-
-    if (ivPtr->init) {
-        objPtr = ivPtr->init;
-    } else {
-        objPtr = Tcl_NewStringObj("<undefined>", -1);
-    }
-    Tcl_ListObjAppendElement((Tcl_Interp*)NULL, listPtr, objPtr);
-
-    val = Itcl_GetInstanceVar(interp, Tcl_GetString(ivPtr->namePtr),
-            contextIoPtr, ivPtr->iclsPtr);
-
-    if (val) {
-        objPtr = Tcl_NewStringObj((CONST84 char *)val, -1);
-    } else {
-        objPtr = Tcl_NewStringObj("<undefined>", -1);
-    }
-    Tcl_ListObjAppendElement((Tcl_Interp*)NULL, listPtr, objPtr);
-
-    return listPtr;
-}
-
-
-
-/*
- * ------------------------------------------------------------------------
  *  ItclWidgetConfigure()
  *
  *  Invoked whenever the user issues the "configure" method for an object.
@@ -407,25 +335,12 @@ ItclWidgetConfigure(
     ItclClass *contextIclsPtr;
     ItclObject *contextIoPtr;
 
-    Tcl_HashSearch place;
     Tcl_HashEntry *hPtr;
-    Tcl_Obj *resultPtr;
-    Tcl_Obj *objPtr;
-    Tcl_DString buffer;
-    Tcl_DString buffer2;
-    Tcl_Obj *optionNamePtr;
-    ItclClass *iclsPtr;
-    ItclVariable *ivPtr;
     ItclVarLookup *vlookup;
-    ItclMemberCode *mcode;
-    ItclHierIter hier;
-    ItclDelegatedOption *idoPtr;
+    ItclDelegatedMethod *idmPtr;
     ItclComponent *icPtr;
     const char *val;
-    CONST char *lastval;
     char *token;
-    char *varName;
-    int i;
     int result;
 
     ItclShowArgs(0, "ItclWidgetConfigure", objc, objv);
@@ -455,18 +370,16 @@ ItclWidgetConfigure(
         contextIclsPtr = contextIoPtr->iclsPtr;
     }
 
-    /*
-     *  HANDLE:  configure
-     */
-    if (objc == 1) {
-        optionNamePtr = Tcl_NewStringObj("*", -1);
-        Tcl_IncrRefCount(optionNamePtr);
-        hPtr = Tcl_FindHashEntry(&contextIclsPtr->delegatedOptions,
-            (char *)optionNamePtr);
-fprintf(stderr, "hPtr:%p\n", hPtr);
-        if (hPtr != NULL) {
-	    idoPtr = Tcl_GetHashValue(hPtr);
-	    icPtr = idoPtr->icPtr;
+    Tcl_Obj *methodNamePtr;
+    methodNamePtr = Tcl_NewStringObj("*", -1);
+    hPtr = Tcl_FindHashEntry(&contextIclsPtr->delegatedMethods, (char *)
+            methodNamePtr);
+    if (hPtr != NULL) {
+        idmPtr = (ItclDelegatedMethod *)Tcl_GetHashValue(hPtr);
+	Tcl_SetStringObj(methodNamePtr, "configure", -1);
+        hPtr = Tcl_FindHashEntry(&idmPtr->exceptions, (char *)methodNamePtr);
+        if (hPtr == NULL) {
+	    icPtr = idmPtr->icPtr;
 	    val = Itcl_GetInstanceVar(interp, Tcl_GetString(icPtr->namePtr),
 	            contextIoPtr, contextIclsPtr);
             if (val != NULL) {
@@ -477,201 +390,11 @@ fprintf(stderr, "hPtr:%p\n", hPtr);
                 result = Tcl_Eval(interp, Tcl_DStringValue(&buffer));
                 return result;
 	    }
-        }
-        resultPtr = Tcl_NewListObj(0, (Tcl_Obj**)NULL);
-
-        Itcl_InitHierIter(&hier, contextIclsPtr);
-        while ((iclsPtr=Itcl_AdvanceHierIter(&hier)) != NULL) {
-            hPtr = Tcl_FirstHashEntry(&iclsPtr->variables, &place);
-            while (hPtr) {
-                ivPtr = (ItclVariable*)Tcl_GetHashValue(hPtr);
-                if (ivPtr->protection == ITCL_PUBLIC) {
-                    objPtr = ItclReportPublicOpt(interp, ivPtr, contextIoPtr);
-
-                    Tcl_ListObjAppendElement((Tcl_Interp*)NULL, resultPtr,
-                        objPtr);
-                }
-                hPtr = Tcl_NextHashEntry(&place);
-            }
-        }
-        Itcl_DeleteHierIter(&hier);
-
-        Tcl_SetObjResult(interp, resultPtr);
-        return TCL_OK;
-    } else {
-
-        /*
-         *  HANDLE:  configure -option
-         */
-        if (objc == 2) {
-            token = Tcl_GetStringFromObj(objv[1], (int*)NULL);
-            if (*token != '-') {
-                Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
-                    "improper usage: should be ",
-                    "\"object configure ?-option? ?value -option value...?\"",
-                    (char*)NULL);
-                return TCL_ERROR;
-            }
-
-            vlookup = NULL;
-            hPtr = Tcl_FindHashEntry(&contextIclsPtr->resolveVars, token+1);
-            if (hPtr) {
-                vlookup = (ItclVarLookup*)Tcl_GetHashValue(hPtr);
-
-                if (vlookup->ivPtr->protection != ITCL_PUBLIC) {
-                    vlookup = NULL;
-                }
-            }
-	    optionNamePtr = Tcl_NewStringObj("*", -1);
-	    Tcl_IncrRefCount(optionNamePtr);
-            hPtr = Tcl_FindHashEntry(&contextIclsPtr->delegatedOptions,
-	            (char *)optionNamePtr);
-            if (hPtr != NULL) {
-		idoPtr = Tcl_GetHashValue(hPtr);
-		icPtr = idoPtr->icPtr;
-		val = Itcl_GetInstanceVar(interp,
-		        Tcl_GetString(icPtr->namePtr), contextIoPtr,
-			contextIclsPtr);
-	        if (val != NULL) {
-		    Tcl_DString buffer;
-		    Tcl_DStringInit(&buffer);
-		    Tcl_DStringAppend(&buffer, val, -1);
-		    Tcl_DStringAppend(&buffer, " configure ", -1);
-		    Tcl_DStringAppend(&buffer, token, -1);
-                    result = Tcl_Eval(interp, Tcl_DStringValue(&buffer));
-                    return result;
-		}
-	    }
-	    Tcl_SetStringObj(optionNamePtr, token, -1);
-            hPtr = Tcl_FindHashEntry(&contextIclsPtr->options,
-	            (char *)optionNamePtr);
-            if (hPtr != NULL) {
-/* FIX ME to be implemented */
-fprintf(stderr, "hPtr1!%p!%s!\n", hPtr, Tcl_GetString(optionNamePtr));
-	    }
-            hPtr = Tcl_FindHashEntry(&contextIclsPtr->delegatedOptions,
-	            (char *)optionNamePtr);
-            if (hPtr != NULL) {
-/* FIX ME to be implemented */
-fprintf(stderr, "hPtr2!%p!\n", hPtr);
-	    }
-	    Tcl_DecrRefCount(optionNamePtr);
-            if (!vlookup) {
-                Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
-                    "unknown option \"", token, "\"",
-                    (char*)NULL);
-                return TCL_ERROR;
-            }
-
-            resultPtr = ItclReportPublicOpt(interp,
-	            vlookup->ivPtr, contextIoPtr);
-            Tcl_SetObjResult(interp, resultPtr);
-            return TCL_OK;
-        }
+	}
+        if (hPtr != NULL) {
+	}
     }
-
-    /*
-     *  HANDLE:  configure -option value -option value...
-     *
-     *  Be careful to work in the virtual scope.  If this "configure"
-     *  method was defined in a base class, the current namespace
-     *  (from Itcl_ExecMethod()) will be that base class.  Activate
-     *  the derived class namespace here, so that instance variables
-     *  are accessed properly.
-     */
-    result = TCL_OK;
-
-    Tcl_DStringInit(&buffer);
-    Tcl_DStringInit(&buffer2);
-
-    for (i=1; i < objc; i+=2) {
-        vlookup = NULL;
-        token = Tcl_GetString(objv[i]);
-        if (*token == '-') {
-            hPtr = Tcl_FindHashEntry(&contextIclsPtr->resolveVars, token+1);
-            if (hPtr) {
-                vlookup = (ItclVarLookup*)Tcl_GetHashValue(hPtr);
-            }
-        }
-
-        if (!vlookup || vlookup->ivPtr->protection != ITCL_PUBLIC) {
-            Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
-                "unknown option \"", token, "\"",
-                (char*)NULL);
-            result = TCL_ERROR;
-            goto configureDone;
-        }
-        if (i == objc-1) {
-            Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
-                "value for \"", token, "\" missing",
-                (char*)NULL);
-            result = TCL_ERROR;
-            goto configureDone;
-        }
-
-        ivPtr = vlookup->ivPtr;
-        Tcl_DStringSetLength(&buffer2, 0);
-        Tcl_DStringAppend(&buffer2,
-	        Tcl_GetString(contextIoPtr->varNsNamePtr), -1);
-        Tcl_DStringAppend(&buffer2,
-	        Tcl_GetString(ivPtr->iclsPtr->fullname), -1);
-        Tcl_DStringAppend(&buffer2, "::", 2);
-        Tcl_DStringAppend(&buffer2,
-	        Tcl_GetString(ivPtr->namePtr), -1);
-	varName = Tcl_DStringValue(&buffer2);
-        lastval = Tcl_GetVar2(interp, varName, (char*)NULL, 0);
-        Tcl_DStringSetLength(&buffer, 0);
-        Tcl_DStringAppend(&buffer, (lastval) ? lastval : "", -1);
-
-        token = Tcl_GetStringFromObj(objv[i+1], (int*)NULL);
-
-        if (Tcl_SetVar2(interp, varName, (char*)NULL, token,
-                TCL_LEAVE_ERR_MSG) == NULL) {
-
-            char msg[256];
-            sprintf(msg, "\n    (error in configuration of public variable \"%.100s\")", Tcl_GetString(ivPtr->fullNamePtr));
-            Tcl_AddErrorInfo(interp, msg);
-            result = TCL_ERROR;
-            goto configureDone;
-        }
-
-        /*
-         *  If this variable has some "config" code, invoke it now.
-         *
-         *  TRICKY NOTE:  Be careful to evaluate the code one level
-         *    up in the call stack, so that it's executed in the
-         *    calling context, and not in the context that we've
-         *    set up for public variable access.
-         */
-        mcode = ivPtr->codePtr;
-        if (mcode && Itcl_IsMemberCodeImplemented(mcode)) {
-	    if (!ivPtr->iclsPtr->infoPtr->useOldResolvers) {
-                Itcl_SetCallFrameResolver(interp, contextIoPtr->resolvePtr);
-            }
-	    Tcl_Namespace *saveNsPtr = Tcl_GetCurrentNamespace(interp);
-	    Itcl_SetCallFrameNamespace(interp, ivPtr->iclsPtr->namesp);
-	    result = Tcl_EvalObjEx(interp, mcode->bodyPtr, 0);
-	    Itcl_SetCallFrameNamespace(interp, saveNsPtr);
-            if (result == TCL_OK) {
-                Tcl_ResetResult(interp);
-            } else {
-                char msg[256];
-                sprintf(msg, "\n    (error in configuration of public variable \"%.100s\")", Tcl_GetString(ivPtr->fullNamePtr));
-                Tcl_AddErrorInfo(interp, msg);
-
-                Tcl_SetVar2(interp, varName,(char*)NULL,
-                    Tcl_DStringValue(&buffer), 0);
-
-                goto configureDone;
-            }
-        }
-    }
-
-configureDone:
-    Tcl_DStringFree(&buffer2);
-    Tcl_DStringFree(&buffer);
-
-    return result;
+    return TCL_CONTINUE;
 }
 
 /*
@@ -702,9 +425,12 @@ ItclWidgetCget(
     ItclObject *contextIoPtr;
 
     CONST char *name;
-    CONST char *val;
-    ItclVarLookup *vlookup;
+
     Tcl_HashEntry *hPtr;
+    ItclDelegatedMethod *idmPtr;
+    ItclComponent *icPtr;
+    const char *val;
+    int result;
 
     ItclShowArgs(0,"ItclWidgetCget", objc, objv);
     /*
@@ -731,28 +457,32 @@ ItclWidgetCget(
 
     name = Tcl_GetString(objv[1]);
 
-    vlookup = NULL;
-    hPtr = Tcl_FindHashEntry(&contextIclsPtr->resolveVars, name+1);
-    if (hPtr) {
-        vlookup = (ItclVarLookup*)Tcl_GetHashValue(hPtr);
+    Tcl_Obj *methodNamePtr;
+    methodNamePtr = Tcl_NewStringObj("*", -1);
+    hPtr = Tcl_FindHashEntry(&contextIclsPtr->delegatedMethods, (char *)
+            methodNamePtr);
+    if (hPtr != NULL) {
+        idmPtr = (ItclDelegatedMethod *)Tcl_GetHashValue(hPtr);
+	Tcl_SetStringObj(methodNamePtr, "cget", -1);
+        hPtr = Tcl_FindHashEntry(&idmPtr->exceptions, (char *)methodNamePtr);
+        if (hPtr == NULL) {
+	    icPtr = idmPtr->icPtr;
+	    val = Itcl_GetInstanceVar(interp, Tcl_GetString(icPtr->namePtr),
+	            contextIoPtr, contextIclsPtr);
+            if (val != NULL) {
+fprintf(stderr, "found del meth!%p!%s!\n", idmPtr, val);
+	        Tcl_DString buffer;
+	        Tcl_DStringInit(&buffer);
+	        Tcl_DStringAppend(&buffer, val, -1);
+	        Tcl_DStringAppend(&buffer, " cget ", -1);
+	        Tcl_DStringAppend(&buffer, name, -1);
+                result = Tcl_Eval(interp, Tcl_DStringValue(&buffer));
+                return result;
+	    }
+        }
+        if (hPtr != NULL) {
+	}
     }
-
-    if ((vlookup == NULL) || (vlookup->ivPtr->protection != ITCL_PUBLIC)) {
-        Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
-            "unknown option \"", name, "\"",
-            (char*)NULL);
-        return TCL_ERROR;
-    }
-
-    val = Itcl_GetInstanceVar(interp,
-            Tcl_GetString(vlookup->ivPtr->namePtr),
-            contextIoPtr, vlookup->ivPtr->iclsPtr);
-
-    if (val) {
-        Tcl_SetObjResult(interp, Tcl_NewStringObj(val, -1));
-    } else {
-        Tcl_SetObjResult(interp, Tcl_NewStringObj("<undefined>", -1));
-    }
-    return TCL_OK;
+    return TCL_CONTINUE;
 }
 
