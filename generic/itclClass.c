@@ -25,7 +25,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclClass.c,v 1.1.2.5 2007/09/15 11:56:11 wiede Exp $
+ *     RCS:  $Id: itclClass.c,v 1.1.2.6 2007/09/15 20:44:04 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -387,6 +387,23 @@ Itcl_CreateClass(
 
     hPtr = Tcl_CreateHashEntry(&iclsPtr->variables, (char *)namePtr, &newEntry);
     Tcl_SetHashValue(hPtr, (ClientData)ivPtr);
+
+    if (infoPtr->currClassFlags & (ITCL_IS_WIDGET|ITCL_IS_WIDGETADAPTOR)) {
+        /*
+         *  Add the built-in "thiswin" variable to the list of data members.
+         */
+        namePtr = Tcl_NewStringObj("thiswin", -1);
+        Tcl_IncrRefCount(namePtr);
+        (void) Itcl_CreateVariable(interp, iclsPtr, namePtr, (char*)NULL,
+                (char*)NULL, &ivPtr);
+
+        ivPtr->protection = ITCL_PROTECTED;  /* always "protected" */
+        ivPtr->flags |= ITCL_THIS_VAR;       /* mark as "thiswin" variable */
+    
+        hPtr = Tcl_CreateHashEntry(&iclsPtr->variables, (char *)namePtr,
+	        &newEntry);
+        Tcl_SetHashValue(hPtr, (ClientData)ivPtr);
+    }
 
     /*
      *  Create a command in the current namespace to manage the class:
@@ -1261,8 +1278,7 @@ Itcl_BuildVirtualTables(
                 assert(hPtr != NULL);
 
                 vlookup->var.common = (Tcl_Var)Tcl_GetHashValue(hPtr);
-            }
-            else {
+            } else {
                 /*
                  *  If this is a reference to the built-in "this"
                  *  variable, then its index is "0".  Otherwise,

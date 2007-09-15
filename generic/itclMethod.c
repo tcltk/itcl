@@ -25,7 +25,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclMethod.c,v 1.1.2.5 2007/09/15 11:56:11 wiede Exp $
+ *     RCS:  $Id: itclMethod.c,v 1.1.2.6 2007/09/15 20:44:04 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -302,6 +302,32 @@ Itcl_CreateMethod(
 {
     ItclMemberFunc *imPtr;
 
+    return ItclCreateMethod(interp, iclsPtr, namePtr, arglist, body, &imPtr);
+}
+
+/*
+ * ------------------------------------------------------------------------
+ *  ItclCreateMethod()
+ *
+ *  Installs a method into the namespace associated with a class.
+ *  If another command with the same name is already installed, then
+ *  it is overwritten.
+ *
+ *  Returns TCL_OK on success, or TCL_ERROR (along with an error message
+ *  in the specified interp) if anything goes wrong.
+ * ------------------------------------------------------------------------
+ */
+int
+ItclCreateMethod(
+    Tcl_Interp* interp,  /* interpreter managing this action */
+    ItclClass *iclsPtr,  /* class definition */
+    Tcl_Obj *namePtr,    /* name of new method */
+    CONST char* arglist, /* space-separated list of arg names */
+    CONST char* body,    /* body of commands for the method */
+    ItclMemberFunc **imPtrPtr)
+{
+    ItclMemberFunc *imPtr;
+
     /*
      *  Make sure that the method name does not contain anything
      *  goofy like a "::" scope qualifier.
@@ -322,7 +348,9 @@ Itcl_CreateMethod(
     }
 
     Itcl_PreserveData((ClientData)imPtr);
-
+    if (imPtrPtr != NULL) {
+        *imPtrPtr = imPtr;
+    }
     return TCL_OK;
 }
 
@@ -685,7 +713,7 @@ Itcl_CreateMemberCode(
 	    if (strcmp(body, "@itcl-builtin-isa") == 0) {
 	        isDone = 1;
 	    }
-	    if (strcmp(body, "@itcl-builtin-installhull") == 0) {
+	    if (strcmp(body, "@itcl-builtin-hullinstall") == 0) {
 	        isDone = 1;
 	    }
 	    if (!isDone) {
@@ -2085,6 +2113,9 @@ ItclProcErrorProc(
 	                &imPtr->iclsPtr->infoPtr->constructorStack,
 		        constructorStackIndex);
             }
+	    if (currIclsPtr == NULL) {
+	        break;
+	    }
 	    if (upNsPtr == currIclsPtr->namesp) {
 	        break;
 	    }

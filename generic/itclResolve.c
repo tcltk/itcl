@@ -20,7 +20,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itclResolve.c,v 1.1.2.3 2007/09/09 13:38:41 wiede Exp $
+ *     RCS:  $Id: itclResolve.c,v 1.1.2.4 2007/09/15 20:44:04 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -115,9 +115,11 @@ Itcl_ClassCmdResolver(
     ItclObjectInfo *infoPtr;
 
     Tcl_HashEntry *hPtr;
+    Tcl_Obj *namePtr;
     ItclMemberFunc *imPtr;
     int isCmdDeleted;
 
+//fprintf(stderr, "Itcl_ClassCmdResolver!%s!%s!\n", name, nsPtr->fullName);
     infoPtr = (ItclObjectInfo *)Tcl_GetAssocData(interp,
                 ITCL_INTERP_DATA, NULL);
     hPtr = Tcl_FindHashEntry(&infoPtr->namespaceClasses, (char *)nsPtr);
@@ -132,7 +134,18 @@ Itcl_ClassCmdResolver(
      */
     hPtr = Tcl_FindHashEntry(&iclsPtr->resolveCmds, name);
     if (hPtr == NULL) {
-        return TCL_CONTINUE;
+	if (!(iclsPtr->flags & ITCL_IS_CLASS)) {
+	    namePtr = Tcl_NewStringObj(name, -1);
+	    Tcl_IncrRefCount(namePtr);
+	    hPtr = Tcl_FindHashEntry(&iclsPtr->components, (char *)namePtr);
+	    Tcl_DecrRefCount(namePtr);
+            if (hPtr != NULL) {
+fprintf(stderr, "FOUND COMP!%s!\n", name);
+	    }
+        }
+        if (hPtr == NULL) {
+            return TCL_CONTINUE;
+        }
     }
 
     imPtr = (ItclMemberFunc*)Tcl_GetHashValue(hPtr);

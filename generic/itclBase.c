@@ -9,7 +9,7 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itclBase.c,v 1.1.2.6 2007/09/15 11:56:11 wiede Exp $
+ * RCS: @(#) $Id: itclBase.c,v 1.1.2.7 2007/09/15 20:44:04 wiede Exp $
  */
 
 #include <stdlib.h>
@@ -117,6 +117,10 @@ static char *clazzUnknownBody = "\n\
     } obj errInfo]} {\n\
 	return -code error -errorinfo $::errorInfo $obj\n\
     }\n\
+    return $obj\n\
+";
+
+#ifdef NOTDEF
     set body [list {set obj [lindex [::info level 0] 0]}]\n\
     set part {return [::itcl::methodset::objectUnknownCommand [self]}\n\
     append part \" ${myns}::$obj \"\n\
@@ -127,9 +131,8 @@ static char *clazzUnknownBody = "\n\
     ::oo::define ${myns}::$obj method unknown {args} \"[join $body \n]\"\n\
     ::oo::define ${myns}::$obj export unknown\n\
     }\n\
-    return $obj\n\
-";
 
+#endif
 
 /*
  * ------------------------------------------------------------------------
@@ -246,7 +249,7 @@ Initialize (
     infoPtr->protection = ITCL_DEFAULT_PROTECT;
     infoPtr->currIoPtr = NULL;
     infoPtr->windgetInfoPtr = NULL;
-    infoPtr->tkInitted = 0;
+    infoPtr->currClassFlags = 0;
     infoPtr->buildingWidget = 0;
 char *res_option = getenv("ITCL_USE_OLD_RESOLVERS");
 int opt;

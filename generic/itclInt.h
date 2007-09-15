@@ -9,7 +9,7 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itclInt.h,v 1.17.2.8 2007/09/15 11:56:11 wiede Exp $
+ * RCS: @(#) $Id: itclInt.h,v 1.17.2.9 2007/09/15 20:44:04 wiede Exp $
  */
 
 #include <string.h>
@@ -140,7 +140,7 @@ typedef struct ItclObjectInfo {
     struct EnsembleInfo *ensembleInfo;
     ItclWidgetInfo *windgetInfoPtr; /* contains function pointers to be called
                                      * when constructing an ItclWidget object */
-    int tkInitted;                  /* if package Tk has already been loaded */
+    int currClassFlags;             /* flags for the class just in creation */
     int buildingWidget;             /* set if in construction of a widget */
 } ItclObjectInfo;
 
@@ -212,12 +212,16 @@ typedef struct ItclClass {
     int flags;                    /* maintains class status */
 } ItclClass;
 
-#define ITCL_IS_CLASS		0x01000
-#define ITCL_IS_WIDGET		0x02000
-#define ITCL_IS_WIDGETADAPTOR	0x04000
-#define ITCL_IS_TYPE		0x08000
-#define ITCL_WIDGET_IS_FRAME	0x10000
-#define ITCL_WIDGET_IS_TOPLEVEL	0x20000
+#define ITCL_IS_CLASS		        0x001000
+#define ITCL_IS_WIDGET		        0x002000
+#define ITCL_IS_WIDGETADAPTOR	        0x004000
+#define ITCL_IS_TYPE		        0x008000
+#define ITCL_WIDGET_IS_FRAME	        0x010000
+#define ITCL_WIDGET_IS_LABEL_FRAME	0x020000
+#define ITCL_WIDGET_IS_TOPLEVEL	        0x040000
+#define ITCL_WIDGET_IS_TTK_FRAME        0x080000
+#define ITCL_WIDGET_IS_TTK_LABEL_FRAME	0x100000
+#define ITCL_WIDGET_IS_TTK_TOPLEVEL     0x200000
 
 typedef struct ItclHierIter {
     ItclClass *current;           /* current position in hierarchy */
@@ -480,14 +484,14 @@ MODULE_SCOPE int ItclSetParserResolver(Tcl_Namespace *nsPtr);
 MODULE_SCOPE void ItclProcErrorProc(Tcl_Interp *interp, Tcl_Obj *procNameObj);
 MODULE_SCOPE int ItclClassBaseCmd(ClientData clientData, Tcl_Interp *interp,
 	int flags, int objc, Tcl_Obj *CONST objv[], ItclClass **iclsPtrPtr);
-MODULE_SCOPE int Itcl_BiInstallHullCmd (ClientData clientData,
+MODULE_SCOPE int Itcl_BiHullInstallCmd (ClientData clientData,
         Tcl_Interp *interp, int objc, Tcl_Obj *CONST objv[]);
 MODULE_SCOPE int Itcl_CreateOption (Tcl_Interp *interp, ItclClass *iclsPtr,
         Tcl_Obj *name, const char *resourceName, const char *className, 
 	char *init, char *config, ItclOption **ioptPtr);
 MODULE_SCOPE int ItclInitObjectOptions(Tcl_Interp *interp, ItclObject *ioPtr,
         ItclClass *iclsPtr, const char *name);
-MODULE_SCOPE int InstallHullAndOptions(Tcl_Interp *interp, ItclObject *ioPtr,
+MODULE_SCOPE int HullAndOptionsInstall(Tcl_Interp *interp, ItclObject *ioPtr,
         ItclClass *iclsPtr, int objc, Tcl_Obj * const objv[],
 	int *newObjc, Tcl_Obj **newObjv);
 MODULE_SCOPE const char* Itcl_SetInstanceVar(Tcl_Interp *interp,
@@ -495,9 +499,18 @@ MODULE_SCOPE const char* Itcl_SetInstanceVar(Tcl_Interp *interp,
 	ItclObject *contextIoPtr, ItclClass *contextIclsPtr);
 MODULE_SCOPE Tcl_Obj * ItclCapitalize(const char *str);
 MODULE_SCOPE int ItclWidgetConfigure(ClientData clientData, Tcl_Interp *interp,
-        int objc, Tcl_Obj *CONST objv[]);
+        int objc, Tcl_Obj *const objv[]);
 MODULE_SCOPE int ItclWidgetCget(ClientData clientData, Tcl_Interp *interp,
-        int objc, Tcl_Obj *CONST objv[]);
+        int objc, Tcl_Obj *const objv[]);
+MODULE_SCOPE int ItclCreateMethod(Tcl_Interp* interp, ItclClass *iclsPtr,
+	Tcl_Obj *namePtr, const char* arglist, const char* body,
+        ItclMemberFunc **imPtrPtr);
+MODULE_SCOPE int ItclCreateComponent(Tcl_Interp *interp, ItclClass *iclsPtr,
+        Tcl_Obj *componentPtr, ItclComponent **icPtrPtr);
+MODULE_SCOPE int Itcl_WidgetParseInit(Tcl_Interp *interp,
+        ItclObjectInfo *infoPtr);
+MODULE_SCOPE int Itcl_WidgetBiInit(Tcl_Interp *interp);
+
 
 #include "itcl2TclOO.h"
 

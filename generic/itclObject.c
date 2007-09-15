@@ -24,7 +24,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclObject.c,v 1.1.2.4 2007/09/15 11:56:11 wiede Exp $
+ *     RCS:  $Id: itclObject.c,v 1.1.2.5 2007/09/15 20:44:04 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -36,7 +36,7 @@
 /*
  *  FORWARD DECLARATIONS
  */
-static char* ItclTraceThisVar(ClientData cdata, Tcl_Interp *interp,
+static const char* ItclTraceThisVar(ClientData cdata, Tcl_Interp *interp,
 	CONST char *name1, CONST char *name2, int flags);
 
 static void ItclDestroyObject(ClientData clientData);
@@ -219,14 +219,8 @@ ItclCreateObject(
     resolveInfoPtr->flags = ITCL_RESOLVE_OBJECT;
     resolveInfoPtr->ioPtr = ioPtr;
     ioPtr->resolvePtr->clientData = resolveInfoPtr;
-//    ioPtr->namePtr = Tcl_NewStringObj(Tcl_GetCommandName(interp,
-//            ioPtr->accessCmd), -1);
-//    Tcl_IncrRefCount(ioPtr->namePtr);
     Tcl_TraceCommand(interp, Tcl_GetString(ioPtr->namePtr),
             TCL_TRACE_RENAME|TCL_TRACE_DELETE, ObjectRenamedTrace, ioPtr);
-
-
-
 
     Tcl_ObjectSetMetadata(ioPtr->oPtr, iclsPtr->infoPtr->object_meta_type,
             ioPtr);
@@ -299,6 +293,24 @@ ItclCreateObject(
             (char*)ioPtr->accessCmd, &newEntry);
 
         Tcl_SetHashValue(entry, (ClientData)ioPtr);
+	ClientData pmPtr;
+	Tcl_Obj *namePtr;
+	Tcl_Obj *argumentPtr;
+	Tcl_Obj *bodyPtr;
+	namePtr = Tcl_NewStringObj("unknown", -1);
+	Tcl_IncrRefCount(namePtr);
+	argumentPtr = Tcl_NewStringObj("args", -1);
+	Tcl_IncrRefCount(argumentPtr);
+	bodyPtr = Tcl_NewStringObj("uplevel 1 ::itcl::builtin::objectunknown ",
+	        -1);
+	Tcl_AppendToObj(bodyPtr, Tcl_GetString(ioPtr->namePtr), -1);
+	Tcl_AppendToObj(bodyPtr, " $args", -1);
+	Tcl_IncrRefCount(bodyPtr);
+        Itcl_NewProcMethod(interp, ioPtr->oPtr, NULL, NULL, ItclProcErrorProc, 
+	    (ItclMemberFunc *)ioPtr, namePtr, argumentPtr, bodyPtr, &pmPtr);
+	Tcl_DecrRefCount(namePtr);
+	Tcl_DecrRefCount(argumentPtr);
+	Tcl_DecrRefCount(bodyPtr);
     }
 
     /*
@@ -335,6 +347,7 @@ ItclInitObjectVariables(
     Tcl_Namespace *varNsPtr;
     Tcl_CallFrame frame;
     Tcl_Var varPtr;
+    const char *thisName;
     int isNew;
 
     ivPtr = NULL;
@@ -388,11 +401,12 @@ ItclInitObjectVariables(
                        TCL_TRACE_UNSETS, ItclTraceUnsetVar,
                        (ClientData)traceInfoPtr);
 	        if (ivPtr->flags & ITCL_THIS_VAR) {
-		    if (Tcl_SetVar2(interp, Tcl_GetString(ivPtr->namePtr), NULL,
+                    thisName = Tcl_GetString(ivPtr->namePtr);
+		    if (Tcl_SetVar2(interp, thisName, NULL,
 		        "", TCL_NAMESPACE_ONLY) == NULL) {
 		        return TCL_ERROR;
 	            }
-	            Tcl_TraceVar2(interp, "this", NULL,
+	            Tcl_TraceVar2(interp, thisName, NULL,
 		        TCL_TRACE_READS|TCL_TRACE_WRITES, ItclTraceThisVar,
 		        (ClientData)ioPtr);
 	        } else {
@@ -1033,7 +1047,7 @@ ItclReportObjectUsage(
  * ------------------------------------------------------------------------
  */
 /* ARGSUSED */
-static char*
+static const char*
 ItclTraceThisVar(
     ClientData cdata,	    /* object instance data */
     Tcl_Interp *interp,	    /* interpreter managing this variable */
@@ -1042,7 +1056,7 @@ ItclTraceThisVar(
     int flags)		    /* flags indicating read/write */
 {
     ItclObject *contextIoPtr = (ItclObject*)cdata;
-    char *objName;
+    const char *objName;
     Tcl_Obj *objPtr;
 
     /*
@@ -1052,12 +1066,18 @@ ItclTraceThisVar(
         objPtr = Tcl_NewStringObj("", -1);
         Tcl_IncrRefCount(objPtr);
 
-        if (contextIoPtr->accessCmd) {
-            Tcl_GetCommandFullName(contextIoPtr->iclsPtr->interp,
-                contextIoPtr->accessCmd, objPtr);
-        }
+	if (strcmp(name1, "this") == 0) {
+            if (contextIoPtr->accessCmd) {
+                Tcl_GetCommandFullName(contextIoPtr->iclsPtr->interp,
+                    contextIoPtr->accessCmd, objPtr);
+            }
 
-        objName = Tcl_GetString(objPtr);
+            objName = Tcl_GetString(objPtr);
+	} else {
+	    /* thiswidget variable */
+	    objName = Tcl_GetCommandName(contextIoPtr->iclsPtr->interp,
+	            contextIoPtr->accessCmd);
+	}
         Tcl_SetVar(interp, (CONST84 char *)name1, objName, 0);
 
         Tcl_DecrRefCount(objPtr);
@@ -1320,7 +1340,7 @@ ItclObjectUnknownCommand(
     ItclObject *ioPtr;
     ItclObjectInfo *infoPtr;
 
-    ItclShowArgs(2, "ItclObjectUnknownCommand", objc, objv);
+    ItclShowArgs(0, "ItclObjectUnknownCommand", objc, objv);
     cmd = Tcl_GetCommandFromObj(interp, objv[1]);
     if (Tcl_GetCommandInfoFromToken(cmd, &cmdInfo) != 1) {
     }

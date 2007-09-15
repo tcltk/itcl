@@ -9,11 +9,12 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itclWidgetBase.c,v 1.1.2.1 2007/09/15 11:58:35 wiede Exp $
+ * RCS: @(#) $Id: itclWidgetBase.c,v 1.1.2.2 2007/09/15 20:44:04 wiede Exp $
  */
 
 #include <stdlib.h>
 #include "itclInt.h"
+#include <tk.h>
 
 extern struct ItclStubAPI itclStubAPI;
 
@@ -63,7 +64,7 @@ Initialize (
     TclRenameCommand(interp, "::itcl::widgetadaptor", "::itcl::__widgetadaptor");
     infoPtr->windgetInfoPtr = (ItclWidgetInfo *)ckalloc(sizeof(ItclWidgetInfo));
     infoPtr->windgetInfoPtr->initObjectOpts = ItclInitObjectOptions;
-    infoPtr->windgetInfoPtr->instHullAndOpts = InstallHullAndOptions;
+    infoPtr->windgetInfoPtr->instHullAndOpts = HullAndOptionsInstall;
     infoPtr->windgetInfoPtr->widgetConfigure = ItclWidgetConfigure;
     infoPtr->windgetInfoPtr->widgetCget = ItclWidgetCget;
     Itcl_WidgetParseInit(interp, infoPtr);

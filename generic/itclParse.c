@@ -39,7 +39,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclParse.c,v 1.1.2.6 2007/09/15 11:56:11 wiede Exp $
+ *     RCS:  $Id: itclParse.c,v 1.1.2.7 2007/09/15 20:44:04 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -451,9 +451,15 @@ ItclClassBaseCmd(
     /*
      *  Try to create the specified class and its namespace.
      */
+    /* need the workaround with infoPtr->currClassFlags to keep the stubs
+     * call interface compatible!
+     */
+    infoPtr->currClassFlags = flags;
     if (Itcl_CreateClass(interp, className, infoPtr, &iclsPtr) != TCL_OK) {
+        infoPtr->currClassFlags = 0;
         return TCL_ERROR;
     }
+    infoPtr->currClassFlags = 0;
     iclsPtr->flags = flags;
 
     /*
@@ -1434,7 +1440,7 @@ Itcl_TypeCmdStart(
     int objc,                /* number of arguments */
     Tcl_Obj *CONST objv[])   /* argument objects */
 {
-    ItclShowArgs(0, "Itcl_TypeCmdStart", objc, objv);
+    ItclShowArgs(0, "Itcl_TypeCmdStart", objc-1, objv);
     const char *res = Tcl_PkgRequire(interp, "ItclWidget", "4.0", 0);
     if (res == NULL) {
         return TCL_ERROR;
@@ -1459,7 +1465,7 @@ Itcl_WidgetCmdStart(
     int objc,                /* number of arguments */
     Tcl_Obj *CONST objv[])   /* argument objects */
 {
-    ItclShowArgs(0, "Itcl_WidgetCmdStart", objc, objv);
+    ItclShowArgs(0, "Itcl_WidgetCmdStart", objc-1, objv);
     const char *res = Tcl_PkgRequire(interp, "ItclWidget", "4.0", 0);
     if (res == NULL) {
         return TCL_ERROR;
@@ -1484,7 +1490,7 @@ Itcl_WidgetAdaptorCmdStart(
     int objc,                /* number of arguments */
     Tcl_Obj *CONST objv[])   /* argument objects */
 {
-    ItclShowArgs(0, "Itcl_WidgetAdaptorCmdStart", objc, objv);
+    ItclShowArgs(0, "Itcl_WidgetAdaptorCmdStart", objc-1, objv);
     const char *res = Tcl_PkgRequire(interp, "ItclWidget", "4.0", 0);
     if (res == NULL) {
         return TCL_ERROR;

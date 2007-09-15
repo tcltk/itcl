@@ -6,7 +6,7 @@
  * ========================================================================
  *  Author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclWidgetObject.c,v 1.1.2.1 2007/09/15 11:58:35 wiede Exp $
+ *     RCS:  $Id: itclWidgetObject.c,v 1.1.2.2 2007/09/15 20:44:04 wiede Exp $
  * ========================================================================
  *           Copyright (c) 2007 Arnulf Wiedemann
  * ------------------------------------------------------------------------
@@ -37,12 +37,12 @@ ItclInitObjectOptions(
 
 /*
  * ------------------------------------------------------------------------
- *  InstallHullAndOptions()
+ *  HullAndOptionsInstall()
  * ------------------------------------------------------------------------
  */
 
 int
-InstallHullAndOptions(
+HullAndOptionsInstall(
     Tcl_Interp *interp,
     ItclObject *ioPtr,
     ItclClass *iclsPtr,
@@ -59,12 +59,13 @@ InstallHullAndOptions(
     Tcl_Var optionsVar;
     ItclOption *ioptPtr;
     char *token;
+    const char *hullType;
     int hullObjc;
     int foundWclass;
     int result;
     int i;
 
-    ItclShowArgs(0, "InstallHullAndOptions", objc, objv);
+    ItclShowArgs(0, "HullAndOptionsINstall", objc, objv);
     
     Tcl_DStringInit(&buffer),
     Tcl_DStringAppend(&buffer, ITCL_VARIABLES_NAMESPACE, -1);
@@ -96,7 +97,7 @@ InstallHullAndOptions(
 		memcpy(newObjv, objv, i * sizeof(Tcl_Obj *));
 		if (objc-i-2 > 0) {
 		    memcpy(newObjv+i, objv+i+2, (objc-i-2)*sizeof(Tcl_Obj *));
-ItclShowArgs(0, "InstallHullAndOptions2", *newObjc, newObjv);
+ItclShowArgs(0, "HullAndOptionsInstall2", *newObjc, newObjv);
 		}
 	    }
 	}
@@ -114,20 +115,36 @@ ItclShowArgs(0, "InstallHullAndOptions2", *newObjc, newObjv);
     }
     hullObjc = 5;
     hullObjv = (Tcl_Obj **)ckalloc(sizeof(Tcl_Obj *)*hullObjc);
-    hullObjv[0] = Tcl_NewStringObj("installhull", -1);
+    hullObjv[0] = Tcl_NewStringObj("hullinstall", -1);
     Tcl_IncrRefCount(hullObjv[0]);
     hullObjv[1] = Tcl_NewStringObj("using", -1);
     Tcl_IncrRefCount(hullObjv[1]);
-    if (iclsPtr->flags & ITCL_WIDGET_IS_FRAME) 
-    hullObjv[2] = Tcl_NewStringObj((iclsPtr->flags & ITCL_WIDGET_IS_FRAME) ?
-            "frame" : "toplevel" , -1);
+    if (iclsPtr->flags & ITCL_WIDGET_IS_FRAME) {
+        hullType = "frame";
+    }
+    if (iclsPtr->flags & ITCL_WIDGET_IS_LABEL_FRAME) {
+        hullType = "labelframe";
+    }
+    if (iclsPtr->flags & ITCL_WIDGET_IS_TOPLEVEL) {
+        hullType = "toplevel";
+    }
+    if (iclsPtr->flags & ITCL_WIDGET_IS_TTK_FRAME) {
+        hullType = "ttk::frame";
+    }
+    if (iclsPtr->flags & ITCL_WIDGET_IS_TTK_LABEL_FRAME) {
+        hullType = "ttk::labelframe";
+    }
+    if (iclsPtr->flags & ITCL_WIDGET_IS_TTK_TOPLEVEL) {
+        hullType = "ttk::toplevel";
+    }
+    hullObjv[2] = Tcl_NewStringObj(hullType, -1);
     Tcl_IncrRefCount(hullObjv[2]);
     hullObjv[3] = Tcl_NewStringObj("-class", -1);
     Tcl_IncrRefCount(hullObjv[3]);
     hullObjv[4] = Tcl_NewStringObj(Tcl_GetString(widgetClassPtr), -1);
     Tcl_IncrRefCount(hullObjv[4]);
 
-    result = Itcl_BiInstallHullCmd(iclsPtr, interp, hullObjc, hullObjv);
+    result = Itcl_BiHullInstallCmd(iclsPtr, interp, hullObjc, hullObjv);
     Tcl_DecrRefCount(hullObjv[0]);
     Tcl_DecrRefCount(hullObjv[1]);
     Tcl_DecrRefCount(hullObjv[2]);

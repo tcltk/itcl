@@ -32,7 +32,7 @@
  *    }
  *  Author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclWidgetParse.c,v 1.1.2.1 2007/09/15 11:58:35 wiede Exp $
+ *     RCS:  $Id: itclWidgetParse.c,v 1.1.2.2 2007/09/15 20:44:04 wiede Exp $
  * ========================================================================
  *           Copyright (c) 2007  Arnulf Wiedemann
  * ------------------------------------------------------------------------
@@ -44,6 +44,7 @@
 #include "itclInt.h"
 
 Tcl_ObjCmdProc Itcl_ClassComponentCmd;
+Tcl_ObjCmdProc Itcl_ClassComponentInstallCmd;
 Tcl_ObjCmdProc Itcl_ClassDelegateMethodCmd;
 Tcl_ObjCmdProc Itcl_ClassDelegateOptionCmd;
 Tcl_ObjCmdProc Itcl_ClassDelegateProcCmd;
@@ -54,14 +55,12 @@ Tcl_ObjCmdProc Itcl_WidgetCmd;
 Tcl_ObjCmdProc Itcl_WidgetAdaptorCmd;
 Tcl_ObjCmdProc Itcl_TypeCmd;
 
-static int ItclCreateComponent(Tcl_Interp *interp, ItclClass *iclsPtr,
-        Tcl_Obj *componentPtr, ItclComponent **icPtrPtr);
-
 static const struct {
     const char *name;
     Tcl_ObjCmdProc *objProc;
 } parseCmds[] = {
     {"component", Itcl_ClassComponentCmd},
+    {"componentinstall", Itcl_ClassComponentInstallCmd},
     {"hulltype", Itcl_ClassHullTypeCmd},
     {"option", Itcl_ClassOptionCmd},
     {"widgetclass", Itcl_ClassWidgetClassCmd},
@@ -154,16 +153,18 @@ Itcl_WidgetParseInit(
  *
  * ------------------------------------------------------------------------
  */
-static int
+int
 ItclCreateComponent(
     Tcl_Interp *interp,
     ItclClass *iclsPtr,
     Tcl_Obj *componentPtr,
     ItclComponent **icPtrPtr)
 {
+    Tcl_Obj *bodyPtr;
     Tcl_HashEntry *hPtr;
     ItclComponent *icPtr;
     ItclVariable *ivPtr;
+    ItclMemberFunc *imPtr;
     int isNew;
 
     hPtr = Tcl_CreateHashEntry(&iclsPtr->components, (char *)componentPtr,
@@ -173,11 +174,19 @@ ItclCreateComponent(
                 &ivPtr) != TCL_OK) {
             return TCL_ERROR;
         }
+        ivPtr->flags |= ITCL_COMPONENT;
+	bodyPtr = Tcl_NewStringObj("return [$", -1);
+	Tcl_AppendToObj(bodyPtr, Tcl_GetString(componentPtr), -1);
+	Tcl_AppendToObj(bodyPtr, " {*}$args]", -1);
+        if (ItclCreateMethod(interp, iclsPtr, componentPtr, "args",
+	        Tcl_GetString(bodyPtr), &imPtr) != TCL_OK) {
+            return TCL_ERROR;
+        }
+        imPtr->flags |= ITCL_COMPONENT;
         icPtr = (ItclComponent *)ckalloc(sizeof(ItclComponent));
         memset(icPtr, 0, sizeof(ItclComponent));
         icPtr->namePtr = componentPtr;
         Tcl_IncrRefCount(icPtr->namePtr);
-        ivPtr->flags |= ITCL_COMPONENT;
         icPtr->ivPtr = ivPtr;
 	Tcl_SetHashValue(hPtr, icPtr);
         /* FIX ME !!! */
@@ -212,28 +221,25 @@ Itcl_ClassComponentCmd(
     ItclObjectInfo *infoPtr;
     ItclClass *iclsPtr;
     ItclComponent *icPtr;
+    const char *usage;
     int inherit;
     int newObjc;
 
     ItclShowArgs(0, "Itcl_ClassComponentCmd", objc, objv);
     infoPtr = (ItclObjectInfo*)clientData;
     iclsPtr = (ItclClass*)Itcl_PeekStack(&infoPtr->clsStack);
-    if ((objc != 2) && (objc != 4)) {
-        Tcl_AppendResult(interp,
-	        "wrong # args should be: component ?-inherit <boolean>?", NULL);
+    usage = "component ?-inherit?";
+    if ((objc != 2) && (objc != 3)) {
+        Tcl_AppendResult(interp, "wrong # args should be: ", usage, NULL);
         return TCL_ERROR;
     }
     inherit = 0;
-    if (objc == 4) {
+    if (objc == 3) {
         if (strcmp(Tcl_GetString(objv[2]), "-inherit") != 0) {
-            Tcl_AppendResult(interp,
-	            "wrong syntax should be: component ?-inherit <boolean>?",
-		    NULL);
+            Tcl_AppendResult(interp, "wrong syntax should be: ", usage, NULL);
             return TCL_ERROR;
 	}
-        if (Tcl_GetBooleanFromObj(interp,objv[3],&inherit) != TCL_OK) {
-	    return TCL_ERROR;
-	}
+        inherit = 1;
     }
     if (ItclCreateComponent(interp, iclsPtr, objv[1], &icPtr) != TCL_OK) {
         return TCL_ERROR;
@@ -268,6 +274,41 @@ Itcl_ClassComponentCmd(
 	Tcl_DecrRefCount(newObjv[4]);
     }
     return TCL_OK;
+}
+
+/*
+ * ------------------------------------------------------------------------
+ *  Itcl_ClassComponentInstallCmd()
+ *
+ *  Invoked by Tcl during the parsing of a class definition whenever
+ *  the "componentinstall" command is invoked to define a componentinstall 
+ *  Handles the following syntax:
+ *
+ *      componentinstall 
+ *
+ * ------------------------------------------------------------------------
+ */
+int
+Itcl_ClassComponentInstallCmd(
+    ClientData clientData,   /* info for all known objects */
+    Tcl_Interp *interp,      /* current interpreter */
+    int objc,                /* number of arguments */
+    Tcl_Obj *CONST objv[])   /* argument objects */
+{
+//    Tcl_Obj **newObjv;
+    ItclObjectInfo *infoPtr;
+    ItclClass *iclsPtr;
+//    ItclComponent *icPtr;
+//    const char *usage;
+//    int inherit;
+//    int newObjc;
+
+    ItclShowArgs(0, "Itcl_ClassComponentInstallCmd", objc, objv);
+    infoPtr = (ItclObjectInfo*)clientData;
+    iclsPtr = (ItclClass*)Itcl_PeekStack(&infoPtr->clsStack);
+iclsPtr = NULL;
+    Tcl_AppendResult(interp, "componentinstall not yet implemented", NULL);
+    return TCL_ERROR;
 }
 
 /*
@@ -309,8 +350,24 @@ Itcl_ClassHullTypeCmd(
 	iclsPtr->flags |= ITCL_WIDGET_IS_FRAME;
         correctArg = 1;
     }
+    if (strcmp(Tcl_GetString(objv[1]), "labelframe") == 0) {
+	iclsPtr->flags |= ITCL_WIDGET_IS_LABEL_FRAME;
+        correctArg = 1;
+    }
     if (strcmp(Tcl_GetString(objv[1]), "toplevel") == 0) {
 	iclsPtr->flags |= ITCL_WIDGET_IS_TOPLEVEL;
+        correctArg = 1;
+    }
+    if (strcmp(Tcl_GetString(objv[1]), "ttk::frame") == 0) {
+	iclsPtr->flags |= ITCL_WIDGET_IS_TTK_FRAME;
+        correctArg = 1;
+    }
+    if (strcmp(Tcl_GetString(objv[1]), "ttk::labelframe") == 0) {
+	iclsPtr->flags |= ITCL_WIDGET_IS_TTK_LABEL_FRAME;
+        correctArg = 1;
+    }
+    if (strcmp(Tcl_GetString(objv[1]), "ttk::toplevel") == 0) {
+	iclsPtr->flags |= ITCL_WIDGET_IS_TTK_TOPLEVEL;
         correctArg = 1;
     }
     if (!correctArg) {
@@ -375,7 +432,10 @@ Itcl_ClassDelegateMethodCmd(
     ItclShowArgs(0, "Itcl_ClassDelegateMethodCmd", objc, objv);
     ItclObjectInfo *infoPtr = (ItclObjectInfo*)clientData;
     ItclClass *iclsPtr = (ItclClass*)Itcl_PeekStack(&infoPtr->clsStack);
+iclsPtr = NULL;
 
+    Tcl_AppendResult(interp, "delegate method not yet implemented", NULL);
+//    return TCL_ERROR;
     return TCL_OK;
 }
 
@@ -576,8 +636,10 @@ Itcl_ClassDelegateProcCmd(
     ItclShowArgs(0, "Itcl_ClassDelegateProcCmd", objc, objv);
     ItclObjectInfo *infoPtr = (ItclObjectInfo*)clientData;
     ItclClass *iclsPtr = (ItclClass*)Itcl_PeekStack(&infoPtr->clsStack);
+iclsPtr = NULL;
 
-    return TCL_OK;
+    Tcl_AppendResult(interp, "delegate proc not yet implemented", NULL);
+    return TCL_ERROR;
 }
 
 /*
@@ -630,9 +692,9 @@ Itcl_ClassOptionCmd(
     }
     pLevel = Itcl_Protection(interp, 0);
 
-    usage = "namespec ?init? ?-default value? ?-readonly flag? ?-cgetmethod methodName? ?-configuremethod methodName? ?-validatemethod methodName?";
+    usage = "namespec ?init? ?-default value? ?-readonly? ?-cgetmethod methodName? ?-configuremethod methodName? ?-validatemethod methodName?";
     if (pLevel == ITCL_PUBLIC) {
-        if (objc < 2 || objc > 12) {
+        if (objc < 2 || objc > 11) {
             Tcl_WrongNumArgs(interp, 1, objv, usage);
             return TCL_ERROR;
         }
@@ -665,12 +727,7 @@ Itcl_ClassOptionCmd(
 	    } else {
 	      if (strcmp(token, "-readonly") == 0) {
 	        foundOption = 1;
-		i++;
-	        if (Tcl_GetBooleanFromObj(interp,objv[i],&readOnly) != TCL_OK) {
-		    Tcl_AppendResult(interp,
-		            "value for option readonly is no boolean!", NULL);
-		    return TCL_ERROR;
-		}
+		readOnly = 1;
 	      } else {
 	        if (strcmp(token, "-cgetmethod") == 0) {
 	            foundOption = 1;

@@ -8,7 +8,7 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itclNeededFromTclOO.c,v 1.1.2.4 2007/09/09 20:53:47 wiede Exp $
+ * RCS: @(#) $Id: itclNeededFromTclOO.c,v 1.1.2.5 2007/09/15 20:44:04 wiede Exp $
  */
 
 #include <tclOOInt.h>
@@ -30,6 +30,10 @@ Tcl_Method
 _Tcl_NewProcMethod(
     Tcl_Interp *interp,		/* The interpreter containing the object. */
     Tcl_Object oPtr,		/* The object to modify. */
+    TclOO_PreCallProc preCallPtr,
+    TclOO_PostCallProc postCallPtr,
+    Tcl_ProcErrorProc errProc,
+    ClientData clientData,
     Tcl_Obj *nameObj,		/* The name of the method, which must not be
 				 * NULL. */
     Tcl_Obj *argsObj,		/* The formal argument list for the method,
@@ -37,7 +41,7 @@ _Tcl_NewProcMethod(
     Tcl_Obj *bodyObj,		/* The body of the method, which must not be
 				 * NULL. */
     int flags,                  /* Whether this is a public method. */
-    ClientData *clientData)
+    ClientData *clientData2)
 {
     ProcedureMethod *pmPtr;
     Tcl_Method method;
@@ -45,9 +49,12 @@ _Tcl_NewProcMethod(
     method = (Tcl_Method)TclOONewProcMethod(interp, (Object *)oPtr, flags,
             nameObj, argsObj, bodyObj, &pmPtr);
     pmPtr->flags = flags & USE_DECLARER_NS;
+    pmPtr->preCallProc = preCallPtr;
+    pmPtr->postCallProc = postCallPtr;
+    pmPtr->errProc = errProc;
     pmPtr->clientData = clientData;
-    if (clientData != NULL) {
-        *clientData = pmPtr;
+    if (clientData2 != NULL) {
+        *clientData2 = pmPtr;
     }
     return method;
 }

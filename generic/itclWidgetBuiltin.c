@@ -4,12 +4,12 @@
  *  DESCRIPTION:  Object-Oriented Extensions to Tcl
  *
  *  These procedures handle built-in class methods, including the
- *  "installhull" method 
+ *  "hullinstall" method 
  *
  * ========================================================================
  *  Author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclWidgetBuiltin.c,v 1.1.2.1 2007/09/15 11:58:35 wiede Exp $
+ *     RCS:  $Id: itclWidgetBuiltin.c,v 1.1.2.2 2007/09/15 20:44:04 wiede Exp $
  * ========================================================================
  *           Copyright (c) 2007 Arnulf Wiedemann
  * ------------------------------------------------------------------------
@@ -30,8 +30,8 @@ typedef struct BiMethod {
 } BiMethod;
 
 static BiMethod BiMethodList[] = {
-    { "installhull", "using widgetType ?arg ...?",
-                   "@itcl-builtin-installhull",  Itcl_BiInstallHullCmd },
+    { "hullinstall", "using widgetType ?arg ...?",
+                   "@itcl-builtin-hullinstall",  Itcl_BiHullInstallCmd },
 };
 static int BiMethodListLen = sizeof(BiMethodList)/sizeof(BiMethod);
 
@@ -138,18 +138,18 @@ Itcl_InstallWidgetBiMethods(
 
 /*
  * ------------------------------------------------------------------------
- *  Itcl_BiInstallHullCmd()
+ *  Itcl_BiHullInstallCmd()
  *
- *  Invoked whenever the user issues the "installhull" method for an object.
+ *  Invoked whenever the user issues the "hullinstall" method for an object.
  *  Handles the following syntax:
  *
- *    <objName> installhull using <widgetType> ?arg ...?
+ *    <objName> hullinstall using <widgetType> ?arg ...?
  *
  * ------------------------------------------------------------------------
  */
 /* ARGSUSED */
 int
-Itcl_BiInstallHullCmd(
+Itcl_BiHullInstallCmd(
     ClientData clientData,   /* class definition */
     Tcl_Interp *interp,      /* current interpreter */
     int objc,                /* number of arguments */
@@ -173,7 +173,7 @@ Itcl_BiInstallHullCmd(
     ItclClass *contextIclsPtr;
     ItclObject *contextIoPtr;
 
-    ItclShowArgs(0, "Itcl_BiInstallHullCmd", objc, objv);
+    ItclShowArgs(0, "Itcl_BiHullInstallCmd", objc, objv);
     iclsPtr = (ItclClass *)clientData;
     if (iclsPtr->infoPtr->buildingWidget) {
         contextIclsPtr = iclsPtr;
@@ -192,7 +192,7 @@ Itcl_BiInstallHullCmd(
     if (contextIoPtr == NULL) {
         Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
             "improper usage: should be \"", 
-	    "object installhull using <widgetType> ?arg ...?\"",
+	    "object hullinstall using <widgetType> ?arg ...?\"",
             (char*)NULL);
         return TCL_ERROR;
     }
@@ -297,7 +297,7 @@ Itcl_BiInstallHullCmd(
         return TCL_ERROR;
     }
 #endif
-//fprintf(stderr, "Itcl_BiInstallHullCmd END!%s!\n", Tcl_GetStringResult(interp));
+//fprintf(stderr, "Itcl_BiHullInstallCmd END!%s!\n", Tcl_GetStringResult(interp));
     return result;
 }
 
@@ -413,11 +413,15 @@ ItclWidgetConfigure(
     Tcl_Obj *objPtr;
     Tcl_DString buffer;
     Tcl_DString buffer2;
+    Tcl_Obj *optionNamePtr;
     ItclClass *iclsPtr;
     ItclVariable *ivPtr;
     ItclVarLookup *vlookup;
     ItclMemberCode *mcode;
     ItclHierIter hier;
+    ItclDelegatedOption *idoPtr;
+    ItclComponent *icPtr;
+    const char *val;
     CONST char *lastval;
     char *token;
     char *varName;
@@ -455,6 +459,25 @@ ItclWidgetConfigure(
      *  HANDLE:  configure
      */
     if (objc == 1) {
+        optionNamePtr = Tcl_NewStringObj("*", -1);
+        Tcl_IncrRefCount(optionNamePtr);
+        hPtr = Tcl_FindHashEntry(&contextIclsPtr->delegatedOptions,
+            (char *)optionNamePtr);
+fprintf(stderr, "hPtr:%p\n", hPtr);
+        if (hPtr != NULL) {
+	    idoPtr = Tcl_GetHashValue(hPtr);
+	    icPtr = idoPtr->icPtr;
+	    val = Itcl_GetInstanceVar(interp, Tcl_GetString(icPtr->namePtr),
+	            contextIoPtr, contextIclsPtr);
+            if (val != NULL) {
+	        Tcl_DString buffer;
+	        Tcl_DStringInit(&buffer);
+	        Tcl_DStringAppend(&buffer, val, -1);
+	        Tcl_DStringAppend(&buffer, " configure", -1);
+                result = Tcl_Eval(interp, Tcl_DStringValue(&buffer));
+                return result;
+	    }
+        }
         resultPtr = Tcl_NewListObj(0, (Tcl_Obj**)NULL);
 
         Itcl_InitHierIter(&hier, contextIclsPtr);
@@ -499,15 +522,11 @@ ItclWidgetConfigure(
                     vlookup = NULL;
                 }
             }
-	    Tcl_Obj *optionNamePtr;
 	    optionNamePtr = Tcl_NewStringObj("*", -1);
 	    Tcl_IncrRefCount(optionNamePtr);
             hPtr = Tcl_FindHashEntry(&contextIclsPtr->delegatedOptions,
 	            (char *)optionNamePtr);
             if (hPtr != NULL) {
-                ItclDelegatedOption *idoPtr;
-                ItclComponent *icPtr;
-	        const char *val;
 		idoPtr = Tcl_GetHashValue(hPtr);
 		icPtr = idoPtr->icPtr;
 		val = Itcl_GetInstanceVar(interp,

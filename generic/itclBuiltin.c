@@ -24,7 +24,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclBuiltin.c,v 1.1.2.4 2007/09/15 11:56:11 wiede Exp $
+ *     RCS:  $Id: itclBuiltin.c,v 1.1.2.5 2007/09/15 20:44:04 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -61,6 +61,7 @@ static int BiMethodListLen = sizeof(BiMethodList)/sizeof(BiMethod);
 static Tcl_Obj* ItclReportPublicOpt _ANSI_ARGS_((Tcl_Interp *interp,
     ItclVariable *ivPtr, ItclObject *contextIoPtr));
 
+static Tcl_ObjCmdProc ItclBiObjectUnknownCmd;
 
 /*
  * ------------------------------------------------------------------------
@@ -99,7 +100,10 @@ Itcl_BiInit(
     Tcl_DStringFree(&buffer);
 
     Tcl_CreateObjCommand(interp, "::itcl::builtin::chain", Itcl_BiChainCmd,
-        (ClientData)NULL, (Tcl_CmdDeleteProc*)NULL);
+            NULL, (Tcl_CmdDeleteProc*)NULL);
+
+    Tcl_CreateObjCommand(interp, "::itcl::builtin::objectunknown",
+            ItclBiObjectUnknownCmd, NULL, (Tcl_CmdDeleteProc*)NULL);
 
     ItclInfoInit(interp);
     /*
@@ -319,7 +323,7 @@ Itcl_BiConfigureCmd(
     Tcl_DString buffer;
     Tcl_DString buffer2;
 
-    ItclShowArgs(2, "Itcl_BiConfigureCmd", objc, objv);
+    ItclShowArgs(0, "Itcl_BiConfigureCmd", objc, objv);
     vlookup = NULL;
     token = NULL;
     /*
@@ -346,6 +350,7 @@ Itcl_BiConfigureCmd(
         contextIclsPtr = contextIoPtr->iclsPtr;
     }
 
+fprintf(stderr, "CIP!%p!0x%08x\n", contextIclsPtr, contextIclsPtr->flags);
     if (!(contextIclsPtr->flags & ITCL_IS_CLASS)) {
 	ItclWidgetInfo *iwInfoPtr;
 	iwInfoPtr = contextIclsPtr->infoPtr->windgetInfoPtr;
@@ -824,4 +829,45 @@ Itcl_BiChainCmd(
     Itcl_DeleteHierIter(&hier);
     return result;
 }
+
+/*
+ * ------------------------------------------------------------------------
+ *  ItclBiObjectUnknownCmd()
+ *
+ *  Invoked to handle the "objectunknown" command
+ *  this is called whenever an object is called with an unknown method/proc
+ *  following syntax:
+ *
+ *    unkownobject <object> <methodname> ?<arg> <arg>...?
+ *
+ * ------------------------------------------------------------------------
+ */
+/* ARGSUSED */
+static int
+ItclBiObjectUnknownCmd(
+    ClientData dummy,        /* not used */
+    Tcl_Interp *interp,      /* current interpreter */
+    int objc,                /* number of arguments */
+    Tcl_Obj *CONST objv[])   /* argument objects */
+{
+    Tcl_Object oPtr;
+    Tcl_Command cmd;
+    Tcl_CmdInfo cmdInfo;
+    ItclObject *ioPtr;
+    ItclObjectInfo *infoPtr;
 
+    ItclShowArgs(0, "ItclBiUnknownObjectCmd", objc, objv);
+    cmd = Tcl_GetCommandFromObj(interp, objv[1]);
+    if (Tcl_GetCommandInfoFromToken(cmd, &cmdInfo) != 1) {
+    }
+    oPtr = cmdInfo.objClientData;
+    infoPtr = (ItclObjectInfo *)Tcl_GetAssocData(interp,
+            ITCL_INTERP_DATA, NULL);
+    ioPtr = (ItclObject *)Tcl_ObjectGetMetadata(oPtr,
+            infoPtr->object_meta_type);
+    Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+            "bad option \"", Tcl_GetString(objv[2]), "\": should be one of...",
+	    (char*)NULL);
+    ItclReportObjectUsage(interp, ioPtr, NULL, NULL);
+    return TCL_ERROR;
+}
