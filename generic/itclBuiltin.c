@@ -24,7 +24,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclBuiltin.c,v 1.1.2.6 2007/09/15 23:51:14 wiede Exp $
+ *     RCS:  $Id: itclBuiltin.c,v 1.1.2.7 2007/09/16 20:12:58 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -161,7 +161,7 @@ Itcl_InstallBiMethods(
     ItclClass *iclsPtr)      /* class definition to be updated */
 {
     int result = TCL_OK;
-    Tcl_HashEntry *entry = NULL;
+    Tcl_HashEntry *hPtr = NULL;
 
     int i;
     ItclHierIter hier;
@@ -182,15 +182,15 @@ Itcl_InstallBiMethods(
 	Tcl_SetStringObj(objPtr, BiMethodList[i].name, -1);
         superPtr = Itcl_AdvanceHierIter(&hier);
         while (superPtr) {
-            entry = Tcl_FindHashEntry(&superPtr->functions, (char *)objPtr);
-            if (entry) {
+            hPtr = Tcl_FindHashEntry(&superPtr->functions, (char *)objPtr);
+            if (hPtr) {
                 break;
             }
             superPtr = Itcl_AdvanceHierIter(&hier);
         }
         Itcl_DeleteHierIter(&hier);
 
-        if (!entry) {
+        if (!hPtr) {
             result = Itcl_CreateMethod(interp, iclsPtr,
 	        Tcl_NewStringObj(BiMethodList[i].name, -1),
                 BiMethodList[i].usage, BiMethodList[i].registration);
@@ -311,7 +311,7 @@ Itcl_BiConfigureCmd(
     Tcl_DString buffer;
     Tcl_DString buffer2;
     Tcl_HashSearch place;
-    Tcl_HashEntry *entry;
+    Tcl_HashEntry *hPtr;
     ItclClass *iclsPtr;
     ItclVariable *ivPtr;
     ItclVarLookup *vlookup;
@@ -323,7 +323,7 @@ Itcl_BiConfigureCmd(
     int i;
     int result;
 
-    ItclShowArgs(0, "Itcl_BiConfigureCmd", objc, objv);
+    ItclShowArgs(1, "Itcl_BiConfigureCmd", objc, objv);
     vlookup = NULL;
     token = NULL;
     /*
@@ -350,15 +350,18 @@ Itcl_BiConfigureCmd(
         contextIclsPtr = contextIoPtr->iclsPtr;
     }
 
-fprintf(stderr, "CIP!%p!0x%08x\n", contextIclsPtr, contextIclsPtr->flags);
     if (!(contextIclsPtr->flags & ITCL_IS_CLASS)) {
-	ItclWidgetInfo *iwInfoPtr;
-	iwInfoPtr = contextIclsPtr->infoPtr->windgetInfoPtr;
-        if (iwInfoPtr != NULL) {
-	    result = iwInfoPtr->widgetConfigure(contextIclsPtr, interp,
-	            objc, objv);
-	    if (result != TCL_CONTINUE) {
-	        return result;
+	/* first check if it is an option */
+        hPtr = Tcl_FindHashEntry(&contextIclsPtr->options, (char *) objv[1]);
+	if (hPtr != NULL) {
+	    ItclWidgetInfo *iwInfoPtr;
+	    iwInfoPtr = contextIclsPtr->infoPtr->windgetInfoPtr;
+            if (iwInfoPtr != NULL) {
+	        result = iwInfoPtr->widgetConfigure(contextIclsPtr, interp,
+	                objc, objv);
+	        if (result != TCL_CONTINUE) {
+	            return result;
+	        }
 	    }
 	}
     }
@@ -370,16 +373,16 @@ fprintf(stderr, "CIP!%p!0x%08x\n", contextIclsPtr, contextIclsPtr->flags);
 
         Itcl_InitHierIter(&hier, contextIclsPtr);
         while ((iclsPtr=Itcl_AdvanceHierIter(&hier)) != NULL) {
-            entry = Tcl_FirstHashEntry(&iclsPtr->variables, &place);
-            while (entry) {
-                ivPtr = (ItclVariable*)Tcl_GetHashValue(entry);
+            hPtr = Tcl_FirstHashEntry(&iclsPtr->variables, &place);
+            while (hPtr) {
+                ivPtr = (ItclVariable*)Tcl_GetHashValue(hPtr);
                 if (ivPtr->protection == ITCL_PUBLIC) {
                     objPtr = ItclReportPublicOpt(interp, ivPtr, contextIoPtr);
 
                     Tcl_ListObjAppendElement((Tcl_Interp*)NULL, resultPtr,
                         objPtr);
                 }
-                entry = Tcl_NextHashEntry(&place);
+                hPtr = Tcl_NextHashEntry(&place);
             }
         }
         Itcl_DeleteHierIter(&hier);
@@ -402,9 +405,9 @@ fprintf(stderr, "CIP!%p!0x%08x\n", contextIclsPtr, contextIclsPtr->flags);
             }
 
             vlookup = NULL;
-            entry = Tcl_FindHashEntry(&contextIclsPtr->resolveVars, token+1);
-            if (entry) {
-                vlookup = (ItclVarLookup*)Tcl_GetHashValue(entry);
+            hPtr = Tcl_FindHashEntry(&contextIclsPtr->resolveVars, token+1);
+            if (hPtr) {
+                vlookup = (ItclVarLookup*)Tcl_GetHashValue(hPtr);
 
                 if (vlookup->ivPtr->protection != ITCL_PUBLIC) {
                     vlookup = NULL;
@@ -442,9 +445,9 @@ fprintf(stderr, "CIP!%p!0x%08x\n", contextIclsPtr, contextIclsPtr->flags);
         vlookup = NULL;
         token = Tcl_GetString(objv[i]);
         if (*token == '-') {
-            entry = Tcl_FindHashEntry(&contextIclsPtr->resolveVars, token+1);
-            if (entry) {
-                vlookup = (ItclVarLookup*)Tcl_GetHashValue(entry);
+            hPtr = Tcl_FindHashEntry(&contextIclsPtr->resolveVars, token+1);
+            if (hPtr) {
+                vlookup = (ItclVarLookup*)Tcl_GetHashValue(hPtr);
             }
         }
 
@@ -555,7 +558,7 @@ Itcl_BiCgetCmd(
     ItclClass *contextIclsPtr;
     ItclObject *contextIoPtr;
 
-    Tcl_HashEntry *entry;
+    Tcl_HashEntry *hPtr;
     ItclVarLookup *vlookup;
     CONST char *name;
     CONST char *val;
@@ -598,9 +601,9 @@ Itcl_BiCgetCmd(
     name = Tcl_GetString(objv[1]);
 
     vlookup = NULL;
-    entry = Tcl_FindHashEntry(&contextIclsPtr->resolveVars, name+1);
-    if (entry) {
-        vlookup = (ItclVarLookup*)Tcl_GetHashValue(entry);
+    hPtr = Tcl_FindHashEntry(&contextIclsPtr->resolveVars, name+1);
+    if (hPtr) {
+        vlookup = (ItclVarLookup*)Tcl_GetHashValue(hPtr);
     }
 
     if ((vlookup == NULL) || (vlookup->ivPtr->protection != ITCL_PUBLIC)) {
@@ -644,7 +647,7 @@ ItclReportPublicOpt(
 {
     CONST char *val;
     ItclClass *iclsPtr;
-    Tcl_HashEntry *entry;
+    Tcl_HashEntry *hPtr;
     ItclVarLookup *vlookup;
     Tcl_DString optName;
     Tcl_Obj *listPtr;
@@ -662,10 +665,10 @@ ItclReportPublicOpt(
     Tcl_DStringAppend(&optName, "-", -1);
 
     iclsPtr = (ItclClass*)contextIoPtr->iclsPtr;
-    entry = Tcl_FindHashEntry(&iclsPtr->resolveVars,
+    hPtr = Tcl_FindHashEntry(&iclsPtr->resolveVars,
             Tcl_GetString(ivPtr->fullNamePtr));
-    assert(entry != NULL);
-    vlookup = (ItclVarLookup*)Tcl_GetHashValue(entry);
+    assert(hPtr != NULL);
+    vlookup = (ItclVarLookup*)Tcl_GetHashValue(hPtr);
     Tcl_DStringAppend(&optName, vlookup->leastQualName, -1);
 
     objPtr = Tcl_NewStringObj(Tcl_DStringValue(&optName), -1);
@@ -729,7 +732,7 @@ Itcl_BiChainCmd(
     char *head;
     ItclClass *iclsPtr;
     ItclHierIter hier;
-    Tcl_HashEntry *entry;
+    Tcl_HashEntry *hPtr;
     ItclMemberFunc *imPtr;
     Tcl_DString buffer;
     Tcl_Obj *cmdlinePtr;
@@ -801,9 +804,9 @@ Itcl_BiChainCmd(
     objPtr = Tcl_NewStringObj(cmd, -1);
     Tcl_IncrRefCount(objPtr);
     while ((iclsPtr = Itcl_AdvanceHierIter(&hier)) != NULL) {
-        entry = Tcl_FindHashEntry(&iclsPtr->functions, (char *)objPtr);
-        if (entry) {
-            imPtr = (ItclMemberFunc*)Tcl_GetHashValue(entry);
+        hPtr = Tcl_FindHashEntry(&iclsPtr->functions, (char *)objPtr);
+        if (hPtr) {
+            imPtr = (ItclMemberFunc*)Tcl_GetHashValue(hPtr);
 
             /*
              *  NOTE:  Avoid the usual "virtual" behavior of

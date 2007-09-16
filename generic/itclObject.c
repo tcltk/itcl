@@ -24,7 +24,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclObject.c,v 1.1.2.7 2007/09/16 17:16:29 wiede Exp $
+ *     RCS:  $Id: itclObject.c,v 1.1.2.8 2007/09/16 20:12:58 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -820,7 +820,7 @@ Itcl_ObjectIsa(
 
 /*
  * ------------------------------------------------------------------------
- *  Itcl_GetInstanceVar()
+ *  ItclGetInstanceVar()
  *
  *  Returns the current value for an object data member.  The member
  *  name is interpreted with respect to the given class scope, which
@@ -832,9 +832,10 @@ Itcl_ObjectIsa(
  * ------------------------------------------------------------------------
  */
 CONST char*
-Itcl_GetInstanceVar(
+ItclGetInstanceVar(
     Tcl_Interp *interp,        /* current interpreter */
-    const char *name,          /* name of desired instance variable */
+    const char *name1,         /* name of desired instance variable */
+    const char *name2,         /* array element or NULL */
     ItclObject *contextIoPtr,  /* current object */
     ItclClass *contextIclsPtr) /* name is interpreted in this scope */
 {
@@ -869,12 +870,36 @@ Itcl_GetInstanceVar(
     if (nsPtr != NULL) {
 	framePtr = &frame;
 	Tcl_PushCallFrame(interp, framePtr, nsPtr, /*isProcCallFrame*/0);
-        val = Tcl_GetVar2(interp, (CONST84 char *)name, (char*)NULL,
+        val = Tcl_GetVar2(interp, (CONST84 char *)name1, (char*)name2,
 	        TCL_LEAVE_ERR_MSG);
         Tcl_PopCallFrame(interp);
     }
 
     return val;
+}
+
+/*
+ * ------------------------------------------------------------------------
+ *  Itcl_GetInstanceVar()
+ *
+ *  Returns the current value for an object data member.  The member
+ *  name is interpreted with respect to the given class scope, which
+ *  is usually the most-specific class for the object.
+ *
+ *  If successful, this procedure returns a pointer to a string value
+ *  which remains alive until the variable changes it value.  If
+ *  anything goes wrong, this returns NULL.
+ * ------------------------------------------------------------------------
+ */
+CONST char*
+Itcl_GetInstanceVar(
+    Tcl_Interp *interp,        /* current interpreter */
+    const char *name,          /* name of desired instance variable */
+    ItclObject *contextIoPtr,  /* current object */
+    ItclClass *contextIclsPtr) /* name is interpreted in this scope */
+{
+    return ItclGetInstanceVar(interp, name, NULL, contextIoPtr,
+            contextIclsPtr);
 }
 
 /*
@@ -891,7 +916,7 @@ Itcl_GetInstanceVar(
  * ------------------------------------------------------------------------
  */
 CONST char*
-Itcl_SetInstanceVar(
+ItclSetInstanceVar(
     Tcl_Interp *interp,        /* current interpreter */
     const char *name,          /* name of desired instance variable */
     const char *name2,         /* array member or NULL */

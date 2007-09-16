@@ -41,7 +41,7 @@
  *
  *  Author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclWidgetParse.c,v 1.1.2.5 2007/09/16 17:16:30 wiede Exp $
+ *     RCS:  $Id: itclWidgetParse.c,v 1.1.2.6 2007/09/16 20:12:59 wiede Exp $
  * ========================================================================
  *           Copyright (c) 2007  Arnulf Wiedemann
  * ------------------------------------------------------------------------
@@ -968,8 +968,8 @@ Itcl_ClassOptionCmd(
         className = name+1;
         needCapitalize = 1;
     }
-    init = NULL;
-    if (newObjc > 1) {
+    init = defaultValue;
+    if ((newObjc > 1) && (init == NULL)) {
         init = Tcl_GetString(newObjv[1]);
     }
 

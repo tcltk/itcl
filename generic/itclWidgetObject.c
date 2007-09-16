@@ -11,7 +11,7 @@
  * ========================================================================
  *  Author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclWidgetObject.c,v 1.1.2.5 2007/09/16 17:16:30 wiede Exp $
+ *     RCS:  $Id: itclWidgetObject.c,v 1.1.2.6 2007/09/16 20:12:59 wiede Exp $
  * ========================================================================
  *           Copyright (c) 2007 Arnulf Wiedemann
  * ------------------------------------------------------------------------
@@ -59,9 +59,6 @@ HullAndOptionsInstall(
     FOREACH_HASH_DECLS;
     Tcl_Obj *widgetClassPtr;
     Tcl_Obj **hullObjv;
-    Tcl_DString buffer;
-    Tcl_DString buffer2;
-    Tcl_Var optionsVar;
     ItclOption *ioptPtr;
     char *token;
     const char *hullType;
@@ -71,19 +68,12 @@ HullAndOptionsInstall(
     int i;
 
     ItclShowArgs(1, "HullAndOptionsInstall", objc, objv);
-    
-    Tcl_DStringInit(&buffer),
-    Tcl_DStringAppend(&buffer, ITCL_VARIABLES_NAMESPACE, -1);
-    Tcl_DStringAppend(&buffer, "::", 2);
-    Tcl_DStringAppend(&buffer, Tcl_GetCommandName(interp, ioPtr->accessCmd), -1);
-    Tcl_DStringAppend(&buffer, Tcl_GetString(iclsPtr->fullname), -1);
-    Tcl_DStringAppend(&buffer, "::options", -1);
-    Tcl_DStringInit(&buffer2),
-    optionsVar = Tcl_FindNamespaceVar(interp, Tcl_DStringValue(&buffer), NULL, 0);
     FOREACH_HASH_VALUE(ioptPtr, &iclsPtr->options) {
-        Tcl_DStringAppend(&buffer2, Tcl_DStringValue(&buffer), -1);
-	Tcl_DStringAppend(&buffer2, "::", 1);
-        Tcl_DStringAppend(&buffer2, Tcl_GetString(ioptPtr->namePtr)+1, -1);
+	if (ioptPtr->init != NULL) {
+	    ItclSetInstanceVar(interp, "options",
+	            Tcl_GetString(ioptPtr->namePtr),
+		    Tcl_GetString(ioptPtr->init), ioPtr, iclsPtr);
+	}
         
     }
     widgetClassPtr = iclsPtr->widgetClassPtr;

@@ -12,7 +12,7 @@
  * ========================================================================
  *  Author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclWidgetBuiltin.c,v 1.1.2.5 2007/09/16 17:16:30 wiede Exp $
+ *     RCS:  $Id: itclWidgetBuiltin.c,v 1.1.2.6 2007/09/16 20:12:59 wiede Exp $
  * ========================================================================
  *           Copyright (c) 2007 Arnulf Wiedemann
  * ------------------------------------------------------------------------
@@ -239,12 +239,12 @@ Itcl_BiHullInstallCmd(
         val = Tk_GetOption(tkWin, Tcl_GetString(ioptPtr->resourceNamePtr),
 	        Tcl_GetString(ioptPtr->classNamePtr));
 	if (val != NULL) {
-            val = Itcl_SetInstanceVar(interp, "options",
+            val = ItclSetInstanceVar(interp, "options",
 	            Tcl_GetString(ioptPtr->namePtr), val,
                     contextIoPtr, contextIoPtr->iclsPtr);
 	}
 	if (ioptPtr->init != NULL) {
-            val = Itcl_SetInstanceVar(interp, "options",
+            val = ItclSetInstanceVar(interp, "options",
 	            Tcl_GetString(ioptPtr->namePtr),
 		    Tcl_GetString(ioptPtr->init),
                     contextIoPtr, contextIoPtr->iclsPtr);
@@ -284,7 +284,7 @@ Itcl_BiHullInstallCmd(
     ivPtr =Tcl_GetHashValue(hPtr);
     hPtr = Tcl_FindHashEntry(&contextIoPtr->objectVariables, (char *)ivPtr);
     varPtr = Tcl_GetHashValue(hPtr);
-    val = Itcl_SetInstanceVar(interp, "hull", NULL, Tcl_DStringValue(&buffer),
+    val = ItclSetInstanceVar(interp, "hull", NULL, Tcl_DStringValue(&buffer),
             contextIoPtr, contextIoPtr->iclsPtr);
     Tcl_DStringFree(&buffer);
     if (val == NULL) {
@@ -292,15 +292,6 @@ Itcl_BiHullInstallCmd(
             Tcl_GetString(contextIoPtr->namePtr), "\"", NULL);
         return TCL_ERROR;
     }
-
-#ifdef NOTDEF
-    if (varPtr != NULL) {
-	Tcl_AppendResult(interp, "hull is already set for object \"", 
-	        Tcl_GetString(contextIoPtr->namePtr), "\"", NULL);
-        return TCL_ERROR;
-    }
-#endif
-//fprintf(stderr, "Itcl_BiHullInstallCmd END!%s!\n", Tcl_GetStringResult(interp));
     return result;
 }
 
@@ -339,16 +330,20 @@ ItclWidgetConfigure(
     ItclObject *contextIoPtr;
 
     Tcl_HashEntry *hPtr;
+    Tcl_DString buffer;
     ItclVarLookup *vlookup;
     ItclDelegatedMethod *idmPtr;
     ItclComponent *icPtr;
+    ItclOption *ioptPtr;
     const char *val;
     char *token;
+    int i;
     int result;
 
-    ItclShowArgs(0, "SHOULD NOT BE CALLED !!!ItclWidgetConfigure", objc, objv);
+    ItclShowArgs(1, "ItclWidgetConfigure", objc, objv);
     vlookup = NULL;
     token = NULL;
+    ioptPtr = NULL;
     /*
      *  Make sure that this command is being invoked in the proper
      *  context.
@@ -373,6 +368,7 @@ ItclWidgetConfigure(
         contextIclsPtr = contextIoPtr->iclsPtr;
     }
 
+    hPtr = NULL;
     Tcl_Obj *methodNamePtr;
     methodNamePtr = Tcl_NewStringObj("*", -1);
     hPtr = Tcl_FindHashEntry(&contextIclsPtr->delegatedMethods, (char *)
@@ -383,21 +379,113 @@ ItclWidgetConfigure(
         hPtr = Tcl_FindHashEntry(&idmPtr->exceptions, (char *)methodNamePtr);
         if (hPtr == NULL) {
 	    icPtr = idmPtr->icPtr;
-	    val = Itcl_GetInstanceVar(interp, Tcl_GetString(icPtr->namePtr),
-	            contextIoPtr, contextIclsPtr);
+	    val = ItclGetInstanceVar(interp, Tcl_GetString(icPtr->namePtr),
+	            NULL, contextIoPtr, contextIclsPtr);
             if (val != NULL) {
 	        Tcl_DString buffer;
 	        Tcl_DStringInit(&buffer);
 	        Tcl_DStringAppend(&buffer, val, -1);
-	        Tcl_DStringAppend(&buffer, " configure", -1);
+	        Tcl_DStringAppend(&buffer, " configure ", -1);
+		for(i=2;i<objc;i++) {
+		    Tcl_DStringAppend(&buffer, Tcl_GetString(objv[i]), -1);
+		    Tcl_DStringAppend(&buffer, " ", 1);
+		}
                 result = Tcl_Eval(interp, Tcl_DStringValue(&buffer));
                 return result;
 	    }
 	}
-        if (hPtr != NULL) {
-	}
     }
-    return TCL_CONTINUE;
+    /* now do the hard work */
+    if (objc == 1) {
+fprintf(stderr, "plain configure not yet implemented\n");
+    }
+    /* first handle delegated options */
+    hPtr = Tcl_FindHashEntry(&contextIclsPtr->delegatedMethods, (char *)
+            objv[1]);
+    if (hPtr != NULL) {
+        idmPtr = (ItclDelegatedMethod *)Tcl_GetHashValue(hPtr);
+        icPtr = idmPtr->icPtr;
+        val = ItclGetInstanceVar(interp, Tcl_GetString(icPtr->namePtr),
+                NULL, contextIoPtr, contextIclsPtr);
+        if (val != NULL) {
+            Tcl_DString buffer;
+            Tcl_DStringInit(&buffer);
+	    Tcl_DStringAppend(&buffer, val, -1);
+	    Tcl_DStringAppend(&buffer, " configure ", -1);
+	    for(i=2;i<objc;i++) {
+	        Tcl_DStringAppend(&buffer, Tcl_GetString(objv[i]), -1);
+	        Tcl_DStringAppend(&buffer, " ", 1);
+	    }
+            result = Tcl_Eval(interp, Tcl_DStringValue(&buffer));
+            return result;
+        }
+    }
+    /* now look if it is an option at all */
+    hPtr = Tcl_FindHashEntry(&contextIclsPtr->options, (char *) objv[1]);
+    if (hPtr == NULL) {
+	/* no option at all, let the normal configure do the job */
+	return TCL_CONTINUE;
+    }
+    ioptPtr = (ItclOption *)Tcl_GetHashValue(hPtr);
+    if (objc == 2) {
+        /* return info for an option */
+	/* FIX ME temporary !!! */
+        return TCL_OK;
+    }
+    Tcl_DStringInit(&buffer);
+    result = TCL_CONTINUE;
+    /* set one or more options */
+    for (i=1; i < objc; i+=2) {
+	if (i+1 > objc) {
+	    Tcl_AppendResult(interp, "need option value pair", NULL);
+	    result = TCL_ERROR;
+	    break;
+	}
+        hPtr = Tcl_FindHashEntry(&contextIclsPtr->options, (char *) objv[i]);
+        if (hPtr == NULL) {
+	    /* check if normal public variable/common */
+	    /* FIX ME !!! temporary */
+	    result = TCL_CONTINUE;
+	    break;
+        }
+        ioptPtr = (ItclOption *)Tcl_GetHashValue(hPtr);
+        if (ioptPtr->validateMethodPtr != NULL) {
+            Tcl_DStringAppend(&buffer, Tcl_GetString(
+	            ioptPtr->validateMethodPtr), -1);
+            Tcl_DStringAppend(&buffer, " ", -1);
+            Tcl_DStringAppend(&buffer, Tcl_GetString(objv[i]), -1);
+            Tcl_DStringAppend(&buffer, " ", -1);
+            Tcl_DStringAppend(&buffer, Tcl_GetString(objv[i+1]), -1);
+	    result = Tcl_Eval(interp, Tcl_DStringValue(&buffer));
+	    if (result != TCL_OK) {
+	        break;
+	    }
+	}
+        Tcl_DStringFree(&buffer);
+        if (ioptPtr->configureMethodPtr != NULL) {
+            Tcl_DStringAppend(&buffer, Tcl_GetString(
+	            ioptPtr->configureMethodPtr), -1);
+            Tcl_DStringAppend(&buffer, " ", -1);
+            Tcl_DStringAppend(&buffer, Tcl_GetString(objv[i]), -1);
+            Tcl_DStringAppend(&buffer, " ", -1);
+            Tcl_DStringAppend(&buffer, Tcl_GetString(objv[i+1]), -1);
+	    result = Tcl_Eval(interp, Tcl_DStringValue(&buffer));
+	    if (result != TCL_OK) {
+	        break;
+	    }
+	} else {
+	    if (ItclSetInstanceVar(interp, "options", Tcl_GetString(objv[i]),
+	            Tcl_GetString(objv[i+1]), contextIoPtr, contextIclsPtr)
+		    == NULL) {
+		result = TCL_ERROR;
+	        break;
+	    }
+	}
+        Tcl_DStringFree(&buffer);
+        result = TCL_OK;
+    }
+    Tcl_DStringFree(&buffer);
+    return result;
 }
 
 /*
@@ -427,15 +515,16 @@ ItclWidgetCget(
     ItclClass *contextIclsPtr;
     ItclObject *contextIoPtr;
 
-    CONST char *name;
-
+    Tcl_DString buffer;
     Tcl_HashEntry *hPtr;
     ItclDelegatedMethod *idmPtr;
     ItclComponent *icPtr;
+    ItclOption *ioptPtr;
     const char *val;
+    int i;
     int result;
 
-    ItclShowArgs(0,"SHOULD NOT BE CALLED !!!ItclWidgetCget", objc, objv);
+    ItclShowArgs(1,"ItclWidgetCget", objc, objv);
     /*
      *  Make sure that this command is being invoked in the proper
      *  context.
@@ -458,8 +547,7 @@ ItclWidgetCget(
         contextIclsPtr = contextIoPtr->iclsPtr;
     }
 
-    name = Tcl_GetString(objv[1]);
-
+    hPtr = NULL;
     Tcl_Obj *methodNamePtr;
     methodNamePtr = Tcl_NewStringObj("*", -1);
     hPtr = Tcl_FindHashEntry(&contextIclsPtr->delegatedMethods, (char *)
@@ -470,22 +558,74 @@ ItclWidgetCget(
         hPtr = Tcl_FindHashEntry(&idmPtr->exceptions, (char *)methodNamePtr);
         if (hPtr == NULL) {
 	    icPtr = idmPtr->icPtr;
-	    val = Itcl_GetInstanceVar(interp, Tcl_GetString(icPtr->namePtr),
-	            contextIoPtr, contextIclsPtr);
+	    val = ItclGetInstanceVar(interp, Tcl_GetString(icPtr->namePtr),
+	            NULL, contextIoPtr, contextIclsPtr);
             if (val != NULL) {
-fprintf(stderr, "found del meth!%p!%s!\n", idmPtr, val);
 	        Tcl_DString buffer;
 	        Tcl_DStringInit(&buffer);
 	        Tcl_DStringAppend(&buffer, val, -1);
 	        Tcl_DStringAppend(&buffer, " cget ", -1);
-	        Tcl_DStringAppend(&buffer, name, -1);
+		for(i=2;i<objc;i++) {
+		    Tcl_DStringAppend(&buffer, Tcl_GetString(objv[i]), -1);
+		    Tcl_DStringAppend(&buffer, " ", 1);
+		}
                 result = Tcl_Eval(interp, Tcl_DStringValue(&buffer));
                 return result;
 	    }
-        }
-        if (hPtr != NULL) {
 	}
     }
-    return TCL_CONTINUE;
+    if (objc == 1) {
+        Tcl_WrongNumArgs(interp, 1, objv, "option");
+        return TCL_ERROR;
+    }
+    /* now do the hard work */
+    /* first handle delegated options */
+    hPtr = Tcl_FindHashEntry(&contextIclsPtr->delegatedMethods, (char *)
+            objv[1]);
+    if (hPtr != NULL) {
+        idmPtr = (ItclDelegatedMethod *)Tcl_GetHashValue(hPtr);
+        icPtr = idmPtr->icPtr;
+        val = ItclGetInstanceVar(interp, Tcl_GetString(icPtr->namePtr),
+                NULL, contextIoPtr, contextIclsPtr);
+        if (val != NULL) {
+            Tcl_DString buffer;
+            Tcl_DStringInit(&buffer);
+	    Tcl_DStringAppend(&buffer, val, -1);
+	    Tcl_DStringAppend(&buffer, " cget ", -1);
+	    for(i=2;i<objc;i++) {
+	        Tcl_DStringAppend(&buffer, Tcl_GetString(objv[i]), -1);
+	        Tcl_DStringAppend(&buffer, " ", 1);
+	    }
+            result = Tcl_Eval(interp, Tcl_DStringValue(&buffer));
+            return result;
+        }
+    }
+    /* now look if it is an option at all */
+    hPtr = Tcl_FindHashEntry(&contextIclsPtr->options, (char *) objv[1]);
+    if (hPtr == NULL) {
+	/* no option at all, let the normal configure do the job */
+	return TCL_CONTINUE;
+    }
+    ioptPtr = (ItclOption *)Tcl_GetHashValue(hPtr);
+    Tcl_DStringInit(&buffer);
+    result = TCL_CONTINUE;
+    ioptPtr = (ItclOption *)Tcl_GetHashValue(hPtr);
+    if (ioptPtr->cgetMethodPtr != NULL) {
+        Tcl_DStringAppend(&buffer, Tcl_GetString(
+                ioptPtr->cgetMethodPtr), -1);
+        Tcl_DStringAppend(&buffer, " ", -1);
+        Tcl_DStringAppend(&buffer, Tcl_GetString(objv[1]), -1);
+	result = Tcl_Eval(interp, Tcl_DStringValue(&buffer));
+        Tcl_DStringFree(&buffer);
+    } else {
+	if (ItclGetInstanceVar(interp, "options", Tcl_GetString(objv[i]),
+	        contextIoPtr, contextIclsPtr) == NULL) {
+	    result = TCL_ERROR;
+	} else {
+            result = TCL_OK;
+        }
+    }
+    Tcl_DStringFree(&buffer);
+    return result;
 }
 

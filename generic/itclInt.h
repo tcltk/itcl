@@ -9,7 +9,7 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itclInt.h,v 1.17.2.11 2007/09/16 17:16:29 wiede Exp $
+ * RCS: @(#) $Id: itclInt.h,v 1.17.2.12 2007/09/16 20:12:58 wiede Exp $
  */
 
 #include <string.h>
@@ -500,7 +500,10 @@ MODULE_SCOPE int HullAndOptionsInstall(Tcl_Interp *interp, ItclObject *ioPtr,
 	int *newObjc, Tcl_Obj **newObjv);
 MODULE_SCOPE int DelegationInstall(Tcl_Interp *interp, ItclObject *ioPtr,
         ItclClass *iclsPtr);
-MODULE_SCOPE const char* Itcl_SetInstanceVar(Tcl_Interp *interp,
+MODULE_SCOPE const char* ItclGetInstanceVar(Tcl_Interp *interp,
+        const char *name, const char *name2, ItclObject *contextIoPtr,
+	ItclClass *contextIclsPtr);
+MODULE_SCOPE const char* ItclSetInstanceVar(Tcl_Interp *interp,
         const char *name, const char *name2, const char *value,
 	ItclObject *contextIoPtr, ItclClass *contextIclsPtr);
 MODULE_SCOPE Tcl_Obj * ItclCapitalize(const char *str);
