@@ -8,7 +8,7 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itcl2TclOO.c,v 1.1.2.5 2007/09/15 20:44:04 wiede Exp $
+ * RCS: @(#) $Id: itcl2TclOO.c,v 1.1.2.6 2007/09/16 17:16:29 wiede Exp $
  */
 
 #include <tclOOInt.h>
@@ -202,4 +202,85 @@ Itcl_NewProcMethod(
     return Tcl_NewProcMethod(interp, oPtr, preCallPtr, postCallPtr,
            errProc, clientData, nameObj, argsObj, bodyObj,
            PUBLIC_METHOD | USE_DECLARER_NS, clientData2);
+}
+
+/*
+ * ----------------------------------------------------------------------
+ *
+ * Itcl_NewForwardClassMethod --
+ *
+ *	Create a new forwarded method for a class for Itcl.
+ *
+ * ----------------------------------------------------------------------
+ */
+
+Tcl_Method
+Itcl_NewForwardClassMethod(
+    Tcl_Interp *interp,
+    Tcl_Class clsPtr,
+    int flags,
+    Tcl_Obj *nameObj,
+    Tcl_Obj *prefixObj)
+{
+    return Tcl_NewForwardClassMethod(interp, clsPtr, flags, nameObj,
+            prefixObj);
+}
+
+/*
+ * ----------------------------------------------------------------------
+ *
+ * Itcl_NewForwardMethod --
+ *
+ *	Create a new forwarded method for an object for Itcl.
+ *
+ * ----------------------------------------------------------------------
+ */
+
+Tcl_Method
+Itcl_NewForwardMethod(
+    Tcl_Interp *interp,
+    Tcl_Object oPtr,
+    int flags,
+    Tcl_Obj *nameObj,
+    Tcl_Obj *prefixObj)
+{
+    return Tcl_NewForwardMethod(interp, oPtr, flags, nameObj, prefixObj);
+}
+
+/*
+ * ----------------------------------------------------------------------
+ *
+ * Itcl_AddToMixinSubs --
+ *
+ *      Utility function to add a class to the list of mixinSubs within
+ *      another class.
+ *
+ * ----------------------------------------------------------------------
+ */
+
+void
+Itcl_AddToMixinSubs(
+    Tcl_Class subPtr,
+    Tcl_Class superPtr)
+{
+    Tcl_AddToMixinSubs(subPtr, superPtr);
+}
+
+/*
+ * ----------------------------------------------------------------------
+ *
+ * Itcl_RemovedFromMixinSubs --
+ *
+ *      Utility function to remove a class from the list of mixinSubs within
+ *      another class.
+ *
+ * ----------------------------------------------------------------------
+ */
+
+void
+Itcl_RemoveFromMixinSubs(
+    Tcl_Class subPtr,
+    Tcl_Class superPtr)
+{
+    Tcl_RemoveFromMixinSubs(subPtr, superPtr);
 }

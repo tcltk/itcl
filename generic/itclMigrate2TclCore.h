@@ -51,6 +51,7 @@ typedef void (*Tcl_ProcErrorProc)(Tcl_Interp *interp, Tcl_Obj *procNameObj);
 #define Tcl_SetProcCmd _Tcl_SetProcCmd
 #define Tcl_SetNamespaceResolver _Tcl_SetNamespaceResolver
 #define Tcl_InvokeNamespaceProc _Tcl_InvokeNamespaceProc
+#define Tcl_RenameCommand Tcl_RenameCommand
 
 
 EXTERN Tcl_Command _Tcl_GetOriginalCommand(Tcl_Command command);
@@ -76,6 +77,8 @@ EXTERN int Itcl_IsCallFrameArgument(Tcl_Interp *interp, const char *name);
 EXTERN int Itcl_ProcessReturn(Tcl_Interp *interp, int code, int level,
         Tcl_Obj *returnOpts);
 EXTERN int ItclGetInterpErrorLine(Tcl_Interp *interp);
+EXTERN int Tcl_RenameCommand(Tcl_Interp *interp, const char *oldName,
+	const char *newName);
 
 
 /* end migration code */

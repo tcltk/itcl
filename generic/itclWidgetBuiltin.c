@@ -12,7 +12,7 @@
  * ========================================================================
  *  Author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclWidgetBuiltin.c,v 1.1.2.4 2007/09/16 00:01:04 wiede Exp $
+ *     RCS:  $Id: itclWidgetBuiltin.c,v 1.1.2.5 2007/09/16 17:16:30 wiede Exp $
  * ========================================================================
  *           Copyright (c) 2007 Arnulf Wiedemann
  * ------------------------------------------------------------------------
@@ -176,7 +176,7 @@ Itcl_BiHullInstallCmd(
     ItclClass *contextIclsPtr;
     ItclObject *contextIoPtr;
 
-    ItclShowArgs(0, "Itcl_BiHullInstallCmd", objc, objv);
+    ItclShowArgs(1, "Itcl_BiHullInstallCmd", objc, objv);
     iclsPtr = (ItclClass *)clientData;
     if (iclsPtr->infoPtr->buildingWidget) {
         contextIclsPtr = iclsPtr;
@@ -269,7 +269,7 @@ Itcl_BiHullInstallCmd(
             break;
 	}
     }
-    TclRenameCommand(interp, Tcl_GetString(contextIoPtr->namePtr),
+    Tcl_RenameCommand(interp, Tcl_GetString(contextIoPtr->namePtr),
             Tcl_DStringValue(&buffer));
 
     namePtr = Tcl_NewStringObj("hull", -1);
@@ -346,7 +346,7 @@ ItclWidgetConfigure(
     char *token;
     int result;
 
-    ItclShowArgs(0, "ItclWidgetConfigure", objc, objv);
+    ItclShowArgs(0, "SHOULD NOT BE CALLED !!!ItclWidgetConfigure", objc, objv);
     vlookup = NULL;
     token = NULL;
     /*
@@ -435,7 +435,7 @@ ItclWidgetCget(
     const char *val;
     int result;
 
-    ItclShowArgs(0,"ItclWidgetCget", objc, objv);
+    ItclShowArgs(0,"SHOULD NOT BE CALLED !!!ItclWidgetCget", objc, objv);
     /*
      *  Make sure that this command is being invoked in the proper
      *  context.

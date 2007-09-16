@@ -12,7 +12,7 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itclWidgetBase.c,v 1.1.2.3 2007/09/16 00:01:04 wiede Exp $
+ * RCS: @(#) $Id: itclWidgetBase.c,v 1.1.2.4 2007/09/16 17:16:30 wiede Exp $
  */
 
 #include <stdlib.h>
@@ -38,7 +38,6 @@ Initialize (
     Tcl_Interp *interp)
 {
     Tcl_Namespace *nsPtr;
-    Tcl_Namespace *itclNs;
     ItclObjectInfo *infoPtr;
 
     if (Tcl_InitStubs(interp, TCL_VERSION, 0) == NULL) {
@@ -62,12 +61,14 @@ Initialize (
         Tcl_Panic("Itcl: cannot create namespace: \"%s\" \n", "::itclwidget::internal");
     }
 
-    TclRenameCommand(interp, "::itcl::type", "::itcl::__type");
-    TclRenameCommand(interp, "::itcl::widget", "::itcl::__widget");
-    TclRenameCommand(interp, "::itcl::widgetadaptor", "::itcl::__widgetadaptor");
+    Tcl_RenameCommand(interp, "::itcl::type", "::itcl::__type");
+    Tcl_RenameCommand(interp, "::itcl::widget", "::itcl::__widget");
+    Tcl_RenameCommand(interp, "::itcl::widgetadaptor",
+            "::itcl::__widgetadaptor");
     infoPtr->windgetInfoPtr = (ItclWidgetInfo *)ckalloc(sizeof(ItclWidgetInfo));
     infoPtr->windgetInfoPtr->initObjectOpts = ItclInitObjectOptions;
-    infoPtr->windgetInfoPtr->instHullAndOpts = HullAndOptionsInstall;
+    infoPtr->windgetInfoPtr->hullAndOptsInst = HullAndOptionsInstall;
+    infoPtr->windgetInfoPtr->delegationInst = DelegationInstall;
     infoPtr->windgetInfoPtr->widgetConfigure = ItclWidgetConfigure;
     infoPtr->windgetInfoPtr->widgetCget = ItclWidgetCget;
     Itcl_WidgetParseInit(interp, infoPtr);

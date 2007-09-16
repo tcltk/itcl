@@ -11,7 +11,7 @@
  * ========================================================================
  *  Author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclWidgetCmd.c,v 1.1.2.3 2007/09/16 00:01:04 wiede Exp $
+ *     RCS:  $Id: itclWidgetCmd.c,v 1.1.2.4 2007/09/16 17:16:30 wiede Exp $
  * ========================================================================
  *           Copyright (c) 2007 Arnulf Wiedemann
  * ------------------------------------------------------------------------
@@ -43,10 +43,9 @@ Itcl_TypeCmd(
     int result;
 
     infoPtr = (ItclObjectInfo *)clientData;
-    ItclShowArgs(0, "Itcl_TypeCmd", objc-1, objv);
+    ItclShowArgs(1, "Itcl_TypeCmd", objc-1, objv);
     result = ItclClassBaseCmd(clientData, interp, ITCL_IS_TYPE, objc, objv,
             &iclsPtr);
-    Tcl_AppendResult(interp, "::itcl::type  command not yet implemented", NULL);
     return result;
 }
 
@@ -74,7 +73,7 @@ Itcl_WidgetCmd(
     int result;
 
     infoPtr = (ItclObjectInfo *)clientData;
-    ItclShowArgs(0, "Itcl_WidgetCmd", objc-1, objv);
+    ItclShowArgs(1, "Itcl_WidgetCmd", objc-1, objv);
     result = ItclClassBaseCmd(clientData, interp, ITCL_IS_WIDGET, objc, objv,
             &iclsPtr);
     if (result != TCL_OK) {
@@ -123,6 +122,7 @@ Itcl_WidgetAdaptorCmd(
     Tcl_Obj *namePtr;
     ItclClass *iclsPtr;
     ItclObjectInfo *infoPtr;
+    ItclComponent *icPtr;
     ItclVariable *ivPtr;
     int result;
 
@@ -133,8 +133,7 @@ Itcl_WidgetAdaptorCmd(
     /* create the hull variable */
     namePtr = Tcl_NewStringObj("hull", 4);
     Tcl_IncrRefCount(namePtr);
-    if (Itcl_CreateVariable(interp, iclsPtr, namePtr, NULL, NULL,
-            &ivPtr) != TCL_OK) {
+    if (ItclCreateComponent(interp, iclsPtr, namePtr, &icPtr) != TCL_OK) {
         return TCL_ERROR;
     }
     iclsPtr->numVariables++;
@@ -146,5 +145,6 @@ Itcl_WidgetAdaptorCmd(
         return TCL_ERROR;
     }
     iclsPtr->numVariables++;
+    Itcl_BuildVirtualTables(iclsPtr);
     return result;
 }

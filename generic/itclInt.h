@@ -9,7 +9,7 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itclInt.h,v 1.17.2.10 2007/09/15 23:51:14 wiede Exp $
+ * RCS: @(#) $Id: itclInt.h,v 1.17.2.11 2007/09/16 17:16:29 wiede Exp $
  */
 
 #include <string.h>
@@ -100,15 +100,18 @@ struct EnsembleInfo;
 struct ItclDelegatedOptionInfo;
 struct ItclDelegatedMethodInfo;
 
-typedef int (*InstHullAndOptions)(Tcl_Interp *interp,
+typedef int (*HullAndOptionsInst)(Tcl_Interp *interp,
         struct ItclObject *ioPtr, struct ItclClass *iclsPtr, int objc,
 	Tcl_Obj *const *objv, int *newObjc, Tcl_Obj **newObjv);
 typedef int (*InitObjectOptions)(Tcl_Interp *interp,
         struct ItclObject *ioPtr, struct ItclClass *iclsPtr, const char *name);
+typedef int (*DelegationInst)(Tcl_Interp *interp,
+        struct ItclObject *ioPtr, struct ItclClass *iclsPtr);
 
 typedef struct ItclWidgetInfo {
     InitObjectOptions initObjectOpts;
-    InstHullAndOptions instHullAndOpts;
+    HullAndOptionsInst hullAndOptsInst;
+    DelegationInst delegationInst;
     Tcl_ObjCmdProc *widgetConfigure;
     Tcl_ObjCmdProc *widgetCget;
 } ItclWidgetInfo;
@@ -381,14 +384,15 @@ typedef struct ItclDelegatedOption {
     Tcl_Obj *resourceNamePtr;
     Tcl_Obj *classNamePtr;
     ItclComponent *icPtr;
-    Tcl_Obj *asScript;
+    Tcl_Obj *asPtr;
     Tcl_HashTable exceptions;
 } ItclDelegatedOption;
 
 typedef struct ItclDelegatedMethod {
     Tcl_Obj *namePtr;
     ItclComponent *icPtr;
-    Tcl_Obj *asScript;
+    Tcl_Obj *asPtr;
+    Tcl_Obj *usingPtr;
     Tcl_HashTable exceptions;
 } ItclDelegatedMethod;
 
@@ -494,6 +498,8 @@ MODULE_SCOPE int ItclInitObjectOptions(Tcl_Interp *interp, ItclObject *ioPtr,
 MODULE_SCOPE int HullAndOptionsInstall(Tcl_Interp *interp, ItclObject *ioPtr,
         ItclClass *iclsPtr, int objc, Tcl_Obj * const objv[],
 	int *newObjc, Tcl_Obj **newObjv);
+MODULE_SCOPE int DelegationInstall(Tcl_Interp *interp, ItclObject *ioPtr,
+        ItclClass *iclsPtr);
 MODULE_SCOPE const char* Itcl_SetInstanceVar(Tcl_Interp *interp,
         const char *name, const char *name2, const char *value,
 	ItclObject *contextIoPtr, ItclClass *contextIclsPtr);

@@ -9,7 +9,7 @@
  * ========================================================================
  *  AUTHOR:  Arnulf Wiedemann
  *
- *     RCS:  $Id: itclMigrate2TclCore.c,v 1.1.2.5 2007/09/09 20:53:47 wiede Exp $
+ *     RCS:  $Id: itclMigrate2TclCore.c,v 1.1.2.6 2007/09/16 17:16:29 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -347,4 +347,13 @@ ItclGetInterpErrorLine(
 {
     Interp *iPtr = (Interp *) interp;
     return iPtr->errorLine;
+}
+
+int
+Tcl_RenameCommand(
+    Tcl_Interp *interp,
+    const char *oldName,
+    const char *newName)
+{
+    return TclRenameCommand(interp, oldName, newName);
 }

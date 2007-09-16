@@ -8,3 +8,9 @@ EXTERN Tcl_Method Itcl_NewProcMethod(Tcl_Interp *interp, Tcl_Object oPtr,
 	Tcl_Obj *argsObj, Tcl_Obj *bodyObj, ClientData *clientData2);
 EXTERN int Itcl_PublicObjectCmd(ClientData clientData, Tcl_Interp *interp,
         Tcl_Class clsPtr, int objc, Tcl_Obj *const *objv);
+EXTERN Tcl_Method Itcl_NewForwardClassMethod(Tcl_Interp *interp,
+        Tcl_Class clsPtr, int flags, Tcl_Obj *nameObj, Tcl_Obj *prefixObj);
+EXTERN Tcl_Method Itcl_NewForwardMethod(Tcl_Interp *interp, Tcl_Object oPtr,
+        int flags, Tcl_Obj *nameObj, Tcl_Obj *prefixObj);
+EXTERN void Itcl_AddToMixinSubs(Tcl_Class subPtr, Tcl_Class superPtr);
+EXTERN void Itcl_RemoveFromMixinSubs(Tcl_Class subPtr, Tcl_Class superPtr);

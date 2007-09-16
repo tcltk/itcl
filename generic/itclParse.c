@@ -39,7 +39,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclParse.c,v 1.1.2.7 2007/09/15 20:44:04 wiede Exp $
+ *     RCS:  $Id: itclParse.c,v 1.1.2.8 2007/09/16 17:16:29 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -1440,7 +1440,7 @@ Itcl_TypeCmdStart(
     int objc,                /* number of arguments */
     Tcl_Obj *CONST objv[])   /* argument objects */
 {
-    ItclShowArgs(0, "Itcl_TypeCmdStart", objc-1, objv);
+    ItclShowArgs(1, "Itcl_TypeCmdStart", objc-1, objv);
     const char *res = Tcl_PkgRequire(interp, "ItclWidget", "4.0", 0);
     if (res == NULL) {
         return TCL_ERROR;
@@ -1465,7 +1465,7 @@ Itcl_WidgetCmdStart(
     int objc,                /* number of arguments */
     Tcl_Obj *CONST objv[])   /* argument objects */
 {
-    ItclShowArgs(0, "Itcl_WidgetCmdStart", objc-1, objv);
+    ItclShowArgs(1, "Itcl_WidgetCmdStart", objc-1, objv);
     const char *res = Tcl_PkgRequire(interp, "ItclWidget", "4.0", 0);
     if (res == NULL) {
         return TCL_ERROR;
@@ -1490,7 +1490,7 @@ Itcl_WidgetAdaptorCmdStart(
     int objc,                /* number of arguments */
     Tcl_Obj *CONST objv[])   /* argument objects */
 {
-    ItclShowArgs(0, "Itcl_WidgetAdaptorCmdStart", objc-1, objv);
+    ItclShowArgs(1, "Itcl_WidgetAdaptorCmdStart", objc-1, objv);
     const char *res = Tcl_PkgRequire(interp, "ItclWidget", "4.0", 0);
     if (res == NULL) {
         return TCL_ERROR;
