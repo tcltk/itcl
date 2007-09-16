@@ -4,12 +4,15 @@
  *  DESCRIPTION:  Object-Oriented Extensions to Tcl
  *
  *  These procedures handle built-in class methods, including the
- *  "hullinstall" method 
+ *  "hullinstall" method for package ItclWidget
+ *
+ * This implementation is based mostly on the ideas of snit
+ * whose author is William Duquette.
  *
  * ========================================================================
  *  Author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclWidgetBuiltin.c,v 1.1.2.3 2007/09/15 23:51:14 wiede Exp $
+ *     RCS:  $Id: itclWidgetBuiltin.c,v 1.1.2.4 2007/09/16 00:01:04 wiede Exp $
  * ========================================================================
  *           Copyright (c) 2007 Arnulf Wiedemann
  * ------------------------------------------------------------------------

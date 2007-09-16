@@ -2,14 +2,17 @@
  * itclWidgetBase.c --
  *
  * This file contains the C-implemeted part of a
- * Itcl implemenatation
+ * Itcl implemenatation for package ItclWidget
+ *
+ * This implementation is based mostly on the ideas of snit
+ * whose author is William Duquette.
  *
  * Copyright (c) 2007 by Arnulf P. Wiedemann
  *
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itclWidgetBase.c,v 1.1.2.2 2007/09/15 20:44:04 wiede Exp $
+ * RCS: @(#) $Id: itclWidgetBase.c,v 1.1.2.3 2007/09/16 00:01:04 wiede Exp $
  */
 
 #include <stdlib.h>

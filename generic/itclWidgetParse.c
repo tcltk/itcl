@@ -5,18 +5,23 @@
  *
  *  [incr Tcl] provides object-oriented extensions to Tcl, much as
  *
- *  Procedures in this file support the new syntax for [incr Tcl]
- *  class definitions:
+ *  Procedures in this file support the new syntax for commands
+ *  for class definitions of package ItclWidget:
  *
+ *    itcl::type <className> {
+ *    }
+ *    itcl::widgetadaptor <className> {
+ *    }
  *    itcl::widget <className> {
  *        inherit <base-class>...
  *
- *        delegate name to component as script
- *        delegate name to component using script
+ *        delegate method/option to component as script
+ *        delegate method/option to component using script
  *
  *        option {<nameSpec>} ?{value}? ?-cgetmethod {<name>}?
  *                ?-configuremethod {<name>}? ?-validatemethod {<name>}?
  *                ?-readonly {<boolean>}?
+ *        component {<componentname>}
  *         
  *        constructor {<arglist>} ?{<init>}? {<body>}
  *        destructor {<body>}
@@ -30,9 +35,13 @@
  *        protected <thing> ?<args>...?
  *        private <thing> ?<args>...?
  *    }
+ *
+ * This implementation is based mostly on the ideas of snit
+ * whose author is William Duquette.
+ *
  *  Author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclWidgetParse.c,v 1.1.2.3 2007/09/15 23:51:14 wiede Exp $
+ *     RCS:  $Id: itclWidgetParse.c,v 1.1.2.4 2007/09/16 00:01:04 wiede Exp $
  * ========================================================================
  *           Copyright (c) 2007  Arnulf Wiedemann
  * ------------------------------------------------------------------------

@@ -3,10 +3,15 @@
  *      PACKAGE:  [incr Tcl]
  *  DESCRIPTION:  Object-Oriented Extensions to Tcl
  *
+ * Implementation of commands for package ItclWidget
+ *
+ * This implementation is based mostly on the ideas of snit
+ * whose author is William Duquette.
+ *
  * ========================================================================
  *  Author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclWidgetCmd.c,v 1.1.2.2 2007/09/15 20:44:04 wiede Exp $
+ *     RCS:  $Id: itclWidgetCmd.c,v 1.1.2.3 2007/09/16 00:01:04 wiede Exp $
  * ========================================================================
  *           Copyright (c) 2007 Arnulf Wiedemann
  * ------------------------------------------------------------------------
