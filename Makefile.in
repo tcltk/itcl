@@ -316,6 +316,8 @@ itclWidgetBuiltin.o: $(GENERIC_DIR)/itclInt.h $(GENERIC_DIR)/itcl.h
 
 itclWidgetObject.o: $(GENERIC_DIR)/itclInt.h $(GENERIC_DIR)/itcl.h
 
+itclWidgetInfo.o: $(GENERIC_DIR)/itclInt.h $(GENERIC_DIR)/itcl.h
+
 itclWidgetStubLib.o: $(GENERIC_DIR)/itclInt.h $(GENERIC_DIR)/itcl.h
 
 #========================================================================

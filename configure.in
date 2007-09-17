@@ -1,12 +1,14 @@
-# $Id: configure.in,v 1.34.2.2 2007/09/09 11:06:32 wiede Exp $
+# $Id: configure.in,v 1.34.2.3 2007/09/17 15:47:52 wiede Exp $
 
-AC_REVISION($Revision: 1.34.2.2 $)
+AC_REVISION($Revision: 1.34.2.3 $)
 AC_INIT([Itcl],[4.0])
 AC_CONFIG_AUX_DIR(tclconfig)
 
 TEA_INIT([3.6])
 TEA_PATH_TCLCONFIG
 TEA_LOAD_TCLCONFIG
+TEA_PATH_TKCONFIG
+TEA_LOAD_TKCONFIG
 TEA_PATH_TCLOOCONFIG
 TEA_LOAD_TCLOOCONFIG
 TEA_PATH_ITCLCONFIG
@@ -21,11 +23,17 @@ TEA_ADD_SOURCES(
 	itclResolve.c itclMigrate2TclCore.c
 	itclBuiltin.c itclEnsemble.c itclCmd.c
 	itclInfo.c itclNeededFromTclOO.c)
+TEA_ADD_WIDGET_SOURCES(
+	itclWidgetBase.c itclWidgetParse.c
+	itclWidgetCmd.c itclWidgetBuiltin.c
+	itclWidgetObject.c itclWidgetInfo.c
+        )
 AS_IF([test ${TEA_PLATFORM} = "windows"], [
     PKG_OBJECTS="${PKG_OBJECTS} ${PACKAGE_NAME}.res.o"
     RC=windres
     AC_SUBST(RC)])
 TEA_ADD_STUB_SOURCES(itclStubLib.c)
+TEA_ADD_WIDGET_STUB_SOURCES(itclWidgetStubLib.c)
 TEA_ADD_HEADERS([generic/itcl.h generic/itclInt.h])
 TEA_ADD_INCLUDES([-I. -I\"`${CYGPATH} ${srcdir}/generic`\"])
 TEA_PRIVATE_TCL_HEADERS
@@ -42,6 +50,7 @@ AC_DEFINE(USE_TCL_STUBS,[1],[Should always be 1])
 AC_DEFINE(BUILD_itcl,[1],[Set to 1 when building package])
 
 TEA_MAKE_LIB
+TEA_MAKE_WIDGET_LIB
 
 TEA_PROG_TCLSH
 CONFIGURE_OUTPUTS="Makefile config.cache config.log config.status itclConfig.sh"
