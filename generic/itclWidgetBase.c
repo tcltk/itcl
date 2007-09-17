@@ -12,7 +12,7 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itclWidgetBase.c,v 1.1.2.4 2007/09/16 17:16:30 wiede Exp $
+ * RCS: @(#) $Id: itclWidgetBase.c,v 1.1.2.5 2007/09/17 19:22:36 wiede Exp $
  */
 
 #include <stdlib.h>
@@ -78,6 +78,10 @@ Initialize (
      *  are automatically built into class definitions.
      */
     if (Itcl_WidgetBiInit(interp) != TCL_OK) {
+        return TCL_ERROR;
+    }
+
+    if (ItclWidgetInfoInit(interp) != TCL_OK) {
         return TCL_ERROR;
     }
 

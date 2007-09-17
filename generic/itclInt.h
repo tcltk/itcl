@@ -9,7 +9,7 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itclInt.h,v 1.17.2.12 2007/09/16 20:12:58 wiede Exp $
+ * RCS: @(#) $Id: itclInt.h,v 1.17.2.13 2007/09/17 19:22:36 wiede Exp $
  */
 
 #include <string.h>
@@ -519,6 +519,7 @@ MODULE_SCOPE int ItclCreateComponent(Tcl_Interp *interp, ItclClass *iclsPtr,
 MODULE_SCOPE int Itcl_WidgetParseInit(Tcl_Interp *interp,
         ItclObjectInfo *infoPtr);
 MODULE_SCOPE int Itcl_WidgetBiInit(Tcl_Interp *interp);
+MODULE_SCOPE int ItclWidgetInfoInit(Tcl_Interp *interp);
 
 
 #include "itcl2TclOO.h"
