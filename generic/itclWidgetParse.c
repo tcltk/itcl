@@ -41,7 +41,7 @@
  *
  *  Author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclWidgetParse.c,v 1.1.2.6 2007/09/16 20:12:59 wiede Exp $
+ *     RCS:  $Id: itclWidgetParse.c,v 1.1.2.7 2007/09/19 14:43:50 wiede Exp $
  * ========================================================================
  *           Copyright (c) 2007  Arnulf Wiedemann
  * ------------------------------------------------------------------------
@@ -238,6 +238,12 @@ Itcl_ClassComponentCmd(
     infoPtr = (ItclObjectInfo*)clientData;
     iclsPtr = (ItclClass*)Itcl_PeekStack(&infoPtr->clsStack);
     usage = "component ?-inherit?";
+    if (iclsPtr->flags & ITCL_IS_CLASS) {
+        Tcl_AppendResult(interp, "\"", Tcl_GetString(iclsPtr->name),
+	        " is no ::itcl::widget/::itcl::widgetadaptor/::itcl::type.", 
+		" Only these can have components", NULL);
+	return TCL_ERROR;
+    }
     if ((objc != 2) && (objc != 3)) {
         Tcl_AppendResult(interp, "wrong # args should be: ", usage, NULL);
         return TCL_ERROR;
@@ -468,10 +474,17 @@ Itcl_ClassDelegateMethodCmd(
     int i;
 
     ItclShowArgs(1, "Itcl_ClassDelegateMethodCmd", objc, objv);
-    Tcl_AppendResult(interp, "delegate method not yet implemented", NULL);
     usageStr = "delegate method <methodName> to <componentName> ?as <targetName>?\n\
 delegate method <methodName> ?to <componentName>? using <pattern>\n\
 delegate method * ?to <componentName>? ?using <pattern>? ?except <methods>?";
+    infoPtr = (ItclObjectInfo*)clientData;
+    iclsPtr = (ItclClass*)Itcl_PeekStack(&infoPtr->clsStack);
+    if (iclsPtr->flags & ITCL_IS_CLASS) {
+        Tcl_AppendResult(interp, "\"", Tcl_GetString(iclsPtr->name),
+	        " is no ::itcl::widget/::itcl::widgetadaptor/::itcl::type.", 
+		" Only these can delegate methods", NULL);
+	return TCL_ERROR;
+    }
     if (objc < 4) {
 	Tcl_AppendResult(interp, "wrong # args should be ", usageStr, NULL);
         return TCL_ERROR;
@@ -524,8 +537,6 @@ delegate method * ?to <componentName>? ?using <pattern>? ?except <methods>?";
 	        "cannot specify \"as\" with \"delegate option *\"", NULL);
 	return TCL_ERROR;
     }
-    infoPtr = (ItclObjectInfo *)clientData;
-    iclsPtr = (ItclClass *)Itcl_PeekStack(&infoPtr->clsStack);
     /* FIX ME !!! */
     /* check for already delegated */
 
@@ -638,6 +649,14 @@ Itcl_ClassDelegateOptionCmd(
 	Tcl_AppendResult(interp, "wrong # args should be ", usageStr, NULL);
         return TCL_ERROR;
     }
+    infoPtr = (ItclObjectInfo *)clientData;
+    iclsPtr = (ItclClass *)Itcl_PeekStack(&infoPtr->clsStack);
+    if (iclsPtr->flags & ITCL_IS_CLASS) {
+        Tcl_AppendResult(interp, "\"", Tcl_GetString(iclsPtr->name),
+	        " is no ::itcl::widget/::itcl::widgetadaptor/::itcl::type.", 
+		" Only these can delegate options", NULL);
+	return TCL_ERROR;
+    }
     token = Tcl_GetString(objv[1]);
     if (Tcl_SplitList(interp, (CONST84 char *)token, &argc, &argv) != TCL_OK) {
         return TCL_ERROR;
@@ -709,8 +728,6 @@ Itcl_ClassDelegateOptionCmd(
 	        "cannot specify \"except\" with \"delegate option *\"", NULL);
 	return TCL_ERROR;
     }
-    infoPtr = (ItclObjectInfo *)clientData;
-    iclsPtr = (ItclClass *)Itcl_PeekStack(&infoPtr->clsStack);
     /* FIX ME !!! */
     /* check for already delegated */
 
@@ -796,12 +813,155 @@ Itcl_ClassDelegateProcCmd(
     int objc,                /* number of arguments */
     Tcl_Obj *CONST objv[])   /* argument objects */
 {
-    ItclShowArgs(0, "Itcl_ClassDelegateProcCmd", objc, objv);
-    ItclObjectInfo *infoPtr = (ItclObjectInfo*)clientData;
-    ItclClass *iclsPtr = (ItclClass*)Itcl_PeekStack(&infoPtr->clsStack);
-iclsPtr = NULL;
+    Tcl_Obj *procNamePtr;
+    Tcl_Obj *componentPtr;
+    Tcl_Obj *targetPtr;
+    Tcl_Obj *usingPtr;
+    Tcl_Obj *exceptionsPtr;
+    Tcl_HashEntry *hPtr;
+    ItclObjectInfo *infoPtr;
+    ItclClass *iclsPtr;
+    ItclComponent *icPtr;
+    ItclDelegatedMethod *idmPtr;
+    const char *usageStr;
+    const char *procName;
+    const char *component;
+    const char *token;
+    const char **argv;
+    int argc;
+    int foundOpt;
+    int isNew;
+    int i;
 
-    Tcl_AppendResult(interp, "delegate proc not yet implemented", NULL);
+    ItclShowArgs(0, "Itcl_ClassDelegateProcCmd", objc, objv);
+    usageStr = "delegate proc <procName> to <componentName> ?as <targetName>?\n\
+delegate proc <procName> ?to <componentName>? using <pattern>\n\
+delegate proc * ?to <componentName>? ?using <pattern>? ?except <procs>?";
+    infoPtr = (ItclObjectInfo*)clientData;
+    iclsPtr = (ItclClass*)Itcl_PeekStack(&infoPtr->clsStack);
+    if (iclsPtr->flags & ITCL_IS_CLASS) {
+        Tcl_AppendResult(interp, "\"", Tcl_GetString(iclsPtr->name),
+	        " is no ::itcl::widget/::itcl::widgetadaptor/::itcl::type.", 
+		" Only these can delegate procs", NULL);
+	return TCL_ERROR;
+    }
+
+    if (objc < 4) {
+	Tcl_AppendResult(interp, "wrong # args should be ", usageStr, NULL);
+        return TCL_ERROR;
+    }
+    procName = Tcl_GetString(objv[1]);
+    component = NULL;
+    targetPtr = NULL;
+    usingPtr = NULL;
+    exceptionsPtr = NULL;
+    for(i=2;i<objc;i++) {
+        token = Tcl_GetString(objv[i]);
+	if (i+1 == objc) {
+	    Tcl_AppendResult(interp, "wrong # args should be ", usageStr, NULL);
+	    return TCL_ERROR;
+	}
+	foundOpt = 0;
+	if (strcmp(token, "to") == 0) {
+	    i++;
+	    component = Tcl_GetString(objv[i]);
+	    componentPtr = objv[i];
+	    foundOpt++;
+        }
+	if (strcmp(token, "as") == 0) {
+	    i++;
+	    targetPtr = objv[i];
+	    foundOpt++;
+        }
+	if (strcmp(token, "except") == 0) {
+	    i++;
+	    exceptionsPtr = objv[i];
+	    foundOpt++;
+        }
+	if (strcmp(token, "using") == 0) {
+	    i++;
+	    usingPtr = objv[i];
+	    foundOpt++;
+        }
+        if (!foundOpt) {
+	    Tcl_AppendResult(interp, "bad option\"", token, "\" should be ",
+	            usageStr, NULL);
+	    return TCL_ERROR;
+	}
+    }
+    if ((component == NULL) && (usingPtr == NULL)) {
+	Tcl_AppendResult(interp, "missing to should be: ", usageStr, NULL);
+	return TCL_ERROR;
+    }
+    if ((*procName == '*') && (targetPtr != NULL)) {
+	Tcl_AppendResult(interp,
+	        "cannot specify \"as\" with \"delegate option *\"", NULL);
+	return TCL_ERROR;
+    }
+    /* FIX ME !!! */
+    /* check for already delegated */
+
+    if (componentPtr != NULL) {
+        if (ItclCreateComponent(interp, iclsPtr, componentPtr, &icPtr)
+	        != TCL_OK) {
+            return TCL_ERROR;
+        }
+    } else {
+        icPtr = NULL;
+    }
+    idmPtr = (ItclDelegatedMethod *)ckalloc(sizeof(ItclDelegatedMethod));
+    memset(idmPtr, 0, sizeof(ItclDelegatedMethod));
+    Tcl_InitObjHashTable(&idmPtr->exceptions);
+    if (*procName != '*') {
+        if ((targetPtr == NULL) && (usingPtr == NULL)) {
+	    targetPtr = Tcl_NewStringObj(procName, -1);
+	}
+        /* check for valid proc name */
+        // ItclIsValidMethodName(procName);
+        /* check for locally defined option */
+        procNamePtr = Tcl_NewStringObj(procName, -1);
+	Tcl_IncrRefCount(procNamePtr);
+	hPtr = Tcl_FindHashEntry(&iclsPtr->functions, (char *)procNamePtr);
+	if (hPtr != NULL) {
+	    Tcl_AppendResult(interp, "proc \"", procName,
+	            "\" has been defined locally", NULL);
+	    return TCL_ERROR;
+	}
+        idmPtr->namePtr = procNamePtr;
+
+    } else {
+        procNamePtr = Tcl_NewStringObj("*", -1);
+	Tcl_IncrRefCount(procNamePtr);
+        idmPtr->namePtr = procNamePtr;
+    }
+    idmPtr->icPtr = icPtr;
+    idmPtr->asPtr = targetPtr;
+    if (idmPtr->asPtr != NULL) {
+        Tcl_IncrRefCount(idmPtr->asPtr);
+    }
+    idmPtr->usingPtr = usingPtr;
+    if (idmPtr->usingPtr != NULL) {
+        Tcl_IncrRefCount(idmPtr->usingPtr);
+    }
+    if (exceptionsPtr != NULL) {
+        if (Tcl_SplitList(interp, Tcl_GetString(exceptionsPtr), &argc, &argv)
+	        != TCL_OK) {
+	    return TCL_ERROR;
+	}
+        for(i=0;i<argc;i++) {
+	    Tcl_Obj *objPtr;
+	    objPtr = Tcl_NewStringObj(argv[i], -1);
+	    Tcl_IncrRefCount(objPtr);
+	    hPtr = Tcl_CreateHashEntry(&idmPtr->exceptions, (char *)objPtr,
+	            &isNew);
+	    /* FIX ME !!! */
+	    /* set the hash value to theItclMemberFunc value here !! */
+	}
+    }
+    idmPtr->flags = ITCL_COMMON;
+    hPtr = Tcl_CreateHashEntry(&iclsPtr->delegatedMethods,
+            (char *)idmPtr->namePtr, &isNew);
+    Tcl_SetHashValue(hPtr, idmPtr);
     return TCL_ERROR;
 }
 

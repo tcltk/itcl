@@ -9,7 +9,7 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itclInt.h,v 1.17.2.13 2007/09/17 19:22:36 wiede Exp $
+ * RCS: @(#) $Id: itclInt.h,v 1.17.2.14 2007/09/19 14:43:50 wiede Exp $
  */
 
 #include <string.h>
@@ -394,6 +394,7 @@ typedef struct ItclDelegatedMethod {
     Tcl_Obj *asPtr;
     Tcl_Obj *usingPtr;
     Tcl_HashTable exceptions;
+    int flags;
 } ItclDelegatedMethod;
 
 typedef struct IctlVarTraceInfo {
