@@ -12,7 +12,7 @@
  * ========================================================================
  *  Author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclWidgetBuiltin.c,v 1.1.2.6 2007/09/16 20:12:59 wiede Exp $
+ *     RCS:  $Id: itclWidgetBuiltin.c,v 1.1.2.7 2007/09/22 13:15:04 wiede Exp $
  * ========================================================================
  *           Copyright (c) 2007 Arnulf Wiedemann
  * ------------------------------------------------------------------------
@@ -332,7 +332,7 @@ ItclWidgetConfigure(
     Tcl_HashEntry *hPtr;
     Tcl_DString buffer;
     ItclVarLookup *vlookup;
-    ItclDelegatedMethod *idmPtr;
+    ItclDelegatedFunction *idmPtr;
     ItclComponent *icPtr;
     ItclOption *ioptPtr;
     const char *val;
@@ -371,10 +371,10 @@ ItclWidgetConfigure(
     hPtr = NULL;
     Tcl_Obj *methodNamePtr;
     methodNamePtr = Tcl_NewStringObj("*", -1);
-    hPtr = Tcl_FindHashEntry(&contextIclsPtr->delegatedMethods, (char *)
+    hPtr = Tcl_FindHashEntry(&contextIclsPtr->delegatedFunctions, (char *)
             methodNamePtr);
     if (hPtr != NULL) {
-        idmPtr = (ItclDelegatedMethod *)Tcl_GetHashValue(hPtr);
+        idmPtr = (ItclDelegatedFunction *)Tcl_GetHashValue(hPtr);
 	Tcl_SetStringObj(methodNamePtr, "configure", -1);
         hPtr = Tcl_FindHashEntry(&idmPtr->exceptions, (char *)methodNamePtr);
         if (hPtr == NULL) {
@@ -398,12 +398,13 @@ ItclWidgetConfigure(
     /* now do the hard work */
     if (objc == 1) {
 fprintf(stderr, "plain configure not yet implemented\n");
+        return TCL_ERROR;
     }
     /* first handle delegated options */
-    hPtr = Tcl_FindHashEntry(&contextIclsPtr->delegatedMethods, (char *)
+    hPtr = Tcl_FindHashEntry(&contextIclsPtr->delegatedFunctions, (char *)
             objv[1]);
     if (hPtr != NULL) {
-        idmPtr = (ItclDelegatedMethod *)Tcl_GetHashValue(hPtr);
+        idmPtr = (ItclDelegatedFunction *)Tcl_GetHashValue(hPtr);
         icPtr = idmPtr->icPtr;
         val = ItclGetInstanceVar(interp, Tcl_GetString(icPtr->namePtr),
                 NULL, contextIoPtr, contextIclsPtr);
@@ -517,7 +518,7 @@ ItclWidgetCget(
 
     Tcl_DString buffer;
     Tcl_HashEntry *hPtr;
-    ItclDelegatedMethod *idmPtr;
+    ItclDelegatedFunction *idmPtr;
     ItclComponent *icPtr;
     ItclOption *ioptPtr;
     const char *val;
@@ -550,10 +551,10 @@ ItclWidgetCget(
     hPtr = NULL;
     Tcl_Obj *methodNamePtr;
     methodNamePtr = Tcl_NewStringObj("*", -1);
-    hPtr = Tcl_FindHashEntry(&contextIclsPtr->delegatedMethods, (char *)
+    hPtr = Tcl_FindHashEntry(&contextIclsPtr->delegatedFunctions, (char *)
             methodNamePtr);
     if (hPtr != NULL) {
-        idmPtr = (ItclDelegatedMethod *)Tcl_GetHashValue(hPtr);
+        idmPtr = (ItclDelegatedFunction *)Tcl_GetHashValue(hPtr);
 	Tcl_SetStringObj(methodNamePtr, "cget", -1);
         hPtr = Tcl_FindHashEntry(&idmPtr->exceptions, (char *)methodNamePtr);
         if (hPtr == NULL) {
@@ -580,10 +581,10 @@ ItclWidgetCget(
     }
     /* now do the hard work */
     /* first handle delegated options */
-    hPtr = Tcl_FindHashEntry(&contextIclsPtr->delegatedMethods, (char *)
+    hPtr = Tcl_FindHashEntry(&contextIclsPtr->delegatedFunctions, (char *)
             objv[1]);
     if (hPtr != NULL) {
-        idmPtr = (ItclDelegatedMethod *)Tcl_GetHashValue(hPtr);
+        idmPtr = (ItclDelegatedFunction *)Tcl_GetHashValue(hPtr);
         icPtr = idmPtr->icPtr;
         val = ItclGetInstanceVar(interp, Tcl_GetString(icPtr->namePtr),
                 NULL, contextIoPtr, contextIclsPtr);

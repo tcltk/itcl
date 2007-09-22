@@ -8,7 +8,7 @@
  * ========================================================================
  *  Author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclWidgetInfo.c,v 1.1.2.1 2007/09/17 19:22:36 wiede Exp $
+ *     RCS:  $Id: itclWidgetInfo.c,v 1.1.2.2 2007/09/22 13:15:04 wiede Exp $
  * ========================================================================
  *           Copyright (c) 2007 Arnulf Wiedemann
  * ------------------------------------------------------------------------
@@ -28,6 +28,7 @@ Tcl_ObjCmdProc ItclBiInfoTypesCmd;
 Tcl_ObjCmdProc ItclBiInfoWidgetsCmd;
 Tcl_ObjCmdProc ItclBiInfoWidgetAdaptorsCmd;
 
+#ifdef NOTDEF
 typedef struct InfoMethod {
     char* name;              /* method name */
     char* usage;             /* string describing usage */
@@ -44,6 +45,7 @@ static InfoMethod InfoMethodList[] = {
     { "widgetadaptors", "", ItclBiInfoWidgetAdaptorsCmd },
     { NULL, NULL, NULL }
 };
+#endif
 
 struct NameProcMap { const char *name; Tcl_ObjCmdProc *proc; };
 

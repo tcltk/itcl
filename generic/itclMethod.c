@@ -25,7 +25,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclMethod.c,v 1.1.2.6 2007/09/15 20:44:04 wiede Exp $
+ *     RCS:  $Id: itclMethod.c,v 1.1.2.7 2007/09/22 13:15:04 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -766,22 +766,22 @@ void
 Itcl_DeleteMemberCode(
     char* cdata)  /* pointer to member function definition */
 {
-    ItclMemberCode* mcode = (ItclMemberCode*)cdata;
+    ItclMemberCode* mCodePtr = (ItclMemberCode*)cdata;
 
-    if (mcode == NULL) {
+    if (mCodePtr == NULL) {
         return;
     }
-    if (mcode->argListPtr != NULL) {
-        DeleteArgList(mcode->argListPtr);
+    if (mCodePtr->argListPtr != NULL) {
+        DeleteArgList(mCodePtr->argListPtr);
     }
-    if (mcode->usagePtr != NULL) {
-        Tcl_DecrRefCount(mcode->usagePtr);
+    if (mCodePtr->usagePtr != NULL) {
+        Tcl_DecrRefCount(mCodePtr->usagePtr);
     }
-    if (mcode->argumentPtr != NULL) {
-        Tcl_DecrRefCount(mcode->argumentPtr);
+    if (mCodePtr->argumentPtr != NULL) {
+        Tcl_DecrRefCount(mCodePtr->argumentPtr);
     }
-    /* do NOT free mcode->bodyPtr here !! that is done in TclOO!! */
-    ckfree((char*)mcode);
+    /* do NOT free mCodePtr->bodyPtr here !! that is done in TclOO!! */
+    ckfree((char*)mCodePtr);
 }
 
 

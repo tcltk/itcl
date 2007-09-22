@@ -23,7 +23,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclCmd.c,v 1.1.2.5 2007/09/15 11:56:11 wiede Exp $
+ *     RCS:  $Id: itclCmd.c,v 1.1.2.6 2007/09/22 13:15:03 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -999,6 +999,10 @@ Itcl_FilterAddCmd(
     ItclShowArgs(1, "Itcl_FilterCmd", objc, objv);
 //    Tcl_Namespace *contextNs = Tcl_GetCurrentNamespace(interp);
 /* FIX ME need to change the chain command to do the same here as the TclOO next command !! */
+    if (objc < 3) {
+        Tcl_WrongNumArgs(interp, 1, objv, "<className> <filterName> ?<filterName> ...?");
+        return TCL_ERROR;
+    }
     newObjv = (Tcl_Obj **)ckalloc(sizeof(Tcl_Obj *)*(objc+1));
     newObjv[0] = Tcl_NewStringObj("::oo::define", -1);
     Tcl_IncrRefCount(newObjv[0]);
@@ -1056,11 +1060,27 @@ Itcl_ForwardAddCmd(
     int objc,                /* number of arguments */
     Tcl_Obj *CONST objv[])   /* argument objects */
 {
+    Tcl_Obj *prefixObj;
     Tcl_Obj **newObjv;
+    Tcl_Method mPtr;
+    ItclObjectInfo *infoPtr;
+    ItclClass *iclsPtr;
     int result;
 
     ItclShowArgs(1, "Itcl_ForwardAddCmd", objc, objv);
-//    Tcl_Namespace *contextNs = Tcl_GetCurrentNamespace(interp);
+    if (objc < 3) {
+        Tcl_WrongNumArgs(interp, 1, objv, "<forwardName> <targetName> ?<arg> ...?");
+        return TCL_ERROR;
+    }
+    infoPtr = (ItclObjectInfo *)infoPtr;
+    iclsPtr = (ItclClass*)Itcl_PeekStack(&infoPtr->clsStack);
+    prefixObj = Tcl_NewListObj(objc-2, objv+2);
+    mPtr = Itcl_NewForwardClassMethod(interp, iclsPtr->classPtr, 1,
+            objv[1], prefixObj);
+    if (mPtr == NULL) {
+        return TCL_ERROR;
+    }
+    return TCL_OK;
     newObjv = (Tcl_Obj **)ckalloc(sizeof(Tcl_Obj *)*(objc+1));
     newObjv[0] = Tcl_NewStringObj("::oo::define", -1);
     Tcl_IncrRefCount(newObjv[0]);
@@ -1118,10 +1138,17 @@ Itcl_MixinAddCmd(
     Tcl_Obj *CONST objv[])   /* argument objects */
 {
     Tcl_Obj **newObjv;
+    ItclObjectInfo *infoPtr;
+    ItclClass *iclsPtr;
     int result;
 
     ItclShowArgs(1, "Itcl_MixinAddCmd", objc, objv);
-//    Tcl_Namespace *contextNs = Tcl_GetCurrentNamespace(interp);
+    if (objc < 3) {
+        Tcl_WrongNumArgs(interp, 1, objv, "<className> <mixinName> ?<mixinName> ...?");
+        return TCL_ERROR;
+    }
+    infoPtr = (ItclObjectInfo *)infoPtr;
+    iclsPtr = (ItclClass*)Itcl_PeekStack(&infoPtr->clsStack);
     newObjv = (Tcl_Obj **)ckalloc(sizeof(Tcl_Obj *)*(objc+1));
     newObjv[0] = Tcl_NewStringObj("::oo::define", -1);
     Tcl_IncrRefCount(newObjv[0]);

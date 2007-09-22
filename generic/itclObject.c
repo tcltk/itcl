@@ -22,9 +22,9 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *  overhauled version author: Arnulf Wiedemann
+ *  overhauled version author: Arnulf Wiedemann Copyright (c) 2007
  *
- *     RCS:  $Id: itclObject.c,v 1.1.2.8 2007/09/16 20:12:58 wiede Exp $
+ *     RCS:  $Id: itclObject.c,v 1.1.2.9 2007/09/22 13:15:04 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -48,6 +48,23 @@ static int ItclDestructBase(Tcl_Interp *interp, ItclObject *contextObj,
 static int ItclInitObjectVariables(Tcl_Interp *interp, ItclObject *ioPtr,
         ItclClass *iclsPtr, const char *name);
 
+
+/*
+ * ------------------------------------------------------------------------
+ *  ItclDeleteObjectMetadata()
+ *
+ *  Delete the metadata data if any
+ *-------------------------------------------------------------------------
+ */
+void
+ItclDeleteObjectMetadata(
+    ClientData clientData)
+{
+    /*
+     * nothing to to yet, as there are only ItclClass or ItclObject pointers
+     * stored, which are freed elsewhere
+     */
+}
 
 /*
  * ------------------------------------------------------------------------

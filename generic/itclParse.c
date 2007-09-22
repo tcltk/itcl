@@ -39,7 +39,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclParse.c,v 1.1.2.8 2007/09/16 17:16:29 wiede Exp $
+ *     RCS:  $Id: itclParse.c,v 1.1.2.9 2007/09/22 13:15:04 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -71,6 +71,8 @@ Tcl_ObjCmdProc Itcl_ClassMethodCmd;
 Tcl_ObjCmdProc Itcl_ClassProcCmd;
 Tcl_ObjCmdProc Itcl_ClassVariableCmd;
 Tcl_ObjCmdProc Itcl_ClassProtectionCmd;
+Tcl_ObjCmdProc Itcl_ClassFilterCmd;
+Tcl_ObjCmdProc Itcl_ClassMixinCmd;
 Tcl_ObjCmdProc Itcl_TypeCmdStart;
 Tcl_ObjCmdProc Itcl_WidgetCmdStart;
 Tcl_ObjCmdProc Itcl_WidgetAdaptorCmdStart;
@@ -82,6 +84,8 @@ static const struct {
     {"common", Itcl_ClassCommonCmd},
     {"constructor", Itcl_ClassConstructorCmd},
     {"destructor", Itcl_ClassDestructorCmd},
+    {"filter", Itcl_ClassFilterCmd},
+    {"mixin", Itcl_ClassMixinCmd},
     {"inherit", Itcl_ClassInheritCmd},
     {"method", Itcl_ClassMethodCmd},
     {"proc", Itcl_ClassProcCmd},
@@ -1421,6 +1425,42 @@ ItclDelObjectInfo(
 // FIX ME !!!
 // free class_meta_type and object_meta_type
     ckfree((char*)infoPtr);
+}
+
+/*
+ * ------------------------------------------------------------------------
+ *  Itcl_ClassFilterCmd()
+ *
+ *
+ * ------------------------------------------------------------------------
+ */
+int
+Itcl_ClassFilterCmd(
+    ClientData clientData,   /* info for all known objects */
+    Tcl_Interp *interp,      /* current interpreter */
+    int objc,                /* number of arguments */
+    Tcl_Obj *CONST objv[])   /* argument objects */
+{
+    ItclShowArgs(0, "Itcl_ClassFilterCmd", objc, objv);
+    return TCL_OK;
+}
+
+/*
+ * ------------------------------------------------------------------------
+ *  Itcl_ClassMixinCmd()
+ *
+ *
+ * ------------------------------------------------------------------------
+ */
+int
+Itcl_ClassMixinCmd(
+    ClientData clientData,   /* info for all known objects */
+    Tcl_Interp *interp,      /* current interpreter */
+    int objc,                /* number of arguments */
+    Tcl_Obj *CONST objv[])   /* argument objects */
+{
+    ItclShowArgs(0, "Itcl_ClassMixinCmd", objc, objv);
+    return TCL_OK;
 }
 
 /*

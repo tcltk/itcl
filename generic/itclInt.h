@@ -9,7 +9,7 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itclInt.h,v 1.17.2.14 2007/09/19 14:43:50 wiede Exp $
+ * RCS: @(#) $Id: itclInt.h,v 1.17.2.15 2007/09/22 13:15:03 wiede Exp $
  */
 
 #include <string.h>
@@ -189,9 +189,9 @@ typedef struct ItclClass {
                                      in this class.  Look up simple string
                                      names and get back
 				     ItclDelegatedOptionInfo * ptrs */
-    Tcl_HashTable delegatedMethods; /* definitions for all delegated methods
-                                     in this class.  Look up simple string
-                                     names and get back
+    Tcl_HashTable delegatedFunctions; /* definitions for all delegated methods
+                                     or procs in this class.  Look up simple
+				     string names and get back
 				     ItclDelegatedMethodInfo * ptrs */
     int numInstanceVars;          /* number of instance vars in variables
                                      table */
@@ -205,9 +205,9 @@ typedef struct ItclClass {
     struct ItclMemberFunc *destructor;   /* the class destructor or NULL */
     struct ItclMemberFunc *constructorInit;  /* the class constructor init code or NULL */
     Tcl_Resolve *resolvePtr;
-    Tcl_Object oPtr;		  /* TclOO class object */
     Tcl_Obj *widgetClassPtr;      /* class name for widget if class is an
                                    * ::itcl::widget */
+    Tcl_Object oPtr;		  /* TclOO class object */
     Tcl_Class  classPtr;          /* TclOO class */
     int numCommons;               /* number of commons in this class */
     int numVariables;             /* number of variables in this class */
@@ -225,6 +225,7 @@ typedef struct ItclClass {
 #define ITCL_WIDGET_IS_TTK_FRAME        0x080000
 #define ITCL_WIDGET_IS_TTK_LABEL_FRAME	0x100000
 #define ITCL_WIDGET_IS_TTK_TOPLEVEL     0x200000
+#define ITCL_CLASS_NS_TEARDOWN          0x400000
 
 typedef struct ItclHierIter {
     ItclClass *current;           /* current position in hierarchy */
@@ -257,6 +258,8 @@ typedef struct ItclObject {
 #define ITCL_OBJECT_SHOULD_VARNS_DELETE  0x40
 #define ITCL_CLASS_NO_VARNS_DELETE       0x100
 #define ITCL_CLASS_SHOULD_VARNS_DELETE   0x200
+#define ITCL_CLASS_DELETE_CALLED         0x400
+#define ITCL_CLASS_DELETED               0x800
 
 #define ITCL_IGNORE_ERRS  0x002  /* useful for construction/destruction */
 
@@ -388,14 +391,14 @@ typedef struct ItclDelegatedOption {
     Tcl_HashTable exceptions;
 } ItclDelegatedOption;
 
-typedef struct ItclDelegatedMethod {
+typedef struct ItclDelegatedFunction {
     Tcl_Obj *namePtr;
     ItclComponent *icPtr;
     Tcl_Obj *asPtr;
     Tcl_Obj *usingPtr;
     Tcl_HashTable exceptions;
     int flags;
-} ItclDelegatedMethod;
+} ItclDelegatedFunction;
 
 typedef struct IctlVarTraceInfo {
     int flags;
@@ -521,6 +524,9 @@ MODULE_SCOPE int Itcl_WidgetParseInit(Tcl_Interp *interp,
         ItclObjectInfo *infoPtr);
 MODULE_SCOPE int Itcl_WidgetBiInit(Tcl_Interp *interp);
 MODULE_SCOPE int ItclWidgetInfoInit(Tcl_Interp *interp);
+MODULE_SCOPE void ItclDeleteObjectMetadata(ClientData clientData);
+MODULE_SCOPE void ItclDeleteClassMetadata(ClientData clientData);
+MODULE_SCOPE void ItclDeleteArgList(ItclArgList *arglistPtr);
 
 
 #include "itcl2TclOO.h"

@@ -41,7 +41,7 @@
  *
  *  Author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclWidgetParse.c,v 1.1.2.7 2007/09/19 14:43:50 wiede Exp $
+ *     RCS:  $Id: itclWidgetParse.c,v 1.1.2.8 2007/09/22 13:15:04 wiede Exp $
  * ========================================================================
  *           Copyright (c) 2007  Arnulf Wiedemann
  * ------------------------------------------------------------------------
@@ -462,7 +462,7 @@ Itcl_ClassDelegateMethodCmd(
     ItclObjectInfo *infoPtr;
     ItclClass *iclsPtr;
     ItclComponent *icPtr;
-    ItclDelegatedMethod *idmPtr;
+    ItclDelegatedFunction *idmPtr;
     const char *usageStr;
     const char *methodName;
     const char *component;
@@ -548,8 +548,8 @@ delegate method * ?to <componentName>? ?using <pattern>? ?except <methods>?";
     } else {
         icPtr = NULL;
     }
-    idmPtr = (ItclDelegatedMethod *)ckalloc(sizeof(ItclDelegatedMethod));
-    memset(idmPtr, 0, sizeof(ItclDelegatedMethod));
+    idmPtr = (ItclDelegatedFunction *)ckalloc(sizeof(ItclDelegatedFunction));
+    memset(idmPtr, 0, sizeof(ItclDelegatedFunction));
     Tcl_InitObjHashTable(&idmPtr->exceptions);
     if (*methodName != '*') {
         if ((targetPtr == NULL) && (usingPtr == NULL)) {
@@ -597,7 +597,7 @@ delegate method * ?to <componentName>? ?using <pattern>? ?except <methods>?";
 	    /* set the hash value to theItclMemberFunc value here !! */
 	}
     }
-    hPtr = Tcl_CreateHashEntry(&iclsPtr->delegatedMethods,
+    hPtr = Tcl_CreateHashEntry(&iclsPtr->delegatedFunctions,
             (char *)idmPtr->namePtr, &isNew);
     Tcl_SetHashValue(hPtr, idmPtr);
     return TCL_OK;
@@ -822,7 +822,7 @@ Itcl_ClassDelegateProcCmd(
     ItclObjectInfo *infoPtr;
     ItclClass *iclsPtr;
     ItclComponent *icPtr;
-    ItclDelegatedMethod *idmPtr;
+    ItclDelegatedFunction *idmPtr;
     const char *usageStr;
     const char *procName;
     const char *component;
@@ -909,8 +909,8 @@ delegate proc * ?to <componentName>? ?using <pattern>? ?except <procs>?";
     } else {
         icPtr = NULL;
     }
-    idmPtr = (ItclDelegatedMethod *)ckalloc(sizeof(ItclDelegatedMethod));
-    memset(idmPtr, 0, sizeof(ItclDelegatedMethod));
+    idmPtr = (ItclDelegatedFunction *)ckalloc(sizeof(ItclDelegatedFunction));
+    memset(idmPtr, 0, sizeof(ItclDelegatedFunction));
     Tcl_InitObjHashTable(&idmPtr->exceptions);
     if (*procName != '*') {
         if ((targetPtr == NULL) && (usingPtr == NULL)) {
@@ -959,7 +959,7 @@ delegate proc * ?to <componentName>? ?using <pattern>? ?except <procs>?";
 	}
     }
     idmPtr->flags = ITCL_COMMON;
-    hPtr = Tcl_CreateHashEntry(&iclsPtr->delegatedMethods,
+    hPtr = Tcl_CreateHashEntry(&iclsPtr->delegatedFunctions,
             (char *)idmPtr->namePtr, &isNew);
     Tcl_SetHashValue(hPtr, idmPtr);
     return TCL_ERROR;

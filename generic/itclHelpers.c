@@ -9,7 +9,7 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itclHelpers.c,v 1.1.2.3 2007/09/15 11:56:11 wiede Exp $
+ * RCS: @(#) $Id: itclHelpers.c,v 1.1.2.4 2007/09/22 13:15:03 wiede Exp $
  */
 
 #include "itclInt.h"
@@ -219,7 +219,9 @@ ItclDeleteArgList(
 	if (currPtr->defaultValuePtr != NULL) {
 	    Tcl_DecrRefCount(currPtr->defaultValuePtr);
 	}
-	Tcl_DecrRefCount(currPtr->namePtr);
+	if (currPtr->namePtr != NULL) {
+	    Tcl_DecrRefCount(currPtr->namePtr);
+	}
         nextPtr = currPtr->nextPtr;
         ckfree((char *)currPtr);
     }

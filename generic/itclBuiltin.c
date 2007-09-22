@@ -24,7 +24,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclBuiltin.c,v 1.1.2.7 2007/09/16 20:12:58 wiede Exp $
+ *     RCS:  $Id: itclBuiltin.c,v 1.1.2.8 2007/09/22 13:15:03 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -326,6 +326,7 @@ Itcl_BiConfigureCmd(
     ItclShowArgs(1, "Itcl_BiConfigureCmd", objc, objv);
     vlookup = NULL;
     token = NULL;
+    hPtr = NULL;
     /*
      *  Make sure that this command is being invoked in the proper
      *  context.
@@ -352,8 +353,11 @@ Itcl_BiConfigureCmd(
 
     if (!(contextIclsPtr->flags & ITCL_IS_CLASS)) {
 	/* first check if it is an option */
-        hPtr = Tcl_FindHashEntry(&contextIclsPtr->options, (char *) objv[1]);
-	if (hPtr != NULL) {
+	if (objc > 1) {
+            hPtr = Tcl_FindHashEntry(&contextIclsPtr->options,
+	            (char *) objv[1]);
+	}
+	if ((objc == 1) || (hPtr != NULL)) {
 	    ItclWidgetInfo *iwInfoPtr;
 	    iwInfoPtr = contextIclsPtr->infoPtr->windgetInfoPtr;
             if (iwInfoPtr != NULL) {
@@ -363,7 +367,7 @@ Itcl_BiConfigureCmd(
 	            return result;
 	        }
 	    }
-	}
+        }
     }
     /*
      *  HANDLE:  configure
@@ -866,7 +870,7 @@ ItclBiObjectUnknownCmd(
     ItclObject *ioPtr;
     ItclObjectInfo *infoPtr;
 
-    ItclShowArgs(0, "ItclBiUnknownObjectCmd", objc, objv);
+    ItclShowArgs(2, "ItclBiUnknownObjectCmd", objc, objv);
     cmd = Tcl_GetCommandFromObj(interp, objv[1]);
     if (Tcl_GetCommandInfoFromToken(cmd, &cmdInfo) != 1) {
     }

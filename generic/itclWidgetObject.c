@@ -11,7 +11,7 @@
  * ========================================================================
  *  Author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclWidgetObject.c,v 1.1.2.6 2007/09/16 20:12:59 wiede Exp $
+ *     RCS:  $Id: itclWidgetObject.c,v 1.1.2.7 2007/09/22 13:15:04 wiede Exp $
  * ========================================================================
  *           Copyright (c) 2007 Arnulf Wiedemann
  * ------------------------------------------------------------------------
@@ -165,7 +165,7 @@ DelegationInstall(
     Tcl_Obj *listPtr;;
     Tcl_Obj *componentNamePtr;
     ItclMemberFunc *imPtr;
-    ItclDelegatedMethod *idmPtr;
+    ItclDelegatedFunction *idmPtr;
     FOREACH_HASH_DECLS;
     char *methodName;
     const char *val;
@@ -178,7 +178,7 @@ DelegationInstall(
     delegateAll = 0;
     noDelegate = ITCL_CONSTRUCTOR|ITCL_DESTRUCTOR|ITCL_COMPONENT;
     componentNamePtr = NULL;
-    FOREACH_HASH_VALUE(idmPtr, &iclsPtr->delegatedMethods) {
+    FOREACH_HASH_VALUE(idmPtr, &iclsPtr->delegatedFunctions) {
 	/* save to allow nested FOREACH */
 	if (*Tcl_GetString(idmPtr->namePtr) == '*') {
 	    delegateAll = 1;

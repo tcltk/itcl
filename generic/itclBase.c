@@ -1,7 +1,7 @@
 /*
  * itclBase.c --
  *
- * This file contains the C-implemeted part of a
+ * This file contains the C-implemented startup part of a
  * Itcl implemenatation
  *
  * Copyright (c) 2007 by Arnulf P. Wiedemann
@@ -9,7 +9,7 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itclBase.c,v 1.1.2.7 2007/09/15 20:44:04 wiede Exp $
+ * RCS: @(#) $Id: itclBase.c,v 1.1.2.8 2007/09/22 13:15:03 wiede Exp $
  */
 
 #include <stdlib.h>
@@ -119,20 +119,6 @@ static char *clazzUnknownBody = "\n\
     }\n\
     return $obj\n\
 ";
-
-#ifdef NOTDEF
-    set body [list {set obj [lindex [::info level 0] 0]}]\n\
-    set part {return [::itcl::methodset::objectUnknownCommand [self]}\n\
-    append part \" ${myns}::$obj \"\n\
-    append part {{*}$args]}\n\
-    lappend body $part\n\
-    catch {\n\
-        # just in case object has been destructed during construction\n\
-    ::oo::define ${myns}::$obj method unknown {args} \"[join $body \n]\"\n\
-    ::oo::define ${myns}::$obj export unknown\n\
-    }\n\
-
-#endif
 
 /*
  * ------------------------------------------------------------------------
@@ -159,21 +145,6 @@ AddClassUnknowMethod(
     }
     return TCL_OK;
 }
-
-/*
- * ------------------------------------------------------------------------
- *  Itcl_DeleteObjectMetadata()
- *
- *  Delete the metadata data if any
- *-------------------------------------------------------------------------
- */
-void
-Itcl_DeleteObjectMetadata(
-    ClientData clientData)
-{
-/* FIX ME !!! NEED CODE HERE !! */
-}
-
 /*
  * ------------------------------------------------------------------------
  *  Initialize()
@@ -229,13 +200,13 @@ Initialize (
             sizeof(Tcl_ObjectMetadataType));
     infoPtr->class_meta_type->version = TCL_OO_METADATA_VERSION_CURRENT;
     infoPtr->class_meta_type->name = "ItclClass";
-    infoPtr->class_meta_type->deleteProc = Itcl_DeleteObjectMetadata;
+    infoPtr->class_meta_type->deleteProc = ItclDeleteClassMetadata;
     infoPtr->class_meta_type->cloneProc = NULL;
     infoPtr->object_meta_type = (Tcl_ObjectMetadataType *)ckalloc(
             sizeof(Tcl_ObjectMetadataType));
     infoPtr->object_meta_type->version = TCL_OO_METADATA_VERSION_CURRENT;
     infoPtr->object_meta_type->name = "ItclObject";
-    infoPtr->object_meta_type->deleteProc = Itcl_DeleteObjectMetadata;
+    infoPtr->object_meta_type->deleteProc = ItclDeleteObjectMetadata;
     infoPtr->object_meta_type->cloneProc = NULL;
     Tcl_InitHashTable(&infoPtr->objects, TCL_ONE_WORD_KEYS);
     Tcl_InitObjHashTable(&infoPtr->classes);
@@ -345,12 +316,6 @@ opt = atoi(res_option);
      *  Package is now loaded.
      */
 
-/* next lines are not needed in production environment !! */
-#define ITCL_DEBUG_C_INTERFACE 1
-#ifdef ITCL_DEBUG_C_INTERFACE
-    void RegisterDebugCFunctions(Tcl_Interp *interp);
-    RegisterDebugCFunctions(interp);
-#endif
     return Tcl_PkgProvideEx(interp, "Itcl", ITCL_VERSION, &itclStubAPI);
 }
 
