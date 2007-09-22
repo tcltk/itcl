@@ -20,7 +20,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itclResolve.c,v 1.1.2.4 2007/09/15 20:44:04 wiede Exp $
+ *     RCS:  $Id: itclResolve.c,v 1.1.2.5 2007/09/22 13:39:23 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -343,13 +343,13 @@ Itcl_ClassVarResolver(
 	Tcl_DStringAppend(&buffer, ITCL_VARIABLES_NAMESPACE, -1);
 	Tcl_DStringAppend(&buffer, "::", 2);
 	Tcl_DStringAppend(&buffer, Tcl_GetString(contextIoPtr->namePtr), -1);
-	if (vlookup->ivPtr->iclsPtr->namesp == NULL) {
+	if (vlookup->ivPtr->iclsPtr->nsPtr == NULL) {
 	    /* deletion of class is running */
 	    Tcl_DStringAppend(&buffer,
 	             Tcl_GetCurrentNamespace(interp)->fullName, -1);
         } else {
 	    Tcl_DStringAppend(&buffer,
-	             vlookup->ivPtr->iclsPtr->namesp->fullName, -1);
+	             vlookup->ivPtr->iclsPtr->nsPtr->fullName, -1);
 	}
 	Tcl_DStringAppend(&buffer, "::this", 6);
         Tcl_Var varPtr;
@@ -528,12 +528,12 @@ ItclClassRuntimeVarResolver(
 	    Tcl_DStringAppend(&buffer, "::", 2);
 	    Tcl_DStringAppend(&buffer,
 	            Tcl_GetString(contextIoPtr->namePtr), -1);
-	    if (vlookup->ivPtr->iclsPtr->namesp == NULL) {
+	    if (vlookup->ivPtr->iclsPtr->nsPtr == NULL) {
 	        Tcl_DStringAppend(&buffer,
 	                Tcl_GetCurrentNamespace(interp)->fullName, -1);
 	    } else {
 	        Tcl_DStringAppend(&buffer,
-	                vlookup->ivPtr->iclsPtr->namesp->fullName, -1);
+	                vlookup->ivPtr->iclsPtr->nsPtr->fullName, -1);
 	    }
 	    Tcl_DStringAppend(&buffer, "::this", 6);
             Tcl_Var varPtr;

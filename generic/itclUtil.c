@@ -23,7 +23,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclUtil.c,v 1.1.2.3 2007/09/09 13:38:41 wiede Exp $
+ *     RCS:  $Id: itclUtil.c,v 1.1.2.4 2007/09/22 13:39:23 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -800,7 +800,7 @@ Itcl_CanAccess2(
         return 1;
     } else {
         if (protection == ITCL_PRIVATE) {
-            return (iclsPtr->namesp == fromNsPtr);
+            return (iclsPtr->nsPtr == fromNsPtr);
         }
     }
 

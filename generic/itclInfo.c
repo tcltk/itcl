@@ -24,7 +24,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclInfo.c,v 1.1.2.3 2007/09/09 13:38:40 wiede Exp $
+ *     RCS:  $Id: itclInfo.c,v 1.1.2.4 2007/09/22 13:39:22 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -285,14 +285,14 @@ Itcl_BiInfoClassCmd(
      *  name.  Use normal class names when possible.
      */
     if (contextIoPtr) {
-        contextNs = contextIoPtr->iclsPtr->namesp;
+        contextNs = contextIoPtr->iclsPtr->nsPtr;
     } else {
         assert(contextIclsPtr != NULL);
-        assert(contextIclsPtr->namesp != NULL);
+        assert(contextIclsPtr->nsPtr != NULL);
         if (contextIclsPtr->infoPtr->useOldResolvers) {
             contextNs = Itcl_GetUplevelNamespace(interp, 1);
         } else {
-            contextNs = contextIclsPtr->namesp;
+            contextNs = contextIclsPtr->nsPtr;
 	}
     }
 
@@ -379,9 +379,11 @@ Itcl_BiInfoInheritCmd(
     upNsPtr = Itcl_GetUplevelNamespace(interp, 1);
     if (imPtr->iclsPtr->infoPtr->useOldResolvers) {
         if (contextIoPtr != NULL) {
-            if (upNsPtr != contextIclsPtr->namesp) {
+            if (upNsPtr != contextIclsPtr->nsPtr) {
 		Tcl_HashEntry *hPtr;
-		hPtr = Tcl_FindHashEntry(&imPtr->iclsPtr->infoPtr->namespaceClasses, (char *)upNsPtr);
+		hPtr = Tcl_FindHashEntry(
+		        &imPtr->iclsPtr->infoPtr->namespaceClasses,
+			(char *)upNsPtr);
 		if (hPtr != NULL) {
 		    contextIclsPtr = Tcl_GetHashValue(hPtr);
 		} else {
@@ -400,10 +402,10 @@ Itcl_BiInfoInheritCmd(
     elem = Itcl_FirstListElem(&contextIclsPtr->bases);
     while (elem) {
         iclsPtr = (ItclClass*)Itcl_GetListValue(elem);
-        if (iclsPtr->namesp->parentPtr == activeNs) {
-            objPtr = Tcl_NewStringObj(iclsPtr->namesp->name, -1);
+        if (iclsPtr->nsPtr->parentPtr == activeNs) {
+            objPtr = Tcl_NewStringObj(iclsPtr->nsPtr->name, -1);
         } else {
-            objPtr = Tcl_NewStringObj(iclsPtr->namesp->fullName, -1);
+            objPtr = Tcl_NewStringObj(iclsPtr->nsPtr->fullName, -1);
         }
         Tcl_ListObjAppendElement((Tcl_Interp*)NULL, listPtr, objPtr);
         elem = Itcl_NextListElem(elem);
@@ -482,7 +484,7 @@ Itcl_BiInfoHeritageCmd(
     upNsPtr = Itcl_GetUplevelNamespace(interp, 1);
     if (contextIclsPtr->infoPtr->useOldResolvers) {
         if (contextIoPtr != NULL) {
-            if (upNsPtr != contextIclsPtr->namesp) {
+            if (upNsPtr != contextIclsPtr->nsPtr) {
 	        Tcl_HashEntry *hPtr;
 	        hPtr = Tcl_FindHashEntry(&imPtr->iclsPtr->infoPtr->namespaceClasses, (char *)upNsPtr);
 	        if (hPtr != NULL) {
@@ -503,14 +505,14 @@ Itcl_BiInfoHeritageCmd(
     Itcl_InitHierIter(&hier, contextIclsPtr);
     while ((iclsPtr=Itcl_AdvanceHierIter(&hier)) != NULL) {
 /* FIX ME !!! */
-if (iclsPtr->namesp == NULL) {
-fprintf(stderr, "ITCL: iclsPtr->namesp == NULL %s 0x%08x\n", Tcl_GetString(iclsPtr->fullname), iclsPtr->flags);
+if (iclsPtr->nsPtr == NULL) {
+fprintf(stderr, "ITCL: iclsPtr->nsPtr == NULL %s 0x%08x\n", Tcl_GetString(iclsPtr->fullNamePtr), iclsPtr->flags);
 return TCL_ERROR;
 }
-        if (iclsPtr->namesp->parentPtr == activeNs) {
-            objPtr = Tcl_NewStringObj(iclsPtr->namesp->name, -1);
+        if (iclsPtr->nsPtr->parentPtr == activeNs) {
+            objPtr = Tcl_NewStringObj(iclsPtr->nsPtr->name, -1);
         } else {
-            objPtr = Tcl_NewStringObj(iclsPtr->namesp->fullName, -1);
+            objPtr = Tcl_NewStringObj(iclsPtr->nsPtr->fullName, -1);
         }
         Tcl_ListObjAppendElement((Tcl_Interp*)NULL, listPtr, objPtr);
     }
@@ -617,7 +619,7 @@ Itcl_BiInfoFunctionCmd(
         if (entry == NULL) {
             Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
                 "\"", cmdName, "\" isn't a member function in class \"",
-                contextIclsPtr->namesp->fullName, "\"",
+                contextIclsPtr->nsPtr->fullName, "\"",
                 (char*)NULL);
             return TCL_ERROR;
         }
@@ -846,7 +848,7 @@ Itcl_BiInfoVariableCmd(
         if (entry == NULL) {
             Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
                 "\"", varName, "\" isn't a variable in class \"",
-                contextIclsPtr->namesp->fullName, "\"",
+                contextIclsPtr->nsPtr->fullName, "\"",
                 (char*)NULL);
             return TCL_ERROR;
         }

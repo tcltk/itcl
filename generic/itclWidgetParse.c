@@ -41,7 +41,7 @@
  *
  *  Author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclWidgetParse.c,v 1.1.2.8 2007/09/22 13:15:04 wiede Exp $
+ *     RCS:  $Id: itclWidgetParse.c,v 1.1.2.9 2007/09/22 13:39:23 wiede Exp $
  * ========================================================================
  *           Copyright (c) 2007  Arnulf Wiedemann
  * ------------------------------------------------------------------------
@@ -239,7 +239,7 @@ Itcl_ClassComponentCmd(
     iclsPtr = (ItclClass*)Itcl_PeekStack(&infoPtr->clsStack);
     usage = "component ?-inherit?";
     if (iclsPtr->flags & ITCL_IS_CLASS) {
-        Tcl_AppendResult(interp, "\"", Tcl_GetString(iclsPtr->name),
+        Tcl_AppendResult(interp, "\"", Tcl_GetString(iclsPtr->namePtr),
 	        " is no ::itcl::widget/::itcl::widgetadaptor/::itcl::type.", 
 		" Only these can have components", NULL);
 	return TCL_ERROR;
@@ -348,7 +348,7 @@ Itcl_ClassHullTypeCmd(
     ItclObjectInfo *infoPtr = (ItclObjectInfo*)clientData;
     ItclClass *iclsPtr = (ItclClass*)Itcl_PeekStack(&infoPtr->clsStack);
     if (!(iclsPtr->flags & ITCL_IS_WIDGET)) {
-        Tcl_AppendResult(interp, "\"", Tcl_GetString(iclsPtr->name),
+        Tcl_AppendResult(interp, "\"", Tcl_GetString(iclsPtr->namePtr),
 	        " is no ::itcl::widget.", 
 		" Only an ::itcl::widget can have a hulltype", NULL);
 	return TCL_ERROR;
@@ -421,7 +421,7 @@ Itcl_ClassWidgetClassCmd(
         return TCL_ERROR;
     }
     if (!(iclsPtr->flags & ITCL_IS_WIDGET)) {
-        Tcl_AppendResult(interp, "\"", Tcl_GetString(iclsPtr->name),
+        Tcl_AppendResult(interp, "\"", Tcl_GetString(iclsPtr->namePtr),
 	        " is no ::itcl::widget.", 
 		" Only an ::itcl::widget can have a widgetclass", NULL);
 	return TCL_ERROR;
@@ -480,7 +480,7 @@ delegate method * ?to <componentName>? ?using <pattern>? ?except <methods>?";
     infoPtr = (ItclObjectInfo*)clientData;
     iclsPtr = (ItclClass*)Itcl_PeekStack(&infoPtr->clsStack);
     if (iclsPtr->flags & ITCL_IS_CLASS) {
-        Tcl_AppendResult(interp, "\"", Tcl_GetString(iclsPtr->name),
+        Tcl_AppendResult(interp, "\"", Tcl_GetString(iclsPtr->namePtr),
 	        " is no ::itcl::widget/::itcl::widgetadaptor/::itcl::type.", 
 		" Only these can delegate methods", NULL);
 	return TCL_ERROR;
@@ -652,7 +652,7 @@ Itcl_ClassDelegateOptionCmd(
     infoPtr = (ItclObjectInfo *)clientData;
     iclsPtr = (ItclClass *)Itcl_PeekStack(&infoPtr->clsStack);
     if (iclsPtr->flags & ITCL_IS_CLASS) {
-        Tcl_AppendResult(interp, "\"", Tcl_GetString(iclsPtr->name),
+        Tcl_AppendResult(interp, "\"", Tcl_GetString(iclsPtr->namePtr),
 	        " is no ::itcl::widget/::itcl::widgetadaptor/::itcl::type.", 
 		" Only these can delegate options", NULL);
 	return TCL_ERROR;
@@ -840,7 +840,7 @@ delegate proc * ?to <componentName>? ?using <pattern>? ?except <procs>?";
     infoPtr = (ItclObjectInfo*)clientData;
     iclsPtr = (ItclClass*)Itcl_PeekStack(&infoPtr->clsStack);
     if (iclsPtr->flags & ITCL_IS_CLASS) {
-        Tcl_AppendResult(interp, "\"", Tcl_GetString(iclsPtr->name),
+        Tcl_AppendResult(interp, "\"", Tcl_GetString(iclsPtr->namePtr),
 	        " is no ::itcl::widget/::itcl::widgetadaptor/::itcl::type.", 
 		" Only these can delegate procs", NULL);
 	return TCL_ERROR;

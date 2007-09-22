@@ -9,7 +9,7 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itclInt.h,v 1.17.2.15 2007/09/22 13:15:03 wiede Exp $
+ * RCS: @(#) $Id: itclInt.h,v 1.17.2.16 2007/09/22 13:39:22 wiede Exp $
  */
 
 #include <string.h>
@@ -157,10 +157,10 @@ typedef struct EnsembleInfo {
  *  Representation for each [incr Tcl] class.
  */
 typedef struct ItclClass {
-    Tcl_Obj *name;                /* class name */
-    Tcl_Obj *fullname;            /* fully qualified class name */
+    Tcl_Obj *namePtr;             /* class name */
+    Tcl_Obj *fullNamePtr;         /* fully qualified class name */
     Tcl_Interp *interp;           /* interpreter that manages this info */
-    Tcl_Namespace *namesp;        /* namespace representing class scope */
+    Tcl_Namespace *nsPtr;         /* namespace representing class scope */
     Tcl_Command accessCmd;        /* access command for creating instances */
 
     struct ItclObjectInfo *infoPtr;
@@ -208,7 +208,7 @@ typedef struct ItclClass {
     Tcl_Obj *widgetClassPtr;      /* class name for widget if class is an
                                    * ::itcl::widget */
     Tcl_Object oPtr;		  /* TclOO class object */
-    Tcl_Class  classPtr;          /* TclOO class */
+    Tcl_Class  clsPtr;            /* TclOO class */
     int numCommons;               /* number of commons in this class */
     int numVariables;             /* number of variables in this class */
     int unique;                   /* unique number for #auto generation */

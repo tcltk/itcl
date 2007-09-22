@@ -24,7 +24,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclBuiltin.c,v 1.1.2.8 2007/09/22 13:15:03 wiede Exp $
+ *     RCS:  $Id: itclBuiltin.c,v 1.1.2.9 2007/09/22 13:39:22 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -475,7 +475,7 @@ Itcl_BiConfigureCmd(
         Tcl_DStringAppend(&buffer2,
 	        Tcl_GetString(contextIoPtr->varNsNamePtr), -1);
         Tcl_DStringAppend(&buffer2,
-	        Tcl_GetString(ivPtr->iclsPtr->fullname), -1);
+	        Tcl_GetString(ivPtr->iclsPtr->fullNamePtr), -1);
         Tcl_DStringAppend(&buffer2, "::", 2);
         Tcl_DStringAppend(&buffer2,
 	        Tcl_GetString(ivPtr->namePtr), -1);
@@ -510,7 +510,7 @@ Itcl_BiConfigureCmd(
                 Itcl_SetCallFrameResolver(interp, contextIoPtr->resolvePtr);
             }
 	    Tcl_Namespace *saveNsPtr = Tcl_GetCurrentNamespace(interp);
-	    Itcl_SetCallFrameNamespace(interp, ivPtr->iclsPtr->namesp);
+	    Itcl_SetCallFrameNamespace(interp, ivPtr->iclsPtr->nsPtr);
 	    result = Tcl_EvalObjEx(interp, mcode->bodyPtr, 0);
 	    Itcl_SetCallFrameNamespace(interp, saveNsPtr);
             if (result == TCL_OK) {

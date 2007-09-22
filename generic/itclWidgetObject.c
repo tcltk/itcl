@@ -11,7 +11,7 @@
  * ========================================================================
  *  Author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclWidgetObject.c,v 1.1.2.7 2007/09/22 13:15:04 wiede Exp $
+ *     RCS:  $Id: itclWidgetObject.c,v 1.1.2.8 2007/09/22 13:39:23 wiede Exp $
  * ========================================================================
  *           Copyright (c) 2007 Arnulf Wiedemann
  * ------------------------------------------------------------------------
@@ -99,7 +99,7 @@ HullAndOptionsInstall(
     if (widgetClassPtr == NULL) {
 	char buf[2];
 	char *cp;
-	cp = Tcl_GetString(iclsPtr->name);
+	cp = Tcl_GetString(iclsPtr->namePtr);
         widgetClassPtr = Tcl_NewStringObj("", -1);
 	buf[0] = toupper(*cp);
 	buf[1] = '\0';
@@ -268,7 +268,7 @@ DelegationInstall(
 				            Tcl_NewStringObj(cp, ep-cp-1));
 				}
 			        Tcl_ListObjAppendElement(interp, listPtr,
-				        Tcl_NewStringObj(iclsPtr->namesp->name,
+				        Tcl_NewStringObj(iclsPtr->nsPtr->name,
 					        -1));
 			        break;
 			    case 's':
@@ -287,7 +287,7 @@ DelegationInstall(
 				}
 			        Tcl_ListObjAppendElement(interp, listPtr,
 				        Tcl_NewStringObj(
-					        iclsPtr->namesp->fullName,
+					        iclsPtr->nsPtr->fullName,
 						-1));
 			        break;
 			    default:
@@ -331,7 +331,7 @@ DelegationInstall(
 	    /* and now for the argument */
 	    Tcl_IncrRefCount(imPtr->namePtr);
             Tcl_Method mPtr;
-	    mPtr = Itcl_NewForwardClassMethod(interp, iclsPtr->classPtr, 1,
+	    mPtr = Itcl_NewForwardClassMethod(interp, iclsPtr->clsPtr, 1,
 	            imPtr->namePtr, listPtr);
         }
         search = search2;

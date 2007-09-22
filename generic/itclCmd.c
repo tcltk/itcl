@@ -23,7 +23,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclCmd.c,v 1.1.2.6 2007/09/22 13:15:03 wiede Exp $
+ *     RCS:  $Id: itclCmd.c,v 1.1.2.7 2007/09/22 13:39:22 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -585,7 +585,7 @@ Itcl_ScopeCmd(
         if (!entry) {
             Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
                 "variable \"", token, "\" not found in class \"",
-                Tcl_GetString(contextIclsPtr->fullname), "\"",
+                Tcl_GetString(contextIclsPtr->fullNamePtr), "\"",
                 (char*)NULL);
             result = TCL_ERROR;
             goto scopeCmdDone;
@@ -1075,7 +1075,7 @@ Itcl_ForwardAddCmd(
     infoPtr = (ItclObjectInfo *)infoPtr;
     iclsPtr = (ItclClass*)Itcl_PeekStack(&infoPtr->clsStack);
     prefixObj = Tcl_NewListObj(objc-2, objv+2);
-    mPtr = Itcl_NewForwardClassMethod(interp, iclsPtr->classPtr, 1,
+    mPtr = Itcl_NewForwardClassMethod(interp, iclsPtr->clsPtr, 1,
             objv[1], prefixObj);
     if (mPtr == NULL) {
         return TCL_ERROR;

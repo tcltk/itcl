@@ -25,7 +25,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann Copyright (c) 2007
  *
- *     RCS:  $Id: itclClass.c,v 1.1.2.7 2007/09/22 13:15:03 wiede Exp $
+ *     RCS:  $Id: itclClass.c,v 1.1.2.8 2007/09/22 13:39:22 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -142,17 +142,17 @@ ClassNamespaceDeleted(
     
     iclsPtr = clientData;
 
-    if (iclsPtr->namesp == NULL) {
+    if (iclsPtr->nsPtr == NULL) {
         return NULL;
     }
     if (iclsPtr->flags & ITCL_CLASS_DELETED) {
         return NULL;
     }
-    iclsPtr->namesp = NULL;
+    iclsPtr->nsPtr = NULL;
     /* delete the namespace for the common variables */
     Tcl_DStringInit(&buffer);
     Tcl_DStringAppend(&buffer, ITCL_VARIABLES_NAMESPACE, -1);
-    Tcl_DStringAppend(&buffer, Tcl_GetString(iclsPtr->fullname), -1);
+    Tcl_DStringAppend(&buffer, Tcl_GetString(iclsPtr->fullNamePtr), -1);
     nsPtr = Tcl_FindNamespace(interp, Tcl_DStringValue(&buffer), NULL, 0);
     Tcl_DStringFree(&buffer);
     if (nsPtr != NULL) {
@@ -265,12 +265,12 @@ Itcl_CreateClass(
      *  Allocate class definition data.
      */
     iclsPtr = (ItclClass*)ckalloc(sizeof(ItclClass));
-    iclsPtr->name = NULL;
-    iclsPtr->fullname = NULL;
+    iclsPtr->namePtr = NULL;
+    iclsPtr->fullNamePtr = NULL;
     iclsPtr->interp = interp;
     iclsPtr->infoPtr = infoPtr;
     Itcl_PreserveData((ClientData)infoPtr);
-    iclsPtr->namesp = NULL;
+    iclsPtr->nsPtr = NULL;
     iclsPtr->accessCmd = NULL;
     iclsPtr->initCode = NULL;
 
@@ -346,11 +346,11 @@ Itcl_CreateClass(
     if (oPtr == NULL) {
         Tcl_AppendResult(interp,
                 "ITCL: cannot create Tcl_NewObjectInstance for class \"",
-                Tcl_GetString(iclsPtr->fullname), "\"", NULL);
+                Tcl_GetString(iclsPtr->fullNamePtr), "\"", NULL);
        return TCL_ERROR;
     }
     Tcl_ObjectSetMetadata((Tcl_Object) oPtr, infoPtr->class_meta_type, iclsPtr);
-    iclsPtr->classPtr = Tcl_GetObjectAsClass(oPtr);
+    iclsPtr->clsPtr = Tcl_GetObjectAsClass(oPtr);
     iclsPtr->oPtr = oPtr;
     Tcl_ObjectSetMapCmdNameProc(iclsPtr->oPtr, ItclMapCmdNameProc);
     cmd = Tcl_GetObjectCommand(iclsPtr->oPtr);
@@ -374,7 +374,7 @@ Itcl_CreateClass(
     if (classNs == NULL) {
 	Tcl_AppendResult(interp,
 	        "ITCL: cannot create/get class namespace for class \"",
-		Tcl_GetString(iclsPtr->fullname), "\"", NULL);
+		Tcl_GetString(iclsPtr->fullNamePtr), "\"", NULL);
         Itcl_ReleaseData((ClientData)iclsPtr);
         return TCL_ERROR;
     }
@@ -388,21 +388,21 @@ Itcl_CreateClass(
     } else {
         Tcl_SetNamespaceResolver(classNs, iclsPtr->resolvePtr);
     }
-    iclsPtr->namesp = classNs;
+    iclsPtr->nsPtr = classNs;
 
 
-    iclsPtr->name = Tcl_NewStringObj(classNs->name, -1);
-    Tcl_IncrRefCount(iclsPtr->name);
+    iclsPtr->namePtr = Tcl_NewStringObj(classNs->name, -1);
+    Tcl_IncrRefCount(iclsPtr->namePtr);
 
-    iclsPtr->fullname = Tcl_NewStringObj(classNs->fullName, -1);
-    Tcl_IncrRefCount(iclsPtr->fullname);
+    iclsPtr->fullNamePtr = Tcl_NewStringObj(classNs->fullName, -1);
+    Tcl_IncrRefCount(iclsPtr->fullNamePtr);
 
-    hPtr = Tcl_CreateHashEntry(&infoPtr->classes, (char *)iclsPtr->fullname,
+    hPtr = Tcl_CreateHashEntry(&infoPtr->classes, (char *)iclsPtr->fullNamePtr,
             &newEntry);
     if (hPtr == NULL) {
 	Tcl_AppendResult(interp,
 	        "ITCL: cannot create hash entry in infoPtr->classes for class \"",
-		Tcl_GetString(iclsPtr->fullname), "\"", NULL);
+		Tcl_GetString(iclsPtr->fullNamePtr), "\"", NULL);
 	return TCL_ERROR;
     }
     Tcl_SetHashValue(hPtr, (ClientData)iclsPtr);
@@ -413,7 +413,7 @@ Itcl_CreateClass(
 	Tcl_AppendResult(interp,
 	        "ITCL: cannot create hash entry in infoPtr->namespaceClasses",
 		" for class \"", 
-		Tcl_GetString(iclsPtr->fullname), "\"", NULL);
+		Tcl_GetString(iclsPtr->fullNamePtr), "\"", NULL);
 	return TCL_ERROR;
     }
     Tcl_SetHashValue(hPtr, (ClientData)iclsPtr);
@@ -424,7 +424,7 @@ Itcl_CreateClass(
      */
     Tcl_DStringInit(&buffer);
     Tcl_DStringAppend(&buffer, ITCL_VARIABLES_NAMESPACE, -1);
-    Tcl_DStringAppend(&buffer, Tcl_GetString(iclsPtr->fullname), -1);
+    Tcl_DStringAppend(&buffer, Tcl_GetString(iclsPtr->fullNamePtr), -1);
     if (Tcl_CreateNamespace(interp, Tcl_DStringValue(&buffer),
             NULL, 0) == NULL) {
 	Tcl_AppendResult(interp, "ITCL: cannot create variables namespace \"",
@@ -495,21 +495,21 @@ ItclDeleteClassVariablesNamespace(
     Tcl_DString buffer;
     Tcl_Namespace *varNsPtr;
 
-    if (iclsPtr->namesp == NULL) {
+    if (iclsPtr->nsPtr == NULL) {
         return;
     }
     if (!(iclsPtr->flags & ITCL_CLASS_NO_VARNS_DELETE)) {
         /* free the classes's variables namespace and variables in it */
         Tcl_DStringInit(&buffer);
         Tcl_DStringAppend(&buffer, ITCL_VARIABLES_NAMESPACE, -1);
-        Tcl_DStringAppend(&buffer, iclsPtr->namesp->fullName, -1);
+        Tcl_DStringAppend(&buffer, iclsPtr->nsPtr->fullName, -1);
         varNsPtr = Tcl_FindNamespace(interp, Tcl_DStringValue(&buffer),
 	        NULL, 0);
         if (varNsPtr != NULL) {
             Tcl_DeleteNamespace(varNsPtr);
         }
         Tcl_DStringFree(&buffer);
-        iclsPtr->namesp = NULL;
+        iclsPtr->nsPtr = NULL;
     } else {
         iclsPtr->flags |= ITCL_CLASS_SHOULD_VARNS_DELETE;
     }
@@ -601,8 +601,8 @@ Itcl_DeleteClass(
      *    above, but it also disconnects this class from its
      *    base-class lists, and removes the class access command.
      */
-    if (iclsPtr->namesp != NULL) {
-        Tcl_DeleteNamespace(iclsPtr->namesp);
+    if (iclsPtr->nsPtr != NULL) {
+        Tcl_DeleteNamespace(iclsPtr->nsPtr);
         ItclDeleteClassVariablesNamespace(interp, iclsPtr);
     }
     return TCL_OK;
@@ -610,7 +610,7 @@ Itcl_DeleteClass(
 deleteClassFail:
     Tcl_DStringInit(&buffer);
     Tcl_DStringAppend(&buffer, "\n    (while deleting class \"", -1);
-    Tcl_DStringAppend(&buffer, iclsPtr2->namesp->fullName, -1);
+    Tcl_DStringAppend(&buffer, iclsPtr2->nsPtr->fullName, -1);
     Tcl_DStringAppend(&buffer, "\")", -1);
     Tcl_AddErrorInfo(interp, Tcl_DStringValue(&buffer));
     Tcl_DStringFree(&buffer);
@@ -641,10 +641,10 @@ ItclDestroyClass(
         return;
     }
     iclsPtr->accessCmd = NULL;
-    if (iclsPtr->namesp != NULL) {
+    if (iclsPtr->nsPtr != NULL) {
     if (iclsPtr->flags & ITCL_CLASS_DELETED) {
-        Tcl_DeleteNamespace(iclsPtr->namesp);
-        iclsPtr->namesp = NULL;
+        Tcl_DeleteNamespace(iclsPtr->nsPtr);
+        iclsPtr->nsPtr = NULL;
     }
     }
     Itcl_ReleaseData((ClientData)iclsPtr);
@@ -687,9 +687,9 @@ ItclDestroyClassNamesp(
     elem = Itcl_FirstListElem(&iclsPtr->derived);
     while (elem) {
         iclsPtr2 = (ItclClass*)Itcl_GetListValue(elem);
-	if (iclsPtr2->namesp != NULL) {
-            Tcl_DeleteNamespace(iclsPtr2->namesp);
-            iclsPtr2->namesp = NULL;
+	if (iclsPtr2->nsPtr != NULL) {
+            Tcl_DeleteNamespace(iclsPtr2->nsPtr);
+            iclsPtr2->nsPtr = NULL;
         }
 
 	/* As the first namespace is now destroyed we have to get the
@@ -920,8 +920,8 @@ ItclFreeClass(
 
     Itcl_ReleaseData((ClientData)iclsPtr->infoPtr);
 
-    Tcl_DecrRefCount(iclsPtr->name);
-    Tcl_DecrRefCount(iclsPtr->fullname);
+    Tcl_DecrRefCount(iclsPtr->namePtr);
+    Tcl_DecrRefCount(iclsPtr->fullNamePtr);
 
     FOREACH_HASH_VALUE(iclsPtr2, &iclsPtr->infoPtr->namespaceClasses) {
         if (iclsPtr2 == iclsPtr) {
@@ -1233,7 +1233,7 @@ Itcl_HandleClass(
                 do {
 		    Tcl_CmdInfo dummy;
 
-                    sprintf(unique,"%.200s%d", Tcl_GetString(iclsPtr->name),
+                    sprintf(unique,"%.200s%d", Tcl_GetString(iclsPtr->namePtr),
                         iclsPtr->unique++);
                     unique[0] = tolower(unique[0]);
 
@@ -1385,7 +1385,7 @@ Itcl_BuildVirtualTables(
              *  the object's variable table.
              */
             if ((ivPtr->flags & ITCL_COMMON) != 0) {
-                nsPtr = (Namespace*)iclsPtr2->namesp;
+                nsPtr = (Namespace*)iclsPtr2->nsPtr;
                 hPtr = Tcl_FindHashEntry(&nsPtr->varTable, ivPtr->name);
                 assert(hPtr != NULL);
 
@@ -1416,7 +1416,7 @@ Itcl_BuildVirtualTables(
              */
             Tcl_DStringSetLength(&buffer, 0);
             Tcl_DStringAppend(&buffer, Tcl_GetString(ivPtr->namePtr), -1);
-            nsPtr = iclsPtr2->namesp;
+            nsPtr = iclsPtr2->nsPtr;
 
             while (1) {
                 hPtr = Tcl_CreateHashEntry(&iclsPtr->resolveVars,
@@ -1486,7 +1486,7 @@ Itcl_BuildVirtualTables(
              */
             Tcl_DStringSetLength(&buffer, 0);
             Tcl_DStringAppend(&buffer, Tcl_GetString(imPtr->namePtr), -1);
-            nsPtr = iclsPtr2->namesp;
+            nsPtr = iclsPtr2->nsPtr;
 
             while (1) {
                 hPtr = Tcl_CreateHashEntry(&iclsPtr->resolveCmds,
@@ -1556,7 +1556,7 @@ Itcl_CreateVariable(
         Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
             "variable name \"", Tcl_GetString(namePtr),
 	    "\" already defined in class \"",
-            iclsPtr->fullname, "\"",
+            iclsPtr->fullNamePtr, "\"",
             (char*)NULL);
         return TCL_ERROR;
     }
@@ -1589,7 +1589,8 @@ Itcl_CreateVariable(
     ivPtr->codePtr      = mCodePtr;
     ivPtr->namePtr      = namePtr;
     Tcl_IncrRefCount(ivPtr->namePtr);
-    ivPtr->fullNamePtr = Tcl_NewStringObj(Tcl_GetString(iclsPtr->fullname), -1);
+    ivPtr->fullNamePtr = Tcl_NewStringObj(
+            Tcl_GetString(iclsPtr->fullNamePtr), -1);
     Tcl_AppendToObj(ivPtr->fullNamePtr, "::", 2);
     Tcl_AppendToObj(ivPtr->fullNamePtr, Tcl_GetString(namePtr), -1);
     Tcl_IncrRefCount(ivPtr->fullNamePtr);
@@ -1650,7 +1651,7 @@ Itcl_CreateOption(
         Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
             "option name \"", Tcl_GetString(namePtr),
 	    "\" already defined in class \"",
-            iclsPtr->fullname, "\"",
+            iclsPtr->fullNamePtr, "\"",
             (char*)NULL);
         return TCL_ERROR;
     }
@@ -1687,7 +1688,8 @@ Itcl_CreateOption(
     Tcl_IncrRefCount(ioptPtr->resourceNamePtr);
     ioptPtr->classNamePtr = Tcl_NewStringObj(className, -1);
     Tcl_IncrRefCount(ioptPtr->classNamePtr);
-    ioptPtr->fullNamePtr = Tcl_NewStringObj(Tcl_GetString(iclsPtr->fullname), -1);
+    ioptPtr->fullNamePtr = Tcl_NewStringObj(
+            Tcl_GetString(iclsPtr->fullNamePtr), -1);
     Tcl_AppendToObj(ioptPtr->fullNamePtr, "::", 2);
     Tcl_AppendToObj(ioptPtr->fullNamePtr, Tcl_GetString(namePtr), -1);
     Tcl_IncrRefCount(ioptPtr->fullNamePtr);

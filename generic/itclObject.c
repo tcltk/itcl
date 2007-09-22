@@ -24,7 +24,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann Copyright (c) 2007
  *
- *     RCS:  $Id: itclObject.c,v 1.1.2.9 2007/09/22 13:15:04 wiede Exp $
+ *     RCS:  $Id: itclObject.c,v 1.1.2.10 2007/09/22 13:39:22 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -214,8 +214,8 @@ ItclCreateObject(
     }
 
 
-    ioPtr->oPtr = Tcl_NewObjectInstance(interp, iclsPtr->classPtr, name,
-            iclsPtr->namesp->fullName, /* objc */-1, NULL, /* skip */0);
+    ioPtr->oPtr = Tcl_NewObjectInstance(interp, iclsPtr->clsPtr, name,
+            iclsPtr->nsPtr->fullName, /* objc */-1, NULL, /* skip */0);
     if (ioPtr->oPtr == NULL) {
 	// NEED TO FREE STUFF HERE !! 
         return TCL_ERROR;
@@ -393,7 +393,7 @@ ItclInitObjectVariables(
              Tcl_DStringAppend(&buffer, "::", 2);
 	}
 	Tcl_DStringAppend(&buffer, name, -1);
-	Tcl_DStringAppend(&buffer, iclsPtr2->namesp->fullName, -1);
+	Tcl_DStringAppend(&buffer, iclsPtr2->nsPtr->fullName, -1);
 	varNsPtr = Tcl_CreateNamespace(interp, Tcl_DStringValue(&buffer),
 	        NULL, 0);
 	if (varNsPtr == NULL) {
@@ -689,7 +689,7 @@ ItclDestructBase(
      *  invoke it.
      */
     if (Tcl_FindHashEntry(contextIoPtr->destructed,
-            (char *)contextIclsPtr->name) == NULL) {
+            (char *)contextIclsPtr->namePtr) == NULL) {
         result = Itcl_InvokeMethodIfExists(interp, "destructor",
             contextIclsPtr, contextIoPtr, 0, (Tcl_Obj* CONST*)NULL);
         if (result != TCL_OK) {
@@ -880,7 +880,7 @@ ItclGetInstanceVar(
      */
     Tcl_DStringInit(&buffer);
     Tcl_DStringAppend(&buffer, Tcl_GetString(contextIoPtr->varNsNamePtr), -1);
-    Tcl_DStringAppend(&buffer, Tcl_GetString(contextIclsPtr->fullname), -1);
+    Tcl_DStringAppend(&buffer, Tcl_GetString(contextIclsPtr->fullNamePtr), -1);
     nsPtr = Tcl_FindNamespace(interp, Tcl_DStringValue(&buffer), NULL, 0);
     Tcl_DStringFree(&buffer);
     val = NULL;
@@ -965,7 +965,7 @@ ItclSetInstanceVar(
      */
     Tcl_DStringInit(&buffer);
     Tcl_DStringAppend(&buffer, Tcl_GetString(contextIoPtr->varNsNamePtr), -1);
-    Tcl_DStringAppend(&buffer, Tcl_GetString(contextIclsPtr->fullname), -1);
+    Tcl_DStringAppend(&buffer, Tcl_GetString(contextIclsPtr->fullNamePtr), -1);
     nsPtr = Tcl_FindNamespace(interp, Tcl_DStringValue(&buffer), NULL, 0);
     Tcl_DStringFree(&buffer);
     val = NULL;
@@ -1322,15 +1322,15 @@ ItclObjectCmd(
 	    if (elem == NULL) {
 	        /* check the class itself */
 		if (strcmp((const char *)Tcl_GetString(className),
-		        (const char *)Tcl_GetString(iclsPtr->name)) == 0) {
-		    clsPtr = iclsPtr->classPtr;
+		        (const char *)Tcl_GetString(iclsPtr->namePtr)) == 0) {
+		    clsPtr = iclsPtr->clsPtr;
 		}
 	    }
             while (elem != NULL) {
                 basePtr = (ItclClass*)Itcl_GetListValue(elem);
 		if (strcmp((const char *)Tcl_GetString(className),
-		        (const char *)Tcl_GetString(basePtr->name)) == 0) {
-		    clsPtr = basePtr->classPtr;
+		        (const char *)Tcl_GetString(basePtr->namePtr)) == 0) {
+		    clsPtr = basePtr->clsPtr;
 		    break;
 		}
                 elem = Itcl_NextListElem(elem);
@@ -1426,7 +1426,7 @@ GetClassFromClassName(
     /* look for the class in the hierarchy */
     /* first check the class itself */
     if (strcmp(className,
-            (const char *)Tcl_GetString(iclsPtr->name)) == 0) {
+            (const char *)Tcl_GetString(iclsPtr->namePtr)) == 0) {
 	return iclsPtr;
     }
     elem = Itcl_FirstListElem(&iclsPtr->bases);
@@ -1488,7 +1488,7 @@ ItclMapCmdNameProc(
         sp = Tcl_GetString(className);
 	iclsPtr2 = GetClassFromClassName(sp, iclsPtr);
 	if (iclsPtr2 != NULL) {
-	    *clsPtr = iclsPtr2->classPtr;
+	    *clsPtr = iclsPtr2->clsPtr;
 	    Tcl_SetStringObj(mappedCmd, Tcl_GetString(methodName), -1);
 	}
         Tcl_DecrRefCount(className);

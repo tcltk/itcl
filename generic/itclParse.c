@@ -39,7 +39,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclParse.c,v 1.1.2.9 2007/09/22 13:15:04 wiede Exp $
+ *     RCS:  $Id: itclParse.c,v 1.1.2.10 2007/09/22 13:39:22 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -471,7 +471,7 @@ ItclClassBaseCmd(
      *  Do this before parsing the class definition, so methods/procs
      *  can override the built-in commands.
      */
-    result = Tcl_Import(interp, iclsPtr->namesp, "::itcl::builtin::*",
+    result = Tcl_Import(interp, iclsPtr->nsPtr, "::itcl::builtin::*",
         /* allowOverwrite */ 1);
 
     if (result != TCL_OK) {
@@ -479,7 +479,7 @@ ItclClassBaseCmd(
         sprintf(msg, "\n    (while installing built-in commands for class \"%.100s\")", className);
         Tcl_AddErrorInfo(interp, msg);
 
-        Tcl_DeleteNamespace(iclsPtr->namesp);
+        Tcl_DeleteNamespace(iclsPtr->nsPtr);
         return TCL_ERROR;
     }
 
@@ -506,7 +506,7 @@ ItclClassBaseCmd(
             className, interp->errorLine);
         Tcl_AddErrorInfo(interp, msg);
 
-        Tcl_DeleteNamespace(iclsPtr->namesp);
+        Tcl_DeleteNamespace(iclsPtr->nsPtr);
         return TCL_ERROR;
     }
 
@@ -516,7 +516,7 @@ ItclClassBaseCmd(
      *  as they don't conflict with those defined in the class.
      */
     if (Itcl_InstallBiMethods(interp, iclsPtr) != TCL_OK) {
-        Tcl_DeleteNamespace(iclsPtr->namesp);
+        Tcl_DeleteNamespace(iclsPtr->nsPtr);
         return TCL_ERROR;
     }
 
@@ -566,7 +566,7 @@ ItclClassBaseCmd(
 	    }
 	    ClientData pmPtr;
 	    imPtr->tmPtr = (ClientData)Itcl_NewProcClassMethod(interp,
-	        iclsPtr->classPtr, ItclCheckCallMethod, ItclAfterCallMethod,
+	        iclsPtr->clsPtr, ItclCheckCallMethod, ItclAfterCallMethod,
                 ItclProcErrorProc, imPtr, imPtr->namePtr, argumentPtr,
 		bodyPtr, &pmPtr);
 	    hPtr2 = Tcl_CreateHashEntry(&iclsPtr->infoPtr->procMethods,
@@ -650,14 +650,14 @@ Itcl_ClassInheritCmd(
         while (elem) {
             cdPtr = (ItclClass*)Itcl_GetListValue(elem);
             Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
-                Tcl_GetString(cdPtr->name), " ", (char*)NULL);
+                Tcl_GetString(cdPtr->namePtr), " ", (char*)NULL);
 
             elem = Itcl_NextListElem(elem);
         }
 
         Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
             "\" already defined for class \"",
-	    Tcl_GetString(iclsPtr->fullname), "\"",
+	    Tcl_GetString(iclsPtr->fullNamePtr), "\"",
             (char*)NULL);
         return TCL_ERROR;
     }
@@ -665,7 +665,7 @@ Itcl_ClassInheritCmd(
     /*
      *  Validate each base class and add it to the "bases" list.
      */
-    result = Tcl_PushCallFrame(interp, &frame, iclsPtr->namesp->parentPtr,
+    result = Tcl_PushCallFrame(interp, &frame, iclsPtr->nsPtr->parentPtr,
         /* isProcCallFrame */ 0);
 
     if (result != TCL_OK) {
@@ -708,7 +708,7 @@ Itcl_ClassInheritCmd(
          */
         if (baseClsPtr == iclsPtr) {
             Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
-                "class \"", Tcl_GetString(iclsPtr->name),
+                "class \"", Tcl_GetString(iclsPtr->namePtr),
 		"\" cannot inherit from itself",
                 (char*)NULL);
             goto inheritError;
@@ -729,9 +729,9 @@ Itcl_ClassInheritCmd(
             if (Itcl_GetListValue(elem) == Itcl_GetListValue(elem2)) {
                 cdPtr = (ItclClass*)Itcl_GetListValue(elem);
                 Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
-                    "class \"", iclsPtr->fullname,
+                    "class \"", iclsPtr->fullNamePtr,
                     "\" cannot inherit base class \"",
-                    cdPtr->fullname, "\" more than once",
+                    cdPtr->fullNamePtr, "\" more than once",
                     (char*)NULL);
                 goto inheritError;
             }
@@ -769,9 +769,9 @@ Itcl_ClassInheritCmd(
 
         badCdPtr = cdPtr;
         Tcl_AppendStringsToObj(resultPtr,
-            "class \"", Tcl_GetString(iclsPtr->fullname),
+            "class \"", Tcl_GetString(iclsPtr->fullNamePtr),
 	    "\" inherits base class \"",
-            Tcl_GetString(badCdPtr->fullname), "\" more than once:",
+            Tcl_GetString(badCdPtr->fullNamePtr), "\" more than once:",
             (char*)NULL);
 
         cdPtr = iclsPtr;
@@ -790,11 +790,12 @@ Itcl_ClassInheritCmd(
                     if (Itcl_GetStackValue(&stack, i) == NULL) {
                         cdPtr = (ItclClass*)Itcl_GetStackValue(&stack, i-1);
                         Tcl_AppendStringsToObj(resultPtr,
-                            Tcl_GetString(cdPtr->name), "->",
+                            Tcl_GetString(cdPtr->namePtr), "->",
                             (char*)NULL);
                     }
                 }
-                Tcl_AppendToObj(resultPtr, Tcl_GetString(badCdPtr->name), -1);
+                Tcl_AppendToObj(resultPtr,
+		        Tcl_GetString(badCdPtr->namePtr), -1);
             }
             else if (!cdPtr) {
                 (void)Itcl_PopStack(&stack);
@@ -825,13 +826,13 @@ Itcl_ClassInheritCmd(
     haveClasses = 0;
     elem = Itcl_FirstListElem(&iclsPtr->bases);
     Tcl_DStringAppend(&buffer, "::oo::define ", -1);
-    Tcl_DStringAppend(&buffer, Tcl_GetString(iclsPtr->fullname), -1);
+    Tcl_DStringAppend(&buffer, Tcl_GetString(iclsPtr->fullNamePtr), -1);
     Tcl_DStringAppend(&buffer, " superclass", -1);
     while (elem) {
         baseClsPtr = (ItclClass*)Itcl_GetListValue(elem);
         haveClasses++;
         Tcl_DStringAppend(&buffer, " ", -1);
-        Tcl_DStringAppend(&buffer, Tcl_GetString(baseClsPtr->fullname), -1);
+        Tcl_DStringAppend(&buffer, Tcl_GetString(baseClsPtr->fullNamePtr), -1);
 
         Itcl_AppendList(&baseClsPtr->derived, (ClientData)iclsPtr);
         Itcl_PreserveData((ClientData)iclsPtr);
@@ -971,7 +972,7 @@ Itcl_ClassConstructorCmd(
     if (Tcl_FindHashEntry(&iclsPtr->functions, (char *)objv[0])) {
         Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
             "\"", Tcl_GetString(namePtr), "\" already defined in class \"",
-            iclsPtr->fullname, "\"",
+            iclsPtr->fullNamePtr, "\"",
             (char*)NULL);
         return TCL_ERROR;
     }
@@ -1041,7 +1042,7 @@ Itcl_ClassDestructorCmd(
     if (Tcl_FindHashEntry(&iclsPtr->functions, (char *)namePtr)) {
         Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
             "\"", Tcl_GetString(namePtr), "\" already defined in class \"",
-            iclsPtr->fullname, "\"",
+            iclsPtr->fullNamePtr, "\"",
             (char*)NULL);
         return TCL_ERROR;
     }
@@ -1304,11 +1305,11 @@ Itcl_ClassCommonCmd(
 	 * go to the variables namespace of the class */
         Tcl_DStringAppend(&buffer, ITCL_VARIABLES_NAMESPACE, -1);
     }
-    Tcl_DStringAppend(&buffer, Tcl_GetString(ivPtr->iclsPtr->fullname), -1);
+    Tcl_DStringAppend(&buffer, Tcl_GetString(ivPtr->iclsPtr->fullNamePtr), -1);
     commonNsPtr = Tcl_FindNamespace(interp, Tcl_DStringValue(&buffer), NULL, 0);
     if (commonNsPtr == NULL) {
         Tcl_AppendResult(interp, "ITCL: cannot find common variables namespace",
-	        " for class \"", Tcl_GetString(ivPtr->iclsPtr->fullname),
+	        " for class \"", Tcl_GetString(ivPtr->iclsPtr->fullNamePtr),
 		"\"", NULL);
 	return TCL_ERROR;
     }
