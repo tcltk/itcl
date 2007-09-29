@@ -41,7 +41,7 @@
  *
  *  Author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclWidgetParse.c,v 1.1.2.9 2007/09/22 13:39:23 wiede Exp $
+ *     RCS:  $Id: itclWidgetParse.c,v 1.1.2.10 2007/09/29 09:39:30 wiede Exp $
  * ========================================================================
  *           Copyright (c) 2007  Arnulf Wiedemann
  * ------------------------------------------------------------------------
@@ -459,6 +459,7 @@ Itcl_ClassDelegateMethodCmd(
     Tcl_Obj *usingPtr;
     Tcl_Obj *exceptionsPtr;
     Tcl_HashEntry *hPtr;
+    Tcl_HashEntry *hPtr2;
     ItclObjectInfo *infoPtr;
     ItclClass *iclsPtr;
     ItclComponent *icPtr;
@@ -537,8 +538,16 @@ delegate method * ?to <componentName>? ?using <pattern>? ?except <methods>?";
 	        "cannot specify \"as\" with \"delegate option *\"", NULL);
 	return TCL_ERROR;
     }
-    /* FIX ME !!! */
     /* check for already delegated */
+    methodNamePtr = Tcl_NewStringObj(methodName, -1);
+    Tcl_IncrRefCount(methodNamePtr);
+    hPtr = Tcl_FindHashEntry(&iclsPtr->delegatedFunctions, (char *)
+            methodNamePtr);
+    if (hPtr != NULL) {
+        Tcl_AppendResult(interp, "method \"", methodName,
+	        "\" is already delegated", NULL);
+        return TCL_ERROR;
+    }
 
     if (componentPtr != NULL) {
         if (ItclCreateComponent(interp, iclsPtr, componentPtr, &icPtr)
@@ -553,13 +562,10 @@ delegate method * ?to <componentName>? ?using <pattern>? ?except <methods>?";
     Tcl_InitObjHashTable(&idmPtr->exceptions);
     if (*methodName != '*') {
         if ((targetPtr == NULL) && (usingPtr == NULL)) {
-	    targetPtr = Tcl_NewStringObj(methodName, -1);
+	    targetPtr = methodNamePtr;
 	}
-        /* check for valid method name */
-        // ItclIsValidMethodName(methodName);
-        /* check for locally defined option */
-        methodNamePtr = Tcl_NewStringObj(methodName, -1);
-	Tcl_IncrRefCount(methodNamePtr);
+	/* FIX ME !!! */
+        /* check for locally defined method */
 	hPtr = Tcl_FindHashEntry(&iclsPtr->functions, (char *)methodNamePtr);
 	if (hPtr != NULL) {
 	    Tcl_AppendResult(interp, "method \"", methodName,
@@ -569,8 +575,6 @@ delegate method * ?to <componentName>? ?using <pattern>? ?except <methods>?";
         idmPtr->namePtr = methodNamePtr;
 
     } else {
-        methodNamePtr = Tcl_NewStringObj("*", -1);
-	Tcl_IncrRefCount(methodNamePtr);
         idmPtr->namePtr = methodNamePtr;
     }
     idmPtr->icPtr = icPtr;
@@ -593,8 +597,16 @@ delegate method * ?to <componentName>? ?using <pattern>? ?except <methods>?";
 	    Tcl_IncrRefCount(objPtr);
 	    hPtr = Tcl_CreateHashEntry(&idmPtr->exceptions, (char *)objPtr,
 	            &isNew);
-	    /* FIX ME !!! */
-	    /* set the hash value to theItclMemberFunc value here !! */
+	    hPtr2 = Tcl_FindHashEntry(&iclsPtr->functions, (char *)objPtr);
+/* FIX ME !!! can only be done after a class/widget has been parsed completely !! */
+#ifdef NOTDEF
+	    if (hPtr2 == NULL) {
+	        Tcl_AppendResult(interp, "no such method: \"",
+		        Tcl_GetString(objPtr), "\" found for delegation", NULL);
+	        return TCL_ERROR;
+	    }
+	    Tcl_SetHashValue(hPtr, Tcl_GetHashValue(hPtr2));
+#endif
 	}
     }
     hPtr = Tcl_CreateHashEntry(&iclsPtr->delegatedFunctions,
@@ -629,6 +641,7 @@ Itcl_ClassDelegateOptionCmd(
     Tcl_Obj *resourceNamePtr;
     Tcl_Obj *classNamePtr;
     Tcl_HashEntry *hPtr;
+    Tcl_HashEntry *hPtr2;
     ItclObjectInfo *infoPtr;
     ItclClass *iclsPtr;
     ItclComponent *icPtr;
@@ -728,8 +741,17 @@ Itcl_ClassDelegateOptionCmd(
 	        "cannot specify \"except\" with \"delegate option *\"", NULL);
 	return TCL_ERROR;
     }
-    /* FIX ME !!! */
     /* check for already delegated */
+    optionNamePtr = Tcl_NewStringObj("*", -1);
+    Tcl_IncrRefCount(optionNamePtr);
+    hPtr = Tcl_FindHashEntry(&iclsPtr->delegatedOptions, (char *)
+            optionNamePtr);
+    if (hPtr != NULL) {
+        Tcl_AppendResult(interp, "option \"", option,
+	        "\" is already delegated", NULL);
+        return TCL_ERROR;
+    }
+
 
     if (ItclCreateComponent(interp, iclsPtr, componentPtr, &icPtr) != TCL_OK) {
         return TCL_ERROR;
@@ -739,7 +761,7 @@ Itcl_ClassDelegateOptionCmd(
     Tcl_InitObjHashTable(&idoPtr->exceptions);
     if (*option != '*') {
         if (targetPtr == NULL) {
-	    targetPtr = Tcl_NewStringObj(option, -1);
+	    targetPtr = optionNamePtr;
 	}
         if (resourceNamePtr == NULL) {
 	    resourceNamePtr = Tcl_NewStringObj(option+1, -1);
@@ -748,11 +770,10 @@ Itcl_ClassDelegateOptionCmd(
         if (classNamePtr == NULL) {
 	    classNamePtr = ItclCapitalize(option+1);
 	}
+	/* FIX ME !!! */
+	/* check for locally defined option */
         /* check for valid option name */
         // ItclIsValidOptionName(option);
-        /* check for locally defined option */
-        optionNamePtr = Tcl_NewStringObj(option, -1);
-	Tcl_IncrRefCount(optionNamePtr);
 	hPtr = Tcl_FindHashEntry(&iclsPtr->options, (char *)optionNamePtr);
 	if (hPtr != NULL) {
 	    Tcl_AppendResult(interp, "option \"", option,
@@ -764,8 +785,6 @@ Itcl_ClassDelegateOptionCmd(
         idoPtr->classNamePtr = classNamePtr;
 
     } else {
-        optionNamePtr = Tcl_NewStringObj("*", -1);
-	Tcl_IncrRefCount(optionNamePtr);
         idoPtr->namePtr = optionNamePtr;
     }
     idoPtr->icPtr = icPtr;
@@ -784,8 +803,16 @@ Itcl_ClassDelegateOptionCmd(
 	    Tcl_IncrRefCount(objPtr);
 	    hPtr = Tcl_CreateHashEntry(&idoPtr->exceptions, (char *)objPtr,
 	            &isNew);
-	    /* FIX ME !!! */
-	    /* set the hash value to the ItclOption value here !! */
+	    hPtr2 = Tcl_FindHashEntry(&iclsPtr->options, (char *)objPtr);
+/* FIX ME !!! can only be done after a class/widget has been parsed completely !! */
+#ifdef NOTDEF
+	    if (hPtr2 == NULL) {
+	        Tcl_AppendResult(interp, "no such option: \"",
+		        Tcl_GetString(objPtr), "\" found for delegation", NULL);
+	        return TCL_ERROR;
+	    }
+	    Tcl_SetHashValue(hPtr, Tcl_GetHashValue(hPtr2));
+#endif
 	}
     }
     hPtr = Tcl_CreateHashEntry(&iclsPtr->delegatedOptions,
@@ -819,6 +846,7 @@ Itcl_ClassDelegateProcCmd(
     Tcl_Obj *usingPtr;
     Tcl_Obj *exceptionsPtr;
     Tcl_HashEntry *hPtr;
+    Tcl_HashEntry *hPtr2;
     ItclObjectInfo *infoPtr;
     ItclClass *iclsPtr;
     ItclComponent *icPtr;
@@ -898,8 +926,17 @@ delegate proc * ?to <componentName>? ?using <pattern>? ?except <procs>?";
 	        "cannot specify \"as\" with \"delegate option *\"", NULL);
 	return TCL_ERROR;
     }
-    /* FIX ME !!! */
     /* check for already delegated */
+    procNamePtr = Tcl_NewStringObj(procName, -1);
+    Tcl_IncrRefCount(procNamePtr);
+    hPtr = Tcl_FindHashEntry(&iclsPtr->delegatedFunctions, (char *)
+            procNamePtr);
+    if (hPtr != NULL) {
+        Tcl_AppendResult(interp, "proc \"", procName,
+	        "\" is already delegated", NULL);
+        return TCL_ERROR;
+    }
+
 
     if (componentPtr != NULL) {
         if (ItclCreateComponent(interp, iclsPtr, componentPtr, &icPtr)
@@ -914,13 +951,10 @@ delegate proc * ?to <componentName>? ?using <pattern>? ?except <procs>?";
     Tcl_InitObjHashTable(&idmPtr->exceptions);
     if (*procName != '*') {
         if ((targetPtr == NULL) && (usingPtr == NULL)) {
-	    targetPtr = Tcl_NewStringObj(procName, -1);
+	    targetPtr = procNamePtr;
 	}
-        /* check for valid proc name */
-        // ItclIsValidMethodName(procName);
-        /* check for locally defined option */
-        procNamePtr = Tcl_NewStringObj(procName, -1);
-	Tcl_IncrRefCount(procNamePtr);
+	/* FIX ME !!! */
+        /* check for locally defined proc */
 	hPtr = Tcl_FindHashEntry(&iclsPtr->functions, (char *)procNamePtr);
 	if (hPtr != NULL) {
 	    Tcl_AppendResult(interp, "proc \"", procName,
@@ -954,8 +988,16 @@ delegate proc * ?to <componentName>? ?using <pattern>? ?except <procs>?";
 	    Tcl_IncrRefCount(objPtr);
 	    hPtr = Tcl_CreateHashEntry(&idmPtr->exceptions, (char *)objPtr,
 	            &isNew);
-	    /* FIX ME !!! */
-	    /* set the hash value to theItclMemberFunc value here !! */
+	    hPtr2 = Tcl_FindHashEntry(&iclsPtr->functions, (char *)objPtr);
+/* FIX ME !!! can only be done after a class/widget has been parsed completely !! */
+#ifdef NOTDEF
+	    if (hPtr2 == NULL) {
+	        Tcl_AppendResult(interp, "no such method: \"",
+		        Tcl_GetString(objPtr), "\" found for delegation", NULL);
+	        return TCL_ERROR;
+	    }
+	    Tcl_SetHashValue(hPtr, Tcl_GetHashValue(hPtr2));
+#endif
 	}
     }
     idmPtr->flags = ITCL_COMMON;

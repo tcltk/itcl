@@ -9,7 +9,7 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itclInt.h,v 1.17.2.16 2007/09/22 13:39:22 wiede Exp $
+ * RCS: @(#) $Id: itclInt.h,v 1.17.2.17 2007/09/29 09:39:30 wiede Exp $
  */
 
 #include <string.h>
@@ -195,15 +195,19 @@ typedef struct ItclClass {
 				     ItclDelegatedMethodInfo * ptrs */
     int numInstanceVars;          /* number of instance vars in variables
                                      table */
-    Tcl_HashTable classCommons;   /* used for storing variable namespace string for Tcl_Resolve */
+    Tcl_HashTable classCommons;   /* used for storing variable namespace
+                                   * string for Tcl_Resolve */
     Tcl_HashTable resolveVars;    /* all possible names for variables in
                                    * this class (e.g., x, foo::x, etc.) */
     Tcl_HashTable resolveCmds;    /* all possible names for functions in
                                    * this class (e.g., x, foo::x, etc.) */
     Tcl_HashTable contextCache;   /* cache for function contexts */
-    struct ItclMemberFunc *constructor;  /* the class constructor or NULL */
-    struct ItclMemberFunc *destructor;   /* the class destructor or NULL */
-    struct ItclMemberFunc *constructorInit;  /* the class constructor init code or NULL */
+    struct ItclMemberFunc *constructor;
+                                  /* the class constructor or NULL */
+    struct ItclMemberFunc *destructor;
+                                  /* the class destructor or NULL */
+    struct ItclMemberFunc *constructorInit;
+                                  /* the class constructor init code or NULL */
     Tcl_Resolve *resolvePtr;
     Tcl_Obj *widgetClassPtr;      /* class name for widget if class is an
                                    * ::itcl::widget */
