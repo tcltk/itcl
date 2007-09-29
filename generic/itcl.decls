@@ -1,5 +1,5 @@
 # -*- tcl -*-
-# $Id: itcl.decls,v 1.3.2.4 2007/09/10 15:42:34 wiede Exp $
+# $Id: itcl.decls,v 1.3.2.5 2007/09/29 22:16:49 wiede Exp $
 
 # public API
 library itcl
@@ -556,4 +556,16 @@ declare 166 current {
 }
 declare 167 current {
     Tcl_Obj * const * Itcl_GetCallFrameObjv(Tcl_Interp *interp)
+}
+declare 168 current {
+    int Itcl_NWidgetCmd (ClientData infoPtr, Tcl_Interp *interp, \
+        int objc, Tcl_Obj *CONST objv[])
+}
+declare 169 current {
+    int Itcl_AddOptionCmd (ClientData infoPtr, Tcl_Interp *interp, \
+        int objc, Tcl_Obj *CONST objv[])
+}
+declare 170 current {
+    int Itcl_AddComponentCmd (ClientData infoPtr, Tcl_Interp *interp, \
+        int objc, Tcl_Obj *CONST objv[])
 }

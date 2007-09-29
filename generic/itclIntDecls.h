@@ -1,5 +1,5 @@
 /*
- * $Id: itclIntDecls.h,v 1.13.2.5 2007/09/10 15:42:35 wiede Exp $
+ * $Id: itclIntDecls.h,v 1.13.2.6 2007/09/29 22:16:49 wiede Exp $
  *
  * This file is (mostly) automatically generated from itcl.decls.
  */
@@ -23,7 +23,7 @@ extern const char *Itcl_InitStubs(
 /* !BEGIN!: Do not edit below this line. */
 
 #define ITCLINT_STUBS_EPOCH 0
-#define ITCLINT_STUBS_REVISION 136
+#define ITCLINT_STUBS_REVISION 138
 
 #if !defined(USE_ITCL_STUBS)
 
@@ -478,6 +478,14 @@ ITCLAPI int		Itcl_SetCallFrameNamespace (Tcl_Interp * interp,
 ITCLAPI int		Itcl_GetCallFrameObjc (Tcl_Interp * interp);
 /* 167 */
 ITCLAPI Tcl_Obj * const * Itcl_GetCallFrameObjv (Tcl_Interp * interp);
+/* 168 */
+ITCLAPI int		Itcl_NWidgetCmd (ClientData infoPtr, 
+				Tcl_Interp * interp, int objc, 
+				Tcl_Obj *CONST objv[]);
+/* 169 */
+ITCLAPI int		Itcl_AddOptionCmd (ClientData infoPtr, 
+				Tcl_Interp * interp, int objc, 
+				Tcl_Obj *CONST objv[]);
 
 #endif /* !defined(USE_ITCL_STUBS) */
 
@@ -655,6 +663,8 @@ typedef struct ItclIntStubs {
     int (*itcl_SetCallFrameNamespace) (Tcl_Interp * interp, Tcl_Namespace * nsPtr); /* 165 */
     int (*itcl_GetCallFrameObjc) (Tcl_Interp * interp); /* 166 */
     Tcl_Obj * const * (*itcl_GetCallFrameObjv) (Tcl_Interp * interp); /* 167 */
+    int (*itcl_NWidgetCmd) (ClientData infoPtr, Tcl_Interp * interp, int objc, Tcl_Obj *CONST objv[]); /* 168 */
+    int (*itcl_AddOptionCmd) (ClientData infoPtr, Tcl_Interp * interp, int objc, Tcl_Obj *CONST objv[]); /* 169 */
 } ItclIntStubs;
 
 #ifdef __cplusplus
@@ -1168,6 +1178,14 @@ extern const ItclIntStubs *itclIntStubsPtr;
 #ifndef Itcl_GetCallFrameObjv
 #define Itcl_GetCallFrameObjv \
 	(itclIntStubsPtr->itcl_GetCallFrameObjv) /* 167 */
+#endif
+#ifndef Itcl_NWidgetCmd
+#define Itcl_NWidgetCmd \
+	(itclIntStubsPtr->itcl_NWidgetCmd) /* 168 */
+#endif
+#ifndef Itcl_AddOptionCmd
+#define Itcl_AddOptionCmd \
+	(itclIntStubsPtr->itcl_AddOptionCmd) /* 169 */
 #endif
 
 #endif /* defined(USE_ITCL_STUBS) */

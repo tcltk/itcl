@@ -23,7 +23,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclCmd.c,v 1.1.2.7 2007/09/22 13:39:22 wiede Exp $
+ *     RCS:  $Id: itclCmd.c,v 1.1.2.8 2007/09/29 22:16:49 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -1187,3 +1187,320 @@ Itcl_MixinDeleteCmd(
     Tcl_AppendResult(interp, "::itcl::mixin delete command not yet implemented", NULL);
     return TCL_ERROR;
 }
+
+/*
+ * ------------------------------------------------------------------------
+ *  Itcl_NWidgetCmd()
+ *
+ *  Used to build an [incr Tcl] nwidget
+ *
+ *  Returns TCL_OK/TCL_ERROR to indicate success/failure.
+ * ------------------------------------------------------------------------
+ */
+/* ARGSUSED */
+int
+Itcl_NWidgetCmd(
+    ClientData clientData,   /* infoPtr */
+    Tcl_Interp *interp,      /* current interpreter */
+    int objc,                /* number of arguments */
+    Tcl_Obj *CONST objv[])   /* argument objects */
+{
+    Tcl_Obj *namePtr;
+    ItclClass *iclsPtr;
+    ItclObjectInfo *infoPtr;
+    ItclVariable *ivPtr;
+    int result;
+
+    infoPtr = (ItclObjectInfo *)clientData;
+    ItclShowArgs(0, "Itcl_NWidgetCmd", objc-1, objv);
+    result = ItclClassBaseCmd(clientData, interp, ITCL_IS_NWIDGET, objc, objv,
+            &iclsPtr);
+    if (result != TCL_OK) {
+        return result;
+    }
+    /* create the options variable */
+    namePtr = Tcl_NewStringObj("options", 7);
+    Tcl_IncrRefCount(namePtr);
+    if (Itcl_CreateVariable(interp, iclsPtr, namePtr, NULL, NULL,
+            &ivPtr) != TCL_OK) {
+        return TCL_ERROR;
+    }
+    iclsPtr->numVariables++;
+    Itcl_BuildVirtualTables(iclsPtr);
+    return result;
+}
+
+/*
+ * ------------------------------------------------------------------------
+ *  Itcl_AddOptionCmd()
+ *
+ *  Used to build an option to an [incr Tcl] nwidget
+ *
+ *  Syntax: ::itcl::addoption <nwidget object> <optionName> <defaultValue>
+ *
+ *  Returns TCL_OK/TCL_ERROR to indicate success/failure.
+ * ------------------------------------------------------------------------
+ */
+/* ARGSUSED */
+int
+Itcl_AddOptionCmd(
+    ClientData clientData,   /* infoPtr */
+    Tcl_Interp *interp,      /* current interpreter */
+    int objc,                /* number of arguments */
+    Tcl_Obj *CONST objv[])   /* argument objects */
+{
+    Tcl_Object oPtr;
+    Tcl_Obj *namePtr;
+    Tcl_Obj *nameSpecPtr;
+    ItclObjectInfo *infoPtr;
+    Tcl_Obj **newObjv;
+    ItclOption *ioptPtr;
+    ItclObject *ioPtr;
+    char *init;
+    char *defaultValue;
+    char *cgetMethod;
+    char *configureMethod;
+    char *validateMethod;
+    char *token;
+    char *usage;
+    const char **argv;
+    const char *name;
+    const char *resourceName;
+    const char *className;
+    int argc;
+    int pLevel;
+    int readOnly;
+    int newObjc;
+    int foundOption;
+    int result;
+    int i;
+
+    result = TCL_OK;
+    infoPtr = (ItclObjectInfo *)clientData;
+    ItclShowArgs(0, "Itcl_AddOptionCmd", objc, objv);
+    ItclClass *iclsPtr = (ItclClass*)Itcl_PeekStack(&infoPtr->clsStack);
+    if (iclsPtr->flags & ITCL_IS_CLASS) {
+        Tcl_AppendResult(interp, "a \"class\" cannot have options", NULL);
+	return TCL_ERROR;
+    }
+    pLevel = Itcl_Protection(interp, 0);
+
+    usage = "nwidgetObject namespec ?init? ?-default value? ?-readonly? ?-cgetmethod methodName? ?-configuremethod methodName? ?-validatemethod methodName?";
+    if (pLevel == ITCL_PUBLIC) {
+        if ((objc < 3) || (objc > 12)) {
+            Tcl_WrongNumArgs(interp, 1, objv, usage);
+	    return TCL_ERROR;
+        }
+    } else {
+        if ((objc < 3) || (objc > 13)) {
+            Tcl_WrongNumArgs(interp, 1, objv, usage);
+            return TCL_ERROR;
+	}
+    }
+
+    oPtr = Tcl_GetObjectFromObj(interp, objv[1]);
+    if (oPtr == NULL) {
+        Tcl_AppendResult(interp,
+	        "no such object \"",
+	        Tcl_GetString(objv[1]), "\"", NULL);
+        return TCL_ERROR;
+    }
+    ioPtr = (ItclObject *)Tcl_ObjectGetMetadata(oPtr,
+                infoPtr->object_meta_type);
+    if (ioPtr == NULL) {
+        Tcl_AppendResult(interp, Tcl_GetString(objv[1]), "is no nwidget", NULL);
+        return TCL_ERROR;
+    }
+    defaultValue = NULL;
+    cgetMethod = NULL;
+    configureMethod = NULL;
+    validateMethod = NULL;
+    readOnly = 0;
+    newObjc = 0;
+    newObjv = (Tcl_Obj **)ckalloc(sizeof(Tcl_Obj *)*newObjc);
+    for (i=2; i<objc; i++) {
+        token = Tcl_GetString(objv[i]);
+	foundOption = 0;
+	if (*token == '-') {
+	    if (objc < i+1) {
+                Tcl_WrongNumArgs(interp, 1, objv, usage);
+	        return TCL_ERROR;
+	    }
+	    if (strcmp(token, "-default") == 0) {
+	        foundOption = 1;
+		i++;
+	        defaultValue = Tcl_GetString(objv[i]);
+	    } else {
+	      if (strcmp(token, "-readonly") == 0) {
+	        foundOption = 1;
+		readOnly = 1;
+	      } else {
+	        if (strcmp(token, "-cgetmethod") == 0) {
+	            foundOption = 1;
+		    i++;
+	            cgetMethod = Tcl_GetString(objv[i]);
+		} else {
+	          if (strcmp(token, "-configuremethod") == 0) {
+	              foundOption = 1;
+		      i++;
+	              configureMethod = Tcl_GetString(objv[i]);
+		  } else {
+	            if (strcmp(token, "-validatemethod") == 0) {
+	                foundOption = 1;
+		        i++;
+	                validateMethod = Tcl_GetString(objv[i]);
+		    }
+	          }
+	        }
+	      }
+	    }
+	}
+	if (!foundOption) {
+	    newObjv[newObjc] = objv[i];
+	    newObjc++;
+	}
+    }
+    
+    if (newObjc < 1) {
+        Tcl_AppendResult(interp, usage, NULL);
+	return TCL_ERROR;
+    }
+    resourceName = NULL;
+    className = NULL;
+
+    /*
+     *  Make sure that the variable name does not contain anything
+     *  goofy like a "::" scope qualifier.
+     */
+    nameSpecPtr = newObjv[0];
+    token = Tcl_GetString(nameSpecPtr);
+    if (Tcl_SplitList(interp, (CONST84 char *)token, &argc, &argv) != TCL_OK) {
+        return TCL_ERROR;
+    }
+    name = argv[0];
+    if (*name != '-') {
+	Tcl_AppendResult(interp, "options must start with a '-'", NULL);
+        return TCL_ERROR;
+    }
+    if (strstr(name, "::")) {
+        Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+            "bad option name \"", name, "\"", (char*)NULL);
+        return TCL_ERROR;
+    }
+    const char *cp;
+    cp = name;
+    while (*cp) {
+        if (isupper(*cp)) {
+	    Tcl_AppendResult(interp,
+	            "options must not contain uppercase characters", NULL);
+            return TCL_ERROR;
+	}
+	cp++;
+    }
+    if (argc > 1) {
+        resourceName = argv[1];
+    } else {
+	/* resource name defaults to option name minus hyphen */
+        resourceName = name+1;
+    }
+    int needCapitalize = 0;
+    if (argc > 2) {
+        className = argv[2];
+    } else {
+	/* class name defaults to option name minus hyphen and capitalized */
+        className = name+1;
+        needCapitalize = 1;
+    }
+    init = defaultValue;
+    if ((newObjc > 1) && (init == NULL)) {
+        init = Tcl_GetString(newObjv[1]);
+    }
+
+    namePtr = Tcl_NewStringObj(name, -1);
+    Tcl_IncrRefCount(namePtr);
+    if (Itcl_CreateOption(interp, iclsPtr, namePtr, resourceName, className, 
+            init, configureMethod, &ioptPtr) != TCL_OK) {
+        return TCL_ERROR;
+    }
+    if (cgetMethod != NULL) {
+        ioptPtr->cgetMethodPtr = Tcl_NewStringObj(cgetMethod, -1);
+    }
+    if (configureMethod != NULL) {
+        ioptPtr->configureMethodPtr = Tcl_NewStringObj(configureMethod, -1);
+    }
+    if (validateMethod != NULL) {
+        ioptPtr->validateMethodPtr = Tcl_NewStringObj(validateMethod, -1);
+    }
+    if (readOnly != 0) {
+        ioptPtr->flags |= ITCL_OPTION_READONLY;
+    }
+
+    ckfree((char *)newObjv);
+    return TCL_OK;
+}
+
+/*
+ * ------------------------------------------------------------------------
+ *  Itcl_AddComponentCmd()
+ *
+ *  Used to add a component to an [incr Tcl] nwidget
+ *
+ *  Returns TCL_OK/TCL_ERROR to indicate success/failure.
+ * ------------------------------------------------------------------------
+ */
+/* ARGSUSED */
+int
+Itcl_AddComponentCmd(
+    ClientData clientData,   /* infoPtr */
+    Tcl_Interp *interp,      /* current interpreter */
+    int objc,                /* number of arguments */
+    Tcl_Obj *CONST objv[])   /* argument objects */
+{
+    ItclObjectInfo *infoPtr;
+    int result;
+
+    result = TCL_OK;
+    infoPtr = (ItclObjectInfo *)clientData;
+    ItclShowArgs(0, "Itcl_AddOptionCmd", objc, objv);
+    return result;
+}
+
+/*
+ * ------------------------------------------------------------------------
+ *  Itcl_StructCmd()
+ *
+ *  Used to an [incr Tcl] struct
+ *
+ *  Returns TCL_OK/TCL_ERROR to indicate success/failure.
+ * ------------------------------------------------------------------------
+ */
+/* ARGSUSED */
+int
+Itcl_StructCmd(
+    ClientData clientData,   /* infoPtr */
+    Tcl_Interp *interp,      /* current interpreter */
+    int objc,                /* number of arguments */
+    Tcl_Obj *CONST objv[])   /* argument objects */
+{
+    Tcl_Obj *namePtr;
+    ItclClass *iclsPtr;
+    ItclObjectInfo *infoPtr;
+    ItclVariable *ivPtr;
+    int result;
+
+    infoPtr = (ItclObjectInfo *)clientData;
+    ItclShowArgs(1, "Itcl_StructCmd", objc-1, objv);
+    result = ItclClassBaseCmd(clientData, interp, ITCL_IS_STRUCT, objc, objv,
+            &iclsPtr);
+    /* create the options variable */
+    namePtr = Tcl_NewStringObj("options", 7);
+    Tcl_IncrRefCount(namePtr);
+    if (Itcl_CreateVariable(interp, iclsPtr, namePtr, NULL, NULL,
+            &ivPtr) != TCL_OK) {
+        return TCL_ERROR;
+    }
+    iclsPtr->numVariables++;
+    Itcl_BuildVirtualTables(iclsPtr);
+    return result;
+}
+

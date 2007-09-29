@@ -24,7 +24,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclBuiltin.c,v 1.1.2.9 2007/09/22 13:39:22 wiede Exp $
+ *     RCS:  $Id: itclBuiltin.c,v 1.1.2.10 2007/09/29 22:16:49 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -55,6 +55,8 @@ static BiMethod BiMethodList[] = {
 };
 static int BiMethodListLen = sizeof(BiMethodList)/sizeof(BiMethod);
 
+Tcl_ObjCmdProc ItclWidgetConfigure;
+Tcl_ObjCmdProc ItclWidgetCget;
 /*
  *  FORWARD DECLARATIONS
  */
@@ -357,16 +359,9 @@ Itcl_BiConfigureCmd(
             hPtr = Tcl_FindHashEntry(&contextIclsPtr->options,
 	            (char *) objv[1]);
 	}
-	if ((objc == 1) || (hPtr != NULL)) {
-	    ItclWidgetInfo *iwInfoPtr;
-	    iwInfoPtr = contextIclsPtr->infoPtr->windgetInfoPtr;
-            if (iwInfoPtr != NULL) {
-	        result = iwInfoPtr->widgetConfigure(contextIclsPtr, interp,
-	                objc, objv);
-	        if (result != TCL_CONTINUE) {
-	            return result;
-	        }
-	    }
+        result = ItclWidgetConfigure(contextIclsPtr, interp, objc, objv);
+        if (result != TCL_CONTINUE) {
+            return result;
         }
     }
     /*
@@ -568,7 +563,7 @@ Itcl_BiCgetCmd(
     CONST char *val;
     int result;
 
-    ItclShowArgs(2,"Itcl_BiCgetCmd", objc, objv);
+    ItclShowArgs(1,"Itcl_BiCgetCmd", objc, objv);
     /*
      *  Make sure that this command is being invoked in the proper
      *  context.
@@ -592,15 +587,10 @@ Itcl_BiCgetCmd(
     }
 
     if (!(contextIclsPtr->flags &ITCL_IS_CLASS)) {
-	ItclWidgetInfo *iwInfoPtr;
-	iwInfoPtr = contextIclsPtr->infoPtr->windgetInfoPtr;
-        if (iwInfoPtr != NULL) {
-	    result = iwInfoPtr->widgetCget(contextIclsPtr, interp,
-	            objc, objv);
-	    if (result != TCL_CONTINUE) {
-	        return result;
-	    }
-	}
+        result = ItclWidgetCget(contextIclsPtr, interp, objc, objv);
+        if (result != TCL_CONTINUE) {
+            return result;
+        }
     }
     name = Tcl_GetString(objv[1]);
 
@@ -699,6 +689,53 @@ ItclReportPublicOpt(
 
     return listPtr;
 }
+
+/*
+ * ------------------------------------------------------------------------
+ *  ItclReportOption()
+ *
+ *  Returns information about an option formatted as a
+ *  configuration option:
+ *
+ *    <optionName> <initVal> <currentVal>
+ *
+ *  Used by ItclWidgetConfigureCmd() to report configuration options.
+ *  Returns a Tcl_Obj containing the information.
+ * ------------------------------------------------------------------------
+ */
+static Tcl_Obj*
+ItclReportOption(
+    Tcl_Interp *interp,      /* interpreter containing the object */
+    ItclOption *ioptPtr,     /* option to be reported */
+    ItclObject *contextIoPtr) /* object containing this variable */
+{
+    CONST char *val;
+    Tcl_Obj *listPtr;
+    Tcl_Obj *objPtr;
+
+    listPtr = Tcl_NewListObj(0, (Tcl_Obj**)NULL);
+
+    Tcl_ListObjAppendElement((Tcl_Interp*)NULL, listPtr, ioptPtr->namePtr);
+    Tcl_ListObjAppendElement((Tcl_Interp*)NULL, listPtr,
+            ioptPtr->resourceNamePtr);
+    Tcl_ListObjAppendElement((Tcl_Interp*)NULL, listPtr, ioptPtr->classNamePtr);
+    if (ioptPtr->init) {
+        objPtr = ioptPtr->init;
+    } else {
+        objPtr = Tcl_NewStringObj("<undefined>", -1);
+    }
+    Tcl_ListObjAppendElement((Tcl_Interp*)NULL, listPtr, objPtr);
+    val = ItclGetInstanceVar(interp, "options", Tcl_GetString(ioptPtr->namePtr),
+            contextIoPtr, ioptPtr->iclsPtr);
+    if (val) {
+        objPtr = Tcl_NewStringObj((CONST84 char *)val, -1);
+    } else {
+        objPtr = Tcl_NewStringObj("<undefined>", -1);
+    }
+    Tcl_ListObjAppendElement((Tcl_Interp*)NULL, listPtr, objPtr);
+    return listPtr;
+}
+
 
 
 /*
@@ -885,3 +922,410 @@ ItclBiObjectUnknownCmd(
     ItclReportObjectUsage(interp, ioPtr, NULL, NULL);
     return TCL_ERROR;
 }
+
+/*
+ * ------------------------------------------------------------------------
+ *  ItclWidgetConfigure()
+ *
+ *  Invoked whenever the user issues the "configure" method for an object.
+ *  If the class is not ITCL_IS CLASS
+ *  Handles the following syntax:
+ *
+ *    <objName> configure ?-<option>? ?<value> -<option> <value>...?
+ *
+ *  Allows access to public variables as if they were configuration
+ *  options.  With no arguments, this command returns the current
+ *  list of public variable options.  If -<option> is specified,
+ *  this returns the information for just one option:
+ *
+ *    -<optionName> <initVal> <currentVal>
+ *
+ *  Otherwise, the list of arguments is parsed, and values are
+ *  assigned to the various public variable options.  When each
+ *  option changes, a big of "config" code associated with the option
+ *  is executed, to bring the object up to date.
+ * ------------------------------------------------------------------------
+ */
+/* ARGSUSED */
+int
+ItclWidgetConfigure(
+    ClientData clientData,   /* class definition */
+    Tcl_Interp *interp,      /* current interpreter */
+    int objc,                /* number of arguments */
+    Tcl_Obj *CONST objv[])   /* argument objects */
+{
+    ItclClass *contextIclsPtr;
+    ItclObject *contextIoPtr;
+
+    Tcl_HashEntry *hPtr;
+    Tcl_DString buffer;
+    Tcl_Object oPtr;
+    Tcl_Obj *resultPtr;
+    Tcl_Obj *objPtr;
+    ItclVarLookup *vlookup;
+    ItclDelegatedFunction *idmPtr;
+    ItclDelegatedOption *idoPtr;
+    ItclObject *ioPtr;
+    ItclComponent *icPtr;
+    ItclOption *ioptPtr;
+    ItclObjectInfo *infoPtr;
+    const char *val;
+    char *token;
+    int i;
+    int result;
+
+    ItclShowArgs(1, "ItclWidgetConfigure", objc, objv);
+    vlookup = NULL;
+    token = NULL;
+    ioptPtr = NULL;
+    /*
+     *  Make sure that this command is being invoked in the proper
+     *  context.
+     */
+    contextIclsPtr = NULL;
+    if (Itcl_GetContext(interp, &contextIclsPtr, &contextIoPtr) != TCL_OK) {
+        return TCL_ERROR;
+    }
+
+    if (contextIoPtr == NULL) {
+        Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+            "improper usage: should be ",
+            "\"object configure ?-option? ?value -option value...?\"",
+            (char*)NULL);
+        return TCL_ERROR;
+    }
+
+    /*
+     *  BE CAREFUL:  work in the virtual scope!
+     */
+    if (contextIoPtr != NULL) {
+        contextIclsPtr = contextIoPtr->iclsPtr;
+    }
+    infoPtr = contextIclsPtr->infoPtr;
+    if (infoPtr->currContextIclsPtr != NULL) {
+        contextIclsPtr = infoPtr->currContextIclsPtr;
+    }
+
+    hPtr = NULL;
+    Tcl_Obj *methodNamePtr;
+    methodNamePtr = Tcl_NewStringObj("*", -1);
+    hPtr = Tcl_FindHashEntry(&contextIclsPtr->delegatedFunctions, (char *)
+            methodNamePtr);
+    if (hPtr != NULL) {
+        idmPtr = (ItclDelegatedFunction *)Tcl_GetHashValue(hPtr);
+	Tcl_SetStringObj(methodNamePtr, "configure", -1);
+        hPtr = Tcl_FindHashEntry(&idmPtr->exceptions, (char *)methodNamePtr);
+        if (hPtr == NULL) {
+	    icPtr = idmPtr->icPtr;
+	    val = ItclGetInstanceVar(interp, Tcl_GetString(icPtr->namePtr),
+	            NULL, contextIoPtr, contextIclsPtr);
+            if (val != NULL) {
+	        Tcl_DString buffer;
+	        Tcl_DStringInit(&buffer);
+	        Tcl_DStringAppend(&buffer, val, -1);
+	        Tcl_DStringAppend(&buffer, " configure ", -1);
+		for(i=2;i<objc;i++) {
+		    Tcl_DStringAppend(&buffer, Tcl_GetString(objv[i]), -1);
+		    Tcl_DStringAppend(&buffer, " ", 1);
+		}
+		objPtr = Tcl_NewStringObj(val, -1);
+	        Tcl_IncrRefCount(objPtr);
+	        oPtr = Tcl_GetObjectFromObj(interp, objPtr);
+	        if (oPtr != NULL) {
+                    ioPtr = (ItclObject *)Tcl_ObjectGetMetadata(oPtr,
+                            infoPtr->object_meta_type);
+	            infoPtr->currContextIclsPtr = ioPtr->iclsPtr;
+	        }
+                result = Tcl_Eval(interp, Tcl_DStringValue(&buffer));
+	        Tcl_DecrRefCount(objPtr);
+	        if (oPtr != NULL) {
+	            infoPtr->currContextIclsPtr = NULL;
+	        }
+                return result;
+	    }
+	}
+    }
+    /* now do the hard work */
+    if (objc == 1) {
+fprintf(stderr, "plain configure not yet implemented\n");
+        return TCL_ERROR;
+    }
+    /* first handle delegated options */
+    hPtr = Tcl_FindHashEntry(&contextIclsPtr->delegatedOptions, (char *)
+            objv[1]);
+
+    if (hPtr != NULL) {
+        idoPtr = (ItclDelegatedOption *)Tcl_GetHashValue(hPtr);
+        icPtr = idoPtr->icPtr;
+        val = ItclGetInstanceVar(interp, Tcl_GetString(icPtr->namePtr),
+                NULL, contextIoPtr, contextIclsPtr);
+        if (val != NULL) {
+            Tcl_DString buffer;
+            Tcl_DStringInit(&buffer);
+	    Tcl_DStringAppend(&buffer, val, -1);
+	    Tcl_DStringAppend(&buffer, " configure ", -1);
+	    for(i=1;i<objc;i++) {
+	        Tcl_DStringAppend(&buffer, Tcl_GetString(objv[i]), -1);
+	        Tcl_DStringAppend(&buffer, " ", 1);
+	    }
+	    objPtr = Tcl_NewStringObj(val, -1);
+	    Tcl_IncrRefCount(objPtr);
+	    oPtr = Tcl_GetObjectFromObj(interp, objPtr);
+	    if (oPtr != NULL) {
+                ioPtr = (ItclObject *)Tcl_ObjectGetMetadata(oPtr,
+                        infoPtr->object_meta_type);
+	        infoPtr->currContextIclsPtr = ioPtr->iclsPtr;
+	    }
+            result = Tcl_Eval(interp, Tcl_DStringValue(&buffer));
+	    Tcl_DecrRefCount(objPtr);
+	    if (oPtr != NULL) {
+	        infoPtr->currContextIclsPtr = NULL;
+	    }
+            return result;
+        }
+    }
+    /* now look if it is an option at all */
+    hPtr = Tcl_FindHashEntry(&contextIclsPtr->options, (char *) objv[1]);
+    if (hPtr == NULL) {
+	/* no option at all, let the normal configure do the job */
+	return TCL_CONTINUE;
+    }
+    ioptPtr = (ItclOption *)Tcl_GetHashValue(hPtr);
+    if (objc == 2) {
+        resultPtr = ItclReportOption(interp, ioptPtr, contextIoPtr);
+        Tcl_SetObjResult(interp, resultPtr);
+        return TCL_OK;
+    }
+    Tcl_DStringInit(&buffer);
+    result = TCL_CONTINUE;
+    /* set one or more options */
+    for (i=1; i < objc; i+=2) {
+	if (i+1 > objc) {
+	    Tcl_AppendResult(interp, "need option value pair", NULL);
+	    result = TCL_ERROR;
+	    break;
+	}
+        hPtr = Tcl_FindHashEntry(&contextIclsPtr->options, (char *) objv[i]);
+        if (hPtr == NULL) {
+	    /* check if normal public variable/common */
+	    /* FIX ME !!! temporary */
+	    result = TCL_CONTINUE;
+	    break;
+        }
+        ioptPtr = (ItclOption *)Tcl_GetHashValue(hPtr);
+        if (ioptPtr->validateMethodPtr != NULL) {
+            Tcl_DStringAppend(&buffer, Tcl_GetString(
+	            ioptPtr->validateMethodPtr), -1);
+            Tcl_DStringAppend(&buffer, " ", -1);
+            Tcl_DStringAppend(&buffer, Tcl_GetString(objv[i]), -1);
+            Tcl_DStringAppend(&buffer, " ", -1);
+            Tcl_DStringAppend(&buffer, Tcl_GetString(objv[i+1]), -1);
+	    result = Tcl_Eval(interp, Tcl_DStringValue(&buffer));
+	    if (result != TCL_OK) {
+	        break;
+	    }
+	}
+        Tcl_DStringFree(&buffer);
+        if (ioptPtr->configureMethodPtr != NULL) {
+            Tcl_DStringAppend(&buffer, Tcl_GetString(
+	            ioptPtr->configureMethodPtr), -1);
+            Tcl_DStringAppend(&buffer, " ", -1);
+            Tcl_DStringAppend(&buffer, Tcl_GetString(objv[i]), -1);
+            Tcl_DStringAppend(&buffer, " ", -1);
+            Tcl_DStringAppend(&buffer, Tcl_GetString(objv[i+1]), -1);
+	    result = Tcl_Eval(interp, Tcl_DStringValue(&buffer));
+	    if (result != TCL_OK) {
+	        break;
+	    }
+	} else {
+	    if (ItclSetInstanceVar(interp, "options", Tcl_GetString(objv[i]),
+	            Tcl_GetString(objv[i+1]), contextIoPtr, contextIclsPtr)
+		    == NULL) {
+		result = TCL_ERROR;
+	        break;
+	    }
+	}
+        Tcl_DStringFree(&buffer);
+        result = TCL_OK;
+    }
+    Tcl_DStringFree(&buffer);
+    return result;
+}
+
+/*
+ * ------------------------------------------------------------------------
+ *  ItclWidgetCget()
+ *
+ *  Invoked whenever the user issues the "cget" method for an object.
+ *  If the class is NOT ITCL_IS_CLASS
+ *  Handles the following syntax:
+ *
+ *    <objName> cget -<option>
+ *
+ *  Allows access to public variables as if they were configuration
+ *  options.  Mimics the behavior of the usual "cget" method for
+ *  Tk widgets.  Returns the current value of the public variable
+ *  with name <option>.
+ * ------------------------------------------------------------------------
+ */
+/* ARGSUSED */
+int
+ItclWidgetCget(
+    ClientData clientData,   /* class definition */
+    Tcl_Interp *interp,      /* current interpreter */
+    int objc,                /* number of arguments */
+    Tcl_Obj *CONST objv[])   /* argument objects */
+{
+    ItclClass *contextIclsPtr;
+    ItclObject *contextIoPtr;
+
+    Tcl_DString buffer;
+    Tcl_HashEntry *hPtr;
+    Tcl_Obj *objPtr;
+    Tcl_Object oPtr;
+    ItclDelegatedFunction *idmPtr;
+    ItclDelegatedOption *idoPtr;
+    ItclComponent *icPtr;
+    ItclObjectInfo *infoPtr;
+    ItclOption *ioptPtr;
+    ItclObject *ioPtr;
+    const char *val;
+    int i;
+    int result;
+
+    ItclShowArgs(1,"ItclWidgetCget", objc, objv);
+    /*
+     *  Make sure that this command is being invoked in the proper
+     *  context.
+     */
+    contextIclsPtr = NULL;
+    if (Itcl_GetContext(interp, &contextIclsPtr, &contextIoPtr) != TCL_OK) {
+        return TCL_ERROR;
+    }
+    if ((contextIoPtr == NULL) || objc != 2) {
+        Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+            "improper usage: should be \"object cget -option\"",
+            (char*)NULL);
+        return TCL_ERROR;
+    }
+
+    /*
+     *  BE CAREFUL:  work in the virtual scope!
+     */
+    if (contextIoPtr != NULL) {
+        contextIclsPtr = contextIoPtr->iclsPtr;
+    }
+    infoPtr = contextIclsPtr->infoPtr;
+    if (infoPtr->currContextIclsPtr != NULL) {
+        contextIclsPtr = infoPtr->currContextIclsPtr;
+    }
+
+    hPtr = NULL;
+    Tcl_Obj *methodNamePtr;
+    methodNamePtr = Tcl_NewStringObj("*", -1);
+    hPtr = Tcl_FindHashEntry(&contextIclsPtr->delegatedFunctions, (char *)
+            methodNamePtr);
+    if (hPtr != NULL) {
+        idmPtr = (ItclDelegatedFunction *)Tcl_GetHashValue(hPtr);
+	Tcl_SetStringObj(methodNamePtr, "cget", -1);
+        hPtr = Tcl_FindHashEntry(&idmPtr->exceptions, (char *)methodNamePtr);
+        if (hPtr == NULL) {
+	    icPtr = idmPtr->icPtr;
+	    val = ItclGetInstanceVar(interp, Tcl_GetString(icPtr->namePtr),
+	            NULL, contextIoPtr, contextIclsPtr);
+            if (val != NULL) {
+	        Tcl_DString buffer;
+	        Tcl_DStringInit(&buffer);
+	        Tcl_DStringAppend(&buffer, val, -1);
+	        Tcl_DStringAppend(&buffer, " cget ", -1);
+		for(i=1;i<objc;i++) {
+		    Tcl_DStringAppend(&buffer, Tcl_GetString(objv[i]), -1);
+		    Tcl_DStringAppend(&buffer, " ", 1);
+		}
+		objPtr = Tcl_NewStringObj(val, -1);
+	        Tcl_IncrRefCount(objPtr);
+	        oPtr = Tcl_GetObjectFromObj(interp, objPtr);
+	        if (oPtr != NULL) {
+                    ioPtr = (ItclObject *)Tcl_ObjectGetMetadata(oPtr,
+                            infoPtr->object_meta_type);
+	            infoPtr->currContextIclsPtr = ioPtr->iclsPtr;
+	        }
+                result = Tcl_Eval(interp, Tcl_DStringValue(&buffer));
+	        Tcl_DecrRefCount(objPtr);
+	        if (oPtr != NULL) {
+	            infoPtr->currContextIclsPtr = NULL;
+	        }
+                return result;
+	    }
+	}
+    }
+    if (objc == 1) {
+        Tcl_WrongNumArgs(interp, 1, objv, "option");
+        return TCL_ERROR;
+    }
+    /* now do the hard work */
+    /* first handle delegated options */
+    hPtr = Tcl_FindHashEntry(&contextIclsPtr->delegatedOptions, (char *)
+            objv[1]);
+    if (hPtr != NULL) {
+        idoPtr = (ItclDelegatedOption *)Tcl_GetHashValue(hPtr);
+        icPtr = idoPtr->icPtr;
+        val = ItclGetInstanceVar(interp, Tcl_GetString(icPtr->namePtr),
+                NULL, contextIoPtr, contextIclsPtr);
+        if (val != NULL) {
+            Tcl_DString buffer;
+            Tcl_DStringInit(&buffer);
+	    Tcl_DStringAppend(&buffer, val, -1);
+	    Tcl_DStringAppend(&buffer, " cget ", -1);
+	    for(i=1;i<objc;i++) {
+	        Tcl_DStringAppend(&buffer, Tcl_GetString(objv[i]), -1);
+	        Tcl_DStringAppend(&buffer, " ", 1);
+	    }
+	    objPtr = Tcl_NewStringObj(val, -1);
+	    Tcl_IncrRefCount(objPtr);
+	    oPtr = Tcl_GetObjectFromObj(interp, objPtr);
+	    if (oPtr != NULL) {
+                ioPtr = (ItclObject *)Tcl_ObjectGetMetadata(oPtr,
+                        infoPtr->object_meta_type);
+	        infoPtr->currContextIclsPtr = ioPtr->iclsPtr;
+	    }
+            result = Tcl_Eval(interp, Tcl_DStringValue(&buffer));
+	    Tcl_DecrRefCount(objPtr);
+	    if (oPtr != NULL) {
+	        infoPtr->currContextIclsPtr = NULL;
+	    }
+            return result;
+        }
+    }
+    /* now look if it is an option at all */
+    hPtr = Tcl_FindHashEntry(&contextIclsPtr->options, (char *) objv[1]);
+    if (hPtr == NULL) {
+	/* no option at all, let the normal configure do the job */
+	return TCL_CONTINUE;
+    }
+    ioptPtr = (ItclOption *)Tcl_GetHashValue(hPtr);
+    Tcl_DStringInit(&buffer);
+    result = TCL_CONTINUE;
+    ioptPtr = (ItclOption *)Tcl_GetHashValue(hPtr);
+    if (ioptPtr->cgetMethodPtr != NULL) {
+        Tcl_DStringAppend(&buffer, Tcl_GetString(
+                ioptPtr->cgetMethodPtr), -1);
+        Tcl_DStringAppend(&buffer, " ", -1);
+        Tcl_DStringAppend(&buffer, Tcl_GetString(objv[1]), -1);
+	result = Tcl_Eval(interp, Tcl_DStringValue(&buffer));
+        Tcl_DStringFree(&buffer);
+    } else {
+        val = ItclGetInstanceVar(interp, "options",
+                Tcl_GetString(ioptPtr->namePtr),
+		contextIoPtr, ioptPtr->iclsPtr);
+        if (val) {
+            Tcl_SetObjResult(interp, Tcl_NewStringObj(val, -1));
+        } else {
+            Tcl_SetObjResult(interp, Tcl_NewStringObj("<undefined>", -1));
+        }
+        result = TCL_OK;
+    }
+    Tcl_DStringFree(&buffer);
+    return result;
+}
+

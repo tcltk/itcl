@@ -1,5 +1,5 @@
 /*
- * $Id: itclDecls.h,v 1.9.2.5 2007/09/10 15:42:35 wiede Exp $
+ * $Id: itclDecls.h,v 1.9.2.6 2007/09/29 22:16:49 wiede Exp $
  *
  * This file is (mostly) automatically generated from itcl.decls.
  */
@@ -21,7 +21,7 @@ extern const char *Itcl_InitStubs(
 /* !BEGIN!: Do not edit below this line. */
 
 #define ITCL_STUBS_EPOCH 0
-#define ITCL_STUBS_REVISION 136
+#define ITCL_STUBS_REVISION 138
 
 #if !defined(USE_ITCL_STUBS)
 

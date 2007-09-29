@@ -9,7 +9,7 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itclInt.h,v 1.17.2.17 2007/09/29 09:39:30 wiede Exp $
+ * RCS: @(#) $Id: itclInt.h,v 1.17.2.18 2007/09/29 22:16:49 wiede Exp $
  */
 
 #include <string.h>
@@ -143,6 +143,9 @@ typedef struct ItclObjectInfo {
     struct EnsembleInfo *ensembleInfo;
     ItclWidgetInfo *windgetInfoPtr; /* contains function pointers to be called
                                      * when constructing an ItclWidget object */
+    struct ItclClass *currContextIclsPtr;
+                                    /* context class for delegated option
+                                     * handling */
     int currClassFlags;             /* flags for the class just in creation */
     int buildingWidget;             /* set if in construction of a widget */
 } ItclObjectInfo;
@@ -219,16 +222,18 @@ typedef struct ItclClass {
     int flags;                    /* maintains class status */
 } ItclClass;
 
-#define ITCL_IS_CLASS		        0x001000
-#define ITCL_IS_WIDGET		        0x002000
-#define ITCL_IS_WIDGETADAPTOR	        0x004000
-#define ITCL_IS_TYPE		        0x008000
-#define ITCL_WIDGET_IS_FRAME	        0x010000
-#define ITCL_WIDGET_IS_LABEL_FRAME	0x020000
-#define ITCL_WIDGET_IS_TOPLEVEL	        0x040000
-#define ITCL_WIDGET_IS_TTK_FRAME        0x080000
-#define ITCL_WIDGET_IS_TTK_LABEL_FRAME	0x100000
-#define ITCL_WIDGET_IS_TTK_TOPLEVEL     0x200000
+#define ITCL_IS_CLASS		        0x0001000
+#define ITCL_IS_WIDGET		        0x0002000
+#define ITCL_IS_WIDGETADAPTOR	        0x0004000
+#define ITCL_IS_TYPE		        0x0008000
+#define ITCL_IS_STRUCT		        0x0010000
+#define ITCL_IS_NWIDGET		        0x0020000
+#define ITCL_WIDGET_IS_FRAME	        0x0040000
+#define ITCL_WIDGET_IS_LABEL_FRAME	0x0080000
+#define ITCL_WIDGET_IS_TOPLEVEL	        0x0100000
+#define ITCL_WIDGET_IS_TTK_FRAME        0x0200000
+#define ITCL_WIDGET_IS_TTK_LABEL_FRAME	0x0400000
+#define ITCL_WIDGET_IS_TTK_TOPLEVEL     0x1000000
 #define ITCL_CLASS_NS_TEARDOWN          0x400000
 
 typedef struct ItclHierIter {

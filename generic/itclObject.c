@@ -24,7 +24,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann Copyright (c) 2007
  *
- *     RCS:  $Id: itclObject.c,v 1.1.2.10 2007/09/22 13:39:22 wiede Exp $
+ *     RCS:  $Id: itclObject.c,v 1.1.2.11 2007/09/29 22:16:50 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -312,6 +312,12 @@ ItclCreateObject(
         Tcl_SetHashValue(entry, (ClientData)ioPtr);
 
         if (!(ioPtr->iclsPtr->flags & ITCL_IS_CLASS)) {
+	    if (DelegationInstall(interp, ioPtr, iclsPtr) != TCL_OK) {
+	        return TCL_ERROR;
+	    }
+	}
+#ifdef NOTDEF
+        if (!(ioPtr->iclsPtr->flags & (ITCL_IS_CLASS|ITCL_IS_STRUCT|ITCL_IS_NWIDGET))) {
 	    if (infoPtr->windgetInfoPtr->delegationInst != NULL) {
                 if (infoPtr->windgetInfoPtr->delegationInst(interp, ioPtr,
 		        iclsPtr) != TCL_OK) {
@@ -319,6 +325,7 @@ ItclCreateObject(
 	        }
 	    }
 	}
+#endif
 
         /* add the objects unknow command to handle all unknown sub commands */
 	ClientData pmPtr;
@@ -1495,4 +1502,229 @@ ItclMapCmdNameProc(
         Tcl_DecrRefCount(methodName);
     }
     return TCL_OK;
+}
+
+/*
+ * ------------------------------------------------------------------------
+ *  DelegationFunction()
+ * ------------------------------------------------------------------------
+ */
+
+int
+DelegateFunction(
+    Tcl_Interp *interp,
+    ItclObject *ioPtr,
+    ItclClass *iclsPtr,
+    Tcl_Obj *componentNamePtr,
+    ItclDelegatedFunction *idmPtr)
+{
+    Tcl_Obj *listPtr;;
+    const char **argv;
+    int argc;
+    int j;
+
+    listPtr = Tcl_NewListObj(0, NULL);
+    if (componentNamePtr != NULL) {
+        Tcl_ListObjAppendElement(interp, listPtr, componentNamePtr);
+        Tcl_IncrRefCount(componentNamePtr);
+    }
+    if (idmPtr->asPtr != NULL) {
+        Tcl_SplitList(interp, Tcl_GetString(idmPtr->asPtr),
+	        &argc, &argv);
+        for(j=0;j<argc;j++) {
+            Tcl_ListObjAppendElement(interp, listPtr,
+                    Tcl_NewStringObj(argv[j], -1));
+        }
+    } else {
+	if (idmPtr->usingPtr != NULL) {
+	    char *cp;
+	    char *ep;
+	    cp = Tcl_GetString(idmPtr->usingPtr);
+	    ep = cp;
+	    while (*ep != '\0') {
+	        if (*ep == '%') {
+		    if (*(ep+1) == '%') {
+		        ep++;
+		        continue;
+		    }
+		    switch (*(ep+1)) {
+		    case 'c':
+			if (ep-cp-1 > 0) {
+		            Tcl_ListObjAppendElement(interp, listPtr,
+			            Tcl_NewStringObj(cp, ep-cp-1));
+			}
+			if (idmPtr->icPtr == NULL) {
+			    Tcl_AppendResult(interp,
+			            "no component for %c", NULL);
+			    return TCL_ERROR;
+			}
+		        Tcl_ListObjAppendElement(interp, listPtr,
+			        Tcl_NewStringObj(Tcl_GetString(
+				        componentNamePtr), -1));
+		        break;
+		    case 'm':
+			if (ep-cp-1 > 0) {
+		            Tcl_ListObjAppendElement(interp, listPtr,
+			            Tcl_NewStringObj(cp, ep-cp-1));
+			}
+		        Tcl_ListObjAppendElement(interp, listPtr,
+			        Tcl_NewStringObj(Tcl_GetString(
+				        idmPtr->namePtr), -1));
+		        break;
+		    case 'n':
+			if (ep-cp-1 > 0) {
+		            Tcl_ListObjAppendElement(interp, listPtr,
+			            Tcl_NewStringObj(cp, ep-cp-1));
+			}
+		        Tcl_ListObjAppendElement(interp, listPtr,
+			        Tcl_NewStringObj(iclsPtr->nsPtr->name,
+				        -1));
+		        break;
+		    case 's':
+			if (ep-cp-1 > 0) {
+		            Tcl_ListObjAppendElement(interp, listPtr,
+			            Tcl_NewStringObj(cp, ep-cp-1));
+			}
+		        Tcl_ListObjAppendElement(interp, listPtr,
+			        Tcl_NewStringObj(Tcl_GetString(
+				        ioPtr->namePtr), -1));
+		        break;
+		    case 't':
+			if (ep-cp-1 > 0) {
+		            Tcl_ListObjAppendElement(interp, listPtr,
+			            Tcl_NewStringObj(cp, ep-cp-1));
+			}
+		        Tcl_ListObjAppendElement(interp, listPtr,
+			        Tcl_NewStringObj(
+				        iclsPtr->nsPtr->fullName,
+					-1));
+		        break;
+		    default:
+		      {
+			char buf[2];
+			buf[1] = '\0';
+			sprintf(buf, "%c", *(ep+1));
+			Tcl_AppendResult(interp,
+			        "there is no %%", buf, " substitution",
+				NULL);
+			return TCL_ERROR;
+		        break;
+		      }
+		    }
+		    ep +=2;
+		    cp = ep;
+		} else {
+		    if (*ep == ' ') {
+			if (ep-cp > 0) {
+		            Tcl_ListObjAppendElement(interp, listPtr,
+			            Tcl_NewStringObj(cp, ep-cp));
+			}
+		        while((*ep != '\0') && (*ep == ' ')) {
+			    ep++;
+			}
+			cp = ep;
+		    } else {
+		        ep++;
+		    }
+		}
+	    }
+	    if (cp != ep) {
+                Tcl_ListObjAppendElement(interp, listPtr,
+	                Tcl_NewStringObj(cp, ep-cp-1));
+	    }
+	} else {
+            Tcl_ListObjAppendElement(interp, listPtr, idmPtr->namePtr);
+        }
+    }
+    Tcl_IncrRefCount(idmPtr->namePtr);
+    /* and now for the argument */
+    Tcl_IncrRefCount(idmPtr->namePtr);
+    Tcl_Method mPtr;
+    mPtr = Itcl_NewForwardClassMethod(interp, iclsPtr->clsPtr, 1,
+            idmPtr->namePtr, listPtr);
+    if (mPtr != NULL) {
+        return TCL_OK;
+    }
+    return TCL_ERROR;
+}
+
+/*
+ * ------------------------------------------------------------------------
+ *  DelegationInstall()
+ * ------------------------------------------------------------------------
+ */
+
+int
+DelegationInstall(
+    Tcl_Interp *interp,
+    ItclObject *ioPtr,
+    ItclClass *iclsPtr)
+{
+    Tcl_HashEntry *hPtr2;
+    Tcl_HashSearch search2;
+    Tcl_Obj *componentNamePtr;
+    ItclDelegatedFunction *idmPtr;
+    ItclMemberFunc *imPtr;
+    FOREACH_HASH_DECLS;
+    char *methodName;
+    const char *val;
+    int result;
+    int noDelegate;
+    int delegateAll;
+
+    result = TCL_OK;
+    delegateAll = 0;
+    noDelegate = ITCL_CONSTRUCTOR|ITCL_DESTRUCTOR|ITCL_COMPONENT;
+    componentNamePtr = NULL;
+    FOREACH_HASH_VALUE(idmPtr, &iclsPtr->delegatedFunctions) {
+	methodName = Tcl_GetString(idmPtr->namePtr);
+	if (*methodName == '*') {
+	    delegateAll = 1;
+	}
+	if (idmPtr->icPtr != NULL) {
+            val = Itcl_GetInstanceVar(interp,
+	            Tcl_GetString(idmPtr->icPtr->namePtr), ioPtr, iclsPtr);
+	    componentNamePtr = Tcl_NewStringObj(val, -1);
+            Tcl_IncrRefCount(componentNamePtr);
+	} else {
+	    componentNamePtr = NULL;
+	}
+	if (!delegateAll) {
+	    result = DelegateFunction(interp, ioPtr, iclsPtr,
+	            componentNamePtr, idmPtr);
+	    if (result != TCL_OK) {
+	        return result;
+	    }
+	} else {
+	    /* save to allow nested FOREACH */
+            search2 = search;
+            FOREACH_HASH_VALUE(imPtr, &iclsPtr->functions) {
+	        methodName = Tcl_GetString(imPtr->namePtr);
+                if (imPtr->flags & noDelegate) {
+		    continue;
+		}
+                if (strcmp(methodName, "info") == 0) {
+	            continue;
+	        }
+                if (strcmp(methodName, "isa") == 0) {
+	            continue;
+	        }
+                hPtr2 = Tcl_FindHashEntry(&idmPtr->exceptions,
+		        (char *)imPtr->namePtr);
+                if (hPtr2 != NULL) {
+		    continue;
+		}
+	        result = DelegateFunction(interp, ioPtr, iclsPtr,
+	                componentNamePtr, idmPtr);
+	        if (result != TCL_OK) {
+	            break;
+	        }
+            }
+            search = search2;
+        }
+	if (componentNamePtr != NULL) {
+            Tcl_DecrRefCount(componentNamePtr);
+        }
+    }
+    return result;
 }
