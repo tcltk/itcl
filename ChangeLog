@@ -1,4 +1,8 @@
-RCS: @(#) $Id: ChangeLog,v 1.1.2.3 2007/09/09 12:56:52 wiede Exp $
+RCS: @(#) $Id: ChangeLog,v 1.1.2.4 2007/09/29 09:50:00 wiede Exp $
+2007-09-29 Arnulf P. Wiedemann <wiede@users.sf.net>
+    * fixed configuration files
+    * new/modified code for ItclWidget package (missing code for specification)
+    * added
 2007-09-09 Arnulf P. Wiedemann <wiede@users.sf.net>
     * beautifying and fixes for stack backtrace handling
     * too many files to list here (nearly all)
