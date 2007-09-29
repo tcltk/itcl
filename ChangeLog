@@ -1,4 +1,13 @@
-RCS: @(#) $Id: ChangeLog,v 1.1.2.4 2007/09/29 09:50:00 wiede Exp $
+RCS: @(#) $Id: ChangeLog,v 1.1.2.5 2007/09/29 22:26:06 wiede Exp $
+2007-09-29 Arnulf P. Wiedemann <wiede@users.sf.net>
+    * new commands ::itcl::struct, ::itcl::nwidget ::itcl::addoption and
+    * ::itcl::addcomponent
+    * some rearraging of functions for options and delegation, so that
+    * these can be used in the above commands without the need to load
+    * the ItclWidget package
+    * The above commands will be used for a prototype implementation
+    * of NexTk (from George Peter Staplin) with Itcl using the megapkg
+    * package of George Peter Staplin as a base
 2007-09-29 Arnulf P. Wiedemann <wiede@users.sf.net>
     * fixed configuration files
     * new/modified code for ItclWidget package (missing code for specification)
