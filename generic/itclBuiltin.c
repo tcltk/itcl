@@ -24,7 +24,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclBuiltin.c,v 1.1.2.10 2007/09/29 22:16:49 wiede Exp $
+ *     RCS:  $Id: itclBuiltin.c,v 1.1.2.11 2007/09/30 19:02:23 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -1114,14 +1114,21 @@ fprintf(stderr, "plain configure not yet implemented\n");
         }
         ioptPtr = (ItclOption *)Tcl_GetHashValue(hPtr);
         if (ioptPtr->validateMethodPtr != NULL) {
+	    int intVal;
             Tcl_DStringAppend(&buffer, Tcl_GetString(
 	            ioptPtr->validateMethodPtr), -1);
             Tcl_DStringAppend(&buffer, " ", -1);
             Tcl_DStringAppend(&buffer, Tcl_GetString(objv[i]), -1);
-            Tcl_DStringAppend(&buffer, " ", -1);
+            Tcl_DStringAppend(&buffer, " [list ", -1);
             Tcl_DStringAppend(&buffer, Tcl_GetString(objv[i+1]), -1);
+            Tcl_DStringAppend(&buffer, " ]", -1);
 	    result = Tcl_Eval(interp, Tcl_DStringValue(&buffer));
 	    if (result != TCL_OK) {
+	        break;
+	    }
+            Tcl_GetIntFromObj(interp, Tcl_GetObjResult(interp), &intVal);
+	    if (!intVal) {
+		/* validate has already set option */
 	        break;
 	    }
 	}
@@ -1131,9 +1138,14 @@ fprintf(stderr, "plain configure not yet implemented\n");
 	            ioptPtr->configureMethodPtr), -1);
             Tcl_DStringAppend(&buffer, " ", -1);
             Tcl_DStringAppend(&buffer, Tcl_GetString(objv[i]), -1);
-            Tcl_DStringAppend(&buffer, " ", -1);
+            Tcl_DStringAppend(&buffer, " [list ", -1);
             Tcl_DStringAppend(&buffer, Tcl_GetString(objv[i+1]), -1);
+            Tcl_DStringAppend(&buffer, "]", -1);
+	    Tcl_Namespace *nsPtr;
+	    nsPtr = Tcl_GetCurrentNamespace(interp);
+	    Itcl_SetCallFrameNamespace(interp, ioptPtr->iclsPtr->nsPtr);
 	    result = Tcl_Eval(interp, Tcl_DStringValue(&buffer));
+	    Itcl_SetCallFrameNamespace(interp, nsPtr);
 	    if (result != TCL_OK) {
 	        break;
 	    }

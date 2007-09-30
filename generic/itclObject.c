@@ -24,7 +24,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann Copyright (c) 2007
  *
- *     RCS:  $Id: itclObject.c,v 1.1.2.11 2007/09/29 22:16:50 wiede Exp $
+ *     RCS:  $Id: itclObject.c,v 1.1.2.12 2007/09/30 19:02:23 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -213,7 +213,6 @@ ItclCreateObject(
         }
     }
 
-
     ioPtr->oPtr = Tcl_NewObjectInstance(interp, iclsPtr->clsPtr, name,
             iclsPtr->nsPtr->fullName, /* objc */-1, NULL, /* skip */0);
     if (ioPtr->oPtr == NULL) {
@@ -316,17 +315,6 @@ ItclCreateObject(
 	        return TCL_ERROR;
 	    }
 	}
-#ifdef NOTDEF
-        if (!(ioPtr->iclsPtr->flags & (ITCL_IS_CLASS|ITCL_IS_STRUCT|ITCL_IS_NWIDGET))) {
-	    if (infoPtr->windgetInfoPtr->delegationInst != NULL) {
-                if (infoPtr->windgetInfoPtr->delegationInst(interp, ioPtr,
-		        iclsPtr) != TCL_OK) {
-	            return TCL_ERROR;
-	        }
-	    }
-	}
-#endif
-
         /* add the objects unknow command to handle all unknown sub commands */
 	ClientData pmPtr;
 	Tcl_Obj *namePtr;
