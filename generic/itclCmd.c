@@ -23,7 +23,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclCmd.c,v 1.1.2.8 2007/09/29 22:16:49 wiede Exp $
+ *     RCS:  $Id: itclCmd.c,v 1.1.2.9 2007/10/02 22:43:29 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -1213,10 +1213,13 @@ Itcl_NWidgetCmd(
 
     infoPtr = (ItclObjectInfo *)clientData;
     ItclShowArgs(0, "Itcl_NWidgetCmd", objc-1, objv);
-    result = ItclClassBaseCmd(clientData, interp, ITCL_IS_NWIDGET, objc, objv,
+    result = ItclClassBaseCmd(clientData, interp, ITCL_NWIDGET, objc, objv,
             &iclsPtr);
     if (result != TCL_OK) {
         return result;
+    }
+    if (iclsPtr == NULL) {
+fprintf(stderr, "Itcl_NWidgetCmd!iclsPtr == NULL\n");
     }
     /* create the options variable */
     namePtr = Tcl_NewStringObj("options", 7);
@@ -1279,7 +1282,7 @@ Itcl_AddOptionCmd(
     infoPtr = (ItclObjectInfo *)clientData;
     ItclShowArgs(0, "Itcl_AddOptionCmd", objc, objv);
     ItclClass *iclsPtr = (ItclClass*)Itcl_PeekStack(&infoPtr->clsStack);
-    if (iclsPtr->flags & ITCL_IS_CLASS) {
+    if (iclsPtr->flags & ITCL_CLASS) {
         Tcl_AppendResult(interp, "a \"class\" cannot have options", NULL);
 	return TCL_ERROR;
     }
@@ -1467,7 +1470,7 @@ Itcl_AddComponentCmd(
 
 /*
  * ------------------------------------------------------------------------
- *  Itcl_StructCmd()
+ *  Itcl_EClassCmd()
  *
  *  Used to an [incr Tcl] struct
  *
@@ -1476,7 +1479,7 @@ Itcl_AddComponentCmd(
  */
 /* ARGSUSED */
 int
-Itcl_StructCmd(
+Itcl_EClassCmd(
     ClientData clientData,   /* infoPtr */
     Tcl_Interp *interp,      /* current interpreter */
     int objc,                /* number of arguments */
@@ -1489,9 +1492,14 @@ Itcl_StructCmd(
     int result;
 
     infoPtr = (ItclObjectInfo *)clientData;
-    ItclShowArgs(1, "Itcl_StructCmd", objc-1, objv);
-    result = ItclClassBaseCmd(clientData, interp, ITCL_IS_STRUCT, objc, objv,
+    ItclShowArgs(1, "Itcl_EClassCmd", objc-1, objv);
+    result = ItclClassBaseCmd(clientData, interp, ITCL_ECLASS, objc, objv,
             &iclsPtr);
+    if (iclsPtr == NULL) {
+    ItclShowArgs(0, "Itcl_EClassCmd", objc-1, objv);
+fprintf(stderr, "Itcl_EClassCmd!iclsPtr == NULL\n");
+        return TCL_ERROR;
+    }
     /* create the options variable */
     namePtr = Tcl_NewStringObj("options", 7);
     Tcl_IncrRefCount(namePtr);

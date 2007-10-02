@@ -9,7 +9,7 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itclInt.h,v 1.17.2.18 2007/09/29 22:16:49 wiede Exp $
+ * RCS: @(#) $Id: itclInt.h,v 1.17.2.19 2007/10/02 22:43:29 wiede Exp $
  */
 
 #include <string.h>
@@ -222,19 +222,19 @@ typedef struct ItclClass {
     int flags;                    /* maintains class status */
 } ItclClass;
 
-#define ITCL_IS_CLASS		        0x0001000
-#define ITCL_IS_WIDGET		        0x0002000
-#define ITCL_IS_WIDGETADAPTOR	        0x0004000
-#define ITCL_IS_TYPE		        0x0008000
-#define ITCL_IS_STRUCT		        0x0010000
-#define ITCL_IS_NWIDGET		        0x0020000
-#define ITCL_WIDGET_IS_FRAME	        0x0040000
-#define ITCL_WIDGET_IS_LABEL_FRAME	0x0080000
-#define ITCL_WIDGET_IS_TOPLEVEL	        0x0100000
-#define ITCL_WIDGET_IS_TTK_FRAME        0x0200000
-#define ITCL_WIDGET_IS_TTK_LABEL_FRAME	0x0400000
-#define ITCL_WIDGET_IS_TTK_TOPLEVEL     0x1000000
-#define ITCL_CLASS_NS_TEARDOWN          0x400000
+#define ITCL_CLASS		        0x0001000
+#define ITCL_WIDGET		        0x0002000
+#define ITCL_WIDGETADAPTOR	        0x0004000
+#define ITCL_TYPE		        0x0008000
+#define ITCL_ECLASS		        0x0010000
+#define ITCL_NWIDGET		        0x0020000
+#define ITCL_WIDGET_FRAME	        0x0040000
+#define ITCL_WIDGET_LABEL_FRAME	        0x0080000
+#define ITCL_WIDGET_TOPLEVEL	        0x0100000
+#define ITCL_WIDGET_TTK_FRAME           0x0200000
+#define ITCL_WIDGET_TTK_LABEL_FRAME	0x0400000
+#define ITCL_WIDGET_TTK_TOPLEVEL        0x1000000
+#define ITCL_CLASS_NS_TEARDOWN          0x2000000
 
 typedef struct ItclHierIter {
     ItclClass *current;           /* current position in hierarchy */

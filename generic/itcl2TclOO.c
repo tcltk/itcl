@@ -8,7 +8,7 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itcl2TclOO.c,v 1.1.2.6 2007/09/16 17:16:29 wiede Exp $
+ * RCS: @(#) $Id: itcl2TclOO.c,v 1.1.2.7 2007/10/02 22:43:29 wiede Exp $
  */
 
 #include <tclOOInt.h>
@@ -23,6 +23,7 @@ Itcl_InvokeProcedureMethod(
     int objc,			/* Number of arguments. */
     Tcl_Obj *const *objv)	/* Arguments as actually seen. */
 {
+    ItclShowArgs(1, "Itcl_InvokeProcedureMethod", objc, objv);
     Method *mPtr = clientData;
     Tcl_Namespace *nsPtr = mPtr->declaringClassPtr->thisPtr->namespacePtr;
     ProcedureMethod *pmPtr = mPtr->clientData;
@@ -115,6 +116,7 @@ Itcl_PublicObjectCmd(
     Object *oPtr = (Object *)clientData;
     int result;
 
+    ItclShowArgs(1, "Itcl_PublicObjectCmd", objc, objv);
     result = TclOOObjectCmdCore(oPtr, interp, objc, objv, PUBLIC_METHOD,
 	    &oPtr->publicContextCache, (Class *)clsPtr);
     return result;

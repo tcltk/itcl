@@ -25,7 +25,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclMethod.c,v 1.1.2.8 2007/09/22 13:39:22 wiede Exp $
+ *     RCS:  $Id: itclMethod.c,v 1.1.2.9 2007/10/02 22:43:29 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -1525,6 +1525,7 @@ Itcl_ConstructBase(
         Tcl_AppendToObj(newObjv[1], "___constructor_init", -1);
         Tcl_IncrRefCount(newObjv[1]);
         memcpy(newObjv+2, objv+2, (objc-2)*sizeof(Tcl_Obj *));
+ItclShowArgs(0, "__CON", cmdlinec, cmdlinev);
         result = Itcl_PublicObjectCmd(contextClass->infoPtr->currIoPtr->oPtr,
 	        interp, contextClass->clsPtr, cmdlinec, cmdlinev);
         Tcl_DecrRefCount(newObjv[1]);

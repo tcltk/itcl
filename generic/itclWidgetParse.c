@@ -41,7 +41,7 @@
  *
  *  Author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclWidgetParse.c,v 1.1.2.11 2007/09/29 22:16:50 wiede Exp $
+ *     RCS:  $Id: itclWidgetParse.c,v 1.1.2.12 2007/10/02 22:43:31 wiede Exp $
  * ========================================================================
  *           Copyright (c) 2007  Arnulf Wiedemann
  * ------------------------------------------------------------------------
@@ -177,7 +177,7 @@ Itcl_ClassHullTypeCmd(
     ItclShowArgs(1, "Itcl_ClassHullTypeCmd", objc, objv);
     ItclObjectInfo *infoPtr = (ItclObjectInfo*)clientData;
     ItclClass *iclsPtr = (ItclClass*)Itcl_PeekStack(&infoPtr->clsStack);
-    if (!(iclsPtr->flags & ITCL_IS_WIDGET)) {
+    if (!(iclsPtr->flags & ITCL_WIDGET)) {
         Tcl_AppendResult(interp, "\"", Tcl_GetString(iclsPtr->namePtr),
 	        " is no ::itcl::widget.", 
 		" Only an ::itcl::widget can have a hulltype", NULL);
@@ -189,27 +189,27 @@ Itcl_ClassHullTypeCmd(
     }
     correctArg = 0;
     if (strcmp(Tcl_GetString(objv[1]), "frame") == 0) {
-	iclsPtr->flags |= ITCL_WIDGET_IS_FRAME;
+	iclsPtr->flags |= ITCL_WIDGET_FRAME;
         correctArg = 1;
     }
     if (strcmp(Tcl_GetString(objv[1]), "labelframe") == 0) {
-	iclsPtr->flags |= ITCL_WIDGET_IS_LABEL_FRAME;
+	iclsPtr->flags |= ITCL_WIDGET_LABEL_FRAME;
         correctArg = 1;
     }
     if (strcmp(Tcl_GetString(objv[1]), "toplevel") == 0) {
-	iclsPtr->flags |= ITCL_WIDGET_IS_TOPLEVEL;
+	iclsPtr->flags |= ITCL_WIDGET_TOPLEVEL;
         correctArg = 1;
     }
     if (strcmp(Tcl_GetString(objv[1]), "ttk::frame") == 0) {
-	iclsPtr->flags |= ITCL_WIDGET_IS_TTK_FRAME;
+	iclsPtr->flags |= ITCL_WIDGET_TTK_FRAME;
         correctArg = 1;
     }
     if (strcmp(Tcl_GetString(objv[1]), "ttk::labelframe") == 0) {
-	iclsPtr->flags |= ITCL_WIDGET_IS_TTK_LABEL_FRAME;
+	iclsPtr->flags |= ITCL_WIDGET_TTK_LABEL_FRAME;
         correctArg = 1;
     }
     if (strcmp(Tcl_GetString(objv[1]), "ttk::toplevel") == 0) {
-	iclsPtr->flags |= ITCL_WIDGET_IS_TTK_TOPLEVEL;
+	iclsPtr->flags |= ITCL_WIDGET_TTK_TOPLEVEL;
         correctArg = 1;
     }
     if (!correctArg) {
@@ -250,7 +250,7 @@ Itcl_ClassWidgetClassCmd(
         Tcl_WrongNumArgs(interp, 1, objv, "<widgetclass>");
         return TCL_ERROR;
     }
-    if (!(iclsPtr->flags & ITCL_IS_WIDGET)) {
+    if (!(iclsPtr->flags & ITCL_WIDGET)) {
         Tcl_AppendResult(interp, "\"", Tcl_GetString(iclsPtr->namePtr),
 	        " is no ::itcl::widget.", 
 		" Only an ::itcl::widget can have a widgetclass", NULL);

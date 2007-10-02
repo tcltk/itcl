@@ -24,7 +24,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann Copyright (c) 2007
  *
- *     RCS:  $Id: itclObject.c,v 1.1.2.12 2007/09/30 19:02:23 wiede Exp $
+ *     RCS:  $Id: itclObject.c,v 1.1.2.13 2007/10/02 22:43:29 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -189,7 +189,7 @@ ItclCreateObject(
     infoPtr = iclsPtr->infoPtr;
     infoPtr->currIoPtr = ioPtr;
     if (infoPtr->windgetInfoPtr != NULL) {
-        if (iclsPtr->flags & (ITCL_IS_WIDGET|ITCL_IS_WIDGETADAPTOR)) {
+        if (iclsPtr->flags & (ITCL_WIDGET|ITCL_WIDGETADAPTOR)) {
             /* 
              * set all the init values for options
              */
@@ -203,7 +203,7 @@ ItclCreateObject(
                 }
             }
         }
-        if (iclsPtr->flags & ITCL_IS_WIDGET) {
+        if (iclsPtr->flags & ITCL_WIDGET) {
 	    if (infoPtr->windgetInfoPtr->hullAndOptsInst != NULL) {
                 if (infoPtr->windgetInfoPtr->hullAndOptsInst(interp, ioPtr,
 		        iclsPtr, objc, objv, &newObjc, newObjv) != TCL_OK) {
@@ -263,6 +263,7 @@ ItclCreateObject(
         result = Itcl_ConstructBase(interp, ioPtr, iclsPtr, newObjc, newObjv);
     }
 
+fprintf(stderr, "5!%d!%s!\n", result, Tcl_GetStringResult(interp));
     /*
      *  If construction failed, then delete the object access
      *  command.  This will destruct the object and delete the
@@ -310,7 +311,7 @@ ItclCreateObject(
 
         Tcl_SetHashValue(entry, (ClientData)ioPtr);
 
-        if (!(ioPtr->iclsPtr->flags & ITCL_IS_CLASS)) {
+        if (!(ioPtr->iclsPtr->flags & ITCL_CLASS)) {
 	    if (DelegationInstall(interp, ioPtr, iclsPtr) != TCL_OK) {
 	        return TCL_ERROR;
 	    }
@@ -1258,20 +1259,22 @@ ItclObjectCmd(
     int objc,
     Tcl_Obj *const *objv)
 {
+    Tcl_Obj *methodName;
+    Tcl_Obj *className;
+    Tcl_Obj **newObjv;
+    Tcl_DString buffer;
     ItclMemberFunc *imPtr;
     ItclClass *iclsPtr;
     Itcl_ListElem *elem;
     ItclClass *basePtr;
-    Tcl_Obj *methodName;
-    Tcl_Obj *className;
-    Tcl_Obj **newObjv;
     char *sp;
-    char *cp;
+    char *head;
+    char *tail;
     int isDirectCall;
     int incr;
     int result;
 
-    ItclShowArgs(2, "ItclObjectCmd", objc, objv);
+    ItclShowArgs(1, "ItclObjectCmd", objc, objv);
 
     incr = 0;
     isDirectCall = 0;
@@ -1300,15 +1303,12 @@ ItclObjectCmd(
     methodName = NULL;
     if (objv[0] != NULL) {
         sp = Tcl_GetString(objv[0]);
-        if ((*sp == ':') && (sp[1] == ':')) {
-            sp += 2;
-        }
-        cp = strstr(sp, "::");
-        if (cp != NULL) {
+        Itcl_ParseNamespPath(sp, &buffer, &head, &tail);
+        if (head != NULL) {
 	    className = NULL;
-            methodName = Tcl_NewStringObj(cp+2, -1);
+            methodName = Tcl_NewStringObj(tail, -1);
 	    Tcl_IncrRefCount(methodName);
-	    className = Tcl_NewStringObj(sp, cp-sp);
+	    className = Tcl_NewStringObj(head, -1);
 	    Tcl_IncrRefCount(className);
 	    sp = Tcl_GetString(className);
 	    /* look for the class in the hierarchy */
@@ -1332,6 +1332,7 @@ ItclObjectCmd(
 	    }
             Tcl_DecrRefCount(className);
         }
+        Tcl_DStringFree(&buffer);
     }
     if (isDirectCall) {
         methodName = objv[0];
@@ -1451,19 +1452,18 @@ ItclMapCmdNameProc(
 {
     Tcl_Obj *methodName;
     Tcl_Obj *className;
+    Tcl_DString buffer;
     ItclObject *ioPtr;
     ItclClass *iclsPtr;
     ItclClass *iclsPtr2;
     ItclObjectInfo *infoPtr;
-    char *cp;
+    char *head;
+    char *tail;
     char *sp;
 
     sp = Tcl_GetString(mappedCmd);
-    if ((*sp == ':') && (sp[1] == ':')) {
-        sp += 2;
-    }
-    cp = strstr(sp, "::");
-    if (cp != NULL) {
+    Itcl_ParseNamespPath(sp, &buffer, &head, &tail);
+    if (head != NULL) {
         infoPtr = (ItclObjectInfo *)Tcl_GetAssocData(interp,
                 ITCL_INTERP_DATA, NULL);
         ioPtr = (ItclObject *)Tcl_ObjectGetMetadata(clientData,
@@ -1476,9 +1476,9 @@ ItclMapCmdNameProc(
             iclsPtr = ioPtr->iclsPtr;
 	}
         className = NULL;
-        methodName = Tcl_NewStringObj(cp+2, -1);
+        methodName = Tcl_NewStringObj(tail, -1);
         Tcl_IncrRefCount(methodName);
-        className = Tcl_NewStringObj(sp, cp-sp);
+        className = Tcl_NewStringObj(head, -1);
         Tcl_IncrRefCount(className);
         sp = Tcl_GetString(className);
 	iclsPtr2 = GetClassFromClassName(sp, iclsPtr);
@@ -1489,6 +1489,7 @@ ItclMapCmdNameProc(
         Tcl_DecrRefCount(className);
         Tcl_DecrRefCount(methodName);
     }
+    Tcl_DStringFree(&buffer);
     return TCL_OK;
 }
 

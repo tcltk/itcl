@@ -20,7 +20,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itclResolve.c,v 1.1.2.5 2007/09/22 13:39:23 wiede Exp $
+ *     RCS:  $Id: itclResolve.c,v 1.1.2.6 2007/10/02 22:43:30 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -134,13 +134,12 @@ Itcl_ClassCmdResolver(
      */
     hPtr = Tcl_FindHashEntry(&iclsPtr->resolveCmds, name);
     if (hPtr == NULL) {
-	if (!(iclsPtr->flags & ITCL_IS_CLASS)) {
+	if (!(iclsPtr->flags & ITCL_CLASS)) {
 	    namePtr = Tcl_NewStringObj(name, -1);
 	    Tcl_IncrRefCount(namePtr);
 	    hPtr = Tcl_FindHashEntry(&iclsPtr->components, (char *)namePtr);
 	    Tcl_DecrRefCount(namePtr);
             if (hPtr != NULL) {
-fprintf(stderr, "FOUND COMP!%s!\n", name);
 	    }
         }
         if (hPtr == NULL) {
@@ -208,6 +207,7 @@ isCmdDeleted = 0;
     }
 
     *rPtr = imPtr->accessCmd;
+//fprintf(stderr, "ret4!%s!\n", Tcl_GetCommandName(interp, imPtr->accessCmd));
     return TCL_OK;
 }
 

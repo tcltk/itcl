@@ -11,7 +11,7 @@
  * ========================================================================
  *  Author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclWidgetObject.c,v 1.1.2.9 2007/09/29 22:16:50 wiede Exp $
+ *     RCS:  $Id: itclWidgetObject.c,v 1.1.2.10 2007/10/02 22:43:30 wiede Exp $
  * ========================================================================
  *           Copyright (c) 2007 Arnulf Wiedemann
  * ------------------------------------------------------------------------
@@ -113,22 +113,22 @@ HullAndOptionsInstall(
     Tcl_IncrRefCount(hullObjv[0]);
     hullObjv[1] = Tcl_NewStringObj("using", -1);
     Tcl_IncrRefCount(hullObjv[1]);
-    if (iclsPtr->flags & ITCL_WIDGET_IS_FRAME) {
+    if (iclsPtr->flags & ITCL_WIDGET_FRAME) {
         hullType = "frame";
     }
-    if (iclsPtr->flags & ITCL_WIDGET_IS_LABEL_FRAME) {
+    if (iclsPtr->flags & ITCL_WIDGET_LABEL_FRAME) {
         hullType = "labelframe";
     }
-    if (iclsPtr->flags & ITCL_WIDGET_IS_TOPLEVEL) {
+    if (iclsPtr->flags & ITCL_WIDGET_TOPLEVEL) {
         hullType = "toplevel";
     }
-    if (iclsPtr->flags & ITCL_WIDGET_IS_TTK_FRAME) {
+    if (iclsPtr->flags & ITCL_WIDGET_TTK_FRAME) {
         hullType = "ttk::frame";
     }
-    if (iclsPtr->flags & ITCL_WIDGET_IS_TTK_LABEL_FRAME) {
+    if (iclsPtr->flags & ITCL_WIDGET_TTK_LABEL_FRAME) {
         hullType = "ttk::labelframe";
     }
-    if (iclsPtr->flags & ITCL_WIDGET_IS_TTK_TOPLEVEL) {
+    if (iclsPtr->flags & ITCL_WIDGET_TTK_TOPLEVEL) {
         hullType = "ttk::toplevel";
     }
     hullObjv[2] = Tcl_NewStringObj(hullType, -1);

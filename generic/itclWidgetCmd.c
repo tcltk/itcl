@@ -11,7 +11,7 @@
  * ========================================================================
  *  Author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclWidgetCmd.c,v 1.1.2.4 2007/09/16 17:16:30 wiede Exp $
+ *     RCS:  $Id: itclWidgetCmd.c,v 1.1.2.5 2007/10/02 22:43:30 wiede Exp $
  * ========================================================================
  *           Copyright (c) 2007 Arnulf Wiedemann
  * ------------------------------------------------------------------------
@@ -44,7 +44,7 @@ Itcl_TypeCmd(
 
     infoPtr = (ItclObjectInfo *)clientData;
     ItclShowArgs(1, "Itcl_TypeCmd", objc-1, objv);
-    result = ItclClassBaseCmd(clientData, interp, ITCL_IS_TYPE, objc, objv,
+    result = ItclClassBaseCmd(clientData, interp, ITCL_TYPE, objc, objv,
             &iclsPtr);
     return result;
 }
@@ -74,13 +74,13 @@ Itcl_WidgetCmd(
 
     infoPtr = (ItclObjectInfo *)clientData;
     ItclShowArgs(1, "Itcl_WidgetCmd", objc-1, objv);
-    result = ItclClassBaseCmd(clientData, interp, ITCL_IS_WIDGET, objc, objv,
+    result = ItclClassBaseCmd(clientData, interp, ITCL_WIDGET, objc, objv,
             &iclsPtr);
     if (result != TCL_OK) {
         return result;
     }
-    if (!(iclsPtr->flags &(ITCL_WIDGET_IS_FRAME|ITCL_WIDGET_IS_TOPLEVEL))) {
-        iclsPtr->flags |= ITCL_WIDGET_IS_FRAME;
+    if (!(iclsPtr->flags &(ITCL_WIDGET_FRAME|ITCL_WIDGET_TOPLEVEL))) {
+        iclsPtr->flags |= ITCL_WIDGET_FRAME;
     }
     /* create the hull component */
     ItclComponent *icPtr;
@@ -128,7 +128,7 @@ Itcl_WidgetAdaptorCmd(
 
     infoPtr = (ItclObjectInfo *)clientData;
     ItclShowArgs(0, "Itcl_WidgetAdaptorCmd", objc-1, objv);
-    result = ItclClassBaseCmd(clientData, interp, ITCL_IS_WIDGETADAPTOR,
+    result = ItclClassBaseCmd(clientData, interp, ITCL_WIDGETADAPTOR,
             objc, objv, &iclsPtr);
     /* create the hull variable */
     namePtr = Tcl_NewStringObj("hull", 4);

@@ -39,7 +39,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclParse.c,v 1.1.2.11 2007/09/29 22:16:50 wiede Exp $
+ *     RCS:  $Id: itclParse.c,v 1.1.2.12 2007/10/02 22:43:30 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -78,7 +78,7 @@ Tcl_ObjCmdProc Itcl_WidgetCmdStart;
 Tcl_ObjCmdProc Itcl_WidgetAdaptorCmdStart;
 Tcl_ObjCmdProc Itcl_ClassOptionCmd;
 Tcl_ObjCmdProc Itcl_NWidgetCmd;
-Tcl_ObjCmdProc Itcl_StructCmd;
+Tcl_ObjCmdProc Itcl_EClassCmd;
 Tcl_ObjCmdProc Itcl_AddOptionCmd;
 Tcl_ObjCmdProc Itcl_AddComponentCmd;
 Tcl_ObjCmdProc Itcl_ClassComponentCmd;
@@ -379,7 +379,7 @@ Itcl_ParseInit(
         (ClientData)infoPtr, (Tcl_CmdDeleteProc*)NULL);
     Itcl_PreserveData((ClientData)infoPtr);
 
-    Tcl_CreateObjCommand(interp, "::itcl::struct", Itcl_StructCmd,
+    Tcl_CreateObjCommand(interp, "::itcl::eclass", Itcl_EClassCmd,
         (ClientData)infoPtr, (Tcl_CmdDeleteProc*)NULL);
     Itcl_PreserveData((ClientData)infoPtr);
 
@@ -451,7 +451,7 @@ Itcl_ClassCmd(
 {
     ItclClass *iclsPtr;
 
-    return ItclClassBaseCmd(clientData, interp, ITCL_IS_CLASS, objc, objv,
+    return ItclClassBaseCmd(clientData, interp, ITCL_CLASS, objc, objv,
             &iclsPtr);
 }
 
@@ -465,8 +465,8 @@ int
 ItclClassBaseCmd(
     ClientData clientData,   /* info for all known objects */
     Tcl_Interp *interp,      /* current interpreter */
-    int flags,               /* flags: ITCL_IS_CLASS, ITCL_IS_TYPE,
-                              * ITCL_IS_WIDGET or ITCL_IS_WIDGETADAPTOR */
+    int flags,               /* flags: ITCL_CLASS, ITCL_TYPE,
+                              * ITCL_WIDGET or ITCL_WIDGETADAPTOR */
     int objc,                /* number of arguments */
     Tcl_Obj *CONST objv[],   /* argument objects */
     ItclClass **iclsPtrPtr)  /* for returning iclsPtr */
@@ -1641,7 +1641,7 @@ Itcl_ClassOptionCmd(
     ItclShowArgs(1, "Itcl_ClassOptionCmd", objc, objv);
     ItclObjectInfo *infoPtr = (ItclObjectInfo*)clientData;
     ItclClass *iclsPtr = (ItclClass*)Itcl_PeekStack(&infoPtr->clsStack);
-    if (iclsPtr->flags & ITCL_IS_CLASS) {
+    if (iclsPtr->flags & ITCL_CLASS) {
         Tcl_AppendResult(interp, "a \"class\" cannot have options", NULL);
 	return TCL_ERROR;
     }
@@ -1871,7 +1871,7 @@ Itcl_ClassComponentCmd(
     infoPtr = (ItclObjectInfo*)clientData;
     iclsPtr = (ItclClass*)Itcl_PeekStack(&infoPtr->clsStack);
     usage = "component ?-inherit?";
-    if (iclsPtr->flags & ITCL_IS_CLASS) {
+    if (iclsPtr->flags & ITCL_CLASS) {
         Tcl_AppendResult(interp, "\"", Tcl_GetString(iclsPtr->namePtr),
 	        " is no ::itcl::widget/::itcl::widgetadaptor/::itcl::type.", 
 		" Only these can have components", NULL);
@@ -1967,7 +1967,7 @@ delegate method <methodName> ?to <componentName>? using <pattern>\n\
 delegate method * ?to <componentName>? ?using <pattern>? ?except <methods>?";
     infoPtr = (ItclObjectInfo*)clientData;
     iclsPtr = (ItclClass*)Itcl_PeekStack(&infoPtr->clsStack);
-    if (iclsPtr->flags & ITCL_IS_CLASS) {
+    if (iclsPtr->flags & ITCL_CLASS) {
         Tcl_AppendResult(interp, "\"", Tcl_GetString(iclsPtr->namePtr),
 	        " is no ::itcl::widget/::itcl::widgetadaptor/::itcl::type.", 
 		" Only these can delegate methods", NULL);
@@ -2152,7 +2152,7 @@ Itcl_ClassDelegateOptionCmd(
     }
     infoPtr = (ItclObjectInfo *)clientData;
     iclsPtr = (ItclClass *)Itcl_PeekStack(&infoPtr->clsStack);
-    if (iclsPtr->flags & ITCL_IS_CLASS) {
+    if (iclsPtr->flags & ITCL_CLASS) {
         Tcl_AppendResult(interp, "\"", Tcl_GetString(iclsPtr->namePtr),
 	        " is no ::itcl::widget/::itcl::widgetadaptor/::itcl::type/::itcl::struct.", 
 		" Only these can delegate options", NULL);
@@ -2358,7 +2358,7 @@ delegate proc <procName> ?to <componentName>? using <pattern>\n\
 delegate proc * ?to <componentName>? ?using <pattern>? ?except <procs>?";
     infoPtr = (ItclObjectInfo*)clientData;
     iclsPtr = (ItclClass*)Itcl_PeekStack(&infoPtr->clsStack);
-    if (iclsPtr->flags & ITCL_IS_CLASS) {
+    if (iclsPtr->flags & ITCL_CLASS) {
         Tcl_AppendResult(interp, "\"", Tcl_GetString(iclsPtr->namePtr),
 	        " is no ::itcl::widget/::itcl::widgetadaptor/::itcl::type.", 
 		" Only these can delegate procs", NULL);

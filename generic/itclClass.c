@@ -25,7 +25,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann Copyright (c) 2007
  *
- *     RCS:  $Id: itclClass.c,v 1.1.2.8 2007/09/22 13:39:22 wiede Exp $
+ *     RCS:  $Id: itclClass.c,v 1.1.2.9 2007/10/02 22:43:29 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -447,7 +447,7 @@ Itcl_CreateClass(
     hPtr = Tcl_CreateHashEntry(&iclsPtr->variables, (char *)namePtr, &newEntry);
     Tcl_SetHashValue(hPtr, (ClientData)ivPtr);
 
-    if (infoPtr->currClassFlags & (ITCL_IS_WIDGET|ITCL_IS_WIDGETADAPTOR)) {
+    if (infoPtr->currClassFlags & (ITCL_WIDGET|ITCL_WIDGETADAPTOR)) {
         /*
          *  Add the built-in "thiswin" variable to the list of data members.
          */
@@ -1167,6 +1167,7 @@ Itcl_HandleClass(
     char *pos;
     char *match;
 
+    ItclShowArgs(1, "Itcl_HandleClassCmd", objc, objv);
     /*
      *  If the command is invoked without an object name, then do nothing.
      *  This used to support autoloading--that the class name could be

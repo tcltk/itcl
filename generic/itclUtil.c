@@ -23,7 +23,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclUtil.c,v 1.1.2.4 2007/09/22 13:39:23 wiede Exp $
+ *     RCS:  $Id: itclUtil.c,v 1.1.2.5 2007/10/02 22:43:30 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -720,11 +720,11 @@ Itcl_Protection(interp, newLevel)
  * ------------------------------------------------------------------------
  */
 void
-Itcl_ParseNamespPath(name, buffer, head, tail)
-    CONST char *name;    /* path name to class member */
-    Tcl_DString *buffer; /* dynamic string buffer (uninitialized) */
-    char **head;         /* returns "namesp::namesp::namesp" part */
-    char **tail;         /* returns "element" part */
+Itcl_ParseNamespPath(
+    CONST char *name,    /* path name to class member */
+    Tcl_DString *buffer, /* dynamic string buffer (uninitialized) */
+    char **head,         /* returns "namesp::namesp::namesp" part */
+    char **tail)         /* returns "element" part */
 {
     register char *sep, *newname;
 
