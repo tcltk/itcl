@@ -23,7 +23,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclCmd.c,v 1.1.2.9 2007/10/02 22:43:29 wiede Exp $
+ *     RCS:  $Id: itclCmd.c,v 1.1.2.10 2007/10/03 12:25:31 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -1061,11 +1061,9 @@ Itcl_ForwardAddCmd(
     Tcl_Obj *CONST objv[])   /* argument objects */
 {
     Tcl_Obj *prefixObj;
-    Tcl_Obj **newObjv;
     Tcl_Method mPtr;
     ItclObjectInfo *infoPtr;
     ItclClass *iclsPtr;
-    int result;
 
     ItclShowArgs(1, "Itcl_ForwardAddCmd", objc, objv);
     if (objc < 3) {
@@ -1081,19 +1079,6 @@ Itcl_ForwardAddCmd(
         return TCL_ERROR;
     }
     return TCL_OK;
-    newObjv = (Tcl_Obj **)ckalloc(sizeof(Tcl_Obj *)*(objc+1));
-    newObjv[0] = Tcl_NewStringObj("::oo::define", -1);
-    Tcl_IncrRefCount(newObjv[0]);
-    newObjv[1] = objv[1];
-    newObjv[2] = Tcl_NewStringObj("forward", -1);
-    Tcl_IncrRefCount(newObjv[2]);
-    memcpy(newObjv+3, objv+2, sizeof(Tcl_Obj *)*(objc-2));
-    ItclShowArgs(1, "Itcl_ForwardAddCmd2", objc+1, newObjv);
-    result = Tcl_EvalObjv(interp, objc+1, newObjv, 0);
-    Tcl_DecrRefCount(newObjv[0]);
-    Tcl_DecrRefCount(newObjv[2]);
-
-    return result;
 }
 
 /*

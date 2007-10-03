@@ -39,7 +39,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclParse.c,v 1.1.2.12 2007/10/02 22:43:30 wiede Exp $
+ *     RCS:  $Id: itclParse.c,v 1.1.2.13 2007/10/03 12:25:31 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -85,6 +85,7 @@ Tcl_ObjCmdProc Itcl_ClassComponentCmd;
 Tcl_ObjCmdProc Itcl_ClassDelegateMethodCmd;
 Tcl_ObjCmdProc Itcl_ClassDelegateOptionCmd;
 Tcl_ObjCmdProc Itcl_ClassDelegateProcCmd;
+Tcl_ObjCmdProc Itcl_ClassForwardCmd;
 
 static const struct {
     const char *name;
@@ -95,6 +96,7 @@ static const struct {
     {"constructor", Itcl_ClassConstructorCmd},
     {"destructor", Itcl_ClassDestructorCmd},
     {"filter", Itcl_ClassFilterCmd},
+    {"forward", Itcl_ClassForwardCmd},
     {"mixin", Itcl_ClassMixinCmd},
     {"inherit", Itcl_ClassInheritCmd},
     {"method", Itcl_ClassMethodCmd},
@@ -1500,8 +1502,40 @@ Itcl_ClassFilterCmd(
     int objc,                /* number of arguments */
     Tcl_Obj *CONST objv[])   /* argument objects */
 {
-    ItclShowArgs(0, "Itcl_ClassFilterCmd", objc, objv);
-    return TCL_OK;
+    Tcl_Obj **newObjv;
+    ItclObjectInfo *infoPtr;
+    ItclClass *iclsPtr;
+    int result;
+
+    ItclShowArgs(1, "Itcl_ClassFilterCmd", objc, objv);
+    infoPtr = (ItclObjectInfo*)clientData;
+    iclsPtr = (ItclClass*)Itcl_PeekStack(&infoPtr->clsStack);
+    if (iclsPtr->flags & ITCL_CLASS) {
+        Tcl_AppendResult(interp, "\"", Tcl_GetString(iclsPtr->namePtr),
+	        " is no ::itcl::widget/::itcl::widgetadaptor/::itcl::type.", 
+		" Only these can delegate procs", NULL);
+	return TCL_ERROR;
+    }
+/* FIX ME need to change the chain command to do the same here as the TclOO next command !! */
+    if (objc < 2) {
+        Tcl_WrongNumArgs(interp, 1, objv, "<filterName> ?<filterName> ...?");
+        return TCL_ERROR;
+    }
+    newObjv = (Tcl_Obj **)ckalloc(sizeof(Tcl_Obj *)*(objc+2));
+    newObjv[0] = Tcl_NewStringObj("::oo::define", -1);
+    Tcl_IncrRefCount(newObjv[0]);
+    newObjv[1] = Tcl_NewStringObj(Tcl_GetString(iclsPtr->fullNamePtr), -1);
+    Tcl_IncrRefCount(newObjv[1]);
+    newObjv[2] = Tcl_NewStringObj("filter", -1);
+    Tcl_IncrRefCount(newObjv[2]);
+    memcpy(newObjv+3, objv+1, sizeof(Tcl_Obj *)*(objc-1));
+ItclShowArgs(1, "Itcl_ClassFilterCmd2", objc+2, newObjv);
+    result = Tcl_EvalObjv(interp, objc+2, newObjv, 0);
+    Tcl_DecrRefCount(newObjv[0]);
+    Tcl_DecrRefCount(newObjv[1]);
+    Tcl_DecrRefCount(newObjv[2]);
+    ckfree((char *)newObjv);
+    return result;
 }
 
 /*
@@ -2497,4 +2531,48 @@ delegate proc * ?to <componentName>? ?using <pattern>? ?except <procs>?";
     Tcl_SetHashValue(hPtr, idmPtr);
     return TCL_ERROR;
 }
+/*
+ * ------------------------------------------------------------------------
+ *  Itcl_ClassForwardCmd()
+ *
+ *  Used to similar to iterp alias to forward the call of a method 
+ *  to another method within the class
+ *
+ *  Returns TCL_OK/TCL_ERROR to indicate success/failure.
+ * ------------------------------------------------------------------------
+ */
+/* ARGSUSED */
+int
+Itcl_ClassForwardCmd(
+    ClientData clientData,   /* unused */
+    Tcl_Interp *interp,      /* current interpreter */
+    int objc,                /* number of arguments */
+    Tcl_Obj *CONST objv[])   /* argument objects */
+{
+    Tcl_Obj *prefixObj;
+    Tcl_Method mPtr;
+    ItclObjectInfo *infoPtr;
+    ItclClass *iclsPtr;
 
+    ItclShowArgs(1, "Itcl_ClassForwardCmd", objc, objv);
+    infoPtr = (ItclObjectInfo*)clientData;
+    iclsPtr = (ItclClass*)Itcl_PeekStack(&infoPtr->clsStack);
+    if (iclsPtr->flags & ITCL_CLASS) {
+        Tcl_AppendResult(interp, "\"", Tcl_GetString(iclsPtr->namePtr),
+	        " is no ::itcl::widget/::itcl::widgetadaptor/",
+		"::itcl::type/::itcl::eclass.", 
+		" Only these can delegate procs", NULL);
+	return TCL_ERROR;
+    }
+    if (objc < 3) {
+        Tcl_WrongNumArgs(interp, 1, objv, "<forwardName> <targetName> ?<arg> ...?");
+        return TCL_ERROR;
+    }
+    prefixObj = Tcl_NewListObj(objc-2, objv+2);
+    mPtr = Itcl_NewForwardClassMethod(interp, iclsPtr->clsPtr, 1,
+            objv[1], prefixObj);
+    if (mPtr == NULL) {
+        return TCL_ERROR;
+    }
+    return TCL_OK;
+}
