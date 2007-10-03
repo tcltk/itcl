@@ -1,6 +1,6 @@
 #
 # @configure_input@
-# RCS: @(#) $Id: Makefile.in,v 1.29.2.9 2007/10/03 16:47:20 wiede Exp $
+# RCS: @(#) $Id: Makefile.in,v 1.29.2.10 2007/10/03 17:29:00 wiede Exp $
 #
 
 #========================================================================
@@ -64,7 +64,7 @@ TCL_BIN_DIR=@TCL_BIN_DIR@
 TCL_LIBS=@TCL_LIBS@
 TCLSH_PROGRAM=@TCLSH_PROG@
 INCLUDES=@PKG_INCLUDES@ @TCL_INCLUDES@ @TCLOO_INCLUDES@
-EXTRA_CFLAGS=@PKG_CFLAGS@ @TCLOO_CFLAGS@
+EXTRA_CFLAGS=@PKG_CFLAGS@
 DEFS=@DEFS@ $(EXTRA_CFLAGS)
 CPPFLAGS=@CPPFLAGS@
 LIBS=@PKG_LIBS@ @LIBS@ @MATH_LIBS@
