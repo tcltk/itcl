@@ -24,7 +24,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclBuiltin.c,v 1.1.2.12 2007/10/02 22:43:29 wiede Exp $
+ *     RCS:  $Id: itclBuiltin.c,v 1.1.2.13 2007/10/03 09:47:54 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -314,6 +314,7 @@ Itcl_BiConfigureCmd(
     Tcl_DString buffer2;
     Tcl_HashSearch place;
     Tcl_HashEntry *hPtr;
+    Tcl_Namespace *saveNsPtr;
     ItclClass *iclsPtr;
     ItclVariable *ivPtr;
     ItclVarLookup *vlookup;
@@ -418,7 +419,6 @@ Itcl_BiConfigureCmd(
                     (char*)NULL);
                 return TCL_ERROR;
             }
-
             resultPtr = ItclReportPublicOpt(interp,
 	            vlookup->ivPtr, contextIoPtr);
             Tcl_SetObjResult(interp, resultPtr);
@@ -507,12 +507,17 @@ Itcl_BiConfigureCmd(
 	    if (!ivPtr->iclsPtr->infoPtr->useOldResolvers) {
                 Itcl_SetCallFrameResolver(interp, contextIoPtr->resolvePtr);
             }
+	    saveNsPtr = Tcl_GetCurrentNamespace(interp);
+	    Itcl_SetCallFrameNamespace(interp, ivPtr->iclsPtr->nsPtr);
 	    result = Tcl_EvalObjEx(interp, mcode->bodyPtr, 0);
+	    Itcl_SetCallFrameNamespace(interp, saveNsPtr);
             if (result == TCL_OK) {
                 Tcl_ResetResult(interp);
             } else {
                 char msg[256];
-                sprintf(msg, "\n    (error in configuration of public variable \"%.100s\")", Tcl_GetString(ivPtr->fullNamePtr));
+                sprintf(msg,
+		"\n    (error in configuration of public variable \"%.100s\")",
+		        Tcl_GetString(ivPtr->fullNamePtr));
                 Tcl_AddErrorInfo(interp, msg);
 
                 Tcl_SetVar2(interp, varName,(char*)NULL,

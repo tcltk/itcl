@@ -24,7 +24,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann Copyright (c) 2007
  *
- *     RCS:  $Id: itclObject.c,v 1.1.2.13 2007/10/02 22:43:29 wiede Exp $
+ *     RCS:  $Id: itclObject.c,v 1.1.2.14 2007/10/03 09:47:54 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -263,7 +263,10 @@ ItclCreateObject(
         result = Itcl_ConstructBase(interp, ioPtr, iclsPtr, newObjc, newObjv);
     }
 
-fprintf(stderr, "5!%d!%s!\n", result, Tcl_GetStringResult(interp));
+/* FIX ME this is only for debugging a funny case, where the error message is wrong at the end */
+if (result != TCL_OK) {
+fprintf(stderr, "CONSTRUCTOR error!%s!\n", Tcl_GetStringResult(interp));
+}
     /*
      *  If construction failed, then delete the object access
      *  command.  This will destruct the object and delete the
@@ -1259,24 +1262,25 @@ ItclObjectCmd(
     int objc,
     Tcl_Obj *const *objv)
 {
-    Tcl_Obj *methodName;
-    Tcl_Obj *className;
+    Tcl_Obj *methodNamePtr;
     Tcl_Obj **newObjv;
     Tcl_DString buffer;
     ItclMemberFunc *imPtr;
     ItclClass *iclsPtr;
     Itcl_ListElem *elem;
     ItclClass *basePtr;
-    char *sp;
-    char *head;
+    char *className;
     char *tail;
+    char *cp;
     int isDirectCall;
     int incr;
     int result;
+    int found;
 
     ItclShowArgs(1, "ItclObjectCmd", objc, objv);
 
     incr = 0;
+    found = 0;
     isDirectCall = 0;
     imPtr = (ItclMemberFunc *)clientData;
     iclsPtr = imPtr->iclsPtr;
@@ -1300,66 +1304,69 @@ ItclObjectCmd(
 	}
         oPtr = Tcl_ObjectContextObject((Tcl_ObjectContext)clientData);
     }
-    methodName = NULL;
+    methodNamePtr = NULL;
     if (objv[0] != NULL) {
-        sp = Tcl_GetString(objv[0]);
-        Itcl_ParseNamespPath(sp, &buffer, &head, &tail);
-        if (head != NULL) {
-	    className = NULL;
-            methodName = Tcl_NewStringObj(tail, -1);
-	    Tcl_IncrRefCount(methodName);
-	    className = Tcl_NewStringObj(head, -1);
-	    Tcl_IncrRefCount(className);
-	    sp = Tcl_GetString(className);
+        Itcl_ParseNamespPath(Tcl_GetString(objv[0]), &buffer,
+	        &className, &tail);
+        if (className != NULL) {
+            methodNamePtr = Tcl_NewStringObj(tail, -1);
+	    Tcl_IncrRefCount(methodNamePtr);
 	    /* look for the class in the hierarchy */
-
+	    cp = className;
+	    if ((*cp == ':') && (*(cp+1) == ':')) {
+	        cp += 2;
+	    }
             elem = Itcl_FirstListElem(&iclsPtr->bases);
 	    if (elem == NULL) {
 	        /* check the class itself */
-		if (strcmp((const char *)Tcl_GetString(className),
+		if (strcmp((const char *)cp,
 		        (const char *)Tcl_GetString(iclsPtr->namePtr)) == 0) {
+		    found = 1;
 		    clsPtr = iclsPtr->clsPtr;
 		}
 	    }
             while (elem != NULL) {
                 basePtr = (ItclClass*)Itcl_GetListValue(elem);
-		if (strcmp((const char *)Tcl_GetString(className),
+		if (strcmp((const char *)cp,
 		        (const char *)Tcl_GetString(basePtr->namePtr)) == 0) {
 		    clsPtr = basePtr->clsPtr;
+//fprintf(stderr, "found2!%s!\n", basePtr->nsPtr->fullName);
+		    found = 1;
 		    break;
 		}
                 elem = Itcl_NextListElem(elem);
 	    }
-            Tcl_DecrRefCount(className);
         }
         Tcl_DStringFree(&buffer);
     }
     if (isDirectCall) {
-        methodName = objv[0];
-        Tcl_IncrRefCount(methodName);
+	if (!found) {
+            methodNamePtr = objv[0];
+            Tcl_IncrRefCount(methodNamePtr);
+        }
     }
-    if (methodName != NULL) {
+    if (methodNamePtr != NULL) {
         incr = 1;
     }
     newObjv = NULL;
-    if (methodName != NULL) {
+    if (methodNamePtr != NULL) {
         newObjv = (Tcl_Obj **)ckalloc(sizeof(Tcl_Obj *)*(objc+incr));
         newObjv[0] = Tcl_NewStringObj("my", 2);
-        newObjv[1] = methodName;
+        newObjv[1] = methodNamePtr;
         Tcl_IncrRefCount(newObjv[0]);
         Tcl_IncrRefCount(newObjv[1]);
         memcpy(newObjv+incr+1, objv+1, (sizeof(Tcl_Obj*)*(objc-1)));
     }
-    if (methodName != NULL) {
+    if (methodNamePtr != NULL) {
         result = Itcl_PublicObjectCmd(oPtr, interp, clsPtr, objc+incr, newObjv);
     } else {
         result = Itcl_PublicObjectCmd(oPtr, interp, clsPtr, objc, objv);
     }
 
-    if (methodName != NULL) {
+    if (methodNamePtr != NULL) {
         Tcl_DecrRefCount(newObjv[0]);
         Tcl_DecrRefCount(newObjv[1]);
-        Tcl_DecrRefCount(methodName);
+        Tcl_DecrRefCount(methodNamePtr);
         ckfree((char *)newObjv);
     }
     return result;
