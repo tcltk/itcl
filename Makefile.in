@@ -1,6 +1,6 @@
 #
 # @configure_input@
-# RCS: @(#) $Id: Makefile.in,v 1.29.2.7 2007/09/29 09:48:04 wiede Exp $
+# RCS: @(#) $Id: Makefile.in,v 1.29.2.8 2007/10/03 14:32:40 wiede Exp $
 #
 
 #========================================================================
@@ -259,7 +259,7 @@ $(PKG_WIDGET_STUB_LIB_FILE): $(PKG_WIDGET_STUB_OBJECTS) $(PKG_STUB_LIB_FILE)
 pkgIndex.tcl: Makefile
 	-@echo Creating pkgIndex.tcl
 	@( \
-	echo 'if {[catch {package require Tcl $(TCL_VERSION_REQ)}]} return'; \
+	echo 'if {[catch {package present Tcl $(TCL_VERSION_REQ)}]} return'; \
 	echo 'package ifneeded $(PACKAGE_NAME) $(PACKAGE_VERSION) \
 	    [list load [file join $$dir $(PKG_LIB_FILE)] Itcl] ';  \
 	echo 'package ifneeded $(WIDGET_PACKAGE_NAME) $(WIDGET_PACKAGE_VERSION) \
