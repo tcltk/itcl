@@ -24,7 +24,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann Copyright (c) 2007
  *
- *     RCS:  $Id: itclObject.c,v 1.1.2.15 2007/10/07 12:32:37 wiede Exp $
+ *     RCS:  $Id: itclObject.c,v 1.1.2.16 2007/10/07 18:58:47 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -910,6 +910,7 @@ ItclGetInstanceVar(
     Tcl_Namespace *nsPtr;
     Tcl_DString buffer;
     CONST char *val;
+    int doAppend;
 
     /*
      *  Make sure that the current namespace context includes an
@@ -929,11 +930,15 @@ ItclGetInstanceVar(
      */
     Tcl_DStringInit(&buffer);
     Tcl_DStringAppend(&buffer, Tcl_GetString(contextIoPtr->varNsNamePtr), -1);
+    doAppend = 1;
     if (contextIclsPtr->flags & ITCL_ECLASS) {
-        if (strcmp(name1, "itcl_options") != 0) {
-            Tcl_DStringAppend(&buffer,
-	            Tcl_GetString(contextIclsPtr->fullNamePtr), -1);
+        if (strcmp(name1, "itcl_options") == 0) {
+	    doAppend = 0;
         }
+    }
+    if (doAppend) {
+        Tcl_DStringAppend(&buffer,
+                Tcl_GetString(contextIclsPtr->fullNamePtr), -1);
     }
     nsPtr = Tcl_FindNamespace(interp, Tcl_DStringValue(&buffer), NULL, 0);
     Tcl_DStringFree(&buffer);
@@ -1000,6 +1005,7 @@ ItclSetInstanceVar(
     Tcl_Namespace *nsPtr;
     Tcl_DString buffer;
     CONST char *val;
+    int doAppend;
 
     /*
      *  Make sure that the current namespace context includes an
@@ -1019,11 +1025,15 @@ ItclSetInstanceVar(
      */
     Tcl_DStringInit(&buffer);
     Tcl_DStringAppend(&buffer, Tcl_GetString(contextIoPtr->varNsNamePtr), -1);
+    doAppend = 1;
     if (contextIclsPtr->flags & ITCL_ECLASS) {
-        if (strcmp(name1, "itcl_options") != 0) {
-            Tcl_DStringAppend(&buffer,
-	            Tcl_GetString(contextIclsPtr->fullNamePtr), -1);
+        if (strcmp(name1, "itcl_options") == 0) {
+	    doAppend = 0;
         }
+    }
+    if (doAppend) {
+        Tcl_DStringAppend(&buffer,
+                Tcl_GetString(contextIclsPtr->fullNamePtr), -1);
     }
     nsPtr = Tcl_FindNamespace(interp, Tcl_DStringValue(&buffer), NULL, 0);
     Tcl_DStringFree(&buffer);

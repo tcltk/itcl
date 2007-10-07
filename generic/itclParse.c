@@ -39,7 +39,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclParse.c,v 1.1.2.14 2007/10/07 12:32:37 wiede Exp $
+ *     RCS:  $Id: itclParse.c,v 1.1.2.15 2007/10/07 18:58:47 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -1652,6 +1652,7 @@ Itcl_ClassOptionCmd(
 {
     ItclOption *ioptPtr;
     Tcl_Obj *namePtr;
+    Tcl_Obj *classNamePtr;
     Tcl_Obj *nameSpecPtr;
     Tcl_Obj **newObjv;
     char *init;
@@ -1665,6 +1666,7 @@ Itcl_ClassOptionCmd(
     const char *name;
     const char *resourceName;
     const char *className;
+    char ch;
     int argc;
     int pLevel;
     int readOnly;
@@ -1786,14 +1788,18 @@ Itcl_ClassOptionCmd(
 	/* resource name defaults to option name minus hyphen */
         resourceName = name+1;
     }
-    int needCapitalize = 0;
     if (argc > 2) {
         className = argv[2];
     } else {
 	/* class name defaults to option name minus hyphen and capitalized */
         className = name+1;
-        needCapitalize = 1;
     }
+    ch = toupper(*className);
+    char buf[2];
+    sprintf(buf, "%c", ch);
+    classNamePtr = Tcl_NewStringObj(buf, -1);
+    Tcl_AppendToObj(classNamePtr, className+1, -1);
+    Tcl_IncrRefCount(classNamePtr);
     init = defaultValue;
     if ((newObjc > 1) && (init == NULL)) {
         init = Tcl_GetString(newObjv[1]);
@@ -1801,10 +1807,13 @@ Itcl_ClassOptionCmd(
 
     namePtr = Tcl_NewStringObj(name, -1);
     Tcl_IncrRefCount(namePtr);
-    if (Itcl_CreateOption(interp, iclsPtr, namePtr, resourceName, className, 
-            init, configureMethod, &ioptPtr) != TCL_OK) {
+    if (Itcl_CreateOption(interp, iclsPtr, namePtr, resourceName,
+            Tcl_GetString(classNamePtr), init, configureMethod,
+	    &ioptPtr) != TCL_OK) {
+        Tcl_DecrRefCount(classNamePtr);
         return TCL_ERROR;
     }
+    Tcl_DecrRefCount(classNamePtr);
     if (cgetMethod != NULL) {
         ioptPtr->cgetMethodPtr = Tcl_NewStringObj(cgetMethod, -1);
     }

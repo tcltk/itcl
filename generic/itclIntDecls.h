@@ -1,5 +1,5 @@
 /*
- * $Id: itclIntDecls.h,v 1.13.2.6 2007/09/29 22:16:49 wiede Exp $
+ * $Id: itclIntDecls.h,v 1.13.2.7 2007/10/07 18:58:47 wiede Exp $
  *
  * This file is (mostly) automatically generated from itcl.decls.
  */
@@ -23,7 +23,7 @@ extern const char *Itcl_InitStubs(
 /* !BEGIN!: Do not edit below this line. */
 
 #define ITCLINT_STUBS_EPOCH 0
-#define ITCLINT_STUBS_REVISION 138
+#define ITCLINT_STUBS_REVISION 140
 
 #if !defined(USE_ITCL_STUBS)
 
@@ -486,6 +486,14 @@ ITCLAPI int		Itcl_NWidgetCmd (ClientData infoPtr,
 ITCLAPI int		Itcl_AddOptionCmd (ClientData infoPtr, 
 				Tcl_Interp * interp, int objc, 
 				Tcl_Obj *CONST objv[]);
+/* 170 */
+ITCLAPI int		Itcl_AddComponentCmd (ClientData infoPtr, 
+				Tcl_Interp * interp, int objc, 
+				Tcl_Obj *CONST objv[]);
+/* 171 */
+ITCLAPI int		Itcl_BiInfoOptionCmd (ClientData dummy, 
+				Tcl_Interp * interp, int objc, 
+				Tcl_Obj *CONST objv[]);
 
 #endif /* !defined(USE_ITCL_STUBS) */
 
@@ -665,6 +673,8 @@ typedef struct ItclIntStubs {
     Tcl_Obj * const * (*itcl_GetCallFrameObjv) (Tcl_Interp * interp); /* 167 */
     int (*itcl_NWidgetCmd) (ClientData infoPtr, Tcl_Interp * interp, int objc, Tcl_Obj *CONST objv[]); /* 168 */
     int (*itcl_AddOptionCmd) (ClientData infoPtr, Tcl_Interp * interp, int objc, Tcl_Obj *CONST objv[]); /* 169 */
+    int (*itcl_AddComponentCmd) (ClientData infoPtr, Tcl_Interp * interp, int objc, Tcl_Obj *CONST objv[]); /* 170 */
+    int (*itcl_BiInfoOptionCmd) (ClientData dummy, Tcl_Interp * interp, int objc, Tcl_Obj *CONST objv[]); /* 171 */
 } ItclIntStubs;
 
 #ifdef __cplusplus
@@ -1186,6 +1196,14 @@ extern const ItclIntStubs *itclIntStubsPtr;
 #ifndef Itcl_AddOptionCmd
 #define Itcl_AddOptionCmd \
 	(itclIntStubsPtr->itcl_AddOptionCmd) /* 169 */
+#endif
+#ifndef Itcl_AddComponentCmd
+#define Itcl_AddComponentCmd \
+	(itclIntStubsPtr->itcl_AddComponentCmd) /* 170 */
+#endif
+#ifndef Itcl_BiInfoOptionCmd
+#define Itcl_BiInfoOptionCmd \
+	(itclIntStubsPtr->itcl_BiInfoOptionCmd) /* 171 */
 #endif
 
 #endif /* defined(USE_ITCL_STUBS) */

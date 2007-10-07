@@ -1,5 +1,5 @@
 # -*- tcl -*-
-# $Id: itcl.decls,v 1.3.2.5 2007/09/29 22:16:49 wiede Exp $
+# $Id: itcl.decls,v 1.3.2.6 2007/10/07 18:58:47 wiede Exp $
 
 # public API
 library itcl
@@ -568,4 +568,8 @@ declare 169 current {
 declare 170 current {
     int Itcl_AddComponentCmd (ClientData infoPtr, Tcl_Interp *interp, \
         int objc, Tcl_Obj *CONST objv[])
+}
+declare 171 current {
+    int Itcl_BiInfoOptionCmd (ClientData dummy, Tcl_Interp *interp, int objc, \
+        Tcl_Obj *CONST objv[])
 }
