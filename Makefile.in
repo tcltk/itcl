@@ -1,6 +1,6 @@
 #
 # @configure_input@
-# RCS: @(#) $Id: Makefile.in,v 1.29.2.10 2007/10/03 17:29:00 wiede Exp $
+# RCS: @(#) $Id: Makefile.in,v 1.29.2.11 2007/10/07 12:37:38 wiede Exp $
 #
 
 #========================================================================
@@ -97,7 +97,7 @@ PKG_KIT_ROOT=$(PKG_DIR)-$(PLATFORM)
 PKG_KIT=$(PKG_KIT_ROOT).kit
 pkglibdir=$(libdir)/$(PKG_DIR)
 top_builddir=.
-TCL_VERSION_REQ=8.5a7
+TCL_VERSION_REQ=8.5b1
 TK_VERSION_REQ=8.5
 EXTRA_PATH=$(top_builddir):$(TCL_BIN_DIR)
 TCLSH=$(TCLSH_ENV) "$(TCLSH_PROGRAM)"
