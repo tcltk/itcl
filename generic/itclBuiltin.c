@@ -24,7 +24,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclBuiltin.c,v 1.1.2.13 2007/10/03 09:47:54 wiede Exp $
+ *     RCS:  $Id: itclBuiltin.c,v 1.1.2.14 2007/10/07 12:32:33 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -730,7 +730,7 @@ ItclReportOption(
         objPtr = Tcl_NewStringObj("<undefined>", -1);
     }
     Tcl_ListObjAppendElement((Tcl_Interp*)NULL, listPtr, objPtr);
-    val = ItclGetInstanceVar(interp, "options", Tcl_GetString(ioptPtr->namePtr),
+    val = ItclGetInstanceVar(interp, "itcl_options", Tcl_GetString(ioptPtr->namePtr),
             contextIoPtr, ioptPtr->iclsPtr);
     if (val) {
         objPtr = Tcl_NewStringObj((CONST84 char *)val, -1);
@@ -912,7 +912,7 @@ ItclBiObjectUnknownCmd(
     ItclObject *ioPtr;
     ItclObjectInfo *infoPtr;
 
-    ItclShowArgs(1, "ItclBiUnknownObjectCmd", objc, objv);
+    ItclShowArgs(1, "ItclBiObjectUnknownCmd", objc, objv);
     cmd = Tcl_GetCommandFromObj(interp, objv[1]);
     if (Tcl_GetCommandInfoFromToken(cmd, &cmdInfo) != 1) {
     }
@@ -1144,7 +1144,7 @@ fprintf(stderr, "plain configure not yet implemented\n");
         }
         ioptPtr = (ItclOption *)Tcl_GetHashValue(hPtr);
         if (ioptPtr->validateMethodPtr != NULL) {
-	    int intVal;
+//	    int intVal;
             Tcl_DStringAppend(&buffer, Tcl_GetString(
 	            ioptPtr->validateMethodPtr), -1);
             Tcl_DStringAppend(&buffer, " ", -1);
@@ -1156,11 +1156,13 @@ fprintf(stderr, "plain configure not yet implemented\n");
 	    if (result != TCL_OK) {
 	        break;
 	    }
+#ifdef NOTDEF
             Tcl_GetIntFromObj(interp, Tcl_GetObjResult(interp), &intVal);
 	    if (!intVal) {
 		/* validate has already set option */
 //	        break;
 	    }
+#endif
 	}
         Tcl_DStringFree(&buffer);
         if (ioptPtr->configureMethodPtr != NULL) {
@@ -1179,8 +1181,9 @@ fprintf(stderr, "plain configure not yet implemented\n");
 	        break;
 	    }
 	} else {
-	    if (ItclSetInstanceVar(interp, "options", Tcl_GetString(objv[i]),
-	            Tcl_GetString(objv[i+1]), contextIoPtr, contextIclsPtr)
+	    if (ItclSetInstanceVar(interp, "itcl_options",
+	            Tcl_GetString(objv[i]),
+	            Tcl_GetString(objv[i+1]), contextIoPtr, ioptPtr->iclsPtr)
 		    == NULL) {
 		result = TCL_ERROR;
 	        break;
@@ -1226,10 +1229,12 @@ ItclWidgetCget(
     Tcl_Object oPtr;
     ItclDelegatedFunction *idmPtr;
     ItclDelegatedOption *idoPtr;
+    ItclHierIter hier;
     ItclComponent *icPtr;
     ItclObjectInfo *infoPtr;
     ItclOption *ioptPtr;
     ItclObject *ioPtr;
+    ItclClass *iclsPtr;
     const char *val;
     int i;
     int result;
@@ -1339,7 +1344,14 @@ ItclWidgetCget(
         }
     }
     /* now look if it is an option at all */
-    hPtr = Tcl_FindHashEntry(&contextIclsPtr->options, (char *) objv[1]);
+    Itcl_InitHierIter(&hier, contextIclsPtr);
+    while ((iclsPtr = Itcl_AdvanceHierIter(&hier)) != NULL) {
+        hPtr = Tcl_FindHashEntry(&iclsPtr->options, (char *) objv[1]);
+        if (hPtr != NULL) {
+	    break;
+	}
+    }
+    Itcl_DeleteHierIter(&hier);
     if (hPtr == NULL) {
 	/* no option at all, let the normal configure do the job */
 	return TCL_CONTINUE;
@@ -1356,7 +1368,7 @@ ItclWidgetCget(
 	result = Tcl_Eval(interp, Tcl_DStringValue(&buffer));
         Tcl_DStringFree(&buffer);
     } else {
-        val = ItclGetInstanceVar(interp, "options",
+        val = ItclGetInstanceVar(interp, "itcl_options",
                 Tcl_GetString(ioptPtr->namePtr),
 		contextIoPtr, ioptPtr->iclsPtr);
         if (val) {

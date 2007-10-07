@@ -20,7 +20,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itclResolve.c,v 1.1.2.6 2007/10/02 22:43:30 wiede Exp $
+ *     RCS:  $Id: itclResolve.c,v 1.1.2.7 2007/10/07 12:32:37 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -119,7 +119,6 @@ Itcl_ClassCmdResolver(
     ItclMemberFunc *imPtr;
     int isCmdDeleted;
 
-//fprintf(stderr, "Itcl_ClassCmdResolver!%s!%s!\n", name, nsPtr->fullName);
     infoPtr = (ItclObjectInfo *)Tcl_GetAssocData(interp,
                 ITCL_INTERP_DATA, NULL);
     hPtr = Tcl_FindHashEntry(&infoPtr->namespaceClasses, (char *)nsPtr);
@@ -207,7 +206,6 @@ isCmdDeleted = 0;
     }
 
     *rPtr = imPtr->accessCmd;
-//fprintf(stderr, "ret4!%s!\n", Tcl_GetCommandName(interp, imPtr->accessCmd));
     return TCL_OK;
 }
 
@@ -359,6 +357,20 @@ Itcl_ClassVarResolver(
 	    return TCL_OK;
         }
     }
+    if (strcmp(name, "itcl_options") == 0) {
+        Tcl_DString buffer;
+	Tcl_DStringInit(&buffer);
+	Tcl_DStringAppend(&buffer, ITCL_VARIABLES_NAMESPACE, -1);
+	Tcl_DStringAppend(&buffer, "::", 2);
+	Tcl_DStringAppend(&buffer, Tcl_GetString(contextIoPtr->namePtr), -1);
+	Tcl_DStringAppend(&buffer, "::itcl_options", 14);
+        Tcl_Var varPtr;
+	varPtr = Tcl_FindNamespaceVar(interp, Tcl_DStringValue(&buffer), NULL, 0);
+        if (varPtr != NULL) {
+            *rPtr = varPtr;
+	    return TCL_OK;
+        }
+    }
     if (hPtr != NULL) {
         *rPtr = Tcl_GetHashValue(hPtr);
         return TCL_OK;
@@ -389,9 +401,9 @@ Itcl_ClassVarResolver(
 int
 Itcl_ClassCompiledVarResolver(
     Tcl_Interp *interp,         /* current interpreter */
-    CONST char* name,                 /* name of the variable being accessed */
+    CONST char* name,           /* name of the variable being accessed */
     int length,                 /* number of characters in name */
-    Tcl_Namespace *nsPtr,     /* namespace performing the resolution */
+    Tcl_Namespace *nsPtr,       /* namespace performing the resolution */
     Tcl_ResolvedVarInfo **rPtr) /* returns: info that makes it possible to
                                  *   resolve the variable at runtime */
 {
@@ -536,6 +548,22 @@ ItclClassRuntimeVarResolver(
 	                vlookup->ivPtr->iclsPtr->nsPtr->fullName, -1);
 	    }
 	    Tcl_DStringAppend(&buffer, "::this", 6);
+            Tcl_Var varPtr;
+	    varPtr = Tcl_FindNamespaceVar(interp, Tcl_DStringValue(&buffer),
+	            NULL, 0);
+            if (varPtr != NULL) {
+	        return varPtr;
+            }
+        }
+        if (strcmp(Tcl_GetString(vlookup->ivPtr->namePtr),
+	        "itcl_options") == 0) {
+            Tcl_DString buffer;
+	    Tcl_DStringInit(&buffer);
+	    Tcl_DStringAppend(&buffer, ITCL_VARIABLES_NAMESPACE, -1);
+	    Tcl_DStringAppend(&buffer, "::", 2);
+	    Tcl_DStringAppend(&buffer,
+	            Tcl_GetString(contextIoPtr->namePtr), -1);
+	    Tcl_DStringAppend(&buffer, "::itcl_options", 14);
             Tcl_Var varPtr;
 	    varPtr = Tcl_FindNamespaceVar(interp, Tcl_DStringValue(&buffer),
 	            NULL, 0);

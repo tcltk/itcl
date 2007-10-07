@@ -11,7 +11,7 @@
  * ========================================================================
  *  Author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclWidgetObject.c,v 1.1.2.10 2007/10/02 22:43:30 wiede Exp $
+ *     RCS:  $Id: itclWidgetObject.c,v 1.1.2.11 2007/10/07 12:32:38 wiede Exp $
  * ========================================================================
  *           Copyright (c) 2007 Arnulf Wiedemann
  * ------------------------------------------------------------------------
@@ -70,11 +70,10 @@ HullAndOptionsInstall(
     ItclShowArgs(1, "HullAndOptionsInstall", objc, objv);
     FOREACH_HASH_VALUE(ioptPtr, &iclsPtr->options) {
 	if (ioptPtr->init != NULL) {
-	    ItclSetInstanceVar(interp, "options",
+	    ItclSetInstanceVar(interp, "itcl_options",
 	            Tcl_GetString(ioptPtr->namePtr),
 		    Tcl_GetString(ioptPtr->init), ioPtr, iclsPtr);
 	}
-        
     }
     widgetClassPtr = iclsPtr->widgetClassPtr;
     foundWclass = 0;

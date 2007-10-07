@@ -9,7 +9,7 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itclInt.h,v 1.17.2.19 2007/10/02 22:43:29 wiede Exp $
+ * RCS: @(#) $Id: itclInt.h,v 1.17.2.20 2007/10/07 12:32:37 wiede Exp $
  */
 
 #include <string.h>
@@ -250,7 +250,10 @@ typedef struct ItclObject {
 
     Tcl_HashTable* constructed;  /* temp storage used during construction */
     Tcl_HashTable* destructed;   /* temp storage used during destruction */
-    Tcl_HashTable objectVariables; /* used for storing Tcl_Var entries for variable resolving, key is ivPtr of variable, value is varPtr */
+    Tcl_HashTable objectVariables;
+                                 /* used for storing Tcl_Var entries for
+				  * variable resolving, key is ivPtr of
+				  * variable, value is varPtr */
     Tcl_HashTable contextCache;   /* cache for function contexts */
     Tcl_Obj *namePtr;
     Tcl_Obj *varNsNamePtr;
@@ -325,6 +328,29 @@ typedef struct ItclMemberCode {
 #define ITCL_BUILTIN           0x800  /* non-zero => built-in method */
 #define ITCL_OPTION_READONLY   0x1000 /* non-zero => readonly */
 #define ITCL_COMPONENT         0x2000 /* non-zero => component */
+#define ITCL_OPTIONS_VAR       0x400  /* non-zero => built-in "itcl_options"
+                                       * variable */
+
+/*
+ *  Instance components.
+ */
+struct ItclVariable;
+typedef struct ItclComponent {
+    Tcl_Obj *namePtr;           /* member name */
+    struct ItclVariable *ivPtr; /* variable for this component */
+    int flags;
+} ItclComponent;
+
+#define ITCL_COMPONENT_INHERIT	0x01
+
+typedef struct ItclDelegatedFunction {
+    Tcl_Obj *namePtr;
+    ItclComponent *icPtr;
+    Tcl_Obj *asPtr;
+    Tcl_Obj *usingPtr;
+    Tcl_HashTable exceptions;
+    int flags;
+} ItclDelegatedFunction;
 
 /*
  *  Representation of member functions in an [incr Tcl] class.
@@ -346,6 +372,8 @@ typedef struct ItclMemberFunc {
     ItclArgList *argListPtr;    /* the parsed arguments */
     ItclClass *declaringClassPtr; /* the class which declared the method/proc */
     ClientData tmPtr;           /* TclOO methodPtr */
+    ItclDelegatedFunction *idmPtr;
+                                /* if the function is delegated != NULL */
 } ItclMemberFunc;
 
 /*
@@ -362,20 +390,25 @@ typedef struct ItclVariable {
 } ItclVariable;
 
 
-/*
- *  Instance components.
- */
-typedef struct ItclComponent {
-    Tcl_Obj *namePtr;           /* member name */
-    ItclVariable *ivPtr;        /* variable for this component */
-    int flags;
-} ItclComponent;
+struct ItclOption;
 
-#define ITCL_COMPONENT_INHERIT	0x01
+typedef struct ItclDelegatedOption {
+    Tcl_Obj *namePtr;
+    Tcl_Obj *resourceNamePtr;
+    Tcl_Obj *classNamePtr;
+    struct ItclOption *ioptPtr;  /* the option name or null for "*" */
+    ItclComponent *icPtr;        /* the component where the delegation goes
+                                  * to */
+    Tcl_Obj *asPtr;
+    Tcl_HashTable exceptions;    /* exceptions from delegation */
+} ItclDelegatedOption;
+
 /*
  *  Instance options.
  */
 typedef struct ItclOption {
+                                /* within a class hierarchy there must be only
+				 * one option with the same name !! */
     Tcl_Obj *namePtr;           /* member name */
     Tcl_Obj *fullNamePtr;       /* member name with "class::" qualifier */
     Tcl_Obj *resourceNamePtr;
@@ -389,25 +422,9 @@ typedef struct ItclOption {
     Tcl_Obj *cgetMethodPtr;
     Tcl_Obj *configureMethodPtr;
     Tcl_Obj *validateMethodPtr;
+    ItclDelegatedOption *idoPtr;
+                                /* if the option is delegated != NULL */
 } ItclOption;
-
-typedef struct ItclDelegatedOption {
-    Tcl_Obj *namePtr;
-    Tcl_Obj *resourceNamePtr;
-    Tcl_Obj *classNamePtr;
-    ItclComponent *icPtr;
-    Tcl_Obj *asPtr;
-    Tcl_HashTable exceptions;
-} ItclDelegatedOption;
-
-typedef struct ItclDelegatedFunction {
-    Tcl_Obj *namePtr;
-    ItclComponent *icPtr;
-    Tcl_Obj *asPtr;
-    Tcl_Obj *usingPtr;
-    Tcl_HashTable exceptions;
-    int flags;
-} ItclDelegatedFunction;
 
 typedef struct IctlVarTraceInfo {
     int flags;

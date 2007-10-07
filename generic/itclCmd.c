@@ -23,7 +23,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclCmd.c,v 1.1.2.10 2007/10/03 12:25:31 wiede Exp $
+ *     RCS:  $Id: itclCmd.c,v 1.1.2.11 2007/10/07 12:32:36 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -1206,15 +1206,6 @@ Itcl_NWidgetCmd(
     if (iclsPtr == NULL) {
 fprintf(stderr, "Itcl_NWidgetCmd!iclsPtr == NULL\n");
     }
-    /* create the options variable */
-    namePtr = Tcl_NewStringObj("options", 7);
-    Tcl_IncrRefCount(namePtr);
-    if (Itcl_CreateVariable(interp, iclsPtr, namePtr, NULL, NULL,
-            &ivPtr) != TCL_OK) {
-        return TCL_ERROR;
-    }
-    iclsPtr->numVariables++;
-    Itcl_BuildVirtualTables(iclsPtr);
     return result;
 }
 
@@ -1485,15 +1476,6 @@ Itcl_EClassCmd(
 fprintf(stderr, "Itcl_EClassCmd!iclsPtr == NULL\n");
         return TCL_ERROR;
     }
-    /* create the options variable */
-    namePtr = Tcl_NewStringObj("options", 7);
-    Tcl_IncrRefCount(namePtr);
-    if (Itcl_CreateVariable(interp, iclsPtr, namePtr, NULL, NULL,
-            &ivPtr) != TCL_OK) {
-        return TCL_ERROR;
-    }
-    iclsPtr->numVariables++;
-    Itcl_BuildVirtualTables(iclsPtr);
     return result;
 }
 

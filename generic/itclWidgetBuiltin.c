@@ -12,7 +12,7 @@
  * ========================================================================
  *  Author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclWidgetBuiltin.c,v 1.1.2.8 2007/09/29 22:16:50 wiede Exp $
+ *     RCS:  $Id: itclWidgetBuiltin.c,v 1.1.2.9 2007/10/07 12:32:37 wiede Exp $
  * ========================================================================
  *           Copyright (c) 2007 Arnulf Wiedemann
  * ------------------------------------------------------------------------
@@ -239,12 +239,12 @@ Itcl_BiHullInstallCmd(
         val = Tk_GetOption(tkWin, Tcl_GetString(ioptPtr->resourceNamePtr),
 	        Tcl_GetString(ioptPtr->classNamePtr));
 	if (val != NULL) {
-            val = ItclSetInstanceVar(interp, "options",
+            val = ItclSetInstanceVar(interp, "itcl_options",
 	            Tcl_GetString(ioptPtr->namePtr), val,
                     contextIoPtr, contextIoPtr->iclsPtr);
 	}
 	if (ioptPtr->init != NULL) {
-            val = ItclSetInstanceVar(interp, "options",
+            val = ItclSetInstanceVar(interp, "itcl_options",
 	            Tcl_GetString(ioptPtr->namePtr),
 		    Tcl_GetString(ioptPtr->init),
                     contextIoPtr, contextIoPtr->iclsPtr);

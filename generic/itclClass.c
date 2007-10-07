@@ -25,7 +25,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann Copyright (c) 2007
  *
- *     RCS:  $Id: itclClass.c,v 1.1.2.9 2007/10/02 22:43:29 wiede Exp $
+ *     RCS:  $Id: itclClass.c,v 1.1.2.10 2007/10/07 12:32:33 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -447,6 +447,25 @@ Itcl_CreateClass(
     hPtr = Tcl_CreateHashEntry(&iclsPtr->variables, (char *)namePtr, &newEntry);
     Tcl_SetHashValue(hPtr, (ClientData)ivPtr);
 
+    if (infoPtr->currClassFlags & (ITCL_ECLASS|ITCL_NWIDGET)) {
+        /*
+         *  Add the built-in "itcl_options" variable to the list of
+	 *  data members.
+         */
+        namePtr = Tcl_NewStringObj("itcl_options", -1);
+        Tcl_IncrRefCount(namePtr);
+        (void) Itcl_CreateVariable(interp, iclsPtr, namePtr, (char*)NULL,
+                (char*)NULL, &ivPtr);
+
+        ivPtr->protection = ITCL_PROTECTED;  /* always "protected" */
+        ivPtr->flags |= ITCL_OPTIONS_VAR;    /* mark as "itcl_options"
+	                                      * variable */
+    
+        hPtr = Tcl_CreateHashEntry(&iclsPtr->variables, (char *)namePtr,
+	        &newEntry);
+        Tcl_SetHashValue(hPtr, (ClientData)ivPtr);
+
+    }
     if (infoPtr->currClassFlags & (ITCL_WIDGET|ITCL_WIDGETADAPTOR)) {
         /*
          *  Add the built-in "thiswin" variable to the list of data members.

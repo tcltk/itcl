@@ -11,7 +11,7 @@
  * ========================================================================
  *  Author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclWidgetCmd.c,v 1.1.2.5 2007/10/02 22:43:30 wiede Exp $
+ *     RCS:  $Id: itclWidgetCmd.c,v 1.1.2.6 2007/10/07 12:32:37 wiede Exp $
  * ========================================================================
  *           Copyright (c) 2007 Arnulf Wiedemann
  * ------------------------------------------------------------------------
@@ -90,7 +90,7 @@ Itcl_WidgetCmd(
         return TCL_ERROR;
     }
     /* create the options variable */
-    namePtr = Tcl_NewStringObj("options", 7);
+    namePtr = Tcl_NewStringObj("itcl_options", 11);
     Tcl_IncrRefCount(namePtr);
     if (Itcl_CreateVariable(interp, iclsPtr, namePtr, NULL, NULL,
             &ivPtr) != TCL_OK) {
@@ -138,7 +138,7 @@ Itcl_WidgetAdaptorCmd(
     }
     iclsPtr->numVariables++;
     /* create the options variable */
-    namePtr = Tcl_NewStringObj("options", 7);
+    namePtr = Tcl_NewStringObj("itcl_options", 11);
     Tcl_IncrRefCount(namePtr);
     if (Itcl_CreateVariable(interp, iclsPtr, namePtr, NULL, NULL,
             &ivPtr) != TCL_OK) {

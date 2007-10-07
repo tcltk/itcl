@@ -39,7 +39,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclParse.c,v 1.1.2.13 2007/10/03 12:25:31 wiede Exp $
+ *     RCS:  $Id: itclParse.c,v 1.1.2.14 2007/10/07 12:32:37 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -2045,7 +2045,7 @@ delegate method * ?to <componentName>? ?using <pattern>? ?except <methods>?";
 	    foundOpt++;
         }
         if (!foundOpt) {
-	    Tcl_AppendResult(interp, "bad option\"", token, "\" should be ",
+	    Tcl_AppendResult(interp, "bad option \"", token, "\" should be ",
 	            usageStr, NULL);
 	    return TCL_ERROR;
 	}
@@ -2246,7 +2246,7 @@ Itcl_ClassDelegateOptionCmd(
 	    foundOpt++;
         }
         if (!foundOpt) {
-	    Tcl_AppendResult(interp, "bad option\"", token, "\" should be ",
+	    Tcl_AppendResult(interp, "bad option \"", token, "\" should be ",
 	            usageStr, NULL);
 	    return TCL_ERROR;
 	}
@@ -2437,7 +2437,7 @@ delegate proc * ?to <componentName>? ?using <pattern>? ?except <procs>?";
 	    foundOpt++;
         }
         if (!foundOpt) {
-	    Tcl_AppendResult(interp, "bad option\"", token, "\" should be ",
+	    Tcl_AppendResult(interp, "bad option \"", token, "\" should be ",
 	            usageStr, NULL);
 	    return TCL_ERROR;
 	}
