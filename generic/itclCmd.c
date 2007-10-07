@@ -23,7 +23,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclCmd.c,v 1.1.2.11 2007/10/07 12:32:36 wiede Exp $
+ *     RCS:  $Id: itclCmd.c,v 1.1.2.12 2007/10/07 12:35:46 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -1190,10 +1190,8 @@ Itcl_NWidgetCmd(
     int objc,                /* number of arguments */
     Tcl_Obj *CONST objv[])   /* argument objects */
 {
-    Tcl_Obj *namePtr;
     ItclClass *iclsPtr;
     ItclObjectInfo *infoPtr;
-    ItclVariable *ivPtr;
     int result;
 
     infoPtr = (ItclObjectInfo *)clientData;
@@ -1461,10 +1459,8 @@ Itcl_EClassCmd(
     int objc,                /* number of arguments */
     Tcl_Obj *CONST objv[])   /* argument objects */
 {
-    Tcl_Obj *namePtr;
     ItclClass *iclsPtr;
     ItclObjectInfo *infoPtr;
-    ItclVariable *ivPtr;
     int result;
 
     infoPtr = (ItclObjectInfo *)clientData;
@@ -1472,7 +1468,7 @@ Itcl_EClassCmd(
     result = ItclClassBaseCmd(clientData, interp, ITCL_ECLASS, objc, objv,
             &iclsPtr);
     if (iclsPtr == NULL) {
-    ItclShowArgs(0, "Itcl_EClassCmd", objc-1, objv);
+        ItclShowArgs(0, "Itcl_EClassCmd", objc-1, objv);
 fprintf(stderr, "Itcl_EClassCmd!iclsPtr == NULL\n");
         return TCL_ERROR;
     }
