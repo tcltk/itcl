@@ -24,7 +24,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclInfo.c,v 1.1.2.5 2007/10/07 18:58:47 wiede Exp $
+ *     RCS:  $Id: itclInfo.c,v 1.1.2.6 2007/10/07 19:01:21 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -1479,7 +1479,7 @@ Itcl_BiInfoOptionCmd(
     int i;
     int result;
 
-    ItclShowArgs(0, "Itcl_BiInfoOptionCmd", objc, objv);
+    ItclShowArgs(1, "Itcl_BiInfoOptionCmd", objc, objv);
     /*
      *  If this command is not invoked within a class namespace,
      *  signal an error.
@@ -1506,7 +1506,6 @@ Itcl_BiInfoOptionCmd(
 	return TCL_ERROR;
     }
     contextIclsPtr = Tcl_GetHashValue(hPtr);
-fprintf(stderr, "CL!%s!%s!%s!\n", contextIclsPtr->nsPtr->fullName, Tcl_GetCurrentNamespace(interp)->fullName, Itcl_GetUplevelNamespace(interp, 1)->fullName);
 
     /*
      *  Process args:
@@ -1660,7 +1659,6 @@ fprintf(stderr, "CL!%s!%s!%s!\n", contextIclsPtr->nsPtr->fullName, Tcl_GetCurren
          */
         resultPtr = Tcl_NewListObj(0, (Tcl_Obj**)NULL);
 	Tcl_IncrRefCount(resultPtr);
-fprintf(stderr, "contextIclsPtr!%s!\n", contextIclsPtr->nsPtr->fullName);
         Itcl_InitHierIter(&hier, contextIclsPtr);
         while ((iclsPtr=Itcl_AdvanceHierIter(&hier)) != NULL) {
             hPtr = Tcl_FirstHashEntry(&iclsPtr->options, &place);
