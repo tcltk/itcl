@@ -39,7 +39,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclParse.c,v 1.1.2.17 2007/10/14 18:42:30 wiede Exp $
+ *     RCS:  $Id: itclParse.c,v 1.1.2.18 2007/10/14 23:41:57 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -614,7 +614,7 @@ ItclClassBaseCmd(
 	        argumentPtr = Tcl_NewStringObj("args", -1);
 		int isDone;
 		isDone = 0;
-	        bodyPtr = Tcl_NewStringObj("return [uplevel 0 ", -1);
+	        bodyPtr = Tcl_NewStringObj("return [", -1);
 		if (strcmp(Tcl_GetString(imPtr->codePtr->bodyPtr),
 		        "@itcl-builtin-cget") == 0) {
 		    Tcl_AppendToObj(bodyPtr, "::itcl::builtin::cget", -1);
@@ -639,7 +639,7 @@ ItclClassBaseCmd(
 		    Tcl_AppendToObj(bodyPtr,
 		            Tcl_GetString(imPtr->codePtr->bodyPtr), -1);
                 }
-	        Tcl_AppendToObj(bodyPtr, " {*}[list $args]]", -1);
+	        Tcl_AppendToObj(bodyPtr, " {*}$args]", -1);
 	    }
 	    ClientData pmPtr;
 	    imPtr->tmPtr = (ClientData)Itcl_NewProcClassMethod(interp,
@@ -1719,7 +1719,7 @@ Itcl_ClassOptionCmd(
     validateMethod = NULL;
     readOnly = 0;
     newObjc = 0;
-    newObjv = (Tcl_Obj **)ckalloc(sizeof(Tcl_Obj *)*newObjc);
+    newObjv = (Tcl_Obj **)ckalloc(sizeof(Tcl_Obj *)*objc);
     for (i=1; i<objc; i++) {
         token = Tcl_GetString(objv[i]);
 	foundOption = 0;
@@ -1833,12 +1833,15 @@ Itcl_ClassOptionCmd(
     Tcl_DecrRefCount(classNamePtr);
     if (cgetMethod != NULL) {
         ioptPtr->cgetMethodPtr = Tcl_NewStringObj(cgetMethod, -1);
+        Tcl_IncrRefCount(ioptPtr->cgetMethodPtr);
     }
     if (configureMethod != NULL) {
         ioptPtr->configureMethodPtr = Tcl_NewStringObj(configureMethod, -1);
+        Tcl_IncrRefCount(ioptPtr->configureMethodPtr);
     }
     if (validateMethod != NULL) {
         ioptPtr->validateMethodPtr = Tcl_NewStringObj(validateMethod, -1);
+        Tcl_IncrRefCount(ioptPtr->validateMethodPtr);
     }
     if (readOnly != 0) {
         ioptPtr->flags |= ITCL_OPTION_READONLY;
@@ -2152,6 +2155,7 @@ delegate method * ?to <componentName>? ?using <pattern>? ?except <methods>?";
     } else {
         idmPtr->namePtr = methodNamePtr;
     }
+    Tcl_IncrRefCount(idmPtr->namePtr);
     idmPtr->icPtr = icPtr;
     idmPtr->asPtr = targetPtr;
     if (idmPtr->asPtr != NULL) {

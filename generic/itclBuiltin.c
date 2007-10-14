@@ -24,7 +24,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclBuiltin.c,v 1.1.2.16 2007/10/14 18:42:29 wiede Exp $
+ *     RCS:  $Id: itclBuiltin.c,v 1.1.2.17 2007/10/14 23:41:56 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -453,7 +453,7 @@ Itcl_BiConfigureCmd(
             }
         }
 
-        if (!vlookup || vlookup->ivPtr->protection != ITCL_PUBLIC) {
+        if (!vlookup || (vlookup->ivPtr->protection != ITCL_PUBLIC)) {
             Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
                 "unknown option \"", token, "\"",
                 (char*)NULL);
@@ -912,7 +912,7 @@ ItclBiObjectUnknownCmd(
     ItclObject *ioPtr;
     ItclObjectInfo *infoPtr;
 
-    ItclShowArgs(0, "ItclBiObjectUnknownCmd", objc, objv);
+    ItclShowArgs(1, "ItclBiObjectUnknownCmd", objc, objv);
     cmd = Tcl_GetCommandFromObj(interp, objv[1]);
     if (Tcl_GetCommandInfoFromToken(cmd, &cmdInfo) != 1) {
     }
@@ -967,8 +967,9 @@ ItclWidgetConfigure(
     Tcl_Object oPtr;
     Tcl_Obj *resultPtr;
     Tcl_Obj *objPtr;
+    Tcl_Obj *methodNamePtr;
     Tcl_Namespace *saveNsPtr;
-    ItclHierIter hier;
+    Tcl_Obj **newObjv;
     ItclVarLookup *vlookup;
     ItclDelegatedFunction *idmPtr;
     ItclDelegatedOption *idoPtr;
@@ -1015,11 +1016,9 @@ ItclWidgetConfigure(
     }
 
     hPtr = NULL;
-    Tcl_Obj *methodNamePtr;
+    /* first check if method configure is delegated */
     methodNamePtr = Tcl_NewStringObj("*", -1);
-    Itcl_InitHierIter(&hier, contextIclsPtr);
-    while ((iclsPtr = Itcl_AdvanceHierIter(&hier)) != NULL) {
-    hPtr = Tcl_FindHashEntry(&iclsPtr->delegatedFunctions, (char *)
+    hPtr = Tcl_FindHashEntry(&contextIclsPtr->delegatedFunctions, (char *)
             methodNamePtr);
     if (hPtr != NULL) {
         idmPtr = (ItclDelegatedFunction *)Tcl_GetHashValue(hPtr);
@@ -1055,33 +1054,29 @@ ItclWidgetConfigure(
 	    }
 	}
     }
-    }
-    Itcl_DeleteHierIter(&hier);
     /* now do the hard work */
     if (objc == 1) {
 fprintf(stderr, "plain configure not yet implemented\n");
         return TCL_ERROR;
     }
-    Itcl_InitHierIter(&hier, contextIclsPtr);
-    while ((iclsPtr = Itcl_AdvanceHierIter(&hier)) != NULL) {
     /* first handle delegated options */
-    hPtr = Tcl_FindHashEntry(&iclsPtr->delegatedOptions, (char *)
+    hPtr = Tcl_FindHashEntry(&contextIoPtr->objectDelegatedOptions, (char *)
             objv[1]);
-
     if (hPtr != NULL) {
+	/* the option is delegated */
         idoPtr = (ItclDelegatedOption *)Tcl_GetHashValue(hPtr);
         icPtr = idoPtr->icPtr;
         val = ItclGetInstanceVar(interp, Tcl_GetString(icPtr->namePtr),
-                NULL, contextIoPtr, contextIclsPtr);
+                NULL, contextIoPtr, icPtr->ivPtr->iclsPtr);
         if (val != NULL) {
-            Tcl_DString buffer;
-            Tcl_DStringInit(&buffer);
-	    Tcl_DStringAppend(&buffer, val, -1);
-	    Tcl_DStringAppend(&buffer, " configure ", -1);
+	    newObjv = (Tcl_Obj **)ckalloc(sizeof(Tcl_Obj *)*(objc+2));
+	    newObjv[0] = Tcl_NewStringObj(val, -1);
+	    Tcl_IncrRefCount(newObjv[0]);
+	    newObjv[1] = Tcl_NewStringObj("configure", 9);
+	    Tcl_IncrRefCount(newObjv[1]);
 	    for(i=1;i<objc;i++) {
-	        Tcl_DStringAppend(&buffer, Tcl_GetString(objv[i]), -1);
-	        Tcl_DStringAppend(&buffer, " ", 1);
-	    }
+	        newObjv[i+1] = objv[i];
+            }
 	    objPtr = Tcl_NewStringObj(val, -1);
 	    Tcl_IncrRefCount(objPtr);
 	    oPtr = Tcl_GetObjectFromObj(interp, objPtr);
@@ -1090,7 +1085,10 @@ fprintf(stderr, "plain configure not yet implemented\n");
                         infoPtr->object_meta_type);
 	        infoPtr->currContextIclsPtr = ioPtr->iclsPtr;
 	    }
-            result = Tcl_Eval(interp, Tcl_DStringValue(&buffer));
+            result = Tcl_EvalObjv(interp, objc+1, newObjv, TCL_EVAL_DIRECT);
+            Tcl_DecrRefCount(newObjv[0]);
+            Tcl_DecrRefCount(newObjv[1]);
+            ckfree((char *)newObjv);
 	    Tcl_DecrRefCount(objPtr);
 	    if (oPtr != NULL) {
 	        infoPtr->currContextIclsPtr = NULL;
@@ -1098,18 +1096,9 @@ fprintf(stderr, "plain configure not yet implemented\n");
             return result;
         }
     }
-    }
-    Itcl_DeleteHierIter(&hier);
-    /* FIX ME !!! should handle real options here and hand the rest back !! */
+
     /* now look if it is an option at all */
-    Itcl_InitHierIter(&hier, contextIclsPtr);
-    while ((iclsPtr = Itcl_AdvanceHierIter(&hier)) != NULL) {
-        hPtr = Tcl_FindHashEntry(&iclsPtr->options, (char *) objv[1]);
-        if (hPtr != NULL) {
-	    break;
-	}
-    }
-    Itcl_DeleteHierIter(&hier);
+    hPtr = Tcl_FindHashEntry(&contextIoPtr->objectOptions, (char *) objv[1]);
     if (hPtr == NULL) {
 	/* no option at all, let the normal configure do the job */
 	return TCL_CONTINUE;
@@ -1129,13 +1118,8 @@ fprintf(stderr, "plain configure not yet implemented\n");
 	    result = TCL_ERROR;
 	    break;
 	}
-        Itcl_InitHierIter(&hier, contextIclsPtr);
-        while ((iclsPtr = Itcl_AdvanceHierIter(&hier)) != NULL) {
-            hPtr = Tcl_FindHashEntry(&iclsPtr->options, (char *) objv[i]);
-            if (hPtr != NULL) {
-	        break;
-	    }
-	}
+        hPtr = Tcl_FindHashEntry(&contextIoPtr->objectOptions,
+	        (char *) objv[i]);
         if (hPtr == NULL) {
 	    /* check if normal public variable/common */
 	    /* FIX ME !!! temporary */
@@ -1166,16 +1150,26 @@ fprintf(stderr, "plain configure not yet implemented\n");
 	}
         Tcl_DStringFree(&buffer);
         if (ioptPtr->configureMethodPtr != NULL) {
-            Tcl_DStringAppend(&buffer, Tcl_GetString(
-	            ioptPtr->configureMethodPtr), -1);
-            Tcl_DStringAppend(&buffer, " ", -1);
-            Tcl_DStringAppend(&buffer, Tcl_GetString(objv[i]), -1);
-            Tcl_DStringAppend(&buffer, " [list ", -1);
-            Tcl_DStringAppend(&buffer, Tcl_GetString(objv[i+1]), -1);
-            Tcl_DStringAppend(&buffer, "]", -1);
+	    newObjv = (Tcl_Obj **)ckalloc(sizeof(Tcl_Obj *)*3);
+	    newObjv[0] = ioptPtr->configureMethodPtr;
+	    Tcl_IncrRefCount(newObjv[0]);
+	    newObjv[1] = objv[i];
+	    Tcl_IncrRefCount(newObjv[1]);
+#ifdef NOTDEF
+	    if (strlen(Tcl_GetString(objv[i+1])) == 0) {
+	        newObjv[2] = Tcl_NewStringObj("{}", 1);
+	    } else {
+#endif
+	        newObjv[2] = objv[i+1];
+//	    }
+	    Tcl_IncrRefCount(newObjv[2]);
 	    saveNsPtr = Tcl_GetCurrentNamespace(interp);
 	    Itcl_SetCallFrameNamespace(interp, ioptPtr->iclsPtr->nsPtr);
-	    result = Tcl_Eval(interp, Tcl_DStringValue(&buffer));
+            result = Tcl_EvalObjv(interp, 3, newObjv, TCL_EVAL_DIRECT);
+	    Tcl_DecrRefCount(newObjv[0]);
+	    Tcl_DecrRefCount(newObjv[1]);
+	    Tcl_DecrRefCount(newObjv[2]);
+            ckfree((char *)newObjv);
 	    Itcl_SetCallFrameNamespace(interp, saveNsPtr);
 	    if (result != TCL_OK) {
 	        break;
