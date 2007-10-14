@@ -23,7 +23,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclCmd.c,v 1.1.2.13 2007/10/14 17:19:06 wiede Exp $
+ *     RCS:  $Id: itclCmd.c,v 1.1.2.14 2007/10/14 18:42:29 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -1331,6 +1331,86 @@ Itcl_AddDelegatedOptionCmd(
     hPtr = Tcl_CreateHashEntry(&ioPtr->objectDelegatedOptions,
             (char *)idoPtr->namePtr, &isNew);
     Tcl_SetHashValue(hPtr, idoPtr);
+    return result;
+}
+
+/*
+ * ------------------------------------------------------------------------
+ *  Itcl_AddDelegatedFunctionCmd()
+ *
+ *  Used to build an function to an [incr Tcl] nwidget/eclass
+ *
+ *  Syntax: ::itcl::adddelegatedfunction <nwidget object> <fucntionName> ...
+ *
+ *  Returns TCL_OK/TCL_ERROR to indicate success/failure.
+ * ------------------------------------------------------------------------
+ */
+/* ARGSUSED */
+int
+Itcl_AddDelegatedFunctionCmd(
+    ClientData clientData,   /* infoPtr */
+    Tcl_Interp *interp,      /* current interpreter */
+    int objc,                /* number of arguments */
+    Tcl_Obj *CONST objv[])   /* argument objects */
+{
+    Tcl_HashEntry *hPtr;
+    Tcl_Command cmd;
+    Tcl_Obj *componentNamePtr;
+    ItclObjectInfo *infoPtr;
+    ItclObject *ioPtr;
+    ItclClass *iclsPtr;
+    ItclDelegatedFunction *idmPtr;
+    ItclHierIter hier;
+    const char *val;
+    int isNew;
+    int result;
+
+    result = TCL_OK;
+    infoPtr = (ItclObjectInfo *)clientData;
+    ItclShowArgs(1, "Itcl_AddDelegatedFunctionCmd", objc, objv);
+    if (objc < 4) {
+        Tcl_WrongNumArgs(interp, 1, objv, 
+	        "className protection method/proc functionName ...");
+	return TCL_ERROR;
+    }
+    
+    cmd = Tcl_FindCommand(interp, Tcl_GetString(objv[1]), NULL, 0);
+    if (cmd == NULL) {
+	Tcl_AppendResult(interp, "object \"", Tcl_GetString(objv[1]),
+	        "\" not found", NULL);
+        return TCL_ERROR;
+    }
+    hPtr = Tcl_FindHashEntry(&infoPtr->objects, (char *)cmd);
+    if (hPtr == NULL) {
+	Tcl_AppendResult(interp, "object \"", Tcl_GetString(objv[1]),
+	        "\" not found", NULL);
+        return TCL_ERROR;
+    }
+    ioPtr = Tcl_GetHashValue(hPtr);
+    result = Itcl_HandleDelegateMethodCmd(interp, ioPtr, NULL, &idmPtr,
+            objc-3, objv+3);
+    if (result != TCL_OK) {
+        return result;
+    }
+    componentNamePtr = idmPtr->icPtr->namePtr;
+    Itcl_InitHierIter(&hier, ioPtr->iclsPtr);
+    while ((iclsPtr = Itcl_AdvanceHierIter(&hier)) != NULL) {
+        hPtr = Tcl_FindHashEntry(&iclsPtr->components, (char *)
+                componentNamePtr);
+	if (hPtr != NULL) {
+	    break;
+	}
+    }
+    Itcl_DeleteHierIter(&hier);
+    val = Itcl_GetInstanceVar(interp,
+            Tcl_GetString(componentNamePtr), ioPtr, iclsPtr);
+    componentNamePtr = Tcl_NewStringObj(val, -1);
+    Tcl_IncrRefCount(componentNamePtr);
+    DelegateFunction(interp, ioPtr, ioPtr->iclsPtr, componentNamePtr, idmPtr);
+    hPtr = Tcl_CreateHashEntry(&ioPtr->objectDelegatedFunctions,
+            (char *)idmPtr->namePtr, &isNew);
+    Tcl_DecrRefCount(componentNamePtr);
+    Tcl_SetHashValue(hPtr, idmPtr);
     return result;
 }
 

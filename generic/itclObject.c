@@ -24,7 +24,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann Copyright (c) 2007
  *
- *     RCS:  $Id: itclObject.c,v 1.1.2.17 2007/10/14 17:19:08 wiede Exp $
+ *     RCS:  $Id: itclObject.c,v 1.1.2.18 2007/10/14 18:42:30 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -171,6 +171,7 @@ ItclCreateObject(
     Tcl_InitHashTable(&ioPtr->objectVariables, TCL_ONE_WORD_KEYS);
     Tcl_InitObjHashTable(&ioPtr->objectOptions);
     Tcl_InitObjHashTable(&ioPtr->objectDelegatedOptions);
+    Tcl_InitObjHashTable(&ioPtr->objectDelegatedFunctions);
     Tcl_InitHashTable(&ioPtr->contextCache, TCL_ONE_WORD_KEYS);
 
     Itcl_PreserveData((ClientData)ioPtr);  /* while we're using this... */

@@ -39,7 +39,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclParse.c,v 1.1.2.16 2007/10/14 17:19:08 wiede Exp $
+ *     RCS:  $Id: itclParse.c,v 1.1.2.17 2007/10/14 18:42:30 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -81,6 +81,7 @@ Tcl_ObjCmdProc Itcl_NWidgetCmd;
 Tcl_ObjCmdProc Itcl_EClassCmd;
 Tcl_ObjCmdProc Itcl_AddOptionCmd;
 Tcl_ObjCmdProc Itcl_AddDelegatedOptionCmd;
+Tcl_ObjCmdProc Itcl_AddDelegatedFunctionCmd;
 Tcl_ObjCmdProc Itcl_AddComponentCmd;
 Tcl_ObjCmdProc Itcl_SetComponentCmd;
 Tcl_ObjCmdProc Itcl_ClassComponentCmd;
@@ -381,6 +382,11 @@ Itcl_ParseInit(
 
     Tcl_CreateObjCommand(interp, "::itcl::adddelegatedoption",
         Itcl_AddDelegatedOptionCmd,
+        (ClientData)infoPtr, (Tcl_CmdDeleteProc*)NULL);
+    Itcl_PreserveData((ClientData)infoPtr);
+
+    Tcl_CreateObjCommand(interp, "::itcl::adddelegatedmethod",
+        Itcl_AddDelegatedFunctionCmd,
         (ClientData)infoPtr, (Tcl_CmdDeleteProc*)NULL);
     Itcl_PreserveData((ClientData)infoPtr);
 
@@ -1977,7 +1983,7 @@ Itcl_ClassComponentCmd(
 
 /*
  * ------------------------------------------------------------------------
- *  Itcl_ClassDelegateMethodCmd()
+ *  Itcl_HandleDelegateMethodCmd()
  *
  *  Invoked by Tcl during the parsing of a class definition whenever
  *  the "delegate method" command is invoked to define a 
@@ -1988,9 +1994,13 @@ Itcl_ClassComponentCmd(
  * ------------------------------------------------------------------------
  */
 int
-Itcl_ClassDelegateMethodCmd(
-    ClientData clientData,   /* info for all known objects */
+Itcl_HandleDelegateMethodCmd(
     Tcl_Interp *interp,      /* current interpreter */
+    ItclObject *ioPtr,       /* != NULL for ::itcl::adddelgatedmethod 
+                                otherwise NULL */
+    ItclClass *iclsPtr,      /* != NULL for delegate method otherwise NULL */
+    ItclDelegatedFunction **idmPtrPtr,
+                             /* where to return idoPtr */
     int objc,                /* number of arguments */
     Tcl_Obj *CONST objv[])   /* argument objects */
 {
@@ -2000,33 +2010,25 @@ Itcl_ClassDelegateMethodCmd(
     Tcl_Obj *usingPtr;
     Tcl_Obj *exceptionsPtr;
     Tcl_HashEntry *hPtr;
-    Tcl_HashEntry *hPtr2;
-    ItclObjectInfo *infoPtr;
-    ItclClass *iclsPtr;
     ItclComponent *icPtr;
     ItclDelegatedFunction *idmPtr;
+    ItclHierIter hier;
     const char *usageStr;
     const char *methodName;
     const char *component;
     const char *token;
     const char **argv;
+    char *what;
+    const char *whatName;
     int argc;
     int foundOpt;
     int isNew;
     int i;
 
-    ItclShowArgs(1, "Itcl_ClassDelegateMethodCmd", objc, objv);
+    ItclShowArgs(1, "Itcl_HandleDelegateMethodCmd", objc, objv);
     usageStr = "delegate method <methodName> to <componentName> ?as <targetName>?\n\
 delegate method <methodName> ?to <componentName>? using <pattern>\n\
 delegate method * ?to <componentName>? ?using <pattern>? ?except <methods>?";
-    infoPtr = (ItclObjectInfo*)clientData;
-    iclsPtr = (ItclClass*)Itcl_PeekStack(&infoPtr->clsStack);
-    if (iclsPtr->flags & ITCL_CLASS) {
-        Tcl_AppendResult(interp, "\"", Tcl_GetString(iclsPtr->namePtr),
-	        " is no ::itcl::widget/::itcl::widgetadaptor/::itcl::type.", 
-		" Only these can delegate methods", NULL);
-	return TCL_ERROR;
-    }
     if (objc < 4) {
 	Tcl_AppendResult(interp, "wrong # args should be ", usageStr, NULL);
         return TCL_ERROR;
@@ -2036,6 +2038,13 @@ delegate method * ?to <componentName>? ?using <pattern>? ?except <methods>?";
     targetPtr = NULL;
     usingPtr = NULL;
     exceptionsPtr = NULL;
+    if (ioPtr != NULL) {
+        what = "object";
+	whatName = Tcl_GetCommandName(interp, ioPtr->accessCmd);
+    } else {
+	whatName = iclsPtr->nsPtr->fullName;
+        what = "class";
+    }
     for(i=2;i<objc;i++) {
         token = Tcl_GetString(objv[i]);
 	if (i+1 == objc) {
@@ -2082,21 +2091,54 @@ delegate method * ?to <componentName>? ?using <pattern>? ?except <methods>?";
     /* check for already delegated */
     methodNamePtr = Tcl_NewStringObj(methodName, -1);
     Tcl_IncrRefCount(methodNamePtr);
-    hPtr = Tcl_FindHashEntry(&iclsPtr->delegatedFunctions, (char *)
-            methodNamePtr);
+    if (ioPtr != NULL) {
+        hPtr = Tcl_FindHashEntry(&ioPtr->objectDelegatedFunctions, (char *)
+                methodNamePtr);
+    } else {
+        hPtr = Tcl_FindHashEntry(&iclsPtr->delegatedFunctions, (char *)
+                methodNamePtr);
+    }
     if (hPtr != NULL) {
         Tcl_AppendResult(interp, "method \"", methodName,
 	        "\" is already delegated", NULL);
         return TCL_ERROR;
     }
 
-    if (componentPtr != NULL) {
-        if (ItclCreateComponent(interp, iclsPtr, componentPtr, &icPtr)
-	        != TCL_OK) {
-            return TCL_ERROR;
-        }
+    if (ioPtr != NULL) {
+        Itcl_InitHierIter(&hier, ioPtr->iclsPtr);
+	while ((iclsPtr = Itcl_AdvanceHierIter(&hier)) != NULL) {
+	    hPtr = Tcl_FindHashEntry(&iclsPtr->components,
+	            (char *)componentPtr);
+            if (hPtr != NULL) {
+	        break;
+	    }
+	}
+	Itcl_DeleteHierIter(&hier);
     } else {
-        icPtr = NULL;
+        hPtr = Tcl_FindHashEntry(&iclsPtr->components, (char *)componentPtr);
+    }
+    if (hPtr == NULL) {
+	Tcl_AppendResult(interp, what, " \"", whatName,
+	        "\" has no component \"", Tcl_GetString(componentPtr), "\"",
+		NULL);
+        return TCL_ERROR;
+    }
+    icPtr = Tcl_GetHashValue(hPtr);
+    if (*methodName != '*') {
+	/* FIX ME !!! */
+        /* check for locally defined method */
+	hPtr = NULL;
+	if (ioPtr != NULL) {
+	} else {
+	    /* FIX ME !! have to check the hierarchy !! */
+//	    hPtr = Tcl_FindHashEntry(&iclsPtr->functions,
+//	            (char *)methodNamePtr);
+	}
+	if (hPtr != NULL) {
+	    Tcl_AppendResult(interp, "method \"", methodName,
+	            "\" has been defined locally", NULL);
+	    return TCL_ERROR;
+	}
     }
     idmPtr = (ItclDelegatedFunction *)ckalloc(sizeof(ItclDelegatedFunction));
     memset(idmPtr, 0, sizeof(ItclDelegatedFunction));
@@ -2104,14 +2146,6 @@ delegate method * ?to <componentName>? ?using <pattern>? ?except <methods>?";
     if (*methodName != '*') {
         if ((targetPtr == NULL) && (usingPtr == NULL)) {
 	    targetPtr = methodNamePtr;
-	}
-	/* FIX ME !!! */
-        /* check for locally defined method */
-	hPtr = Tcl_FindHashEntry(&iclsPtr->functions, (char *)methodNamePtr);
-	if (hPtr != NULL) {
-	    Tcl_AppendResult(interp, "method \"", methodName,
-	            "\" has been defined locally", NULL);
-	    return TCL_ERROR;
 	}
         idmPtr->namePtr = methodNamePtr;
 
@@ -2138,9 +2172,9 @@ delegate method * ?to <componentName>? ?using <pattern>? ?except <methods>?";
 	    Tcl_IncrRefCount(objPtr);
 	    hPtr = Tcl_CreateHashEntry(&idmPtr->exceptions, (char *)objPtr,
 	            &isNew);
+#ifdef NOTDEF
 	    hPtr2 = Tcl_FindHashEntry(&iclsPtr->functions, (char *)objPtr);
 /* FIX ME !!! can only be done after a class/widget has been parsed completely !! */
-#ifdef NOTDEF
 	    if (hPtr2 == NULL) {
 	        Tcl_AppendResult(interp, "no such method: \"",
 		        Tcl_GetString(objPtr), "\" found for delegation", NULL);
@@ -2149,6 +2183,56 @@ delegate method * ?to <componentName>? ?using <pattern>? ?except <methods>?";
 	    Tcl_SetHashValue(hPtr, Tcl_GetHashValue(hPtr2));
 #endif
 	}
+    }
+    if (idmPtrPtr != NULL) {
+        *idmPtrPtr = idmPtr;
+    }
+    return TCL_OK;
+}
+
+/*
+ * ------------------------------------------------------------------------
+ *  Itcl_ClassDelegateMethodCmd()
+ *
+ *  Invoked by Tcl during the parsing of a class definition whenever
+ *  the "delegate method" command is invoked to define a 
+ *  Handles the following syntax:
+ *
+ *      delegate method
+ *
+ * ------------------------------------------------------------------------
+ */
+int
+Itcl_ClassDelegateMethodCmd(
+    ClientData clientData,   /* info for all known objects */
+    Tcl_Interp *interp,      /* current interpreter */
+    int objc,                /* number of arguments */
+    Tcl_Obj *CONST objv[])   /* argument objects */
+{
+    Tcl_HashEntry *hPtr;
+    ItclObjectInfo *infoPtr;
+    ItclClass *iclsPtr;
+    ItclDelegatedFunction *idmPtr;
+    const char *usageStr;
+    int isNew;
+    int result;
+
+    ItclShowArgs(1, "Itcl_ClassDelegateMethodCmd", objc, objv);
+    usageStr = "delegate method <methodName> to <componentName> ?as <targetName>?\n\
+delegate method <methodName> ?to <componentName>? using <pattern>\n\
+delegate method * ?to <componentName>? ?using <pattern>? ?except <methods>?";
+    infoPtr = (ItclObjectInfo*)clientData;
+    iclsPtr = (ItclClass*)Itcl_PeekStack(&infoPtr->clsStack);
+    if (iclsPtr->flags & ITCL_CLASS) {
+        Tcl_AppendResult(interp, "\"", Tcl_GetString(iclsPtr->namePtr),
+	        " is no ::itcl::widget/::itcl::widgetadaptor/::itcl::type.", 
+		" Only these can delegate methods", NULL);
+	return TCL_ERROR;
+    }
+    result = Itcl_HandleDelegateMethodCmd(interp, NULL, iclsPtr, &idmPtr, objc,
+            objv);
+    if (result != TCL_OK) {
+        return result;
     }
     hPtr = Tcl_CreateHashEntry(&iclsPtr->delegatedFunctions,
             (char *)idmPtr->namePtr, &isNew);

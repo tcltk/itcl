@@ -9,7 +9,7 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itclInt.h,v 1.17.2.21 2007/10/14 17:19:06 wiede Exp $
+ * RCS: @(#) $Id: itclInt.h,v 1.17.2.22 2007/10/14 18:42:29 wiede Exp $
  */
 
 #include <string.h>
@@ -262,6 +262,11 @@ typedef struct ItclObject {
 				     members in this object. Look up option
 				     namePtr names and get back
 				     ItclOption* ptrs */
+    Tcl_HashTable objectDelegatedFunctions;
+                                  /* definitions for all delegated function
+				     members in this object. Look up function
+				     namePtr names and get back
+				     ItclMemberFunc * ptrs */
     Tcl_HashTable contextCache;   /* cache for function contexts */
     Tcl_Obj *namePtr;
     Tcl_Obj *varNsNamePtr;
@@ -570,7 +575,12 @@ MODULE_SCOPE int ItclInitObjectOptions(Tcl_Interp *interp, ItclObject *ioPtr,
 MODULE_SCOPE int Itcl_HandleDelegateOptionCmd(Tcl_Interp *interp,
         ItclObject *ioPtr, ItclClass *iclsPtr, ItclDelegatedOption **idoPtrPtr,
         int objc, Tcl_Obj *CONST objv[]);
-
+MODULE_SCOPE int Itcl_HandleDelegateMethodCmd(Tcl_Interp *interp,
+        ItclObject *ioPtr, ItclClass *iclsPtr,
+	ItclDelegatedFunction **idmPtrPtr, int objc, Tcl_Obj *CONST objv[]);
+MODULE_SCOPE int DelegateFunction(Tcl_Interp *interp, ItclObject *ioPtr,
+        ItclClass *iclsPtr, Tcl_Obj *componentNamePtr,
+        ItclDelegatedFunction *idmPtr);
 
 
 #include "itcl2TclOO.h"
