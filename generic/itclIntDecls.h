@@ -1,5 +1,5 @@
 /*
- * $Id: itclIntDecls.h,v 1.13.2.7 2007/10/07 18:58:47 wiede Exp $
+ * $Id: itclIntDecls.h,v 1.13.2.8 2007/10/14 17:19:07 wiede Exp $
  *
  * This file is (mostly) automatically generated from itcl.decls.
  */
@@ -23,7 +23,7 @@ extern const char *Itcl_InitStubs(
 /* !BEGIN!: Do not edit below this line. */
 
 #define ITCLINT_STUBS_EPOCH 0
-#define ITCLINT_STUBS_REVISION 140
+#define ITCLINT_STUBS_REVISION 141
 
 #if !defined(USE_ITCL_STUBS)
 
@@ -494,6 +494,10 @@ ITCLAPI int		Itcl_AddComponentCmd (ClientData infoPtr,
 ITCLAPI int		Itcl_BiInfoOptionCmd (ClientData dummy, 
 				Tcl_Interp * interp, int objc, 
 				Tcl_Obj *CONST objv[]);
+/* 172 */
+ITCLAPI int		Itcl_BiInfoComponentCmd (ClientData dummy, 
+				Tcl_Interp * interp, int objc, 
+				Tcl_Obj *CONST objv[]);
 
 #endif /* !defined(USE_ITCL_STUBS) */
 
@@ -675,6 +679,7 @@ typedef struct ItclIntStubs {
     int (*itcl_AddOptionCmd) (ClientData infoPtr, Tcl_Interp * interp, int objc, Tcl_Obj *CONST objv[]); /* 169 */
     int (*itcl_AddComponentCmd) (ClientData infoPtr, Tcl_Interp * interp, int objc, Tcl_Obj *CONST objv[]); /* 170 */
     int (*itcl_BiInfoOptionCmd) (ClientData dummy, Tcl_Interp * interp, int objc, Tcl_Obj *CONST objv[]); /* 171 */
+    int (*itcl_BiInfoComponentCmd) (ClientData dummy, Tcl_Interp * interp, int objc, Tcl_Obj *CONST objv[]); /* 172 */
 } ItclIntStubs;
 
 #ifdef __cplusplus
@@ -1204,6 +1209,10 @@ extern const ItclIntStubs *itclIntStubsPtr;
 #ifndef Itcl_BiInfoOptionCmd
 #define Itcl_BiInfoOptionCmd \
 	(itclIntStubsPtr->itcl_BiInfoOptionCmd) /* 171 */
+#endif
+#ifndef Itcl_BiInfoComponentCmd
+#define Itcl_BiInfoComponentCmd \
+	(itclIntStubsPtr->itcl_BiInfoComponentCmd) /* 172 */
 #endif
 
 #endif /* defined(USE_ITCL_STUBS) */

@@ -9,7 +9,7 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itclInt.h,v 1.17.2.20 2007/10/07 12:32:37 wiede Exp $
+ * RCS: @(#) $Id: itclInt.h,v 1.17.2.21 2007/10/14 17:19:06 wiede Exp $
  */
 
 #include <string.h>
@@ -254,6 +254,14 @@ typedef struct ItclObject {
                                  /* used for storing Tcl_Var entries for
 				  * variable resolving, key is ivPtr of
 				  * variable, value is varPtr */
+    Tcl_HashTable objectOptions; /* definitions for all option members
+                                     in this object. Look up option namePtr
+                                     names and get back ItclOption* ptrs */
+    Tcl_HashTable objectDelegatedOptions;
+                                  /* definitions for all delegated option
+				     members in this object. Look up option
+				     namePtr names and get back
+				     ItclOption* ptrs */
     Tcl_HashTable contextCache;   /* cache for function contexts */
     Tcl_Obj *namePtr;
     Tcl_Obj *varNsNamePtr;
@@ -488,8 +496,8 @@ MODULE_SCOPE void ItclReportObjectUsage(Tcl_Interp *interp,
         ItclObject *contextIoPtr, Tcl_Namespace *callerNsPtr,
 	Tcl_Namespace *contextNsPtr);
 MODULE_SCOPE void ItclGetInfoUsage(Tcl_Interp *interp, Tcl_Obj *objPtr);
-MODULE_SCOPE int ItclMapCmdNameProc(ClientData clientData, Tcl_Interp *interp,
-        Tcl_Obj *mappedCmd, Tcl_Class *clsPtr);
+MODULE_SCOPE int ItclMapMethodNameProc(Tcl_Interp *interp, Tcl_Object oPtr,
+        Tcl_Class *startClsPtr, Tcl_Obj *methodObj);
 MODULE_SCOPE int ItclCreateArgList(Tcl_Interp *interp, const char *str,
         int *argcPtr, int *maxArgcPtr, Tcl_Obj **usagePtr,
 	ItclArgList **arglistPtrPtr, ItclMemberFunc *imPtr,
@@ -553,6 +561,16 @@ MODULE_SCOPE int ItclWidgetInfoInit(Tcl_Interp *interp);
 MODULE_SCOPE void ItclDeleteObjectMetadata(ClientData clientData);
 MODULE_SCOPE void ItclDeleteClassMetadata(ClientData clientData);
 MODULE_SCOPE void ItclDeleteArgList(ItclArgList *arglistPtr);
+MODULE_SCOPE int Itcl_ClassOptionCmd(ClientData clientData, Tcl_Interp *interp,
+        int objc, Tcl_Obj *CONST objv[]);
+MODULE_SCOPE int DelegatedOptionsInstall(Tcl_Interp *interp,
+        ItclClass *iclsPtr);
+MODULE_SCOPE int ItclInitObjectOptions(Tcl_Interp *interp, ItclObject *ioPtr,
+         ItclClass *iclsPtr, const char *name);
+MODULE_SCOPE int Itcl_HandleDelegateOptionCmd(Tcl_Interp *interp,
+        ItclObject *ioPtr, ItclClass *iclsPtr, ItclDelegatedOption **idoPtrPtr,
+        int objc, Tcl_Obj *CONST objv[]);
+
 
 
 #include "itcl2TclOO.h"

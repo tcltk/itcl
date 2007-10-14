@@ -24,7 +24,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclInfo.c,v 1.1.2.6 2007/10/07 19:01:21 wiede Exp $
+ *     RCS:  $Id: itclInfo.c,v 1.1.2.7 2007/10/14 17:19:06 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -44,6 +44,9 @@ static InfoMethod InfoMethodList[] = {
     { "args", "procname", Itcl_BiInfoArgsCmd },
     { "body", "procname", Itcl_BiInfoBodyCmd },
     { "class", "", Itcl_BiInfoClassCmd },
+    { "component",
+        "?name? ?-inherit? ?-value?",
+        Itcl_BiInfoComponentCmd },
     { "function",
         "?name? ?-protection? ?-type? ?-name? ?-args? ?-body?",
         Itcl_BiInfoFunctionCmd },
@@ -75,6 +78,7 @@ static const struct NameProcMap infoCmds2[] = {
     { "::itcl::builtin::Info::args", Itcl_BiInfoArgsCmd },
     { "::itcl::builtin::Info::body", Itcl_BiInfoBodyCmd },
     { "::itcl::builtin::Info::class", Itcl_BiInfoClassCmd },
+    { "::itcl::builtin::Info::component", Itcl_BiInfoComponentCmd },
     { "::itcl::builtin::Info::function", Itcl_BiInfoFunctionCmd },
     { "::itcl::builtin::Info::heritage", Itcl_BiInfoHeritageCmd },
     { "::itcl::builtin::Info::inherit", Itcl_BiInfoInheritCmd },
@@ -1416,13 +1420,13 @@ Itcl_DefaultInfoCmd(
  * ------------------------------------------------------------------------
  *  Itcl_BiInfoOptionCmd()
  *
- *  Returns information regarding class data members (variables and
- *  commons).  Handles the following syntax:
+ *  Returns information regarding class options.
+ *  Handles the following syntax:
  *
  *    info option ?optionName? ?-protection? ?-name? ?-resource? ?-class?
  *        ?-default? ?-configmethod? ?-cgetmethod? ?-validatemethod? ?-value?
  *
- *  If the ?varName? is not specified, then a list of all known
+ *  If the ?optionName? is not specified, then a list of all known
  *  data members is returned.  Otherwise, the information for a
  *  specific member is returned.  Returns a status TCL_OK/TCL_ERROR
  *  to indicate success/failure.
@@ -1509,7 +1513,7 @@ Itcl_BiInfoOptionCmd(
 
     /*
      *  Process args:
-     *  ?varName? ?-protection? ?-name? ?-resource? ?-class?
+     *  ?optionName? ?-protection? ?-name? ?-resource? ?-class?
      * ?-default? ?-cgetmethod? ?-configuremethod? ?-validatemethod? ?-value?
      */
     objv++;  /* skip over command name */
@@ -1522,7 +1526,7 @@ Itcl_BiInfoOptionCmd(
     }
 
     /*
-     *  Return info for a specific variable.
+     *  Return info for a specific option.
      */
     if (optionName) {
 	optionNamePtr = Tcl_NewStringObj(optionName, -1);
@@ -1665,6 +1669,224 @@ Itcl_BiInfoOptionCmd(
             while (hPtr) {
                 ioptPtr = (ItclOption*)Tcl_GetHashValue(hPtr);
                 objPtr = ioptPtr->fullNamePtr;
+                Tcl_ListObjAppendElement((Tcl_Interp*)NULL, resultPtr, objPtr);
+                hPtr = Tcl_NextHashEntry(&place);
+            }
+        }
+        Itcl_DeleteHierIter(&hier);
+
+        Tcl_SetObjResult(interp, resultPtr);
+    }
+    return TCL_OK;
+}
+
+/*
+ * ------------------------------------------------------------------------
+ *  Itcl_BiInfoComponentCmd()
+ *
+ *  Returns information regarding class components.
+ *  Handles the following syntax:
+ *
+ *    info component ?componentName? ?-inherit? ?-name? ?-value?
+ *
+ *  If the ?componentName? is not specified, then a list of all known
+ *  data members is returned.  Otherwise, the information for a
+ *  specific member is returned.  Returns a status TCL_OK/TCL_ERROR
+ *  to indicate success/failure.
+ * ------------------------------------------------------------------------
+ */
+/* ARGSUSED */
+int
+Itcl_BiInfoComponentCmd(
+    ClientData dummy,        /* not used */
+    Tcl_Interp *interp,      /* current interpreter */
+    int objc,                /* number of arguments */
+    Tcl_Obj *CONST objv[])   /* argument objects */
+{
+    char *componentName = NULL;
+    Tcl_Obj *resultPtr = NULL;
+    Tcl_Obj *objPtr = NULL;
+    Tcl_Obj *componentNamePtr;
+
+    static const char *components[] = {
+	"-name", "-inherit", "-value", (char*)NULL
+    };
+    enum BCompIdx {
+	BCompNameIdx, BCompInheritIdx, BCompValueIdx
+    } *icomplist, icomplistStorage[3];
+
+    static enum BCompIdx DefInfoComponent[3] = {
+        BCompNameIdx,
+        BCompInheritIdx,
+        BCompValueIdx
+    };
+
+    ItclClass *contextIclsPtr;
+    ItclObject *contextIoPtr;
+    ItclObjectInfo *infoPtr;
+
+    Tcl_HashSearch place;
+    Tcl_HashEntry *hPtr;
+    Tcl_Namespace *nsPtr;
+    ItclComponent *icPtr;
+    ItclHierIter hier;
+    ItclClass *iclsPtr;
+    CONST char *val;
+    CONST char *name;
+    int i;
+    int result;
+
+    ItclShowArgs(1, "Itcl_BiInfoComponentCmd", objc, objv);
+    /*
+     *  If this command is not invoked within a class namespace,
+     *  signal an error.
+     */
+    contextIclsPtr = NULL;
+    if (Itcl_GetContext(interp, &contextIclsPtr, &contextIoPtr) != TCL_OK) {
+        name = Tcl_GetString(objv[0]);
+        Tcl_ResetResult(interp);
+        Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+            "\nget info like this instead 5: ",
+            "\n  namespace eval className { info ", name, "... }",
+            (char*)NULL);
+        return TCL_ERROR;
+    }
+    if (contextIoPtr != NULL) {
+        contextIclsPtr = contextIoPtr->iclsPtr;
+    }
+    nsPtr = Itcl_GetUplevelNamespace(interp, 1);
+    if (nsPtr->parentPtr == NULL) {
+        /* :: namespace */
+	nsPtr = contextIclsPtr->nsPtr;
+    }
+    infoPtr = contextIclsPtr->infoPtr;
+    hPtr = Tcl_FindHashEntry(&infoPtr->namespaceClasses, (char *)nsPtr);
+    if (hPtr == NULL) {
+        Tcl_AppendResult(interp, "cannot find class name for namespace \"",
+	        nsPtr->fullName, "\"", NULL);
+	return TCL_ERROR;
+    }
+    contextIclsPtr = Tcl_GetHashValue(hPtr);
+
+    /*
+     *  Process args:
+     *  ?componentName? ?-inherit? ?-name? ?-value?
+     */
+    objv++;  /* skip over command name */
+    objc--;
+
+    if (objc > 0) {
+        componentName = Tcl_GetString(*objv);
+        objc--;
+	objv++;
+    }
+
+    /*
+     *  Return info for a specific component.
+     */
+    if (componentName) {
+	componentNamePtr = Tcl_NewStringObj(componentName, -1);
+	Itcl_InitHierIter(&hier, contextIoPtr->iclsPtr);
+	while ((iclsPtr = Itcl_AdvanceHierIter(&hier)) != NULL) {
+	    hPtr = Tcl_FindHashEntry(&iclsPtr->components,
+	            (char *)componentNamePtr);
+	    if (hPtr != NULL) {
+	        break;
+	    }
+	}
+	Itcl_DeleteHierIter(&hier);
+        if (hPtr == NULL) {
+            Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+                "\"", componentName, "\" isn't a component in class \"",
+                contextIclsPtr->nsPtr->fullName, "\"",
+                (char*)NULL);
+            return TCL_ERROR;
+        }
+        icPtr = (ItclComponent *)Tcl_GetHashValue(hPtr);
+
+        /*
+         *  By default, return everything.
+         */
+        if (objc == 0) {
+            icomplist = DefInfoComponent;
+            objc = 3;
+        } else {
+
+            /*
+             *  Otherwise, scan through all remaining flags and
+             *  figure out what to return.
+             */
+            icomplist = &icomplistStorage[0];
+            for (i=0 ; i < objc; i++) {
+                result = Tcl_GetIndexFromObj(interp, objv[i],
+                    components, "component", 0, (int*)(&icomplist[i]));
+                if (result != TCL_OK) {
+                    return TCL_ERROR;
+                }
+            }
+        }
+
+        if (objc > 1) {
+            resultPtr = Tcl_NewListObj(0, (Tcl_Obj**)NULL);
+        }
+
+        for (i=0 ; i < objc; i++) {
+            switch (icomplist[i]) {
+                case BCompNameIdx:
+                    objPtr = icPtr->ivPtr->fullNamePtr;
+                    break;
+
+                case BCompInheritIdx:
+		    if (icPtr->flags & ITCL_COMPONENT_INHERIT) {
+                        val = "1";
+		    } else {
+                        val = "0";
+		    }
+                    objPtr = Tcl_NewStringObj((CONST84 char *)val, -1);
+                    break;
+
+                case BCompValueIdx:
+		    if (contextIoPtr == NULL) {
+                        Tcl_ResetResult(interp);
+                        Tcl_AppendResult(interp,
+                                "cannot access object-specific info ",
+                                "without an object context",
+                                (char*)NULL);
+                        return TCL_ERROR;
+                    } else {
+                        val = ItclGetInstanceVar(interp,
+			        Tcl_GetString(icPtr->namePtr), NULL,
+                                    contextIoPtr, icPtr->ivPtr->iclsPtr);
+                    }
+                    if (val == NULL) {
+                        val = "<undefined>";
+                    }
+                    objPtr = Tcl_NewStringObj((CONST84 char *)val, -1);
+		    Tcl_IncrRefCount(objPtr);
+                    break;
+            }
+
+            if (objc == 1) {
+                resultPtr = objPtr;
+            } else {
+                Tcl_ListObjAppendElement((Tcl_Interp*)NULL, resultPtr,
+                    objPtr);
+            }
+        }
+        Tcl_SetObjResult(interp, resultPtr);
+    } else {
+
+        /*
+         *  Return the list of available components.
+         */
+        resultPtr = Tcl_NewListObj(0, (Tcl_Obj**)NULL);
+	Tcl_IncrRefCount(resultPtr);
+        Itcl_InitHierIter(&hier, contextIclsPtr);
+        while ((iclsPtr=Itcl_AdvanceHierIter(&hier)) != NULL) {
+            hPtr = Tcl_FirstHashEntry(&iclsPtr->components, &place);
+            while (hPtr) {
+                icPtr = (ItclComponent *)Tcl_GetHashValue(hPtr);
+                objPtr = icPtr->ivPtr->fullNamePtr;
                 Tcl_ListObjAppendElement((Tcl_Interp*)NULL, resultPtr, objPtr);
                 hPtr = Tcl_NextHashEntry(&place);
             }

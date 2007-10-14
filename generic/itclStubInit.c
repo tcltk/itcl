@@ -1,5 +1,5 @@
 /*
- * $Id: itclStubInit.c,v 1.4.2.7 2007/10/07 18:58:48 wiede Exp $
+ * $Id: itclStubInit.c,v 1.4.2.8 2007/10/14 17:19:09 wiede Exp $
  *
  * This file is (mostly) automatically generated from itcl.decls.
  * It is compiled and linked in with the itcl package proper.
@@ -187,6 +187,7 @@ ItclIntStubs itclIntStubs = {
     Itcl_AddOptionCmd, /* 169 */
     Itcl_AddComponentCmd, /* 170 */
     Itcl_BiInfoOptionCmd, /* 171 */
+    Itcl_BiInfoComponentCmd, /* 172 */
 };
 
 static ItclStubHooks itclStubHooks = {

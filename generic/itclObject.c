@@ -24,7 +24,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann Copyright (c) 2007
  *
- *     RCS:  $Id: itclObject.c,v 1.1.2.16 2007/10/07 18:58:47 wiede Exp $
+ *     RCS:  $Id: itclObject.c,v 1.1.2.17 2007/10/14 17:19:08 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -169,6 +169,8 @@ ItclCreateObject(
     Tcl_DStringFree(&buffer);
 
     Tcl_InitHashTable(&ioPtr->objectVariables, TCL_ONE_WORD_KEYS);
+    Tcl_InitObjHashTable(&ioPtr->objectOptions);
+    Tcl_InitObjHashTable(&ioPtr->objectDelegatedOptions);
     Tcl_InitHashTable(&ioPtr->contextCache, TCL_ONE_WORD_KEYS);
 
     Itcl_PreserveData((ClientData)ioPtr);  /* while we're using this... */
@@ -190,6 +192,10 @@ ItclCreateObject(
     }
     if (iclsPtr->flags & (ITCL_ECLASS|ITCL_NWIDGET)) {
         ItclInitEClassOptions(interp, ioPtr);
+        if (ItclInitObjectOptions(interp, ioPtr, iclsPtr, name) != TCL_OK) {
+	    Tcl_AppendResult(interp, "error in ItclInitObjectOptions", NULL);
+            return TCL_ERROR;
+        }
     }
 
     infoPtr = iclsPtr->infoPtr;
@@ -224,7 +230,7 @@ ItclCreateObject(
 	// NEED TO FREE STUFF HERE !! 
         return TCL_ERROR;
     }
-    Tcl_ObjectSetMapCmdNameProc(ioPtr->oPtr, ItclMapCmdNameProc);
+    Tcl_ObjectSetMapMethodNameProc(ioPtr->oPtr, ItclMapMethodNameProc);
 
     ioPtr->accessCmd = Tcl_GetObjectCommand(ioPtr->oPtr);
     Tcl_GetCommandInfoFromToken(ioPtr->accessCmd, &cmdInfo);
@@ -418,6 +424,7 @@ ItclInitObjectVariables(
         while (entry) {
             ivPtr = (ItclVariable*)Tcl_GetHashValue(entry);
             if ((ivPtr->flags & ITCL_OPTIONS_VAR) && !itclOptionsIsSet) {
+                /* this is the special code for the "itcl_options" variable */
 		itclOptionsIsSet = 1;
                 itclOptionsName = Tcl_GetString(ivPtr->namePtr);
                 Tcl_DStringInit(&buffer2);
@@ -511,6 +518,100 @@ ItclInitObjectVariables(
             entry = Tcl_NextHashEntry(&place);
         }
 	Tcl_PopCallFrame(interp);
+        iclsPtr2 = Itcl_AdvanceHierIter(&hier);
+    }
+    Tcl_DStringFree(&buffer);
+    Itcl_DeleteHierIter(&hier);
+    return TCL_OK;
+}
+
+/*
+ * ------------------------------------------------------------------------
+ *  ItclInitObjectOptions()
+ *
+ *  Collect all instance options for the given object instance to allow
+ *  faster runtime access to the options.
+ *  It is assumed, that an option can only exist in one class!!
+ *  So no duplicates allowed!!
+ *  This is usually invoked *  automatically by Itcl_CreateObject(),
+ *  when an object is created.
+ * ------------------------------------------------------------------------
+ */
+int
+ItclInitObjectOptions(
+   Tcl_Interp *interp,
+   ItclObject *ioPtr,
+   ItclClass *iclsPtr,
+   const char *name)
+{
+    Tcl_DString buffer;
+    ItclClass *iclsPtr2;
+    ItclHierIter hier;
+    ItclOption *ioptPtr;
+    ItclDelegatedOption *idoPtr;
+    Tcl_HashEntry *hPtr;
+    Tcl_HashEntry *hPtr2;;
+    Tcl_HashSearch place;
+    Tcl_CallFrame frame;
+    Tcl_Namespace *varNsPtr;
+    const char *itclOptionsName;
+    int isNew;
+
+    ioptPtr = NULL;
+    Itcl_InitHierIter(&hier, iclsPtr);
+    iclsPtr2 = Itcl_AdvanceHierIter(&hier);
+    while (iclsPtr2 != NULL) {
+	/* now initialize the options which have an init value */
+        hPtr = Tcl_FirstHashEntry(&iclsPtr2->options, &place);
+        while (hPtr) {
+            ioptPtr = (ItclOption*)Tcl_GetHashValue(hPtr);
+	    hPtr2 = Tcl_CreateHashEntry(&ioPtr->objectOptions,
+	            (char *)ioptPtr->namePtr, &isNew);
+	    if (isNew) {
+		Tcl_SetHashValue(hPtr2, ioptPtr);
+                itclOptionsName = Tcl_GetString(ioptPtr->namePtr);
+                Tcl_DStringInit(&buffer);
+	        Tcl_DStringAppend(&buffer, ITCL_VARIABLES_NAMESPACE, -1);
+	        if ((name[0] != ':') && (name[1] != ':')) {
+                     Tcl_DStringAppend(&buffer, "::", 2);
+	        }
+	        Tcl_DStringAppend(&buffer, name, -1);
+	        varNsPtr = Tcl_CreateNamespace(interp,
+		        Tcl_DStringValue(&buffer), NULL, 0);
+	        if (varNsPtr == NULL) {
+	            varNsPtr = Tcl_FindNamespace(interp,
+		            Tcl_DStringValue(&buffer), NULL, 0);
+	        }
+                Tcl_DStringFree(&buffer);
+	        /* now initialize the options which have an init value */
+                if (Tcl_PushCallFrame(interp, &frame, varNsPtr,
+                        /*isProcCallFrame*/0) != TCL_OK) {
+                    return TCL_ERROR;
+                }
+                if (Tcl_SetVar2(interp, "itcl_options", "",
+	                "", TCL_NAMESPACE_ONLY) == NULL) {
+	            Tcl_PopCallFrame(interp);
+		    return TCL_ERROR;
+                }
+                Tcl_TraceVar2(interp, "itcl_options",
+                        NULL,
+                        TCL_TRACE_READS|TCL_TRACE_WRITES,
+                        ItclTraceOptionVar, (ClientData)ioPtr);
+	        Tcl_PopCallFrame(interp);
+            }
+            hPtr = Tcl_NextHashEntry(&place);
+        }
+	/* now check for options which are delegated */
+        hPtr = Tcl_FirstHashEntry(&iclsPtr2->delegatedOptions, &place);
+        while (hPtr) {
+            idoPtr = (ItclDelegatedOption*)Tcl_GetHashValue(hPtr);
+	    hPtr2 = Tcl_CreateHashEntry(&ioPtr->objectDelegatedOptions,
+	            (char *)idoPtr->namePtr, &isNew);
+	    if (isNew) {
+		Tcl_SetHashValue(hPtr2, idoPtr);
+	    }
+            hPtr = Tcl_NextHashEntry(&place);
+        }
         iclsPtr2 = Itcl_AdvanceHierIter(&hier);
     }
     Tcl_DStringFree(&buffer);
@@ -1566,11 +1667,11 @@ GetClassFromClassName(
  */
 
 int
-ItclMapCmdNameProc(
-    ClientData clientData,
+ItclMapMethodNameProc(
     Tcl_Interp *interp,
-    Tcl_Obj *mappedCmd,
-    Tcl_Class *clsPtr)
+    Tcl_Object oPtr,
+    Tcl_Class *startClsPtr,
+    Tcl_Obj *methodObj)
 {
     Tcl_Obj *methodName;
     Tcl_Obj *className;
@@ -1583,16 +1684,16 @@ ItclMapCmdNameProc(
     char *tail;
     char *sp;
 
-    sp = Tcl_GetString(mappedCmd);
+    sp = Tcl_GetString(methodObj);
     Itcl_ParseNamespPath(sp, &buffer, &head, &tail);
     if (head != NULL) {
         infoPtr = (ItclObjectInfo *)Tcl_GetAssocData(interp,
                 ITCL_INTERP_DATA, NULL);
-        ioPtr = (ItclObject *)Tcl_ObjectGetMetadata(clientData,
+        ioPtr = (ItclObject *)Tcl_ObjectGetMetadata(oPtr,
                 infoPtr->object_meta_type);
 	if (ioPtr == NULL) {
 	    /* try to get the class (if a class is creating an object) */
-            iclsPtr = (ItclClass *)Tcl_ObjectGetMetadata(clientData,
+            iclsPtr = (ItclClass *)Tcl_ObjectGetMetadata(oPtr,
                     infoPtr->class_meta_type);
 	} else {
             iclsPtr = ioPtr->iclsPtr;
@@ -1605,8 +1706,8 @@ ItclMapCmdNameProc(
         sp = Tcl_GetString(className);
 	iclsPtr2 = GetClassFromClassName(sp, iclsPtr);
 	if (iclsPtr2 != NULL) {
-	    *clsPtr = iclsPtr2->clsPtr;
-	    Tcl_SetStringObj(mappedCmd, Tcl_GetString(methodName), -1);
+	    *startClsPtr = iclsPtr2->clsPtr;
+	    Tcl_SetStringObj(methodObj, Tcl_GetString(methodName), -1);
 	}
         Tcl_DecrRefCount(className);
         Tcl_DecrRefCount(methodName);
@@ -1761,6 +1862,52 @@ DelegateFunction(
 
 /*
  * ------------------------------------------------------------------------
+ *  DelegatOptionsInstall()
+ * ------------------------------------------------------------------------
+ */
+
+int
+DelegatedOptionsInstall(
+    Tcl_Interp *interp,
+    ItclClass *iclsPtr)
+{
+    Tcl_HashEntry *hPtr2;
+    Tcl_HashSearch search2;
+    ItclDelegatedOption *idoPtr;
+    ItclOption *ioptPtr;
+    FOREACH_HASH_DECLS;
+    char *optionName;
+
+    FOREACH_HASH_VALUE(idoPtr, &iclsPtr->delegatedOptions) {
+	optionName = Tcl_GetString(idoPtr->namePtr);
+	if (*optionName == '*') {
+	    /* allow nested FOREACH */
+	    search2 = search;
+	    FOREACH_HASH_VALUE(ioptPtr, &iclsPtr->options) {
+	        if (Tcl_FindHashEntry(&idoPtr->exceptions,
+		        (char *)idoPtr->namePtr) == NULL) {
+		    ioptPtr->idoPtr = idoPtr;
+		}
+	    }
+	    search = search2;
+	} else {
+            hPtr2 = Tcl_FindHashEntry(&iclsPtr->options,
+	            (char *)idoPtr->namePtr);
+	    if (hPtr2 == NULL) {
+                Tcl_AppendResult(interp, "missing option \"", optionName,
+		        "\" in options for delegate option", NULL);
+		return TCL_ERROR;
+	    }
+	    ioptPtr = Tcl_GetHashValue(hPtr2);
+	    idoPtr->ioptPtr = ioptPtr;
+	    ioptPtr->idoPtr = idoPtr;
+        }
+    }
+    return TCL_OK;
+}
+
+/*
+ * ------------------------------------------------------------------------
  *  DelegationInstall()
  * ------------------------------------------------------------------------
  */
@@ -1775,12 +1922,9 @@ DelegationInstall(
     Tcl_HashSearch search2;
     Tcl_Obj *componentNamePtr;
     ItclDelegatedFunction *idmPtr;
-    ItclDelegatedOption *idoPtr;
-    ItclOption *ioptPtr;
     ItclMemberFunc *imPtr;
     FOREACH_HASH_DECLS;
     char *methodName;
-    char *optionName;
     const char *val;
     int result;
     int noDelegate;
@@ -1840,31 +1984,7 @@ DelegationInstall(
             Tcl_DecrRefCount(componentNamePtr);
         }
     }
-    FOREACH_HASH_VALUE(idoPtr, &iclsPtr->delegatedOptions) {
-	optionName = Tcl_GetString(idoPtr->namePtr);
-	if (*optionName == '*') {
-	    /* allow nested FOREACH */
-	    search2 = search;
-	    FOREACH_HASH_VALUE(ioptPtr, &iclsPtr->options) {
-	        if (Tcl_FindHashEntry(&idoPtr->exceptions,
-		        (char *)idoPtr->namePtr) == NULL) {
-		    ioptPtr->idoPtr = idoPtr;
-		}
-	    }
-	    search = search2;
-	} else {
-            hPtr2 = Tcl_FindHashEntry(&iclsPtr->options,
-	            (char *)idoPtr->namePtr);
-	    if (hPtr2 == NULL) {
-                Tcl_AppendResult(interp, "missing option \"", optionName,
-		        "\" in options for delegate option", NULL);
-		return TCL_ERROR;
-	    }
-	    ioptPtr = Tcl_GetHashValue(hPtr2);
-	    idoPtr->ioptPtr = ioptPtr;
-	    ioptPtr->idoPtr = idoPtr;
-        }
-    }
+    result = DelegatedOptionsInstall(interp, iclsPtr);
     return result;
 }
 

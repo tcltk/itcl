@@ -39,7 +39,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclParse.c,v 1.1.2.15 2007/10/07 18:58:47 wiede Exp $
+ *     RCS:  $Id: itclParse.c,v 1.1.2.16 2007/10/14 17:19:08 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -80,7 +80,9 @@ Tcl_ObjCmdProc Itcl_ClassOptionCmd;
 Tcl_ObjCmdProc Itcl_NWidgetCmd;
 Tcl_ObjCmdProc Itcl_EClassCmd;
 Tcl_ObjCmdProc Itcl_AddOptionCmd;
+Tcl_ObjCmdProc Itcl_AddDelegatedOptionCmd;
 Tcl_ObjCmdProc Itcl_AddComponentCmd;
+Tcl_ObjCmdProc Itcl_SetComponentCmd;
 Tcl_ObjCmdProc Itcl_ClassComponentCmd;
 Tcl_ObjCmdProc Itcl_ClassDelegateMethodCmd;
 Tcl_ObjCmdProc Itcl_ClassDelegateOptionCmd;
@@ -377,7 +379,16 @@ Itcl_ParseInit(
         (ClientData)infoPtr, (Tcl_CmdDeleteProc*)NULL);
     Itcl_PreserveData((ClientData)infoPtr);
 
+    Tcl_CreateObjCommand(interp, "::itcl::adddelegatedoption",
+        Itcl_AddDelegatedOptionCmd,
+        (ClientData)infoPtr, (Tcl_CmdDeleteProc*)NULL);
+    Itcl_PreserveData((ClientData)infoPtr);
+
     Tcl_CreateObjCommand(interp, "::itcl::addcomponent", Itcl_AddComponentCmd,
+        (ClientData)infoPtr, (Tcl_CmdDeleteProc*)NULL);
+    Itcl_PreserveData((ClientData)infoPtr);
+
+    Tcl_CreateObjCommand(interp, "::itcl::setcomponent", Itcl_SetComponentCmd,
         (ClientData)infoPtr, (Tcl_CmdDeleteProc*)NULL);
     Itcl_PreserveData((ClientData)infoPtr);
 
@@ -2147,22 +2158,28 @@ delegate method * ?to <componentName>? ?using <pattern>? ?except <methods>?";
 
 /*
  * ------------------------------------------------------------------------
- *  Itcl_ClassDelegateOptionCmd()
+ *  Itcl_HandleDelegateOptionCmd()
  *
  *  Invoked by Tcl during the parsing of a class definition whenever
  *  the "delegate option" command is invoked to define a 
+ *  or if ::itcl::adddelegateoption with an itcl object
  *  Handles the following syntax:
  *
- *      delegate option
+ *      delegate option ...
  *
  * ------------------------------------------------------------------------
  */
 int
-Itcl_ClassDelegateOptionCmd(
-    ClientData clientData,   /* info for all known objects */
+Itcl_HandleDelegateOptionCmd(
     Tcl_Interp *interp,      /* current interpreter */
+    ItclObject *ioPtr,       /* != NULL for ::itcl::adddelgatedoption 
+                                otherwise NULL */
+    ItclClass *iclsPtr,      /* != NULL for delegate option otherwise NULL */
+    ItclDelegatedOption **idoPtrPtr,
+                             /* where to return idoPtr */
     int objc,                /* number of arguments */
     Tcl_Obj *CONST objv[])   /* argument objects */
+
 {
     Tcl_Obj *allOptionNamePtr;
     Tcl_Obj *optionNamePtr;
@@ -2172,34 +2189,33 @@ Itcl_ClassDelegateOptionCmd(
     Tcl_Obj *resourceNamePtr;
     Tcl_Obj *classNamePtr;
     Tcl_HashEntry *hPtr;
-    Tcl_HashEntry *hPtr2;
-    ItclObjectInfo *infoPtr;
-    ItclClass *iclsPtr;
     ItclComponent *icPtr;
     ItclDelegatedOption *idoPtr;
+    ItclHierIter hier;
     const char *usageStr;
     const char *option;
     const char *component;
     const char *token;
     const char **argv;
+    char *what;
+    const char *whatName;
     int foundOpt;
     int argc;
     int isNew;
     int i;
 
-    ItclShowArgs(1, "Itcl_ClassDelegateOptionCmd", objc, objv);
+    ItclShowArgs(1, "Itcl_HandleDelegatedOptionCmd", objc, objv);
     usageStr = "<optionDef> to <targetDef> ?as <script>? ?except <script>?";
     if (objc < 4) {
 	Tcl_AppendResult(interp, "wrong # args should be ", usageStr, NULL);
         return TCL_ERROR;
     }
-    infoPtr = (ItclObjectInfo *)clientData;
-    iclsPtr = (ItclClass *)Itcl_PeekStack(&infoPtr->clsStack);
-    if (iclsPtr->flags & ITCL_CLASS) {
-        Tcl_AppendResult(interp, "\"", Tcl_GetString(iclsPtr->namePtr),
-	        " is no ::itcl::widget/::itcl::widgetadaptor/::itcl::type/::itcl::struct.", 
-		" Only these can delegate options", NULL);
-	return TCL_ERROR;
+    if (ioPtr != NULL) {
+        what = "object";
+	whatName = Tcl_GetCommandName(interp, ioPtr->accessCmd);
+    } else {
+	whatName = iclsPtr->nsPtr->fullName;
+        what = "class";
     }
     token = Tcl_GetString(objv[1]);
     if (Tcl_SplitList(interp, (CONST84 char *)token, &argc, &argv) != TCL_OK) {
@@ -2269,16 +2285,23 @@ Itcl_ClassDelegateOptionCmd(
 	        "cannot specify \"as\" with \"delegate option *\"", NULL);
 	return TCL_ERROR;
     }
+#ifdef NOTDEF
     if ((*option == '*') && (exceptionsPtr != NULL)) {
 	Tcl_AppendResult(interp,
 	        "cannot specify \"except\" with \"delegate option *\"", NULL);
 	return TCL_ERROR;
     }
+#endif
     /* check for already delegated */
     allOptionNamePtr = Tcl_NewStringObj("*", -1);
     Tcl_IncrRefCount(allOptionNamePtr);
-    hPtr = Tcl_FindHashEntry(&iclsPtr->delegatedOptions, (char *)
-            allOptionNamePtr);
+    if (ioPtr != NULL) {
+        hPtr = Tcl_FindHashEntry(&ioPtr->objectDelegatedOptions, (char *)
+                allOptionNamePtr);
+    } else {
+        hPtr = Tcl_FindHashEntry(&iclsPtr->delegatedOptions, (char *)
+                allOptionNamePtr);
+    }
     Tcl_DecrRefCount(allOptionNamePtr);
     if (hPtr != NULL) {
         Tcl_AppendResult(interp, "option \"", option,
@@ -2286,9 +2309,42 @@ Itcl_ClassDelegateOptionCmd(
         return TCL_ERROR;
     }
 
-
-    if (ItclCreateComponent(interp, iclsPtr, componentPtr, &icPtr) != TCL_OK) {
+    if (ioPtr != NULL) {
+        Itcl_InitHierIter(&hier, ioPtr->iclsPtr);
+	while ((iclsPtr = Itcl_AdvanceHierIter(&hier)) != NULL) {
+	    hPtr = Tcl_FindHashEntry(&iclsPtr->components,
+	            (char *)componentPtr);
+            if (hPtr != NULL) {
+	        break;
+	    }
+	}
+	Itcl_DeleteHierIter(&hier);
+    } else {
+        hPtr = Tcl_FindHashEntry(&iclsPtr->components, (char *)componentPtr);
+    }
+    if (hPtr == NULL) {
+	Tcl_AppendResult(interp, what, " \"", whatName,
+	        "\" has no component \"", Tcl_GetString(componentPtr), "\"",
+		NULL);
         return TCL_ERROR;
+    }
+    icPtr = Tcl_GetHashValue(hPtr);
+    if (*option != '*') {
+	/* FIX ME !!! */
+	/* check for locally defined option */
+        /* check for valid option name */
+        // ItclIsValidOptionName(option);
+	if (ioPtr != NULL) {
+	    hPtr = Tcl_FindHashEntry(&ioPtr->objectOptions,
+	            (char *)optionNamePtr);
+	} else {
+	    hPtr = Tcl_FindHashEntry(&iclsPtr->options, (char *)optionNamePtr);
+	}
+	if (hPtr != NULL) {
+	    Tcl_AppendResult(interp, "option \"", option,
+	            "\" has been defined locally", NULL);
+	    return TCL_ERROR;
+	}
     }
     idoPtr = (ItclDelegatedOption *)ckalloc(sizeof(ItclDelegatedOption));
     memset(idoPtr, 0, sizeof(ItclDelegatedOption));
@@ -2303,16 +2359,6 @@ Itcl_ClassDelegateOptionCmd(
 	}
         if (classNamePtr == NULL) {
 	    classNamePtr = ItclCapitalize(option+1);
-	}
-	/* FIX ME !!! */
-	/* check for locally defined option */
-        /* check for valid option name */
-        // ItclIsValidOptionName(option);
-	hPtr = Tcl_FindHashEntry(&iclsPtr->options, (char *)optionNamePtr);
-	if (hPtr != NULL) {
-	    Tcl_AppendResult(interp, "option \"", option,
-	            "\" has been defined locally", NULL);
-	    return TCL_ERROR;
 	}
         idoPtr->namePtr = optionNamePtr;
         idoPtr->resourceNamePtr = resourceNamePtr;
@@ -2337,9 +2383,9 @@ Itcl_ClassDelegateOptionCmd(
 	    Tcl_IncrRefCount(objPtr);
 	    hPtr = Tcl_CreateHashEntry(&idoPtr->exceptions, (char *)objPtr,
 	            &isNew);
+#ifdef NOTDEF
 	    hPtr2 = Tcl_FindHashEntry(&iclsPtr->options, (char *)objPtr);
 /* FIX ME !!! can only be done after a class/widget has been parsed completely !! */
-#ifdef NOTDEF
 	    if (hPtr2 == NULL) {
 	        Tcl_AppendResult(interp, "no such option: \"",
 		        Tcl_GetString(objPtr), "\" found for delegation", NULL);
@@ -2348,6 +2394,58 @@ Itcl_ClassDelegateOptionCmd(
 	    Tcl_SetHashValue(hPtr, Tcl_GetHashValue(hPtr2));
 #endif
 	}
+    }
+    if (idoPtrPtr != NULL) {
+        *idoPtrPtr = idoPtr;
+    }
+    return TCL_OK;
+}
+
+/*
+ * ------------------------------------------------------------------------
+ *  Itcl_ClassDelegateOptionCmd()
+ *
+ *  Invoked by Tcl during the parsing of a class definition whenever
+ *  the "delegate option" command is invoked to define a 
+ *  Handles the following syntax:
+ *
+ *      delegate option
+ *
+ * ------------------------------------------------------------------------
+ */
+int
+Itcl_ClassDelegateOptionCmd(
+    ClientData clientData,   /* info for all known objects */
+    Tcl_Interp *interp,      /* current interpreter */
+    int objc,                /* number of arguments */
+    Tcl_Obj *CONST objv[])   /* argument objects */
+{
+    Tcl_HashEntry *hPtr;
+    ItclObjectInfo *infoPtr;
+    ItclClass *iclsPtr;
+    ItclDelegatedOption *idoPtr;
+    const char *usageStr;
+    int isNew;
+    int result;
+
+    ItclShowArgs(1, "Itcl_ClassDelegateOptionCmd", objc, objv);
+    usageStr = "<optionDef> to <targetDef> ?as <script>? ?except <script>?";
+    if (objc < 4) {
+	Tcl_AppendResult(interp, "wrong # args should be ", usageStr, NULL);
+        return TCL_ERROR;
+    }
+    infoPtr = (ItclObjectInfo *)clientData;
+    iclsPtr = (ItclClass *)Itcl_PeekStack(&infoPtr->clsStack);
+    if (iclsPtr->flags & ITCL_CLASS) {
+        Tcl_AppendResult(interp, "\"", Tcl_GetString(iclsPtr->namePtr),
+	        " is no ::itcl::widget/::itcl::widgetadaptor/::itcl::type/::itcl::struct.", 
+		" Only these can delegate options", NULL);
+	return TCL_ERROR;
+    }
+    result = Itcl_HandleDelegateOptionCmd(interp, NULL, iclsPtr, &idoPtr,
+             objc, objv);
+    if (result != TCL_OK) {
+        return result;
     }
     hPtr = Tcl_CreateHashEntry(&iclsPtr->delegatedOptions,
             (char *)idoPtr->namePtr, &isNew);

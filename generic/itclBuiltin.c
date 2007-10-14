@@ -24,7 +24,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclBuiltin.c,v 1.1.2.14 2007/10/07 12:32:33 wiede Exp $
+ *     RCS:  $Id: itclBuiltin.c,v 1.1.2.15 2007/10/14 17:19:05 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -1227,14 +1227,13 @@ ItclWidgetCget(
     Tcl_HashEntry *hPtr;
     Tcl_Obj *objPtr;
     Tcl_Object oPtr;
+    Tcl_Obj *methodNamePtr;
     ItclDelegatedFunction *idmPtr;
     ItclDelegatedOption *idoPtr;
-    ItclHierIter hier;
     ItclComponent *icPtr;
     ItclObjectInfo *infoPtr;
     ItclOption *ioptPtr;
     ItclObject *ioPtr;
-    ItclClass *iclsPtr;
     const char *val;
     int i;
     int result;
@@ -1267,7 +1266,7 @@ ItclWidgetCget(
     }
 
     hPtr = NULL;
-    Tcl_Obj *methodNamePtr;
+    /* first check if method cget is delegated */
     methodNamePtr = Tcl_NewStringObj("*", -1);
     hPtr = Tcl_FindHashEntry(&contextIclsPtr->delegatedFunctions, (char *)
             methodNamePtr);
@@ -1311,13 +1310,14 @@ ItclWidgetCget(
     }
     /* now do the hard work */
     /* first handle delegated options */
-    hPtr = Tcl_FindHashEntry(&contextIclsPtr->delegatedOptions, (char *)
+    hPtr = Tcl_FindHashEntry(&contextIoPtr->objectDelegatedOptions, (char *)
             objv[1]);
     if (hPtr != NULL) {
+	/* the option is delegated */
         idoPtr = (ItclDelegatedOption *)Tcl_GetHashValue(hPtr);
         icPtr = idoPtr->icPtr;
         val = ItclGetInstanceVar(interp, Tcl_GetString(icPtr->namePtr),
-                NULL, contextIoPtr, contextIclsPtr);
+                NULL, contextIoPtr, icPtr->ivPtr->iclsPtr);
         if (val != NULL) {
             Tcl_DString buffer;
             Tcl_DStringInit(&buffer);
@@ -1341,17 +1341,19 @@ ItclWidgetCget(
 	        infoPtr->currContextIclsPtr = NULL;
 	    }
             return result;
-        }
-    }
-    /* now look if it is an option at all */
-    Itcl_InitHierIter(&hier, contextIclsPtr);
-    while ((iclsPtr = Itcl_AdvanceHierIter(&hier)) != NULL) {
-        hPtr = Tcl_FindHashEntry(&iclsPtr->options, (char *) objv[1]);
-        if (hPtr != NULL) {
-	    break;
+        } else {
+	    Tcl_ResetResult(interp);
+	    Tcl_AppendResult(interp, "component \"",
+	            Tcl_GetString(icPtr->namePtr),
+	            "\" is not set, needed for option \"",
+		    Tcl_GetString(objv[1]),
+	            "\"", NULL);
+	    return TCL_ERROR;
 	}
     }
-    Itcl_DeleteHierIter(&hier);
+
+    /* now look if it is an option at all */
+    hPtr = Tcl_FindHashEntry(&contextIoPtr->objectOptions, (char *) objv[1]);
     if (hPtr == NULL) {
 	/* no option at all, let the normal configure do the job */
 	return TCL_CONTINUE;
@@ -1359,7 +1361,6 @@ ItclWidgetCget(
     ioptPtr = (ItclOption *)Tcl_GetHashValue(hPtr);
     Tcl_DStringInit(&buffer);
     result = TCL_CONTINUE;
-    ioptPtr = (ItclOption *)Tcl_GetHashValue(hPtr);
     if (ioptPtr->cgetMethodPtr != NULL) {
         Tcl_DStringAppend(&buffer, Tcl_GetString(
                 ioptPtr->cgetMethodPtr), -1);

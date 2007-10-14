@@ -25,7 +25,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann Copyright (c) 2007
  *
- *     RCS:  $Id: itclClass.c,v 1.1.2.10 2007/10/07 12:32:33 wiede Exp $
+ *     RCS:  $Id: itclClass.c,v 1.1.2.11 2007/10/14 17:19:05 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -352,7 +352,7 @@ Itcl_CreateClass(
     Tcl_ObjectSetMetadata((Tcl_Object) oPtr, infoPtr->class_meta_type, iclsPtr);
     iclsPtr->clsPtr = Tcl_GetObjectAsClass(oPtr);
     iclsPtr->oPtr = oPtr;
-    Tcl_ObjectSetMapCmdNameProc(iclsPtr->oPtr, ItclMapCmdNameProc);
+    Tcl_ObjectSetMapMethodNameProc(iclsPtr->oPtr, ItclMapMethodNameProc);
     cmd = Tcl_GetObjectCommand(iclsPtr->oPtr);
     Tcl_GetCommandInfoFromToken(cmd, &cmdInfo);
     cmdInfo.deleteProc = ItclDestroyClass;

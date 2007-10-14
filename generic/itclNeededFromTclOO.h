@@ -3,12 +3,12 @@ typedef int (*TclOO_PreCallProc)(ClientData clientData, Tcl_Interp *interp,
         Tcl_ObjectContext contextPtr, Tcl_CallFrame *framePtr, int *isFinished);
 typedef int (*TclOO_PostCallProc)(ClientData clientData, Tcl_Interp *interp,
         Tcl_ObjectContext contextPtr, Tcl_Namespace *nsPtr, int result);
-typedef int (*TclOO_MapCmdName)(ClientData clientData, Tcl_Interp *interp,
-        Tcl_Obj *mappedCmd, Tcl_Class *clsPtr);
+typedef int (*TclOO_MapMethodNameProc)(Tcl_Interp *interp, Tcl_Object oPtr,
+        Tcl_Class *startClsPtr, Tcl_Obj *methodObj);
 #endif
 
-EXTERN void Tcl_ObjectSetMapCmdNameProc(Tcl_Object oPtr,
-        TclOO_MapCmdName mapCmdNameProc);
+EXTERN void Tcl_ObjectSetMapMethodNameProc(Tcl_Object oPtr,
+        TclOO_MapMethodNameProc mapMethodNameProc);
 
 
 #define Tcl_ProcPtrFromPM _Tcl_ProcPtrFromPM
