@@ -24,7 +24,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclBuiltin.c,v 1.1.2.19 2007/10/15 19:53:18 wiede Exp $
+ *     RCS:  $Id: itclBuiltin.c,v 1.1.2.20 2007/10/15 23:28:02 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -319,21 +319,29 @@ Itcl_BiConfigureCmd(
     Tcl_HashSearch place;
     Tcl_HashEntry *hPtr;
     Tcl_Namespace *saveNsPtr;
+    Tcl_Obj * const *unparsedObjv;
     ItclClass *iclsPtr;
     ItclVariable *ivPtr;
     ItclVarLookup *vlookup;
     ItclMemberCode *mcode;
     ItclHierIter hier;
+    ItclObjectInfo *infoPtr;
     CONST char *lastval;
     char *token;
     char *varName;
     int i;
+    int unparsedObjc;
     int result;
 
     ItclShowArgs(1, "Itcl_BiConfigureCmd", objc, objv);
     vlookup = NULL;
     token = NULL;
     hPtr = NULL;
+    unparsedObjc = objc;
+    unparsedObjv = objv;
+    Tcl_DStringInit(&buffer);
+    Tcl_DStringInit(&buffer2);
+
     /*
      *  Make sure that this command is being invoked in the proper
      *  context.
@@ -358,6 +366,7 @@ Itcl_BiConfigureCmd(
         contextIclsPtr = contextIoPtr->iclsPtr;
     }
 
+    infoPtr = contextIclsPtr->infoPtr;
     if (!(contextIclsPtr->flags & ITCL_CLASS)) {
 	/* first check if it is an option */
 	if (objc > 1) {
@@ -368,11 +377,17 @@ Itcl_BiConfigureCmd(
         if (result != TCL_CONTINUE) {
             return result;
         }
+        if (infoPtr->unparsedObjc > 0) {
+            unparsedObjc = infoPtr->unparsedObjc;
+            unparsedObjv = infoPtr->unparsedObjv;
+	} else {
+	    unparsedObjc = 0;
+	}
     }
     /*
      *  HANDLE:  configure
      */
-    if (objc == 1) {
+    if (unparsedObjc == 1) {
         resultPtr = Tcl_NewListObj(0, (Tcl_Obj**)NULL);
 
         Itcl_InitHierIter(&hier, contextIclsPtr);
@@ -398,8 +413,8 @@ Itcl_BiConfigureCmd(
         /*
          *  HANDLE:  configure -option
          */
-        if (objc == 2) {
-            token = Tcl_GetStringFromObj(objv[1], (int*)NULL);
+        if (unparsedObjc == 2) {
+            token = Tcl_GetStringFromObj(unparsedObjv[1], (int*)NULL);
             if (*token != '-') {
                 Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
                     "improper usage: should be ",
@@ -441,12 +456,14 @@ Itcl_BiConfigureCmd(
      */
     result = TCL_OK;
 
-    Tcl_DStringInit(&buffer);
-    Tcl_DStringInit(&buffer2);
-
-    for (i=1; i < objc; i+=2) {
+    for (i=1; i < unparsedObjc; i+=2) {
+	if (i+1 >= unparsedObjc) {
+	    Tcl_AppendResult(interp, "need option value pair", NULL);
+	    result = TCL_ERROR;
+            goto configureDone;
+	}
         vlookup = NULL;
-        token = Tcl_GetString(objv[i]);
+        token = Tcl_GetString(unparsedObjv[i]);
         if (*token == '-') {
             hPtr = Tcl_FindHashEntry(&contextIclsPtr->resolveVars, token+1);
             if (hPtr == NULL) {
@@ -458,15 +475,13 @@ Itcl_BiConfigureCmd(
         }
 
         if (!vlookup || (vlookup->ivPtr->protection != ITCL_PUBLIC)) {
-            Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
-                "unknown option \"", token, "\"",
+            Tcl_AppendResult(interp, "unknown option \"", token, "\"",
                 (char*)NULL);
             result = TCL_ERROR;
             goto configureDone;
         }
-        if (i == objc-1) {
-            Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
-                "value for \"", token, "\" missing",
+        if (i == unparsedObjc-1) {
+            Tcl_AppendResult(interp, "value for \"", token, "\" missing",
                 (char*)NULL);
             result = TCL_ERROR;
             goto configureDone;
@@ -486,13 +501,14 @@ Itcl_BiConfigureCmd(
         Tcl_DStringSetLength(&buffer, 0);
         Tcl_DStringAppend(&buffer, (lastval) ? lastval : "", -1);
 
-        token = Tcl_GetStringFromObj(objv[i+1], (int*)NULL);
-
+        token = Tcl_GetString(unparsedObjv[i+1]);
         if (Tcl_SetVar2(interp, varName, (char*)NULL, token,
                 TCL_LEAVE_ERR_MSG) == NULL) {
 
             char msg[256];
-            sprintf(msg, "\n    (error in configuration of public variable \"%.100s\")", Tcl_GetString(ivPtr->fullNamePtr));
+            sprintf(msg,
+	        "\n    (error in configuration of public variable \"%.100s\")",
+	            Tcl_GetString(ivPtr->fullNamePtr));
             Tcl_AddErrorInfo(interp, msg);
             result = TCL_ERROR;
             goto configureDone;
@@ -533,6 +549,14 @@ Itcl_BiConfigureCmd(
     }
 
 configureDone:
+    if (infoPtr->unparsedObjc > 0) {
+        for(i=0;i<infoPtr->unparsedObjc;i++) {
+            Tcl_DecrRefCount(infoPtr->unparsedObjv[i]);
+        }
+        ckfree ((char *)infoPtr->unparsedObjv);
+        infoPtr->unparsedObjv = NULL;
+        infoPtr->unparsedObjc = 0;
+    }
     Tcl_DStringFree(&buffer2);
     Tcl_DStringFree(&buffer);
 
@@ -1103,22 +1127,23 @@ fprintf(stderr, "plain configure not yet implemented\n");
         }
     }
 
-    /* now look if it is an option at all */
-    hPtr = Tcl_FindHashEntry(&contextIoPtr->objectOptions, (char *) objv[1]);
-    if (hPtr == NULL) {
-	/* no option at all, let the normal configure do the job */
-	return TCL_CONTINUE;
-    }
-    ioptPtr = (ItclOption *)Tcl_GetHashValue(hPtr);
     if (objc == 2) {
+        /* now look if it is an option at all */
+        hPtr = Tcl_FindHashEntry(&contextIoPtr->objectOptions,
+	        (char *) objv[1]);
+        if (hPtr == NULL) {
+	    /* no option at all, let the normal configure do the job */
+	    return TCL_CONTINUE;
+        }
+        ioptPtr = (ItclOption *)Tcl_GetHashValue(hPtr);
         resultPtr = ItclReportOption(interp, ioptPtr, contextIoPtr);
         Tcl_SetObjResult(interp, resultPtr);
         return TCL_OK;
     }
-    result = TCL_CONTINUE;
+    result = TCL_OK;
     /* set one or more options */
     for (i=1; i < objc; i+=2) {
-	if (i+1 > objc) {
+	if (i+1 >= objc) {
 	    Tcl_AppendResult(interp, "need option value pair", NULL);
 	    result = TCL_ERROR;
 	    break;
@@ -1126,10 +1151,26 @@ fprintf(stderr, "plain configure not yet implemented\n");
         hPtr = Tcl_FindHashEntry(&contextIoPtr->objectOptions,
 	        (char *) objv[i]);
         if (hPtr == NULL) {
+	    infoPtr->unparsedObjc += 2;
+	    if (infoPtr->unparsedObjv == NULL) {
+	        infoPtr->unparsedObjc++; /* keep the first slot for 
+		                            correct working !! */
+	        infoPtr->unparsedObjv = (Tcl_Obj **)ckalloc(sizeof(Tcl_Obj *)
+	                *(infoPtr->unparsedObjc));
+	        infoPtr->unparsedObjv[0] = objv[0];
+	        Tcl_IncrRefCount(infoPtr->unparsedObjv[0]);
+	    } else {
+	        infoPtr->unparsedObjv = (Tcl_Obj **)ckrealloc(
+	                (char *)infoPtr->unparsedObjv, sizeof(Tcl_Obj *)
+	                *(infoPtr->unparsedObjc));
+	    }
+	    infoPtr->unparsedObjv[infoPtr->unparsedObjc-2] = objv[i];
+	    Tcl_IncrRefCount(infoPtr->unparsedObjv[infoPtr->unparsedObjc-2]);
+	    infoPtr->unparsedObjv[infoPtr->unparsedObjc-1] = objv[i+1];
+	    Tcl_IncrRefCount(infoPtr->unparsedObjv[infoPtr->unparsedObjc-1]);
 	    /* check if normal public variable/common ? */
 	    /* FIX ME !!! temporary */
-	    result = TCL_CONTINUE;
-	    break;
+	    continue;
         }
         ioptPtr = (ItclOption *)Tcl_GetHashValue(hPtr);
         if (ioptPtr->validateMethodPtr != NULL) {
@@ -1180,6 +1221,9 @@ fprintf(stderr, "plain configure not yet implemented\n");
 	    }
 	}
         result = TCL_OK;
+    }
+    if (infoPtr->unparsedObjc > 0) {
+        return TCL_CONTINUE;
     }
     return result;
 }
@@ -1409,8 +1453,9 @@ ItclExtendedSetGet(
     const char *val;
     char *token;
     int result;
+    int setValue;
 
-    ItclShowArgs(0, "ItclExtendedSetGet", objc, objv);
+    ItclShowArgs(1, "ItclExtendedSetGet", objc, objv);
     token = NULL;
     imvPtr = NULL;
     result = TCL_OK;
@@ -1468,6 +1513,7 @@ ItclExtendedSetGet(
     }
     imvPtr = (ItclMethodVariable *)Tcl_GetHashValue(hPtr);
     result = TCL_OK;
+    setValue = 1;
     if (imvPtr->callbackPtr != NULL) {
         newObjv = (Tcl_Obj **)ckalloc(sizeof(Tcl_Obj *)*3);
         newObjv[0] = imvPtr->callbackPtr;
@@ -1483,10 +1529,14 @@ ItclExtendedSetGet(
         ckfree((char *)newObjv);
     }
     if (result == TCL_OK) {
-        if (ItclSetInstanceVar(interp, Tcl_GetString(objv[1]), NULL, 
-	        Tcl_GetString(objv[2]), contextIoPtr,
-		imvPtr->iclsPtr) == NULL) {
-            result = TCL_ERROR;
+        Tcl_GetIntFromObj(interp, Tcl_GetObjResult(interp), &setValue);
+	/* if setValue != 0 set the new value of the variable here */
+	if (setValue) {
+            if (ItclSetInstanceVar(interp, Tcl_GetString(objv[1]), NULL, 
+	            Tcl_GetString(objv[2]), contextIoPtr,
+		    imvPtr->iclsPtr) == NULL) {
+                result = TCL_ERROR;
+            }
         }
     }
     return result;

@@ -9,7 +9,7 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itclBase.c,v 1.1.2.9 2007/09/29 22:16:49 wiede Exp $
+ * RCS: @(#) $Id: itclBase.c,v 1.1.2.10 2007/10/15 23:28:02 wiede Exp $
  */
 
 #include <stdlib.h>
@@ -195,6 +195,7 @@ Initialize (
      *  it to the itcl namespace for ownership.
      */
     infoPtr = (ItclObjectInfo*)ckalloc(sizeof(ItclObjectInfo));
+    memset(infoPtr, 0, sizeof(ItclObjectInfo));
     infoPtr->interp = interp;
     infoPtr->class_meta_type = (Tcl_ObjectMetadataType *)ckalloc(
             sizeof(Tcl_ObjectMetadataType));

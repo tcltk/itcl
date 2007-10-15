@@ -25,7 +25,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclMethod.c,v 1.1.2.11 2007/10/15 19:53:20 wiede Exp $
+ *     RCS:  $Id: itclMethod.c,v 1.1.2.12 2007/10/15 23:28:02 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -444,7 +444,7 @@ Itcl_CreateMemberFunc(
     if (!newEntry) {
         Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
             "\"", Tcl_GetString(namePtr), "\" already defined in class \"",
-            iclsPtr->fullNamePtr, "\"",
+            Tcl_GetString(iclsPtr->fullNamePtr), "\"",
             (char*)NULL);
         return TCL_ERROR;
     }

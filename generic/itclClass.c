@@ -25,7 +25,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann Copyright (c) 2007
  *
- *     RCS:  $Id: itclClass.c,v 1.1.2.12 2007/10/15 19:53:19 wiede Exp $
+ *     RCS:  $Id: itclClass.c,v 1.1.2.13 2007/10/15 23:28:02 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -1577,7 +1577,7 @@ Itcl_CreateVariable(
         Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
             "variable name \"", Tcl_GetString(namePtr),
 	    "\" already defined in class \"",
-            iclsPtr->fullNamePtr, "\"",
+            Tcl_GetString(iclsPtr->fullNamePtr), "\"",
             (char*)NULL);
         return TCL_ERROR;
     }
@@ -1672,7 +1672,7 @@ Itcl_CreateOption(
         Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
             "option name \"", Tcl_GetString(namePtr),
 	    "\" already defined in class \"",
-            iclsPtr->fullNamePtr, "\"",
+            Tcl_GetString(iclsPtr->fullNamePtr), "\"",
             (char*)NULL);
         return TCL_ERROR;
     }
@@ -1768,7 +1768,7 @@ Itcl_CreateMethodVariable(
         Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
             "methdovariable name \"", Tcl_GetString(namePtr),
 	    "\" already defined in class \"",
-            iclsPtr->fullNamePtr, "\"",
+            Tcl_GetString (iclsPtr->fullNamePtr), "\"",
             (char*)NULL);
         return TCL_ERROR;
     }

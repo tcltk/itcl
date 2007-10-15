@@ -9,7 +9,7 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itclInt.h,v 1.17.2.24 2007/10/15 19:53:20 wiede Exp $
+ * RCS: @(#) $Id: itclInt.h,v 1.17.2.25 2007/10/15 23:28:02 wiede Exp $
  */
 
 #include <string.h>
@@ -148,6 +148,10 @@ typedef struct ItclObjectInfo {
                                      * handling */
     int currClassFlags;             /* flags for the class just in creation */
     int buildingWidget;             /* set if in construction of a widget */
+    int unparsedObjc;               /* number options not parsed by 
+                                       ItclExtendedConfigure/-Cget function */
+    Tcl_Obj **unparsedObjv;         /* options not parsed by
+                                       ItclExtendedConfigure/-Cget function */
 } ItclObjectInfo;
 
 typedef struct EnsembleInfo {

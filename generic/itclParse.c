@@ -39,7 +39,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclParse.c,v 1.1.2.20 2007/10/15 19:53:21 wiede Exp $
+ *     RCS:  $Id: itclParse.c,v 1.1.2.21 2007/10/15 23:28:02 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -1059,7 +1059,7 @@ Itcl_ClassConstructorCmd(
     if (Tcl_FindHashEntry(&iclsPtr->functions, (char *)objv[0])) {
         Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
             "\"", Tcl_GetString(namePtr), "\" already defined in class \"",
-            iclsPtr->fullNamePtr, "\"",
+            Tcl_GetString(iclsPtr->fullNamePtr), "\"",
             (char*)NULL);
         return TCL_ERROR;
     }
@@ -1129,7 +1129,7 @@ Itcl_ClassDestructorCmd(
     if (Tcl_FindHashEntry(&iclsPtr->functions, (char *)namePtr)) {
         Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
             "\"", Tcl_GetString(namePtr), "\" already defined in class \"",
-            iclsPtr->fullNamePtr, "\"",
+            Tcl_GetString(iclsPtr->fullNamePtr), "\"",
             (char*)NULL);
         return TCL_ERROR;
     }
@@ -2814,7 +2814,7 @@ Itcl_ClassMethodVariableCmd(
     int pLevel;
     int result;
 
-    ItclShowArgs(0, "Itcl_ClassMethodVariableCmd", objc, objv);
+    ItclShowArgs(1, "Itcl_ClassMethodVariableCmd", objc, objv);
     infoPtr = (ItclObjectInfo*)clientData;
     iclsPtr = (ItclClass*)Itcl_PeekStack(&infoPtr->clsStack);
     if (iclsPtr->flags & ITCL_CLASS) {
@@ -2845,6 +2845,7 @@ Itcl_ClassMethodVariableCmd(
     }
 
     defaultPtr = NULL;
+    callbackPtr = NULL;
     for (i=2;i<objc;i++) {
 	foundOpt = 0;
         token = Tcl_GetString(objv[i]);
