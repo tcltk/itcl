@@ -24,7 +24,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclBuiltin.c,v 1.1.2.17 2007/10/14 23:41:56 wiede Exp $
+ *     RCS:  $Id: itclBuiltin.c,v 1.1.2.18 2007/10/15 09:22:57 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -55,8 +55,8 @@ static BiMethod BiMethodList[] = {
 };
 static int BiMethodListLen = sizeof(BiMethodList)/sizeof(BiMethod);
 
-Tcl_ObjCmdProc ItclWidgetConfigure;
-Tcl_ObjCmdProc ItclWidgetCget;
+Tcl_ObjCmdProc ItclExtendedConfigure;
+Tcl_ObjCmdProc ItclExtendedCget;
 /*
  *  FORWARD DECLARATIONS
  */
@@ -360,7 +360,7 @@ Itcl_BiConfigureCmd(
             hPtr = Tcl_FindHashEntry(&contextIclsPtr->options,
 	            (char *) objv[1]);
 	}
-        result = ItclWidgetConfigure(contextIclsPtr, interp, objc, objv);
+        result = ItclExtendedConfigure(contextIclsPtr, interp, objc, objv);
         if (result != TCL_CONTINUE) {
             return result;
         }
@@ -592,7 +592,7 @@ Itcl_BiCgetCmd(
     }
 
     if (!(contextIclsPtr->flags & ITCL_CLASS)) {
-        result = ItclWidgetCget(contextIclsPtr, interp, objc, objv);
+        result = ItclExtendedCget(contextIclsPtr, interp, objc, objv);
         if (result != TCL_CONTINUE) {
             return result;
         }
@@ -704,7 +704,7 @@ ItclReportPublicOpt(
  *
  *    <optionName> <initVal> <currentVal>
  *
- *  Used by ItclWidgetConfigureCmd() to report configuration options.
+ *  Used by ItclExtendedConfigure() to report configuration options.
  *  Returns a Tcl_Obj containing the information.
  * ------------------------------------------------------------------------
  */
@@ -930,7 +930,7 @@ ItclBiObjectUnknownCmd(
 
 /*
  * ------------------------------------------------------------------------
- *  ItclWidgetConfigure()
+ *  ItclExtendedConfigure()
  *
  *  Invoked whenever the user issues the "configure" method for an object.
  *  If the class is not ITCL_CLASS
@@ -953,7 +953,7 @@ ItclBiObjectUnknownCmd(
  */
 /* ARGSUSED */
 int
-ItclWidgetConfigure(
+ItclExtendedConfigure(
     ClientData clientData,   /* class definition */
     Tcl_Interp *interp,      /* current interpreter */
     int objc,                /* number of arguments */
@@ -963,7 +963,6 @@ ItclWidgetConfigure(
     ItclObject *contextIoPtr;
 
     Tcl_HashEntry *hPtr;
-    Tcl_DString buffer;
     Tcl_Object oPtr;
     Tcl_Obj *resultPtr;
     Tcl_Obj *objPtr;
@@ -983,7 +982,7 @@ ItclWidgetConfigure(
     int i;
     int result;
 
-    ItclShowArgs(1, "ItclWidgetConfigure", objc, objv);
+    ItclShowArgs(1, "ItclExtendedConfigure", objc, objv);
     vlookup = NULL;
     token = NULL;
     ioptPtr = NULL;
@@ -1029,14 +1028,14 @@ ItclWidgetConfigure(
 	    val = ItclGetInstanceVar(interp, Tcl_GetString(icPtr->namePtr),
 	            NULL, contextIoPtr, iclsPtr);
             if (val != NULL) {
-	        Tcl_DString buffer;
-	        Tcl_DStringInit(&buffer);
-	        Tcl_DStringAppend(&buffer, val, -1);
-	        Tcl_DStringAppend(&buffer, " configure ", -1);
-		for(i=2;i<objc;i++) {
-		    Tcl_DStringAppend(&buffer, Tcl_GetString(objv[i]), -1);
-		    Tcl_DStringAppend(&buffer, " ", 1);
-		}
+	        newObjv = (Tcl_Obj **)ckalloc(sizeof(Tcl_Obj *)*(objc+2));
+	        newObjv[0] = Tcl_NewStringObj(val, -1);
+	        Tcl_IncrRefCount(newObjv[0]);
+	        newObjv[1] = Tcl_NewStringObj("configure", 9);
+	        Tcl_IncrRefCount(newObjv[1]);
+	        for(i=2;i<objc;i++) {
+	            newObjv[i+1] = objv[i];
+                }
 		objPtr = Tcl_NewStringObj(val, -1);
 	        Tcl_IncrRefCount(objPtr);
 	        oPtr = Tcl_GetObjectFromObj(interp, objPtr);
@@ -1045,7 +1044,10 @@ ItclWidgetConfigure(
                             infoPtr->object_meta_type);
 	            infoPtr->currContextIclsPtr = ioPtr->iclsPtr;
 	        }
-                result = Tcl_Eval(interp, Tcl_DStringValue(&buffer));
+                result = Tcl_EvalObjv(interp, objc, newObjv, TCL_EVAL_DIRECT);
+                Tcl_DecrRefCount(newObjv[0]);
+                Tcl_DecrRefCount(newObjv[1]);
+                ckfree((char *)newObjv);
 	        Tcl_DecrRefCount(objPtr);
 	        if (oPtr != NULL) {
 	            infoPtr->currContextIclsPtr = NULL;
@@ -1109,7 +1111,6 @@ fprintf(stderr, "plain configure not yet implemented\n");
         Tcl_SetObjResult(interp, resultPtr);
         return TCL_OK;
     }
-    Tcl_DStringInit(&buffer);
     result = TCL_CONTINUE;
     /* set one or more options */
     for (i=1; i < objc; i+=2) {
@@ -1121,26 +1122,24 @@ fprintf(stderr, "plain configure not yet implemented\n");
         hPtr = Tcl_FindHashEntry(&contextIoPtr->objectOptions,
 	        (char *) objv[i]);
         if (hPtr == NULL) {
-	    /* check if normal public variable/common */
+	    /* check if normal public variable/common ? */
 	    /* FIX ME !!! temporary */
 	    result = TCL_CONTINUE;
 	    break;
         }
         ioptPtr = (ItclOption *)Tcl_GetHashValue(hPtr);
         if (ioptPtr->validateMethodPtr != NULL) {
-//	    int intVal;
-            Tcl_DStringAppend(&buffer, Tcl_GetString(
-	            ioptPtr->validateMethodPtr), -1);
-            Tcl_DStringAppend(&buffer, " ", -1);
-            Tcl_DStringAppend(&buffer, Tcl_GetString(objv[i]), -1);
-            Tcl_DStringAppend(&buffer, " [list ", -1);
-            Tcl_DStringAppend(&buffer, Tcl_GetString(objv[i+1]), -1);
-            Tcl_DStringAppend(&buffer, " ]", -1);
-	    result = Tcl_Eval(interp, Tcl_DStringValue(&buffer));
+	    newObjv = (Tcl_Obj **)ckalloc(sizeof(Tcl_Obj *)*3);
+	    newObjv[0] = ioptPtr->validateMethodPtr;
+	    newObjv[1] = objv[i];
+	    newObjv[2] = objv[i+1];
+            result = Tcl_EvalObjv(interp, 3, newObjv, TCL_EVAL_DIRECT);
+            ckfree((char *)newObjv);
 	    if (result != TCL_OK) {
 	        break;
 	    }
 #ifdef NOTDEF
+//	    int intVal;
             Tcl_GetIntFromObj(interp, Tcl_GetObjResult(interp), &intVal);
 	    if (!intVal) {
 		/* validate has already set option */
@@ -1148,20 +1147,13 @@ fprintf(stderr, "plain configure not yet implemented\n");
 	    }
 #endif
 	}
-        Tcl_DStringFree(&buffer);
         if (ioptPtr->configureMethodPtr != NULL) {
 	    newObjv = (Tcl_Obj **)ckalloc(sizeof(Tcl_Obj *)*3);
 	    newObjv[0] = ioptPtr->configureMethodPtr;
 	    Tcl_IncrRefCount(newObjv[0]);
 	    newObjv[1] = objv[i];
 	    Tcl_IncrRefCount(newObjv[1]);
-#ifdef NOTDEF
-	    if (strlen(Tcl_GetString(objv[i+1])) == 0) {
-	        newObjv[2] = Tcl_NewStringObj("{}", 1);
-	    } else {
-#endif
-	        newObjv[2] = objv[i+1];
-//	    }
+	    newObjv[2] = objv[i+1];
 	    Tcl_IncrRefCount(newObjv[2]);
 	    saveNsPtr = Tcl_GetCurrentNamespace(interp);
 	    Itcl_SetCallFrameNamespace(interp, ioptPtr->iclsPtr->nsPtr);
@@ -1183,16 +1175,14 @@ fprintf(stderr, "plain configure not yet implemented\n");
 	        break;
 	    }
 	}
-        Tcl_DStringFree(&buffer);
         result = TCL_OK;
     }
-    Tcl_DStringFree(&buffer);
     return result;
 }
 
 /*
  * ------------------------------------------------------------------------
- *  ItclWidgetCget()
+ *  ItclExtendedCget()
  *
  *  Invoked whenever the user issues the "cget" method for an object.
  *  If the class is NOT ITCL_CLASS
@@ -1208,7 +1198,7 @@ fprintf(stderr, "plain configure not yet implemented\n");
  */
 /* ARGSUSED */
 int
-ItclWidgetCget(
+ItclExtendedCget(
     ClientData clientData,   /* class definition */
     Tcl_Interp *interp,      /* current interpreter */
     int objc,                /* number of arguments */
@@ -1217,11 +1207,11 @@ ItclWidgetCget(
     ItclClass *contextIclsPtr;
     ItclObject *contextIoPtr;
 
-    Tcl_DString buffer;
     Tcl_HashEntry *hPtr;
     Tcl_Obj *objPtr;
     Tcl_Object oPtr;
     Tcl_Obj *methodNamePtr;
+    Tcl_Obj **newObjv;
     ItclDelegatedFunction *idmPtr;
     ItclDelegatedOption *idoPtr;
     ItclComponent *icPtr;
@@ -1232,7 +1222,7 @@ ItclWidgetCget(
     int i;
     int result;
 
-    ItclShowArgs(1,"ItclWidgetCget", objc, objv);
+    ItclShowArgs(1,"ItclExtendedCget", objc, objv);
     /*
      *  Make sure that this command is being invoked in the proper
      *  context.
@@ -1273,13 +1263,13 @@ ItclWidgetCget(
 	    val = ItclGetInstanceVar(interp, Tcl_GetString(icPtr->namePtr),
 	            NULL, contextIoPtr, contextIclsPtr);
             if (val != NULL) {
-	        Tcl_DString buffer;
-	        Tcl_DStringInit(&buffer);
-	        Tcl_DStringAppend(&buffer, val, -1);
-	        Tcl_DStringAppend(&buffer, " cget ", -1);
+	        newObjv = (Tcl_Obj **)ckalloc(sizeof(Tcl_Obj *)*(objc+1));
+	        newObjv[0] = Tcl_NewStringObj(val, -1);
+	        Tcl_IncrRefCount(newObjv[0]);
+	        newObjv[1] = Tcl_NewStringObj("cget", 4);
+	        Tcl_IncrRefCount(newObjv[1]);
 		for(i=1;i<objc;i++) {
-		    Tcl_DStringAppend(&buffer, Tcl_GetString(objv[i]), -1);
-		    Tcl_DStringAppend(&buffer, " ", 1);
+		    newObjv[i+1] = objv[i];
 		}
 		objPtr = Tcl_NewStringObj(val, -1);
 	        Tcl_IncrRefCount(objPtr);
@@ -1289,7 +1279,9 @@ ItclWidgetCget(
                             infoPtr->object_meta_type);
 	            infoPtr->currContextIclsPtr = ioPtr->iclsPtr;
 	        }
-                result = Tcl_Eval(interp, Tcl_DStringValue(&buffer));
+                result = Tcl_EvalObjv(interp, objc+1, newObjv, TCL_EVAL_DIRECT);
+	        Tcl_DecrRefCount(newObjv[0]);
+	        Tcl_DecrRefCount(newObjv[1]);
 	        Tcl_DecrRefCount(objPtr);
 	        if (oPtr != NULL) {
 	            infoPtr->currContextIclsPtr = NULL;
@@ -1313,13 +1305,13 @@ ItclWidgetCget(
         val = ItclGetInstanceVar(interp, Tcl_GetString(icPtr->namePtr),
                 NULL, contextIoPtr, icPtr->ivPtr->iclsPtr);
         if (val != NULL) {
-            Tcl_DString buffer;
-            Tcl_DStringInit(&buffer);
-	    Tcl_DStringAppend(&buffer, val, -1);
-	    Tcl_DStringAppend(&buffer, " cget ", -1);
+	    newObjv = (Tcl_Obj **)ckalloc(sizeof(Tcl_Obj *)*(objc+1));
+	    newObjv[0] = Tcl_NewStringObj(val, -1);
+	    Tcl_IncrRefCount(newObjv[0]);
+	    newObjv[1] = Tcl_NewStringObj("cget", 4);
+	    Tcl_IncrRefCount(newObjv[1]);
 	    for(i=1;i<objc;i++) {
-	        Tcl_DStringAppend(&buffer, Tcl_GetString(objv[i]), -1);
-	        Tcl_DStringAppend(&buffer, " ", 1);
+	        newObjv[i+1] = objv[i];
 	    }
 	    objPtr = Tcl_NewStringObj(val, -1);
 	    Tcl_IncrRefCount(objPtr);
@@ -1329,7 +1321,9 @@ ItclWidgetCget(
                         infoPtr->object_meta_type);
 	        infoPtr->currContextIclsPtr = ioPtr->iclsPtr;
 	    }
-            result = Tcl_Eval(interp, Tcl_DStringValue(&buffer));
+            result = Tcl_EvalObjv(interp, objc+1, newObjv, TCL_EVAL_DIRECT);
+	    Tcl_DecrRefCount(newObjv[0]);
+	    Tcl_DecrRefCount(newObjv[1]);
 	    Tcl_DecrRefCount(objPtr);
 	    if (oPtr != NULL) {
 	        infoPtr->currContextIclsPtr = NULL;
@@ -1353,15 +1347,12 @@ ItclWidgetCget(
 	return TCL_CONTINUE;
     }
     ioptPtr = (ItclOption *)Tcl_GetHashValue(hPtr);
-    Tcl_DStringInit(&buffer);
     result = TCL_CONTINUE;
     if (ioptPtr->cgetMethodPtr != NULL) {
-        Tcl_DStringAppend(&buffer, Tcl_GetString(
-                ioptPtr->cgetMethodPtr), -1);
-        Tcl_DStringAppend(&buffer, " ", -1);
-        Tcl_DStringAppend(&buffer, Tcl_GetString(objv[1]), -1);
-	result = Tcl_Eval(interp, Tcl_DStringValue(&buffer));
-        Tcl_DStringFree(&buffer);
+        newObjv = (Tcl_Obj **)ckalloc(sizeof(Tcl_Obj *)*2);
+        newObjv[0] = ioptPtr->cgetMethodPtr;
+        newObjv[1] = objv[1];
+        result = Tcl_EvalObjv(interp, objc+1, newObjv, TCL_EVAL_DIRECT);
     } else {
         val = ItclGetInstanceVar(interp, "itcl_options",
                 Tcl_GetString(ioptPtr->namePtr),
@@ -1373,7 +1364,5 @@ ItclWidgetCget(
         }
         result = TCL_OK;
     }
-    Tcl_DStringFree(&buffer);
     return result;
 }
-

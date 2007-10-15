@@ -9,7 +9,7 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itclInt.h,v 1.17.2.22 2007/10/14 18:42:29 wiede Exp $
+ * RCS: @(#) $Id: itclInt.h,v 1.17.2.23 2007/10/15 09:22:59 wiede Exp $
  */
 
 #include <string.h>
@@ -550,9 +550,9 @@ MODULE_SCOPE const char* ItclSetInstanceVar(Tcl_Interp *interp,
         const char *name, const char *name2, const char *value,
 	ItclObject *contextIoPtr, ItclClass *contextIclsPtr);
 MODULE_SCOPE Tcl_Obj * ItclCapitalize(const char *str);
-MODULE_SCOPE int ItclWidgetConfigure(ClientData clientData, Tcl_Interp *interp,
-        int objc, Tcl_Obj *const objv[]);
-MODULE_SCOPE int ItclWidgetCget(ClientData clientData, Tcl_Interp *interp,
+MODULE_SCOPE int ItclExtendedConfigure(ClientData clientData,
+        Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]);
+MODULE_SCOPE int ItclExtendedCget(ClientData clientData, Tcl_Interp *interp,
         int objc, Tcl_Obj *const objv[]);
 MODULE_SCOPE int ItclCreateMethod(Tcl_Interp* interp, ItclClass *iclsPtr,
 	Tcl_Obj *namePtr, const char* arglist, const char* body,

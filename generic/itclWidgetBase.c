@@ -12,7 +12,7 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itclWidgetBase.c,v 1.1.2.5 2007/09/17 19:22:36 wiede Exp $
+ * RCS: @(#) $Id: itclWidgetBase.c,v 1.1.2.6 2007/10/15 09:23:00 wiede Exp $
  */
 
 #include <stdlib.h>
@@ -69,8 +69,8 @@ Initialize (
     infoPtr->windgetInfoPtr->initObjectOpts = ItclInitObjectOptions;
     infoPtr->windgetInfoPtr->hullAndOptsInst = HullAndOptionsInstall;
     infoPtr->windgetInfoPtr->delegationInst = DelegationInstall;
-    infoPtr->windgetInfoPtr->widgetConfigure = ItclWidgetConfigure;
-    infoPtr->windgetInfoPtr->widgetCget = ItclWidgetCget;
+    infoPtr->windgetInfoPtr->widgetConfigure = ItclExtendedConfigure;
+    infoPtr->windgetInfoPtr->widgetCget = ItclExtendedCget;
     Itcl_WidgetParseInit(interp, infoPtr);
 
     /*

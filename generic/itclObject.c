@@ -24,7 +24,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann Copyright (c) 2007
  *
- *     RCS:  $Id: itclObject.c,v 1.1.2.18 2007/10/14 18:42:30 wiede Exp $
+ *     RCS:  $Id: itclObject.c,v 1.1.2.19 2007/10/15 09:22:59 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -49,7 +49,7 @@ static int ItclDestructBase(Tcl_Interp *interp, ItclObject *contextObj,
 
 static int ItclInitObjectVariables(Tcl_Interp *interp, ItclObject *ioPtr,
         ItclClass *iclsPtr, const char *name);
-static int ItclInitEClassOptions(Tcl_Interp *interp, ItclObject *ioPtr);
+static int ItclInitExtendedClassOptions(Tcl_Interp *interp, ItclObject *ioPtr);
 
 
 /*
@@ -192,7 +192,7 @@ ItclCreateObject(
         return TCL_ERROR;
     }
     if (iclsPtr->flags & (ITCL_ECLASS|ITCL_NWIDGET)) {
-        ItclInitEClassOptions(interp, ioPtr);
+        ItclInitExtendedClassOptions(interp, ioPtr);
         if (ItclInitObjectOptions(interp, ioPtr, iclsPtr, name) != TCL_OK) {
 	    Tcl_AppendResult(interp, "error in ItclInitObjectOptions", NULL);
             return TCL_ERROR;
@@ -1991,18 +1991,16 @@ DelegationInstall(
 
 /*
  * ------------------------------------------------------------------------
- *  ItclInitEClassOptions()
+ *  ItclInitExtendedClassOptions()
  * ------------------------------------------------------------------------
  */
 
 static int
-ItclInitEClassOptions(
+ItclInitExtendedClassOptions(
     Tcl_Interp *interp,
     ItclObject *ioPtr)
 {
-//    Tcl_Obj *namePtr;
     ItclClass *iclsPtr;
-//    ItclVariable *ivPtr;
     ItclOption *ioptPtr;
     ItclHierIter hier;
     FOREACH_HASH_DECLS;

@@ -23,7 +23,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclCmd.c,v 1.1.2.14 2007/10/14 18:42:29 wiede Exp $
+ *     RCS:  $Id: itclCmd.c,v 1.1.2.15 2007/10/15 09:22:57 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -1523,7 +1523,7 @@ fprintf(stderr, "deleting old delegated options\n");
 
 /*
  * ------------------------------------------------------------------------
- *  Itcl_EClassCmd()
+ *  Itcl_ExtendedClassCmd()
  *
  *  Used to an [incr Tcl] struct
  *
@@ -1532,7 +1532,7 @@ fprintf(stderr, "deleting old delegated options\n");
  */
 /* ARGSUSED */
 int
-Itcl_EClassCmd(
+Itcl_ExtendedClassCmd(
     ClientData clientData,   /* infoPtr */
     Tcl_Interp *interp,      /* current interpreter */
     int objc,                /* number of arguments */
@@ -1543,12 +1543,12 @@ Itcl_EClassCmd(
     int result;
 
     infoPtr = (ItclObjectInfo *)clientData;
-    ItclShowArgs(1, "Itcl_EClassCmd", objc-1, objv);
+    ItclShowArgs(1, "Itcl_ExtendedClassCmd", objc-1, objv);
     result = ItclClassBaseCmd(clientData, interp, ITCL_ECLASS, objc, objv,
             &iclsPtr);
     if (iclsPtr == NULL) {
-        ItclShowArgs(0, "Itcl_EClassCmd", objc-1, objv);
-fprintf(stderr, "Itcl_EClassCmd!iclsPtr == NULL\n");
+        ItclShowArgs(0, "Itcl_ExtendedClassCmd", objc-1, objv);
+fprintf(stderr, "Itcl_ExtendedClassCmd!iclsPtr == NULL\n");
         return TCL_ERROR;
     }
     return result;

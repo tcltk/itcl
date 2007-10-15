@@ -39,7 +39,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclParse.c,v 1.1.2.18 2007/10/14 23:41:57 wiede Exp $
+ *     RCS:  $Id: itclParse.c,v 1.1.2.19 2007/10/15 09:22:59 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -78,7 +78,7 @@ Tcl_ObjCmdProc Itcl_WidgetCmdStart;
 Tcl_ObjCmdProc Itcl_WidgetAdaptorCmdStart;
 Tcl_ObjCmdProc Itcl_ClassOptionCmd;
 Tcl_ObjCmdProc Itcl_NWidgetCmd;
-Tcl_ObjCmdProc Itcl_EClassCmd;
+Tcl_ObjCmdProc Itcl_ExtendedClassCmd;
 Tcl_ObjCmdProc Itcl_AddOptionCmd;
 Tcl_ObjCmdProc Itcl_AddDelegatedOptionCmd;
 Tcl_ObjCmdProc Itcl_AddDelegatedFunctionCmd;
@@ -398,7 +398,7 @@ Itcl_ParseInit(
         (ClientData)infoPtr, (Tcl_CmdDeleteProc*)NULL);
     Itcl_PreserveData((ClientData)infoPtr);
 
-    Tcl_CreateObjCommand(interp, "::itcl::eclass", Itcl_EClassCmd,
+    Tcl_CreateObjCommand(interp, "::itcl::extendedclass", Itcl_ExtendedClassCmd,
         (ClientData)infoPtr, (Tcl_CmdDeleteProc*)NULL);
     Itcl_PreserveData((ClientData)infoPtr);
 
@@ -2755,7 +2755,7 @@ Itcl_ClassForwardCmd(
     if (iclsPtr->flags & ITCL_CLASS) {
         Tcl_AppendResult(interp, "\"", Tcl_GetString(iclsPtr->namePtr),
 	        " is no ::itcl::widget/::itcl::widgetadaptor/",
-		"::itcl::type/::itcl::eclass.", 
+		"::itcl::type/::itcl::extendedclass.", 
 		" Only these can delegate procs", NULL);
 	return TCL_ERROR;
     }
