@@ -24,7 +24,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclInfo.c,v 1.1.2.7 2007/10/14 17:19:06 wiede Exp $
+ *     RCS:  $Id: itclInfo.c,v 1.1.2.8 2007/10/15 19:53:19 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -732,6 +732,11 @@ Itcl_BiInfoFunctionCmd(
 		if (imPtr->codePtr && (imPtr->codePtr->flags & ITCL_BUILTIN)) {
 		    if (strcmp(Tcl_GetString(imPtr->namePtr), "info") == 0) {
 		        useIt = 0;
+		    }
+		    if (strcmp(Tcl_GetString(imPtr->namePtr), "setget") == 0) {
+			if (!(imPtr->iclsPtr->flags & ITCL_ECLASS)) {
+		            useIt = 0;
+		        }
 		    }
 		}
 		if (useIt) {

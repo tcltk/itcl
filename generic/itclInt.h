@@ -9,7 +9,7 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itclInt.h,v 1.17.2.23 2007/10/15 09:22:59 wiede Exp $
+ * RCS: @(#) $Id: itclInt.h,v 1.17.2.24 2007/10/15 19:53:20 wiede Exp $
  */
 
 #include <string.h>
@@ -196,6 +196,10 @@ typedef struct ItclClass {
                                      or procs in this class.  Look up simple
 				     string names and get back
 				     ItclDelegatedMethodInfo * ptrs */
+    Tcl_HashTable methodVariables; /* definitions for all methodvariable members
+                                     in this class.  Look up simple string
+                                     names and get back
+				     ItclMethodVariable* ptrs */
     int numInstanceVars;          /* number of instance vars in variables
                                      table */
     Tcl_HashTable classCommons;   /* used for storing variable namespace
@@ -257,6 +261,11 @@ typedef struct ItclObject {
     Tcl_HashTable objectOptions; /* definitions for all option members
                                      in this object. Look up option namePtr
                                      names and get back ItclOption* ptrs */
+    Tcl_HashTable objectMethodVariables;
+                                 /* definitions for all methodvariable members
+                                     in this object. Look up methodvariable
+				     namePtr names and get back
+				     ItclMethodVariable* ptrs */
     Tcl_HashTable objectDelegatedOptions;
                                   /* definitions for all delegated option
 				     members in this object. Look up option
@@ -439,6 +448,19 @@ typedef struct ItclOption {
                                 /* if the option is delegated != NULL */
 } ItclOption;
 
+/*
+ *  Instance methodvariables.
+ */
+typedef struct ItclMethodVariable {
+    Tcl_Obj *namePtr;           /* member name */
+    Tcl_Obj *fullNamePtr;       /* member name with "class::" qualifier */
+    ItclClass *iclsPtr;         /* class containing this member */
+    int protection;             /* protection level */
+    int flags;                  /* flags describing member (see below) */
+    Tcl_Obj *defaultValuePtr;
+    Tcl_Obj *callbackPtr;
+} ItclMethodVariable;
+
 typedef struct IctlVarTraceInfo {
     int flags;
     ItclVariable* ivPtr;
@@ -536,6 +558,9 @@ MODULE_SCOPE int Itcl_BiHullInstallCmd (ClientData clientData,
 MODULE_SCOPE int Itcl_CreateOption (Tcl_Interp *interp, ItclClass *iclsPtr,
         Tcl_Obj *name, const char *resourceName, const char *className, 
 	char *init, char *config, ItclOption **ioptPtr);
+MODULE_SCOPE int Itcl_CreateMethodVariable (Tcl_Interp *interp,
+        ItclClass *iclsPtr, Tcl_Obj *name, Tcl_Obj *defaultPtr,
+	Tcl_Obj *callbackPtr, ItclMethodVariable **imvPtr);
 MODULE_SCOPE int ItclInitObjectOptions(Tcl_Interp *interp, ItclObject *ioPtr,
         ItclClass *iclsPtr, const char *name);
 MODULE_SCOPE int HullAndOptionsInstall(Tcl_Interp *interp, ItclObject *ioPtr,
@@ -581,7 +606,8 @@ MODULE_SCOPE int Itcl_HandleDelegateMethodCmd(Tcl_Interp *interp,
 MODULE_SCOPE int DelegateFunction(Tcl_Interp *interp, ItclObject *ioPtr,
         ItclClass *iclsPtr, Tcl_Obj *componentNamePtr,
         ItclDelegatedFunction *idmPtr);
-
+MODULE_SCOPE int ItclInitObjectMethodVariables(Tcl_Interp *interp,
+        ItclObject *ioPtr, ItclClass *iclsPtr, const char *name);
 
 #include "itcl2TclOO.h"
 

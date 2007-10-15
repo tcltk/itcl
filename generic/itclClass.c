@@ -25,7 +25,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann Copyright (c) 2007
  *
- *     RCS:  $Id: itclClass.c,v 1.1.2.11 2007/10/14 17:19:05 wiede Exp $
+ *     RCS:  $Id: itclClass.c,v 1.1.2.12 2007/10/15 19:53:19 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -280,6 +280,7 @@ Itcl_CreateClass(
     Tcl_InitObjHashTable(&iclsPtr->components);
     Tcl_InitObjHashTable(&iclsPtr->delegatedOptions);
     Tcl_InitObjHashTable(&iclsPtr->delegatedFunctions);
+    Tcl_InitObjHashTable(&iclsPtr->methodVariables);
 
     iclsPtr->numInstanceVars = 0;
     Tcl_InitHashTable(&iclsPtr->classCommons, TCL_ONE_WORD_KEYS);
@@ -1730,6 +1731,82 @@ Itcl_CreateOption(
     *ioptPtrPtr = ioptPtr;
     return TCL_OK;
 }
+
+/*
+ * ------------------------------------------------------------------------
+ *  Itcl_CreateMethodVariable()
+ *
+ *  Creates a new class methdovariable definition.  If this is a public
+ *  methodvariable, 
+ *
+ *  Returns TCL_ERROR along with an error message in the specified
+ *  interpreter if anything goes wrong.  Otherwise, this returns
+ *  TCL_OK and a pointer to the new option definition in "imvPtr".
+ * ------------------------------------------------------------------------
+ */
+int
+Itcl_CreateMethodVariable(
+    Tcl_Interp *interp,       /* interpreter managing this transaction */
+    ItclClass* iclsPtr,       /* class containing this variable */
+    Tcl_Obj* namePtr,         /* variable name */
+    Tcl_Obj* defaultPtr,      /* initial value */
+    Tcl_Obj* callbackPtr,     /* code invoked when variable is set */
+    ItclMethodVariable** imvPtrPtr)
+                              /* returns: new methdovariable definition */
+{
+    int isNew;
+    ItclMethodVariable *imvPtr;
+    Tcl_HashEntry *hPtr;
+
+    /*
+     *  Add this methodvariable to the options table for the class.
+     *  Make sure that the methodvariable name does not already exist.
+     */
+    hPtr = Tcl_CreateHashEntry(&iclsPtr->methodVariables,
+            (char *)namePtr, &isNew);
+    if (!isNew) {
+        Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+            "methdovariable name \"", Tcl_GetString(namePtr),
+	    "\" already defined in class \"",
+            iclsPtr->fullNamePtr, "\"",
+            (char*)NULL);
+        return TCL_ERROR;
+    }
+    Tcl_IncrRefCount(namePtr);
+
+    /*
+     *  If everything looks good, create the option definition.
+     */
+    imvPtr = (ItclMethodVariable*)ckalloc(sizeof(ItclMethodVariable));
+    memset(imvPtr, 0, sizeof(ItclMethodVariable));
+    imvPtr->iclsPtr      = iclsPtr;
+    imvPtr->protection   = Itcl_Protection(interp, 0);
+    imvPtr->namePtr      = namePtr;
+    Tcl_IncrRefCount(imvPtr->namePtr);
+    imvPtr->fullNamePtr = Tcl_NewStringObj(
+            Tcl_GetString(iclsPtr->fullNamePtr), -1);
+    Tcl_AppendToObj(imvPtr->fullNamePtr, "::", 2);
+    Tcl_AppendToObj(imvPtr->fullNamePtr, Tcl_GetString(namePtr), -1);
+    Tcl_IncrRefCount(imvPtr->fullNamePtr);
+    imvPtr->defaultValuePtr    = defaultPtr;
+    if (defaultPtr != NULL) {
+        Tcl_IncrRefCount(imvPtr->defaultValuePtr);
+    }
+    imvPtr->callbackPtr    = callbackPtr;
+    if (callbackPtr != NULL) {
+        Tcl_IncrRefCount(imvPtr->callbackPtr);
+    }
+
+    if (imvPtr->protection == ITCL_DEFAULT_PROTECT) {
+        imvPtr->protection = ITCL_PROTECTED;
+    }
+
+    Tcl_SetHashValue(hPtr, (ClientData)imvPtr);
+
+    *imvPtrPtr = imvPtr;
+    return TCL_OK;
+}
+
 
 
 /*

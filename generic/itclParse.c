@@ -39,7 +39,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclParse.c,v 1.1.2.19 2007/10/15 09:22:59 wiede Exp $
+ *     RCS:  $Id: itclParse.c,v 1.1.2.20 2007/10/15 19:53:21 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -89,6 +89,7 @@ Tcl_ObjCmdProc Itcl_ClassDelegateMethodCmd;
 Tcl_ObjCmdProc Itcl_ClassDelegateOptionCmd;
 Tcl_ObjCmdProc Itcl_ClassDelegateProcCmd;
 Tcl_ObjCmdProc Itcl_ClassForwardCmd;
+Tcl_ObjCmdProc Itcl_ClassMethodVariableCmd;
 
 static const struct {
     const char *name;
@@ -103,6 +104,7 @@ static const struct {
     {"mixin", Itcl_ClassMixinCmd},
     {"inherit", Itcl_ClassInheritCmd},
     {"method", Itcl_ClassMethodCmd},
+    {"methodvariable", Itcl_ClassMethodVariableCmd},
     {"option", Itcl_ClassOptionCmd},
     {"proc", Itcl_ClassProcCmd},
     {"variable", Itcl_ClassVariableCmd},
@@ -633,6 +635,14 @@ ItclClassBaseCmd(
 		if (strcmp(Tcl_GetString(imPtr->codePtr->bodyPtr),
 		        "@itcl-builtin-isa") == 0) {
 		    Tcl_AppendToObj(bodyPtr, "::itcl::builtin::isa", -1);
+		    isDone = 1;
+		}
+		if (strncmp(Tcl_GetString(imPtr->codePtr->bodyPtr),
+		        "@itcl-builtin-setget", 20) == 0) {
+		    char *cp = Tcl_GetString(imPtr->codePtr->bodyPtr)+20;
+		    Tcl_AppendToObj(bodyPtr, "::itcl::builtin::setget ", -1);
+		    Tcl_AppendToObj(bodyPtr, cp, -1);
+		    Tcl_AppendToObj(bodyPtr, " ", 1);
 		    isDone = 1;
 		}
 		if (!isDone) {
@@ -2756,7 +2766,7 @@ Itcl_ClassForwardCmd(
         Tcl_AppendResult(interp, "\"", Tcl_GetString(iclsPtr->namePtr),
 	        " is no ::itcl::widget/::itcl::widgetadaptor/",
 		"::itcl::type/::itcl::extendedclass.", 
-		" Only these can delegate procs", NULL);
+		" Only these can forward", NULL);
 	return TCL_ERROR;
     }
     if (objc < 3) {
@@ -2770,4 +2780,118 @@ Itcl_ClassForwardCmd(
         return TCL_ERROR;
     }
     return TCL_OK;
+}
+/*
+ * ------------------------------------------------------------------------
+ *  Itcl_ClassMethodVariableCmd()
+ *
+ *  Used to similar to iterp alias to forward the call of a method 
+ *  to another method within the class
+ *
+ *  Returns TCL_OK/TCL_ERROR to indicate success/failure.
+ * ------------------------------------------------------------------------
+ */
+/* ARGSUSED */
+int
+Itcl_ClassMethodVariableCmd(
+    ClientData clientData,   /* unused */
+    Tcl_Interp *interp,      /* current interpreter */
+    int objc,                /* number of arguments */
+    Tcl_Obj *CONST objv[])   /* argument objects */
+{
+    Tcl_Obj *namePtr;
+    Tcl_Obj *defaultPtr;
+    Tcl_Obj *callbackPtr;
+    ItclObjectInfo *infoPtr;
+    ItclClass *iclsPtr;
+    ItclVariable *ivPtr;
+    ItclMemberFunc *imPtr;
+    ItclMethodVariable *imvPtr;
+    const char *token;
+    const char *usageStr;
+    int i;
+    int foundOpt;
+    int pLevel;
+    int result;
+
+    ItclShowArgs(0, "Itcl_ClassMethodVariableCmd", objc, objv);
+    infoPtr = (ItclObjectInfo*)clientData;
+    iclsPtr = (ItclClass*)Itcl_PeekStack(&infoPtr->clsStack);
+    if (iclsPtr->flags & ITCL_CLASS) {
+        Tcl_AppendResult(interp, "\"", Tcl_GetString(iclsPtr->namePtr),
+	        " is no ::itcl::widget/::itcl::widgetadaptor/",
+		"::itcl::type/::itcl::extendedclass.", 
+		" Only these can have methodvariables", NULL);
+	return TCL_ERROR;
+    }
+    usageStr = "<name> ?-default value? ?-callback script?";
+    if ((objc < 2) || (objc > 6)) {
+        Tcl_WrongNumArgs(interp, 1, objv, usageStr);
+        return TCL_ERROR;
+    }
+
+    pLevel = Itcl_Protection(interp, 0);
+
+    /*
+     *  Make sure that the variable name does not contain anything
+     *  goofy like a "::" scope qualifier.
+     */
+    namePtr = objv[1];
+    if (strstr(Tcl_GetString(namePtr), "::")) {
+        Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+            "bad variable name \"", Tcl_GetString(namePtr), "\"",
+            (char*)NULL);
+        return TCL_ERROR;
+    }
+
+    defaultPtr = NULL;
+    for (i=2;i<objc;i++) {
+	foundOpt = 0;
+        token = Tcl_GetString(objv[i]);
+	if (strcmp(token, "-default") == 0) {
+	    if (i+1 > objc) {
+                Tcl_WrongNumArgs(interp, 1, objv, usageStr);
+                return TCL_ERROR;
+	    }
+	    defaultPtr = objv[i+1];
+	    i++;
+	    foundOpt++;
+	}
+	if (strcmp(token, "-callback") == 0) {
+	    if (i+1 > objc) {
+                Tcl_WrongNumArgs(interp, 1, objv, usageStr);
+                return TCL_ERROR;
+	    }
+	    callbackPtr = objv[i+1];
+	    i++;
+	    foundOpt++;
+	}
+	if (!foundOpt) {
+            Tcl_WrongNumArgs(interp, 1, objv, usageStr);
+            return TCL_ERROR;
+        }
+    }
+
+    if (Itcl_CreateVariable(interp, iclsPtr, namePtr,
+            Tcl_GetString(defaultPtr), NULL, &ivPtr) != TCL_OK) {
+        return TCL_ERROR;
+    }
+    iclsPtr->numVariables++;
+    result = Itcl_CreateMethodVariable(interp, iclsPtr, namePtr, defaultPtr,
+            callbackPtr, &imvPtr);
+    if (result != TCL_OK) {
+        return result;
+    }
+    Tcl_Obj *objPtr;
+    objPtr = Tcl_NewStringObj("@itcl-builtin-setget ", -1);
+    Tcl_AppendToObj(objPtr, Tcl_GetString(namePtr), -1);
+    Tcl_AppendToObj(objPtr, " ", 1);
+    result = ItclCreateMethod(interp, iclsPtr, namePtr, "args",
+            Tcl_GetString(objPtr), &imPtr);
+    if (result != TCL_OK) {
+        return result;
+    }
+    /* install a write trace if callbackPtr != NULL */
+    /* FIX ME to be done */
+    return TCL_OK;   
 }

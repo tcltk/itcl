@@ -25,7 +25,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclMethod.c,v 1.1.2.10 2007/10/03 09:47:54 wiede Exp $
+ *     RCS:  $Id: itclMethod.c,v 1.1.2.11 2007/10/15 19:53:20 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -715,6 +715,9 @@ Itcl_CreateMemberCode(
 	        isDone = 1;
 	    }
 	    if (strcmp(body, "@itcl-builtin-hullinstall") == 0) {
+	        isDone = 1;
+	    }
+	    if (strncmp(body, "@itcl-builtin-setget", 20) == 0) {
 	        isDone = 1;
 	    }
 	    if (!isDone) {
@@ -1721,6 +1724,9 @@ Itcl_CmdAliasProc(
 	}
 	if (strcmp(cmdName, "@itcl-builtin-configure") == 0) {
 	    return Tcl_FindCommand(interp, "::itcl::builtin::configure", NULL, 0);
+	}
+	if (strncmp(cmdName, "@itcl-builtin-setget", 20) == 0) {
+	    return Tcl_FindCommand(interp, "::itcl::builtin::setget", NULL, 0);
 	}
 	if (strcmp(cmdName, "@itcl-builtin-isa") == 0) {
 	    return Tcl_FindCommand(interp, "::itcl::builtin::isa", NULL, 0);

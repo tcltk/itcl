@@ -24,7 +24,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann Copyright (c) 2007
  *
- *     RCS:  $Id: itclObject.c,v 1.1.2.19 2007/10/15 09:22:59 wiede Exp $
+ *     RCS:  $Id: itclObject.c,v 1.1.2.20 2007/10/15 19:53:20 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -172,6 +172,7 @@ ItclCreateObject(
     Tcl_InitObjHashTable(&ioPtr->objectOptions);
     Tcl_InitObjHashTable(&ioPtr->objectDelegatedOptions);
     Tcl_InitObjHashTable(&ioPtr->objectDelegatedFunctions);
+    Tcl_InitObjHashTable(&ioPtr->objectMethodVariables);
     Tcl_InitHashTable(&ioPtr->contextCache, TCL_ONE_WORD_KEYS);
 
     Itcl_PreserveData((ClientData)ioPtr);  /* while we're using this... */
@@ -195,6 +196,12 @@ ItclCreateObject(
         ItclInitExtendedClassOptions(interp, ioPtr);
         if (ItclInitObjectOptions(interp, ioPtr, iclsPtr, name) != TCL_OK) {
 	    Tcl_AppendResult(interp, "error in ItclInitObjectOptions", NULL);
+            return TCL_ERROR;
+        }
+        if (ItclInitObjectMethodVariables(interp, ioPtr, iclsPtr, name)
+	        != TCL_OK) {
+	    Tcl_AppendResult(interp, "error in ItclInitObjectMethodVariables",
+	            NULL);
             return TCL_ERROR;
         }
     }
@@ -616,6 +623,51 @@ ItclInitObjectOptions(
         iclsPtr2 = Itcl_AdvanceHierIter(&hier);
     }
     Tcl_DStringFree(&buffer);
+    Itcl_DeleteHierIter(&hier);
+    return TCL_OK;
+}
+
+/*
+ * ------------------------------------------------------------------------
+ *  ItclInitObjectMethodVariables()
+ *
+ *  Collect all instance methdovariables for the given object instance to allow
+ *  faster runtime access to the methdovariables.
+ *  This is usually invoked *  automatically by Itcl_CreateObject(),
+ *  when an object is created.
+ * ------------------------------------------------------------------------
+ */
+int
+ItclInitObjectMethodVariables(
+   Tcl_Interp *interp,
+   ItclObject *ioPtr,
+   ItclClass *iclsPtr,
+   const char *name)
+{
+    ItclClass *iclsPtr2;
+    ItclHierIter hier;
+    ItclMethodVariable *imvPtr;
+    Tcl_HashEntry *hPtr;
+    Tcl_HashEntry *hPtr2;;
+    Tcl_HashSearch place;
+    int isNew;
+
+    imvPtr = NULL;
+    Itcl_InitHierIter(&hier, iclsPtr);
+    iclsPtr2 = Itcl_AdvanceHierIter(&hier);
+    while (iclsPtr2 != NULL) {
+        hPtr = Tcl_FirstHashEntry(&iclsPtr2->methodVariables, &place);
+        while (hPtr) {
+            imvPtr = (ItclMethodVariable*)Tcl_GetHashValue(hPtr);
+	    hPtr2 = Tcl_CreateHashEntry(&ioPtr->objectMethodVariables,
+	            (char *)imvPtr->namePtr, &isNew);
+	    if (isNew) {
+		Tcl_SetHashValue(hPtr2, imvPtr);
+            }
+            hPtr = Tcl_NextHashEntry(&place);
+        }
+        iclsPtr2 = Itcl_AdvanceHierIter(&hier);
+    }
     Itcl_DeleteHierIter(&hier);
     return TCL_OK;
 }
@@ -1207,9 +1259,15 @@ ItclReportObjectUsage(
 	        char *body;
 	        if (imPtr->codePtr != NULL) {
 	            body = Tcl_GetString(imPtr->codePtr->bodyPtr);
-	            if ((*body == '@') &&
-		            (strcmp(body, "@itcl-builtin-info") == 0)) {
-	                imPtr = NULL;
+	            if (*body == '@') {
+                        if (strcmp(body, "@itcl-builtin-info") == 0) {
+	                    imPtr = NULL;
+		        }
+                        if (strcmp(body, "@itcl-builtin-setget") == 0) {
+			    if (!(imPtr->iclsPtr->flags & ITCL_ECLASS)) {
+	                        imPtr = NULL;
+			    }
+		        }
 	            }
 	        }
 	    }

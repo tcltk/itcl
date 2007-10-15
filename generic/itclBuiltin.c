@@ -24,7 +24,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclBuiltin.c,v 1.1.2.18 2007/10/15 09:22:57 wiede Exp $
+ *     RCS:  $Id: itclBuiltin.c,v 1.1.2.19 2007/10/15 19:53:18 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -32,6 +32,10 @@
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  */
 #include "itclInt.h"
+
+Tcl_ObjCmdProc ItclExtendedConfigure;
+Tcl_ObjCmdProc ItclExtendedCget;
+Tcl_ObjCmdProc ItclExtendedSetGet;
 
 /*
  *  Standard list of built-in methods for all objects.
@@ -52,11 +56,11 @@ static BiMethod BiMethodList[] = {
                    "@itcl-builtin-info",  Itcl_BiInfoCmd },
     { "isa",       "className",
                    "@itcl-builtin-isa",  Itcl_BiIsaCmd },
+    { "setget", "varName ?value?",
+                   "@itcl-builtin-setget",  ItclExtendedSetGet },
 };
 static int BiMethodListLen = sizeof(BiMethodList)/sizeof(BiMethod);
 
-Tcl_ObjCmdProc ItclExtendedConfigure;
-Tcl_ObjCmdProc ItclExtendedCget;
 /*
  *  FORWARD DECLARATIONS
  */
@@ -912,7 +916,7 @@ ItclBiObjectUnknownCmd(
     ItclObject *ioPtr;
     ItclObjectInfo *infoPtr;
 
-    ItclShowArgs(1, "ItclBiObjectUnknownCmd", objc, objv);
+    ItclShowArgs(0, "ItclBiObjectUnknownCmd", objc, objv);
     cmd = Tcl_GetCommandFromObj(interp, objv[1]);
     if (Tcl_GetCommandInfoFromToken(cmd, &cmdInfo) != 1) {
     }
@@ -1363,6 +1367,127 @@ ItclExtendedCget(
             Tcl_SetObjResult(interp, Tcl_NewStringObj("<undefined>", -1));
         }
         result = TCL_OK;
+    }
+    return result;
+}
+
+/*
+ * ------------------------------------------------------------------------
+ *  ItclExtendedSetGet()
+ *
+ *  Invoked whenever the user writes to a methodvariable or calls the method
+ *  with the same name as the variable.
+ *  only for not ITCL_CLASS classes
+ *  Handles the following syntax:
+ *
+ *    <objName> setget varName ?<value>?
+ *
+ *  Allows access to methodvariables as if they hat a setter and getter
+ *  method
+ *  With no arguments, this command returns the current
+ *  value of the variable.  If <value> is specified,
+ *  this sets the variable to the value calling a callback if exists:
+ *
+ * ------------------------------------------------------------------------
+ */
+/* ARGSUSED */
+int
+ItclExtendedSetGet(
+    ClientData clientData,   /* class definition */
+    Tcl_Interp *interp,      /* current interpreter */
+    int objc,                /* number of arguments */
+    Tcl_Obj *CONST objv[])   /* argument objects */
+{
+    ItclClass *contextIclsPtr;
+    ItclObject *contextIoPtr;
+
+    Tcl_HashEntry *hPtr;
+    Tcl_Obj **newObjv;
+    ItclMethodVariable *imvPtr;
+    ItclObjectInfo *infoPtr;
+    const char *usageStr;
+    const char *val;
+    char *token;
+    int result;
+
+    ItclShowArgs(0, "ItclExtendedSetGet", objc, objv);
+    token = NULL;
+    imvPtr = NULL;
+    result = TCL_OK;
+    /*
+     *  Make sure that this command is being invoked in the proper
+     *  context.
+     */
+    contextIclsPtr = NULL;
+    if (Itcl_GetContext(interp, &contextIclsPtr, &contextIoPtr) != TCL_OK) {
+        return TCL_ERROR;
+    }
+
+    usageStr = "improper usage: should be \"object setget varName ?value?\"";
+    if (contextIoPtr == NULL) {
+        Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+                usageStr, (char*)NULL);
+        return TCL_ERROR;
+    }
+
+    /*
+     *  BE CAREFUL:  work in the virtual scope!
+     */
+    if (contextIoPtr != NULL) {
+        contextIclsPtr = contextIoPtr->iclsPtr;
+    }
+    infoPtr = contextIclsPtr->infoPtr;
+    if (infoPtr->currContextIclsPtr != NULL) {
+        contextIclsPtr = infoPtr->currContextIclsPtr;
+    }
+
+    hPtr = NULL;
+    if (objc < 2) {
+        Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+                usageStr, (char*)NULL);
+        return TCL_ERROR;
+    }
+    /* look if it is an methodvariable at all */
+    hPtr = Tcl_FindHashEntry(&contextIoPtr->objectMethodVariables,
+            (char *) objv[1]);
+    if (hPtr == NULL) {
+	Tcl_AppendResult(interp, "no such methodvariable \"",
+	        Tcl_GetString(objv[1]), "\"", NULL);
+	return TCL_ERROR;
+    }
+    imvPtr = (ItclMethodVariable *)Tcl_GetHashValue(hPtr);
+    if (objc == 2) {
+        val = ItclGetInstanceVar(interp, Tcl_GetString(objv[1]), NULL, 
+	        contextIoPtr, imvPtr->iclsPtr);
+        if (val == NULL) {
+            result = TCL_ERROR;
+        } else {
+	   Tcl_SetResult(interp, (char *)val, TCL_VOLATILE);
+	}
+        return result;
+    }
+    imvPtr = (ItclMethodVariable *)Tcl_GetHashValue(hPtr);
+    result = TCL_OK;
+    if (imvPtr->callbackPtr != NULL) {
+        newObjv = (Tcl_Obj **)ckalloc(sizeof(Tcl_Obj *)*3);
+        newObjv[0] = imvPtr->callbackPtr;
+        Tcl_IncrRefCount(newObjv[0]);
+        newObjv[1] = objv[1];
+        Tcl_IncrRefCount(newObjv[1]);
+        newObjv[2] = objv[2];
+        Tcl_IncrRefCount(newObjv[2]);
+        result = Tcl_EvalObjv(interp, 3, newObjv, TCL_EVAL_DIRECT);
+        Tcl_DecrRefCount(newObjv[0]);
+        Tcl_DecrRefCount(newObjv[1]);
+        Tcl_DecrRefCount(newObjv[2]);
+        ckfree((char *)newObjv);
+    }
+    if (result == TCL_OK) {
+        if (ItclSetInstanceVar(interp, Tcl_GetString(objv[1]), NULL, 
+	        Tcl_GetString(objv[2]), contextIoPtr,
+		imvPtr->iclsPtr) == NULL) {
+            result = TCL_ERROR;
+        }
     }
     return result;
 }
