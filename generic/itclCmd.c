@@ -23,7 +23,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclCmd.c,v 1.1.2.15 2007/10/15 09:22:57 wiede Exp $
+ *     RCS:  $Id: itclCmd.c,v 1.1.2.16 2007/10/16 21:04:06 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -1070,7 +1070,7 @@ Itcl_ForwardAddCmd(
         Tcl_WrongNumArgs(interp, 1, objv, "<forwardName> <targetName> ?<arg> ...?");
         return TCL_ERROR;
     }
-    infoPtr = (ItclObjectInfo *)infoPtr;
+    infoPtr = Tcl_GetAssocData(interp, ITCL_INTERP_DATA, NULL);
     iclsPtr = (ItclClass*)Itcl_PeekStack(&infoPtr->clsStack);
     prefixObj = Tcl_NewListObj(objc-2, objv+2);
     mPtr = Itcl_NewForwardClassMethod(interp, iclsPtr->clsPtr, 1,
@@ -1132,7 +1132,7 @@ Itcl_MixinAddCmd(
         Tcl_WrongNumArgs(interp, 1, objv, "<className> <mixinName> ?<mixinName> ...?");
         return TCL_ERROR;
     }
-    infoPtr = (ItclObjectInfo *)infoPtr;
+    infoPtr = Tcl_GetAssocData(interp, ITCL_INTERP_DATA, NULL);
     iclsPtr = (ItclClass*)Itcl_PeekStack(&infoPtr->clsStack);
     newObjv = (Tcl_Obj **)ckalloc(sizeof(Tcl_Obj *)*(objc+1));
     newObjv[0] = Tcl_NewStringObj("::oo::define", -1);
