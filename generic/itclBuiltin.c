@@ -24,7 +24,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclBuiltin.c,v 1.1.2.20 2007/10/15 23:28:02 wiede Exp $
+ *     RCS:  $Id: itclBuiltin.c,v 1.1.2.21 2007/10/16 09:50:13 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -995,7 +995,9 @@ ItclExtendedConfigure(
     Tcl_Obj *resultPtr;
     Tcl_Obj *objPtr;
     Tcl_Obj *methodNamePtr;
+    Tcl_Obj *configureMethodPtr;
     Tcl_Namespace *saveNsPtr;
+    Tcl_Namespace *evalNsPtr;
     Tcl_Obj **newObjv;
     ItclVarLookup *vlookup;
     ItclDelegatedFunction *idmPtr;
@@ -1183,31 +1185,55 @@ fprintf(stderr, "plain configure not yet implemented\n");
 	    if (result != TCL_OK) {
 	        break;
 	    }
-#ifdef NOTDEF
-//	    int intVal;
-            Tcl_GetIntFromObj(interp, Tcl_GetObjResult(interp), &intVal);
-	    if (!intVal) {
-		/* validate has already set option */
-//	        break;
-	    }
-#endif
 	}
-        if (ioptPtr->configureMethodPtr != NULL) {
+	configureMethodPtr = NULL;
+	if (ioptPtr->configureMethodPtr != NULL) {
+	    configureMethodPtr = ioptPtr->configureMethodPtr;
+	    Tcl_IncrRefCount(configureMethodPtr);
+	    evalNsPtr = ioptPtr->iclsPtr->nsPtr;
+	}
+	if (ioptPtr->configureMethodVarPtr != NULL) {
+	    val = ItclGetInstanceVar(interp,
+	            Tcl_GetString(ioptPtr->configureMethodVarPtr), NULL,
+		    contextIoPtr, ioptPtr->iclsPtr);
+	    if (val == NULL) {
+	        Tcl_AppendResult(interp, "configure cannot get value for",
+		        " configuremethodvar \"",
+			Tcl_GetString(ioptPtr->configureMethodVarPtr),
+			"\"", NULL);
+		return TCL_ERROR;
+	    }
+	    hPtr = Tcl_FindHashEntry(&contextIoPtr->iclsPtr->resolveCmds,
+	        (char *)val);
+            if (hPtr != NULL) {
+		ItclMemberFunc *imPtr;
+		imPtr = (ItclMemberFunc *)Tcl_GetHashValue(hPtr);
+	        evalNsPtr = imPtr->iclsPtr->nsPtr;
+	    } else {
+		Tcl_AppendResult(interp, "cannot find method \"",
+		        val, "\" found in configuremethodvar", NULL);
+		return TCL_ERROR;
+	    }
+	    configureMethodPtr = Tcl_NewStringObj(val, -1);
+	    Tcl_IncrRefCount(configureMethodPtr);
+	}
+        if (configureMethodPtr != NULL) {
 	    newObjv = (Tcl_Obj **)ckalloc(sizeof(Tcl_Obj *)*3);
-	    newObjv[0] = ioptPtr->configureMethodPtr;
+	    newObjv[0] = configureMethodPtr;
 	    Tcl_IncrRefCount(newObjv[0]);
 	    newObjv[1] = objv[i];
 	    Tcl_IncrRefCount(newObjv[1]);
 	    newObjv[2] = objv[i+1];
 	    Tcl_IncrRefCount(newObjv[2]);
 	    saveNsPtr = Tcl_GetCurrentNamespace(interp);
-	    Itcl_SetCallFrameNamespace(interp, ioptPtr->iclsPtr->nsPtr);
+	    Itcl_SetCallFrameNamespace(interp, evalNsPtr);
             result = Tcl_EvalObjv(interp, 3, newObjv, TCL_EVAL_DIRECT);
 	    Tcl_DecrRefCount(newObjv[0]);
 	    Tcl_DecrRefCount(newObjv[1]);
 	    Tcl_DecrRefCount(newObjv[2]);
             ckfree((char *)newObjv);
 	    Itcl_SetCallFrameNamespace(interp, saveNsPtr);
+	    Tcl_DecrRefCount(configureMethodPtr);
 	    if (result != TCL_OK) {
 	        break;
 	    }
@@ -1217,13 +1243,16 @@ fprintf(stderr, "plain configure not yet implemented\n");
 	            Tcl_GetString(objv[i+1]), contextIoPtr, ioptPtr->iclsPtr)
 		    == NULL) {
 		result = TCL_ERROR;
+fprintf(stderr, "BRK3!%s!\n", Tcl_GetStringResult(interp));
 	        break;
 	    }
 	}
         result = TCL_OK;
     }
     if (infoPtr->unparsedObjc > 0) {
-        return TCL_CONTINUE;
+	if (result == TCL_OK) {
+            return TCL_CONTINUE;
+        }
     }
     return result;
 }

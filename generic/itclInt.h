@@ -9,7 +9,7 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itclInt.h,v 1.17.2.25 2007/10/15 23:28:02 wiede Exp $
+ * RCS: @(#) $Id: itclInt.h,v 1.17.2.26 2007/10/16 09:50:13 wiede Exp $
  */
 
 #include <string.h>
@@ -446,8 +446,11 @@ typedef struct ItclOption {
     Tcl_Obj *init;              /* initial value */
     Tcl_Obj *defaultValuePtr;
     Tcl_Obj *cgetMethodPtr;
+    Tcl_Obj *cgetMethodVarPtr;
     Tcl_Obj *configureMethodPtr;
+    Tcl_Obj *configureMethodVarPtr;
     Tcl_Obj *validateMethodPtr;
+    Tcl_Obj *validateMethodVarPtr;
     ItclDelegatedOption *idoPtr;
                                 /* if the option is delegated != NULL */
 } ItclOption;

@@ -39,7 +39,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclParse.c,v 1.1.2.21 2007/10/15 23:28:02 wiede Exp $
+ *     RCS:  $Id: itclParse.c,v 1.1.2.22 2007/10/16 09:50:13 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -1685,8 +1685,11 @@ Itcl_ClassOptionCmd(
     char *init;
     char *defaultValue;
     char *cgetMethod;
+    char *cgetMethodVar;
     char *configureMethod;
+    char *configureMethodVar;
     char *validateMethod;
+    char *validateMethodVar;
     char *token;
     char *usage;
     const char **argv;
@@ -1710,7 +1713,7 @@ Itcl_ClassOptionCmd(
     }
     pLevel = Itcl_Protection(interp, 0);
 
-    usage = "namespec ?init? ?-default value? ?-readonly? ?-cgetmethod methodName? ?-configuremethod methodName? ?-validatemethod methodName?";
+    usage = "namespec ?init? ?-default value? ?-readonly? ?-cgetmethod methodName? ?-cgetmethodvar varName? ?-configuremethod methodName? ?-configuremethodvar varName? ?-validatemethod methodName? ?-validatemethodvar varName";
     if (pLevel == ITCL_PUBLIC) {
         if (objc < 2 || objc > 11) {
             Tcl_WrongNumArgs(interp, 1, objv, usage);
@@ -1727,6 +1730,9 @@ Itcl_ClassOptionCmd(
     cgetMethod = NULL;
     configureMethod = NULL;
     validateMethod = NULL;
+    cgetMethodVar = NULL;
+    configureMethodVar = NULL;
+    validateMethodVar = NULL;
     readOnly = 0;
     newObjc = 0;
     newObjv = (Tcl_Obj **)ckalloc(sizeof(Tcl_Obj *)*objc);
@@ -1747,20 +1753,41 @@ Itcl_ClassOptionCmd(
 	        foundOption = 1;
 		readOnly = 1;
 	      } else {
-	        if (strcmp(token, "-cgetmethod") == 0) {
-	            foundOption = 1;
-		    i++;
-	            cgetMethod = Tcl_GetString(objv[i]);
-		} else {
-	          if (strcmp(token, "-configuremethod") == 0) {
-	              foundOption = 1;
-		      i++;
-	              configureMethod = Tcl_GetString(objv[i]);
-		  } else {
-	            if (strcmp(token, "-validatemethod") == 0) {
+	        if (strncmp(token, "-cgetmethod", 11) == 0) {
+	            if (strcmp(token, "-cgetmethod") == 0) {
 	                foundOption = 1;
 		        i++;
-	                validateMethod = Tcl_GetString(objv[i]);
+	                cgetMethod = Tcl_GetString(objv[i]);
+		    }
+	            if (strcmp(token, "-cgetmethodvar") == 0) {
+	                foundOption = 1;
+		        i++;
+	                cgetMethodVar = Tcl_GetString(objv[i]);
+		    }
+		} else {
+	          if (strncmp(token, "-configuremethod", 16) == 0) {
+	              if (strcmp(token, "-configuremethod") == 0) {
+	                  foundOption = 1;
+		          i++;
+	                  configureMethod = Tcl_GetString(objv[i]);
+		      }
+	              if (strcmp(token, "-configuremethodvar") == 0) {
+	                  foundOption = 1;
+		          i++;
+	                  configureMethodVar = Tcl_GetString(objv[i]);
+		      }
+		  } else {
+	            if (strncmp(token, "-validatemethod", 15) == 0) {
+	                if (strcmp(token, "-validatemethod") == 0) {
+	                    foundOption = 1;
+		            i++;
+	                    validateMethod = Tcl_GetString(objv[i]);
+		        }
+	                if (strcmp(token, "-validatemethodvar") == 0) {
+	                    foundOption = 1;
+		            i++;
+	                    validateMethodVar = Tcl_GetString(objv[i]);
+		        }
 		    }
 	          }
 	        }
@@ -1773,6 +1800,24 @@ Itcl_ClassOptionCmd(
 	}
     }
     
+    if ((cgetMethod != NULL) && (cgetMethodVar != NULL)) {
+        Tcl_AppendResult(interp,
+	        "option -cgetmethod and -cgetmethodvar cannot be used both",
+		NULL);
+	return TCL_ERROR;
+    }
+    if ((configureMethod != NULL) && (configureMethodVar != NULL)) {
+        Tcl_AppendResult(interp,
+	        "option -configuremethod and -configuremethodvar cannot be used both",
+		NULL);
+	return TCL_ERROR;
+    }
+    if ((validateMethod != NULL) && (validateMethodVar != NULL)) {
+        Tcl_AppendResult(interp,
+	        "option -validatemethod and -validatemethodvar cannot be used both",
+		NULL);
+	return TCL_ERROR;
+    }
     if (newObjc < 1) {
         Tcl_AppendResult(interp, usage, NULL);
 	return TCL_ERROR;
@@ -1852,6 +1897,18 @@ Itcl_ClassOptionCmd(
     if (validateMethod != NULL) {
         ioptPtr->validateMethodPtr = Tcl_NewStringObj(validateMethod, -1);
         Tcl_IncrRefCount(ioptPtr->validateMethodPtr);
+    }
+    if (cgetMethodVar != NULL) {
+        ioptPtr->cgetMethodVarPtr = Tcl_NewStringObj(cgetMethodVar, -1);
+        Tcl_IncrRefCount(ioptPtr->cgetMethodVarPtr);
+    }
+    if (configureMethodVar != NULL) {
+        ioptPtr->configureMethodVarPtr = Tcl_NewStringObj(configureMethodVar, -1);
+        Tcl_IncrRefCount(ioptPtr->configureMethodVarPtr);
+    }
+    if (validateMethodVar != NULL) {
+        ioptPtr->validateMethodVarPtr = Tcl_NewStringObj(validateMethodVar, -1);
+        Tcl_IncrRefCount(ioptPtr->validateMethodVarPtr);
     }
     if (readOnly != 0) {
         ioptPtr->flags |= ITCL_OPTION_READONLY;
