@@ -24,7 +24,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann Copyright (c) 2007
  *
- *     RCS:  $Id: itclObject.c,v 1.1.2.20 2007/10/15 19:53:20 wiede Exp $
+ *     RCS:  $Id: itclObject.c,v 1.1.2.21 2007/10/18 21:37:54 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -260,6 +260,11 @@ ItclCreateObject(
     Tcl_ObjectSetMetadata(ioPtr->oPtr, iclsPtr->infoPtr->object_meta_type,
             ioPtr);
 
+    /* make the object known, if it is used in the constructor already! */
+    entry = Tcl_CreateHashEntry(&iclsPtr->infoPtr->objects,
+        (char*)ioPtr->accessCmd, &newEntry);
+    Tcl_SetHashValue(entry, (ClientData)ioPtr);
+
     /*
      *  Now construct the object.  Look for a constructor in the
      *  most-specific class, and if there is one, invoke it.
@@ -357,6 +362,14 @@ fprintf(stderr, "DEBUG CONSTRUCTOR error!%s!\n", Tcl_GetStringResult(interp));
 	Tcl_DecrRefCount(namePtr);
 	Tcl_DecrRefCount(argumentPtr);
 	Tcl_DecrRefCount(bodyPtr);
+    } else {
+        if (ioPtr->accessCmd != NULL) {
+            entry = Tcl_FindHashEntry(&iclsPtr->infoPtr->objects,
+                (char*)ioPtr->accessCmd);
+	    if (entry != NULL) {
+                Tcl_DeleteHashEntry(entry);
+	    }
+        }
     }
 
     /*
@@ -622,7 +635,6 @@ ItclInitObjectOptions(
         }
         iclsPtr2 = Itcl_AdvanceHierIter(&hier);
     }
-    Tcl_DStringFree(&buffer);
     Itcl_DeleteHierIter(&hier);
     return TCL_OK;
 }

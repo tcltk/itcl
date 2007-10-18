@@ -24,7 +24,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclInfo.c,v 1.1.2.8 2007/10/15 19:53:19 wiede Exp $
+ *     RCS:  $Id: itclInfo.c,v 1.1.2.9 2007/10/18 21:37:54 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -33,6 +33,7 @@
  */
 #include "itclInt.h"
 
+Tcl_ObjCmdProc Itcl_BiInfoExistsCmd;
 
 typedef struct InfoMethod {
     char* name;              /* method name */
@@ -79,6 +80,7 @@ static const struct NameProcMap infoCmds2[] = {
     { "::itcl::builtin::Info::body", Itcl_BiInfoBodyCmd },
     { "::itcl::builtin::Info::class", Itcl_BiInfoClassCmd },
     { "::itcl::builtin::Info::component", Itcl_BiInfoComponentCmd },
+    { "::itcl::builtin::Info::exists", Itcl_BiInfoExistsCmd },
     { "::itcl::builtin::Info::function", Itcl_BiInfoFunctionCmd },
     { "::itcl::builtin::Info::heritage", Itcl_BiInfoHeritageCmd },
     { "::itcl::builtin::Info::inherit", Itcl_BiInfoInheritCmd },
@@ -1051,6 +1053,7 @@ Itcl_BiInfoVarsCmd(
     memcpy(newObjv+1, objv+1, sizeof(Tcl_Obj *)*(objc-1));
     result = Tcl_EvalObjv(interp, objc, newObjv, 0);
     Tcl_DecrRefCount(newObjv[0]);
+    ckfree((char *)newObjv);
     if (objc < 2) {
         return result;
     }
@@ -1110,6 +1113,45 @@ Itcl_BiInfoVarsCmd(
 
 /*
  * ------------------------------------------------------------------------
+ *  Itcl_BiInfoExistsCmd()
+ *
+ *  Returns information regarding existance of vars/params 
+ *
+ *    info exists 
+ *  uses ::info exists
+ *
+ *  Returns a status TCL_OK/TCL_ERROR
+ *  to indicate success/failure.
+ * ------------------------------------------------------------------------
+ */
+/* ARGSUSED */
+int
+Itcl_BiInfoExistsCmd(
+    ClientData dummy,        /* not used */
+    Tcl_Interp *interp,      /* current interpreter */
+    int objc,                /* number of arguments */
+    Tcl_Obj *CONST objv[])   /* argument objects */
+{
+    Tcl_Obj **newObjv;
+    Tcl_Namespace *saveNsPtr;
+    int result = TCL_OK;
+
+    ItclShowArgs(1, "Itcl_BiInfoExists", objc, objv);
+    newObjv = (Tcl_Obj **)ckalloc(sizeof(Tcl_Obj *)*(objc));
+    newObjv[0] = Tcl_NewStringObj("::tcl::Info_exists", -1);
+    Tcl_IncrRefCount(newObjv[0]);
+    memcpy(newObjv+1, objv+1, sizeof(Tcl_Obj *)*(objc-1));
+    saveNsPtr = Tcl_GetCurrentNamespace(interp);
+    Itcl_SetCallFrameNamespace(interp, Itcl_GetUplevelNamespace(interp, 1));
+    result = Tcl_EvalObjv(interp, objc, newObjv, 0);
+    Tcl_DecrRefCount(newObjv[0]);
+    Itcl_SetCallFrameNamespace(interp, saveNsPtr);
+    ckfree((char *)newObjv);
+    return result;
+}
+
+/*
+ * ------------------------------------------------------------------------
  *  Itcl_BiInfoUnknownCmd()
  *
  *  the unknown handler for the ::itcl::builtin::Info ensemble
@@ -1127,7 +1169,7 @@ Itcl_BiInfoUnknownCmd(
     Tcl_Obj *objPtr;
     int result;
 
-    ItclShowArgs(2, "Itcl_BiInfoUnknownCmd", objc, objv);
+    ItclShowArgs(1, "Itcl_BiInfoUnknownCmd", objc, objv);
     result = TCL_OK;
     if (objc < 3) {
         /* produce usage message */
@@ -1138,6 +1180,13 @@ Itcl_BiInfoUnknownCmd(
         return TCL_ERROR;
     }
     listObj = Tcl_NewListObj(-1, NULL);
+    objPtr = Tcl_NewStringObj("namespace", -1);
+    Tcl_ListObjAppendElement(interp, listObj, objPtr);
+    objPtr = Tcl_NewStringObj("inscope", -1);
+    Tcl_ListObjAppendElement(interp, listObj, objPtr);
+    objPtr = Tcl_NewStringObj(Itcl_GetUplevelNamespace(interp, 1)->fullName,
+            -1);
+    Tcl_ListObjAppendElement(interp, listObj, objPtr);
     objPtr = Tcl_NewStringObj("::info", -1);
     Tcl_ListObjAppendElement(interp, listObj, objPtr);
     objPtr = Tcl_NewStringObj(Tcl_GetString(objv[2]), -1);
@@ -1387,6 +1436,7 @@ Itcl_DefaultInfoCmd(
     Tcl_Command cmd;
     Tcl_Obj *resultPtr;
 
+    ItclShowArgs(1, "Itcl_DefaultInfoCmd", objc, objv);
     /*
      *  Look for the usual "::info" command, and use it to
      *  evaluate the unknown option.

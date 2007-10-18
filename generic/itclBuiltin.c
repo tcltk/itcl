@@ -24,7 +24,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclBuiltin.c,v 1.1.2.21 2007/10/16 09:50:13 wiede Exp $
+ *     RCS:  $Id: itclBuiltin.c,v 1.1.2.22 2007/10/18 21:37:54 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -940,7 +940,7 @@ ItclBiObjectUnknownCmd(
     ItclObject *ioPtr;
     ItclObjectInfo *infoPtr;
 
-    ItclShowArgs(0, "ItclBiObjectUnknownCmd", objc, objv);
+    ItclShowArgs(1, "ItclBiObjectUnknownCmd", objc, objv);
     cmd = Tcl_GetCommandFromObj(interp, objv[1]);
     if (Tcl_GetCommandInfoFromToken(cmd, &cmdInfo) != 1) {
     }
