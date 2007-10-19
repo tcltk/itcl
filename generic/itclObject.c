@@ -24,7 +24,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann Copyright (c) 2007
  *
- *     RCS:  $Id: itclObject.c,v 1.1.2.21 2007/10/18 21:37:54 wiede Exp $
+ *     RCS:  $Id: itclObject.c,v 1.1.2.22 2007/10/19 20:44:32 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -1733,7 +1733,7 @@ GetClassFromClassName(
 
 /*
  * ------------------------------------------------------------------------
- *  ItclMapProcCmd()
+ *  ItclMapMethodNameProc()
  * ------------------------------------------------------------------------
  */
 

@@ -8,7 +8,7 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itcl2TclOO.c,v 1.1.2.7 2007/10/02 22:43:29 wiede Exp $
+ * RCS: @(#) $Id: itcl2TclOO.c,v 1.1.2.8 2007/10/19 20:44:32 wiede Exp $
  */
 
 #include <tclOOInt.h>
@@ -133,6 +133,7 @@ Itcl_PrivateObjectCmd(
     Object *oPtr = (Object *)clientData;
     int result;
 
+    ItclShowArgs(1, "Itcl_PrivateObjectCmd", objc, objv);
     result = TclOOObjectCmdCore(oPtr, interp, objc, objv, PRIVATE_METHOD,
 	    &oPtr->publicContextCache, (Class *)clsPtr);
     return result;
