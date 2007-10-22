@@ -23,7 +23,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itcl_methods.c,v 1.21 2007/08/07 20:05:30 msofer Exp $
+ *     RCS:  $Id: itcl_methods.c,v 1.22 2007/10/22 22:58:29 hobbs Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -1666,7 +1666,8 @@ Itcl_PushContext(interp, member, contextClass, contextObj, contextPtr)
          *  storage space for the context, then allocate more space.
          */
         localCt = procPtr->numCompiledLocals;
-        if (localCt > sizeof(contextPtr->localStorage)/itclVarLocalSize) {
+        if (localCt >
+		(int)(sizeof(contextPtr->localStorage)/itclVarLocalSize)) {
             contextPtr->compiledLocals = (Var*)ckalloc(
                 (unsigned)(localCt * itclVarLocalSize)
             );
