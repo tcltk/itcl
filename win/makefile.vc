@@ -5,7 +5,7 @@
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 # 
 # Copyright (c) 1993-1998 Lucent Technologies, Inc.
-# RCS: $Id: makefile.vc,v 1.34 2007/09/06 21:37:56 davygrvy Exp $
+# RCS: $Id: makefile.vc,v 1.35 2007/11/03 17:57:16 davygrvy Exp $
 #------------------------------------------------------------------------------
 #  Do not modify this file!
 #------------------------------------------------------------------------------
@@ -283,6 +283,35 @@ genstubs:
 	$(TCLSH) $(TOOLSDIR)\genStubs.tcl $(GENERICDIR) \
         	$(GENERICDIR)\$(PROJECT).decls $(GENERICDIR)\$(PROJECT)Int.decls
 !endif
+
+#---------------------------------------------------------------------
+# Generate the source dependencies.
+#---------------------------------------------------------------------
+
+depend:
+!if !exist($(TCLSH))
+	@echo Build tclsh first!
+!else
+	$(TCLSH) $(TCLTOOLSDIR)\mkdepend.tcl -vc32 -out:"$(OUT_DIR)\depend.mk" \
+		-passthru:"-DBUILD_itcl $(ITCL_INCLUDES) $(TCL_INCLUDES)" $(GENERICDIR),$$(GENERICDIR) \
+		$(WINDIR),$$(WINDIR) @<<
+$(ITCLOBJS)
+<<
+!endif
+
+#---------------------------------------------------------------------
+# Dependency rules
+#---------------------------------------------------------------------
+
+!if exist("$(OUT_DIR)\depend.mk")
+!include "$(OUT_DIR)\depend.mk"
+!message *** Dependency rules in use.
+!else
+!message *** Dependency rules are not being used.
+!endif
+
+### add a spacer in the output
+!message
 
 #---------------------------------------------------------------------
 # Special case object file targets
