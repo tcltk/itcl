@@ -39,7 +39,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itclInt.h,v 1.17 2007/08/07 20:05:29 msofer Exp $
+ *     RCS:  $Id: itclInt.h,v 1.18 2007/11/03 15:26:08 davygrvy Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -60,7 +60,7 @@
 #define ITCL_TCL_PRE_8_5 (TCL_MAJOR_VERSION == 8 && TCL_MINOR_VERSION < 5)
 
 #if !ITCL_TCL_PRE_8_5
-#if (USE_TCL_STUBS)
+#if defined(USE_TCL_STUBS)
 
 /*
  * Fix Tcl bug #803489 the right way.  We need to always use the old Stub
