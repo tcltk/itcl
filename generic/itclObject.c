@@ -24,7 +24,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann Copyright (c) 2007
  *
- *     RCS:  $Id: itclObject.c,v 1.1.2.22 2007/10/19 20:44:32 wiede Exp $
+ *     RCS:  $Id: itclObject.c,v 1.1.2.23 2007/11/23 20:26:15 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -131,6 +131,7 @@ ItclCreateObject(
     Tcl_CmdInfo cmdInfo;
     Tcl_HashEntry *entry;
     ItclObjectInfo *infoPtr;
+    ItclObject *saveCurrIoPtr;
     ItclObject *ioPtr;
     Itcl_InterpState istate;
     Tcl_Obj **newObjv;
@@ -207,6 +208,7 @@ ItclCreateObject(
     }
 
     infoPtr = iclsPtr->infoPtr;
+    saveCurrIoPtr = infoPtr->currIoPtr;
     infoPtr->currIoPtr = ioPtr;
     if (infoPtr->windgetInfoPtr != NULL) {
         if (iclsPtr->flags & (ITCL_WIDGET|ITCL_WIDGETADAPTOR)) {
@@ -318,7 +320,7 @@ fprintf(stderr, "DEBUG CONSTRUCTOR error!%s!\n", Tcl_GetStringResult(interp));
      *  Destroy the "constructed" table in the object data, since
      *  it is no longer needed.
      */
-    iclsPtr->infoPtr->currIoPtr = NULL;
+    infoPtr->currIoPtr = saveCurrIoPtr;
     Tcl_DeleteHashTable(ioPtr->constructed);
     ckfree((char*)ioPtr->constructed);
     ioPtr->constructed = NULL;

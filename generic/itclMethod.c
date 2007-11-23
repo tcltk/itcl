@@ -25,7 +25,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclMethod.c,v 1.1.2.12 2007/10/15 23:28:02 wiede Exp $
+ *     RCS:  $Id: itclMethod.c,v 1.1.2.13 2007/11/23 20:26:15 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -1969,6 +1969,10 @@ ItclCheckCallMethod(
     if (callContextPtr == NULL) {
         callContextPtr = (ItclCallContext *)ckalloc(
                 sizeof(ItclCallContext));
+	if (ioPtr == NULL) {
+	    Tcl_AppendResult(interp, "ItclCheckCallMethod  ioPtr == NULL", NULL);
+	    return TCL_ERROR;
+	}
         callContextPtr->objectFlags = ioPtr->flags;
         callContextPtr->classFlags = imPtr->iclsPtr->flags;
         callContextPtr->nsPtr = Tcl_GetCurrentNamespace(interp);
@@ -2120,6 +2124,9 @@ ItclProcErrorProc(
 	                &imPtr->iclsPtr->infoPtr->constructorStack,
 		        constructorStackIndex);
             }
+	    if (constructorStackIndex < 0) {
+	        break;
+	    }
 	    if (currIclsPtr == NULL) {
 	        break;
 	    }
