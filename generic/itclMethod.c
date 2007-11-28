@@ -25,7 +25,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclMethod.c,v 1.1.2.13 2007/11/23 20:26:15 wiede Exp $
+ *     RCS:  $Id: itclMethod.c,v 1.1.2.14 2007/11/28 16:28:51 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -885,6 +885,7 @@ Itcl_EvalMemberCode(
     int i;
     ItclMemberCode *mcode;
 
+    ItclShowArgs(1, "Itcl_EvalMemberCode", objc, objv);
     /*
      *  If this code does not have an implementation yet, then
      *  try to autoload one.  Also, if this is Tcl code, make sure
@@ -1402,7 +1403,7 @@ Itcl_ExecProc(
     ItclMemberFunc *imPtr = (ItclMemberFunc*)clientData;
     int result = TCL_OK;
 
-    ItclShowArgs(2, "Itcl_ExecProc", objc, objv);
+    ItclShowArgs(1, "Itcl_ExecProc", objc, objv);
 
     /*
      *  Make sure that this command member can be accessed from
@@ -1619,6 +1620,7 @@ Itcl_InvokeMethodIfExists(
     int cmdlinec;
     Tcl_Obj **cmdlinev;
 
+    ItclShowArgs(1, "Itcl_InvokeMethodIfExists", objc, objv);
     Tcl_Obj *objPtr = Tcl_NewStringObj(name, -1);
     entry = Tcl_FindHashEntry(&contextClass->functions, (char *)objPtr);
 

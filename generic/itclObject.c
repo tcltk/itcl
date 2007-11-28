@@ -24,7 +24,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann Copyright (c) 2007
  *
- *     RCS:  $Id: itclObject.c,v 1.1.2.23 2007/11/23 20:26:15 wiede Exp $
+ *     RCS:  $Id: itclObject.c,v 1.1.2.24 2007/11/28 16:28:51 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -1685,7 +1685,7 @@ ItclObjectUnknownCommand(
     ItclObject *ioPtr;
     ItclObjectInfo *infoPtr;
 
-    ItclShowArgs(0, "ItclObjectUnknownCommand", objc, objv);
+    ItclShowArgs(1, "ItclObjectUnknownCommand", objc, objv);
     cmd = Tcl_GetCommandFromObj(interp, objv[1]);
     if (Tcl_GetCommandInfoFromToken(cmd, &cmdInfo) != 1) {
     }
@@ -1712,6 +1712,8 @@ GetClassFromClassName(
     const char *className,
     ItclClass *iclsPtr)
 {
+    Tcl_Obj *objPtr;
+    Tcl_HashEntry *hPtr;
     ItclClass *basePtr;
     Itcl_ListElem *elem;
 
@@ -1730,7 +1732,17 @@ GetClassFromClassName(
 	}
         elem = Itcl_NextListElem(elem);
     }
-    return NULL;
+    /* as a last chance try with className in hash table */
+    objPtr = Tcl_NewStringObj(className, -1);
+    Tcl_IncrRefCount(objPtr);
+    hPtr = Tcl_FindHashEntry(&iclsPtr->infoPtr->classes, (char *)objPtr);
+    if (hPtr != NULL) {
+        iclsPtr = Tcl_GetHashValue(hPtr);
+    } else {
+        iclsPtr = NULL;
+    }
+    Tcl_DecrRefCount(objPtr);
+    return iclsPtr;
 }
 
 /*
@@ -1776,8 +1788,7 @@ ItclMapMethodNameProc(
         Tcl_IncrRefCount(methodName);
         className = Tcl_NewStringObj(head, -1);
         Tcl_IncrRefCount(className);
-        sp = Tcl_GetString(className);
-	iclsPtr2 = GetClassFromClassName(sp, iclsPtr);
+	iclsPtr2 = GetClassFromClassName(head, iclsPtr);
 	if (iclsPtr2 != NULL) {
 	    *startClsPtr = iclsPtr2->clsPtr;
 	    Tcl_SetStringObj(methodObj, Tcl_GetString(methodName), -1);
