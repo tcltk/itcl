@@ -24,7 +24,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclBuiltin.c,v 1.1.2.23 2007/10/19 20:44:32 wiede Exp $
+ *     RCS:  $Id: itclBuiltin.c,v 1.1.2.24 2007/11/30 14:25:00 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -139,7 +139,7 @@ Itcl_BiInit(
 /* FIX ME !!! need to restore ::tcl::Info_vars if Itcl is unloaded !! */
             Tcl_DictObjPut(NULL, mapDict, Tcl_NewStringObj("vars", -1),
                     Tcl_NewStringObj("::itcl::builtin::Info::vars", -1));
-            Tcl_SetEnsembleMappingDict(NULL, infoCmd, mapDict);
+            Tcl_SetEnsembleMappingDict(interp, infoCmd, mapDict);
         }
     }
 
