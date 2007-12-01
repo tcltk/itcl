@@ -24,7 +24,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann Copyright (c) 2007
  *
- *     RCS:  $Id: itclObject.c,v 1.1.2.25 2007/12/01 18:56:34 wiede Exp $
+ *     RCS:  $Id: itclObject.c,v 1.1.2.26 2007/12/01 23:11:33 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -1580,19 +1580,18 @@ ItclObjectCmd(
     if (oPtr == NULL) {
 	ClientData clientData;
 	clientData = Itcl_GetCallFrameClientData(interp);
-	if ((imPtr->flags & ITCL_COMMON) 
+	if ((imPtr->flags & ITCL_COMMON)
 	        && (imPtr->codePtr != NULL)
-		&& !(imPtr->codePtr->flags & ITCL_BUILTIN)) {
+	        && !(imPtr->codePtr->flags & ITCL_BUILTIN)) {
 	    result = Itcl_InvokeProcedureMethod(imPtr->tmPtr, interp,
 	            ItclCheckCallProc, objc, objv);
             return result;
 	}
 	if (clientData == NULL) {
-	    if ((imPtr->flags & ITCL_COMMON)
-	            || ((imPtr->codePtr != NULL)
-		        && (imPtr->codePtr->flags & ITCL_BUILTIN))) {
+	    if (((imPtr->codePtr != NULL)
+	            && (imPtr->codePtr->flags & ITCL_BUILTIN))) {
 	        result = Itcl_InvokeProcedureMethod(imPtr->tmPtr, interp,
-		        ItclCheckCallProc, objc, objv);
+	                ItclCheckCallProc, objc, objv);
                 return result;
 	    }
 	    Tcl_AppendResult(interp,
