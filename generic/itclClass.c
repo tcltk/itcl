@@ -25,7 +25,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann Copyright (c) 2007
  *
- *     RCS:  $Id: itclClass.c,v 1.1.2.13 2007/10/15 23:28:02 wiede Exp $
+ *     RCS:  $Id: itclClass.c,v 1.1.2.14 2007/12/01 18:56:34 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -107,19 +107,25 @@ void
 ItclDeleteClassMetadata(
     ClientData clientData)
 {
+#ifdef NOTDEF
     Tcl_Command cmd;
     Tcl_CmdInfo cmdInfo;
+#endif
     ItclClass *iclsPtr;
 
     iclsPtr = clientData;
+#ifdef NOTDEF
     cmd = Tcl_GetObjectCommand(iclsPtr->oPtr);
     if (iclsPtr->accessCmd != NULL) {
         Tcl_GetCommandInfoFromToken(iclsPtr->accessCmd, &cmdInfo);
         cmdInfo.deleteProc = NULL;
         Tcl_SetCommandInfoFromToken(cmd, &cmdInfo);
     }
+#endif
     iclsPtr->flags |= ITCL_CLASS_DELETE_CALLED;
+#ifdef NOTDEF
     Itcl_ReleaseData(clientData);
+#endif
 }
 
 /*
@@ -174,6 +180,7 @@ ClassNamespaceDeleted(
  *  definition.
  * ------------------------------------------------------------------------
  */
+static Tcl_Interp *_interp;
 int
 Itcl_CreateClass(
     Tcl_Interp* interp,		/* interpreter that will contain new class */
@@ -195,6 +202,7 @@ Itcl_CreateClass(
     Tcl_HashEntry *hPtr;
     int newEntry;
 
+_interp = interp;
     /*
      * check for an empty class name to avoid a crash
      */
@@ -662,10 +670,10 @@ ItclDestroyClass(
     }
     iclsPtr->accessCmd = NULL;
     if (iclsPtr->nsPtr != NULL) {
-    if (iclsPtr->flags & ITCL_CLASS_DELETED) {
-        Tcl_DeleteNamespace(iclsPtr->nsPtr);
-        iclsPtr->nsPtr = NULL;
-    }
+        if (iclsPtr->flags & ITCL_CLASS_DELETED) {
+            Tcl_DeleteNamespace(iclsPtr->nsPtr);
+            iclsPtr->nsPtr = NULL;
+        }
     }
     Itcl_ReleaseData((ClientData)iclsPtr);
 }
@@ -756,7 +764,7 @@ ItclDestroyClassNamesp(
         while (elem) {
             derivedPtr = (ItclClass*)Itcl_GetListValue(elem);
             if (derivedPtr == iclsPtr) {
-                Itcl_ReleaseData( Itcl_GetListValue(elem) );
+                Itcl_ReleaseData(Itcl_GetListValue(elem));
                 elem = Itcl_DeleteListElem(elem);
             } else {
                 elem = Itcl_NextListElem(elem);

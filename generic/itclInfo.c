@@ -24,7 +24,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclInfo.c,v 1.1.2.10 2007/11/30 14:25:00 wiede Exp $
+ *     RCS:  $Id: itclInfo.c,v 1.1.2.11 2007/12/01 18:56:34 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -1048,7 +1048,7 @@ Itcl_BiInfoVarsCmd(
 
     ItclShowArgs(2, "Itcl_BiInfoVars", objc, objv);
     newObjv = (Tcl_Obj **)ckalloc(sizeof(Tcl_Obj *)*(objc));
-    newObjv[0] = Tcl_NewStringObj("::tcl::Info_vars", -1);
+    newObjv[0] = Tcl_NewStringObj("::tcl::info::vars", -1);
     Tcl_IncrRefCount(newObjv[0]);
     memcpy(newObjv+1, objv+1, sizeof(Tcl_Obj *)*(objc-1));
     result = Tcl_EvalObjv(interp, objc, newObjv, 0);
