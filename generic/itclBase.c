@@ -9,7 +9,7 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itclBase.c,v 1.1.2.10 2007/10/15 23:28:02 wiede Exp $
+ * RCS: @(#) $Id: itclBase.c,v 1.1.2.11 2007/12/07 21:43:05 wiede Exp $
  */
 
 #include <stdlib.h>
@@ -44,7 +44,7 @@ namespace eval ::itcl {\n\
             lappend dirs [file join $bindir .. .. library]\n\
             lappend dirs [file join $bindir .. .. Itcl library]\n\
             lappend dirs [file join $bindir .. .. .. Itcl library]\n\
-            lappend dirs [file join $bindir .. .. itcloo library]\n\
+            lappend dirs [file join $bindir .. .. itcl-ng itcl library]\n\
             # On MacOSX, check the directories in the tcl_pkgPath\n\
             if {[string equal $::tcl_platform(platform) \"unix\"] && \
                     [string equal $::tcl_platform(os) \"Darwin\"]} {\n\
