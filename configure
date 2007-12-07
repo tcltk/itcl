@@ -309,7 +309,7 @@ ac_includes_default="\
 # include <unistd.h>
 #endif"
 
-ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS CYGPATH EXEEXT WIDGET_PACKAGE_NAME WIDGET_PACKAGE_VERSION PKG_LIB_FILE PKG_WIDGET_LIB_FILE PKG_STUB_LIB_FILE PKG_WIDGET_STUB_LIB_FILE PKG_STUB_SOURCES PKG_STUB_OBJECTS PKG_WIDGET_STUB_SOURCES PKG_WIDGET_STUB_OBJECTS PKG_TCL_SOURCES PKG_HEADERS PKG_INCLUDES PKG_LIBS PKG_CFLAGS TCL_VERSION TCL_BIN_DIR TCL_SRC_DIR TCL_LIB_FILE TCL_LIB_FLAG TCL_LIB_SPEC TCL_STUB_LIB_FILE TCL_STUB_LIB_FLAG TCL_STUB_LIB_SPEC TCL_LIBS TCL_DEFS TCL_EXTRA_CFLAGS TCL_LD_FLAGS TCL_SHLIB_LD_LIBS TK_VERSION TK_BIN_DIR TK_SRC_DIR TK_LIB_FILE TK_LIB_FLAG TK_LIB_SPEC TK_STUB_LIB_FILE TK_STUB_LIB_FLAG TK_STUB_LIB_SPEC TK_LIBS TK_XINCLUDES TCLOO_VERSION TCLOO_LIB_DIR TCLOO_SRC_DIR TCLOO_LIB_FILE TCLOO_LIB_FLAG TCLOO_LIB_SPEC TCLOO_STUB_LIB_FILE TCLOO_STUB_LIB_FLAG TCLOO_STUB_LIB_SPEC TCLOO_INCLUDE_SPEC TCLOO_PRIVATE_INCLUDE_SPEC TCLOO_LIBS TCLOO_DEFS TCLOO_CFLAGS TCLOO_LD_FLAGS TCLOO_SHLIB_LD_LIBS CC CFLAGS LDFLAGS CPPFLAGS ac_ct_CC OBJEXT CPP INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA SET_MAKE RANLIB ac_ct_RANLIB EGREP MATH_LIBS PKG_SOURCES PKG_OBJECTS PKG_WIDGET_SOURCES PKG_WIDGET_OBJECTS RC TCL_TOP_DIR_NATIVE TCL_GENERIC_DIR_NATIVE TCL_UNIX_DIR_NATIVE TCL_WIN_DIR_NATIVE TCL_BMAP_DIR_NATIVE TCL_TOOL_DIR_NATIVE TCL_PLATFORM_DIR_NATIVE TCL_INCLUDES TCLOO_INCLUDES TCLOO_TOP_DIR_NATIVE TCLOO_UNIX_DIR_NATIVE TCLOO_WIN_DIR_NATIVE TCLOO_GENERIC_DIR_NATIVE TCLOO_PLATFORM_DIR_NATIVE TCL_THREADS SHARED_BUILD AR CELIB_DIR LIBOBJS DL_LIBS CFLAGS_DEBUG CFLAGS_OPTIMIZE CFLAGS_WARNING STLIB_LD SHLIB_LD SHLIB_LD_LIBS SHLIB_CFLAGS LD_LIBRARY_PATH_VAR TCL_DBGX CFLAGS_DEFAULT LDFLAGS_DEFAULT CLEANFILES MAKE_LIB MAKE_SHARED_LIB MAKE_STATIC_LIB MAKE_STUB_LIB RANLIB_STUB MAKE_WIDGET_LIB MAKE_WIDGET_SHARED_LIB MAKE_WIDGET_STATIC_LIB MAKE_WIDGET_STUB_LIB TCLSH_PROG CONFIGURE_OUTPUTS SDX SDX_KIT LTLIBOBJS'
+ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS CYGPATH EXEEXT PKG_LIB_FILE PKG_STUB_LIB_FILE PKG_STUB_SOURCES PKG_STUB_OBJECTS PKG_TCL_SOURCES PKG_HEADERS PKG_INCLUDES PKG_LIBS PKG_CFLAGS TCL_VERSION TCL_BIN_DIR TCL_SRC_DIR TCL_LIB_FILE TCL_LIB_FLAG TCL_LIB_SPEC TCL_STUB_LIB_FILE TCL_STUB_LIB_FLAG TCL_STUB_LIB_SPEC TCL_LIBS TCL_DEFS TCL_EXTRA_CFLAGS TCL_LD_FLAGS TCL_SHLIB_LD_LIBS TK_VERSION TK_BIN_DIR TK_SRC_DIR TK_LIB_FILE TK_LIB_FLAG TK_LIB_SPEC TK_STUB_LIB_FILE TK_STUB_LIB_FLAG TK_STUB_LIB_SPEC TK_LIBS TK_XINCLUDES TCLOO_VERSION TCLOO_LIB_DIR TCLOO_SRC_DIR TCLOO_LIB_FILE TCLOO_LIB_FLAG TCLOO_LIB_SPEC TCLOO_STUB_LIB_FILE TCLOO_STUB_LIB_FLAG TCLOO_STUB_LIB_SPEC TCLOO_INCLUDE_SPEC TCLOO_PRIVATE_INCLUDE_SPEC TCLOO_LIBS TCLOO_DEFS TCLOO_CFLAGS TCLOO_LD_FLAGS TCLOO_SHLIB_LD_LIBS SHARED_LIB_SUFFIX CC CFLAGS LDFLAGS CPPFLAGS ac_ct_CC OBJEXT CPP INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA SET_MAKE RANLIB ac_ct_RANLIB EGREP MATH_LIBS PKG_SOURCES PKG_OBJECTS RC TCL_TOP_DIR_NATIVE TCL_GENERIC_DIR_NATIVE TCL_UNIX_DIR_NATIVE TCL_WIN_DIR_NATIVE TCL_BMAP_DIR_NATIVE TCL_TOOL_DIR_NATIVE TCL_PLATFORM_DIR_NATIVE TCL_INCLUDES TCLOO_INCLUDES TCLOO_TOP_DIR_NATIVE TCLOO_UNIX_DIR_NATIVE TCLOO_WIN_DIR_NATIVE TCLOO_GENERIC_DIR_NATIVE TCLOO_PLATFORM_DIR_NATIVE TCL_THREADS SHARED_BUILD AR CELIB_DIR LIBOBJS DL_LIBS CFLAGS_DEBUG CFLAGS_OPTIMIZE CFLAGS_WARNING STLIB_LD SHLIB_LD SHLIB_LD_LIBS SHLIB_CFLAGS LD_LIBRARY_PATH_VAR TCL_DBGX CFLAGS_DEFAULT LDFLAGS_DEFAULT CLEANFILES MAKE_LIB MAKE_SHARED_LIB MAKE_STATIC_LIB MAKE_STUB_LIB RANLIB_STUB TCLSH_PROG CONFIGURE_OUTPUTS SDX SDX_KIT ITCL_INCLUDE_SPEC ITCL_PRIVATE_INCLUDE_SPEC ITCL_LIB_SPEC ITCL_STUB_LIB_SPEC ITCL_SRC_DIR LTLIBOBJS'
 ac_subst_files=''
 
 # Initialize some variables set by options.
@@ -1350,8 +1350,6 @@ ac_configure="$SHELL $ac_aux_dir/configure" # This should be Cygnus configure.
     # are compatible with.
     TEA_VERSION="3.6"
 
-    WIDGET_PACKAGE_NAME=ItclWidget
-    WIDGET_PACKAGE_VERSION=4.0
     echo "$as_me:$LINENO: checking for correct TEA configuration" >&5
 echo $ECHO_N "checking for correct TEA configuration... $ECHO_C" >&6
     if test x"${PACKAGE_NAME}" = x ; then
@@ -1434,19 +1432,13 @@ fi
 
 
 
-
-
     # This package name must be replaced statically for AC_SUBST to work
-
 
     # Substitute STUB_LIB_FILE in case package creates a stub library too.
 
 
-
     # We AC_SUBST these here to ensure they are subst'ed,
     # in case the user doesn't call TEA_ADD_...
-
-
 
 
 
@@ -2092,6 +2084,7 @@ echo "${ECHO_T}could not find ${TCLOO_LIB_DIR}/tclooConfig.sh" >&6
     eval "TCLOO_STUB_LIB_SPEC=\"${TCLOO_STUB_LIB_SPEC}\""
     eval "TCLOO_STUB_LIB_FILE=\"${TCLOO_STUB_LIB_FILE}\""
     eval "TCLOO_CFLAGS=\"${TCLOO_CFLAGS}\""
+
 
 
 
@@ -6583,43 +6576,6 @@ echo "$as_me: error: could not find source file '$i'" >&2;}
 
 
 
-
-    vars="itclWidgetBase.c itclWidgetParse.c
-	itclWidgetCmd.c itclWidgetBuiltin.c
-	itclWidgetObject.c itclWidgetInfo.c
-        "
-    for i in $vars; do
-	case $i in
-	    \$*)
-		# allow $-var names
-		PKG_WIDGET_SOURCES="$PKG_WIDGET_SOURCES $i"
-		PKG_WIDGET_OBJECTS="$PKG_WIDGET_OBJECTS $i"
-		;;
-	    *)
-		# check for existence - allows for generic/win/unix VPATH
-		if test ! -f "${srcdir}/$i" -a ! -f "${srcdir}/generic/$i" \
-		    -a ! -f "${srcdir}/win/$i" -a ! -f "${srcdir}/unix/$i" \
-		    ; then
-		    { { echo "$as_me:$LINENO: error: could not find source file '$i'" >&5
-echo "$as_me: error: could not find source file '$i'" >&2;}
-   { (exit 1); exit 1; }; }
-		fi
-		PKG_WIDGET_SOURCES="$PKG_WIDGET_SOURCES $i"
-		# this assumes it is in a VPATH dir
-		i=`basename $i`
-		# handle user calling this before or after TEA_SETUP_COMPILER
-		if test x"${OBJEXT}" != x ; then
-		    j="`echo $i | sed -e 's/\.[^.]*$//'`.${OBJEXT}"
-		else
-		    j="`echo $i | sed -e 's/\.[^.]*$//'`.\${OBJEXT}"
-		fi
-		PKG_WIDGET_OBJECTS="$PKG_WIDGET_OBJECTS $j"
-		;;
-	esac
-    done
-
-
-
 if test ${TEA_PLATFORM} = "windows"; then
 
     PKG_OBJECTS="${PKG_OBJECTS} ${PACKAGE_NAME}.res.o"
@@ -6653,31 +6609,6 @@ echo "$as_me: error: could not find stub source file '$i'" >&2;}
 
 
 
-    vars="itclWidgetStubLib.c"
-    for i in $vars; do
-	# check for existence - allows for generic/win/unix VPATH
-	if test ! -f "${srcdir}/$i" -a ! -f "${srcdir}/generic/$i" \
-	    -a ! -f "${srcdir}/win/$i" -a ! -f "${srcdir}/unix/$i" \
-	    ; then
-	    { { echo "$as_me:$LINENO: error: could not find stub source file '$i'" >&5
-echo "$as_me: error: could not find stub source file '$i'" >&2;}
-   { (exit 1); exit 1; }; }
-	fi
-	PKG_WIDGET_STUB_SOURCES="$PKG_WIDGET_STUB_SOURCES $i"
-	# this assumes it is in a VPATH dir
-	i=`basename $i`
-	# handle user calling this before or after TEA_SETUP_COMPILER
-	if test x"${OBJEXT}" != x ; then
-	    j="`echo $i | sed -e 's/\.[^.]*$//'`.${OBJEXT}"
-	else
-	    j="`echo $i | sed -e 's/\.[^.]*$//'`.\${OBJEXT}"
-	fi
-	PKG_WIDGET_STUB_OBJECTS="$PKG_WIDGET_STUB_OBJECTS $j"
-    done
-
-
-
-
     vars="generic/itcl.h generic/itclInt.h"
     for i in $vars; do
 	# check for existence, be strict because it is installed
@@ -6694,6 +6625,20 @@ echo "$as_me: error: could not find header file '${srcdir}/$i'" >&2;}
     vars="-I. -I\"`${CYGPATH} ${srcdir}/generic`\""
     for i in $vars; do
 	PKG_INCLUDES="$PKG_INCLUDES $i"
+    done
+
+
+# next 2 lines FIX ME use var instead of .so !!
+XX=`echo $TCLOO_LIB_SPEC | sed -e 's/-L//' -e 's/ -l/\/lib/'`.so
+echo XX!$XX!$TCLOO_LIB_SPEC!
+
+    vars="${XX}"
+    for i in $vars; do
+	if test "${TEA_PLATFORM}" = "windows" -a "$GCC" = "yes" ; then
+	    # Convert foo.lib to -lfoo for GCC.  No-op if not *.lib
+	    i=`echo "$i" | sed -e 's/^\([^-].*\)\.lib$/-l\1/i'`
+	fi
+	PKG_LIBS="$PKG_LIBS $i"
     done
 
 
@@ -13159,85 +13104,6 @@ _ACEOF
 
 
 
-    if test "${TEA_PLATFORM}" = "windows" -a "$GCC" != "yes"; then
-	MAKE_WIDGET_STATIC_LIB="\${STLIB_LD} -out:\$@ \$(PKG_WIDGET_OBJECTS) \$(PKG_LIB)"
-	MAKE_WIDGET_SHARED_LIB="\${SHLIB_LD} \${SHLIB_LD_LIBS} \${LDFLAGS_DEFAULT} -out:\$@ \${PKG_WIDGET_OBJECTS} \${PKG_LIB} \${TK_LIB_FILE}"
-	MAKE_WIDGET_STUB_LIB="\${STLIB_LD} -out:\$@ \${PKG_WIDGET_STUB_OBJECTS} \${PKG_STUB_LIB} \${TK_LIB_FILE}"
-    else
-	MAKE_WIDGET_STATIC_LIB="\${STLIB_LD} \$@ \${PKG_WIDGET_OBJECTS} \${PKG_LIB} \${TK_LIB_FILE}"
-	MAKE_WIDGET_SHARED_LIB="\${SHLIB_LD} -o \$@ \${PKG_WIDGET_OBJECTS} \${SHLIB_LD_LIBS} ${PKG_LIB} \${TK_LIB_FILE}"
-	MAKE_WIDGET_STUB_LIB="\${STLIB_LD} \$@ \$(PKG_WIDGET_STUB_OBJECTS) \${PKG_STUB_LIB} \${TK_LIB_FILE}"
-    fi
-
-    if test "${SHARED_BUILD}" = "1" ; then
-	MAKE_WIDGET_LIB="${MAKE_WIDGET_SHARED_LIB} "
-    else
-	MAKE_WIDGET_LIB="${MAKE_WIDGET_STATIC_LIB} "
-    fi
-
-    #--------------------------------------------------------------------
-    # Shared libraries and static libraries have different names.
-    # Use the double eval to make sure any variables in the suffix is
-    # substituted. (@@@ Might not be necessary anymore)
-    #--------------------------------------------------------------------
-
-    if test "${TEA_PLATFORM}" = "windows" ; then
-	if test "${SHARED_BUILD}" = "1" ; then
-	    # FIX ME !!! the next line is only TEMPORARY until TclOO is
-	    # integrated into Tcl
-	    SHLIB_LD_LIBS="${SHLIB_LD_LIBS} \${TK_LIB_FILE} \"`${CYGPATH} /home/arnulf/SOURCES/tclOO/oo/libTclOO0.1.so`\""
-	    # We force the unresolved linking of symbols that are really in
-	    # the private libraries of Tcl and Tk.
-	    SHLIB_LD_LIBS="${SHLIB_LD_LIBS} \"`${CYGPATH} ${TCL_BIN_DIR}/${TCL_STUB_LIB_FILE}`\""
-	    if test x"${TK_BIN_DIR}" != x ; then
-		SHLIB_LD_LIBS="${SHLIB_LD_LIBS} \"`${CYGPATH} ${TK_BIN_DIR}/${TK_STUB_LIB_FILE}`\""
-	    fi
-	    eval eval "PKG_WIDGET_LIB_FILE=${WIDGET_PACKAGE_NAME}${SHARED_LIB_SUFFIX}"
-	else
-	    eval eval "PKG_WIDGET_LIB_FILE=${WIDGET_PACKAGE_NAME}${UNSHARED_LIB_SUFFIX}"
-	fi
-	# Some packages build their own stubs libraries
-	eval eval "PKG_WIDGET_STUB_LIB_FILE=${WIDGET_PACKAGE_NAME}stub${UNSHARED_LIB_SUFFIX}"
-	if test "$GCC" = "yes"; then
-	    PKG_WIDGET_STUB_LIB_FILE=lib${PKG_WIDGET_STUB_LIB_FILE}
-	fi
-	# These aren't needed on Windows (either MSVC or gcc)
-	RANLIB=:
-	RANLIB_STUB=:
-    else
-	RANLIB_STUB="${RANLIB}"
-	if test "${SHARED_BUILD}" = "1" ; then
-# FIX ME !!! the next lines are only TEMPORARY until I know how to succesfully
-# link libTclOO0.1.so
-	    TCLOO_LIB_SPEC2=`echo ${TCLOO_LIB_SPEC} | sed -e 's/-L//'`
-	    TCLOO_LIB_SPEC2=`echo ${TCLOO_LIB_SPEC2} | sed -e 's/ -lTclOO0.1/\/libTclOO0.1.so/'`
-	    SHLIB_LD_LIBS="${SHLIB_LD_LIBS} ${TCLOO_STUB_LIB_SPEC} ${TCLOO_LIB_SPEC2}"
-#	    SHLIB_LD_LIBS="${SHLIB_LD_LIBS} ${TCLOO_STUB_LIB_SPEC}"
-
-	    SHLIB_LD_LIBS="${SHLIB_LD_LIBS} ${TCL_STUB_LIB_SPEC}"
-	    eval eval "PKG_WIDGET_LIB_FILE=lib${WIDGET_PACKAGE_NAME}${SHARED_LIB_SUFFIX}"
-	    RANLIB=:
-	else
-	    eval eval "PKG_WIDGET_LIB_FILE=lib${WIDGET_PACKAGE_NAME}${UNSHARED_LIB_SUFFIX}"
-	fi
-	# Some packages build their own stubs libraries
-	eval eval "PKG_WIDGET_STUB_LIB_FILE=lib${WIDGET_PACKAGE_NAME}stub${UNSHARED_LIB_SUFFIX}"
-    fi
-
-    # These are escaped so that only CFLAGS is picked up at configure time.
-    # The other values will be substituted at make time.
-    CFLAGS="${CFLAGS} \${CFLAGS_DEFAULT} \${CFLAGS_WARNING}"
-    if test "${SHARED_BUILD}" = "1" ; then
-	CFLAGS="${CFLAGS} \${SHLIB_CFLAGS}"
-    fi
-
-
-
-
-
-
-
-
 
     echo "$as_me:$LINENO: checking for tclsh" >&5
 echo $ECHO_N "checking for tclsh... $ECHO_C" >&6
@@ -13369,6 +13235,30 @@ if test "${SDX}" = "none"; then
     { echo "$as_me:$LINENO: WARNING: cannot find sdx; building starkits will fail; building as a normal library still supported" >&5
 echo "$as_me: WARNING: cannot find sdx; building starkits will fail; building as a normal library still supported" >&2;}
 fi
+
+
+# TODO: Adapt this for OSX Frameworks...
+# This next bit is a bit ugly, but it makes things for itclConfig.sh...
+eval "srcdir2=\"`pwd`\""
+eval "ITCL_SRC_DIR=\"`${CYGPATH} ${srcdir2}`\""
+eval "ITCL_PRIVATE_INCLUDE_DIR=\"`${CYGPATH} ${srcdir2}/generic`\""
+case ${ITCL_PRIVATE_INCLUDE_DIR} in
+    /*) ITCL_PRIVATE_INCLUDE_SPEC="-I${ITCL_PRIVATE_INCLUDE_DIR}" ;;
+        *)  ITCL_PRIVATE_INCLUDE_SPEC="-I`pwd`/${ITCL_PRIVATE_INCLUDE_DIR}" ;;
+	esac
+eval "TCL_INCLUDE_SPEC=\"-I`${CYGPATH} ${includedir}`\""
+if test ${TCL_LIB_VERSIONS_OK} = nodots; then
+    eval "ITCL_LIB_SPEC=\"-L`${CYGPATH} ${libdir}/${PACKAGE_NAME}${PACKAGE_VERSION}` -l${PACKAGE_NAME}${TCL_TRIM_DOTS}\""
+    eval "ITCL_STUB_LIB_SPEC=\"-L`${CYGPATH} ${libdir}/${PACKAGE_NAME}${PACKAGE_VERSION}` -l${PACKAGE_NAME}stub${TCL_TRIM_DOTS}\""
+else
+    eval "ITCL_LIB_SPEC=\"-L`${CYGPATH} ${libdir}/${PACKAGE_NAME}${PACKAGE_VERSION}` -l${PACKAGE_NAME}${PACKAGE_VERSION}\""
+    eval "ITCL_STUB_LIB_SPEC=\"-L`${CYGPATH} ${libdir}/${PACKAGE_NAME}${PACKAGE_VERSION}` -l${PACKAGE_NAME}stub${PACKAGE_VERSION}\""
+fi
+
+
+
+
+
 
 
                     ac_config_files="$ac_config_files Makefile itclConfig.sh"
@@ -14013,16 +13903,10 @@ s,@ECHO_T@,$ECHO_T,;t t
 s,@LIBS@,$LIBS,;t t
 s,@CYGPATH@,$CYGPATH,;t t
 s,@EXEEXT@,$EXEEXT,;t t
-s,@WIDGET_PACKAGE_NAME@,$WIDGET_PACKAGE_NAME,;t t
-s,@WIDGET_PACKAGE_VERSION@,$WIDGET_PACKAGE_VERSION,;t t
 s,@PKG_LIB_FILE@,$PKG_LIB_FILE,;t t
-s,@PKG_WIDGET_LIB_FILE@,$PKG_WIDGET_LIB_FILE,;t t
 s,@PKG_STUB_LIB_FILE@,$PKG_STUB_LIB_FILE,;t t
-s,@PKG_WIDGET_STUB_LIB_FILE@,$PKG_WIDGET_STUB_LIB_FILE,;t t
 s,@PKG_STUB_SOURCES@,$PKG_STUB_SOURCES,;t t
 s,@PKG_STUB_OBJECTS@,$PKG_STUB_OBJECTS,;t t
-s,@PKG_WIDGET_STUB_SOURCES@,$PKG_WIDGET_STUB_SOURCES,;t t
-s,@PKG_WIDGET_STUB_OBJECTS@,$PKG_WIDGET_STUB_OBJECTS,;t t
 s,@PKG_TCL_SOURCES@,$PKG_TCL_SOURCES,;t t
 s,@PKG_HEADERS@,$PKG_HEADERS,;t t
 s,@PKG_INCLUDES@,$PKG_INCLUDES,;t t
@@ -14069,6 +13953,7 @@ s,@TCLOO_DEFS@,$TCLOO_DEFS,;t t
 s,@TCLOO_CFLAGS@,$TCLOO_CFLAGS,;t t
 s,@TCLOO_LD_FLAGS@,$TCLOO_LD_FLAGS,;t t
 s,@TCLOO_SHLIB_LD_LIBS@,$TCLOO_SHLIB_LD_LIBS,;t t
+s,@SHARED_LIB_SUFFIX@,$SHARED_LIB_SUFFIX,;t t
 s,@CC@,$CC,;t t
 s,@CFLAGS@,$CFLAGS,;t t
 s,@LDFLAGS@,$LDFLAGS,;t t
@@ -14086,8 +13971,6 @@ s,@EGREP@,$EGREP,;t t
 s,@MATH_LIBS@,$MATH_LIBS,;t t
 s,@PKG_SOURCES@,$PKG_SOURCES,;t t
 s,@PKG_OBJECTS@,$PKG_OBJECTS,;t t
-s,@PKG_WIDGET_SOURCES@,$PKG_WIDGET_SOURCES,;t t
-s,@PKG_WIDGET_OBJECTS@,$PKG_WIDGET_OBJECTS,;t t
 s,@RC@,$RC,;t t
 s,@TCL_TOP_DIR_NATIVE@,$TCL_TOP_DIR_NATIVE,;t t
 s,@TCL_GENERIC_DIR_NATIVE@,$TCL_GENERIC_DIR_NATIVE,;t t
@@ -14126,14 +14009,15 @@ s,@MAKE_SHARED_LIB@,$MAKE_SHARED_LIB,;t t
 s,@MAKE_STATIC_LIB@,$MAKE_STATIC_LIB,;t t
 s,@MAKE_STUB_LIB@,$MAKE_STUB_LIB,;t t
 s,@RANLIB_STUB@,$RANLIB_STUB,;t t
-s,@MAKE_WIDGET_LIB@,$MAKE_WIDGET_LIB,;t t
-s,@MAKE_WIDGET_SHARED_LIB@,$MAKE_WIDGET_SHARED_LIB,;t t
-s,@MAKE_WIDGET_STATIC_LIB@,$MAKE_WIDGET_STATIC_LIB,;t t
-s,@MAKE_WIDGET_STUB_LIB@,$MAKE_WIDGET_STUB_LIB,;t t
 s,@TCLSH_PROG@,$TCLSH_PROG,;t t
 s,@CONFIGURE_OUTPUTS@,$CONFIGURE_OUTPUTS,;t t
 s,@SDX@,$SDX,;t t
 s,@SDX_KIT@,$SDX_KIT,;t t
+s,@ITCL_INCLUDE_SPEC@,$ITCL_INCLUDE_SPEC,;t t
+s,@ITCL_PRIVATE_INCLUDE_SPEC@,$ITCL_PRIVATE_INCLUDE_SPEC,;t t
+s,@ITCL_LIB_SPEC@,$ITCL_LIB_SPEC,;t t
+s,@ITCL_STUB_LIB_SPEC@,$ITCL_STUB_LIB_SPEC,;t t
+s,@ITCL_SRC_DIR@,$ITCL_SRC_DIR,;t t
 s,@LTLIBOBJS@,$LTLIBOBJS,;t t
 CEOF
 
