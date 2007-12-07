@@ -4,6 +4,7 @@
  */
 #define FRAME_HAS_RESOLVER 0x100
 struct Tcl_Resolve;
+struct Tcl_Var;
 typedef Tcl_Command (Tcl_CmdAliasProc)(Tcl_Interp *interp,
         Tcl_Namespace *nsPtr, CONST char *cmdName,
         ClientData clientData);

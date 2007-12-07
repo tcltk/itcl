@@ -11,7 +11,6 @@ EXTERN void Tcl_ObjectSetMapMethodNameProc(Tcl_Object oPtr,
         TclOO_MapMethodNameProc mapMethodNameProc);
 
 
-#define Tcl_ProcPtrFromPM _Tcl_ProcPtrFromPM
 #define Tcl_NewProcMethod _Tcl_NewProcMethod
 #define Tcl_NewProcClassMethod _Tcl_NewProcClassMethod
 #define Tcl_NewForwardMethod _Tcl_NewForwardMethod
