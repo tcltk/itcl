@@ -1,0 +1,2 @@
+if {[catch {package present Tcl }]} return
+package ifneeded itclWidget 4.0  [list load [file join $dir libItclWidget4.0.so] itclWidget] 
