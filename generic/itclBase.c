@@ -9,7 +9,7 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itclBase.c,v 1.1.2.11 2007/12/07 21:43:05 wiede Exp $
+ * RCS: @(#) $Id: itclBase.c,v 1.1.2.12 2007/12/09 15:35:00 wiede Exp $
  */
 
 #include <stdlib.h>
@@ -155,7 +155,8 @@ AddClassUnknowMethod(
  * ------------------------------------------------------------------------
  */
 
-int DLLEXPORT Tcloo_Init(Tcl_Interp *interp);
+const char *TclOOInitializeStubs(Tcl_Interp *interp, const char *version,
+        int epoch, int revision);
 
 static int
 Initialize (
@@ -168,7 +169,11 @@ Initialize (
     if (Tcl_InitStubs(interp, TCL_VERSION, 0) == NULL) {
         return TCL_ERROR;
     }
-    if (Tcloo_Init(interp) != TCL_OK) {
+    const char * ret = TclOOInitializeStubs(interp, "0.1.1", 0, 0);
+    if (ret == NULL) {
+        return TCL_ERROR;
+    }
+    if (InitTclOOFunctionPointers(interp) != TCL_OK) {
         return TCL_ERROR;
     }
 

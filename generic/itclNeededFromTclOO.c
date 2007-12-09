@@ -8,13 +8,111 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itclNeededFromTclOO.c,v 1.1.2.6 2007/09/16 17:16:29 wiede Exp $
+ * RCS: @(#) $Id: itclNeededFromTclOO.c,v 1.1.2.7 2007/12/09 15:35:01 wiede Exp $
  */
 
 #include <tclOOInt.h>
+#include <dlfcn.h>
 
 typedef void (*Tcl_ProcErrorProc)(Tcl_Interp *interp, Tcl_Obj *procNameObj);
+typedef void (*AddToMixinSubs)(Class *subPtr, Class *superPtr);
+typedef void (*RemoveFromMixinSubs)(Class *subPtr, Class *superPtr);
+typedef Method *(*NewProcMethod)(Tcl_Interp * interp, Object * oPtr, int flags,
+        Tcl_Obj * nameObj, Tcl_Obj * argsObj, Tcl_Obj * bodyObj,
+	ProcedureMethod ** pmPtrPtr);
+typedef Method *(*NewProcClassMethod)(Tcl_Interp * interp, Class * clsPtr,
+        int flags, Tcl_Obj * nameObj, Tcl_Obj * argsObj, Tcl_Obj * bodyObj,
+	ProcedureMethod ** pmPtrPtr);
+typedef Method *(*NewForwardMethod)(Tcl_Interp *interp, Object *oPtr,
+	int flags, Tcl_Obj *nameObj, Tcl_Obj *prefixObj);
+typedef Method *(*NewForwardClassMethod)(Tcl_Interp *interp, Class *clsPtr,
+	int flags, Tcl_Obj *nameObj, Tcl_Obj *prefixObj);
+typedef void(*SetMapMethodNameProc)(Tcl_Object oPtr,
+        TclOO_MapMethodNameProc mapMethodNameProc);
 
+static struct tcloo_fcn_ptrs {
+    AddToMixinSubs addToMixinSubs;
+    RemoveFromMixinSubs removeFromMixinSubs;
+    NewProcMethod newProcMethod;
+    NewProcClassMethod newProcClassMethod;
+    NewForwardMethod newForwardMethod;
+    NewForwardClassMethod newForwardClassMethod;
+    SetMapMethodNameProc setMapMethodNameProc;
+} tcloo_fcn_ptrs = { NULL, NULL, NULL, NULL, NULL, NULL, NULL };
+
+/*
+ * ----------------------------------------------------------------------
+ *
+ * InitTclOOFunctionPointers --
+ *
+ *	Create a new procedure-like method for an object for Itcl.
+ *
+ * ----------------------------------------------------------------------
+ */
+
+int
+InitTclOOFunctionPointers(
+    Tcl_Interp *interp)
+{
+    void *dlhandle;
+
+    dlhandle = dlopen(NULL, RTLD_NOW);
+#ifdef NOTDEF
+    tcloo_fcn_ptrs.addToMixinSubs =
+            dlsym(dlhandle, "TclOOAddToMixinSubs");
+    if (tcloo_fcn_ptrs.addToMixinSubs == NULL) {
+	Tcl_AppendResult(interp,
+	    "cannot find symbol TclOOAddToMixinSubs for package TclOO", NULL);
+        return TCL_ERROR;
+    }
+    tcloo_fcn_ptrs.removeFromMixinSubs =
+            dlsym(dlhandle, "TclOORemoveFromMixinSubs");
+    if (tcloo_fcn_ptrs.removeFromMixinSubs == NULL) {
+	Tcl_AppendResult(interp,
+	    "cannot find symbol TclOOAddRemoveFromSubs for package TclOO", NULL);
+        return TCL_ERROR;
+    }
+#endif
+    tcloo_fcn_ptrs.newProcMethod =
+            dlsym(dlhandle, "TclOONewProcMethod");
+    if (tcloo_fcn_ptrs.newProcMethod == NULL) {
+	Tcl_AppendResult(interp,
+	    "cannot find symbol TclOONewProcMethod for package TclOO", NULL);
+        return TCL_ERROR;
+    }
+    tcloo_fcn_ptrs.newProcClassMethod =
+            dlsym(dlhandle, "TclOONewProcClassMethod");
+    if (tcloo_fcn_ptrs.newProcClassMethod == NULL) {
+	Tcl_AppendResult(interp,
+	    "cannot find symbol TclOONewProcClassMethod for package TclOO", NULL);
+        return TCL_ERROR;
+    }
+#ifdef NOTDEF
+    tcloo_fcn_ptrs.newForwardMethod =
+            dlsym(dlhandle, "TclOONewForwardMethod");
+    if (tcloo_fcn_ptrs.newForwardMethod == NULL) {
+	Tcl_AppendResult(interp,
+	    "cannot find symbol TclOONewForwardMethod for package TclOO", NULL);
+        return TCL_ERROR;
+    }
+    tcloo_fcn_ptrs.newForwardClassMethod =
+            dlsym(dlhandle, "TclOONewForwardClassMethod");
+    if (tcloo_fcn_ptrs.newForwardClassMethod == NULL) {
+	Tcl_AppendResult(interp,
+	    "cannot find symbol TclOONewForwardClassMethod for package TclOO", NULL);
+        return TCL_ERROR;
+    }
+#endif
+    tcloo_fcn_ptrs.setMapMethodNameProc =
+            dlsym(dlhandle, "Tcl_ObjectSetMapMethodNameProc");
+    if (tcloo_fcn_ptrs.setMapMethodNameProc == NULL) {
+	Tcl_AppendResult(interp,
+	    "cannot find symbol Tcl_ObjectSetMapMethodNameProc for package TclOO", NULL);
+        return TCL_ERROR;
+    }
+    dlclose(dlhandle);
+    return TCL_OK;
+}
 
 /*
  * ----------------------------------------------------------------------
@@ -46,7 +144,9 @@ _Tcl_NewProcMethod(
     ProcedureMethod *pmPtr;
     Tcl_Method method;
 
-    method = (Tcl_Method)TclOONewProcMethod(interp, (Object *)oPtr, flags,
+//    method = (Tcl_Method)TclOONewProcMethod(interp, (Object *)oPtr, flags,
+//            nameObj, argsObj, bodyObj, &pmPtr);
+    method = (Tcl_Method)tcloo_fcn_ptrs.newProcMethod(interp, (Object *)oPtr, flags,
             nameObj, argsObj, bodyObj, &pmPtr);
     pmPtr->flags = flags & USE_DECLARER_NS;
     pmPtr->preCallProc = preCallPtr;
@@ -92,7 +192,9 @@ _Tcl_NewProcClassMethod(
     ProcedureMethod *pmPtr;
     Method *method;
 
-    method = TclOONewProcClassMethod(interp, (Class *)clsPtr, flags,
+//    method = TclOONewProcClassMethod(interp, (Class *)clsPtr, flags,
+//            nameObj, argsObj, bodyObj, &pmPtr);
+    method = tcloo_fcn_ptrs.newProcClassMethod(interp, (Class *)clsPtr, flags,
             nameObj, argsObj, bodyObj, &pmPtr);
     pmPtr->flags = flags & USE_DECLARER_NS;
     pmPtr->preCallProc = preCallPtr;
@@ -112,8 +214,11 @@ _Tcl_NewForwardMethod(
     Tcl_Obj *nameObj,
     Tcl_Obj *prefixObj)
 {
-    return (Tcl_Method)TclOONewForwardMethod(interp, (Object *)oPtr,
+//    return (Tcl_Method)TclOONewForwardMethod(interp, (Object *)oPtr,
+//            flags, nameObj, prefixObj);
+    return (Tcl_Method)tcloo_fcn_ptrs.newForwardMethod(interp, (Object *)oPtr,
             flags, nameObj, prefixObj);
+return NULL;
 }
 
 Tcl_Method
@@ -124,8 +229,11 @@ _Tcl_NewForwardClassMethod(
     Tcl_Obj *nameObj,
     Tcl_Obj *prefixObj)
 {
-    return (Tcl_Method)TclOONewForwardClassMethod(interp, (Class *)clsPtr,
+//    return (Tcl_Method)TclOONewForwardClassMethod(interp, (Class *)clsPtr,
+//            flags, nameObj, prefixObj);
+    return (Tcl_Method)tcloo_fcn_ptrs.newForwardClassMethod(interp, (Class *)clsPtr,
             flags, nameObj, prefixObj);
+return NULL;
 }
 
 void
@@ -133,7 +241,8 @@ _Tcl_AddToMixinSubs(
     Tcl_Class subPtr,
     Tcl_Class superPtr)
 {
-    TclOOAddToMixinSubs((Class *)subPtr, (Class *)superPtr);
+//    TclOOAddToMixinSubs((Class *)subPtr, (Class *)superPtr);
+    tcloo_fcn_ptrs.addToMixinSubs((Class *)subPtr, (Class *)superPtr);
 }
 
 void
@@ -141,6 +250,14 @@ _Tcl_RemoveFromMixinSubs(
     Tcl_Class subPtr,
     Tcl_Class superPtr)
 {
-    TclOORemoveFromMixinSubs((Class *)subPtr, (Class *)superPtr);
+//    TclOORemoveFromMixinSubs((Class *)subPtr, (Class *)superPtr);
+    tcloo_fcn_ptrs.removeFromMixinSubs((Class *)subPtr, (Class *)superPtr);
 }
 
+void
+_Tcl_ObjectSetMapMethodNameProc(
+    Tcl_Object oPtr,
+    TclOO_MapMethodNameProc mapMethodNameProc)
+{
+    tcloo_fcn_ptrs.setMapMethodNameProc(oPtr, mapMethodNameProc);
+}

@@ -9,7 +9,7 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itclInt.h,v 1.17.2.26 2007/10/16 09:50:13 wiede Exp $
+ * RCS: @(#) $Id: itclInt.h,v 1.17.2.27 2007/12/09 15:35:01 wiede Exp $
  */
 
 #include <string.h>
@@ -615,6 +615,7 @@ MODULE_SCOPE int DelegateFunction(Tcl_Interp *interp, ItclObject *ioPtr,
         ItclDelegatedFunction *idmPtr);
 MODULE_SCOPE int ItclInitObjectMethodVariables(Tcl_Interp *interp,
         ItclObject *ioPtr, ItclClass *iclsPtr, const char *name);
+MODULE_SCOPE int InitTclOOFunctionPointers(Tcl_Interp *interp);
 
 #include "itcl2TclOO.h"
 

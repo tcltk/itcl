@@ -17,6 +17,7 @@ EXTERN void Tcl_ObjectSetMapMethodNameProc(Tcl_Object oPtr,
 #define Tcl_NewForwardClassMethod _Tcl_NewForwardClassMethod
 #define Tcl_AddToMixinSubs  _Tcl_AddToMixinSubs
 #define Tcl_RemoveFromMixinSubs _Tcl_RemoveFromMixinSubs
+#define Tcl_ObjectSetMapMethodNameProc _Tcl_ObjectSetMapMethodNameProc
 
 EXTERN ClientData _Tcl_ProcPtrFromPM(ClientData clientData);
 EXTERN Tcl_Method _Tcl_NewProcMethod(Tcl_Interp *interp, Tcl_Object oPtr,
@@ -33,5 +34,6 @@ EXTERN Tcl_Method _Tcl_NewForwardClassMethod(Tcl_Interp *interp,
         Tcl_Class clsPtr, int flags, Tcl_Obj *nameObj, Tcl_Obj *prefixObj);
 EXTERN void _Tcl_AddToMixinSubs(Tcl_Class subPtr, Tcl_Class superPtr);
 EXTERN void _Tcl_RemoveFromMixinSubs(Tcl_Class subPtr, Tcl_Class superPtr);
-
+EXTERN void Tcl_ObjectSetMapMethodNameProc(Tcl_Object oPtr,
+        TclOO_MapMethodNameProc mapMethodNameProc);
 
