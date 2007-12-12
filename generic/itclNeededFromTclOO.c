@@ -8,7 +8,7 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itclNeededFromTclOO.c,v 1.1.2.7 2007/12/09 15:35:01 wiede Exp $
+ * RCS: @(#) $Id: itclNeededFromTclOO.c,v 1.1.2.8 2007/12/12 15:31:04 wiede Exp $
  */
 
 #include <tclOOInt.h>
@@ -17,12 +17,6 @@
 typedef void (*Tcl_ProcErrorProc)(Tcl_Interp *interp, Tcl_Obj *procNameObj);
 typedef void (*AddToMixinSubs)(Class *subPtr, Class *superPtr);
 typedef void (*RemoveFromMixinSubs)(Class *subPtr, Class *superPtr);
-typedef Method *(*NewProcMethod)(Tcl_Interp * interp, Object * oPtr, int flags,
-        Tcl_Obj * nameObj, Tcl_Obj * argsObj, Tcl_Obj * bodyObj,
-	ProcedureMethod ** pmPtrPtr);
-typedef Method *(*NewProcClassMethod)(Tcl_Interp * interp, Class * clsPtr,
-        int flags, Tcl_Obj * nameObj, Tcl_Obj * argsObj, Tcl_Obj * bodyObj,
-	ProcedureMethod ** pmPtrPtr);
 typedef Method *(*NewForwardMethod)(Tcl_Interp *interp, Object *oPtr,
 	int flags, Tcl_Obj *nameObj, Tcl_Obj *prefixObj);
 typedef Method *(*NewForwardClassMethod)(Tcl_Interp *interp, Class *clsPtr,
@@ -33,12 +27,10 @@ typedef void(*SetMapMethodNameProc)(Tcl_Object oPtr,
 static struct tcloo_fcn_ptrs {
     AddToMixinSubs addToMixinSubs;
     RemoveFromMixinSubs removeFromMixinSubs;
-    NewProcMethod newProcMethod;
-    NewProcClassMethod newProcClassMethod;
     NewForwardMethod newForwardMethod;
     NewForwardClassMethod newForwardClassMethod;
     SetMapMethodNameProc setMapMethodNameProc;
-} tcloo_fcn_ptrs = { NULL, NULL, NULL, NULL, NULL, NULL, NULL };
+} tcloo_fcn_ptrs = { NULL, NULL, NULL, NULL, NULL };
 
 /*
  * ----------------------------------------------------------------------
@@ -73,20 +65,6 @@ InitTclOOFunctionPointers(
         return TCL_ERROR;
     }
 #endif
-    tcloo_fcn_ptrs.newProcMethod =
-            dlsym(dlhandle, "TclOONewProcMethod");
-    if (tcloo_fcn_ptrs.newProcMethod == NULL) {
-	Tcl_AppendResult(interp,
-	    "cannot find symbol TclOONewProcMethod for package TclOO", NULL);
-        return TCL_ERROR;
-    }
-    tcloo_fcn_ptrs.newProcClassMethod =
-            dlsym(dlhandle, "TclOONewProcClassMethod");
-    if (tcloo_fcn_ptrs.newProcClassMethod == NULL) {
-	Tcl_AppendResult(interp,
-	    "cannot find symbol TclOONewProcClassMethod for package TclOO", NULL);
-        return TCL_ERROR;
-    }
 #ifdef NOTDEF
     tcloo_fcn_ptrs.newForwardMethod =
             dlsym(dlhandle, "TclOONewForwardMethod");
@@ -95,6 +73,7 @@ InitTclOOFunctionPointers(
 	    "cannot find symbol TclOONewForwardMethod for package TclOO", NULL);
         return TCL_ERROR;
     }
+#endif
     tcloo_fcn_ptrs.newForwardClassMethod =
             dlsym(dlhandle, "TclOONewForwardClassMethod");
     if (tcloo_fcn_ptrs.newForwardClassMethod == NULL) {
@@ -102,7 +81,6 @@ InitTclOOFunctionPointers(
 	    "cannot find symbol TclOONewForwardClassMethod for package TclOO", NULL);
         return TCL_ERROR;
     }
-#endif
     tcloo_fcn_ptrs.setMapMethodNameProc =
             dlsym(dlhandle, "Tcl_ObjectSetMapMethodNameProc");
     if (tcloo_fcn_ptrs.setMapMethodNameProc == NULL) {
@@ -144,10 +122,10 @@ _Tcl_NewProcMethod(
     ProcedureMethod *pmPtr;
     Tcl_Method method;
 
-//    method = (Tcl_Method)TclOONewProcMethod(interp, (Object *)oPtr, flags,
-//            nameObj, argsObj, bodyObj, &pmPtr);
-    method = (Tcl_Method)tcloo_fcn_ptrs.newProcMethod(interp, (Object *)oPtr, flags,
+    method = (Tcl_Method)TclOONewProcMethod(interp, (Object *)oPtr, flags,
             nameObj, argsObj, bodyObj, &pmPtr);
+//    method = (Tcl_Method)tcloo_fcn_ptrs.newProcMethod(interp, (Object *)oPtr, flags,
+//            nameObj, argsObj, bodyObj, &pmPtr);
     pmPtr->flags = flags & USE_DECLARER_NS;
     pmPtr->preCallProc = preCallPtr;
     pmPtr->postCallProc = postCallPtr;
@@ -192,9 +170,7 @@ _Tcl_NewProcClassMethod(
     ProcedureMethod *pmPtr;
     Method *method;
 
-//    method = TclOONewProcClassMethod(interp, (Class *)clsPtr, flags,
-//            nameObj, argsObj, bodyObj, &pmPtr);
-    method = tcloo_fcn_ptrs.newProcClassMethod(interp, (Class *)clsPtr, flags,
+    method = TclOONewProcClassMethod(interp, (Class *)clsPtr, flags,
             nameObj, argsObj, bodyObj, &pmPtr);
     pmPtr->flags = flags & USE_DECLARER_NS;
     pmPtr->preCallProc = preCallPtr;

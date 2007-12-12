@@ -9,7 +9,7 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itclBase.c,v 1.1.2.12 2007/12/09 15:35:00 wiede Exp $
+ * RCS: @(#) $Id: itclBase.c,v 1.1.2.13 2007/12/12 15:31:04 wiede Exp $
  */
 
 #include <stdlib.h>
@@ -49,6 +49,13 @@ namespace eval ::itcl {\n\
             if {[string equal $::tcl_platform(platform) \"unix\"] && \
                     [string equal $::tcl_platform(os) \"Darwin\"]} {\n\
                 foreach d $::tcl_pkgPath {\n\
+                    lappend dirs [file join $d Itcl$version]\n\
+                }\n\
+            }\n\
+            # On *nix, check the directories in the tcl_pkgPath\n\
+            if {[string equal $::tcl_platform(platform) \"unix\"]} {\n\
+                foreach d $::tcl_pkgPath {\n\
+                    lappend dirs $d\n\
                     lappend dirs [file join $d Itcl$version]\n\
                 }\n\
             }\n\
