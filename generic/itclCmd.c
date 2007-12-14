@@ -23,7 +23,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclCmd.c,v 1.1.2.16 2007/10/16 21:04:06 wiede Exp $
+ *     RCS:  $Id: itclCmd.c,v 1.1.2.17 2007/12/14 14:51:04 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -526,6 +526,7 @@ Itcl_ScopeCmd(
     Tcl_HashEntry *entry;
     ItclObjectInfo *infoPtr;
     ItclVarLookup *vlookup;
+    int doAppend;
 
     ItclShowArgs(2, "Itcl_ScopeCmd", objc, objv);
     if (objc != 2) {
@@ -610,7 +611,7 @@ Itcl_ScopeCmd(
 
         /*
          *  If this is not a common variable, then we better have
-         *  an object context.  Return the name "@itcl object variable".
+         *  an object context.  Return the name as a fully qualified name.
          */
         infoPtr = contextIclsPtr->infoPtr;
 	ClientData clientData;
@@ -632,16 +633,34 @@ Itcl_ScopeCmd(
             goto scopeCmdDone;
         }
 
+        doAppend = 1;
+        if (contextIclsPtr->flags & ITCL_ECLASS) {
+            if (strcmp(token, "itcl_options") == 0) {
+	        doAppend = 0;
+            }
+        }
         objPtr = Tcl_NewStringObj((char*)NULL, 0);
         Tcl_IncrRefCount(objPtr);
-        Tcl_GetCommandFullName(interp, contextIoPtr->accessCmd, objPtr);
+	if (doAppend) {
+            Tcl_GetCommandFullName(interp, contextIoPtr->accessCmd, objPtr);
+	} else {
+	    Tcl_AppendToObj(objPtr, "::", -1);
+	    Tcl_AppendToObj(objPtr,
+	            Tcl_GetCommandName(interp, contextIoPtr->accessCmd), -1);
+	}
 
         objPtr2 = Tcl_NewStringObj((char*)NULL, 0);
         Tcl_IncrRefCount(objPtr2);
 	Tcl_AppendToObj(objPtr2, ITCL_VARIABLES_NAMESPACE, -1);
 	Tcl_AppendToObj(objPtr2, Tcl_GetString(objPtr), -1);
-        Tcl_AppendToObj(objPtr2,
-	    Tcl_GetString(vlookup->ivPtr->fullNamePtr), -1);
+        if (doAppend) {
+            Tcl_AppendToObj(objPtr2,
+	            Tcl_GetString(vlookup->ivPtr->fullNamePtr), -1);
+        } else {
+            Tcl_AppendToObj(objPtr2, "::", -1);
+            Tcl_AppendToObj(objPtr2,
+	            Tcl_GetString(vlookup->ivPtr->namePtr), -1);
+	}
 
         if (openParen) {
             *openParen = '(';
