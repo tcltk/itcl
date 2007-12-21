@@ -8,7 +8,7 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itclNeededFromTclOO.c,v 1.1.2.8 2007/12/12 15:31:04 wiede Exp $
+ * RCS: @(#) $Id: itclNeededFromTclOO.c,v 1.1.2.9 2007/12/21 20:02:28 wiede Exp $
  */
 
 #include <tclOOInt.h>
@@ -49,6 +49,8 @@ InitTclOOFunctionPointers(
     void *dlhandle;
 
     dlhandle = dlopen(NULL, RTLD_NOW);
+void *dummy = dlsym(dlhandle, "Tcl_PushCallFrame");
+fprintf(stderr, "dummy!%p!\n", dummy);
 #ifdef NOTDEF
     tcloo_fcn_ptrs.addToMixinSubs =
             dlsym(dlhandle, "TclOOAddToMixinSubs");

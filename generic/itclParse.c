@@ -39,7 +39,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclParse.c,v 1.1.2.23 2007/12/07 22:07:25 wiede Exp $
+ *     RCS:  $Id: itclParse.c,v 1.1.2.24 2007/12/21 20:02:28 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -569,13 +569,13 @@ ItclClassBaseCmd(
      */
     Itcl_PushStack((ClientData)iclsPtr, &infoPtr->clsStack);
 
-    result = Tcl_PushCallFrame(interp, &frame, parserNs,
+    result = Itcl_PushCallFrame(interp, &frame, parserNs,
         /* isProcCallFrame */ 0);
 
     Itcl_SetCallFrameResolver(interp, iclsPtr->resolvePtr);
     if (result == TCL_OK) {
         result = Tcl_EvalObj(interp, objv[2]);
-        Tcl_PopCallFrame(interp);
+        Itcl_PopCallFrame(interp);
     }
     Itcl_PopStack(&infoPtr->clsStack);
 
@@ -752,7 +752,7 @@ Itcl_ClassInheritCmd(
     /*
      *  Validate each base class and add it to the "bases" list.
      */
-    result = Tcl_PushCallFrame(interp, &frame, iclsPtr->nsPtr->parentPtr,
+    result = Itcl_PushCallFrame(interp, &frame, iclsPtr->nsPtr->parentPtr,
         /* isProcCallFrame */ 0);
 
     if (result != TCL_OK) {
@@ -926,7 +926,7 @@ Itcl_ClassInheritCmd(
 
         elem = Itcl_NextListElem(elem);
     }
-    Tcl_PopCallFrame(interp);
+    Itcl_PopCallFrame(interp);
     if (haveClasses) {
         result = Tcl_Eval(interp, Tcl_DStringValue(&buffer));
     }
@@ -939,7 +939,7 @@ Itcl_ClassInheritCmd(
      *  down and return an error.
      */
 inheritError:
-    Tcl_PopCallFrame(interp);
+    Itcl_PopCallFrame(interp);
 
     elem = Itcl_FirstListElem(&iclsPtr->bases);
     while (elem) {
@@ -1407,7 +1407,7 @@ Itcl_ClassCommonCmd(
     if (isNew) {
         Tcl_SetHashValue(hPtr, varPtr);
     }
-    result = Tcl_PushCallFrame(interp, &frame, commonNsPtr,
+    result = Itcl_PushCallFrame(interp, &frame, commonNsPtr,
         /* isProcCallFrame */ 0);
     IctlVarTraceInfo *traceInfoPtr;
     traceInfoPtr = (IctlVarTraceInfo *)ckalloc(sizeof(IctlVarTraceInfo));
@@ -1419,7 +1419,7 @@ Itcl_ClassCommonCmd(
     Tcl_TraceVar2(interp, Tcl_GetString(ivPtr->namePtr), NULL,
            TCL_TRACE_UNSETS, ItclTraceUnsetVar,
            (ClientData)traceInfoPtr);
-    Tcl_PopCallFrame(interp);
+    Itcl_PopCallFrame(interp);
 
     /*
      *  TRICKY NOTE:  Make sure to rebuild the virtual tables for this

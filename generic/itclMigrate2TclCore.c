@@ -9,7 +9,7 @@
  * ========================================================================
  *  AUTHOR:  Arnulf Wiedemann
  *
- *     RCS:  $Id: itclMigrate2TclCore.c,v 1.1.2.6 2007/09/16 17:16:29 wiede Exp $
+ *     RCS:  $Id: itclMigrate2TclCore.c,v 1.1.2.7 2007/12/21 20:02:28 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -357,3 +357,50 @@ Tcl_RenameCommand(
 {
     return TclRenameCommand(interp, oldName, newName);
 }
+
+int
+Itcl_PushCallFrame(
+    Tcl_Interp * interp,
+    Tcl_CallFrame * framePtr,
+    Tcl_Namespace * nsPtr,
+    int isProcCallFrame)
+{
+    return Tcl_PushCallFrame(interp, framePtr, nsPtr, isProcCallFrame);
+}
+
+void
+Itcl_PopCallFrame(
+    Tcl_Interp * interp)
+{
+    Tcl_PopCallFrame(interp);
+}
+
+void
+Itcl_GetVariableFullName(
+    Tcl_Interp * interp,
+    Tcl_Var variable,
+    Tcl_Obj * objPtr)
+{
+    Tcl_GetVariableFullName(interp, variable, objPtr);
+}
+
+Tcl_Var
+Itcl_FindNamespaceVar(
+    Tcl_Interp * interp,
+    CONST char * name,
+    Tcl_Namespace * contextNsPtr,
+    int flags)
+{
+    return Tcl_FindNamespaceVar(interp, name, contextNsPtr, flags);
+}
+
+void
+Itcl_SetNamespaceResolvers (
+    Tcl_Namespace * namespacePtr,
+    Tcl_ResolveCmdProc * cmdProc,
+    Tcl_ResolveVarProc * varProc,
+    Tcl_ResolveCompiledVarProc * compiledVarProc)
+{
+    Tcl_SetNamespaceResolvers(namespacePtr, cmdProc, varProc, compiledVarProc);
+}
+

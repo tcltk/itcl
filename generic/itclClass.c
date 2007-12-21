@@ -25,7 +25,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann Copyright (c) 2007
  *
- *     RCS:  $Id: itclClass.c,v 1.1.2.14 2007/12/01 18:56:34 wiede Exp $
+ *     RCS:  $Id: itclClass.c,v 1.1.2.15 2007/12/21 20:02:24 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -33,18 +33,6 @@
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  */
 #include "itclInt.h"
-
-typedef int (Tcl_ResolveCompiledVarProc) (Tcl_Interp *interp,
-        CONST84 char *name, int length, Tcl_Namespace *context,
-        struct Tcl_ResolvedVarInfo **rPtr);
-typedef int (Tcl_ResolveVarProc) (Tcl_Interp *interp, CONST84 char *name,
-        Tcl_Namespace *context, int flags, Tcl_Var *rPtr);
-typedef int (Tcl_ResolveCmdProc) (Tcl_Interp *interp, CONST84 char *name,
-        Tcl_Namespace *context, int flags, Tcl_Command *rPtr);
-
-void Tcl_SetNamespaceResolvers (Tcl_Namespace * namespacePtr,
-    Tcl_ResolveCmdProc * cmdProc, Tcl_ResolveVarProc * varProc,
-    Tcl_ResolveCompiledVarProc * compiledVarProc);
 
 static Tcl_NamespaceDeleteProc* _TclOONamespaceDeleteProc = NULL;
 
@@ -390,7 +378,7 @@ _interp = interp;
 
     Itcl_EventuallyFree((ClientData)iclsPtr, ItclFreeClass);
     if (iclsPtr->infoPtr->useOldResolvers) {
-        Tcl_SetNamespaceResolvers(classNs,
+        Itcl_SetNamespaceResolvers(classNs,
                 (Tcl_ResolveCmdProc*)Itcl_ClassCmdResolver,
                 (Tcl_ResolveVarProc*)Itcl_ClassVarResolver,
                 (Tcl_ResolveCompiledVarProc*)Itcl_ClassCompiledVarResolver);

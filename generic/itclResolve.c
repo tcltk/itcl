@@ -20,7 +20,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itclResolve.c,v 1.1.2.7 2007/10/07 12:32:37 wiede Exp $
+ *     RCS:  $Id: itclResolve.c,v 1.1.2.8 2007/12/21 20:02:28 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -29,6 +29,7 @@
  */
 #include "itclInt.h"
 
+#ifdef NOTDEF
 struct Tcl_ResolvedVarInfo;
 
 typedef Tcl_Var (Tcl_ResolveRuntimeVarProc)(Tcl_Interp *interp,
@@ -69,11 +70,7 @@ typedef struct Tcl_ResolverInfo {
 				/* Procedure handling variable name resolution
 				 * at compile time. */
 } Tcl_ResolverInfo;
-
-void Tcl_SetNamespaceResolvers (Tcl_Namespace * namespacePtr,
-    Tcl_ResolveCmdProc * cmdProc, Tcl_ResolveVarProc * varProc,
-    Tcl_ResolveCompiledVarProc * compiledVarProc);
-
+#endif
 
 /*
  * This structure is a subclass of Tcl_ResolvedVarInfo that contains the
@@ -351,7 +348,7 @@ Itcl_ClassVarResolver(
 	}
 	Tcl_DStringAppend(&buffer, "::this", 6);
         Tcl_Var varPtr;
-	varPtr = Tcl_FindNamespaceVar(interp, Tcl_DStringValue(&buffer), NULL, 0);
+	varPtr = Itcl_FindNamespaceVar(interp, Tcl_DStringValue(&buffer), NULL, 0);
         if (varPtr != NULL) {
             *rPtr = varPtr;
 	    return TCL_OK;
@@ -365,7 +362,7 @@ Itcl_ClassVarResolver(
 	Tcl_DStringAppend(&buffer, Tcl_GetString(contextIoPtr->namePtr), -1);
 	Tcl_DStringAppend(&buffer, "::itcl_options", 14);
         Tcl_Var varPtr;
-	varPtr = Tcl_FindNamespaceVar(interp, Tcl_DStringValue(&buffer), NULL, 0);
+	varPtr = Itcl_FindNamespaceVar(interp, Tcl_DStringValue(&buffer), NULL, 0);
         if (varPtr != NULL) {
             *rPtr = varPtr;
 	    return TCL_OK;
@@ -549,7 +546,7 @@ ItclClassRuntimeVarResolver(
 	    }
 	    Tcl_DStringAppend(&buffer, "::this", 6);
             Tcl_Var varPtr;
-	    varPtr = Tcl_FindNamespaceVar(interp, Tcl_DStringValue(&buffer),
+	    varPtr = Itcl_FindNamespaceVar(interp, Tcl_DStringValue(&buffer),
 	            NULL, 0);
             if (varPtr != NULL) {
 	        return varPtr;
@@ -565,7 +562,7 @@ ItclClassRuntimeVarResolver(
 	            Tcl_GetString(contextIoPtr->namePtr), -1);
 	    Tcl_DStringAppend(&buffer, "::itcl_options", 14);
             Tcl_Var varPtr;
-	    varPtr = Tcl_FindNamespaceVar(interp, Tcl_DStringValue(&buffer),
+	    varPtr = Itcl_FindNamespaceVar(interp, Tcl_DStringValue(&buffer),
 	            NULL, 0);
             if (varPtr != NULL) {
 	        return varPtr;
@@ -670,7 +667,7 @@ int
 ItclSetParserResolver(
     Tcl_Namespace *nsPtr)
 {
-    Tcl_SetNamespaceResolvers(nsPtr, (Tcl_ResolveCmdProc*)NULL,
+    Itcl_SetNamespaceResolvers(nsPtr, (Tcl_ResolveCmdProc*)NULL,
             Itcl_ParseVarResolver, (Tcl_ResolveCompiledVarProc*)NULL);
     return TCL_OK;
 }

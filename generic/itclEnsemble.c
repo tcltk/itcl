@@ -25,7 +25,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclEnsemble.c,v 1.1.2.3 2007/09/09 13:38:40 wiede Exp $
+ *     RCS:  $Id: itclEnsemble.c,v 1.1.2.4 2007/12/21 20:02:28 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -2078,7 +2078,7 @@ EnsembleUnknownCmd(
     EnsemblePart *ensPart;
     Ensemble *ensData;
 
-    ItclShowArgs(2, "EnsembleUnknownCmd", objc, objv);
+    ItclShowArgs(0, "EnsembleUnknownCmd", objc, objv);
     cmd = Tcl_GetCommandFromObj(interp, objv[1]);
 /* FIX ME !!! */
     if (cmd == NULL) {

@@ -24,7 +24,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann Copyright (c) 2007
  *
- *     RCS:  $Id: itclObject.c,v 1.1.2.26 2007/12/01 23:11:33 wiede Exp $
+ *     RCS:  $Id: itclObject.c,v 1.1.2.27 2007/12/21 20:02:28 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -439,7 +439,7 @@ ItclInitObjectVariables(
 	            NULL, 0);
 	}
 	/* now initialize the variables which have an init value */
-        if (Tcl_PushCallFrame(interp, &frame, varNsPtr,
+        if (Itcl_PushCallFrame(interp, &frame, varNsPtr,
                 /*isProcCallFrame*/0) != TCL_OK) {
             return TCL_ERROR;
         }
@@ -463,23 +463,23 @@ ItclInitObjectVariables(
 		            Tcl_DStringValue(&buffer2), NULL, 0);
 	        }
                 Tcl_DStringFree(&buffer2);
-	        Tcl_PopCallFrame(interp);
+	        Itcl_PopCallFrame(interp);
 	        /* now initialize the variables which have an init value */
-                if (Tcl_PushCallFrame(interp, &frame, varNsPtr2,
+                if (Itcl_PushCallFrame(interp, &frame, varNsPtr2,
                         /*isProcCallFrame*/0) != TCL_OK) {
                     return TCL_ERROR;
                 }
                 if (Tcl_SetVar2(interp, "itcl_options", "",
 	                "", TCL_NAMESPACE_ONLY) == NULL) {
-	            Tcl_PopCallFrame(interp);
+	            Itcl_PopCallFrame(interp);
 		    return TCL_ERROR;
                 }
                 Tcl_TraceVar2(interp, "itcl_options",
                         NULL,
                         TCL_TRACE_READS|TCL_TRACE_WRITES,
                         ItclTraceOptionVar, (ClientData)ioPtr);
-	        Tcl_PopCallFrame(interp);
-                if (Tcl_PushCallFrame(interp, &frame, varNsPtr,
+	        Itcl_PopCallFrame(interp);
+                if (Itcl_PushCallFrame(interp, &frame, varNsPtr,
                         /*isProcCallFrame*/0) != TCL_OK) {
                     return TCL_ERROR;
                 }
@@ -527,7 +527,7 @@ ItclInitObjectVariables(
 	        hPtr2 = Tcl_FindHashEntry(&iclsPtr2->classCommons,
 		        (char *)ivPtr);
 		if (hPtr2 == NULL) {
-	            Tcl_PopCallFrame(interp);
+	            Itcl_PopCallFrame(interp);
 		    return TCL_ERROR;
 		}
 		varPtr = Tcl_GetHashValue(hPtr2);
@@ -540,7 +540,7 @@ ItclInitObjectVariables(
 	    }
             entry = Tcl_NextHashEntry(&place);
         }
-	Tcl_PopCallFrame(interp);
+	Itcl_PopCallFrame(interp);
         iclsPtr2 = Itcl_AdvanceHierIter(&hier);
     }
     Tcl_DStringFree(&buffer);
@@ -607,20 +607,20 @@ ItclInitObjectOptions(
 	        }
                 Tcl_DStringFree(&buffer);
 	        /* now initialize the options which have an init value */
-                if (Tcl_PushCallFrame(interp, &frame, varNsPtr,
+                if (Itcl_PushCallFrame(interp, &frame, varNsPtr,
                         /*isProcCallFrame*/0) != TCL_OK) {
                     return TCL_ERROR;
                 }
                 if (Tcl_SetVar2(interp, "itcl_options", "",
 	                "", TCL_NAMESPACE_ONLY) == NULL) {
-	            Tcl_PopCallFrame(interp);
+	            Itcl_PopCallFrame(interp);
 		    return TCL_ERROR;
                 }
                 Tcl_TraceVar2(interp, "itcl_options",
                         NULL,
                         TCL_TRACE_READS|TCL_TRACE_WRITES,
                         ItclTraceOptionVar, (ClientData)ioPtr);
-	        Tcl_PopCallFrame(interp);
+	        Itcl_PopCallFrame(interp);
             }
             hPtr = Tcl_NextHashEntry(&place);
         }
@@ -1113,10 +1113,10 @@ ItclGetInstanceVar(
     val = NULL;
     if (nsPtr != NULL) {
 	framePtr = &frame;
-	Tcl_PushCallFrame(interp, framePtr, nsPtr, /*isProcCallFrame*/0);
+	Itcl_PushCallFrame(interp, framePtr, nsPtr, /*isProcCallFrame*/0);
         val = Tcl_GetVar2(interp, (CONST84 char *)name1, (char*)name2,
 	        TCL_LEAVE_ERR_MSG);
-        Tcl_PopCallFrame(interp);
+        Itcl_PopCallFrame(interp);
     }
 
     return val;
@@ -1208,10 +1208,10 @@ ItclSetInstanceVar(
     val = NULL;
     if (nsPtr != NULL) {
 	framePtr = &frame;
-	Tcl_PushCallFrame(interp, framePtr, nsPtr, /*isProcCallFrame*/0);
+	Itcl_PushCallFrame(interp, framePtr, nsPtr, /*isProcCallFrame*/0);
         val = Tcl_SetVar2(interp, (CONST84 char *)name1, (char*)name2,
 	        value, TCL_LEAVE_ERR_MSG);
-        Tcl_PopCallFrame(interp);
+        Itcl_PopCallFrame(interp);
     }
 
     return val;

@@ -23,7 +23,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclCmd.c,v 1.1.2.17 2007/12/14 14:51:04 wiede Exp $
+ *     RCS:  $Id: itclCmd.c,v 1.1.2.18 2007/12/21 20:02:28 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -683,7 +683,7 @@ Itcl_ScopeCmd(
          */
         Tcl_Obj *resultPtr = Tcl_GetObjResult(interp);
 
-        var = Tcl_FindNamespaceVar(interp, token, contextNsPtr,
+        var = Itcl_FindNamespaceVar(interp, token, contextNsPtr,
             TCL_NAMESPACE_ONLY);
 
         if (!var) {
@@ -695,7 +695,7 @@ Itcl_ScopeCmd(
             goto scopeCmdDone;
         }
 
-        Tcl_GetVariableFullName(interp, var, resultPtr);
+        Itcl_GetVariableFullName(interp, var, resultPtr);
         if (openParen) {
             *openParen = '(';
             Tcl_AppendToObj(resultPtr, openParen, -1);

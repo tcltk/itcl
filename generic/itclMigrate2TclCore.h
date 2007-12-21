@@ -19,20 +19,62 @@ typedef struct Tcl_Resolve {
 } Tcl_Resolve;
 #endif
 
-/* missing functions for Itcl to avoid including of tclInt.h */
-
 #ifndef _TCLINT
-/* these functions exist but are NOT PUBLISHED */
-EXTERN int Tcl_PushCallFrame (Tcl_Interp * interp,
+struct Tcl_ResolvedVarInfo;
+
+typedef Tcl_Var (Tcl_ResolveRuntimeVarProc)(Tcl_Interp *interp,
+	struct Tcl_ResolvedVarInfo *vinfoPtr);
+
+typedef void (Tcl_ResolveVarDeleteProc)(struct Tcl_ResolvedVarInfo *vinfoPtr);
+
+/*
+ * The following structure encapsulates the routines needed to resolve a
+ * variable reference at runtime. Any variable specific state will typically
+ * be appended to this structure.
+ */
+
+typedef struct Tcl_ResolvedVarInfo {
+    Tcl_ResolveRuntimeVarProc *fetchProc;
+    Tcl_ResolveVarDeleteProc *deleteProc;
+} Tcl_ResolvedVarInfo;
+
+typedef int (Tcl_ResolveCompiledVarProc) (Tcl_Interp *interp,
+	CONST84 char *name, int length, Tcl_Namespace *context,
+	Tcl_ResolvedVarInfo **rPtr);
+
+typedef int (Tcl_ResolveVarProc) (Tcl_Interp *interp, CONST84 char *name,
+	Tcl_Namespace *context, int flags, Tcl_Var *rPtr);
+
+typedef int (Tcl_ResolveCmdProc) (Tcl_Interp *interp, CONST84 char *name,
+	Tcl_Namespace *context, int flags, Tcl_Command *rPtr);
+
+typedef struct Tcl_ResolverInfo {
+    Tcl_ResolveCmdProc *cmdResProc;
+				/* Procedure handling command name
+				 * resolution. */
+    Tcl_ResolveVarProc *varResProc;
+				/* Procedure handling variable name resolution
+				 * for variables that can only be handled at
+				 * runtime. */
+    Tcl_ResolveCompiledVarProc *compiledVarResProc;
+				/* Procedure handling variable name resolution
+				 * at compile time. */
+} Tcl_ResolverInfo;
+#endif
+
+/* these functions exist as Tcl_* but are NOT PUBLISHED so make an Itcl_* wrapper */
+EXTERN int Itcl_PushCallFrame (Tcl_Interp * interp,
                 Tcl_CallFrame * framePtr,
 	        Tcl_Namespace * nsPtr, int isProcCallFrame);
-EXTERN void Tcl_PopCallFrame (Tcl_Interp * interp);
-EXTERN void Tcl_GetVariableFullName (Tcl_Interp * interp,
+EXTERN void Itcl_PopCallFrame (Tcl_Interp * interp);
+EXTERN void Itcl_GetVariableFullName (Tcl_Interp * interp,
                 Tcl_Var variable, Tcl_Obj * objPtr);
-EXTERN Tcl_Var Tcl_FindNamespaceVar (Tcl_Interp * interp,
+EXTERN Tcl_Var Itcl_FindNamespaceVar (Tcl_Interp * interp,
                 CONST char * name, Tcl_Namespace * contextNsPtr, int flags);
+EXTERN void Itcl_SetNamespaceResolvers (Tcl_Namespace * namespacePtr,
+        Tcl_ResolveCmdProc * cmdProc, Tcl_ResolveVarProc * varProc,
+        Tcl_ResolveCompiledVarProc * compiledVarProc);
 /* end of functions that exist but are NOT PUBLISHED */
-#endif
 
 
 /* here come the definitions for code which should be migrated to Tcl core */
