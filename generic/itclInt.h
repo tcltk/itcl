@@ -9,7 +9,7 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itclInt.h,v 1.17.2.27 2007/12/09 15:35:01 wiede Exp $
+ * RCS: @(#) $Id: itclInt.h,v 1.17.2.28 2007/12/22 21:22:23 wiede Exp $
  */
 
 #include <string.h>
@@ -443,8 +443,7 @@ typedef struct ItclOption {
     int protection;             /* protection level */
     int flags;                  /* flags describing member (see below) */
     ItclMemberCode *codePtr;    /* code associated with member */
-    Tcl_Obj *init;              /* initial value */
-    Tcl_Obj *defaultValuePtr;
+    Tcl_Obj *defaultValuePtr;   /* initial value */
     Tcl_Obj *cgetMethodPtr;
     Tcl_Obj *cgetMethodVarPtr;
     Tcl_Obj *configureMethodPtr;
@@ -563,8 +562,7 @@ MODULE_SCOPE int ItclClassBaseCmd(ClientData clientData, Tcl_Interp *interp,
 MODULE_SCOPE int Itcl_BiHullInstallCmd (ClientData clientData,
         Tcl_Interp *interp, int objc, Tcl_Obj *CONST objv[]);
 MODULE_SCOPE int Itcl_CreateOption (Tcl_Interp *interp, ItclClass *iclsPtr,
-        Tcl_Obj *name, const char *resourceName, const char *className, 
-	char *init, char *config, ItclOption **ioptPtr);
+	ItclOption *ioptPtr);
 MODULE_SCOPE int Itcl_CreateMethodVariable (Tcl_Interp *interp,
         ItclClass *iclsPtr, Tcl_Obj *name, Tcl_Obj *defaultPtr,
 	Tcl_Obj *callbackPtr, ItclMethodVariable **imvPtr);
@@ -616,6 +614,11 @@ MODULE_SCOPE int DelegateFunction(Tcl_Interp *interp, ItclObject *ioPtr,
 MODULE_SCOPE int ItclInitObjectMethodVariables(Tcl_Interp *interp,
         ItclObject *ioPtr, ItclClass *iclsPtr, const char *name);
 MODULE_SCOPE int InitTclOOFunctionPointers(Tcl_Interp *interp);
+MODULE_SCOPE ItclOption* ItclNewOption(Tcl_Interp *interp, ItclObject *ioPtr,
+        ItclClass *iclsPtr, Tcl_Obj *namePtr, const char *resourceName,
+        const char *className, char *init, ItclMemberCode *mCodePtr);
+MODULE_SCOPE int ItclParseOption(ItclObjectInfo *infoPtr, Tcl_Interp *interp,
+        int objc, Tcl_Obj *CONST objv[], ItclOption **ioptPtrPtr);
 
 #include "itcl2TclOO.h"
 

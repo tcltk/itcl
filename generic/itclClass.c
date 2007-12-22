@@ -25,7 +25,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann Copyright (c) 2007
  *
- *     RCS:  $Id: itclClass.c,v 1.1.2.15 2007/12/21 20:02:24 wiede Exp $
+ *     RCS:  $Id: itclClass.c,v 1.1.2.16 2007/12/22 21:22:21 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -1647,33 +1647,29 @@ int
 Itcl_CreateOption(
     Tcl_Interp *interp,       /* interpreter managing this transaction */
     ItclClass* iclsPtr,       /* class containing this variable */
-    Tcl_Obj* namePtr,         /* option name */
-    const char *resourceName, /* resource name */
-    const char *className,    /* class name */
-    char* init,               /* initial value */
-    char* config,             /* code invoked when variable is configured */
-    ItclOption** ioptPtrPtr)  /* returns: new option definition */
+    ItclOption* ioptPtr)      /* new option definition */
 {
     int newEntry;
-    ItclOption *ioptPtr;
     ItclMemberCode *mCodePtr;
     Tcl_HashEntry *hPtr;
 
+    mCodePtr = NULL;
     /*
      *  Add this option to the options table for the class.
      *  Make sure that the option name does not already exist.
      */
-    hPtr = Tcl_CreateHashEntry(&iclsPtr->options, (char *)namePtr, &newEntry);
+    hPtr = Tcl_CreateHashEntry(&iclsPtr->options,
+            (char *)ioptPtr->namePtr, &newEntry);
     if (!newEntry) {
         Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
-            "option name \"", Tcl_GetString(namePtr),
+            "option name \"", Tcl_GetString(ioptPtr->namePtr),
 	    "\" already defined in class \"",
             Tcl_GetString(iclsPtr->fullNamePtr), "\"",
             (char*)NULL);
         return TCL_ERROR;
     }
-    Tcl_IncrRefCount(namePtr);
 
+#ifdef NOTDEF
     /*
      *  If this option has some "config" code, try to capture
      *  its implementation.
@@ -1689,42 +1685,16 @@ Itcl_CreateOption(
     } else {
         mCodePtr = NULL;
     }
+#endif
         
-
-    /*
-     *  If everything looks good, create the option definition.
-     */
-    ioptPtr = (ItclOption*)ckalloc(sizeof(ItclOption));
-    memset(ioptPtr, 0, sizeof(ItclOption));
-    ioptPtr->iclsPtr      = iclsPtr;
-    ioptPtr->protection   = Itcl_Protection(interp, 0);
-    ioptPtr->codePtr      = mCodePtr;
-    ioptPtr->namePtr      = namePtr;
-    Tcl_IncrRefCount(ioptPtr->namePtr);
-    ioptPtr->resourceNamePtr = Tcl_NewStringObj(resourceName, -1);
-    Tcl_IncrRefCount(ioptPtr->resourceNamePtr);
-    ioptPtr->classNamePtr = Tcl_NewStringObj(className, -1);
-    Tcl_IncrRefCount(ioptPtr->classNamePtr);
+    ioptPtr->iclsPtr = iclsPtr;
+    ioptPtr->codePtr = mCodePtr;
     ioptPtr->fullNamePtr = Tcl_NewStringObj(
             Tcl_GetString(iclsPtr->fullNamePtr), -1);
     Tcl_AppendToObj(ioptPtr->fullNamePtr, "::", 2);
-    Tcl_AppendToObj(ioptPtr->fullNamePtr, Tcl_GetString(namePtr), -1);
+    Tcl_AppendToObj(ioptPtr->fullNamePtr, Tcl_GetString(ioptPtr->namePtr), -1);
     Tcl_IncrRefCount(ioptPtr->fullNamePtr);
-
-    if (ioptPtr->protection == ITCL_DEFAULT_PROTECT) {
-        ioptPtr->protection = ITCL_PROTECTED;
-    }
-
-    if (init) {
-        ioptPtr->init = Tcl_NewStringObj(init, -1);
-        Tcl_IncrRefCount(ioptPtr->init);
-    } else {
-        ioptPtr->init = NULL;
-    }
-
     Tcl_SetHashValue(hPtr, (ClientData)ioptPtr);
-
-    *ioptPtrPtr = ioptPtr;
     return TCL_OK;
 }
 

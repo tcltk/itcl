@@ -39,7 +39,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclParse.c,v 1.1.2.24 2007/12/21 20:02:28 wiede Exp $
+ *     RCS:  $Id: itclParse.c,v 1.1.2.25 2007/12/22 21:22:23 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -80,6 +80,7 @@ Tcl_ObjCmdProc Itcl_ClassOptionCmd;
 Tcl_ObjCmdProc Itcl_NWidgetCmd;
 Tcl_ObjCmdProc Itcl_ExtendedClassCmd;
 Tcl_ObjCmdProc Itcl_AddOptionCmd;
+Tcl_ObjCmdProc Itcl_AddObjectOptionCmd;
 Tcl_ObjCmdProc Itcl_AddDelegatedOptionCmd;
 Tcl_ObjCmdProc Itcl_AddDelegatedFunctionCmd;
 Tcl_ObjCmdProc Itcl_AddComponentCmd;
@@ -379,6 +380,11 @@ Itcl_ParseInit(
     Itcl_PreserveData((ClientData)infoPtr);
 
     Tcl_CreateObjCommand(interp, "::itcl::addoption", Itcl_AddOptionCmd,
+        (ClientData)infoPtr, (Tcl_CmdDeleteProc*)NULL);
+    Itcl_PreserveData((ClientData)infoPtr);
+
+    Tcl_CreateObjCommand(interp, "::itcl::addobjectoption",
+        Itcl_AddObjectOptionCmd,
         (ClientData)infoPtr, (Tcl_CmdDeleteProc*)NULL);
     Itcl_PreserveData((ClientData)infoPtr);
 
@@ -1672,9 +1678,9 @@ Itcl_WidgetAdaptorCmdStart(
 
 /*
  * ------------------------------------------------------------------------
- *  Itcl_ClassOptionCmd()
+ *  ItclParseOption()
  *
- *  Invoked by Tcl during the parsing of a class definition whenever
+ *  Invoked by Tcl during the parsing whenever
  *  the "option" command is invoked to define an option 
  *  Handles the following syntax:
  *
@@ -1683,14 +1689,14 @@ Itcl_WidgetAdaptorCmdStart(
  * ------------------------------------------------------------------------
  */
 int
-Itcl_ClassOptionCmd(
-    ClientData clientData,   /* info for all known objects */
+ItclParseOption(
+    ItclObjectInfo *infoPtr, /* info for all known objects */
     Tcl_Interp *interp,      /* current interpreter */
     int objc,                /* number of arguments */
-    Tcl_Obj *CONST objv[])   /* argument objects */
+    Tcl_Obj *CONST objv[],   /* argument objects */
+    ItclOption **ioptPtrPtr) /* where the otpion info is found */
 {
     ItclOption *ioptPtr;
-    Tcl_Obj *namePtr;
     Tcl_Obj *classNamePtr;
     Tcl_Obj *nameSpecPtr;
     Tcl_Obj **newObjv;
@@ -1716,13 +1722,6 @@ Itcl_ClassOptionCmd(
     int foundOption;
     int i;
 
-    ItclShowArgs(1, "Itcl_ClassOptionCmd", objc, objv);
-    ItclObjectInfo *infoPtr = (ItclObjectInfo*)clientData;
-    ItclClass *iclsPtr = (ItclClass*)Itcl_PeekStack(&infoPtr->clsStack);
-    if (iclsPtr->flags & ITCL_CLASS) {
-        Tcl_AppendResult(interp, "a \"class\" cannot have options", NULL);
-	return TCL_ERROR;
-    }
     pLevel = Itcl_Protection(interp, 0);
 
     usage = "namespec ?init? ?-default value? ?-readonly? ?-cgetmethod methodName? ?-cgetmethodvar varName? ?-configuremethod methodName? ?-configuremethodvar varName? ?-validatemethod methodName? ?-validatemethodvar varName";
@@ -1820,13 +1819,15 @@ Itcl_ClassOptionCmd(
     }
     if ((configureMethod != NULL) && (configureMethodVar != NULL)) {
         Tcl_AppendResult(interp,
-	        "option -configuremethod and -configuremethodvar cannot be used both",
+	        "option -configuremethod and -configuremethodvar",
+		"cannot be used both",
 		NULL);
 	return TCL_ERROR;
     }
     if ((validateMethod != NULL) && (validateMethodVar != NULL)) {
         Tcl_AppendResult(interp,
-	        "option -validatemethod and -validatemethodvar cannot be used both",
+	        "option -validatemethod and -validatemethodvar",
+		"cannot be used both",
 		NULL);
 	return TCL_ERROR;
     }
@@ -1837,10 +1838,6 @@ Itcl_ClassOptionCmd(
     resourceName = NULL;
     className = NULL;
 
-    /*
-     *  Make sure that the variable name does not contain anything
-     *  goofy like a "::" scope qualifier.
-     */
     nameSpecPtr = newObjv[0];
     token = Tcl_GetString(nameSpecPtr);
     if (Tcl_SplitList(interp, (CONST84 char *)token, &argc, &argv) != TCL_OK) {
@@ -1851,6 +1848,11 @@ Itcl_ClassOptionCmd(
 	Tcl_AppendResult(interp, "options must start with a '-'", NULL);
         return TCL_ERROR;
     }
+
+    /*
+     *  Make sure that the variable name does not contain anything
+     *  goofy like a "::" scope qualifier.
+     */
     if (strstr(name, "::")) {
         Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
             "bad option name \"", name, "\"", (char*)NULL);
@@ -1888,16 +1890,24 @@ Itcl_ClassOptionCmd(
     if ((newObjc > 1) && (init == NULL)) {
         init = Tcl_GetString(newObjv[1]);
     }
-
-    namePtr = Tcl_NewStringObj(name, -1);
-    Tcl_IncrRefCount(namePtr);
-    if (Itcl_CreateOption(interp, iclsPtr, namePtr, resourceName,
-            Tcl_GetString(classNamePtr), init, configureMethod,
-	    &ioptPtr) != TCL_OK) {
-        Tcl_DecrRefCount(classNamePtr);
-        return TCL_ERROR;
+    
+    ioptPtr = (ItclOption*)ckalloc(sizeof(ItclOption));
+    memset(ioptPtr, 0, sizeof(ItclOption));
+    ioptPtr->protection   = Itcl_Protection(interp, 0);
+    if (ioptPtr->protection == ITCL_DEFAULT_PROTECT) {
+        ioptPtr->protection = ITCL_PROTECTED;
     }
-    Tcl_DecrRefCount(classNamePtr);
+    ioptPtr->namePtr      = Tcl_NewStringObj(name, -1);
+    Tcl_IncrRefCount(ioptPtr->namePtr);
+    ioptPtr->resourceNamePtr = Tcl_NewStringObj(resourceName, -1);
+    Tcl_IncrRefCount(ioptPtr->resourceNamePtr);
+    ioptPtr->classNamePtr = classNamePtr;
+    Tcl_IncrRefCount(ioptPtr->classNamePtr);
+
+    if (init) {
+        ioptPtr->defaultValuePtr = Tcl_NewStringObj(init, -1);
+        Tcl_IncrRefCount(ioptPtr->defaultValuePtr);
+    }
     if (cgetMethod != NULL) {
         ioptPtr->cgetMethodPtr = Tcl_NewStringObj(cgetMethod, -1);
         Tcl_IncrRefCount(ioptPtr->cgetMethodPtr);
@@ -1926,7 +1936,48 @@ Itcl_ClassOptionCmd(
         ioptPtr->flags |= ITCL_OPTION_READONLY;
     }
 
+    ckfree((char *)argv);
     ckfree((char *)newObjv);
+    *ioptPtrPtr = ioptPtr;
+    return TCL_OK;
+}
+
+/*
+ * ------------------------------------------------------------------------
+ *  Itcl_ClassOptionCmd()
+ *
+ *  Invoked by Tcl during the parsing of a class definition whenever
+ *  the "option" command is invoked to define an option 
+ *  Handles the following syntax:
+ *
+ *      option 
+ *
+ * ------------------------------------------------------------------------
+ */
+int
+Itcl_ClassOptionCmd(
+    ClientData clientData,   /* info for all known objects */
+    Tcl_Interp *interp,      /* current interpreter */
+    int objc,                /* number of arguments */
+    Tcl_Obj *CONST objv[])   /* argument objects */
+{
+    ItclOption *ioptPtr;
+
+    ItclShowArgs(1, "Itcl_ClassOptionCmd", objc, objv);
+    ItclObjectInfo *infoPtr = (ItclObjectInfo*)clientData;
+    ItclClass *iclsPtr = (ItclClass*)Itcl_PeekStack(&infoPtr->clsStack);
+    if (iclsPtr->flags & ITCL_CLASS) {
+        Tcl_AppendResult(interp, "a \"class\" cannot have options", NULL);
+	return TCL_ERROR;
+    }
+
+    if (ItclParseOption(infoPtr, interp, objc, objv, &ioptPtr) != TCL_OK) {
+	return TCL_ERROR;
+    }
+
+    if (Itcl_CreateOption(interp, iclsPtr, ioptPtr) != TCL_OK) {
+        return TCL_ERROR;
+    }
     return TCL_OK;
 }
 
@@ -2328,8 +2379,8 @@ delegate method * ?to <componentName>? ?using <pattern>? ?except <methods>?";
  *  Itcl_HandleDelegateOptionCmd()
  *
  *  Invoked by Tcl during the parsing of a class definition whenever
- *  the "delegate option" command is invoked to define a 
- *  or if ::itcl::adddelegateoption with an itcl object
+ *  the "delegate option" command is invoked to define a delegated option
+ *  or if ::itcl::adddelegateoption is called with an itcl object
  *  Handles the following syntax:
  *
  *      delegate option ...

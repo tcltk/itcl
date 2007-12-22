@@ -24,7 +24,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclBuiltin.c,v 1.1.2.25 2007/12/01 18:56:34 wiede Exp $
+ *     RCS:  $Id: itclBuiltin.c,v 1.1.2.26 2007/12/22 21:22:21 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -752,8 +752,8 @@ ItclReportOption(
     Tcl_ListObjAppendElement((Tcl_Interp*)NULL, listPtr,
             ioptPtr->resourceNamePtr);
     Tcl_ListObjAppendElement((Tcl_Interp*)NULL, listPtr, ioptPtr->classNamePtr);
-    if (ioptPtr->init) {
-        objPtr = ioptPtr->init;
+    if (ioptPtr->defaultValuePtr) {
+        objPtr = ioptPtr->defaultValuePtr;
     } else {
         objPtr = Tcl_NewStringObj("<undefined>", -1);
     }
@@ -1429,7 +1429,7 @@ ItclExtendedCget(
         newObjv = (Tcl_Obj **)ckalloc(sizeof(Tcl_Obj *)*2);
         newObjv[0] = ioptPtr->cgetMethodPtr;
         newObjv[1] = objv[1];
-        result = Tcl_EvalObjv(interp, objc+1, newObjv, TCL_EVAL_DIRECT);
+        result = Tcl_EvalObjv(interp, objc, newObjv, TCL_EVAL_DIRECT);
     } else {
         val = ItclGetInstanceVar(interp, "itcl_options",
                 Tcl_GetString(ioptPtr->namePtr),

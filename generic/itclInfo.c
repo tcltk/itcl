@@ -24,7 +24,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclInfo.c,v 1.1.2.11 2007/12/01 18:56:34 wiede Exp $
+ *     RCS:  $Id: itclInfo.c,v 1.1.2.12 2007/12/22 21:22:22 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -1585,16 +1585,15 @@ Itcl_BiInfoOptionCmd(
      */
     if (optionName) {
 	optionNamePtr = Tcl_NewStringObj(optionName, -1);
-        hPtr = Tcl_FindHashEntry(&contextIclsPtr->options,
+        hPtr = Tcl_FindHashEntry(&contextIoPtr->objectOptions,
 	        (char *)optionNamePtr);
         if (hPtr == NULL) {
             Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
-                "\"", optionName, "\" isn't a option in class \"",
-                contextIclsPtr->nsPtr->fullName, "\"",
+                 "\"", optionName, "\" isn't a option in object \"",
+                Tcl_GetString(contextIoPtr->namePtr), "\"",
                 (char*)NULL);
             return TCL_ERROR;
         }
-
         ioptPtr = (ItclOption*)Tcl_GetHashValue(hPtr);
 
         /*
@@ -1666,7 +1665,7 @@ Itcl_BiInfoOptionCmd(
                     break;
 
                 case BOptDefaultIdx:
-		    if (ioptPtr->defaultValuePtr) {
+		    if (ioptPtr->defaultValuePtr != NULL) {
 		        objPtr = ioptPtr->defaultValuePtr;
                     } else {
                         objPtr = Tcl_NewStringObj("<undefined>", -1);

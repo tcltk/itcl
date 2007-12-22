@@ -23,7 +23,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclCmd.c,v 1.1.2.18 2007/12/21 20:02:28 wiede Exp $
+ *     RCS:  $Id: itclCmd.c,v 1.1.2.19 2007/12/22 21:22:22 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -1232,7 +1232,7 @@ fprintf(stderr, "Itcl_NWidgetCmd!iclsPtr == NULL\n");
  *
  *  Used to build an option to an [incr Tcl] nwidget/eclass
  *
- *  Syntax: ::itcl::addoption <nwidget object> <optionName> <defaultValue>
+ *  Syntax: ::itcl::addoption <nwidget class> <optionName> <defaultValue>
  *
  *  Returns TCL_OK/TCL_ERROR to indicate success/failure.
  * ------------------------------------------------------------------------
@@ -1291,6 +1291,101 @@ Itcl_AddOptionCmd(
     }
     result = DelegatedOptionsInstall(interp, iclsPtr);
     return result;
+}
+
+/*
+ * ------------------------------------------------------------------------
+ *  Itcl_AddObjectOptionCmd()
+ *
+ *  Used to build an option for an [incr Tcl] object
+ *
+ *  Syntax: ::itcl::addobjectoption <object> <protection> option <optionSpec> 
+ *     ?-default <defaultValue>?
+ *     ?-configuremethod <configuremethod>?
+ *     ?-validatemethod <validatemethod>?
+ *     ?-cgetmethod <cgetmethod>?
+ *     ?-configuremethodvar <configuremethodvar>?
+ *     ?-validatemethodvar <validatemethodvar>?
+ *     ?-cgetmethodvar <cgetmethodvar>?
+ *     ?-readonly?
+ *
+ *  Returns TCL_OK/TCL_ERROR to indicate success/failure.
+ * ------------------------------------------------------------------------
+ */
+/* ARGSUSED */
+int
+Itcl_AddObjectOptionCmd(
+    ClientData clientData,   /* infoPtr */
+    Tcl_Interp *interp,      /* current interpreter */
+    int objc,                /* number of arguments */
+    Tcl_Obj *CONST objv[])   /* argument objects */
+{
+    Tcl_HashEntry *hPtr;
+    Tcl_Command cmd;
+    Tcl_Obj *objPtr;
+    ItclObjectInfo *infoPtr;
+    ItclObject *ioPtr;
+    ItclOption *ioptPtr;
+    const char *protectionStr;
+    int pLevel;
+    int isNew;
+
+    ioptPtr = NULL;
+    infoPtr = (ItclObjectInfo *)clientData;
+    ItclShowArgs(1, "Itcl_AddObjectOptionCmd", objc, objv);
+    if (objc < 4) {
+        Tcl_WrongNumArgs(interp, 1, objv, 
+	        "objectName protection option optionName ...");
+	return TCL_ERROR;
+    }
+    
+    cmd = Tcl_FindCommand(interp, Tcl_GetString(objv[1]), NULL, 0);
+    if (cmd == NULL) {
+	Tcl_AppendResult(interp, "object \"", Tcl_GetString(objv[1]),
+	        "\" not found", NULL);
+        return TCL_ERROR;
+    }
+    hPtr = Tcl_FindHashEntry(&infoPtr->objects, (char *)cmd);
+    if (hPtr == NULL) {
+	Tcl_AppendResult(interp, "object \"", Tcl_GetString(objv[1]),
+	        "\" not found", NULL);
+        return TCL_ERROR;
+    }
+    ioPtr = Tcl_GetHashValue(hPtr);
+    protectionStr = Tcl_GetString(objv[2]);
+    pLevel = -1;
+    if (strcmp(protectionStr, "public") == 0) {
+        pLevel = ITCL_PUBLIC;
+    }
+    if (strcmp(protectionStr, "protected") == 0) {
+        pLevel = ITCL_PROTECTED;
+    }
+    if (strcmp(protectionStr, "private") == 0) {
+        pLevel = ITCL_PRIVATE;
+    }
+    if (pLevel == -1) {
+	Tcl_AppendResult(interp, "bad protection \"", protectionStr, "\"",
+	        NULL);
+        return TCL_ERROR;
+    }
+    infoPtr->protection = pLevel;
+    if (ItclParseOption(infoPtr, interp, objc-3, objv+3, &ioptPtr) != TCL_OK) {
+	return TCL_ERROR;
+    }
+    objPtr = Tcl_NewObj();
+    Tcl_GetCommandFullName(interp, ioPtr->accessCmd, objPtr);
+    ioptPtr->fullNamePtr = Tcl_NewStringObj(
+            Tcl_GetString(ioPtr->namePtr), -1);
+    Tcl_AppendToObj(ioptPtr->fullNamePtr, "::", 2);
+    Tcl_AppendToObj(ioptPtr->fullNamePtr, Tcl_GetString(ioptPtr->namePtr), -1);
+    Tcl_IncrRefCount(ioptPtr->fullNamePtr);
+    hPtr = Tcl_CreateHashEntry(&ioPtr->objectOptions,
+            (char *)ioptPtr->namePtr, &isNew);
+    Tcl_SetHashValue(hPtr, ioptPtr);
+    ItclSetInstanceVar(interp, "itcl_options",
+            Tcl_GetString(ioptPtr->namePtr),
+            Tcl_GetString(ioptPtr->defaultValuePtr), ioPtr, NULL);
+    return TCL_OK;
 }
 
 /*

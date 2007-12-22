@@ -24,7 +24,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann Copyright (c) 2007
  *
- *     RCS:  $Id: itclObject.c,v 1.1.2.27 2007/12/21 20:02:28 wiede Exp $
+ *     RCS:  $Id: itclObject.c,v 1.1.2.28 2007/12/22 21:22:23 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -1099,7 +1099,7 @@ ItclGetInstanceVar(
     Tcl_DStringInit(&buffer);
     Tcl_DStringAppend(&buffer, Tcl_GetString(contextIoPtr->varNsNamePtr), -1);
     doAppend = 1;
-    if (contextIclsPtr->flags & ITCL_ECLASS) {
+    if ((contextIclsPtr == NULL) || (contextIclsPtr->flags & ITCL_ECLASS)) {
         if (strcmp(name1, "itcl_options") == 0) {
 	    doAppend = 0;
         }
@@ -1194,7 +1194,7 @@ ItclSetInstanceVar(
     Tcl_DStringInit(&buffer);
     Tcl_DStringAppend(&buffer, Tcl_GetString(contextIoPtr->varNsNamePtr), -1);
     doAppend = 1;
-    if (contextIclsPtr->flags & ITCL_ECLASS) {
+    if ((contextIclsPtr == NULL) || (contextIclsPtr->flags & ITCL_ECLASS)) {
         if (strcmp(name1, "itcl_options") == 0) {
 	    doAppend = 0;
         }
@@ -2098,10 +2098,11 @@ ItclInitExtendedClassOptions(
     Itcl_InitHierIter(&hier, iclsPtr);
     while ((iclsPtr = Itcl_AdvanceHierIter(&hier)) != NULL) {
         FOREACH_HASH_VALUE(ioptPtr, &iclsPtr->options) {
-            if (ioptPtr->init != NULL) {
+            if (ioptPtr->defaultValuePtr != NULL) {
                 ItclSetInstanceVar(interp, "itcl_options",
                         Tcl_GetString(ioptPtr->namePtr),
-                        Tcl_GetString(ioptPtr->init), ioPtr, iclsPtr);
+                        Tcl_GetString(ioptPtr->defaultValuePtr),
+			ioPtr, iclsPtr);
             }
 	}
     }
