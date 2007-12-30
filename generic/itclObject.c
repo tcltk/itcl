@@ -24,7 +24,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann Copyright (c) 2007
  *
- *     RCS:  $Id: itclObject.c,v 1.1.2.28 2007/12/22 21:22:23 wiede Exp $
+ *     RCS:  $Id: itclObject.c,v 1.1.2.29 2007/12/30 23:08:43 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -554,8 +554,10 @@ ItclInitObjectVariables(
  *
  *  Collect all instance options for the given object instance to allow
  *  faster runtime access to the options.
- *  It is assumed, that an option can only exist in one class!!
- *  So no duplicates allowed!!
+ *  if the same option name is used in more than one class the first one
+ *  found is used (for initializing and for the class name)!!
+ *  # It is assumed, that an option can only exist in one class??
+ *  # So no duplicates allowed??
  *  This is usually invoked *  automatically by Itcl_CreateObject(),
  *  when an object is created.
  * ------------------------------------------------------------------------
@@ -2099,10 +2101,14 @@ ItclInitExtendedClassOptions(
     while ((iclsPtr = Itcl_AdvanceHierIter(&hier)) != NULL) {
         FOREACH_HASH_VALUE(ioptPtr, &iclsPtr->options) {
             if (ioptPtr->defaultValuePtr != NULL) {
-                ItclSetInstanceVar(interp, "itcl_options",
-                        Tcl_GetString(ioptPtr->namePtr),
-                        Tcl_GetString(ioptPtr->defaultValuePtr),
-			ioPtr, iclsPtr);
+		if (ItclGetInstanceVar(interp, "itcl_options",
+		        Tcl_GetString(ioptPtr->namePtr), ioPtr, iclsPtr)
+			== NULL) {
+                    ItclSetInstanceVar(interp, "itcl_options",
+                            Tcl_GetString(ioptPtr->namePtr),
+                            Tcl_GetString(ioptPtr->defaultValuePtr),
+			    ioPtr, iclsPtr);
+	        }
             }
 	}
     }

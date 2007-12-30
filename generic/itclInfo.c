@@ -24,7 +24,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclInfo.c,v 1.1.2.12 2007/12/22 21:22:22 wiede Exp $
+ *     RCS:  $Id: itclInfo.c,v 1.1.2.13 2007/12/30 23:08:43 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -1722,7 +1722,7 @@ Itcl_BiInfoOptionCmd(
             hPtr = Tcl_FirstHashEntry(&iclsPtr->options, &place);
             while (hPtr) {
                 ioptPtr = (ItclOption*)Tcl_GetHashValue(hPtr);
-                objPtr = ioptPtr->fullNamePtr;
+                objPtr = ioptPtr->namePtr;
                 Tcl_ListObjAppendElement((Tcl_Interp*)NULL, resultPtr, objPtr);
                 hPtr = Tcl_NextHashEntry(&place);
             }
