@@ -25,7 +25,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclEnsemble.c,v 1.1.2.4 2007/12/21 20:02:28 wiede Exp $
+ *     RCS:  $Id: itclEnsemble.c,v 1.1.2.5 2008/01/06 19:24:31 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -2028,6 +2028,9 @@ Itcl_EnsembleErrorCmd(
  *----------------------------------------------------------------------
  */
 
+int Itcl_InvokeEnsembleMethod(Tcl_Interp *interp, Tcl_Namespace *nsPtr,
+    Tcl_Obj *namePtr, Tcl_Proc procPtr, int objc, Tcl_Obj *const *objv);
+
 static int
 EnsembleSubCmd(
     ClientData clientData,      /* ensPart struct pointer */
@@ -2048,8 +2051,10 @@ EnsembleSubCmd(
 if (ensPart->clientData == NULL) {
     return TCL_ERROR;
 }
-        result = Tcl_InvokeNamespaceProc(interp, (Tcl_Proc)ensPart->clientData,
-	        nsPtr, ensPart->namePtr, objc, objv);
+        result = Itcl_InvokeEnsembleMethod(interp, nsPtr, ensPart->namePtr,
+	        (Tcl_Proc)ensPart->clientData, objc, objv);
+//        result = Tcl_InvokeNamespaceProc(interp, (Tcl_Proc)ensPart->clientData,
+//	        nsPtr, ensPart->namePtr, objc, objv);
     } else {
         result = (*ensPart->objProc)(ensPart->clientData,
 	        interp, objc, objv);

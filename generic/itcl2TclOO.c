@@ -8,25 +8,22 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itcl2TclOO.c,v 1.1.2.8 2007/10/19 20:44:32 wiede Exp $
+ * RCS: @(#) $Id: itcl2TclOO.c,v 1.1.2.9 2008/01/06 19:24:29 wiede Exp $
  */
 
+#include <tcl.h>
+#include <tclOO.h>
 #include <tclOOInt.h>
-#define _TCLOOINT_H
-#include "itclInt.h"
 
 int
-Itcl_InvokeProcedureMethod(
-    ClientData clientData,	/* Pointer to some per-method context. */
+Tcl_InvokeClassProcedureMethod(
     Tcl_Interp *interp,
-    TclOO_PreCallProc preCallProc,
+    Tcl_Obj *namePtr,           /* name of the method */
+    Tcl_Namespace *nsPtr,       /* namespace for calling method */
+    ProcedureMethod *pmPtr,     /* method type specific data */
     int objc,			/* Number of arguments. */
     Tcl_Obj *const *objv)	/* Arguments as actually seen. */
 {
-    ItclShowArgs(1, "Itcl_InvokeProcedureMethod", objc, objv);
-    Method *mPtr = clientData;
-    Tcl_Namespace *nsPtr = mPtr->declaringClassPtr->thisPtr->namespacePtr;
-    ProcedureMethod *pmPtr = mPtr->clientData;
     Proc *procPtr = pmPtr->procPtr;
     int flags = FRAME_IS_METHOD;
     CallFrame frame;
@@ -43,7 +40,7 @@ Itcl_InvokeProcedureMethod(
 
     result = TclProcCompileProc(interp, pmPtr->procPtr,
 	    pmPtr->procPtr->bodyPtr, (Namespace *) nsPtr, "body of method",
-	    Tcl_GetString(mPtr->namePtr));
+	    Tcl_GetString(namePtr));
     if (result != TCL_OK) {
 	return result;
     }
@@ -69,13 +66,14 @@ Itcl_InvokeProcedureMethod(
      * veto the call.
      */
 
-    if (preCallProc != NULL) {
+    if (pmPtr->preCallProc != NULL) {
 	int isFinished;
 
-	result = preCallProc(pmPtr->clientData, interp, NULL,
+	result = pmPtr->preCallProc(pmPtr->clientData, interp, NULL,
 		(Tcl_CallFrame *) framePtr, &isFinished);
 	if (isFinished || result != TCL_OK) {
 	    Tcl_PopCallFrame(interp);
+	    TclStackFree(interp, framePtr);
 	    goto done;
 	}
     }
@@ -86,10 +84,58 @@ Itcl_InvokeProcedureMethod(
      * name is passed as an argument.
      */
 
-    result = TclObjInterpProcCore(interp, mPtr->namePtr, 1, ItclProcErrorProc);
+    result = TclObjInterpProcCore(interp, namePtr, 1, pmPtr->errProc);
+
+    /*
+     * Give the post-call callback a chance to do some cleanup. Note that at
+     * this point the call frame itself is invalid; it's already been popped.
+     */
+
+    if (pmPtr->postCallProc) {
+        result = pmPtr->postCallProc(pmPtr->clientData, interp, NULL,
+                nsPtr, result);
+    }
 
 done:
     return result;
+}
+
+int
+Itcl_InvokeProcedureMethod(
+    ClientData clientData,	/* Pointer to some per-method context. */
+    Tcl_Interp *interp,
+    int objc,			/* Number of arguments. */
+    Tcl_Obj *const *objv)	/* Arguments as actually seen. */
+{
+    Method *mPtr = clientData;
+    Tcl_Namespace *nsPtr = mPtr->declaringClassPtr->thisPtr->namespacePtr;
+    return Tcl_InvokeClassProcedureMethod(interp, mPtr->namePtr, nsPtr,
+            mPtr->clientData, objc, objv);
+}
+
+int
+Itcl_InvokeEnsembleMethod(
+    Tcl_Interp *interp,
+    Tcl_Namespace *nsPtr,       /* namespace to call the method in */
+    Tcl_Obj *namePtr,           /* name of the method */
+    Proc *procPtr,
+    int objc,			/* Number of arguments. */
+    Tcl_Obj *const *objv)	/* Arguments as actually seen. */
+{
+    ProcedureMethod pm;
+
+    pm.version = TCLOO_PROCEDURE_METHOD_VERSION;
+    pm.procPtr = (Proc *)procPtr;
+    pm.flags = USE_DECLARER_NS;
+    pm.clientData = NULL;
+    pm.deleteClientdataProc = NULL;
+    pm.cloneClientdataProc = NULL;
+    pm.errProc = NULL;
+    pm.preCallProc = NULL;
+    pm.postCallProc = NULL;
+    pm.gfivProc = NULL;
+    return Tcl_InvokeClassProcedureMethod(interp, namePtr, nsPtr,
+            &pm, objc, objv);
 }
 
 
@@ -99,7 +145,7 @@ done:
  * Itcl_PublicObjectCmd, Itcl_PrivateObjectCmd --
  *
  *	Main entry point for object invokations. The Public* and Private*
- *	wrapper functions are just thin wrappers round the main ObjectCmd
+ *	wrapper functions are just thin wrappers around the main ObjectCmd
  *	function that does call chain creation, management and invokation.
  *
  * ----------------------------------------------------------------------
@@ -113,12 +159,11 @@ Itcl_PublicObjectCmd(
     int objc,
     Tcl_Obj *const *objv)
 {
-    Object *oPtr = (Object *)clientData;
+    Tcl_Object oPtr = (Tcl_Object)clientData;
     int result;
 
-    ItclShowArgs(1, "Itcl_PublicObjectCmd", objc, objv);
-    result = TclOOObjectCmdCore(oPtr, interp, objc, objv, PUBLIC_METHOD,
-	    &oPtr->publicContextCache, (Class *)clsPtr);
+    result = TclOOInvokeObject(interp, oPtr, clsPtr, PUBLIC_METHOD,
+            objc, objv);
     return result;
 }
 
@@ -130,12 +175,11 @@ Itcl_PrivateObjectCmd(
     int objc,
     Tcl_Obj *const *objv)
 {
-    Object *oPtr = (Object *)clientData;
+    Tcl_Object oPtr = (Tcl_Object)clientData;
     int result;
 
-    ItclShowArgs(1, "Itcl_PrivateObjectCmd", objc, objv);
-    result = TclOOObjectCmdCore(oPtr, interp, objc, objv, PRIVATE_METHOD,
-	    &oPtr->publicContextCache, (Class *)clsPtr);
+    result = TclOOInvokeObject(interp, oPtr, clsPtr, PRIVATE_METHOD,
+            objc, objv);
     return result;
 }
 
@@ -155,7 +199,7 @@ Itcl_NewProcClassMethod(
     Tcl_Class clsPtr,		/* The class to modify. */
     TclOO_PreCallProc preCallPtr,
     TclOO_PostCallProc postCallPtr,
-    Tcl_ProcErrorProc errProc,
+    ProcErrorProc errProc,
     ClientData clientData,
     Tcl_Obj *nameObj,		/* The name of the method, which may be NULL;
 				 * if so, up to caller to manage storage
@@ -170,7 +214,7 @@ Itcl_NewProcClassMethod(
 {
     Tcl_Method result;
 
-    result = Tcl_NewProcClassMethod(interp, clsPtr, preCallPtr, postCallPtr,
+    result = TclOONewProcClassMethodEx(interp, clsPtr, preCallPtr, postCallPtr,
            errProc, clientData, nameObj, argsObj, bodyObj,
            PUBLIC_METHOD | USE_DECLARER_NS, clientData2);
     return result;
@@ -192,7 +236,7 @@ Itcl_NewProcMethod(
     Tcl_Object oPtr,		/* The object to modify. */
     TclOO_PreCallProc preCallPtr,
     TclOO_PostCallProc postCallPtr,
-    Tcl_ProcErrorProc errProc,
+    ProcErrorProc errProc,
     ClientData clientData,
     Tcl_Obj *nameObj,		/* The name of the method, which must not be
 				 * NULL. */
@@ -202,7 +246,7 @@ Itcl_NewProcMethod(
 				 * NULL. */
     ClientData *clientData2)
 {
-    return Tcl_NewProcMethod(interp, oPtr, preCallPtr, postCallPtr,
+    return TclOONewProcInstanceMethodEx(interp, oPtr, preCallPtr, postCallPtr,
            errProc, clientData, nameObj, argsObj, bodyObj,
            PUBLIC_METHOD | USE_DECLARER_NS, clientData2);
 }
@@ -225,8 +269,8 @@ Itcl_NewForwardClassMethod(
     Tcl_Obj *nameObj,
     Tcl_Obj *prefixObj)
 {
-    return Tcl_NewForwardClassMethod(interp, clsPtr, flags, nameObj,
-            prefixObj);
+    return (Tcl_Method)TclOONewForwardClassMethod(interp, (Class *)clsPtr,
+            flags, nameObj, prefixObj);
 }
 
 /*
@@ -247,43 +291,6 @@ Itcl_NewForwardMethod(
     Tcl_Obj *nameObj,
     Tcl_Obj *prefixObj)
 {
-    return Tcl_NewForwardMethod(interp, oPtr, flags, nameObj, prefixObj);
-}
-
-/*
- * ----------------------------------------------------------------------
- *
- * Itcl_AddToMixinSubs --
- *
- *      Utility function to add a class to the list of mixinSubs within
- *      another class.
- *
- * ----------------------------------------------------------------------
- */
-
-void
-Itcl_AddToMixinSubs(
-    Tcl_Class subPtr,
-    Tcl_Class superPtr)
-{
-    Tcl_AddToMixinSubs(subPtr, superPtr);
-}
-
-/*
- * ----------------------------------------------------------------------
- *
- * Itcl_RemovedFromMixinSubs --
- *
- *      Utility function to remove a class from the list of mixinSubs within
- *      another class.
- *
- * ----------------------------------------------------------------------
- */
-
-void
-Itcl_RemoveFromMixinSubs(
-    Tcl_Class subPtr,
-    Tcl_Class superPtr)
-{
-    Tcl_RemoveFromMixinSubs(subPtr, superPtr);
+    return (Tcl_Method)TclOONewForwardMethod(interp, (Object *)oPtr,
+            flags, nameObj, prefixObj);
 }

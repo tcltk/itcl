@@ -12,5 +12,3 @@ EXTERN Tcl_Method Itcl_NewForwardClassMethod(Tcl_Interp *interp,
         Tcl_Class clsPtr, int flags, Tcl_Obj *nameObj, Tcl_Obj *prefixObj);
 EXTERN Tcl_Method Itcl_NewForwardMethod(Tcl_Interp *interp, Tcl_Object oPtr,
         int flags, Tcl_Obj *nameObj, Tcl_Obj *prefixObj);
-EXTERN void Itcl_AddToMixinSubs(Tcl_Class subPtr, Tcl_Class superPtr);
-EXTERN void Itcl_RemoveFromMixinSubs(Tcl_Class subPtr, Tcl_Class superPtr);

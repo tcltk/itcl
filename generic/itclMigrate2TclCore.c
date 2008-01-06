@@ -9,7 +9,7 @@
  * ========================================================================
  *  AUTHOR:  Arnulf Wiedemann
  *
- *     RCS:  $Id: itclMigrate2TclCore.c,v 1.1.2.7 2007/12/21 20:02:28 wiede Exp $
+ *     RCS:  $Id: itclMigrate2TclCore.c,v 1.1.2.8 2008/01/06 19:24:32 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -19,13 +19,6 @@
 #include <tcl.h>
 #include <tclInt.h>
 #include "itclMigrate2TclCore.h"
-
-Tcl_Command
-_Tcl_GetOriginalCommand(
-    Tcl_Command command) 
-{
-    return TclGetOriginalCommand(command);
-}
 
 int
 Itcl_SetCallFrameResolver(
@@ -100,26 +93,6 @@ _Tcl_ResetRewriteEnsemble(
 }
 
 int
-_Tcl_CreateProc(
-    Tcl_Interp *interp,         /* Interpreter containing proc. */
-    Tcl_Namespace *nsPtr,       /* Namespace containing this proc. */
-    CONST char *procName,       /* Unqualified name of this proc. */
-    Tcl_Obj *argsPtr,           /* Description of arguments. */
-    Tcl_Obj *bodyPtr,           /* Command body. */
-    Tcl_Proc *procPtrPtr)       /* Returns: pointer to proc data. */
-{
-    return TclCreateProc(interp, (Namespace *)nsPtr, procName, argsPtr,
-            bodyPtr, (Proc **)procPtrPtr);
-}
-
-void *
-_Tcl_GetObjInterpProc(
-    void)
-{
-    return (void *)TclGetObjInterpProc();
-}
-
-int
 _Tcl_SetNamespaceResolver(
     Tcl_Namespace *nsPtr,
     Tcl_Resolve *resolvePtr)
@@ -131,80 +104,6 @@ _Tcl_SetNamespaceResolver(
     ((Namespace *)nsPtr)->resolvePtr = resolvePtr;
 #endif
     return TCL_OK;
-}
-
-void
-_Tcl_ProcDeleteProc(
-    ClientData clientData)
-{
-    TclProcDeleteProc(clientData);
-}
-
-static void
-ItclMethodErrorHandler(
-    Tcl_Interp *interp,
-    Tcl_Obj *methodNameObj)
-{
-fprintf(stderr, "ItclMethodErrorHandler called!%s\n", Tcl_GetString(methodNameObj));
-}
-
-int
-_Tcl_InvokeNamespaceProc(
-    Tcl_Interp *interp,
-    Tcl_Proc proc,
-    Tcl_Namespace *nsPtr,
-    Tcl_Obj *namePtr,
-    int objc,
-    Tcl_Obj *const *objv)
-{
-    CallFrame frame;
-    CallFrame *framePtr = &frame;
-    CallFrame **framePtrPtr1 = &framePtr;
-    Tcl_CallFrame **framePtrPtr = (Tcl_CallFrame **)framePtrPtr1;
-    Command cmd;
-    Proc *procPtr = (Proc *)proc;
-    int flags = 0;;
-    int result;
-
-    memset(&cmd, 0, sizeof(Command));
-    cmd.nsPtr = (Namespace *) nsPtr;
-    cmd.clientData = NULL;
-    procPtr->cmdPtr = &cmd;
-
-    result = TclProcCompileProc(interp, procPtr,
-            procPtr->bodyPtr, (Namespace *) nsPtr, "body of method",
-            Tcl_GetString(namePtr));
-    if (result != TCL_OK) {
-        return result;
-    }
-
-    /*
-     * Make the stack frame and fill it out with information about this call.
-     * This operation may fail.
-     */
-
-
-    flags |= FRAME_IS_PROC;
-    result = TclPushStackFrame(interp, framePtrPtr, nsPtr, flags);
-    if (result != TCL_OK) {
-        return result;
-    }
-
-    framePtr->clientData = NULL;
-    framePtr->objc = objc;
-    framePtr->objv = objv;
-    framePtr->procPtr = procPtr;
-
-    /*
-     * Now invoke the body of the method. Note that we need to take special
-     * action when doing unknown processing to ensure that the missing method
-     * name is passed as an argument.
-     */
-
-    result = TclObjInterpProcCore(interp, namePtr, 1, ItclMethodErrorHandler);
-
-    return result;
-
 }
 
 Tcl_Var
@@ -347,60 +246,5 @@ ItclGetInterpErrorLine(
 {
     Interp *iPtr = (Interp *) interp;
     return iPtr->errorLine;
-}
-
-int
-Tcl_RenameCommand(
-    Tcl_Interp *interp,
-    const char *oldName,
-    const char *newName)
-{
-    return TclRenameCommand(interp, oldName, newName);
-}
-
-int
-Itcl_PushCallFrame(
-    Tcl_Interp * interp,
-    Tcl_CallFrame * framePtr,
-    Tcl_Namespace * nsPtr,
-    int isProcCallFrame)
-{
-    return Tcl_PushCallFrame(interp, framePtr, nsPtr, isProcCallFrame);
-}
-
-void
-Itcl_PopCallFrame(
-    Tcl_Interp * interp)
-{
-    Tcl_PopCallFrame(interp);
-}
-
-void
-Itcl_GetVariableFullName(
-    Tcl_Interp * interp,
-    Tcl_Var variable,
-    Tcl_Obj * objPtr)
-{
-    Tcl_GetVariableFullName(interp, variable, objPtr);
-}
-
-Tcl_Var
-Itcl_FindNamespaceVar(
-    Tcl_Interp * interp,
-    CONST char * name,
-    Tcl_Namespace * contextNsPtr,
-    int flags)
-{
-    return Tcl_FindNamespaceVar(interp, name, contextNsPtr, flags);
-}
-
-void
-Itcl_SetNamespaceResolvers (
-    Tcl_Namespace * namespacePtr,
-    Tcl_ResolveCmdProc * cmdProc,
-    Tcl_ResolveVarProc * varProc,
-    Tcl_ResolveCompiledVarProc * compiledVarProc)
-{
-    Tcl_SetNamespaceResolvers(namespacePtr, cmdProc, varProc, compiledVarProc);
 }
 

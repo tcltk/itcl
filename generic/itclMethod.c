@@ -25,7 +25,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclMethod.c,v 1.1.2.14 2007/11/28 16:28:51 wiede Exp $
+ *     RCS:  $Id: itclMethod.c,v 1.1.2.15 2008/01/06 19:24:32 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -1882,8 +1882,20 @@ ItclCheckCallMethod(
         ioPtr = imPtr->iclsPtr->infoPtr->currIoPtr;
     } else {
 	if (contextPtr == NULL) {
+	    if ((imPtr->flags & ITCL_COMMON) ||
+                    (imPtr->codePtr->flags & ITCL_BUILTIN)) {
+                if (!imPtr->iclsPtr->infoPtr->useOldResolvers) {
+                    Itcl_SetCallFrameResolver(interp,
+                            imPtr->iclsPtr->resolvePtr);
+                }
+                if (isFinished != NULL) {
+                    *isFinished = 0;
+                }
+                return TCL_OK;
+            }
 	    Tcl_AppendResult(interp,
 	            "ItclCheckCallMethod cannot get context object (NULL)",
+                    " for ", Tcl_GetString(imPtr->fullNamePtr),
 		    NULL);
 	    return TCL_ERROR;
 	}
@@ -1969,12 +1981,15 @@ ItclCheckCallMethod(
         }
     }
     if (callContextPtr == NULL) {
-        callContextPtr = (ItclCallContext *)ckalloc(
-                sizeof(ItclCallContext));
 	if (ioPtr == NULL) {
 	    Tcl_AppendResult(interp, "ItclCheckCallMethod  ioPtr == NULL", NULL);
+            if (isFinished != NULL) {
+                *isFinished = 1;
+            }
 	    return TCL_ERROR;
 	}
+        callContextPtr = (ItclCallContext *)ckalloc(
+                sizeof(ItclCallContext));
         callContextPtr->objectFlags = ioPtr->flags;
         callContextPtr->classFlags = imPtr->iclsPtr->flags;
         callContextPtr->nsPtr = Tcl_GetCurrentNamespace(interp);
@@ -2026,7 +2041,20 @@ ItclAfterCallMethod(
     oPtr = NULL;
     imPtr = (ItclMemberFunc *)clientData;
 
-    callContextPtr = Itcl_PopStack(&imPtr->iclsPtr->infoPtr->contextStack);
+    callContextPtr = NULL;
+    if (contextPtr != NULL) {
+        callContextPtr = Itcl_PopStack(&imPtr->iclsPtr->infoPtr->contextStack);
+    }
+    if (callContextPtr == NULL) {
+        if ((imPtr->flags & ITCL_COMMON) ||
+                (imPtr->codePtr->flags & ITCL_BUILTIN)) {
+            return call_result;
+        }
+	Tcl_AppendResult(interp,
+	        "ItclAfterCallMethod cannot get context object (NULL)",
+                " for ", Tcl_GetString(imPtr->fullNamePtr), NULL);
+        return TCL_ERROR;
+    }
     /*
      *  If this is a constructor or destructor, and if it is being
      *  invoked at the appropriate time, keep track of which methods

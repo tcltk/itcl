@@ -9,7 +9,7 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itclInt.h,v 1.17.2.28 2007/12/22 21:22:23 wiede Exp $
+ * RCS: @(#) $Id: itclInt.h,v 1.17.2.29 2008/01/06 19:24:31 wiede Exp $
  */
 
 #include <string.h>
@@ -17,6 +17,7 @@
 #include <tcl.h>
 #include <tclOO.h>
 #include "itclMigrate2TclCore.h"
+#include "itclTclIntStubsFcn.h"
 #include "itclNeededFromTclOO.h"
 #include "itcl.h"
 

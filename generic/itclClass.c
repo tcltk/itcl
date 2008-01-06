@@ -25,7 +25,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann Copyright (c) 2007
  *
- *     RCS:  $Id: itclClass.c,v 1.1.2.16 2007/12/22 21:22:21 wiede Exp $
+ *     RCS:  $Id: itclClass.c,v 1.1.2.17 2008/01/06 19:24:30 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -45,7 +45,9 @@ static void ItclFreeClass _ANSI_ARGS_((char* cdata));
 static void ItclDeleteFunction(ItclMemberFunc *imPtr);
 static void ItclDeleteComponent(ItclComponent *icPtr);
 static void ItclDeleteOption(ItclOption *ioptPtr);
+#ifdef NOTDEF
 static void ItclDeleteDelegatedOption(ItclDelegatedOption *idoPtr);
+#endif
 static void ItclDeleteDelegatedFunction(ItclDelegatedFunction *idmPtr);
 
 
@@ -349,7 +351,7 @@ _interp = interp;
     Tcl_ObjectSetMetadata((Tcl_Object) oPtr, infoPtr->class_meta_type, iclsPtr);
     iclsPtr->clsPtr = Tcl_GetObjectAsClass(oPtr);
     iclsPtr->oPtr = oPtr;
-    Tcl_ObjectSetMapMethodNameProc(iclsPtr->oPtr, ItclMapMethodNameProc);
+    Tcl_ObjectSetMethodNameMapper(iclsPtr->oPtr, ItclMapMethodNameProc);
     cmd = Tcl_GetObjectCommand(iclsPtr->oPtr);
     Tcl_GetCommandInfoFromToken(cmd, &cmdInfo);
     cmdInfo.deleteProc = ItclDestroyClass;
@@ -2013,6 +2015,7 @@ ItclDeleteOption(
     }
     ckfree((char*)ioptPtr);
 }
+#ifdef NOTDEF
 
 /*
  * ------------------------------------------------------------------------
@@ -2040,6 +2043,7 @@ ItclDeleteDelegatedOption(
     Tcl_DeleteHashTable(&idoPtr->exceptions);
     ckfree((char *)idoPtr);
 }
+#endif
 
 /*
  * ------------------------------------------------------------------------

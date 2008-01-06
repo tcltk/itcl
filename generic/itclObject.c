@@ -24,7 +24,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann Copyright (c) 2007
  *
- *     RCS:  $Id: itclObject.c,v 1.1.2.29 2007/12/30 23:08:43 wiede Exp $
+ *     RCS:  $Id: itclObject.c,v 1.1.2.30 2008/01/06 19:24:34 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -240,7 +240,7 @@ ItclCreateObject(
 	// NEED TO FREE STUFF HERE !! 
         return TCL_ERROR;
     }
-    Tcl_ObjectSetMapMethodNameProc(ioPtr->oPtr, ItclMapMethodNameProc);
+    Tcl_ObjectSetMethodNameMapper(ioPtr->oPtr, ItclMapMethodNameProc);
 
     ioPtr->accessCmd = Tcl_GetObjectCommand(ioPtr->oPtr);
     Tcl_GetCommandInfoFromToken(ioPtr->accessCmd, &cmdInfo);
@@ -1543,7 +1543,7 @@ ItclFreeObject(
  */
 
 int Itcl_InvokeProcedureMethod(ClientData clientData, Tcl_Interp *interp,
-        void * preCallProc, int objc, Tcl_Obj *const *objv);
+	int objc, Tcl_Obj *const *objv);
 
 int
 ItclObjectCmd(
@@ -1586,14 +1586,14 @@ ItclObjectCmd(
 	        && (imPtr->codePtr != NULL)
 	        && !(imPtr->codePtr->flags & ITCL_BUILTIN)) {
 	    result = Itcl_InvokeProcedureMethod(imPtr->tmPtr, interp,
-	            ItclCheckCallProc, objc, objv);
+	            objc, objv);
             return result;
 	}
 	if (clientData == NULL) {
 	    if (((imPtr->codePtr != NULL)
 	            && (imPtr->codePtr->flags & ITCL_BUILTIN))) {
 	        result = Itcl_InvokeProcedureMethod(imPtr->tmPtr, interp,
-	                ItclCheckCallProc, objc, objv);
+	                objc, objv);
                 return result;
 	    }
 	    Tcl_AppendResult(interp,

@@ -23,7 +23,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclCmd.c,v 1.1.2.19 2007/12/22 21:22:22 wiede Exp $
+ *     RCS:  $Id: itclCmd.c,v 1.1.2.20 2008/01/06 19:24:30 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -1084,13 +1084,23 @@ Itcl_ForwardAddCmd(
     ItclObjectInfo *infoPtr;
     ItclClass *iclsPtr;
 
-    ItclShowArgs(1, "Itcl_ForwardAddCmd", objc, objv);
+    ItclShowArgs(0, "Itcl_ForwardAddCmd", objc, objv);
     if (objc < 3) {
         Tcl_WrongNumArgs(interp, 1, objv, "<forwardName> <targetName> ?<arg> ...?");
         return TCL_ERROR;
     }
     infoPtr = Tcl_GetAssocData(interp, ITCL_INTERP_DATA, NULL);
     iclsPtr = (ItclClass*)Itcl_PeekStack(&infoPtr->clsStack);
+    if (iclsPtr == NULL) {
+	Tcl_HashEntry *hPtr;
+        hPtr = Tcl_FindHashEntry(&infoPtr->classes, (char *)objv[1]);
+	if (hPtr == NULL) {
+	    Tcl_AppendResult(interp, "class: \"", Tcl_GetString(objv[1]),
+	            "\" not found", NULL);
+	    return TCL_ERROR;
+	}
+        iclsPtr = Tcl_GetHashValue(hPtr);
+    }
     prefixObj = Tcl_NewListObj(objc-2, objv+2);
     mPtr = Itcl_NewForwardClassMethod(interp, iclsPtr->clsPtr, 1,
             objv[1], prefixObj);
