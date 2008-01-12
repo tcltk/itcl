@@ -1,0 +1,87 @@
+# $Id: configure.in,v 1.1.2.1 2008/01/12 18:45:31 wiede Exp $
+
+AC_REVISION($Revision: 1.1.2.1 $)
+AC_INIT([Itclng],[0.1])
+AC_CONFIG_AUX_DIR(tclconfig)
+
+TEA_INIT([3.6])
+TEA_PATH_TCLCONFIG
+TEA_LOAD_TCLCONFIG
+TEA_PATH_TKCONFIG
+TEA_LOAD_TKCONFIG
+TEA_PATH_TCLOOCONFIG
+TEA_LOAD_TCLOOCONFIG
+TEA_PREFIX
+TEA_SETUP_COMPILER
+TEA_ADD_SOURCES(
+	itclngBase.c itclngHelpers.c itclng2TclOO.c
+	itclngUtil.c
+	itclngParse.c itclngClass.c itclngObject.c itclngMethod.c
+	itclngStubs.c itclngStubInit.c
+	itclngResolve.c itclngMigrate2TclCore.c
+	itclngTclIntStubsFcn.c
+	itclngBuiltin.c itclngCmd.c
+	itclngInfo.c itclngNeededFromTclOO.c)
+AS_IF([test ${TEA_PLATFORM} = "windows"], [
+    PKG_OBJECTS="${PKG_OBJECTS} ${PACKAGE_NAME}.res.o"
+    RC=windres
+    AC_SUBST(RC)])
+TEA_ADD_STUB_SOURCES(itclngStubLib.c)
+TEA_ADD_HEADERS([generic/itclng.h generic/itclngInt.h])
+TEA_ADD_INCLUDES([-I. -I\"`${CYGPATH} ${srcdir}/generic`\"])
+TEA_ADD_LIBS([${TCLOO_STUB_LIB_SPEC}])
+TEA_PRIVATE_TCL_HEADERS
+TEA_PUBLIC_TCLOO_HEADERS
+TEA_PRIVATE_TCLOO_HEADERS
+TEA_ENABLE_THREADS
+TEA_ENABLE_SHARED
+TEA_ENABLE_SYMBOLS
+TEA_CONFIG_CFLAGS
+
+CLEANFILES="$CLEANFILES pkgIndex.tcl"
+AC_SUBST(CLEANFILES)
+AC_DEFINE(USE_TCL_STUBS,[1],[Should always be 1])
+AC_DEFINE(BUILD_itclng,[1],[Set to 1 when building package])
+
+TEA_MAKE_LIB
+
+TEA_PROG_TCLSH
+CONFIGURE_OUTPUTS="Makefile config.cache config.log config.status itclngConfig.sh"
+AC_SUBST(CONFIGURE_OUTPUTS)
+
+AC_PATH_PROG(SDX, sdx, none)
+AS_IF([test "${SDX}" = "none"],[
+    AC_PATH_PROG(SDX_KIT, sdx.kit, none)
+    AS_IF([test "${SDX_KIT}" != "none"],[
+	# We assume that sdx.kit is on the path, and that the default tclsh
+	# is activetcl
+	SDX="tclsh '${SDX_KIT}'"])])
+AS_IF([test "${SDX}" = "none"],[
+    AC_MSG_WARN([cannot find sdx; building starkits will fail; building as a normal library still supported])])
+
+# TODO: Adapt this for OSX Frameworks...
+# This next bit is a bit ugly, but it makes things for itclngConfig.sh...
+eval "srcdir2=\"`pwd`\""
+eval "ITCLNG_SRC_DIR=\"`${CYGPATH} ${srcdir2}`\""
+eval "ITCLNG_PRIVATE_INCLUDE_DIR=\"`${CYGPATH} ${srcdir2}/generic`\""
+case ${ITCLNG_PRIVATE_INCLUDE_DIR} in
+    /*) ITCLNG_PRIVATE_INCLUDE_SPEC="-I${ITCLNG_PRIVATE_INCLUDE_DIR}" ;;
+        *)  ITCLNG_PRIVATE_INCLUDE_SPEC="-I`pwd`/${ITCLNG_PRIVATE_INCLUDE_DIR}" ;;
+	esac
+eval "TCL_INCLUDE_SPEC=\"-I`${CYGPATH} ${includedir}`\""
+if test ${TCL_LIB_VERSIONS_OK} = nodots; then
+    eval "ITCLNG_LIB_SPEC=\"-L`${CYGPATH} ${libdir}/${PACKAGE_NAME}${PACKAGE_VERSION}` -l${PACKAGE_NAME}${TCL_TRIM_DOTS}\""
+    eval "ITCLNG_STUB_LIB_SPEC=\"-L`${CYGPATH} ${libdir}/${PACKAGE_NAME}${PACKAGE_VERSION}` -l${PACKAGE_NAME}stub${TCL_TRIM_DOTS}\""
+else
+    eval "ITCLNG_LIB_SPEC=\"-L`${CYGPATH} ${libdir}/${PACKAGE_NAME}${PACKAGE_VERSION}` -l${PACKAGE_NAME}${PACKAGE_VERSION}\""
+    eval "ITCLNG_STUB_LIB_SPEC=\"-L`${CYGPATH} ${libdir}/${PACKAGE_NAME}${PACKAGE_VERSION}` -l${PACKAGE_NAME}stub${PACKAGE_VERSION}\""
+fi
+AC_SUBST(ITCLNG_INCLUDE_SPEC)
+AC_SUBST(ITCLNG_PRIVATE_INCLUDE_SPEC)
+AC_SUBST(ITCLNG_LIB_SPEC)
+AC_SUBST(ITCLNG_STUB_LIB_SPEC)
+AC_SUBST(ITCLNG_SRC_DIR)
+
+
+AC_CONFIG_FILES([Makefile itclngConfig.sh])
+AC_OUTPUT
