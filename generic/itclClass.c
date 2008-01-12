@@ -25,7 +25,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann Copyright (c) 2007
  *
- *     RCS:  $Id: itclClass.c,v 1.1.2.17 2008/01/06 19:24:30 wiede Exp $
+ *     RCS:  $Id: itclClass.c,v 1.1.2.18 2008/01/12 18:29:04 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -1303,7 +1303,10 @@ Itcl_HandleClass(
 
     Tcl_DStringFree(&buffer);
     if (result == TCL_ERROR) {
-        return Itcl_ProcessReturn(interp, result, 2, NULL);
+	Tcl_Obj *objPtr;
+	
+	objPtr = Tcl_NewStringObj("-level 2", -1);
+	result = Tcl_SetReturnOptions(interp, objPtr);
     }
     return result;
 }

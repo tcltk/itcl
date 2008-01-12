@@ -20,7 +20,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itclResolve.c,v 1.1.2.8 2007/12/21 20:02:28 wiede Exp $
+ *     RCS:  $Id: itclResolve.c,v 1.1.2.9 2008/01/12 18:29:04 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -123,7 +123,6 @@ Itcl_ClassCmdResolver(
         return TCL_CONTINUE;
     }
     iclsPtr = Tcl_GetHashValue(hPtr);
-
     /*
      *  If the command is a member function, and if it is
      *  accessible, return its Tcl command handle.
@@ -162,7 +161,7 @@ Itcl_ClassCmdResolver(
                 Tcl_AppendResult(interp,
                     "can't access \"", name, "\": ",
                     Itcl_ProtectionStr(imPtr->protection),
-                    " variable",
+                    " function",
                     (char*)NULL);
             }
             return TCL_ERROR;
@@ -201,7 +200,6 @@ isCmdDeleted = 0;
 	}
 	return TCL_ERROR;   /* disallow access! */
     }
-
     *rPtr = imPtr->accessCmd;
     return TCL_OK;
 }

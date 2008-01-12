@@ -3,7 +3,6 @@
  * infoPtr->useOldResolvers == 0 which is not the default
  */
 #define FRAME_HAS_RESOLVER 0x100
-//struct Tcl_Resolve;
 struct Tcl_Var;
 typedef Tcl_Command (Tcl_CmdAliasProc)(Tcl_Interp *interp,
         Tcl_Namespace *nsPtr, CONST char *cmdName,
@@ -95,6 +94,3 @@ EXTERN int _Tcl_InvokeNamespaceProc(Tcl_Interp *interp, Tcl_Proc proc,
 EXTERN Tcl_Var Tcl_NewNamespaceVar(Tcl_Interp *interp, Tcl_Namespace *nsPtr,
 	const char *varName);
 EXTERN int Itcl_IsCallFrameArgument(Tcl_Interp *interp, const char *name);
-EXTERN int Itcl_ProcessReturn(Tcl_Interp *interp, int code, int level,
-        Tcl_Obj *returnOpts);
-EXTERN int ItclGetInterpErrorLine(Tcl_Interp *interp);

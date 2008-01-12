@@ -9,7 +9,7 @@
  * ========================================================================
  *  AUTHOR:  Arnulf Wiedemann
  *
- *     RCS:  $Id: itclMigrate2TclCore.c,v 1.1.2.8 2008/01/06 19:24:32 wiede Exp $
+ *     RCS:  $Id: itclMigrate2TclCore.c,v 1.1.2.9 2008/01/12 18:29:04 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -223,28 +223,3 @@ Itcl_IsCallFrameArgument(
     }
     return 0;
 }
-
-int
-Itcl_ProcessReturn(
-    Tcl_Interp *interp,
-    int code,
-    int level,
-    Tcl_Obj *returnOpts)
-{
-    Interp *iPtr = (Interp *) interp;
-    if (level != 0) {
-        iPtr->returnLevel = level;
-        iPtr->returnCode = code;
-        return TCL_RETURN;
-    }
-    return TCL_ERROR;
-}
-
-int
-ItclGetInterpErrorLine(
-    Tcl_Interp *interp)
-{
-    Interp *iPtr = (Interp *) interp;
-    return iPtr->errorLine;
-}
-

@@ -9,7 +9,7 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itclInt.h,v 1.17.2.29 2008/01/06 19:24:31 wiede Exp $
+ * RCS: @(#) $Id: itclInt.h,v 1.17.2.30 2008/01/12 18:29:04 wiede Exp $
  */
 
 #include <string.h>
@@ -355,8 +355,9 @@ typedef struct ItclMemberCode {
 #define ITCL_BUILTIN           0x800  /* non-zero => built-in method */
 #define ITCL_OPTION_READONLY   0x1000 /* non-zero => readonly */
 #define ITCL_COMPONENT         0x2000 /* non-zero => component */
-#define ITCL_OPTIONS_VAR       0x400  /* non-zero => built-in "itcl_options"
+#define ITCL_OPTIONS_VAR       0x4000 /* non-zero => built-in "itcl_options"
                                        * variable */
+#define ITCL_CALLED_FROM_EXEC  0x8000 /* non-zero => component */
 
 /*
  *  Instance components.

@@ -25,7 +25,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclMethod.c,v 1.1.2.15 2008/01/06 19:24:32 wiede Exp $
+ *     RCS:  $Id: itclMethod.c,v 1.1.2.16 2008/01/12 18:29:04 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -1288,7 +1288,7 @@ Itcl_ExecMethod(
     ItclClass *iclsPtr;
     ItclObject *ioPtr;
 
-    ItclShowArgs(2, "Itcl_ExecMethod", objc, objv);
+    ItclShowArgs(1, "Itcl_ExecMethod", objc, objv);
 
     /*
      *  Make sure that the current namespace context includes an
@@ -1373,6 +1373,8 @@ return TCL_ERROR;
      *  the method in case it gets deleted during execution.
      */
     Itcl_PreserveData((ClientData)imPtr);
+    /* next line is VERY UGLY HACK !! to make test xxx run */
+    imPtr->flags |= ITCL_CALLED_FROM_EXEC; 
     result = Itcl_EvalMemberCode(interp, imPtr, ioPtr, objc, objv);
     Itcl_ReleaseData((ClientData)imPtr);
     return result;
@@ -1936,22 +1938,25 @@ ItclCheckCallMethod(
     if (cNsPtr == NULL) {
         cNsPtr = Tcl_GetCurrentNamespace(interp);
     }
-    if (!Itcl_CanAccessFunc(imPtr, cNsPtr)) {
-	char *token = Tcl_GetString(imPtr->namePtr);
-	if ((*token != 'i') || (strcmp(token, "info") != 0)) {
-            Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
-                   "bad option \"", token, "\": should be one of...",
-                    (char*)NULL);
-	    ItclReportObjectUsage(interp, ioPtr,
-	            Tcl_GetCurrentNamespace(interp),
-		    Itcl_GetUplevelNamespace(interp, 1));
-            if (isFinished != NULL) {
-                *isFinished = 1;
-            }
-            return TCL_ERROR;
+    if ((imPtr->flags & ITCL_CALLED_FROM_EXEC)) {
+        imPtr->flags &= ~ITCL_CALLED_FROM_EXEC;
+    } else {
+        if (!Itcl_CanAccessFunc(imPtr, cNsPtr)) {
+	    char *token = Tcl_GetString(imPtr->namePtr);
+	    if ((*token != 'i') || (strcmp(token, "info") != 0)) {
+                Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+                       "bad option \"", token, "\": should be one of...",
+                        (char*)NULL);
+	        ItclReportObjectUsage(interp, ioPtr,
+	                Tcl_GetCurrentNamespace(interp),
+	         Itcl_GetUplevelNamespace(interp, 1));
+                if (isFinished != NULL) {
+                    *isFinished = 1;
+                }
+                return TCL_ERROR;
+	    }
         }
     }
-
     isNew = 0;
     callContextPtr = NULL;
     Tcl_Namespace *currNsPtr;
@@ -2214,8 +2219,33 @@ ItclProcErrorProc(
         }
 
         if ((imPtr->codePtr->flags & ITCL_IMPLEMENT_TCL) != 0) {
+            Tcl_Obj *dictPtr;
+	    Tcl_Obj *keyPtr;
+	    Tcl_Obj *valuePtr;
+	    int lineNo;
+
+	    keyPtr = Tcl_NewStringObj("-errorline", -1);
+            dictPtr = Tcl_GetReturnOptions(interp, TCL_ERROR);
+	    if (Tcl_DictObjGet(interp, dictPtr, keyPtr, &valuePtr) != TCL_OK) {
+	        /* how should we handle an error ? */
+		Tcl_DecrRefCount(keyPtr);
+		return;
+	    }
+            if (valuePtr == NULL) {
+	        /* how should we handle an error ? */
+		Tcl_DecrRefCount(keyPtr);
+		return;
+	    }
+            if (Tcl_GetIntFromObj(interp, valuePtr, &lineNo) != TCL_OK) {
+	        /* how should we handle an error ? */
+		Tcl_DecrRefCount(keyPtr);
+	        Tcl_DecrRefCount(valuePtr);
+		return;
+	    }
+	    Tcl_DecrRefCount(keyPtr);
+	    Tcl_DecrRefCount(valuePtr);
             Tcl_AppendToObj(objPtr, "body line ", -1);
-            sprintf(num, "%d", ItclGetInterpErrorLine(interp));
+            sprintf(num, "%d", lineNo);
             Tcl_AppendToObj(objPtr, num, -1);
             Tcl_AppendToObj(objPtr, ")", -1);
         } else {
