@@ -10,7 +10,7 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itclng.h,v 1.1.2.1 2008/01/12 18:45:32 wiede Exp $
+ * RCS: @(#) $Id: itclng.h,v 1.1.2.2 2008/01/12 23:43:46 wiede Exp $
  */
 
 /*
@@ -88,6 +88,30 @@ typedef struct Itclng_Stack {
 
 #define Itclng_GetStackSize(stackPtr) ((stackPtr)->len)
 
+/*
+ *  Generic linked list.
+ */
+struct Itclng_List;
+typedef struct Itclng_ListElem {
+    struct Itclng_List* owner;     /* list containing this element */
+    ClientData value;            /* value associated with this element */
+    struct Itclng_ListElem *prev;  /* previous element in linked list */
+    struct Itclng_ListElem *next;  /* next element in linked list */
+} Itclng_ListElem;
+
+typedef struct Itclng_List {
+    int validate;                /* validation stamp */
+    int num;                     /* number of elements */
+    struct Itclng_ListElem *head;  /* previous element in linked list */
+    struct Itclng_ListElem *tail;  /* next element in linked list */
+} Itclng_List;
+
+#define Itclng_FirstListElem(listPtr) ((listPtr)->head)
+#define Itclng_LastListElem(listPtr)  ((listPtr)->tail)
+#define Itclng_NextListElem(elemPtr)  ((elemPtr)->next)
+#define Itclng_PrevListElem(elemPtr)  ((elemPtr)->prev)
+#define Itclng_GetListLength(listPtr) ((listPtr)->num)
+#define Itclng_GetListValue(elemPtr)  ((elemPtr)->value)
 
 /*
  * Include all the public API, generated from itcl.decls.

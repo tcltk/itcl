@@ -1,5 +1,5 @@
 /*
- * itclBase.c --
+ * itclngBase.c --
  *
  * This file contains the C-implemented startup part of a
  * Itcl implemenatation
@@ -9,91 +9,24 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itclngBase.c,v 1.1.2.1 2008/01/12 18:45:32 wiede Exp $
+ * RCS: @(#) $Id: itclngBase.c,v 1.1.2.2 2008/01/12 23:43:46 wiede Exp $
  */
 
 #include <stdlib.h>
 #include "itclngInt.h"
 
-extern struct ItclStubAPI itclStubAPI;
+/* BEGIN OF DUMMY FUNCTIONS !! */
+void ItclngDeleteObjectMetadata(ClientData clientData) { fprintf(stderr, "ItclngDeleteObjectMetadata not yet implemented!!\n"); }
+/* END OF DUMMY FUNCTIONS !! */
+
+extern struct ItclngStubAPI itclngStubAPI;
 
 static int Initialize _ANSI_ARGS_((Tcl_Interp *interp));
 
-static char initScript[] = "\n\
-namespace eval ::itcl {\n\
-    proc _find_init {} {\n\
-        global env tcl_library\n\
-        variable arnulf\n\
-        variable library\n\
-        variable version\n\
-        rename _find_init {}\n\
-        if {[info exists library]} {\n\
-            lappend dirs $library\n\
-        } else {\n\
-            if {[catch {uplevel #0 source -rsrc Itcl}] == 0} {\n\
-                return\n\
-            }\n\
-            set dirs {}\n\
-            if {[info exists env(ITCL_LIBRARY)]} {\n\
-                lappend dirs $env(ITCL_LIBRARY)\n\
-            }\n\
-            lappend dirs [file join [file dirname $tcl_library] Itcl$version]\n\
-            set bindir [file dirname [info nameofexecutable]]\n\
-            lappend dirs [file join $bindir .. lib Itcl$version]\n\
-            lappend dirs [file join $bindir .. library]\n\
-            lappend dirs [file join $bindir .. .. library]\n\
-            lappend dirs [file join $bindir .. .. Itcl library]\n\
-            lappend dirs [file join $bindir .. .. .. Itcl library]\n\
-            lappend dirs [file join $bindir .. .. itcl-ng itcl library]\n\
-            # On MacOSX, check the directories in the tcl_pkgPath\n\
-            if {[string equal $::tcl_platform(platform) \"unix\"] && \
-                    [string equal $::tcl_platform(os) \"Darwin\"]} {\n\
-                foreach d $::tcl_pkgPath {\n\
-                    lappend dirs [file join $d Itcl$version]\n\
-                }\n\
-            }\n\
-            # On *nix, check the directories in the tcl_pkgPath\n\
-            if {[string equal $::tcl_platform(platform) \"unix\"]} {\n\
-                foreach d $::tcl_pkgPath {\n\
-                    lappend dirs $d\n\
-                    lappend dirs [file join $d Itcl$version]\n\
-                }\n\
-            }\n\
-        }\n\
-        foreach i $dirs {\n\
-            set library $i\n\
-            set itclfile [file join $i itcl.tcl]\n\
-            if {![catch {uplevel #0 [list source $itclfile]} msg]} {\n\
-                return\n\
-            }\n\
-        }\n\
-        set msg \"Can't find a usable itcl.tcl in the following directories:\n\"\n\
-        append msg \"    $dirs\n\"\n\
-        append msg \"This probably means that Itcl/Tcl weren't installed properly.\n\"\n\
-        append msg \"If you know where the Itcl library directory was installed,\n\"\n\
-        append msg \"you can set the environment variable ITCL_LIBRARY to point\n\"\n\
-        append msg \"to the library directory.\n\"\n\
-        error $msg\n\
-    }\n\
-    _find_init\n\
-}";
-
-/*
- * The following script is used to initialize Itcl in a safe interpreter.
- */
+static char *clazzClassScript = "set itclngClass [::oo::class create ::itclng::clazz]; \
+    ::oo::define $itclngClass superclass ::oo::class";
 
-static char safeInitScript[] =
-"proc ::itcl::local {class name args} {\n\
-    set ptr [uplevel [list $class $name] $args]\n\
-    uplevel [list set itcl-local-$ptr $ptr]\n\
-    set cmd [uplevel namespace which -command $ptr]\n\
-    uplevel [list trace variable itcl-local-$ptr u \"::itcl::delete object $cmd; list\"]\n\
-    return $ptr\n\
-}";
-
-static char *clazzClassScript = "set itclClass [::oo::class create ::itcl::clazz]; \
-    ::oo::define $itclClass superclass ::oo::class";
-
+#ifdef NOTDEF
 
 static char *clazzUnknownBody = "\n\
     set mySelf [::oo::Helpers::self]\n\
@@ -136,15 +69,15 @@ static char *clazzUnknownBody = "\n\
 static int
 AddClassUnknowMethod(
     Tcl_Interp *interp,
-    ItclObjectInfo *infoPtr,
+    ItclngObjectInfo *infoPtr,
     Tcl_Class clsPtr)
 {
     ClientData pmPtr;
+    Tcl_Obj *bodyPtr = Tcl_NewStringObj(clazzUnknownBody, -1);
     Tcl_Obj *namePtr = Tcl_NewStringObj("unknown", -1);
     Tcl_IncrRefCount(namePtr);
     Tcl_Obj *argumentPtr = Tcl_NewStringObj("m args", -1);
     Tcl_IncrRefCount(argumentPtr);
-    Tcl_Obj *bodyPtr = Tcl_NewStringObj(clazzUnknownBody, -1);
     ClientData tmPtr = (ClientData)Itcl_NewProcClassMethod(interp,
         clsPtr, NULL, NULL, NULL, NULL, namePtr, argumentPtr, bodyPtr, &pmPtr);
     if (tmPtr == NULL) {
@@ -152,6 +85,7 @@ AddClassUnknowMethod(
     }
     return TCL_OK;
 }
+#endif
 /*
  * ------------------------------------------------------------------------
  *  Initialize()
@@ -170,8 +104,7 @@ Initialize (
     Tcl_Interp *interp)
 {
     Tcl_Namespace *nsPtr;
-    Tcl_Namespace *itclNs;
-    ItclObjectInfo *infoPtr;
+    ItclngObjectInfo *infoPtr;
 
     if (Tcl_InitStubs(interp, TCL_VERSION, 0) == NULL) {
         return TCL_ERROR;
@@ -180,149 +113,73 @@ Initialize (
     if (ret == NULL) {
         return TCL_ERROR;
     }
-    if (InitTclOOFunctionPointers(interp) != TCL_OK) {
-        return TCL_ERROR;
-    }
-
-    nsPtr = Tcl_CreateNamespace(interp, ITCL_NAMESPACE, NULL, NULL);
+    nsPtr = Tcl_CreateNamespace(interp, ITCLNG_NAMESPACE, NULL, NULL);
     if (nsPtr == NULL) {
-        Tcl_Panic("Itcl: cannot create namespace: \"%s\" \n", ITCL_NAMESPACE);
+        Tcl_Panic("Itclng: cannot create namespace: \"%s\" \n", ITCLNG_NAMESPACE);
     }
-    nsPtr = Tcl_CreateNamespace(interp, ITCL_NAMESPACE"::methodset",
-            NULL, NULL);
-    if (nsPtr == NULL) {
-        Tcl_Panic("Itcl: cannot create namespace: \"%s::methodset\" \n",
-	        ITCL_NAMESPACE);
-    }
-    Tcl_CreateObjCommand(interp,
-            ITCL_NAMESPACE"::methodset::callCCommand",
-            ItclCallCCommand, NULL, NULL);
-    Tcl_CreateObjCommand(interp,
-            ITCL_NAMESPACE"::methodset::objectUnknownCommand",
-            ItclObjectUnknownCommand, NULL, NULL);
-
     /*
      *  Create the top-level data structure for tracking objects.
      *  Store this as "associated data" for easy access, but link
      *  it to the itcl namespace for ownership.
      */
-    infoPtr = (ItclObjectInfo*)ckalloc(sizeof(ItclObjectInfo));
-    memset(infoPtr, 0, sizeof(ItclObjectInfo));
+    infoPtr = (ItclngObjectInfo*)ckalloc(sizeof(ItclngObjectInfo));
+    memset(infoPtr, 0, sizeof(ItclngObjectInfo));
     infoPtr->interp = interp;
     infoPtr->class_meta_type = (Tcl_ObjectMetadataType *)ckalloc(
             sizeof(Tcl_ObjectMetadataType));
     infoPtr->class_meta_type->version = TCL_OO_METADATA_VERSION_CURRENT;
-    infoPtr->class_meta_type->name = "ItclClass";
-    infoPtr->class_meta_type->deleteProc = ItclDeleteClassMetadata;
+    infoPtr->class_meta_type->name = "ItclngClass";
+    infoPtr->class_meta_type->deleteProc = ItclngDeleteClassMetadata;
     infoPtr->class_meta_type->cloneProc = NULL;
     infoPtr->object_meta_type = (Tcl_ObjectMetadataType *)ckalloc(
             sizeof(Tcl_ObjectMetadataType));
     infoPtr->object_meta_type->version = TCL_OO_METADATA_VERSION_CURRENT;
-    infoPtr->object_meta_type->name = "ItclObject";
-    infoPtr->object_meta_type->deleteProc = ItclDeleteObjectMetadata;
+    infoPtr->object_meta_type->name = "ItclngObject";
+    infoPtr->object_meta_type->deleteProc = ItclngDeleteObjectMetadata;
     infoPtr->object_meta_type->cloneProc = NULL;
     Tcl_InitHashTable(&infoPtr->objects, TCL_ONE_WORD_KEYS);
     Tcl_InitObjHashTable(&infoPtr->classes);
     Tcl_InitHashTable(&infoPtr->namespaceClasses, TCL_ONE_WORD_KEYS);
     Tcl_InitHashTable(&infoPtr->procMethods, TCL_ONE_WORD_KEYS);
-    infoPtr->ensembleInfo = (EnsembleInfo *)ckalloc(sizeof(EnsembleInfo));
-    memset(infoPtr->ensembleInfo, 0, sizeof(EnsembleInfo));
-    Tcl_InitHashTable(&infoPtr->ensembleInfo->ensembles, TCL_ONE_WORD_KEYS);
-    Tcl_InitHashTable(&infoPtr->ensembleInfo->subEnsembles, TCL_ONE_WORD_KEYS);
-    infoPtr->ensembleInfo->numEnsembles = 0;
-    infoPtr->protection = ITCL_DEFAULT_PROTECT;
+    infoPtr->protection = ITCLNG_PUBLIC;
     infoPtr->currIoPtr = NULL;
-    infoPtr->windgetInfoPtr = NULL;
     infoPtr->currContextIclsPtr = NULL;
     infoPtr->currClassFlags = 0;
-    infoPtr->buildingWidget = 0;
-char *res_option = getenv("ITCL_USE_OLD_RESOLVERS");
-int opt;
-if (res_option == NULL) {
-opt = 1;
-} else {
-opt = atoi(res_option);
-}
-    infoPtr->useOldResolvers = opt;
-    Itcl_InitStack(&infoPtr->clsStack);
-    Itcl_InitStack(&infoPtr->contextStack);
-    Itcl_InitStack(&infoPtr->constructorStack);
+    Itclng_InitStack(&infoPtr->clsStack);
+    Itclng_InitStack(&infoPtr->contextStack);
+    Itclng_InitStack(&infoPtr->constructorStack);
 
-    Tcl_SetAssocData(interp, ITCL_INTERP_DATA,
+    Tcl_SetAssocData(interp, ITCLNG_INTERP_DATA,
         (Tcl_InterpDeleteProc*)NULL, (ClientData)infoPtr);
 
-    Itcl_PreserveData((ClientData)infoPtr);
+    Tcl_Preserve((ClientData)infoPtr);
 
-    /* first create the Itcl base class as root of itcl classes */
+    /* first create the Itclng base class as root of itclng classes */
     if (Tcl_Eval(interp, clazzClassScript) != TCL_OK) {
-        Tcl_Panic("cannot create Itcl root class ::itcl::clazz");
+        Tcl_Panic("cannot create Itclng root class ::itclng::clazz");
     }
-    Tcl_Obj *objPtr = Tcl_NewStringObj("::itcl::clazz", -1);
+    Tcl_Obj *objPtr = Tcl_NewStringObj("::itclng::clazz", -1);
     infoPtr->clazzObjectPtr = Tcl_GetObjectFromObj(interp, objPtr);
     if (infoPtr->clazzObjectPtr == NULL) {
         Tcl_AppendResult(interp,
-                "ITCL: cannot get Object for ::itcl::clazz for class \"",
-                "::itcl::clazz", "\"", NULL);
+                "ITCLNG: cannot get Object for ::itclng::clazz for class \"",
+                "::itclng::clazz", "\"", NULL);
         return TCL_ERROR;
     }
     infoPtr->clazzClassPtr = Tcl_GetObjectAsClass(infoPtr->clazzObjectPtr);
+#ifdef NOTDEF
     AddClassUnknowMethod(interp, infoPtr, infoPtr->clazzClassPtr);
+#endif
 
-    /*
-     *  Initialize the ensemble package first, since we need this
-     *  for other parts of [incr Tcl].
-     */
-
-    if (Itcl_EnsembleInit(interp) != TCL_OK) {
+    if (Itclng_InitCommands(interp, infoPtr) != TCL_OK) {
         return TCL_ERROR;
     }
-
-    Itcl_ParseInit(interp, infoPtr);
-
-    /*
-     *  Create "itcl::builtin" namespace for commands that
-     *  are automatically built into class definitions.
-     */
-    if (Itcl_BiInit(interp) != TCL_OK) {
-        return TCL_ERROR;
-    }
-
-    /*
-     *  Export all commands in the "itcl" namespace so that they
-     *  can be imported with something like "namespace import itcl::*"
-     */
-    itclNs = Tcl_FindNamespace(interp, "::itcl", (Tcl_Namespace*)NULL,
-        TCL_LEAVE_ERR_MSG);
-
-    /*
-     *  This was changed from a glob export (itcl::*) to explicit
-     *  command exports, so that the itcl::is command can *not* be
-     *  exported. This is done for concern that the itcl::is command
-     *  imported might be confusing ("is").
-     */
-    if (!itclNs ||
-            (Tcl_Export(interp, itclNs, "body", /* reset */ 1) != TCL_OK) ||
-            (Tcl_Export(interp, itclNs, "class", 0) != TCL_OK) ||
-            (Tcl_Export(interp, itclNs, "code", 0) != TCL_OK) ||
-            (Tcl_Export(interp, itclNs, "configbody", 0) != TCL_OK) ||
-            (Tcl_Export(interp, itclNs, "delete", 0) != TCL_OK) ||
-            (Tcl_Export(interp, itclNs, "delete_helper", 0) != TCL_OK) ||
-            (Tcl_Export(interp, itclNs, "ensemble", 0) != TCL_OK) ||
-            (Tcl_Export(interp, itclNs, "filter", 0) != TCL_OK) ||
-            (Tcl_Export(interp, itclNs, "find", 0) != TCL_OK) ||
-            (Tcl_Export(interp, itclNs, "forward", 0) != TCL_OK) ||
-            (Tcl_Export(interp, itclNs, "local", 0) != TCL_OK) ||
-            (Tcl_Export(interp, itclNs, "mixin", 0) != TCL_OK) ||
-            (Tcl_Export(interp, itclNs, "scope", 0) != TCL_OK)) {
-        return TCL_ERROR;
-    }
-
     /*
      *  Set up the variables containing version info.
      */
 
-    Tcl_SetVar(interp, "::itcl::version", ITCL_VERSION, TCL_NAMESPACE_ONLY);
-    Tcl_SetVar(interp, "::itcl::patchLevel", ITCL_PATCH_LEVEL,
+    Tcl_SetVar(interp, "::itclng::version", ITCLNG_VERSION, TCL_NAMESPACE_ONLY);
+    Tcl_SetVar(interp, "::itclng::patchLevel", ITCLNG_PATCH_LEVEL,
             TCL_NAMESPACE_ONLY);
 
 
@@ -330,18 +187,18 @@ opt = atoi(res_option);
      *  Package is now loaded.
      */
 
-    return Tcl_PkgProvideEx(interp, "Itcl", ITCL_VERSION, &itclStubAPI);
+    return Tcl_PkgProvideEx(interp, "Itclng", ITCLNG_VERSION, &itclngStubAPI);
 }
 
 /*
  * ------------------------------------------------------------------------
- *  Itcl_Init()
+ *  Itclng_Init()
  *
  *  Invoked whenever a new INTERPRETER is created to install the
  *  [incr Tcl] package.  Usually invoked within Tcl_AppInit() at
  *  the start of execution.
  *
- *  Creates the "::itcl" namespace and installs access commands for
+ *  Creates the "::itclng" namespace and installs access commands for
  *  creating classes and querying info.
  *
  *  Returns TCL_OK on success, or TCL_ERROR (along with an error
@@ -350,24 +207,25 @@ opt = atoi(res_option);
  */
 
 int
-Itcl_Init (
+Itclng_Init (
     Tcl_Interp *interp)
 {
     if (Initialize(interp) != TCL_OK) {
         return TCL_ERROR;
     }
 
-    return  Tcl_Eval(interp, initScript);
+//    return  Tcl_Eval(interp, initScript);
+return TCL_OK; 
 }
 
 /*
  * ------------------------------------------------------------------------
- *  Itcl_SafeInit()
+ *  Itclng_SafeInit()
  *
  *  Invoked whenever a new SAFE INTERPRETER is created to install
  *  the [incr Tcl] package.
  *
- *  Creates the "::itcl" namespace and installs access commands for
+ *  Creates the "::itclng" namespace and installs access commands for
  *  creating classes and querying info.
  *
  *  Returns TCL_OK on success, or TCL_ERROR (along with an error
@@ -376,73 +234,12 @@ Itcl_Init (
  */
 
 int
-Itcl_SafeInit (
+Itclng_SafeInit (
     Tcl_Interp *interp)
 {
     if (Initialize(interp) != TCL_OK) {
         return TCL_ERROR;
     }
-    return Tcl_Eval(interp, safeInitScript);
-}
-
-/*
- * ------------------------------------------------------------------------
- *  ItclCallCCommand()
- *  syntax: is
- *  objv[0]    command name of myself (::itcl::methodset::callCCommand)
- * ------------------------------------------------------------------------
- */
-
-int
-ItclCallCCommand(
-    ClientData clientData,
-    Tcl_Interp *interp,
-    int objc,
-    Tcl_Obj *const *objv)
-{
-    Tcl_CmdProc *argProc;
-    Tcl_ObjCmdProc *objProc;
-    ClientData cData;
-    int result;
-
-    ItclShowArgs(2, "ItclCallCCommand", objc, objv);
-    if (!Itcl_FindC(interp, Tcl_GetString(objv[0])+1, &argProc,
-            &objProc, &cData)) {
-	Tcl_AppendResult(interp, "no such registered C command 1: \"",
-	        Tcl_GetString(objv[1]), "\"", NULL);
-        return TCL_ERROR;
-    }
-    if ((argProc == NULL) && (objProc == NULL)) {
-	Tcl_AppendResult(interp, "no such registered C command 2: \"",
-	        Tcl_GetString(objv[1]), "\"", NULL);
-        return TCL_ERROR;
-    }
-    result = TCL_ERROR;
-    if (argProc != NULL) {
-	CONST84 char **argv;
-	int i;
-
-	argv = (CONST84 char**)ckalloc((unsigned)(objc*sizeof(char*)));
-	for (i=1;i<objc;i++) {
-	    argv[i-1] = Tcl_GetString(objv[i]);
-	}
-        result = (*argProc)(cData, interp, objc-1, argv);
-        ckfree((char*)argv);
-    }
-    if (objProc != NULL) {
-	Tcl_Namespace *callerNsPtr;
-        callerNsPtr = Itcl_GetUplevelNamespace(interp, 1);
-        ItclShowArgs(2, "CARGS", Itcl_GetCallFrameObjc(interp),
-	        Itcl_GetCallFrameObjv(interp));
-        ItclObjectInfo *infoPtr;
-        infoPtr = (ItclObjectInfo *)Tcl_GetAssocData(interp,
-                ITCL_INTERP_DATA, NULL);
-
-/* FIX ME have to use ItclCallContext here !!! */
-//	Itcl_PushStack(callerNsPtr, &infoPtr->namespaceStack);
-        result = (*objProc)(cData, interp, Itcl_GetCallFrameObjc(interp)-1,
-	        Itcl_GetCallFrameObjv(interp)+1);
-//	Itcl_PopStack(&infoPtr->namespaceStack);
-    }
-    return result;
+//    return Tcl_Eval(interp, safeInitScript);
+return TCL_OK;
 }
