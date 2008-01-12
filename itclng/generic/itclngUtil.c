@@ -3,30 +3,9 @@
  *      PACKAGE:  [incr Tcl]
  *  DESCRIPTION:  Object-Oriented Extensions to Tcl
  *
- *  [incr Tcl] provides object-oriented extensions to Tcl, much as
- *  C++ provides object-oriented extensions to C.  It provides a means
- *  of encapsulating related procedures together with their shared data
- *  in a local namespace that is hidden from the outside world.  It
- *  promotes code re-use through inheritance.  More than anything else,
- *  it encourages better organization of Tcl applications through the
- *  object-oriented paradigm, leading to code that is easier to
- *  understand and maintain.
- *
  *  This segment provides common utility functions used throughout
  *  the other [incr Tcl] source files.
  *
- * ========================================================================
- *  AUTHOR:  Michael J. McLennan
- *           Bell Labs Innovations for Lucent Technologies
- *           mmclennan@lucent.com
- *           http://www.tcltk.com/itcl
- *
- *  overhauled version author: Arnulf Wiedemann
- *
- *     RCS:  $Id: itclngUtil.c,v 1.1.2.1 2008/01/12 18:45:32 wiede Exp $
- * ========================================================================
- *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
- * ------------------------------------------------------------------------
  * See the file "license.terms" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  */
@@ -35,11 +14,11 @@
 /*
  *  POOL OF LIST ELEMENTS FOR LINKED LIST
  */
-static Itcl_ListElem *listPool = NULL;
+static Itclng_ListElem *listPool = NULL;
 static int listPoolLen = 0;
 
-#define ITCL_VALID_LIST 0x01face10  /* magic bit pattern for validation */
-#define ITCL_LIST_POOL_SIZE 200     /* max number of elements in listPool */
+#define ITCLNG_VALID_LIST 0x01face10  /* magic bit pattern for validation */
+#define ITCLNG_LIST_POOL_SIZE 200     /* max number of elements in listPool */
 
 /*
  *  This structure is used to take a snapshot of the interpreter
@@ -61,7 +40,7 @@ typedef struct InterpState {
 
 /*
  * ------------------------------------------------------------------------
- *  Itcl_Assert()
+ *  Itclng_Assert()
  *
  *  Called whenever an assert() test fails.  Prints a diagnostic
  *  message and abruptly exits.
@@ -69,12 +48,12 @@ typedef struct InterpState {
  */
 
 void
-Itcl_Assert(testExpr, fileName, lineNumber)
-    CONST char *testExpr;   /* string representing test expression */
-    CONST char *fileName;   /* file name containing this call */
-    int lineNumber;	    /* line number containing this call */
+Itclng_Assert(
+    CONST char *testExpr,   /* string representing test expression */
+    CONST char *fileName,   /* file name containing this call */
+    int lineNumber)	    /* line number containing this call */
 {
-    Tcl_Panic("Itcl Assertion failed: \"%s\" (line %d of %s)",
+    Tcl_Panic("Itclng Assertion failed: \"%s\" (line %d of %s)",
 	testExpr, lineNumber, fileName);
 }
 
@@ -82,15 +61,15 @@ Itcl_Assert(testExpr, fileName, lineNumber)
 
 /*
  * ------------------------------------------------------------------------
- *  Itcl_InitStack()
+ *  Itclng_InitStack()
  *
  *  Initializes a stack structure, allocating a certain amount of memory
  *  for the stack and setting the stack length to zero.
  * ------------------------------------------------------------------------
  */
 void
-Itcl_InitStack(stack)
-    Itcl_Stack *stack;     /* stack to be initialized */
+Itclng_InitStack(stack)
+    Itclng_Stack *stack;     /* stack to be initialized */
 {
     stack->values = stack->space;
     stack->max = sizeof(stack->space)/sizeof(ClientData);
@@ -99,15 +78,15 @@ Itcl_InitStack(stack)
 
 /*
  * ------------------------------------------------------------------------
- *  Itcl_DeleteStack()
+ *  Itclng_DeleteStack()
  *
  *  Destroys a stack structure, freeing any memory that may have been
  *  allocated to represent it.
  * ------------------------------------------------------------------------
  */
 void
-Itcl_DeleteStack(stack)
-    Itcl_Stack *stack;     /* stack to be deleted */
+Itclng_DeleteStack(stack)
+    Itclng_Stack *stack;     /* stack to be deleted */
 {
     /*
      *  If memory was explicitly allocated (instead of using the
@@ -122,16 +101,16 @@ Itcl_DeleteStack(stack)
 
 /*
  * ------------------------------------------------------------------------
- *  Itcl_PushStack()
+ *  Itclng_PushStack()
  *
  *  Pushes a piece of client data onto the top of the given stack.
  *  If the stack is not large enough, it is automatically resized.
  * ------------------------------------------------------------------------
  */
 void
-Itcl_PushStack(cdata,stack)
+Itclng_PushStack(cdata,stack)
     ClientData cdata;      /* data to be pushed onto stack */
-    Itcl_Stack *stack;     /* stack */
+    Itclng_Stack *stack;     /* stack */
 {
     ClientData *newStack;
 
@@ -154,14 +133,14 @@ Itcl_PushStack(cdata,stack)
 
 /*
  * ------------------------------------------------------------------------
- *  Itcl_PopStack()
+ *  Itclng_PopStack()
  *
  *  Pops a bit of client data from the top of the given stack.
  * ------------------------------------------------------------------------
  */
 ClientData
-Itcl_PopStack(stack)
-    Itcl_Stack *stack;  /* stack to be manipulated */
+Itclng_PopStack(stack)
+    Itclng_Stack *stack;  /* stack to be manipulated */
 {
     if (stack->values && (stack->len > 0)) {
         stack->len--;
@@ -172,14 +151,14 @@ Itcl_PopStack(stack)
 
 /*
  * ------------------------------------------------------------------------
- *  Itcl_PeekStack()
+ *  Itclng_PeekStack()
  *
  *  Gets the current value from the top of the given stack.
  * ------------------------------------------------------------------------
  */
 ClientData
-Itcl_PeekStack(stack)
-    Itcl_Stack *stack;  /* stack to be examined */
+Itclng_PeekStack(stack)
+    Itclng_Stack *stack;  /* stack to be examined */
 {
     if (stack->values && (stack->len > 0)) {
         return stack->values[stack->len-1];
@@ -189,15 +168,15 @@ Itcl_PeekStack(stack)
 
 /*
  * ------------------------------------------------------------------------
- *  Itcl_GetStackValue()
+ *  Itclng_GetStackValue()
  *
  *  Gets a value at some index within the stack.  Index "0" is the
  *  first value pushed onto the stack.
  * ------------------------------------------------------------------------
  */
 ClientData
-Itcl_GetStackValue(stack,pos)
-    Itcl_Stack *stack;  /* stack to be examined */
+Itclng_GetStackValue(stack,pos)
+    Itclng_Stack *stack;  /* stack to be examined */
     int pos;            /* get value at this index */
 {
     if (stack->values && (stack->len > 0)) {
@@ -210,17 +189,17 @@ Itcl_GetStackValue(stack,pos)
 
 /*
  * ------------------------------------------------------------------------
- *  Itcl_InitList()
+ *  Itclng_InitList()
  *
  *  Initializes a linked list structure, setting the list to the empty
  *  state.
  * ------------------------------------------------------------------------
  */
 void
-Itcl_InitList(listPtr)
-    Itcl_List *listPtr;     /* list to be initialized */
+Itclng_InitList(listPtr)
+    Itclng_List *listPtr;     /* list to be initialized */
 {
-    listPtr->validate = ITCL_VALID_LIST;
+    listPtr->validate = ITCLNG_VALID_LIST;
     listPtr->num      = 0;
     listPtr->head     = NULL;
     listPtr->tail     = NULL;
@@ -228,7 +207,7 @@ Itcl_InitList(listPtr)
 
 /*
  * ------------------------------------------------------------------------
- *  Itcl_DeleteList()
+ *  Itclng_DeleteList()
  *
  *  Destroys a linked list structure, deleting all of its elements and
  *  setting it to an empty state.  If the elements have memory associated
@@ -237,23 +216,23 @@ Itcl_InitList(listPtr)
  * ------------------------------------------------------------------------
  */
 void
-Itcl_DeleteList(listPtr)
-    Itcl_List *listPtr;     /* list to be deleted */
+Itclng_DeleteList(listPtr)
+    Itclng_List *listPtr;     /* list to be deleted */
 {
-    Itcl_ListElem *elemPtr;
+    Itclng_ListElem *elemPtr;
 
-    assert(listPtr->validate == ITCL_VALID_LIST);
+    assert(listPtr->validate == ITCLNG_VALID_LIST);
 
     elemPtr = listPtr->head;
     while (elemPtr) {
-        elemPtr = Itcl_DeleteListElem(elemPtr);
+        elemPtr = Itclng_DeleteListElem(elemPtr);
     }
     listPtr->validate = 0;
 }
 
 /*
  * ------------------------------------------------------------------------
- *  Itcl_CreateListElem()
+ *  Itclng_CreateListElem()
  *
  *  Low-level routined used by procedures like Itcl_InsertList() and
  *  Itcl_AppendList() to create new list elements.  If elements are
@@ -261,11 +240,11 @@ Itcl_DeleteList(listPtr)
  *  a new one is allocated.
  * ------------------------------------------------------------------------
  */
-Itcl_ListElem*
-Itcl_CreateListElem(listPtr)
-    Itcl_List *listPtr;     /* list that will contain this new element */
+Itclng_ListElem*
+Itclng_CreateListElem(listPtr)
+    Itclng_List *listPtr;     /* list that will contain this new element */
 {
-    Itcl_ListElem *elemPtr;
+    Itclng_ListElem *elemPtr;
 
     if (listPoolLen > 0) {
         elemPtr = listPool;
@@ -273,7 +252,7 @@ Itcl_CreateListElem(listPtr)
         --listPoolLen;
     }
     else {
-        elemPtr = (Itcl_ListElem*)ckalloc((unsigned)sizeof(Itcl_ListElem));
+        elemPtr = (Itclng_ListElem*)ckalloc((unsigned)sizeof(Itclng_ListElem));
     }
     elemPtr->owner = listPtr;
     elemPtr->value = NULL;
@@ -285,19 +264,19 @@ Itcl_CreateListElem(listPtr)
 
 /*
  * ------------------------------------------------------------------------
- *  Itcl_DeleteListElem()
+ *  Itclng_DeleteListElem()
  *
  *  Destroys a single element in a linked list, returning it to a pool of
  *  elements that can be later reused.  Returns a pointer to the next
  *  element in the list.
  * ------------------------------------------------------------------------
  */
-Itcl_ListElem*
-Itcl_DeleteListElem(elemPtr)
-    Itcl_ListElem *elemPtr;     /* list element to be deleted */
+Itclng_ListElem*
+Itclng_DeleteListElem(elemPtr)
+    Itclng_ListElem *elemPtr;     /* list element to be deleted */
 {
-    Itcl_List *listPtr;
-    Itcl_ListElem *nextPtr;
+    Itclng_List *listPtr;
+    Itclng_ListElem *nextPtr;
 
     nextPtr = elemPtr->next;
 
@@ -315,7 +294,7 @@ Itcl_DeleteListElem(elemPtr)
         listPtr->tail = elemPtr->prev;
     --listPtr->num;
 
-    if (listPoolLen < ITCL_LIST_POOL_SIZE) {
+    if (listPoolLen < ITCLNG_LIST_POOL_SIZE) {
         elemPtr->next = listPool;
         listPool = elemPtr;
         ++listPoolLen;
@@ -328,22 +307,22 @@ Itcl_DeleteListElem(elemPtr)
 
 /*
  * ------------------------------------------------------------------------
- *  Itcl_InsertList()
+ *  Itclng_InsertList()
  *
  *  Creates a new list element containing the given value and returns
  *  a pointer to it.  The element is inserted at the beginning of the
  *  specified list.
  * ------------------------------------------------------------------------
  */
-Itcl_ListElem*
-Itcl_InsertList(listPtr,val)
-    Itcl_List *listPtr;     /* list being modified */
+Itclng_ListElem*
+Itclng_InsertList(listPtr,val)
+    Itclng_List *listPtr;     /* list being modified */
     ClientData val;         /* value associated with new element */
 {
-    Itcl_ListElem *elemPtr;
-    assert(listPtr->validate == ITCL_VALID_LIST);
+    Itclng_ListElem *elemPtr;
+    assert(listPtr->validate == ITCLNG_VALID_LIST);
 
-    elemPtr = Itcl_CreateListElem(listPtr);
+    elemPtr = Itclng_CreateListElem(listPtr);
 
     elemPtr->value = val;
     elemPtr->next  = listPtr->head;
@@ -362,26 +341,26 @@ Itcl_InsertList(listPtr,val)
 
 /*
  * ------------------------------------------------------------------------
- *  Itcl_InsertListElem()
+ *  Itclng_InsertListElem()
  *
  *  Creates a new list element containing the given value and returns
  *  a pointer to it.  The element is inserted in the list just before
  *  the specified element.
  * ------------------------------------------------------------------------
  */
-Itcl_ListElem*
-Itcl_InsertListElem(pos,val)
-    Itcl_ListElem *pos;     /* insert just before this element */
+Itclng_ListElem*
+Itclng_InsertListElem(pos,val)
+    Itclng_ListElem *pos;     /* insert just before this element */
     ClientData val;         /* value associated with new element */
 {
-    Itcl_List *listPtr;
-    Itcl_ListElem *elemPtr;
+    Itclng_List *listPtr;
+    Itclng_ListElem *elemPtr;
 
     listPtr = pos->owner;
-    assert(listPtr->validate == ITCL_VALID_LIST);
+    assert(listPtr->validate == ITCLNG_VALID_LIST);
     assert(pos != NULL);
 
-    elemPtr = Itcl_CreateListElem(listPtr);
+    elemPtr = Itclng_CreateListElem(listPtr);
     elemPtr->value = val;
 
     elemPtr->prev = pos->prev;
@@ -404,22 +383,22 @@ Itcl_InsertListElem(pos,val)
 
 /*
  * ------------------------------------------------------------------------
- *  Itcl_AppendList()
+ *  Itclng_AppendList()
  *
  *  Creates a new list element containing the given value and returns
  *  a pointer to it.  The element is appended at the end of the
  *  specified list.
  * ------------------------------------------------------------------------
  */
-Itcl_ListElem*
-Itcl_AppendList(listPtr,val)
-    Itcl_List *listPtr;     /* list being modified */
+Itclng_ListElem*
+Itclng_AppendList(listPtr,val)
+    Itclng_List *listPtr;     /* list being modified */
     ClientData val;         /* value associated with new element */
 {
-    Itcl_ListElem *elemPtr;
-    assert(listPtr->validate == ITCL_VALID_LIST);
+    Itclng_ListElem *elemPtr;
+    assert(listPtr->validate == ITCLNG_VALID_LIST);
 
-    elemPtr = Itcl_CreateListElem(listPtr);
+    elemPtr = Itclng_CreateListElem(listPtr);
 
     elemPtr->value = val;
     elemPtr->prev  = listPtr->tail;
@@ -438,26 +417,26 @@ Itcl_AppendList(listPtr,val)
 
 /*
  * ------------------------------------------------------------------------
- *  Itcl_AppendListElem()
+ *  Itclng_AppendListElem()
  *
  *  Creates a new list element containing the given value and returns
  *  a pointer to it.  The element is inserted in the list just after
  *  the specified element.
  * ------------------------------------------------------------------------
  */
-Itcl_ListElem*
-Itcl_AppendListElem(pos,val)
-    Itcl_ListElem *pos;     /* insert just after this element */
+Itclng_ListElem*
+Itclng_AppendListElem(pos,val)
+    Itclng_ListElem *pos;     /* insert just after this element */
     ClientData val;         /* value associated with new element */
 {
-    Itcl_List *listPtr;
-    Itcl_ListElem *elemPtr;
+    Itclng_List *listPtr;
+    Itclng_ListElem *elemPtr;
 
     listPtr = pos->owner;
-    assert(listPtr->validate == ITCL_VALID_LIST);
+    assert(listPtr->validate == ITCLNG_VALID_LIST);
     assert(pos != NULL);
 
-    elemPtr = Itcl_CreateListElem(listPtr);
+    elemPtr = Itclng_CreateListElem(listPtr);
     elemPtr->value = val;
 
     elemPtr->next = pos->next;
@@ -480,23 +459,24 @@ Itcl_AppendListElem(pos,val)
 
 /*
  * ------------------------------------------------------------------------
- *  Itcl_SetListValue()
+ *  Itclng_SetListValue()
  *
  *  Modifies the value associated with a list element.
  * ------------------------------------------------------------------------
  */
 void
-Itcl_SetListValue(elemPtr,val)
-    Itcl_ListElem *elemPtr; /* list element being modified */
+Itclng_SetListValue(elemPtr,val)
+    Itclng_ListElem *elemPtr; /* list element being modified */
     ClientData val;         /* new value associated with element */
 {
-    Itcl_List *listPtr = elemPtr->owner;
-    assert(listPtr->validate == ITCL_VALID_LIST);
+    Itclng_List *listPtr = elemPtr->owner;
+    assert(listPtr->validate == ITCLNG_VALID_LIST);
     assert(elemPtr != NULL);
 
     elemPtr->value = val;
 }
 
+#ifdef NOTDEF
 
 /*
  * ========================================================================
@@ -655,10 +635,11 @@ Itcl_DiscardInterpState(state)
     Tcl_DiscardInterpState((Tcl_InterpState)state);
     return;
 }
+#endif
 
 /*
  * ------------------------------------------------------------------------
- *  Itcl_Protection()
+ *  Itclng_Protection()
  *
  *  Used to query/set the protection level used when commands/variables
  *  are defined within a class.  The default protection level (when
@@ -673,28 +654,27 @@ Itcl_DiscardInterpState(state)
  * ------------------------------------------------------------------------
  */
 int
-Itcl_Protection(interp, newLevel)
-    Tcl_Interp *interp;  /* interpreter being queried */
-    int newLevel;        /* new protection level or 0 */
+Itclng_Protection(
+    Tcl_Interp *interp,  /* interpreter being queried */
+    int newLevel)        /* new protection level or 0 */
 {
     int oldVal;
-    ItclObjectInfo *infoPtr;
+    ItclngObjectInfo *infoPtr;
 
     /*
      *  If a new level was specified, then set the protection level.
      *  In any case, return the protection level as it stands right now.
      */
-    infoPtr = (ItclObjectInfo*) Tcl_GetAssocData(interp, ITCL_INTERP_DATA,
+    infoPtr = (ItclngObjectInfo*) Tcl_GetAssocData(interp, ITCLNG_INTERP_DATA,
         (Tcl_InterpDeleteProc**)NULL);
 
     assert(infoPtr != NULL);
     oldVal = infoPtr->protection;
 
     if (newLevel != 0) {
-        assert(newLevel == ITCL_PUBLIC ||
-            newLevel == ITCL_PROTECTED ||
-            newLevel == ITCL_PRIVATE ||
-            newLevel == ITCL_DEFAULT_PROTECT);
+        assert(newLevel == ITCLNG_PUBLIC ||
+            newLevel == ITCLNG_PROTECTED ||
+            newLevel == ITCLNG_PRIVATE);
         infoPtr->protection = newLevel;
     }
     return oldVal;
@@ -702,7 +682,7 @@ Itcl_Protection(interp, newLevel)
 
 /*
  * ------------------------------------------------------------------------
- *  Itcl_ParseNamespPath()
+ *  Itclng_ParseNamespPath()
  *
  *  Parses a reference to a namespace element of the form:
  *
@@ -720,7 +700,7 @@ Itcl_Protection(interp, newLevel)
  * ------------------------------------------------------------------------
  */
 void
-Itcl_ParseNamespPath(
+Itclng_ParseNamespPath(
     CONST char *name,    /* path name to class member */
     Tcl_DString *buffer, /* dynamic string buffer (uninitialized) */
     char **head,         /* returns "namesp::namesp::namesp" part */
@@ -771,7 +751,7 @@ Itcl_ParseNamespPath(
 
 /*
  * ------------------------------------------------------------------------
- *  Itcl_CanAccess2()
+ *  Itclng_CanAccess2()
  *
  *  Checks to see if a class member can be accessed from a particular
  *  namespace context.  Public things can always be accessed.  Protected
@@ -784,22 +764,22 @@ Itcl_ParseNamespPath(
  * ------------------------------------------------------------------------
  */
 int
-Itcl_CanAccess2(
-    ItclClass *iclsPtr,        /* class being tested */
+Itclng_CanAccess2(
+    ItclngClass *iclsPtr,        /* class being tested */
     int protection,            /* protection level being tested */
     Tcl_Namespace* fromNsPtr)  /* namespace requesting access */
 {
-    ItclClass* fromIclsPtr;
+    ItclngClass* fromIclsPtr;
     Tcl_HashEntry *entry;
 
     /*
      *  If the protection level is "public" or "private", then the
      *  answer is known immediately.
      */
-    if (protection == ITCL_PUBLIC) {
+    if (protection == ITCLNG_PUBLIC) {
         return 1;
     } else {
-        if (protection == ITCL_PRIVATE) {
+        if (protection == ITCLNG_PRIVATE) {
             return (iclsPtr->nsPtr == fromNsPtr);
         }
     }
@@ -809,10 +789,10 @@ Itcl_CanAccess2(
      *  heritage of the namespace requesting access.  If cdefnPtr
      *  is in the heritage, then access is allowed.
      */
-    assert (protection == ITCL_PROTECTED);
+    assert (protection == ITCLNG_PROTECTED);
 
-    if (Itcl_IsClassNamespace(fromNsPtr)) {
-        fromIclsPtr =  (ItclClass*)Tcl_ObjectGetMetadata(fromNsPtr->clientData,
+    if (Itclng_IsClassNamespace(fromNsPtr)) {
+        fromIclsPtr =  (ItclngClass*)Tcl_ObjectGetMetadata(fromNsPtr->clientData,
 	        iclsPtr->infoPtr->class_meta_type);
 	if (fromIclsPtr == NULL) {
 	   return 0;
@@ -829,7 +809,7 @@ Itcl_CanAccess2(
 
 /*
  * ------------------------------------------------------------------------
- *  Itcl_CanAccess()
+ *  Itclng_CanAccess()
  *
  *  Checks to see if a class member can be accessed from a particular
  *  namespace context.  Public things can always be accessed.  Protected
@@ -842,17 +822,17 @@ Itcl_CanAccess2(
  * ------------------------------------------------------------------------
  */
 int
-Itcl_CanAccess(
-    ItclMemberFunc* imPtr,     /* class member being tested */
+Itclng_CanAccess(
+    ItclngMemberFunc* imPtr,     /* class member being tested */
     Tcl_Namespace* fromNsPtr)  /* namespace requesting access */
 {
-    return Itcl_CanAccess2(imPtr->iclsPtr, imPtr->protection, fromNsPtr);
+    return Itclng_CanAccess2(imPtr->iclsPtr, imPtr->protection, fromNsPtr);
 }
 
 
 /*
  * ------------------------------------------------------------------------
- *  Itcl_CanAccessFunc()
+ *  Itclng_CanAccessFunc()
  *
  *  Checks to see if a member function with the specified protection
  *  level can be accessed from a particular namespace context.  This
@@ -865,19 +845,19 @@ Itcl_CanAccess(
  * ------------------------------------------------------------------------
  */
 int
-Itcl_CanAccessFunc(
-    ItclMemberFunc* imPtr,     /* member function being tested */
+Itclng_CanAccessFunc(
+    ItclngMemberFunc* imPtr,     /* member function being tested */
     Tcl_Namespace* fromNsPtr)  /* namespace requesting access */
 {
-    ItclClass *iclsPtr;
-    ItclClass *fromIclsPtr;
-    ItclMemberFunc *ovlfunc;
+    ItclngClass *iclsPtr;
+    ItclngClass *fromIclsPtr;
+    ItclngMemberFunc *ovlfunc;
     Tcl_HashEntry *entry;
 
     /*
      *  Apply the usual rules first.
      */
-    if (Itcl_CanAccess(imPtr, fromNsPtr)) {
+    if (Itclng_CanAccess(imPtr, fromNsPtr)) {
         return 1;
     }
 
@@ -888,8 +868,8 @@ Itcl_CanAccessFunc(
      *  is one, then this method overrides it, and the base class
      *  has access.
      */
-    if ((imPtr->flags & ITCL_COMMON) == 0 &&
-            Itcl_IsClassNamespace(fromNsPtr)) {
+    if ((imPtr->flags & ITCLNG_COMMON) == 0 &&
+            Itclng_IsClassNamespace(fromNsPtr)) {
         Tcl_HashEntry *hPtr;
 
         iclsPtr = imPtr->iclsPtr;
@@ -905,9 +885,9 @@ Itcl_CanAccessFunc(
                 Tcl_GetString(imPtr->namePtr));
 
             if (entry) {
-                ovlfunc = (ItclMemberFunc*)Tcl_GetHashValue(entry);
-                if ((ovlfunc->flags & ITCL_COMMON) == 0 &&
-                     ovlfunc->protection < ITCL_PRIVATE) {
+                ovlfunc = (ItclngMemberFunc*)Tcl_GetHashValue(entry);
+                if ((ovlfunc->flags & ITCLNG_COMMON) == 0 &&
+                     ovlfunc->protection < ITCLNG_PRIVATE) {
                     return 1;
                 }
             }
@@ -916,6 +896,7 @@ Itcl_CanAccessFunc(
     return 0;
 }
 
+#ifdef NOTDEF
 
 /*
  * ------------------------------------------------------------------------
@@ -995,4 +976,4 @@ Itcl_DecodeScopedCommand(
     *rCmdPtr = cmdName;
     return TCL_OK;
 }
-
+#endif
