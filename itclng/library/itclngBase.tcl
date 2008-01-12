@@ -16,16 +16,25 @@ namespace eval ::itclng {
         proc create {className args} {
 	    variable infosNsName
 
-puts stderr "CREATE!$className!"
-	    set ${infosNsName}::currClassName $className
+	    if {$className eq ""} {
+	        return -code error -level 2 "invalid classname \"\""
+	    }
 	    set nsName [uplevel 1 namespace current]
 	    if {$nsName ne "::"} {
 	        set nsName ${nsName}::
 	    }
 	    set fullClassName $nsName$className
+	    set infoNs ::itclng::internal::classinfos$fullClassName
+	    if {[::namespace exists $infoNs]} {
+	        return -code error -level 2 "class \"$className\" already exists"
+	    }
+	    if {[::info comm $fullClassName] ne ""} {
+	        return -code error -level 2 "command \"$className\" already exists"
+	    }
+	    set ${infosNsName}::currClassName $className
 	    set ${infosNsName}::currFullClassName $fullClassName
-	    set myClassName [string trimleft $fullClassName :]
-	    set infoNs ::itclng::internal::classinfos::${myClassName}
+	    set xx [::itclng::internal::commands createClass $fullClassName]
+puts stderr "CLASS!$xx!"
 	    namespace eval $infoNs {}
 	    set infoNs ${infoNs}::infos
 puts stderr "IS!$infoNs!"

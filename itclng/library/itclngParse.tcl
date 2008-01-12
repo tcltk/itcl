@@ -1,6 +1,6 @@
 namespace eval ::itclng::parser {
     proc parseMember {type args} {
-	set protection [lindex [::info level -2] 0]
+	::set protection [lindex [::info level -2] 0]
 	switch $protection {
 	public -
 	protected -
@@ -11,14 +11,14 @@ namespace eval ::itclng::parser {
 	  }
 	}
 	if {[llength $args] < 1} {
-	    set frameInfo [::info frame 4]
-	    set line [dict get $frameInfo line]
+	    ::set frameInfo [::info frame 4]
+	    ::set line [dict get $frameInfo line]
 	    return -code error -level 4 -line $line "usage: $protection $type <name> ...\n     while executing \"$protection $type\""
 	}
-	set name [lindex $args 0]
-	set args [lrange $args 1 end]
-	set fullClassName $::itclng::internal::parseinfos::currFullClassName
-	set infoNs ::itclng::internal::classinfos${fullClassName}::infos
+	::set name [lindex $args 0]
+	::set args [lrange $args 1 end]
+	::set fullClassName $::itclng::internal::parseinfos::currFullClassName
+	::set infoNs ::itclng::internal::classinfos${fullClassName}::infos
 puts stderr "parseMember!$fullClassName!!$protection!$type!$name!$args!"
         ::itclng::member::${type} $infoNs $fullClassName $protection $name {*}$args
     }
@@ -26,8 +26,8 @@ puts stderr "parseMember!$fullClassName!!$protection!$type!$name!$args!"
 	if {[llength $args] < 1} {
 	    return -code error -level 2 "usage: $type <name> ..."
 	}
-	set name [lindex $args 0]
-	set args [lrange $args 1 end]
+	::set name [lindex $args 0]
+	::set args [lrange $args 1 end]
         puts stderr "parseSpecialMember!$type!$name!$args!"
     }
     proc private {args} {
@@ -91,7 +91,7 @@ puts stderr "parseMember!$fullClassName!!$protection!$type!$name!$args!"
         parseSpecialMember inherit {*}$args
     }
     proc set {name args} {
-	set fullClassName $::itclng::internal::parseinfos::currFullClassName
+	::set fullClassName $::itclng::internal::parseinfos::currFullClassName
         namespace eval $fullClassName [list ::set $name $args]
     }
     proc proc {args} {
