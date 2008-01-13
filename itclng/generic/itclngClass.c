@@ -106,13 +106,12 @@ ClassNamespaceDeleted(
 
 /*
  * ------------------------------------------------------------------------
- *  Itclng_CreateClass()
+ *  Itclng_CreateClassCmd()
  *
  *  Creates a namespace and its associated class definition data.
  *  If a namespace already exists with that name, then this routine
  *  returns TCL_ERROR, along with an error message in the interp.
- *  If successful, it returns TCL_OK and a pointer to the new class
- *  definition.
+ *  If successful, it returns TCL_OK and the new full class name
  * ------------------------------------------------------------------------
  */
 int
@@ -135,7 +134,7 @@ Itclng_CreateClassCmd(
     Tcl_HashEntry *hPtr;
     int newEntry;
 
-    ItclngShowArgs(0, "Itcl_CreateClass", objc, objv);
+    ItclngShowArgs(0, "Itclng_CreateClassCmd", objc, objv);
     if (ItclngCheckNumCmdParams(interp, infoPtr, "createClass", objc, 1, 1) !=
             TCL_OK) {
         return TCL_ERROR;
@@ -312,6 +311,12 @@ Itclng_CreateClassCmd(
     Tcl_TraceCommand(interp, Tcl_GetCommandName(interp, iclsPtr->accessCmd),
                 TCL_TRACE_RENAME|TCL_TRACE_DELETE, ClassRenamedTrace, iclsPtr);
     /* FIX ME should set the class objects unknown command to Itclng_HandleClass */
+    /*
+     *  Push this class onto the class definition stack so that it
+     *  becomes the current context for all commands in the parser.
+     *  Activate the parser and evaluate the class definition.
+     */
+    Itclng_PushStack((ClientData)iclsPtr, &infoPtr->clsStack);
 
     Tcl_ResetResult(interp);
     Tcl_AppendResult(interp, Tcl_GetString(iclsPtr->fullNamePtr), NULL);
@@ -1403,11 +1408,13 @@ Itclng_CreateVariable(
      *  its implementation.
      */
     if (config) {
+#ifdef NOTDEF
         if (Itclng_CreateMemberCode(interp, iclsPtr, (char*)NULL, config,
                 &mCodePtr) != TCL_OK) {
             Tcl_DeleteHashEntry(hPtr);
             return TCL_ERROR;
         }
+#endif
         Tcl_Preserve((ClientData)mCodePtr);
         Tcl_EventuallyFree((ClientData)mCodePtr, Itclng_DeleteMemberCode);
     } else {

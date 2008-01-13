@@ -9,7 +9,7 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itclngHelpers.c,v 1.1.2.3 2008/01/13 11:56:24 wiede Exp $
+ * RCS: @(#) $Id: itclngHelpers.c,v 1.1.2.4 2008/01/13 19:46:29 wiede Exp $
  */
 
 #include "itclngInt.h"
@@ -44,6 +44,186 @@ ItclngShowArgs(
     fprintf(stderr, "!\n");
 }
 #endif
+
+/*
+ * ------------------------------------------------------------------------
+ *  ItclngGetClassDictInfo()
+ *
+ *  Gets info about a function, variable, option of a class
+ *  Returns a Tcl_Obj containg the string/dict part.
+ * ------------------------------------------------------------------------
+ */
+Tcl_Obj*
+ItclngGetClassDictInfo(
+    ItclngClass *iclsPtr,
+    const char *what,
+    const char *elementName)
+{
+    Tcl_Obj *objPtr;
+    Tcl_Obj *dictPtr;
+    Tcl_Obj *keyPtr;
+    Tcl_Obj *valuePtr;
+
+    objPtr = Tcl_NewStringObj(ITCLNG_CLASS_INFO_NAMESPACE, -1);
+    Tcl_AppendToObj(objPtr, Tcl_GetString(iclsPtr->fullNamePtr), -1);
+    Tcl_AppendToObj(objPtr, "::infos", -1);
+    dictPtr = Tcl_ObjGetVar2(iclsPtr->interp, objPtr, NULL, 0);
+    Tcl_DecrRefCount(objPtr);
+    keyPtr = Tcl_NewStringObj(what, -1);
+    valuePtr = Tcl_NewObj();
+    if (Tcl_DictObjGet(iclsPtr->interp, dictPtr, keyPtr, &valuePtr) != TCL_OK) {
+fprintf(stderr, "cannot get dict for class");
+	Tcl_DecrRefCount(keyPtr);
+        return NULL;
+    }
+    dictPtr = valuePtr;
+    Tcl_SetStringObj(keyPtr, elementName, -1);
+    if (Tcl_DictObjGet(iclsPtr->interp, dictPtr, keyPtr, &valuePtr) != TCL_OK) {
+fprintf(stderr, "cannot get element for class");
+	Tcl_DecrRefCount(keyPtr);
+        return NULL;
+    }
+    Tcl_DecrRefCount(keyPtr);
+    if (valuePtr != NULL) {
+        Tcl_IncrRefCount(valuePtr);
+    }
+    return valuePtr;
+}
+
+/*
+ * ------------------------------------------------------------------------
+ *  ItclngGetDictValueInfo()
+ *
+ *  Gets info about a function, variable, option of a class
+ *  Returns a Tcl_Obj containg the string/dict part.
+ * ------------------------------------------------------------------------
+ */
+Tcl_Obj*
+ItclngGetDictValueInfo(
+    Tcl_Interp *interp,
+    Tcl_Obj *dictPtr,
+    const char *elementName)
+{
+    Tcl_Obj *keyPtr;
+    Tcl_Obj *valuePtr;
+
+    keyPtr = Tcl_NewStringObj(elementName, -1);
+    valuePtr = Tcl_NewObj();
+    if (Tcl_DictObjGet(interp, dictPtr, keyPtr, &valuePtr) != TCL_OK) {
+fprintf(stderr, "cannot get element part");
+	Tcl_DecrRefCount(keyPtr);
+        return NULL;
+    }
+    Tcl_DecrRefCount(keyPtr);
+    if (valuePtr != NULL) {
+        Tcl_IncrRefCount(valuePtr);
+    }
+    return valuePtr;
+}
+
+/*
+ * ------------------------------------------------------------------------
+ *  ItclngGetArgumentString()
+ *
+ * ------------------------------------------------------------------------
+ */
+Tcl_Obj *
+ItclngGetArgumentString(
+    ItclngClass *iclsPtr,
+    const char *functionName)
+{
+    Tcl_Obj *dictPtr;
+    Tcl_Obj *valuePtr;
+
+    dictPtr = ItclngGetClassDictInfo(iclsPtr, "functions", functionName);
+    if (dictPtr == NULL) {
+        return NULL;
+    }
+    valuePtr = ItclngGetDictValueInfo(iclsPtr->interp, dictPtr,
+            "arguments");
+    if (valuePtr == NULL) {
+        return NULL;
+    }
+    dictPtr = valuePtr;
+    valuePtr = ItclngGetDictValueInfo(iclsPtr->interp, dictPtr,
+            "definition");
+    return valuePtr;
+}
+
+/*
+ * ------------------------------------------------------------------------
+ *  ItclngGetBodyString()
+ *
+ * ------------------------------------------------------------------------
+ */
+Tcl_Obj *
+ItclngGetBodyString(
+    ItclngClass *iclsPtr,
+    const char *functionName)
+{
+    Tcl_Obj *dictPtr;
+    Tcl_Obj *valuePtr;
+
+    dictPtr = ItclngGetClassDictInfo(iclsPtr, "functions", functionName);
+    if (dictPtr == NULL) {
+        return NULL;
+    }
+    valuePtr = ItclngGetDictValueInfo(iclsPtr->interp, dictPtr,
+            "body");
+    return valuePtr;
+}
+
+/*
+ * ------------------------------------------------------------------------
+ *  ItclngGetStateString()
+ *
+ * ------------------------------------------------------------------------
+ */
+Tcl_Obj *
+ItclngGetStateString(
+    ItclngClass *iclsPtr,
+    const char *functionName)
+{
+    Tcl_Obj *dictPtr;
+    Tcl_Obj *valuePtr;
+
+    dictPtr = ItclngGetClassDictInfo(iclsPtr, "functions", functionName);
+    if (dictPtr == NULL) {
+        return NULL;
+    }
+    valuePtr = ItclngGetDictValueInfo(iclsPtr->interp, dictPtr,
+            "state");
+    return valuePtr;
+}
+
+/*
+ * ------------------------------------------------------------------------
+ *  ItclngGetUsageString()
+ *
+ * ------------------------------------------------------------------------
+ */
+Tcl_Obj *
+ItclngGetUsageString(
+    ItclngClass *iclsPtr,
+    const char *functionName)
+{
+    Tcl_Obj *dictPtr;
+    Tcl_Obj *valuePtr;
+
+    dictPtr = ItclngGetClassDictInfo(iclsPtr, "functions", functionName);
+    if (dictPtr == NULL) {
+        return NULL;
+    }
+    valuePtr = ItclngGetDictValueInfo(iclsPtr->interp, dictPtr,
+            "arguments");
+    if (valuePtr == NULL) {
+        return NULL;
+    }
+    dictPtr = valuePtr;
+    valuePtr = ItclngGetDictValueInfo(iclsPtr->interp, dictPtr,
+            "usage");
+    return valuePtr;
+}
 
 /*
  * ------------------------------------------------------------------------

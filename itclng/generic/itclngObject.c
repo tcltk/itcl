@@ -22,8 +22,8 @@ static char* ItclngTraceOptionVar(ClientData cdata, Tcl_Interp *interp,
 	CONST char *name1, CONST char *name2, int flags);
 
 static void ItclngFreeObject(char * clientData);
-#endif
 static void ItclngDestroyObject(ClientData clientData);
+#endif
 
 static int ItclngDestructBase(Tcl_Interp *interp, ItclngObject *contextObj,
         ItclngClass *contextClass, int flags);
@@ -1267,6 +1267,7 @@ ItclngReportObjectUsage(
         }
         if ((imPtr != NULL) && (imPtr->codePtr != NULL)) {
 	    if (imPtr->codePtr->flags & ITCLNG_BUILTIN) {
+#ifdef NOTDEF
 	        char *body;
 	        if (imPtr->codePtr != NULL) {
 	            body = Tcl_GetString(imPtr->codePtr->bodyPtr);
@@ -1276,6 +1277,7 @@ ItclngReportObjectUsage(
 		        }
 	            }
 	        }
+#endif
 	    }
 	}
 
@@ -1427,7 +1429,6 @@ ItclngTraceOptionVar(
     }
     return NULL;
 }
-#endif
 
 /*
  * ------------------------------------------------------------------------
@@ -1486,6 +1487,7 @@ ItclngDestroyObject(
 
     Tcl_Release((ClientData)contextIoPtr);
 }
+#endif
 
 /*
  * ------------------------------------------------------------------------

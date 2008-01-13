@@ -25,7 +25,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclngMethod.c,v 1.1.2.1 2008/01/13 11:54:57 wiede Exp $
+ *     RCS:  $Id: itclngMethod.c,v 1.1.2.2 2008/01/13 19:46:29 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -34,9 +34,10 @@
  */
 #include "itclngInt.h"
 
+#ifdef NOTDEF
 static int EquivArgLists(Tcl_Interp *interp, ItclngArgList *origArgs,
         ItclngArgList *realArgs);
-static void DeleteArgList(ItclngArgList *arglistPtr);
+#endif
 static void ItclngDeleteFunction(ItclngMemberFunc *imPtr);
 
 
@@ -55,23 +56,6 @@ ItclngDeleteFunction(
     Tcl_DecrRefCount(imPtr->fullNamePtr);
     if (imPtr->codePtr != NULL) {
        Tcl_Release((ClientData)imPtr->codePtr);
-    }
-    if (imPtr->usagePtr != NULL) {
-        Tcl_DecrRefCount(imPtr->usagePtr);
-    }
-    if (imPtr->argumentPtr != NULL) {
-        Tcl_DecrRefCount(imPtr->argumentPtr);
-    }
-    if (imPtr->origArgsPtr != NULL) {
-        Tcl_DecrRefCount(imPtr->origArgsPtr);
-    }
-    if (imPtr->bodyPtr != NULL) {
-        Tcl_DecrRefCount(imPtr->bodyPtr);
-    }
-    if (imPtr->argListPtr != NULL) {
-#ifdef NOTDEF
-        ItclngDeleteArgList(imPtr->argListPtr);
-#endif
     }
     ckfree((char*)imPtr);
 }
@@ -298,11 +282,13 @@ Itclng_ConfigBodyCmd(
 
     token = Tcl_GetString(objv[2]);
 
+#ifdef NOTDEF
     if (Itclng_CreateMemberCode(interp, iclsPtr, (char*)NULL, token,
             &mcode) != TCL_OK) {
         status = TCL_ERROR;
         goto configBodyCmdDone;
     }
+#endif
 
     Tcl_Preserve((ClientData)mcode);
     Tcl_EventuallyFree((ClientData)mcode, Itclng_DeleteMemberCode);
@@ -315,130 +301,6 @@ Itclng_ConfigBodyCmd(
 configBodyCmdDone:
     Tcl_DStringFree(&buffer);
     return status;
-}
-
-
-/*
- * ------------------------------------------------------------------------
- *  Itclng_CreateMethod()
- *
- *  Installs a method into the namespace associated with a class.
- *  If another command with the same name is already installed, then
- *  it is overwritten.
- *
- *  Returns TCL_OK on success, or TCL_ERROR (along with an error message
- *  in the specified interp) if anything goes wrong.
- * ------------------------------------------------------------------------
- */
-int
-Itclng_CreateMethod(
-    Tcl_Interp* interp,  /* interpreter managing this action */
-    ItclngClass *iclsPtr,  /* class definition */
-    Tcl_Obj *namePtr,    /* name of new method */
-    CONST char* arglist, /* space-separated list of arg names */
-    CONST char* body)    /* body of commands for the method */
-{
-    ItclngMemberFunc *imPtr;
-
-    return ItclngCreateMethod(interp, iclsPtr, namePtr, arglist, body, &imPtr);
-}
-
-/*
- * ------------------------------------------------------------------------
- *  ItclngCreateMethod()
- *
- *  Installs a method into the namespace associated with a class.
- *  If another command with the same name is already installed, then
- *  it is overwritten.
- *
- *  Returns TCL_OK on success, or TCL_ERROR (along with an error message
- *  in the specified interp) if anything goes wrong.
- * ------------------------------------------------------------------------
- */
-int
-ItclngCreateMethod(
-    Tcl_Interp* interp,  /* interpreter managing this action */
-    ItclngClass *iclsPtr,  /* class definition */
-    Tcl_Obj *namePtr,    /* name of new method */
-    CONST char* arglist, /* space-separated list of arg names */
-    CONST char* body,    /* body of commands for the method */
-    ItclngMemberFunc **imPtrPtr)
-{
-    ItclngMemberFunc *imPtr;
-
-    /*
-     *  Make sure that the method name does not contain anything
-     *  goofy like a "::" scope qualifier.
-     */
-    if (strstr(Tcl_GetString(namePtr),"::")) {
-        Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
-            "bad method name \"", Tcl_GetString(namePtr), "\"",
-            (char*)NULL);
-        return TCL_ERROR;
-    }
-
-    /*
-     *  Create the method definition.
-     */
-    if (Itclng_CreateMemberFunc(interp, iclsPtr, namePtr, arglist, body, &imPtr)
-        != TCL_OK) {
-        return TCL_ERROR;
-    }
-
-    Tcl_Preserve((ClientData)imPtr);
-    if (imPtrPtr != NULL) {
-        *imPtrPtr = imPtr;
-    }
-    return TCL_OK;
-}
-
-/*
- * ------------------------------------------------------------------------
- *  Itclng_CreateProc()
- *
- *  Installs a class proc into the namespace associated with a class.
- *  If another command with the same name is already installed, then
- *  it is overwritten.  Returns TCL_OK on success, or TCL_ERROR  (along
- *  with an error message in the specified interp) if anything goes
- *  wrong.
- * ------------------------------------------------------------------------
- */
-int
-Itclng_CreateProc(
-    Tcl_Interp* interp,  /* interpreter managing this action */
-    ItclngClass *iclsPtr,  /* class definition */
-    Tcl_Obj* namePtr,    /* name of new proc */
-    const char *arglist, /* space-separated list of arg names */
-    const char *body)    /* body of commands for the proc */
-{
-    ItclngMemberFunc *imPtr;
-
-    /*
-     *  Make sure that the proc name does not contain anything
-     *  goofy like a "::" scope qualifier.
-     */
-    if (strstr(Tcl_GetString(namePtr),"::")) {
-        Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
-            "bad proc name \"", Tcl_GetString(namePtr), "\"",
-            (char*)NULL);
-        return TCL_ERROR;
-    }
-
-    /*
-     *  Create the proc definition.
-     */
-    if (Itclng_CreateMemberFunc(interp, iclsPtr, namePtr, arglist,
-            body, &imPtr) != TCL_OK) {
-        return TCL_ERROR;
-    }
-
-    /*
-     *  Mark procs as "common".  This distinguishes them from methods.
-     */
-    imPtr->flags |= ITCLNG_COMMON;
-
-    Tcl_Preserve((ClientData)imPtr);
-    return TCL_OK;
 }
 
 
@@ -457,12 +319,94 @@ void Itclng_DeleteMemberFunc (char *cdata) {
 
 /*
  * ------------------------------------------------------------------------
- *  Itclng_CreateMemberFunc()
+ *  ItclngCreateMemberCode()
  *
- *  Creates the data record representing a member function.  This
- *  includes the argument list and the body of the function.  If the
- *  body is of the form "@name", then it is treated as a label for
- *  a C procedure registered by Itclng_RegisterC().
+ *  Creates the data record representing the implementation behind a
+ *  class member function.
+ *
+ *  The implementation is kept by the member function definition, and
+ *  controlled by a preserve/release paradigm.  That way, if it is in
+ *  use while it is being redefined, it will stay around long enough
+ *  to avoid a core dump.
+ *
+ *  If any errors are encountered, this procedure returns TCL_ERROR
+ *  along with an error message in the interpreter.  Otherwise, it
+ *  returns TCL_OK, and "mcodePtr" returns a pointer to the new
+ *  implementation.
+ * ------------------------------------------------------------------------
+ */
+int
+ItclngCreateMemberCode(
+    Tcl_Interp* interp,            /* interpreter managing this action */
+    ItclngClass *iclsPtr,          /* class containing this member */
+    const char *name,              /* name of function */
+    const char *state,             /* state string of function */
+    ItclngMemberCode** mcodePtr)   /* returns: pointer to new implementation */
+{
+    Tcl_Obj *dictPtr;
+    Tcl_Obj *valuePtr;
+    Tcl_Obj *argPtr;
+    ItclngMemberCode *mcode;
+
+    /*
+     *  Allocate some space to hold the implementation.
+     */
+    mcode = (ItclngMemberCode*)ckalloc(sizeof(ItclngMemberCode));
+    memset(mcode, 0, sizeof(ItclngMemberCode));
+
+    dictPtr = ItclngGetClassDictInfo(iclsPtr, "functions", name);
+    if (dictPtr == NULL) {
+	Tcl_AppendResult(interp, "cannot get function info", NULL);
+        return TCL_ERROR;
+    }
+    argPtr = ItclngGetDictValueInfo(interp, dictPtr, "arguments");
+    Tcl_DecrRefCount(dictPtr);
+    if (argPtr == NULL) {
+	Tcl_AppendResult(interp, "cannot get arguments", NULL);
+        return TCL_ERROR;
+    }
+    valuePtr = ItclngGetDictValueInfo(interp, argPtr, "minargs");
+    if (valuePtr == NULL) {
+	Tcl_AppendResult(interp, "cannot get minargs string", NULL);
+        Tcl_DecrRefCount(argPtr);
+        return TCL_ERROR;
+    }
+    if (Tcl_GetIntFromObj(interp, valuePtr, &mcode->argcount) != TCL_OK) {
+        Tcl_DecrRefCount(argPtr);
+	Tcl_DecrRefCount(valuePtr);
+        return TCL_ERROR;
+    }
+    Tcl_DecrRefCount(valuePtr);
+    valuePtr = ItclngGetDictValueInfo(interp, argPtr, "maxargs");
+    if (valuePtr == NULL) {
+	Tcl_AppendResult(interp, "cannot get maxargs string", NULL);
+        Tcl_DecrRefCount(argPtr);
+        return TCL_ERROR;
+    }
+    if (Tcl_GetIntFromObj(interp, valuePtr, &mcode->maxargcount) != TCL_OK) {
+	Tcl_DecrRefCount(valuePtr);
+        Tcl_DecrRefCount(argPtr);
+        return TCL_ERROR;
+    }
+    Tcl_DecrRefCount(argPtr);
+    Tcl_DecrRefCount(valuePtr);
+    if (strcmp(state, "NO_ARGS") == 0) {
+        mcode->flags   |= ITCLNG_ARG_SPEC;
+    }
+    if (strcmp(state, "NO_BODY") == 0) {
+        mcode->flags |= ITCLNG_IMPLEMENT_TCL;
+    } else {
+        mcode->flags |= ITCLNG_IMPLEMENT_NONE;
+    }
+    *mcodePtr = mcode;
+    return TCL_OK;
+}
+
+/*
+ * ------------------------------------------------------------------------
+ *  ItclngCreateMemberFunction()
+ *
+ *  Creates the data record representing a member function. 
  *
  *  If any errors are encountered, this procedure returns TCL_ERROR
  *  along with an error message in the interpreter.  Otherwise, it
@@ -471,19 +415,19 @@ void Itclng_DeleteMemberFunc (char *cdata) {
  * ------------------------------------------------------------------------
  */
 int
-Itclng_CreateMemberFunc(
+ItclngCreateMemberFunction(
     Tcl_Interp* interp,            /* interpreter managing this action */
     ItclngClass *iclsPtr,            /* class definition */
     Tcl_Obj *namePtr,              /* name of new member */
-    CONST char* arglist,           /* space-separated list of arg names */
-    CONST char* body,              /* body of commands for the method */
     ItclngMemberFunc** imPtrPtr)     /* returns: pointer to new method defn */
 {
-    int newEntry;
-    char *name;
+    Tcl_Obj *statePtr;
+    Tcl_HashEntry *entry;
     ItclngMemberFunc *imPtr;
     ItclngMemberCode *mcode;
-    Tcl_HashEntry *entry;
+    char *name;
+    const char *stateStr;
+    int newEntry;
 
     /*
      *  Add the member function to the list of functions for
@@ -500,12 +444,17 @@ Itclng_CreateMemberFunc(
         return TCL_ERROR;
     }
 
+    name = Tcl_GetString(namePtr);
+    statePtr = ItclngGetStateString(iclsPtr, name);
+    if (statePtr == NULL) {
+	Tcl_AppendResult(interp, "cannot get state string", NULL);
+        return TCL_ERROR;
+    }
+    stateStr = Tcl_GetString(statePtr);
     /*
      *  Try to create the implementation for this command member.
      */
-    if (Itclng_CreateMemberCode(interp, iclsPtr, arglist, body,
-        &mcode) != TCL_OK) {
-
+    if (ItclngCreateMemberCode(interp, iclsPtr, name, stateStr, &mcode) != TCL_OK) {
         Tcl_DeleteHashEntry(entry);
         return TCL_ERROR;
     }
@@ -520,50 +469,18 @@ Itclng_CreateMemberFunc(
     memset(imPtr, 0, sizeof(ItclngMemberFunc));
     imPtr->iclsPtr    = iclsPtr;
     imPtr->protection = Itclng_Protection(interp, 0);
-    imPtr->namePtr    = Tcl_NewStringObj(Tcl_GetString(namePtr), -1);
+    imPtr->namePtr    = Tcl_DuplicateObj(namePtr);
     Tcl_IncrRefCount(imPtr->namePtr);
     imPtr->fullNamePtr = Tcl_NewStringObj(
             Tcl_GetString(iclsPtr->fullNamePtr), -1);
     Tcl_AppendToObj(imPtr->fullNamePtr, "::", 2);
     Tcl_AppendToObj(imPtr->fullNamePtr, Tcl_GetString(namePtr), -1);
     Tcl_IncrRefCount(imPtr->fullNamePtr);
-    if (arglist != NULL) {
-        imPtr->origArgsPtr = Tcl_NewStringObj(arglist, -1);
-        Tcl_IncrRefCount(imPtr->origArgsPtr);
-    }
     imPtr->codePtr    = mcode;
-
     imPtr->declaringClassPtr = iclsPtr;
 
-    if (arglist) {
+    if (strcmp(stateStr, "NO_ARGS") == 0) {
         imPtr->flags |= ITCLNG_ARG_SPEC;
-    }
-    if (mcode->argListPtr) {
-#ifdef NOTDEF
-        ItclngCreateArgList(interp, arglist, &imPtr->argcount,
-	        &imPtr->maxargcount, &imPtr->usagePtr,
-		&imPtr->argListPtr, imPtr, NULL);
-#endif
-    }
-
-    name = Tcl_GetString(namePtr);
-    if ((body != NULL) && (body[0] == '@')) {
-        /* check for builtin cget isa and configure and mark them for
-	 * use of a different arglist "args" for TclOO !! */
-	if (strcmp(name, "cget") == 0) {
-            imPtr->codePtr->flags |= ITCLNG_BUILTIN;
-	}
-	if (strcmp(name, "configure") == 0) {
-	    imPtr->argcount = 0;
-	    imPtr->maxargcount = -1;
-            imPtr->codePtr->flags |= ITCLNG_BUILTIN;
-	}
-	if (strcmp(name, "isa") == 0) {
-            imPtr->codePtr->flags |= ITCLNG_BUILTIN;
-	}
-	if (strcmp(name, "info") == 0) {
-            imPtr->codePtr->flags |= ITCLNG_BUILTIN;
-	}
     }
     if (strcmp(name, "___constructor_init") == 0) {
         imPtr->flags |= ITCLNG_CONINIT;
@@ -583,6 +500,43 @@ Itclng_CreateMemberFunc(
     Tcl_EventuallyFree((ClientData)imPtr, Itclng_DeleteMemberFunc);
 
     *imPtrPtr = imPtr;
+    return TCL_OK;
+}
+
+/*
+ * ------------------------------------------------------------------------
+ *  ItclngCreateMethodOrProc()
+ *
+ *  Installs a method/proc into the namespace associated with a class.
+ *  If another command with the same name is already installed, then
+ *  it is overwritten.
+ *
+ *  Returns TCL_OK on success, or TCL_ERROR (along with an error message
+ *  in the specified interp) if anything goes wrong.
+ * ------------------------------------------------------------------------
+ */
+int
+ItclngCreateMethodOrProc(
+    Tcl_Interp* interp,    /* interpreter managing this action */
+    ItclngClass *iclsPtr,  /* class definition */
+    Tcl_Obj *namePtr,      /* name of new method */
+    int flags)             /* whether this is a method or proc */
+{
+    ItclngMemberFunc *imPtr;
+    /*
+     *  Create the member function definition.
+     */
+    if (ItclngCreateMemberFunction(interp, iclsPtr, namePtr, &imPtr)
+        != TCL_OK) {
+        return TCL_ERROR;
+    }
+
+    /*
+     *  Mark procs as "common".  This distinguishes them from methods.
+     */
+    imPtr->flags |= flags;
+
+    Tcl_Preserve((ClientData)imPtr);
     return TCL_OK;
 }
 
@@ -613,6 +567,7 @@ Itclng_ChangeMemberFunc(
     ItclngMemberCode *mcode = NULL;
     int isNewEntry;
 
+#ifdef NOTDEF
     /*
      *  Try to create the implementation for this command member.
      */
@@ -621,21 +576,29 @@ Itclng_ChangeMemberFunc(
 
         return TCL_ERROR;
     }
+#endif
 
     /*
      *  If the argument list was defined when the function was
      *  created, compare the arg lists or usage strings to make sure
      *  that the interface is not being redefined.
      */
-    if ((imPtr->flags & ITCLNG_ARG_SPEC) != 0 &&
-            (imPtr->argListPtr != NULL) &&
-            !EquivArgLists(interp, imPtr->argListPtr, mcode->argListPtr)) {
+    if ((imPtr->flags & ITCLNG_ARG_SPEC) != 0
+#ifdef NOTDEF
+            && (imPtr->argListPtr != NULL) &&
+            !EquivArgLists(interp, imPtr->argListPtr, mcode->argListPtr)
+#endif
+	    ) {
 	const char *argsStr;
+#ifdef NOTDEF
 	if (imPtr->origArgsPtr != 0) {
 	    argsStr = Tcl_GetString(imPtr->origArgsPtr);
 	} else {
+#endif
 	    argsStr = "";
+#ifdef NOTDEF
 	}
+#endif
         Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
             "argument list changed for function \"",
             Tcl_GetString(imPtr->fullNamePtr), "\": should be \"",
@@ -656,10 +619,17 @@ Itclng_ChangeMemberFunc(
     imPtr->codePtr = mcode;
     if (mcode->flags & ITCLNG_IMPLEMENT_TCL) {
 	ClientData pmPtr;
+	Tcl_Obj *argumentPtr;
+	Tcl_Obj *bodyPtr;
+
+	argumentPtr = ItclngGetArgumentString(imPtr->iclsPtr,
+	        Tcl_GetString(imPtr->namePtr));
+	bodyPtr = ItclngGetBodyString(imPtr->iclsPtr,
+	        Tcl_GetString(imPtr->namePtr));
         imPtr->tmPtr = (ClientData)Itclng_NewProcClassMethod(interp,
 	    imPtr->iclsPtr->clsPtr, ItclngCheckCallMethod, ItclngAfterCallMethod,
-	    ItclngProcErrorProc, imPtr, imPtr->namePtr, mcode->argumentPtr,
-	    mcode->bodyPtr, &pmPtr);
+	    ItclngProcErrorProc, imPtr, imPtr->namePtr, argumentPtr,
+	    bodyPtr, &pmPtr);
         hPtr = Tcl_CreateHashEntry(&imPtr->iclsPtr->infoPtr->procMethods,
                 (char *)imPtr->tmPtr, &isNewEntry);
         if (isNewEntry) {
@@ -670,130 +640,6 @@ Itclng_ChangeMemberFunc(
     return TCL_OK;
 }
 
-
-/*
- * ------------------------------------------------------------------------
- *  Itclng_CreateMemberCode()
- *
- *  Creates the data record representing the implementation behind a
- *  class member function.  This includes the argument list and the body
- *  of the function.  If the body is of the form "@name", then it is
- *  treated as a label for a C procedure registered by Itclng_RegisterC().
- *
- *  The implementation is kept by the member function definition, and
- *  controlled by a preserve/release paradigm.  That way, if it is in
- *  use while it is being redefined, it will stay around long enough
- *  to avoid a core dump.
- *
- *  If any errors are encountered, this procedure returns TCL_ERROR
- *  along with an error message in the interpreter.  Otherwise, it
- *  returns TCL_OK, and "mcodePtr" returns a pointer to the new
- *  implementation.
- * ------------------------------------------------------------------------
- */
-int
-Itclng_CreateMemberCode(
-    Tcl_Interp* interp,            /* interpreter managing this action */
-    ItclngClass *iclsPtr,              /* class containing this member */
-    CONST char* arglist,           /* space-separated list of arg names */
-    CONST char* body,              /* body of commands for the method */
-    ItclngMemberCode** mcodePtr)     /* returns: pointer to new implementation */
-{
-    int argc;
-    int maxArgc;
-    Tcl_Obj *usagePtr;
-    ItclngArgList *argListPtr;
-    ItclngMemberCode *mcode;
-
-    /*
-     *  Allocate some space to hold the implementation.
-     */
-    mcode = (ItclngMemberCode*)ckalloc(sizeof(ItclngMemberCode));
-    memset(mcode, 0, sizeof(ItclngMemberCode));
-
-    if (arglist) {
-#ifdef NOTDEF
-        if (ItclngCreateArgList(interp, arglist, &argc, &maxArgc, &usagePtr,
-	        &argListPtr, NULL, NULL) != TCL_OK) {
-            Itclng_DeleteMemberCode((char*)mcode);
-            return TCL_ERROR;
-        }
-#endif
-        mcode->argcount = argc;
-        mcode->maxargcount = maxArgc;
-        mcode->argListPtr = argListPtr;
-        mcode->usagePtr = usagePtr;
-	mcode->argumentPtr = Tcl_NewStringObj((CONST84 char *)arglist, -1);
-	Tcl_IncrRefCount(mcode->argumentPtr);
-        mcode->flags   |= ITCLNG_ARG_SPEC;
-    } else {
-        argc = 0;
-        argListPtr = NULL;
-    }
-
-    if (body) {
-        mcode->bodyPtr = Tcl_NewStringObj((CONST84 char *)body, -1);
-    } else {
-        mcode->bodyPtr = Tcl_NewStringObj((CONST84 char *)"", -1);
-        mcode->flags |= ITCLNG_IMPLEMENT_NONE;
-    }
-    Tcl_IncrRefCount(mcode->bodyPtr);
-
-    /*
-     *  If the body definition starts with '@', then treat the value
-     *  as a symbolic name for a C procedure.
-     */
-    if (body == NULL) {
-        /* No-op */
-    } else {
-        if (*body == '@') {
-#ifdef NOTDEF
-            Tcl_CmdProc *argCmdProc;
-            Tcl_ObjCmdProc *objCmdProc;
-            ClientData cdata;
-#endif
-	    int isDone;
-
-	    isDone = 0;
-	    if (strcmp(body, "@itcl-builtin-cget") == 0) {
-	        isDone = 1;
-	    }
-	    if (strcmp(body, "@itcl-builtin-configure") == 0) {
-	        isDone = 1;
-	    }
-	    if (strcmp(body, "@itcl-builtin-info") == 0) {
-	        isDone = 1;
-	    }
-	    if (strcmp(body, "@itcl-builtin-isa") == 0) {
-	        isDone = 1;
-	    }
-	    if (strcmp(body, "@itcl-builtin-hullinstall") == 0) {
-	        isDone = 1;
-	    }
-	    if (strncmp(body, "@itcl-builtin-setget", 20) == 0) {
-	        isDone = 1;
-	    }
-	    if (!isDone) {
-                Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
-                        "no registered C procedure with name \"",
-		        body+1, "\"", (char*)NULL);
-                Itclng_DeleteMemberCode((char*)mcode);
-                return TCL_ERROR;
-	    } else {
-                mcode->flags |= ITCLNG_IMPLEMENT_TCL|ITCLNG_BUILTIN;
-	    }
-        } else {
-
-            /*
-             *  Otherwise, treat the body as a chunk of Tcl code.
-             */
-            mcode->flags |= ITCLNG_IMPLEMENT_TCL;
-	}
-    }
-
-    *mcodePtr = mcode;
-    return TCL_OK;
-}
 
 /*
  * ------------------------------------------------------------------------
@@ -813,16 +659,6 @@ Itclng_DeleteMemberCode(
     if (mCodePtr == NULL) {
         return;
     }
-    if (mCodePtr->argListPtr != NULL) {
-        DeleteArgList(mCodePtr->argListPtr);
-    }
-    if (mCodePtr->usagePtr != NULL) {
-        Tcl_DecrRefCount(mCodePtr->usagePtr);
-    }
-    if (mCodePtr->argumentPtr != NULL) {
-        Tcl_DecrRefCount(mCodePtr->argumentPtr);
-    }
-    /* do NOT free mCodePtr->bodyPtr here !! that is done in TclOO!! */
     ckfree((char*)mCodePtr);
 }
 
@@ -980,37 +816,7 @@ Itclng_EvalMemberCode(
 evalMemberCodeDone:
     return result;
 }
-/*
- * ------------------------------------------------------------------------
- *  DeleteArgList()
- * ------------------------------------------------------------------------
- */
-
-static void
-DeleteArgList(
-    ItclngArgList *arglistPtr)	/* first argument in arg list chain */
-{
-#ifdef nOTDEF
-    ItclngArgList *currPtr;
-    ItclngArgList *nextPtr;
-#endif
-
-/* FIX ME !!! */
-return;
 #ifdef NOTDEF
-    currPtr=arglistPtr;
-    while (currPtr != NULL) {
-	if (currPtr->defaultValuePtr != NULL) {
-	    Tcl_DecrRefCount(currPtr->defaultValuePtr);
-	}
-	Tcl_DecrRefCount(currPtr->namePtr);
-        nextPtr = currPtr->nextPtr;
-        ckfree((char *)currPtr);
-        currPtr=nextPtr;
-    }
-    return;
-#endif
-}
 
 /*
  * ------------------------------------------------------------------------
@@ -1091,6 +897,7 @@ EquivArgLists(
 #endif
     return 1;
 }
+#endif
 
 /*
  * ------------------------------------------------------------------------
@@ -1249,13 +1056,16 @@ Itclng_GetMemberFuncUsage(
      *  Add the argument usage info.
      */
     if (imPtr->codePtr) {
+#ifdef NOTDEF
 	if (imPtr->codePtr->usagePtr != NULL) {
             arglist = Tcl_GetString(imPtr->codePtr->usagePtr);
 	} else {
 	    arglist = NULL;
 	}
+#endif
         argcount = imPtr->argcount;
     } else {
+#ifdef NOTDEF
         if (imPtr->argListPtr != NULL) {
             arglist = Tcl_GetString(imPtr->usagePtr);
             argcount = imPtr->argcount;
@@ -1263,6 +1073,7 @@ Itclng_GetMemberFuncUsage(
             arglist = NULL;
             argcount = 0;
         }
+#endif
     }
     if (arglist) {
 	if (strlen(arglist) > 0) {
@@ -1953,7 +1764,9 @@ ItclngCheckCallMethod(
             Tcl_AppendResult(interp, "wrong # args: should be \"",
 	            Tcl_GetString(cObjv[0]), " ",
 	            Tcl_GetString(imPtr->namePtr), " ",
-		    Tcl_GetString(imPtr->usagePtr), "\"", NULL);
+		    ItclngGetUsageString(imPtr->iclsPtr,
+		    Tcl_GetString(imPtr->namePtr)),
+		    "\"", NULL);
 	}
         if (isFinished != NULL) {
             *isFinished = 1;
