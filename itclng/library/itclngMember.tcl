@@ -45,7 +45,7 @@ argument with no name"
 		    append usage "?arg arg ...?"
 		} else {
 		    if {$haveDefault} {
-		        append usage "?$arg?"
+		        append usage "?$argumentName?"
 		    } else {
 		        append usage $argumentName
 		        incr minArgs
@@ -58,11 +58,14 @@ argument with no name"
         return $argInfos
     }
 
-    proc method {infoNs className protection name args} {
-puts stderr "$name![llength $args]!"
-        puts stderr "ME!$infoNs!$className!$protection!$name![join $args !]!"
+    proc methodOrProc {infoNs className type protection name args} {
+puts stderr "methodOrProc!$name![llength $args]!"
+#puts stderr "ME!$infoNs!$className!$protection!$name![join $args !]!"
 	if {[dict exists [set ${infoNs}] functions $name]} {
 	    return -code error -level 4 "\"$name\" already defined in class \"$className\""
+	}
+	if {[string first "::" $name] >= 0} {
+	    return -code error -level 4 "bad $type name \"$name\""
 	}
 	switch [llength $args] {
 	0 {
@@ -95,7 +98,11 @@ puts stderr "$name![llength $args]!"
 	}
 	set argumentInfo [list definition $arguments minargs $minArgs maxargs $maxArgs haveArgsArg $haveArgsArg usage $usage defaultargs $defaultArgs]
         dict lappend ${infoNs} functions $name [list protection $protection arguments $argumentInfo origArguments $argumentInfo body $body origBody $body state $state]
-puts stderr "DI2![dict get [set ${infoNs}] functions $name]!"
+#puts stderr "DI2![dict get [set ${infoNs}] functions $name]!"
+        ::itclng::internal::commands createClass$type $className $name
+    }
+    proc method {infoNs className protection name args} {
+        return [methodOrProc $infoNs $className Method $protection $name {*}$args]
     }
     proc common {infoNs className protection name args} {
     }
@@ -107,6 +114,7 @@ puts stderr "DI2![dict get [set ${infoNs}] functions $name]!"
     }
     proc option {infoNs className protection name args} {
     }
-    proc proc {infoNs className protection args} {
+    proc proc {infoNs className protection name args} {
+        return [methodOrProc $infoNs $className Proc $protection $name {*}$args]
     }
 }

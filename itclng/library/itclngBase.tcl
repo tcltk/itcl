@@ -43,7 +43,17 @@ puts stderr "IS!$infoNs!"
 puts stderr "IV!$infoNs![dict get [set ${infoNs}] functions]!"
 	    dict set ${infoNs} variables [list]
 	    dict set ${infoNs} options [list]
+	    set result 0
+	    if {[catch {
 	    namespace eval ::itclng::parser {*}$args
+	    } errs]} {
+	        set result 1
+	    }
+	    ::itclng::internal::commands createClassFinish $fullClassName $result
+	    if {$result} {
+	        return -code error -level 2 $errs
+	    }
+	    return $fullClassName
 	}
     }
     namespace eval object {
