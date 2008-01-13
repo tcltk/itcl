@@ -16,26 +16,12 @@ static Tcl_NamespaceDeleteProc* _TclOONamespaceDeleteProc = NULL;
 static void ItclngDestroyClass _ANSI_ARGS_((ClientData cdata));
 static void ItclngDestroyClassNamesp _ANSI_ARGS_((ClientData cdata));
 static void ItclngFreeClass _ANSI_ARGS_((char* cdata));
-static void ItclngDeleteFunction(ItclngMemberFunc *imPtr);
 static void ItclngDeleteComponent(ItclngComponent *icPtr);
 static void ItclngDeleteOption(ItclngOption *ioptPtr);
 #ifdef NOTDEF
 static void ItclngDeleteDelegatedOption(ItclngDelegatedOption *idoPtr);
 #endif
 static void ItclngDeleteDelegatedFunction(ItclngDelegatedFunction *idmPtr);
-
-
-/*
- * ------------------------------------------------------------------------
- *  Itclng_DeleteMemberFunc()
- *
- * ------------------------------------------------------------------------
- */
-
-void Itclng_DeleteMemberFunc (char *cdata) {
-    /* needed for stubs compatibility */
-    ItclngDeleteFunction((ItclngMemberFunc *)cdata);
-}
 
 
 /*
@@ -237,12 +223,10 @@ Itclng_CreateClassCmd(
     }
 
     Tcl_EventuallyFree((ClientData)iclsPtr, ItclngFreeClass);
-#ifndef NOTDEF
     Itclng_SetNamespaceResolvers(classNs,
             (Tcl_ResolveCmdProc*)Itclng_ClassCmdResolver,
             (Tcl_ResolveVarProc*)Itclng_ClassVarResolver,
             (Tcl_ResolveCompiledVarProc*)Itclng_ClassCompiledVarResolver);
-#endif
     iclsPtr->nsPtr = classNs;
 
 
@@ -293,7 +277,6 @@ Itclng_CreateClassCmd(
      */
     namePtr = Tcl_NewStringObj("this", -1);
     Tcl_IncrRefCount(namePtr);
-#ifdef NOTDEF
     (void) Itclng_CreateVariable(interp, iclsPtr, namePtr, (char*)NULL,
             (char*)NULL, &ivPtr);
 
@@ -318,7 +301,6 @@ Itclng_CreateClassCmd(
     hPtr = Tcl_CreateHashEntry(&iclsPtr->variables, (char *)namePtr,
             &newEntry);
     Tcl_SetHashValue(hPtr, (ClientData)ivPtr);
-#endif
     /*
      *  Create a command in the current namespace to manage the class:
      *    <className>
@@ -331,6 +313,7 @@ Itclng_CreateClassCmd(
                 TCL_TRACE_RENAME|TCL_TRACE_DELETE, ClassRenamedTrace, iclsPtr);
     /* FIX ME should set the class objects unknown command to Itclng_HandleClass */
 
+    Tcl_ResetResult(interp);
     Tcl_AppendResult(interp, Tcl_GetString(iclsPtr->fullNamePtr), NULL);
     return TCL_OK;
 }
@@ -428,12 +411,10 @@ Itclng_DeleteClass(
         contextIoPtr = (ItclngObject*)Tcl_GetHashValue(hPtr);
 
         if (contextIoPtr->iclsPtr == iclsPtr) {
-#ifdef NOTDEF
             if (Itclng_DeleteObject(interp, contextIoPtr) != TCL_OK) {
                 iclsPtr2 = iclsPtr;
                 goto deleteClassFail;
             }
-#endif
 
 	    /*
 	     * Fix 227804: Whenever an object to delete was found we
@@ -700,9 +681,7 @@ ItclngFreeClass(
      *  Delete all variable definitions.
      */
     FOREACH_HASH_VALUE(ivPtr, &iclsPtr->variables) {
-#ifdef NOTDEF
         Itclng_DeleteVariable(ivPtr);
-#endif
     }
     Tcl_DeleteHashTable(&iclsPtr->variables);
 
@@ -805,7 +784,6 @@ Itclng_IsClassNamespace(
     return 0;
 }
 
-#ifdef NOTDEF
 
 /*
  * ------------------------------------------------------------------------
@@ -858,9 +836,10 @@ Itclng_IsClass(
  * ------------------------------------------------------------------------
  */
 ItclngClass*
-Itclng_FindClass(interp, path, autoload)
-    Tcl_Interp* interp;      /* interpreter containing class */
-    CONST char* path;              /* path name for class */
+Itclng_FindClass(
+    Tcl_Interp* interp,      /* interpreter containing class */
+    CONST char* path,         /* path name for class */
+    int autoload)
 {
     Tcl_Namespace* classNs;
 
@@ -940,9 +919,9 @@ Itclng_FindClass(interp, path, autoload)
  * ------------------------------------------------------------------------
  */
 Tcl_Namespace*
-Itclng_FindClassNamespace(interp, path)
-    Tcl_Interp* interp;        /* interpreter containing class */
-    CONST char* path;                /* path name for class */
+Itclng_FindClassNamespace(
+    Tcl_Interp* interp,        /* interpreter containing class */
+    CONST char* path)                /* path name for class */
 {
     Tcl_Namespace* contextNs = Tcl_GetCurrentNamespace(interp);
     Tcl_Namespace* classNs;
@@ -1374,7 +1353,6 @@ Itclng_BuildVirtualTables(
     Tcl_DStringFree(&buffer);
     Tcl_DStringFree(&buffer2);
 }
-#endif
 
 
 /*
@@ -1425,7 +1403,6 @@ Itclng_CreateVariable(
      *  its implementation.
      */
     if (config) {
-#ifdef NOTDEF
         if (Itclng_CreateMemberCode(interp, iclsPtr, (char*)NULL, config,
                 &mCodePtr) != TCL_OK) {
             Tcl_DeleteHashEntry(hPtr);
@@ -1433,7 +1410,6 @@ Itclng_CreateVariable(
         }
         Tcl_Preserve((ClientData)mCodePtr);
         Tcl_EventuallyFree((ClientData)mCodePtr, Itclng_DeleteMemberCode);
-#endif
     } else {
         mCodePtr = NULL;
     }
@@ -1508,24 +1484,6 @@ Itclng_CreateOption(
         return TCL_ERROR;
     }
 
-#ifdef NOTDEF
-    /*
-     *  If this option has some "config" code, try to capture
-     *  its implementation.
-     */
-    if (config) {
-        if (Itclng_CreateMemberCode(interp, iclsPtr, (char*)NULL, config,
-                &mCodePtr) != TCL_OK) {
-            Tcl_DeleteHashEntry(hPtr);
-            return TCL_ERROR;
-        }
-        Itclng_PreserveData((ClientData)mCodePtr);
-        Itclng_EventuallyFree((ClientData)mCodePtr, Itclng_DeleteMemberCode);
-    } else {
-        mCodePtr = NULL;
-    }
-#endif
-        
     ioptPtr->iclsPtr = iclsPtr;
     ioptPtr->codePtr = mCodePtr;
     ioptPtr->fullNamePtr = Tcl_NewStringObj(
@@ -1683,9 +1641,9 @@ Itclng_GetCommonVar(
  * ------------------------------------------------------------------------
  */
 void
-Itclng_InitHierIter(iter,iclsPtr)
-    ItclngHierIter *iter;   /* iterator used for traversal */
-    ItclngClass *iclsPtr;     /* class definition for start of traversal */
+Itclng_InitHierIter(
+    ItclngHierIter *iter,   /* iterator used for traversal */
+    ItclngClass *iclsPtr)     /* class definition for start of traversal */
 {
     Itclng_InitStack(&iter->stack);
     Itclng_PushStack((ClientData)iclsPtr, &iter->stack);
@@ -1701,8 +1659,8 @@ Itclng_InitHierIter(iter,iclsPtr)
  * ------------------------------------------------------------------------
  */
 void
-Itclng_DeleteHierIter(iter)
-    ItclngHierIter *iter;  /* iterator used for traversal */
+Itclng_DeleteHierIter(
+    ItclngHierIter *iter)  /* iterator used for traversal */
 {
     Itclng_DeleteStack(&iter->stack);
     iter->current = NULL;
@@ -1763,42 +1721,6 @@ Itclng_DeleteVariable(
         Tcl_DecrRefCount(ivPtr->init);
     }
     ckfree((char*)ivPtr);
-}
-
-/*
- * ------------------------------------------------------------------------
- *  ItclngDeleteFunction()
- *
- *  fre data associated with a function
- * ------------------------------------------------------------------------
- */
-static void
-ItclngDeleteFunction(
-    ItclngMemberFunc *imPtr)
-{
-    Tcl_DecrRefCount(imPtr->namePtr);
-    Tcl_DecrRefCount(imPtr->fullNamePtr);
-    if (imPtr->codePtr != NULL) {
-       Tcl_Release((ClientData)imPtr->codePtr);
-    }
-    if (imPtr->usagePtr != NULL) {
-        Tcl_DecrRefCount(imPtr->usagePtr);
-    }
-    if (imPtr->argumentPtr != NULL) {
-        Tcl_DecrRefCount(imPtr->argumentPtr);
-    }
-    if (imPtr->origArgsPtr != NULL) {
-        Tcl_DecrRefCount(imPtr->origArgsPtr);
-    }
-    if (imPtr->bodyPtr != NULL) {
-        Tcl_DecrRefCount(imPtr->bodyPtr);
-    }
-    if (imPtr->argListPtr != NULL) {
-#ifdef NOTDEF
-        ItclngDeleteArgList(imPtr->argListPtr);
-#endif
-    }
-    ckfree((char*)imPtr);
 }
 
 /*

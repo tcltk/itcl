@@ -9,7 +9,7 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itclngInt.h,v 1.1.2.2 2008/01/12 23:43:46 wiede Exp $
+ * RCS: @(#) $Id: itclngInt.h,v 1.1.2.3 2008/01/13 11:56:24 wiede Exp $
  */
 
 #include <string.h>
@@ -18,7 +18,7 @@
 #include <tclOO.h>
 #include "itclngMigrate2TclCore.h"
 #include "itclngTclIntStubsFcn.h"
-//#include "itclngNeededFromTclOO.h"
+#include "itclngNeededFromTclOO.h"
 #include "itclng.h"
 
 /*
@@ -449,7 +449,11 @@ MODULE_SCOPE void ItclngShowArgs(int level, const char *str, int objc,
 
 MODULE_SCOPE int ItclngMapMethodNameProc(Tcl_Interp *interp, Tcl_Object oPtr,
         Tcl_Class *startClsPtr, Tcl_Obj *methodObj);
+
 MODULE_SCOPE int Itclng_Protection(Tcl_Interp *interp, int newLevel);
+MODULE_SCOPE Tcl_Obj* Itclng_CreateArgs(Tcl_Interp *interp,
+        CONST char *string, int objc, Tcl_Obj *CONST objv[]);
+
 MODULE_SCOPE void Itclng_ParseNamespPath(CONST char *name,
         Tcl_DString *buffer, char **head, char **tail);
 MODULE_SCOPE int Itclng_CanAccessFunc(ItclngMemberFunc* imPtr,
@@ -470,8 +474,66 @@ MODULE_SCOPE int Itclng_ClassVarResolver(Tcl_Interp *interp, CONST char* name,
 MODULE_SCOPE int Itclng_ClassCompiledVarResolver(Tcl_Interp *interp,
         CONST char* name, int length, Tcl_Namespace *nsPtr,
         Tcl_ResolvedVarInfo **rPtr);
+MODULE_SCOPE int Itclng_CreateVariable(Tcl_Interp *interp,
+        ItclngClass* iclsPtr, Tcl_Obj* namePtr, char* init, char* config,
+        ItclngVariable** ivPtrPtr);
+MODULE_SCOPE void Itclng_DeleteVariable(ItclngVariable *ivPtr);
+MODULE_SCOPE Tcl_Namespace* Itclng_FindClassNamespace(Tcl_Interp* interp,
+        CONST char* path);
+MODULE_SCOPE void Itclng_InitHierIter(ItclngHierIter *iter,
+        ItclngClass *iclsPtr);
+MODULE_SCOPE void Itclng_DeleteHierIter(ItclngHierIter *iter);
+MODULE_SCOPE ItclngClass* Itclng_AdvanceHierIter(ItclngHierIter *iter);
+MODULE_SCOPE ItclngClass* Itclng_FindClass(Tcl_Interp* interp,
+        CONST char* path, int autoload);
+MODULE_SCOPE void ItclngDeleteClassVariablesNamespace(Tcl_Interp *interp,
+        ItclngClass *iclsPtr);
 
-//#include "itclng2TclOO.h"
+MODULE_SCOPE int Itclng_DeleteObject(Tcl_Interp *interp,
+        ItclngObject *contextIoPtr);
+MODULE_SCOPE void ItclngDeleteObjectVariablesNamespace(Tcl_Interp *interp,
+        ItclngObject *ioPtr);
+MODULE_SCOPE void ItclngReportObjectUsage(Tcl_Interp *interp,
+        ItclngObject *contextIoPtr, Tcl_Namespace *callerNsPtr,
+        Tcl_Namespace *contextNsPtr);
+
+
+MODULE_SCOPE int Itclng_CreateMemberCode(Tcl_Interp* interp,
+        ItclngClass *iclsPtr, CONST char* arglist, CONST char* body,
+        ItclngMemberCode** mcodePtr);
+MODULE_SCOPE void Itclng_DeleteMemberCode(char* cdata);
+MODULE_SCOPE int ItclngCreateObject(Tcl_Interp *interp,
+        CONST char* name, ItclngClass *iclsPtr, int objc,
+        Tcl_Obj *CONST objv[]);
+MODULE_SCOPE int Itclng_DestructObject(Tcl_Interp *interp,
+        ItclngObject *contextIoPtr, int flags);
+MODULE_SCOPE int Itclng_ChangeMemberFunc(Tcl_Interp* interp,
+        ItclngMemberFunc* imPtr, CONST char* arglist, CONST char* body);
+MODULE_SCOPE int ItclngCreateMethod(Tcl_Interp* interp,
+        ItclngClass *iclsPtr, Tcl_Obj *namePtr, CONST char* arglist,
+        CONST char* body, ItclngMemberFunc **imPtrPtr);
+MODULE_SCOPE int Itclng_CreateMemberFunc(Tcl_Interp* interp,
+        ItclngClass *iclsPtr, Tcl_Obj *namePtr, CONST char* arglist,
+        CONST char* body, ItclngMemberFunc** imPtrPtr);
+MODULE_SCOPE int ItclngCheckCallMethod(ClientData clientData,
+        Tcl_Interp *interp, Tcl_ObjectContext contextPtr,
+        Tcl_CallFrame *framePtr, int *isFinished);
+MODULE_SCOPE int ItclngAfterCallMethod(ClientData clientData,
+        Tcl_Interp *interp, Tcl_ObjectContext contextPtr, Tcl_Namespace *nsPtr,
+        int call_result);
+MODULE_SCOPE void ItclngProcErrorProc(Tcl_Interp *interp,
+        Tcl_Obj *procNameObj);
+MODULE_SCOPE int Itclng_ConstructBase(Tcl_Interp *interp,
+        ItclngObject *contextObj, ItclngClass *contextClass, int objc,
+        Tcl_Obj *const *objv);
+MODULE_SCOPE void Itclng_GetMemberFuncUsage(ItclngMemberFunc *imPtr,
+        ItclngObject *contextIoPtr, Tcl_Obj *objPtr);
+MODULE_SCOPE int Itclng_InvokeMethodIfExists(Tcl_Interp *interp,
+        CONST char *name, ItclngClass *contextClass, ItclngObject *contextObj,
+        int objc, Tcl_Obj *CONST objv[]);
+
+
+#include "itclng2TclOO.h"
 
 /*
  * Include all the private API, generated from itcl.decls.

@@ -94,3 +94,10 @@ EXTERN int _Tcl_InvokeNamespaceProc(Tcl_Interp *interp, Tcl_Proc proc,
 EXTERN Tcl_Var Tcl_NewNamespaceVar(Tcl_Interp *interp, Tcl_Namespace *nsPtr,
 	const char *varName);
 EXTERN int Itclng_IsCallFrameArgument(Tcl_Interp *interp, const char *name);
+EXTERN Tcl_Namespace * Itclng_GetUplevelNamespace(Tcl_Interp *interp,
+        int level);
+EXTERN Tcl_Obj * const * Itclng_GetCallFrameObjv(Tcl_Interp *interp);
+EXTERN ClientData Itclng_GetCallFrameClientData(Tcl_Interp *interp);
+EXTERN int Itclng_GetCallFrameObjc(Tcl_Interp *interp);
+EXTERN int Itclng_SetCallFrameResolver(Tcl_Interp *interp,
+        Tcl_Resolve *resolvePtr);
