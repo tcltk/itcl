@@ -141,6 +141,7 @@ Itclng_CreateClassCmd(
     }
     infoPtr = (ItclngObjectInfo *)clientData;
     oPtr = NULL;
+    ivPtr = NULL;
     nameObjPtr = objv[1];
     /*
      *  Allocate class definition data.
@@ -166,6 +167,16 @@ Itclng_CreateClassCmd(
 
     Itclng_InitList(&iclsPtr->bases);
     Itclng_InitList(&iclsPtr->derived);
+
+    ItclngResolveInfo *resolveInfoPtr = (ItclngResolveInfo *)
+            ckalloc(sizeof(ItclngResolveInfo));
+    memset (resolveInfoPtr, 0, sizeof(ItclngResolveInfo));
+    resolveInfoPtr->flags = ITCLNG_RESOLVE_CLASS;
+    resolveInfoPtr->iclsPtr = iclsPtr;
+    iclsPtr->resolvePtr = (Tcl_Resolve *)ckalloc(sizeof(Tcl_Resolve));
+    iclsPtr->resolvePtr->cmdProcPtr = Itclng_CmdAliasProc;
+    iclsPtr->resolvePtr->varProcPtr = Itclng_VarAliasProc;
+    iclsPtr->resolvePtr->clientData = resolveInfoPtr;
 
     /*
      *  Initialize the heritage info--each class starts with its
@@ -276,8 +287,9 @@ Itclng_CreateClassCmd(
      */
     namePtr = Tcl_NewStringObj("this", -1);
     Tcl_IncrRefCount(namePtr);
-    (void) Itclng_CreateVariable(interp, iclsPtr, namePtr, (char*)NULL,
-            (char*)NULL, &ivPtr);
+    if (ItclngCreateVariable(interp, iclsPtr, namePtr, &ivPtr) != TCL_OK) {
+        return TCL_ERROR;
+    }
 
     ivPtr->protection = ITCLNG_PROTECTED;  /* always "protected" */
     ivPtr->flags |= ITCLNG_THIS_VAR;       /* mark as "this" variable */
@@ -286,15 +298,17 @@ Itclng_CreateClassCmd(
     Tcl_SetHashValue(hPtr, (ClientData)ivPtr);
 
     /*
-     *  Add the built-in "itcl_options" variable to the list of
+     *  Add the built-in "itclng_options" variable to the list of
      *  data members.
      */
-    namePtr = Tcl_NewStringObj("itcl_options", -1);
+    ivPtr = NULL;
+    namePtr = Tcl_NewStringObj("itclng_options", -1);
     Tcl_IncrRefCount(namePtr);
-    (void) Itclng_CreateVariable(interp, iclsPtr, namePtr, (char*)NULL,
-            (char*)NULL, &ivPtr);
+    if (ItclngCreateVariable(interp, iclsPtr, namePtr, &ivPtr) != TCL_OK) {
+        return TCL_ERROR;
+    }
     ivPtr->protection = ITCLNG_PROTECTED;  /* always "protected" */
-    ivPtr->flags |= ITCLNG_OPTIONS_VAR;    /* mark as "itcl_options"
+    ivPtr->flags |= ITCLNG_OPTIONS_VAR;    /* mark as "itclng_options"
 	                                      * variable */
     
     hPtr = Tcl_CreateHashEntry(&iclsPtr->variables, (char *)namePtr,
@@ -320,6 +334,7 @@ Itclng_CreateClassCmd(
 
     Tcl_ResetResult(interp);
     Tcl_AppendResult(interp, Tcl_GetString(iclsPtr->fullNamePtr), NULL);
+fprintf(stderr, "3\n");
     return TCL_OK;
 }
 
@@ -1358,11 +1373,55 @@ Itclng_BuildVirtualTables(
     Tcl_DStringFree(&buffer);
     Tcl_DStringFree(&buffer2);
 }
+
+/*
+ * ------------------------------------------------------------------------
+ *  ItclngCreateVariableMemberCode()
+ *
+ *  Creates the data record representing the implementation behind a
+ *  class variable config code.
+ *
+ *  The implementation is kept by the member function definition, and
+ *  controlled by a preserve/release paradigm.  That way, if it is in
+ *  use while it is being redefined, it will stay around long enough
+ *  to avoid a core dump.
+ *
+ *  If any errors are encountered, this procedure returns TCL_ERROR
+ *  along with an error message in the interpreter.  Otherwise, it
+ *  returns TCL_OK, and "mcodePtr" returns a pointer to the new
+ *  implementation.
+ * ------------------------------------------------------------------------
+ */
+int
+ItclngCreateVariableMemberCode(
+    Tcl_Interp* interp,            /* interpreter managing this action */
+    ItclngClass *iclsPtr,          /* class containing this member */
+    const char *name,              /* name of variable */
+    const char *config,            /* the config code */
+    ItclngMemberCode** mcodePtr)   /* returns: pointer to new implementation */
+{
+    ItclngMemberCode *mcode;
+
+    /*
+     *  Allocate some space to hold the implementation.
+     */
+    mcode = (ItclngMemberCode*)ckalloc(sizeof(ItclngMemberCode));
+    memset(mcode, 0, sizeof(ItclngMemberCode));
+    mcode->argcount = 0;
+    mcode->maxargcount = 0;
+    if (config == NULL) {
+        mcode->flags |= ITCLNG_IMPLEMENT_NONE;
+    } else {
+        mcode->flags |= ITCLNG_IMPLEMENT_TCL;
+    }
+    *mcodePtr = mcode;
+    return TCL_OK;
+}
 
 
 /*
  * ------------------------------------------------------------------------
- *  Itclng_CreateVariable()
+ *  ItclngCreateVariable()
  *
  *  Creates a new class variable definition.  If this is a public
  *  variable, it may have a bit of "config" code that is used to
@@ -1375,19 +1434,30 @@ Itclng_BuildVirtualTables(
  * ------------------------------------------------------------------------
  */
 int
-Itclng_CreateVariable(
+ItclngCreateVariable(
     Tcl_Interp *interp,       /* interpreter managing this transaction */
     ItclngClass* iclsPtr,       /* class containing this variable */
     Tcl_Obj* namePtr,         /* variable name */
-    char* init,               /* initial value */
-    char* config,             /* code invoked when variable is configured */
     ItclngVariable** ivPtrPtr)  /* returns: new variable definition */
 {
-    int newEntry;
+    Tcl_Obj *dictPtr;
+    Tcl_Obj *valuePtr;
+    Tcl_Obj *statePtr;
+    Tcl_HashEntry *hPtr;
     ItclngVariable *ivPtr;
     ItclngMemberCode *mCodePtr;
-    Tcl_HashEntry *hPtr;
+    const char *stateStr;
+    const char* init;       /* initial value */
+    const char *name;
+    int isSpecialVar;
+    int newEntry;
 
+    if (*ivPtrPtr != NULL) {
+        ivPtrPtr = NULL;
+    }
+    init = NULL;
+    mCodePtr = NULL;
+    name = Tcl_GetString(namePtr);
     /*
      *  Add this variable to the variable table for the class.
      *  Make sure that the variable name does not already exist.
@@ -1403,22 +1473,57 @@ Itclng_CreateVariable(
     }
     Tcl_IncrRefCount(namePtr);
 
-    /*
-     *  If this variable has some "config" code, try to capture
-     *  its implementation.
-     */
-    if (config) {
-#ifdef NOTDEF
-        if (Itclng_CreateMemberCode(interp, iclsPtr, (char*)NULL, config,
-                &mCodePtr) != TCL_OK) {
-            Tcl_DeleteHashEntry(hPtr);
+    isSpecialVar = 0;
+    if (strcmp (name, "this") == 0) {
+        isSpecialVar = 1;
+    }
+    if (strcmp (name, "itclng_options") == 0) {
+        isSpecialVar = 1;
+    }
+    if (!isSpecialVar) {
+        statePtr = ItclngGetVariableStateString(iclsPtr, name);
+        if (statePtr == NULL) {
+            Tcl_AppendResult(interp, "cannot get state string", NULL);
             return TCL_ERROR;
         }
-#endif
-        Tcl_Preserve((ClientData)mCodePtr);
-        Tcl_EventuallyFree((ClientData)mCodePtr, Itclng_DeleteMemberCode);
-    } else {
-        mCodePtr = NULL;
+        stateStr = Tcl_GetString(statePtr);
+        dictPtr = ItclngGetClassDictInfo(iclsPtr, "variables", name);
+        if (dictPtr == NULL) {
+            Tcl_AppendResult(interp, "cannot get variables info", NULL);
+            return TCL_ERROR;
+        }
+    
+        /*
+         *  If this variable has some "config" code, try to capture
+         *  its implementation.
+         */
+        if (strcmp(stateStr, "COMPLETE") == 0) {
+            valuePtr = ItclngGetDictValueInfo(interp, dictPtr, "config");
+            if (valuePtr == NULL) {
+                Tcl_AppendResult(interp, "cannot get variable config", NULL);
+                return TCL_ERROR;
+            }
+            if (ItclngCreateVariableMemberCode(interp, iclsPtr, (char*)NULL,
+	            Tcl_GetString(valuePtr), &mCodePtr) != TCL_OK) {
+                Tcl_DeleteHashEntry(hPtr);
+	        Tcl_DecrRefCount(valuePtr);
+                return TCL_ERROR;
+            }
+            Tcl_DecrRefCount(valuePtr);
+            Tcl_Preserve((ClientData)mCodePtr);
+            Tcl_EventuallyFree((ClientData)mCodePtr, Itclng_DeleteMemberCode);
+        } else {
+            if (strcmp(stateStr, "NO_CONFIG") == 0) {
+                valuePtr = ItclngGetDictValueInfo(interp, dictPtr, "init");
+                if (valuePtr == NULL) {
+                    Tcl_AppendResult(interp, "cannot get variable config", NULL);
+                    return TCL_ERROR;
+                }
+	        init = Tcl_GetString(valuePtr);
+	    }
+            mCodePtr = NULL;
+        }
+        Tcl_DecrRefCount(dictPtr);
     }
         
 
@@ -1441,6 +1546,7 @@ Itclng_CreateVariable(
     if (init) {
         ivPtr->init = Tcl_NewStringObj(init, -1);
         Tcl_IncrRefCount(ivPtr->init);
+        Tcl_DecrRefCount(valuePtr);
     } else {
         ivPtr->init = NULL;
     }
@@ -1448,6 +1554,128 @@ Itclng_CreateVariable(
     Tcl_SetHashValue(hPtr, (ClientData)ivPtr);
 
     *ivPtrPtr = ivPtr;
+    return TCL_OK;
+}
+
+/*
+ * ------------------------------------------------------------------------
+ *  ItclngCreateCommonOrVariable()
+ *
+ *  Installs a common/variable into the namespace associated with a class.
+ *
+ *  Returns TCL_OK on success, or TCL_ERROR (along with an error message
+ *  in the specified interp) if anything goes wrong.
+ * ------------------------------------------------------------------------
+ */
+int
+ItclngCreateCommonOrVariable(
+    Tcl_Interp* interp,    /* interpreter managing this action */
+    ItclngClass *iclsPtr,  /* class definition */
+    Tcl_Obj *namePtr,      /* name of new common/variable */
+    int flags)             /* whether this is a common or variable */
+{
+    ItclngVariable *ivPtr;
+
+    ivPtr = NULL;
+    /*
+     *  Create the common/variable definition.
+     */
+    if (ItclngCreateVariable(interp, iclsPtr, namePtr, &ivPtr)
+        != TCL_OK) {
+        return TCL_ERROR;
+    }
+
+    /*
+     *  Mark commons as "common".  This distinguishes them from variables.
+     */
+    ivPtr->flags |= flags;
+    if (flags & ITCLNG_COMMON) {
+	Tcl_HashEntry *hPtr;
+	Tcl_Var varPtr;
+	Tcl_Namespace *commonNsPtr;
+	Tcl_DString buffer;
+	Tcl_CallFrame frame;
+	int result;
+	int isNew;
+
+	iclsPtr->numCommons++;
+        /*
+         *  Create the variable in the namespace associated with the
+         *  class.  Do this the hard way, to avoid the variable resolver
+         *  procedures.  These procedures won't work until we rebuild
+         *  the virtual tables below.
+         */
+        Tcl_DStringInit(&buffer);
+        if (ivPtr->protection != ITCLNG_PUBLIC) {
+            /* public commons go to the class namespace directly the others
+	     * go to the variables namespace of the class */
+            Tcl_DStringAppend(&buffer, ITCLNG_VARIABLES_NAMESPACE, -1);
+        }
+        Tcl_DStringAppend(&buffer,
+	        Tcl_GetString(ivPtr->iclsPtr->fullNamePtr), -1);
+        commonNsPtr = Tcl_FindNamespace(interp, Tcl_DStringValue(&buffer),
+	        NULL, 0);
+        if (commonNsPtr == NULL) {
+            Tcl_AppendResult(interp, "ITCLNG: cannot find common variables",
+	            "namespace for class \"",
+		    Tcl_GetString(ivPtr->iclsPtr->fullNamePtr),
+		    "\"", NULL);
+	    return TCL_ERROR;
+        }
+        varPtr = Tcl_NewNamespaceVar(interp, commonNsPtr,
+                Tcl_GetString(ivPtr->namePtr));
+        hPtr = Tcl_CreateHashEntry(&iclsPtr->classCommons, (char *)ivPtr,
+                &isNew);
+        if (isNew) {
+            Tcl_SetHashValue(hPtr, varPtr);
+        }
+        result = Itclng_PushCallFrame(interp, &frame, commonNsPtr,
+            /* isProcCallFrame */ 0);
+        ItclngVarTraceInfo *traceInfoPtr;
+        traceInfoPtr = (ItclngVarTraceInfo *)ckalloc(sizeof(ItclngVarTraceInfo));
+        memset (traceInfoPtr, 0, sizeof(ItclngVarTraceInfo));
+        traceInfoPtr->flags = ITCLNG_TRACE_CLASS;
+        traceInfoPtr->ioPtr = NULL;
+        traceInfoPtr->iclsPtr = ivPtr->iclsPtr;
+        traceInfoPtr->ivPtr = ivPtr;
+        Tcl_TraceVar2(interp, Tcl_GetString(ivPtr->namePtr), NULL,
+               TCL_TRACE_UNSETS, ItclngTraceUnsetVar,
+               (ClientData)traceInfoPtr);
+        Itclng_PopCallFrame(interp);
+
+        /*
+         *  TRICKY NOTE:  Make sure to rebuild the virtual tables for this
+         *    class so that this variable is ready to access.  The variable
+         *    resolver for the parser namespace needs this info to find the
+         *    variable if the developer tries to set it within the class
+         *    definition.
+         *
+         *  If an initialization value was specified, then initialize
+         *  the variable now.
+         */
+        Itclng_BuildVirtualTables(iclsPtr);
+    
+        if (ivPtr->init) {
+            Tcl_DStringAppend(&buffer, "::", -1);
+            Tcl_DStringAppend(&buffer, Tcl_GetString(ivPtr->namePtr), -1);
+            CONST char *val = Tcl_SetVar(interp,
+	            Tcl_DStringValue(&buffer), Tcl_GetString(ivPtr->init),
+                    TCL_NAMESPACE_ONLY);
+    
+            if (!val) {
+                Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+                    "cannot initialize common variable \"",
+                    Tcl_GetString(ivPtr->namePtr), "\"",
+                    (char*)NULL);
+                return TCL_ERROR;
+            }
+        }
+        Tcl_DStringFree(&buffer);
+    } else {
+	iclsPtr->numVariables++;
+    }
+
+    Tcl_Preserve((ClientData)ivPtr);
     return TCL_OK;
 }
 
@@ -1710,7 +1938,7 @@ Itclng_AdvanceHierIter(
  * ------------------------------------------------------------------------
  *  Itclng_DeleteVariable()
  *
- *  Destroys a variable definition created by Itclng_CreateVariable(),
+ *  Destroys a variable definition created by ItclngCreateVariable(),
  *  freeing all resources associated with it.
  * ------------------------------------------------------------------------
  */

@@ -896,7 +896,6 @@ Itclng_CanAccessFunc(
     return 0;
 }
 
-#ifdef NOTDEF
 
 /*
  * ------------------------------------------------------------------------
@@ -916,7 +915,7 @@ Itclng_CanAccessFunc(
  * ------------------------------------------------------------------------
  */
 int
-Itcl_DecodeScopedCommand(
+Itclng_DecodeScopedCommand(
     Tcl_Interp *interp,		/* current interpreter */
     CONST char *name,		/* string to be decoded */
     Tcl_Namespace **rNsPtr,	/* returns: namespace for scoped value */
@@ -976,4 +975,3 @@ Itcl_DecodeScopedCommand(
     *rCmdPtr = cmdName;
     return TCL_OK;
 }
-#endif

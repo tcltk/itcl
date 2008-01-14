@@ -9,7 +9,7 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itclngHelpers.c,v 1.1.2.4 2008/01/13 19:46:29 wiede Exp $
+ * RCS: @(#) $Id: itclngHelpers.c,v 1.1.2.5 2008/01/14 21:25:53 wiede Exp $
  */
 
 #include "itclngInt.h"
@@ -68,6 +68,9 @@ ItclngGetClassDictInfo(
     Tcl_AppendToObj(objPtr, Tcl_GetString(iclsPtr->fullNamePtr), -1);
     Tcl_AppendToObj(objPtr, "::infos", -1);
     dictPtr = Tcl_ObjGetVar2(iclsPtr->interp, objPtr, NULL, 0);
+    if (dictPtr == NULL) {
+        return NULL;
+    }
     Tcl_DecrRefCount(objPtr);
     keyPtr = Tcl_NewStringObj(what, -1);
     valuePtr = Tcl_NewObj();
@@ -175,12 +178,12 @@ ItclngGetBodyString(
 
 /*
  * ------------------------------------------------------------------------
- *  ItclngGetStateString()
+ *  ItclngGetFunctionStateString()
  *
  * ------------------------------------------------------------------------
  */
 Tcl_Obj *
-ItclngGetStateString(
+ItclngGetFunctionStateString(
     ItclngClass *iclsPtr,
     const char *functionName)
 {
@@ -188,6 +191,29 @@ ItclngGetStateString(
     Tcl_Obj *valuePtr;
 
     dictPtr = ItclngGetClassDictInfo(iclsPtr, "functions", functionName);
+    if (dictPtr == NULL) {
+        return NULL;
+    }
+    valuePtr = ItclngGetDictValueInfo(iclsPtr->interp, dictPtr,
+            "state");
+    return valuePtr;
+}
+
+/*
+ * ------------------------------------------------------------------------
+ *  ItclngGetVariableStateString()
+ *
+ * ------------------------------------------------------------------------
+ */
+Tcl_Obj *
+ItclngGetVariableStateString(
+    ItclngClass *iclsPtr,
+    const char *variableName)
+{
+    Tcl_Obj *dictPtr;
+    Tcl_Obj *valuePtr;
+
+    dictPtr = ItclngGetClassDictInfo(iclsPtr, "variables", variableName);
     if (dictPtr == NULL) {
         return NULL;
     }
@@ -289,7 +315,6 @@ Itclng_CreateArgs(
     return listPtr;
 }
 
-#ifdef NOTDEF
 
 /*
  * ------------------------------------------------------------------------
@@ -305,7 +330,7 @@ ItclngTraceUnsetVar(
     const char *name2,
     int flags)
 {
-    IctlngVarTraceInfo *tracePtr;
+    ItclngVarTraceInfo *tracePtr;
     Tcl_HashEntry *hPtr;
 
     if (name2 != NULL) {
@@ -329,7 +354,6 @@ ItclngTraceUnsetVar(
     }
     return NULL;
 }
-#endif
 
 /*
  * ------------------------------------------------------------------------

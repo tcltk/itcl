@@ -9,15 +9,11 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itclngBase.c,v 1.1.2.2 2008/01/12 23:43:46 wiede Exp $
+ * RCS: @(#) $Id: itclngBase.c,v 1.1.2.3 2008/01/14 21:25:53 wiede Exp $
  */
 
 #include <stdlib.h>
 #include "itclngInt.h"
-
-/* BEGIN OF DUMMY FUNCTIONS !! */
-void ItclngDeleteObjectMetadata(ClientData clientData) { fprintf(stderr, "ItclngDeleteObjectMetadata not yet implemented!!\n"); }
-/* END OF DUMMY FUNCTIONS !! */
 
 extern struct ItclngStubAPI itclngStubAPI;
 

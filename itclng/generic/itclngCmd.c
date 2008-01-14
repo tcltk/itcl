@@ -441,7 +441,9 @@ Itclng_CreateClassCommonCmd(
     int objc,		        /* number of arguments */
     Tcl_Obj *const objv[])	/* argument objects */
 {
+    Tcl_HashEntry *hPtr;
     ItclngObjectInfo *infoPtr;
+    ItclngClass *iclsPtr;
 
     ItclngShowArgs(0, "Itclng_CreateClassCommonCmd", objc, objv);
     if (ItclngCheckNumCmdParams(interp, infoPtr, "createClassMethod", objc,
@@ -449,6 +451,17 @@ Itclng_CreateClassCommonCmd(
         return TCL_ERROR;
     }
     infoPtr = (ItclngObjectInfo *)clientData;
+    hPtr = Tcl_FindHashEntry(&infoPtr->classes, (char *)objv[1]);
+    if (hPtr == NULL) {
+        Tcl_AppendResult(interp, "no such class \"", Tcl_GetString(objv[1]),
+	        "\"", NULL);
+        return TCL_ERROR;
+    }
+    iclsPtr = Tcl_GetHashValue(hPtr);
+    if (ItclngCreateCommonOrVariable(interp, iclsPtr, objv[2],
+            ITCLNG_COMMON) != TCL_OK) {
+	return TCL_ERROR;
+    }
 
     return TCL_OK;
 }
@@ -469,7 +482,9 @@ Itclng_CreateClassVariableCmd(
     int objc,		        /* number of arguments */
     Tcl_Obj *const objv[])	/* argument objects */
 {
+    Tcl_HashEntry *hPtr;
     ItclngObjectInfo *infoPtr;
+    ItclngClass *iclsPtr;
 
     ItclngShowArgs(0, "Itclng_CreateClassVariableCmd", objc, objv);
     if (ItclngCheckNumCmdParams(interp, infoPtr, "createClassVariable", objc,
@@ -477,7 +492,17 @@ Itclng_CreateClassVariableCmd(
         return TCL_ERROR;
     }
     infoPtr = (ItclngObjectInfo *)clientData;
-
+    hPtr = Tcl_FindHashEntry(&infoPtr->classes, (char *)objv[1]);
+    if (hPtr == NULL) {
+        Tcl_AppendResult(interp, "no such class \"", Tcl_GetString(objv[1]),
+	        "\"", NULL);
+        return TCL_ERROR;
+    }
+    iclsPtr = Tcl_GetHashValue(hPtr);
+    if (ItclngCreateCommonOrVariable(interp, iclsPtr, objv[2],
+            /* common */0) != TCL_OK) {
+	return TCL_ERROR;
+    }
     return TCL_OK;
 }
 

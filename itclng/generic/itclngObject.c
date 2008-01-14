@@ -12,7 +12,6 @@
  */
 #include "itclngInt.h"
 
-#ifdef NOTDEF
 /*
  *  FORWARD DECLARATIONS
  */
@@ -23,15 +22,20 @@ static char* ItclngTraceOptionVar(ClientData cdata, Tcl_Interp *interp,
 
 static void ItclngFreeObject(char * clientData);
 static void ItclngDestroyObject(ClientData clientData);
-#endif
 
 static int ItclngDestructBase(Tcl_Interp *interp, ItclngObject *contextObj,
         ItclngClass *contextClass, int flags);
 
-#ifdef NOTDEF
 static int ItclngInitObjectVariables(Tcl_Interp *interp, ItclngObject *ioPtr,
         ItclngClass *iclsPtr, const char *name);
 static int ItclngInitExtendedClassOptions(Tcl_Interp *interp, ItclngObject *ioPtr);
+static int InitObjectOptions(Tcl_Interp *interp, ItclngObject *ioPtr,
+        ItclngClass *iclsPtr, const char *name);
+static int InitObjectMethodVariables(Tcl_Interp *interp, ItclngObject *ioPtr,
+        ItclngClass *iclsPtr, const char *name);
+static int DelegationInstall(Tcl_Interp *interp, ItclngObject *ioPtr,
+	ItclngClass *iclsPtr);
+
 
 
 /*
@@ -71,15 +75,14 @@ ObjectRenamedTrace(
     if (newName != NULL) {
         return;
     }
-    ioPtr->flags |= ITCL_OBJECT_IS_RENAMED;
-    if (ioPtr->flags & ITCL_TCLOO_OBJECT_IS_DELETED) {
+    ioPtr->flags |= ITCLNG_OBJECT_IS_RENAMED;
+    if (ioPtr->flags & ITCLNG_TCLOO_OBJECT_IS_DELETED) {
         ioPtr->oPtr = NULL;
     }
-    if (!(ioPtr->flags & (ITCL_OBJECT_IS_DELETED|ITCL_OBJECT_IS_DESTRUCTED))) {
+    if (!(ioPtr->flags & (ITCLNG_OBJECT_IS_DELETED|ITCLNG_OBJECT_IS_DESTRUCTED))) {
         ItclngDestroyObject(ioPtr);
     }
 }
-#endif
 
 /*
  * ------------------------------------------------------------------------
@@ -110,14 +113,15 @@ ItclngCreateObject(
 {
     int result = TCL_OK;
 
-#ifdef NOTDEF
     Tcl_DString buffer;
     Tcl_CmdInfo cmdInfo;
     Tcl_HashEntry *entry;
     ItclngObjectInfo *infoPtr;
     ItclngObject *saveCurrIoPtr;
     ItclngObject *ioPtr;
+#ifdef NOTDEF
     Itclng_InterpState istate;
+#endif
     Tcl_Obj **newObjv;
     int newObjc;
     int newEntry;
@@ -131,7 +135,7 @@ ItclngCreateObject(
     ioPtr = (ItclngObject*)ckalloc(sizeof(ItclngObject));
     memset(ioPtr, 0, sizeof(ItclngObject));
     ioPtr->iclsPtr = iclsPtr;
-    Itclng_PreserveData((ClientData)iclsPtr);
+    Tcl_Preserve((ClientData)iclsPtr);
 
     ioPtr->constructed = (Tcl_HashTable*)ckalloc(sizeof(Tcl_HashTable));
     Tcl_InitObjHashTable(ioPtr->constructed);
@@ -141,12 +145,12 @@ ItclngCreateObject(
      *  This is done before invoking the constructors so that the
      *  command can be used during construction to query info.
      */
-    Itclng_PreserveData((ClientData)ioPtr);
+    Tcl_Preserve((ClientData)ioPtr);
 
     ioPtr->namePtr = Tcl_NewStringObj(name, -1);
     Tcl_IncrRefCount(ioPtr->namePtr);
     Tcl_DStringInit(&buffer);
-    Tcl_DStringAppend(&buffer, ITCL_VARIABLES_NAMESPACE, -1);
+    Tcl_DStringAppend(&buffer, ITCLNG_VARIABLES_NAMESPACE, -1);
     Tcl_DStringAppend(&buffer, "::", 2);
     Tcl_DStringAppend(&buffer, Tcl_GetString(ioPtr->namePtr), -1);
     ioPtr->varNsNamePtr = Tcl_NewStringObj(Tcl_DStringValue(&buffer), -1);
@@ -160,8 +164,8 @@ ItclngCreateObject(
     Tcl_InitObjHashTable(&ioPtr->objectMethodVariables);
     Tcl_InitHashTable(&ioPtr->contextCache, TCL_ONE_WORD_KEYS);
 
-    Itclng_PreserveData((ClientData)ioPtr);  /* while we're using this... */
-    Itclng_EventuallyFree((ClientData)ioPtr, ItclngFreeObject);
+    Tcl_Preserve((ClientData)ioPtr);  /* while we're using this... */
+    Tcl_EventuallyFree((ClientData)ioPtr, ItclngFreeObject);
 
     /*
      *  Install the class namespace and object context so that
@@ -177,47 +181,21 @@ ItclngCreateObject(
 	Tcl_AppendResult(interp, "error in ItclngInitObjectVariables", NULL);
         return TCL_ERROR;
     }
-    if (iclsPtr->flags & (ITCL_ECLASS|ITCL_NWIDGET)) {
-        ItclngInitExtendedClassOptions(interp, ioPtr);
-        if (ItclngInitObjectOptions(interp, ioPtr, iclsPtr, name) != TCL_OK) {
-	    Tcl_AppendResult(interp, "error in ItclngInitObjectOptions", NULL);
-            return TCL_ERROR;
-        }
-        if (ItclngInitObjectMethodVariables(interp, ioPtr, iclsPtr, name)
-	        != TCL_OK) {
-	    Tcl_AppendResult(interp, "error in ItclngInitObjectMethodVariables",
-	            NULL);
-            return TCL_ERROR;
-        }
+    ItclngInitExtendedClassOptions(interp, ioPtr);
+    if (InitObjectOptions(interp, ioPtr, iclsPtr, name) != TCL_OK) {
+        Tcl_AppendResult(interp, "error in InitObjectOptions", NULL);
+        return TCL_ERROR;
+    }
+    if (InitObjectMethodVariables(interp, ioPtr, iclsPtr, name)
+	    != TCL_OK) {
+	Tcl_AppendResult(interp, "error in InitObjectMethodVariables",
+	        NULL);
+        return TCL_ERROR;
     }
 
     infoPtr = iclsPtr->infoPtr;
     saveCurrIoPtr = infoPtr->currIoPtr;
     infoPtr->currIoPtr = ioPtr;
-    if (infoPtr->windgetInfoPtr != NULL) {
-        if (iclsPtr->flags & (ITCL_WIDGET|ITCL_WIDGETADAPTOR)) {
-            /* 
-             * set all the init values for options
-             */
-
-	    if (infoPtr->windgetInfoPtr->initObjectOpts != NULL) {
-	        if (infoPtr->windgetInfoPtr->initObjectOpts(interp, ioPtr,
-		        iclsPtr, name)  != TCL_OK) {
-	            Tcl_AppendResult(interp, "error in ItclngInitObjectOptions",
-		            NULL);
-                    return TCL_ERROR;
-                }
-            }
-        }
-        if (iclsPtr->flags & ITCL_WIDGET) {
-	    if (infoPtr->windgetInfoPtr->hullAndOptsInst != NULL) {
-                if (infoPtr->windgetInfoPtr->hullAndOptsInst(interp, ioPtr,
-		        iclsPtr, objc, objv, &newObjc, newObjv) != TCL_OK) {
-	            return TCL_ERROR;
-	        }
-	    }
-        }
-    }
     ioPtr->oPtr = Tcl_NewObjectInstance(interp, iclsPtr->clsPtr, name,
             iclsPtr->nsPtr->fullName, /* objc */-1, NULL, /* skip */0);
     if (ioPtr->oPtr == NULL) {
@@ -231,14 +209,14 @@ ItclngCreateObject(
     cmdInfo.deleteProc = (void *)ItclngDestroyObject;
     cmdInfo.deleteData = ioPtr;
     Tcl_SetCommandInfoFromToken(ioPtr->accessCmd, &cmdInfo);
-    ioPtr->resolvePtr = (Tcl_Resolve *)ckalloc(sizeof(Tcl_Resolve));
-    ioPtr->resolvePtr->cmdProcPtr = Itclng_CmdAliasProc;
-    ioPtr->resolvePtr->varProcPtr = Itclng_VarAliasProc;
     ItclngResolveInfo *resolveInfoPtr = (ItclngResolveInfo *)
     ckalloc(sizeof(ItclngResolveInfo));
     memset (resolveInfoPtr, 0, sizeof(ItclngResolveInfo));
-    resolveInfoPtr->flags = ITCL_RESOLVE_OBJECT;
+    resolveInfoPtr->flags = ITCLNG_RESOLVE_OBJECT;
     resolveInfoPtr->ioPtr = ioPtr;
+    ioPtr->resolvePtr = (Tcl_Resolve *)ckalloc(sizeof(Tcl_Resolve));
+    ioPtr->resolvePtr->cmdProcPtr = Itclng_CmdAliasProc;
+    ioPtr->resolvePtr->varProcPtr = Itclng_VarAliasProc;
     ioPtr->resolvePtr->clientData = resolveInfoPtr;
     Tcl_TraceCommand(interp, Tcl_GetString(ioPtr->namePtr),
             TCL_TRACE_RENAME|TCL_TRACE_DELETE, ObjectRenamedTrace, ioPtr);
@@ -284,7 +262,9 @@ fprintf(stderr, "DEBUG CONSTRUCTOR error!%s!\n", Tcl_GetStringResult(interp));
      *  state, since the destructors may generate errors of their own.
      */
     if (result != TCL_OK) {
+#ifdef NOTDEF
         istate = Itclng_SaveInterpState(interp, result);
+#endif
 
 	/* Bug 227824.
 	 * The constructor may destroy the object, possibly indirectly
@@ -296,7 +276,9 @@ fprintf(stderr, "DEBUG CONSTRUCTOR error!%s!\n", Tcl_GetStringResult(interp));
 	    Tcl_DeleteCommandFromToken(interp, ioPtr->accessCmd);
 	    ioPtr->accessCmd = NULL;
 	}
+#ifdef NOTDEF
         result = Itclng_RestoreInterpState(interp, istate);
+#endif
     }
 
     /*
@@ -324,10 +306,8 @@ fprintf(stderr, "DEBUG CONSTRUCTOR error!%s!\n", Tcl_GetStringResult(interp));
 
         Tcl_SetHashValue(entry, (ClientData)ioPtr);
 
-        if (!(ioPtr->iclsPtr->flags & ITCL_CLASS)) {
-	    if (DelegationInstall(interp, ioPtr, iclsPtr) != TCL_OK) {
-	        return TCL_ERROR;
-	    }
+	if (DelegationInstall(interp, ioPtr, iclsPtr) != TCL_OK) {
+	    return TCL_ERROR;
 	}
         /* add the objects unknow command to handle all unknown sub commands */
 	ClientData pmPtr;
@@ -362,11 +342,9 @@ fprintf(stderr, "DEBUG CONSTRUCTOR error!%s!\n", Tcl_GetStringResult(interp));
      *  Release the object.  If it was destructed above, it will
      *  die at this point.
      */
-    Itclng_ReleaseData((ClientData)ioPtr);
-#endif
+    Tcl_Release((ClientData)ioPtr);
     return result;
 }
-#ifdef NOTDEF
 
 /*
  * ------------------------------------------------------------------------
@@ -412,7 +390,7 @@ ItclngInitObjectVariables(
     iclsPtr2 = Itclng_AdvanceHierIter(&hier);
     while (iclsPtr2 != NULL) {
 	Tcl_DStringInit(&buffer);
-	Tcl_DStringAppend(&buffer, ITCL_VARIABLES_NAMESPACE, -1);
+	Tcl_DStringAppend(&buffer, ITCLNG_VARIABLES_NAMESPACE, -1);
 	if ((name[0] != ':') && (name[1] != ':')) {
              Tcl_DStringAppend(&buffer, "::", 2);
 	}
@@ -432,12 +410,12 @@ ItclngInitObjectVariables(
         entry = Tcl_FirstHashEntry(&iclsPtr2->variables, &place);
         while (entry) {
             ivPtr = (ItclngVariable*)Tcl_GetHashValue(entry);
-            if ((ivPtr->flags & ITCL_OPTIONS_VAR) && !itclOptionsIsSet) {
+            if ((ivPtr->flags & ITCLNG_OPTIONS_VAR) && !itclOptionsIsSet) {
                 /* this is the special code for the "itcl_options" variable */
 		itclOptionsIsSet = 1;
                 itclOptionsName = Tcl_GetString(ivPtr->namePtr);
                 Tcl_DStringInit(&buffer2);
-	        Tcl_DStringAppend(&buffer2, ITCL_VARIABLES_NAMESPACE, -1);
+	        Tcl_DStringAppend(&buffer2, ITCLNG_VARIABLES_NAMESPACE, -1);
 	        if ((name[0] != ':') && (name[1] != ':')) {
                      Tcl_DStringAppend(&buffer2, "::", 2);
 	        }
@@ -455,12 +433,12 @@ ItclngInitObjectVariables(
                         /*isProcCallFrame*/0) != TCL_OK) {
                     return TCL_ERROR;
                 }
-                if (Tcl_SetVar2(interp, "itcl_options", "",
+                if (Tcl_SetVar2(interp, "itclng_options", "",
 	                "", TCL_NAMESPACE_ONLY) == NULL) {
 	            Itclng_PopCallFrame(interp);
 		    return TCL_ERROR;
                 }
-                Tcl_TraceVar2(interp, "itcl_options",
+                Tcl_TraceVar2(interp, "itclng_options",
                         NULL,
                         TCL_TRACE_READS|TCL_TRACE_WRITES,
                         ItclngTraceOptionVar, (ClientData)ioPtr);
@@ -472,7 +450,7 @@ ItclngInitObjectVariables(
                 entry = Tcl_NextHashEntry(&place);
 	        continue;
             }
-	    if ((ivPtr->flags & ITCL_COMMON) == 0) {
+	    if ((ivPtr->flags & ITCLNG_COMMON) == 0) {
 		varPtr = Tcl_NewNamespaceVar(interp, varNsPtr,
 		        Tcl_GetString(ivPtr->namePtr));
 	        hPtr2 = Tcl_CreateHashEntry(&ioPtr->objectVariables,
@@ -481,18 +459,18 @@ ItclngInitObjectVariables(
 		    Tcl_SetHashValue(hPtr2, varPtr);
 		} else {
 		}
-                IctlVarTraceInfo *traceInfoPtr;
-                traceInfoPtr = (IctlVarTraceInfo *)ckalloc(
-		        sizeof(IctlVarTraceInfo));
-                memset (traceInfoPtr, 0, sizeof(IctlVarTraceInfo));
-                traceInfoPtr->flags = ITCL_TRACE_OBJECT;
+                ItclngVarTraceInfo *traceInfoPtr;
+                traceInfoPtr = (ItclngVarTraceInfo *)ckalloc(
+		        sizeof(ItclngVarTraceInfo));
+                memset (traceInfoPtr, 0, sizeof(ItclngVarTraceInfo));
+                traceInfoPtr->flags = ITCLNG_TRACE_OBJECT;
                 traceInfoPtr->ioPtr = ioPtr;
                 traceInfoPtr->iclsPtr = iclsPtr2;
                 traceInfoPtr->ivPtr = ivPtr;
                 Tcl_TraceVar2(interp, Tcl_GetString(ivPtr->namePtr), NULL,
                        TCL_TRACE_UNSETS, ItclngTraceUnsetVar,
                        (ClientData)traceInfoPtr);
-	        if (ivPtr->flags & ITCL_THIS_VAR) {
+	        if (ivPtr->flags & ITCLNG_THIS_VAR) {
                     thisName = Tcl_GetString(ivPtr->namePtr);
 		    if (Tcl_SetVar2(interp, thisName, NULL,
 		        "", TCL_NAMESPACE_ONLY) == NULL) {
@@ -536,7 +514,7 @@ ItclngInitObjectVariables(
 
 /*
  * ------------------------------------------------------------------------
- *  ItclngInitObjectOptions()
+ *  InitObjectOptions()
  *
  *  Collect all instance options for the given object instance to allow
  *  faster runtime access to the options.
@@ -548,8 +526,8 @@ ItclngInitObjectVariables(
  *  when an object is created.
  * ------------------------------------------------------------------------
  */
-int
-ItclngInitObjectOptions(
+static int
+InitObjectOptions(
    Tcl_Interp *interp,
    ItclngObject *ioPtr,
    ItclngClass *iclsPtr,
@@ -582,7 +560,7 @@ ItclngInitObjectOptions(
 		Tcl_SetHashValue(hPtr2, ioptPtr);
                 itclOptionsName = Tcl_GetString(ioptPtr->namePtr);
                 Tcl_DStringInit(&buffer);
-	        Tcl_DStringAppend(&buffer, ITCL_VARIABLES_NAMESPACE, -1);
+	        Tcl_DStringAppend(&buffer, ITCLNG_VARIABLES_NAMESPACE, -1);
 	        if ((name[0] != ':') && (name[1] != ':')) {
                      Tcl_DStringAppend(&buffer, "::", 2);
 	        }
@@ -631,7 +609,7 @@ ItclngInitObjectOptions(
 
 /*
  * ------------------------------------------------------------------------
- *  ItclngInitObjectMethodVariables()
+ *  InitObjectMethodVariables()
  *
  *  Collect all instance methdovariables for the given object instance to allow
  *  faster runtime access to the methdovariables.
@@ -639,8 +617,8 @@ ItclngInitObjectOptions(
  *  when an object is created.
  * ------------------------------------------------------------------------
  */
-int
-ItclngInitObjectMethodVariables(
+static int
+InitObjectMethodVariables(
    Tcl_Interp *interp,
    ItclngObject *ioPtr,
    ItclngClass *iclsPtr,
@@ -673,7 +651,6 @@ ItclngInitObjectMethodVariables(
     Itclng_DeleteHierIter(&hier);
     return TCL_OK;
 }
-#endif
 
 /*
  * ------------------------------------------------------------------------
@@ -786,7 +763,7 @@ ItclngDeleteObjectVariablesNamespace(
  *
  *  Invokes the destructor for a particular object.  Usually invoked
  *  by Itclng_DeleteObject() or Itclng_DestroyObject() as a part of the
- *  object destruction process.  If the ITCL_IGNORE_ERRS flag is
+ *  object destruction process.  If the ITCLNG_IGNORE_ERRS flag is
  *  included, all destructors are invoked even if errors are
  *  encountered, and the result will always be TCL_OK.
  *
@@ -798,7 +775,7 @@ int
 Itclng_DestructObject(
     Tcl_Interp *interp,      /* interpreter mananging new object */
     ItclngObject *contextIoPtr,  /* object to be destructed */
-    int flags)               /* flags: ITCL_IGNORE_ERRS */
+    int flags)               /* flags: ITCLNG_IGNORE_ERRS */
 {
     int result;
 
@@ -859,9 +836,7 @@ Itclng_DestructObject(
     contextIoPtr->destructed = NULL;
     }
     
-#ifdef NOTDEF
     ItclngDeleteObjectVariablesNamespace(interp, contextIoPtr);
-#endif
 
     return result;
 }
@@ -873,7 +848,7 @@ Itclng_DestructObject(
  *  Invoked by Itclng_DestructObject() to recursively destruct an object
  *  from the specified class level.  Finds and invokes the destructor
  *  for the specified class, and then recursively destructs all base
- *  classes.  If the ITCL_IGNORE_ERRS flag is included, all destructors
+ *  classes.  If the ITCLNG_IGNORE_ERRS flag is included, all destructors
  *  are invoked even if errors are encountered, and the result will
  *  always be TCL_OK.
  *
@@ -886,11 +861,9 @@ ItclngDestructBase(
     Tcl_Interp *interp,         /* interpreter */
     ItclngObject *contextIoPtr,   /* object being destructed */
     ItclngClass *contextIclsPtr,  /* current class being destructed */
-    int flags)                  /* flags: ITCL_IGNORE_ERRS */
+    int flags)                  /* flags: ITCLNG_IGNORE_ERRS */
 {
-#ifdef NOTDEF
     int result;
-#endif
     Itclng_ListElem *elem;
     ItclngClass *iclsPtr;
 
@@ -900,13 +873,11 @@ ItclngDestructBase(
      */
     if (Tcl_FindHashEntry(contextIoPtr->destructed,
             (char *)contextIclsPtr->namePtr) == NULL) {
-#ifdef NOTDEF
         result = Itclng_InvokeMethodIfExists(interp, "destructor",
             contextIclsPtr, contextIoPtr, 0, (Tcl_Obj* CONST*)NULL);
         if (result != TCL_OK) {
             return TCL_ERROR;
         }
-#endif
     }
 
     /*
@@ -930,7 +901,6 @@ ItclngDestructBase(
     Tcl_ResetResult(interp);
     return TCL_OK;
 }
-#ifdef NOTDEF
 
 /*
  * ------------------------------------------------------------------------
@@ -1095,8 +1065,8 @@ ItclngGetInstanceVar(
     Tcl_DStringInit(&buffer);
     Tcl_DStringAppend(&buffer, Tcl_GetString(contextIoPtr->varNsNamePtr), -1);
     doAppend = 1;
-    if ((contextIclsPtr == NULL) || (contextIclsPtr->flags & ITCL_ECLASS)) {
-        if (strcmp(name1, "itcl_options") == 0) {
+    if (contextIclsPtr == NULL) {
+        if (strcmp(name1, "itclng_options") == 0) {
 	    doAppend = 0;
         }
     }
@@ -1190,8 +1160,8 @@ ItclngSetInstanceVar(
     Tcl_DStringInit(&buffer);
     Tcl_DStringAppend(&buffer, Tcl_GetString(contextIoPtr->varNsNamePtr), -1);
     doAppend = 1;
-    if ((contextIclsPtr == NULL) || (contextIclsPtr->flags & ITCL_ECLASS)) {
-        if (strcmp(name1, "itcl_options") == 0) {
+    if (contextIclsPtr == NULL) {
+        if (strcmp(name1, "itclng_options") == 0) {
 	    doAppend = 0;
         }
     }
@@ -1212,7 +1182,6 @@ ItclngSetInstanceVar(
 
     return val;
 }
-#endif
 
 /*
  * ------------------------------------------------------------------------
@@ -1320,7 +1289,6 @@ ItclngReportObjectUsage(
     }
     Itclng_DeleteList(&cmdList);
 }
-#ifdef NOTDEF
 
 /*
  * ------------------------------------------------------------------------
@@ -1487,7 +1455,6 @@ ItclngDestroyObject(
 
     Tcl_Release((ClientData)contextIoPtr);
 }
-#endif
 
 /*
  * ------------------------------------------------------------------------
@@ -1532,7 +1499,6 @@ ItclngFreeObject(
 
     ckfree((char*)contextObj);
 }
-#ifdef NOTDEF
 
 /*
  * ------------------------------------------------------------------------
@@ -1581,16 +1547,16 @@ ItclngObjectCmd(
     if (oPtr == NULL) {
 	ClientData clientData;
 	clientData = Itclng_GetCallFrameClientData(interp);
-	if ((imPtr->flags & ITCL_COMMON)
+	if ((imPtr->flags & ITCLNG_COMMON)
 	        && (imPtr->codePtr != NULL)
-	        && !(imPtr->codePtr->flags & ITCL_BUILTIN)) {
+	        && !(imPtr->codePtr->flags & ITCLNG_BUILTIN)) {
 	    result = Itclng_InvokeProcedureMethod(imPtr->tmPtr, interp,
 	            objc, objv);
             return result;
 	}
 	if (clientData == NULL) {
 	    if (((imPtr->codePtr != NULL)
-	            && (imPtr->codePtr->flags & ITCL_BUILTIN))) {
+	            && (imPtr->codePtr->flags & ITCLNG_BUILTIN))) {
 	        result = Itclng_InvokeProcedureMethod(imPtr->tmPtr, interp,
 	                objc, objv);
                 return result;
@@ -1698,7 +1664,7 @@ ItclngObjectUnknownCommand(
     }
     oPtr = cmdInfo.objClientData;
     infoPtr = (ItclngObjectInfo *)Tcl_GetAssocData(interp,
-            ITCL_INTERP_DATA, NULL);
+            ITCLNG_INTERP_DATA, NULL);
     ioPtr = (ItclngObject *)Tcl_ObjectGetMetadata(oPtr,
             infoPtr->object_meta_type);
     Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
@@ -1707,7 +1673,6 @@ ItclngObjectUnknownCommand(
     ItclngReportObjectUsage(interp, ioPtr, NULL, NULL);
     return TCL_ERROR;
 }
-#endif
 
 /*
  * ------------------------------------------------------------------------
@@ -1807,7 +1772,6 @@ ItclngMapMethodNameProc(
     Tcl_DStringFree(&buffer);
     return TCL_OK;
 }
-#ifdef NOTDEF
 
 /*
  * ------------------------------------------------------------------------
@@ -2005,7 +1969,7 @@ DelegatedOptionsInstall(
  * ------------------------------------------------------------------------
  */
 
-int
+static int
 DelegationInstall(
     Tcl_Interp *interp,
     ItclngObject *ioPtr,
@@ -2025,7 +1989,7 @@ DelegationInstall(
 
     result = TCL_OK;
     delegateAll = 0;
-    noDelegate = ITCL_CONSTRUCTOR|ITCL_DESTRUCTOR|ITCL_COMPONENT;
+    noDelegate = ITCLNG_CONSTRUCTOR|ITCLNG_DESTRUCTOR|ITCLNG_COMPONENT;
     componentNamePtr = NULL;
     FOREACH_HASH_VALUE(idmPtr, &iclsPtr->delegatedFunctions) {
 	methodName = Tcl_GetString(idmPtr->namePtr);
@@ -2116,4 +2080,3 @@ ItclngInitExtendedClassOptions(
     Itclng_DeleteHierIter(&hier);
     return TCL_OK;
 }
-#endif

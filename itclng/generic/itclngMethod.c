@@ -25,7 +25,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclngMethod.c,v 1.1.2.2 2008/01/13 19:46:29 wiede Exp $
+ *     RCS:  $Id: itclngMethod.c,v 1.1.2.3 2008/01/14 21:25:54 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -282,13 +282,11 @@ Itclng_ConfigBodyCmd(
 
     token = Tcl_GetString(objv[2]);
 
-#ifdef NOTDEF
-    if (Itclng_CreateMemberCode(interp, iclsPtr, (char*)NULL, token,
-            &mcode) != TCL_OK) {
+    if (ItclngCreateVariableMemberCode(interp, iclsPtr,
+            Tcl_GetString(ivPtr->namePtr), token, &mcode) != TCL_OK) {
         status = TCL_ERROR;
         goto configBodyCmdDone;
     }
-#endif
 
     Tcl_Preserve((ClientData)mcode);
     Tcl_EventuallyFree((ClientData)mcode, Itclng_DeleteMemberCode);
@@ -356,7 +354,7 @@ ItclngCreateMemberCode(
 
     dictPtr = ItclngGetClassDictInfo(iclsPtr, "functions", name);
     if (dictPtr == NULL) {
-	Tcl_AppendResult(interp, "cannot get function info", NULL);
+	Tcl_AppendResult(interp, "cannot get functions info", NULL);
         return TCL_ERROR;
     }
     argPtr = ItclngGetDictValueInfo(interp, dictPtr, "arguments");
@@ -390,13 +388,13 @@ ItclngCreateMemberCode(
     }
     Tcl_DecrRefCount(argPtr);
     Tcl_DecrRefCount(valuePtr);
-    if (strcmp(state, "NO_ARGS") == 0) {
+    if (strcmp(state, "NO_ARGS") != 0) {
         mcode->flags   |= ITCLNG_ARG_SPEC;
     }
     if (strcmp(state, "NO_BODY") == 0) {
-        mcode->flags |= ITCLNG_IMPLEMENT_TCL;
-    } else {
         mcode->flags |= ITCLNG_IMPLEMENT_NONE;
+    } else {
+        mcode->flags |= ITCLNG_IMPLEMENT_TCL;
     }
     *mcodePtr = mcode;
     return TCL_OK;
@@ -445,7 +443,7 @@ ItclngCreateMemberFunction(
     }
 
     name = Tcl_GetString(namePtr);
-    statePtr = ItclngGetStateString(iclsPtr, name);
+    statePtr = ItclngGetFunctionStateString(iclsPtr, name);
     if (statePtr == NULL) {
 	Tcl_AppendResult(interp, "cannot get state string", NULL);
         return TCL_ERROR;
@@ -519,7 +517,7 @@ int
 ItclngCreateMethodOrProc(
     Tcl_Interp* interp,    /* interpreter managing this action */
     ItclngClass *iclsPtr,  /* class definition */
-    Tcl_Obj *namePtr,      /* name of new method */
+    Tcl_Obj *namePtr,      /* name of new method/proc */
     int flags)             /* whether this is a method or proc */
 {
     ItclngMemberFunc *imPtr;
@@ -567,16 +565,14 @@ Itclng_ChangeMemberFunc(
     ItclngMemberCode *mcode = NULL;
     int isNewEntry;
 
-#ifdef NOTDEF
     /*
      *  Try to create the implementation for this command member.
      */
-    if (Itclng_CreateMemberCode(interp, imPtr->iclsPtr,
-        arglist, body, &mcode) != TCL_OK) {
+    if (ItclngCreateMemberCode(interp, imPtr->iclsPtr,
+        Tcl_GetString(imPtr->namePtr), "COMPLETE", &mcode) != TCL_OK) {
 
         return TCL_ERROR;
     }
-#endif
 
     /*
      *  If the argument list was defined when the function was
@@ -802,7 +798,6 @@ Itclng_EvalMemberCode(
      *  Execute the code body...
      */
     if ((mcode->flags & ITCLNG_IMPLEMENT_TCL) != 0) {
-#ifdef NOTDEF
         if (imPtr->flags & (ITCLNG_CONSTRUCTOR | ITCLNG_DESTRUCTOR)) {
             result = ItclngObjectCmd(imPtr, interp, contextIoPtr->oPtr,
                    imPtr->iclsPtr->clsPtr, objc, objv);
@@ -810,7 +805,6 @@ Itclng_EvalMemberCode(
             result = ItclngObjectCmd(imPtr, interp, NULL, NULL,
                     objc, objv);
         }
-#endif
      }
 
 evalMemberCodeDone:
@@ -839,7 +833,6 @@ EquivArgLists(
     ItclngArgList *origArgs,
     ItclngArgList *realArgs)
 {
-#ifdef NOTDEF
     ItclngArgList *currPtr;
     char *argName;
 
@@ -894,7 +887,6 @@ EquivArgLists(
        /* new definition has more args then the old one */
        return 0;
     }
-#endif
     return 1;
 }
 #endif
@@ -1520,7 +1512,6 @@ Itclng_CmdAliasProc(
     CONST char *cmdName,
     ClientData clientData)
 {
-#ifdef NOTDEF
     Tcl_HashEntry *hPtr;
     ItclngObjectInfo *infoPtr;
     ItclngClass *iclsPtr;
@@ -1573,8 +1564,6 @@ Itclng_CmdAliasProc(
 	    return Tcl_FindCommand(interp, "::itcl::builtin::Info", NULL, 0);
 	}
     return imPtr->accessCmd;
-#endif
-return NULL;
 }
 
 /*
@@ -1590,7 +1579,6 @@ Itclng_VarAliasProc(
     CONST char *varName,
     ClientData clientData)
 {
-#ifdef NOTDEF
     Tcl_HashEntry *hPtr;
     ItclngObjectInfo *infoPtr;
     ItclngClass *iclsPtr;
@@ -1649,8 +1637,6 @@ Itclng_VarAliasProc(
         varPtr = Tcl_GetHashValue(hPtr);
     }
     return varPtr;
-#endif
-return NULL;
 }
 
 /*

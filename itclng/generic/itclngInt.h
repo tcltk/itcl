@@ -9,7 +9,7 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itclngInt.h,v 1.1.2.4 2008/01/13 19:46:29 wiede Exp $
+ * RCS: @(#) $Id: itclngInt.h,v 1.1.2.5 2008/01/14 21:25:54 wiede Exp $
  */
 
 #include <string.h>
@@ -189,6 +189,7 @@ typedef struct ItclngClass {
                                   /* the class destructor or NULL */
     struct ItclngMemberFunc *constructorInit;
                                   /* the class constructor init code or NULL */
+    Tcl_Resolve *resolvePtr;
     Tcl_Object oPtr;		  /* TclOO class object */
     Tcl_Class  clsPtr;            /* TclOO class */
     int numCommons;               /* number of commons in this class */
@@ -240,6 +241,7 @@ typedef struct ItclngObject {
     Tcl_Obj *namePtr;
     Tcl_Obj *varNsNamePtr;
     Tcl_Object oPtr;             /* the TclOO object */
+    Tcl_Resolve *resolvePtr;
     int flags;
 } ItclngObject;
 
@@ -255,6 +257,15 @@ typedef struct ItclngObject {
 #define ITCLNG_CLASS_DELETED               0x800
 
 #define ITCLNG_IGNORE_ERRS  0x002  /* useful for construction/destruction */
+
+typedef struct ItclngResolveInfo {
+    int flags;
+    ItclngClass *iclsPtr;
+    ItclngObject *ioPtr;
+} ItclngResolveInfo;
+
+#define ITCLNG_RESOLVE_CLASS              0x01
+#define ITCLNG_RESOLVE_OBJECT             0x02
 
 /*
  *  Implementation for any code body in an [incr Tcl] class.
@@ -396,12 +407,12 @@ typedef struct ItclngMethodVariable {
     Tcl_Obj *callbackPtr;
 } ItclngMethodVariable;
 
-typedef struct IctlngVarTraceInfo {
+typedef struct ItclngVarTraceInfo {
     int flags;
     ItclngVariable* ivPtr;
     ItclngClass *iclsPtr;
     ItclngObject *ioPtr;
-} IctlngVarTraceInfo;
+} ItclngVarTraceInfo;
 
 #define ITCLNG_TRACE_CLASS		0x01
 #define ITCLNG_TRACE_OBJECT		0x02
@@ -454,8 +465,15 @@ MODULE_SCOPE Tcl_Obj * ItclngGetBodyString(ItclngClass *iclsPtr,
         const char *functionName);
 MODULE_SCOPE Tcl_Obj * ItclngGetUsageString(ItclngClass *iclsPtr,
         const char *functionName);
-MODULE_SCOPE Tcl_Obj * ItclngGetStateString(ItclngClass *iclsPtr,
+MODULE_SCOPE Tcl_Obj * ItclngGetFunctionStateString(ItclngClass *iclsPtr,
         const char *functionName);
+MODULE_SCOPE Tcl_Obj * ItclngGetVariableStateString(ItclngClass *iclsPtr,
+        const char *variableName);
+MODULE_SCOPE char * ItclngTraceUnsetVar(ClientData clientData,
+        Tcl_Interp *interp, const char *name1, const char *name2, int flags);
+
+MODULE_SCOPE int Itclng_DecodeScopedCommand(Tcl_Interp *interp, CONST char *name,
+	    Tcl_Namespace **rNsPtr, char **rCmdPtr);
 
 MODULE_SCOPE void Itclng_ParseNamespPath(CONST char *name,
         Tcl_DString *buffer, char **head, char **tail);
@@ -477,9 +495,8 @@ MODULE_SCOPE int Itclng_ClassVarResolver(Tcl_Interp *interp, CONST char* name,
 MODULE_SCOPE int Itclng_ClassCompiledVarResolver(Tcl_Interp *interp,
         CONST char* name, int length, Tcl_Namespace *nsPtr,
         Tcl_ResolvedVarInfo **rPtr);
-MODULE_SCOPE int Itclng_CreateVariable(Tcl_Interp *interp,
-        ItclngClass* iclsPtr, Tcl_Obj* namePtr, char* init, char* config,
-        ItclngVariable** ivPtrPtr);
+MODULE_SCOPE int ItclngCreateVariable(Tcl_Interp *interp,
+        ItclngClass* iclsPtr, Tcl_Obj* namePtr, ItclngVariable** ivPtrPtr);
 MODULE_SCOPE void Itclng_DeleteVariable(ItclngVariable *ivPtr);
 MODULE_SCOPE Tcl_Namespace* Itclng_FindClassNamespace(Tcl_Interp* interp,
         CONST char* path);
@@ -492,6 +509,8 @@ MODULE_SCOPE ItclngClass* Itclng_FindClass(Tcl_Interp* interp,
 MODULE_SCOPE void ItclngDeleteClassVariablesNamespace(Tcl_Interp *interp,
         ItclngClass *iclsPtr);
 MODULE_SCOPE void Itclng_BuildVirtualTables(ItclngClass* iclsPtr);
+MODULE_SCOPE int ItclngCreateCommonOrVariable(Tcl_Interp* interp,
+        ItclngClass *iclsPtr, Tcl_Obj *namePtr, int flags);
 
 MODULE_SCOPE int Itclng_DeleteObject(Tcl_Interp *interp,
         ItclngObject *contextIoPtr);
@@ -505,6 +524,10 @@ MODULE_SCOPE int ItclngCreateObject(Tcl_Interp *interp,
         Tcl_Obj *CONST objv[]);
 MODULE_SCOPE int Itclng_DestructObject(Tcl_Interp *interp,
         ItclngObject *contextIoPtr, int flags);
+MODULE_SCOPE int Itclng_IsObject(Tcl_Command cmd);
+MODULE_SCOPE void ItclngDeleteObjectMetadata(ClientData clientData);
+MODULE_SCOPE int ItclngObjectCmd(ClientData clientData, Tcl_Interp *interp,
+    Tcl_Object oPtr, Tcl_Class clsPtr, int objc, Tcl_Obj *const *objv);
 
 
 MODULE_SCOPE int ItclngCreateMethodOrProc(Tcl_Interp* interp,
@@ -515,6 +538,9 @@ MODULE_SCOPE int Itclng_CreateMemberCode(Tcl_Interp* interp,
 MODULE_SCOPE void Itclng_DeleteMemberCode(char* cdata);
 MODULE_SCOPE int Itclng_ChangeMemberFunc(Tcl_Interp* interp,
         ItclngMemberFunc* imPtr, CONST char* arglist, CONST char* body);
+MODULE_SCOPE int ItclngCreateVariableMemberCode(Tcl_Interp* interp,
+        ItclngClass *iclsPtr, const char *name, const char *config,
+	ItclngMemberCode** mcodePtr);
 MODULE_SCOPE int ItclngCheckCallMethod(ClientData clientData,
         Tcl_Interp *interp, Tcl_ObjectContext contextPtr,
         Tcl_CallFrame *framePtr, int *isFinished);
@@ -535,6 +561,10 @@ MODULE_SCOPE int Itclng_ExecProc(ClientData clientData,
         Tcl_Interp *interp, int objc, Tcl_Obj *CONST objv[]);
 MODULE_SCOPE int Itclng_ExecMethod(ClientData clientData,
         Tcl_Interp *interp, int objc, Tcl_Obj *CONST objv[]);
+MODULE_SCOPE Tcl_Command Itclng_CmdAliasProc(Tcl_Interp *interp,
+        Tcl_Namespace *nsPtr, CONST char *cmdName, ClientData clientData);
+MODULE_SCOPE Tcl_Var Itclng_VarAliasProc(Tcl_Interp *interp,
+        Tcl_Namespace *nsPtr, CONST char *varName, ClientData clientData);
 
 
 #include "itclng2TclOO.h"
