@@ -84,7 +84,7 @@ puts stderr "methodOrProc!$name![llength $args]!"
 	    set body [lindex $args 1]
 	  }
 	default {
-	    return -code error -level 4 "should be: <protection> method <name> ?arguments? ?body?"
+	    return -code error -level 4 "should be: <protection> $type <name> ?arguments? ?body?"
 	  }
 	}
 	set minArgs 0
@@ -101,12 +101,56 @@ puts stderr "methodOrProc!$name![llength $args]!"
 #puts stderr "DI2![dict get [set ${infoNs}] functions $name]!"
         ::itclng::internal::commands createClass$type $className $name
     }
+
+    proc commonOrVariable {infoNs className type protection name args} {
+puts stderr "commonOrVariable!$name![llength $args]!"
+#puts stderr "ME!$infoNs!$className!$protection!$name![join $args !]!"
+	if {[dict exists [set ${infoNs}] variables $name]} {
+	    return -code error -level 4 "\"$name\" already defined in class \"$className\""
+	}
+	if {[string first "::" $name] >= 0} {
+	    return -code error -level 4 "bad $type name \"$name\""
+	}
+	switch [llength $args] {
+	0 {
+	    set state NO_INIT
+	    set initValue ""
+	    set configValue ""
+	  }
+	1 {
+	    set state NO_CONFIG
+	    set initValue [lindex $args 0]
+	    set configValue ""
+	  }
+	2 {
+	    if {($protection ne "public") || ($type eq "Common")} {
+	        return -code error -level 4 "should be: <protection> $type <name> ?init?"
+	    }
+	    set state COMPLETE
+	    set initValue [lindex $args 0]
+	    set configValue [lindex $args 1]
+	  }
+	default {
+	    set protectionUsage ""
+	    if {$protection eq "public"} {
+	         set protectionUsage " ?config?"
+	    }
+	    return -code error -level 4 "should be: <protection> $type <name> ?init?$protectionUsage"
+	  }
+	}
+        dict lappend ${infoNs} variables $name [list protection $protection init $initValue config $configValue state $state]
+puts stderr "DI2![dict get [set ${infoNs}] variables $name]!"
+        ::itclng::internal::commands createClass$type $className $name
+    }
+
     proc method {infoNs className protection name args} {
         return [methodOrProc $infoNs $className Method $protection $name {*}$args]
     }
     proc common {infoNs className protection name args} {
+        return [commonOrVariable $infoNs $className Common $protection $name {*}$args]
     }
     proc variable {infoNs className protection name args} {
+        return [commonOrVariable $infoNs $className Variable $protection $name {*}$args]
     }
     proc methodvariable {infoNs className protection name args} {
     }
