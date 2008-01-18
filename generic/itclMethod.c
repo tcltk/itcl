@@ -25,7 +25,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclMethod.c,v 1.1.2.16 2008/01/12 18:29:04 wiede Exp $
+ *     RCS:  $Id: itclMethod.c,v 1.1.2.17 2008/01/18 17:11:30 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -1311,42 +1311,8 @@ Itcl_ExecMethod(
     /*
      *  Make sure that this command member can be accessed from
      *  the current namespace context.
+     *  That is now done in ItclMapMethodNameProc !!
      */
-    if (imPtr->protection != ITCL_PUBLIC) {
-        if (!Itcl_CanAccessFunc(imPtr, Tcl_GetCurrentNamespace(interp))) {
-	    int canAccess = 0;
-	    ItclMemberFunc *imPtr2 = NULL;
-            Tcl_HashEntry *hPtr;
-	    Tcl_ObjectContext context;
-	    context = Itcl_GetCallFrameClientData(interp);
-if (context == NULL) {
-fprintf(stderr, "context == NULL 1\n");
-return TCL_ERROR;
-}
-	    hPtr = Tcl_FindHashEntry(&imPtr->iclsPtr->infoPtr->procMethods,
-	            (char *)Tcl_ObjectContextMethod(context));
-	    if (hPtr != NULL) {
-		/* needed for test protect-2.5 */
-	        imPtr2 = Tcl_GetHashValue(hPtr);
-	    }
-	    if (!canAccess) {
-		if ((imPtr->protection & ITCL_PRIVATE) && (imPtr2 != NULL) &&
-		        (imPtr->iclsPtr->nsPtr != imPtr2->iclsPtr->nsPtr)) {
-                    Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
-		            "invalid command name \"",
-			    Tcl_GetString(objv[0]),
-			    "\"", NULL);
-		    return TCL_ERROR;
-
-		}
-                Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
-                        "can't access \"", Tcl_GetString(imPtr->fullNamePtr),
-		        "\": ", Itcl_ProtectionStr(imPtr->protection),
-		        " function", (char*)NULL);
-                return TCL_ERROR;
-            }
-        }
-    }
 
     /*
      *  All methods should be "virtual" unless they are invoked with
@@ -1375,6 +1341,7 @@ return TCL_ERROR;
     Itcl_PreserveData((ClientData)imPtr);
     /* next line is VERY UGLY HACK !! to make test xxx run */
     imPtr->flags |= ITCL_CALLED_FROM_EXEC; 
+
     result = Itcl_EvalMemberCode(interp, imPtr, ioPtr, objc, objv);
     Itcl_ReleaseData((ClientData)imPtr);
     return result;
@@ -1413,7 +1380,6 @@ Itcl_ExecProc(
      */
     if (imPtr->protection != ITCL_PUBLIC) {
         if (!Itcl_CanAccessFunc(imPtr, Tcl_GetCurrentNamespace(interp))) {
-	    int canAccess = 0;
 	    ItclMemberFunc *imPtr2 = NULL;
             Tcl_HashEntry *hPtr;
 	    Tcl_ObjectContext context;
@@ -1430,22 +1396,19 @@ Itcl_ExecProc(
 	    if (hPtr != NULL) {
 	        imPtr2 = Tcl_GetHashValue(hPtr);
 	    }
-	    if (!canAccess) {
-		if ((imPtr->protection & ITCL_PRIVATE) && (imPtr2 != NULL) &&
-		        (imPtr->iclsPtr->nsPtr != imPtr2->iclsPtr->nsPtr)) {
-                    Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
-		            "invalid command name \"",
-			    Tcl_GetString(objv[0]),
-			    "\"", NULL);
-		    return TCL_ERROR;
-
-		}
+	    if ((imPtr->protection & ITCL_PRIVATE) && (imPtr2 != NULL) &&
+	            (imPtr->iclsPtr->nsPtr != imPtr2->iclsPtr->nsPtr)) {
                 Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
-                        "can't access \"", Tcl_GetString(imPtr->fullNamePtr),
-			"\": ", Itcl_ProtectionStr(imPtr->protection),
-			" function", (char*)NULL);
-                return TCL_ERROR;
+	                "invalid command name \"",
+		        Tcl_GetString(objv[0]),
+		        "\"", NULL);
+	        return TCL_ERROR;
 	    }
+            Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+                    "can't access \"", Tcl_GetString(imPtr->fullNamePtr),
+		    "\": ", Itcl_ProtectionStr(imPtr->protection),
+		    " function", (char*)NULL);
+            return TCL_ERROR;
         }
     }
 
@@ -1933,29 +1896,6 @@ ItclCheckCallMethod(
             *isFinished = 1;
         }
         return TCL_ERROR;
-    }
-    Tcl_Namespace *cNsPtr = Itcl_GetUplevelNamespace(interp, 1);
-    if (cNsPtr == NULL) {
-        cNsPtr = Tcl_GetCurrentNamespace(interp);
-    }
-    if ((imPtr->flags & ITCL_CALLED_FROM_EXEC)) {
-        imPtr->flags &= ~ITCL_CALLED_FROM_EXEC;
-    } else {
-        if (!Itcl_CanAccessFunc(imPtr, cNsPtr)) {
-	    char *token = Tcl_GetString(imPtr->namePtr);
-	    if ((*token != 'i') || (strcmp(token, "info") != 0)) {
-                Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
-                       "bad option \"", token, "\": should be one of...",
-                        (char*)NULL);
-	        ItclReportObjectUsage(interp, ioPtr,
-	                Tcl_GetCurrentNamespace(interp),
-	         Itcl_GetUplevelNamespace(interp, 1));
-                if (isFinished != NULL) {
-                    *isFinished = 1;
-                }
-                return TCL_ERROR;
-	    }
-        }
     }
     isNew = 0;
     callContextPtr = NULL;

@@ -25,7 +25,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann Copyright (c) 2007
  *
- *     RCS:  $Id: itclClass.c,v 1.1.2.18 2008/01/12 18:29:04 wiede Exp $
+ *     RCS:  $Id: itclClass.c,v 1.1.2.19 2008/01/18 17:11:30 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -170,7 +170,6 @@ ClassNamespaceDeleted(
  *  definition.
  * ------------------------------------------------------------------------
  */
-static Tcl_Interp *_interp;
 int
 Itcl_CreateClass(
     Tcl_Interp* interp,		/* interpreter that will contain new class */
@@ -192,7 +191,6 @@ Itcl_CreateClass(
     Tcl_HashEntry *hPtr;
     int newEntry;
 
-_interp = interp;
     /*
      * check for an empty class name to avoid a crash
      */

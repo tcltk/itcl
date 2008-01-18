@@ -20,7 +20,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itclResolve.c,v 1.1.2.9 2008/01/12 18:29:04 wiede Exp $
+ *     RCS:  $Id: itclResolve.c,v 1.1.2.10 2008/01/18 17:11:30 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -124,8 +124,7 @@ Itcl_ClassCmdResolver(
     }
     iclsPtr = Tcl_GetHashValue(hPtr);
     /*
-     *  If the command is a member function, and if it is
-     *  accessible, return its Tcl command handle.
+     *  If the command is a member function
      */
     hPtr = Tcl_FindHashEntry(&iclsPtr->resolveCmds, name);
     if (hPtr == NULL) {
@@ -141,32 +140,7 @@ Itcl_ClassCmdResolver(
             return TCL_CONTINUE;
         }
     }
-
     imPtr = (ItclMemberFunc*)Tcl_GetHashValue(hPtr);
-
-
-    /*
-     *  For protected/private functions, figure out whether or
-     *  not the function is accessible from the current context.
-     *
-     *  TRICKY NOTE:  Use Itcl_GetTrueNamespace to determine
-     *    the current context.  If the current call frame is
-     *    "transparent", this handles it properly.
-     */
-    if (imPtr->protection != ITCL_PUBLIC) {
-        nsPtr = Tcl_GetCurrentNamespace(interp);
-        if (!Itcl_CanAccessFunc(imPtr, nsPtr)) {
-
-            if ((flags & TCL_LEAVE_ERR_MSG) != 0) {
-                Tcl_AppendResult(interp,
-                    "can't access \"", name, "\": ",
-                    Itcl_ProtectionStr(imPtr->protection),
-                    " function",
-                    (char*)NULL);
-            }
-            return TCL_ERROR;
-        }
-    }
 
     /*
      *  Looks like we found an accessible member function.

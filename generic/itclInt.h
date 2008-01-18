@@ -9,7 +9,7 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itclInt.h,v 1.17.2.30 2008/01/12 18:29:04 wiede Exp $
+ * RCS: @(#) $Id: itclInt.h,v 1.17.2.31 2008/01/18 17:11:30 wiede Exp $
  */
 
 #include <string.h>
@@ -625,7 +625,7 @@ MODULE_SCOPE int ItclParseOption(ItclObjectInfo *infoPtr, Tcl_Interp *interp,
 #include "itcl2TclOO.h"
 
 /*
- * Include all the private API, generated from tclOO.decls.
+ * Include all the private API, generated from itcl.decls.
  */
 
 #include "itclIntDecls.h"
