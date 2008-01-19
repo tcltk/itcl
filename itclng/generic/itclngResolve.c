@@ -20,7 +20,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itclngResolve.c,v 1.1.2.1 2008/01/12 23:39:48 wiede Exp $
+ *     RCS:  $Id: itclngResolve.c,v 1.1.2.2 2008/01/19 17:29:13 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -144,7 +144,6 @@ Itclng_ClassCmdResolver(
     }
 
     imPtr = (ItclngMemberFunc*)Tcl_GetHashValue(hPtr);
-
 
     /*
      *  For protected/private functions, figure out whether or

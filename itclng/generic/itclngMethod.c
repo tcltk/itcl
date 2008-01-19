@@ -25,7 +25,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclngMethod.c,v 1.1.2.3 2008/01/14 21:25:54 wiede Exp $
+ *     RCS:  $Id: itclngMethod.c,v 1.1.2.4 2008/01/19 17:29:13 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -1108,7 +1108,7 @@ Itclng_ExecMethod(
     ItclngClass *iclsPtr;
     ItclngObject *ioPtr;
 
-    ItclngShowArgs(2, "Itclng_ExecMethod", objc, objv);
+    ItclngShowArgs(0, "Itclng_ExecMethod", objc, objv);
 
     /*
      *  Make sure that the current namespace context includes an
@@ -1131,42 +1131,8 @@ Itclng_ExecMethod(
     /*
      *  Make sure that this command member can be accessed from
      *  the current namespace context.
+     *  That is now done in ItclMapMethodNameProc !!
      */
-    if (imPtr->protection != ITCLNG_PUBLIC) {
-        if (!Itclng_CanAccessFunc(imPtr, Tcl_GetCurrentNamespace(interp))) {
-	    int canAccess = 0;
-	    ItclngMemberFunc *imPtr2 = NULL;
-            Tcl_HashEntry *hPtr;
-	    Tcl_ObjectContext context;
-	    context = Itclng_GetCallFrameClientData(interp);
-if (context == NULL) {
-fprintf(stderr, "context == NULL 1\n");
-return TCL_ERROR;
-}
-	    hPtr = Tcl_FindHashEntry(&imPtr->iclsPtr->infoPtr->procMethods,
-	            (char *)Tcl_ObjectContextMethod(context));
-	    if (hPtr != NULL) {
-		/* needed for test protect-2.5 */
-	        imPtr2 = Tcl_GetHashValue(hPtr);
-	    }
-	    if (!canAccess) {
-		if ((imPtr->protection & ITCLNG_PRIVATE) && (imPtr2 != NULL) &&
-		        (imPtr->iclsPtr->nsPtr != imPtr2->iclsPtr->nsPtr)) {
-                    Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
-		            "invalid command name \"",
-			    Tcl_GetString(objv[0]),
-			    "\"", NULL);
-		    return TCL_ERROR;
-
-		}
-                Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
-                        "can't access \"", Tcl_GetString(imPtr->fullNamePtr),
-		        "\": ", Itclng_ProtectionStr(imPtr->protection),
-		        " function", (char*)NULL);
-                return TCL_ERROR;
-            }
-        }
-    }
 
     /*
      *  All methods should be "virtual" unless they are invoked with
@@ -1223,7 +1189,7 @@ Itclng_ExecProc(
     ItclngMemberFunc *imPtr = (ItclngMemberFunc*)clientData;
     int result = TCL_OK;
 
-    ItclngShowArgs(1, "Itclng_ExecProc", objc, objv);
+    ItclngShowArgs(0, "Itclng_ExecProc", objc, objv);
 
     /*
      *  Make sure that this command member can be accessed from
@@ -1231,7 +1197,6 @@ Itclng_ExecProc(
      */
     if (imPtr->protection != ITCLNG_PUBLIC) {
         if (!Itclng_CanAccessFunc(imPtr, Tcl_GetCurrentNamespace(interp))) {
-	    int canAccess = 0;
 	    ItclngMemberFunc *imPtr2 = NULL;
             Tcl_HashEntry *hPtr;
 	    Tcl_ObjectContext context;
@@ -1248,23 +1213,20 @@ Itclng_ExecProc(
 	    if (hPtr != NULL) {
 	        imPtr2 = Tcl_GetHashValue(hPtr);
 	    }
-	    if (!canAccess) {
-		if ((imPtr->protection & ITCLNG_PRIVATE) && (imPtr2 != NULL) &&
-		        (imPtr->iclsPtr->nsPtr != imPtr2->iclsPtr->nsPtr)) {
-                    Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
-		            "invalid command name \"",
-			    Tcl_GetString(objv[0]),
-			    "\"", NULL);
-		    return TCL_ERROR;
-
-		}
+	    if ((imPtr->protection & ITCLNG_PRIVATE) && (imPtr2 != NULL) &&
+	            (imPtr->iclsPtr->nsPtr != imPtr2->iclsPtr->nsPtr)) {
                 Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
-                        "can't access \"", Tcl_GetString(imPtr->fullNamePtr),
-			"\": ", Itclng_ProtectionStr(imPtr->protection),
-			" function", (char*)NULL);
-                return TCL_ERROR;
+		        "invalid command name \"",
+		        Tcl_GetString(objv[0]),
+		        "\"", NULL);
+		return TCL_ERROR;
 	    }
-        }
+            Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+                    "can't access \"", Tcl_GetString(imPtr->fullNamePtr),
+		    "\": ", Itclng_ProtectionStr(imPtr->protection),
+		    " function", (char*)NULL);
+            return TCL_ERROR;
+	}
     }
 
     /*
@@ -1759,26 +1721,6 @@ ItclngCheckCallMethod(
         }
         return TCL_ERROR;
     }
-    Tcl_Namespace *cNsPtr = Itclng_GetUplevelNamespace(interp, 1);
-    if (cNsPtr == NULL) {
-        cNsPtr = Tcl_GetCurrentNamespace(interp);
-    }
-    if (!Itclng_CanAccessFunc(imPtr, cNsPtr)) {
-	char *token = Tcl_GetString(imPtr->namePtr);
-	if ((*token != 'i') || (strcmp(token, "info") != 0)) {
-            Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
-                   "bad option \"", token, "\": should be one of...",
-                    (char*)NULL);
-	    ItclngReportObjectUsage(interp, ioPtr,
-	            Tcl_GetCurrentNamespace(interp),
-		    Itclng_GetUplevelNamespace(interp, 1));
-            if (isFinished != NULL) {
-                *isFinished = 1;
-            }
-            return TCL_ERROR;
-        }
-    }
-
     isNew = 0;
     callContextPtr = NULL;
     Tcl_Namespace *currNsPtr;
@@ -1809,6 +1751,13 @@ ItclngCheckCallMethod(
     }
     if (callContextPtr == NULL) {
 	if (ioPtr == NULL) {
+	    if ((imPtr->flags & ITCLNG_COMMON) ||
+                    (imPtr->codePtr->flags & ITCLNG_BUILTIN)) {
+                if (isFinished != NULL) {
+                    *isFinished = 0;
+                }
+                return TCL_OK;
+	    }
 	    Tcl_AppendResult(interp, "ItclngCheckCallMethod  ioPtr == NULL", NULL);
             if (isFinished != NULL) {
                 *isFinished = 1;

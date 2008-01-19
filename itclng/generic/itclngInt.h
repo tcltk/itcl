@@ -9,7 +9,7 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itclngInt.h,v 1.1.2.5 2008/01/14 21:25:54 wiede Exp $
+ * RCS: @(#) $Id: itclngInt.h,v 1.1.2.6 2008/01/19 17:29:13 wiede Exp $
  */
 
 #include <string.h>
@@ -112,22 +112,23 @@ typedef struct ItclngObjectInfo {
                                      * set only during calling of constructors
 				     * otherwise NULL */
     Tcl_ObjectMetadataType *class_meta_type;
-                                    /* type for getting the Itcl class info
+                                    /* type for getting the Itclng class info
                                      * from a TclOO Tcl_Object */
     Tcl_ObjectMetadataType *object_meta_type;
-                                    /* type for getting the Itcl object info
+                                    /* type for getting the Itclng object info
                                      * from a TclOO Tcl_Object */
-    Tcl_Object clazzObjectPtr;      /* the root object of Itcl */
-    Tcl_Class clazzClassPtr;        /* the root class of Itcl */
+    Tcl_Object clazzObjectPtr;      /* the root TclOO object of Itclng */
+    Tcl_Class clazzClassPtr;        /* the root TclOO class of Itclng */
+    struct ItclngClass *clazzIclsPtr; /* the root Itclng class of Itclng */
     struct EnsembleInfo *ensembleInfo;
     struct ItclngClass *currContextIclsPtr;
                                     /* context class for delegated option
                                      * handling */
     int currClassFlags;             /* flags for the class just in creation */
     int unparsedObjc;               /* number options not parsed by 
-                                       ItclExtendedConfigure/-Cget function */
+                                       ItclngExtendedConfigure/-Cget function */
     Tcl_Obj **unparsedObjv;         /* options not parsed by
-                                       ItclExtendedConfigure/-Cget function */
+                                       ItclngExtendedConfigure/-Cget function */
 } ItclngObjectInfo;
 
 /*
@@ -495,6 +496,10 @@ MODULE_SCOPE int Itclng_ClassVarResolver(Tcl_Interp *interp, CONST char* name,
 MODULE_SCOPE int Itclng_ClassCompiledVarResolver(Tcl_Interp *interp,
         CONST char* name, int length, Tcl_Namespace *nsPtr,
         Tcl_ResolvedVarInfo **rPtr);
+
+MODULE_SCOPE int ItclngCreateClassBase( ClientData clientData,
+        Tcl_Interp* interp, Tcl_Object oPtr, int objc,
+        Tcl_Obj *const*objv);
 MODULE_SCOPE int ItclngCreateVariable(Tcl_Interp *interp,
         ItclngClass* iclsPtr, Tcl_Obj* namePtr, ItclngVariable** ivPtrPtr);
 MODULE_SCOPE void Itclng_DeleteVariable(ItclngVariable *ivPtr);

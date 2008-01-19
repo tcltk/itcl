@@ -1734,6 +1734,7 @@ ItclngMapMethodNameProc(
     Tcl_Obj *methodName;
     Tcl_Obj *className;
     Tcl_DString buffer;
+    Tcl_HashEntry *hPtr;
     ItclngObject *ioPtr;
     ItclngClass *iclsPtr;
     ItclngClass *iclsPtr2;
@@ -1742,20 +1743,24 @@ ItclngMapMethodNameProc(
     char *tail;
     char *sp;
 
+fprintf(stderr, "MAP!%s!\n", Tcl_GetString(methodObj));
+    iclsPtr = NULL;
+    iclsPtr2 = NULL;
+    methodName = NULL;
+    infoPtr = (ItclngObjectInfo *)Tcl_GetAssocData(interp,
+            ITCLNG_INTERP_DATA, NULL);
+    ioPtr = (ItclngObject *)Tcl_ObjectGetMetadata(oPtr,
+            infoPtr->object_meta_type);
+    if (ioPtr == NULL) {
+        /* try to get the class (if a class is creating an object) */
+        iclsPtr = (ItclngClass *)Tcl_ObjectGetMetadata(oPtr,
+            infoPtr->class_meta_type);
+    } else {
+        iclsPtr = ioPtr->iclsPtr;
+    }
     sp = Tcl_GetString(methodObj);
     Itclng_ParseNamespPath(sp, &buffer, &head, &tail);
     if (head != NULL) {
-        infoPtr = (ItclngObjectInfo *)Tcl_GetAssocData(interp,
-                ITCLNG_INTERP_DATA, NULL);
-        ioPtr = (ItclngObject *)Tcl_ObjectGetMetadata(oPtr,
-                infoPtr->object_meta_type);
-	if (ioPtr == NULL) {
-	    /* try to get the class (if a class is creating an object) */
-            iclsPtr = (ItclngClass *)Tcl_ObjectGetMetadata(oPtr,
-                    infoPtr->class_meta_type);
-	} else {
-            iclsPtr = ioPtr->iclsPtr;
-	}
         className = NULL;
         methodName = Tcl_NewStringObj(tail, -1);
         Tcl_IncrRefCount(methodName);
@@ -1768,6 +1773,47 @@ ItclngMapMethodNameProc(
 	}
         Tcl_DecrRefCount(className);
         Tcl_DecrRefCount(methodName);
+    }
+    hPtr = Tcl_FindHashEntry(&iclsPtr->resolveCmds, Tcl_GetString(methodObj));
+    if (hPtr != NULL) {
+	ItclngMemberFunc *imPtr;
+	Tcl_Namespace *nsPtr;
+
+	nsPtr = Tcl_GetCurrentNamespace(interp);
+        imPtr = Tcl_GetHashValue(hPtr);
+        if (!Itclng_CanAccessFunc(imPtr, nsPtr)) {
+	    char *token = Tcl_GetString(imPtr->namePtr);
+	    if ((*token != 'i') || (strcmp(token, "info") != 0)) {
+		/* needed for test protect-2.5 */
+	        ItclngMemberFunc *imPtr2 = NULL;
+                Tcl_HashEntry *hPtr;
+	        Tcl_ObjectContext context;
+	        context = Itclng_GetCallFrameClientData(interp);
+                if (context != NULL) {
+	            hPtr = Tcl_FindHashEntry(
+		            &imPtr->iclsPtr->infoPtr->procMethods,
+	                    (char *)Tcl_ObjectContextMethod(context));
+	            if (hPtr != NULL) {
+	                imPtr2 = Tcl_GetHashValue(hPtr);
+	            }
+		    if ((imPtr->protection & ITCLNG_PRIVATE) &&
+		            (imPtr2 != NULL) &&
+		            (imPtr->iclsPtr->nsPtr != imPtr2->iclsPtr->nsPtr)) {
+                        Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+		                "invalid command name \"",
+			        token,
+			        "\"", NULL);
+		        return TCL_ERROR;
+		    }
+                }
+		/* END needed for test protect-2.5 */
+                Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+                       "bad option \"", token, "\": should be one of...",
+                        (char*)NULL);
+	        ItclngReportObjectUsage(interp, ioPtr, nsPtr, nsPtr);
+                return TCL_ERROR;
+            }
+        }
     }
     Tcl_DStringFree(&buffer);
     return TCL_OK;

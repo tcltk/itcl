@@ -116,26 +116,27 @@ ClassNamespaceDeleted(
  */
 int
 Itclng_CreateClassCmd(
-    ClientData *clientData,	/* info for all known objects */
+    ClientData clientData,	/* info for all known objects */
     Tcl_Interp* interp,		/* interpreter that will contain new class */
     int objc,		        /* number of arguments */
-    Tcl_Obj *const*objv)	/* returns: pointer to class definition */
+    Tcl_Obj *const *objv)	/* returns: pointer to class definition */
 {
     ItclngObjectInfo *infoPtr;
     Tcl_DString buffer;
     Tcl_Command cmd;
     Tcl_CmdInfo cmdInfo;
     Tcl_Namespace *classNs;
-    Tcl_Object oPtr;
     Tcl_Obj *nameObjPtr;
     Tcl_Obj *namePtr;
+    Tcl_Object oPtr;
+    Tcl_Class clsPtr;
     ItclngClass *iclsPtr;
     ItclngVariable *ivPtr;
     Tcl_HashEntry *hPtr;
     int newEntry;
 
     ItclngShowArgs(0, "Itclng_CreateClassCmd", objc, objv);
-    if (ItclngCheckNumCmdParams(interp, infoPtr, "createClass", objc, 1, 1) !=
+    if (ItclngCheckNumCmdParams(interp, infoPtr, "createClass", objc, 2, 2) !=
             TCL_OK) {
         return TCL_ERROR;
     }
@@ -143,6 +144,18 @@ Itclng_CreateClassCmd(
     oPtr = NULL;
     ivPtr = NULL;
     nameObjPtr = objv[1];
+    oPtr = Tcl_GetObjectFromObj(interp, objv[2]);
+    if (oPtr == NULL) {
+	Tcl_AppendResult(interp,
+	        "ITCLNG: cannot get TclOO Object for class \"",
+                Tcl_GetString(objv[2]), "\"", NULL);
+        return TCL_ERROR;
+    }
+    if (infoPtr->clazzObjectPtr == NULL) {
+	/* the root class of Itclng muts be the first one to be created !! */
+        infoPtr->clazzObjectPtr = oPtr;
+    }
+    clsPtr = Tcl_GetObjectAsClass(oPtr);
     /*
      *  Allocate class definition data.
      */
@@ -179,7 +192,7 @@ Itclng_CreateClassCmd(
     iclsPtr->resolvePtr->clientData = resolveInfoPtr;
 
     /*
-     *  Initialize the heritage info--each class starts with its
+     *  Initialize the heritage info -- each class starts with its
      *  own class definition in the heritage.  Base classes are
      *  added to the heritage from the "inherit" statement.
      */
@@ -194,8 +207,9 @@ Itclng_CreateClassCmd(
      */
     Tcl_Preserve((ClientData)iclsPtr);
 
-    oPtr = Tcl_NewObjectInstance(interp, infoPtr->clazzClassPtr,
-            Tcl_GetString(nameObjPtr), Tcl_GetString(nameObjPtr), 0, NULL, 0);
+    oPtr = Tcl_NewObjectInstance(interp, clsPtr,
+            Tcl_GetString(nameObjPtr), Tcl_GetString(nameObjPtr), 0,
+	    NULL, 0);
     if (oPtr == NULL) {
         Tcl_AppendResult(interp,
                 "ITCL: cannot create Tcl_NewObjectInstance for class \"",
@@ -213,6 +227,13 @@ Itclng_CreateClassCmd(
     Tcl_SetCommandInfoFromToken(cmd, &cmdInfo);
     classNs = Tcl_FindNamespace(interp, Tcl_GetString(nameObjPtr),
             (Tcl_Namespace*)NULL, /* flags */ 0);
+    if (classNs == NULL) {
+	Tcl_AppendResult(interp,
+	        "ITCLNG: cannot get class namespace for class \"",
+		Tcl_GetString(iclsPtr->fullNamePtr), "\"", NULL);
+        Tcl_Release((ClientData)iclsPtr);
+        return TCL_ERROR;
+    }
     if (_TclOONamespaceDeleteProc == NULL) {
         _TclOONamespaceDeleteProc = classNs->deleteProc;
     }
@@ -222,15 +243,6 @@ Itclng_CreateClassCmd(
     Tcl_SetVar(interp, Tcl_DStringValue(&buffer), "1", 0);
     Tcl_TraceVar(interp, Tcl_DStringValue(&buffer), TCL_TRACE_UNSETS,
             ClassNamespaceDeleted, iclsPtr);
-
-
-    if (classNs == NULL) {
-	Tcl_AppendResult(interp,
-	        "ITCLNG: cannot create/get class namespace for class \"",
-		Tcl_GetString(iclsPtr->fullNamePtr), "\"", NULL);
-        Tcl_Release((ClientData)iclsPtr);
-        return TCL_ERROR;
-    }
 
     Tcl_EventuallyFree((ClientData)iclsPtr, ItclngFreeClass);
     Itclng_SetNamespaceResolvers(classNs,
@@ -334,7 +346,6 @@ Itclng_CreateClassCmd(
 
     Tcl_ResetResult(interp);
     Tcl_AppendResult(interp, Tcl_GetString(iclsPtr->fullNamePtr), NULL);
-fprintf(stderr, "3\n");
     return TCL_OK;
 }
 
@@ -978,19 +989,13 @@ Itclng_FindClassNamespace(
 
 /*
  * ------------------------------------------------------------------------
- *  Itclng_HandleClass()
+ *  Itclng_CreateObjectCmd()
  *
- *  first argument is ::itcl::parser::handleClass 
+ *  first argument is ::itclng::commands::createObject 
  *  Invoked by Tcl whenever the user issues the command associated with
  *  a class name.  Handles the following syntax:
  *
- *    <className>
- *    <className> <objName> ?<args>...?
- *
- *  Without any arguments, the command does nothing.  In the olden days,
- *  this allowed the class name to be invoked by itself to prompt the
- *  autoloader to load the class definition.  Today, this behavior is
- *  retained for backward compatibility with old releases.
+ *    <className> create <objName> ?<args>...?
  *
  *  If arguments are specified, then this procedure creates a new
  *  object named <objName> in the appropriate class.  Note that if
@@ -999,7 +1004,7 @@ Itclng_FindClassNamespace(
  * ------------------------------------------------------------------------
  */
 int
-Itclng_HandleClass(
+Itclng_CreateObjectCmd(
     ClientData clientData,   /* class definition */
     Tcl_Interp *interp,      /* current interpreter */
     int objc,                /* number of arguments */
@@ -1019,7 +1024,7 @@ Itclng_HandleClass(
     char *pos;
     char *match;
 
-    ItclngShowArgs(1, "Itclng_HandleClassCmd", objc, objv);
+    ItclngShowArgs(0, "Itclng_CreateObjectCmd", objc, objv);
     /*
      *  If the command is invoked without an object name, then do nothing.
      *  This used to support autoloading--that the class name could be
@@ -1139,6 +1144,7 @@ Itclng_HandleClass(
     if (result == TCL_ERROR) {
 	Tcl_Obj *objPtr;
 	
+	(void)Tcl_GetReturnOptions(interp, result);
 	objPtr = Tcl_NewStringObj("-level 2", -1);
 	result = Tcl_SetReturnOptions(interp, objPtr);
     }
@@ -1330,7 +1336,6 @@ Itclng_BuildVirtualTables(
         hPtr = Tcl_FirstHashEntry(&iclsPtr2->functions, &place);
         while (hPtr) {
             imPtr = (ItclngMemberFunc*)Tcl_GetHashValue(hPtr);
-
             /*
              *  Create all possible names for this function and enter
              *  them into the command resolution table:

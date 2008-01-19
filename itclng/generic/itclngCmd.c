@@ -22,6 +22,7 @@ Tcl_ObjCmdProc Itclng_CreateClassCommonCmd;
 Tcl_ObjCmdProc Itclng_CreateClassVariableCmd;
 Tcl_ObjCmdProc Itclng_CreateClassOptionCmd;
 Tcl_ObjCmdProc Itclng_CreateClassMethodVariableCmd;
+Tcl_ObjCmdProc Itclng_CreateObjectCmd;
 
 typedef struct InfoMethod {
     char* commandName;       /* method name */
@@ -31,9 +32,9 @@ typedef struct InfoMethod {
 
 static InfoMethod ItclngMethodList[] = {
     { "::itclng::internal::commands::createClass",
-      "fullClassName", Itclng_CreateClassCmd },
+      "fullClassName baseClassName", Itclng_CreateClassCmd },
     { "::itclng::internal::commands::createClassFinish",
-      "fullClassName", Itclng_CreateClassFinishCmd },
+      "fullClassName resultValue", Itclng_CreateClassFinishCmd },
     { "::itclng::internal::commands::createClassMethod",
       "fullClassName methodName", Itclng_CreateClassMethodCmd },
     { "::itclng::internal::commands::createClassProc",
@@ -46,6 +47,8 @@ static InfoMethod ItclngMethodList[] = {
       "fullClassName variableName", Itclng_CreateClassOptionCmd },
     { "::itclng::internal::commands::createClassMethodVariable",
       "fullClassName methodVariableName", Itclng_CreateClassMethodVariableCmd },
+    { "::itclng::internal::commands::createObject",
+      "fullClassName objectName ?arg arg ... ?", Itclng_CreateObjectCmd },
     { NULL, NULL, NULL }
 };
 
@@ -72,9 +75,11 @@ Itclng_InitCommands (
      * Build the ensemble used to implement [::itclng::internal::commands].
      */
 
-    nsPtr = Tcl_CreateNamespace(interp, "::itclng::internal::commands", NULL, NULL);
+    nsPtr = Tcl_CreateNamespace(interp, "::itclng::internal::commands",
+            NULL, NULL);
     if (nsPtr == NULL) {
-        Tcl_Panic("ITCLNG: error in creating namespace: ::itclng::internal::commands \n");
+        Tcl_Panic("ITCLNG: error in creating namespace: ",
+	        "::itclng::internal::commands \n");
     }
     cmd = Tcl_CreateEnsemble(interp, nsPtr->fullName, nsPtr,
         TCL_ENSEMBLE_PREFIX);
@@ -85,7 +90,8 @@ Itclng_InitCommands (
     }
     Tcl_Obj *ensObjPtr = Tcl_NewStringObj("::itclng::internal::commands", -1);
     Tcl_IncrRefCount(ensObjPtr);
-    Tcl_Obj *unkObjPtr = Tcl_NewStringObj("::itclng::internal::commands::unknown", -1);
+    Tcl_Obj *unkObjPtr = Tcl_NewStringObj(
+            "::itclng::internal::commands::unknown", -1);
     Tcl_IncrRefCount(unkObjPtr);
     if (Tcl_SetEnsembleUnknownHandler(NULL,
             Tcl_FindEnsemble(interp, ensObjPtr, TCL_LEAVE_ERR_MSG),
@@ -209,6 +215,47 @@ ItclngCheckNumCmdParams(
 
 /*
  * ------------------------------------------------------------------------
+ *  CreateOOMethod()
+ *
+ *  Creates a class method in TclOO
+ *  On failure returns TCL_ERROR, along with an error message in the interp.
+ *  If successful, it returns TCL_OK and the full method name
+ * ------------------------------------------------------------------------
+ */
+static int
+CreateOOMethod(
+    ItclngMemberFunc *imPtr,
+    Tcl_Obj *argumentPtr,
+    Tcl_Obj *bodyPtr)
+{
+    Tcl_HashEntry *hPtr2;
+    int isNewEntry;
+
+    ClientData pmPtr;
+    imPtr->tmPtr = (ClientData)Itclng_NewProcClassMethod(
+            imPtr->iclsPtr->interp, imPtr->iclsPtr->clsPtr,
+	    ItclngCheckCallMethod, ItclngAfterCallMethod,
+            ItclngProcErrorProc, imPtr, imPtr->namePtr, argumentPtr,
+            bodyPtr, &pmPtr);
+    hPtr2 = Tcl_CreateHashEntry(&imPtr->iclsPtr->infoPtr->procMethods,
+            (char *)imPtr->tmPtr, &isNewEntry);
+    if (isNewEntry) {
+        Tcl_SetHashValue(hPtr2, imPtr);
+    }
+    if ((imPtr->flags & ITCLNG_COMMON) == 0) {
+        imPtr->accessCmd = Tcl_CreateObjCommand(imPtr->iclsPtr->interp,
+	        Tcl_GetString(imPtr->fullNamePtr),
+	        Itclng_ExecMethod, imPtr, Tcl_Release);
+    } else {
+        imPtr->accessCmd = Tcl_CreateObjCommand(imPtr->iclsPtr->interp,
+	        Tcl_GetString(imPtr->fullNamePtr),
+		Itclng_ExecProc, imPtr, Tcl_Release);
+    }
+    return TCL_OK;
+}
+
+/*
+ * ------------------------------------------------------------------------
  *  Itclng_CreateClassFinishCmd()
  *
  *  Creates a class method
@@ -223,14 +270,14 @@ Itclng_CreateClassFinishCmd(
     int objc,		        /* number of arguments */
     Tcl_Obj *const*objv)	/* argument objects */
 {
-    ItclngObjectInfo *infoPtr;
-    ItclngClass *iclsPtr;
     Tcl_DString buffer;
     Tcl_Obj *argumentPtr;
     Tcl_Obj *bodyPtr;
     FOREACH_HASH_DECLS;
-    Tcl_HashEntry *hPtr2;
-    int isNewEntry;
+    ItclngObjectInfo *infoPtr;
+    ItclngClass *iclsPtr;
+    ItclngClass *iclsPtr2;
+    int newEntry;
 
     ItclngShowArgs(0, "Itclng_CreateClassFinishCmd", objc, objv);
     if (ItclngCheckNumCmdParams(interp, infoPtr, "createClassFinish", objc,
@@ -238,15 +285,6 @@ Itclng_CreateClassFinishCmd(
         return TCL_ERROR;
     }
     infoPtr = (ItclngObjectInfo *)clientData;
-#ifdef NOTDEF
-    hPtr = Tcl_FindHashEntry(&infoPtr->classes, (char *)objv[1]);
-    if (hPtr == NULL) {
-        Tcl_AppendResult(interp, "no such class \"", Tcl_GetString(objv[1]),
-	        "\"", NULL);
-        return TCL_ERROR;
-    }
-    iclsPtr = Tcl_GetHashValue(hPtr);
-#endif
     iclsPtr = Itclng_PopStack(&infoPtr->clsStack);
 
     /*
@@ -254,12 +292,20 @@ Itclng_CreateClassFinishCmd(
      *  Add built-in methods such as "configure" and "cget"--as long
      *  as they don't conflict with those defined in the class.
      */
-#ifdef NOTDEF
-    if (Itcl_InstallBiMethods(interp, iclsPtr) != TCL_OK) {
-        Tcl_DeleteNamespace(iclsPtr->nsPtr);
-        return TCL_ERROR;
+    if (Itclng_FirstListElem(&iclsPtr->bases) == NULL) {
+        /* no inheritance at all if it is ::itclng::clazz make it known */
+	if (infoPtr->clazzIclsPtr == NULL) {
+	    /* must be the Itclng clazz */
+	    infoPtr->clazzIclsPtr = iclsPtr;
+	} else {
+        /* no inheritance at all so add ::itclng::clazz to the inheritance */
+	    iclsPtr2 = infoPtr->clazzIclsPtr;
+            (void) Tcl_CreateHashEntry(&iclsPtr->heritage, (char*)iclsPtr2,
+	            &newEntry);
+            Itclng_AppendList(&iclsPtr->bases, (ClientData)iclsPtr2);
+	    Tcl_Preserve((ClientData)iclsPtr2);
+        }
     }
-#endif
 
     /*
      *  Build the name resolution tables for all data members.
@@ -275,72 +321,11 @@ Itclng_CreateClassFinishCmd(
                     Tcl_GetString(imPtr->namePtr));
 	    bodyPtr = ItclngGetBodyString(iclsPtr,
 	            Tcl_GetString(imPtr->namePtr));;
-#ifdef NOTDEF
-	    if (imPtr->codePtr->flags & ITCL_BUILTIN) {
-//FIX ME MEMORY leak!!
-	        argumentPtr = Tcl_NewStringObj("args", -1);
-		int isDone;
-		isDone = 0;
-	        bodyPtr = Tcl_NewStringObj("return [", -1);
-		if (strcmp(Tcl_GetString(imPtr->codePtr->bodyPtr),
-		        "@itcl-builtin-cget") == 0) {
-		    Tcl_AppendToObj(bodyPtr, "::itcl::builtin::cget", -1);
-		    isDone = 1;
-		}
-		if (strcmp(Tcl_GetString(imPtr->codePtr->bodyPtr),
-		        "@itcl-builtin-configure") == 0) {
-		    Tcl_AppendToObj(bodyPtr, "::itcl::builtin::configure", -1);
-		    isDone = 1;
-		}
-		if (strcmp(Tcl_GetString(imPtr->codePtr->bodyPtr),
-		        "@itcl-builtin-info") == 0) {
-		    Tcl_AppendToObj(bodyPtr, "::itcl::builtin::Info", -1);
-		    isDone = 1;
-		}
-		if (strcmp(Tcl_GetString(imPtr->codePtr->bodyPtr),
-		        "@itcl-builtin-isa") == 0) {
-		    Tcl_AppendToObj(bodyPtr, "::itcl::builtin::isa", -1);
-		    isDone = 1;
-		}
-		if (strncmp(Tcl_GetString(imPtr->codePtr->bodyPtr),
-		        "@itcl-builtin-setget", 20) == 0) {
-		    char *cp = Tcl_GetString(imPtr->codePtr->bodyPtr)+20;
-		    Tcl_AppendToObj(bodyPtr, "::itcl::builtin::setget ", -1);
-		    Tcl_AppendToObj(bodyPtr, cp, -1);
-		    Tcl_AppendToObj(bodyPtr, " ", 1);
-		    isDone = 1;
-		}
-		if (!isDone) {
-		    Tcl_AppendToObj(bodyPtr,
-		            Tcl_GetString(imPtr->codePtr->bodyPtr), -1);
-                }
-	        Tcl_AppendToObj(bodyPtr, " {*}$args]", -1);
-	    }
-#endif
-	    ClientData pmPtr;
-	    imPtr->tmPtr = (ClientData)Itclng_NewProcClassMethod(interp,
-	        iclsPtr->clsPtr, ItclngCheckCallMethod, ItclngAfterCallMethod,
-                ItclngProcErrorProc, imPtr, imPtr->namePtr, argumentPtr,
-		bodyPtr, &pmPtr);
-	    hPtr2 = Tcl_CreateHashEntry(&iclsPtr->infoPtr->procMethods,
-	            (char *)imPtr->tmPtr, &isNewEntry);
-	    if (isNewEntry) {
-	        Tcl_SetHashValue(hPtr2, imPtr);
-	    }
-	    if ((imPtr->flags & ITCLNG_COMMON) == 0) {
-	        imPtr->accessCmd = Tcl_CreateObjCommand(interp,
-		        Tcl_GetString(imPtr->fullNamePtr),
-		        Itclng_ExecMethod, imPtr, Tcl_Release);
-	    } else {
-	        imPtr->accessCmd = Tcl_CreateObjCommand(interp,
-		        Tcl_GetString(imPtr->fullNamePtr),
-			Itclng_ExecProc, imPtr, Tcl_Release);
-	    }
+	    (void)CreateOOMethod(imPtr, argumentPtr, bodyPtr);
             Tcl_DStringInit(&buffer);
         }
     }
     Tcl_DStringFree(&buffer);
-
     Tcl_ResetResult(interp);
     return TCL_OK;
 }
@@ -365,7 +350,7 @@ Itclng_CreateClassMethodCmd(
     ItclngObjectInfo *infoPtr;
     ItclngClass *iclsPtr;
 
-    ItclngShowArgs(0, "Itclng_CreateClassMethodCmd", objc, objv);
+    ItclngShowArgs(1, "Itclng_CreateClassMethodCmd", objc, objv);
     if (ItclngCheckNumCmdParams(interp, infoPtr, "createClassMethod", objc,
             2, 2) != TCL_OK) {
         return TCL_ERROR;
@@ -405,7 +390,7 @@ Itclng_CreateClassProcCmd(
     ItclngObjectInfo *infoPtr;
     ItclngClass *iclsPtr;
 
-    ItclngShowArgs(0, "Itclng_CreateClassProcCmd", objc, objv);
+    ItclngShowArgs(1, "Itclng_CreateClassProcCmd", objc, objv);
     if (ItclngCheckNumCmdParams(interp, infoPtr, "createClassProc", objc, 2, 2)
             != TCL_OK) {
         return TCL_ERROR;
@@ -445,7 +430,7 @@ Itclng_CreateClassCommonCmd(
     ItclngObjectInfo *infoPtr;
     ItclngClass *iclsPtr;
 
-    ItclngShowArgs(0, "Itclng_CreateClassCommonCmd", objc, objv);
+    ItclngShowArgs(1, "Itclng_CreateClassCommonCmd", objc, objv);
     if (ItclngCheckNumCmdParams(interp, infoPtr, "createClassMethod", objc,
             2, 2) != TCL_OK) {
         return TCL_ERROR;
@@ -486,7 +471,7 @@ Itclng_CreateClassVariableCmd(
     ItclngObjectInfo *infoPtr;
     ItclngClass *iclsPtr;
 
-    ItclngShowArgs(0, "Itclng_CreateClassVariableCmd", objc, objv);
+    ItclngShowArgs(1, "Itclng_CreateClassVariableCmd", objc, objv);
     if (ItclngCheckNumCmdParams(interp, infoPtr, "createClassVariable", objc,
             2, 2) != TCL_OK) {
         return TCL_ERROR;
