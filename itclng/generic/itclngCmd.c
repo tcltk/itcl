@@ -22,6 +22,7 @@ Tcl_ObjCmdProc Itclng_CreateClassCommonCmd;
 Tcl_ObjCmdProc Itclng_CreateClassVariableCmd;
 Tcl_ObjCmdProc Itclng_CreateClassOptionCmd;
 Tcl_ObjCmdProc Itclng_CreateClassMethodVariableCmd;
+Tcl_ObjCmdProc Itclng_CreateClassInheritCmd;
 Tcl_ObjCmdProc Itclng_CreateObjectCmd;
 
 typedef struct InfoMethod {
@@ -47,6 +48,8 @@ static InfoMethod ItclngMethodList[] = {
       "fullClassName variableName", Itclng_CreateClassOptionCmd },
     { "::itclng::internal::commands::createClassMethodVariable",
       "fullClassName methodVariableName", Itclng_CreateClassMethodVariableCmd },
+    { "::itclng::internal::commands::createClassInherit",
+      "fullClassName className ?className ...?", Itclng_CreateClassInheritCmd },
     { "::itclng::internal::commands::createObject",
       "fullClassName objectName ?arg arg ... ?", Itclng_CreateObjectCmd },
     { NULL, NULL, NULL }
@@ -544,6 +547,73 @@ Itclng_CreateClassMethodVariableCmd(
     }
     infoPtr = (ItclngObjectInfo *)clientData;
 
+    return TCL_OK;
+}
+
+/*
+ * ------------------------------------------------------------------------
+ *  Itclng_CreateClassInheritCmd()
+ *
+ *  Creates a class inheritance
+ *  On failure returns TCL_ERROR, along with an error message in the interp.
+ *  If successful, it returns TCL_OK
+ * ------------------------------------------------------------------------
+ */
+int
+Itclng_CreateClassInheritCmd(
+    ClientData clientData,	/* info for all known objects */
+    Tcl_Interp* interp,		/* interpreter */
+    int objc,		        /* number of arguments */
+    Tcl_Obj *CONST objv[])	/* argument objects */
+{
+    Tcl_HashEntry *hPtr;
+    ItclngObjectInfo *infoPtr;
+    ItclngClass *iclsPtr;
+    ItclngClass *iclsPtr2;
+    ItclngHierIter hier;
+    int newEntry;
+
+    ItclngShowArgs(0, "Itclng_CreateClassInheritCmd", objc, objv);
+    if (ItclngCheckNumCmdParams(interp, infoPtr, "createClassInherit", objc,
+            2, -1) != TCL_OK) {
+        return TCL_ERROR;
+    }
+    infoPtr = (ItclngObjectInfo *)clientData;
+    iclsPtr = (ItclngClass*)Itclng_PeekStack(&infoPtr->clsStack);
+    objc--;
+    objc--;
+    objv++;
+    objv++;
+    for(;objc > 0;objc--) {
+	hPtr = Tcl_FindHashEntry(&infoPtr->classes, (char *)(*objv));
+	/* FIX ME !!! eventually need autoload here !! */
+	if (hPtr == NULL) {
+            Tcl_AppendResult(interp, "no such class \"", Tcl_GetString(*objv),
+	            "\"", NULL);
+	    return TCL_ERROR;
+	}
+        iclsPtr2 = Tcl_GetHashValue(hPtr);
+	Itclng_AppendList(&iclsPtr->bases, (ClientData)iclsPtr2);
+	Tcl_Preserve((ClientData)iclsPtr2);
+        objv++;
+    }
+    /*
+     *  Add each base class and all of its base classes into
+     *  the heritage for the current class.  Along the way, make
+     *  sure that no class appears twice in the heritage.
+     */
+    Itclng_InitHierIter(&hier, iclsPtr);
+    iclsPtr2 = Itclng_AdvanceHierIter(&hier);  /* skip the class itself */
+    iclsPtr2 = Itclng_AdvanceHierIter(&hier);
+    while (iclsPtr2 != NULL) {
+        (void) Tcl_CreateHashEntry(&iclsPtr->heritage, (char*)iclsPtr2,
+	        &newEntry);
+        if (!newEntry) {
+            break;
+        }
+        iclsPtr2 = Itclng_AdvanceHierIter(&hier);
+    }
+    Itclng_DeleteHierIter(&hier);
     return TCL_OK;
 }
 

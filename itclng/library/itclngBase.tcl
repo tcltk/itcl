@@ -9,18 +9,20 @@ namespace eval ::itclng {
     ]
     namespace eval class {
 	variable infosNsName ::itclng::internal::parseinfos
+	variable internalCmds ::itclng::internal::commands
+
         namespace ensemble create
 	namespace ensemble configure ::itclng::class -map [list \
 	    create ::itclng::class::create \
 	]
         proc create {className args} {
 	    variable infosNsName
+	    variable internalCmds
 
 	    if {$className eq ""} {
 	        return -code error -level 2 "invalid classname \"\""
 	    }
 	    set nsName [uplevel 1 namespace current]
-puts stderr "CL!$nsName!$className!"
 	    if {$nsName ne "::"} {
 	        set nsName ${nsName}::
 	    }
@@ -43,23 +45,29 @@ puts stderr "CL!$nsName!$className!"
 	    } else {
 	        set fromClassName ::itclng::clazz
 	    }
-	    set xx [::itclng::internal::commands createClass $fullClassName $fromClassName]
-puts stderr "CLASS!$xx!"
+	    $internalCmds createClass $fullClassName $fromClassName
 	    namespace eval $infoNs {}
 	    set infoNs ${infoNs}::infos
 	    set $infoNs [list]
 	    dict set ${infoNs} functions [list]
 	    dict set ${infoNs} variables [list]
 	    dict set ${infoNs} options [list]
+	    dict set ${infoNs} inheritance [list]
 	    set result 0
 	    if {[catch {
 	    namespace eval ::itclng::parser {*}$args
 	    } errs]} {
 	        set result 1
 	    }
-	    ::itclng::internal::commands createClassFinish $fullClassName $result
+	    $internalCmds createClassFinish $fullClassName $result
 	    if {$result} {
 	        return -code error -level 2 $errs
+	    }
+	    set inh [dict get [set $infoNs] inheritance]
+	    if {[llength $inh] == 0} {
+	        if {$fullClassName ne "::itclng::clazz"} {
+	            ::oo::define $fullClassName superclass ::itclng::clazz
+	        }
 	    }
 	    ::oo::define $fullClassName self.method unknown {args} { 
 	        return [uplevel 1 ::itclng::builtin::unknown {*}$args]

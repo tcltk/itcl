@@ -35,4 +35,7 @@ namespace eval ::itclng::builtin {
     proc unknown {args} {
         puts stderr "::itclng::builtin::unknown called!$args!"
     }
+    proc objectunknown {args} {
+        puts stderr "::itclng::builtin::objectunknown called!$args!"
+    }
 }

@@ -26,6 +26,13 @@ namespace eval ::itclng::parser {
 	if {[llength $args] < 1} {
 	    return -code error -level 2 "usage: $type <name> ..."
 	}
+	::set fullClassName $::itclng::internal::parseinfos::currFullClassName
+	::set infoNs ::itclng::internal::classinfos${fullClassName}::infos
+	switch $type {
+	inherit {
+	      ::itclng::member::${type} $infoNs $fullClassName {*}$args
+	  }
+	}
 	::set name [lindex $args 0]
 	::set args [lrange $args 1 end]
 #puts stderr "parseSpecialMember!$type!$name!$args!"

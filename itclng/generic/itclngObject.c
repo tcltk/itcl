@@ -318,7 +318,7 @@ fprintf(stderr, "DEBUG CONSTRUCTOR error!%s!\n", Tcl_GetStringResult(interp));
 	Tcl_IncrRefCount(namePtr);
 	argumentPtr = Tcl_NewStringObj("args", -1);
 	Tcl_IncrRefCount(argumentPtr);
-	bodyPtr = Tcl_NewStringObj("uplevel 1 ::itcl::builtin::objectunknown ",
+	bodyPtr = Tcl_NewStringObj("uplevel 1 ::itclng::builtin::objectunknown ",
 	        -1);
 	Tcl_AppendToObj(bodyPtr, Tcl_GetString(ioPtr->namePtr), -1);
 	Tcl_AppendToObj(bodyPtr, " $args", -1);

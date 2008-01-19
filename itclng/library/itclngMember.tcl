@@ -146,18 +146,63 @@ puts stderr "methodOrProc!$name!$type!"
     proc method {infoNs className protection name args} {
         return [methodOrProc $infoNs $className Method $protection $name {*}$args]
     }
+
     proc common {infoNs className protection name args} {
         return [commonOrVariable $infoNs $className Common $protection $name {*}$args]
     }
+
     proc variable {infoNs className protection name args} {
         return [commonOrVariable $infoNs $className Variable $protection $name {*}$args]
     }
+
     proc methodvariable {infoNs className protection name args} {
     }
+
     proc component {infoNs className protection name args} {
     }
+
     proc option {infoNs className protection name args} {
     }
+
+    proc inherit {infoNs className args} {
+	set nsName [uplevel 5 namespace current]
+	if {$nsName ne "::"} {
+	    set nsName ${nsName}::
+	}
+puts stderr "INHERIT!$nsName!$infoNs!$className!$args!"
+	set inh [dict get [set $infoNs] inheritance]
+        if {[llength $inh] > 0} {
+	    return -code error -level 5 "inheritance \"[join $inh { }]\" already defined for class \"$className\""
+	}
+	set idx -1
+	set superClasses [list]
+	foreach clsName $args {
+	    set fullClsName $clsName
+	    if {![string match "::*" $clsName]} {
+	        set fullClsName $nsName$clsName
+	    }
+	    incr idx
+	    set idx2 [lsearch $args $clsName]
+	    if {$idx != $idx2} {
+	        return -code error -level 6 "class \"$className\" more than once in inherit list"
+	    }
+	    set idx2 [lsearch [lrange $args [expr {$idx+1}] end] $clsName]
+	    if {$idx2 >= 0} {
+	        return -code error -level 6 "class \"$clsName\" more than once in inherit list"
+	    }
+	    if {$clsName eq "$className"} {
+	        return -code error -level 6 "class \"$className\" cannot inherit from itself"
+	    }
+	    if {![::namespace exists ::itclng::internal::classinfos$fullClsName]} {
+	        return -code error -level 5 "cannot inherit from \"$clsName\""
+	    }
+	    lappend superClasses $fullClsName
+	}
+	dict set $infoNs inheritance $superClasses
+        ::itclng::internal::commands::createClassInherit $className {*}$superClasses
+	::oo::define $className superclass {*}$superClasses
+    }
+
     proc proc {infoNs className protection name args} {
         return [methodOrProc $infoNs $className Proc $protection $name {*}$args]
     }
