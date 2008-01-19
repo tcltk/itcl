@@ -19,7 +19,7 @@ namespace eval ::itclng::parser {
 	::set args [lrange $args 1 end]
 	::set fullClassName $::itclng::internal::parseinfos::currFullClassName
 	::set infoNs ::itclng::internal::classinfos${fullClassName}::infos
-puts stderr "parseMember!$fullClassName!!$protection!$type!$name!$args!"
+#puts stderr "parseMember!$fullClassName!!$protection!$type!$name!$args!"
         ::itclng::member::${type} $infoNs $fullClassName $protection $name {*}$args
     }
     proc parseSpecialMember {type args} {
@@ -28,7 +28,7 @@ puts stderr "parseMember!$fullClassName!!$protection!$type!$name!$args!"
 	}
 	::set name [lindex $args 0]
 	::set args [lrange $args 1 end]
-        puts stderr "parseSpecialMember!$type!$name!$args!"
+#puts stderr "parseSpecialMember!$type!$name!$args!"
     }
     proc private {args} {
         if {[llength $args] == 1} {

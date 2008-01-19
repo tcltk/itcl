@@ -59,7 +59,7 @@ argument with no name"
     }
 
     proc methodOrProc {infoNs className type protection name args} {
-puts stderr "methodOrProc!$name![llength $args]!"
+puts stderr "methodOrProc!$name!$type!"
 #puts stderr "ME!$infoNs!$className!$protection!$name![join $args !]!"
 	if {[dict exists [set ${infoNs}] functions $name]} {
 	    return -code error -level 4 "\"$name\" already defined in class \"$className\""
@@ -103,7 +103,7 @@ puts stderr "methodOrProc!$name![llength $args]!"
     }
 
     proc commonOrVariable {infoNs className type protection name args} {
-puts stderr "commonOrVariable!$name![llength $args]!"
+#puts stderr "commonOrVariable!$name![llength $args]!"
 #puts stderr "ME!$infoNs!$className!$protection!$name![join $args !]!"
 	if {[dict exists [set ${infoNs}] variables $name]} {
 	    return -code error -level 4 "\"$name\" already defined in class \"$className\""
@@ -139,7 +139,7 @@ puts stderr "commonOrVariable!$name![llength $args]!"
 	  }
 	}
         dict lappend ${infoNs} variables $name [list protection $protection init $initValue config $configValue state $state]
-puts stderr "DI2![dict get [set ${infoNs}] variables $name]!"
+#puts stderr "DI2![dict get [set ${infoNs}] variables $name]!"
         ::itclng::internal::commands createClass$type $className $name
     }
 

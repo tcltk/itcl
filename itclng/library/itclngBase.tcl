@@ -20,10 +20,15 @@ namespace eval ::itclng {
 	        return -code error -level 2 "invalid classname \"\""
 	    }
 	    set nsName [uplevel 1 namespace current]
+puts stderr "CL!$nsName!$className!"
 	    if {$nsName ne "::"} {
 	        set nsName ${nsName}::
 	    }
-	    set fullClassName $nsName$className
+	    if {[string match "::*" $className]} {
+	        set fullClassName $className
+	    } else {
+	        set fullClassName $nsName$className
+	    }
 	    set infoNs ::itclng::internal::classinfos$fullClassName
 	    if {[::namespace exists $infoNs]} {
 	        return -code error -level 2 "class \"$className\" already exists"
@@ -33,14 +38,17 @@ namespace eval ::itclng {
 	    }
 	    set ${infosNsName}::currClassName $className
 	    set ${infosNsName}::currFullClassName $fullClassName
-	    set xx [::itclng::internal::commands createClass $fullClassName]
+	    if {$fullClassName eq "::itclng::clazz"} {
+	        set fromClassName ::oo::class
+	    } else {
+	        set fromClassName ::itclng::clazz
+	    }
+	    set xx [::itclng::internal::commands createClass $fullClassName $fromClassName]
 puts stderr "CLASS!$xx!"
 	    namespace eval $infoNs {}
 	    set infoNs ${infoNs}::infos
-puts stderr "IS!$infoNs!"
 	    set $infoNs [list]
 	    dict set ${infoNs} functions [list]
-puts stderr "IV!$infoNs![dict get [set ${infoNs}] functions]!"
 	    dict set ${infoNs} variables [list]
 	    dict set ${infoNs} options [list]
 	    set result 0
@@ -53,6 +61,10 @@ puts stderr "IV!$infoNs![dict get [set ${infoNs}] functions]!"
 	    if {$result} {
 	        return -code error -level 2 $errs
 	    }
+	    ::oo::define $fullClassName self.method unknown {args} { 
+	        return [uplevel 1 ::itclng::builtin::unknown {*}$args]
+	    }
+	    ::oo::define $fullClassName export unknown
 	    return $fullClassName
 	}
     }
@@ -76,3 +88,4 @@ puts stderr "IV!$infoNs![dict get [set ${infoNs}] functions]!"
 	}
     }
 }
+
