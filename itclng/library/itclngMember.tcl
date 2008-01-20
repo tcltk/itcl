@@ -1,4 +1,4 @@
-namespace eval ::itclng::member {
+namespace eval ${::itcl::internal::infos::rootNamespace}::member {
 
     proc GetArgumentInfos {name arguments} {
 	set minArgs 0
@@ -99,7 +99,7 @@ puts stderr "methodOrProc!$name!$type!"
 	set argumentInfo [list definition $arguments minargs $minArgs maxargs $maxArgs haveArgsArg $haveArgsArg usage $usage defaultargs $defaultArgs]
         dict lappend ${infoNs} functions $name [list protection $protection arguments $argumentInfo origArguments $argumentInfo body $body origBody $body state $state]
 #puts stderr "DI2![dict get [set ${infoNs}] functions $name]!"
-        ::itclng::internal::commands createClass$type $className $name
+        ${::itcl::internal::infos::internalCmds} createClass$type $className $name
     }
 
     proc commonOrVariable {infoNs className type protection name args} {
@@ -140,7 +140,7 @@ puts stderr "methodOrProc!$name!$type!"
 	}
         dict lappend ${infoNs} variables $name [list protection $protection init $initValue config $configValue state $state]
 #puts stderr "DI2![dict get [set ${infoNs}] variables $name]!"
-        ::itclng::internal::commands createClass$type $className $name
+        ${::itcl::internal::infos::internalCmds} createClass$type $className $name
     }
 
     proc method {infoNs className protection name args} {
@@ -153,6 +153,53 @@ puts stderr "methodOrProc!$name!$type!"
 
     proc variable {infoNs className protection name args} {
         return [commonOrVariable $infoNs $className Variable $protection $name {*}$args]
+    }
+
+    proc constructor {infoNs className type protection name args} {
+	if {[dict exists [set ${infoNs}] functions $name]} {
+	    return -code error -level 4 "\"$name\" already defined in class \"$className\""
+	}
+	set initCode [list]
+	set body [list]
+        switch [llength $args] {
+	1 {
+	    set state NO_BODY
+	    set arguments [lindex $args 0]
+	  }
+	2 {
+	    set state COMPLETE
+	    set arguments [lindex $args 0]
+	    set body [lindex $args 1]
+	  }
+	3 {
+	    set state COMPLETE
+	    set arguments [lindex $args 0]
+	    set initCode [lindex $args 1]
+	    set body [lindex $args 2]
+	  }
+	default {
+	    return -code error -level 3 "Wrong # args should be $name args ?init? body"
+	  }
+	}
+	set minArgs 0
+	set maxArgs 0
+	set haveArgsArg 0
+	set usage ""
+	set defaultArgs [list]
+        set argInfo [GetArgumentInfos $name $arguments]
+	foreach {minArgs maxArgs haveArgsArg usage defaultArgs} $argInfo break
+	set argumentInfo [list definition $arguments minargs $minArgs maxargs $maxArgs haveArgsArg $haveArgsArg usage $usage defaultargs $defaultArgs]
+        dict lappend ${infoNs} functions $name [list protection $protection arguments $argumentInfo origArguments $argumentInfo body $body origBody $body state $state]
+#puts stderr "DI2![dict get [set ${infoNs}] functions $name]!"
+	if {$initCode ne ""} {
+            dict lappend ${infoNs} functions __constructor_init [list protection $protection arguments $argumentInfo origArguments $argumentInfo body $initCode origBody $initCode state COMPLETE]
+            ${::itcl::internal::infos::internalCmds} createClassConstructorInit $className __constructor_init
+	}
+        ${::itcl::internal::infos::internalCmds} createClassConstructor $className $name
+    }
+
+    proc destructor {infoNs className type protection name args} {
+puts stderr "DES!$args!"
     }
 
     proc methodvariable {infoNs className protection name args} {
@@ -193,13 +240,13 @@ puts stderr "INHERIT!$nsName!$infoNs!$className!$args!"
 	    if {$clsName eq "$className"} {
 	        return -code error -level 6 "class \"$className\" cannot inherit from itself"
 	    }
-	    if {![::namespace exists ::itclng::internal::classinfos$fullClsName]} {
+	    if {![::namespace exists ${::itcl::internal::infos::internalClassInfos}$fullClsName]} {
 	        return -code error -level 5 "cannot inherit from \"$clsName\""
 	    }
 	    lappend superClasses $fullClsName
 	}
 	dict set $infoNs inheritance $superClasses
-        ::itclng::internal::commands::createClassInherit $className {*}$superClasses
+        ${::itcl::internal::infos::internalCmds}::createClassInherit $className {*}$superClasses
 	::oo::define $className superclass {*}$superClasses
     }
 

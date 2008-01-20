@@ -45,7 +45,7 @@ puts stderr "=== class!self!create!$className!"
     dict set ${infoNs} inheritance [list]
     set result 0
     if {[catch {
-        namespace eval ::itclng::parser {*}$args
+        namespace eval ${::itcl::internal::infos::rootNamespace}::parser {*}$args
     } errs]} {
         set result 1
     }
@@ -60,7 +60,7 @@ puts stderr "=== class!self!create!$className!"
         }
     }
     ::oo::define $fullClassName self.method unknown {args} { 
-        return [uplevel 1 ::itclng::builtin::unknown {*}$args]
+        return [uplevel 1 ${::itcl::internal::infos::rootNamespace}::builtin::unknown {*}$args]
     }
     ::oo::define $fullClassName export unknown
     return $fullClassName
@@ -74,22 +74,22 @@ namespace eval $::itcl::internal::infos::rootClassName {}
 $::itcl::internal::infos::rootClassName create $::itcl::internal::infos::rootClassName {
     public proc info {args} {
 puts stderr "class!info!" ;
-	return [uplevel 1 ::itclng::builtin::info {*}$args]
+	return [uplevel 1 ${::itcl::internal::infos::rootNamespace}::builtin::info {*}$args]
     }
 
     public method cget {args} {
 puts stderr "class!cget!" ;
-	return [uplevel 1 ::itclng::internal::commands::cget {*}$args]
+	return [uplevel 1 ${::itcl::internal::infos::internalCmds}::cget {*}$args]
     }
 
     public method configure {args} {
 puts stderr "class!configure!" ;
-	return [namespace eval ::arnulf::cl1 " ::itclng::internal::commands::configure $args"]
-#	return [uplevel 2 ::itclng::internal::commands::configure {*}$args]
+	return [namespace eval ::arnulf::cl1 " ${::itcl::internal::infos::internalCmds}::configure $args"]
+#	return [uplevel 2 ${::itcl::internal::infos::internalCmds}::configure {*}$args]
     }
 
     public proc create {args} {
 puts stderr "+++class!create!" ;
-	return [uplevel 1 ::itclng::builtin::create [self] {*}$args]
+	return [uplevel 1 ${::itcl::internal::infos::rootNamespace}::builtin::create [self] {*}$args]
     }
 }

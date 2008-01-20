@@ -1,17 +1,18 @@
-namespace eval ::itclng::builtin {
-    variable infoNS ::itclng::internal::classinfos
+namespace eval ${::itcl::internal::infos::rootNamespace}::builtin {
+    variable infoNS $::itcl::internal::infos::internalClassInfos
+    variable __builtinRootNamespace ${::itcl::internal::infos::rootNamespace}::builtin
 
-    proc info {args} {
-        puts stderr "::itclng::builtin::info called!$args!"
+    proc infox {args} {
+        puts stderr "builtin info called!$args!"
     }
     proc configure {args} {
-        puts stderr "::itclng::builtin::configure called!$args!"
+        puts stderr "builtin configure called!$args!"
     }
     proc cget {args} {
-        puts stderr "::itclng::builtin::cget called!$args!"
+        puts stderr "builtin cget called!$args!"
     }
     proc create {className args} {
-        puts stderr "::itclng::builtin::create called!$className!$args!"
+        puts stderr "builtin create called!$className!$args!"
         set namespace [uplevel 1 namespace current]
 	set myNamespace $namespace
         if {$myNamespace ne "::"} {
@@ -22,7 +23,7 @@ namespace eval ::itclng::builtin {
 	if {[string length $cmd] > 0} {
             error "command \"$className\" already exists in namespace \"$namespace\""
         }
-	set cmd [list uplevel 1 ::itclng::internal::commands::createObject \
+	set cmd [list uplevel 1 ${::itcl::internal::infos::internalCmds}::createObject \
 	        $className $className {*}[list $args]]
 	if {[catch {
 	    eval $cmd
@@ -33,9 +34,9 @@ namespace eval ::itclng::builtin {
 
     }
     proc unknown {args} {
-        puts stderr "::itclng::builtin::unknown called!$args!"
+        puts stderr "builtin unknown called!$args!"
     }
     proc objectunknown {args} {
-        puts stderr "::itclng::builtin::objectunknown called!$args!"
+        puts stderr "builtin objectunknown called!$args!"
     }
 }

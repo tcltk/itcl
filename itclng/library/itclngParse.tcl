@@ -1,4 +1,4 @@
-namespace eval ::itclng::parser {
+namespace eval ${::itcl::internal::infos::rootNamespace}::parser {
     proc parseMember {type args} {
 	::set protection [lindex [::info level -2] 0]
 	switch $protection {
@@ -17,25 +17,30 @@ namespace eval ::itclng::parser {
 	}
 	::set name [lindex $args 0]
 	::set args [lrange $args 1 end]
-	::set fullClassName $::itclng::internal::parseinfos::currFullClassName
-	::set infoNs ::itclng::internal::classinfos${fullClassName}::infos
-#puts stderr "parseMember!$fullClassName!!$protection!$type!$name!$args!"
-        ::itclng::member::${type} $infoNs $fullClassName $protection $name {*}$args
+	::set fullClassName [::set ${::itcl::internal::infos::rootNamespace}::internal::parseinfos::currFullClassName]
+	::set infoNs ${::itcl::internal::infos::internalClassInfos}${fullClassName}::infos
+puts stderr "parseMember!$fullClassName!!$protection!$type!$name!$args!"
+        ${::itcl::internal::infos::rootNamespace}::member::${type} $infoNs $fullClassName $protection $name {*}$args
     }
     proc parseSpecialMember {type args} {
 	if {[llength $args] < 1} {
 	    return -code error -level 2 "usage: $type <name> ..."
 	}
-	::set fullClassName $::itclng::internal::parseinfos::currFullClassName
-	::set infoNs ::itclng::internal::classinfos${fullClassName}::infos
+	::set fullClassName [::set ${::itcl::internal::infos::rootNamespace}::internal::parseinfos::currFullClassName]
+	::set infoNs ${::itcl::internal::infos::internalClassInfos}${fullClassName}::infos
 	switch $type {
+	constructor -
+	destructor {
+	      return [${::itcl::internal::infos::rootNamespace}::member::${type} $infoNs $fullClassName $type protected $type {*}$args]
+	  }
 	inherit {
-	      ::itclng::member::${type} $infoNs $fullClassName {*}$args
+	      return [${::itcl::internal::infos::rootNamespace}::member::${type} $infoNs $fullClassName {*}$args]
 	  }
 	}
 	::set name [lindex $args 0]
 	::set args [lrange $args 1 end]
 #puts stderr "parseSpecialMember!$type!$name!$args!"
+	${::itcl::internal::infos::rootNamespace}::member::${type} $infoNs $fullClassName $name {*}$args
     }
     proc private {args} {
         if {[llength $args] == 1} {
@@ -98,7 +103,7 @@ namespace eval ::itclng::parser {
         parseSpecialMember inherit {*}$args
     }
     proc set {name args} {
-	::set fullClassName $::itclng::internal::parseinfos::currFullClassName
+	::set fullClassName ${::itcl::internal::infos::rootNamespace}::internal::parseinfos::currFullClassName
         namespace eval $fullClassName [list ::set $name $args]
     }
     proc proc {args} {
