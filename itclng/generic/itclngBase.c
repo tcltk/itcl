@@ -9,7 +9,7 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itclngBase.c,v 1.1.2.4 2008/01/19 17:29:13 wiede Exp $
+ * RCS: @(#) $Id: itclngBase.c,v 1.1.2.5 2008/01/20 17:17:16 wiede Exp $
  */
 
 #include <stdlib.h>
@@ -38,7 +38,7 @@ static int
 Initialize (
     Tcl_Interp *interp)
 {
-    Tcl_Namespace *nsPtr;
+    Tcl_Obj *objPtr;
     ItclngObjectInfo *infoPtr;
 
     if (Tcl_InitStubs(interp, TCL_VERSION, 0) == NULL) {
@@ -48,11 +48,6 @@ Initialize (
     if (ret == NULL) {
         return TCL_ERROR;
     }
-    nsPtr = Tcl_CreateNamespace(interp, ITCLNG_NAMESPACE, NULL, NULL);
-    if (nsPtr == NULL) {
-        Tcl_Panic("Itclng: cannot create namespace: \"%s\" \n",
-	        ITCLNG_NAMESPACE);
-    }
     /*
      *  Create the top-level data structure for tracking objects.
      *  Store this as "associated data" for easy access, but link
@@ -61,6 +56,66 @@ Initialize (
     infoPtr = (ItclngObjectInfo*)ckalloc(sizeof(ItclngObjectInfo));
     memset(infoPtr, 0, sizeof(ItclngObjectInfo));
     infoPtr->interp = interp;
+
+    /* get the root class name */
+    objPtr = Tcl_NewStringObj(ITCLNG_INTERNAL_INFO_NAMESPACE, -1);
+    Tcl_AppendToObj(objPtr, "::rootClassName", -1);
+    infoPtr->rootClassName = Tcl_ObjGetVar2(interp, objPtr, NULL,
+            TCL_LEAVE_ERR_MSG);
+    if (infoPtr->rootClassName == NULL) {
+	Tcl_DecrRefCount(objPtr);
+        return TCL_ERROR;
+    }
+    Tcl_DecrRefCount(objPtr);
+    Tcl_IncrRefCount(infoPtr->rootClassName);
+
+    /* get the root namespace */
+    objPtr = Tcl_NewStringObj(ITCLNG_INTERNAL_INFO_NAMESPACE, -1);
+    Tcl_AppendToObj(objPtr, "::rootNamespace", -1);
+    infoPtr->rootNamespace = Tcl_ObjGetVar2(interp, objPtr, NULL,
+            TCL_LEAVE_ERR_MSG);
+    if (infoPtr->rootNamespace == NULL) {
+	Tcl_DecrRefCount(objPtr);
+        return TCL_ERROR;
+    }
+    Tcl_DecrRefCount(objPtr);
+    Tcl_IncrRefCount(infoPtr->rootNamespace);
+
+    /* get the internal commands namespace */
+    objPtr = Tcl_NewStringObj(ITCLNG_INTERNAL_INFO_NAMESPACE, -1);
+    Tcl_AppendToObj(objPtr, "::internalCmds", -1);
+    infoPtr->internalCmds = Tcl_ObjGetVar2(interp, objPtr, NULL,
+            TCL_LEAVE_ERR_MSG);
+    if (infoPtr->internalCmds == NULL) {
+	Tcl_DecrRefCount(objPtr);
+        return TCL_ERROR;
+    }
+    Tcl_DecrRefCount(objPtr);
+    Tcl_IncrRefCount(infoPtr->internalCmds);
+
+    /* get the namespace for the (class)variables */
+    objPtr = Tcl_NewStringObj(ITCLNG_INTERNAL_INFO_NAMESPACE, -1);
+    Tcl_AppendToObj(objPtr, "::internalVars", -1);
+    infoPtr->internalVars = Tcl_ObjGetVar2(interp, objPtr, NULL,
+            TCL_LEAVE_ERR_MSG);
+    if (infoPtr->internalVars == NULL) {
+	Tcl_DecrRefCount(objPtr);
+        return TCL_ERROR;
+    }
+    Tcl_DecrRefCount(objPtr);
+    Tcl_IncrRefCount(infoPtr->internalVars);
+
+    /* get the namespace for the internal class infos */
+    objPtr = Tcl_NewStringObj(ITCLNG_INTERNAL_INFO_NAMESPACE, -1);
+    Tcl_AppendToObj(objPtr, "::internalClassInfos", -1);
+    infoPtr->internalClassInfos = Tcl_ObjGetVar2(interp, objPtr, NULL,
+            TCL_LEAVE_ERR_MSG);
+    if (infoPtr->internalClassInfos == NULL) {
+	Tcl_DecrRefCount(objPtr);
+        return TCL_ERROR;
+    }
+    Tcl_DecrRefCount(objPtr);
+    Tcl_IncrRefCount(infoPtr->internalClassInfos);
 
     /* initialize the class meta data type for TclOO */
     infoPtr->class_meta_type = (Tcl_ObjectMetadataType *)ckalloc(
@@ -122,8 +177,7 @@ Initialize (
  *  [incr Tcl] package.  Usually invoked within Tcl_AppInit() at
  *  the start of execution.
  *
- *  Creates the "::itclng" namespace and installs access commands for
- *  creating classes and querying info.
+ *  Installs access commands for creating classes and querying info.
  *
  *  Returns TCL_OK on success, or TCL_ERROR (along with an error
  *  message in the interpreter) if anything goes wrong.
@@ -149,8 +203,7 @@ return TCL_OK;
  *  Invoked whenever a new SAFE INTERPRETER is created to install
  *  the [incr Tcl] package.
  *
- *  Creates the "::itclng" namespace and installs access commands for
- *  creating classes and querying info.
+ *  Installs access commands for creating classes and querying info.
  *
  *  Returns TCL_OK on success, or TCL_ERROR (along with an error
  *  message in the interpreter) if anything goes wrong.

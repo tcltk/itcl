@@ -101,3 +101,5 @@ EXTERN ClientData Itclng_GetCallFrameClientData(Tcl_Interp *interp);
 EXTERN int Itclng_GetCallFrameObjc(Tcl_Interp *interp);
 EXTERN int Itclng_SetCallFrameResolver(Tcl_Interp *interp,
         Tcl_Resolve *resolvePtr);
+EXTERN int Itclng_SetCallFrameNamespace(Tcl_Interp *interp,
+        Tcl_Namespace *nsPtr);

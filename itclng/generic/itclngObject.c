@@ -147,10 +147,12 @@ ItclngCreateObject(
      */
     Tcl_Preserve((ClientData)ioPtr);
 
+    infoPtr = iclsPtr->infoPtr;
     ioPtr->namePtr = Tcl_NewStringObj(name, -1);
     Tcl_IncrRefCount(ioPtr->namePtr);
     Tcl_DStringInit(&buffer);
-    Tcl_DStringAppend(&buffer, ITCLNG_VARIABLES_NAMESPACE, -1);
+    Tcl_DStringAppend(&buffer,
+            Tcl_GetString(infoPtr->internalVars), -1);
     Tcl_DStringAppend(&buffer, "::", 2);
     Tcl_DStringAppend(&buffer, Tcl_GetString(ioPtr->namePtr), -1);
     ioPtr->varNsNamePtr = Tcl_NewStringObj(Tcl_DStringValue(&buffer), -1);
@@ -193,7 +195,6 @@ ItclngCreateObject(
         return TCL_ERROR;
     }
 
-    infoPtr = iclsPtr->infoPtr;
     saveCurrIoPtr = infoPtr->currIoPtr;
     infoPtr->currIoPtr = ioPtr;
     ioPtr->oPtr = Tcl_NewObjectInstance(interp, iclsPtr->clsPtr, name,
@@ -390,7 +391,8 @@ ItclngInitObjectVariables(
     iclsPtr2 = Itclng_AdvanceHierIter(&hier);
     while (iclsPtr2 != NULL) {
 	Tcl_DStringInit(&buffer);
-	Tcl_DStringAppend(&buffer, ITCLNG_VARIABLES_NAMESPACE, -1);
+	Tcl_DStringAppend(&buffer,
+	        Tcl_GetString(iclsPtr2->infoPtr->internalVars), -1);
 	if ((name[0] != ':') && (name[1] != ':')) {
              Tcl_DStringAppend(&buffer, "::", 2);
 	}
@@ -415,7 +417,8 @@ ItclngInitObjectVariables(
 		itclOptionsIsSet = 1;
                 itclOptionsName = Tcl_GetString(ivPtr->namePtr);
                 Tcl_DStringInit(&buffer2);
-	        Tcl_DStringAppend(&buffer2, ITCLNG_VARIABLES_NAMESPACE, -1);
+	        Tcl_DStringAppend(&buffer2, Tcl_GetString(
+			ivPtr->iclsPtr->infoPtr->internalVars), -1);
 	        if ((name[0] != ':') && (name[1] != ':')) {
                      Tcl_DStringAppend(&buffer2, "::", 2);
 	        }
@@ -560,7 +563,8 @@ InitObjectOptions(
 		Tcl_SetHashValue(hPtr2, ioptPtr);
                 itclOptionsName = Tcl_GetString(ioptPtr->namePtr);
                 Tcl_DStringInit(&buffer);
-	        Tcl_DStringAppend(&buffer, ITCLNG_VARIABLES_NAMESPACE, -1);
+	        Tcl_DStringAppend(&buffer,
+		        Tcl_GetString(iclsPtr2->infoPtr->internalVars), -1);
 	        if ((name[0] != ':') && (name[1] != ':')) {
                      Tcl_DStringAppend(&buffer, "::", 2);
 	        }
@@ -741,7 +745,8 @@ ItclngDeleteObjectVariablesNamespace(
 	    return;
 	}
         Tcl_DStringInit(&buffer);
-        Tcl_DStringAppend(&buffer, ITCLNG_VARIABLES_NAMESPACE, -1);
+        Tcl_DStringAppend(&buffer,
+	        Tcl_GetString(ioPtr->iclsPtr->infoPtr->internalVars), -1);
         if ((name[0] != ':') && (name[1] != ':')) {
                 Tcl_DStringAppend(&buffer, "::", 2);
         }

@@ -20,7 +20,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itclngResolve.c,v 1.1.2.2 2008/01/19 17:29:13 wiede Exp $
+ *     RCS:  $Id: itclngResolve.c,v 1.1.2.3 2008/01/20 17:17:18 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -332,7 +332,8 @@ Itclng_ClassVarResolver(
     if (strcmp(name, "this") == 0) {
         Tcl_DString buffer;
 	Tcl_DStringInit(&buffer);
-	Tcl_DStringAppend(&buffer, ITCLNG_VARIABLES_NAMESPACE, -1);
+	Tcl_DStringAppend(&buffer,
+	        Tcl_GetString(infoPtr->internalVars), -1);
 	Tcl_DStringAppend(&buffer, "::", 2);
 	Tcl_DStringAppend(&buffer, Tcl_GetString(contextIoPtr->namePtr), -1);
 	if (vlookup->ivPtr->iclsPtr->nsPtr == NULL) {
@@ -354,7 +355,8 @@ Itclng_ClassVarResolver(
     if (strcmp(name, "itcl_options") == 0) {
         Tcl_DString buffer;
 	Tcl_DStringInit(&buffer);
-	Tcl_DStringAppend(&buffer, ITCLNG_VARIABLES_NAMESPACE, -1);
+	Tcl_DStringAppend(&buffer,
+	        Tcl_GetString(infoPtr->internalVars), -1);
 	Tcl_DStringAppend(&buffer, "::", 2);
 	Tcl_DStringAppend(&buffer, Tcl_GetString(contextIoPtr->namePtr), -1);
 	Tcl_DStringAppend(&buffer, "::itcl_options", 14);
@@ -530,7 +532,8 @@ ItclngClassRuntimeVarResolver(
         if (strcmp(Tcl_GetString(vlookup->ivPtr->namePtr), "this") == 0) {
             Tcl_DString buffer;
 	    Tcl_DStringInit(&buffer);
-	    Tcl_DStringAppend(&buffer, ITCLNG_VARIABLES_NAMESPACE, -1);
+	    Tcl_DStringAppend(&buffer, Tcl_GetString(
+		    vlookup->ivPtr->iclsPtr->infoPtr->internalVars), -1);
 	    Tcl_DStringAppend(&buffer, "::", 2);
 	    Tcl_DStringAppend(&buffer,
 	            Tcl_GetString(contextIoPtr->namePtr), -1);
@@ -553,7 +556,8 @@ ItclngClassRuntimeVarResolver(
 	        "itcl_options") == 0) {
             Tcl_DString buffer;
 	    Tcl_DStringInit(&buffer);
-	    Tcl_DStringAppend(&buffer, ITCLNG_VARIABLES_NAMESPACE, -1);
+	    Tcl_DStringAppend(&buffer, Tcl_GetString(
+		    vlookup->ivPtr->iclsPtr->infoPtr->internalVars), -1);
 	    Tcl_DStringAppend(&buffer, "::", 2);
 	    Tcl_DStringAppend(&buffer,
 	            Tcl_GetString(contextIoPtr->namePtr), -1);

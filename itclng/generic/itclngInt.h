@@ -9,7 +9,7 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itclngInt.h,v 1.1.2.6 2008/01/19 17:29:13 wiede Exp $
+ * RCS: @(#) $Id: itclngInt.h,v 1.1.2.7 2008/01/20 17:17:17 wiede Exp $
  */
 
 #include <string.h>
@@ -73,9 +73,7 @@
 
 #define ALLOC_CHUNK 8
 
-#define ITCLNG_VARIABLES_NAMESPACE "::itclng::internal::variables"
-#define ITCLNG_COMMANDS_NAMESPACE "::itclng::internal::commands"
-#define ITCLNG_CLASS_INFO_NAMESPACE "::itclng::internal::classinfos"
+#define ITCLNG_INTERNAL_INFO_NAMESPACE "::itcl::internal::infos"
 
 typedef struct ItclngArgList {
     struct ItclArgList *nextPtr;        /* pointer to next argument */
@@ -97,6 +95,11 @@ struct ItclngDelegatedMethodInfo;
 
 typedef struct ItclngObjectInfo {
     Tcl_Interp *interp;             /* interpreter that manages this info */
+    Tcl_Obj *rootClassName;         /* the root class of all itcl classes */
+    Tcl_Obj *rootNamespace;         /* the root namespace where we live in */
+    Tcl_Obj *internalCmds;          /* the namespace for internal commands */
+    Tcl_Obj *internalVars;          /* the namespace for internal (class)variables */
+    Tcl_Obj *internalClassInfos;    /* the namespace for internal class infos */
     Tcl_HashTable objects;          /* list of all known objects */
     Tcl_HashTable classes;          /* list of all known classes */
     Tcl_HashTable namespaceClasses; /* maps from nsPtr to iclsPtr */
@@ -117,9 +120,10 @@ typedef struct ItclngObjectInfo {
     Tcl_ObjectMetadataType *object_meta_type;
                                     /* type for getting the Itclng object info
                                      * from a TclOO Tcl_Object */
-    Tcl_Object clazzObjectPtr;      /* the root TclOO object of Itclng */
-    Tcl_Class clazzClassPtr;        /* the root TclOO class of Itclng */
-    struct ItclngClass *clazzIclsPtr; /* the root Itclng class of Itclng */
+    Tcl_Object rootClassObjectPtr;  /* the root TclOO object of Itclng */
+    Tcl_Class rootClassClassPtr;    /* the root TclOO class of Itclng */
+    struct ItclngClass *rootClassIclsPtr;
+                                    /* the root Itclng class of Itclng */
     struct EnsembleInfo *ensembleInfo;
     struct ItclngClass *currContextIclsPtr;
                                     /* context class for delegated option
@@ -533,6 +537,12 @@ MODULE_SCOPE int Itclng_IsObject(Tcl_Command cmd);
 MODULE_SCOPE void ItclngDeleteObjectMetadata(ClientData clientData);
 MODULE_SCOPE int ItclngObjectCmd(ClientData clientData, Tcl_Interp *interp,
     Tcl_Object oPtr, Tcl_Class clsPtr, int objc, Tcl_Obj *const *objv);
+MODULE_SCOPE const char* ItclngGetInstanceVar(Tcl_Interp *interp,
+        const char *name1, const char *name2, ItclngObject *contextIoPtr,
+	ItclngClass *contextIclsPtr);
+MODULE_SCOPE const char* Itclng_GetInstanceVar(Tcl_Interp *interp,
+        const char *name, ItclngObject *contextIoPtr,
+	ItclngClass *contextIclsPtr);
 
 
 MODULE_SCOPE int ItclngCreateMethodOrProc(Tcl_Interp* interp,
@@ -570,6 +580,8 @@ MODULE_SCOPE Tcl_Command Itclng_CmdAliasProc(Tcl_Interp *interp,
         Tcl_Namespace *nsPtr, CONST char *cmdName, ClientData clientData);
 MODULE_SCOPE Tcl_Var Itclng_VarAliasProc(Tcl_Interp *interp,
         Tcl_Namespace *nsPtr, CONST char *varName, ClientData clientData);
+MODULE_SCOPE int Itclng_GetContext(Tcl_Interp *interp,
+        ItclngClass **iclsPtrPtr, ItclngObject **ioPtrPtr);
 
 
 #include "itclng2TclOO.h"

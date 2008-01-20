@@ -92,7 +92,8 @@ ClassNamespaceDeleted(
     iclsPtr->nsPtr = NULL;
     /* delete the namespace for the common variables */
     Tcl_DStringInit(&buffer);
-    Tcl_DStringAppend(&buffer, ITCLNG_VARIABLES_NAMESPACE, -1);
+    Tcl_DStringAppend(&buffer,
+            Tcl_GetString(iclsPtr->infoPtr->internalVars), -1);
     Tcl_DStringAppend(&buffer, Tcl_GetString(iclsPtr->fullNamePtr), -1);
     nsPtr = Tcl_FindNamespace(interp, Tcl_DStringValue(&buffer), NULL, 0);
     Tcl_DStringFree(&buffer);
@@ -151,9 +152,9 @@ Itclng_CreateClassCmd(
                 Tcl_GetString(objv[2]), "\"", NULL);
         return TCL_ERROR;
     }
-    if (infoPtr->clazzObjectPtr == NULL) {
+    if (infoPtr->rootClassObjectPtr == NULL) {
 	/* the root class of Itclng muts be the first one to be created !! */
-        infoPtr->clazzObjectPtr = oPtr;
+        infoPtr->rootClassObjectPtr = oPtr;
     }
     clsPtr = Tcl_GetObjectAsClass(oPtr);
     /*
@@ -207,13 +208,18 @@ Itclng_CreateClassCmd(
      */
     Tcl_Preserve((ClientData)iclsPtr);
 
-    oPtr = Tcl_NewObjectInstance(interp, clsPtr,
-            Tcl_GetString(nameObjPtr), Tcl_GetString(nameObjPtr), 0,
-	    NULL, 0);
+    if (strcmp(Tcl_GetString(nameObjPtr),
+            Tcl_GetString(infoPtr->rootClassName)) == 0) {
+        oPtr = Tcl_GetObjectFromObj(interp, nameObjPtr);
+    } else {
+        oPtr = Tcl_NewObjectInstance(interp, clsPtr,
+                Tcl_GetString(nameObjPtr), Tcl_GetString(nameObjPtr), 0,
+	        NULL, 0);
+    }
     if (oPtr == NULL) {
         Tcl_AppendResult(interp,
                 "ITCL: cannot create Tcl_NewObjectInstance for class \"",
-                Tcl_GetString(iclsPtr->fullNamePtr), "\"", NULL);
+                Tcl_GetString(nameObjPtr), "\"", NULL);
        return TCL_ERROR;
     }
     Tcl_ObjectSetMetadata((Tcl_Object) oPtr, infoPtr->class_meta_type, iclsPtr);
@@ -230,7 +236,7 @@ Itclng_CreateClassCmd(
     if (classNs == NULL) {
 	Tcl_AppendResult(interp,
 	        "ITCLNG: cannot get class namespace for class \"",
-		Tcl_GetString(iclsPtr->fullNamePtr), "\"", NULL);
+		Tcl_GetString(nameObjPtr), "\"", NULL);
         Tcl_Release((ClientData)iclsPtr);
         return TCL_ERROR;
     }
@@ -284,7 +290,8 @@ Itclng_CreateClassCmd(
      * public variables go directly to the class namespace
      */
     Tcl_DStringInit(&buffer);
-    Tcl_DStringAppend(&buffer, ITCLNG_VARIABLES_NAMESPACE, -1);
+    Tcl_DStringAppend(&buffer,
+            Tcl_GetString(iclsPtr->infoPtr->internalVars), -1);
     Tcl_DStringAppend(&buffer, Tcl_GetString(iclsPtr->fullNamePtr), -1);
     if (Tcl_CreateNamespace(interp, Tcl_DStringValue(&buffer),
             NULL, 0) == NULL) {
@@ -370,7 +377,8 @@ ItclngDeleteClassVariablesNamespace(
     if (!(iclsPtr->flags & ITCLNG_CLASS_NO_VARNS_DELETE)) {
         /* free the classes's variables namespace and variables in it */
         Tcl_DStringInit(&buffer);
-        Tcl_DStringAppend(&buffer, ITCLNG_VARIABLES_NAMESPACE, -1);
+        Tcl_DStringAppend(&buffer,
+	        Tcl_GetString(iclsPtr->infoPtr->internalVars), -1);
         Tcl_DStringAppend(&buffer, iclsPtr->nsPtr->fullName, -1);
         varNsPtr = Tcl_FindNamespace(interp, Tcl_DStringValue(&buffer),
 	        NULL, 0);
@@ -991,7 +999,7 @@ Itclng_FindClassNamespace(
  * ------------------------------------------------------------------------
  *  Itclng_CreateObjectCmd()
  *
- *  first argument is ::itclng::commands::createObject 
+ *  first argument is createObject 
  *  Invoked by Tcl whenever the user issues the command associated with
  *  a class name.  Handles the following syntax:
  *
@@ -1614,7 +1622,8 @@ ItclngCreateCommonOrVariable(
         if (ivPtr->protection != ITCLNG_PUBLIC) {
             /* public commons go to the class namespace directly the others
 	     * go to the variables namespace of the class */
-            Tcl_DStringAppend(&buffer, ITCLNG_VARIABLES_NAMESPACE, -1);
+            Tcl_DStringAppend(&buffer,
+	            Tcl_GetString(ivPtr->iclsPtr->infoPtr->internalVars), -1);
         }
         Tcl_DStringAppend(&buffer,
 	        Tcl_GetString(ivPtr->iclsPtr->fullNamePtr), -1);
@@ -1860,7 +1869,8 @@ Itclng_GetCommonVar(
      */
     Tcl_DStringInit(&buffer);
     if (ivPtr->protection != ITCLNG_PUBLIC) {
-        Tcl_DStringAppend(&buffer, ITCLNG_VARIABLES_NAMESPACE, -1);
+        Tcl_DStringAppend(&buffer,
+	        Tcl_GetString(ivPtr->iclsPtr->infoPtr->internalVars), -1);
     }
     Tcl_DStringAppend(&buffer, name, -1);
 

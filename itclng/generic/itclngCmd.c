@@ -23,7 +23,12 @@ Tcl_ObjCmdProc Itclng_CreateClassVariableCmd;
 Tcl_ObjCmdProc Itclng_CreateClassOptionCmd;
 Tcl_ObjCmdProc Itclng_CreateClassMethodVariableCmd;
 Tcl_ObjCmdProc Itclng_CreateClassInheritCmd;
+Tcl_ObjCmdProc Itclng_CreateClassConstructorCmd;
+Tcl_ObjCmdProc Itclng_CreateClassDestructorCmd;
+Tcl_ObjCmdProc Itclng_CreateClassConstructorInitCmd;
 Tcl_ObjCmdProc Itclng_CreateObjectCmd;
+Tcl_ObjCmdProc Itclng_ConfigureCmd;
+Tcl_ObjCmdProc Itclng_CgetCmd;
 
 typedef struct InfoMethod {
     char* commandName;       /* method name */
@@ -32,26 +37,51 @@ typedef struct InfoMethod {
 } InfoMethod;
 
 static InfoMethod ItclngMethodList[] = {
-    { "::itclng::internal::commands::createClass",
-      "fullClassName baseClassName", Itclng_CreateClassCmd },
-    { "::itclng::internal::commands::createClassFinish",
-      "fullClassName resultValue", Itclng_CreateClassFinishCmd },
-    { "::itclng::internal::commands::createClassMethod",
-      "fullClassName methodName", Itclng_CreateClassMethodCmd },
-    { "::itclng::internal::commands::createClassProc",
-      "fullClassName procName", Itclng_CreateClassProcCmd },
-    { "::itclng::internal::commands::createClassCommon",
-      "fullClassName commonName", Itclng_CreateClassCommonCmd },
-    { "::itclng::internal::commands::createClassVariable",
-      "fullClassName variableName", Itclng_CreateClassVariableCmd },
-    { "::itclng::internal::commands::createClassOption",
-      "fullClassName variableName", Itclng_CreateClassOptionCmd },
-    { "::itclng::internal::commands::createClassMethodVariable",
-      "fullClassName methodVariableName", Itclng_CreateClassMethodVariableCmd },
-    { "::itclng::internal::commands::createClassInherit",
-      "fullClassName className ?className ...?", Itclng_CreateClassInheritCmd },
-    { "::itclng::internal::commands::createObject",
-      "fullClassName objectName ?arg arg ... ?", Itclng_CreateObjectCmd },
+    { "createClass",
+      "fullClassName baseClassName",
+      Itclng_CreateClassCmd },
+    { "createClassFinish",
+      "fullClassName resultValue",
+      Itclng_CreateClassFinishCmd },
+    { "createClassMethod",
+      "fullClassName methodName",
+      Itclng_CreateClassMethodCmd },
+    { "createClassProc",
+      "fullClassName procName",
+      Itclng_CreateClassProcCmd },
+    { "createClassCommon",
+      "fullClassName commonName",
+      Itclng_CreateClassCommonCmd },
+    { "createClassVariable",
+      "fullClassName variableName",
+      Itclng_CreateClassVariableCmd },
+    { "createClassOption",
+      "fullClassName variableName",
+      Itclng_CreateClassOptionCmd },
+    { "createClassMethodVariable",
+      "fullClassName methodVariableName",
+      Itclng_CreateClassMethodVariableCmd },
+    { "createClassInherit",
+      "fullClassName className ?className ...?",
+      Itclng_CreateClassInheritCmd },
+    { "createObject",
+      "fullClassName objectName ?arg arg ... ?",
+      Itclng_CreateObjectCmd },
+    { "configure",
+      "fullClassName ?arg arg ... ?",
+      Itclng_ConfigureCmd },
+    { "cget",
+      "fullClassName ?arg arg ... ?",
+      Itclng_CgetCmd },
+    { "createClassConstructor",
+      "fullClassName constructor",
+      Itclng_CreateClassConstructorCmd },
+    { "createClassConstructorInit",
+      "fullClassName __constructor_init",
+      Itclng_CreateClassConstructorInitCmd},
+    { "createClassDestructor",
+      "fullClassName constructor",
+      Itclng_CreateClassDestructorCmd },
     { NULL, NULL, NULL }
 };
 
@@ -70,31 +100,37 @@ Itclng_InitCommands (
     Tcl_Interp *interp,
     ItclngObjectInfo *infoPtr)
 {
+    Tcl_Obj *cmdNamePtr;
+    Tcl_Obj *unkObjPtr;
+    Tcl_Obj *ensObjPtr;
     Tcl_Namespace *nsPtr;
     Tcl_Command cmd;
     int i;
 
     /*
-     * Build the ensemble used to implement [::itclng::internal::commands].
+     * Build the ensemble used to implement internal commands.
      */
 
-    nsPtr = Tcl_CreateNamespace(interp, "::itclng::internal::commands",
-            NULL, NULL);
+    nsPtr = Tcl_FindNamespace(interp, Tcl_GetString(infoPtr->internalCmds),
+            NULL, 0);
     if (nsPtr == NULL) {
-        Tcl_Panic("ITCLNG: error in creating namespace: ",
-	        "::itclng::internal::commands \n");
+        Tcl_Panic("ITCLNG: error in getting namespace for internal commands");
     }
     cmd = Tcl_CreateEnsemble(interp, nsPtr->fullName, nsPtr,
         TCL_ENSEMBLE_PREFIX);
     Tcl_Export(interp, nsPtr, "[a-z]*", 1);
     for (i=0; ItclngMethodList[i].commandName!=NULL; i++) {
-        Tcl_CreateObjCommand(interp, ItclngMethodList[i].commandName,
+	cmdNamePtr = Tcl_NewStringObj(Tcl_GetString(infoPtr->internalCmds), -1);
+	Tcl_AppendToObj(cmdNamePtr, "::", 2);
+	Tcl_AppendToObj(cmdNamePtr, ItclngMethodList[i].commandName, -1);
+        Tcl_CreateObjCommand(interp, Tcl_GetString(cmdNamePtr),
                 ItclngMethodList[i].proc, infoPtr, NULL);
+        Tcl_DecrRefCount(cmdNamePtr);
     }
-    Tcl_Obj *ensObjPtr = Tcl_NewStringObj("::itclng::internal::commands", -1);
+    ensObjPtr = infoPtr->internalCmds;
     Tcl_IncrRefCount(ensObjPtr);
-    Tcl_Obj *unkObjPtr = Tcl_NewStringObj(
-            "::itclng::internal::commands::unknown", -1);
+    unkObjPtr = Tcl_NewStringObj(Tcl_GetString(infoPtr->internalCmds), -1);
+    Tcl_AppendToObj(unkObjPtr, "::unknown", -1);
     Tcl_IncrRefCount(unkObjPtr);
     if (Tcl_SetEnsembleUnknownHandler(NULL,
             Tcl_FindEnsemble(interp, ensObjPtr, TCL_LEAVE_ERR_MSG),
@@ -118,24 +154,18 @@ ItclngGetUsage(
     ItclngObjectInfo *infoPtr,
     Tcl_Obj *objPtr)       /* returns: summary of usage info */
 {
-    const char *cp;
     char *spaces = "  ";
     int i;
 
     for (i=0; ItclngMethodList[i].commandName != NULL; i++) {
 	if (strcmp(ItclngMethodList[i].commandName,
-	        "::itclng::internal::commands::unknown") == 0) {
+	        "unknown") == 0) {
 	    continue;
 	}
         Tcl_AppendToObj(objPtr, spaces, -1);
-        Tcl_AppendToObj(objPtr, "::itclng::internal::commands ", -1);
-	cp = strrchr(ItclngMethodList[i].commandName, ':');
-	if (cp == NULL) {
-	   cp = ItclngMethodList[i].commandName;
-	} else {
-	   cp++;
-	}
-        Tcl_AppendToObj(objPtr, cp, -1);
+        Tcl_AppendToObj(objPtr, Tcl_GetString(infoPtr->internalCmds), -1);
+        Tcl_AppendToObj(objPtr, " ", 1);
+        Tcl_AppendToObj(objPtr, ItclngMethodList[i].commandName, -1);
         if (strlen(ItclngMethodList[i].usage) > 0) {
             Tcl_AppendToObj(objPtr, " ", -1);
             Tcl_AppendToObj(objPtr, ItclngMethodList[i].usage, -1);
@@ -193,20 +223,14 @@ ItclngCheckNumCmdParams(
     int numParams,
     int maxParams)
 {
-    const char *cp;
     int i;
     
     if ((objc < numParams+1) || ((objc > maxParams+1) && (maxParams != -1))) {
         for (i=0; ItclngMethodList[i].commandName != NULL; i++) {
-	    cp = strrchr(ItclngMethodList[i].commandName, ':');
-	    if (cp == NULL) {
-	        cp = ItclngMethodList[i].commandName;
-	    } else {
-	        cp++;
-	    }
-	    if (strcmp(cp, funcName) == 0) {
+	    if (strcmp(ItclngMethodList[i].commandName, funcName) == 0) {
                 Tcl_AppendResult(interp,
-                        "wrong # args: should be \"::itclng::internal::commands ",
+                        "wrong # args: should be \"",
+			Tcl_GetString(infoPtr->internalCmds), " ",
 		        funcName, " ", 
 		        ItclngMethodList[i].usage, "\"", NULL);
                 return TCL_ERROR;
@@ -296,13 +320,13 @@ Itclng_CreateClassFinishCmd(
      *  as they don't conflict with those defined in the class.
      */
     if (Itclng_FirstListElem(&iclsPtr->bases) == NULL) {
-        /* no inheritance at all if it is ::itclng::clazz make it known */
-	if (infoPtr->clazzIclsPtr == NULL) {
-	    /* must be the Itclng clazz */
-	    infoPtr->clazzIclsPtr = iclsPtr;
+        /* no inheritance at all if it is the root class, then make it known */
+	if (infoPtr->rootClassIclsPtr == NULL) {
+	    /* must be the the root class */
+	    infoPtr->rootClassIclsPtr = iclsPtr;
 	} else {
-        /* no inheritance at all so add ::itclng::clazz to the inheritance */
-	    iclsPtr2 = infoPtr->clazzIclsPtr;
+        /* no inheritance at all so add the root to the inheritance */
+	    iclsPtr2 = infoPtr->rootClassIclsPtr;
             (void) Tcl_CreateHashEntry(&iclsPtr->heritage, (char*)iclsPtr2,
 	            &newEntry);
             Itclng_AppendList(&iclsPtr->bases, (ClientData)iclsPtr2);
@@ -410,6 +434,132 @@ Itclng_CreateClassProcCmd(
             ITCLNG_COMMON) != TCL_OK) {
 	return TCL_ERROR;
     }
+    return TCL_OK;
+}
+
+/*
+ * ------------------------------------------------------------------------
+ *  Itclng_CreateClassConstructorCmd()
+ *
+ *  Creates a class constructor
+ *  On failure returns TCL_ERROR, along with an error message in the interp.
+ *  If successful, it returns TCL_OK and the full method name
+ * ------------------------------------------------------------------------
+ */
+int
+Itclng_CreateClassConstructorCmd(
+    ClientData clientData,	/* info for all known objects */
+    Tcl_Interp* interp,		/* interpreter */
+    int objc,		        /* number of arguments */
+    Tcl_Obj *const*objv)	/* argument objects */
+{
+    Tcl_HashEntry *hPtr;
+    ItclngObjectInfo *infoPtr;
+    ItclngClass *iclsPtr;
+
+    ItclngShowArgs(0, "Itclng_CreateClassConstructorCmd", objc, objv);
+    if (ItclngCheckNumCmdParams(interp, infoPtr, "createClassConstructor", objc,
+            2, 2) != TCL_OK) {
+        return TCL_ERROR;
+    }
+    infoPtr = (ItclngObjectInfo *)clientData;
+    hPtr = Tcl_FindHashEntry(&infoPtr->classes, (char *)objv[1]);
+    if (hPtr == NULL) {
+        Tcl_AppendResult(interp, "no such class \"", Tcl_GetString(objv[1]),
+	        "\"", NULL);
+        return TCL_ERROR;
+    }
+    iclsPtr = Tcl_GetHashValue(hPtr);
+#ifdef NOTDEF
+    if (ItclngCreateMethodOrProc(interp, iclsPtr, objv[2],
+            /* no proc */ 0) != TCL_OK) {
+	return TCL_ERROR;
+    }
+#endif
+    return TCL_OK;
+}
+
+/*
+ * ------------------------------------------------------------------------
+ *  Itclng_CreateClassDestructorCmd()
+ *
+ *  Creates a class destructor
+ *  On failure returns TCL_ERROR, along with an error message in the interp.
+ *  If successful, it returns TCL_OK and the full method name
+ * ------------------------------------------------------------------------
+ */
+int
+Itclng_CreateClassDestructorCmd(
+    ClientData clientData,	/* info for all known objects */
+    Tcl_Interp* interp,		/* interpreter */
+    int objc,		        /* number of arguments */
+    Tcl_Obj *const*objv)	/* argument objects */
+{
+    Tcl_HashEntry *hPtr;
+    ItclngObjectInfo *infoPtr;
+    ItclngClass *iclsPtr;
+
+    ItclngShowArgs(0, "Itclng_CreateClassDestructorCmd", objc, objv);
+    if (ItclngCheckNumCmdParams(interp, infoPtr, "createClassDestructor", objc,
+            2, 2) != TCL_OK) {
+        return TCL_ERROR;
+    }
+    infoPtr = (ItclngObjectInfo *)clientData;
+    hPtr = Tcl_FindHashEntry(&infoPtr->classes, (char *)objv[1]);
+    if (hPtr == NULL) {
+        Tcl_AppendResult(interp, "no such class \"", Tcl_GetString(objv[1]),
+	        "\"", NULL);
+        return TCL_ERROR;
+    }
+    iclsPtr = Tcl_GetHashValue(hPtr);
+#ifdef NOTDEF
+    if (ItclngCreateMethodOrProc(interp, iclsPtr, objv[2],
+            /* no proc */ 0) != TCL_OK) {
+	return TCL_ERROR;
+    }
+#endif
+    return TCL_OK;
+}
+
+/*
+ * ------------------------------------------------------------------------
+ *  Itclng_CreateClassConstructorInitCmd()
+ *
+ *  Creates a class __constructor_init
+ *  On failure returns TCL_ERROR, along with an error message in the interp.
+ *  If successful, it returns TCL_OK and the full method name
+ * ------------------------------------------------------------------------
+ */
+int
+Itclng_CreateClassConstructorInitCmd(
+    ClientData clientData,	/* info for all known objects */
+    Tcl_Interp* interp,		/* interpreter */
+    int objc,		        /* number of arguments */
+    Tcl_Obj *const*objv)	/* argument objects */
+{
+    Tcl_HashEntry *hPtr;
+    ItclngObjectInfo *infoPtr;
+    ItclngClass *iclsPtr;
+
+    ItclngShowArgs(0, "Itclng_CreateClassConstructorInitCmd", objc, objv);
+    if (ItclngCheckNumCmdParams(interp, infoPtr, "createClassConstructorInit", objc,
+            2, 2) != TCL_OK) {
+        return TCL_ERROR;
+    }
+    infoPtr = (ItclngObjectInfo *)clientData;
+    hPtr = Tcl_FindHashEntry(&infoPtr->classes, (char *)objv[1]);
+    if (hPtr == NULL) {
+        Tcl_AppendResult(interp, "no such class \"", Tcl_GetString(objv[1]),
+	        "\"", NULL);
+        return TCL_ERROR;
+    }
+    iclsPtr = Tcl_GetHashValue(hPtr);
+#ifdef NOTDEF
+    if (ItclngCreateMethodOrProc(interp, iclsPtr, objv[2],
+            /* no proc */ 0) != TCL_OK) {
+	return TCL_ERROR;
+    }
+#endif
     return TCL_OK;
 }
 
@@ -616,6 +766,507 @@ Itclng_CreateClassInheritCmd(
     Itclng_DeleteHierIter(&hier);
     return TCL_OK;
 }
+
+/*
+ * ------------------------------------------------------------------------
+ *  ItclngReportPublicOpt()
+ *
+ *  Returns information about a public variable formatted as a
+ *  configuration option:
+ *
+ *    -<varName> <initVal> <currentVal>
+ *
+ *  Used by Itcl_BiConfigureCmd() to report configuration options.
+ *  Returns a Tcl_Obj containing the information.
+ * ------------------------------------------------------------------------
+ */
+static Tcl_Obj*
+ItclngReportPublicOpt(
+    Tcl_Interp *interp,      /* interpreter containing the object */
+    ItclngVariable *ivPtr,     /* public variable to be reported */
+    ItclngObject *contextIoPtr) /* object containing this variable */
+{
+    CONST char *val;
+    ItclngClass *iclsPtr;
+    Tcl_HashEntry *hPtr;
+    ItclngVarLookup *vlookup;
+    Tcl_DString optName;
+    Tcl_Obj *listPtr;
+    Tcl_Obj *objPtr;
+
+    listPtr = Tcl_NewListObj(0, (Tcl_Obj**)NULL);
+
+    /*
+     *  Determine how the option name should be reported.
+     *  If the simple name can be used to find it in the virtual
+     *  data table, then use the simple name.  Otherwise, this
+     *  is a shadowed variable; use the full name.
+     */
+    Tcl_DStringInit(&optName);
+    Tcl_DStringAppend(&optName, "-", -1);
+
+    iclsPtr = (ItclngClass*)contextIoPtr->iclsPtr;
+    hPtr = Tcl_FindHashEntry(&iclsPtr->resolveVars,
+            Tcl_GetString(ivPtr->fullNamePtr));
+    assert(hPtr != NULL);
+    vlookup = (ItclngVarLookup*)Tcl_GetHashValue(hPtr);
+    Tcl_DStringAppend(&optName, vlookup->leastQualName, -1);
+
+    objPtr = Tcl_NewStringObj(Tcl_DStringValue(&optName), -1);
+    Tcl_ListObjAppendElement((Tcl_Interp*)NULL, listPtr, objPtr);
+    Tcl_DStringFree(&optName);
+
+
+    if (ivPtr->init) {
+        objPtr = ivPtr->init;
+    } else {
+        objPtr = Tcl_NewStringObj("<undefined>", -1);
+    }
+    Tcl_ListObjAppendElement((Tcl_Interp*)NULL, listPtr, objPtr);
+
+    val = Itclng_GetInstanceVar(interp, Tcl_GetString(ivPtr->namePtr),
+            contextIoPtr, ivPtr->iclsPtr);
+
+    if (val) {
+        objPtr = Tcl_NewStringObj((CONST84 char *)val, -1);
+    } else {
+        objPtr = Tcl_NewStringObj("<undefined>", -1);
+    }
+    Tcl_ListObjAppendElement((Tcl_Interp*)NULL, listPtr, objPtr);
+
+    return listPtr;
+}
+#ifdef NOTDEF
+
+/*
+ * ------------------------------------------------------------------------
+ *  ItclngReportOption()
+ *
+ *  Returns information about an option formatted as a
+ *  configuration option:
+ *
+ *    <optionName> <initVal> <currentVal>
+ *
+ *  Used by ItclExtendedConfigure() to report configuration options.
+ *  Returns a Tcl_Obj containing the information.
+ * ------------------------------------------------------------------------
+ */
+static Tcl_Obj*
+ItclngReportOption(
+    Tcl_Interp *interp,      /* interpreter containing the object */
+    ItclngOption *ioptPtr,     /* option to be reported */
+    ItclngObject *contextIoPtr) /* object containing this variable */
+{
+    CONST char *val;
+    Tcl_Obj *listPtr;
+    Tcl_Obj *objPtr;
+
+    listPtr = Tcl_NewListObj(0, (Tcl_Obj**)NULL);
+
+    Tcl_ListObjAppendElement((Tcl_Interp*)NULL, listPtr, ioptPtr->namePtr);
+    Tcl_ListObjAppendElement((Tcl_Interp*)NULL, listPtr,
+            ioptPtr->resourceNamePtr);
+    Tcl_ListObjAppendElement((Tcl_Interp*)NULL, listPtr, ioptPtr->classNamePtr);
+    if (ioptPtr->defaultValuePtr) {
+        objPtr = ioptPtr->defaultValuePtr;
+    } else {
+        objPtr = Tcl_NewStringObj("<undefined>", -1);
+    }
+    Tcl_ListObjAppendElement((Tcl_Interp*)NULL, listPtr, objPtr);
+    val = ItclngGetInstanceVar(interp, "itcl_options", Tcl_GetString(ioptPtr->namePtr),
+            contextIoPtr, ioptPtr->iclsPtr);
+    if (val) {
+        objPtr = Tcl_NewStringObj((CONST84 char *)val, -1);
+    } else {
+        objPtr = Tcl_NewStringObj("<undefined>", -1);
+    }
+    Tcl_ListObjAppendElement((Tcl_Interp*)NULL, listPtr, objPtr);
+    return listPtr;
+}
+#endif
+
+/*
+ * ------------------------------------------------------------------------
+ *  Itclng_ConfigureCmd()
+ *
+ *  Invoked whenever the user issues the "configure" method for an object.
+ *  Handles the following syntax:
+ *
+ *    <objName> configure ?-<option>? ?<value> -<option> <value>...?
+ *
+ *  Allows access to public variables as if they were configuration
+ *  options.  With no arguments, this command returns the current
+ *  list of public variable options.  If -<option> is specified,
+ *  this returns the information for just one option:
+ *
+ *    -<optionName> <initVal> <currentVal>
+ *
+ *  Otherwise, the list of arguments is parsed, and values are
+ *  assigned to the various public variable options.  When each
+ *  option changes, a big of "config" code associated with the option
+ *  is executed, to bring the object up to date.
+ * ------------------------------------------------------------------------
+ */
+/* ARGSUSED */
+int
+Itclng_ConfigureCmd(
+    ClientData clientData,   /* class definition */
+    Tcl_Interp *interp,      /* current interpreter */
+    int objc,                /* number of arguments */
+    Tcl_Obj *CONST objv[])   /* argument objects */
+{
+    ItclngClass *contextIclsPtr;
+    ItclngObject *contextIoPtr;
+
+    Tcl_Obj *resultPtr;
+    Tcl_Obj *objPtr;
+    Tcl_DString buffer;
+    Tcl_DString buffer2;
+    Tcl_HashSearch place;
+    Tcl_HashEntry *hPtr;
+    Tcl_Namespace *saveNsPtr;
+    Tcl_Obj * const *unparsedObjv;
+    ItclngClass *iclsPtr;
+    ItclngVariable *ivPtr;
+    ItclngVarLookup *vlookup;
+    ItclngMemberCode *mcode;
+    ItclngHierIter hier;
+    ItclngObjectInfo *infoPtr;
+    CONST char *lastval;
+    char *token;
+    char *varName;
+    int i;
+    int unparsedObjc;
+    int result;
+
+    ItclngShowArgs(0, "Itclng_BiConfigureCmd", objc, objv);
+    vlookup = NULL;
+    token = NULL;
+    hPtr = NULL;
+    unparsedObjc = objc;
+    unparsedObjv = objv;
+    Tcl_DStringInit(&buffer);
+    Tcl_DStringInit(&buffer2);
+
+    /*
+     *  Make sure that this command is being invoked in the proper
+     *  context.
+     */
+fprintf(stderr, "NS!%s!\n", Tcl_GetCurrentNamespace(interp)->fullName);
+    contextIclsPtr = NULL;
+    if (Itclng_GetContext(interp, &contextIclsPtr, &contextIoPtr) != TCL_OK) {
+        return TCL_ERROR;
+    }
+
+    if (contextIoPtr == NULL) {
+        Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+            "improper usage: should be ",
+            "\"object configure ?-option? ?value -option value...?\"",
+            (char*)NULL);
+        return TCL_ERROR;
+    }
+
+    /*
+     *  BE CAREFUL:  work in the virtual scope!
+     */
+    if (contextIoPtr != NULL) {
+        contextIclsPtr = contextIoPtr->iclsPtr;
+    }
+
+    infoPtr = contextIclsPtr->infoPtr;
+#ifdef NOTDEF
+    if (!(contextIclsPtr->flags & ITCL_CLASS)) {
+	/* first check if it is an option */
+	if (objc > 1) {
+            hPtr = Tcl_FindHashEntry(&contextIclsPtr->options,
+	            (char *) objv[1]);
+	}
+        result = ItclngExtendedConfigure(contextIclsPtr, interp, objc, objv);
+        if (result != TCL_CONTINUE) {
+            return result;
+        }
+        if (infoPtr->unparsedObjc > 0) {
+            unparsedObjc = infoPtr->unparsedObjc;
+            unparsedObjv = infoPtr->unparsedObjv;
+	} else {
+	    unparsedObjc = 0;
+	}
+    }
+#endif
+    /*
+     *  HANDLE:  configure
+     */
+    if (unparsedObjc == 1) {
+        resultPtr = Tcl_NewListObj(0, (Tcl_Obj**)NULL);
+
+        Itclng_InitHierIter(&hier, contextIclsPtr);
+        while ((iclsPtr=Itclng_AdvanceHierIter(&hier)) != NULL) {
+            hPtr = Tcl_FirstHashEntry(&iclsPtr->variables, &place);
+            while (hPtr) {
+                ivPtr = (ItclngVariable*)Tcl_GetHashValue(hPtr);
+                if (ivPtr->protection == ITCLNG_PUBLIC) {
+                    objPtr = ItclngReportPublicOpt(interp, ivPtr, contextIoPtr);
+
+                    Tcl_ListObjAppendElement((Tcl_Interp*)NULL, resultPtr,
+                        objPtr);
+                }
+                hPtr = Tcl_NextHashEntry(&place);
+            }
+        }
+        Itclng_DeleteHierIter(&hier);
+
+        Tcl_SetObjResult(interp, resultPtr);
+        return TCL_OK;
+    } else {
+
+        /*
+         *  HANDLE:  configure -option
+         */
+        if (unparsedObjc == 2) {
+            token = Tcl_GetString(unparsedObjv[1]);
+            if (*token != '-') {
+                Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+                    "improper usage: should be ",
+                    "\"object configure ?-option? ?value -option value...?\"",
+                    (char*)NULL);
+                return TCL_ERROR;
+            }
+
+            vlookup = NULL;
+            hPtr = Tcl_FindHashEntry(&contextIclsPtr->resolveVars, token+1);
+            if (hPtr) {
+                vlookup = (ItclngVarLookup*)Tcl_GetHashValue(hPtr);
+
+                if (vlookup->ivPtr->protection != ITCLNG_PUBLIC) {
+                    vlookup = NULL;
+                }
+            }
+            if (!vlookup) {
+                Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+                    "unknown option \"", token, "\"",
+                    (char*)NULL);
+                return TCL_ERROR;
+            }
+            resultPtr = ItclngReportPublicOpt(interp,
+	            vlookup->ivPtr, contextIoPtr);
+            Tcl_SetObjResult(interp, resultPtr);
+            return TCL_OK;
+        }
+    }
+
+    /*
+     *  HANDLE:  configure -option value -option value...
+     *
+     *  Be careful to work in the virtual scope.  If this "configure"
+     *  method was defined in a base class, the current namespace
+     *  (from Itcl_ExecMethod()) will be that base class.  Activate
+     *  the derived class namespace here, so that instance variables
+     *  are accessed properly.
+     */
+    result = TCL_OK;
+
+    for (i=1; i < unparsedObjc; i+=2) {
+	if (i+1 >= unparsedObjc) {
+	    Tcl_AppendResult(interp, "need option value pair", NULL);
+	    result = TCL_ERROR;
+            goto configureDone;
+	}
+        vlookup = NULL;
+        token = Tcl_GetString(unparsedObjv[i]);
+        if (*token == '-') {
+            hPtr = Tcl_FindHashEntry(&contextIclsPtr->resolveVars, token+1);
+            if (hPtr == NULL) {
+                hPtr = Tcl_FindHashEntry(&contextIclsPtr->resolveVars, token);
+	    }
+            if (hPtr) {
+                vlookup = (ItclngVarLookup*)Tcl_GetHashValue(hPtr);
+            }
+        }
+
+        if (!vlookup || (vlookup->ivPtr->protection != ITCLNG_PUBLIC)) {
+            Tcl_AppendResult(interp, "unknown option \"", token, "\"",
+                (char*)NULL);
+            result = TCL_ERROR;
+            goto configureDone;
+        }
+        if (i == unparsedObjc-1) {
+            Tcl_AppendResult(interp, "value for \"", token, "\" missing",
+                (char*)NULL);
+            result = TCL_ERROR;
+            goto configureDone;
+        }
+
+        ivPtr = vlookup->ivPtr;
+        Tcl_DStringSetLength(&buffer2, 0);
+        Tcl_DStringAppend(&buffer2,
+	        Tcl_GetString(contextIoPtr->varNsNamePtr), -1);
+        Tcl_DStringAppend(&buffer2,
+	        Tcl_GetString(ivPtr->iclsPtr->fullNamePtr), -1);
+        Tcl_DStringAppend(&buffer2, "::", 2);
+        Tcl_DStringAppend(&buffer2,
+	        Tcl_GetString(ivPtr->namePtr), -1);
+	varName = Tcl_DStringValue(&buffer2);
+        lastval = Tcl_GetVar2(interp, varName, (char*)NULL, 0);
+        Tcl_DStringSetLength(&buffer, 0);
+        Tcl_DStringAppend(&buffer, (lastval) ? lastval : "", -1);
+
+        token = Tcl_GetString(unparsedObjv[i+1]);
+        if (Tcl_SetVar2(interp, varName, (char*)NULL, token,
+                TCL_LEAVE_ERR_MSG) == NULL) {
+
+            char msg[256];
+            sprintf(msg,
+	        "\n    (error in configuration of public variable \"%.100s\")",
+	            Tcl_GetString(ivPtr->fullNamePtr));
+            Tcl_AddErrorInfo(interp, msg);
+            result = TCL_ERROR;
+            goto configureDone;
+        }
+
+        /*
+         *  If this variable has some "config" code, invoke it now.
+         *
+         *  TRICKY NOTE:  Be careful to evaluate the code one level
+         *    up in the call stack, so that it's executed in the
+         *    calling context, and not in the context that we've
+         *    set up for public variable access.
+         */
+        mcode = ivPtr->codePtr;
+        if (mcode && Itclng_IsMemberCodeImplemented(mcode)) {
+#ifdef NOTDEF
+	    if (!ivPtr->iclsPtr->infoPtr->useOldResolvers) {
+                Itclng_SetCallFrameResolver(interp, contextIoPtr->resolvePtr);
+            }
+#endif
+	    saveNsPtr = Tcl_GetCurrentNamespace(interp);
+	    Itclng_SetCallFrameNamespace(interp, ivPtr->iclsPtr->nsPtr);
+#ifdef NOTDEF
+	    result = Tcl_EvalObjEx(interp, mcode->bodyPtr, 0);
+#endif
+	    Itclng_SetCallFrameNamespace(interp, saveNsPtr);
+            if (result == TCL_OK) {
+                Tcl_ResetResult(interp);
+            } else {
+                char msg[256];
+                sprintf(msg,
+		"\n    (error in configuration of public variable \"%.100s\")",
+		        Tcl_GetString(ivPtr->fullNamePtr));
+                Tcl_AddErrorInfo(interp, msg);
+
+                Tcl_SetVar2(interp, varName,(char*)NULL,
+                    Tcl_DStringValue(&buffer), 0);
+
+                goto configureDone;
+            }
+        }
+    }
+
+configureDone:
+    if (infoPtr->unparsedObjc > 0) {
+        for(i=0;i<infoPtr->unparsedObjc;i++) {
+            Tcl_DecrRefCount(infoPtr->unparsedObjv[i]);
+        }
+        ckfree ((char *)infoPtr->unparsedObjv);
+        infoPtr->unparsedObjv = NULL;
+        infoPtr->unparsedObjc = 0;
+    }
+    Tcl_DStringFree(&buffer2);
+    Tcl_DStringFree(&buffer);
+
+    return result;
+}
+
+
+/*
+ * ------------------------------------------------------------------------
+ *  Itclng_CgetCmd()
+ *
+ *  Invoked whenever the user issues the "cget" method for an object.
+ *  Handles the following syntax:
+ *
+ *    <objName> cget -<option>
+ *
+ *  Allows access to public variables as if they were configuration
+ *  options.  Mimics the behavior of the usual "cget" method for
+ *  Tk widgets.  Returns the current value of the public variable
+ *  with name <option>.
+ * ------------------------------------------------------------------------
+ */
+/* ARGSUSED */
+int
+Itclng_CgetCmd(
+    ClientData clientData,   /* class definition */
+    Tcl_Interp *interp,      /* current interpreter */
+    int objc,                /* number of arguments */
+    Tcl_Obj *CONST objv[])   /* argument objects */
+{
+    ItclngClass *contextIclsPtr;
+    ItclngObject *contextIoPtr;
+
+    Tcl_HashEntry *hPtr;
+    ItclngVarLookup *vlookup;
+    CONST char *name;
+    CONST char *val;
+//    int result;
+
+    ItclngShowArgs(1,"Itclng_BiCgetCmd", objc, objv);
+    /*
+     *  Make sure that this command is being invoked in the proper
+     *  context.
+     */
+    contextIclsPtr = NULL;
+    if (Itclng_GetContext(interp, &contextIclsPtr, &contextIoPtr) != TCL_OK) {
+        return TCL_ERROR;
+    }
+    if ((contextIoPtr == NULL) || objc != 2) {
+        Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+            "improper usage: should be \"object cget -option\"",
+            (char*)NULL);
+        return TCL_ERROR;
+    }
+
+    /*
+     *  BE CAREFUL:  work in the virtual scope!
+     */
+    if (contextIoPtr != NULL) {
+        contextIclsPtr = contextIoPtr->iclsPtr;
+    }
+
+#ifdef NOTDEF
+    if (!(contextIclsPtr->flags & ITCL_CLASS)) {
+        result = ItclngExtendedCget(contextIclsPtr, interp, objc, objv);
+        if (result != TCL_CONTINUE) {
+            return result;
+        }
+    }
+#endif
+    name = Tcl_GetString(objv[1]);
+
+    vlookup = NULL;
+    hPtr = Tcl_FindHashEntry(&contextIclsPtr->resolveVars, name+1);
+    if (hPtr) {
+        vlookup = (ItclngVarLookup*)Tcl_GetHashValue(hPtr);
+    }
+
+    if ((vlookup == NULL) || (vlookup->ivPtr->protection != ITCLNG_PUBLIC)) {
+        Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+            "unknown option \"", name, "\"",
+            (char*)NULL);
+        return TCL_ERROR;
+    }
+
+    val = Itclng_GetInstanceVar(interp,
+            Tcl_GetString(vlookup->ivPtr->namePtr),
+            contextIoPtr, vlookup->ivPtr->iclsPtr);
+
+    if (val) {
+        Tcl_SetObjResult(interp, Tcl_NewStringObj(val, -1));
+    } else {
+        Tcl_SetObjResult(interp, Tcl_NewStringObj("<undefined>", -1));
+    }
+    return TCL_OK;
+}
+
 
 
 #ifdef NOTDEF

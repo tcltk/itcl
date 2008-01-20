@@ -9,7 +9,7 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itclngHelpers.c,v 1.1.2.5 2008/01/14 21:25:53 wiede Exp $
+ * RCS: @(#) $Id: itclngHelpers.c,v 1.1.2.6 2008/01/20 17:17:17 wiede Exp $
  */
 
 #include "itclngInt.h"
@@ -64,7 +64,8 @@ ItclngGetClassDictInfo(
     Tcl_Obj *keyPtr;
     Tcl_Obj *valuePtr;
 
-    objPtr = Tcl_NewStringObj(ITCLNG_CLASS_INFO_NAMESPACE, -1);
+    objPtr = Tcl_NewStringObj(
+            Tcl_GetString(iclsPtr->infoPtr->internalClassInfos), -1);
     Tcl_AppendToObj(objPtr, Tcl_GetString(iclsPtr->fullNamePtr), -1);
     Tcl_AppendToObj(objPtr, "::infos", -1);
     dictPtr = Tcl_ObjGetVar2(iclsPtr->interp, objPtr, NULL, 0);
