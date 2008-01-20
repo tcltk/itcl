@@ -1612,29 +1612,22 @@ ItclngObjectCmd(
             Tcl_IncrRefCount(methodNamePtr);
         }
     }
-    if (methodNamePtr != NULL) {
-        incr = 1;
-    }
     newObjv = NULL;
     if (methodNamePtr != NULL) {
+        incr = 1;
         newObjv = (Tcl_Obj **)ckalloc(sizeof(Tcl_Obj *)*(objc+incr));
         newObjv[0] = Tcl_NewStringObj("my", 2);
         newObjv[1] = methodNamePtr;
         Tcl_IncrRefCount(newObjv[0]);
         Tcl_IncrRefCount(newObjv[1]);
         memcpy(newObjv+incr+1, objv+1, (sizeof(Tcl_Obj*)*(objc-1)));
-    }
-    if (methodNamePtr != NULL) {
         result = Itclng_PublicObjectCmd(oPtr, interp, clsPtr, objc+incr, newObjv);
-    } else {
-        result = Itclng_PublicObjectCmd(oPtr, interp, clsPtr, objc, objv);
-    }
-
-    if (methodNamePtr != NULL) {
         Tcl_DecrRefCount(newObjv[0]);
         Tcl_DecrRefCount(newObjv[1]);
         Tcl_DecrRefCount(methodNamePtr);
         ckfree((char *)newObjv);
+    } else {
+        result = Itclng_PublicObjectCmd(oPtr, interp, clsPtr, objc, objv);
     }
     return result;
 }

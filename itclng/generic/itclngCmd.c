@@ -77,10 +77,10 @@ static InfoMethod ItclngMethodList[] = {
       "fullClassName constructor",
       Itclng_CreateClassConstructorCmd },
     { "createClassConstructorInit",
-      "fullClassName __constructor_init",
+      "fullClassName ___constructor_init",
       Itclng_CreateClassConstructorInitCmd},
     { "createClassDestructor",
-      "fullClassName constructor",
+      "fullClassName destructor",
       Itclng_CreateClassDestructorCmd },
     { NULL, NULL, NULL }
 };
@@ -259,6 +259,7 @@ CreateOOMethod(
     int isNewEntry;
 
     ClientData pmPtr;
+fprintf(stderr, "CreateOOMethod!%s!%s!%s!\n", Tcl_GetString(imPtr->fullNamePtr), Tcl_GetString(argumentPtr), Tcl_GetString(bodyPtr));
     imPtr->tmPtr = (ClientData)Itclng_NewProcClassMethod(
             imPtr->iclsPtr->interp, imPtr->iclsPtr->clsPtr,
 	    ItclngCheckCallMethod, ItclngAfterCallMethod,
@@ -376,6 +377,7 @@ Itclng_CreateClassMethodCmd(
     Tcl_HashEntry *hPtr;
     ItclngObjectInfo *infoPtr;
     ItclngClass *iclsPtr;
+    ItclngMemberFunc *imPtr;
 
     ItclngShowArgs(1, "Itclng_CreateClassMethodCmd", objc, objv);
     if (ItclngCheckNumCmdParams(interp, infoPtr, "createClassMethod", objc,
@@ -391,7 +393,7 @@ Itclng_CreateClassMethodCmd(
     }
     iclsPtr = Tcl_GetHashValue(hPtr);
     if (ItclngCreateMethodOrProc(interp, iclsPtr, objv[2],
-            /* no proc */ 0) != TCL_OK) {
+            /* is common (proc) */ 0, &imPtr) != TCL_OK) {
 	return TCL_ERROR;
     }
     return TCL_OK;
@@ -416,6 +418,7 @@ Itclng_CreateClassProcCmd(
     Tcl_HashEntry *hPtr;
     ItclngObjectInfo *infoPtr;
     ItclngClass *iclsPtr;
+    ItclngMemberFunc *imPtr;
 
     ItclngShowArgs(1, "Itclng_CreateClassProcCmd", objc, objv);
     if (ItclngCheckNumCmdParams(interp, infoPtr, "createClassProc", objc, 2, 2)
@@ -431,7 +434,7 @@ Itclng_CreateClassProcCmd(
     }
     iclsPtr = Tcl_GetHashValue(hPtr);
     if (ItclngCreateMethodOrProc(interp, iclsPtr, objv[2],
-            ITCLNG_COMMON) != TCL_OK) {
+            ITCLNG_COMMON, &imPtr) != TCL_OK) {
 	return TCL_ERROR;
     }
     return TCL_OK;
@@ -456,6 +459,7 @@ Itclng_CreateClassConstructorCmd(
     Tcl_HashEntry *hPtr;
     ItclngObjectInfo *infoPtr;
     ItclngClass *iclsPtr;
+    ItclngMemberFunc *imPtr;
 
     ItclngShowArgs(0, "Itclng_CreateClassConstructorCmd", objc, objv);
     if (ItclngCheckNumCmdParams(interp, infoPtr, "createClassConstructor", objc,
@@ -470,12 +474,11 @@ Itclng_CreateClassConstructorCmd(
         return TCL_ERROR;
     }
     iclsPtr = Tcl_GetHashValue(hPtr);
-#ifdef NOTDEF
     if (ItclngCreateMethodOrProc(interp, iclsPtr, objv[2],
-            /* no proc */ 0) != TCL_OK) {
+            /* is common (proc) */ 0, &imPtr) != TCL_OK) {
 	return TCL_ERROR;
     }
-#endif
+    imPtr->flags &= ITCLNG_CONSTRUCTOR;
     return TCL_OK;
 }
 
@@ -498,6 +501,7 @@ Itclng_CreateClassDestructorCmd(
     Tcl_HashEntry *hPtr;
     ItclngObjectInfo *infoPtr;
     ItclngClass *iclsPtr;
+    ItclngMemberFunc *imPtr;
 
     ItclngShowArgs(0, "Itclng_CreateClassDestructorCmd", objc, objv);
     if (ItclngCheckNumCmdParams(interp, infoPtr, "createClassDestructor", objc,
@@ -512,12 +516,11 @@ Itclng_CreateClassDestructorCmd(
         return TCL_ERROR;
     }
     iclsPtr = Tcl_GetHashValue(hPtr);
-#ifdef NOTDEF
     if (ItclngCreateMethodOrProc(interp, iclsPtr, objv[2],
-            /* no proc */ 0) != TCL_OK) {
+            /* is common (proc) */ 0, &imPtr) != TCL_OK) {
 	return TCL_ERROR;
     }
-#endif
+    imPtr->flags &= ITCLNG_DESTRUCTOR;
     return TCL_OK;
 }
 
@@ -525,7 +528,7 @@ Itclng_CreateClassDestructorCmd(
  * ------------------------------------------------------------------------
  *  Itclng_CreateClassConstructorInitCmd()
  *
- *  Creates a class __constructor_init
+ *  Creates a class ___constructor_init
  *  On failure returns TCL_ERROR, along with an error message in the interp.
  *  If successful, it returns TCL_OK and the full method name
  * ------------------------------------------------------------------------
@@ -540,10 +543,11 @@ Itclng_CreateClassConstructorInitCmd(
     Tcl_HashEntry *hPtr;
     ItclngObjectInfo *infoPtr;
     ItclngClass *iclsPtr;
+    ItclngMemberFunc *imPtr;
 
     ItclngShowArgs(0, "Itclng_CreateClassConstructorInitCmd", objc, objv);
-    if (ItclngCheckNumCmdParams(interp, infoPtr, "createClassConstructorInit", objc,
-            2, 2) != TCL_OK) {
+    if (ItclngCheckNumCmdParams(interp, infoPtr, "createClassConstructorInit",
+            objc, 2, 2) != TCL_OK) {
         return TCL_ERROR;
     }
     infoPtr = (ItclngObjectInfo *)clientData;
@@ -554,12 +558,12 @@ Itclng_CreateClassConstructorInitCmd(
         return TCL_ERROR;
     }
     iclsPtr = Tcl_GetHashValue(hPtr);
-#ifdef NOTDEF
     if (ItclngCreateMethodOrProc(interp, iclsPtr, objv[2],
-            /* no proc */ 0) != TCL_OK) {
+            /* is common (proc) */ 0, &imPtr) != TCL_OK) {
 	return TCL_ERROR;
     }
-#endif
+    imPtr->flags &= ITCLNG_CONINIT;
+    iclsPtr->initCode = ItclngGetBodyString(iclsPtr, Tcl_GetString(objv[2]));
     return TCL_OK;
 }
 

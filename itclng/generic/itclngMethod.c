@@ -25,7 +25,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclngMethod.c,v 1.1.2.4 2008/01/19 17:29:13 wiede Exp $
+ *     RCS:  $Id: itclngMethod.c,v 1.1.2.5 2008/01/20 19:59:42 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -518,13 +518,13 @@ ItclngCreateMethodOrProc(
     Tcl_Interp* interp,    /* interpreter managing this action */
     ItclngClass *iclsPtr,  /* class definition */
     Tcl_Obj *namePtr,      /* name of new method/proc */
-    int flags)             /* whether this is a method or proc */
+    int flags,             /* whether this is a method or proc */
+    ItclngMemberFunc **imPtrPtr)
 {
-    ItclngMemberFunc *imPtr;
     /*
      *  Create the member function definition.
      */
-    if (ItclngCreateMemberFunction(interp, iclsPtr, namePtr, &imPtr)
+    if (ItclngCreateMemberFunction(interp, iclsPtr, namePtr, imPtrPtr)
         != TCL_OK) {
         return TCL_ERROR;
     }
@@ -532,9 +532,9 @@ ItclngCreateMethodOrProc(
     /*
      *  Mark procs as "common".  This distinguishes them from methods.
      */
-    imPtr->flags |= flags;
+    (*imPtrPtr)->flags |= flags;
 
-    Tcl_Preserve((ClientData)imPtr);
+    Tcl_Preserve((ClientData)(*imPtrPtr));
     return TCL_OK;
 }
 
@@ -798,7 +798,7 @@ Itclng_EvalMemberCode(
      *  Execute the code body...
      */
     if ((mcode->flags & ITCLNG_IMPLEMENT_TCL) != 0) {
-        if (imPtr->flags & (ITCLNG_CONSTRUCTOR | ITCLNG_DESTRUCTOR)) {
+        if (imPtr->flags & (ITCLNG_CONSTRUCTOR )) {
             result = ItclngObjectCmd(imPtr, interp, contextIoPtr->oPtr,
                    imPtr->iclsPtr->clsPtr, objc, objv);
         } else {
@@ -1116,6 +1116,8 @@ Itclng_ExecMethod(
      *  only if an object context exists.
      */
     iclsPtr = imPtr->iclsPtr;
+fprintf(stderr, "EXE!%s!%d!\n", Tcl_GetString(imPtr->namePtr), imPtr->argcount);
+
     if (Itclng_GetContext(interp, &iclsPtr, &ioPtr) != TCL_OK) {
         return TCL_ERROR;
     }
@@ -1700,6 +1702,7 @@ ItclngCheckCallMethod(
     }
     int cObjc = Itclng_GetCallFrameObjc(interp);
     Tcl_Obj *const * cObjv = Itclng_GetCallFrameObjv(interp);
+fprintf(stderr, "ARGS!%s!%d!%d!\n", Tcl_GetString(imPtr->namePtr), cObjc-2, imPtr->argcount);
     if (cObjc-2 < imPtr->argcount) {
 	if (strcmp(Tcl_GetString(imPtr->namePtr), "info") == 0) {
             Tcl_Obj *objPtr = Tcl_NewStringObj(

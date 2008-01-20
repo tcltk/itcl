@@ -9,7 +9,7 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itclngInt.h,v 1.1.2.7 2008/01/20 17:17:17 wiede Exp $
+ * RCS: @(#) $Id: itclngInt.h,v 1.1.2.8 2008/01/20 19:59:42 wiede Exp $
  */
 
 #include <string.h>
@@ -546,7 +546,8 @@ MODULE_SCOPE const char* Itclng_GetInstanceVar(Tcl_Interp *interp,
 
 
 MODULE_SCOPE int ItclngCreateMethodOrProc(Tcl_Interp* interp,
-        ItclngClass *iclsPtr, Tcl_Obj *namePtr, int flags);
+        ItclngClass *iclsPtr, Tcl_Obj *namePtr, int flags,
+	ItclngMemberFunc **imPtrPtr);
 MODULE_SCOPE int Itclng_CreateMemberCode(Tcl_Interp* interp,
         ItclngClass *iclsPtr, CONST char* arglist, CONST char* body,
         ItclngMemberCode** mcodePtr);
