@@ -1,6 +1,6 @@
-::oo::class create ${::itcl::internal::infos::rootNamespace}::class
-::oo::define ${::itcl::internal::infos::rootNamespace}::class superclass ::oo::class
-::oo::define ${::itcl::internal::infos::rootNamespace}::class self.method create {className args} {
+::oo::class create ${::itcl::internal::infos::rootClassName}
+::oo::define ${::itcl::internal::infos::rootClassName} superclass ::oo::class
+::oo::define ${::itcl::internal::infos::rootClassName} self.method create {className args} {
 puts stderr "=== class!self!create!$className!"
     ::set infosNsName ${::itcl::internal::infos::rootNamespace}::internal::parseinfos
     ::set internalCmds $::itcl::internal::infos::internalCmds

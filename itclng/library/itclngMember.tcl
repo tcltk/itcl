@@ -192,14 +192,28 @@ puts stderr "methodOrProc!$name!$type!"
         dict lappend ${infoNs} functions $name [list protection $protection arguments $argumentInfo origArguments $argumentInfo body $body origBody $body state $state]
 #puts stderr "DI2![dict get [set ${infoNs}] functions $name]!"
 	if {$initCode ne ""} {
-            dict lappend ${infoNs} functions __constructor_init [list protection $protection arguments $argumentInfo origArguments $argumentInfo body $initCode origBody $initCode state COMPLETE]
-            ${::itcl::internal::infos::internalCmds} createClassConstructorInit $className __constructor_init
+            dict lappend ${infoNs} functions ___constructor_init [list protection $protection arguments $argumentInfo origArguments $argumentInfo body $initCode origBody $initCode state COMPLETE]
+            ${::itcl::internal::infos::internalCmds} createClassConstructorInit $className ___constructor_init
 	}
         ${::itcl::internal::infos::internalCmds} createClassConstructor $className $name
     }
 
     proc destructor {infoNs className type protection name args} {
 puts stderr "DES!$args!"
+	if {[dict exists [set ${infoNs}] functions $name]} {
+	    return -code error -level 4 "\"$name\" already defined in class \"$className\""
+	}
+        set state COMPLETE
+        set arguments ""
+        set body [lindex $args 0]
+	set minArgs 0
+	set maxArgs 0
+	set haveArgsArg 0
+	set usage ""
+	set defaultArgs [list]
+	set argumentInfo [list definition $arguments minargs $minArgs maxargs $maxArgs haveArgsArg $haveArgsArg usage $usage defaultargs $defaultArgs]
+        dict lappend ${infoNs} functions $name [list protection $protection arguments $argumentInfo origArguments $argumentInfo body $body origBody $body state $state]
+        ${::itcl::internal::infos::internalCmds} createClassDestructor $className $name
     }
 
     proc methodvariable {infoNs className protection name args} {
