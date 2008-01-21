@@ -1,12 +1,13 @@
+puts stderr "CL!${::itcl::internal::infos::rootClassName}!"
 ::oo::class create ${::itcl::internal::infos::rootClassName}
 ::oo::define ${::itcl::internal::infos::rootClassName} superclass ::oo::class
 ::oo::define ${::itcl::internal::infos::rootClassName} self.method create {className args} {
-puts stderr "=== class!self!create!$className!"
     ::set infosNsName ${::itcl::internal::infos::rootNamespace}::internal::parseinfos
     ::set internalCmds $::itcl::internal::infos::internalCmds
 
     if {$className eq ""} {
-        return -code error -level 2 "invalid classname \"\""
+#        return -code error -level 2 "invalid classname \"\""
+        return -code error "invalid class name \"\""
     }
     set nsName [uplevel 1 namespace current]
     if {$nsName ne "::"} {
@@ -78,18 +79,17 @@ puts stderr "class!info!" ;
     }
 
     public method cget {args} {
-puts stderr "class!cget!" ;
 	return [uplevel 1 ${::itcl::internal::infos::internalCmds}::cget {*}$args]
     }
 
     public method configure {args} {
-puts stderr "class!configure!" ;
-	return [namespace eval ::arnulf::cl1 " ${::itcl::internal::infos::internalCmds}::configure $args"]
-#	return [uplevel 2 ${::itcl::internal::infos::internalCmds}::configure {*}$args]
+	set nsName [uplevel 1 namespace current]
+	set contextInfo [uplevel 1 ${::itcl::internal::infos::internalCmds}::getContext]
+puts stderr "contextInfo!$contextInfo!$args!"
+	return [namespace eval $nsName " ${::itcl::internal::infos::internalCmds}::configure $args"]
     }
 
     public proc create {args} {
-puts stderr "+++class!create!" ;
 	return [uplevel 1 ${::itcl::internal::infos::rootNamespace}::builtin::create [self] {*}$args]
     }
 }

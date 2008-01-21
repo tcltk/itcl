@@ -1,5 +1,5 @@
 namespace eval ::itcl::internal::infos {
-    variable rootNamespace ::itclng
+    variable rootNamespace ::itcl
     variable rootClassName ${rootNamespace}::class
 #    variable rootClassName ${rootNamespace}::type
     variable internalCmds ${rootNamespace}::internal::commands

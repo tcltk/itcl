@@ -19,7 +19,7 @@ namespace eval ${::itcl::internal::infos::rootNamespace}::parser {
 	::set args [lrange $args 1 end]
 	::set fullClassName [::set ${::itcl::internal::infos::rootNamespace}::internal::parseinfos::currFullClassName]
 	::set infoNs ${::itcl::internal::infos::internalClassInfos}${fullClassName}::infos
-puts stderr "parseMember!$fullClassName!!$protection!$type!$name!$args!"
+#puts stderr "parseMember!$fullClassName!!$protection!$type!$name!$args!"
         ${::itcl::internal::infos::rootNamespace}::member::${type} $infoNs $fullClassName $protection $name {*}$args
     }
     proc parseSpecialMember {type args} {

@@ -5,11 +5,11 @@ namespace eval ${::itcl::internal::infos::rootNamespace}::member {
 	set maxArgs 0
 	set haveArgsArg 0
 	set usage ""
+        set defaultArgs [list]
 	if {$arguments ne ""} {
 	    set lgth [llength $arguments]
 	    set argNo 0
 	    set sep ""
-	    set defaultArgs [list]
 	    foreach arg $arguments {
 		incr argNo
 	        if {$arg eq ""} {
@@ -59,7 +59,7 @@ argument with no name"
     }
 
     proc methodOrProc {infoNs className type protection name args} {
-puts stderr "methodOrProc!$name!$type!"
+#puts stderr "methodOrProc!$name!$type!"
 #puts stderr "ME!$infoNs!$className!$protection!$name![join $args !]!"
 	if {[dict exists [set ${infoNs}] functions $name]} {
 	    return -code error -level 4 "\"$name\" already defined in class \"$className\""
@@ -199,7 +199,6 @@ puts stderr "methodOrProc!$name!$type!"
     }
 
     proc destructor {infoNs className type protection name args} {
-puts stderr "DES!$args!"
 	if {[dict exists [set ${infoNs}] functions $name]} {
 	    return -code error -level 4 "\"$name\" already defined in class \"$className\""
 	}
