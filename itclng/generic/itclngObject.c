@@ -111,6 +111,7 @@ ItclngCreateObject(
     int objc,                /* number of arguments */
     Tcl_Obj *CONST objv[])   /* argument objects */
 {
+    ItclngShowArgs(0, "ItclngCreateObject", objc, objv);
     int result = TCL_OK;
 
     Tcl_DString buffer;
@@ -197,6 +198,7 @@ ItclngCreateObject(
 
     saveCurrIoPtr = infoPtr->currIoPtr;
     infoPtr->currIoPtr = ioPtr;
+fprintf(stderr, "CREAOBJ!%s!%s!\n", name, Tcl_GetCurrentNamespace(interp)->fullName);
     ioPtr->oPtr = Tcl_NewObjectInstance(interp, iclsPtr->clsPtr, name,
             iclsPtr->nsPtr->fullName, /* objc */-1, NULL, /* skip */0);
     if (ioPtr->oPtr == NULL) {
@@ -1741,7 +1743,6 @@ ItclngMapMethodNameProc(
     char *tail;
     char *sp;
 
-fprintf(stderr, "MAP!%s!\n", Tcl_GetString(methodObj));
     iclsPtr = NULL;
     iclsPtr2 = NULL;
     methodName = NULL;

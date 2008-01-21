@@ -29,6 +29,7 @@ Tcl_ObjCmdProc Itclng_CreateClassConstructorInitCmd;
 Tcl_ObjCmdProc Itclng_CreateObjectCmd;
 Tcl_ObjCmdProc Itclng_ConfigureCmd;
 Tcl_ObjCmdProc Itclng_CgetCmd;
+Tcl_ObjCmdProc Itclng_GetContextCmd;
 
 typedef struct InfoMethod {
     char* commandName;       /* method name */
@@ -82,6 +83,9 @@ static InfoMethod ItclngMethodList[] = {
     { "createClassDestructor",
       "fullClassName destructor",
       Itclng_CreateClassDestructorCmd },
+    { "getContext",
+      "",
+      Itclng_GetContextCmd },
     { NULL, NULL, NULL }
 };
 
@@ -259,7 +263,6 @@ CreateOOMethod(
     int isNewEntry;
 
     ClientData pmPtr;
-fprintf(stderr, "CreateOOMethod!%s!%s!%s!\n", Tcl_GetString(imPtr->fullNamePtr), Tcl_GetString(argumentPtr), Tcl_GetString(bodyPtr));
     imPtr->tmPtr = (ClientData)Itclng_NewProcClassMethod(
             imPtr->iclsPtr->interp, imPtr->iclsPtr->clsPtr,
 	    ItclngCheckCallMethod, ItclngAfterCallMethod,
@@ -307,7 +310,7 @@ Itclng_CreateClassFinishCmd(
     ItclngClass *iclsPtr2;
     int newEntry;
 
-    ItclngShowArgs(0, "Itclng_CreateClassFinishCmd", objc, objv);
+    ItclngShowArgs(1, "Itclng_CreateClassFinishCmd", objc, objv);
     if (ItclngCheckNumCmdParams(interp, infoPtr, "createClassFinish", objc,
             2, 2) != TCL_OK) {
         return TCL_ERROR;
@@ -461,7 +464,7 @@ Itclng_CreateClassConstructorCmd(
     ItclngClass *iclsPtr;
     ItclngMemberFunc *imPtr;
 
-    ItclngShowArgs(0, "Itclng_CreateClassConstructorCmd", objc, objv);
+    ItclngShowArgs(1, "Itclng_CreateClassConstructorCmd", objc, objv);
     if (ItclngCheckNumCmdParams(interp, infoPtr, "createClassConstructor", objc,
             2, 2) != TCL_OK) {
         return TCL_ERROR;
@@ -503,7 +506,7 @@ Itclng_CreateClassDestructorCmd(
     ItclngClass *iclsPtr;
     ItclngMemberFunc *imPtr;
 
-    ItclngShowArgs(0, "Itclng_CreateClassDestructorCmd", objc, objv);
+    ItclngShowArgs(1, "Itclng_CreateClassDestructorCmd", objc, objv);
     if (ItclngCheckNumCmdParams(interp, infoPtr, "createClassDestructor", objc,
             2, 2) != TCL_OK) {
         return TCL_ERROR;
@@ -545,7 +548,7 @@ Itclng_CreateClassConstructorInitCmd(
     ItclngClass *iclsPtr;
     ItclngMemberFunc *imPtr;
 
-    ItclngShowArgs(0, "Itclng_CreateClassConstructorInitCmd", objc, objv);
+    ItclngShowArgs(1, "Itclng_CreateClassConstructorInitCmd", objc, objv);
     if (ItclngCheckNumCmdParams(interp, infoPtr, "createClassConstructorInit",
             objc, 2, 2) != TCL_OK) {
         return TCL_ERROR;
@@ -727,7 +730,7 @@ Itclng_CreateClassInheritCmd(
     ItclngHierIter hier;
     int newEntry;
 
-    ItclngShowArgs(0, "Itclng_CreateClassInheritCmd", objc, objv);
+    ItclngShowArgs(1, "Itclng_CreateClassInheritCmd", objc, objv);
     if (ItclngCheckNumCmdParams(interp, infoPtr, "createClassInherit", objc,
             2, -1) != TCL_OK) {
         return TCL_ERROR;
@@ -768,6 +771,64 @@ Itclng_CreateClassInheritCmd(
         iclsPtr2 = Itclng_AdvanceHierIter(&hier);
     }
     Itclng_DeleteHierIter(&hier);
+    return TCL_OK;
+}
+
+/*
+ * ------------------------------------------------------------------------
+ *  Itclng_GetContextCmd()
+ *
+ *  Creates a class destructor
+ *  On failure returns TCL_ERROR, along with an error message in the interp.
+ *  If successful, it returns TCL_OK and the full method name
+ * ------------------------------------------------------------------------
+ */
+int
+Itclng_GetContextCmd(
+    ClientData clientData,	/* info for all known objects */
+    Tcl_Interp* interp,		/* interpreter */
+    int objc,		        /* number of arguments */
+    Tcl_Obj *const*objv)	/* argument objects */
+{
+    Tcl_Obj *resultPtr;
+    Tcl_Obj *objPtr;
+    ItclngObjectInfo *infoPtr;
+    ItclngObject *ioPtr;
+    ItclngClass *iclsPtr;
+
+    ItclngShowArgs(0, "Itclng_GetContextCmd", objc, objv);
+    if (ItclngCheckNumCmdParams(interp, infoPtr, "getContext", objc,
+            0, 0) != TCL_OK) {
+        return TCL_ERROR;
+    }
+    infoPtr = (ItclngObjectInfo *)clientData;
+    iclsPtr = NULL;
+    ioPtr = NULL;
+    if (Itclng_GetContext(interp, &iclsPtr, &ioPtr) != TCL_OK) {
+        return TCL_ERROR;
+    }
+    resultPtr = Tcl_NewListObj(0, (Tcl_Obj**)NULL);
+    if (iclsPtr != NULL) {
+        objPtr = Tcl_NewStringObj(iclsPtr->nsPtr->fullName, -1);
+    } else {
+	objPtr = Tcl_NewStringObj("", -1);
+    }
+    Tcl_ListObjAppendElement((Tcl_Interp*)NULL, resultPtr, objPtr);
+    if (ioPtr != NULL) {
+        objPtr = Tcl_NewObj();
+	Tcl_GetCommandFullName(interp, ioPtr->accessCmd, objPtr);
+    } else {
+	objPtr = Tcl_NewStringObj("", -1);
+    }
+    Tcl_ListObjAppendElement((Tcl_Interp*)NULL, resultPtr, objPtr);
+    if (ioPtr != NULL) {
+        objPtr = Tcl_NewStringObj(ioPtr->iclsPtr->nsPtr->fullName, -1);
+    } else {
+	objPtr = Tcl_NewStringObj("", -1);
+    }
+    Tcl_ListObjAppendElement((Tcl_Interp*)NULL, resultPtr, objPtr);
+fprintf(stderr, "CONTEXT!%p!%p!\n", iclsPtr, ioPtr);
+    Tcl_SetObjResult(interp, resultPtr);
     return TCL_OK;
 }
 

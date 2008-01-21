@@ -136,7 +136,7 @@ Itclng_CreateClassCmd(
     Tcl_HashEntry *hPtr;
     int newEntry;
 
-    ItclngShowArgs(0, "Itclng_CreateClassCmd", objc, objv);
+    ItclngShowArgs(1, "Itclng_CreateClassCmd", objc, objv);
     if (ItclngCheckNumCmdParams(interp, infoPtr, "createClass", objc, 2, 2) !=
             TCL_OK) {
         return TCL_ERROR;
@@ -1003,7 +1003,7 @@ Itclng_FindClassNamespace(
  *  Invoked by Tcl whenever the user issues the command associated with
  *  a class name.  Handles the following syntax:
  *
- *    <className> create <objName> ?<args>...?
+ *    <className> <objName> ?<args>...?
  *
  *  If arguments are specified, then this procedure creates a new
  *  object named <objName> in the appropriate class.  Note that if
@@ -1040,11 +1040,11 @@ Itclng_CreateObjectCmd(
      *  load the class definition.  We retain the behavior here for
      *  backward-compatibility with earlier releases.
      */
-    if (objc <= 3) {
+    if (objc <= 2) {
         return TCL_OK;
     }
 
-    hPtr = Tcl_FindHashEntry(&infoPtr->classes, (char *)objv[2]);
+    hPtr = Tcl_FindHashEntry(&infoPtr->classes, (char *)objv[1]);
     if (hPtr == NULL) {
         Tcl_AppendResult(interp, "no such class: \"",
 	        Tcl_GetString(objv[1]), "\"", NULL);
@@ -1052,32 +1052,9 @@ Itclng_CreateObjectCmd(
     }
     iclsPtr = Tcl_GetHashValue(hPtr);
 
+    token = Tcl_GetString(objv[2]);
     /*
-     *  If the object name is "::", and if this is an old-style class
-     *  definition, then treat the remaining arguments as a command
-     *  in the class namespace.  This used to be the way of invoking
-     *  a class proc, but the new syntax is "class::proc" (without
-     *  spaces).
-     */
-    token = Tcl_GetString(objv[3]);
-    if ((*token == ':') && (strcmp(token,"::") == 0) && (objc > 4)) {
-        /*
-         *  If this is not an old-style class, then return an error
-         *  describing the syntax change.
-         */
-        Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
-            "syntax \"class :: proc\" is an anachronism\n",
-            "[incr Tcl] no longer supports this syntax.\n",
-            "Instead, remove the spaces from your procedure invocations:\n",
-            "  ",
-            Tcl_GetString(objv[1]), "::",
-            Tcl_GetString(objv[4]), " ?args?",
-            (char*)NULL);
-        return TCL_ERROR;
-    }
-
-    /*
-     *  Otherwise, we have a proper object name.  Create a new instance
+     *  we have a proper object name.  Create a new instance
      *  with that name.  If the name contains "#auto", replace this with
      *  a uniquely generated string based on the class name.
      */
@@ -1142,7 +1119,7 @@ Itclng_CreateObjectCmd(
      *  Try to create a new object.  If successful, return the
      *  object name as the result of this command.
      */
-    result = ItclngCreateObject(interp, objName, iclsPtr, objc-4, objv+4);
+    result = ItclngCreateObject(interp, objName, iclsPtr, objc-3, objv+3);
 
     if (result == TCL_OK) {
         Tcl_SetObjResult(interp, Tcl_NewStringObj(objName, -1));

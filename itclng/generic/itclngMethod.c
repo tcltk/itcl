@@ -25,7 +25,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclngMethod.c,v 1.1.2.5 2008/01/20 19:59:42 wiede Exp $
+ *     RCS:  $Id: itclngMethod.c,v 1.1.2.6 2008/01/21 21:03:59 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -1108,7 +1108,7 @@ Itclng_ExecMethod(
     ItclngClass *iclsPtr;
     ItclngObject *ioPtr;
 
-    ItclngShowArgs(0, "Itclng_ExecMethod", objc, objv);
+    ItclngShowArgs(1, "Itclng_ExecMethod", objc, objv);
 
     /*
      *  Make sure that the current namespace context includes an
@@ -1116,7 +1116,6 @@ Itclng_ExecMethod(
      *  only if an object context exists.
      */
     iclsPtr = imPtr->iclsPtr;
-fprintf(stderr, "EXE!%s!%d!\n", Tcl_GetString(imPtr->namePtr), imPtr->argcount);
 
     if (Itclng_GetContext(interp, &iclsPtr, &ioPtr) != TCL_OK) {
         return TCL_ERROR;
@@ -1191,7 +1190,7 @@ Itclng_ExecProc(
     ItclngMemberFunc *imPtr = (ItclngMemberFunc*)clientData;
     int result = TCL_OK;
 
-    ItclngShowArgs(0, "Itclng_ExecProc", objc, objv);
+    ItclngShowArgs(1, "Itclng_ExecProc", objc, objv);
 
     /*
      *  Make sure that this command member can be accessed from
@@ -1242,9 +1241,6 @@ Itclng_ExecProc(
     Tcl_Release((ClientData)imPtr);
     return result;
 }
-
-
-
 
 /*
  * ------------------------------------------------------------------------
@@ -1702,7 +1698,6 @@ ItclngCheckCallMethod(
     }
     int cObjc = Itclng_GetCallFrameObjc(interp);
     Tcl_Obj *const * cObjv = Itclng_GetCallFrameObjv(interp);
-fprintf(stderr, "ARGS!%s!%d!%d!\n", Tcl_GetString(imPtr->namePtr), cObjc-2, imPtr->argcount);
     if (cObjc-2 < imPtr->argcount) {
 	if (strcmp(Tcl_GetString(imPtr->namePtr), "info") == 0) {
             Tcl_Obj *objPtr = Tcl_NewStringObj(
