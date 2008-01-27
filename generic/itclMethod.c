@@ -25,7 +25,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclMethod.c,v 1.1.2.17 2008/01/18 17:11:30 wiede Exp $
+ *     RCS:  $Id: itclMethod.c,v 1.1.2.18 2008/01/27 19:27:55 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -956,7 +956,7 @@ Itcl_EvalMemberCode(
 //	Itcl_PopStack(&imPtr->iclsPtr->infoPtr->namespaceStack));
     } else {
         if ((mcode->flags & ITCL_IMPLEMENT_TCL) != 0) {
-	    if (imPtr->flags & (ITCL_CONSTRUCTOR | ITCL_DESTRUCTOR)) {
+	    if (imPtr->flags & (ITCL_CONSTRUCTOR|ITCL_DESTRUCTOR)) {
                 result = ItclObjectCmd(imPtr, interp, contextIoPtr->oPtr,
 	                imPtr->iclsPtr->clsPtr, objc, objv);
 	    } else {
