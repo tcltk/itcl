@@ -9,7 +9,7 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itclngInt.h,v 1.1.2.8 2008/01/20 19:59:42 wiede Exp $
+ * RCS: @(#) $Id: itclngInt.h,v 1.1.2.9 2008/01/27 19:26:22 wiede Exp $
  */
 
 #include <string.h>
@@ -476,6 +476,7 @@ MODULE_SCOPE Tcl_Obj * ItclngGetVariableStateString(ItclngClass *iclsPtr,
         const char *variableName);
 MODULE_SCOPE char * ItclngTraceUnsetVar(ClientData clientData,
         Tcl_Interp *interp, const char *name1, const char *name2, int flags);
+MODULE_SCOPE int ItclngDeleteClassDictInfo(ItclngClass *iclsPtr);
 
 MODULE_SCOPE int Itclng_DecodeScopedCommand(Tcl_Interp *interp, CONST char *name,
 	    Tcl_Namespace **rNsPtr, char **rCmdPtr);
@@ -520,6 +521,9 @@ MODULE_SCOPE void ItclngDeleteClassVariablesNamespace(Tcl_Interp *interp,
 MODULE_SCOPE void Itclng_BuildVirtualTables(ItclngClass* iclsPtr);
 MODULE_SCOPE int ItclngCreateCommonOrVariable(Tcl_Interp* interp,
         ItclngClass *iclsPtr, Tcl_Obj *namePtr, int flags);
+MODULE_SCOPE int Itclng_IsClass(Tcl_Command cmd);
+MODULE_SCOPE int Itclng_DeleteClass(Tcl_Interp *interp,
+        ItclngClass *iclsPtr);
 
 MODULE_SCOPE int Itclng_DeleteObject(Tcl_Interp *interp,
         ItclngObject *contextIoPtr);
@@ -543,6 +547,10 @@ MODULE_SCOPE const char* ItclngGetInstanceVar(Tcl_Interp *interp,
 MODULE_SCOPE const char* Itclng_GetInstanceVar(Tcl_Interp *interp,
         const char *name, ItclngObject *contextIoPtr,
 	ItclngClass *contextIclsPtr);
+MODULE_SCOPE int Itclng_FindObject(Tcl_Interp *interp,
+        CONST char *name, ItclngObject **roPtr);
+MODULE_SCOPE int Itclng_ObjectIsa(ItclngObject *contextIoPtr,
+        ItclngClass *iclsPtr);
 
 
 MODULE_SCOPE int ItclngCreateMethodOrProc(Tcl_Interp* interp,

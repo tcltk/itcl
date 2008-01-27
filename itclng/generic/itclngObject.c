@@ -107,11 +107,11 @@ int
 ItclngCreateObject(
     Tcl_Interp *interp,      /* interpreter mananging new object */
     CONST char* name,        /* name of new object */
-    ItclngClass *iclsPtr,        /* class for new object */
+    ItclngClass *iclsPtr,    /* class for new object */
     int objc,                /* number of arguments */
     Tcl_Obj *CONST objv[])   /* argument objects */
 {
-    ItclngShowArgs(0, "ItclngCreateObject", objc, objv);
+    ItclngShowArgs(1, "ItclngCreateObject", objc, objv);
     int result = TCL_OK;
 
     Tcl_DString buffer;
@@ -198,7 +198,6 @@ ItclngCreateObject(
 
     saveCurrIoPtr = infoPtr->currIoPtr;
     infoPtr->currIoPtr = ioPtr;
-fprintf(stderr, "CREAOBJ!%s!%s!\n", name, Tcl_GetCurrentNamespace(interp)->fullName);
     ioPtr->oPtr = Tcl_NewObjectInstance(interp, iclsPtr->clsPtr, name,
             iclsPtr->nsPtr->fullName, /* objc */-1, NULL, /* skip */0);
     if (ioPtr->oPtr == NULL) {
@@ -321,8 +320,9 @@ fprintf(stderr, "DEBUG CONSTRUCTOR error!%s!\n", Tcl_GetStringResult(interp));
 	Tcl_IncrRefCount(namePtr);
 	argumentPtr = Tcl_NewStringObj("args", -1);
 	Tcl_IncrRefCount(argumentPtr);
-	bodyPtr = Tcl_NewStringObj("uplevel 1 ::itclng::builtin::objectunknown ",
-	        -1);
+	bodyPtr = Tcl_NewStringObj("uplevel 1 ", -1);
+	Tcl_AppendToObj(bodyPtr, Tcl_GetString(infoPtr->rootNamespace), -1);
+	Tcl_AppendToObj(bodyPtr, "::builtin::objectunknown ", -1);
 	Tcl_AppendToObj(bodyPtr, Tcl_GetString(ioPtr->namePtr), -1);
 	Tcl_AppendToObj(bodyPtr, " $args", -1);
 	Tcl_IncrRefCount(bodyPtr);
@@ -479,6 +479,7 @@ ItclngInitObjectVariables(
                     thisName = Tcl_GetString(ivPtr->namePtr);
 		    if (Tcl_SetVar2(interp, thisName, NULL,
 		        "", TCL_NAMESPACE_ONLY) == NULL) {
+                        Itclng_PopCallFrame(interp);
 		        return TCL_ERROR;
 	            }
 	            Tcl_TraceVar2(interp, thisName, NULL,
@@ -488,6 +489,7 @@ ItclngInitObjectVariables(
 	            if (ivPtr->init != NULL) {
 		        if (Tcl_ObjSetVar2(interp, ivPtr->namePtr, NULL,
 		            ivPtr->init, TCL_NAMESPACE_ONLY) == NULL) {
+                            Itclng_PopCallFrame(interp);
 		            return TCL_ERROR;
 	                }
 	            }
@@ -1440,7 +1442,9 @@ ItclngDestroyObject(
      */
 #ifdef NOTDEF
     istate = Itclng_SaveInterpState(iclsPtr->interp, 0);
+#endif
     Itclng_DestructObject(iclsPtr->interp, contextIoPtr, ITCLNG_IGNORE_ERRS);
+#ifdef NOTDEF
     Itclng_RestoreInterpState(iclsPtr->interp, istate);
 #endif
 

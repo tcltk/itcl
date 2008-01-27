@@ -1,12 +1,11 @@
-puts stderr "CL!${::itcl::internal::infos::rootClassName}!"
 ::oo::class create ${::itcl::internal::infos::rootClassName}
 ::oo::define ${::itcl::internal::infos::rootClassName} superclass ::oo::class
 ::oo::define ${::itcl::internal::infos::rootClassName} self.method create {className args} {
+#puts stderr "SELF.CREATE!$className!"
     ::set infosNsName ${::itcl::internal::infos::rootNamespace}::internal::parseinfos
     ::set internalCmds $::itcl::internal::infos::internalCmds
 
     if {$className eq ""} {
-#        return -code error -level 2 "invalid classname \"\""
         return -code error "invalid class name \"\""
     }
     set nsName [uplevel 1 namespace current]
@@ -52,7 +51,7 @@ puts stderr "CL!${::itcl::internal::infos::rootClassName}!"
     }
     $internalCmds createClassFinish $fullClassName $result
     if {$result} {
-        return -code error -level 2 $errs
+        return -code error -level 1 $errs
     }
     set inh [dict get [set $infoNs] inheritance]
     if {[llength $inh] == 0} {
@@ -64,6 +63,7 @@ puts stderr "CL!${::itcl::internal::infos::rootClassName}!"
         return [uplevel 1 ${::itcl::internal::infos::rootNamespace}::builtin::unknown {*}$args]
     }
     ::oo::define $fullClassName export unknown
+#puts stderr "SELF.CREATE END!$fullClassName!"
     return $fullClassName
 }
 
@@ -83,13 +83,17 @@ puts stderr "class!info!" ;
     }
 
     public method configure {args} {
+	set nsName [namespace current]
 	set nsName [uplevel 1 namespace current]
-	set contextInfo [uplevel 1 ${::itcl::internal::infos::internalCmds}::getContext]
-puts stderr "contextInfo!$contextInfo!$args!"
+#	set contextInfo [uplevel 1 ${::itcl::internal::infos::internalCmds}::getContext]
+	set contextInfo [${::itcl::internal::infos::internalCmds}::getContext]
 	return [namespace eval $nsName " ${::itcl::internal::infos::internalCmds}::configure $args"]
     }
 
     public proc create {args} {
-	return [uplevel 1 ${::itcl::internal::infos::rootNamespace}::builtin::create [self] {*}$args]
+#puts stderr "CREATE![lindex $args 0]!"
+	set result [uplevel 1 ${::itcl::internal::infos::rootNamespace}::builtin::create [self] {*}$args]
+#puts stderr "CREATE END!$result!"
+        return $result
     }
 }

@@ -9,7 +9,7 @@ puts stderr "builtin configure called!$args!"
 puts stderr "builtin cget called!$args!"
     }
     proc create {className args} {
-puts stderr "BI!create!$className!$args!"
+#puts stderr "BI!create!$className!$args!"
 	if {[llength $args] == 0} {
 	    # call without arguments: ignore it
 	    return
@@ -23,7 +23,7 @@ puts stderr "BI!create!$className!$args!"
         }
 # check for class already exists here !!!
         set cmd [uplevel 1 ::info command ${myNamespace}$objectName]
-puts stderr "CMD!$namespace!$cmd!"
+#puts stderr "CMD!$namespace!$cmd!"
 	if {[string length $cmd] > 0} {
             return -code error -level 2 "command \"$objectName\" already exists in namespace \"$namespace\""
         }
@@ -39,9 +39,10 @@ puts stderr "CMD!$namespace!$cmd!"
 
     }
     proc unknown {args} {
-        puts stderr "builtin unknown called!$args!"
+puts stderr "builtin unknown called!$args!"
     }
     proc objectunknown {args} {
-        puts stderr "builtin objectunknown called!$args!"
+        return -code error -level 2 "bad option \"[lindex $args 1]\": should be one of ...\n\
+"
     }
 }

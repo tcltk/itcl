@@ -9,7 +9,7 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itclngHelpers.c,v 1.1.2.6 2008/01/20 17:17:17 wiede Exp $
+ * RCS: @(#) $Id: itclngHelpers.c,v 1.1.2.7 2008/01/27 19:26:22 wiede Exp $
  */
 
 #include "itclngInt.h"
@@ -44,6 +44,31 @@ ItclngShowArgs(
     fprintf(stderr, "!\n");
 }
 #endif
+
+/*
+ * ------------------------------------------------------------------------
+ *  ItclngDeleteClassDictInfo()
+ *
+ *  removes the class dict info variable
+ * ------------------------------------------------------------------------
+ */
+int
+ItclngDeleteClassDictInfo(
+    ItclngClass *iclsPtr)
+{
+    Tcl_Obj *objPtr;
+    int result;
+
+    objPtr = Tcl_NewStringObj("::namespace delete ", -1);
+    Tcl_AppendToObj(objPtr,
+            Tcl_GetString(iclsPtr->infoPtr->internalClassInfos), -1);
+    Tcl_AppendToObj(objPtr, Tcl_GetString(iclsPtr->fullNamePtr), -1);
+    Tcl_IncrRefCount(objPtr);
+//fprintf(stderr, "DEL!%s!\n", Tcl_GetString(objPtr));
+    result = Tcl_EvalObj(iclsPtr->interp, objPtr);
+    Tcl_DecrRefCount(objPtr);
+    return result;
+}
 
 /*
  * ------------------------------------------------------------------------

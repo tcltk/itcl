@@ -25,7 +25,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclngMethod.c,v 1.1.2.6 2008/01/21 21:03:59 wiede Exp $
+ *     RCS:  $Id: itclngMethod.c,v 1.1.2.7 2008/01/27 19:26:22 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -798,7 +798,7 @@ Itclng_EvalMemberCode(
      *  Execute the code body...
      */
     if ((mcode->flags & ITCLNG_IMPLEMENT_TCL) != 0) {
-        if (imPtr->flags & (ITCLNG_CONSTRUCTOR )) {
+        if (imPtr->flags & (ITCLNG_CONSTRUCTOR|ITCLNG_DESTRUCTOR)) {
             result = ItclngObjectCmd(imPtr, interp, contextIoPtr->oPtr,
                    imPtr->iclsPtr->clsPtr, objc, objv);
         } else {

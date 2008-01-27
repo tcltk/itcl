@@ -30,6 +30,14 @@ Tcl_ObjCmdProc Itclng_CreateObjectCmd;
 Tcl_ObjCmdProc Itclng_ConfigureCmd;
 Tcl_ObjCmdProc Itclng_CgetCmd;
 Tcl_ObjCmdProc Itclng_GetContextCmd;
+Tcl_ObjCmdProc Itclng_FindClassesCmd;
+Tcl_ObjCmdProc Itclng_FindObjectsCmd;
+Tcl_ObjCmdProc Itclng_DeleteClassCmd;
+Tcl_ObjCmdProc Itclng_DeleteObjectCmd;
+Tcl_ObjCmdProc Itclng_IsClassCmd;
+Tcl_ObjCmdProc Itclng_IsObjectCmd;
+Tcl_ObjCmdProc Itclng_ScopeCmd;
+Tcl_ObjCmdProc Itclng_CodeCmd;
 
 typedef struct InfoMethod {
     char* commandName;       /* method name */
@@ -86,6 +94,30 @@ static InfoMethod ItclngMethodList[] = {
     { "getContext",
       "",
       Itclng_GetContextCmd },
+    { "findClasses",
+      "",
+      Itclng_FindClassesCmd },
+    { "findObjects",
+      "",
+      Itclng_FindObjectsCmd },
+    { "deleteClass",
+      "",
+      Itclng_DeleteClassCmd },
+    { "deleteObject",
+      "object ?object object ...?",
+      Itclng_DeleteObjectCmd },
+    { "isClass",
+      "",
+      Itclng_IsClassCmd },
+    { "isObject",
+      "",
+      Itclng_IsObjectCmd },
+    { "scope",
+      "",
+      Itclng_ScopeCmd },
+    { "code",
+      "",
+      Itclng_CodeCmd },
     { NULL, NULL, NULL }
 };
 
@@ -796,7 +828,7 @@ Itclng_GetContextCmd(
     ItclngObject *ioPtr;
     ItclngClass *iclsPtr;
 
-    ItclngShowArgs(0, "Itclng_GetContextCmd", objc, objv);
+    ItclngShowArgs(1, "Itclng_GetContextCmd", objc, objv);
     if (ItclngCheckNumCmdParams(interp, infoPtr, "getContext", objc,
             0, 0) != TCL_OK) {
         return TCL_ERROR;
@@ -827,7 +859,6 @@ Itclng_GetContextCmd(
 	objPtr = Tcl_NewStringObj("", -1);
     }
     Tcl_ListObjAppendElement((Tcl_Interp*)NULL, resultPtr, objPtr);
-fprintf(stderr, "CONTEXT!%p!%p!\n", iclsPtr, ioPtr);
     Tcl_SetObjResult(interp, resultPtr);
     return TCL_OK;
 }
@@ -1004,7 +1035,7 @@ Itclng_ConfigureCmd(
     int unparsedObjc;
     int result;
 
-    ItclngShowArgs(0, "Itclng_BiConfigureCmd", objc, objv);
+    ItclngShowArgs(1, "Itclng_ConfigureCmd", objc, objv);
     vlookup = NULL;
     token = NULL;
     hPtr = NULL;
@@ -1017,7 +1048,6 @@ Itclng_ConfigureCmd(
      *  Make sure that this command is being invoked in the proper
      *  context.
      */
-fprintf(stderr, "NS!%s!\n", Tcl_GetCurrentNamespace(interp)->fullName);
     contextIclsPtr = NULL;
     if (Itclng_GetContext(interp, &contextIclsPtr, &contextIoPtr) != TCL_OK) {
         return TCL_ERROR;
@@ -1332,13 +1362,10 @@ Itclng_CgetCmd(
     return TCL_OK;
 }
 
-
-
-#ifdef NOTDEF
 
 /*
  * ------------------------------------------------------------------------
- *  Itcl_FindClassesCmd()
+ *  Itclng_FindClassesCmd()
  *
  *  Invoked by Tcl whenever the user issues an "itcl::find classes"
  *  command to query the list of known classes.  Handles the following
@@ -1351,7 +1378,7 @@ Itclng_CgetCmd(
  */
 /* ARGSUSED */
 int
-Itcl_FindClassesCmd(
+Itclng_FindClassesCmd(
     ClientData clientData,   /* class/object info */
     Tcl_Interp *interp,      /* current interpreter */
     int objc,                /* number of arguments */
@@ -1367,13 +1394,13 @@ Itcl_FindClassesCmd(
     Tcl_HashTable unique;
     Tcl_HashEntry *entry;
     Tcl_HashSearch place;
-    Itcl_Stack search;
+    Itclng_Stack search;
     Tcl_Command cmd;
     Tcl_Command originalCmd;
     Tcl_Namespace *nsPtr;
     Tcl_Obj *objPtr;
 
-    ItclShowArgs(2, "Itcl_FindClassesCmd", objc, objv);
+    ItclngShowArgs(2, "Itclng_FindClassesCmd", objc, objv);
     if (objc > 2) {
         Tcl_WrongNumArgs(interp, 1, objv, "?pattern?");
         return TCL_ERROR;
@@ -1393,15 +1420,15 @@ Itcl_FindClassesCmd(
      *  represent classes, report them.
      */
 
-    Itcl_InitStack(&search);
-    Itcl_PushStack((ClientData)globalNs, &search);
-    Itcl_PushStack((ClientData)activeNs, &search);  /* last in, first out! */
+    Itclng_InitStack(&search);
+    Itclng_PushStack((ClientData)globalNs, &search);
+    Itclng_PushStack((ClientData)activeNs, &search);  /* last in, first out! */
 
     Tcl_InitHashTable(&unique, TCL_ONE_WORD_KEYS);
 
     handledActiveNs = 0;
-    while (Itcl_GetStackSize(&search) > 0) {
-        nsPtr = Itcl_PopStack(&search);
+    while (Itclng_GetStackSize(&search) > 0) {
+        nsPtr = Itclng_PopStack(&search);
         if (nsPtr == activeNs && handledActiveNs) {
             continue;
         }
@@ -1410,7 +1437,7 @@ Itcl_FindClassesCmd(
 	        &place);
         while (entry) {
             cmd = (Tcl_Command)Tcl_GetHashValue(entry);
-            if (Itcl_IsClass(cmd)) {
+            if (Itclng_IsClass(cmd)) {
                 originalCmd = Tcl_GetOriginalCommand(cmd);
 
                 /*
@@ -1459,12 +1486,12 @@ Itcl_FindClassesCmd(
          */
         entry = Tcl_FirstHashEntry(Tcl_GetNamespaceChildTable(nsPtr), &place);
         while (entry != NULL) {
-            Itcl_PushStack(Tcl_GetHashValue(entry), &search);
+            Itclng_PushStack(Tcl_GetHashValue(entry), &search);
             entry = Tcl_NextHashEntry(&place);
         }
     }
     Tcl_DeleteHashTable(&unique);
-    Itcl_DeleteStack(&search);
+    Itclng_DeleteStack(&search);
 
     return TCL_OK;
 }
@@ -1472,7 +1499,7 @@ Itcl_FindClassesCmd(
 
 /*
  * ------------------------------------------------------------------------
- *  Itcl_FindObjectsCmd()
+ *  Itclng_FindObjectsCmd()
  *
  *  Invoked by Tcl whenever the user issues an "itcl::find objects"
  *  command to query the list of known objects.  Handles the following
@@ -1484,7 +1511,7 @@ Itcl_FindClassesCmd(
  * ------------------------------------------------------------------------
  */
 int
-Itcl_FindObjectsCmd(
+Itclng_FindObjectsCmd(
     ClientData clientData,   /* class/object info */
     Tcl_Interp *interp,      /* current interpreter */
     int objc,                /* number of arguments */
@@ -1495,8 +1522,8 @@ Itcl_FindObjectsCmd(
     int forceFullNames = 0;
 
     char *pattern = NULL;
-    ItclClass *iclsPtr = NULL;
-    ItclClass *isaDefn = NULL;
+    ItclngClass *iclsPtr = NULL;
+    ItclngClass *isaDefn = NULL;
 
     char *name = NULL;
     char *token = NULL;
@@ -1505,17 +1532,18 @@ Itcl_FindObjectsCmd(
     int newEntry;
     int match;
     int handledActiveNs;
-    ItclObject *contextIoPtr;
+    ItclngObject *contextIoPtr;
     Tcl_HashTable unique;
     Tcl_HashEntry *entry;
     Tcl_HashSearch place;
-    Itcl_Stack search;
+    Itclng_Stack search;
     Tcl_Command cmd;
     Tcl_Command originalCmd;
     Tcl_CmdInfo cmdInfo;
     Tcl_Namespace *nsPtr;
     Tcl_Obj *objPtr;
 
+    ItclngShowArgs(1, "Itclng_FindObjects", objc, objv);
     /*
      *  Parse arguments:
      *  objects ?-class <className>? ?-isa <className>? ?<pattern>?
@@ -1533,7 +1561,7 @@ Itcl_FindObjectsCmd(
         }
         else if ((pos+1 < objc) && (strcmp(token,"-class") == 0)) {
             name = Tcl_GetString(objv[pos+1]);
-            iclsPtr = Itcl_FindClass(interp, name, /* autoload */ 1);
+            iclsPtr = Itclng_FindClass(interp, name, /* autoload */ 1);
             if (iclsPtr == NULL) {
                 return TCL_ERROR;
             }
@@ -1541,7 +1569,7 @@ Itcl_FindObjectsCmd(
         }
         else if ((pos+1 < objc) && (strcmp(token,"-isa") == 0)) {
             name = Tcl_GetString(objv[pos+1]);
-            isaDefn = Itcl_FindClass(interp, name, /* autoload */ 1);
+            isaDefn = Itclng_FindClass(interp, name, /* autoload */ 1);
             if (isaDefn == NULL) {
                 return TCL_ERROR;
             }
@@ -1575,15 +1603,15 @@ Itcl_FindObjectsCmd(
      *  represent objects, report them.
      */
 
-    Itcl_InitStack(&search);
-    Itcl_PushStack((ClientData)globalNs, &search);
-    Itcl_PushStack((ClientData)activeNs, &search);  /* last in, first out! */
+    Itclng_InitStack(&search);
+    Itclng_PushStack((ClientData)globalNs, &search);
+    Itclng_PushStack((ClientData)activeNs, &search);  /* last in, first out! */
 
     Tcl_InitHashTable(&unique, TCL_ONE_WORD_KEYS);
 
     handledActiveNs = 0;
-    while (Itcl_GetStackSize(&search) > 0) {
-        nsPtr = Itcl_PopStack(&search);
+    while (Itclng_GetStackSize(&search) > 0) {
+        nsPtr = Itclng_PopStack(&search);
         if (nsPtr == activeNs && handledActiveNs) {
             continue;
         }
@@ -1591,13 +1619,13 @@ Itcl_FindObjectsCmd(
         entry = Tcl_FirstHashEntry(Tcl_GetNamespaceCommandTable(nsPtr), &place);
         while (entry) {
             cmd = (Tcl_Command)Tcl_GetHashValue(entry);
-            if (Itcl_IsObject(cmd)) {
+            if (Itclng_IsObject(cmd)) {
                 originalCmd = Tcl_GetOriginalCommand(cmd);
                 if (originalCmd) {
                     cmd = originalCmd;
                 }
 		Tcl_GetCommandInfoFromToken(cmd, &cmdInfo);
-                contextIoPtr = (ItclObject*)cmdInfo.deleteData;
+                contextIoPtr = (ItclngObject*)cmdInfo.deleteData;
 
                 /*
                  *  Report full names if:
@@ -1658,19 +1686,19 @@ Itcl_FindObjectsCmd(
          */
         entry = Tcl_FirstHashEntry(Tcl_GetNamespaceChildTable(nsPtr), &place);
         while (entry != NULL) {
-            Itcl_PushStack(Tcl_GetHashValue(entry), &search);
+            Itclng_PushStack(Tcl_GetHashValue(entry), &search);
             entry = Tcl_NextHashEntry(&place);
         }
     }
     Tcl_DeleteHashTable(&unique);
-    Itcl_DeleteStack(&search);
+    Itclng_DeleteStack(&search);
 
     return TCL_OK;
 }
 
 /*
  * ------------------------------------------------------------------------
- *  Itcl_DelClassCmd()
+ *  Itclng_DeleteClassCmd()
  *
  *  Part of the "delete" ensemble.  Invoked by Tcl whenever the
  *  user issues a "delete class" command to delete classes.
@@ -1683,7 +1711,7 @@ Itcl_FindObjectsCmd(
  */
 /* ARGSUSED */
 int
-Itcl_DelClassCmd(
+Itclng_DeleteClassCmd(
     ClientData clientData,   /* unused */
     Tcl_Interp *interp,      /* current interpreter */
     int objc,                /* number of arguments */
@@ -1691,9 +1719,9 @@ Itcl_DelClassCmd(
 {
     int i;
     char *name;
-    ItclClass *iclsPtr;
+    ItclngClass *iclsPtr;
 
-    ItclShowArgs(2, "Itcl_DelClassCmd", objc, objv);
+    ItclngShowArgs(0, "Itclng_DeleteClassCmd", objc, objv);
     /*
      *  Since destroying a base class will destroy all derived
      *  classes, calls like "destroy class Base Derived" could
@@ -1703,7 +1731,7 @@ Itcl_DelClassCmd(
      */
     for (i=1; i < objc; i++) {
         name = Tcl_GetString(objv[i]);
-        iclsPtr = Itcl_FindClass(interp, name, /* autoload */ 1);
+        iclsPtr = Itclng_FindClass(interp, name, /* autoload */ 1);
         if (iclsPtr == NULL) {
             return TCL_ERROR;
         }
@@ -1711,11 +1739,11 @@ Itcl_DelClassCmd(
 
     for (i=1; i < objc; i++) {
         name = Tcl_GetString(objv[i]);
-        iclsPtr = Itcl_FindClass(interp, name, /* autoload */ 0);
+        iclsPtr = Itclng_FindClass(interp, name, /* autoload */ 0);
 
         if (iclsPtr) {
             Tcl_ResetResult(interp);
-            if (Itcl_DeleteClass(interp, iclsPtr) != TCL_OK) {
+            if (Itclng_DeleteClass(interp, iclsPtr) != TCL_OK) {
                 return TCL_ERROR;
             }
         }
@@ -1727,7 +1755,7 @@ Itcl_DelClassCmd(
 
 /*
  * ------------------------------------------------------------------------
- *  Itcl_DelObjectCmd()
+ *  Itclng_DeleteObjectCmd()
  *
  *  Part of the "delete" ensemble.  Invoked by Tcl whenever the user
  *  issues a "delete object" command to delete [incr Tcl] objects.
@@ -1739,7 +1767,7 @@ Itcl_DelClassCmd(
  * ------------------------------------------------------------------------
  */
 int
-Itcl_DelObjectCmd(
+Itclng_DeleteObjectCmd(
     ClientData clientData,   /* object management info */
     Tcl_Interp *interp,      /* current interpreter */
     int objc,                /* number of arguments */
@@ -1747,9 +1775,9 @@ Itcl_DelObjectCmd(
 {
     int i;
     char *name;
-    ItclObject *contextIoPtr;
+    ItclngObject *contextIoPtr;
 
-    ItclShowArgs(2, "Itcl_DelObjectCmd", objc, objv);
+    ItclngShowArgs(1, "Itclng_DeleteObjectCmd", objc, objv);
     /*
      *  Scan through the list of objects and attempt to delete them.
      *  If anything goes wrong (i.e., destructors fail), then
@@ -1757,7 +1785,7 @@ Itcl_DelObjectCmd(
      */
     for (i=1; i < objc; i++) {
         name = Tcl_GetStringFromObj(objv[i], (int*)NULL);
-        if (Itcl_FindObject(interp, name, &contextIoPtr) != TCL_OK) {
+        if (Itclng_FindObject(interp, name, &contextIoPtr) != TCL_OK) {
             return TCL_ERROR;
         }
 
@@ -1768,7 +1796,7 @@ Itcl_DelObjectCmd(
             return TCL_ERROR;
         }
 
-        if (Itcl_DeleteObject(interp, contextIoPtr) != TCL_OK) {
+        if (Itclng_DeleteObject(interp, contextIoPtr) != TCL_OK) {
             return TCL_ERROR;
         }
     }
@@ -1778,7 +1806,7 @@ Itcl_DelObjectCmd(
 
 /*
  * ------------------------------------------------------------------------
- *  Itcl_ScopeCmd()
+ *  Itclng_ScopeCmd()
  *
  *  Invoked by Tcl whenever the user issues a "scope" command to
  *  create a fully qualified variable name.  Handles the following
@@ -1807,7 +1835,7 @@ Itcl_DelObjectCmd(
  */
 /* ARGSUSED */
 int
-Itcl_ScopeCmd(
+Itclng_ScopeCmd(
     ClientData dummy,        /* unused */
     Tcl_Interp *interp,      /* current interpreter */
     int objc,                /* number of arguments */
@@ -1825,14 +1853,14 @@ Itcl_ScopeCmd(
     Tcl_Obj *objPtr;
     Tcl_Obj *objPtr2;
     Tcl_Var var;
-    ItclClass *contextIclsPtr;
-    ItclObject *contextIoPtr;
+    ItclngClass *contextIclsPtr;
+    ItclngObject *contextIoPtr;
     Tcl_HashEntry *entry;
-    ItclObjectInfo *infoPtr;
-    ItclVarLookup *vlookup;
+    ItclngObjectInfo *infoPtr;
+    ItclngVarLookup *vlookup;
     int doAppend;
 
-    ItclShowArgs(2, "Itcl_ScopeCmd", objc, objv);
+    ItclngShowArgs(2, "Itclng_ScopeCmd", objc, objv);
     if (objc != 2) {
         Tcl_WrongNumArgs(interp, 1, objv, "varname");
         return TCL_ERROR;
@@ -1879,12 +1907,12 @@ Itcl_ScopeCmd(
     contextIoPtr = NULL;
     contextIclsPtr = NULL;
     oPtr = NULL;
-    infoPtr = Tcl_GetAssocData(interp, ITCL_INTERP_DATA, &procPtr);
+    infoPtr = Tcl_GetAssocData(interp, ITCLNG_INTERP_DATA, &procPtr);
     hPtr = Tcl_FindHashEntry(&infoPtr->namespaceClasses, (char *)contextNsPtr);
     if (hPtr != NULL) {
-        contextIclsPtr = (ItclClass *)Tcl_GetHashValue(hPtr);
+        contextIclsPtr = (ItclngClass *)Tcl_GetHashValue(hPtr);
     }
-    if (Itcl_IsClassNamespace(contextNsPtr)) {
+    if (Itclng_IsClassNamespace(contextNsPtr)) {
 
         entry = Tcl_FindHashEntry(&contextIclsPtr->resolveVars, token);
         if (!entry) {
@@ -1895,12 +1923,13 @@ Itcl_ScopeCmd(
             result = TCL_ERROR;
             goto scopeCmdDone;
         }
-        vlookup = (ItclVarLookup*)Tcl_GetHashValue(entry);
+        vlookup = (ItclngVarLookup*)Tcl_GetHashValue(entry);
 
-        if (vlookup->ivPtr->flags & ITCL_COMMON) {
+        if (vlookup->ivPtr->flags & ITCLNG_COMMON) {
             Tcl_Obj *resultPtr = Tcl_GetObjResult(interp);
-	    if (vlookup->ivPtr->protection != ITCL_PUBLIC) {
-	        Tcl_AppendToObj(resultPtr, ITCL_VARIABLES_NAMESPACE, -1);
+	    if (vlookup->ivPtr->protection != ITCLNG_PUBLIC) {
+	        Tcl_AppendToObj(resultPtr, Tcl_GetString(
+		        vlookup->ivPtr->iclsPtr->infoPtr->internalVars), -1);
 	    }
             Tcl_AppendToObj(resultPtr,
 	        Tcl_GetString(vlookup->ivPtr->fullNamePtr), -1);
@@ -1919,11 +1948,11 @@ Itcl_ScopeCmd(
          */
         infoPtr = contextIclsPtr->infoPtr;
 	ClientData clientData;
-        clientData = Itcl_GetCallFrameClientData(interp);
+        clientData = Itclng_GetCallFrameClientData(interp);
         if (clientData != NULL) {
             oPtr = Tcl_ObjectContextObject((Tcl_ObjectContext)clientData);
             if (oPtr != NULL) {
-                contextIoPtr = (ItclObject*)Tcl_ObjectGetMetadata(
+                contextIoPtr = (ItclngObject*)Tcl_ObjectGetMetadata(
 	                oPtr, infoPtr->object_meta_type);
 	    }
         }
@@ -1938,10 +1967,8 @@ Itcl_ScopeCmd(
         }
 
         doAppend = 1;
-        if (contextIclsPtr->flags & ITCL_ECLASS) {
-            if (strcmp(token, "itcl_options") == 0) {
-	        doAppend = 0;
-            }
+        if (strcmp(token, "itcl_options") == 0) {
+	    doAppend = 0;
         }
         objPtr = Tcl_NewStringObj((char*)NULL, 0);
         Tcl_IncrRefCount(objPtr);
@@ -1955,7 +1982,8 @@ Itcl_ScopeCmd(
 
         objPtr2 = Tcl_NewStringObj((char*)NULL, 0);
         Tcl_IncrRefCount(objPtr2);
-	Tcl_AppendToObj(objPtr2, ITCL_VARIABLES_NAMESPACE, -1);
+	Tcl_AppendToObj(objPtr2, Tcl_GetString(
+	        vlookup->ivPtr->iclsPtr->infoPtr->internalVars), -1);
 	Tcl_AppendToObj(objPtr2, Tcl_GetString(objPtr), -1);
         if (doAppend) {
             Tcl_AppendToObj(objPtr2,
@@ -1987,7 +2015,7 @@ Itcl_ScopeCmd(
          */
         Tcl_Obj *resultPtr = Tcl_GetObjResult(interp);
 
-        var = Itcl_FindNamespaceVar(interp, token, contextNsPtr,
+        var = Itclng_FindNamespaceVar(interp, token, contextNsPtr,
             TCL_NAMESPACE_ONLY);
 
         if (!var) {
@@ -1999,7 +2027,7 @@ Itcl_ScopeCmd(
             goto scopeCmdDone;
         }
 
-        Itcl_GetVariableFullName(interp, var, resultPtr);
+        Itclng_GetVariableFullName(interp, var, resultPtr);
         if (openParen) {
             *openParen = '(';
             Tcl_AppendToObj(resultPtr, openParen, -1);
@@ -2017,7 +2045,7 @@ scopeCmdDone:
 
 /*
  * ------------------------------------------------------------------------
- *  Itcl_CodeCmd()
+ *  Itclng_CodeCmd()
  *
  *  Invoked by Tcl whenever the user issues a "code" command to
  *  create a scoped command string.  Handles the following syntax:
@@ -2037,7 +2065,7 @@ scopeCmdDone:
  */
 /* ARGSUSED */
 int
-Itcl_CodeCmd(
+Itclng_CodeCmd(
     ClientData dummy,        /* unused */
     Tcl_Interp *interp,      /* current interpreter */
     int objc,                /* number of arguments */
@@ -2049,6 +2077,7 @@ Itcl_CodeCmd(
     char *token;
     Tcl_Obj *listPtr, *objPtr;
 
+    ItclngShowArgs(1, "Itclng_CodeCmd", objc, objv);
     /*
      *  Handle flags like "-namespace"...
      */
@@ -2124,7 +2153,7 @@ Itcl_CodeCmd(
 
 /*
  * ------------------------------------------------------------------------
- *  Itcl_IsObjectCmd()
+ *  Itclng_IsObjectCmd()
  *
  *  Invoked by Tcl whenever the user issues an "itcl::is object"
  *  command to test whether the argument is an object or not.
@@ -2136,7 +2165,7 @@ Itcl_CodeCmd(
  * ------------------------------------------------------------------------
  */
 int
-Itcl_IsObjectCmd(
+Itclng_IsObjectCmd(
     ClientData clientData,   /* class/object info */
     Tcl_Interp *interp,      /* current interpreter */
     int objc,                /* number of arguments */
@@ -2151,8 +2180,8 @@ Itcl_IsObjectCmd(
     char            *token;
     Tcl_Command     cmd;
     Tcl_Namespace   *contextNs = NULL;
-    ItclClass       *iclsPtr = NULL;
-    ItclObject      *contextObj;
+    ItclngClass       *iclsPtr = NULL;
+    ItclngObject      *contextObj;
 
     /*
      *    Handle the arguments.
@@ -2174,7 +2203,7 @@ Itcl_IsObjectCmd(
 
         if (strcmp(token,"-class") == 0) {
             cname = Tcl_GetString(objv[idx+1]);
-            iclsPtr = Itcl_FindClass(interp, cname, /* no autoload */ 0);
+            iclsPtr = Itclng_FindClass(interp, cname, /* no autoload */ 0);
 
             if (iclsPtr == NULL) {
                     return TCL_ERROR;
@@ -2194,7 +2223,7 @@ Itcl_IsObjectCmd(
      *  "namespace inscope <namesp> <command>".  If it is,
      *  decode it.
      */
-    if (Itcl_DecodeScopedCommand(interp, name, &contextNs, &cmdName)
+    if (Itclng_DecodeScopedCommand(interp, name, &contextNs, &cmdName)
         != TCL_OK) {
         return TCL_ERROR;
     }
@@ -2204,7 +2233,7 @@ Itcl_IsObjectCmd(
     /*
      *    Need the NULL test, or the test will fail if cmd is NULL
      */
-    if (cmd == NULL || ! Itcl_IsObject(cmd)) {
+    if (cmd == NULL || ! Itclng_IsObject(cmd)) {
         Tcl_SetObjResult(interp, Tcl_NewBooleanObj(0));
         return TCL_OK;
     }
@@ -2215,8 +2244,8 @@ Itcl_IsObjectCmd(
     if (classFlag) {
 	Tcl_CmdInfo cmdInfo;
         if (Tcl_GetCommandInfoFromToken(cmd, &cmdInfo) == 1) {
-            contextObj = (ItclObject*)cmdInfo.objClientData;
-            if (! Itcl_ObjectIsa(contextObj, iclsPtr)) {
+            contextObj = (ItclngObject*)cmdInfo.objClientData;
+            if (! Itclng_ObjectIsa(contextObj, iclsPtr)) {
                 Tcl_SetObjResult(interp, Tcl_NewBooleanObj(0));
                 return TCL_OK;
             }
@@ -2237,7 +2266,7 @@ Itcl_IsObjectCmd(
 
 /*
  * ------------------------------------------------------------------------
- *  Itcl_IsClassCmd()
+ *  Itclng_IsClassCmd()
  *
  *  Invoked by Tcl whenever the user issues an "itcl::is class"
  *  command to test whether the argument is an itcl class or not
@@ -2249,7 +2278,7 @@ Itcl_IsObjectCmd(
  * ------------------------------------------------------------------------
  */
 int
-Itcl_IsClassCmd(
+Itclng_IsClassCmd(
     ClientData clientData,   /* class/object info */
     Tcl_Interp *interp,      /* current interpreter */
     int objc,                /* number of arguments */
@@ -2258,7 +2287,7 @@ Itcl_IsClassCmd(
 
     char           *cname;
     char           *name;
-    ItclClass      *iclsPtr = NULL;
+    ItclngClass      *iclsPtr = NULL;
     Tcl_Namespace  *contextNs = NULL;
 
     /*
@@ -2276,11 +2305,11 @@ Itcl_IsClassCmd(
      *    "namespace inscope <namesp> <command>".  If it is,
      *    decode it.
      */
-    if (Itcl_DecodeScopedCommand(interp, name, &contextNs, &cname) != TCL_OK) {
+    if (Itclng_DecodeScopedCommand(interp, name, &contextNs, &cname) != TCL_OK) {
         return TCL_ERROR;
     }
 
-    iclsPtr = Itcl_FindClass(interp, cname, /* no autoload */ 0);
+    iclsPtr = Itclng_FindClass(interp, cname, /* no autoload */ 0);
 
     /*
      *    If classDefn is NULL, then it wasn't found, hence it
@@ -2295,8 +2324,9 @@ Itcl_IsClassCmd(
     ckfree(cname);
 
     return TCL_OK;
-
 } /* end Itcl_IsClassCmd function */
+
+#ifdef NOTDEF
 
 /*
  * ------------------------------------------------------------------------

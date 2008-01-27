@@ -634,6 +634,9 @@ ItclngDestroyClassNamesp(
 	    }
 	    iclsPtr->accessCmd = NULL;
         }
+        if (ItclngDeleteClassDictInfo(iclsPtr) != TCL_OK) {
+fprintf(stderr, "INTERNAL ERROR!ItclngDeleteClassDictInfo!%s!\n", Tcl_GetStringResult(iclsPtr->interp));
+	}
     }
 
     /*
@@ -1032,7 +1035,7 @@ Itclng_CreateObjectCmd(
     char *pos;
     char *match;
 
-    ItclngShowArgs(0, "Itclng_CreateObjectCmd", objc, objv);
+    ItclngShowArgs(1, "Itclng_CreateObjectCmd", objc, objv);
     /*
      *  If the command is invoked without an object name, then do nothing.
      *  This used to support autoloading--that the class name could be
