@@ -9,7 +9,7 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itclngHelpers.c,v 1.1.2.7 2008/01/27 19:26:22 wiede Exp $
+ * RCS: @(#) $Id: itclngHelpers.c,v 1.1.2.8 2008/01/30 19:55:05 wiede Exp $
  */
 
 #include "itclngInt.h"
@@ -200,6 +200,60 @@ ItclngGetBodyString(
     valuePtr = ItclngGetDictValueInfo(iclsPtr->interp, dictPtr,
             "body");
     return valuePtr;
+}
+
+/*
+ * ------------------------------------------------------------------------
+ *  ItclngProtection()
+ *
+ *  Converts the string protection code into interl value:
+ *  ITCL_PUBLIC, ITCL_PROTECTED, or ITCL_PRIVATE.
+ * ------------------------------------------------------------------------
+ */
+int
+ItclngProtection(
+    const char *protectionStr)     /* protection level */
+{
+    if (strcmp(protectionStr, "public") == 0) {
+        return ITCLNG_PUBLIC;
+    }
+    if (strcmp(protectionStr, "protected") == 0) {
+        return ITCLNG_PROTECTED;
+    }
+    if (strcmp(protectionStr, "private") == 0) {
+        return ITCLNG_PRIVATE;
+    }
+    return -1;
+}
+
+/*
+ * ------------------------------------------------------------------------
+ *  ItclngGetProtection()
+ *
+ * ------------------------------------------------------------------------
+ */
+int
+ItclngGetProtection(
+    ItclngClass *iclsPtr,
+    const char *which,
+    const char *name)
+{
+    Tcl_Obj *dictPtr;
+    Tcl_Obj *valuePtr;
+    int result;
+
+    dictPtr = ItclngGetClassDictInfo(iclsPtr, which, name);
+    if (dictPtr == NULL) {
+        return -1;
+    }
+    valuePtr = ItclngGetDictValueInfo(iclsPtr->interp, dictPtr,
+            "protection");
+    if (valuePtr == NULL) {
+        return -1;
+    }
+    result = ItclngProtection(Tcl_GetString(valuePtr));
+    Tcl_DecrRefCount(valuePtr);
+    return result;
 }
 
 /*

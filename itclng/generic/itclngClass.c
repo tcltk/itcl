@@ -1526,7 +1526,7 @@ ItclngCreateVariable(
     ivPtr = (ItclngVariable*)ckalloc(sizeof(ItclngVariable));
     memset(ivPtr, 0, sizeof(ItclngVariable));
     ivPtr->iclsPtr      = iclsPtr;
-    ivPtr->protection   = Itclng_Protection(interp, 0);
+    ivPtr->protection   = ItclngGetProtection(iclsPtr, "variables", name);
     ivPtr->codePtr      = mCodePtr;
     ivPtr->namePtr      = namePtr;
     Tcl_IncrRefCount(ivPtr->namePtr);

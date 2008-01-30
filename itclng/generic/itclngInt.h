@@ -9,7 +9,7 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itclngInt.h,v 1.1.2.9 2008/01/27 19:26:22 wiede Exp $
+ * RCS: @(#) $Id: itclngInt.h,v 1.1.2.10 2008/01/30 19:55:06 wiede Exp $
  */
 
 #include <string.h>
@@ -477,6 +477,8 @@ MODULE_SCOPE Tcl_Obj * ItclngGetVariableStateString(ItclngClass *iclsPtr,
 MODULE_SCOPE char * ItclngTraceUnsetVar(ClientData clientData,
         Tcl_Interp *interp, const char *name1, const char *name2, int flags);
 MODULE_SCOPE int ItclngDeleteClassDictInfo(ItclngClass *iclsPtr);
+MODULE_SCOPE int ItclngGetProtection(ItclngClass *iclsPtr,
+        const char *which, const char *name);
 
 MODULE_SCOPE int Itclng_DecodeScopedCommand(Tcl_Interp *interp, CONST char *name,
 	    Tcl_Namespace **rNsPtr, char **rCmdPtr);
@@ -501,6 +503,10 @@ MODULE_SCOPE int Itclng_ClassVarResolver(Tcl_Interp *interp, CONST char* name,
 MODULE_SCOPE int Itclng_ClassCompiledVarResolver(Tcl_Interp *interp,
         CONST char* name, int length, Tcl_Namespace *nsPtr,
         Tcl_ResolvedVarInfo **rPtr);
+MODULE_SCOPE int Itclng_ConfigureCmd(ClientData clientData,
+        Tcl_Interp *interp, int objc, Tcl_Obj *CONST objv[]);
+MODULE_SCOPE int Itclng_CgetCmd(ClientData clientData,
+        Tcl_Interp *interp, int objc, Tcl_Obj *CONST objv[]);
 
 MODULE_SCOPE int ItclngCreateClassBase( ClientData clientData,
         Tcl_Interp* interp, Tcl_Object oPtr, int objc,
@@ -551,6 +557,9 @@ MODULE_SCOPE int Itclng_FindObject(Tcl_Interp *interp,
         CONST char *name, ItclngObject **roPtr);
 MODULE_SCOPE int Itclng_ObjectIsa(ItclngObject *contextIoPtr,
         ItclngClass *iclsPtr);
+MODULE_SCOPE CONST char* ItclngSetInstanceVar(Tcl_Interp *interp,
+        const char *name1, const char *name2, const char *value,
+        ItclngObject *contextIoPtr, ItclngClass *contextIclsPtr);
 
 
 MODULE_SCOPE int ItclngCreateMethodOrProc(Tcl_Interp* interp,

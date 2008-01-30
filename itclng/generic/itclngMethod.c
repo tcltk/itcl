@@ -25,7 +25,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclngMethod.c,v 1.1.2.7 2008/01/27 19:26:22 wiede Exp $
+ *     RCS:  $Id: itclngMethod.c,v 1.1.2.8 2008/01/30 19:55:07 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -466,7 +466,7 @@ ItclngCreateMemberFunction(
     imPtr = (ItclngMemberFunc*)ckalloc(sizeof(ItclngMemberFunc));
     memset(imPtr, 0, sizeof(ItclngMemberFunc));
     imPtr->iclsPtr    = iclsPtr;
-    imPtr->protection = Itclng_Protection(interp, 0);
+    imPtr->protection = ItclngGetProtection(iclsPtr, "functions", name);
     imPtr->namePtr    = Tcl_DuplicateObj(namePtr);
     Tcl_IncrRefCount(imPtr->namePtr);
     imPtr->fullNamePtr = Tcl_NewStringObj(
@@ -1648,17 +1648,23 @@ ItclngCheckCallMethod(
 {
 
     Tcl_Object oPtr;
-    ItclngObject *ioPtr;
     Tcl_HashEntry *hPtr;
+    Tcl_Namespace *saveNsPtr;
+    Tcl_ObjCmdProc *procPtr;
+    ItclngObjectInfo *infoPtr;
+    ItclngObject *ioPtr;
     ItclngCallContext *callContextPtr;
     ItclngCallContext *callContextPtr2;
     ItclngMemberFunc *imPtr;
+    const char *methodName;
+    int hadBuiltin;
     int result;
     int isNew;
 
     oPtr = NULL;
     hPtr = NULL;
     imPtr = (ItclngMemberFunc *)clientData;
+    infoPtr = imPtr->iclsPtr->infoPtr;
     if (imPtr->flags & ITCLNG_CONSTRUCTOR) {
         ioPtr = imPtr->iclsPtr->infoPtr->currIoPtr;
     } else {
@@ -1685,6 +1691,43 @@ ItclngCheckCallMethod(
         oPtr = Tcl_ObjectContextObject(contextPtr);
 	ioPtr = Tcl_ObjectGetMetadata(oPtr,
 	        imPtr->iclsPtr->infoPtr->object_meta_type);
+    }
+    if (imPtr->iclsPtr == infoPtr->rootClassIclsPtr) {
+        /* this are methods of the root class, check for calls of builtins */
+        methodName = Tcl_GetString(imPtr->namePtr);
+	hadBuiltin = 0;
+        if (strcmp(methodName, "configure") == 0) {
+	    hadBuiltin = 1;
+	    procPtr = Itclng_ConfigureCmd;
+	}
+        if (strcmp(methodName, "cget") == 0) {
+	    hadBuiltin = 1;
+	    procPtr = Itclng_CgetCmd;
+	}
+	if (hadBuiltin) {
+	    saveNsPtr = Tcl_GetCurrentNamespace(interp);
+	    Itclng_SetCallFrameNamespace(interp, ioPtr->iclsPtr->nsPtr);
+        callContextPtr = (ItclngCallContext *)ckalloc(
+                sizeof(ItclngCallContext));
+        callContextPtr->objectFlags = ioPtr->flags;
+        callContextPtr->classFlags = imPtr->iclsPtr->flags;
+        callContextPtr->nsPtr = saveNsPtr;
+        callContextPtr->ioPtr = ioPtr;
+        callContextPtr->iclsPtr = imPtr->iclsPtr;
+        callContextPtr->imPtr = imPtr;
+        callContextPtr->refCount = 1;
+	    Itclng_PushStack(callContextPtr, &infoPtr->contextStack);
+	    result = (* procPtr)(imPtr->iclsPtr, interp,
+	            Itclng_GetCallFrameObjc(interp)-1,
+	            Itclng_GetCallFrameObjv(interp)+1);
+	    Itclng_PopStack(&infoPtr->contextStack);
+	    Itclng_SetCallFrameNamespace(interp, saveNsPtr);
+	    ckfree((char *)callContextPtr);
+            if (isFinished != NULL) {
+                *isFinished = 1;
+            }
+            return result;
+        }
     }
     if ((imPtr->codePtr != NULL) &&
             (imPtr->codePtr->flags & ITCLNG_IMPLEMENT_NONE)) {
