@@ -104,7 +104,7 @@ argument with no name"
 
     proc commonOrVariable {infoNs className type protection name args} {
 #puts stderr "commonOrVariable!$name![llength $args]!"
-#puts stderr "ME!$infoNs!$className!$protection!$name![join $args !]!"
+#puts stderr "VAR!$infoNs!$className!$protection!$name![join $args !]!"
 	if {[dict exists [set ${infoNs}] variables $name]} {
 	    return -code error -level 4 "\"$name\" already defined in class \"$className\""
 	}

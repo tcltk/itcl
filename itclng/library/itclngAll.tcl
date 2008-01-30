@@ -1,6 +1,10 @@
-source [file join [file dirname [::info script]] itclngBase.tcl]
-source [file join [file dirname [::info script]] itclngParse.tcl]
-source [file join [file dirname [::info script]] itclngMember.tcl]
-source [file join [file dirname [::info script]] itclngBuiltin.tcl]
-source [file join [file dirname [::info script]] itclngInfo.tcl]
-source [file join [file dirname [::info script]] itclngClass.tcl]
+set dir [file dirname [::info script]]
+if {$dir eq "."} {
+    set dir ./library
+}
+source [file join $dir itclngBase.tcl]
+source [file join $dir itclngParse.tcl]
+source [file join $dir itclngMember.tcl]
+source [file join $dir itclngBuiltin.tcl]
+source [file join $dir itclngInfo.tcl]
+source [file join $dir itclngClass.tcl]

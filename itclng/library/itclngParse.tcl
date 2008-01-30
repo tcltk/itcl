@@ -31,7 +31,7 @@ namespace eval ${::itcl::internal::infos::rootNamespace}::parser {
 	switch $type {
 	constructor -
 	destructor {
-	      return [${::itcl::internal::infos::rootNamespace}::member::${type} $infoNs $fullClassName $type protected $type {*}$args]
+	      return [${::itcl::internal::infos::rootNamespace}::member::${type} $infoNs $fullClassName $type public $type {*}$args]
 	  }
 	inherit {
 	      return [${::itcl::internal::infos::rootNamespace}::member::${type} $infoNs $fullClassName {*}$args]
