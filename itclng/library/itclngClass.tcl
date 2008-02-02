@@ -73,8 +73,21 @@ namespace eval $::itcl::internal::infos::rootClassName {}
 
 # this time we create the class again so Itcl knows about it too!!
 $::itcl::internal::infos::rootClassName create $::itcl::internal::infos::rootClassName {
+    protected common envNs ""
     public proc info {args} {
-puts stderr "class!info!" ;
+puts stderr "class!info!$args![uplevel 1 namespace current]!" ;
+	if {[llength $args] == 0} {
+	    return -code error "wrong # args: should be one of...
+  info args procname
+  info body procname
+  info class
+  info component ?name? ?-inherit? ?-value?
+  info function ?name? ?-protection? ?-type? ?-name? ?-args? ?-body?
+  info heritage
+  info inherit
+  info variable ?name? ?-protection? ?-type? ?-name? ?-init? ?-value? ?-config?
+...and others described on the man page"
+	}
 	return [uplevel 1 ${::itcl::internal::infos::rootNamespace}::builtin::info {*}$args]
     }
 

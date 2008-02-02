@@ -138,7 +138,7 @@ argument with no name"
 	    return -code error -level 4 "should be: <protection> $type <name> ?init?$protectionUsage"
 	  }
 	}
-        dict lappend ${infoNs} variables $name [list protection $protection init $initValue config $configValue state $state]
+        dict lappend ${infoNs} variables $name [list protection $protection type [string tolower $type] init $initValue config $configValue state $state]
 #puts stderr "DI2![dict get [set ${infoNs}] variables $name]!"
         ${::itcl::internal::infos::internalCmds} createClass$type $className $name
     }
@@ -259,6 +259,7 @@ puts stderr "INHERIT!$nsName!$infoNs!$className!$args!"
 	    lappend superClasses $fullClsName
 	}
 	dict set $infoNs inheritance $superClasses
+puts stderr "++++!$infoNs!"
         ${::itcl::internal::infos::internalCmds}::createClassInherit $className {*}$superClasses
 	::oo::define $className superclass {*}$superClasses
     }

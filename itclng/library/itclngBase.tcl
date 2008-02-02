@@ -142,5 +142,15 @@ puts stderr "find object called!$args!"
         set __rootNamespace $::itcl::internal::infos::rootNamespace
         return [uplevel 1 ${__rootNamespace}::internal::commands::scope $args]
     }
+    proc body {args} {
+        set __rootNamespace $::itcl::internal::infos::rootNamespace
+#        return [uplevel 1 ${__rootNamespace}::internal::commands::body $args]
+return {}
+    }
+    proc configbody {args} {
+        set __rootNamespace $::itcl::internal::infos::rootNamespace
+#        return [uplevel 1 ${__rootNamespace}::internal::commands::body $args]
+return {}
+    }
 }
 
