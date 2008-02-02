@@ -30,6 +30,8 @@ Tcl_ObjCmdProc Itclng_CreateObjectCmd;
 Tcl_ObjCmdProc Itclng_ConfigureCmd;
 Tcl_ObjCmdProc Itclng_CgetCmd;
 Tcl_ObjCmdProc Itclng_GetContextCmd;
+Tcl_ObjCmdProc Itclng_GetCallContextInfoCmd;
+Tcl_ObjCmdProc Itclng_GetInstanceVarValueCmd;
 Tcl_ObjCmdProc Itclng_FindClassesCmd;
 Tcl_ObjCmdProc Itclng_FindObjectsCmd;
 Tcl_ObjCmdProc Itclng_DeleteClassCmd;
@@ -97,6 +99,12 @@ static InfoMethod ItclngMethodList[] = {
     { "getContext",
       "",
       Itclng_GetContextCmd },
+    { "getCallContextInfo",
+      "",
+      Itclng_GetCallContextInfoCmd },
+    { "getInstanceVarValue",
+      "",
+      Itclng_GetInstanceVarValueCmd },
     { "findClasses",
       "",
       Itclng_FindClassesCmd },
@@ -813,9 +821,9 @@ Itclng_CreateClassInheritCmd(
  * ------------------------------------------------------------------------
  *  Itclng_GetContextCmd()
  *
- *  Creates a class destructor
+ *  gets context info concerning class and object
  *  On failure returns TCL_ERROR, along with an error message in the interp.
- *  If successful, it returns TCL_OK and the full method name
+ *  If successful, it returns TCL_OK and the info
  * ------------------------------------------------------------------------
  */
 int
@@ -830,6 +838,7 @@ Itclng_GetContextCmd(
     ItclngObjectInfo *infoPtr;
     ItclngObject *ioPtr;
     ItclngClass *iclsPtr;
+    ItclngCallContext *callContextPtr;
 
     ItclngShowArgs(1, "Itclng_GetContextCmd", objc, objv);
     if (ItclngCheckNumCmdParams(interp, infoPtr, "getContext", objc,
@@ -839,6 +848,14 @@ Itclng_GetContextCmd(
     infoPtr = (ItclngObjectInfo *)clientData;
     iclsPtr = NULL;
     ioPtr = NULL;
+    callContextPtr = Itclng_PeekStack(&infoPtr->contextStack);
+    if (callContextPtr != NULL) {
+        objPtr = Tcl_NewStringObj(callContextPtr->ioPtr->iclsPtr->nsPtr->fullName, -1);
+    } else {
+	objPtr = Tcl_NewStringObj("", -1);
+    }
+fprintf(stderr, "CALLNS!%s!\n", Tcl_GetString(objPtr));
+//    Tcl_ListObjAppendElement((Tcl_Interp*)NULL, resultPtr, objPtr);
     if (Itclng_GetContext(interp, &iclsPtr, &ioPtr) != TCL_OK) {
         return TCL_ERROR;
     }
@@ -863,6 +880,123 @@ Itclng_GetContextCmd(
     }
     Tcl_ListObjAppendElement((Tcl_Interp*)NULL, resultPtr, objPtr);
     Tcl_SetObjResult(interp, resultPtr);
+    return TCL_OK;
+}
+
+/*
+ * ------------------------------------------------------------------------
+ *  Itclng_GetCallContextInfoCmd()
+ *
+ *  get call context info
+ *  On failure returns TCL_ERROR, along with an error message in the interp.
+ *  If successful, it returns TCL_OK and the info
+ * ------------------------------------------------------------------------
+ */
+int
+Itclng_GetCallContextInfoCmd(
+    ClientData clientData,	/* info for all known objects */
+    Tcl_Interp* interp,		/* interpreter */
+    int objc,		        /* number of arguments */
+    Tcl_Obj *const*objv)	/* argument objects */
+{
+    Tcl_Obj *resultPtr;
+    Tcl_Obj *objPtr;
+    ItclngObjectInfo *infoPtr;
+    ItclngCallContext *callContextPtr;
+
+    ItclngShowArgs(0, "Itclng_GetCallContextInfoCmd", objc, objv);
+    if (ItclngCheckNumCmdParams(interp, infoPtr, "getCallContextInfo", objc,
+            0, 0) != TCL_OK) {
+        return TCL_ERROR;
+    }
+    infoPtr = (ItclngObjectInfo *)clientData;
+    resultPtr = Tcl_NewListObj(0, (Tcl_Obj**)NULL);
+    callContextPtr = Itclng_PeekStack(&infoPtr->contextStack);
+    if (callContextPtr != NULL) {
+	objPtr = Tcl_NewObj();
+	Tcl_GetCommandFullName(interp, callContextPtr->ioPtr->accessCmd,
+	        objPtr);
+        Tcl_ListObjAppendElement((Tcl_Interp*)NULL, resultPtr, objPtr);
+        objPtr = Tcl_NewStringObj(callContextPtr->iclsPtr->nsPtr->fullName, -1);
+        Tcl_ListObjAppendElement((Tcl_Interp*)NULL, resultPtr, objPtr);
+        objPtr = Tcl_NewStringObj(callContextPtr->ioPtr->iclsPtr->nsPtr->fullName, -1);
+        Tcl_ListObjAppendElement((Tcl_Interp*)NULL, resultPtr, objPtr);
+        objPtr = Tcl_NewStringObj(callContextPtr->nsPtr->fullName, -1);
+        Tcl_ListObjAppendElement((Tcl_Interp*)NULL, resultPtr, objPtr);
+        objPtr = Tcl_NewStringObj(Tcl_GetString(
+	        callContextPtr->imPtr->fullNamePtr), -1);
+    } else {
+	objPtr = Tcl_NewStringObj("", -1);
+        Tcl_ListObjAppendElement((Tcl_Interp*)NULL, resultPtr, objPtr);
+	objPtr = Tcl_NewStringObj("", -1);
+        Tcl_ListObjAppendElement((Tcl_Interp*)NULL, resultPtr, objPtr);
+	objPtr = Tcl_NewStringObj("", -1);
+        Tcl_ListObjAppendElement((Tcl_Interp*)NULL, resultPtr, objPtr);
+	objPtr = Tcl_NewStringObj("", -1);
+        Tcl_ListObjAppendElement((Tcl_Interp*)NULL, resultPtr, objPtr);
+	objPtr = Tcl_NewStringObj("", -1);
+    }
+    Tcl_ListObjAppendElement((Tcl_Interp*)NULL, resultPtr, objPtr);
+    Tcl_SetObjResult(interp, resultPtr);
+    return TCL_OK;
+}
+
+/*
+ * ------------------------------------------------------------------------
+ *  Itclng_InstanceVarValueCmd()
+ *
+ *  get value of the instance variable
+ *  On failure returns TCL_ERROR, along with an error message in the interp.
+ *  If successful, it returns TCL_OK and the info
+ * ------------------------------------------------------------------------
+ */
+int
+Itclng_GetInstanceVarValueCmd(
+    ClientData clientData,	/* info for all known objects */
+    Tcl_Interp* interp,		/* interpreter */
+    int objc,		        /* number of arguments */
+    Tcl_Obj *const*objv)	/* argument objects */
+{
+    Tcl_Obj *objPtr;
+    Tcl_HashEntry *hPtr;
+    ItclngObjectInfo *infoPtr;
+    ItclngCallContext *callContextPtr;
+    ItclngVariable *ivPtr;
+    const char *name1;
+    const char *name2;
+    const char *cp;
+
+    ItclngShowArgs(0, "Itclng_GetInstanceVarValueCmd", objc, objv);
+    if (ItclngCheckNumCmdParams(interp, infoPtr, "getInstanceVarValue", objc,
+            2, 2) != TCL_OK) {
+        return TCL_ERROR;
+    }
+    name1 = Tcl_GetString(objv[1]);
+    name2 = Tcl_GetString(objv[2]);
+    if (strlen(name2) == 0) {
+        name2 = NULL;
+    }
+    infoPtr = (ItclngObjectInfo *)clientData;
+    callContextPtr = Itclng_PeekStack(&infoPtr->contextStack);
+    if (callContextPtr != NULL) {
+        hPtr = Tcl_FindHashEntry(&callContextPtr->ioPtr->iclsPtr->variables,
+	        (char *)objv[1]);
+        if (hPtr == NULL) {
+	    Tcl_AppendResult(interp, "no such variable 1 \"", name1, NULL);
+	    return TCL_ERROR;
+	}
+	ivPtr = Tcl_GetHashValue(hPtr);
+	cp = ItclngGetInstanceVar(interp, name1, name2, callContextPtr->ioPtr,
+	        ivPtr->iclsPtr);
+        if (cp == NULL) {
+	    Tcl_AppendResult(interp, "no such variable 2 \"", name1, NULL);
+	    return TCL_ERROR;
+	}
+	objPtr = Tcl_NewStringObj(cp, -1);
+    } else {
+	objPtr = Tcl_NewStringObj("", -1);
+    }
+    Tcl_SetObjResult(interp, objPtr);
     return TCL_OK;
 }
 

@@ -9,7 +9,7 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itclngInt.h,v 1.1.2.10 2008/01/30 19:55:06 wiede Exp $
+ * RCS: @(#) $Id: itclngInt.h,v 1.1.2.11 2008/02/02 18:43:55 wiede Exp $
  */
 
 #include <string.h>
@@ -550,6 +550,9 @@ MODULE_SCOPE int ItclngObjectCmd(ClientData clientData, Tcl_Interp *interp,
 MODULE_SCOPE const char* ItclngGetInstanceVar(Tcl_Interp *interp,
         const char *name1, const char *name2, ItclngObject *contextIoPtr,
 	ItclngClass *contextIclsPtr);
+MODULE_SCOPE CONST char* ItclngSetInstanceVar(Tcl_Interp *interp,
+        const char *name1, const char *name2, const char *value,
+        ItclngObject *contextIoPtr, ItclngClass *contextIclsPtr);
 MODULE_SCOPE const char* Itclng_GetInstanceVar(Tcl_Interp *interp,
         const char *name, ItclngObject *contextIoPtr,
 	ItclngClass *contextIclsPtr);
@@ -557,9 +560,6 @@ MODULE_SCOPE int Itclng_FindObject(Tcl_Interp *interp,
         CONST char *name, ItclngObject **roPtr);
 MODULE_SCOPE int Itclng_ObjectIsa(ItclngObject *contextIoPtr,
         ItclngClass *iclsPtr);
-MODULE_SCOPE CONST char* ItclngSetInstanceVar(Tcl_Interp *interp,
-        const char *name1, const char *name2, const char *value,
-        ItclngObject *contextIoPtr, ItclngClass *contextIclsPtr);
 
 
 MODULE_SCOPE int ItclngCreateMethodOrProc(Tcl_Interp* interp,

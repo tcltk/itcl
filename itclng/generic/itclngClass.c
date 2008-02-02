@@ -1505,11 +1505,17 @@ ItclngCreateVariable(
             Tcl_DecrRefCount(valuePtr);
             Tcl_Preserve((ClientData)mCodePtr);
             Tcl_EventuallyFree((ClientData)mCodePtr, Itclng_DeleteMemberCode);
+            valuePtr = ItclngGetDictValueInfo(interp, dictPtr, "init");
+            if (valuePtr == NULL) {
+                Tcl_AppendResult(interp, "cannot get variable init", NULL);
+                return TCL_ERROR;
+            }
+	    init = Tcl_GetString(valuePtr);
         } else {
             if (strcmp(stateStr, "NO_CONFIG") == 0) {
                 valuePtr = ItclngGetDictValueInfo(interp, dictPtr, "init");
                 if (valuePtr == NULL) {
-                    Tcl_AppendResult(interp, "cannot get variable config", NULL);
+                    Tcl_AppendResult(interp, "cannot get variable init", NULL);
                     return TCL_ERROR;
                 }
 	        init = Tcl_GetString(valuePtr);

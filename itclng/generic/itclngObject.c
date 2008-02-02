@@ -392,6 +392,11 @@ ItclngInitObjectVariables(
     Itclng_InitHierIter(&hier, iclsPtr);
     iclsPtr2 = Itclng_AdvanceHierIter(&hier);
     while (iclsPtr2 != NULL) {
+	if (iclsPtr2 == iclsPtr->infoPtr->rootClassIclsPtr) {
+	    /* Skip root class ! */
+            iclsPtr2 = Itclng_AdvanceHierIter(&hier);
+	    continue;
+	}
 	Tcl_DStringInit(&buffer);
 	Tcl_DStringAppend(&buffer,
 	        Tcl_GetString(iclsPtr2->infoPtr->internalVars), -1);
