@@ -1,5 +1,28 @@
 namespace eval ${::itcl::internal::infos::rootNamespace}::member {
 
+    proc EquivArgumentInfos {newArguments newState oldArguments oldState} {
+#puts stderr "NEW!$newArguments!$newState!"
+#puts stderr "OLD!$oldArguments!$oldState!"
+	if {$oldState eq "NO_ARGS"} {
+	    return 1
+	}
+	set newMinArgs [dict get $newArguments minargs]
+	set oldMinArgs [dict get $oldArguments minargs]
+        if {$newMinArgs != $oldMinArgs} {
+	   return 0
+	}
+	set newMaxArgs [dict get $newArguments maxargs]
+	set oldMaxArgs [dict get $oldArguments maxargs]
+        if {$newMaxArgs != $oldMaxArgs} {
+	   return 0
+	}
+	set newDefaultArgs [dict get $newArguments defaultargs]
+	set oldDefaultArgs [dict get $oldArguments defaultargs]
+        if {$newDefaultArgs != $oldDefaultArgs} {
+	   return 0
+	}
+	return 1
+    }
     proc GetArgumentInfos {name arguments} {
 	set minArgs 0
 	set maxArgs 0
@@ -54,8 +77,8 @@ argument with no name"
 	        set sep " "
 	    }
 	}
-	set argInfos [list $minArgs $maxArgs $haveArgsArg $usage $defaultArgs]
-        return $argInfos
+	set argumentInfo [list definition $arguments minargs $minArgs maxargs $maxArgs haveArgsArg $haveArgsArg usage $usage defaultargs $defaultArgs]
+        return $argumentInfo
     }
 
     proc methodOrProc {infoNs className type protection name args} {
@@ -87,17 +110,8 @@ argument with no name"
 	    return -code error -level 4 "should be: <protection> $type <name> ?arguments? ?body?"
 	  }
 	}
-	set minArgs 0
-	set maxArgs 0
-	set haveArgsArg 0
-	set usage ""
-	set defaultArgs [list]
-	if {$state ne "NO_ARGS"} {
-	    set argInfo [GetArgumentInfos $name $arguments]
-	    foreach {minArgs maxArgs haveArgsArg usage defaultArgs} $argInfo break
-	}
-	set argumentInfo [list definition $arguments minargs $minArgs maxargs $maxArgs haveArgsArg $haveArgsArg usage $usage defaultargs $defaultArgs]
-        dict lappend ${infoNs} functions $name [list protection $protection arguments $argumentInfo origArguments $argumentInfo body $body origBody $body state $state]
+        set argumentInfo [GetArgumentInfos $name $arguments]
+        dict lappend ${infoNs} functions $name [list protection $protection arguments $argumentInfo origArguments $argumentInfo body $body origBody $body state $state origState $state]
 #puts stderr "DI2![dict get [set ${infoNs}] functions $name]!"
         ${::itcl::internal::infos::internalCmds} createClass$type $className $name
     }
@@ -181,15 +195,8 @@ argument with no name"
 	    return -code error -level 3 "Wrong # args should be $name args ?init? body"
 	  }
 	}
-	set minArgs 0
-	set maxArgs 0
-	set haveArgsArg 0
-	set usage ""
-	set defaultArgs [list]
-        set argInfo [GetArgumentInfos $name $arguments]
-	foreach {minArgs maxArgs haveArgsArg usage defaultArgs} $argInfo break
-	set argumentInfo [list definition $arguments minargs $minArgs maxargs $maxArgs haveArgsArg $haveArgsArg usage $usage defaultargs $defaultArgs]
-        dict lappend ${infoNs} functions $name [list protection $protection arguments $argumentInfo origArguments $argumentInfo body $body origBody $body state $state]
+        set argumentInfo [GetArgumentInfos $name $arguments]
+        dict lappend ${infoNs} functions $name [list protection $protection arguments $argumentInfo origArguments $argumentInfo body $body origBody $body state $state origState $state]
 #puts stderr "DI2![dict get [set ${infoNs}] functions $name]!"
 	if {$initCode ne ""} {
             dict lappend ${infoNs} functions ___constructor_init [list protection $protection arguments $argumentInfo origArguments $argumentInfo body $initCode origBody $initCode state COMPLETE]
@@ -202,16 +209,11 @@ argument with no name"
 	if {[dict exists [set ${infoNs}] functions $name]} {
 	    return -code error -level 4 "\"$name\" already defined in class \"$className\""
 	}
-        set state COMPLETE
         set arguments ""
+        set state COMPLETE
         set body [lindex $args 0]
-	set minArgs 0
-	set maxArgs 0
-	set haveArgsArg 0
-	set usage ""
-	set defaultArgs [list]
-	set argumentInfo [list definition $arguments minargs $minArgs maxargs $maxArgs haveArgsArg $haveArgsArg usage $usage defaultargs $defaultArgs]
-        dict lappend ${infoNs} functions $name [list protection $protection arguments $argumentInfo origArguments $argumentInfo body $body origBody $body state $state]
+        set argumentInfo [GetArgumentInfos $name $arguments]
+        dict lappend ${infoNs} functions $name [list protection $protection arguments $argumentInfo origArguments $argumentInfo body $body origBody $body state $state origState $state]
         ${::itcl::internal::infos::internalCmds} createClassDestructor $className $name
     }
 

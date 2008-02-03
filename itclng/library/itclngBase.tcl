@@ -144,8 +144,45 @@ puts stderr "find object called!$args!"
     }
     proc body {args} {
         set __rootNamespace $::itcl::internal::infos::rootNamespace
-#        return [uplevel 1 ${__rootNamespace}::internal::commands::body $args]
-return {}
+        if {[llength $args] != 3} {
+	    set myRootNamespace [string trimleft $__rootNamespace :]
+	    return -code error "wrong # args: should be \"${myRootNamespace}::body class::func arglist body\""
+	}
+puts stderr "BODY!$args!"
+        foreach {classAndMethod arglist body} $args break
+        set className [::namespace qualifiers $classAndMethod]
+	if {$className eq ""} {
+	    return -code error "missing class specifier for body declaration \"$classAndMethod\""
+	}
+        set ns [uplevel 1 ::namespace current]
+	if {$ns ne "::"} {
+	    set ns ${ns}::
+	}
+	if {![string match "::*" $className]} {
+	    set className ${ns}$className
+	}
+	set funcName [::namespace tail $classAndMethod]
+	namespace upvar ${__rootNamespace}::builtin::info infoNS infoNS
+	if {![dict exists [set ${infoNS}${className}::infos] functions]} {
+	    return -code error "no such class \"$className\""
+	}
+	set funcInfos [dict get [set ${infoNS}${className}::infos] functions]
+        if {![dict exists $funcInfos $funcName]} {
+	    return -code error "function \"$funcName\" is not defined in class \"$className\""
+	}
+        set funcInfo [dict get $funcInfos $funcName]
+        set state [dict get $funcInfo state]
+        set origState [dict get $funcInfo origState]
+	set origArguments [dict get $funcInfo origArguments]
+        set argumentInfo [${__rootNamespace}::member::GetArgumentInfos $funcName $arglist]
+	if {![${__rootNamespace}::member::EquivArgumentInfos $argumentInfo COMPLETE $origArguments $origState]} {
+	    return -code error "argument list changed for function \"${className}::$funcName\": should be \"[dict get $origArguments definition]\""
+	}
+	dict set ${infoNS}${className}::infos functions $funcName arguments $argumentInfo
+	dict set ${infoNS}${className}::infos functions $funcName body $body
+	dict set ${infoNS}${className}::infos functions $funcName state COMPLETE
+        set funcInfo [dict get $funcInfos $funcName]
+        return [uplevel 1 ${__rootNamespace}::internal::commands::changeClassMemberFunc $className $funcName]
     }
     proc configbody {args} {
         set __rootNamespace $::itcl::internal::infos::rootNamespace

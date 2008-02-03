@@ -103,8 +103,8 @@ namespace eval ${::itcl::internal::infos::rootNamespace}::parser {
         parseSpecialMember inherit {*}$args
     }
     proc set {name args} {
-	::set fullClassName ${::itcl::internal::infos::rootNamespace}::internal::parseinfos::currFullClassName
-        namespace eval $fullClassName [list ::set $name $args]
+	::set fullClassName [::set ${::itcl::internal::infos::rootNamespace}::internal::parseinfos::currFullClassName]
+        namespace eval $fullClassName [list ::set $name {*}$args]
     }
     proc proc {args} {
         parseMember proc {*}$args
