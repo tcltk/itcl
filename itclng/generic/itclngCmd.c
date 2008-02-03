@@ -18,6 +18,7 @@ Tcl_ObjCmdProc Itclng_CreateClassCmd;
 Tcl_ObjCmdProc Itclng_CreateClassFinishCmd;
 Tcl_ObjCmdProc Itclng_CreateClassMethodCmd;
 Tcl_ObjCmdProc Itclng_CreateClassProcCmd;
+Tcl_ObjCmdProc Itclng_ChangeClassMemberFuncCmd;
 Tcl_ObjCmdProc Itclng_CreateClassCommonCmd;
 Tcl_ObjCmdProc Itclng_CreateClassVariableCmd;
 Tcl_ObjCmdProc Itclng_CreateClassOptionCmd;
@@ -63,6 +64,9 @@ static InfoMethod ItclngMethodList[] = {
     { "createClassProc",
       "fullClassName procName",
       Itclng_CreateClassProcCmd },
+    { "changeClassMemberFunc",
+      "fullClassName methodName",
+      Itclng_ChangeClassMemberFuncCmd },
     { "createClassCommon",
       "fullClassName commonName",
       Itclng_CreateClassCommonCmd },
@@ -481,6 +485,53 @@ Itclng_CreateClassProcCmd(
     iclsPtr = Tcl_GetHashValue(hPtr);
     if (ItclngCreateMethodOrProc(interp, iclsPtr, objv[2],
             ITCLNG_COMMON, &imPtr) != TCL_OK) {
+	return TCL_ERROR;
+    }
+    return TCL_OK;
+}
+
+/*
+ * ------------------------------------------------------------------------
+ *  Itclng_ChangeClassMemberFuncCmd()
+ *
+ *  Change a class memebr func
+ *  On failure returns TCL_ERROR, along with an error message in the interp.
+ *  If successful, it returns TCL_OK and the full method name
+ * ------------------------------------------------------------------------
+ */
+int
+Itclng_ChangeClassMemberFuncCmd(
+    ClientData clientData,	/* info for all known objects */
+    Tcl_Interp* interp,		/* interpreter */
+    int objc,		        /* number of arguments */
+    Tcl_Obj *const*objv)	/* argument objects */
+{
+    Tcl_HashEntry *hPtr;
+    ItclngObjectInfo *infoPtr;
+    ItclngClass *iclsPtr;
+    ItclngMemberFunc *imPtr;
+
+    ItclngShowArgs(0, "Itclng_ChangeClassMemberFuncCmd", objc, objv);
+    if (ItclngCheckNumCmdParams(interp, infoPtr, "changeClassMemberFunc", objc,
+            2, 2) != TCL_OK) {
+        return TCL_ERROR;
+    }
+    infoPtr = (ItclngObjectInfo *)clientData;
+    hPtr = Tcl_FindHashEntry(&infoPtr->classes, (char *)objv[1]);
+    if (hPtr == NULL) {
+        Tcl_AppendResult(interp, "no such class \"", Tcl_GetString(objv[1]),
+	        "\"", NULL);
+        return TCL_ERROR;
+    }
+    iclsPtr = Tcl_GetHashValue(hPtr);
+    hPtr = Tcl_FindHashEntry(&iclsPtr->functions, (char *)objv[2]);
+    if (hPtr == NULL) {
+        Tcl_AppendResult(interp, "no such function \"", Tcl_GetString(objv[2]),
+	        "\"", NULL);
+        return TCL_ERROR;
+    }
+    imPtr = Tcl_GetHashValue(hPtr);
+    if (ItclngChangeMemberFunc(interp, iclsPtr, objv[2], imPtr) != TCL_OK) {
 	return TCL_ERROR;
     }
     return TCL_OK;
@@ -917,7 +968,7 @@ Itclng_GetCallContextInfoCmd(
 	Tcl_GetCommandFullName(interp, callContextPtr->ioPtr->accessCmd,
 	        objPtr);
         Tcl_ListObjAppendElement((Tcl_Interp*)NULL, resultPtr, objPtr);
-        objPtr = Tcl_NewStringObj(callContextPtr->iclsPtr->nsPtr->fullName, -1);
+        objPtr = Tcl_NewStringObj(callContextPtr->imPtr->iclsPtr->nsPtr->fullName, -1);
         Tcl_ListObjAppendElement((Tcl_Interp*)NULL, resultPtr, objPtr);
         objPtr = Tcl_NewStringObj(callContextPtr->ioPtr->iclsPtr->nsPtr->fullName, -1);
         Tcl_ListObjAppendElement((Tcl_Interp*)NULL, resultPtr, objPtr);

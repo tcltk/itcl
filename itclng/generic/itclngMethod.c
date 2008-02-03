@@ -25,7 +25,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclngMethod.c,v 1.1.2.8 2008/01/30 19:55:07 wiede Exp $
+ *     RCS:  $Id: itclngMethod.c,v 1.1.2.9 2008/02/03 19:03:49 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -138,15 +138,6 @@ Itclng_BodyCmd(
      *  even those in a base class.  Make sure that the class
      *  containing the method definition is the requested class.
      */
-    if (objc != 4) {
-        token = Tcl_GetString(objv[0]);
-        Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
-            "wrong # args: should be \"",
-            token, " class::func arglist body\"",
-            (char*)NULL);
-        status = TCL_ERROR;
-        goto bodyCmdDone;
-    }
 
     imPtr = NULL;
     entry = Tcl_FindHashEntry(&iclsPtr->resolveCmds, tail);
@@ -391,10 +382,10 @@ ItclngCreateMemberCode(
     if (strcmp(state, "NO_ARGS") != 0) {
         mcode->flags   |= ITCLNG_ARG_SPEC;
     }
-    if (strcmp(state, "NO_BODY") == 0) {
-        mcode->flags |= ITCLNG_IMPLEMENT_NONE;
-    } else {
+    if (strcmp(state, "COMPLETE") == 0) {
         mcode->flags |= ITCLNG_IMPLEMENT_TCL;
+    } else {
+        mcode->flags |= ITCLNG_IMPLEMENT_NONE;
     }
     *mcodePtr = mcode;
     return TCL_OK;
@@ -540,6 +531,81 @@ ItclngCreateMethodOrProc(
 
 /*
  * ------------------------------------------------------------------------
+ *  ItclngChangeMemberFunc()
+ *
+ *  Modifies the data record representing a member function.  This
+ *  is usually the body of the function, but can include the argument
+ *  list if it was not defined when the member was first created.
+ *
+ *  If any errors are encountered, this procedure returns TCL_ERROR
+ *  along with an error message in the interpreter.  Otherwise, it
+ *  returns TCL_OK
+ * ------------------------------------------------------------------------
+ */
+int
+ItclngChangeMemberFunc(
+    Tcl_Interp* interp,            /* interpreter managing this action */
+    ItclngClass *iclsPtr,          /* the class */
+    Tcl_Obj *namePtr,              /* the function name */
+    ItclngMemberFunc* imPtr)       /* command member being changed */
+{
+    Tcl_HashEntry *hPtr;
+    Tcl_Obj *statePtr;
+    ItclngMemberCode *mcode = NULL;
+    int isNewEntry;
+    const char *stateStr;
+    const char *name;
+
+    name = Tcl_GetString(namePtr);
+    statePtr = ItclngGetFunctionStateString(iclsPtr, name);
+    if (statePtr == NULL) {
+	Tcl_AppendResult(interp, "cannot get state string", NULL);
+        return TCL_ERROR;
+    }
+    stateStr = Tcl_GetString(statePtr);
+    /*
+     *  Try to create the implementation for this command member.
+     */
+    if (ItclngCreateMemberCode(interp, imPtr->iclsPtr,
+        Tcl_GetString(imPtr->namePtr), stateStr, &mcode) != TCL_OK) {
+
+        return TCL_ERROR;
+    }
+
+    /*
+     *  Free up the old implementation and install the new one.
+     */
+    Tcl_Preserve((ClientData)mcode);
+    Tcl_EventuallyFree((ClientData)mcode, Itclng_DeleteMemberCode);
+
+    Tcl_Release((ClientData)imPtr->codePtr);
+    imPtr->flags |= ITCLNG_BODY_SPEC;
+    imPtr->codePtr = mcode;
+    if (mcode->flags & ITCLNG_IMPLEMENT_TCL) {
+	ClientData pmPtr;
+	Tcl_Obj *argumentPtr;
+	Tcl_Obj *bodyPtr;
+
+	argumentPtr = ItclngGetArgumentString(imPtr->iclsPtr,
+	        Tcl_GetString(imPtr->namePtr));
+	bodyPtr = ItclngGetBodyString(imPtr->iclsPtr,
+	        Tcl_GetString(imPtr->namePtr));
+        imPtr->tmPtr = (ClientData)Itclng_NewProcClassMethod(interp,
+	    imPtr->iclsPtr->clsPtr, ItclngCheckCallMethod,
+	    ItclngAfterCallMethod,
+	    ItclngProcErrorProc, imPtr, imPtr->namePtr, argumentPtr,
+	    bodyPtr, &pmPtr);
+        hPtr = Tcl_CreateHashEntry(&imPtr->iclsPtr->infoPtr->procMethods,
+                (char *)imPtr->tmPtr, &isNewEntry);
+        if (isNewEntry) {
+            Tcl_SetHashValue(hPtr, imPtr);
+        }
+    }
+    return TCL_OK;
+}
+
+/*
+ * ------------------------------------------------------------------------
  *  Itclng_ChangeMemberFunc()
  *
  *  Modifies the data record representing a member function.  This
@@ -587,7 +653,7 @@ Itclng_ChangeMemberFunc(
 	    ) {
 	const char *argsStr;
 #ifdef NOTDEF
-	if (imPtr->origArgsPtr != 0) {
+	if (imPtr->origArgsPtr != NULL) {
 	    argsStr = Tcl_GetString(imPtr->origArgsPtr);
 	} else {
 #endif
@@ -717,6 +783,7 @@ Itclng_GetMemberCode(
     assert(mcode != NULL);
 
     if (!Itclng_IsMemberCodeImplemented(mcode)) {
+fprintf(stderr, "CIMPL!%s!0x%08x\n", Tcl_GetString(imPtr->namePtr), mcode->flags);
         Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
             "member function \"", Tcl_GetString(imPtr->fullNamePtr),
             "\" is not defined and cannot be autoloaded",
@@ -940,8 +1007,8 @@ Itclng_GetContext(
     infoPtr = (ItclngObjectInfo *)Tcl_GetAssocData(interp,
             ITCLNG_INTERP_DATA, NULL);
     callContextPtr = Itclng_PeekStack(&infoPtr->contextStack);
-    if ((callContextPtr != NULL) && (callContextPtr->iclsPtr != NULL)) {
-        *iclsPtrPtr = callContextPtr->iclsPtr;
+    if ((callContextPtr != NULL) && (callContextPtr->imPtr != NULL)) {
+        *iclsPtrPtr = callContextPtr->imPtr->iclsPtr;
     } else {
         hPtr = Tcl_FindHashEntry(&infoPtr->namespaceClasses,
                 (char *)activeNs);
@@ -1710,10 +1777,8 @@ ItclngCheckCallMethod(
         callContextPtr = (ItclngCallContext *)ckalloc(
                 sizeof(ItclngCallContext));
         callContextPtr->objectFlags = ioPtr->flags;
-        callContextPtr->classFlags = imPtr->iclsPtr->flags;
         callContextPtr->nsPtr = saveNsPtr;
         callContextPtr->ioPtr = ioPtr;
-        callContextPtr->iclsPtr = imPtr->iclsPtr;
         callContextPtr->imPtr = imPtr;
         callContextPtr->refCount = 1;
 	    Itclng_PushStack(callContextPtr, &infoPtr->contextStack);
@@ -1773,17 +1838,13 @@ ItclngCheckCallMethod(
 	    if (callContextPtr2->refCount == 0) {
 	        callContextPtr = callContextPtr2;
                 callContextPtr->objectFlags = ioPtr->flags;
-                callContextPtr->classFlags = imPtr->iclsPtr->flags;
                 callContextPtr->nsPtr = Tcl_GetCurrentNamespace(interp);
                 callContextPtr->ioPtr = ioPtr;
-                callContextPtr->iclsPtr = imPtr->iclsPtr;
                 callContextPtr->imPtr = imPtr;
                 callContextPtr->refCount = 1;
 	    } else {
 	      if ((callContextPtr2->objectFlags == ioPtr->flags) 
-	            && (callContextPtr2->classFlags == imPtr->iclsPtr->flags)
-		    && (callContextPtr2->nsPtr == currNsPtr)
-		    && (callContextPtr2->iclsPtr == imPtr->iclsPtr)) {
+		    && (callContextPtr2->nsPtr == currNsPtr)) {
 	        callContextPtr = callContextPtr2;
                 callContextPtr->refCount++;
               }
@@ -1808,10 +1869,8 @@ ItclngCheckCallMethod(
         callContextPtr = (ItclngCallContext *)ckalloc(
                 sizeof(ItclngCallContext));
         callContextPtr->objectFlags = ioPtr->flags;
-        callContextPtr->classFlags = imPtr->iclsPtr->flags;
         callContextPtr->nsPtr = Tcl_GetCurrentNamespace(interp);
         callContextPtr->ioPtr = ioPtr;
-        callContextPtr->iclsPtr = imPtr->iclsPtr;
         callContextPtr->imPtr = imPtr;
         callContextPtr->refCount = 1;
     }
@@ -1820,8 +1879,8 @@ ItclngCheckCallMethod(
     }
     Itclng_PushStack(callContextPtr, &imPtr->iclsPtr->infoPtr->contextStack);
 
-    ioPtr->flags |= ITCLNG_OBJECT_NO_VARNS_DELETE;
-    imPtr->iclsPtr->flags |= ITCLNG_CLASS_NO_VARNS_DELETE;
+    ioPtr->callRefCount++;
+    imPtr->iclsPtr->callRefCount++;
 #ifdef NOTDEF
     if (!imPtr->iclsPtr->infoPtr->useOldResolvers) {
         Itclng_SetCallFrameResolver(interp, ioPtr->resolvePtr);
@@ -1893,24 +1952,16 @@ ItclngAfterCallMethod(
                 (char *)imPtr->iclsPtr->namePtr, &newEntry);
         }
     }
-    ioPtr->flags &= ~ITCLNG_OBJECT_NO_VARNS_DELETE;
+    ioPtr->callRefCount--;
+    imPtr->iclsPtr->callRefCount--;
+if (ioPtr->flags != callContextPtr->objectFlags) {
+fprintf(stderr, "IOPTR_FLAGS2!0x%08x!0x%08x!%s!%d!%d!\n", ioPtr->flags, callContextPtr->objectFlags, Tcl_GetString(imPtr->fullNamePtr), ioPtr->callRefCount, imPtr->iclsPtr->callRefCount);
+}
     if (ioPtr->flags & ITCLNG_OBJECT_SHOULD_VARNS_DELETE) {
-        callContextPtr->objectFlags |= ITCLNG_OBJECT_SHOULD_VARNS_DELETE;
-    }
-    ioPtr->flags = callContextPtr->objectFlags;
-    if (ioPtr->flags & ITCLNG_OBJECT_SHOULD_VARNS_DELETE) {
+fprintf(stderr, "DELOBJVAR!%s!%d!\n", Tcl_GetCommandName(interp, ioPtr->accessCmd), ioPtr->callRefCount);
         ItclngDeleteObjectVariablesNamespace(interp, ioPtr);
     }
     
-    imPtr->iclsPtr->flags &= ~ITCLNG_CLASS_NO_VARNS_DELETE;
-    if (imPtr->iclsPtr->flags & ITCLNG_CLASS_SHOULD_VARNS_DELETE) {
-        callContextPtr->classFlags |= ITCLNG_CLASS_SHOULD_VARNS_DELETE;
-    }
-    imPtr->iclsPtr->flags = callContextPtr->classFlags;
-    if (imPtr->iclsPtr->flags & ITCLNG_CLASS_SHOULD_VARNS_DELETE) {
-        ItclngDeleteClassVariablesNamespace(interp, imPtr->iclsPtr);
-    }
-
     callContextPtr->refCount--;
     if (callContextPtr->refCount == 0) {
         if (callContextPtr->ioPtr != NULL) {

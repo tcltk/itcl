@@ -374,22 +374,18 @@ ItclngDeleteClassVariablesNamespace(
     if (iclsPtr->nsPtr == NULL) {
         return;
     }
-    if (!(iclsPtr->flags & ITCLNG_CLASS_NO_VARNS_DELETE)) {
-        /* free the classes's variables namespace and variables in it */
-        Tcl_DStringInit(&buffer);
-        Tcl_DStringAppend(&buffer,
-	        Tcl_GetString(iclsPtr->infoPtr->internalVars), -1);
-        Tcl_DStringAppend(&buffer, iclsPtr->nsPtr->fullName, -1);
-        varNsPtr = Tcl_FindNamespace(interp, Tcl_DStringValue(&buffer),
-	        NULL, 0);
-        if (varNsPtr != NULL) {
-            Tcl_DeleteNamespace(varNsPtr);
-        }
-        Tcl_DStringFree(&buffer);
-        iclsPtr->nsPtr = NULL;
-    } else {
-        iclsPtr->flags |= ITCLNG_CLASS_SHOULD_VARNS_DELETE;
+    /* free the classes's variables namespace and variables in it */
+    Tcl_DStringInit(&buffer);
+    Tcl_DStringAppend(&buffer,
+            Tcl_GetString(iclsPtr->infoPtr->internalVars), -1);
+    Tcl_DStringAppend(&buffer, iclsPtr->nsPtr->fullName, -1);
+    varNsPtr = Tcl_FindNamespace(interp, Tcl_DStringValue(&buffer),
+	    NULL, 0);
+    if (varNsPtr != NULL) {
+        Tcl_DeleteNamespace(varNsPtr);
     }
+    Tcl_DStringFree(&buffer);
+    iclsPtr->nsPtr = NULL;
 }
 
 /*

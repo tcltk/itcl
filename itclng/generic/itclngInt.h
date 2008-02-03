@@ -9,7 +9,7 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itclngInt.h,v 1.1.2.11 2008/02/02 18:43:55 wiede Exp $
+ * RCS: @(#) $Id: itclngInt.h,v 1.1.2.12 2008/02/03 19:03:49 wiede Exp $
  */
 
 #include <string.h>
@@ -201,6 +201,7 @@ typedef struct ItclngClass {
     int numVariables;             /* number of variables in this class */
     int unique;                   /* unique number for #auto generation */
     int flags;                    /* maintains class status */
+    int callRefCount;             /* prevent deleting if refcount > 1 */
 } ItclngClass;
 
 #define ITCLNG_CLASS		        0x0001000
@@ -248,14 +249,14 @@ typedef struct ItclngObject {
     Tcl_Object oPtr;             /* the TclOO object */
     Tcl_Resolve *resolvePtr;
     int flags;
+    int callRefCount;             /* prevent deleting if refcount > 1 */
 } ItclngObject;
 
 #define ITCLNG_OBJECT_IS_DELETED           0x01
 #define ITCLNG_OBJECT_IS_DESTRUCTED        0x02
 #define ITCLNG_OBJECT_IS_RENAMED           0x04
+#define ITCLNG_OBJECT_SHOULD_VARNS_DELETE  0x08
 #define ITCLNG_TCLOO_OBJECT_IS_DELETED     0x10
-#define ITCLNG_OBJECT_NO_VARNS_DELETE      0x20
-#define ITCLNG_OBJECT_SHOULD_VARNS_DELETE  0x40
 #define ITCLNG_CLASS_NO_VARNS_DELETE       0x100
 #define ITCLNG_CLASS_SHOULD_VARNS_DELETE   0x200
 #define ITCLNG_CLASS_DELETE_CALLED         0x400
@@ -438,10 +439,8 @@ typedef struct ItclngVarLookup {
 
 typedef struct ItclngCallContext {
     int objectFlags;
-    int classFlags;
     Tcl_Namespace *nsPtr;
     ItclngObject *ioPtr;
-    ItclngClass *iclsPtr;
     ItclngMemberFunc *imPtr;
     int refCount;
 } ItclngCallContext;
@@ -600,6 +599,8 @@ MODULE_SCOPE Tcl_Var Itclng_VarAliasProc(Tcl_Interp *interp,
         Tcl_Namespace *nsPtr, CONST char *varName, ClientData clientData);
 MODULE_SCOPE int Itclng_GetContext(Tcl_Interp *interp,
         ItclngClass **iclsPtrPtr, ItclngObject **ioPtrPtr);
+MODULE_SCOPE int ItclngChangeMemberFunc(Tcl_Interp* interp,
+        ItclngClass *iclsPtr, Tcl_Obj *namePtr, ItclngMemberFunc* imPtr);
 
 
 #include "itclng2TclOO.h"

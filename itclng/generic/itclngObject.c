@@ -744,7 +744,7 @@ ItclngDeleteObjectVariablesNamespace(
     Tcl_Namespace *varNsPtr;
     const char *name;
 
-    if (!(ioPtr->flags & ITCLNG_OBJECT_NO_VARNS_DELETE)) {
+    if (ioPtr->callRefCount < 1) {
         /* free the object's variables namespace and variables in it */
         ioPtr->flags &= ~ITCLNG_OBJECT_SHOULD_VARNS_DELETE;
         Tcl_DStringInit(&buffer);
