@@ -25,7 +25,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclMethod.c,v 1.1.2.18 2008/01/27 19:27:55 wiede Exp $
+ *     RCS:  $Id: itclMethod.c,v 1.1.2.19 2008/02/03 19:00:49 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -116,15 +116,6 @@ Itcl_BodyCmd(
      *  even those in a base class.  Make sure that the class
      *  containing the method definition is the requested class.
      */
-    if (objc != 4) {
-        token = Tcl_GetString(objv[0]);
-        Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
-            "wrong # args: should be \"",
-            token, " class::func arglist body\"",
-            (char*)NULL);
-        status = TCL_ERROR;
-        goto bodyCmdDone;
-    }
 
     imPtr = NULL;
     entry = Tcl_FindHashEntry(&iclsPtr->resolveCmds, tail);
@@ -582,7 +573,7 @@ Itcl_ChangeMemberFunc(
             (imPtr->argListPtr != NULL) &&
             !EquivArgLists(interp, imPtr->argListPtr, mcode->argListPtr)) {
 	const char *argsStr;
-	if (imPtr->origArgsPtr != 0) {
+	if (imPtr->origArgsPtr != NULL) {
 	    argsStr = Tcl_GetString(imPtr->origArgsPtr);
 	} else {
 	    argsStr = "";
@@ -932,7 +923,6 @@ Itcl_EvalMemberCode(
             ((mcode->flags & ITCL_IMPLEMENT_ARGCMD) != 0)) {
 	Tcl_Namespace *callerNsPtr;
 	callerNsPtr = Tcl_GetCurrentNamespace(interp);
-//	Itcl_PushStack(callerNsPtr, &imPtr->iclsPtr->infoPtr->namespaceStack);
 	Itcl_SetCallFrameNamespace(interp, imPtr->iclsPtr->nsPtr);
 
         if ((mcode->flags & ITCL_IMPLEMENT_OBJCMD) != 0) {
@@ -952,8 +942,6 @@ Itcl_EvalMemberCode(
                 ckfree((char*)argv);
 	    }
         }
-//	Itcl_SetCallFrameNamespace(interp,
-//	Itcl_PopStack(&imPtr->iclsPtr->infoPtr->namespaceStack));
     } else {
         if ((mcode->flags & ITCL_IMPLEMENT_TCL) != 0) {
 	    if (imPtr->flags & (ITCL_CONSTRUCTOR|ITCL_DESTRUCTOR)) {
@@ -1124,8 +1112,8 @@ Itcl_GetContext(
     infoPtr = (ItclObjectInfo *)Tcl_GetAssocData(interp,
             ITCL_INTERP_DATA, NULL);
     callContextPtr = Itcl_PeekStack(&infoPtr->contextStack);
-    if ((callContextPtr != NULL) && (callContextPtr->iclsPtr != NULL)) {
-        *iclsPtrPtr = callContextPtr->iclsPtr;
+    if ((callContextPtr != NULL) && (callContextPtr->imPtr != NULL)) {
+        *iclsPtrPtr = callContextPtr->imPtr->iclsPtr;
     } else {
         hPtr = Tcl_FindHashEntry(&infoPtr->namespaceClasses,
                 (char *)activeNs);
@@ -1908,17 +1896,13 @@ ItclCheckCallMethod(
 	    if (callContextPtr2->refCount == 0) {
 	        callContextPtr = callContextPtr2;
                 callContextPtr->objectFlags = ioPtr->flags;
-                callContextPtr->classFlags = imPtr->iclsPtr->flags;
                 callContextPtr->nsPtr = Tcl_GetCurrentNamespace(interp);
                 callContextPtr->ioPtr = ioPtr;
-                callContextPtr->iclsPtr = imPtr->iclsPtr;
                 callContextPtr->imPtr = imPtr;
                 callContextPtr->refCount = 1;
 	    } else {
 	      if ((callContextPtr2->objectFlags == ioPtr->flags) 
-	            && (callContextPtr2->classFlags == imPtr->iclsPtr->flags)
-		    && (callContextPtr2->nsPtr == currNsPtr)
-		    && (callContextPtr2->iclsPtr == imPtr->iclsPtr)) {
+		    && (callContextPtr2->nsPtr == currNsPtr)) {
 	        callContextPtr = callContextPtr2;
                 callContextPtr->refCount++;
               }
@@ -1936,10 +1920,8 @@ ItclCheckCallMethod(
         callContextPtr = (ItclCallContext *)ckalloc(
                 sizeof(ItclCallContext));
         callContextPtr->objectFlags = ioPtr->flags;
-        callContextPtr->classFlags = imPtr->iclsPtr->flags;
         callContextPtr->nsPtr = Tcl_GetCurrentNamespace(interp);
         callContextPtr->ioPtr = ioPtr;
-        callContextPtr->iclsPtr = imPtr->iclsPtr;
         callContextPtr->imPtr = imPtr;
         callContextPtr->refCount = 1;
     }
@@ -1948,8 +1930,9 @@ ItclCheckCallMethod(
     }
     Itcl_PushStack(callContextPtr, &imPtr->iclsPtr->infoPtr->contextStack);
 
-    ioPtr->flags |= ITCL_OBJECT_NO_VARNS_DELETE;
-    imPtr->iclsPtr->flags |= ITCL_CLASS_NO_VARNS_DELETE;
+    ioPtr->callRefCount++;
+    imPtr->iclsPtr->callRefCount++;
+//    ioPtr->flags |= ITCL_OBJECT_NO_VARNS_DELETE;
     if (!imPtr->iclsPtr->infoPtr->useOldResolvers) {
         Itcl_SetCallFrameResolver(interp, ioPtr->resolvePtr);
     }
@@ -2019,24 +2002,13 @@ ItclAfterCallMethod(
                 (char *)imPtr->iclsPtr->namePtr, &newEntry);
         }
     }
-    ioPtr->flags &= ~ITCL_OBJECT_NO_VARNS_DELETE;
+    ioPtr->callRefCount--;
+    imPtr->iclsPtr->callRefCount--;
     if (ioPtr->flags & ITCL_OBJECT_SHOULD_VARNS_DELETE) {
-        callContextPtr->objectFlags |= ITCL_OBJECT_SHOULD_VARNS_DELETE;
-    }
-    ioPtr->flags = callContextPtr->objectFlags;
-    if (ioPtr->flags & ITCL_OBJECT_SHOULD_VARNS_DELETE) {
+fprintf(stderr, "DELVAR OBJECT 2 %d\n", ioPtr->callRefCount);
         ItclDeleteObjectVariablesNamespace(interp, ioPtr);
     }
     
-    imPtr->iclsPtr->flags &= ~ITCL_CLASS_NO_VARNS_DELETE;
-    if (imPtr->iclsPtr->flags & ITCL_CLASS_SHOULD_VARNS_DELETE) {
-        callContextPtr->classFlags |= ITCL_CLASS_SHOULD_VARNS_DELETE;
-    }
-    imPtr->iclsPtr->flags = callContextPtr->classFlags;
-    if (imPtr->iclsPtr->flags & ITCL_CLASS_SHOULD_VARNS_DELETE) {
-        ItclDeleteClassVariablesNamespace(interp, imPtr->iclsPtr);
-    }
-
     callContextPtr->refCount--;
     if (callContextPtr->refCount == 0) {
         if (callContextPtr->ioPtr != NULL) {

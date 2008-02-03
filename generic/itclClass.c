@@ -25,7 +25,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann Copyright (c) 2007
  *
- *     RCS:  $Id: itclClass.c,v 1.1.2.19 2008/01/18 17:11:30 wiede Exp $
+ *     RCS:  $Id: itclClass.c,v 1.1.2.20 2008/02/03 19:00:48 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -514,21 +514,17 @@ ItclDeleteClassVariablesNamespace(
     if (iclsPtr->nsPtr == NULL) {
         return;
     }
-    if (!(iclsPtr->flags & ITCL_CLASS_NO_VARNS_DELETE)) {
-        /* free the classes's variables namespace and variables in it */
-        Tcl_DStringInit(&buffer);
-        Tcl_DStringAppend(&buffer, ITCL_VARIABLES_NAMESPACE, -1);
-        Tcl_DStringAppend(&buffer, iclsPtr->nsPtr->fullName, -1);
-        varNsPtr = Tcl_FindNamespace(interp, Tcl_DStringValue(&buffer),
-	        NULL, 0);
-        if (varNsPtr != NULL) {
-            Tcl_DeleteNamespace(varNsPtr);
-        }
-        Tcl_DStringFree(&buffer);
-        iclsPtr->nsPtr = NULL;
-    } else {
-        iclsPtr->flags |= ITCL_CLASS_SHOULD_VARNS_DELETE;
+    /* free the classes's variables namespace and variables in it */
+    Tcl_DStringInit(&buffer);
+    Tcl_DStringAppend(&buffer, ITCL_VARIABLES_NAMESPACE, -1);
+    Tcl_DStringAppend(&buffer, iclsPtr->nsPtr->fullName, -1);
+    varNsPtr = Tcl_FindNamespace(interp, Tcl_DStringValue(&buffer),
+	    NULL, 0);
+    if (varNsPtr != NULL) {
+        Tcl_DeleteNamespace(varNsPtr);
     }
+    Tcl_DStringFree(&buffer);
+    iclsPtr->nsPtr = NULL;
 }
 
 /*

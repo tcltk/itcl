@@ -24,7 +24,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann Copyright (c) 2007
  *
- *     RCS:  $Id: itclObject.c,v 1.1.2.32 2008/01/18 17:11:30 wiede Exp $
+ *     RCS:  $Id: itclObject.c,v 1.1.2.33 2008/02/03 19:00:49 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -767,9 +767,9 @@ ItclDeleteObjectVariablesNamespace(
     Tcl_Namespace *varNsPtr;
     const char *name;
 
-    if (!(ioPtr->flags & ITCL_OBJECT_NO_VARNS_DELETE)) {
+    if (ioPtr->callRefCount < 1) {
         /* free the object's variables namespace and variables in it */
-        ioPtr->flags &= ~ITCL_OBJECT_SHOULD_VARNS_DELETE;
+	ioPtr->flags &= ~ITCL_OBJECT_SHOULD_VARNS_DELETE;
         Tcl_DStringInit(&buffer);
         name = Tcl_GetCommandName(interp, ioPtr->accessCmd);
 	if (strlen(name) == 0) {

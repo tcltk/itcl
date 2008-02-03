@@ -9,7 +9,7 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itclInt.h,v 1.17.2.31 2008/01/18 17:11:30 wiede Exp $
+ * RCS: @(#) $Id: itclInt.h,v 1.17.2.32 2008/02/03 19:00:49 wiede Exp $
  */
 
 #include <string.h>
@@ -229,6 +229,7 @@ typedef struct ItclClass {
     int numVariables;             /* number of variables in this class */
     int unique;                   /* unique number for #auto generation */
     int flags;                    /* maintains class status */
+    int callRefCount;             /* prevent deleting of class if refcount > 1 */
 } ItclClass;
 
 #define ITCL_CLASS		        0x0001000
@@ -287,14 +288,14 @@ typedef struct ItclObject {
     Tcl_Object oPtr;             /* the TclOO object */
     Tcl_Resolve *resolvePtr;
     int flags;
+    int callRefCount;             /* prevent deleting of object if refcount > 1 */
 } ItclObject;
 
 #define ITCL_OBJECT_IS_DELETED           0x01
 #define ITCL_OBJECT_IS_DESTRUCTED        0x02
 #define ITCL_OBJECT_IS_RENAMED           0x04
+#define ITCL_OBJECT_SHOULD_VARNS_DELETE  0x08
 #define ITCL_TCLOO_OBJECT_IS_DELETED     0x10
-#define ITCL_OBJECT_NO_VARNS_DELETE      0x20
-#define ITCL_OBJECT_SHOULD_VARNS_DELETE  0x40
 #define ITCL_CLASS_NO_VARNS_DELETE       0x100
 #define ITCL_CLASS_SHOULD_VARNS_DELETE   0x200
 #define ITCL_CLASS_DELETE_CALLED         0x400
@@ -495,10 +496,8 @@ typedef struct ItclVarLookup {
 
 typedef struct ItclCallContext {
     int objectFlags;
-    int classFlags;
     Tcl_Namespace *nsPtr;
     ItclObject *ioPtr;
-    ItclClass *iclsPtr;
     ItclMemberFunc *imPtr;
     int refCount;
 } ItclCallContext;
