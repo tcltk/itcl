@@ -25,7 +25,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclngMethod.c,v 1.1.2.9 2008/02/03 19:03:49 wiede Exp $
+ *     RCS:  $Id: itclngMethod.c,v 1.1.2.10 2008/02/04 20:46:58 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -601,6 +601,58 @@ ItclngChangeMemberFunc(
             Tcl_SetHashValue(hPtr, imPtr);
         }
     }
+    return TCL_OK;
+}
+
+/*
+ * ------------------------------------------------------------------------
+ *  ItclngChangeVariableConfig()
+ *
+ *  Modifies the data record representing a class variable.  This
+ *  is usually the body of the function, but can include the argument
+ *  list if it was not defined when the member was first created.
+ *
+ *  If any errors are encountered, this procedure returns TCL_ERROR
+ *  along with an error message in the interpreter.  Otherwise, it
+ *  returns TCL_OK
+ * ------------------------------------------------------------------------
+ */
+int
+ItclngChangeVariableConfig(
+    Tcl_Interp* interp,            /* interpreter managing this action */
+    ItclngClass *iclsPtr,          /* the class */
+    Tcl_Obj *namePtr,              /* the variable name */
+    const char *configPtr,         /* the variable name */
+    ItclngVariable* ivPtr)         /* variable being changed */
+{
+    Tcl_Obj *statePtr;
+    ItclngMemberCode *mcode = NULL;
+    const char *stateStr;
+    const char *name;
+
+    name = Tcl_GetString(namePtr);
+    statePtr = ItclngGetVariableStateString(iclsPtr, name);
+    if (statePtr == NULL) {
+	Tcl_AppendResult(interp, "cannot get state string", NULL);
+        return TCL_ERROR;
+    }
+    stateStr = Tcl_GetString(statePtr);
+    /*
+     *  Try to create the implementation for this command member.
+     */
+    if (ItclngCreateVariableMemberCode(interp, iclsPtr,
+            Tcl_GetString(ivPtr->namePtr), configPtr, &mcode) != TCL_OK) {
+        return TCL_ERROR;
+    }
+
+    /*
+     *  Free up the old implementation and install the new one.
+     */
+    Tcl_Preserve((ClientData)mcode);
+    Tcl_EventuallyFree((ClientData)mcode, Itclng_DeleteMemberCode);
+
+    Tcl_Release((ClientData)ivPtr->codePtr);
+    ivPtr->codePtr = mcode;
     return TCL_OK;
 }
 
