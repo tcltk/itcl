@@ -6,14 +6,23 @@ namespace eval ${::itcl::internal::infos::rootNamespace}::member {
 	if {$oldState eq "NO_ARGS"} {
 	    return 1
 	}
+	set oldHaveArgsArg [dict get $oldArguments haveArgsArg]
 	set newMinArgs [dict get $newArguments minargs]
 	set oldMinArgs [dict get $oldArguments minargs]
         if {$newMinArgs != $oldMinArgs} {
+	   if {$oldHaveArgsArg} {
+	       if {$newMinArgs > $oldMinArgs} {
+	           return 1
+	       }
+	   }
 	   return 0
 	}
 	set newMaxArgs [dict get $newArguments maxargs]
 	set oldMaxArgs [dict get $oldArguments maxargs]
         if {$newMaxArgs != $oldMaxArgs} {
+	   if {$oldHaveArgsArg} {
+	       return 1
+	   }
 	   return 0
 	}
 	set newDefaultArgs [dict get $newArguments defaultargs]
@@ -111,7 +120,7 @@ argument with no name"
 	  }
 	}
         set argumentInfo [GetArgumentInfos $name $arguments]
-        dict lappend ${infoNs} functions $name [list protection $protection arguments $argumentInfo origArguments $argumentInfo body $body origBody $body state $state origState $state]
+        dict lappend ${infoNs} functions $name [list protection $protection arguments $argumentInfo origArguments $argumentInfo body $body origBody $body state $state origState $state type [string tolower $type]]
 #puts stderr "DI2![dict get [set ${infoNs}] functions $name]!"
         ${::itcl::internal::infos::internalCmds} createClass$type $className $name
     }

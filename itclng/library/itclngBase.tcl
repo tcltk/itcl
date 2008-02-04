@@ -179,6 +179,7 @@ puts stderr "BODY!$args!"
 	    return -code error "argument list changed for function \"${className}::$funcName\": should be \"[dict get $origArguments definition]\""
 	}
 	dict set ${infoNS}${className}::infos functions $funcName arguments $argumentInfo
+puts stderr "BODY!body!$body!"
 	dict set ${infoNS}${className}::infos functions $funcName body $body
 	dict set ${infoNS}${className}::infos functions $funcName state COMPLETE
         set funcInfo [dict get $funcInfos $funcName]
@@ -186,8 +187,42 @@ puts stderr "BODY!$args!"
     }
     proc configbody {args} {
         set __rootNamespace $::itcl::internal::infos::rootNamespace
-#        return [uplevel 1 ${__rootNamespace}::internal::commands::body $args]
-return {}
+        if {[llength $args] != 2} {
+	    set myRootNamespace [string trimleft $__rootNamespace :]
+	    return -code error "wrong # args: should be \"${myRootNamespace}::configbody class::option body\""
+	}
+puts stderr "CONFIGBODY!$args!"
+        foreach {classAndVar body} $args break
+        set className [::namespace qualifiers $classAndVar]
+	if {$className eq ""} {
+	    return -code error "missing class specifier for body declaration \"$classAndVar\""
+	}
+        set ns [uplevel 1 ::namespace current]
+	if {$ns ne "::"} {
+	    set ns ${ns}::
+	}
+	if {![string match "::*" $className]} {
+	    set className ${ns}$className
+	}
+	set varName [::namespace tail $classAndVar]
+	namespace upvar ${__rootNamespace}::builtin::info infoNS infoNS
+	if {![dict exists [set ${infoNS}${className}::infos] variables]} {
+	    return -code error "no such class \"$className\""
+	}
+	set varInfos [dict get [set ${infoNS}${className}::infos] variables]
+        if {![dict exists $varInfos $varName]} {
+	    return -code error "option \"$varName\" is not defined in class \"$className\""
+	}
+        set varInfo [dict get $varInfos $varName]
+        set protection [dict get $varInfo protection]
+	if {$protection ne "public"} {
+	    return -code error "option \"${className}::$varName\" is not a public configuration option"
+	}
+        set state [dict get $varInfo state]
+puts stderr "VAR!$varName!$body!$state!$varInfo!"
+	dict set ${infoNS}${className}::infos variables $varName config $body
+puts stderr "VAR2!$varName!"
+        return [uplevel 1 ${__rootNamespace}::internal::commands::changeClassVariableConfig $className $varName "$body"]
     }
 }
 
