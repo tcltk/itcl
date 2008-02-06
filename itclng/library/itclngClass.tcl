@@ -85,9 +85,11 @@ puts stderr "class!info!$args![uplevel 1 namespace current]!" ;
   info function ?name? ?-protection? ?-type? ?-name? ?-args? ?-body?
   info heritage
   info inherit
+  info option ?name? ?-protection? ?-resource? ?-class? ?-name? ?-default? ?-cgetmethod? ?-configuremethod? ?-validatemethod? ?-value?
   info variable ?name? ?-protection? ?-type? ?-name? ?-init? ?-value? ?-config?
 ...and others described on the man page"
 	}
+set ::itcl::internal::infos::infoNamespace [uplevel 1 namespace current]
 	return [uplevel 1 ${::itcl::internal::infos::rootNamespace}::builtin::info {*}$args]
     }
 
@@ -98,9 +100,15 @@ puts stderr "class!info!$args![uplevel 1 namespace current]!" ;
     public method configure {args} {
 	set nsName [namespace current]
 	set nsName [uplevel 1 namespace current]
-#	set contextInfo [uplevel 1 ${::itcl::internal::infos::internalCmds}::getContext]
 	set contextInfo [${::itcl::internal::infos::internalCmds}::getContext]
 	return [namespace eval $nsName " ${::itcl::internal::infos::internalCmds}::configure $args"]
+    }
+
+    public method isa {args} {
+	set nsName [namespace current]
+	set nsName [uplevel 1 namespace current]
+	set contextInfo [${::itcl::internal::infos::internalCmds}::getContext]
+	return [namespace eval $nsName " ${::itcl::internal::infos::internalCmds}::isa $args"]
     }
 
     public proc create {args} {

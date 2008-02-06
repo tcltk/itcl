@@ -8,6 +8,9 @@ puts stderr "builtin configure called!$args!"
     proc cget {args} {
 puts stderr "builtin cget called!$args!"
     }
+    proc isa {args} {
+puts stderr "builtin isa called!$args!"
+    }
     proc create {className args} {
 #puts stderr "BI!create!$className!$args!"
 	if {[llength $args] == 0} {
@@ -32,8 +35,9 @@ puts stderr "builtin cget called!$args!"
 	        $className $objectName {*}[list $args]]
 	if {[catch {
 	    set obj [eval $cmd]
-        } errInfo]} {
-            return -code error -level 2 -errorinfo $::errorInfo
+        } errInfo errInfo2]} {
+#            return -code error -level 1 $errInfo
+            return -code error -level 2 -errorinfo $::errorInfo $errInfo
 	}
         return $obj
 
