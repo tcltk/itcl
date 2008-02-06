@@ -9,7 +9,7 @@
 #            mmclennan@lucent.com
 #            http://www.tcltk.com/itcl
 #
-#      RCS:  $Id: itcl.tcl,v 1.7 2007/07/05 00:23:10 hobbs Exp $
+#      RCS:  $Id: itcl.tcl,v 1.8 2008/02/06 18:59:56 hobbs Exp $
 # ----------------------------------------------------------------------
 #            Copyright (c) 1993-1998  Lucent Technologies, Inc.
 # ======================================================================
@@ -147,4 +147,84 @@ proc auto_import {pattern} {
             }
         }
     }
+}
+
+# ----------------------------------------------------------------------
+# itcl_class, itcl_info
+# ----------------------------------------------------------------------
+# Compat handling for itcl_class/info, set for auto_index loading only
+#
+# Only need to convert public/protected usage.
+# Uses Tcl 8.4+ coding style
+#
+
+if {([llength [info commands itcl_class]] == 0)
+    && [package vsatisfies $::tcl_version 8.4]} {
+    proc ::itcl::CmdSplit {body} {
+	# DGP's command split
+	set commands {}
+	set chunk ""
+	foreach line [split $body "\n"] {
+	    append chunk $line
+	    if {[info complete "$chunk\n"]} {
+		# $chunk ends in a complete Tcl command, and none of the
+		# newlines within it end a complete Tcl command.  If there
+		# are multiple Tcl commands in $chunk, they must be
+		# separated by semi-colons.
+		set cmd ""
+		foreach part [split $chunk ";"] {
+		    append cmd $part
+		    if {[info complete "$cmd\n"]} {
+			set cmd [string trimleft $cmd]
+			# Drop empty commands and comments
+			if {($cmd ne "") && ![string match #* $cmd]} {
+			    lappend commands $cmd
+			}
+			if {[string match #* $cmd]} {
+			    set cmd "#;"
+			} else {
+			    set cmd ""
+			}
+		    } else {
+			# No complete command yet.
+			# Replace semicolon and continue
+			append cmd ";"
+		    }
+		}
+		set chunk ""
+	    } else {
+		# No end of command yet.  Put the newline back and continue
+		append chunk "\n"
+	    }
+	}
+	if {[string trim $chunk] ne ""} {
+	    return -code error "Can't parse body into a\
+                sequence of commands.\n\tIncomplete command:\n$chunk"
+	}
+	return $commands
+    }
+
+    proc ::itcl::itcl_class {className body} {
+	# inherit baseClass ?baseClass...? ; # no change
+	# constructor args ?init? body     ; # no change
+	# destructor body                  ; # no change
+	# method name args body            ; # no change
+	# proc name args body              ; # no change
+	# common varName ?init?            ; # no change
+	# public varName ?init? ?config?   ; # variable ...
+	# protected varName ?init?         ; # variable ... (?)
+	set cmds [::itcl::CmdSplit $body]
+	set newcmds [list]
+	foreach cmd $cmds {
+	    if {![catch {lindex $cmd 0} firstcmd]} {
+		if {$firstcmd eq "public" || $firstcmd eq "protected"} {
+		    lset cmd 0 "variable"
+		}
+	    }
+	    append newcmds "$cmd\n"
+	}
+	return [uplevel 1 [list ::itcl::class $className $newcmds]]
+    }
+    set ::auto_index(itcl_class) [list interp alias {} ::itcl_class {} ::itcl::itcl_class]
+    set ::auto_index(itcl_info) [list interp alias {} ::itcl_info {} ::itcl::find]
 }
