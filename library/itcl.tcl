@@ -9,7 +9,7 @@
 #            mmclennan@lucent.com
 #            http://www.tcltk.com/itcl
 #
-#      RCS:  $Id: itcl.tcl,v 1.8 2008/02/06 18:59:56 hobbs Exp $
+#      RCS:  $Id: itcl.tcl,v 1.9 2008/02/07 17:48:21 hobbs Exp $
 # ----------------------------------------------------------------------
 #            Copyright (c) 1993-1998  Lucent Technologies, Inc.
 # ======================================================================
@@ -218,7 +218,7 @@ if {([llength [info commands itcl_class]] == 0)
 	foreach cmd $cmds {
 	    if {![catch {lindex $cmd 0} firstcmd]} {
 		if {$firstcmd eq "public" || $firstcmd eq "protected"} {
-		    lset cmd 0 "variable"
+		    set cmd [linsert $cmd 1 "variable"]
 		}
 	    }
 	    append newcmds "$cmd\n"
