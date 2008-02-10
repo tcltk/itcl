@@ -1,6 +1,6 @@
-# $Id: configure.in,v 1.1.2.1 2008/01/12 18:45:31 wiede Exp $
+# $Id: configure.in,v 1.1.2.2 2008/02/10 18:42:35 wiede Exp $
 
-AC_REVISION($Revision: 1.1.2.1 $)
+AC_REVISION($Revision: 1.1.2.2 $)
 AC_INIT([Itclng],[0.1])
 AC_CONFIG_AUX_DIR(tclconfig)
 
@@ -14,14 +14,10 @@ TEA_LOAD_TCLOOCONFIG
 TEA_PREFIX
 TEA_SETUP_COMPILER
 TEA_ADD_SOURCES(
-	itclngBase.c itclngHelpers.c itclng2TclOO.c
-	itclngUtil.c
-	itclngParse.c itclngClass.c itclngObject.c itclngMethod.c
-	itclngStubs.c itclngStubInit.c
-	itclngResolve.c itclngMigrate2TclCore.c
-	itclngTclIntStubsFcn.c
-	itclngBuiltin.c itclngCmd.c
-	itclngInfo.c itclngNeededFromTclOO.c)
+	itclngBase.c itclngHelpers.c itclngCmd.c itclngClass.c
+	itclngObject.c itclngResolve.c itclngMigrate2TclCore.c
+	itclngTclIntStubsFcn.c itclngMethod.c itclng2TclOO.c
+	itclngUtil.c itclngStubInit.c itclngCMethod.c itclngLinkage.c)
 AS_IF([test ${TEA_PLATFORM} = "windows"], [
     PKG_OBJECTS="${PKG_OBJECTS} ${PACKAGE_NAME}.res.o"
     RC=windres

@@ -6,7 +6,7 @@
 #            mmclennan@lucent.com
 #            http://www.tcltk.com/itcl
 #
-#      RCS:  $Id: inherit.test,v 1.1.2.1 2008/02/02 18:38:28 wiede Exp $
+#      RCS:  $Id: inherit.test,v 1.1.2.2 2008/02/10 18:42:36 wiede Exp $
 # ----------------------------------------------------------------------
 #            Copyright (c) 1993-1998  Lucent Technologies, Inc.
 # ======================================================================
@@ -145,13 +145,13 @@ test inherit-1.8 {errors during construction are cleaned up and reported} {
 "eval test_cd_foobar::constructor 1 2 fred $x"
     while constructing object "::test_cd_mongrel1" in ::test_cd_mongrel::constructor (body line 2)
     invoked from within
-"test_cd_mongrel #auto bob"} {{foo: 1 2} {mongrel destruct} {foobar destruct} {foo destruct} {bar destruct} {geek destruct}}}
+"test_cd_mongrel create #auto bob"} {{foo: 1 2} {mongrel destruct} {foobar destruct} {foo destruct} {bar destruct} {geek destruct}}}
 
 test inherit-1.9 {errors during destruction prevent object delete} {
     global errorInfo test_cd_watch
     itcl::body test_cd_bar::constructor {args} {return "bar: $args"}
     itcl::body test_cd_bar::destructor {} {error "bar: failed"}
-    test_cd_mongrel mongrel1 ted
+    test_cd_mongrel create mongrel1 ted
     set test_cd_watch ""
     list [catch {itcl::delete object mongrel1} msg] $msg \
         $errorInfo $test_cd_watch [itcl::find objects mongrel*]
@@ -254,7 +254,7 @@ test inherit-3.1 {define classes with public variables} {
         }
         public method do {args} {eval $args}
     }
-} {}
+} {::test_cd_mongrel}
 
 test inherit-3.2 {create an object with public variables} {
     test_cd_mongrel create #auto
@@ -319,7 +319,7 @@ test inherit-4.1 {define classes for inheritance info} {
         inherit test_cd_foobar test_cd_geek
         public method do {args} {eval $args}
     }
-} {}
+} {::test_cd_mongrel}
 
 test inherit-4.2 {create an object for inheritance tests} {
     test_cd_mongrel create #auto
@@ -386,7 +386,7 @@ test inherit-5.1 {define classes for inheritance info} {
     itcl::class create test_cd_mongrel {
         inherit test_cd_foobar test_cd_geek
     }
-} {}
+} {::test_cd_mongrel}
 
 test inherit-5.2 {create objects for info tests} {
     list [test_cd_foo create #auto] [test_cd_foo create #auto] \
@@ -458,7 +458,7 @@ test inherit-6.1 {define classes for scope tests} {
 } {::test_cd_mongrel}
 
 test inherit-6.2 {create objects for scoping tests} {
-    list [test_cd_mongrel #auto] [test_cd_foobar #auto]
+    list [test_cd_mongrel create #auto] [test_cd_foobar create #auto]
 } {test_cd_mongrel0 test_cd_foobar0}
 
 test inherit-6.3 {methods are "virtual" outside of the class} {
@@ -555,7 +555,7 @@ test inherit-7.3 {cannot inherit from yourself} {
             inherit bogus
         }
     } msg] $msg
-} {1 {class "bogus" cannot inherit from itself}}
+} {1 {class "::bogus" cannot inherit from itself}}
 
 test inherit-7.4 {cannot have more than one inherit statement} {
     list [catch {
@@ -566,7 +566,7 @@ test inherit-7.4 {cannot have more than one inherit statement} {
             inherit test_inherit_base2
         }
     } msg] $msg
-} {1 {inheritance "test_inherit_base1 " already defined for class "::bogus"}}
+} {1 {inheritance "::test_inherit_base1" already defined for class "::bogus"}}
 
 # ----------------------------------------------------------------------
 #  Multiple base class error detection

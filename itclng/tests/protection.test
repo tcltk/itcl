@@ -6,7 +6,7 @@
 #            mmclennan@lucent.com
 #            http://www.tcltk.com/itcl
 #
-#      RCS:  $Id: protection.test,v 1.1.2.1 2008/02/02 18:38:30 wiede Exp $
+#      RCS:  $Id: protection.test,v 1.1.2.2 2008/02/10 18:42:36 wiede Exp $
 # ----------------------------------------------------------------------
 #            Copyright (c) 1993-1998  Lucent Technologies, Inc.
 # ======================================================================
@@ -48,7 +48,7 @@ test protect-1.1 {define a class with various protection levels} {
         }
         public method do {args} {eval $args}
     }
-} ""
+} {::test_pr}
 
 test protect-1.2 {create an object to execute tests} {
     test_pr create #auto
@@ -170,7 +170,7 @@ test protect-2.1 {define a derived class} {
         protected method dprom {} {return "pro (only in derived)"}
         private method dprim {} {return "pri (only in derived)"}
     }
-} ""
+} {::test_pr_derived}
 
 test protect-2.2 {create an object to execute tests} {
     test_pr_derived create #auto
@@ -318,7 +318,7 @@ test protect-3.1 {define a base class with private variables} {
         private variable pridv "pridv-value"
         private common pridc "pridc-value"
     }
-} ""
+} {::test_info_derived}
 
 test protect-3.2 {create an object to execute tests} {
     test_info_derived create #auto

@@ -6,7 +6,7 @@
 #            mmclennan@lucent.com
 #            http://www.tcltk.com/itcl
 #
-#      RCS:  $Id: body.test,v 1.1.2.1 2008/02/02 18:38:26 wiede Exp $
+#      RCS:  $Id: body.test,v 1.1.2.2 2008/02/10 18:42:35 wiede Exp $
 # ----------------------------------------------------------------------
 #            Copyright (c) 1993-1998  Lucent Technologies, Inc.
 # ======================================================================
@@ -166,7 +166,7 @@ test body-3.1 {define a class with public variables} {
         public variable nocode {}
         public common messages
     }
-} ""
+} {::test_cbody}
 
 test body-3.2 {check syntax of "configbody" command} {
     list [catch "itcl::configbody test_cbody::option" msg] $msg
@@ -185,7 +185,7 @@ test body-3.5 {protected variables have no config code} {
 } {1 {option "::test_cbody::prot" is not a public configuration option}}
 
 test body-3.6 {can use public variables without a body} {
-    test_cbody #auto
+    test_cbody create #auto
     list [catch "test_cbody0 configure -nocode 1" msg] $msg
 } {0 {}}
 

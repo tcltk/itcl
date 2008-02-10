@@ -6,7 +6,7 @@
 #            mmclennan@lucent.com
 #            http://www.tcltk.com/itcl
 #
-#      RCS:  $Id: info.test,v 1.1.2.1 2008/02/02 18:38:28 wiede Exp $
+#      RCS:  $Id: info.test,v 1.1.2.2 2008/02/10 18:42:36 wiede Exp $
 # ----------------------------------------------------------------------
 #            Copyright (c) 1993-1998  Lucent Technologies, Inc.
 # ======================================================================
@@ -80,6 +80,7 @@ test info-1.2 {info: errors trigger usage info} {
   info function ?name? ?-protection? ?-type? ?-name? ?-args? ?-body?
   info heritage
   info inherit
+  info option ?name? ?-protection? ?-resource? ?-class? ?-name? ?-default? ?-cgetmethod? ?-configuremethod? ?-validatemethod? ?-value?
   info variable ?name? ?-protection? ?-type? ?-name? ?-init? ?-value? ?-config?
 ...and others described on the man page}}
 
@@ -105,7 +106,6 @@ test info-1.4 {info: info class works on class itself} {
 # ----------------------------------------------------------------------
 #  Data members
 # ----------------------------------------------------------------------
-puts stderr "2.1"
 test info-2.1 {info: all variables} {
     lsort [ti info variable]
 } {::test_info::defc ::test_info::defv ::test_info::pric ::test_info::priv ::test_info::proc ::test_info::prov ::test_info::pubc ::test_info::pubv ::test_info::this ::test_info::uninitc ::test_info::uninitv ::test_info_base::base}

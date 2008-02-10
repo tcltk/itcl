@@ -1,6 +1,6 @@
 #
 # @configure_input@
-# RCS: @(#) $Id: Makefile.in,v 1.1.2.1 2008/01/12 18:45:31 wiede Exp $
+# RCS: @(#) $Id: Makefile.in,v 1.1.2.2 2008/02/10 18:42:35 wiede Exp $
 #
 
 #========================================================================
@@ -63,7 +63,7 @@ CYGPATH=@CYGPATH@
 SDX=@SDX@
 RC=@RC@
 CC_SWITCHES = ${CFLAGS} ${EXTRA_CLFAGS} ${CFLAGS_WARNING} ${SHLIB_CFLAGS} \
--I${GENERIC_DIR} -DARNULF_FOR_ITCL_CODE -DITCL_DEBUG \
+-I${GENERIC_DIR} -DARNULF_FOR_ITCL_CODE -DITCLNG_DEBUG \
 ${AC_FLAGS} ${GENERIC_FLAGS} ${PROTO_FLAGS} \
 ${ENV_FLAGS}
 
@@ -174,8 +174,8 @@ doc:
 #========================================================================
 
 test: package libraries
-	@echo $(TCLSH_PROGRAM) $(SRC_DIR)/tests/all.tcl -load "package require Itcl" $(TESTFLAGS)
-	@$(TCLSH) `$(CYGPATH) $(SRC_DIR)/tests/all.tcl` -load "package require Itcl" $(TESTFLAGS)
+	@echo $(TCLSH_PROGRAM) $(SRC_DIR)/tests/all.tcl -load "package require Itclng" $(TESTFLAGS)
+	@$(TCLSH) `$(CYGPATH) $(SRC_DIR)/tests/all.tcl` -load "package require Itclng" $(TESTFLAGS)
 
 benchmarks: package libraries
 	@echo Benchmark Iterations = $(ITERATIONS)
@@ -236,8 +236,10 @@ pkgIndex.tcl: Makefile
 	-@echo Creating pkgIndex.tcl
 	@( \
 	echo 'if {[catch {package present Tcl $(TCL_VERSION_REQ)}]} return'; \
-	echo 'package ifneeded $(PACKAGE_NAME) $(PACKAGE_VERSION) \
-	    [list load [file join $$dir $(PKG_LIB_FILE)] Itclng] ';  \
+	echo 'package ifneeded $(PACKAGE_NAME) $(PACKAGE_VERSION) " \
+	    [list source [file join $$dir itclngInit.tcl]] ;  \
+	    [list load [file join $$dir $(PKG_LIB_FILE)] $(PACKAGE_NAME)] ; \
+	    [list source [file join $$dir itclngAll.tcl]] "';  \
 	) > pkgIndex.tcl
 Makefile: $(SRC_DIR)/Makefile.in $(top_builddir)/config.status
 	cd $(top_builddir) \

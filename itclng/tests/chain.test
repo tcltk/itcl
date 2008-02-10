@@ -6,7 +6,7 @@
 #            mmclennan@lucent.com
 #            http://www.tcltk.com/itcl
 #
-#      RCS:  $Id: chain.test,v 1.1.2.1 2008/02/02 18:38:26 wiede Exp $
+#      RCS:  $Id: chain.test,v 1.1.2.2 2008/02/10 18:42:35 wiede Exp $
 # ----------------------------------------------------------------------
 #            Copyright (c) 1993-1998  Lucent Technologies, Inc.
 # ======================================================================
@@ -113,12 +113,14 @@ test chain-1.4 {invoke a chained method with a specific name} {
     set test_chain_status
 } {{b::show hello there} {a::show hello there} {d::show hello there}}
 
+puts stderr 1.5
 test chain-1.5 {chained methods can cross multiple-inheritance branches} {
     set test_chain_status ""
     $testobj test_chain_a::show "hello there"
     set test_chain_status
 } {{b::show hello there} {a::show hello there}}
 
+puts stderr 1.6
 test chain-1.6 {invoke a chained proc} {
     set test_chain_status ""
     test_chain_d::tell "testing 1 2 3"
@@ -133,7 +135,7 @@ test chain-1.7 {invoke a chained proc} {
 
 test chain-2.1 {create a test object in a base class} {
     set test_chain_status ""
-    set testobj [test_chain_c #auto 4 5 6]
+    set testobj [test_chain_c create #auto 4 5 6]
     set test_chain_status
 } {{b::constructor 4 5 6} {a::constructor 4 5 6} {c::constructor 4 5 6}}
 

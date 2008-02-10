@@ -6,7 +6,7 @@
 #            mmclennan@lucent.com
 #            http://www.tcltk.com/itcl
 #
-#      RCS:  $Id: delete.test,v 1.1.2.1 2008/02/02 18:38:28 wiede Exp $
+#      RCS:  $Id: delete.test,v 1.1.2.2 2008/02/10 18:42:36 wiede Exp $
 # ----------------------------------------------------------------------
 #            Copyright (c) 1993-1998  Lucent Technologies, Inc.
 # ======================================================================
@@ -68,7 +68,7 @@ test delete-2.1 {define a simple classes with inheritance} {
             return ">$num<"
         }
     }
-} {::test_delete_base}
+} {::test_delete}
 
 test delete-2.2 {create some base and derived class objects} {
     for {set i 0} {$i < 3} {incr i} {
@@ -114,7 +114,7 @@ test delete-3.1 {redefine classes with inheritance} {
             return ">$num<"
         }
     }
-} {::test_delete_base}
+} {::test_delete}
 
 test delete-3.2 {create some base and derived class objects} {
     for {set i 0} {$i < 3} {incr i} {
@@ -186,7 +186,7 @@ test basic-5.1 {define a simple class} {
             return $x
         }
     }
-} {}
+} {::test_delete_name}
 
 test basic-5.2 {delete using a qualified name} {
     namespace eval test_delete2 {test_delete_name create #auto}
@@ -195,7 +195,7 @@ test basic-5.2 {delete using a qualified name} {
 } {0 {} {}}
 
 test basic-5.3 {delete using a scoped value} {
-    set obj [namespace eval test_delete2 {itcl::code [test_delete_name #auto]}]
+    set obj [namespace eval test_delete2 {itcl::code [test_delete_name create #auto]}]
     set cmd [list itcl::delete object $obj]
     list [catch $cmd msg] $msg [itcl::find objects -isa test_delete_name]
 } {0 {} {}}
