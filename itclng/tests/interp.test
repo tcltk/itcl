@@ -6,7 +6,7 @@
 #            mmclennan@lucent.com
 #            http://www.tcltk.com/itcl
 #
-#      RCS:  $Id: interp.test,v 1.1.2.1 2008/02/02 18:38:29 wiede Exp $
+#      RCS:  $Id: interp.test,v 1.1.2.2 2008/02/10 19:58:15 wiede Exp $
 # ----------------------------------------------------------------------
 #            Copyright (c) 1993-1998  Lucent Technologies, Inc.
 # ======================================================================
@@ -26,12 +26,14 @@ if {[lsearch [namespace children] ::tcltest] == -1} {
 # ----------------------------------------------------------------------
 test interp-1.1 {create a slave interp with [incr Tcl]} {
     interp create slave
-    load "" Itcl slave
+#    load "" Itcl slave
+    slave eval "package require Itcl"
     list [slave eval "namespace children :: itcl"] [interp delete slave]
 } {::itcl {}}
 
 test interp-1.2 {create a safe slave interp with [incr Tcl]} {
     interp create -safe slave
+    load "" TclOO slave
     load "" Itcl slave
     list [slave eval "namespace children :: itcl"] [interp delete slave]
 } {::itcl {}}

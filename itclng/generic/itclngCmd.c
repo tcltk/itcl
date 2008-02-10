@@ -1867,13 +1867,13 @@ Itclng_ChainCmd(
     if (cObjv == NULL) {
             return TCL_OK;
     }
-    if (Itclng_GetCallFrameClientData(interp) == NULL) {
+    if (Itclng_GetCallFrameClientData(interp, 0) == NULL) {
         /* that has been a direct call, so no object in front !! */
 	cmd = Tcl_GetString(cObjv[0]);
     } else {
         cmd = Tcl_GetString(cObjv[1]);
     }
-fprintf(stderr, "CHAIN1!%s!%p!%s!%s!%s!\n", cmd, Itclng_GetCallFrameClientData(interp), Tcl_GetCurrentNamespace(interp)->fullName, Itclng_GetUplevelNamespace(interp, 1)->fullName, contextIclsPtr->nsPtr->fullName);
+fprintf(stderr, "CHAIN1!%s!%p!%s!%s!%s!\n", cmd, Itclng_GetCallFrameClientData(interp, 0), Tcl_GetCurrentNamespace(interp)->fullName, Itclng_GetUplevelNamespace(interp, 1)->fullName, contextIclsPtr->nsPtr->fullName);
     result = TCL_OK;
     Itclng_ParseNamespPath(cmd, &buffer, &head, &cmd);
     if (strcmp(cmd, "___constructor_init") == 0) {
@@ -2463,7 +2463,7 @@ Itclng_ScopeCmd(
     ItclngVarLookup *vlookup;
     int doAppend;
 
-    ItclngShowArgs(2, "Itclng_ScopeCmd", objc, objv);
+    ItclngShowArgs(0, "Itclng_ScopeCmd", objc, objv);
     if (objc != 2) {
         Tcl_WrongNumArgs(interp, 1, objv, "varname");
         return TCL_ERROR;
@@ -2551,7 +2551,7 @@ Itclng_ScopeCmd(
          */
         infoPtr = contextIclsPtr->infoPtr;
 	ClientData clientData;
-        clientData = Itclng_GetCallFrameClientData(interp);
+        clientData = Itclng_GetCallFrameClientData(interp, 1);
         if (clientData != NULL) {
             oPtr = Tcl_ObjectContextObject((Tcl_ObjectContext)clientData);
             if (oPtr != NULL) {

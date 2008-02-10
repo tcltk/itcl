@@ -9,7 +9,7 @@
  * ========================================================================
  *  AUTHOR:  Arnulf Wiedemann
  *
- *     RCS:  $Id: itclngMigrate2TclCore.c,v 1.1.2.1 2008/01/12 23:39:48 wiede Exp $
+ *     RCS:  $Id: itclngMigrate2TclCore.c,v 1.1.2.2 2008/02/10 19:58:15 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -146,9 +146,16 @@ Itclng_GetUplevelNamespace(
 
 ClientData
 Itclng_GetCallFrameClientData(
-    Tcl_Interp *interp)
+    Tcl_Interp *interp,
+    int level)
 {
+    if (level < 0) {
+        return NULL;
+    }
     CallFrame *framePtr = ((Interp *)interp)->framePtr;
+    while ((framePtr != NULL) && (level-- > 0)) {
+        framePtr = framePtr->callerVarPtr;
+    }
     if (framePtr == NULL) {
         return NULL;
     }

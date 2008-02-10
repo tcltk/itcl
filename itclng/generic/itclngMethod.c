@@ -25,7 +25,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclngMethod.c,v 1.1.2.11 2008/02/10 18:40:40 wiede Exp $
+ *     RCS:  $Id: itclngMethod.c,v 1.1.2.12 2008/02/10 19:58:15 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -1335,7 +1335,7 @@ Itclng_ExecProc(
 	    ItclngMemberFunc *imPtr2 = NULL;
             Tcl_HashEntry *hPtr;
 	    Tcl_ObjectContext context;
-	    context = Itclng_GetCallFrameClientData(interp);
+	    context = Itclng_GetCallFrameClientData(interp, 0);
             if (context == NULL) {
                 Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
                         "can't access \"", Tcl_GetString(imPtr->fullNamePtr),

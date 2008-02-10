@@ -1572,7 +1572,7 @@ ItclngObjectCmd(
     }
     if (oPtr == NULL) {
 	ClientData clientData;
-	clientData = Itclng_GetCallFrameClientData(interp);
+	clientData = Itclng_GetCallFrameClientData(interp, 0);
 	if ((imPtr->flags & ITCLNG_COMMON)
 	        && (imPtr->codePtr != NULL)
 	        && !(imPtr->codePtr->flags & ITCLNG_BUILTIN)) {
@@ -1811,7 +1811,7 @@ ItclngMapMethodNameProc(
 	        ItclngMemberFunc *imPtr2 = NULL;
                 Tcl_HashEntry *hPtr;
 	        Tcl_ObjectContext context;
-	        context = Itclng_GetCallFrameClientData(interp);
+	        context = Itclng_GetCallFrameClientData(interp, 0);
                 if (context != NULL) {
 	            hPtr = Tcl_FindHashEntry(
 		            &imPtr->iclsPtr->infoPtr->procMethods,

@@ -150,13 +150,29 @@ puts stderr "A3!$a22!"
 }
         }
     }
+
     proc code {args} {
         set __rootNamespace $::itcl::internal::infos::rootNamespace
-        return [uplevel 1 ${__rootNamespace}::internal::commands::code $args]
+	if {[catch {
+            set ret [uplevel 1 ${__rootNamespace}::internal::commands::code $args]
+        } msg msg2]} {
+	    regsub {internal::commands::} $msg {} msg
+	    return -code error $msg
+	} else {
+	    return $ret
+	}
     }
+
     proc scope {args} {
         set __rootNamespace $::itcl::internal::infos::rootNamespace
-        return [uplevel 1 ${__rootNamespace}::internal::commands::scope $args]
+	if {[catch {
+            set ret [uplevel 1 ${__rootNamespace}::internal::commands::scope $args]
+        } msg msg2]} {
+	    regsub {internal::commands::} $msg {} msg
+	    return -code error $msg
+	} else {
+	    return $ret
+	}
     }
     proc body {args} {
         set __rootNamespace $::itcl::internal::infos::rootNamespace
