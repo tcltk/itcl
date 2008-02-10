@@ -17,6 +17,22 @@ namespace eval ${::itcl::internal::infos::rootNamespace}::builtin::info {
 	    exists ${__rootNamespace}::builtin::info::exists \
     ]
 
+    proc GetInheritance {nsName className} {
+puts stderr "GetInheritance!$className!"
+	set inh [list]
+        set inh2 [dict get [set ${nsName}${className}::infos] inheritance]
+puts stderr "INH2!$inh2!"
+        foreach className $inh2 {
+	    lappend inh $className
+            set inh2 [GetInheritance $nsName $className]
+	    if {[llength $inh2] > 0} {
+                set inh [concat $inh $inh2]
+	    }
+        }
+puts stderr "RET!$inh!"
+        return $inh
+    }
+
     proc args {args} {
 	if {[llength $args] != 1} {
 	    return -code error "wrong # args: should be \"info args function\""
@@ -350,7 +366,8 @@ puts stderr "callContextInfo!$callContextInfo!"
 	if {$className eq "::itcl::class"} {
 	    set className $objectClassName
 	}
-        set inh [dict get [set ${infoNS}${className}::infos] inheritance]
+        set inh [GetInheritance ${infoNS} ${className}]
+#        set inh [dict get [set ${infoNS}${className}::infos] inheritance]
 puts stderr "inh!$className!$inh!"
         return [concat [list $className] $inh]
     }
@@ -367,10 +384,10 @@ puts stderr "callContextInfo!$callContextInfo!"
 	    set className $objectClassName
 	}
 	namespace upvar ${::itcl::internal::infos::rootNamespace}::builtin::info infoNS infoNS
+        set inh2 [GetInheritance ${infoNS} ${className}]
         set inh [dict get [set ${infoNS}${className}::infos] inheritance]
-puts stderr "inh!$className!$inh!"
+puts stderr "inh!$className!$inh!$inh2!"
         return $inh
-#        return [lrange $inh 1 end]
     }
 
     proc variable {args} {
@@ -378,7 +395,7 @@ puts stderr "inh!$className!$inh!"
 	set objectClassName ""
         foreach {objectName className objectClassName namespaceName funcName} $callContextInfo break
 puts stderr "info variable called!$args![namespace current]![uplevel 1 namespace current]!"
-puts stderr "className!$callContextInfo!"
+puts stderr "callContextInfo!$callContextInfo!"
 #puts stderr "objectName!$objectName!className!$className!objectClassName!$objectClassName!namespaceName!$namespaceName!funcName!$funcName!"
 	namespace upvar ${::itcl::internal::infos::rootNamespace}::builtin::info infoNS infoNS
 	if {$objectClassName eq ""}  {
@@ -390,13 +407,13 @@ get info like this instead:
   namespace eval className { info ", name, "... }"
 	    return -code error -level 3 $err
 	}
-        set inh [dict get [set ${infoNS}${objectClassName}::infos] inheritance]
 	set result [list]
-	if {$inh ne ""} {
-	    set inh [concat [list $objectClassName] $inh]
-	} else {
-	    set inh [list $objectClassName]
-	}
+        set inh [list $objectClassName]
+	set className $objectClassName
+        set inh2 [GetInheritance ${infoNS} ${className}]
+puts stderr "INH2!$inh2!"
+        set inh [concat $inh $inh2]
+puts stderr "INH!$inh![llength $args]!"
 	set found 0
         switch [llength $args] {
 	0 {
@@ -410,11 +427,24 @@ get info like this instead:
 	    set found 1
 	  }
         1 {
-	    set varName [lindex $args 0]
+	    set arg0 [lindex $args 0]
+	    set varName [::namespace tail $arg0]
+	    set prefix [::namespace qualifiers $arg0]
+	    if {[string length $prefix] > 0} {
+	        if {$prefix ne "::"} {
+		    set prefix ::$prefix
+		}
+	    }
 	    if {$varName eq "this"} {
 	        return [list protected variable ${objectClassName}::this $objectName $objectName]
 	    }
 	    foreach className $inh {
+		if {[string length $prefix] > 0} {
+		    if {$prefix ne $className} {
+		        continue
+		    }
+		}
+puts stderr "INFOVAR!${className}!"
                 set variables [dict get [set ${infoNS}${className}::infos] variables]
                 foreach {name info} $variables {
 		    if {$name eq $varName} {

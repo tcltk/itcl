@@ -72,6 +72,12 @@ namespace eval ${::itcl::internal::infos::rootNamespace}::parser {
     proc method {args} {
         parseMember method {*}$args
     }
+    proc cmethod {args} {
+        parseMember cmethod {*}$args
+    }
+    proc cproc {args} {
+        parseMember cproc {*}$args
+    }
     proc methodvariable {args} {
         parseMember methodvariable {*}$args
     }

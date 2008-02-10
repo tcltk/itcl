@@ -131,7 +131,23 @@ puts stderr "find object called!$args!"
         }
         proc object {args} {
             set __rootNamespace $::itcl::internal::infos::rootNamespace
-            return [uplevel 1 ${__rootNamespace}::internal::commands::deleteObject $args]
+	    return [uplevel 1 ${__rootNamespace}::internal::commands::deleteObject $args]
+if {0} {
+	    if {[catch {
+	    set ret [${__rootNamespace}::internal::commands::deleteObject $args]
+	    } a1 a2]} {
+puts stderr "A1!$a1!$a2!"
+		set a20 [dict get $a2 -errorinfo]
+	        set a21 [split $a20 \n]
+		set a22 [join [lrange $a21 0 end-1] \n]
+puts stderr "A2!$a22![::info level 1]!"
+		append a22 "\n[::info level 1]"
+puts stderr "A3!$a22!"
+	        return -code error -errorInfo $a22 $a1
+	    } else {
+	        return $ret
+	    }
+}
         }
     }
     proc code {args} {
@@ -219,10 +235,10 @@ puts stderr "CONFIGBODY!$args!"
 	    return -code error "option \"${className}::$varName\" is not a public configuration option"
 	}
         set state [dict get $varInfo state]
-puts stderr "VAR!$varName!$body!$state!$varInfo!"
 	dict set ${infoNS}${className}::infos variables $varName config $body
-puts stderr "VAR2!$varName!"
-        return [uplevel 1 ${__rootNamespace}::internal::commands::changeClassVariableConfig $className $varName "$body"]
+	dict set ${infoNS}${className}::infos variables $varName state COMPLETE
+	set cmd [list ${__rootNamespace}::internal::commands::changeClassVariableConfig $className $varName $body]
+        return [uplevel 1 $cmd]
     }
 }
 

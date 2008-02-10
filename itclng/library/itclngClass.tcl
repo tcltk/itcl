@@ -49,10 +49,15 @@
     } errs]} {
         set result 1
     }
-    $internalCmds createClassFinish $fullClassName $result
     if {$result} {
+puts stderr "+++DELETE!$fullClassName!"
+	set myNsName [::namespace qualifiers $infoNs]
+	::namespace delete $myNsName
+        rename $fullClassName {}
+#	::namespace delete $fullClassName
         return -code error -level 1 $errs
     }
+    $internalCmds createClassFinish $fullClassName $result
     set inh [dict get [set $infoNs] inheritance]
     if {[llength $inh] == 0} {
         if {$fullClassName ne "$::itcl::internal::infos::rootClassName"} {
@@ -108,7 +113,12 @@ set ::itcl::internal::infos::infoNamespace [uplevel 1 namespace current]
 	set nsName [namespace current]
 	set nsName [uplevel 1 namespace current]
 	set contextInfo [${::itcl::internal::infos::internalCmds}::getContext]
-	return [namespace eval $nsName " ${::itcl::internal::infos::internalCmds}::isa $args"]
+puts stderr "ISA!$args!$contextInfo!"
+	return [${::itcl::internal::infos::internalCmds}::isa $args]
+    }
+
+    public cproc chain {args} {
+        Itclng_ChainCmd
     }
 
     public proc create {args} {

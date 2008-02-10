@@ -119,6 +119,15 @@ argument with no name"
 	    return -code error -level 4 "should be: <protection> $type <name> ?arguments? ?body?"
 	  }
 	}
+	switch $type {
+	CProc -
+	CMethod {
+	      set body [string trim $body \n]
+	      set body [string trim $body { }]
+	      set body [string trim $body \n]
+	      set body [string trim $body { }]
+	  }
+	}
         set argumentInfo [GetArgumentInfos $name $arguments]
         dict lappend ${infoNs} functions $name [list protection $protection arguments $argumentInfo origArguments $argumentInfo body $body origBody $body state $state origState $state type [string tolower $type]]
 #puts stderr "DI2![dict get [set ${infoNs}] functions $name]!"
@@ -164,6 +173,14 @@ argument with no name"
         dict lappend ${infoNs} variables $name [list protection $protection type [string tolower $type] init $initValue config $configValue state $state]
 #puts stderr "DI2![dict get [set ${infoNs}] variables $name]!"
         ${::itcl::internal::infos::internalCmds} createClass$type $className $name
+    }
+
+    proc cmethod {infoNs className protection name args} {
+        return [methodOrProc $infoNs $className CMethod $protection $name {*}$args]
+    }
+
+    proc cproc {infoNs className protection name args} {
+        return [methodOrProc $infoNs $className CProc $protection $name {*}$args]
     }
 
     proc method {infoNs className protection name args} {
@@ -261,11 +278,11 @@ puts stderr "INHERIT!$nsName!$infoNs!$className!$args!"
 	    if {$idx2 >= 0} {
 	        return -code error -level 6 "class \"$clsName\" more than once in inherit list"
 	    }
-	    if {$clsName eq "$className"} {
+	    if {$fullClsName eq "$className"} {
 	        return -code error -level 6 "class \"$className\" cannot inherit from itself"
 	    }
 	    if {![::namespace exists ${::itcl::internal::infos::internalClassInfos}$fullClsName]} {
-	        return -code error -level 5 "cannot inherit from \"$clsName\""
+	        return -code error -level 5 "cannot inherit from \"$clsName\" (class \"$clsName\" not found in context \"$nsName\")"
 	    }
 	    lappend superClasses $fullClsName
 	}
