@@ -6,6 +6,7 @@ typedef int (*TclOO_PostCallProc)(ClientData clientData, Tcl_Interp *interp,
 #endif
 
 
+#ifdef NOTDEF
 #define Tcl_NewProcMethod _Tcl_NewProcMethod
 #define Tcl_NewProcClassMethod _Tcl_NewProcClassMethod
 #define Tcl_NewForwardMethod _Tcl_NewForwardMethod
@@ -28,4 +29,4 @@ EXTERN Tcl_Method _Tcl_NewForwardClassMethod(Tcl_Interp *interp,
         Tcl_Class clsPtr, int flags, Tcl_Obj *nameObj, Tcl_Obj *prefixObj);
 EXTERN void _Tcl_AddToMixinSubs(Tcl_Class subPtr, Tcl_Class superPtr);
 EXTERN void _Tcl_RemoveFromMixinSubs(Tcl_Class subPtr, Tcl_Class superPtr);
-
+#endif

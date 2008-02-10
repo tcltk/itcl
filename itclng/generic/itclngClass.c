@@ -475,6 +475,7 @@ Itclng_DeleteClass(
      *    base-class lists, and removes the class access command.
      */
     if (iclsPtr->nsPtr != NULL) {
+fprintf(stderr, "delete class namespace\n");
         Tcl_DeleteNamespace(iclsPtr->nsPtr);
         ItclngDeleteClassVariablesNamespace(interp, iclsPtr);
     }
@@ -1470,7 +1471,7 @@ ItclngCreateVariable(
         isSpecialVar = 1;
     }
     if (!isSpecialVar) {
-        statePtr = ItclngGetVariableStateString(iclsPtr, name);
+        statePtr = ItclngGetVariableInfoString(iclsPtr, name, "state");
         if (statePtr == NULL) {
             Tcl_AppendResult(interp, "cannot get state string", NULL);
             return TCL_ERROR;

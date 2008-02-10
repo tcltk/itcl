@@ -25,7 +25,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclngMethod.c,v 1.1.2.10 2008/02/04 20:46:58 wiede Exp $
+ *     RCS:  $Id: itclngMethod.c,v 1.1.2.11 2008/02/10 18:40:40 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -443,7 +443,8 @@ ItclngCreateMemberFunction(
     /*
      *  Try to create the implementation for this command member.
      */
-    if (ItclngCreateMemberCode(interp, iclsPtr, name, stateStr, &mcode) != TCL_OK) {
+    if (ItclngCreateMemberCode(interp, iclsPtr, name, stateStr, &mcode) !=
+            TCL_OK) {
         Tcl_DeleteHashEntry(entry);
         return TCL_ERROR;
     }
@@ -586,8 +587,8 @@ ItclngChangeMemberFunc(
 	Tcl_Obj *argumentPtr;
 	Tcl_Obj *bodyPtr;
 
-	argumentPtr = ItclngGetArgumentString(imPtr->iclsPtr,
-	        Tcl_GetString(imPtr->namePtr));
+	argumentPtr = ItclngGetArgumentInfo(imPtr->iclsPtr,
+	        Tcl_GetString(imPtr->namePtr), "arguments", "definition");
 	bodyPtr = ItclngGetBodyString(imPtr->iclsPtr,
 	        Tcl_GetString(imPtr->namePtr));
         imPtr->tmPtr = (ClientData)Itclng_NewProcClassMethod(interp,
@@ -631,7 +632,7 @@ ItclngChangeVariableConfig(
     const char *name;
 
     name = Tcl_GetString(namePtr);
-    statePtr = ItclngGetVariableStateString(iclsPtr, name);
+    statePtr = ItclngGetVariableInfoString(iclsPtr, name, "state");
     if (statePtr == NULL) {
 	Tcl_AppendResult(interp, "cannot get state string", NULL);
         return TCL_ERROR;
@@ -651,7 +652,9 @@ ItclngChangeVariableConfig(
     Tcl_Preserve((ClientData)mcode);
     Tcl_EventuallyFree((ClientData)mcode, Itclng_DeleteMemberCode);
 
-    Tcl_Release((ClientData)ivPtr->codePtr);
+    if (ivPtr->codePtr != NULL) {
+        Tcl_Release((ClientData)ivPtr->codePtr);
+    }
     ivPtr->codePtr = mcode;
     return TCL_OK;
 }
@@ -736,8 +739,8 @@ Itclng_ChangeMemberFunc(
 	Tcl_Obj *argumentPtr;
 	Tcl_Obj *bodyPtr;
 
-	argumentPtr = ItclngGetArgumentString(imPtr->iclsPtr,
-	        Tcl_GetString(imPtr->namePtr));
+	argumentPtr = ItclngGetArgumentInfo(imPtr->iclsPtr,
+	        Tcl_GetString(imPtr->namePtr), "arguments", "definition");
 	bodyPtr = ItclngGetBodyString(imPtr->iclsPtr,
 	        Tcl_GetString(imPtr->namePtr));
         imPtr->tmPtr = (ClientData)Itclng_NewProcClassMethod(interp,
@@ -1114,12 +1117,13 @@ Itclng_GetMemberFuncUsage(
     ItclngObject *contextIoPtr,   /* invoked with respect to this object */
     Tcl_Obj *objPtr)            /* returns: string showing usage */
 {
-    int argcount;
-    char *name;
-    char *arglist;
+    Tcl_Obj *arglistPtr;
     Tcl_HashEntry *entry;
     ItclngMemberFunc *mf;
     ItclngClass *iclsPtr;
+    char *name;
+    char *arglist;
+    int argcount;
 
     /*
      *  If the command is a method and an object context was
@@ -1167,24 +1171,35 @@ Itclng_GetMemberFuncUsage(
      *  Add the argument usage info.
      */
     if (imPtr->codePtr) {
-#ifdef NOTDEF
-	if (imPtr->codePtr->usagePtr != NULL) {
-            arglist = Tcl_GetString(imPtr->codePtr->usagePtr);
-	} else {
-	    arglist = NULL;
+	arglistPtr = ItclngGetArgumentInfo(imPtr->iclsPtr,
+	        Tcl_GetString(imPtr->namePtr), "origArguments", "usage");
+	if (arglistPtr == NULL) {
+fprintf(stderr, "INTERNAL ERROR: cannot get origArguments usage\n");
+	    return;
 	}
-#endif
+        arglist = Tcl_GetString(arglistPtr);
         argcount = imPtr->argcount;
     } else {
-#ifdef NOTDEF
-        if (imPtr->argListPtr != NULL) {
-            arglist = Tcl_GetString(imPtr->usagePtr);
-            argcount = imPtr->argcount;
-        } else {
-            arglist = NULL;
-            argcount = 0;
+        arglistPtr = ItclngGetArgumentInfo(imPtr->iclsPtr,
+                Tcl_GetString(imPtr->namePtr), "arguments", "usage");
+        if (arglistPtr == NULL) {
+fprintf(stderr, "INTERNAL ERROR: cannot get arguments usage\n");
+            return;
         }
-#endif
+        arglist = Tcl_GetString(arglistPtr);
+        argcount = imPtr->argcount;
+    }
+    if (imPtr->iclsPtr == imPtr->iclsPtr->infoPtr->rootClassIclsPtr) {
+        name = Tcl_GetString(imPtr->namePtr);
+        if (strcmp(name, "cget") == 0) {
+	    arglist = "-option";
+	}
+        if (strcmp(name, "configure") == 0) {
+	    arglist = "?-option? ?value -option value...?";
+	}
+        if (strcmp(name, "isa") == 0) {
+	    arglist = "className";
+	}
     }
     if (arglist) {
 	if (strlen(arglist) > 0) {
@@ -1395,6 +1410,7 @@ Itclng_ConstructBase(
     int cmdlinec;
     Tcl_Obj **cmdlinev;
 
+ItclngShowArgs(0, "Itclng_ConstructBase", objc, objv);
     /*
      *  If the class has an "initCode", invoke it in the current context.
      *
@@ -1420,14 +1436,16 @@ Itclng_ConstructBase(
         (void) Tcl_ListObjGetElements((Tcl_Interp*)NULL, cmdlinePtr,
             &cmdlinec, &cmdlinev);
         Tcl_Obj **newObjv;
-        newObjv = (Tcl_Obj **)ckalloc(sizeof(Tcl_Obj *)*(objc));
+        newObjv = (Tcl_Obj **)ckalloc(sizeof(Tcl_Obj *)*(objc+1));
         newObjv[0] = Tcl_NewStringObj(Tcl_GetCommandName(interp,
 	        contextObj->accessCmd), -1);
         Tcl_IncrRefCount(newObjv[0]);
         newObjv[1] = Tcl_NewStringObj("", -1);
         Tcl_AppendToObj(newObjv[1], "___constructor_init", -1);
         Tcl_IncrRefCount(newObjv[1]);
-        memcpy(newObjv+2, objv+2, (objc-2)*sizeof(Tcl_Obj *));
+	if (objc > 2) {
+            memcpy(newObjv+2, objv+2, (objc-2)*sizeof(Tcl_Obj *));
+	}
         result = Itclng_PublicObjectCmd(contextClass->infoPtr->currIoPtr->oPtr,
 	        interp, contextClass->clsPtr, cmdlinec, cmdlinev);
         Tcl_DecrRefCount(newObjv[1]);
@@ -1783,6 +1801,7 @@ ItclngCheckCallMethod(
     oPtr = NULL;
     hPtr = NULL;
     imPtr = (ItclngMemberFunc *)clientData;
+fprintf(stderr, "Itclng_CheckCallMethod!%s!\n", Tcl_GetString(imPtr->namePtr));
     infoPtr = imPtr->iclsPtr->infoPtr;
     if (imPtr->flags & ITCLNG_CONSTRUCTOR) {
         ioPtr = imPtr->iclsPtr->infoPtr->currIoPtr;
@@ -1858,7 +1877,10 @@ ItclngCheckCallMethod(
     }
     int cObjc = Itclng_GetCallFrameObjc(interp);
     Tcl_Obj *const * cObjv = Itclng_GetCallFrameObjv(interp);
+ItclngShowArgs(0, "Check", cObjc, cObjv);
+fprintf(stderr, "IM!%s!%d!\n", Tcl_GetString(imPtr->namePtr), imPtr->argcount);
     if (cObjc-2 < imPtr->argcount) {
+fprintf(stderr, "bad args\n");
 	if (strcmp(Tcl_GetString(imPtr->namePtr), "info") == 0) {
             Tcl_Obj *objPtr = Tcl_NewStringObj(
 	            "wrong # args: should be one of...\n", -1);

@@ -9,7 +9,7 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itclngHelpers.c,v 1.1.2.8 2008/01/30 19:55:05 wiede Exp $
+ * RCS: @(#) $Id: itclngHelpers.c,v 1.1.2.9 2008/02/10 18:40:40 wiede Exp $
  */
 
 #include "itclngInt.h"
@@ -152,14 +152,16 @@ fprintf(stderr, "cannot get element part");
 
 /*
  * ------------------------------------------------------------------------
- *  ItclngGetArgumentString()
+ *  ItclngGetArgumentInfo()
  *
  * ------------------------------------------------------------------------
  */
 Tcl_Obj *
-ItclngGetArgumentString(
+ItclngGetArgumentInfo(
     ItclngClass *iclsPtr,
-    const char *functionName)
+    const char *functionName,
+    const char *which,
+    const char *what)
 {
     Tcl_Obj *dictPtr;
     Tcl_Obj *valuePtr;
@@ -169,13 +171,13 @@ ItclngGetArgumentString(
         return NULL;
     }
     valuePtr = ItclngGetDictValueInfo(iclsPtr->interp, dictPtr,
-            "arguments");
+            which);
     if (valuePtr == NULL) {
         return NULL;
     }
     dictPtr = valuePtr;
     valuePtr = ItclngGetDictValueInfo(iclsPtr->interp, dictPtr,
-            "definition");
+            what);
     return valuePtr;
 }
 
@@ -281,14 +283,15 @@ ItclngGetFunctionStateString(
 
 /*
  * ------------------------------------------------------------------------
- *  ItclngGetVariableStateString()
+ *  ItclngGetVariableInfoString()
  *
  * ------------------------------------------------------------------------
  */
 Tcl_Obj *
-ItclngGetVariableStateString(
+ItclngGetVariableInfoString(
     ItclngClass *iclsPtr,
-    const char *variableName)
+    const char *variableName,
+    const char *what)
 {
     Tcl_Obj *dictPtr;
     Tcl_Obj *valuePtr;
@@ -298,7 +301,7 @@ ItclngGetVariableStateString(
         return NULL;
     }
     valuePtr = ItclngGetDictValueInfo(iclsPtr->interp, dictPtr,
-            "state");
+            what);
     return valuePtr;
 }
 

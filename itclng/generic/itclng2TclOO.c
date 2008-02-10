@@ -8,12 +8,26 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itclng2TclOO.c,v 1.1.2.1 2008/01/13 11:54:57 wiede Exp $
+ * RCS: @(#) $Id: itclng2TclOO.c,v 1.1.2.2 2008/02/10 18:40:40 wiede Exp $
  */
 
 #include <tcl.h>
 #include <tclOO.h>
 #include <tclOOInt.h>
+#include <itclngCMethod.h>
+
+EXTERN Tcl_Method TclOONewCInstanceMethodEx(Tcl_Interp *interp,
+        Tcl_Object oPtr,
+	TclOO_PreCallProc preCallPtr, TclOO_PostCallProc postCallPtr,
+        ProcErrorProc errProc, ClientData clientData, Tcl_Obj *nameObj,
+        Tcl_Obj *argsObj, Tcl_ObjCmdProc *cMethod, int flags,
+	void **internalTokenPtr);
+EXTERN Tcl_Method TclOONewCClassMethodEx(Tcl_Interp *interp,
+        Tcl_Class clsPtr,
+        TclOO_PreCallProc preCallPtr, TclOO_PostCallProc postCallPtr,
+	ProcErrorProc errProc, ClientData clientData, Tcl_Obj *nameObj,
+	Tcl_Obj *argsObj, Tcl_ObjCmdProc *cMethod, int flags,
+	void **internalTokenPtr);
 
 int
 Tcl_InvokeClassProcedureMethod(
@@ -101,6 +115,54 @@ done:
 }
 
 int
+Tcl_InvokeClassCMethod(
+    Tcl_Interp *interp,
+    Tcl_Obj *namePtr,           /* name of the method */
+    Tcl_Namespace *nsPtr,       /* namespace for calling method */
+    CMethod *cmPtr,             /* method type specific data */
+    int objc,			/* Number of arguments. */
+    Tcl_Obj *const *objv)	/* Arguments as actually seen. */
+{
+    int result;
+
+    /*
+     * Give the pre-call callback a chance to do some setup and, possibly,
+     * veto the call.
+     */
+
+    if (cmPtr->preCallProc != NULL) {
+	int isFinished;
+
+	result = cmPtr->preCallProc(cmPtr->clientData, interp, NULL,
+		NULL, &isFinished);
+	if (isFinished || result != TCL_OK) {
+	    goto done;
+	}
+    }
+
+    /*
+     * Now invoke the body of the method. Note that we need to take special
+     * action when doing unknown processing to ensure that the missing method
+     * name is passed as an argument.
+     */
+
+    result = (cmPtr->cMethodPtr)(cmPtr, interp, objc, objv);
+
+    /*
+     * Give the post-call callback a chance to do some cleanup. Note that at
+     * this point the call frame itself is invalid; it's already been popped.
+     */
+
+    if (cmPtr->postCallProc) {
+        result = cmPtr->postCallProc(cmPtr->clientData, interp, NULL,
+                nsPtr, result);
+    }
+
+done:
+    return result;
+}
+
+int
 Itclng_InvokeProcedureMethod(
     ClientData clientData,	/* Pointer to some per-method context. */
     Tcl_Interp *interp,
@@ -110,6 +172,19 @@ Itclng_InvokeProcedureMethod(
     Method *mPtr = clientData;
     Tcl_Namespace *nsPtr = mPtr->declaringClassPtr->thisPtr->namespacePtr;
     return Tcl_InvokeClassProcedureMethod(interp, mPtr->namePtr, nsPtr,
+            mPtr->clientData, objc, objv);
+}
+
+int
+Itclng_InvokeCMethod(
+    ClientData clientData,	/* Pointer to some per-method context. */
+    Tcl_Interp *interp,
+    int objc,			/* Number of arguments. */
+    Tcl_Obj *const *objv)	/* Arguments as actually seen. */
+{
+    Method *mPtr = clientData;
+    Tcl_Namespace *nsPtr = mPtr->declaringClassPtr->thisPtr->namespacePtr;
+    return Tcl_InvokeClassCMethod(interp, mPtr->namePtr, nsPtr,
             mPtr->clientData, objc, objv);
 }
 
@@ -249,6 +324,74 @@ Itclng_NewProcMethod(
 {
     return TclOONewProcInstanceMethodEx(interp, oPtr, preCallPtr, postCallPtr,
            errProc, clientData, nameObj, argsObj, bodyObj,
+           PUBLIC_METHOD | USE_DECLARER_NS, clientData2);
+}
+
+/*
+ * ----------------------------------------------------------------------
+ *
+ * Itclng_NewProcClassMethod --
+ *
+ *	Create a new procedure-like method for a class for Itcl.
+ *
+ * ----------------------------------------------------------------------
+ */
+
+Tcl_Method
+Itclng_NewCClassMethod(
+    Tcl_Interp *interp,		/* The interpreter containing the class. */
+    Tcl_Class clsPtr,		/* The class to modify. */
+    TclOO_PreCallProc preCallPtr,
+    TclOO_PostCallProc postCallPtr,
+    ProcErrorProc errProc,
+    ClientData clientData,
+    Tcl_Obj *nameObj,		/* The name of the method, which may be NULL;
+				 * if so, up to caller to manage storage
+				 * (e.g., because it is a constructor or
+				 * destructor). */
+    Tcl_Obj *argsObj,		/* The formal argument list for the method,
+				 * which may be NULL; if so, it is equivalent
+				 * to an empty list. */
+    Tcl_ObjCmdProc *cMethod,	/* The C-implemented method, which must not be
+				 * NULL. */
+    ClientData *clientData2)
+{
+    Tcl_Method result;
+
+    result = TclOONewCClassMethodEx(interp, clsPtr, preCallPtr, postCallPtr,
+           errProc, clientData, nameObj, argsObj, cMethod,
+           PUBLIC_METHOD | USE_DECLARER_NS, clientData2);
+    return result;
+}
+
+/*
+ * ----------------------------------------------------------------------
+ *
+ * Itclng_NewProcMethod --
+ *
+ *	Create a new procedure-like method for an object for Itcl.
+ *
+ * ----------------------------------------------------------------------
+ */
+
+Tcl_Method
+Itclng_NewCMethod(
+    Tcl_Interp *interp,		/* The interpreter containing the object. */
+    Tcl_Object oPtr,		/* The object to modify. */
+    TclOO_PreCallProc preCallPtr,
+    TclOO_PostCallProc postCallPtr,
+    ProcErrorProc errProc,
+    ClientData clientData,
+    Tcl_Obj *nameObj,		/* The name of the method, which must not be
+				 * NULL. */
+    Tcl_Obj *argsObj,		/* The formal argument list for the method,
+				 * which must not be NULL. */
+    Tcl_ObjCmdProc *cMethod,	/* The C-implemented method, which must not be
+				 * NULL. */
+    ClientData *clientData2)
+{
+    return TclOONewCInstanceMethodEx(interp, oPtr, preCallPtr, postCallPtr,
+           errProc, clientData, nameObj, argsObj, cMethod,
            PUBLIC_METHOD | USE_DECLARER_NS, clientData2);
 }
 

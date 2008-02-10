@@ -17,7 +17,9 @@
 Tcl_ObjCmdProc Itclng_CreateClassCmd;
 Tcl_ObjCmdProc Itclng_CreateClassFinishCmd;
 Tcl_ObjCmdProc Itclng_CreateClassMethodCmd;
+Tcl_ObjCmdProc Itclng_CreateClassCMethodCmd;
 Tcl_ObjCmdProc Itclng_CreateClassProcCmd;
+Tcl_ObjCmdProc Itclng_CreateClassCProcCmd;
 Tcl_ObjCmdProc Itclng_ChangeClassMemberFuncCmd;
 Tcl_ObjCmdProc Itclng_ChangeClassVariableConfigCmd;
 Tcl_ObjCmdProc Itclng_CreateClassCommonCmd;
@@ -31,6 +33,8 @@ Tcl_ObjCmdProc Itclng_CreateClassConstructorInitCmd;
 Tcl_ObjCmdProc Itclng_CreateObjectCmd;
 Tcl_ObjCmdProc Itclng_ConfigureCmd;
 Tcl_ObjCmdProc Itclng_CgetCmd;
+Tcl_ObjCmdProc Itclng_IsaCmd;
+Tcl_ObjCmdProc Itclng_ChainCmd;
 Tcl_ObjCmdProc Itclng_GetContextCmd;
 Tcl_ObjCmdProc Itclng_GetCallContextInfoCmd;
 Tcl_ObjCmdProc Itclng_GetInstanceVarValueCmd;
@@ -62,9 +66,15 @@ static InfoMethod ItclngMethodList[] = {
     { "createClassMethod",
       "fullClassName methodName",
       Itclng_CreateClassMethodCmd },
+    { "createClassCMethod",
+      "fullClassName methodName",
+      Itclng_CreateClassCMethodCmd },
     { "createClassProc",
       "fullClassName procName",
       Itclng_CreateClassProcCmd },
+    { "createClassCProc",
+      "fullClassName procName",
+      Itclng_CreateClassCProcCmd },
     { "changeClassMemberFunc",
       "fullClassName methodName",
       Itclng_ChangeClassMemberFuncCmd },
@@ -95,6 +105,12 @@ static InfoMethod ItclngMethodList[] = {
     { "cget",
       "fullClassName ?arg arg ... ?",
       Itclng_CgetCmd },
+    { "isa",
+      "fullClassName ?arg arg ... ?",
+      Itclng_IsaCmd },
+    { "chain",
+      "?arg arg ... ?",
+      Itclng_ChainCmd },
     { "createClassConstructor",
       "fullClassName constructor",
       Itclng_CreateClassConstructorCmd },
@@ -311,14 +327,33 @@ CreateOOMethod(
     Tcl_Obj *bodyPtr)
 {
     Tcl_HashEntry *hPtr2;
+    Tcl_ObjCmdProc *objProcPtr;
+    Tcl_CmdProc *argProcPtr;
+    Tcl_Obj *namePtr;
+    ClientData clientData;
+    ClientData pmPtr;
     int isNewEntry;
 
-    ClientData pmPtr;
-    imPtr->tmPtr = (ClientData)Itclng_NewProcClassMethod(
-            imPtr->iclsPtr->interp, imPtr->iclsPtr->clsPtr,
-	    ItclngCheckCallMethod, ItclngAfterCallMethod,
-            ItclngProcErrorProc, imPtr, imPtr->namePtr, argumentPtr,
-            bodyPtr, &pmPtr);
+    if (imPtr->flags &ITCLNG_IMPLEMENT_C) {
+	namePtr = ItclngGetBodyString(imPtr->iclsPtr,
+	        Tcl_GetString(imPtr->namePtr));
+        if (!Itclng_FindC(imPtr->iclsPtr->interp, Tcl_GetString(namePtr),
+	        &argProcPtr, &objProcPtr, &clientData) != TCL_OK) {
+fprintf(stderr, "cannot find C-function %s for %s\n", Tcl_GetString(namePtr), Tcl_GetString(imPtr->namePtr));
+	    return TCL_ERROR;
+	}
+        imPtr->tmPtr = (ClientData)Itclng_NewCClassMethod(
+                imPtr->iclsPtr->interp, imPtr->iclsPtr->clsPtr,
+	        ItclngCheckCallMethod, ItclngAfterCallMethod,
+                ItclngProcErrorProc, imPtr, imPtr->namePtr, argumentPtr,
+                objProcPtr, &pmPtr);
+    } else {
+        imPtr->tmPtr = (ClientData)Itclng_NewProcClassMethod(
+                imPtr->iclsPtr->interp, imPtr->iclsPtr->clsPtr,
+	        ItclngCheckCallMethod, ItclngAfterCallMethod,
+                ItclngProcErrorProc, imPtr, imPtr->namePtr, argumentPtr,
+                bodyPtr, &pmPtr);
+    }
     hPtr2 = Tcl_CreateHashEntry(&imPtr->iclsPtr->infoPtr->procMethods,
             (char *)imPtr->tmPtr, &isNewEntry);
     if (isNewEntry) {
@@ -380,7 +415,7 @@ Itclng_CreateClassFinishCmd(
 	    /* must be the the root class */
 	    infoPtr->rootClassIclsPtr = iclsPtr;
 	} else {
-        /* no inheritance at all so add the root to the inheritance */
+            /* no inheritance at all so add the root to the inheritance */
 	    iclsPtr2 = infoPtr->rootClassIclsPtr;
             (void) Tcl_CreateHashEntry(&iclsPtr->heritage, (char*)iclsPtr2,
 	            &newEntry);
@@ -399,8 +434,8 @@ Itclng_CreateClassFinishCmd(
     Tcl_DStringInit(&buffer);
     FOREACH_HASH_VALUE(imPtr, &iclsPtr->functions) {
         if (!(imPtr->flags & ITCLNG_IMPLEMENT_NONE)) {
-	    argumentPtr = ItclngGetArgumentString(iclsPtr,
-                    Tcl_GetString(imPtr->namePtr));
+	    argumentPtr = ItclngGetArgumentInfo(iclsPtr,
+                    Tcl_GetString(imPtr->namePtr), "arguments", "definition");
 	    bodyPtr = ItclngGetBodyString(iclsPtr,
 	            Tcl_GetString(imPtr->namePtr));;
 	    (void)CreateOOMethod(imPtr, argumentPtr, bodyPtr);
@@ -455,6 +490,48 @@ Itclng_CreateClassMethodCmd(
 
 /*
  * ------------------------------------------------------------------------
+ *  Itclng_CreateClassCMethodCmd()
+ *
+ *  Creates a class C-implemented method
+ *  On failure returns TCL_ERROR, along with an error message in the interp.
+ *  If successful, it returns TCL_OK and the full method name
+ * ------------------------------------------------------------------------
+ */
+int
+Itclng_CreateClassCMethodCmd(
+    ClientData clientData,	/* info for all known objects */
+    Tcl_Interp* interp,		/* interpreter */
+    int objc,		        /* number of arguments */
+    Tcl_Obj *const*objv)	/* argument objects */
+{
+    Tcl_HashEntry *hPtr;
+    ItclngObjectInfo *infoPtr;
+    ItclngClass *iclsPtr;
+    ItclngMemberFunc *imPtr;
+
+    ItclngShowArgs(0, "Itclng_CreateClassCMethodCmd", objc, objv);
+    if (ItclngCheckNumCmdParams(interp, infoPtr, "createClassCMethod", objc,
+            2, 2) != TCL_OK) {
+        return TCL_ERROR;
+    }
+    infoPtr = (ItclngObjectInfo *)clientData;
+    hPtr = Tcl_FindHashEntry(&infoPtr->classes, (char *)objv[1]);
+    if (hPtr == NULL) {
+        Tcl_AppendResult(interp, "no such class \"", Tcl_GetString(objv[1]),
+	        "\"", NULL);
+        return TCL_ERROR;
+    }
+    iclsPtr = Tcl_GetHashValue(hPtr);
+    if (ItclngCreateMethodOrProc(interp, iclsPtr, objv[2],
+            /* is common (proc) */ 0, &imPtr) != TCL_OK) {
+	return TCL_ERROR;
+    }
+    imPtr->flags |= ITCLNG_IMPLEMENT_C;
+    return TCL_OK;
+}
+
+/*
+ * ------------------------------------------------------------------------
  *  Itclng_CreateClassProcCmd()
  *
  *  Creates a class proc
@@ -491,6 +568,48 @@ Itclng_CreateClassProcCmd(
             ITCLNG_COMMON, &imPtr) != TCL_OK) {
 	return TCL_ERROR;
     }
+    return TCL_OK;
+}
+
+/*
+ * ------------------------------------------------------------------------
+ *  Itclng_CreateClassCProcCmd()
+ *
+ *  Creates a class C-implemented proc
+ *  On failure returns TCL_ERROR, along with an error message in the interp.
+ *  If successful, it returns TCL_OK and the full method name
+ * ------------------------------------------------------------------------
+ */
+int
+Itclng_CreateClassCProcCmd(
+    ClientData clientData,	/* info for all known objects */
+    Tcl_Interp* interp,		/* interpreter */
+    int objc,		        /* number of arguments */
+    Tcl_Obj *const*objv)	/* argument objects */
+{
+    Tcl_HashEntry *hPtr;
+    ItclngObjectInfo *infoPtr;
+    ItclngClass *iclsPtr;
+    ItclngMemberFunc *imPtr;
+
+    ItclngShowArgs(0, "Itclng_CreateClassCProcCmd", objc, objv);
+    if (ItclngCheckNumCmdParams(interp, infoPtr, "createClassCProc", objc,
+            2, 2) != TCL_OK) {
+        return TCL_ERROR;
+    }
+    infoPtr = (ItclngObjectInfo *)clientData;
+    hPtr = Tcl_FindHashEntry(&infoPtr->classes, (char *)objv[1]);
+    if (hPtr == NULL) {
+        Tcl_AppendResult(interp, "no such class \"", Tcl_GetString(objv[1]),
+	        "\"", NULL);
+        return TCL_ERROR;
+    }
+    iclsPtr = Tcl_GetHashValue(hPtr);
+    if (ItclngCreateMethodOrProc(interp, iclsPtr, objv[2],
+            ITCLNG_COMMON, &imPtr) != TCL_OK) {
+	return TCL_ERROR;
+    }
+    imPtr->flags |= ITCLNG_IMPLEMENT_C;
     return TCL_OK;
 }
 
@@ -877,7 +996,7 @@ Itclng_CreateClassInheritCmd(
     ItclngHierIter hier;
     int newEntry;
 
-    ItclngShowArgs(1, "Itclng_CreateClassInheritCmd", objc, objv);
+    ItclngShowArgs(0, "Itclng_CreateClassInheritCmd", objc, objv);
     if (ItclngCheckNumCmdParams(interp, infoPtr, "createClassInherit", objc,
             2, -1) != TCL_OK) {
         return TCL_ERROR;
@@ -913,7 +1032,9 @@ Itclng_CreateClassInheritCmd(
         (void) Tcl_CreateHashEntry(&iclsPtr->heritage, (char*)iclsPtr2,
 	        &newEntry);
         if (!newEntry) {
-            break;
+	    if (iclsPtr2 != iclsPtr->infoPtr->rootClassIclsPtr) {
+                break;
+	    }
         }
         iclsPtr2 = Itclng_AdvanceHierIter(&hier);
     }
@@ -1083,9 +1204,13 @@ Itclng_GetInstanceVarValueCmd(
     infoPtr = (ItclngObjectInfo *)clientData;
     callContextPtr = Itclng_PeekStack(&infoPtr->contextStack);
     if (callContextPtr != NULL) {
+fprintf(stderr, "COCL!%s!\n", callContextPtr->ioPtr->iclsPtr->nsPtr->fullName);
         hPtr = Tcl_FindHashEntry(&callContextPtr->ioPtr->iclsPtr->variables,
 	        (char *)objv[1]);
         if (hPtr == NULL) {
+            hPtr = Tcl_FindHashEntry(
+	            &callContextPtr->ioPtr->iclsPtr->resolveVars,
+	            Tcl_GetString(objv[1]));
 	    Tcl_AppendResult(interp, "no such variable 1 \"", name1, NULL);
 	    return TCL_ERROR;
 	}
@@ -1261,6 +1386,7 @@ Itclng_ConfigureCmd(
     Tcl_HashEntry *hPtr;
     Tcl_Namespace *saveNsPtr;
     Tcl_Obj * const *unparsedObjv;
+    Tcl_Obj *configPtr;
     ItclngClass *iclsPtr;
     ItclngVariable *ivPtr;
     ItclngVarLookup *vlookup;
@@ -1476,9 +1602,9 @@ Itclng_ConfigureCmd(
 #endif
 	    saveNsPtr = Tcl_GetCurrentNamespace(interp);
 	    Itclng_SetCallFrameNamespace(interp, ivPtr->iclsPtr->nsPtr);
-#ifdef NOTDEF
-	    result = Tcl_EvalObjEx(interp, mcode->bodyPtr, 0);
-#endif
+            configPtr = ItclngGetVariableInfoString(ivPtr->iclsPtr,
+	            Tcl_GetString(ivPtr->namePtr), "config");
+	    result = Tcl_EvalObjEx(interp, configPtr, 0);
 	    Itclng_SetCallFrameNamespace(interp, saveNsPtr);
             if (result == TCL_OK) {
                 Tcl_ResetResult(interp);
@@ -1601,6 +1727,242 @@ Itclng_CgetCmd(
         Tcl_SetObjResult(interp, Tcl_NewStringObj("<undefined>", -1));
     }
     return TCL_OK;
+}
+
+/*
+ * ------------------------------------------------------------------------
+ *  Itclng_BiIsaCmd()
+ *
+ *  Invoked whenever the user issues the "isa" method for an object.
+ *  Handles the following syntax:
+ *
+ *    <objName> isa <className>
+ *
+ *  Checks to see if the object has the given <className> anywhere
+ *  in its heritage.  Returns 1 if so, and 0 otherwise.
+ * ------------------------------------------------------------------------
+ */
+/* ARGSUSED */
+int
+Itclng_IsaCmd(
+    ClientData clientData,   /* class definition */
+    Tcl_Interp *interp,      /* current interpreter */
+    int objc,                /* number of arguments */
+    Tcl_Obj *CONST objv[])   /* argument objects */
+{
+    ItclngClass *iclsPtr;
+    char *token;
+
+    ItclngClass *contextIclsPtr;
+    ItclngObject *contextIoPtr;
+
+    ItclngShowArgs(0, "Itclng_IsaCmd", objc, objv);
+    /*
+     *  Make sure that this command is being invoked in the proper
+     *  context.
+     */
+    contextIclsPtr = NULL;
+    if (Itclng_GetContext(interp, &contextIclsPtr, &contextIoPtr) != TCL_OK) {
+        return TCL_ERROR;
+    }
+
+    if (contextIoPtr == NULL) {
+        Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+            "improper usage: should be \"object isa className\"",
+            (char*)NULL);
+        return TCL_ERROR;
+    }
+    if (objc != 2) {
+        token = Tcl_GetString(objv[0]);
+        Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+            "wrong # args: should be \"object ", token, " className\"",
+            (char*)NULL);
+        return TCL_ERROR;
+    }
+
+    /*
+     *  Look for the requested class.  If it is not found, then
+     *  try to autoload it.  If it absolutely cannot be found,
+     *  signal an error.
+     */
+    token = Tcl_GetString(objv[1]);
+    iclsPtr = Itclng_FindClass(interp, token, /* autoload */ 1);
+    if (iclsPtr == NULL) {
+        return TCL_ERROR;
+    }
+
+fprintf(stderr, "ICLS!%s!\n", iclsPtr->nsPtr->fullName);
+    if (Itclng_ObjectIsa(contextIoPtr, iclsPtr)) {
+        Tcl_SetIntObj(Tcl_GetObjResult(interp), 1);
+    } else {
+        Tcl_SetIntObj(Tcl_GetObjResult(interp), 0);
+    }
+    return TCL_OK;
+}
+
+/*
+ * ------------------------------------------------------------------------
+ *  Itclng_ChainCmd()
+ *
+ *  Invoked to handle the "chain" command, to access the version of
+ *  a method or proc that exists in a base class.  Handles the
+ *  following syntax:
+ *
+ *    chain ?<arg> <arg>...?
+ *
+ *  Looks up the inheritance hierarchy for another implementation
+ *  of the method/proc that is currently executing.  If another
+ *  implementation is found, it is invoked with the specified
+ *  <arg> arguments.  If it is not found, this command does nothing.
+ *  This allows a base class method to be called out in a generic way,
+ *  so the code will not have to change if the base class changes.
+ *
+ *  Returns TCL_OK or TCL_ERROR on failure
+ * ------------------------------------------------------------------------
+ */
+/* ARGSUSED */
+int
+Itclng_ChainCmd(
+    ClientData clientData,   /* class definition */
+    Tcl_Interp *interp,      /* current interpreter */
+    int objc,                /* number of arguments */
+    Tcl_Obj *CONST objv[])   /* argument objects */
+{
+    int result = TCL_OK;
+
+    ItclngClass *contextIclsPtr;
+    ItclngObject *contextIoPtr;
+
+    Tcl_HashEntry *hPtr;
+    Tcl_DString buffer;
+    Tcl_Obj *cmdlinePtr;
+    Tcl_Obj **newobjv;
+    ItclngMemberFunc *imPtr;
+    ItclngClass *iclsPtr;
+    ItclngHierIter hier;
+    char *cmd;
+    char *head;
+
+    ItclngShowArgs(0, "Itclng_ChainCmd", objc, objv);
+    /*
+     *  If this command is not invoked within a class namespace,
+     *  signal an error.
+     */
+    contextIclsPtr = NULL;
+    if (Itclng_GetContext(interp, &contextIclsPtr, &contextIoPtr) != TCL_OK) {
+        Tcl_ResetResult(interp);
+        Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+            "cannot chain functions outside of a class context",
+            (char*)NULL);
+        return TCL_ERROR;
+    }
+
+    /*
+     *  Try to get the command name from the current call frame.
+     *  If it cannot be determined, do nothing.  Otherwise, trim
+     *  off any leading path names.
+     */
+    Tcl_Obj * const *cObjv;
+    cObjv = Itclng_GetCallFrameObjv(interp);
+    if (cObjv == NULL) {
+            return TCL_OK;
+    }
+    if (Itclng_GetCallFrameClientData(interp) == NULL) {
+        /* that has been a direct call, so no object in front !! */
+	cmd = Tcl_GetString(cObjv[0]);
+    } else {
+        cmd = Tcl_GetString(cObjv[1]);
+    }
+fprintf(stderr, "CHAIN1!%s!%p!%s!%s!%s!\n", cmd, Itclng_GetCallFrameClientData(interp), Tcl_GetCurrentNamespace(interp)->fullName, Itclng_GetUplevelNamespace(interp, 1)->fullName, contextIclsPtr->nsPtr->fullName);
+    result = TCL_OK;
+    Itclng_ParseNamespPath(cmd, &buffer, &head, &cmd);
+    if (strcmp(cmd, "___constructor_init") == 0) {
+        cmd = "constructor";
+    }
+fprintf(stderr, "HEAD!%s!\n", head == NULL ? "(nil)" : head);
+#ifndef NOTDEF
+    hPtr = Tcl_FindHashEntry(&contextIclsPtr->infoPtr->namespaceClasses,
+            (char *)Tcl_GetCurrentNamespace(interp));
+    if (hPtr != NULL) {
+        contextIclsPtr = Tcl_GetHashValue(hPtr);
+fprintf(stderr, "NC!%s!\n", contextIclsPtr->nsPtr->fullName);
+    } else {
+        /* must be a direct call from the object, so use the object's
+	 * class */
+	contextIclsPtr = contextIoPtr->iclsPtr;
+    }
+fprintf(stderr, "CMD2!%s!%s!\n", cmd, contextIclsPtr->nsPtr->fullName);
+#endif
+
+    /*
+     *  Look for the specified command in one of the base classes.
+     *  If we have an object context, then start from the most-specific
+     *  class and walk up the hierarchy to the current context.  If
+     *  there is multiple inheritance, having the entire inheritance
+     *  hierarchy will allow us to jump over to another branch of
+     *  the inheritance tree.
+     *
+     *  If there is no object context, just start with the current
+     *  class context.
+     */
+    if (contextIoPtr != NULL) {
+        Itclng_InitHierIter(&hier, contextIoPtr->iclsPtr);
+        while ((iclsPtr = Itclng_AdvanceHierIter(&hier)) != NULL) {
+fprintf(stderr, "LOICLS!%s!%s!\n", iclsPtr->nsPtr->fullName, contextIclsPtr->nsPtr->fullName);
+            if (iclsPtr == contextIclsPtr) {
+                break;
+            }
+        }
+    } else {
+        Itclng_InitHierIter(&hier, contextIclsPtr);
+        Itclng_AdvanceHierIter(&hier);    /* skip the current class */
+    }
+
+    /*
+     *  Now search up the class hierarchy for the next implementation.
+     *  If found, execute it.  Otherwise, do nothing.
+     */
+    Tcl_Obj *objPtr;
+    objPtr = Tcl_NewStringObj(cmd, -1);
+    Tcl_IncrRefCount(objPtr);
+    while ((iclsPtr = Itclng_AdvanceHierIter(&hier)) != NULL) {
+        hPtr = Tcl_FindHashEntry(&iclsPtr->functions, (char *)objPtr);
+fprintf(stderr, "H!%s!%p!\n", iclsPtr->nsPtr->fullName, hPtr);
+        if (hPtr) {
+            imPtr = (ItclngMemberFunc*)Tcl_GetHashValue(hPtr);
+
+            /*
+             *  NOTE:  Avoid the usual "virtual" behavior of
+             *         methods by passing the full name as
+             *         the command argument.
+             */
+            cmdlinePtr = Itclng_CreateArgs(interp, Tcl_GetString(imPtr->fullNamePtr),
+                objc-1, objv+1);
+
+            (void) Tcl_ListObjGetElements((Tcl_Interp*)NULL, cmdlinePtr,
+                &objc, &newobjv);
+
+ItclngShowArgs(0, "Itclng_ChainCmd2", objc-1, newobjv+1);
+            Itclng_SetCallFrameNamespace(interp, imPtr->iclsPtr->nsPtr);
+	    if (imPtr->flags & ITCLNG_CONSTRUCTOR) {
+	        Tcl_SetStringObj(newobjv[0], Tcl_GetCommandName(interp,
+		        contextIclsPtr->infoPtr->currIoPtr->accessCmd), -1);
+	        result = Itclng_EvalMemberCode(interp, imPtr,
+		        imPtr->iclsPtr->infoPtr->currIoPtr, objc-1, newobjv+1);
+	    } else {
+	        result = Itclng_EvalMemberCode(interp, imPtr, contextIoPtr,
+		        objc-1, newobjv+1);
+            }
+
+            Tcl_DecrRefCount(cmdlinePtr);
+            break;
+	}
+    }
+    Tcl_DecrRefCount(objPtr);
+
+    Tcl_DStringFree(&buffer);
+    Itclng_DeleteHierIter(&hier);
+    return result;
 }
 
 
@@ -2014,9 +2376,9 @@ Itclng_DeleteObjectCmd(
     int objc,                /* number of arguments */
     Tcl_Obj *CONST objv[])   /* argument objects */
 {
-    int i;
-    char *name;
     ItclngObject *contextIoPtr;
+    char *name;
+    int i;
 
     ItclngShowArgs(1, "Itclng_DeleteObjectCmd", objc, objv);
     /*
@@ -2027,18 +2389,18 @@ Itclng_DeleteObjectCmd(
     for (i=1; i < objc; i++) {
         name = Tcl_GetStringFromObj(objv[i], (int*)NULL);
         if (Itclng_FindObject(interp, name, &contextIoPtr) != TCL_OK) {
-            return TCL_ERROR;
+	    return TCL_ERROR;
         }
 
         if (contextIoPtr == NULL) {
             Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
                 "object \"", name, "\" not found",
                 (char*)NULL);
-            return TCL_ERROR;
+	    return TCL_ERROR;
         }
 
         if (Itclng_DeleteObject(interp, contextIoPtr) != TCL_OK) {
-            return TCL_ERROR;
+	    return TCL_ERROR;
         }
     }
     return TCL_OK;

@@ -1213,19 +1213,21 @@ ItclngReportObjectUsage(
     Tcl_Namespace *callerNsPtr,
     Tcl_Namespace *contextNsPtr)  /* the context namespace */
 {
-    ItclngClass *iclsPtr = (ItclngClass*)contextIoPtr->iclsPtr;
-    int ignore = ITCLNG_CONSTRUCTOR | ITCLNG_DESTRUCTOR | ITCLNG_COMMON;
 
-    int cmp;
-    char *name;
-    Itclng_List cmdList;
-    Itclng_ListElem *elem;
+    Tcl_Obj *resultPtr;
     Tcl_HashEntry *entry;
     Tcl_HashSearch place;
+    ItclngClass *iclsPtr;
+    Itclng_List cmdList;
+    Itclng_ListElem *elem;
     ItclngMemberFunc *imPtr;
     ItclngMemberFunc *cmpFunc;
-    Tcl_Obj *resultPtr;
+    char *name;
+    int cmp;
+    int ignore;
 
+    ignore = ITCLNG_CONSTRUCTOR | ITCLNG_DESTRUCTOR | ITCLNG_COMMON;
+    iclsPtr = (ItclngClass*)contextIoPtr->iclsPtr;
     /*
      *  Scan through all methods in the virtual table and sort
      *  them in alphabetical order.  Report only the methods
@@ -1296,9 +1298,15 @@ ItclngReportObjectUsage(
     elem = Itclng_FirstListElem(&cmdList);
     while (elem) {
         imPtr = (ItclngMemberFunc*)Itclng_GetListValue(elem);
+        if (imPtr->iclsPtr == imPtr->iclsPtr->infoPtr->rootClassIclsPtr) {
+            name = Tcl_GetString(imPtr->namePtr);
+            if (strcmp(name, "chain") == 0) {
+                elem = Itclng_NextListElem(elem);
+	        continue;
+            }
+        }
         Tcl_AppendToObj(resultPtr, "\n  ", -1);
         Itclng_GetMemberFuncUsage(imPtr, contextIoPtr, resultPtr);
-
         elem = Itclng_NextListElem(elem);
     }
     Itclng_DeleteList(&cmdList);
@@ -1525,6 +1533,8 @@ ItclngFreeObject(
 
 int Itclng_InvokeProcedureMethod(ClientData clientData, Tcl_Interp *interp,
 	int objc, Tcl_Obj *const *objv);
+int Itclng_InvokeCMethod(ClientData clientData, Tcl_Interp *interp,
+	int objc, Tcl_Obj *const *objv);
 
 int
 ItclngObjectCmd(
@@ -1566,8 +1576,13 @@ ItclngObjectCmd(
 	if ((imPtr->flags & ITCLNG_COMMON)
 	        && (imPtr->codePtr != NULL)
 	        && !(imPtr->codePtr->flags & ITCLNG_BUILTIN)) {
-	    result = Itclng_InvokeProcedureMethod(imPtr->tmPtr, interp,
-	            objc, objv);
+            if (imPtr->flags &ITCLNG_IMPLEMENT_C) {
+	        result = Itclng_InvokeCMethod(imPtr->tmPtr, interp,
+	                objc, objv);
+	    } else {
+	        result = Itclng_InvokeProcedureMethod(imPtr->tmPtr, interp,
+	                objc, objv);
+	    }
             return result;
 	}
 	if (clientData == NULL) {

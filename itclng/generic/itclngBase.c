@@ -9,7 +9,7 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itclngBase.c,v 1.1.2.5 2008/01/20 17:17:16 wiede Exp $
+ * RCS: @(#) $Id: itclngBase.c,v 1.1.2.6 2008/02/10 18:40:40 wiede Exp $
  */
 
 #include <stdlib.h>
@@ -20,6 +20,9 @@ extern struct ItclngStubAPI itclngStubAPI;
 Tcl_ObjCmdProc Itclng_CreateClassFinishCmd;
 const char *TclOOInitializeStubs(Tcl_Interp *interp, const char *version,
         int epoch, int revision);
+
+Tcl_ObjCmdProc Itclng_ChainCmd;
+Tcl_ObjCmdProc Itclng_ScopeCmd;
 
 static int Initialize _ANSI_ARGS_((Tcl_Interp *interp));
 
@@ -153,6 +156,10 @@ Initialize (
     if (Itclng_InitCommands(interp, infoPtr) != TCL_OK) {
         return TCL_ERROR;
     }
+    Itclng_RegisterObjC(interp, "Itclng_ChainCmd", Itclng_ChainCmd,
+            infoPtr, NULL);
+    Itclng_RegisterObjC(interp, "Itclng_ScopeCmd", Itclng_ScopeCmd,
+            infoPtr, NULL);
     /*
      *  Set up the variables containing version info.
      */

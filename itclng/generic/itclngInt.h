@@ -9,7 +9,7 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itclngInt.h,v 1.1.2.13 2008/02/04 20:46:58 wiede Exp $
+ * RCS: @(#) $Id: itclngInt.h,v 1.1.2.14 2008/02/10 18:40:40 wiede Exp $
  */
 
 #include <string.h>
@@ -287,6 +287,7 @@ typedef struct ItclngMemberCode {
  */
 #define ITCLNG_IMPLEMENT_NONE    0x001  /* no implementation */
 #define ITCLNG_IMPLEMENT_TCL     0x002  /* Tcl implementation */
+#define ITCLNG_IMPLEMENT_C       0x004  /* C implementation */
 
 #define Itclng_IsMemberCodeImplemented(mcode) \
     (((mcode)->flags & ITCLNG_IMPLEMENT_NONE) == 0)
@@ -297,16 +298,16 @@ typedef struct ItclngMemberCode {
 #define ITCLNG_CONSTRUCTOR       0x010  /* non-zero => is a constructor */
 #define ITCLNG_DESTRUCTOR        0x020  /* non-zero => is a destructor */
 #define ITCLNG_COMMON            0x040  /* non-zero => is a "proc" */
-#define ITCLNG_ARG_SPEC          0x080  /* non-zero => has an argument spec */
-#define ITCLNG_BODY_SPEC         0x100  /* non-zero => has an body spec */
-#define ITCLNG_THIS_VAR          0x200  /* non-zero => built-in "this" variable */
-#define ITCLNG_CONINIT           0x400  /* non-zero => is a constructor
-                                       * init code */
-#define ITCLNG_BUILTIN           0x800  /* non-zero => built-in method */
-#define ITCLNG_OPTION_READONLY   0x1000 /* non-zero => readonly */
-#define ITCLNG_COMPONENT         0x2000 /* non-zero => component */
-#define ITCLNG_OPTIONS_VAR       0x4000 /* non-zero => built-in "itclng_options"
-                                       * variable */
+#define ITCLNG_ARG_SPEC          0x100  /* non-zero => has an argument spec */
+#define ITCLNG_BODY_SPEC         0x200  /* non-zero => has an body spec */
+#define ITCLNG_THIS_VAR          0x400  /* non-zero => built-in "this" variable */
+#define ITCLNG_CONINIT           0x800  /* non-zero => is a constructor
+                                         * init code */
+#define ITCLNG_BUILTIN           0x1000 /* non-zero => built-in method */
+#define ITCLNG_OPTION_READONLY   0x2000 /* non-zero => readonly */
+#define ITCLNG_COMPONENT         0x4000 /* non-zero => component */
+#define ITCLNG_OPTIONS_VAR       0x8000 /* non-zero => built-in "itclng_options"
+                                         * variable */
 
 /*
  *  Instance components.
@@ -463,22 +464,28 @@ MODULE_SCOPE Tcl_Obj* ItclngGetClassDictInfo(ItclngClass *iclsPtr,
         const char *what, const char *elementName);
 MODULE_SCOPE Tcl_Obj* ItclngGetDictValueInfo(Tcl_Interp *interp,
         Tcl_Obj *dictPtr, const char *elementName);
-MODULE_SCOPE Tcl_Obj * ItclngGetArgumentString(ItclngClass *iclsPtr,
-        const char *functionName);
+MODULE_SCOPE Tcl_Obj * ItclngGetArgumentInfo(ItclngClass *iclsPtr,
+        const char *functionName, const char * which, const char *what);
 MODULE_SCOPE Tcl_Obj * ItclngGetBodyString(ItclngClass *iclsPtr,
         const char *functionName);
 MODULE_SCOPE Tcl_Obj * ItclngGetUsageString(ItclngClass *iclsPtr,
         const char *functionName);
 MODULE_SCOPE Tcl_Obj * ItclngGetFunctionStateString(ItclngClass *iclsPtr,
         const char *functionName);
-MODULE_SCOPE Tcl_Obj * ItclngGetVariableStateString(ItclngClass *iclsPtr,
-        const char *variableName);
+MODULE_SCOPE Tcl_Obj * ItclngGetVariableInfoString(ItclngClass *iclsPtr,
+        const char *variableName, const char *what);
 MODULE_SCOPE char * ItclngTraceUnsetVar(ClientData clientData,
         Tcl_Interp *interp, const char *name1, const char *name2, int flags);
 MODULE_SCOPE int ItclngDeleteClassDictInfo(ItclngClass *iclsPtr);
 MODULE_SCOPE int ItclngGetProtection(ItclngClass *iclsPtr,
         const char *which, const char *name);
 
+MODULE_SCOPE int Itclng_RegisterObjC(Tcl_Interp *interp, CONST char *name,
+	Tcl_ObjCmdProc *proc, ClientData clientData,
+	Tcl_CmdDeleteProc *deleteProc);
+MODULE_SCOPE int Itclng_FindC(Tcl_Interp *interp, CONST char *name,
+        Tcl_CmdProc **argProcPtr, Tcl_ObjCmdProc **objProcPtr,
+        ClientData *cDataPtr);
 MODULE_SCOPE int Itclng_DecodeScopedCommand(Tcl_Interp *interp, CONST char *name,
 	    Tcl_Namespace **rNsPtr, char **rCmdPtr);
 
@@ -604,7 +611,9 @@ MODULE_SCOPE int ItclngChangeMemberFunc(Tcl_Interp* interp,
 MODULE_SCOPE int ItclngChangeVariableConfig(Tcl_Interp* interp,
         ItclngClass *iclsPtr, Tcl_Obj *namePtr, const char *configPtr,
 	ItclngVariable* ivPtr);
-
+MODULE_SCOPE int Itclng_EvalMemberCode(Tcl_Interp *interp,
+        ItclngMemberFunc *imPtr, ItclngObject *contextIoPtr,
+        int objc, Tcl_Obj *CONST objv[]);
 
 #include "itclng2TclOO.h"
 
