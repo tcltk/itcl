@@ -23,7 +23,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itcl_methods.c,v 1.22 2007/10/22 22:58:29 hobbs Exp $
+ *     RCS:  $Id: itcl_methods.c,v 1.23 2008/06/13 22:14:44 hobbs Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -622,12 +622,7 @@ Itcl_CreateMemberCode(interp, cdefn, arglist, body, mcodePtr)
      *  Allocate some space to hold the implementation.
      */
     mcode = (ItclMemberCode*)ckalloc(sizeof(ItclMemberCode));
-    mcode->flags        = 0;
-    mcode->argcount     = 0;
-    mcode->arglist      = NULL;
-    mcode->procPtr      = NULL;
-    mcode->cfunc.objCmd = NULL;
-    mcode->clientData   = NULL;
+    memset(mcode, 0, sizeof(ItclMemberCode));
 
     if (arglist) {
         if (Itcl_CreateArgList(interp, arglist, &argc, &args)
@@ -656,6 +651,7 @@ Itcl_CreateMemberCode(interp, cdefn, arglist, body, mcodePtr)
     procPtr->iPtr = (Interp*)interp;
     procPtr->refCount = 1;
     procPtr->cmdPtr = (Command*)ckalloc(sizeof(Command));
+    memset(procPtr->cmdPtr, 0, sizeof(Command));
     procPtr->cmdPtr->nsPtr = (Namespace*)cdefn->namesp;
 
     if (body) {
