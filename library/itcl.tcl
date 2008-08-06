@@ -9,7 +9,7 @@
 #            mmclennan@lucent.com
 #            http://www.tcltk.com/itcl
 #
-#      RCS:  $Id: itcl.tcl,v 1.9 2008/02/07 17:48:21 hobbs Exp $
+#      RCS:  $Id: itcl.tcl,v 1.10 2008/08/06 22:39:57 msofer Exp $
 # ----------------------------------------------------------------------
 #            Copyright (c) 1993-1998  Lucent Technologies, Inc.
 # ======================================================================
@@ -227,4 +227,36 @@ if {([llength [info commands itcl_class]] == 0)
     }
     set ::auto_index(itcl_class) [list interp alias {} ::itcl_class {} ::itcl::itcl_class]
     set ::auto_index(itcl_info) [list interp alias {} ::itcl_info {} ::itcl::find]
+}
+
+# ----------------------------------------------------------------------
+# [namespace inscope]
+# ----------------------------------------------------------------------
+# Modify [unknown] to handle Itcl's usage of [namespace inscope]
+#
+
+namespace eval ::itcl {
+    variable UNKNOWN_ORIG [info body ::unknown]
+    variable UNKNOWN_ADD {
+	##########################################################################
+	##########################################################################
+	# ADDED BY Itcl
+	#
+	# Itcl requires special handling for [namespace inscope]
+	#
+
+	set cmd [lindex $args 0]
+	if {[regexp "^:*namespace\[ \t\n\]+inscope" $cmd] && [llength $cmd] == 4} {
+	    #return -code error "You need an {*}"
+	    set arglist [lrange $args 1 end]
+	    set ret [catch {uplevel 1 ::$cmd $arglist} result opts]
+	    dict unset opts -errorinfo
+	    dict incr opts -level
+	    return -options $opts $result
+	}
+	##########################################################################
+	##########################################################################
+    }
+    proc ::unknown args "$UNKNOWN_ADD\n$UNKNOWN_ORIG"
+
 }
