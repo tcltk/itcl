@@ -1,6 +1,6 @@
-# $Id: configure.in,v 1.34.2.6 2007/12/09 15:45:57 wiede Exp $
+# $Id: configure.in,v 1.34.2.7 2008/09/28 10:55:33 wiede Exp $
 
-AC_REVISION($Revision: 1.34.2.6 $)
+AC_REVISION($Revision: 1.34.2.7 $)
 AC_INIT([Itcl],[4.0])
 AC_CONFIG_AUX_DIR(tclconfig)
 
@@ -9,8 +9,6 @@ TEA_PATH_TCLCONFIG
 TEA_LOAD_TCLCONFIG
 TEA_PATH_TKCONFIG
 TEA_LOAD_TKCONFIG
-TEA_PATH_TCLOOCONFIG
-TEA_LOAD_TCLOOCONFIG
 TEA_PREFIX
 TEA_SETUP_COMPILER
 TEA_ADD_SOURCES(
@@ -19,6 +17,7 @@ TEA_ADD_SOURCES(
 	itclParse.c itclClass.c itclObject.c itclMethod.c
 	itclStubs.c itclStubInit.c
 	itclResolve.c itclMigrate2TclCore.c
+	itclTclIntStubsFcn.c
 	itclBuiltin.c itclEnsemble.c itclCmd.c
 	itclInfo.c itclNeededFromTclOO.c)
 AS_IF([test ${TEA_PLATFORM} = "windows"], [
@@ -28,10 +27,7 @@ AS_IF([test ${TEA_PLATFORM} = "windows"], [
 TEA_ADD_STUB_SOURCES(itclStubLib.c)
 TEA_ADD_HEADERS([generic/itcl.h generic/itclInt.h])
 TEA_ADD_INCLUDES([-I. -I\"`${CYGPATH} ${srcdir}/generic`\"])
-TEA_ADD_LIBS([${TCLOO_STUB_LIB_SPEC}])
 TEA_PRIVATE_TCL_HEADERS
-TEA_PUBLIC_TCLOO_HEADERS
-TEA_PRIVATE_TCLOO_HEADERS
 TEA_ENABLE_THREADS
 TEA_ENABLE_SHARED
 TEA_ENABLE_SYMBOLS
