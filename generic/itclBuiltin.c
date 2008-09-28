@@ -24,7 +24,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclBuiltin.c,v 1.1.2.26 2007/12/22 21:22:21 wiede Exp $
+ *     RCS:  $Id: itclBuiltin.c,v 1.1.2.27 2008/09/28 10:41:38 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -771,6 +771,23 @@ ItclReportOption(
 
 
 
+static int
+CallChainCall(
+    ClientData data[],
+    Tcl_Interp *interp,
+    int result)
+{
+    ItclMemberFunc *imPtr = data[0];
+    ItclObject *contextIoPtr = data[1];
+    int objc = (int)data[2];
+    Tcl_Obj **objv = data[3];
+
+    if (result == TCL_OK) {
+        result = Itcl_EvalMemberCode(interp, imPtr, contextIoPtr, objc, objv+1);
+    }
+    return result;
+}
+
 /*
  * ------------------------------------------------------------------------
  *  Itcl_BiChainCmd()
@@ -790,8 +807,8 @@ ItclReportOption(
  * ------------------------------------------------------------------------
  */
 /* ARGSUSED */
-int
-Itcl_BiChainCmd(
+static int
+NRBiChainCmd(
     ClientData dummy,        /* not used */
     Tcl_Interp *interp,      /* current interpreter */
     int objc,                /* number of arguments */
@@ -803,6 +820,7 @@ Itcl_BiChainCmd(
     ItclObject *contextIoPtr;
 
     char *cmd;
+    char *cmd1;
     char *head;
     ItclClass *iclsPtr;
     ItclHierIter hier;
@@ -813,6 +831,10 @@ Itcl_BiChainCmd(
     Tcl_Obj **newobjv;
 
     ItclShowArgs(1, "Itcl_BiChainCmd", objc, objv);
+    Tcl_Obj * const *cObjv;
+    int freeCmd;
+    int idx;
+
     /*
      *  If this command is not invoked within a class namespace,
      *  signal an error.
@@ -831,19 +853,24 @@ Itcl_BiChainCmd(
      *  If it cannot be determined, do nothing.  Otherwise, trim
      *  off any leading path names.
      */
-    Tcl_Obj * const *cObjv;
     cObjv = Itcl_GetCallFrameObjv(interp);
     if (cObjv == NULL) {
-            return TCL_OK;
+        return TCL_OK;
     }
-    if (Itcl_GetCallFrameClientData(interp) == NULL) {
+
+    if ((Itcl_GetCallFrameClientData(interp) == NULL) || (objc == 1)) {
         /* that has been a direct call, so no object in front !! */
-	cmd = Tcl_GetString(cObjv[0]);
+	idx = 0;
     } else {
-        cmd = Tcl_GetString(cObjv[1]);
+	idx = 1;
     }
-    Itcl_ParseNamespPath(cmd, &buffer, &head, &cmd);
+    cmd1 = (char *)ckalloc(strlen(Tcl_GetString(cObjv[idx]))+1);
+    freeCmd = 1;
+    strcpy(cmd1, Tcl_GetString(cObjv[idx]));
+    Itcl_ParseNamespPath(cmd1, &buffer, &head, &cmd);
     if (strcmp(cmd, "___constructor_init") == 0) {
+	ckfree(cmd1);
+	freeCmd = 0;
         cmd = "constructor";
     }
 
@@ -876,6 +903,9 @@ Itcl_BiChainCmd(
      */
     Tcl_Obj *objPtr;
     objPtr = Tcl_NewStringObj(cmd, -1);
+    if (freeCmd) {
+        ckfree(cmd1);
+    }
     Tcl_IncrRefCount(objPtr);
     while ((iclsPtr = Itcl_AdvanceHierIter(&hier)) != NULL) {
         hPtr = Tcl_FindHashEntry(&iclsPtr->functions, (char *)objPtr);
@@ -890,19 +920,20 @@ Itcl_BiChainCmd(
             cmdlinePtr = Itcl_CreateArgs(interp, Tcl_GetString(imPtr->fullNamePtr),
                 objc-1, objv+1);
 
+	    int my_objc;
             (void) Tcl_ListObjGetElements((Tcl_Interp*)NULL, cmdlinePtr,
-                &objc, &newobjv);
+                &my_objc, &newobjv);
 
 	    if (imPtr->flags & ITCL_CONSTRUCTOR) {
-	        Tcl_SetStringObj(newobjv[0], Tcl_GetCommandName(interp,
-		        contextIclsPtr->infoPtr->currIoPtr->accessCmd), -1);
-	        result = Itcl_EvalMemberCode(interp, imPtr,
-		        imPtr->iclsPtr->infoPtr->currIoPtr, objc-1, newobjv+1);
-	    } else {
-	        result = Itcl_EvalMemberCode(interp, imPtr, contextIoPtr,
-		        objc-1, newobjv+1);
+		Tcl_DecrRefCount(newobjv[0]);
+		newobjv[0] = Tcl_NewStringObj(Tcl_GetCommandName(interp,
+                        contextIclsPtr->infoPtr->currIoPtr->accessCmd), -1);
+		Tcl_IncrRefCount(newobjv[0]);
+		contextIoPtr = imPtr->iclsPtr->infoPtr->currIoPtr;
             }
-
+//ItclShowArgs(0, "___chain", objc-1, newobjv+1);
+            result = Itcl_EvalMemberCode(interp, imPtr, contextIoPtr,
+	            my_objc-1, newobjv+1);
             Tcl_DecrRefCount(cmdlinePtr);
             break;
         }
@@ -913,6 +944,17 @@ Itcl_BiChainCmd(
     Itcl_DeleteHierIter(&hier);
     return result;
 }
+/* ARGSUSED */
+int
+Itcl_BiChainCmd(
+    ClientData clientData,
+    Tcl_Interp *interp,
+    int objc,
+    Tcl_Obj *const *objv)
+{
+    return Itcl_NRCallObjProc(clientData, interp, NRBiChainCmd, objc, objv);
+}
+
 
 /*
  * ------------------------------------------------------------------------

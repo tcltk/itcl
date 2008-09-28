@@ -24,7 +24,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann Copyright (c) 2007
  *
- *     RCS:  $Id: itclObject.c,v 1.1.2.33 2008/02/03 19:00:49 wiede Exp $
+ *     RCS:  $Id: itclObject.c,v 1.1.2.34 2008/09/28 10:41:38 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -138,7 +138,7 @@ ItclCreateObject(
     int newObjc;
     int newEntry;
 
-    /* just init for the cas of none ItclWidget objects */
+    /* just init for the case of none ItclWidget objects */
     newObjc = objc;
     newObjv = (Tcl_Obj **)objv;
     /*
@@ -424,6 +424,7 @@ ItclInitObjectVariables(
     itclOptionsIsSet = 0;
     Itcl_InitHierIter(&hier, iclsPtr);
     iclsPtr2 = Itcl_AdvanceHierIter(&hier);
+    Tcl_ResetResult(interp);
     while (iclsPtr2 != NULL) {
 	Tcl_DStringInit(&buffer);
 	Tcl_DStringAppend(&buffer, ITCL_VARIABLES_NAMESPACE, -1);
@@ -510,6 +511,7 @@ ItclInitObjectVariables(
                     thisName = Tcl_GetString(ivPtr->namePtr);
 		    if (Tcl_SetVar2(interp, thisName, NULL,
 		        "", TCL_NAMESPACE_ONLY) == NULL) {
+	                Itcl_PopCallFrame(interp);
 		        return TCL_ERROR;
 	            }
 	            Tcl_TraceVar2(interp, thisName, NULL,
@@ -519,6 +521,7 @@ ItclInitObjectVariables(
 	            if (ivPtr->init != NULL) {
 		        if (Tcl_ObjSetVar2(interp, ivPtr->namePtr, NULL,
 		            ivPtr->init, TCL_NAMESPACE_ONLY) == NULL) {
+	                    Itcl_PopCallFrame(interp);
 		            return TCL_ERROR;
 	                }
 	            }
@@ -793,6 +796,35 @@ ItclDeleteObjectVariablesNamespace(
     }
 }
 
+static int
+FinalizeDeleteObject(
+    ClientData data[],
+    Tcl_Interp *interp,
+    int result)
+{
+    ItclObject *contextIoPtr = data[0];
+    ItclDeleteObjectVariablesNamespace(interp, contextIoPtr);
+    if (result == TCL_OK) {
+        Tcl_ResetResult(interp);
+    }
+
+    Tcl_DeleteHashTable(contextIoPtr->destructed);
+    ckfree((char*)contextIoPtr->destructed);
+    contextIoPtr->destructed = NULL;
+        
+    return result;
+}
+
+static int
+CallDestructBase(
+    ClientData data[],
+    Tcl_Interp *interp,
+    int result)
+{
+    ItclObject *contextIoPtr = data[0];
+    int flags = PTR2INT(data[1]);
+    return ItclDestructBase(interp, contextIoPtr, contextIoPtr->iclsPtr, flags);
+}
 /*
  * ------------------------------------------------------------------------
  *  Itcl_DestructObject()
@@ -847,33 +879,27 @@ Itcl_DestructObject(
 
     result = TCL_OK;
     if (contextIoPtr->oPtr != NULL) {
-    /*
-     *  Create a "destructed" table to keep track of which destructors
-     *  have been invoked.  This is used in ItclDestructBase to make
-     *  sure that all base class destructors have been called,
-     *  explicitly or implicitly.
-     */
-    contextIoPtr->destructed = (Tcl_HashTable*)ckalloc(sizeof(Tcl_HashTable));
-    Tcl_InitObjHashTable(contextIoPtr->destructed);
+        /*
+         *  Create a "destructed" table to keep track of which destructors
+         *  have been invoked.  This is used in ItclDestructBase to make
+         *  sure that all base class destructors have been called,
+         *  explicitly or implicitly.
+         */
+        contextIoPtr->destructed = (Tcl_HashTable*)ckalloc(sizeof(Tcl_HashTable));
+        Tcl_InitObjHashTable(contextIoPtr->destructed);
 
-    /*
-     *  Destruct the object starting from the most-specific class.
-     *  If all goes well, return the null string as the result.
-     */
-    result = ItclDestructBase(interp, contextIoPtr,
-            contextIoPtr->iclsPtr, flags);
-
-    if (result == TCL_OK) {
-        Tcl_ResetResult(interp);
+        /*
+         *  Destruct the object starting from the most-specific class.
+         *  If all goes well, return the null string as the result.
+         */
+        void *callbackPtr;
+        callbackPtr = Itcl_GetCurrentCallbackPtr(interp);
+        Itcl_NRAddCallback(interp, FinalizeDeleteObject, contextIoPtr,
+	        NULL, NULL, NULL);
+        Itcl_NRAddCallback(interp, CallDestructBase, contextIoPtr,
+	        INT2PTR(flags), NULL, NULL);
+        result = Itcl_NRRunCallbacks(interp, callbackPtr);
     }
-
-    Tcl_DeleteHashTable(contextIoPtr->destructed);
-    ckfree((char*)contextIoPtr->destructed);
-    contextIoPtr->destructed = NULL;
-    }
-    
-    ItclDeleteObjectVariablesNamespace(interp, contextIoPtr);
-
     return result;
 }
 
@@ -1545,6 +1571,20 @@ ItclFreeObject(
 int Itcl_InvokeProcedureMethod(ClientData clientData, Tcl_Interp *interp,
 	int objc, Tcl_Obj *const *objv);
 
+static int
+CallPublicObjectCmd(
+    ClientData data[],
+    Tcl_Interp *interp,
+    int result)
+{
+    Tcl_Object *oPtr = data[0];
+    Tcl_Class clsPtr = data[1];
+    int objc = PTR2INT(data[2]);
+    Tcl_Obj *const* objv = data[3];
+    result = Itcl_PublicObjectCmd(oPtr, interp, clsPtr, objc, objv);
+    return result;
+}
+
 int
 ItclObjectCmd(
     ClientData clientData,
@@ -1561,6 +1601,7 @@ ItclObjectCmd(
     ItclClass *iclsPtr;
     Itcl_ListElem *elem;
     ItclClass *basePtr;
+    void *callbackPtr;
     char *className;
     char *tail;
     char *cp;
@@ -1642,6 +1683,7 @@ ItclObjectCmd(
             Tcl_IncrRefCount(methodNamePtr);
         }
     }
+    callbackPtr = Itcl_GetCurrentCallbackPtr(interp);
     newObjv = NULL;
     if (methodNamePtr != NULL) {
         incr = 1;
@@ -1651,15 +1693,19 @@ ItclObjectCmd(
         Tcl_IncrRefCount(newObjv[0]);
         Tcl_IncrRefCount(newObjv[1]);
         memcpy(newObjv+incr+1, objv+1, (sizeof(Tcl_Obj*)*(objc-1)));
-        result = Itcl_PublicObjectCmd(oPtr, interp, clsPtr, objc+incr, newObjv);
+        Itcl_NRAddCallback(interp, CallPublicObjectCmd, oPtr, clsPtr, INT2PTR(objc+incr), newObjv);
+
+    } else {
+        Itcl_NRAddCallback(interp, CallPublicObjectCmd, oPtr, clsPtr, INT2PTR(objc), (ClientData)objv);
+    }
+
+    result = Itcl_NRRunCallbacks(interp, callbackPtr);
+    if (methodNamePtr != NULL) {
         Tcl_DecrRefCount(newObjv[0]);
         Tcl_DecrRefCount(newObjv[1]);
         Tcl_DecrRefCount(methodNamePtr);
         ckfree((char *)newObjv);
-    } else {
-        result = Itcl_PublicObjectCmd(oPtr, interp, clsPtr, objc, objv);
     }
-
     return result;
 }
 

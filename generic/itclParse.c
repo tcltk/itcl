@@ -39,7 +39,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclParse.c,v 1.1.2.25 2007/12/22 21:22:23 wiede Exp $
+ *     RCS:  $Id: itclParse.c,v 1.1.2.26 2008/09/28 10:41:38 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -519,7 +519,7 @@ ItclClassBaseCmd(
         Tcl_WrongNumArgs(interp, 1, objv, "name { definition }");
         return TCL_ERROR;
     }
-    ItclShowArgs(2, "ItclClassBaseCmd", objc, objv);
+    ItclShowArgs(1, "ItclClassBaseCmd", objc, objv);
     className = Tcl_GetString(objv[1]);
 
     /*
@@ -1217,7 +1217,7 @@ Itcl_ClassProcCmd(
     int objc,                /* number of arguments */
     Tcl_Obj *CONST objv[])   /* argument objects */
 {
-    ItclShowArgs(2, "Itcl_ClassProcCmd", objc, objv);
+    ItclShowArgs(1, "Itcl_ClassProcCmd", objc, objv);
     ItclObjectInfo *infoPtr = (ItclObjectInfo*)clientData;
     ItclClass *iclsPtr = (ItclClass*)Itcl_PeekStack(&infoPtr->clsStack);
 

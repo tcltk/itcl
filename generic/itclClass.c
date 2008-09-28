@@ -25,7 +25,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann Copyright (c) 2007
  *
- *     RCS:  $Id: itclClass.c,v 1.1.2.20 2008/02/03 19:00:48 wiede Exp $
+ *     RCS:  $Id: itclClass.c,v 1.1.2.21 2008/09/28 10:41:38 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -159,6 +159,27 @@ ClassNamespaceDeleted(
 }
 
 
+static int
+CallNewObjectInstance(
+    ClientData data[],
+    Tcl_Interp *interp,
+    int result)
+{
+    ItclObjectInfo *infoPtr = data[0];
+    const char* path = data[1];
+    Tcl_Object *oPtr = data[2];
+    Tcl_Obj *nameObjPtr = data[3];
+
+    *oPtr = Tcl_NewObjectInstance(interp, infoPtr->clazzClassPtr,
+            path, path, 0, NULL, 0);
+    if (*oPtr == NULL) {
+        Tcl_AppendResult(interp,
+                "ITCL: cannot create Tcl_NewObjectInstance for class \"",
+                Tcl_GetString(nameObjPtr), "\"", NULL);
+       return TCL_ERROR;
+    }
+    return TCL_OK;
+}
 /*
  * ------------------------------------------------------------------------
  *  Itcl_CreateClass()
@@ -189,6 +210,8 @@ Itcl_CreateClass(
     ItclClass *iclsPtr;
     ItclVariable *ivPtr;
     Tcl_HashEntry *hPtr;
+    void *callbackPtr;
+    int result;
     int newEntry;
 
     /*
@@ -338,13 +361,12 @@ Itcl_CreateClass(
             Tcl_DeleteCommandFromToken(interp, oldCmd);
         }
     }
-    oPtr = Tcl_NewObjectInstance(interp, infoPtr->clazzClassPtr,
-            path, path, 0, NULL, 0);
-    if (oPtr == NULL) {
-        Tcl_AppendResult(interp,
-                "ITCL: cannot create Tcl_NewObjectInstance for class \"",
-                Tcl_GetString(iclsPtr->fullNamePtr), "\"", NULL);
-       return TCL_ERROR;
+    callbackPtr = Itcl_GetCurrentCallbackPtr(interp);
+    Itcl_NRAddCallback(interp, CallNewObjectInstance, infoPtr,
+            (ClientData)path, &oPtr, nameObjPtr);
+    result = Itcl_NRRunCallbacks(interp, callbackPtr);
+    if (result == TCL_ERROR) {
+        return TCL_ERROR;
     }
     Tcl_ObjectSetMetadata((Tcl_Object) oPtr, infoPtr->class_meta_type, iclsPtr);
     iclsPtr->clsPtr = Tcl_GetObjectAsClass(oPtr);
@@ -527,81 +549,52 @@ ItclDeleteClassVariablesNamespace(
     iclsPtr->nsPtr = NULL;
 }
 
-/*
- * ------------------------------------------------------------------------
- *  Itcl_DeleteClass()
- *
- *  Deletes a class by deleting all derived classes and all objects in
- *  that class, and finally, by destroying the class namespace.  This
- *  procedure provides a friendly way of doing this.  If any errors
- *  are detected along the way, the process is aborted.
- *
- *  Returns TCL_OK if successful, or TCL_ERROR (along with an error
- *  message in the interpreter) if anything goes wrong.
- * ------------------------------------------------------------------------
- */
 int
-Itcl_DeleteClass(
-    Tcl_Interp *interp,     /* interpreter managing this class */
-    ItclClass *iclsPtr)    /* class */
+CallDeleteOneObject(
+    ClientData data[],
+    Tcl_Interp *interp,
+    int result)
 {
     ItclClass *iclsPtr2 = NULL;
-
-    Itcl_ListElem *elem;
     ItclObject *contextIoPtr;
     Tcl_HashEntry *hPtr;
     Tcl_HashSearch place;
     Tcl_DString buffer;
-
-    if (iclsPtr->flags & ITCL_CLASS_DELETE_CALLED) {
-        return TCL_OK;
+    ItclClass *iclsPtr = data[0];
+    void *callbackPtr;
+    
+    if (result != TCL_OK) {
+        return result;
     }
     /*
-     *  Destroy all derived classes, since these lose their meaning
-     *  when the base class goes away.  If anything goes wrong,
-     *  abort with an error.
-     *
-     *  TRICKY NOTE:  When a derived class is destroyed, it
-     *    automatically deletes itself from the "derived" list.
+     * Fix 227804: Whenever an object to delete was found we
+     * have to reset the search to the beginning as the
+     * current entry in the search was deleted and accessing it
+     * is therefore not allowed anymore.
      */
-    elem = Itcl_FirstListElem(&iclsPtr->derived);
-    while (elem) {
-        iclsPtr2 = (ItclClass*)Itcl_GetListValue(elem);
-        elem = Itcl_NextListElem(elem);  /* advance here--elem will go away */
 
-        if (Itcl_DeleteClass(interp, iclsPtr2) != TCL_OK) {
-            goto deleteClassFail;
-        }
-    }
-
-    /*
-     *  Scan through and find all objects that belong to this class.
-     *  Note that more specialized objects have already been
-     *  destroyed above, when derived classes were destroyed.
-     *  Destroy objects and report any errors.
-     */
     hPtr = Tcl_FirstHashEntry(&iclsPtr->infoPtr->objects, &place);
-    while (hPtr) {
+    if (hPtr) {
         contextIoPtr = (ItclObject*)Tcl_GetHashValue(hPtr);
 
-        if (contextIoPtr->iclsPtr == iclsPtr) {
+        while (contextIoPtr->iclsPtr != iclsPtr) {
+            hPtr = Tcl_NextHashEntry(&place);
+            if (hPtr == NULL) {
+                break;
+            }
+        }
+        if (hPtr) {
+	    callbackPtr = Itcl_GetCurrentCallbackPtr(interp);
             if (Itcl_DeleteObject(interp, contextIoPtr) != TCL_OK) {
                 iclsPtr2 = iclsPtr;
                 goto deleteClassFail;
             }
 
-	    /*
-	     * Fix 227804: Whenever an object to delete was found we
-	     * have to reset the search to the beginning as the
-	     * current entry in the search was deleted and accessing it
-	     * is therefore not allowed anymore.
-	     */
-
-	    hPtr = Tcl_FirstHashEntry(&iclsPtr->infoPtr->objects, &place);
-	    continue;
+            Itcl_NRAddCallback(interp, CallDeleteOneObject, iclsPtr,
+	            NULL, NULL, NULL);
+            return Itcl_NRRunCallbacks(interp, callbackPtr);
         }
 
-        hPtr = Tcl_NextHashEntry(&place);
     }
 
     /*
@@ -627,6 +620,100 @@ deleteClassFail:
     Tcl_AddErrorInfo(interp, Tcl_DStringValue(&buffer));
     Tcl_DStringFree(&buffer);
     return TCL_ERROR;
+}
+
+int
+CallDeleteOneClass(
+    ClientData data[],
+    Tcl_Interp *interp,
+    int result)
+{
+    Tcl_DString buffer;
+    ItclClass *iclsPtr = data[0];
+
+    if (result != TCL_OK) {
+        return result;
+    }
+    result = Itcl_DeleteClass(interp, iclsPtr);
+    if (result == TCL_OK) {
+        return TCL_OK;
+    }
+
+    Tcl_DStringInit(&buffer);
+    Tcl_DStringAppend(&buffer, "\n    (while deleting class \"", -1);
+    Tcl_DStringAppend(&buffer, iclsPtr->nsPtr->fullName, -1);
+    Tcl_DStringAppend(&buffer, "\")", -1);
+    Tcl_AddErrorInfo(interp, Tcl_DStringValue(&buffer));
+    Tcl_DStringFree(&buffer);
+    return TCL_ERROR;
+}
+/*
+ * ------------------------------------------------------------------------
+ *  Itcl_DeleteClass()
+ *
+ *  Deletes a class by deleting all derived classes and all objects in
+ *  that class, and finally, by destroying the class namespace.  This
+ *  procedure provides a friendly way of doing this.  If any errors
+ *  are detected along the way, the process is aborted.
+ *
+ *  Returns TCL_OK if successful, or TCL_ERROR (along with an error
+ *  message in the interpreter) if anything goes wrong.
+ * ------------------------------------------------------------------------
+ */
+int
+Itcl_DeleteClass(
+    Tcl_Interp *interp,     /* interpreter managing this class */
+    ItclClass *iclsPtr)    /* class */
+{
+    ItclClass *iclsPtr2 = NULL;
+
+    Itcl_ListElem *elem;
+    int result;
+    void *callbackPtr;
+
+    if (iclsPtr->flags & ITCL_CLASS_DELETE_CALLED) {
+        return TCL_OK;
+    }
+    /*
+     *  Destroy all derived classes, since these lose their meaning
+     *  when the base class goes away.  If anything goes wrong,
+     *  abort with an error.
+     *
+     *  TRICKY NOTE:  When a derived class is destroyed, it
+     *    automatically deletes itself from the "derived" list.
+     */
+    elem = Itcl_FirstListElem(&iclsPtr->derived);
+    while (elem) {
+        iclsPtr2 = (ItclClass*)Itcl_GetListValue(elem);
+        elem = Itcl_NextListElem(elem);  /* advance here--elem will go away */
+
+        callbackPtr = Itcl_GetCurrentCallbackPtr(interp);
+        Itcl_NRAddCallback(interp, CallDeleteOneClass, iclsPtr2, NULL,
+	        NULL, NULL);
+        result = Itcl_NRRunCallbacks(interp, callbackPtr);
+        if (result != TCL_OK) {
+            return result;
+        }
+    }
+
+    /*
+     *  Scan through and find all objects that belong to this class.
+     *  Note that more specialized objects have already been
+     *  destroyed above, when derived classes were destroyed.
+     *  Destroy objects and report any errors.
+     */
+    /*
+     * we have to enroll the while loop to fit for NRE
+     * so we add a callback to delete the first element
+     * and run this callback. At the end of the execution of that callback
+     * we add eventually a callback for the next element and run that etc ...
+     * if an error occurs we terminate the enrolled loop and return
+     * otherwise we return at the end of the enrolled loop.
+     */
+    callbackPtr = Itcl_GetCurrentCallbackPtr(interp);
+    Itcl_NRAddCallback(interp, CallDeleteOneObject, iclsPtr, NULL, NULL, NULL);
+    return Itcl_NRRunCallbacks(interp, callbackPtr);
+
 }
 
 
@@ -1136,6 +1223,28 @@ Itcl_FindClassNamespace(interp, path)
 }
 
 
+static int
+FinalizeCreateObject(
+    ClientData data[],
+    Tcl_Interp *interp,
+    int result)
+{
+    Tcl_Obj* objNamePtr = data[0];
+    char *objName = Tcl_GetString(objNamePtr);
+    if (result == TCL_OK) {
+	Tcl_ResetResult(interp);
+        Tcl_SetObjResult(interp, Tcl_NewStringObj(objName, -1));
+    }
+
+    if (result == TCL_ERROR) {
+	Tcl_Obj *objPtr;
+	
+	objPtr = Tcl_NewStringObj("-level 2", -1);
+	result = Tcl_SetReturnOptions(interp, objPtr);
+    }
+    Tcl_DecrRefCount(objNamePtr);
+    return result;
+}
 /*
  * ------------------------------------------------------------------------
  *  Itcl_HandleClass()
@@ -1168,7 +1277,6 @@ Itcl_HandleClass(
     ItclClass *iclsPtr;
     ItclObjectInfo *infoPtr = (ItclObjectInfo *)clientData;
     Tcl_HashEntry *hPtr;
-    int result = TCL_OK;
 
     char unique[256];    /* buffer used for unique part of object names */
     Tcl_DString buffer;  /* buffer used to build object names */
@@ -1289,20 +1397,11 @@ Itcl_HandleClass(
      *  Try to create a new object.  If successful, return the
      *  object name as the result of this command.
      */
-    result = ItclCreateObject(interp, objName, iclsPtr, objc-4, objv+4);
-
-    if (result == TCL_OK) {
-        Tcl_SetObjResult(interp, Tcl_NewStringObj(objName, -1));
-    }
-
+    Tcl_Obj *objNamePtr = Tcl_NewStringObj(objName, -1);
+    Tcl_IncrRefCount(objNamePtr);
     Tcl_DStringFree(&buffer);
-    if (result == TCL_ERROR) {
-	Tcl_Obj *objPtr;
-	
-	objPtr = Tcl_NewStringObj("-level 2", -1);
-	result = Tcl_SetReturnOptions(interp, objPtr);
-    }
-    return result;
+    Itcl_NRAddCallback(interp, FinalizeCreateObject, objNamePtr, NULL, NULL, NULL);
+    return ItclCreateObject(interp, Tcl_GetString(objNamePtr), iclsPtr, objc-4, objv+4);
 }
 
 

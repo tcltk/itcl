@@ -8,7 +8,7 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itclNeededFromTclOO.c,v 1.1.2.11 2008/01/06 19:24:32 wiede Exp $
+ * RCS: @(#) $Id: itclNeededFromTclOO.c,v 1.1.2.12 2008/09/28 10:41:38 wiede Exp $
  */
 
 #include <tclOOInt.h>
@@ -22,6 +22,9 @@ static struct tcloo_fcn_ptrs {
     AddToMixinSubs addToMixinSubs;
     RemoveFromMixinSubs removeFromMixinSubs;
 } tcloo_fcn_ptrs = { NULL, NULL };
+
+// FIXME this has to be changed/adpted, because of changes in TclOO !!!!
+
 
 /*
  * ----------------------------------------------------------------------
@@ -37,10 +40,10 @@ int
 InitTclOOFunctionPointers(
     Tcl_Interp *interp)
 {
+#ifdef NOTDEF
     void *dlhandle;
 
     dlhandle = dlopen(NULL, RTLD_NOW);
-#ifdef NOTDEF
     tcloo_fcn_ptrs.addToMixinSubs =
             dlsym(dlhandle, "TclOOAddToMixinSubs");
     if (tcloo_fcn_ptrs.addToMixinSubs == NULL) {
@@ -55,8 +58,8 @@ InitTclOOFunctionPointers(
 	    "cannot find symbol TclOOAddRemoveFromSubs for package TclOO", NULL);
         return TCL_ERROR;
     }
-#endif
     dlclose(dlhandle);
+#endif
     return TCL_OK;
 }
 

@@ -23,7 +23,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclCmd.c,v 1.1.2.20 2008/01/06 19:24:30 wiede Exp $
+ *     RCS:  $Id: itclCmd.c,v 1.1.2.21 2008/09/28 10:41:38 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -378,8 +378,8 @@ Itcl_FindObjectsCmd(
  * ------------------------------------------------------------------------
  */
 /* ARGSUSED */
-int
-Itcl_DelClassCmd(
+static int
+NRDelClassCmd(
     ClientData clientData,   /* unused */
     Tcl_Interp *interp,      /* current interpreter */
     int objc,                /* number of arguments */
@@ -389,7 +389,7 @@ Itcl_DelClassCmd(
     char *name;
     ItclClass *iclsPtr;
 
-    ItclShowArgs(2, "Itcl_DelClassCmd", objc, objv);
+    ItclShowArgs(1, "Itcl_DelClassCmd", objc, objv);
     /*
      *  Since destroying a base class will destroy all derived
      *  classes, calls like "destroy class Base Derived" could
@@ -420,6 +420,17 @@ Itcl_DelClassCmd(
     return TCL_OK;
 }
 
+/* ARGSUSED */
+int
+Itcl_DelClassCmd(
+    ClientData clientData,
+    Tcl_Interp *interp,
+    int objc,
+    Tcl_Obj *const *objv)
+{
+    return Itcl_NRCallObjProc(clientData, interp, NRDelClassCmd, objc, objv);
+}
+
 
 /*
  * ------------------------------------------------------------------------
@@ -434,18 +445,33 @@ Itcl_DelClassCmd(
  *  Returns TCL_OK/TCL_ERROR to indicate success/failure.
  * ------------------------------------------------------------------------
  */
-int
-Itcl_DelObjectCmd(
+static int
+CallDeleteObject(
+    ClientData data[],
+    Tcl_Interp *interp,
+    int result)
+{
+    ItclObject *contextIoPtr = data[0];
+    if (result == TCL_OK) {
+        result = Itcl_DeleteObject(interp, contextIoPtr);
+    }
+    return result;
+}
+
+static int
+NRDelObjectCmd(
     ClientData clientData,   /* object management info */
     Tcl_Interp *interp,      /* current interpreter */
     int objc,                /* number of arguments */
     Tcl_Obj *CONST objv[])   /* argument objects */
 {
-    int i;
-    char *name;
     ItclObject *contextIoPtr;
+    char *name;
+    void *callbackPtr;
+    int i;
+    int result;
 
-    ItclShowArgs(2, "Itcl_DelObjectCmd", objc, objv);
+    ItclShowArgs(1, "Itcl_DelObjectCmd", objc, objv);
     /*
      *  Scan through the list of objects and attempt to delete them.
      *  If anything goes wrong (i.e., destructors fail), then
@@ -464,13 +490,28 @@ Itcl_DelObjectCmd(
             return TCL_ERROR;
         }
 
-        if (Itcl_DeleteObject(interp, contextIoPtr) != TCL_OK) {
+        callbackPtr = Itcl_GetCurrentCallbackPtr(interp);
+        Itcl_NRAddCallback(interp, CallDeleteObject, contextIoPtr,
+	        NULL, NULL, NULL);
+        result = Itcl_NRRunCallbacks(interp, callbackPtr);
+	if (result != TCL_OK) {
             return TCL_ERROR;
         }
     }
     return TCL_OK;
 }
 
+/* ARGSUSED */
+int
+Itcl_DelObjectCmd(
+    ClientData clientData,
+    Tcl_Interp *interp,
+    int objc,
+    Tcl_Obj *const *objv)
+{
+    return Itcl_NRCallObjProc(clientData, interp, NRDelObjectCmd, objc, objv);
+}
+
 
 /*
  * ------------------------------------------------------------------------

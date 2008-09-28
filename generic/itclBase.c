@@ -9,7 +9,7 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itclBase.c,v 1.1.2.13 2007/12/12 15:31:04 wiede Exp $
+ * RCS: @(#) $Id: itclBase.c,v 1.1.2.14 2008/09/28 10:41:38 wiede Exp $
  */
 
 #include <stdlib.h>
@@ -176,7 +176,7 @@ Initialize (
     if (Tcl_InitStubs(interp, TCL_VERSION, 0) == NULL) {
         return TCL_ERROR;
     }
-    const char * ret = TclOOInitializeStubs(interp, "0.1.1", 0, 0);
+    const char * ret = TclOOInitializeStubs(interp, "0.4a0", 0, 0);
     if (ret == NULL) {
         return TCL_ERROR;
     }

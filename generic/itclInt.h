@@ -9,7 +9,7 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itclInt.h,v 1.17.2.32 2008/02/03 19:00:49 wiede Exp $
+ * RCS: @(#) $Id: itclInt.h,v 1.17.2.33 2008/09/28 10:41:38 wiede Exp $
  */
 
 #include <string.h>
@@ -501,6 +501,22 @@ typedef struct ItclCallContext {
     ItclMemberFunc *imPtr;
     int refCount;
 } ItclCallContext;
+
+/*
+ * Macros used to cast between pointers and integers (e.g. when storing an int
+ * in ClientData), on 64-bit architectures they avoid gcc warning about "cast
+ * to/from pointer from/to integer of different size".
+ */
+
+#if !defined(INT2PTR) && !defined(PTR2INT)
+#   if defined(HAVE_INTPTR_T) || defined(intptr_t)
+#       define INT2PTR(p) ((void*)(intptr_t)(p))
+#       define PTR2INT(p) ((int)(intptr_t)(p))
+#   else
+#       define INT2PTR(p) ((void*)(p))
+#       define PTR2INT(p) ((int)(p))
+#   endif
+#endif
 
 #ifdef ITCL_DEBUG
 MODULE_SCOPE int _itcl_debug_level;

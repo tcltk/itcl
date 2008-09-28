@@ -25,7 +25,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclEnsemble.c,v 1.1.2.6 2008/01/18 17:11:30 wiede Exp $
+ *     RCS:  $Id: itclEnsemble.c,v 1.1.2.7 2008/09/28 10:41:38 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -1965,7 +1965,7 @@ Itcl_EnsPartCmd(
      *  anything goes wrong, clean up before bailing out.
      */
     status = AddEnsemblePart(interp, ensData, partName, usage,
-        Tcl_GetObjInterpProc(), (ClientData)procPtr, Tcl_ProcDeleteProc,
+        Tcl_GetObjInterpProc(), (ClientData)procPtr, _Tcl_ProcDeleteProc,
         ITCL_ENSEMBLE_ENSEMBLE, &ensPart);
 
     return status;
@@ -2032,6 +2032,35 @@ int Itcl_InvokeEnsembleMethod(Tcl_Interp *interp, Tcl_Namespace *nsPtr,
     Tcl_Obj *namePtr, Tcl_Proc procPtr, int objc, Tcl_Obj *const *objv);
 
 static int
+CallInvokeEnsembleMethod(
+    ClientData data[],
+    Tcl_Interp *interp,
+    int result)
+{
+    Tcl_Namespace *nsPtr = data[0];
+    EnsemblePart *ensPart = data[1];
+    int objc = PTR2INT(data[2]);
+    Tcl_Obj *const*objv = data[3];
+
+    result = Itcl_InvokeEnsembleMethod(interp, nsPtr, ensPart->namePtr,
+	        (Tcl_Proc)ensPart->clientData, objc, objv);
+    return result;
+}
+
+static int
+CallInvokeEnsembleMethod2(
+    ClientData data[],
+    Tcl_Interp *interp,
+    int result)
+{
+    EnsemblePart *ensPart = data[0];
+    int objc = PTR2INT(data[1]);
+    Tcl_Obj *const*objv = data[2];
+    result = (*ensPart->objProc)(ensPart->clientData, interp, objc, objv);
+    return result;
+}
+
+static int
 EnsembleSubCmd(
     ClientData clientData,      /* ensPart struct pointer */
     Tcl_Interp *interp,         /* Current interpreter. */
@@ -2042,23 +2071,24 @@ EnsembleSubCmd(
     Tcl_Namespace *nsPtr;
     EnsemblePart *ensPart;
 
-    ItclShowArgs(2, "EnsembleSubCmd", objc, objv);
+    ItclShowArgs(1, "EnsembleSubCmd", objc, objv);
     result = TCL_OK;
     ensPart = (EnsemblePart *)clientData;
     nsPtr = Tcl_GetCurrentNamespace(interp);
+void *callbackPtr;
+callbackPtr = Itcl_GetCurrentCallbackPtr(interp);
     if (ensPart->flags & ITCL_ENSEMBLE_ENSEMBLE) {
 /* FIX ME !!! */
 if (ensPart->clientData == NULL) {
     return TCL_ERROR;
 }
-        result = Itcl_InvokeEnsembleMethod(interp, nsPtr, ensPart->namePtr,
-	        (Tcl_Proc)ensPart->clientData, objc, objv);
+        Itcl_NRAddCallback(interp, CallInvokeEnsembleMethod, nsPtr, ensPart, INT2PTR(objc), objv);
 //        result = Tcl_InvokeNamespaceProc(interp, (Tcl_Proc)ensPart->clientData,
 //	        nsPtr, ensPart->namePtr, objc, objv);
     } else {
-        result = (*ensPart->objProc)(ensPart->clientData,
-	        interp, objc, objv);
+        Itcl_NRAddCallback(interp, CallInvokeEnsembleMethod2, ensPart, INT2PTR(objc), objv, NULL);
     }
+result = Itcl_NRRunCallbacks(interp, callbackPtr);
     return result;
 }
 /*
