@@ -9,7 +9,7 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itclngInt.h,v 1.1.2.14 2008/02/10 18:40:40 wiede Exp $
+ * RCS: @(#) $Id: itclngInt.h,v 1.1.2.15 2008/10/04 17:58:21 wiede Exp $
  */
 
 #include <string.h>
@@ -446,7 +446,7 @@ typedef struct ItclngCallContext {
     int refCount;
 } ItclngCallContext;
 
-#ifdef ITCLNG_DEBUG
+#ifdef ITCLNG_DEBUG_1
 MODULE_SCOPE int _itclng_debug_level;
 MODULE_SCOPE void ItclngShowArgs(int level, const char *str, int objc,
 	Tcl_Obj * const* objv);
@@ -490,7 +490,7 @@ MODULE_SCOPE int Itclng_DecodeScopedCommand(Tcl_Interp *interp, CONST char *name
 	    Tcl_Namespace **rNsPtr, char **rCmdPtr);
 
 MODULE_SCOPE void Itclng_ParseNamespPath(CONST char *name,
-        Tcl_DString *buffer, char **head, char **tail);
+        char **head, char **tail);
 MODULE_SCOPE int Itclng_CanAccessFunc(ItclngMemberFunc* imPtr,
         Tcl_Namespace* fromNsPtr);
 MODULE_SCOPE void Itclng_Assert(CONST char *testExpr, CONST char *fileName,

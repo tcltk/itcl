@@ -20,7 +20,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itclngResolve.c,v 1.1.2.3 2008/01/20 17:17:18 wiede Exp $
+ *     RCS:  $Id: itclngResolve.c,v 1.1.2.4 2008/10/04 17:58:21 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -116,6 +116,10 @@ Itclng_ClassCmdResolver(
     ItclngMemberFunc *imPtr;
     int isCmdDeleted;
 
+    ItclngShowArgs(0, "Itclng_ResolveCmd", 
+	            Itclng_GetCallFrameObjc(interp),
+	            Itclng_GetCallFrameObjv(interp));
+return TCL_CONTINUE;
     infoPtr = (ItclngObjectInfo *)Tcl_GetAssocData(interp,
                 ITCLNG_INTERP_DATA, NULL);
     hPtr = Tcl_FindHashEntry(&infoPtr->namespaceClasses, (char *)nsPtr);
@@ -318,6 +322,7 @@ Itclng_ClassVarResolver(
      *    constructed the object.
      */
     if (contextIoPtr->iclsPtr != vlookup->ivPtr->iclsPtr) {
+#ifdef NOTDEF
 	if (strcmp(Tcl_GetString(vlookup->ivPtr->namePtr), "this") == 0) {
             hPtr = Tcl_FindHashEntry(&contextIoPtr->iclsPtr->resolveVars,
                 Tcl_GetString(vlookup->ivPtr->namePtr));
@@ -326,10 +331,12 @@ Itclng_ClassVarResolver(
                 vlookup = (ItclngVarLookup*)Tcl_GetHashValue(hPtr);
             }
         }
+#endif
     }
     hPtr = Tcl_FindHashEntry(&contextIoPtr->objectVariables,
             (char *)vlookup->ivPtr);
     if (strcmp(name, "this") == 0) {
+#ifdef NOTDEF
         Tcl_DString buffer;
 	Tcl_DStringInit(&buffer);
 	Tcl_DStringAppend(&buffer,
@@ -351,6 +358,7 @@ Itclng_ClassVarResolver(
             *rPtr = varPtr;
 	    return TCL_OK;
         }
+#endif
     }
     if (strcmp(name, "itcl_options") == 0) {
         Tcl_DString buffer;
@@ -529,6 +537,7 @@ ItclngClassRuntimeVarResolver(
         }
         hPtr = Tcl_FindHashEntry(&contextIoPtr->objectVariables,
                 (char *)vlookup->ivPtr);
+#ifdef NOTDEF
         if (strcmp(Tcl_GetString(vlookup->ivPtr->namePtr), "this") == 0) {
             Tcl_DString buffer;
 	    Tcl_DStringInit(&buffer);
@@ -552,6 +561,7 @@ ItclngClassRuntimeVarResolver(
 	        return varPtr;
             }
         }
+#endif
         if (strcmp(Tcl_GetString(vlookup->ivPtr->namePtr),
 	        "itcl_options") == 0) {
             Tcl_DString buffer;

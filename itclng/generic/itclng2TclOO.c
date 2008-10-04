@@ -8,7 +8,7 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itclng2TclOO.c,v 1.1.2.2 2008/02/10 18:40:40 wiede Exp $
+ * RCS: @(#) $Id: itclng2TclOO.c,v 1.1.2.3 2008/10/04 17:58:21 wiede Exp $
  */
 
 #include <tcl.h>
@@ -290,7 +290,7 @@ Itclng_NewProcClassMethod(
 {
     Tcl_Method result;
 
-    result = TclOONewProcClassMethodEx(interp, clsPtr, preCallPtr, postCallPtr,
+    result = TclOONewProcMethodEx(interp, clsPtr, preCallPtr, postCallPtr,
            errProc, clientData, nameObj, argsObj, bodyObj,
            PUBLIC_METHOD | USE_DECLARER_NS, clientData2);
     return result;
@@ -413,7 +413,7 @@ Itclng_NewForwardClassMethod(
     Tcl_Obj *nameObj,
     Tcl_Obj *prefixObj)
 {
-    return (Tcl_Method)TclOONewForwardClassMethod(interp, (Class *)clsPtr,
+    return (Tcl_Method)TclOONewForwardMethod(interp, (Class *)clsPtr,
             flags, nameObj, prefixObj);
 }
 
@@ -435,6 +435,6 @@ Itclng_NewForwardMethod(
     Tcl_Obj *nameObj,
     Tcl_Obj *prefixObj)
 {
-    return (Tcl_Method)TclOONewForwardMethod(interp, (Object *)oPtr,
+    return (Tcl_Method)TclOONewForwardInstanceMethod(interp, (Object *)oPtr,
             flags, nameObj, prefixObj);
 }

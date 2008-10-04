@@ -25,7 +25,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclngMethod.c,v 1.1.2.12 2008/02/10 19:58:15 wiede Exp $
+ *     RCS:  $Id: itclngMethod.c,v 1.1.2.13 2008/10/04 17:58:21 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -98,7 +98,6 @@ Itclng_BodyCmd(
     ItclngClass *iclsPtr;
     ItclngMemberFunc *imPtr;
     Tcl_HashEntry *entry;
-    Tcl_DString buffer;
 
     ItclngShowArgs(2, "Itclng_BodyCmd", objc, objv);
     if (objc != 4) {
@@ -116,9 +115,9 @@ Itclng_BodyCmd(
      *  class exists.
      */
     token = Tcl_GetString(objv[1]);
-    Itclng_ParseNamespPath(token, &buffer, &head, &tail);
+    Itclng_ParseNamespPath(token, &head, &tail);
 
-    if (!head || *head == '\0') {
+    if ((head != NULL) || (*head == '\0')) {
         Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
             "missing class specifier for body declaration \"", token, "\"",
             (char*)NULL);
@@ -166,7 +165,11 @@ Itclng_BodyCmd(
     }
 
 bodyCmdDone:
-    Tcl_DStringFree(&buffer);
+    if (head != NULL) {
+       ckfree(head);
+    } else {
+       ckfree(tail);
+    }
     return status;
 }
 
@@ -202,7 +205,6 @@ Itclng_ConfigBodyCmd(
     char *head;
     char *tail;
     char *token;
-    Tcl_DString buffer;
     ItclngClass *iclsPtr;
     ItclngVarLookup *vlookup;
     ItclngVariable *ivPtr;
@@ -221,7 +223,7 @@ Itclng_ConfigBodyCmd(
      *  class exists.
      */
     token = Tcl_GetString(objv[1]);
-    Itclng_ParseNamespPath(token, &buffer, &head, &tail);
+    Itclng_ParseNamespPath(token, &head, &tail);
 
     if ((head == NULL) || (*head == '\0')) {
         Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
@@ -288,7 +290,11 @@ Itclng_ConfigBodyCmd(
     ivPtr->codePtr = mcode;
 
 configBodyCmdDone:
-    Tcl_DStringFree(&buffer);
+    if (head != NULL) {
+        ckfree(head);
+    } else {
+        ckfree(tail);
+    }
     return status;
 }
 
@@ -882,10 +888,14 @@ Itclng_EvalMemberCode(
      *  try to autoload one.  Also, if this is Tcl code, make sure
      *  that it's compiled and ready to use.
      */
-    if (Itclng_GetMemberCode(interp, imPtr) != TCL_OK) {
-        return TCL_ERROR;
-    }
     mcode = imPtr->codePtr;
+    assert(mcode != NULL);
+    if (mcode->flags & ITCLNG_IMPLEMENT_NONE) {
+        if (Itclng_GetMemberCode(interp, imPtr) != TCL_OK) {
+            return TCL_ERROR;
+        }
+        mcode = imPtr->codePtr;
+    }
 
     /*
      *  Bump the reference count on this code, in case it is
@@ -1410,7 +1420,7 @@ Itclng_ConstructBase(
     int cmdlinec;
     Tcl_Obj **cmdlinev;
 
-ItclngShowArgs(0, "Itclng_ConstructBase", objc, objv);
+ItclngShowArgs(1, "Itclng_ConstructBase", objc, objv);
     /*
      *  If the class has an "initCode", invoke it in the current context.
      *
@@ -1801,7 +1811,7 @@ ItclngCheckCallMethod(
     oPtr = NULL;
     hPtr = NULL;
     imPtr = (ItclngMemberFunc *)clientData;
-fprintf(stderr, "Itclng_CheckCallMethod!%s!\n", Tcl_GetString(imPtr->namePtr));
+//fprintf(stderr, "Itclng_CheckCallMethod!%s!\n", Tcl_GetString(imPtr->namePtr));
     infoPtr = imPtr->iclsPtr->infoPtr;
     if (imPtr->flags & ITCLNG_CONSTRUCTOR) {
         ioPtr = imPtr->iclsPtr->infoPtr->currIoPtr;
@@ -1875,12 +1885,12 @@ fprintf(stderr, "Itclng_CheckCallMethod!%s!\n", Tcl_GetString(imPtr->namePtr));
         }
         return TCL_ERROR;
     }
+#ifndef NOTDEF
     int cObjc = Itclng_GetCallFrameObjc(interp);
     Tcl_Obj *const * cObjv = Itclng_GetCallFrameObjv(interp);
-ItclngShowArgs(0, "Check", cObjc, cObjv);
-fprintf(stderr, "IM!%s!%d!\n", Tcl_GetString(imPtr->namePtr), imPtr->argcount);
-    if (cObjc-2 < imPtr->argcount) {
-fprintf(stderr, "bad args\n");
+//ItclngShowArgs(0, "Check", cObjc, cObjv);
+//fprintf(stderr, "IM!%s!%d!%d!%d!\n", Tcl_GetString(imPtr->namePtr), imPtr->argcount, imPtr->codePtr->argcount, cObjc);
+    if (cObjc-2 < imPtr->codePtr->argcount) {
 	if (strcmp(Tcl_GetString(imPtr->namePtr), "info") == 0) {
             Tcl_Obj *objPtr = Tcl_NewStringObj(
 	            "wrong # args: should be one of...\n", -1);
@@ -1892,8 +1902,8 @@ fprintf(stderr, "bad args\n");
             Tcl_AppendResult(interp, "wrong # args: should be \"",
 	            Tcl_GetString(cObjv[0]), " ",
 	            Tcl_GetString(imPtr->namePtr), " ",
-		    ItclngGetUsageString(imPtr->iclsPtr,
-		    Tcl_GetString(imPtr->namePtr)),
+		    Tcl_GetString(ItclngGetUsageString(imPtr->iclsPtr,
+		    Tcl_GetString(imPtr->namePtr))),
 		    "\"", NULL);
 	}
         if (isFinished != NULL) {
@@ -1901,6 +1911,7 @@ fprintf(stderr, "bad args\n");
         }
         return TCL_ERROR;
     }
+#endif
     isNew = 0;
     callContextPtr = NULL;
     Tcl_Namespace *currNsPtr;
@@ -2029,10 +2040,10 @@ ItclngAfterCallMethod(
     ioPtr->callRefCount--;
     imPtr->iclsPtr->callRefCount--;
 if (ioPtr->flags != callContextPtr->objectFlags) {
-fprintf(stderr, "IOPTR_FLAGS2!0x%08x!0x%08x!%s!%d!%d!\n", ioPtr->flags, callContextPtr->objectFlags, Tcl_GetString(imPtr->fullNamePtr), ioPtr->callRefCount, imPtr->iclsPtr->callRefCount);
+//fprintf(stderr, "IOPTR_FLAGS2!0x%08x!0x%08x!%s!%d!%d!\n", ioPtr->flags, callContextPtr->objectFlags, Tcl_GetString(imPtr->fullNamePtr), ioPtr->callRefCount, imPtr->iclsPtr->callRefCount);
 }
     if (ioPtr->flags & ITCLNG_OBJECT_SHOULD_VARNS_DELETE) {
-fprintf(stderr, "DELOBJVAR!%s!%d!\n", Tcl_GetCommandName(interp, ioPtr->accessCmd), ioPtr->callRefCount);
+//fprintf(stderr, "DELOBJVAR!%s!%d!\n", Tcl_GetCommandName(interp, ioPtr->accessCmd), ioPtr->callRefCount);
         ItclngDeleteObjectVariablesNamespace(interp, ioPtr);
     }
     

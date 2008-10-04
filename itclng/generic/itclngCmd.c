@@ -509,7 +509,7 @@ Itclng_CreateClassCMethodCmd(
     ItclngClass *iclsPtr;
     ItclngMemberFunc *imPtr;
 
-    ItclngShowArgs(0, "Itclng_CreateClassCMethodCmd", objc, objv);
+    ItclngShowArgs(1, "Itclng_CreateClassCMethodCmd", objc, objv);
     if (ItclngCheckNumCmdParams(interp, infoPtr, "createClassCMethod", objc,
             2, 2) != TCL_OK) {
         return TCL_ERROR;
@@ -592,7 +592,7 @@ Itclng_CreateClassCProcCmd(
     ItclngClass *iclsPtr;
     ItclngMemberFunc *imPtr;
 
-    ItclngShowArgs(0, "Itclng_CreateClassCProcCmd", objc, objv);
+    ItclngShowArgs(1, "Itclng_CreateClassCProcCmd", objc, objv);
     if (ItclngCheckNumCmdParams(interp, infoPtr, "createClassCProc", objc,
             2, 2) != TCL_OK) {
         return TCL_ERROR;
@@ -634,7 +634,7 @@ Itclng_ChangeClassMemberFuncCmd(
     ItclngClass *iclsPtr;
     ItclngMemberFunc *imPtr;
 
-    ItclngShowArgs(0, "Itclng_ChangeClassMemberFuncCmd", objc, objv);
+    ItclngShowArgs(1, "Itclng_ChangeClassMemberFuncCmd", objc, objv);
     if (ItclngCheckNumCmdParams(interp, infoPtr, "changeClassMemberFunc", objc,
             2, 2) != TCL_OK) {
         return TCL_ERROR;
@@ -681,7 +681,7 @@ Itclng_ChangeClassVariableConfigCmd(
     ItclngClass *iclsPtr;
     ItclngVariable *ivPtr;
 
-    ItclngShowArgs(0, "Itclng_ChangeClassVariableConfigCmd", objc, objv);
+    ItclngShowArgs(1, "Itclng_ChangeClassVariableConfigCmd", objc, objv);
     if (ItclngCheckNumCmdParams(interp, infoPtr, "changeClassVariableConfig",
             objc, 3, 3) != TCL_OK) {
         return TCL_ERROR;
@@ -701,7 +701,7 @@ Itclng_ChangeClassVariableConfigCmd(
         return TCL_ERROR;
     }
     ivPtr = Tcl_GetHashValue(hPtr);
-fprintf(stderr, "CALL!ItclngChangeVariableConfig!\n");
+//fprintf(stderr, "CALL!ItclngChangeVariableConfig!\n");
     if (ItclngChangeVariableConfig(interp, iclsPtr, objv[2],
             Tcl_GetString(objv[3]), ivPtr) != TCL_OK) {
 	return TCL_ERROR;
@@ -935,7 +935,7 @@ Itclng_CreateClassOptionCmd(
 {
     ItclngObjectInfo *infoPtr;
 
-    ItclngShowArgs(0, "Itclng_CreateClassOptionCmd", objc, objv);
+    ItclngShowArgs(1, "Itclng_CreateClassOptionCmd", objc, objv);
     if (ItclngCheckNumCmdParams(interp, infoPtr, "createClassOption", objc,
             2, 2) != TCL_OK) {
         return TCL_ERROR;
@@ -963,7 +963,7 @@ Itclng_CreateClassMethodVariableCmd(
 {
     ItclngObjectInfo *infoPtr;
 
-    ItclngShowArgs(0, "Itclng_CreateClassMethodVariableCmd", objc, objv);
+    ItclngShowArgs(1, "Itclng_CreateClassMethodVariableCmd", objc, objv);
     if (ItclngCheckNumCmdParams(interp, infoPtr, "createClassMethodVariable",
             objc, 2, 2) != TCL_OK) {
         return TCL_ERROR;
@@ -996,7 +996,7 @@ Itclng_CreateClassInheritCmd(
     ItclngHierIter hier;
     int newEntry;
 
-    ItclngShowArgs(0, "Itclng_CreateClassInheritCmd", objc, objv);
+    ItclngShowArgs(1, "Itclng_CreateClassInheritCmd", objc, objv);
     if (ItclngCheckNumCmdParams(interp, infoPtr, "createClassInherit", objc,
             2, -1) != TCL_OK) {
         return TCL_ERROR;
@@ -1079,7 +1079,7 @@ Itclng_GetContextCmd(
     } else {
 	objPtr = Tcl_NewStringObj("", -1);
     }
-fprintf(stderr, "CALLNS!%s!\n", Tcl_GetString(objPtr));
+//fprintf(stderr, "CALLNS!%s!\n", Tcl_GetString(objPtr));
 //    Tcl_ListObjAppendElement((Tcl_Interp*)NULL, resultPtr, objPtr);
     if (Itclng_GetContext(interp, &iclsPtr, &ioPtr) != TCL_OK) {
         return TCL_ERROR;
@@ -1129,7 +1129,7 @@ Itclng_GetCallContextInfoCmd(
     ItclngObjectInfo *infoPtr;
     ItclngCallContext *callContextPtr;
 
-    ItclngShowArgs(0, "Itclng_GetCallContextInfoCmd", objc, objv);
+    ItclngShowArgs(1, "Itclng_GetCallContextInfoCmd", objc, objv);
     if (ItclngCheckNumCmdParams(interp, infoPtr, "getCallContextInfo", objc,
             0, 0) != TCL_OK) {
         return TCL_ERROR;
@@ -1191,7 +1191,7 @@ Itclng_GetInstanceVarValueCmd(
     const char *name2;
     const char *cp;
 
-    ItclngShowArgs(0, "Itclng_GetInstanceVarValueCmd", objc, objv);
+    ItclngShowArgs(1, "Itclng_GetInstanceVarValueCmd", objc, objv);
     if (ItclngCheckNumCmdParams(interp, infoPtr, "getInstanceVarValue", objc,
             2, 2) != TCL_OK) {
         return TCL_ERROR;
@@ -1204,7 +1204,7 @@ Itclng_GetInstanceVarValueCmd(
     infoPtr = (ItclngObjectInfo *)clientData;
     callContextPtr = Itclng_PeekStack(&infoPtr->contextStack);
     if (callContextPtr != NULL) {
-fprintf(stderr, "COCL!%s!\n", callContextPtr->ioPtr->iclsPtr->nsPtr->fullName);
+//fprintf(stderr, "COCL!%s!\n", callContextPtr->ioPtr->iclsPtr->nsPtr->fullName);
         hPtr = Tcl_FindHashEntry(&callContextPtr->ioPtr->iclsPtr->variables,
 	        (char *)objv[1]);
         if (hPtr == NULL) {
@@ -1756,7 +1756,7 @@ Itclng_IsaCmd(
     ItclngClass *contextIclsPtr;
     ItclngObject *contextIoPtr;
 
-    ItclngShowArgs(0, "Itclng_IsaCmd", objc, objv);
+    ItclngShowArgs(1, "Itclng_IsaCmd", objc, objv);
     /*
      *  Make sure that this command is being invoked in the proper
      *  context.
@@ -1791,7 +1791,7 @@ Itclng_IsaCmd(
         return TCL_ERROR;
     }
 
-fprintf(stderr, "ICLS!%s!\n", iclsPtr->nsPtr->fullName);
+//fprintf(stderr, "ICLS!%s!\n", iclsPtr->nsPtr->fullName);
     if (Itclng_ObjectIsa(contextIoPtr, iclsPtr)) {
         Tcl_SetIntObj(Tcl_GetObjResult(interp), 1);
     } else {
@@ -1834,16 +1834,16 @@ Itclng_ChainCmd(
     ItclngObject *contextIoPtr;
 
     Tcl_HashEntry *hPtr;
-    Tcl_DString buffer;
     Tcl_Obj *cmdlinePtr;
     Tcl_Obj **newobjv;
     ItclngMemberFunc *imPtr;
     ItclngClass *iclsPtr;
     ItclngHierIter hier;
     char *cmd;
+    char *cmd2;
     char *head;
 
-    ItclngShowArgs(0, "Itclng_ChainCmd", objc, objv);
+    ItclngShowArgs(1, "Itclng_ChainCmd", objc, objv);
     /*
      *  If this command is not invoked within a class namespace,
      *  signal an error.
@@ -1873,25 +1873,33 @@ Itclng_ChainCmd(
     } else {
         cmd = Tcl_GetString(cObjv[1]);
     }
-fprintf(stderr, "CHAIN1!%s!%p!%s!%s!%s!\n", cmd, Itclng_GetCallFrameClientData(interp, 0), Tcl_GetCurrentNamespace(interp)->fullName, Itclng_GetUplevelNamespace(interp, 1)->fullName, contextIclsPtr->nsPtr->fullName);
+//fprintf(stderr, "CHAIN1!%s!%p!%s!%s!%s!\n", cmd, Itclng_GetCallFrameClientData(interp, 0), Tcl_GetCurrentNamespace(interp)->fullName, Itclng_GetUplevelNamespace(interp, 1)->fullName, contextIclsPtr->nsPtr->fullName);
     result = TCL_OK;
-    Itclng_ParseNamespPath(cmd, &buffer, &head, &cmd);
-    if (strcmp(cmd, "___constructor_init") == 0) {
-        cmd = "constructor";
+    Itclng_ParseNamespPath(cmd, &head, &cmd2);
+fprintf(stderr, "C!%s!%s!\n", cmd, cmd2);
+    if (strcmp(cmd2, "___constructor_init") == 0) {
+        cmd2 = "constructor";
     }
-fprintf(stderr, "HEAD!%s!\n", head == NULL ? "(nil)" : head);
+    if (head != NULL) {
+        ckfree(head);
+    } else {
+	if (cmd != NULL) {
+            ckfree(cmd);
+	}
+    }
+//fprintf(stderr, "HEAD!%s!\n", head == NULL ? "(nil)" : head);
 #ifndef NOTDEF
     hPtr = Tcl_FindHashEntry(&contextIclsPtr->infoPtr->namespaceClasses,
             (char *)Tcl_GetCurrentNamespace(interp));
     if (hPtr != NULL) {
         contextIclsPtr = Tcl_GetHashValue(hPtr);
-fprintf(stderr, "NC!%s!\n", contextIclsPtr->nsPtr->fullName);
+//fprintf(stderr, "NC!%s!\n", contextIclsPtr->nsPtr->fullName);
     } else {
         /* must be a direct call from the object, so use the object's
 	 * class */
 	contextIclsPtr = contextIoPtr->iclsPtr;
     }
-fprintf(stderr, "CMD2!%s!%s!\n", cmd, contextIclsPtr->nsPtr->fullName);
+//fprintf(stderr, "CMD2!%s!%s!\n", cmd, contextIclsPtr->nsPtr->fullName);
 #endif
 
     /*
@@ -1908,7 +1916,7 @@ fprintf(stderr, "CMD2!%s!%s!\n", cmd, contextIclsPtr->nsPtr->fullName);
     if (contextIoPtr != NULL) {
         Itclng_InitHierIter(&hier, contextIoPtr->iclsPtr);
         while ((iclsPtr = Itclng_AdvanceHierIter(&hier)) != NULL) {
-fprintf(stderr, "LOICLS!%s!%s!\n", iclsPtr->nsPtr->fullName, contextIclsPtr->nsPtr->fullName);
+//fprintf(stderr, "LOICLS!%s!%s!\n", iclsPtr->nsPtr->fullName, contextIclsPtr->nsPtr->fullName);
             if (iclsPtr == contextIclsPtr) {
                 break;
             }
@@ -1923,11 +1931,11 @@ fprintf(stderr, "LOICLS!%s!%s!\n", iclsPtr->nsPtr->fullName, contextIclsPtr->nsP
      *  If found, execute it.  Otherwise, do nothing.
      */
     Tcl_Obj *objPtr;
-    objPtr = Tcl_NewStringObj(cmd, -1);
+    objPtr = Tcl_NewStringObj(cmd2, -1);
     Tcl_IncrRefCount(objPtr);
     while ((iclsPtr = Itclng_AdvanceHierIter(&hier)) != NULL) {
         hPtr = Tcl_FindHashEntry(&iclsPtr->functions, (char *)objPtr);
-fprintf(stderr, "H!%s!%p!\n", iclsPtr->nsPtr->fullName, hPtr);
+fprintf(stderr, "H!%s!%p!%s!\n", iclsPtr->nsPtr->fullName, hPtr, cmd2);
         if (hPtr) {
             imPtr = (ItclngMemberFunc*)Tcl_GetHashValue(hPtr);
 
@@ -1942,7 +1950,7 @@ fprintf(stderr, "H!%s!%p!\n", iclsPtr->nsPtr->fullName, hPtr);
             (void) Tcl_ListObjGetElements((Tcl_Interp*)NULL, cmdlinePtr,
                 &objc, &newobjv);
 
-ItclngShowArgs(0, "Itclng_ChainCmd2", objc-1, newobjv+1);
+ItclngShowArgs(1, "Itclng_ChainCmd2", objc-1, newobjv+1);
             Itclng_SetCallFrameNamespace(interp, imPtr->iclsPtr->nsPtr);
 	    if (imPtr->flags & ITCLNG_CONSTRUCTOR) {
 	        Tcl_SetStringObj(newobjv[0], Tcl_GetCommandName(interp,
@@ -1960,7 +1968,6 @@ ItclngShowArgs(0, "Itclng_ChainCmd2", objc-1, newobjv+1);
     }
     Tcl_DecrRefCount(objPtr);
 
-    Tcl_DStringFree(&buffer);
     Itclng_DeleteHierIter(&hier);
     return result;
 }
@@ -2324,7 +2331,7 @@ Itclng_DeleteClassCmd(
     char *name;
     ItclngClass *iclsPtr;
 
-    ItclngShowArgs(0, "Itclng_DeleteClassCmd", objc, objv);
+    ItclngShowArgs(1, "Itclng_DeleteClassCmd", objc, objv);
     /*
      *  Since destroying a base class will destroy all derived
      *  classes, calls like "destroy class Base Derived" could
@@ -2463,7 +2470,7 @@ Itclng_ScopeCmd(
     ItclngVarLookup *vlookup;
     int doAppend;
 
-    ItclngShowArgs(0, "Itclng_ScopeCmd", objc, objv);
+    ItclngShowArgs(1, "Itclng_ScopeCmd", objc, objv);
     if (objc != 2) {
         Tcl_WrongNumArgs(interp, 1, objv, "varname");
         return TCL_ERROR;
@@ -3021,7 +3028,7 @@ Itcl_ForwardAddCmd(
     ItclObjectInfo *infoPtr;
     ItclClass *iclsPtr;
 
-    ItclShowArgs(0, "Itcl_ForwardAddCmd", objc, objv);
+    ItclShowArgs(1, "Itcl_ForwardAddCmd", objc, objv);
     if (objc < 3) {
         Tcl_WrongNumArgs(interp, 1, objv, "<forwardName> <targetName> ?<arg> ...?");
         return TCL_ERROR;
@@ -3161,7 +3168,7 @@ Itcl_NWidgetCmd(
     int result;
 
     infoPtr = (ItclObjectInfo *)clientData;
-    ItclShowArgs(0, "Itcl_NWidgetCmd", objc-1, objv);
+    ItclShowArgs(1, "Itcl_NWidgetCmd", objc-1, objv);
     result = ItclClassBaseCmd(clientData, interp, ITCL_NWIDGET, objc, objv,
             &iclsPtr);
     if (result != TCL_OK) {
@@ -3201,7 +3208,7 @@ Itcl_AddOptionCmd(
 
     result = TCL_OK;
     infoPtr = (ItclObjectInfo *)clientData;
-    ItclShowArgs(0, "Itcl_AddOptionCmd", objc, objv);
+    ItclShowArgs(1, "Itcl_AddOptionCmd", objc, objv);
     if (objc < 4) {
         Tcl_WrongNumArgs(interp, 1, objv, 
 	        "className protection option optionName ...");

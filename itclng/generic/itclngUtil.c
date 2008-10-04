@@ -702,21 +702,19 @@ Itclng_Protection(
 void
 Itclng_ParseNamespPath(
     CONST char *name,    /* path name to class member */
-    Tcl_DString *buffer, /* dynamic string buffer (uninitialized) */
     char **head,         /* returns "namesp::namesp::namesp" part */
     char **tail)         /* returns "element" part */
 {
     register char *sep, *newname;
 
-    Tcl_DStringInit(buffer);
+    newname = (char *)ckalloc(sizeof(char)*(strlen(name)+1));
+    strcpy(newname, name);
 
     /*
-     *  Copy the name into the buffer and parse it.  Look
+     *  Parse the name.  Look
      *  backward from the end of the string to the first '::'
      *  scope qualifier.
      */
-    Tcl_DStringAppend(buffer, name, -1);
-    newname = Tcl_DStringValue(buffer);
 
     for (sep=newname; *sep != '\0'; sep++)
         ;

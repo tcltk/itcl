@@ -5,7 +5,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclngCMethod.c,v 1.1.2.1 2008/02/10 18:35:20 wiede Exp $
+ *     RCS:  $Id: itclngCMethod.c,v 1.1.2.2 2008/10/04 17:58:21 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -166,7 +166,7 @@ TclOONewCClassMethod(
     cmPtr->version = TCLOO_C_METHOD_VERSION;
     cmPtr->flags = flags & USE_DECLARER_NS;
     cmPtr->cMethodPtr = cMethod;
-    method = Tcl_NewClassMethod(interp, clsPtr, nameObj, flags,
+    method = Tcl_NewMethod(interp, clsPtr, nameObj, flags,
             &CMethodType, cmPtr);
     if (argsLen == -1) {
 	Tcl_DecrRefCount(argsObj);

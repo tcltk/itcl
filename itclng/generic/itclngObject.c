@@ -117,6 +117,7 @@ ItclngCreateObject(
     Tcl_DString buffer;
     Tcl_CmdInfo cmdInfo;
     Tcl_HashEntry *entry;
+    Tcl_Obj *objPtr;
     ItclngObjectInfo *infoPtr;
     ItclngObject *saveCurrIoPtr;
     ItclngObject *ioPtr;
@@ -204,6 +205,7 @@ ItclngCreateObject(
 	// NEED TO FREE STUFF HERE !! 
         return TCL_ERROR;
     }
+
     Tcl_ObjectSetMethodNameMapper(ioPtr->oPtr, ItclngMapMethodNameProc);
 
     ioPtr->accessCmd = Tcl_GetObjectCommand(ioPtr->oPtr);
@@ -226,6 +228,38 @@ ItclngCreateObject(
     Tcl_ObjectSetMetadata(ioPtr->oPtr, iclsPtr->infoPtr->object_meta_type,
             ioPtr);
 
+#ifdef NOTDEF
+    Tcl_Obj *objPtr2;
+FOREACH_HASH_DECLS;
+//    Tcl_HashEntry *hPtr;
+    ItclngVariable *ivPtr;
+    Tcl_Var varPtr;
+    Tcl_Obj *objPtr3;
+    objPtr3 = Tcl_NewObj();
+    char *cp;
+    Tcl_GetCommandFullName(interp, ioPtr->accessCmd, objPtr3);
+    objPtr2 = Tcl_NewStringObj(Tcl_GetString(objPtr3), -1);
+    Tcl_AppendToObj(objPtr2, "::this", -1);
+FOREACH_HASH(ivPtr, varPtr, &ioPtr->objectVariables) {
+    cp = Tcl_GetString(ivPtr->fullNamePtr);
+    cp = cp + strlen(cp) - 6;
+    if (strcmp(cp, "::this") == 0) {
+        break;
+    }
+}
+        Tcl_DStringInit(&buffer);
+	Tcl_DStringInit(&buffer);
+	Tcl_DStringAppend(&buffer,
+	        Tcl_GetString(ivPtr->iclsPtr->infoPtr->internalVars), -1);
+	Tcl_DStringAppend(&buffer, Tcl_GetString(objPtr3), -1);
+	Tcl_DStringAppend(&buffer, ivPtr->iclsPtr->nsPtr->fullName, -1);
+        Tcl_DStringAppend(&buffer, "::this", -1);
+//fprintf(stderr, "STE2!%s!%s!%s!\n", Tcl_GetCurrentNamespace(interp)->fullName, "this", Tcl_GetString(objPtr3));
+	 if (Tcl_SetVar2(interp, Tcl_DStringValue(&buffer), NULL,
+	     Tcl_GetString(objPtr3), TCL_NAMESPACE_ONLY) == NULL) {
+	     return TCL_ERROR;
+         }
+#endif
     /* make the object known, if it is used in the constructor already! */
     entry = Tcl_CreateHashEntry(&iclsPtr->infoPtr->objects,
         (char*)ioPtr->accessCmd, &newEntry);
@@ -248,7 +282,7 @@ ItclngCreateObject(
      *  in case they have constructors.  This will cause the
      *  same chain reaction.
      */
-    Tcl_Obj *objPtr = Tcl_NewStringObj("constructor", -1);
+    objPtr = Tcl_NewStringObj("constructor", -1);
     if (Tcl_FindHashEntry(&iclsPtr->functions, (char *)objPtr) == NULL) {
         result = Itclng_ConstructBase(interp, ioPtr, iclsPtr, newObjc, newObjv);
     }
@@ -386,7 +420,7 @@ ItclngInitObjectVariables(
     /*
      * create all the variables for each class in the
      * ::itcl::variables::<object>::<class> namespace as an
-     * undefined variable using the Tcl "variable xx" command
+     * undefined variable
      */
     itclOptionsIsSet = 0;
     Itclng_InitHierIter(&hier, iclsPtr);
@@ -482,6 +516,7 @@ ItclngInitObjectVariables(
                        (ClientData)traceInfoPtr);
 	        if (ivPtr->flags & ITCLNG_THIS_VAR) {
                     thisName = Tcl_GetString(ivPtr->namePtr);
+#ifdef NOTDEF
 		    if (Tcl_SetVar2(interp, thisName, NULL,
 		        "", TCL_NAMESPACE_ONLY) == NULL) {
                         Itclng_PopCallFrame(interp);
@@ -490,6 +525,25 @@ ItclngInitObjectVariables(
 	            Tcl_TraceVar2(interp, thisName, NULL,
 		        TCL_TRACE_READS|TCL_TRACE_WRITES, ItclngTraceThisVar,
 		        (ClientData)ioPtr);
+#else
+	Tcl_DStringInit(&buffer);
+	Tcl_DStringAppend(&buffer,
+	        Tcl_GetString(iclsPtr2->infoPtr->internalVars), -1);
+	if ((name[0] != ':') && (name[1] != ':')) {
+             Tcl_DStringAppend(&buffer, "::", 2);
+	}
+	Tcl_DStringAppend(&buffer, name, -1);
+	Tcl_DStringAppend(&buffer, iclsPtr2->nsPtr->fullName, -1);
+		    Tcl_Obj *objPtr;
+		    objPtr = Tcl_NewStringObj(name, -1);
+		    Tcl_GetCommandFullName(interp, ioPtr->accessCmd, objPtr);
+//fprintf(stderr, "STE!%s!%s!%s!\n", Tcl_GetCurrentNamespace(interp)->fullName, thisName, Tcl_GetString(objPtr));
+		    if (Tcl_SetVar2(interp, thisName, NULL,
+		        Tcl_GetString(objPtr), TCL_NAMESPACE_ONLY) == NULL) {
+                        Itclng_PopCallFrame(interp);
+		        return TCL_ERROR;
+	            }
+#endif
 	        } else {
 	            if (ivPtr->init != NULL) {
 		        if (Tcl_ObjSetVar2(interp, ivPtr->namePtr, NULL,
@@ -1547,7 +1601,6 @@ ItclngObjectCmd(
 {
     Tcl_Obj *methodNamePtr;
     Tcl_Obj **newObjv;
-    Tcl_DString buffer;
     ItclngMemberFunc *imPtr;
     ItclngClass *iclsPtr;
     Itclng_ListElem *elem;
@@ -1600,9 +1653,10 @@ ItclngObjectCmd(
     }
     methodNamePtr = NULL;
     if (objv[0] != NULL) {
-        Itclng_ParseNamespPath(Tcl_GetString(objv[0]), &buffer,
-	        &className, &tail);
+	if (strstr(Tcl_GetString(objv[0]), "::") != NULL) {
+        Itclng_ParseNamespPath(Tcl_GetString(objv[0]), &className, &tail);
         if (className != NULL) {
+//fprintf(stderr, "ItclngObjectCmd!%s!\n", Tcl_GetString(objv[0]));
             methodNamePtr = Tcl_NewStringObj(tail, -1);
 	    Tcl_IncrRefCount(methodNamePtr);
 	    /* look for the class in the hierarchy */
@@ -1629,8 +1683,11 @@ ItclngObjectCmd(
 		}
                 elem = Itclng_NextListElem(elem);
 	    }
+            ckfree(className);
+        } else {
+            ckfree(tail);
         }
-        Tcl_DStringFree(&buffer);
+        }
     }
     if (isDirectCall) {
 	if (!found) {
@@ -1741,6 +1798,41 @@ GetClassFromClassName(
     Tcl_DecrRefCount(objPtr);
     return iclsPtr;
 }
+int
+GetClassAndName(
+    ItclngClass *iclsPtr,
+    const char *sp,
+    Tcl_Class *startClsPtr,
+    Tcl_Obj *methodObj)
+{
+    Tcl_Obj *className;
+    Tcl_Obj *methodName;
+    ItclngClass *iclsPtr2;
+    char *head;
+    char *tail;
+
+    Itclng_ParseNamespPath(sp, &head, &tail);
+    if (head != NULL) {
+        iclsPtr2 = NULL;
+        methodName = NULL;
+        className = NULL;
+        methodName = Tcl_NewStringObj(tail, -1);
+        Tcl_IncrRefCount(methodName);
+        className = Tcl_NewStringObj(head, -1);
+        Tcl_IncrRefCount(className);
+	iclsPtr2 = GetClassFromClassName(head, iclsPtr);
+	if (iclsPtr2 != NULL) {
+	    *startClsPtr = iclsPtr2->clsPtr;
+	    Tcl_SetStringObj(methodObj, Tcl_GetString(methodName), -1);
+	}
+        Tcl_DecrRefCount(className);
+        Tcl_DecrRefCount(methodName);
+        ckfree(head);
+    } else {
+        ckfree(tail);
+    }
+    return TCL_OK;
+}
 
 /*
  * ------------------------------------------------------------------------
@@ -1755,21 +1847,13 @@ ItclngMapMethodNameProc(
     Tcl_Class *startClsPtr,
     Tcl_Obj *methodObj)
 {
-    Tcl_Obj *methodName;
-    Tcl_Obj *className;
-    Tcl_DString buffer;
     Tcl_HashEntry *hPtr;
     ItclngObject *ioPtr;
     ItclngClass *iclsPtr;
-    ItclngClass *iclsPtr2;
     ItclngObjectInfo *infoPtr;
-    char *head;
-    char *tail;
     char *sp;
 
     iclsPtr = NULL;
-    iclsPtr2 = NULL;
-    methodName = NULL;
     infoPtr = (ItclngObjectInfo *)Tcl_GetAssocData(interp,
             ITCLNG_INTERP_DATA, NULL);
     ioPtr = (ItclngObject *)Tcl_ObjectGetMetadata(oPtr,
@@ -1782,20 +1866,8 @@ ItclngMapMethodNameProc(
         iclsPtr = ioPtr->iclsPtr;
     }
     sp = Tcl_GetString(methodObj);
-    Itclng_ParseNamespPath(sp, &buffer, &head, &tail);
-    if (head != NULL) {
-        className = NULL;
-        methodName = Tcl_NewStringObj(tail, -1);
-        Tcl_IncrRefCount(methodName);
-        className = Tcl_NewStringObj(head, -1);
-        Tcl_IncrRefCount(className);
-	iclsPtr2 = GetClassFromClassName(head, iclsPtr);
-	if (iclsPtr2 != NULL) {
-	    *startClsPtr = iclsPtr2->clsPtr;
-	    Tcl_SetStringObj(methodObj, Tcl_GetString(methodName), -1);
-	}
-        Tcl_DecrRefCount(className);
-        Tcl_DecrRefCount(methodName);
+    if (strstr(sp, "::") != NULL) {
+        GetClassAndName(iclsPtr, sp, startClsPtr, methodObj);
     }
     hPtr = Tcl_FindHashEntry(&iclsPtr->resolveCmds, Tcl_GetString(methodObj));
     if (hPtr != NULL) {
@@ -1838,7 +1910,6 @@ ItclngMapMethodNameProc(
             }
         }
     }
-    Tcl_DStringFree(&buffer);
     return TCL_OK;
 }
 

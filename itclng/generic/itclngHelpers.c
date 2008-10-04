@@ -9,13 +9,13 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itclngHelpers.c,v 1.1.2.9 2008/02/10 18:40:40 wiede Exp $
+ * RCS: @(#) $Id: itclngHelpers.c,v 1.1.2.10 2008/10/04 17:58:21 wiede Exp $
  */
 
 #include "itclngInt.h"
 
 void ItclngDeleteArgList(ItclngArgList *arglistPtr);
-#ifdef ITCLNG_DEBUG
+#ifdef ITCLNG_DEBUG_1
 int _itclng_debug_level = 0;
 
 /*

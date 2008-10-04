@@ -253,6 +253,7 @@ Itclng_CreateClassCmd(
     Tcl_EventuallyFree((ClientData)iclsPtr, ItclngFreeClass);
     Itclng_SetNamespaceResolvers(classNs,
             (Tcl_ResolveCmdProc*)Itclng_ClassCmdResolver,
+//            NULL,
             (Tcl_ResolveVarProc*)Itclng_ClassVarResolver,
             (Tcl_ResolveCompiledVarProc*)Itclng_ClassCompiledVarResolver);
     iclsPtr->nsPtr = classNs;
@@ -475,7 +476,7 @@ Itclng_DeleteClass(
      *    base-class lists, and removes the class access command.
      */
     if (iclsPtr->nsPtr != NULL) {
-fprintf(stderr, "delete class namespace\n");
+//fprintf(stderr, "delete class namespace\n");
         Tcl_DeleteNamespace(iclsPtr->nsPtr);
         ItclngDeleteClassVariablesNamespace(interp, iclsPtr);
     }
@@ -1610,6 +1611,9 @@ ItclngCreateCommonOrVariable(
         }
         Tcl_DStringAppend(&buffer,
 	        Tcl_GetString(ivPtr->iclsPtr->fullNamePtr), -1);
+if (ivPtr->protection == ITCLNG_PUBLIC) {
+//fprintf(stderr, "COMMONVAR!%s!\n", Tcl_DStringValue(&buffer));
+}
         commonNsPtr = Tcl_FindNamespace(interp, Tcl_DStringValue(&buffer),
 	        NULL, 0);
         if (commonNsPtr == NULL) {
