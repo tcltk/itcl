@@ -18,10 +18,10 @@ namespace eval ${::itcl::internal::infos::rootNamespace}::builtin::info {
     ]
 
     proc GetInheritance {nsName className} {
-puts stderr "GetInheritance!$className!"
+# puts stderr "GetInheritance!$className!"
 	set inh [list]
         set inh2 [dict get [set ${nsName}${className}::infos] inheritance]
-puts stderr "INH2!$inh2!"
+# puts stderr "INH2!$inh2!"
         foreach className $inh2 {
 	    lappend inh $className
             set inh2 [GetInheritance $nsName $className]
@@ -29,7 +29,7 @@ puts stderr "INH2!$inh2!"
                 set inh [concat $inh $inh2]
 	    }
         }
-puts stderr "RET!$inh!"
+# puts stderr "RET!$inh!"
         return $inh
     }
 
@@ -83,7 +83,7 @@ get info like this instead: \n\
             set functions [dict get [set ${infoNS}${className}::infos] functions]
             foreach {name info} $functions {
 	        if {$name eq $funcName} {
-puts stderr "FUNC!$name!$info!"
+# puts stderr "FUNC!$name!$info!"
 	            set ret [dict get $functions $funcName arguments usage]
 	            if {$ret eq ""} {
 	                return "<undefined>"
@@ -96,7 +96,7 @@ puts stderr "FUNC!$name!$info!"
     }
 
     proc body {args} {
-puts stderr "info body called!$args!"
+# puts stderr "info body called!$args!"
         if {[llength $args] != 1} {
 	    return -code error "wrong # args: should be \"info body function\""
 	}
@@ -146,7 +146,7 @@ get info like this instead: \n\
             set functions [dict get [set ${infoNS}${className}::infos] functions]
             foreach {name info} $functions {
 	        if {$name eq $funcName} {
-puts stderr "FUNC!$name!$info!"
+# puts stderr "FUNC!$name!$info!"
 	            set ret [dict get $functions $funcName body]
 	            if {$ret eq ""} {
 	                return "<undefined>"
@@ -159,12 +159,12 @@ puts stderr "FUNC!$name!$info!"
     }
 
     proc class {args} {
-puts stderr "info class called!$args![namespace current]![uplevel 1 namespace current]!"
+# puts stderr "info class called!$args![namespace current]![uplevel 1 namespace current]!"
 	if {[llength $args] > 0} {
 	    return -code error "wrong # args: should be \"info class\""
 	}
         set callContextInfo [uplevel 1 ${::itcl::internal::infos::internalCmds}::getCallContextInfo]
-puts stderr "callContextInfo!$callContextInfo!"
+# puts stderr "callContextInfo!$callContextInfo!"
         foreach {objectName className objectClassName namespaceName funcName} $callContextInfo break
 	if {$objectClassName eq ""}  {
 	    set className [set ::itcl::internal::infos::infoNamespace]
@@ -187,13 +187,13 @@ puts stderr "callContextInfo!$callContextInfo!"
     }
 
     proc component {args} {
-puts stderr "info component called!$args!"
+# puts stderr "info component called!$args!"
     }
 
     proc function {args} {
         set callContextInfo [uplevel 1 ${::itcl::internal::infos::internalCmds}::getCallContextInfo]
         foreach {objectName className objectClassName namespaceName funcName} $callContextInfo break
-puts stderr "info function called!$args![namespace current]![uplevel 1 namespace current]!"
+# puts stderr "info function called!$args![namespace current]![uplevel 1 namespace current]!"
 #puts stderr "className!$callContextInfo!"
 #puts stderr "objectName!$objectName!className!$className!objectClassName!$objectClassName!namespaceName!$namespaceName!funcName!$funcName!"
 	namespace upvar ${::itcl::internal::infos::rootNamespace}::builtin::info infoNS infoNS
@@ -213,7 +213,7 @@ get info like this instead:
 	set found 0
         switch [llength $args] {
 	0 {
-puts stderr "INH!$inh!"
+# puts stderr "INH!$inh!"
 	    foreach className $inh {
                 set functions [dict get [set ${infoNS}${className}::infos] functions]
                 foreach {name info} $functions {
@@ -255,7 +255,7 @@ puts stderr "INH!$inh!"
                 set functions [dict get [set ${infoNS}${className}::infos] functions]
                 foreach {name info} $functions {
 		    if {$name eq $funcName} {
-puts stderr "FUNC!$name!$info!"
+# puts stderr "FUNC!$name!$info!"
 			lappend result [dict get $info protection]
 			set type [dict get $info type]
 			lappend result $type
@@ -350,17 +350,17 @@ puts stderr "FUNC!$name!$info!"
         if {[llength $result] == 1} {
 	    set result [lindex $result 0]
 	}
-puts stderr "RES!$result!"
+# puts stderr "RES!$result!"
         return $result
     }
 
     proc heritage {args} {
-puts stderr "info heritage called!$args!"
+# puts stderr "info heritage called!$args!"
         if {[llength $args] != 0} {
 	    return -code error "wrong # args: should be \"info heritage\""
 	}
         set callContextInfo [uplevel 1 ${::itcl::internal::infos::internalCmds}::getCallContextInfo]
-puts stderr "callContextInfo!$callContextInfo!"
+# puts stderr "callContextInfo!$callContextInfo!"
         foreach {objectName className objectClassName namespaceName funcName} $callContextInfo break
 	namespace upvar ${::itcl::internal::infos::rootNamespace}::builtin::info infoNS infoNS
 	if {$className eq "::itcl::class"} {
@@ -368,17 +368,17 @@ puts stderr "callContextInfo!$callContextInfo!"
 	}
         set inh [GetInheritance ${infoNS} ${className}]
 #        set inh [dict get [set ${infoNS}${className}::infos] inheritance]
-puts stderr "inh!$className!$inh!"
+# puts stderr "inh!$className!$inh!"
         return [concat [list $className] $inh]
     }
 
     proc inherit {args} {
-puts stderr "info inherit called!$args!"
+# puts stderr "info inherit called!$args!"
         if {[llength $args] != 0} {
 	    return -code error "wrong # args: should be \"info inherit\""
 	}
         set callContextInfo [uplevel 1 ${::itcl::internal::infos::internalCmds}::getCallContextInfo]
-puts stderr "callContextInfo!$callContextInfo!"
+# puts stderr "callContextInfo!$callContextInfo!"
         foreach {objectName className objectClassName namespaceName funcName} $callContextInfo break
 	if {$className eq "::itcl::class"} {
 	    set className $objectClassName
@@ -386,7 +386,7 @@ puts stderr "callContextInfo!$callContextInfo!"
 	namespace upvar ${::itcl::internal::infos::rootNamespace}::builtin::info infoNS infoNS
         set inh2 [GetInheritance ${infoNS} ${className}]
         set inh [dict get [set ${infoNS}${className}::infos] inheritance]
-puts stderr "inh!$className!$inh!$inh2!"
+# puts stderr "inh!$className!$inh!$inh2!"
         return $inh
     }
 
@@ -394,8 +394,8 @@ puts stderr "inh!$className!$inh!$inh2!"
         set callContextInfo [uplevel 1 ${::itcl::internal::infos::internalCmds}::getCallContextInfo]
 	set objectClassName ""
         foreach {objectName className objectClassName namespaceName funcName} $callContextInfo break
-puts stderr "info variable called!$args![namespace current]![uplevel 1 namespace current]!"
-puts stderr "callContextInfo!$callContextInfo!"
+# puts stderr "info variable called!$args![namespace current]![uplevel 1 namespace current]!"
+# puts stderr "callContextInfo!$callContextInfo!"
 #puts stderr "objectName!$objectName!className!$className!objectClassName!$objectClassName!namespaceName!$namespaceName!funcName!$funcName!"
 	namespace upvar ${::itcl::internal::infos::rootNamespace}::builtin::info infoNS infoNS
 	if {$objectClassName eq ""}  {
@@ -411,9 +411,9 @@ get info like this instead:
         set inh [list $objectClassName]
 	set className $objectClassName
         set inh2 [GetInheritance ${infoNS} ${className}]
-puts stderr "INH2!$inh2!"
+# puts stderr "INH2!$inh2!"
         set inh [concat $inh $inh2]
-puts stderr "INH!$inh![llength $args]!"
+# puts stderr "INH!$inh![llength $args]!"
 	set found 0
         switch [llength $args] {
 	0 {
@@ -444,7 +444,7 @@ puts stderr "INH!$inh![llength $args]!"
 		        continue
 		    }
 		}
-puts stderr "INFOVAR!${className}!"
+# puts stderr "INFOVAR!${className}!"
                 set variables [dict get [set ${infoNS}${className}::infos] variables]
                 foreach {name info} $variables {
 		    if {$name eq $varName} {
@@ -457,7 +457,7 @@ set varNs ::itcl::internal::variables
 			set init [dict get $info init]
 			set config [dict get $info config]
 			set state [dict get $info state]
-puts stderr "VI!$name!$init!$config!$state!$type!"
+# puts stderr "VI!$name!$init!$config!$state!$type!"
 			if {$type eq "common"} {
 			    if {$protection eq "public"} {
 			        if {[catch {
@@ -610,16 +610,19 @@ puts stderr "MSG!$name!$msg!"
         if {[llength $result] == 1} {
 	    set result [lindex $result 0]
 	}
-puts stderr "RES!$result!"
+# puts stderr "RES!$result!"
         return $result
     }
 
     proc vars {args} {
-puts stderr "info vars called!$args!"
+# puts stderr "info vars called!$args!"
+        set lst [uplevel 1 ::info vars]
+#        set locals [uplevel 1 ::info locals]
+        return $lst
     }
 
     proc exists {args} {
-puts stderr "info exists called!$args!"
+# puts stderr "info exists called!$args!"
         return [uplevel 1 ::info exists $args]
     }
 }

@@ -50,13 +50,21 @@
         set result 1
     }
     if {$result} {
-puts stderr "+++DELETE!$fullClassName!"
+# puts stderr "+++DELETE!$fullClassName!"
 	set myNsName [::namespace qualifiers $infoNs]
 	::namespace delete $myNsName
         rename $fullClassName {}
 #	::namespace delete $fullClassName
         return -code error -level 1 $errs
     }
+    namespace upvar ${::itcl::internal::infos::rootNamespace}::builtin::info infoNS infoNS
+    set inh [${::itcl::internal::infos::rootNamespace}::builtin::info::GetInheritance ${infoNS} ${fullClassName}]
+    lappend inh ${::itcl::internal::infos::rootClassName}
+    set oldNsPath [namespace eval $fullClassName {namespace path}]
+    set inh [concat $inh $oldNsPath]
+#puts stderr "CLNSPATH![namespace eval $fullClassName {namespace path}]!"
+    namespace eval $fullClassName "namespace path \"$inh\""
+#puts stderr "INH!$inh![namespace eval $fullClassName {namespace path}]!"
     $internalCmds createClassFinish $fullClassName $result
     set inh [dict get [set $infoNs] inheritance]
     if {[llength $inh] == 0} {
@@ -80,7 +88,7 @@ namespace eval $::itcl::internal::infos::rootClassName {}
 $::itcl::internal::infos::rootClassName create $::itcl::internal::infos::rootClassName {
     protected common envNs ""
     public proc info {args} {
-puts stderr "class!info!$args![uplevel 1 namespace current]!" ;
+# puts stderr "class!info!$args![uplevel 1 namespace current]!" ;
 	if {[llength $args] == 0} {
 	    return -code error "wrong # args: should be one of...
   info args procname
@@ -113,7 +121,7 @@ set ::itcl::internal::infos::infoNamespace [uplevel 1 namespace current]
 	set nsName [namespace current]
 	set nsName [uplevel 1 namespace current]
 	set contextInfo [${::itcl::internal::infos::internalCmds}::getContext]
-puts stderr "ISA!$args!$contextInfo!"
+ puts stderr "ISA!$args!$contextInfo!"
 	return [${::itcl::internal::infos::internalCmds}::isa $args]
     }
 

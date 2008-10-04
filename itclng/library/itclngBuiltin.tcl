@@ -47,7 +47,7 @@ puts stderr "builtin isa called!$args!"
 
     }
     proc unknown {args} {
-puts stderr "builtin unknown called!$args!"
+#puts stderr "builtin unknown called!$args!"
     }
     proc objectunknown {args} {
 puts stderr "builtin objectunknown called!$args!"

@@ -24,10 +24,10 @@ namespace eval $::itcl::internal::infos::rootNamespace {
 		filter ${__rootNamespace}::object::add::filter \
 	    ]
             proc option {args} {
-	        puts stderr "${::itcl::internal::infos::rootNamespace}::object:add::option called![info level 0]!$args!"
+#puts stderr "${::itcl::internal::infos::rootNamespace}::object:add::option called![info level 0]!$args!"
             }
             proc filter {args} {
-	        puts stderr "${::itcl::internal::infos::rootNamespace}::object:add::option called![info level 0]!$args!"
+# puts stderr "${::itcl::internal::infos::rootNamespace}::object:add::option called![info level 0]!$args!"
             }
 	}
     }
@@ -93,7 +93,7 @@ namespace eval $::itcl::internal::infos::rootNamespace {
 	proc object {args} {
             set __rootNamespace $::itcl::internal::infos::rootNamespace
 
-puts stderr "find object called!$args!"
+# puts stderr "find object called!$args!"
 	    return [uplevel 1 ${__rootNamespace}::internal::commands::findObject $args]
 	}
     }
@@ -136,13 +136,13 @@ if {0} {
 	    if {[catch {
 	    set ret [${__rootNamespace}::internal::commands::deleteObject $args]
 	    } a1 a2]} {
-puts stderr "A1!$a1!$a2!"
+# puts stderr "A1!$a1!$a2!"
 		set a20 [dict get $a2 -errorinfo]
 	        set a21 [split $a20 \n]
 		set a22 [join [lrange $a21 0 end-1] \n]
-puts stderr "A2!$a22![::info level 1]!"
+# puts stderr "A2!$a22![::info level 1]!"
 		append a22 "\n[::info level 1]"
-puts stderr "A3!$a22!"
+# puts stderr "A3!$a22!"
 	        return -code error -errorInfo $a22 $a1
 	    } else {
 	        return $ret
@@ -180,7 +180,7 @@ puts stderr "A3!$a22!"
 	    set myRootNamespace [string trimleft $__rootNamespace :]
 	    return -code error "wrong # args: should be \"${myRootNamespace}::body class::func arglist body\""
 	}
-puts stderr "BODY!$args!"
+#puts stderr "BODY!$args!"
         foreach {classAndMethod arglist body} $args break
         set className [::namespace qualifiers $classAndMethod]
 	if {$className eq ""} {
@@ -211,7 +211,7 @@ puts stderr "BODY!$args!"
 	    return -code error "argument list changed for function \"${className}::$funcName\": should be \"[dict get $origArguments definition]\""
 	}
 	dict set ${infoNS}${className}::infos functions $funcName arguments $argumentInfo
-puts stderr "BODY!body!$body!"
+# puts stderr "BODY!body!$body!"
 	dict set ${infoNS}${className}::infos functions $funcName body $body
 	dict set ${infoNS}${className}::infos functions $funcName state COMPLETE
         set funcInfo [dict get $funcInfos $funcName]
@@ -223,7 +223,7 @@ puts stderr "BODY!body!$body!"
 	    set myRootNamespace [string trimleft $__rootNamespace :]
 	    return -code error "wrong # args: should be \"${myRootNamespace}::configbody class::option body\""
 	}
-puts stderr "CONFIGBODY!$args!"
+# puts stderr "CONFIGBODY!$args!"
         foreach {classAndVar body} $args break
         set className [::namespace qualifiers $classAndVar]
 	if {$className eq ""} {
@@ -255,6 +255,14 @@ puts stderr "CONFIGBODY!$args!"
 	dict set ${infoNS}${className}::infos variables $varName state COMPLETE
 	set cmd [list ${__rootNamespace}::internal::commands::changeClassVariableConfig $className $varName $body]
         return [uplevel 1 $cmd]
+    }
+
+    proc local {class name args} {
+        set ptr [uplevel [list $class $name] $args]
+	uplevel [list set itcl-local-$ptr $ptr]
+	set cmd [uplevel namespace which -command $ptr]
+	uplevel [list trace variable itcl-local-$ptr u "::itcl::delete object $cmd; list"]
+	return $ptr
     }
 }
 

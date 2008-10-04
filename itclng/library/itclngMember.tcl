@@ -35,7 +35,7 @@ namespace eval ${::itcl::internal::infos::rootNamespace}::member {
     proc GetArgumentInfos {name arguments} {
 	set minArgs 0
 	set maxArgs 0
-	set haveArgsArg 0
+        set haveArgsArg 0
 	set usage ""
         set defaultArgs [list]
 	if {$arguments ne ""} {
@@ -43,6 +43,7 @@ namespace eval ${::itcl::internal::infos::rootNamespace}::member {
 	    set argNo 0
 	    set sep ""
 	    foreach arg $arguments {
+	        set haveArgsArg 0
 		incr argNo
 	        if {$arg eq ""} {
 		    return -code error -level 4 "procedure \"$name\" has \
@@ -257,17 +258,34 @@ argument with no name"
 	if {$nsName ne "::"} {
 	    set nsName ${nsName}::
 	}
-puts stderr "INHERIT!$nsName!$infoNs!$className!$args!"
+# puts stderr "INHERIT!$nsName!$infoNs!$className!$args!"
 	set inh [dict get [set $infoNs] inheritance]
         if {[llength $inh] > 0} {
 	    return -code error -level 5 "inheritance \"[join $inh { }]\" already defined for class \"$className\""
 	}
+	namespace upvar ${::itcl::internal::infos::rootNamespace}::builtin::info infoNS infoNS
 	set idx -1
 	set superClasses [list]
+	catch {unset _inherits}
 	foreach clsName $args {
 	    set fullClsName $clsName
 	    if {![string match "::*" $clsName]} {
 	        set fullClsName $nsName$clsName
+	    }
+	    set inh ""
+	    catch {
+            set inh [${::itcl::internal::infos::rootNamespace}::builtin::info::GetInheritance ${infoNS} ${fullClsName}]
+	    }
+	    foreach name $inh {
+	        if {[::info exists _inherits($name)]} {
+set midPart1 "???"
+set midPart2 "???"
+	            return -code error -level 6 "class \"$className\" inherits base class \"$name\" more than once
+  [namespace tail $className]->${midPart1}->[namespace tail $name]
+  [namespace tail $className]->${midPart2}->[namespace tail $name]"
+		} else {
+		    set _inherits($name) $name
+		}
 	    }
 	    incr idx
 	    set idx2 [lsearch $args $clsName]
@@ -287,7 +305,7 @@ puts stderr "INHERIT!$nsName!$infoNs!$className!$args!"
 	    lappend superClasses $fullClsName
 	}
 	dict set $infoNs inheritance $superClasses
-puts stderr "++++!$infoNs!"
+# puts stderr "++++!$infoNs!"
         ${::itcl::internal::infos::internalCmds}::createClassInherit $className {*}$superClasses
 	::oo::define $className superclass {*}$superClasses
     }
