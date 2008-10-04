@@ -491,7 +491,7 @@ Itclng_SetListValue(elemPtr,val)
  *  when other data is still being reference-counted and cleaned up.
  *
  * ------------------------------------------------------------------------
- *  Itcl_EventuallyFree()
+ *  Itclng_EventuallyFree()
  *
  *  Registers a piece of data so that it will be freed when no longer
  *  in use.  The data is registered with an initial usage count of "0".
@@ -501,7 +501,7 @@ Itclng_SetListValue(elemPtr,val)
  * ------------------------------------------------------------------------
  */
 void
-Itcl_EventuallyFree(
+Itclng_EventuallyFree(
     ClientData cdata,          /* data to be freed when not in use */
     Tcl_FreeProc *fproc)       /* procedure called to free data */
 {
@@ -518,7 +518,7 @@ Itcl_EventuallyFree(
 
 /*
  * ------------------------------------------------------------------------
- *  Itcl_PreserveData()
+ *  Itclng_PreserveData()
  *
  *  Increases the usage count for a piece of data that will be freed
  *  later when no longer needed.  Each call to Itcl_PreserveData()
@@ -529,8 +529,8 @@ Itcl_EventuallyFree(
  * ------------------------------------------------------------------------
  */
 void
-Itcl_PreserveData(cdata)
-    ClientData cdata;      /* data to be preserved */
+Itclng_PreserveData(
+    ClientData cdata)      /* data to be preserved */
 {
 
     /*
@@ -545,7 +545,7 @@ Itcl_PreserveData(cdata)
 
 /*
  * ------------------------------------------------------------------------
- *  Itcl_ReleaseData()
+ *  Itclng_ReleaseData()
  *
  *  Decreases the usage count for a piece of data that was registered
  *  previously via Itcl_PreserveData().  After Itcl_EventuallyFree()
@@ -554,8 +554,8 @@ Itcl_PreserveData(cdata)
  * ------------------------------------------------------------------------
  */
 void
-Itcl_ReleaseData(cdata)
-    ClientData cdata;      /* data to be released */
+Itclng_ReleaseData(
+    ClientData cdata)      /* data to be released */
 {
 
     /*
@@ -702,19 +702,21 @@ Itclng_Protection(
 void
 Itclng_ParseNamespPath(
     CONST char *name,    /* path name to class member */
+    Tcl_DString *buffer, /* dynamic string buffer (uninitialized) */
     char **head,         /* returns "namesp::namesp::namesp" part */
     char **tail)         /* returns "element" part */
 {
     register char *sep, *newname;
 
-    newname = (char *)ckalloc(sizeof(char)*(strlen(name)+1));
-    strcpy(newname, name);
+    Tcl_DStringInit(buffer);
 
     /*
-     *  Parse the name.  Look
+     *  Copy the name into the buffer and parse it.  Look
      *  backward from the end of the string to the first '::'
      *  scope qualifier.
      */
+    Tcl_DStringAppend(buffer, name, -1);
+    newname = Tcl_DStringValue(buffer);
 
     for (sep=newname; *sep != '\0'; sep++)
         ;

@@ -25,7 +25,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclngMethod.c,v 1.1.2.13 2008/10/04 17:58:21 wiede Exp $
+ *     RCS:  $Id: itclngMethod.c,v 1.1.2.14 2008/10/04 20:58:02 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -34,6 +34,9 @@
  */
 #include "itclngInt.h"
 
+int
+ItclngCreateMemberCode( Tcl_Interp* interp, ItclngClass *iclsPtr,
+    const char *name, const char *state, ItclngMemberCode** mcodePtr);
 #ifdef NOTDEF
 static int EquivArgLists(Tcl_Interp *interp, ItclngArgList *origArgs,
         ItclngArgList *realArgs);
@@ -80,13 +83,12 @@ ItclngDeleteFunction(
  *  Returns TCL_OK/TCL_ERROR to indicate success/failure.
  * ------------------------------------------------------------------------
  */
-/* ARGSUSED */
-int
-Itclng_BodyCmd(
-    ClientData dummy,        /* unused */
+static int
+NRBodyCmd(
+    ClientData clientData,   /*  */
     Tcl_Interp *interp,      /* current interpreter */
     int objc,                /* number of arguments */
-    Tcl_Obj *CONST objv[])   /* argument objects */
+    Tcl_Obj *const *objv)    /* argument objects */
 {
     int status = TCL_OK;
 
@@ -98,6 +100,7 @@ Itclng_BodyCmd(
     ItclngClass *iclsPtr;
     ItclngMemberFunc *imPtr;
     Tcl_HashEntry *entry;
+    Tcl_DString buffer;
 
     ItclngShowArgs(2, "Itclng_BodyCmd", objc, objv);
     if (objc != 4) {
@@ -115,9 +118,9 @@ Itclng_BodyCmd(
      *  class exists.
      */
     token = Tcl_GetString(objv[1]);
-    Itclng_ParseNamespPath(token, &head, &tail);
+    Itclng_ParseNamespPath(token, &buffer, &head, &tail);
 
-    if ((head != NULL) || (*head == '\0')) {
+    if (!head || *head == '\0') {
         Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
             "missing class specifier for body declaration \"", token, "\"",
             (char*)NULL);
@@ -165,12 +168,19 @@ Itclng_BodyCmd(
     }
 
 bodyCmdDone:
-    if (head != NULL) {
-       ckfree(head);
-    } else {
-       ckfree(tail);
-    }
+    Tcl_DStringFree(&buffer);
     return status;
+}
+
+/* ARGSUSED */
+int
+Itclng_BodyCmd(
+    ClientData clientData,
+    Tcl_Interp *interp,      /* current interpreter */
+    int objc,                /* number of arguments */
+    Tcl_Obj *const objv[])   /* argument objects */
+{
+    return Itclng_NRCallObjProc(clientData, interp, NRBodyCmd, objc, objv);
 }
 
 
@@ -193,8 +203,8 @@ bodyCmdDone:
  * ------------------------------------------------------------------------
  */
 /* ARGSUSED */
-int
-Itclng_ConfigBodyCmd(
+static int
+NRConfigBodyCmd(
     ClientData dummy,        /* unused */
     Tcl_Interp *interp,      /* current interpreter */
     int objc,                /* number of arguments */
@@ -205,6 +215,7 @@ Itclng_ConfigBodyCmd(
     char *head;
     char *tail;
     char *token;
+    Tcl_DString buffer;
     ItclngClass *iclsPtr;
     ItclngVarLookup *vlookup;
     ItclngVariable *ivPtr;
@@ -223,7 +234,7 @@ Itclng_ConfigBodyCmd(
      *  class exists.
      */
     token = Tcl_GetString(objv[1]);
-    Itclng_ParseNamespPath(token, &head, &tail);
+    Itclng_ParseNamespPath(token, &buffer, &head, &tail);
 
     if ((head == NULL) || (*head == '\0')) {
         Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
@@ -275,8 +286,8 @@ Itclng_ConfigBodyCmd(
 
     token = Tcl_GetString(objv[2]);
 
-    if (ItclngCreateVariableMemberCode(interp, iclsPtr,
-            Tcl_GetString(ivPtr->namePtr), token, &mcode) != TCL_OK) {
+    if (ItclngCreateMemberCode(interp, iclsPtr, (char*)NULL, token,
+            &mcode) != TCL_OK) {
         status = TCL_ERROR;
         goto configBodyCmdDone;
     }
@@ -290,12 +301,19 @@ Itclng_ConfigBodyCmd(
     ivPtr->codePtr = mcode;
 
 configBodyCmdDone:
-    if (head != NULL) {
-        ckfree(head);
-    } else {
-        ckfree(tail);
-    }
+    Tcl_DStringFree(&buffer);
     return status;
+}
+
+/* ARGSUSED */
+int
+Itclng_ConfigBodyCmd(
+    ClientData clientData,
+    Tcl_Interp *interp,      /* current interpreter */
+    int objc,                /* number of arguments */
+    Tcl_Obj *const objv[])   /* argument objects */
+{
+    return Itclng_NRCallObjProc(clientData, interp, NRConfigBodyCmd, objc, objv);
 }
 
 
@@ -857,6 +875,25 @@ fprintf(stderr, "CIMPL!%s!0x%08x\n", Tcl_GetString(imPtr->namePtr), mcode->flags
 
 
 
+static int
+CallItclObjectCmd(
+    ClientData data[],
+    Tcl_Interp *interp,
+    int result)
+{
+    ItclngMemberFunc *imPtr = data[0];
+    Tcl_Object oPtr = data[1];
+    int objc = PTR2INT(data[2]);
+    Tcl_Obj **objv = data[3];
+
+    if (oPtr != NULL) {
+        return ItclngObjectCmd(imPtr, interp, oPtr, imPtr->iclsPtr->clsPtr,
+                objc, objv);
+    } else {
+        return ItclngObjectCmd(imPtr, interp, NULL, NULL, objc, objv);
+    }
+}
+
 /*
  * ------------------------------------------------------------------------
  *  Itclng_EvalMemberCode()
@@ -870,6 +907,21 @@ fprintf(stderr, "CIMPL!%s!0x%08x\n", Tcl_GetString(imPtr->namePtr), mcode->flags
  *  result string or an error message in the interpreter.
  * ------------------------------------------------------------------------
  */
+static int
+CallConstructBase(
+    ClientData data[],
+    Tcl_Interp *interp,
+    int result)
+{
+    ItclngMemberFunc *imPtr = data[0];
+    ItclngObject *contextIoPtr = data[1];
+    int objc = PTR2INT(data[2]);
+    Tcl_Obj *const* objv = data[3];
+
+    return Itclng_ConstructBase(interp, contextIoPtr, imPtr->iclsPtr,
+                objc, objv);
+}
+
 int
 Itclng_EvalMemberCode(
     Tcl_Interp *interp,       /* current interpreter */
@@ -878,9 +930,9 @@ Itclng_EvalMemberCode(
     int objc,                 /* number of arguments */
     Tcl_Obj *CONST objv[])    /* argument objects */
 {
-    int result = TCL_OK;
-
     ItclngMemberCode *mcode;
+    void *callbackPtr;
+    int result = TCL_OK;
 
     ItclngShowArgs(1, "Itclng_EvalMemberCode", objc, objv);
     /*
@@ -918,9 +970,10 @@ Itclng_EvalMemberCode(
     if ((imPtr->flags & ITCLNG_CONSTRUCTOR) && (contextIoPtr != NULL) &&
         contextIoPtr->constructed) {
 
-        result = Itclng_ConstructBase(interp, contextIoPtr, imPtr->iclsPtr,
-	        objc, objv);
-
+        callbackPtr = Itclng_GetCurrentCallbackPtr(interp);
+        Itclng_NRAddCallback(interp, CallConstructBase, imPtr, contextIoPtr,
+                INT2PTR(objc), (ClientData)objv);
+        result = Itclng_NRRunCallbacks(interp, callbackPtr);
         if (result != TCL_OK) {
             goto evalMemberCodeDone;
         }
@@ -930,13 +983,15 @@ Itclng_EvalMemberCode(
      *  Execute the code body...
      */
     if ((mcode->flags & ITCLNG_IMPLEMENT_TCL) != 0) {
+        callbackPtr = Itclng_GetCurrentCallbackPtr(interp);
         if (imPtr->flags & (ITCLNG_CONSTRUCTOR|ITCLNG_DESTRUCTOR)) {
-            result = ItclngObjectCmd(imPtr, interp, contextIoPtr->oPtr,
-                   imPtr->iclsPtr->clsPtr, objc, objv);
+            Itclng_NRAddCallback(interp, CallItclObjectCmd, imPtr,
+                        contextIoPtr->oPtr, INT2PTR(objc), (void *)objv);
         } else {
-            result = ItclngObjectCmd(imPtr, interp, NULL, NULL,
-                    objc, objv);
+            Itclng_NRAddCallback(interp, CallItclObjectCmd, imPtr,
+                        NULL, INT2PTR(objc), (void *)objv);
         }
+        result = Itclng_NRRunCallbacks(interp, callbackPtr);
      }
 
 evalMemberCodeDone:
@@ -1237,12 +1292,12 @@ fprintf(stderr, "INTERNAL ERROR: cannot get arguments usage\n");
  *  the most-specific class scope.
  * ------------------------------------------------------------------------
  */
-int
-Itclng_ExecMethod(
+static int
+NRExecMethod(
     ClientData clientData,   /* method definition */
     Tcl_Interp *interp,      /* current interpreter */
     int objc,                /* number of arguments */
-    Tcl_Obj *CONST objv[])   /* argument objects */
+    Tcl_Obj *const *objv)    /* argument objects */
 {
     ItclngMemberFunc *imPtr = (ItclngMemberFunc*)clientData;
     int result = TCL_OK;
@@ -1260,12 +1315,11 @@ Itclng_ExecMethod(
      *  only if an object context exists.
      */
     iclsPtr = imPtr->iclsPtr;
-
     if (Itclng_GetContext(interp, &iclsPtr, &ioPtr) != TCL_OK) {
         return TCL_ERROR;
     }
     if (ioPtr == NULL) {
-	if (strcmp(Tcl_GetString(imPtr->namePtr), "info") != 0) {
+        if (strcmp(Tcl_GetString(imPtr->namePtr), "info") != 0) {
             Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
                 "cannot access object-specific info without an object context",
                 (char*)NULL);
@@ -1289,7 +1343,7 @@ Itclng_ExecMethod(
      */
     token = Tcl_GetString(objv[0]);
     if (strstr(token, "::") == NULL) {
-	if (ioPtr != NULL) {
+        if (ioPtr != NULL) {
             entry = Tcl_FindHashEntry(&ioPtr->iclsPtr->resolveCmds,
                 Tcl_GetString(imPtr->namePtr));
 
@@ -1304,9 +1358,23 @@ Itclng_ExecMethod(
      *  the method in case it gets deleted during execution.
      */
     Tcl_Preserve((ClientData)imPtr);
+    /* next line is VERY UGLY HACK !! to make test xxx run */
+//    imPtr->flags |= ITCLNG_CALLED_FROM_EXEC;
+
     result = Itclng_EvalMemberCode(interp, imPtr, ioPtr, objc, objv);
     Tcl_Release((ClientData)imPtr);
     return result;
+}
+
+
+int
+Itclng_ExecMethod(
+    ClientData clientData,   /* method definition */
+    Tcl_Interp *interp,      /* current interpreter */
+    int objc,                /* number of arguments */
+    Tcl_Obj *CONST objv[])   /* argument objects */
+{
+    return Itclng_NRCallObjProc(clientData, interp, NRExecMethod, objc, objv);
 }
 
 
@@ -1324,8 +1392,8 @@ Itclng_ExecMethod(
  *  the most-specific class scope.
  * ------------------------------------------------------------------------
  */
-int
-Itclng_ExecProc(
+static int
+NRExecProc(
     ClientData clientData,   /* proc definition */
     Tcl_Interp *interp,      /* current interpreter */
     int objc,                /* number of arguments */
@@ -1385,6 +1453,56 @@ Itclng_ExecProc(
     Tcl_Release((ClientData)imPtr);
     return result;
 }
+
+
+/* ARGSUSED */
+int
+Itclng_ExecProc(
+    ClientData clientData,
+    Tcl_Interp *interp,
+    int objc,
+    Tcl_Obj *const *objv)
+{
+    return Itclng_NRCallObjProc(clientData, interp, NRExecProc, objc, objv);
+}
+static int
+CallInvokeMethodIfExists(
+    ClientData data[],
+    Tcl_Interp *interp,
+    int result)
+{
+    ItclngClass *iclsPtr = data[0];
+    ItclngObject *contextObj = data[1];
+    int objc = PTR2INT(data[2]);
+    Tcl_Obj* const* objv = data[3];
+
+
+    result = Itclng_InvokeMethodIfExists(interp, "constructor",
+            iclsPtr, contextObj, objc, (Tcl_Obj* CONST*)objv);
+
+    if (result != TCL_OK) {
+        return TCL_ERROR;
+    }
+    return TCL_OK;
+}
+
+static int
+CallPublicObjectCmd(
+    ClientData data[],
+    Tcl_Interp *interp,
+    int result)
+{
+    ItclngClass *contextClass = data[0];
+    int cmdlinec = PTR2INT(data[1]);
+    Tcl_Obj **cmdlinev = data[2];
+
+    result = Itclng_PublicObjectCmd(contextClass->infoPtr->currIoPtr->oPtr,
+            interp, contextClass->clsPtr, cmdlinec, cmdlinev);
+    if (result != TCL_OK) {
+        return TCL_ERROR;
+    }
+    return TCL_OK;
+}
 
 /*
  * ------------------------------------------------------------------------
@@ -1417,6 +1535,7 @@ Itclng_ConstructBase(
     ItclngClass *iclsPtr;
     Tcl_HashEntry *entry;
     Tcl_Obj *cmdlinePtr;
+    void *callbackPtr;
     int cmdlinec;
     Tcl_Obj **cmdlinev;
 
@@ -1445,25 +1564,14 @@ ItclngShowArgs(1, "Itclng_ConstructBase", objc, objv);
 
         (void) Tcl_ListObjGetElements((Tcl_Interp*)NULL, cmdlinePtr,
             &cmdlinec, &cmdlinev);
-        Tcl_Obj **newObjv;
-        newObjv = (Tcl_Obj **)ckalloc(sizeof(Tcl_Obj *)*(objc+1));
-        newObjv[0] = Tcl_NewStringObj(Tcl_GetCommandName(interp,
-	        contextObj->accessCmd), -1);
-        Tcl_IncrRefCount(newObjv[0]);
-        newObjv[1] = Tcl_NewStringObj("", -1);
-        Tcl_AppendToObj(newObjv[1], "___constructor_init", -1);
-        Tcl_IncrRefCount(newObjv[1]);
-	if (objc > 2) {
-            memcpy(newObjv+2, objv+2, (objc-2)*sizeof(Tcl_Obj *));
-	}
-        result = Itclng_PublicObjectCmd(contextClass->infoPtr->currIoPtr->oPtr,
-	        interp, contextClass->clsPtr, cmdlinec, cmdlinev);
-        Tcl_DecrRefCount(newObjv[1]);
-        Tcl_DecrRefCount(newObjv[0]);
-        ckfree((char *)newObjv);
+        callbackPtr = Itclng_GetCurrentCallbackPtr(interp);
+        Itclng_NRAddCallback(interp, CallPublicObjectCmd, contextClass,
+                INT2PTR(cmdlinec), cmdlinev, NULL);
+        result = Itclng_NRRunCallbacks(interp, callbackPtr);
         if (result != TCL_OK) {
-            return TCL_ERROR;
+            return result;
         }
+
     }
 
     /*
@@ -1480,9 +1588,10 @@ ItclngShowArgs(1, "Itclng_ConstructBase", objc, objv);
         if (Tcl_FindHashEntry(contextObj->constructed,
 	        (char *)iclsPtr->namePtr) == NULL) {
 
-            result = Itclng_InvokeMethodIfExists(interp, "constructor",
-                iclsPtr, contextObj, 0, (Tcl_Obj* CONST*)NULL);
-
+            callbackPtr = Itclng_GetCurrentCallbackPtr(interp);
+            Itclng_NRAddCallback(interp, CallInvokeMethodIfExists, iclsPtr,
+                    contextObj, INT2PTR(0), NULL);
+            result = Itclng_NRRunCallbacks(interp, callbackPtr);
             if (result != TCL_OK) {
                 return TCL_ERROR;
             }

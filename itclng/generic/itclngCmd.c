@@ -1836,6 +1836,7 @@ Itclng_ChainCmd(
     Tcl_HashEntry *hPtr;
     Tcl_Obj *cmdlinePtr;
     Tcl_Obj **newobjv;
+    Tcl_DString buffer;
     ItclngMemberFunc *imPtr;
     ItclngClass *iclsPtr;
     ItclngHierIter hier;
@@ -1875,19 +1876,13 @@ Itclng_ChainCmd(
     }
 //fprintf(stderr, "CHAIN1!%s!%p!%s!%s!%s!\n", cmd, Itclng_GetCallFrameClientData(interp, 0), Tcl_GetCurrentNamespace(interp)->fullName, Itclng_GetUplevelNamespace(interp, 1)->fullName, contextIclsPtr->nsPtr->fullName);
     result = TCL_OK;
-    Itclng_ParseNamespPath(cmd, &head, &cmd2);
+    Itclng_ParseNamespPath(cmd, &buffer, &head, &cmd2);
 fprintf(stderr, "C!%s!%s!\n", cmd, cmd2);
     if (strcmp(cmd2, "___constructor_init") == 0) {
         cmd2 = "constructor";
     }
-    if (head != NULL) {
-        ckfree(head);
-    } else {
-	if (cmd != NULL) {
-            ckfree(cmd);
-	}
-    }
 //fprintf(stderr, "HEAD!%s!\n", head == NULL ? "(nil)" : head);
+    Tcl_DStringFree(&buffer);
 #ifndef NOTDEF
     hPtr = Tcl_FindHashEntry(&contextIclsPtr->infoPtr->namespaceClasses,
             (char *)Tcl_GetCurrentNamespace(interp));

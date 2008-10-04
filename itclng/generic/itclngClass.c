@@ -105,6 +105,27 @@ ClassNamespaceDeleted(
 }
 
 
+static int
+CallNewObjectInstance(
+    ClientData data[],
+    Tcl_Interp *interp,
+    int result)
+{
+    ItclngObjectInfo *infoPtr = data[0];
+    const char* path = data[1];
+    Tcl_Object *oPtr = data[2];
+    Tcl_Obj *nameObjPtr = data[3];
+
+    *oPtr = Tcl_NewObjectInstance(interp, infoPtr->rootClassIclsPtr->clsPtr,
+            path, path, 0, NULL, 0);
+    if (*oPtr == NULL) {
+        Tcl_AppendResult(interp,
+                "ITCL: cannot create Tcl_NewObjectInstance for class \"",
+                Tcl_GetString(nameObjPtr), "\"", NULL);
+       return TCL_ERROR;
+    }
+    return TCL_OK;
+}
 /*
  * ------------------------------------------------------------------------
  *  Itclng_CreateClassCmd()
@@ -134,6 +155,8 @@ Itclng_CreateClassCmd(
     ItclngClass *iclsPtr;
     ItclngVariable *ivPtr;
     Tcl_HashEntry *hPtr;
+    void *callbackPtr;
+    int result;
     int newEntry;
 
     ItclngShowArgs(1, "Itclng_CreateClassCmd", objc, objv);
@@ -212,9 +235,21 @@ Itclng_CreateClassCmd(
             Tcl_GetString(infoPtr->rootClassName)) == 0) {
         oPtr = Tcl_GetObjectFromObj(interp, nameObjPtr);
     } else {
+#ifdef OLD
         oPtr = Tcl_NewObjectInstance(interp, clsPtr,
                 Tcl_GetString(nameObjPtr), Tcl_GetString(nameObjPtr), 0,
 	        NULL, 0);
+#endif
+        callbackPtr = Itclng_GetCurrentCallbackPtr(interp);
+        Itclng_NRAddCallback(interp, CallNewObjectInstance, infoPtr,
+                (ClientData)Tcl_GetString(nameObjPtr), &oPtr, nameObjPtr);
+        result = Itclng_NRRunCallbacks(interp, callbackPtr);
+        if (result == TCL_ERROR) {
+            Tcl_AppendResult(interp,
+                    "ITCL: cannot create Tcl_NewObjectInstance for class \"",
+                    Tcl_GetString(nameObjPtr), "\"", NULL);
+           return TCL_ERROR;
+        }
     }
     if (oPtr == NULL) {
         Tcl_AppendResult(interp,
@@ -389,6 +424,103 @@ ItclngDeleteClassVariablesNamespace(
     iclsPtr->nsPtr = NULL;
 }
 
+int
+CallDeleteOneObject(
+    ClientData data[],
+    Tcl_Interp *interp,
+    int result)
+{
+    ItclngClass *iclsPtr2 = NULL;
+    ItclngObject *contextIoPtr;
+    Tcl_HashEntry *hPtr;
+    Tcl_HashSearch place;
+    Tcl_DString buffer;
+    ItclngClass *iclsPtr = data[0];
+    void *callbackPtr;
+
+    if (result != TCL_OK) {
+        return result;
+    }
+    /*
+     * Fix 227804: Whenever an object to delete was found we
+     * have to reset the search to the beginning as the
+     * current entry in the search was deleted and accessing it
+     * is therefore not allowed anymore.
+     */
+
+    hPtr = Tcl_FirstHashEntry(&iclsPtr->infoPtr->objects, &place);
+    if (hPtr) {
+        contextIoPtr = (ItclngObject*)Tcl_GetHashValue(hPtr);
+
+        while (contextIoPtr->iclsPtr != iclsPtr) {
+            hPtr = Tcl_NextHashEntry(&place);
+            if (hPtr == NULL) {
+                break;
+            }
+        }
+        if (hPtr) {
+            callbackPtr = Itclng_GetCurrentCallbackPtr(interp);
+            if (Itclng_DeleteObject(interp, contextIoPtr) != TCL_OK) {
+                iclsPtr2 = iclsPtr;
+                goto deleteClassFail;
+            }
+
+            Itclng_NRAddCallback(interp, CallDeleteOneObject, iclsPtr,
+                    NULL, NULL, NULL);
+            return Itclng_NRRunCallbacks(interp, callbackPtr);
+        }
+    }
+
+    /*
+     *  Destroy the namespace associated with this class.
+     *
+     *  TRICKY NOTE:
+     *    The cleanup procedure associated with the namespace is
+     *    invoked automatically.  It does all of the same things
+     *    above, but it also disconnects this class from its
+     *    base-class lists, and removes the class access command.
+     */
+    if (iclsPtr->nsPtr != NULL) {
+        Tcl_DeleteNamespace(iclsPtr->nsPtr);
+        ItclngDeleteClassVariablesNamespace(interp, iclsPtr);
+    }
+    return TCL_OK;
+
+deleteClassFail:
+    Tcl_DStringInit(&buffer);
+    Tcl_DStringAppend(&buffer, "\n    (while deleting class \"", -1);
+    Tcl_DStringAppend(&buffer, iclsPtr2->nsPtr->fullName, -1);
+    Tcl_DStringAppend(&buffer, "\")", -1);
+    Tcl_AddErrorInfo(interp, Tcl_DStringValue(&buffer));
+    return TCL_ERROR;
+}
+
+int
+CallDeleteOneClass(
+    ClientData data[],
+    Tcl_Interp *interp,
+    int result)
+{
+    Tcl_DString buffer;
+    ItclngClass *iclsPtr = data[0];
+
+    if (result != TCL_OK) {
+        return result;
+    }
+    result = Itclng_DeleteClass(interp, iclsPtr);
+    if (result == TCL_OK) {
+        return TCL_OK;
+    }
+
+    Tcl_DStringInit(&buffer);
+    Tcl_DStringAppend(&buffer, "\n    (while deleting class \"", -1);
+    Tcl_DStringAppend(&buffer, iclsPtr->nsPtr->fullName, -1);
+    Tcl_DStringAppend(&buffer, "\")", -1);
+    Tcl_AddErrorInfo(interp, Tcl_DStringValue(&buffer));
+    Tcl_DStringFree(&buffer);
+    return TCL_ERROR;
+}
+
 /*
  * ------------------------------------------------------------------------
  *  Itclng_DeleteClass()
@@ -410,10 +542,8 @@ Itclng_DeleteClass(
     ItclngClass *iclsPtr2 = NULL;
 
     Itclng_ListElem *elem;
-    ItclngObject *contextIoPtr;
-    Tcl_HashEntry *hPtr;
-    Tcl_HashSearch place;
-    Tcl_DString buffer;
+    int result;
+    void *callbackPtr;
 
     if (iclsPtr->flags & ITCLNG_CLASS_DELETE_CALLED) {
         return TCL_OK;
@@ -431,8 +561,12 @@ Itclng_DeleteClass(
         iclsPtr2 = (ItclngClass*)Itclng_GetListValue(elem);
         elem = Itclng_NextListElem(elem);  /* advance here--elem will go away */
 
-        if (Itclng_DeleteClass(interp, iclsPtr2) != TCL_OK) {
-            goto deleteClassFail;
+        callbackPtr = Itclng_GetCurrentCallbackPtr(interp);
+        Itclng_NRAddCallback(interp, CallDeleteOneClass, iclsPtr2, NULL,
+                NULL, NULL);
+        result = Itclng_NRRunCallbacks(interp, callbackPtr);
+        if (result != TCL_OK) {
+            return result;
         }
     }
 
@@ -442,54 +576,18 @@ Itclng_DeleteClass(
      *  destroyed above, when derived classes were destroyed.
      *  Destroy objects and report any errors.
      */
-    hPtr = Tcl_FirstHashEntry(&iclsPtr->infoPtr->objects, &place);
-    while (hPtr) {
-        contextIoPtr = (ItclngObject*)Tcl_GetHashValue(hPtr);
-
-        if (contextIoPtr->iclsPtr == iclsPtr) {
-            if (Itclng_DeleteObject(interp, contextIoPtr) != TCL_OK) {
-                iclsPtr2 = iclsPtr;
-                goto deleteClassFail;
-            }
-
-	    /*
-	     * Fix 227804: Whenever an object to delete was found we
-	     * have to reset the search to the beginning as the
-	     * current entry in the search was deleted and accessing it
-	     * is therefore not allowed anymore.
-	     */
-
-	    hPtr = Tcl_FirstHashEntry(&iclsPtr->infoPtr->objects, &place);
-	    continue;
-        }
-
-        hPtr = Tcl_NextHashEntry(&place);
-    }
-
     /*
-     *  Destroy the namespace associated with this class.
-     *
-     *  TRICKY NOTE:
-     *    The cleanup procedure associated with the namespace is
-     *    invoked automatically.  It does all of the same things
-     *    above, but it also disconnects this class from its
-     *    base-class lists, and removes the class access command.
+     * we have to enroll the while loop to fit for NRE
+     * so we add a callback to delete the first element
+     * and run this callback. At the end of the execution of that callback
+     * we add eventually a callback for the next element and run that etc ...
+     * if an error occurs we terminate the enrolled loop and return
+     * otherwise we return at the end of the enrolled loop.
      */
-    if (iclsPtr->nsPtr != NULL) {
-//fprintf(stderr, "delete class namespace\n");
-        Tcl_DeleteNamespace(iclsPtr->nsPtr);
-        ItclngDeleteClassVariablesNamespace(interp, iclsPtr);
-    }
-    return TCL_OK;
+    callbackPtr = Itclng_GetCurrentCallbackPtr(interp);
+    Itclng_NRAddCallback(interp, CallDeleteOneObject, iclsPtr, NULL, NULL, NULL);
+    return Itclng_NRRunCallbacks(interp, callbackPtr);
 
-deleteClassFail:
-    Tcl_DStringInit(&buffer);
-    Tcl_DStringAppend(&buffer, "\n    (while deleting class \"", -1);
-    Tcl_DStringAppend(&buffer, iclsPtr2->nsPtr->fullName, -1);
-    Tcl_DStringAppend(&buffer, "\")", -1);
-    Tcl_AddErrorInfo(interp, Tcl_DStringValue(&buffer));
-    Tcl_DStringFree(&buffer);
-    return TCL_ERROR;
 }
 
 

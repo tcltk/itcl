@@ -1,3 +1,13 @@
+#define Itclng_NRAddCallback(interp,procPtr,data0,data1,data2,data3) \
+  Itclng_NRAddCallback_(interp, #procPtr, procPtr, data0, data1, data2, data3)
+EXTERN void Itclng_NRAddCallback_(Tcl_Interp *interp, char *procName,
+        void *procPtr, ClientData data0, ClientData data1,
+        ClientData data2, ClientData data3);
+EXTERN void Itclng_DumpNRCallbacks(Tcl_Interp *interp, char *str);
+EXTERN int Itclng_NRCallObjProc(ClientData clientData, Tcl_Interp *interp,
+        Tcl_ObjCmdProc *objProc, int objc, Tcl_Obj *const *objv);
+EXTERN int Itclng_NRRunCallbacks(Tcl_Interp *interp, void *rootPtr);
+EXTERN void * Itclng_GetCurrentCallbackPtr(Tcl_Interp *interp);
 EXTERN Tcl_Method Itclng_NewProcClassMethod(Tcl_Interp *interp,
         Tcl_Class clsPtr,
         TclOO_PreCallProc preCallPtr, TclOO_PostCallProc postCallPtr,

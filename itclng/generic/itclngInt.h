@@ -9,7 +9,7 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itclngInt.h,v 1.1.2.15 2008/10/04 17:58:21 wiede Exp $
+ * RCS: @(#) $Id: itclngInt.h,v 1.1.2.16 2008/10/04 20:58:02 wiede Exp $
  */
 
 #include <string.h>
@@ -446,6 +446,22 @@ typedef struct ItclngCallContext {
     int refCount;
 } ItclngCallContext;
 
+/*
+ * Macros used to cast between pointers and integers (e.g. when storing an int
+ * in ClientData), on 64-bit architectures they avoid gcc warning about "cast
+ * to/from pointer from/to integer of different size".
+ */
+
+#if !defined(INT2PTR) && !defined(PTR2INT)
+#   if defined(HAVE_INTPTR_T) || defined(intptr_t)
+#       define INT2PTR(p) ((void*)(intptr_t)(p))
+#       define PTR2INT(p) ((int)(intptr_t)(p))
+#   else
+#       define INT2PTR(p) ((void*)(p))
+#       define PTR2INT(p) ((int)(p))
+#   endif
+#endif
+
 #ifdef ITCLNG_DEBUG_1
 MODULE_SCOPE int _itclng_debug_level;
 MODULE_SCOPE void ItclngShowArgs(int level, const char *str, int objc,
@@ -489,8 +505,8 @@ MODULE_SCOPE int Itclng_FindC(Tcl_Interp *interp, CONST char *name,
 MODULE_SCOPE int Itclng_DecodeScopedCommand(Tcl_Interp *interp, CONST char *name,
 	    Tcl_Namespace **rNsPtr, char **rCmdPtr);
 
-MODULE_SCOPE void Itclng_ParseNamespPath(CONST char *name,
-        char **head, char **tail);
+MODULE_SCOPE void Itclng_ParseNamespPath(const char *name,
+        Tcl_DString * buffer, char **head, char **tail);
 MODULE_SCOPE int Itclng_CanAccessFunc(ItclngMemberFunc* imPtr,
         Tcl_Namespace* fromNsPtr);
 MODULE_SCOPE void Itclng_Assert(CONST char *testExpr, CONST char *fileName,

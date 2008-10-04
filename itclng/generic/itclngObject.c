@@ -1601,6 +1601,7 @@ ItclngObjectCmd(
 {
     Tcl_Obj *methodNamePtr;
     Tcl_Obj **newObjv;
+    Tcl_DString buffer;
     ItclngMemberFunc *imPtr;
     ItclngClass *iclsPtr;
     Itclng_ListElem *elem;
@@ -1654,7 +1655,8 @@ ItclngObjectCmd(
     methodNamePtr = NULL;
     if (objv[0] != NULL) {
 	if (strstr(Tcl_GetString(objv[0]), "::") != NULL) {
-        Itclng_ParseNamespPath(Tcl_GetString(objv[0]), &className, &tail);
+        Itclng_ParseNamespPath(Tcl_GetString(objv[0]), &buffer,
+                &className, &tail);
         if (className != NULL) {
 //fprintf(stderr, "ItclngObjectCmd!%s!\n", Tcl_GetString(objv[0]));
             methodNamePtr = Tcl_NewStringObj(tail, -1);
@@ -1683,10 +1685,8 @@ ItclngObjectCmd(
 		}
                 elem = Itclng_NextListElem(elem);
 	    }
-            ckfree(className);
-        } else {
-            ckfree(tail);
         }
+        Tcl_DStringFree(&buffer);
         }
     }
     if (isDirectCall) {
@@ -1807,11 +1807,12 @@ GetClassAndName(
 {
     Tcl_Obj *className;
     Tcl_Obj *methodName;
+    Tcl_DString buffer;
     ItclngClass *iclsPtr2;
     char *head;
     char *tail;
 
-    Itclng_ParseNamespPath(sp, &head, &tail);
+    Itclng_ParseNamespPath(sp, &buffer, &head, &tail);
     if (head != NULL) {
         iclsPtr2 = NULL;
         methodName = NULL;
@@ -1827,10 +1828,8 @@ GetClassAndName(
 	}
         Tcl_DecrRefCount(className);
         Tcl_DecrRefCount(methodName);
-        ckfree(head);
-    } else {
-        ckfree(tail);
     }
+    Tcl_DStringFree(&buffer);
     return TCL_OK;
 }
 

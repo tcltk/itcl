@@ -8,10 +8,11 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itclng2TclOO.c,v 1.1.2.4 2008/10/04 18:44:49 wiede Exp $
+ * RCS: @(#) $Id: itclng2TclOO.c,v 1.1.2.5 2008/10/04 20:58:02 wiede Exp $
  */
 
 #include <tcl.h>
+#include <tclInt.h>
 #include <tclOO.h>
 #include <tclOOInt.h>
 #include <itclngCMethod.h>
@@ -28,6 +29,66 @@ EXTERN Tcl_Method TclOONewCClassMethodEx(Tcl_Interp *interp,
 	ProcErrorProc errProc, ClientData clientData, Tcl_Obj *nameObj,
 	Tcl_Obj *argsObj, Tcl_ObjCmdProc *cMethod, int flags,
 	void **internalTokenPtr);
+
+int
+Itclng_NRCallObjProc(
+    ClientData clientData,
+    Tcl_Interp *interp,
+    Tcl_ObjCmdProc *objProc,
+    int objc,
+    Tcl_Obj *const *objv)
+{
+    return Tcl_NRCallObjProc(interp, objProc, clientData, objc, objv);
+}
+
+void
+Itclng_NRAddCallback_(
+    Tcl_Interp *interp,
+    char *procName,
+    void *procPtr,
+    ClientData data0,
+    ClientData data1,
+    ClientData data2,
+    ClientData data3)
+{
+    Tcl_NRAddCallback(interp, procPtr, data0, data1, data2, data3);
+}
+
+void *
+Itclng_GetCurrentCallbackPtr(
+    Tcl_Interp *interp)
+{
+    return TOP_CB(interp);
+}
+
+int
+Itclng_NRRunCallbacks(
+    Tcl_Interp *interp,
+    void *rootPtr)
+{
+    return TclNRRunCallbacks(interp, TCL_OK, rootPtr, 0);
+}
+
+static int
+CallFinalizePMCall(
+    ClientData data[],
+    Tcl_Interp *interp,
+    int result)
+{
+    Tcl_Namespace *nsPtr = data[0];
+    TclOO_PostCallProc postCallProc = data[1];
+    ClientData clientData = data[2];
+
+    /*
+     * Give the post-call callback a chance to do some cleanup. Note that at
+     * this point the call frame itself is invalid; it's already been popped.
+     */
+
+    if (postCallProc) {
+        result = postCallProc(clientData, interp, NULL, nsPtr, result);
+    }
+    return result;
+}
 
 int
 Tcl_InvokeClassProcedureMethod(
@@ -98,17 +159,8 @@ Tcl_InvokeClassProcedureMethod(
      * name is passed as an argument.
      */
 
-    result = TclNRInterpProcCore(interp, namePtr, 1, pmPtr->errProc);
-
-    /*
-     * Give the post-call callback a chance to do some cleanup. Note that at
-     * this point the call frame itself is invalid; it's already been popped.
-     */
-
-    if (pmPtr->postCallProc) {
-        result = pmPtr->postCallProc(pmPtr->clientData, interp, NULL,
-                nsPtr, result);
-    }
+    Tcl_NRAddCallback(interp, CallFinalizePMCall, nsPtr, pmPtr->postCallProc, pmPtr->clientData, NULL);
+    return TclNRInterpProcCore(interp, namePtr, 1, pmPtr->errProc);
 
 done:
     return result;
