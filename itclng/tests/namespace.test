@@ -6,7 +6,7 @@
 #            mmclennan@lucent.com
 #            http://www.tcltk.com/itcl
 #
-#      RCS:  $Id: namespace.test,v 1.1.2.2 2008/02/10 18:42:36 wiede Exp $
+#      RCS:  $Id: namespace.test,v 1.1.2.3 2008/10/04 22:02:44 wiede Exp $
 # ----------------------------------------------------------------------
 #            Copyright (c) 1993-1998  Lucent Technologies, Inc.
 # ======================================================================
@@ -78,11 +78,11 @@ test namespace-1.5 {can find classes wrapped in a namespace} {
 } {0 ::test_ns_1::c 0 ::test_ns_1::c}
 
 test namespace-1.6 {can't create an object that clobbers a command in this namespace} {
-    list [catch {namespace eval test_ns_1 {Counter exists}} msg] $msg
+    list [catch {namespace eval test_ns_1 {Counter create exists}} msg] $msg
 } {1 {command "exists" already exists in namespace "::test_ns_1"}}
 
 test namespace-1.7 {can create an object that shadows a command in the global namespace} {
-    list [catch {namespace eval test_ns_1 {Counter lreplace}} msg] $msg \
+    list [catch {namespace eval test_ns_1 {Counter create lreplace}} msg] $msg \
          [catch {itcl::find objects *lreplace} msg] $msg \
          [namespace eval test_ns_1 {namespace which lreplace}]
 } {0 lreplace 0 ::test_ns_1::lreplace ::test_ns_1::lreplace}

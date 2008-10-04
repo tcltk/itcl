@@ -536,8 +536,19 @@ ItclngInitObjectVariables(
 	Tcl_DStringAppend(&buffer, iclsPtr2->nsPtr->fullName, -1);
 		    Tcl_Obj *objPtr;
 		    objPtr = Tcl_NewStringObj(name, -1);
+//fprintf(stderr, "objPtr1!%s!\n", Tcl_GetString(objPtr));
+#ifdef NOTDEF
+// Tcl_GetCommandFullName seems not to work!!
+		    objPtr = Tcl_NewObj();
 		    Tcl_GetCommandFullName(interp, ioPtr->accessCmd, objPtr);
-//fprintf(stderr, "STE!%s!%s!%s!\n", Tcl_GetCurrentNamespace(interp)->fullName, thisName, Tcl_GetString(objPtr));
+fprintf(stderr, "objPtr1!%s!\n", Tcl_GetString(objPtr));
+#endif
+		    if (name[0] != ':') {
+		        Tcl_Obj *objPtr2 = Tcl_NewStringObj("::", 2);
+			Tcl_AppendToObj(objPtr2, name, -1);
+			objPtr = objPtr2;
+		    }
+//fprintf(stderr, "SET this!%s!%s!%s!\n", Tcl_GetCurrentNamespace(interp)->fullName, thisName, Tcl_GetString(objPtr));
 		    if (Tcl_SetVar2(interp, thisName, NULL,
 		        Tcl_GetString(objPtr), TCL_NAMESPACE_ONLY) == NULL) {
                         Itclng_PopCallFrame(interp);

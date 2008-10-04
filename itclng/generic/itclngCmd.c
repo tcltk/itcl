@@ -2196,8 +2196,8 @@ Itclng_FindObjectsCmd(
     }
 
     if (pos < objc) {
-        Tcl_WrongNumArgs(interp, 1, objv,
-            "?-class className? ?-isa className? ?pattern?");
+        Tcl_WrongNumArgs(interp, 0, objv,
+            "itcl::find objects ?-class className? ?-isa className? ?pattern?");
         return TCL_ERROR;
     }
 
