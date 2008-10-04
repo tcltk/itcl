@@ -5,7 +5,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclngCMethod.c,v 1.1.2.2 2008/10/04 17:58:21 wiede Exp $
+ *     RCS:  $Id: itclngCMethod.c,v 1.1.2.3 2008/10/04 18:44:49 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -35,7 +35,7 @@ struct PNI {
 typedef struct {
     CallFrame *framePtr;	/* Reference to the call frame itself (it's
 				 * actually allocated on the Tcl stack). */
-    ProcErrorProc errProc;	/* The error handler for the body. */
+    ProcErrorProc *errProc;	/* The error handler for the body. */
     Tcl_Obj *nameObj;		/* The "name" of the command. */
     Command cmd;		/* The command structure. Mostly bogus. */
     ExtraFrameInfo efi;		/* Extra information used for [info frame]. */
@@ -107,7 +107,7 @@ TclOONewCMethod(
     cmPtr->version = TCLOO_C_METHOD_VERSION;
     cmPtr->flags = flags & USE_DECLARER_NS;
     cmPtr->cMethodPtr = cMethod;
-    method = Tcl_NewMethod(interp, oPtr, nameObj, flags,
+    method = Tcl_NewInstanceMethod(interp, oPtr, nameObj, flags,
             &CMethodType, cmPtr);
     if (method == NULL) {
 	ckfree((char *) cmPtr);
@@ -252,7 +252,7 @@ fprintf(stderr, "\n");
 
     skip = Tcl_ObjectContextSkippedArgs(context);
     skip--;
-    if (((CallContext *) context)->flags & OO_UNKNOWN_METHOD) {
+    if (((CallContext *) context)->callPtr->flags & OO_UNKNOWN_METHOD) {
 	skip--;
     }
 fprintf(stderr, "skip!%d!\n", skip);

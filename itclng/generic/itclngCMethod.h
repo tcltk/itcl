@@ -12,7 +12,7 @@ typedef struct CMethod {
     ClientData clientData;
     TclOO_PmCDDeleteProc deleteClientdataProc;
     TclOO_PmCDCloneProc cloneClientdataProc;
-    ProcErrorProc errProc;	/* Replacement error handler. */
+    ProcErrorProc *errProc;	/* Replacement error handler. */
     TclOO_PreCallProc preCallProc;
 				/* Callback to allow for additional setup
 				 * before the method executes. */

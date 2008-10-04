@@ -1,6 +1,6 @@
 #
 # @configure_input@
-# RCS: @(#) $Id: Makefile.in,v 1.1.2.2 2008/02/10 18:42:35 wiede Exp $
+# RCS: @(#) $Id: Makefile.in,v 1.1.2.3 2008/10/04 18:46:24 wiede Exp $
 #
 
 #========================================================================
@@ -52,7 +52,7 @@ TCL_BIN_DIR=@TCL_BIN_DIR@
 # Not actually used, but can help when tracing errors
 TCL_LIBS=@TCL_LIBS@
 TCLSH_PROGRAM=@TCLSH_PROG@
-INCLUDES=@PKG_INCLUDES@ @TCL_INCLUDES@ @TCLOO_INCLUDES@
+INCLUDES=@PKG_INCLUDES@ @TCL_INCLUDES@
 EXTRA_CFLAGS=@PKG_CFLAGS@ -DUSE_TCLOO_STUBS -DUSE_TCL_STUBS
 DEFS=@DEFS@ $(EXTRA_CFLAGS)
 CPPFLAGS=@CPPFLAGS@

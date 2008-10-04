@@ -9,7 +9,7 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itclngBase.c,v 1.1.2.7 2008/02/10 19:58:15 wiede Exp $
+ * RCS: @(#) $Id: itclngBase.c,v 1.1.2.8 2008/10/04 18:44:49 wiede Exp $
  */
 
 #include <stdlib.h>
@@ -18,9 +18,6 @@
 extern struct ItclngStubAPI itclngStubAPI;
 
 Tcl_ObjCmdProc Itclng_CreateClassFinishCmd;
-const char *TclOOInitializeStubs(Tcl_Interp *interp, const char *version,
-        int epoch, int revision);
-
 Tcl_ObjCmdProc Itclng_ChainCmd;
 Tcl_ObjCmdProc Itclng_ScopeCmd;
 Tcl_ObjCmdProc Itclng_CodeCmd;
@@ -48,7 +45,7 @@ Initialize (
     if (Tcl_InitStubs(interp, TCL_VERSION, 0) == NULL) {
         return TCL_ERROR;
     }
-    const char * ret = TclOOInitializeStubs(interp, "0.1.2", 0, 0);
+    const char * ret = TclOOInitializeStubs(interp, TCLOO_VERSION);
     if (ret == NULL) {
         return TCL_ERROR;
     }
