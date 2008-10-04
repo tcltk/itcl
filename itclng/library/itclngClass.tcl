@@ -1,6 +1,6 @@
 ::oo::class create ${::itcl::internal::infos::rootClassName}
 ::oo::define ${::itcl::internal::infos::rootClassName} superclass ::oo::class
-::oo::define ${::itcl::internal::infos::rootClassName} self.method create {className args} {
+::oo::define ${::itcl::internal::infos::rootClassName} self method create {className args} {
 #puts stderr "SELF.CREATE!$className!"
     ::set infosNsName ${::itcl::internal::infos::rootNamespace}::internal::parseinfos
     ::set internalCmds $::itcl::internal::infos::internalCmds
@@ -72,7 +72,7 @@
             ::oo::define $fullClassName superclass $::itcl::internal::infos::rootClassName
         }
     }
-    ::oo::define $fullClassName self.method unknown {args} { 
+    ::oo::define $fullClassName self method unknown {args} { 
         return [uplevel 1 ${::itcl::internal::infos::rootNamespace}::builtin::unknown {*}$args]
     }
     ::oo::define $fullClassName export unknown
@@ -80,7 +80,7 @@
     return $fullClassName
 }
 
-::oo::define $::itcl::internal::infos::rootClassName self.export create
+::oo::define $::itcl::internal::infos::rootClassName self export create
 # need to create namespace by hand, as the class is not created fully as usual!
 namespace eval $::itcl::internal::infos::rootClassName {}
 
