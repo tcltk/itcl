@@ -9,7 +9,6 @@ puts stderr "builtin configure called!$args!"
 puts stderr "builtin cget called!$args!"
     }
     proc chain {args} {
-puts stderr "builtin chain called!$args!${::itcl::internal::infos::internalCmds}!"
         return [${::itcl::internal::infos::internalCmds}::chain $args]
     }
     proc isa {args} {
@@ -54,7 +53,7 @@ puts stderr "builtin objectunknown called!$args!"
         set callContextInfo [uplevel 1 ${::itcl::internal::infos::internalCmds}::getCallContextInfo]
         foreach {objectName className objectClassName namespaceName funcName} $callContextInfo break
 puts stderr "COI!$callContextInfo!"
-        return -code error -level 2 "objectunknown bad option \"[lindex $args 1]\": should be one of ...\n\
+        return -code error -level 2 "bad option \"[lindex $args 1]\": should be one of ...\n\
 "
     }
 }

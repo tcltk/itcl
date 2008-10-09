@@ -258,10 +258,14 @@ if {0} {
     }
 
     proc local {class name args} {
-        set ptr [uplevel [list $class $name] $args]
-	uplevel [list set itcl-local-$ptr $ptr]
-	set cmd [uplevel namespace which -command $ptr]
-	uplevel [list trace variable itcl-local-$ptr u "::itcl::delete object $cmd; list"]
+	set nsName [uplevel 1 namespace current]
+	if {$nsName ne "::"} {
+	    append nsName "::"
+	}
+        set ptr [uplevel 1 [list $class create ${nsName}$name] $args]
+	uplevel 1 [list set itcl-local-[namespace tail $ptr] $ptr]
+	set cmd [uplevel 1 namespace which -command $ptr]
+	uplevel 1 [list trace variable itcl-local-[namespace tail $ptr] u "::itcl::delete object $cmd; list"]
 	return $ptr
     }
 }

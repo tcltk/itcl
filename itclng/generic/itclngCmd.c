@@ -1821,8 +1821,8 @@ Itclng_IsaCmd(
  * ------------------------------------------------------------------------
  */
 /* ARGSUSED */
-int
-Itclng_ChainCmd(
+static int
+NRChainCmd(
     ClientData clientData,   /* class definition */
     Tcl_Interp *interp,      /* current interpreter */
     int objc,                /* number of arguments */
@@ -1841,10 +1841,12 @@ Itclng_ChainCmd(
     ItclngClass *iclsPtr;
     ItclngHierIter hier;
     char *cmd;
-    char *cmd2;
+    char *cmd1;
     char *head;
+    int freeCmd;
+    int idx;
 
-    ItclngShowArgs(1, "Itclng_ChainCmd", objc, objv);
+    ItclngShowArgs(1, "NRChainCmd", objc, objv);
     /*
      *  If this command is not invoked within a class namespace,
      *  signal an error.
@@ -1866,36 +1868,24 @@ Itclng_ChainCmd(
     Tcl_Obj * const *cObjv;
     cObjv = Itclng_GetCallFrameObjv(interp);
     if (cObjv == NULL) {
-            return TCL_OK;
+        return TCL_OK;
     }
     if (Itclng_GetCallFrameClientData(interp, 0) == NULL) {
         /* that has been a direct call, so no object in front !! */
-	cmd = Tcl_GetString(cObjv[0]);
+	idx = 0;
     } else {
-        cmd = Tcl_GetString(cObjv[1]);
+        idx = 1;
     }
-//fprintf(stderr, "CHAIN1!%s!%p!%s!%s!%s!\n", cmd, Itclng_GetCallFrameClientData(interp, 0), Tcl_GetCurrentNamespace(interp)->fullName, Itclng_GetUplevelNamespace(interp, 1)->fullName, contextIclsPtr->nsPtr->fullName);
+    cmd1 = (char *)ckalloc(strlen(Tcl_GetString(cObjv[idx]))+1);
+    freeCmd = 1;
+    strcpy(cmd1, Tcl_GetString(cObjv[idx]));
     result = TCL_OK;
-    Itclng_ParseNamespPath(cmd, &buffer, &head, &cmd2);
-fprintf(stderr, "C!%s!%s!\n", cmd, cmd2);
-    if (strcmp(cmd2, "___constructor_init") == 0) {
-        cmd2 = "constructor";
+    Itclng_ParseNamespPath(cmd1, &buffer, &head, &cmd);
+    if (strcmp(cmd, "___constructor_init") == 0) {
+	ckfree(cmd1);
+	freeCmd = 0;
+        cmd = "constructor";
     }
-//fprintf(stderr, "HEAD!%s!\n", head == NULL ? "(nil)" : head);
-    Tcl_DStringFree(&buffer);
-#ifndef NOTDEF
-    hPtr = Tcl_FindHashEntry(&contextIclsPtr->infoPtr->namespaceClasses,
-            (char *)Tcl_GetCurrentNamespace(interp));
-    if (hPtr != NULL) {
-        contextIclsPtr = Tcl_GetHashValue(hPtr);
-//fprintf(stderr, "NC!%s!\n", contextIclsPtr->nsPtr->fullName);
-    } else {
-        /* must be a direct call from the object, so use the object's
-	 * class */
-	contextIclsPtr = contextIoPtr->iclsPtr;
-    }
-//fprintf(stderr, "CMD2!%s!%s!\n", cmd, contextIclsPtr->nsPtr->fullName);
-#endif
 
     /*
      *  Look for the specified command in one of the base classes.
@@ -1911,7 +1901,6 @@ fprintf(stderr, "C!%s!%s!\n", cmd, cmd2);
     if (contextIoPtr != NULL) {
         Itclng_InitHierIter(&hier, contextIoPtr->iclsPtr);
         while ((iclsPtr = Itclng_AdvanceHierIter(&hier)) != NULL) {
-//fprintf(stderr, "LOICLS!%s!%s!\n", iclsPtr->nsPtr->fullName, contextIclsPtr->nsPtr->fullName);
             if (iclsPtr == contextIclsPtr) {
                 break;
             }
@@ -1926,11 +1915,13 @@ fprintf(stderr, "C!%s!%s!\n", cmd, cmd2);
      *  If found, execute it.  Otherwise, do nothing.
      */
     Tcl_Obj *objPtr;
-    objPtr = Tcl_NewStringObj(cmd2, -1);
+    objPtr = Tcl_NewStringObj(cmd, -1);
+    if (freeCmd) {
+        ckfree(cmd1);
+    }
     Tcl_IncrRefCount(objPtr);
     while ((iclsPtr = Itclng_AdvanceHierIter(&hier)) != NULL) {
         hPtr = Tcl_FindHashEntry(&iclsPtr->functions, (char *)objPtr);
-fprintf(stderr, "H!%s!%p!%s!\n", iclsPtr->nsPtr->fullName, hPtr, cmd2);
         if (hPtr) {
             imPtr = (ItclngMemberFunc*)Tcl_GetHashValue(hPtr);
 
@@ -1942,20 +1933,19 @@ fprintf(stderr, "H!%s!%p!%s!\n", iclsPtr->nsPtr->fullName, hPtr, cmd2);
             cmdlinePtr = Itclng_CreateArgs(interp, Tcl_GetString(imPtr->fullNamePtr),
                 objc-1, objv+1);
 
+	    int my_objc;
             (void) Tcl_ListObjGetElements((Tcl_Interp*)NULL, cmdlinePtr,
-                &objc, &newobjv);
+                &my_objc, &newobjv);
 
-ItclngShowArgs(1, "Itclng_ChainCmd2", objc-1, newobjv+1);
-            Itclng_SetCallFrameNamespace(interp, imPtr->iclsPtr->nsPtr);
 	    if (imPtr->flags & ITCLNG_CONSTRUCTOR) {
-	        Tcl_SetStringObj(newobjv[0], Tcl_GetCommandName(interp,
-		        contextIclsPtr->infoPtr->currIoPtr->accessCmd), -1);
-	        result = Itclng_EvalMemberCode(interp, imPtr,
-		        imPtr->iclsPtr->infoPtr->currIoPtr, objc-1, newobjv+1);
-	    } else {
-	        result = Itclng_EvalMemberCode(interp, imPtr, contextIoPtr,
-		        objc-1, newobjv+1);
+		Tcl_DecrRefCount(newobjv[0]);
+		newobjv[0] = Tcl_NewStringObj(Tcl_GetCommandName(interp,
+                contextIclsPtr->infoPtr->currIoPtr->accessCmd), -1);
+                Tcl_IncrRefCount(newobjv[0]);
+                contextIoPtr = imPtr->iclsPtr->infoPtr->currIoPtr;
             }
+	    result = Itclng_EvalMemberCode(interp, imPtr, contextIoPtr,
+		        my_objc-1, newobjv+1);
 
             Tcl_DecrRefCount(cmdlinePtr);
             break;
@@ -1963,9 +1953,21 @@ ItclngShowArgs(1, "Itclng_ChainCmd2", objc-1, newobjv+1);
     }
     Tcl_DecrRefCount(objPtr);
 
+    Tcl_DStringFree(&buffer);
     Itclng_DeleteHierIter(&hier);
     return result;
 }
+/* ARGSUSED */
+int
+Itclng_ChainCmd(
+    ClientData clientData,
+    Tcl_Interp *interp,
+    int objc,
+    Tcl_Obj *const *objv)
+{
+    return Itclng_NRCallObjProc(clientData, interp, NRChainCmd, objc, objv);
+}
+
 
 
 /*

@@ -280,7 +280,7 @@ argument with no name"
 	        if {[::info exists _inherits($name)]} {
 set midPart1 "???"
 set midPart2 "???"
-	            return -code error -level 6 "class \"$className\" inherits base class \"$name\" more than once
+	            return -code error -level 6 "class \"$className\" inherits base class \"$name\" more than once:
   [namespace tail $className]->${midPart1}->[namespace tail $name]
   [namespace tail $className]->${midPart2}->[namespace tail $name]"
 		} else {

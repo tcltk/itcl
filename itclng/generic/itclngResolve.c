@@ -20,7 +20,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itclngResolve.c,v 1.1.2.4 2008/10/04 17:58:21 wiede Exp $
+ *     RCS:  $Id: itclngResolve.c,v 1.1.2.5 2008/10/09 16:31:40 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -116,7 +116,7 @@ Itclng_ClassCmdResolver(
     ItclngMemberFunc *imPtr;
     int isCmdDeleted;
 
-    ItclngShowArgs(0, "Itclng_ResolveCmd", 
+    ItclngShowArgs(1, "Itclng_ResolveCmd", 
 	            Itclng_GetCallFrameObjc(interp),
 	            Itclng_GetCallFrameObjv(interp));
 return TCL_CONTINUE;
