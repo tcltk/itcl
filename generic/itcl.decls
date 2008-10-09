@@ -1,5 +1,5 @@
 # -*- tcl -*-
-# $Id: itcl.decls,v 1.3.2.7 2007/10/14 17:19:04 wiede Exp $
+# $Id: itcl.decls,v 1.3.2.8 2008/10/09 16:30:34 wiede Exp $
 
 # public API
 library itcl
@@ -576,4 +576,15 @@ declare 171 current {
 declare 172 current {
     int Itcl_BiInfoComponentCmd (ClientData dummy, Tcl_Interp *interp, \
         int objc, Tcl_Obj *CONST objv[])
+}
+declare 173 current {
+    int Itcl_RenameCommand (Tcl_Interp *interp, const char *oldName, \
+	const char *newName)
+}
+declare 174 current {
+    int Itcl_PushCallFrame(Tcl_Interp * interp, Tcl_CallFrame * framePtr, \
+	Tcl_Namespace * nsPtr, int isProcCallFrame);
+}
+declare 175 current {
+    void Itcl_PopCallFrame (Tcl_Interp * interp);
 }

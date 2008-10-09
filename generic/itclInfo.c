@@ -24,7 +24,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclInfo.c,v 1.1.2.13 2007/12/30 23:08:43 wiede Exp $
+ *     RCS:  $Id: itclInfo.c,v 1.1.2.14 2008/10/09 16:30:34 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -1463,7 +1463,7 @@ Itcl_DefaultInfoCmd(
      *  then we got a "bad option" error message.  Add the options
      *  for the current ensemble to the error message.
      */
-    if (result != TCL_OK && strncmp(interp->result,"bad option",10) == 0) {
+    if (result != TCL_OK && strncmp(Tcl_GetStringResult(interp),"bad option",10) == 0) {
         resultPtr = Tcl_GetObjResult(interp);
         Tcl_AppendToObj(resultPtr, "\nor", -1);
         Itcl_GetEnsembleUsageForObj(interp, objv[0], resultPtr);

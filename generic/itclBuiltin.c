@@ -24,7 +24,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclBuiltin.c,v 1.1.2.27 2008/09/28 10:41:38 wiede Exp $
+ *     RCS:  $Id: itclBuiltin.c,v 1.1.2.28 2008/10/09 16:30:34 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -771,23 +771,6 @@ ItclReportOption(
 
 
 
-static int
-CallChainCall(
-    ClientData data[],
-    Tcl_Interp *interp,
-    int result)
-{
-    ItclMemberFunc *imPtr = data[0];
-    ItclObject *contextIoPtr = data[1];
-    int objc = (int)data[2];
-    Tcl_Obj **objv = data[3];
-
-    if (result == TCL_OK) {
-        result = Itcl_EvalMemberCode(interp, imPtr, contextIoPtr, objc, objv+1);
-    }
-    return result;
-}
-
 /*
  * ------------------------------------------------------------------------
  *  Itcl_BiChainCmd()

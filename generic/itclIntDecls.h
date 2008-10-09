@@ -1,5 +1,5 @@
 /*
- * $Id: itclIntDecls.h,v 1.13.2.8 2007/10/14 17:19:07 wiede Exp $
+ * $Id: itclIntDecls.h,v 1.13.2.9 2008/10/09 16:30:34 wiede Exp $
  *
  * This file is (mostly) automatically generated from itcl.decls.
  */
@@ -23,7 +23,7 @@ extern const char *Itcl_InitStubs(
 /* !BEGIN!: Do not edit below this line. */
 
 #define ITCLINT_STUBS_EPOCH 0
-#define ITCLINT_STUBS_REVISION 141
+#define ITCLINT_STUBS_REVISION 144
 
 #if !defined(USE_ITCL_STUBS)
 
@@ -498,6 +498,15 @@ ITCLAPI int		Itcl_BiInfoOptionCmd (ClientData dummy,
 ITCLAPI int		Itcl_BiInfoComponentCmd (ClientData dummy, 
 				Tcl_Interp * interp, int objc, 
 				Tcl_Obj *CONST objv[]);
+/* 173 */
+ITCLAPI int		Itcl_RenameCommand (Tcl_Interp * interp, 
+				const char * oldName, const char * newName);
+/* 174 */
+ITCLAPI int		Itcl_PushCallFrame (Tcl_Interp * interp, 
+				Tcl_CallFrame * framePtr, 
+				Tcl_Namespace * nsPtr, int isProcCallFrame);
+/* 175 */
+ITCLAPI void		Itcl_PopCallFrame (Tcl_Interp * interp);
 
 #endif /* !defined(USE_ITCL_STUBS) */
 
@@ -680,6 +689,9 @@ typedef struct ItclIntStubs {
     int (*itcl_AddComponentCmd) (ClientData infoPtr, Tcl_Interp * interp, int objc, Tcl_Obj *CONST objv[]); /* 170 */
     int (*itcl_BiInfoOptionCmd) (ClientData dummy, Tcl_Interp * interp, int objc, Tcl_Obj *CONST objv[]); /* 171 */
     int (*itcl_BiInfoComponentCmd) (ClientData dummy, Tcl_Interp * interp, int objc, Tcl_Obj *CONST objv[]); /* 172 */
+    int (*itcl_RenameCommand) (Tcl_Interp * interp, const char * oldName, const char * newName); /* 173 */
+    int (*itcl_PushCallFrame) (Tcl_Interp * interp, Tcl_CallFrame * framePtr, Tcl_Namespace * nsPtr, int isProcCallFrame); /* 174 */
+    void (*itcl_PopCallFrame) (Tcl_Interp * interp); /* 175 */
 } ItclIntStubs;
 
 #ifdef __cplusplus
@@ -1213,6 +1225,18 @@ extern const ItclIntStubs *itclIntStubsPtr;
 #ifndef Itcl_BiInfoComponentCmd
 #define Itcl_BiInfoComponentCmd \
 	(itclIntStubsPtr->itcl_BiInfoComponentCmd) /* 172 */
+#endif
+#ifndef Itcl_RenameCommand
+#define Itcl_RenameCommand \
+	(itclIntStubsPtr->itcl_RenameCommand) /* 173 */
+#endif
+#ifndef Itcl_PushCallFrame
+#define Itcl_PushCallFrame \
+	(itclIntStubsPtr->itcl_PushCallFrame) /* 174 */
+#endif
+#ifndef Itcl_PopCallFrame
+#define Itcl_PopCallFrame \
+	(itclIntStubsPtr->itcl_PopCallFrame) /* 175 */
 #endif
 
 #endif /* defined(USE_ITCL_STUBS) */
