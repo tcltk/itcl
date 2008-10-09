@@ -6,7 +6,7 @@
 #            mmclennan@lucent.com
 #            http://www.tcltk.com/itcl
 #
-#      RCS:  $Id: local.test,v 1.1.2.2 2008/10/04 22:02:44 wiede Exp $
+#      RCS:  $Id: local.test,v 1.1.2.3 2008/10/09 16:33:24 wiede Exp $
 # ----------------------------------------------------------------------
 #            Copyright (c) 1993-1998  Lucent Technologies, Inc.
 # ======================================================================
@@ -39,11 +39,11 @@ test local-1.1 {define a class to use for testing} {
             return $status
         }
         public proc test {} {
-            itcl::local create test_local #auto
+            itcl::local test_local #auto
             lappend status "processing"
         }
         public proc test2 {} {
-            itcl::local create test_local #auto
+            itcl::local test_local #auto
             lappend status "call test..."
             test
             lappend status "...back"
