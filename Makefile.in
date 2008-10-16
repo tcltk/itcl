@@ -1,6 +1,6 @@
 #
 # @configure_input@
-# RCS: @(#) $Id: Makefile.in,v 1.29.2.14 2008/09/28 10:55:33 wiede Exp $
+# RCS: @(#) $Id: Makefile.in,v 1.29.2.15 2008/10/16 18:08:16 wiede Exp $
 #
 
 #========================================================================
@@ -86,8 +86,8 @@ PKG_KIT_ROOT=$(PKG_DIR)-$(PLATFORM)
 PKG_KIT=$(PKG_KIT_ROOT).kit
 pkglibdir=$(libdir)/$(PKG_DIR)
 top_builddir=.
-TCL_VERSION_REQ=8.5b1
-TK_VERSION_REQ=8.5
+TCL_VERSION_REQ=8.6
+TK_VERSION_REQ=8.6
 EXTRA_PATH=$(top_builddir):$(TCL_BIN_DIR)
 TCLSH=$(TCLSH_ENV) "$(TCLSH_PROGRAM)"
 CONFIG_CLEAN_FILES=Makefile
@@ -294,6 +294,10 @@ itclWidgetObject.o: $(GENERIC_DIR)/itclInt.h $(GENERIC_DIR)/itcl.h
 itclWidgetInfo.o: $(GENERIC_DIR)/itclInt.h $(GENERIC_DIR)/itcl.h
 
 itclWidgetStubLib.o: $(GENERIC_DIR)/itclInt.h $(GENERIC_DIR)/itcl.h
+
+itclVarsAndCmds.o: $(GENERIC_DIR)/itclVarsAndCmds.c $(GENERIC_DIR)/itclInt.h $(GENERIC_DIR)/itclVarsAndCmds.h
+
+itclResolve2.o: $(GENERIC_DIR)/itclResolve.c $(GENERIC_DIR)/itclInt.h $(GENERIC_DIR)/itclVarsAndCmds.h
 
 #========================================================================
 # How to rebuild the package's stub table.
