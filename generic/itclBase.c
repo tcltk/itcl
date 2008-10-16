@@ -9,7 +9,7 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itclBase.c,v 1.1.2.15 2008/10/09 16:30:34 wiede Exp $
+ * RCS: @(#) $Id: itclBase.c,v 1.1.2.16 2008/10/16 20:05:44 wiede Exp $
  */
 
 #include <stdlib.h>
@@ -164,6 +164,7 @@ AddClassUnknowMethod(
 
 const char *TclOOInitializeStubs(Tcl_Interp *interp, const char *version,
         int epoch, int revision);
+int ItclVarsAndCommandResolveInit(Tcl_Interp *interp);
 
 static int
 Initialize (
@@ -176,7 +177,7 @@ Initialize (
     if (Tcl_InitStubs(interp, TCL_VERSION, 0) == NULL) {
         return TCL_ERROR;
     }
-    const char * ret = TclOOInitializeStubs(interp, "0.4a0", 0, 0);
+    const char * ret = TclOOInitializeStubs(interp, TCLOO_VERSION, 0, 0);
     if (ret == NULL) {
         return TCL_ERROR;
     }
@@ -249,6 +250,8 @@ opt = atoi(res_option);
         (Tcl_InterpDeleteProc*)NULL, (ClientData)infoPtr);
 
     Itcl_PreserveData((ClientData)infoPtr);
+
+    ItclVarsAndCommandResolveInit(interp);
 
     /* first create the Itcl base class as root of itcl classes */
     if (Tcl_Eval(interp, clazzClassScript) != TCL_OK) {
@@ -435,7 +438,7 @@ ItclCallCCommand(
         infoPtr = (ItclObjectInfo *)Tcl_GetAssocData(interp,
                 ITCL_INTERP_DATA, NULL);
 
-/* FIX ME have to use ItclCallContext here !!! */
+/* FIXME have to use ItclCallContext here !!! */
 //	Itcl_PushStack(callerNsPtr, &infoPtr->namespaceStack);
         result = (*objProc)(cData, interp, Itcl_GetCallFrameObjc(interp)-1,
 	        Itcl_GetCallFrameObjv(interp)+1);

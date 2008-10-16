@@ -23,7 +23,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclCmd.c,v 1.1.2.21 2008/09/28 10:41:38 wiede Exp $
+ *     RCS:  $Id: itclCmd.c,v 1.1.2.22 2008/10/16 20:05:45 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -31,6 +31,81 @@
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  */
 #include "itclInt.h"
+/*
+ * ------------------------------------------------------------------------
+ *  Itcl_ThisCmd()
+ *
+ *  Invoked by Tcl for fast access to itcl methods
+ *  syntax:
+ *
+ *    this methodName args ....
+ *
+ *  Returns TCL_OK/TCL_ERROR to indicate success/failure.
+ * ------------------------------------------------------------------------
+ */
+/* ARGSUSED */
+int
+NRThisCmd(
+    ClientData clientData,   /* class info */
+    Tcl_Interp *interp,      /* current interpreter */
+    int objc,                /* number of arguments */
+    Tcl_Obj *CONST objv[])   /* argument objects */
+{
+    ClientData clientData2;
+    Tcl_Object oPtr;
+    ItclClass *iclsPtr;
+
+    ItclShowArgs(1, "NRThisCmd", objc, objv);
+    iclsPtr = clientData;
+    clientData2 = Itcl_GetCallFrameClientData(interp);
+    oPtr = Tcl_ObjectContextObject(clientData2);
+    return Itcl_PublicObjectCmd(oPtr, interp, iclsPtr->clsPtr, objc, objv);
+}
+/* ARGSUSED */
+int
+Itcl_ThisCmd(
+    ClientData clientData,
+    Tcl_Interp *interp,
+    int objc,
+    Tcl_Obj *const *objv)
+{
+    ClientData clientData2;
+    Tcl_Object oPtr;
+    Tcl_HashEntry *hPtr;
+    ItclClass *iclsPtr;
+
+    if (objc == 1) {
+        return Itcl_SelfCmd(clientData,interp, objc, objv);
+    }
+    iclsPtr = clientData;
+    clientData2 = Itcl_GetCallFrameClientData(interp);
+    if (clientData2 == NULL) {
+	Tcl_AppendResult(interp,
+	        "this cannot be invoked without an object context", NULL);
+        return TCL_ERROR;
+    }
+    oPtr = Tcl_ObjectContextObject(clientData2);
+    if (oPtr == NULL) {
+	Tcl_AppendResult(interp,
+	        "this cannot be invoked without an object context", NULL);
+        return TCL_ERROR;
+    }
+    if (objc == 1) {
+	Tcl_Obj *namePtr = Tcl_NewObj();
+
+        Tcl_GetCommandFullName(interp, Tcl_GetObjectCommand(oPtr), namePtr);
+        Tcl_SetObjResult(interp, namePtr);
+	return TCL_OK;
+    }
+    hPtr = Tcl_FindHashEntry(&iclsPtr->resolveCmds, Tcl_GetString(objv[1]));
+    if (hPtr == NULL) {
+	Tcl_AppendResult(interp, "class \"", iclsPtr->nsPtr->fullName,
+	        "\" has no method: \"", Tcl_GetString(objv[1]), "\"", NULL);
+        return TCL_ERROR;
+    }
+    return Itcl_NRCallObjProc(clientData, interp, NRThisCmd, objc, objv);
+}
+
 
 /*
  * ------------------------------------------------------------------------
@@ -1058,7 +1133,7 @@ Itcl_FilterAddCmd(
 
     ItclShowArgs(1, "Itcl_FilterCmd", objc, objv);
 //    Tcl_Namespace *contextNs = Tcl_GetCurrentNamespace(interp);
-/* FIX ME need to change the chain command to do the same here as the TclOO next command !! */
+/* FIXME need to change the chain command to do the same here as the TclOO next command !! */
     if (objc < 3) {
         Tcl_WrongNumArgs(interp, 1, objv, "<className> <filterName> ?<filterName> ...?");
         return TCL_ERROR;

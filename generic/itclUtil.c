@@ -23,7 +23,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclUtil.c,v 1.1.2.5 2007/10/02 22:43:30 wiede Exp $
+ *     RCS:  $Id: itclUtil.c,v 1.1.2.6 2008/10/16 20:05:45 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -905,7 +905,9 @@ Itcl_CanAccessFunc(
                 Tcl_GetString(imPtr->namePtr));
 
             if (entry) {
-                ovlfunc = (ItclMemberFunc*)Tcl_GetHashValue(entry);
+		ItclCmdLookup *clookup;
+		clookup = (ItclCmdLookup *)Tcl_GetHashValue(entry);
+		ovlfunc = clookup->imPtr;
                 if ((ovlfunc->flags & ITCL_COMMON) == 0 &&
                      ovlfunc->protection < ITCL_PRIVATE) {
                     return 1;

@@ -1,5 +1,5 @@
 # -*- tcl -*-
-# $Id: itcl.decls,v 1.3.2.8 2008/10/09 16:30:34 wiede Exp $
+# $Id: itcl.decls,v 1.3.2.9 2008/10/16 20:05:44 wiede Exp $
 
 # public API
 library itcl
@@ -122,11 +122,11 @@ declare 4 current {
 declare 5 current {
     int Itcl_ObjectIsa (ItclObject *contextObj, ItclClass *cdefn)
 }
-declare 7 current {
-    char* Itcl_ProtectionStr (int pLevel)
-}
 declare 6 current {
     int Itcl_Protection (Tcl_Interp *interp, int newLevel)
+}
+declare 7 current {
+    char* Itcl_ProtectionStr (int pLevel)
 }
 declare 8 current {
     int Itcl_CanAccess (ItclMemberFunc* memberPtr, Tcl_Namespace* fromNsPtr)
@@ -543,7 +543,7 @@ declare 161 current {
             const char *functionName)
 }
 declare 162 current {
-    Tcl_Namespace * Itcl_GetUplevelNamespace(Tcl_Interp *interp, int level);
+    Tcl_Namespace * Itcl_GetUplevelNamespace(Tcl_Interp *interp, int level)
 }
 declare 163 current {
     ClientData Itcl_GetCallFrameClientData(Tcl_Interp *interp)

@@ -25,7 +25,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann Copyright (c) 2007
  *
- *     RCS:  $Id: itclClass.c,v 1.1.2.21 2008/09/28 10:41:38 wiede Exp $
+ *     RCS:  $Id: itclClass.c,v 1.1.2.22 2008/10/16 20:05:44 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -34,6 +34,7 @@
  */
 #include "itclInt.h"
 
+EXTERN Tcl_ObjCmdProc Itcl_ThisCmd;
 static Tcl_NamespaceDeleteProc* _TclOONamespaceDeleteProc = NULL;
 
 /*
@@ -79,7 +80,7 @@ ClassRenamedTrace(
     const char *newName,        /* Always NULL ??. not for itk!! */
     int flags)                  /* Why was the object deleted? */
 {
-    /* FIX ME !! maybe not needed at all !! */
+    /* FIXME !! maybe not needed at all !! */
     if (newName != NULL) {
         return;
     }
@@ -400,10 +401,17 @@ Itcl_CreateClass(
 
     Itcl_EventuallyFree((ClientData)iclsPtr, ItclFreeClass);
     if (iclsPtr->infoPtr->useOldResolvers) {
+#ifdef NEW_PROTO_RESOLVER
+        Itcl_SetNamespaceResolvers(classNs,
+                (Tcl_ResolveCmdProc*)Itcl_ClassCmdResolver2,
+                (Tcl_ResolveVarProc*)Itcl_ClassVarResolver2,
+                (Tcl_ResolveCompiledVarProc*)Itcl_ClassCompiledVarResolver2);
+#else
         Itcl_SetNamespaceResolvers(classNs,
                 (Tcl_ResolveCmdProc*)Itcl_ClassCmdResolver,
                 (Tcl_ResolveVarProc*)Itcl_ClassVarResolver,
                 (Tcl_ResolveCompiledVarProc*)Itcl_ClassCompiledVarResolver);
+#endif
     } else {
         Tcl_SetNamespaceResolver(classNs, iclsPtr->resolvePtr);
     }
@@ -450,6 +458,12 @@ Itcl_CreateClass(
 	Tcl_DStringValue(&buffer), "\"", NULL);
         return TCL_ERROR;
     }
+    Tcl_DStringInit(&buffer);
+    Tcl_DStringAppend(&buffer, Tcl_GetString(iclsPtr->fullNamePtr), -1);
+    Tcl_DStringAppend(&buffer, "::this", -1);
+    Tcl_CreateObjCommand(interp,
+            Tcl_DStringValue(&buffer),
+            Itcl_ThisCmd, iclsPtr, NULL);
 
     Tcl_DStringFree(&buffer);
     /*
@@ -512,7 +526,7 @@ Itcl_CreateClass(
     iclsPtr->accessCmd = Tcl_GetObjectCommand(oPtr);
     Tcl_TraceCommand(interp, Tcl_GetCommandName(interp, iclsPtr->accessCmd),
                 TCL_TRACE_RENAME|TCL_TRACE_DELETE, ClassRenamedTrace, iclsPtr);
-    /* FIX ME should set the class objects unknown command to Itcl_HandleClass */
+    /* FIXME should set the class objects unknown command to Itcl_HandleClass */
 
     *rPtr = iclsPtr;
     return TCL_OK;
@@ -924,7 +938,7 @@ ItclFreeClass(
         if (--vlookup->usage == 0) {
             /*
              *  If this is a common variable owned by this class,
-             *  then release the class's hold on it. FIX ME !!!
+             *  then release the class's hold on it. FIXME !!!
              */
             ckfree((char*)vlookup);
         }
@@ -997,10 +1011,11 @@ ItclFreeClass(
     Itcl_DeleteList(&iclsPtr->bases);
     Tcl_DeleteHashTable(&iclsPtr->heritage);
 
-    /* FIX ME !!!
+    /* FIXME !!!
       free classCommons
       free contextCache
-      free resolvePtr
+      free resolvePtr -- this is only needed for CallFrame Resolvers
+                      -- not used at the moment
      */
 
     /*
@@ -1439,6 +1454,8 @@ Itcl_BuildVirtualTables(
     ItclMemberFunc *imPtr;
     ItclHierIter hier;
     ItclClass *iclsPtr2;
+    ItclClassVarInfo *icviPtr;
+    ItclClassCmdInfo *icciPtr;
     Tcl_Namespace* nsPtr;
     Tcl_DString buffer, buffer2;
     int newEntry;
@@ -1465,7 +1482,10 @@ Itcl_BuildVirtualTables(
      *  Set aside the first object-specific slot for the built-in
      *  "this" variable.  Only allocate one of these, even though
      *  there is a definition for "this" in each class scope.
+     *  Set aside the second object-specific slot for the built-in
+     *  "itcl_options" variable.
      */
+    iclsPtr->numInstanceVars++;
     iclsPtr->numInstanceVars++;
 
     /*
@@ -1480,7 +1500,7 @@ Itcl_BuildVirtualTables(
         while (hPtr) {
             ivPtr = (ItclVariable*)Tcl_GetHashValue(hPtr);
 
-            vlookup = (ItclVarLookup*)ckalloc(sizeof(ItclVarLookup));
+            vlookup = (ItclVarLookup *)ckalloc(sizeof(ItclVarLookup));
             vlookup->ivPtr = ivPtr;
             vlookup->usage = 0;
             vlookup->leastQualName = NULL;
@@ -1492,7 +1512,39 @@ Itcl_BuildVirtualTables(
             vlookup->accessible = (ivPtr->protection != ITCL_PRIVATE ||
 	            ivPtr->iclsPtr == iclsPtr);
 
-/* FIX ME !!! sould use for var lookup !! */
+            int type = VAR_TYPE_VARIABLE;
+	    if (ivPtr->flags & ITCL_COMMON) {
+	        type = VAR_TYPE_COMMON;
+	    }
+            /*
+             *  If this is a reference to the built-in "this"
+             *  variable, then its index is "0".  Otherwise,
+             *  add another slot to the end of the table.
+             */
+            if ((ivPtr->flags & ITCL_THIS_VAR) != 0) {
+	        vlookup->varNum = 0;
+	    } else {
+		if ((ivPtr->flags & ITCL_OPTIONS_VAR) != 0) {
+	            vlookup->varNum = 1;
+		} else {
+		    vlookup->varNum = iclsPtr->numInstanceVars++;
+	        }
+	    }
+	    icviPtr = (ItclClassVarInfo *)ckalloc(
+	            sizeof(ItclClassVarInfo));
+	    icviPtr->type = type;
+	    icviPtr->protection = ivPtr->protection;
+	    icviPtr->nsPtr = iclsPtr->nsPtr;
+	    icviPtr->declaringNsPtr = iclsPtr2->nsPtr;
+	    icviPtr->varNum = vlookup->varNum;
+#ifdef NEW_PROTO_RESOLVER
+	    ClientData clientData2;
+            clientData2 = Itcl_RegisterClassVariable(
+	            iclsPtr->infoPtr->interp, iclsPtr2->nsPtr,
+		    Tcl_GetString(ivPtr->namePtr), icviPtr);
+	    vlookup->classVarInfoPtr = clientData2;
+#endif
+/* FIXME !!! should use for var lookup !! */
 #ifdef NOTDEF
             /*
              *  If this is a common variable, then keep a reference to
@@ -1545,6 +1597,11 @@ Itcl_BuildVirtualTables(
                         vlookup->leastQualName =
                             Tcl_GetHashKey(&iclsPtr->resolveVars, hPtr);
                     }
+#ifdef NEW_PROTO_RESOLVER
+                    Itcl_RegisterClassVariable(iclsPtr->infoPtr->interp,
+		        iclsPtr->nsPtr, Tcl_DStringValue(&buffer),
+		        vlookup->classVarInfoPtr);
+#endif
                 }
 
                 if (nsPtr == NULL) {
@@ -1608,7 +1665,29 @@ Itcl_BuildVirtualTables(
                     Tcl_DStringValue(&buffer), &newEntry);
 
                 if (newEntry) {
-                    Tcl_SetHashValue(hPtr, (ClientData)imPtr);
+		    ItclCmdLookup *clookup;
+		    clookup = (ItclCmdLookup *)ckalloc(sizeof(ItclCmdLookup));
+		    memset(clookup, 0, sizeof(ItclCmdLookup));
+		    clookup->imPtr = imPtr;
+                    Tcl_SetHashValue(hPtr, (ClientData)clookup);
+#ifdef NEW_PROTO_RESOLVER
+                    int type = CMD_TYPE_METHOD;
+	            if (imPtr->flags & ITCL_COMMON) {
+	                type = CMD_TYPE_PROC;
+	            }
+	            icciPtr = (ItclClassCmdInfo *)ckalloc(
+	                    sizeof(ItclClassCmdInfo));
+	            icciPtr->type = type;
+	            icciPtr->protection = imPtr->protection;
+	            icciPtr->nsPtr = iclsPtr->nsPtr;
+	            icciPtr->declaringNsPtr = iclsPtr2->nsPtr;
+	            ClientData clientData2;
+                    clientData2 = Itcl_RegisterClassCommand(
+	                    iclsPtr->infoPtr->interp, iclsPtr->nsPtr,
+		            Tcl_GetString(imPtr->namePtr), icciPtr);
+		    clookup->classCmdInfoPtr = clientData2;
+		    clookup->cmdPtr = imPtr->accessCmd;
+#endif
                 }
 
                 if (nsPtr == NULL) {

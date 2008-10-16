@@ -3,74 +3,21 @@
  *      PACKAGE:  [incr Tcl]
  *  DESCRIPTION:  Object-Oriented Extensions to Tcl
  *
- *  [incr Tcl] provides object-oriented extensions to Tcl, much as
- *  C++ provides object-oriented extensions to C.  It provides a means
- *  of encapsulating related procedures together with their shared data
- *  in a local namespace that is hidden from the outside world.  It
- *  promotes code re-use through inheritance.  More than anything else,
- *  it encourages better organization of Tcl applications through the
- *  object-oriented paradigm, leading to code that is easier to
- *  understand and maintain.
- *
  *  These procedures handle command and variable resolution
  *
  * ========================================================================
- *  AUTHOR:  Michael J. McLennan
- *           Bell Labs Innovations for Lucent Technologies
- *           mmclennan@lucent.com
- *           http://www.tcltk.com/itcl
+ *  AUTHOR:  Arnulf Wiedemann
  *
- *     RCS:  $Id: itclResolve.c,v 1.1.2.11 2008/10/16 20:05:45 wiede Exp $
+ *     RCS:  $Id: itclResolve2.c,v 1.1.2.1 2008/10/16 20:05:45 wiede Exp $
  * ========================================================================
- *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
+ *           Copyright (c) Arnulf Wiedemann
  * ------------------------------------------------------------------------
  * See the file "license.terms" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  */
+#include "tclInt.h"
 #include "itclInt.h"
-
-#ifdef NOTDEF
-struct Tcl_ResolvedVarInfo;
-
-typedef Tcl_Var (Tcl_ResolveRuntimeVarProc)(Tcl_Interp *interp,
-	struct Tcl_ResolvedVarInfo *vinfoPtr);
-
-typedef void (Tcl_ResolveVarDeleteProc)(struct Tcl_ResolvedVarInfo *vinfoPtr);
-
-/*
- * The following structure encapsulates the routines needed to resolve a
- * variable reference at runtime. Any variable specific state will typically
- * be appended to this structure.
- */
-
-typedef struct Tcl_ResolvedVarInfo {
-    Tcl_ResolveRuntimeVarProc *fetchProc;
-    Tcl_ResolveVarDeleteProc *deleteProc;
-} Tcl_ResolvedVarInfo;
-
-typedef int (Tcl_ResolveCompiledVarProc) (Tcl_Interp *interp,
-	CONST84 char *name, int length, Tcl_Namespace *context,
-	Tcl_ResolvedVarInfo **rPtr);
-
-typedef int (Tcl_ResolveVarProc) (Tcl_Interp *interp, CONST84 char *name,
-	Tcl_Namespace *context, int flags, Tcl_Var *rPtr);
-
-typedef int (Tcl_ResolveCmdProc) (Tcl_Interp *interp, CONST84 char *name,
-	Tcl_Namespace *context, int flags, Tcl_Command *rPtr);
-
-typedef struct Tcl_ResolverInfo {
-    Tcl_ResolveCmdProc *cmdResProc;
-				/* Procedure handling command name
-				 * resolution. */
-    Tcl_ResolveVarProc *varResProc;
-				/* Procedure handling variable name resolution
-				 * for variables that can only be handled at
-				 * runtime. */
-    Tcl_ResolveCompiledVarProc *compiledVarResProc;
-				/* Procedure handling variable name resolution
-				 * at compile time. */
-} Tcl_ResolverInfo;
-#endif
+#include "itclVCInt.h"
 
 /*
  * This structure is a subclass of Tcl_ResolvedVarInfo that contains the
@@ -81,8 +28,41 @@ typedef struct ItclResolvedVarInfo {
     ItclVarLookup *vlookup;           /* Pointer to lookup info. */
 } ItclResolvedVarInfo;
 
-static Tcl_Var ItclClassRuntimeVarResolver _ANSI_ARGS_((
-    Tcl_Interp *interp, Tcl_ResolvedVarInfo *vinfoPtr));
+static Tcl_Var ItclClassRuntimeVarResolver2 (
+    Tcl_Interp *interp, Tcl_ResolvedVarInfo *vinfoPtr);
+
+int
+Itcl_CheckClassVariableProtection(
+    Tcl_Interp *interp,
+    Tcl_Namespace *nsPtr,
+    const char *varName,
+    ClientData clientData)
+{
+    ItclClassVarInfo *icviPtr;
+
+    icviPtr = (ItclClassVarInfo *)clientData;
+//fprintf(stderr, "Itcl_CheckClassVariableProtection!%s!%s!%s!%d!%d\n", nsPtr->fullName, Tcl_GetCurrentNamespace(interp)->fullName, varName, icviPtr->protection, icviPtr->type);
+    if (icviPtr->protection == ITCL_PRIVATE) {
+        if (icviPtr->declaringNsPtr != nsPtr) {
+	    Tcl_AppendResult(interp, "can't read \"", varName,
+	            "\": no such variable", NULL);
+	    return TCL_ERROR;
+        }
+    }
+    return TCL_OK;
+}
+
+int
+Itcl_CheckClassCommandProtection(
+    Tcl_Interp *interp,
+    Tcl_Namespace *nsPtr,
+    const char *commandName,
+    ClientData clientData)
+{
+//fprintf(stderr, "Itcl_CheckClassCommandProtection!%s!%s!%p!\n", nsPtr->fullName, commandName, clientData);
+    // FIXME need code here !!!
+    return TCL_OK;
+}
 
 
 /*
@@ -100,7 +80,7 @@ static Tcl_Var ItclClassRuntimeVarResolver _ANSI_ARGS_((
  * ------------------------------------------------------------------------
  */
 int
-Itcl_ClassCmdResolver(
+Itcl_ClassCmdResolver2(
     Tcl_Interp *interp,		/* current interpreter */
     CONST char* name,		/* name of the command being accessed */
     Tcl_Namespace *nsPtr,	/* namespace performing the resolution */
@@ -110,12 +90,17 @@ Itcl_ClassCmdResolver(
 {
     ItclClass *iclsPtr;
     ItclObjectInfo *infoPtr;
+    ItclObject *contextIoPtr;
+
+    Tcl_Command cmdPtr;
+    ItclResolvingInfo *iriPtr;
+    ObjectCmdTableInfo *octiPtr;
+    ObjectCmdInfo *ociPtr;
+
 
     Tcl_HashEntry *hPtr;
-    Tcl_Obj *namePtr;
-    ItclMemberFunc *imPtr;
-    int isCmdDeleted;
 
+//fprintf(stderr, "Itcl_ClassCmdResolver2!%s!%s!\n", name, nsPtr->fullName);
     if ((name[0] == 't') && (strcmp(name, "this") == 0)) {
         return TCL_CONTINUE;
     }
@@ -126,63 +111,42 @@ Itcl_ClassCmdResolver(
         return TCL_CONTINUE;
     }
     iclsPtr = Tcl_GetHashValue(hPtr);
-    /*
-     *  If the command is a member function
-     */
-    hPtr = Tcl_FindHashEntry(&iclsPtr->resolveCmds, name);
-    if (hPtr == NULL) {
-	if (!(iclsPtr->flags & ITCL_CLASS)) {
-	    namePtr = Tcl_NewStringObj(name, -1);
-	    Tcl_IncrRefCount(namePtr);
-	    hPtr = Tcl_FindHashEntry(&iclsPtr->components, (char *)namePtr);
-	    Tcl_DecrRefCount(namePtr);
-            if (hPtr != NULL) {
+    ItclCallContext *callContextPtr;
+    callContextPtr = Itcl_PeekStack(&infoPtr->contextStack);
+    iriPtr = Tcl_GetAssocData(interp, ITCL_RESOLVE_DATA, NULL);
+    hPtr = Tcl_FindHashEntry(&iriPtr->resolveCmds , nsPtr->fullName);
+    if (hPtr != NULL) {
+	Tcl_HashTable *tablePtr;
+	tablePtr = Tcl_GetHashValue(hPtr);
+        hPtr = Tcl_FindHashEntry(tablePtr, name);
+        if (hPtr != NULL) {
+	    ItclClassCmdInfo *icciPtr = Tcl_GetHashValue(hPtr);
+            if ((callContextPtr != NULL) && (callContextPtr->ioPtr != NULL)) {
+                contextIoPtr = callContextPtr->ioPtr;
+                hPtr = Tcl_FindHashEntry(&iriPtr->objectCmdsTables,
+		        (char *)contextIoPtr);
+	        if (hPtr != NULL) {
+	            octiPtr = Tcl_GetHashValue(hPtr);
+	            hPtr = Tcl_FindHashEntry(&octiPtr->cmdInfos,
+		           (char *)icciPtr);
+	            if (hPtr != NULL) {
+			int ret;
+			ociPtr = Tcl_GetHashValue(hPtr);
+			ret = (* iriPtr->cmdProtFcn)(interp,
+			        Tcl_GetCurrentNamespace(interp), name,
+				(ClientData)icciPtr);
+			if (ret != TCL_OK) {
+			    return ret;
+			}
+		        cmdPtr = ociPtr->cmdPtr;
+                        *rPtr = cmdPtr;
+	                return TCL_OK;
+		    }
+	        }
 	    }
-        }
-        if (hPtr == NULL) {
-            return TCL_CONTINUE;
-        }
-        imPtr = (ItclMemberFunc*)Tcl_GetHashValue(hPtr);
-    } else {
-        ItclCmdLookup *clookup;
-        clookup = (ItclCmdLookup *)Tcl_GetHashValue(hPtr);
-        imPtr = clookup->imPtr;
-    }
-
-    /*
-     *  Looks like we found an accessible member function.
-     *
-     *  TRICKY NOTE:  Check to make sure that the command handle
-     *    is still valid.  If someone has deleted or renamed the
-     *    command, it may not be.  This is just the time to catch
-     *    it--as it is being resolved again by the compiler.
-     */
-    
-    /*
-     * The following #if is needed so itcl can be compiled with
-     * all versions of Tcl.  The integer "deleted" was renamed to
-     * "flags" in tcl8.4a2.  This #if is also found in itcl_ensemble.c .
-     * We're using a runtime check with itclCompatFlags to adjust for
-     * the behavior of this change, too.
-     *
-     */
-/* FIXME !!! */
-isCmdDeleted = 0;
-//    isCmdDeleted = (!imPtr->accessCmd || imPtr->accessCmd->flags);
-
-    if (isCmdDeleted) {
-	imPtr->accessCmd = NULL;
-
-	if ((flags & TCL_LEAVE_ERR_MSG) != 0) {
-	    Tcl_AppendResult(interp,
-		"can't access \"", name, "\": deleted or redefined\n",
-		"(use the \"body\" command to redefine methods/procs)",
-		(char*)NULL);
 	}
-	return TCL_ERROR;   /* disallow access! */
     }
-    *rPtr = imPtr->accessCmd;
-    return TCL_OK;
+    return TCL_CONTINUE;
 }
 
 
@@ -205,7 +169,7 @@ isCmdDeleted = 0;
  * ------------------------------------------------------------------------
  */
 int
-Itcl_ClassVarResolver(
+Itcl_ClassVarResolver2(
     Tcl_Interp *interp,       /* current interpreter */
     CONST char* name,	      /* name of the variable being accessed */
     Tcl_Namespace *nsPtr,   /* namespace performing the resolution */
@@ -218,6 +182,11 @@ Itcl_ClassVarResolver(
     ItclObject *contextIoPtr;
     Tcl_HashEntry *hPtr;
     ItclVarLookup *vlookup;
+
+    Tcl_Var varPtr;
+    ItclResolvingInfo *iriPtr;
+    ObjectVarTableInfo *ovtiPtr;
+    ObjectVarInfo *oviPtr;
 
     Tcl_Namespace *upNsPtr;
     upNsPtr = Itcl_GetUplevelNamespace(interp, 1);
@@ -253,6 +222,44 @@ Itcl_ClassVarResolver(
         return TCL_CONTINUE;
     }
 
+    iriPtr = Tcl_GetAssocData(interp, ITCL_RESOLVE_DATA, NULL);
+    hPtr = Tcl_FindHashEntry(&iriPtr->resolveVars , nsPtr->fullName);
+    if (hPtr != NULL) {
+	Tcl_HashTable *tablePtr;
+	tablePtr = Tcl_GetHashValue(hPtr);
+        hPtr = Tcl_FindHashEntry(tablePtr , name);
+        if (hPtr != NULL) {
+	    int ret;
+	    ItclClassVarInfo *icviPtr = Tcl_GetHashValue(hPtr);
+	    ret = (* iriPtr->varProtFcn)(interp,
+	            Tcl_GetCurrentNamespace(interp), name,
+		    (ClientData)icviPtr);
+	    if (ret != TCL_OK) {
+	        return ret;
+	    }
+            /*
+             *  If this is an instance variable, then we have to
+             *  find the object context,
+             */
+    
+            if ((callContextPtr != NULL) && (callContextPtr->ioPtr != NULL)) {
+                contextIoPtr = callContextPtr->ioPtr;
+                hPtr = Tcl_FindHashEntry(&iriPtr->objectVarsTables,
+		        (char *)contextIoPtr);
+	        if (hPtr != NULL) {
+	            ovtiPtr = Tcl_GetHashValue(hPtr);
+	            hPtr = Tcl_FindHashEntry(&ovtiPtr->varInfos,
+		           (char *)icviPtr);
+	            if (hPtr != NULL) {
+			oviPtr = Tcl_GetHashValue(hPtr);
+		        varPtr = oviPtr->varPtr;
+                        *rPtr = varPtr;
+	                return TCL_OK;
+		    }
+	        }
+	    }
+	}
+    }
     /*
      *  See if the variable is a known data member and accessible.
      */
@@ -279,78 +286,6 @@ Itcl_ClassVarResolver(
 	}
     }
 
-    /*
-     *  If this is an instance variable, then we have to
-     *  find the object context,
-     */
-
-    if (callContextPtr == NULL) {
-        return TCL_CONTINUE;
-    }
-    if (callContextPtr->ioPtr == NULL) {
-        return TCL_CONTINUE;
-    }
-    contextIoPtr = callContextPtr->ioPtr;
-
-    /*
-     *  TRICKY NOTE:  We've resolved the variable in the current
-     *    class context, but we must also be careful to get its
-     *    index from the most-specific class context.  Variables
-     *    are arranged differently depending on which class
-     *    constructed the object.
-     */
-    if (contextIoPtr->iclsPtr != vlookup->ivPtr->iclsPtr) {
-	if (strcmp(Tcl_GetString(vlookup->ivPtr->namePtr), "this") == 0) {
-            hPtr = Tcl_FindHashEntry(&contextIoPtr->iclsPtr->resolveVars,
-                Tcl_GetString(vlookup->ivPtr->namePtr));
-
-            if (hPtr != NULL) {
-                vlookup = (ItclVarLookup*)Tcl_GetHashValue(hPtr);
-            }
-        }
-    }
-    hPtr = Tcl_FindHashEntry(&contextIoPtr->objectVariables,
-            (char *)vlookup->ivPtr);
-    if (strcmp(name, "this") == 0) {
-        Tcl_DString buffer;
-	Tcl_DStringInit(&buffer);
-	Tcl_DStringAppend(&buffer, ITCL_VARIABLES_NAMESPACE, -1);
-	Tcl_DStringAppend(&buffer, "::", 2);
-	Tcl_DStringAppend(&buffer, Tcl_GetString(contextIoPtr->namePtr), -1);
-	if (vlookup->ivPtr->iclsPtr->nsPtr == NULL) {
-	    /* deletion of class is running */
-	    Tcl_DStringAppend(&buffer,
-	             Tcl_GetCurrentNamespace(interp)->fullName, -1);
-        } else {
-	    Tcl_DStringAppend(&buffer,
-	             vlookup->ivPtr->iclsPtr->nsPtr->fullName, -1);
-	}
-	Tcl_DStringAppend(&buffer, "::this", 6);
-        Tcl_Var varPtr;
-	varPtr = Itcl_FindNamespaceVar(interp, Tcl_DStringValue(&buffer), NULL, 0);
-        if (varPtr != NULL) {
-            *rPtr = varPtr;
-	    return TCL_OK;
-        }
-    }
-    if (strcmp(name, "itcl_options") == 0) {
-        Tcl_DString buffer;
-	Tcl_DStringInit(&buffer);
-	Tcl_DStringAppend(&buffer, ITCL_VARIABLES_NAMESPACE, -1);
-	Tcl_DStringAppend(&buffer, "::", 2);
-	Tcl_DStringAppend(&buffer, Tcl_GetString(contextIoPtr->namePtr), -1);
-	Tcl_DStringAppend(&buffer, "::itcl_options", 14);
-        Tcl_Var varPtr;
-	varPtr = Itcl_FindNamespaceVar(interp, Tcl_DStringValue(&buffer), NULL, 0);
-        if (varPtr != NULL) {
-            *rPtr = varPtr;
-	    return TCL_OK;
-        }
-    }
-    if (hPtr != NULL) {
-        *rPtr = Tcl_GetHashValue(hPtr);
-        return TCL_OK;
-    }
     return TCL_CONTINUE;
 }
 
@@ -375,7 +310,7 @@ Itcl_ClassVarResolver(
  * ------------------------------------------------------------------------
  */
 int
-Itcl_ClassCompiledVarResolver(
+Itcl_ClassCompiledVarResolver2(
     Tcl_Interp *interp,         /* current interpreter */
     CONST char* name,           /* name of the variable being accessed */
     int length,                 /* number of characters in name */
@@ -437,7 +372,7 @@ Itcl_ClassCompiledVarResolver(
      *  context.
      */
     (*rPtr) = (Tcl_ResolvedVarInfo *) ckalloc(sizeof(ItclResolvedVarInfo));
-    (*rPtr)->fetchProc = ItclClassRuntimeVarResolver;
+    (*rPtr)->fetchProc = ItclClassRuntimeVarResolver2;
     (*rPtr)->deleteProc = NULL;
     ((ItclResolvedVarInfo*)(*rPtr))->vlookup = vlookup;
 
@@ -456,7 +391,7 @@ Itcl_ClassCompiledVarResolver(
  * ------------------------------------------------------------------------
  */
 static Tcl_Var
-ItclClassRuntimeVarResolver(
+ItclClassRuntimeVarResolver2(
     Tcl_Interp *interp,               /* current interpreter */
     Tcl_ResolvedVarInfo *resVarInfo)  /* contains ItclVarLookup rep
                                        * for variable */
@@ -466,6 +401,11 @@ ItclClassRuntimeVarResolver(
     ItclClass *iclsPtr;
     ItclObject *contextIoPtr;
     Tcl_HashEntry *hPtr;
+
+    Tcl_Var varPtr;
+    ItclResolvingInfo *iriPtr;
+    ObjectVarTableInfo *ovtiPtr;
+    ObjectVarInfo *oviPtr;
 
     /*
      *  If this is a common data member, then the associated
@@ -489,6 +429,7 @@ ItclClassRuntimeVarResolver(
      */
 
     ItclCallContext *callContextPtr;
+
     callContextPtr = Itcl_PeekStack(&iclsPtr->infoPtr->contextStack);
     if (callContextPtr == NULL) {
         return NULL;
@@ -496,61 +437,41 @@ ItclClassRuntimeVarResolver(
     if (callContextPtr->ioPtr == NULL) {
         return NULL;
     }
-    contextIoPtr = callContextPtr->ioPtr;
-    if (contextIoPtr != NULL) {
-        if (contextIoPtr->iclsPtr != vlookup->ivPtr->iclsPtr) {
-            hPtr = Tcl_FindHashEntry(&contextIoPtr->iclsPtr->resolveVars,
-                Tcl_GetString(vlookup->ivPtr->namePtr));
-
-            if (hPtr != NULL) {
-                vlookup = (ItclVarLookup*)Tcl_GetHashValue(hPtr);
-            } else {
-	    }
-        }
-        hPtr = Tcl_FindHashEntry(&contextIoPtr->objectVariables,
-                (char *)vlookup->ivPtr);
-        if (strcmp(Tcl_GetString(vlookup->ivPtr->namePtr), "this") == 0) {
-            Tcl_DString buffer;
-	    Tcl_DStringInit(&buffer);
-	    Tcl_DStringAppend(&buffer, ITCL_VARIABLES_NAMESPACE, -1);
-	    Tcl_DStringAppend(&buffer, "::", 2);
-	    Tcl_DStringAppend(&buffer,
-	            Tcl_GetString(contextIoPtr->namePtr), -1);
-	    if (vlookup->ivPtr->iclsPtr->nsPtr == NULL) {
-	        Tcl_DStringAppend(&buffer,
-	                Tcl_GetCurrentNamespace(interp)->fullName, -1);
-	    } else {
-	        Tcl_DStringAppend(&buffer,
-	                vlookup->ivPtr->iclsPtr->nsPtr->fullName, -1);
-	    }
-	    Tcl_DStringAppend(&buffer, "::this", 6);
-            Tcl_Var varPtr;
-	    varPtr = Itcl_FindNamespaceVar(interp, Tcl_DStringValue(&buffer),
-	            NULL, 0);
-            if (varPtr != NULL) {
-	        return varPtr;
-            }
-        }
-        if (strcmp(Tcl_GetString(vlookup->ivPtr->namePtr),
-	        "itcl_options") == 0) {
-            Tcl_DString buffer;
-	    Tcl_DStringInit(&buffer);
-	    Tcl_DStringAppend(&buffer, ITCL_VARIABLES_NAMESPACE, -1);
-	    Tcl_DStringAppend(&buffer, "::", 2);
-	    Tcl_DStringAppend(&buffer,
-	            Tcl_GetString(contextIoPtr->namePtr), -1);
-	    Tcl_DStringAppend(&buffer, "::itcl_options", 14);
-            Tcl_Var varPtr;
-	    varPtr = Itcl_FindNamespaceVar(interp, Tcl_DStringValue(&buffer),
-	            NULL, 0);
-            if (varPtr != NULL) {
-	        return varPtr;
-            }
-        }
+    iriPtr = Tcl_GetAssocData(interp, ITCL_RESOLVE_DATA, NULL);
+    hPtr = Tcl_FindHashEntry(&iriPtr->resolveVars,
+            Tcl_GetCurrentNamespace(interp)->fullName);
+    if (hPtr != NULL) {
+        Tcl_HashTable *tablePtr;
+	tablePtr = Tcl_GetHashValue(hPtr);
+        hPtr = Tcl_FindHashEntry(tablePtr,
+	        Tcl_GetString(vlookup->ivPtr->namePtr));
         if (hPtr != NULL) {
-            return (Tcl_Var)Tcl_GetHashValue(hPtr);
-        }
-    } else {
+	    ItclClassVarInfo *icviPtr = Tcl_GetHashValue(hPtr);
+	    int ret;
+	    ret = (* iriPtr->varProtFcn)(interp,
+	            Tcl_GetCurrentNamespace(interp),
+		    Tcl_GetString(vlookup->ivPtr->namePtr),
+		    (ClientData)icviPtr);
+	    if (ret != TCL_OK) {
+	        return NULL;
+	    }
+            /*
+             *  If this is an instance variable, then we have to
+             *  find the object context,
+             */
+
+            contextIoPtr = callContextPtr->ioPtr;
+            hPtr = Tcl_FindHashEntry(&iriPtr->objectVarsTables, (char *)contextIoPtr);
+	    if (hPtr != NULL) {
+	        ovtiPtr = Tcl_GetHashValue(hPtr);
+	        hPtr = Tcl_FindHashEntry(&ovtiPtr->varInfos, (char *)icviPtr);
+	        if (hPtr != NULL) {
+	            oviPtr = Tcl_GetHashValue(hPtr);
+		    varPtr = oviPtr->varPtr;
+	            return varPtr;
+	        }
+	    }
+	}
     }
     return NULL;
 }
@@ -591,7 +512,7 @@ ItclClassRuntimeVarResolver(
  */
 /* ARGSUSED */
 int
-Itcl_ParseVarResolver(
+Itcl_ParseVarResolver2(
     Tcl_Interp *interp,        /* current interpreter */
     CONST char* name,                /* name of the variable being accessed */
     Tcl_Namespace *contextNs,  /* namespace context */
@@ -643,10 +564,10 @@ Itcl_ParseVarResolver(
 
 
 int
-ItclSetParserResolver(
+ItclSetParserResolver2(
     Tcl_Namespace *nsPtr)
 {
     Itcl_SetNamespaceResolvers(nsPtr, (Tcl_ResolveCmdProc*)NULL,
-            Itcl_ParseVarResolver, (Tcl_ResolveCompiledVarProc*)NULL);
+            Itcl_ParseVarResolver2, (Tcl_ResolveCompiledVarProc*)NULL);
     return TCL_OK;
 }

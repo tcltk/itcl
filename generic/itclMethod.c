@@ -25,7 +25,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclMethod.c,v 1.1.2.20 2008/09/28 10:41:38 wiede Exp $
+ *     RCS:  $Id: itclMethod.c,v 1.1.2.21 2008/10/16 20:05:45 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -119,7 +119,9 @@ NRBodyCmd(
     imPtr = NULL;
     entry = Tcl_FindHashEntry(&iclsPtr->resolveCmds, tail);
     if (entry) {
-        imPtr = (ItclMemberFunc*)Tcl_GetHashValue(entry);
+	ItclCmdLookup *clookup;
+	clookup = (ItclCmdLookup *)Tcl_GetHashValue(entry);
+	imPtr = clookup->imPtr;
         if (imPtr->iclsPtr != iclsPtr) {
             imPtr = NULL;
         }
@@ -965,7 +967,7 @@ Itcl_EvalMemberCode(
 
         callbackPtr = Itcl_GetCurrentCallbackPtr(interp);
         Itcl_NRAddCallback(interp, CallConstructBase, imPtr, contextIoPtr,
-	        INT2PTR(objc), objv);
+	        INT2PTR(objc), (ClientData)objv);
         result = Itcl_NRRunCallbacks(interp, callbackPtr);
         if (result != TCL_OK) {
             goto evalMemberCodeDone;
@@ -1028,7 +1030,7 @@ DeleteArgList(
     ItclArgList *currPtr;
     ItclArgList *nextPtr;
 
-/* FIX ME !!! */
+/* FIXME !!! */
 return;
     currPtr=arglistPtr;
     while (currPtr != NULL) {
@@ -1246,7 +1248,9 @@ Itcl_GetMemberFuncUsage(
             mf = NULL;
             entry = Tcl_FindHashEntry(&iclsPtr->resolveCmds, "constructor");
             if (entry) {
-                mf = (ItclMemberFunc*)Tcl_GetHashValue(entry);
+		ItclCmdLookup *clookup;
+		clookup = (ItclCmdLookup *)Tcl_GetHashValue(entry);
+		mf = clookup->imPtr;
             }
 
             if (mf == imPtr) {
@@ -1375,7 +1379,9 @@ NRExecMethod(
                 Tcl_GetString(imPtr->namePtr));
 
             if (entry) {
-                imPtr = (ItclMemberFunc*)Tcl_GetHashValue(entry);
+		ItclCmdLookup *clookup;
+		clookup = (ItclCmdLookup *)Tcl_GetHashValue(entry);
+		imPtr = clookup->imPtr;
             }
         }
     }
@@ -1733,7 +1739,7 @@ Itcl_ReportFuncErrors(
     ItclObject *contextObj,    /* object context for this command */
     int result)                /* integer status code from proc body */
 {
-/* FIX ME !!! */
+/* FIXME !!! */
 /* adapt to use of ItclProcErrorProc for stubs compatibility !! */
     return result;
 }
@@ -1798,10 +1804,12 @@ Itcl_CmdAliasProc(
 	}
         return NULL;
     }
-    imPtr = Tcl_GetHashValue(hPtr);
-	if (strcmp(cmdName, "info") == 0) {
-	    return Tcl_FindCommand(interp, "::itcl::builtin::Info", NULL, 0);
-	}
+    ItclCmdLookup *clookup;
+    clookup = (ItclCmdLookup *)Tcl_GetHashValue(hPtr);
+    imPtr = clookup->imPtr;
+    if (strcmp(cmdName, "info") == 0) {
+        return Tcl_FindCommand(interp, "::itcl::builtin::Info", NULL, 0);
+    }
     return imPtr->accessCmd;
 }
 

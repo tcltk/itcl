@@ -24,7 +24,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclInfo.c,v 1.1.2.14 2008/10/09 16:30:34 wiede Exp $
+ *     RCS:  $Id: itclInfo.c,v 1.1.2.15 2008/10/16 20:05:45 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -254,7 +254,7 @@ Itcl_BiInfoClassCmd(
 
     char *name;
 
-    ItclShowArgs(2, "Itcl_BiInfoClassCmd", objc, objv);
+    ItclShowArgs(1, "Itcl_BiInfoClassCmd", objc, objv);
     if (objc != 1) {
         Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
             "wrong # args: should be \"info class\"",
@@ -300,11 +300,7 @@ Itcl_BiInfoClassCmd(
     } else {
         assert(contextIclsPtr != NULL);
         assert(contextIclsPtr->nsPtr != NULL);
-        if (contextIclsPtr->infoPtr->useOldResolvers) {
-            contextNs = Itcl_GetUplevelNamespace(interp, 1);
-        } else {
-            contextNs = contextIclsPtr->nsPtr;
-	}
+        contextNs = contextIclsPtr->nsPtr;
     }
 
     if (contextNs == NULL) {
@@ -515,7 +511,7 @@ Itcl_BiInfoHeritageCmd(
 
     Itcl_InitHierIter(&hier, contextIclsPtr);
     while ((iclsPtr=Itcl_AdvanceHierIter(&hier)) != NULL) {
-/* FIX ME !!! */
+/* FIXME !!! */
 if (iclsPtr->nsPtr == NULL) {
 fprintf(stderr, "ITCL: iclsPtr->nsPtr == NULL %s 0x%08x\n", Tcl_GetString(iclsPtr->fullNamePtr), iclsPtr->flags);
 return TCL_ERROR;
@@ -635,7 +631,9 @@ Itcl_BiInfoFunctionCmd(
             return TCL_ERROR;
         }
 
-        imPtr = (ItclMemberFunc*)Tcl_GetHashValue(entry);
+	ItclCmdLookup *clookup;
+	clookup = (ItclCmdLookup *)Tcl_GetHashValue(entry);
+	imPtr = clookup->imPtr;
         mcode = imPtr->codePtr;
 
         /*
@@ -1089,7 +1087,7 @@ Itcl_BiInfoVarsCmd(
 		iclsPtr = Tcl_GetHashValue(hPtr);
 		resultListPtr = Tcl_GetObjResult(interp);
 		numElems = 0;
-/* FIX ME !! should perhaps skip ___DO_NOT_DELETE_THIS_VARIABLE here !! */
+/* FIXME !! should perhaps skip ___DO_NOT_DELETE_THIS_VARIABLE here !! */
 		FOREACH_HASH_VALUE(ivPtr, &iclsPtr->variables) {
 		    if ((ivPtr->flags & ITCL_COMMON) != 0) {
 		        if (ivPtr->protection != ITCL_PUBLIC) {
@@ -1237,7 +1235,7 @@ Itcl_BiInfoBodyCmd(
      */
     contextIclsPtr = NULL;
     if (!Itcl_IsClassNamespace(Tcl_GetCurrentNamespace(interp))) {
-/* FIX ME !!! */
+/* FIXME !!! */
 #ifdef NOTDEF
         Proc *procPtr;
 
@@ -1279,7 +1277,9 @@ Itcl_BiInfoBodyCmd(
         return TCL_ERROR;
     }
 
-    imPtr = (ItclMemberFunc*)Tcl_GetHashValue(entry);
+    ItclCmdLookup *clookup;
+    clookup = (ItclCmdLookup *)Tcl_GetHashValue(entry);
+    imPtr = clookup->imPtr;
     mcode = imPtr->codePtr;
 
     /*
@@ -1337,7 +1337,7 @@ Itcl_BiInfoArgsCmd(
      */
     contextIclsPtr = NULL;
     if (!Itcl_IsClassNamespace(Tcl_GetCurrentNamespace(interp))) {
-/* FIX ME !!! */
+/* FIXME !!! */
 #ifdef NOTDEF
         Proc *procPtr;
 //        CompiledLocal *localPtr;
@@ -1389,7 +1389,9 @@ Itcl_BiInfoArgsCmd(
         return TCL_ERROR;
     }
 
-    imPtr = (ItclMemberFunc*)Tcl_GetHashValue(entry);
+    ItclCmdLookup *clookup;
+    clookup = (ItclCmdLookup *)Tcl_GetHashValue(entry);
+    imPtr = clookup->imPtr;
     mcode = imPtr->codePtr;
 
     /*

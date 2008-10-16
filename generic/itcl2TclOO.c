@@ -8,7 +8,7 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itcl2TclOO.c,v 1.1.2.10 2008/09/28 10:41:37 wiede Exp $
+ * RCS: @(#) $Id: itcl2TclOO.c,v 1.1.2.11 2008/10/16 20:05:44 wiede Exp $
  */
 
 #include <tcl.h>
@@ -164,6 +164,7 @@ Itcl_InvokeProcedureMethod(
 {
     Method *mPtr = clientData;
     Tcl_Namespace *nsPtr = mPtr->declaringClassPtr->thisPtr->namespacePtr;
+
     return Tcl_InvokeClassProcedureMethod(interp, mPtr->namePtr, nsPtr,
             mPtr->clientData, objc, objv);
 }
@@ -349,3 +350,49 @@ Itcl_NewForwardMethod(
     return (Tcl_Method)TclOONewForwardInstanceMethod(interp, (Object *)oPtr,
             flags, nameObj, prefixObj);
 }
+
+static Tcl_Obj *
+Itcl_TclOOObjectName(
+    Tcl_Interp *interp,
+    Object *oPtr)
+{
+    Tcl_Obj *namePtr;
+
+    if (oPtr->cachedNameObj) {
+        return oPtr->cachedNameObj;
+    }
+    namePtr = Tcl_NewObj();
+    Tcl_GetCommandFullName(interp, oPtr->command, namePtr);
+    Tcl_IncrRefCount(namePtr);
+    oPtr->cachedNameObj = namePtr;
+    return namePtr;
+}
+
+int
+Itcl_SelfCmd(
+    ClientData clientData,
+    Tcl_Interp *interp,
+    int objc,
+    Tcl_Obj *const *objv)
+{
+    Interp *iPtr = (Interp *) interp;
+    CallFrame *framePtr = iPtr->varFramePtr;
+    CallContext *contextPtr;
+
+
+    if (framePtr == NULL || !(framePtr->isProcCallFrame & FRAME_IS_METHOD)) {
+        Tcl_AppendResult(interp, TclGetString(objv[0]),
+                " may only be called from inside a method", NULL);
+        return TCL_ERROR;
+    }
+
+    contextPtr = framePtr->clientData; 
+
+    if (objc == 1) {
+        Tcl_SetObjResult(interp, Itcl_TclOOObjectName(interp, contextPtr->oPtr));
+        return TCL_OK;
+    }
+fprintf(stderr, "Itcl_SelfCmd!should not happen\n");
+    return TCL_ERROR;
+}
+

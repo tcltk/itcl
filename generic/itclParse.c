@@ -39,7 +39,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclParse.c,v 1.1.2.26 2008/09/28 10:41:38 wiede Exp $
+ *     RCS:  $Id: itclParse.c,v 1.1.2.27 2008/10/16 20:05:45 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -618,7 +618,7 @@ ItclClassBaseCmd(
 	    argumentPtr = imPtr->codePtr->argumentPtr;
 	    bodyPtr = imPtr->codePtr->bodyPtr;
 	    if (imPtr->codePtr->flags & ITCL_BUILTIN) {
-//FIX ME MEMORY leak!!
+// FIXME MEMORY leak!!
 	        argumentPtr = Tcl_NewStringObj("args", -1);
 		int isDone;
 		isDone = 0;
@@ -1516,7 +1516,7 @@ ItclDelObjectInfo(
     Tcl_DeleteHashTable(&infoPtr->objects);
 
     Itcl_DeleteStack(&infoPtr->clsStack);
-// FIX ME !!!
+// FIXME !!!
 // free class_meta_type and object_meta_type
     ckfree((char*)infoPtr);
 }
@@ -1549,7 +1549,6 @@ Itcl_ClassFilterCmd(
 		" Only these can delegate procs", NULL);
 	return TCL_ERROR;
     }
-/* FIX ME need to change the chain command to do the same here as the TclOO next command !! */
     if (objc < 2) {
         Tcl_WrongNumArgs(interp, 1, objv, "<filterName> ?<filterName> ...?");
         return TCL_ERROR;
@@ -2024,7 +2023,7 @@ ItclCreateComponent(
         Tcl_IncrRefCount(icPtr->namePtr);
         icPtr->ivPtr = ivPtr;
 	Tcl_SetHashValue(hPtr, icPtr);
-        /* FIX ME !!! */
+        /* FIXME !!! */
         /* need write trace ! */
     } else {
         icPtr =Tcl_GetHashValue(hPtr);
@@ -2258,12 +2257,12 @@ delegate method * ?to <componentName>? ?using <pattern>? ?except <methods>?";
     }
     icPtr = Tcl_GetHashValue(hPtr);
     if (*methodName != '*') {
-	/* FIX ME !!! */
+	/* FIXME !!! */
         /* check for locally defined method */
 	hPtr = NULL;
 	if (ioPtr != NULL) {
 	} else {
-	    /* FIX ME !! have to check the hierarchy !! */
+	    /* FIXME !! have to check the hierarchy !! */
 //	    hPtr = Tcl_FindHashEntry(&iclsPtr->functions,
 //	            (char *)methodNamePtr);
 	}
@@ -2308,7 +2307,7 @@ delegate method * ?to <componentName>? ?using <pattern>? ?except <methods>?";
 	            &isNew);
 #ifdef NOTDEF
 	    hPtr2 = Tcl_FindHashEntry(&iclsPtr->functions, (char *)objPtr);
-/* FIX ME !!! can only be done after a class/widget has been parsed completely !! */
+/* FIXME !!! can only be done after a class/widget has been parsed completely !! */
 	    if (hPtr2 == NULL) {
 	        Tcl_AppendResult(interp, "no such method: \"",
 		        Tcl_GetString(objPtr), "\" found for delegation", NULL);
@@ -2548,7 +2547,7 @@ Itcl_HandleDelegateOptionCmd(
     }
     icPtr = Tcl_GetHashValue(hPtr);
     if (*option != '*') {
-	/* FIX ME !!! */
+	/* FIXME !!! */
 	/* check for locally defined option */
         /* check for valid option name */
         // ItclIsValidOptionName(option);
@@ -2603,7 +2602,7 @@ Itcl_HandleDelegateOptionCmd(
 	            &isNew);
 #ifdef NOTDEF
 	    hPtr2 = Tcl_FindHashEntry(&iclsPtr->options, (char *)objPtr);
-/* FIX ME !!! can only be done after a class/widget has been parsed completely !! */
+/* FIXME !!! can only be done after a class/widget has been parsed completely !! */
 	    if (hPtr2 == NULL) {
 	        Tcl_AppendResult(interp, "no such option: \"",
 		        Tcl_GetString(objPtr), "\" found for delegation", NULL);
@@ -2803,7 +2802,7 @@ delegate proc * ?to <componentName>? ?using <pattern>? ?except <procs>?";
         if ((targetPtr == NULL) && (usingPtr == NULL)) {
 	    targetPtr = procNamePtr;
 	}
-	/* FIX ME !!! */
+	/* FIXME !!! */
         /* check for locally defined proc */
 	hPtr = Tcl_FindHashEntry(&iclsPtr->functions, (char *)procNamePtr);
 	if (hPtr != NULL) {
@@ -2839,7 +2838,7 @@ delegate proc * ?to <componentName>? ?using <pattern>? ?except <procs>?";
 	    hPtr = Tcl_CreateHashEntry(&idmPtr->exceptions, (char *)objPtr,
 	            &isNew);
 	    hPtr2 = Tcl_FindHashEntry(&iclsPtr->functions, (char *)objPtr);
-/* FIX ME !!! can only be done after a class/widget has been parsed completely !! */
+/* FIXME !!! can only be done after a class/widget has been parsed completely !! */
 #ifdef NOTDEF
 	    if (hPtr2 == NULL) {
 	        Tcl_AppendResult(interp, "no such method: \"",
@@ -3013,6 +3012,6 @@ Itcl_ClassMethodVariableCmd(
         return result;
     }
     /* install a write trace if callbackPtr != NULL */
-    /* FIX ME to be done */
+    /* FIXME to be done */
     return TCL_OK;   
 }

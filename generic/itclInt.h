@@ -9,7 +9,7 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itclInt.h,v 1.17.2.33 2008/09/28 10:41:38 wiede Exp $
+ * RCS: @(#) $Id: itclInt.h,v 1.17.2.34 2008/10/16 20:05:45 wiede Exp $
  */
 
 #include <string.h>
@@ -480,6 +480,28 @@ typedef struct IctlVarTraceInfo {
 #define ITCL_TRACE_CLASS		0x01
 #define ITCL_TRACE_OBJECT		0x02
 
+#define VAR_TYPE_VARIABLE 	1
+#define VAR_TYPE_COMMON 	2
+
+typedef struct ItclClassVarInfo {
+    int type;
+    int protection;
+    int varNum;
+    Tcl_Namespace *nsPtr;
+    Tcl_Namespace *declaringNsPtr;
+} ItclClassVarInfo;
+
+#define CMD_TYPE_METHOD 	1
+#define CMD_TYPE_PROC 		2
+
+typedef struct ItclClassCmdInfo {
+    int type;
+    int protection;
+    int cmdNum;
+    Tcl_Namespace *nsPtr;
+    Tcl_Namespace *declaringNsPtr;
+} ItclClassCmdInfo;
+
 /*
  *  Instance variable lookup entry.
  */
@@ -492,7 +514,20 @@ typedef struct ItclVarLookup {
                                * the fewest qualifiers.  This string is
                                * taken from the resolveVars table, so
                                * it shouldn't be freed. */
+    int varNum;
+    ItclClassVarInfo *classVarInfoPtr;
+    Tcl_Var varPtr;
 } ItclVarLookup;
+
+/*
+ *  Instance command lookup entry.
+ */
+typedef struct ItclCmdLookup {
+    ItclMemberFunc* imPtr;    /* function definition */
+    int cmdNum;
+    ItclClassCmdInfo *classCmdInfoPtr;
+    Tcl_Command cmdPtr;
+} ItclCmdLookup;
 
 typedef struct ItclCallContext {
     int objectFlags;
@@ -572,6 +607,13 @@ MODULE_SCOPE int Itcl_ClassVarResolver(Tcl_Interp *interp, CONST char* name,
 MODULE_SCOPE int Itcl_ClassCompiledVarResolver(Tcl_Interp *interp,
         CONST char* name, int length, Tcl_Namespace *nsPtr,
         struct Tcl_ResolvedVarInfo **rPtr);
+MODULE_SCOPE int Itcl_ClassCmdResolver2(Tcl_Interp *interp, CONST char* name,
+	Tcl_Namespace *nsPtr, int flags, Tcl_Command *rPtr);
+MODULE_SCOPE int Itcl_ClassVarResolver2(Tcl_Interp *interp, CONST char* name,
+        Tcl_Namespace *nsPtr, int flags, Tcl_Var *rPtr);
+MODULE_SCOPE int Itcl_ClassCompiledVarResolver2(Tcl_Interp *interp,
+        CONST char* name, int length, Tcl_Namespace *nsPtr,
+        struct Tcl_ResolvedVarInfo **rPtr);
 MODULE_SCOPE int ItclSetParserResolver(Tcl_Namespace *nsPtr);
 MODULE_SCOPE void ItclProcErrorProc(Tcl_Interp *interp, Tcl_Obj *procNameObj);
 MODULE_SCOPE int ItclClassBaseCmd(ClientData clientData, Tcl_Interp *interp,
@@ -638,6 +680,7 @@ MODULE_SCOPE int ItclParseOption(ItclObjectInfo *infoPtr, Tcl_Interp *interp,
         int objc, Tcl_Obj *CONST objv[], ItclOption **ioptPtrPtr);
 
 #include "itcl2TclOO.h"
+#include "itclVarsAndCmds.h"
 
 /*
  * Include all the private API, generated from itcl.decls.

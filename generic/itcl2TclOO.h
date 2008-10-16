@@ -22,3 +22,6 @@ EXTERN Tcl_Method Itcl_NewForwardClassMethod(Tcl_Interp *interp,
         Tcl_Class clsPtr, int flags, Tcl_Obj *nameObj, Tcl_Obj *prefixObj);
 EXTERN Tcl_Method Itcl_NewForwardMethod(Tcl_Interp *interp, Tcl_Object oPtr,
         int flags, Tcl_Obj *nameObj, Tcl_Obj *prefixObj);
+EXTERN int Itcl_SelfCmd(ClientData clientData, Tcl_Interp *interp,
+        int objc, Tcl_Obj *const *objv);
+

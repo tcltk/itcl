@@ -24,7 +24,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclBuiltin.c,v 1.1.2.28 2008/10/09 16:30:34 wiede Exp $
+ *     RCS:  $Id: itclBuiltin.c,v 1.1.2.29 2008/10/16 20:05:44 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -136,7 +136,7 @@ Itcl_BiInit(
         if (mapDict != NULL) {
             Tcl_DictObjPut(NULL, mapDict, Tcl_NewStringObj("itclinfo", -1),
                     Tcl_NewStringObj("::itcl::builtin::Info", -1));
-/* FIX ME !!! need to restore ::tcl::Info_vars if Itcl is unloaded !! */
+/* FIXME !!! need to restore ::tcl::Info_vars if Itcl is unloaded !! */
             Tcl_DictObjPut(NULL, mapDict, Tcl_NewStringObj("vars", -1),
                     Tcl_NewStringObj("::itcl::builtin::Info::vars", -1));
             Tcl_SetEnsembleMappingDict(interp, infoCmd, mapDict);
@@ -1196,7 +1196,7 @@ fprintf(stderr, "plain configure not yet implemented\n");
 	    infoPtr->unparsedObjv[infoPtr->unparsedObjc-1] = objv[i+1];
 	    Tcl_IncrRefCount(infoPtr->unparsedObjv[infoPtr->unparsedObjc-1]);
 	    /* check if normal public variable/common ? */
-	    /* FIX ME !!! temporary */
+	    /* FIXME !!! temporary */
 	    continue;
         }
         ioptPtr = (ItclOption *)Tcl_GetHashValue(hPtr);
@@ -1232,7 +1232,9 @@ fprintf(stderr, "plain configure not yet implemented\n");
 	        (char *)val);
             if (hPtr != NULL) {
 		ItclMemberFunc *imPtr;
-		imPtr = (ItclMemberFunc *)Tcl_GetHashValue(hPtr);
+		ItclCmdLookup *clookup;
+		clookup = (ItclCmdLookup *)Tcl_GetHashValue(hPtr);
+		imPtr = clookup->imPtr;
 	        evalNsPtr = imPtr->iclsPtr->nsPtr;
 	    } else {
 		Tcl_AppendResult(interp, "cannot find method \"",
