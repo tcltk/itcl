@@ -6,7 +6,7 @@
 #            mmclennan@lucent.com
 #            http://www.tcltk.com/itcl
 #
-#      RCS:  $Id: chain.test,v 1.4 2004/02/12 18:09:50 davygrvy Exp $
+#      RCS:  $Id: chain.test,v 1.4.2.1 2008/10/17 19:52:56 wiede Exp $
 # ----------------------------------------------------------------------
 #            Copyright (c) 1993-1998  Lucent Technologies, Inc.
 # ======================================================================
@@ -26,6 +26,7 @@ if {[lsearch [namespace children] ::tcltest] == -1} {
 test chain-1.1 {define simple classes with inheritance} {
     itcl::class test_chain_a {
         constructor {args} {
+#
             eval chain $args
         } {
             global ::test_chain_status
@@ -44,6 +45,7 @@ test chain-1.1 {define simple classes with inheritance} {
     }
     itcl::class test_chain_b {
         constructor {args} {
+#
             eval chain $args
         } {
             global ::test_chain_status
