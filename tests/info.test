@@ -6,7 +6,7 @@
 #            mmclennan@lucent.com
 #            http://www.tcltk.com/itcl
 #
-#      RCS:  $Id: info.test,v 1.6.2.1 2007/11/23 20:26:15 wiede Exp $
+#      RCS:  $Id: info.test,v 1.6.2.2 2008/10/17 17:10:57 wiede Exp $
 # ----------------------------------------------------------------------
 #            Copyright (c) 1993-1998  Lucent Technologies, Inc.
 # ======================================================================
@@ -79,6 +79,7 @@ test info-1.2 {info: errors trigger usage info} {
   info function ?name? ?-protection? ?-type? ?-name? ?-args? ?-body?
   info heritage
   info inherit
+  info option ?name? ?-protection? ?-resource? ?-class? ?-name? ?-default? ?-cgetmethod? ?-configuremethod? ?-validatemethod? ?-value?
   info variable ?name? ?-protection? ?-type? ?-name? ?-init? ?-value? ?-config?
 ...and others described on the man page}}
 
