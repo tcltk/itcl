@@ -9,7 +9,7 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itclInt.h,v 1.17.2.35 2008/10/17 22:36:43 wiede Exp $
+ * RCS: @(#) $Id: itclInt.h,v 1.17.2.36 2008/10/17 23:18:26 wiede Exp $
  */
 
 #include <string.h>
@@ -558,7 +558,7 @@ MODULE_SCOPE int _itcl_debug_level;
 MODULE_SCOPE void ItclShowArgs(int level, const char *str, int objc,
 	Tcl_Obj * const* objv);
 #else
-#define ItclShowArgs(a,b,c,d)
+#define ItclShowArgs(a,b,c,d) 
 #endif
 
 MODULE_SCOPE Tcl_ObjCmdProc ItclCallCCommand;
