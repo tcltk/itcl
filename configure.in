@@ -227,11 +227,11 @@ TEA_PROG_TCLSH
 # pkglibdir must be a fully qualified path and (not ${exec_prefix}/lib)
 eval pkglibdir="${libdir}/${PACKAGE_NAME}${PACKAGE_VERSION}"
 if test "${TCL_LIB_VERSIONS_OK}" = "ok"; then
-    eval itcl_LIB_FLAG="-litcl${PACKAGE_VERSION}${DBGX}"
-    eval itcl_STUB_LIB_FLAG="-litclstub${PACKAGE_VERSION}${DBGX}"
+    eval itcl_LIB_FLAG="-lItcl${PACKAGE_VERSION}${DBGX}"
+    eval itcl_STUB_LIB_FLAG="-lItclstub${PACKAGE_VERSION}${DBGX}"
 else
-    eval itcl_LIB_FLAG="-litcl`echo ${PACKAGE_VERSION} | tr -d .`${DBGX}"
-    eval itcl_STUB_LIB_FLAG="-litclstub`echo ${PACKAGE_VERSION} | tr -d .`${DBGX}"
+    eval itcl_LIB_FLAG="-lItcl`echo ${PACKAGE_VERSION} | tr -d .`${DBGX}"
+    eval itcl_STUB_LIB_FLAG="-lItclstub`echo ${PACKAGE_VERSION} | tr -d .`${DBGX}"
 fi
 itcl_BUILD_LIB_SPEC="-L`pwd` ${itcl_LIB_FLAG}"
 itcl_LIB_SPEC="-L${pkglibdir} ${itcl_LIB_FLAG}"
