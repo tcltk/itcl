@@ -24,7 +24,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclInfo.c,v 1.1.2.16 2008/10/17 17:14:12 wiede Exp $
+ *     RCS:  $Id: itclInfo.c,v 1.1.2.17 2008/10/17 22:36:43 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -565,7 +565,7 @@ Itcl_BiInfoFunctionCmd(
     Tcl_Obj *resultPtr = NULL;
     Tcl_Obj *objPtr = NULL;
 
-    static const char *options[] = {
+    static CONST84 char *options[] = {
         "-args", "-body", "-name", "-protection", "-type",
         (char*)NULL
     };
@@ -791,7 +791,7 @@ Itcl_BiInfoVariableCmd(
     Tcl_Obj *resultPtr = NULL;
     Tcl_Obj *objPtr = NULL;
 
-    static const char *options[] = {
+    static CONST84 char *options[] = {
         "-config", "-init", "-name", "-protection", "-type",
         "-value", (char*)NULL
     };
@@ -1510,7 +1510,7 @@ Itcl_BiInfoOptionCmd(
     Tcl_Obj *objPtr = NULL;
     Tcl_Obj *optionNamePtr;
 
-    static const char *options[] = {
+    static CONST84 char *options[] = {
         "-cgetmethod", "-class", "-configuremethod", "-default",
 	"-name", "-protection", "-resource", "-validatemethod",
         "-value", (char*)NULL
@@ -1772,7 +1772,7 @@ Itcl_BiInfoComponentCmd(
     Tcl_Obj *objPtr = NULL;
     Tcl_Obj *componentNamePtr;
 
-    static const char *components[] = {
+    static CONST84 char *components[] = {
 	"-name", "-inherit", "-value", (char*)NULL
     };
     enum BCompIdx {

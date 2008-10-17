@@ -39,7 +39,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclParse.c,v 1.1.2.28 2008/10/17 19:57:03 wiede Exp $
+ *     RCS:  $Id: itclParse.c,v 1.1.2.29 2008/10/17 22:36:43 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -1709,7 +1709,7 @@ ItclParseOption(
     char *validateMethodVar;
     char *token;
     char *usage;
-    const char **argv;
+    CONST84 char **argv;
     const char *name;
     const char *resourceName;
     const char *className;
@@ -2149,7 +2149,7 @@ Itcl_HandleDelegateMethodCmd(
     const char *methodName;
     const char *component;
     const char *token;
-    const char **argv;
+    CONST84 char **argv;
     char *what;
     const char *whatName;
     int argc;
@@ -2414,7 +2414,7 @@ Itcl_HandleDelegateOptionCmd(
     const char *option;
     const char *component;
     const char *token;
-    const char **argv;
+    CONST84 char **argv;
     char *what;
     const char *whatName;
     int foundOpt;
@@ -2706,7 +2706,7 @@ Itcl_ClassDelegateProcCmd(
     const char *procName;
     const char *component;
     const char *token;
-    const char **argv;
+    CONST84 char **argv;
     int argc;
     int foundOpt;
     int isNew;

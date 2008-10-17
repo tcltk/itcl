@@ -24,7 +24,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann Copyright (c) 2007
  *
- *     RCS:  $Id: itclObject.c,v 1.1.2.35 2008/10/16 20:05:45 wiede Exp $
+ *     RCS:  $Id: itclObject.c,v 1.1.2.36 2008/10/17 22:36:43 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -37,9 +37,9 @@
  *  FORWARD DECLARATIONS
  */
 static char* ItclTraceThisVar(ClientData cdata, Tcl_Interp *interp,
-	CONST char *name1, CONST char *name2, int flags);
+	CONST84 char *name1, CONST84 char *name2, int flags);
 static char* ItclTraceOptionVar(ClientData cdata, Tcl_Interp *interp,
-	CONST char *name1, CONST char *name2, int flags);
+	CONST84 char *name1, CONST84 char *name2, int flags);
 
 static void ItclDestroyObject(ClientData clientData);
 static void ItclFreeObject(char * clientData);
@@ -1488,8 +1488,8 @@ static char*
 ItclTraceThisVar(
     ClientData cdata,	    /* object instance data */
     Tcl_Interp *interp,	    /* interpreter managing this variable */
-    CONST char *name1,	    /* variable name */
-    CONST char *name2,	    /* unused */
+    CONST84 char *name1,    /* variable name */
+    CONST84 char *name2,    /* unused */
     int flags)		    /* flags indicating read/write */
 {
     ItclObject *contextIoPtr = (ItclObject*)cdata;
@@ -1546,8 +1546,8 @@ static char*
 ItclTraceOptionVar(
     ClientData cdata,	    /* object instance data */
     Tcl_Interp *interp,	    /* interpreter managing this variable */
-    CONST char *name1,	    /* variable name */
-    CONST char *name2,	    /* unused */
+    CONST84 char *name1,    /* variable name */
+    CONST84 char *name2,    /* unused */
     int flags)		    /* flags indicating read/write */
 {
     ItclObject *ioPtr;
@@ -2025,7 +2025,7 @@ DelegateFunction(
     ItclDelegatedFunction *idmPtr)
 {
     Tcl_Obj *listPtr;;
-    const char **argv;
+    CONST84 char **argv;
     int argc;
     int j;
 

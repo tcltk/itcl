@@ -9,7 +9,7 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itclHelpers.c,v 1.1.2.4 2007/09/22 13:15:03 wiede Exp $
+ * RCS: @(#) $Id: itclHelpers.c,v 1.1.2.5 2008/10/17 22:36:43 wiede Exp $
  */
 
 #include "itclInt.h"
@@ -89,8 +89,8 @@ ItclCreateArgList(
 {
     int argc;
     int defaultArgc;
-    const char **argv;
-    const char **defaultArgv;
+    CONST84 char **argv;
+    CONST84 char **defaultArgv;
     ItclArgList *arglistPtr;
     ItclArgList *lastArglistPtr;
     int i;
@@ -389,8 +389,8 @@ char *
 ItclTraceUnsetVar(
     ClientData clientData,
     Tcl_Interp *interp,
-    const char *name1,
-    const char *name2,
+    CONST84 char *name1,
+    CONST84 char *name2,
     int flags)
 {
     IctlVarTraceInfo *tracePtr;

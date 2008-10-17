@@ -25,7 +25,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclEnsemble.c,v 1.1.2.8 2008/10/16 20:05:45 wiede Exp $
+ *     RCS:  $Id: itclEnsemble.c,v 1.1.2.9 2008/10/17 22:36:43 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -95,7 +95,7 @@ static void GetEnsemblePartUsage _ANSI_ARGS_((Tcl_Interp *interp,
     Ensemble *ensData, EnsemblePart *ensPart, Tcl_Obj *objPtr));
 
 static int CreateEnsemble _ANSI_ARGS_((Tcl_Interp *interp,
-    Ensemble *parentEnsData, CONST char *ensName));
+    Ensemble *parentEnsData, CONST84 char *ensName));
 
 static int AddEnsemblePart _ANSI_ARGS_((Tcl_Interp *interp,
     Ensemble* ensData, CONST char* partName, CONST char* usageInfo,

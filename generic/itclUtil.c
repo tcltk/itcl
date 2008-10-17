@@ -23,7 +23,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclUtil.c,v 1.1.2.6 2008/10/16 20:05:45 wiede Exp $
+ *     RCS:  $Id: itclUtil.c,v 1.1.2.7 2008/10/17 22:36:43 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -948,7 +948,7 @@ Itcl_DecodeScopedCommand(
     int len = strlen(name);
     CONST char *pos;
     int listc, result;
-    CONST char **listv;
+    CONST84 char **listv;
 
     cmdName = ckalloc((unsigned)strlen(name)+1);
     strcpy(cmdName, name);

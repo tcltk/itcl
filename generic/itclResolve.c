@@ -20,7 +20,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itclResolve.c,v 1.1.2.11 2008/10/16 20:05:45 wiede Exp $
+ *     RCS:  $Id: itclResolve.c,v 1.1.2.12 2008/10/17 22:36:43 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -593,7 +593,7 @@ ItclClassRuntimeVarResolver(
 int
 Itcl_ParseVarResolver(
     Tcl_Interp *interp,        /* current interpreter */
-    CONST char* name,                /* name of the variable being accessed */
+    CONST84 char* name,        /* name of the variable being accessed */
     Tcl_Namespace *contextNs,  /* namespace context */
     int flags,                 /* TCL_GLOBAL_ONLY => global variable
                                 * TCL_NAMESPACE_ONLY => namespace variable */
