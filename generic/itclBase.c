@@ -9,7 +9,7 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itclBase.c,v 1.1.2.16 2008/10/16 20:05:44 wiede Exp $
+ * RCS: @(#) $Id: itclBase.c,v 1.1.2.17 2008/10/17 19:57:03 wiede Exp $
  */
 
 #include <stdlib.h>
@@ -39,6 +39,7 @@ namespace eval ::itcl {\n\
             }\n\
             lappend dirs [file join [file dirname $tcl_library] Itcl$version]\n\
             set bindir [file dirname [info nameofexecutable]]\n\
+	    lappend dirs [file join . library]\n\
             lappend dirs [file join $bindir .. lib Itcl$version]\n\
             lappend dirs [file join $bindir .. library]\n\
             lappend dirs [file join $bindir .. .. library]\n\

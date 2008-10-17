@@ -39,7 +39,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclParse.c,v 1.1.2.27 2008/10/16 20:05:45 wiede Exp $
+ *     RCS:  $Id: itclParse.c,v 1.1.2.28 2008/10/17 19:57:03 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -2165,6 +2165,7 @@ delegate method * ?to <componentName>? ?using <pattern>? ?except <methods>?";
 	Tcl_AppendResult(interp, "wrong # args should be ", usageStr, NULL);
         return TCL_ERROR;
     }
+    componentPtr = NULL;
     methodName = Tcl_GetString(objv[1]);
     component = NULL;
     targetPtr = NULL;
@@ -2427,6 +2428,7 @@ Itcl_HandleDelegateOptionCmd(
 	Tcl_AppendResult(interp, "wrong # args should be ", usageStr, NULL);
         return TCL_ERROR;
     }
+    componentPtr = NULL;
     if (ioPtr != NULL) {
         what = "object";
 	whatName = Tcl_GetCommandName(interp, ioPtr->accessCmd);
@@ -2714,6 +2716,7 @@ Itcl_ClassDelegateProcCmd(
     usageStr = "delegate proc <procName> to <componentName> ?as <targetName>?\n\
 delegate proc <procName> ?to <componentName>? using <pattern>\n\
 delegate proc * ?to <componentName>? ?using <pattern>? ?except <procs>?";
+    componentPtr = NULL;
     infoPtr = (ItclObjectInfo*)clientData;
     iclsPtr = (ItclClass*)Itcl_PeekStack(&infoPtr->clsStack);
     if (iclsPtr->flags & ITCL_CLASS) {

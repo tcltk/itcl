@@ -24,7 +24,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclBuiltin.c,v 1.1.2.29 2008/10/16 20:05:44 wiede Exp $
+ *     RCS:  $Id: itclBuiltin.c,v 1.1.2.30 2008/10/17 19:57:03 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -1028,7 +1028,6 @@ ItclExtendedConfigure(
     ItclDelegatedFunction *idmPtr;
     ItclDelegatedOption *idoPtr;
     ItclObject *ioPtr;
-    ItclClass *iclsPtr;
     ItclComponent *icPtr;
     ItclOption *ioptPtr;
     ItclObjectInfo *infoPtr;
@@ -1081,7 +1080,7 @@ ItclExtendedConfigure(
         if (hPtr == NULL) {
 	    icPtr = idmPtr->icPtr;
 	    val = ItclGetInstanceVar(interp, Tcl_GetString(icPtr->namePtr),
-	            NULL, contextIoPtr, iclsPtr);
+	            NULL, contextIoPtr, contextIclsPtr);
             if (val != NULL) {
 	        newObjv = (Tcl_Obj **)ckalloc(sizeof(Tcl_Obj *)*(objc+2));
 	        newObjv[0] = Tcl_NewStringObj(val, -1);
@@ -1212,6 +1211,7 @@ fprintf(stderr, "plain configure not yet implemented\n");
 	    }
 	}
 	configureMethodPtr = NULL;
+	evalNsPtr = NULL;
 	if (ioptPtr->configureMethodPtr != NULL) {
 	    configureMethodPtr = ioptPtr->configureMethodPtr;
 	    Tcl_IncrRefCount(configureMethodPtr);

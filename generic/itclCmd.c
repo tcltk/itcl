@@ -23,7 +23,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclCmd.c,v 1.1.2.22 2008/10/16 20:05:45 wiede Exp $
+ *     RCS:  $Id: itclCmd.c,v 1.1.2.23 2008/10/17 19:57:03 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -1723,6 +1723,7 @@ Itcl_SetComponentCmd(
         return TCL_ERROR;
     }
     Itcl_InitHierIter(&hier, contextIoPtr->iclsPtr);
+    hPtr = NULL;
     while ((contextIclsPtr = Itcl_AdvanceHierIter(&hier)) != NULL) {
         hPtr = Tcl_FindHashEntry(&contextIclsPtr->components, (char *)objv[2]);
         if (hPtr != NULL) {

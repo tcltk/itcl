@@ -25,7 +25,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann Copyright (c) 2007
  *
- *     RCS:  $Id: itclClass.c,v 1.1.2.22 2008/10/16 20:05:44 wiede Exp $
+ *     RCS:  $Id: itclClass.c,v 1.1.2.23 2008/10/17 19:57:03 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -995,7 +995,7 @@ ItclFreeClass(
     /*
      *  Delete all delegated functions.
      */
-    FOREACH_HASH_VALUE(idoPtr, &iclsPtr->delegatedFunctions) {
+    FOREACH_HASH_VALUE(idmPtr, &iclsPtr->delegatedFunctions) {
         ItclDeleteDelegatedFunction(idmPtr);
     }
     Tcl_DeleteHashTable(&iclsPtr->delegatedFunctions);
@@ -1455,7 +1455,9 @@ Itcl_BuildVirtualTables(
     ItclHierIter hier;
     ItclClass *iclsPtr2;
     ItclClassVarInfo *icviPtr;
+#ifdef NEW_PROTO_RESOLVER
     ItclClassCmdInfo *icciPtr;
+#endif
     Tcl_Namespace* nsPtr;
     Tcl_DString buffer, buffer2;
     int newEntry;
