@@ -1,6 +1,6 @@
 #
 # @configure_input@
-# RCS: @(#) $Id: Makefile.in,v 1.29.2.15 2008/10/16 18:08:16 wiede Exp $
+# RCS: @(#) $Id: Makefile.in,v 1.29.2.16 2008/10/17 20:22:27 wiede Exp $
 #
 
 #========================================================================
@@ -174,8 +174,8 @@ doc:
 #========================================================================
 
 test: package libraries
-	@echo $(TCLSH_PROGRAM) $(SRC_DIR)/tests/all.tcl -load "package require Itcl" $(TESTFLAGS)
-	@$(TCLSH) `$(CYGPATH) $(SRC_DIR)/tests/all.tcl` -load "package require Itcl" $(TESTFLAGS)
+	@echo $(TCLSH_PROGRAM) $(SRC_DIR)/tests/all.tcl -load "package require Itcl $(PACKAGE_VERSION)" $(TESTFLAGS)
+	@$(TCLSH) `$(CYGPATH) $(SRC_DIR)/tests/all.tcl` -load "package require Itcl $(PACKAGE_VERSION)" $(TESTFLAGS)
 
 benchmarks: package libraries
 	@echo Benchmark Iterations = $(ITERATIONS)
