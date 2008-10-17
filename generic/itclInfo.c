@@ -24,7 +24,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclInfo.c,v 1.1.2.15 2008/10/16 20:05:45 wiede Exp $
+ *     RCS:  $Id: itclInfo.c,v 1.1.2.16 2008/10/17 17:14:12 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -300,7 +300,15 @@ Itcl_BiInfoClassCmd(
     } else {
         assert(contextIclsPtr != NULL);
         assert(contextIclsPtr->nsPtr != NULL);
+#ifdef NEW_PROTO_RESOLVER
         contextNs = contextIclsPtr->nsPtr;
+#else
+        if (contextIclsPtr->infoPtr->useOldResolvers) {
+            contextNs = Itcl_GetUplevelNamespace(interp, 1);
+        } else {
+            contextNs = contextIclsPtr->nsPtr;
+        }
+#endif
     }
 
     if (contextNs == NULL) {
