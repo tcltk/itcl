@@ -8,6 +8,7 @@
  */
 #include "itclngInt.h"
 
+EXTERN Tcl_ObjCmdProc Itclng_ThisCmd;
 static Tcl_NamespaceDeleteProc* _TclOONamespaceDeleteProc = NULL;
 
 /*
@@ -335,6 +336,12 @@ Itclng_CreateClassCmd(
 	Tcl_DStringValue(&buffer), "\"", NULL);
         return TCL_ERROR;
     }
+    Tcl_DStringInit(&buffer);
+    Tcl_DStringAppend(&buffer, Tcl_GetString(iclsPtr->fullNamePtr), -1);
+    Tcl_DStringAppend(&buffer, "::this", -1);
+    Tcl_CreateObjCommand(interp,
+            Tcl_DStringValue(&buffer),
+            Itclng_ThisCmd, iclsPtr, NULL);
 
     Tcl_DStringFree(&buffer);
     /*
