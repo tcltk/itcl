@@ -212,6 +212,70 @@ Itclng_InitCommands (
     Tcl_DecrRefCount(unkObjPtr);
     return TCL_OK;
 }
+
+/*
+ * ------------------------------------------------------------------------
+ *  Itclng_ThisCmd()
+ *
+ *  Invoked by Tcl for fast access to itcl methods
+ *  syntax:
+ *
+ *    this methodName args ....
+ *
+ *  Returns TCL_OK/TCL_ERROR to indicate success/failure.
+ * ------------------------------------------------------------------------
+ */
+/* ARGSUSED */
+int
+NRThisCmd(
+    ClientData clientData,   /* class info */
+    Tcl_Interp *interp,      /* current interpreter */
+    int objc,                /* number of arguments */
+    Tcl_Obj *CONST objv[])   /* argument objects */
+{
+    ClientData clientData2;
+    Tcl_Object oPtr;
+    Tcl_HashEntry *hPtr;
+    ItclngClass *iclsPtr;
+
+    ItclngShowArgs(1, "NRThisCmd", objc, objv);
+    if (objc < 2) {
+        Tcl_WrongNumArgs(interp, 1, objv, "methodname ?arg arg ...?");
+        return TCL_ERROR;
+    }
+    iclsPtr = clientData;
+    clientData2 = Itclng_GetCallFrameClientData(interp, 0);
+    if (clientData2 == NULL) {
+	Tcl_AppendResult(interp,
+	        "this cannot be invoked without an object context", NULL);
+        return TCL_ERROR;
+    }
+    oPtr = Tcl_ObjectContextObject(clientData2);
+    if (oPtr == NULL) {
+	Tcl_AppendResult(interp,
+	        "this cannot be invoked without an object context", NULL);
+        return TCL_ERROR;
+    }
+
+    hPtr = Tcl_FindHashEntry(&iclsPtr->resolveCmds, Tcl_GetString(objv[1]));
+    if (hPtr == NULL) {
+	Tcl_AppendResult(interp, "class \"", iclsPtr->nsPtr->fullName,
+	        "\" has no method: \"", Tcl_GetString(objv[1]), "\"", NULL);
+        return TCL_ERROR;
+    }
+    return Itclng_PublicObjectCmd(oPtr, interp, iclsPtr->clsPtr, objc, objv);
+}
+/* ARGSUSED */
+int
+Itclng_ThisCmd(
+    ClientData clientData,
+    Tcl_Interp *interp,
+    int objc,
+    Tcl_Obj *const *objv)
+{
+    return Itclng_NRCallObjProc(clientData, interp, NRThisCmd, objc, objv);
+}
+
 
 /*
  * ------------------------------------------------------------------------
