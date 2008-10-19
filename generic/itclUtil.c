@@ -23,7 +23,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclUtil.c,v 1.1.2.7 2008/10/17 22:36:43 wiede Exp $
+ *     RCS:  $Id: itclUtil.c,v 1.1.2.8 2008/10/19 16:30:53 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -948,7 +948,7 @@ Itcl_DecodeScopedCommand(
     int len = strlen(name);
     CONST char *pos;
     int listc, result;
-    CONST84 char **listv;
+    const char **listv;
 
     cmdName = ckalloc((unsigned)strlen(name)+1);
     strcpy(cmdName, name);
@@ -960,7 +960,7 @@ Itcl_DecodeScopedCommand(
 	if ((*pos == 'i') && ((pos + 7) <= (name + len))
 	        && (strncmp(pos, "inscope", 7) == 0)) {
 
-            result = Tcl_SplitList(interp, (CONST84 char *)name, &listc,
+            result = Tcl_SplitList(interp, (const char *)name, &listc,
 		    &listv);
             if (result == TCL_OK) {
                 if (listc != 4) {

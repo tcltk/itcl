@@ -15,7 +15,7 @@ cArgFunc(
     ClientData clientData,
     Tcl_Interp *interp,
     int argc,
-    CONST84 char **argv)
+    const char **argv)
 {
     int i;
 

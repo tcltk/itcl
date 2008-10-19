@@ -25,7 +25,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclMethod.c,v 1.1.2.21 2008/10/16 20:05:45 wiede Exp $
+ *     RCS:  $Id: itclMethod.c,v 1.1.2.22 2008/10/19 16:30:53 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -688,7 +688,7 @@ Itcl_CreateMemberCode(
         mcode->maxargcount = maxArgc;
         mcode->argListPtr = argListPtr;
         mcode->usagePtr = usagePtr;
-	mcode->argumentPtr = Tcl_NewStringObj((CONST84 char *)arglist, -1);
+	mcode->argumentPtr = Tcl_NewStringObj((const char *)arglist, -1);
 	Tcl_IncrRefCount(mcode->argumentPtr);
         mcode->flags   |= ITCL_ARG_SPEC;
     } else {
@@ -697,9 +697,9 @@ Itcl_CreateMemberCode(
     }
 
     if (body) {
-        mcode->bodyPtr = Tcl_NewStringObj((CONST84 char *)body, -1);
+        mcode->bodyPtr = Tcl_NewStringObj((const char *)body, -1);
     } else {
-        mcode->bodyPtr = Tcl_NewStringObj((CONST84 char *)"", -1);
+        mcode->bodyPtr = Tcl_NewStringObj((const char *)"", -1);
         mcode->flags |= ITCL_IMPLEMENT_NONE;
     }
     Tcl_IncrRefCount(mcode->bodyPtr);
@@ -995,7 +995,7 @@ Itcl_EvalMemberCode(
                 }
         
                 result = (*mcode->cfunc.argCmd)(mcode->clientData,
-                    interp, objc, (CONST84 char **)argv);
+                    interp, objc, (const char **)argv);
         
                 ckfree((char*)argv);
 	    }

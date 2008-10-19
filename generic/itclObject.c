@@ -24,7 +24,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann Copyright (c) 2007
  *
- *     RCS:  $Id: itclObject.c,v 1.1.2.37 2008/10/19 14:20:50 wiede Exp $
+ *     RCS:  $Id: itclObject.c,v 1.1.2.38 2008/10/19 16:30:53 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -37,9 +37,9 @@
  *  FORWARD DECLARATIONS
  */
 static char* ItclTraceThisVar(ClientData cdata, Tcl_Interp *interp,
-	CONST84 char *name1, CONST84 char *name2, int flags);
+	const char *name1, const char *name2, int flags);
 static char* ItclTraceOptionVar(ClientData cdata, Tcl_Interp *interp,
-	CONST84 char *name1, CONST84 char *name2, int flags);
+	const char *name1, const char *name2, int flags);
 
 static void ItclDestroyObject(ClientData clientData);
 static void ItclFreeObject(char * clientData);
@@ -1259,7 +1259,7 @@ ItclGetInstanceVar(
     if (nsPtr != NULL) {
 	framePtr = &frame;
 	Itcl_PushCallFrame(interp, framePtr, nsPtr, /*isProcCallFrame*/0);
-        val = Tcl_GetVar2(interp, (CONST84 char *)name1, (char*)name2,
+        val = Tcl_GetVar2(interp, (const char *)name1, (char*)name2,
 	        TCL_LEAVE_ERR_MSG);
         Itcl_PopCallFrame(interp);
     }
@@ -1354,7 +1354,7 @@ ItclSetInstanceVar(
     if (nsPtr != NULL) {
 	framePtr = &frame;
 	Itcl_PushCallFrame(interp, framePtr, nsPtr, /*isProcCallFrame*/0);
-        val = Tcl_SetVar2(interp, (CONST84 char *)name1, (char*)name2,
+        val = Tcl_SetVar2(interp, (const char *)name1, (char*)name2,
 	        value, TCL_LEAVE_ERR_MSG);
         Itcl_PopCallFrame(interp);
     }
@@ -1494,8 +1494,8 @@ static char*
 ItclTraceThisVar(
     ClientData cdata,	    /* object instance data */
     Tcl_Interp *interp,	    /* interpreter managing this variable */
-    CONST84 char *name1,    /* variable name */
-    CONST84 char *name2,    /* unused */
+    const char *name1,    /* variable name */
+    const char *name2,    /* unused */
     int flags)		    /* flags indicating read/write */
 {
     ItclObject *contextIoPtr = (ItclObject*)cdata;
@@ -1521,7 +1521,7 @@ ItclTraceThisVar(
 	    objName = Tcl_GetCommandName(contextIoPtr->iclsPtr->interp,
 	            contextIoPtr->accessCmd);
 	}
-        Tcl_SetVar(interp, (CONST84 char *)name1, objName, 0);
+        Tcl_SetVar(interp, (const char *)name1, objName, 0);
 
         Tcl_DecrRefCount(objPtr);
         return NULL;
@@ -1552,8 +1552,8 @@ static char*
 ItclTraceOptionVar(
     ClientData cdata,	    /* object instance data */
     Tcl_Interp *interp,	    /* interpreter managing this variable */
-    CONST84 char *name1,    /* variable name */
-    CONST84 char *name2,    /* unused */
+    const char *name1,    /* variable name */
+    const char *name2,    /* unused */
     int flags)		    /* flags indicating read/write */
 {
     ItclObject *ioPtr;
@@ -1581,6 +1581,16 @@ ItclTraceOptionVar(
     }
     return NULL;
 }
+/*
+ * ------------------------------------------------------------------------
+ *  ItclTraceHullVar()
+ *
+ *  Invoked to handle read/write traces on "hull" variables
+ *
+ *  On write, this procedure returns an error as "hull" may not be modfied
+ * ------------------------------------------------------------------------
+ */
+/* ARGSUSED */
 
 /*
  * ------------------------------------------------------------------------
@@ -2031,7 +2041,7 @@ DelegateFunction(
     ItclDelegatedFunction *idmPtr)
 {
     Tcl_Obj *listPtr;;
-    CONST84 char **argv;
+    const char **argv;
     int argc;
     int j;
 

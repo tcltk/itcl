@@ -25,7 +25,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann Copyright (c) 2007
  *
- *     RCS:  $Id: itclClass.c,v 1.1.2.24 2008/10/19 14:20:50 wiede Exp $
+ *     RCS:  $Id: itclClass.c,v 1.1.2.25 2008/10/19 16:30:53 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -129,8 +129,8 @@ static char *
 ClassNamespaceDeleted(
     ClientData clientData,
     Tcl_Interp *interp,
-    CONST84 char *part1,
-    CONST84 char *part2,
+    const char *part1,
+    const char *part2,
     int flags)
 {
     Tcl_DString buffer;
@@ -230,7 +230,7 @@ Itcl_CreateClass(
      *  We'll just replace the namespace data below with the
      *  proper class data.
      */
-    classNs = Tcl_FindNamespace(interp, (CONST84 char *)path,
+    classNs = Tcl_FindNamespace(interp, (const char *)path,
 	    (Tcl_Namespace*)NULL, /* flags */ 0);
 
     if (classNs != NULL && Itcl_IsClassNamespace(classNs)) {
@@ -247,7 +247,7 @@ Itcl_CreateClass(
      *  usual Tcl commands from being clobbered when a programmer
      *  makes a bogus call like "class info".
      */
-    cmd = Tcl_FindCommand(interp, (CONST84 char *)path,
+    cmd = Tcl_FindCommand(interp, (const char *)path,
 	    (Tcl_Namespace*)NULL, /* flags */ TCL_NAMESPACE_ONLY);
 
     if (cmd != NULL && !Itcl_IsStub(cmd)) {
@@ -523,9 +523,9 @@ Itcl_CreateClass(
         }
     }
     if (infoPtr->currClassFlags & ITCL_WIDGET) {
-        /* create the hull component */
+        /* create the itcl_hull component */
         ItclComponent *icPtr;
-        namePtr = Tcl_NewStringObj("hull", 4);
+        namePtr = Tcl_NewStringObj("itcl_hull", 9);
         Tcl_IncrRefCount(namePtr);
         if (ItclCreateComponent(interp, iclsPtr, namePtr, &icPtr) != TCL_OK) {
             return TCL_ERROR;
@@ -1230,7 +1230,7 @@ Itcl_FindClassNamespace(interp, path)
      *  see if it's the current namespace, and try the global
      *  namespace as well.
      */
-    classNs = Tcl_FindNamespace(interp, (CONST84 char *)path,
+    classNs = Tcl_FindNamespace(interp, (const char *)path,
 	    (Tcl_Namespace*)NULL, /* flags */ 0);
 
     if ( !classNs && contextNs->parentPtr != NULL &&
@@ -2026,7 +2026,7 @@ Itcl_GetCommonVar(
     }
     Tcl_DStringAppend(&buffer, name, -1);
 
-    val = Tcl_GetVar2(interp, (CONST84 char *)Tcl_DStringValue(&buffer),
+    val = Tcl_GetVar2(interp, (const char *)Tcl_DStringValue(&buffer),
             (char*)NULL, 0);
     Tcl_DStringFree(&buffer);
     return val;

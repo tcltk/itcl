@@ -39,7 +39,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclParse.c,v 1.1.2.30 2008/10/19 14:20:50 wiede Exp $
+ *     RCS:  $Id: itclParse.c,v 1.1.2.31 2008/10/19 16:30:53 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -1709,7 +1709,7 @@ ItclParseOption(
     char *validateMethodVar;
     char *token;
     char *usage;
-    CONST84 char **argv;
+    const char **argv;
     const char *name;
     const char *resourceName;
     const char *className;
@@ -1839,7 +1839,7 @@ ItclParseOption(
 
     nameSpecPtr = newObjv[0];
     token = Tcl_GetString(nameSpecPtr);
-    if (Tcl_SplitList(interp, (CONST84 char *)token, &argc, &argv) != TCL_OK) {
+    if (Tcl_SplitList(interp, (const char *)token, &argc, &argv) != TCL_OK) {
         return TCL_ERROR;
     }
     name = argv[0];
@@ -1999,8 +1999,10 @@ ItclCreateComponent(
     ItclComponent *icPtr;
     ItclVariable *ivPtr;
     ItclMemberFunc *imPtr;
+    int isWidgetHullVar;
     int isNew;
 
+    isWidgetHullVar = 0;
     hPtr = Tcl_CreateHashEntry(&iclsPtr->components, (char *)componentPtr,
             &isNew);
     if (isNew) {
@@ -2008,10 +2010,20 @@ ItclCreateComponent(
                 &ivPtr) != TCL_OK) {
             return TCL_ERROR;
         }
+	if (iclsPtr->flags & ITCL_WIDGET) {
+	    if (strcmp(Tcl_GetString(componentPtr), "itcl_hull") == 0) {
+	        /* special built in itcl_hull variable */
+	        ivPtr->flags |= ITCL_HULL_VAR;
+	        isWidgetHullVar = 1;
+	    }
+	}
         ivPtr->flags |= ITCL_COMPONENT;
-	const char *str = "if {[llength $args] == 0} { return $hull }";
+	const char *str = "";
+	if (isWidgetHullVar) {
+	    str = "if {[llength $args] == 0} { return $itcl_hull }\n";
+	}
 	bodyPtr = Tcl_NewStringObj(str, -1);
-	Tcl_AppendToObj(bodyPtr, "\n    return [$", -1);
+	Tcl_AppendToObj(bodyPtr, "return [$", -1);
 	Tcl_AppendToObj(bodyPtr, Tcl_GetString(componentPtr), -1);
 	Tcl_AppendToObj(bodyPtr, " {*}$args]", -1);
         if (ItclCreateMethod(interp, iclsPtr, componentPtr, "args",
@@ -2025,8 +2037,6 @@ ItclCreateComponent(
         Tcl_IncrRefCount(icPtr->namePtr);
         icPtr->ivPtr = ivPtr;
 	Tcl_SetHashValue(hPtr, icPtr);
-        /* FIXME !!! */
-        /* need write trace ! */
     } else {
         icPtr =Tcl_GetHashValue(hPtr);
     }
@@ -2151,7 +2161,7 @@ Itcl_HandleDelegateMethodCmd(
     const char *methodName;
     const char *component;
     const char *token;
-    CONST84 char **argv;
+    const char **argv;
     char *what;
     const char *whatName;
     int argc;
@@ -2416,7 +2426,7 @@ Itcl_HandleDelegateOptionCmd(
     const char *option;
     const char *component;
     const char *token;
-    CONST84 char **argv;
+    const char **argv;
     char *what;
     const char *whatName;
     int foundOpt;
@@ -2439,7 +2449,7 @@ Itcl_HandleDelegateOptionCmd(
         what = "class";
     }
     token = Tcl_GetString(objv[1]);
-    if (Tcl_SplitList(interp, (CONST84 char *)token, &argc, &argv) != TCL_OK) {
+    if (Tcl_SplitList(interp, (const char *)token, &argc, &argv) != TCL_OK) {
         return TCL_ERROR;
     }
     option = argv[0];
@@ -2709,7 +2719,7 @@ Itcl_ClassDelegateProcCmd(
     const char *procName;
     const char *component;
     const char *token;
-    CONST84 char **argv;
+    const char **argv;
     int argc;
     int foundOpt;
     int isNew;

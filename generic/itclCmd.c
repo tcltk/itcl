@@ -23,7 +23,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclCmd.c,v 1.1.2.24 2008/10/19 14:20:50 wiede Exp $
+ *     RCS:  $Id: itclCmd.c,v 1.1.2.25 2008/10/19 16:30:53 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -201,7 +201,7 @@ Itcl_FindClassesCmd(
                     cmdName = Tcl_GetString(objPtr);
                 } else {
                     cmdName = Tcl_GetCommandName(interp, cmd);
-                    objPtr = Tcl_NewStringObj((CONST84 char *)cmdName, -1);
+                    objPtr = Tcl_NewStringObj((const char *)cmdName, -1);
                 }
 
                 if (originalCmd) {
@@ -210,7 +210,7 @@ Itcl_FindClassesCmd(
                 Tcl_CreateHashEntry(&unique, (char*)cmd, &newEntry);
 
                 if (newEntry &&
-			(!pattern || Tcl_StringMatch((CONST84 char *)cmdName,
+			(!pattern || Tcl_StringMatch((const char *)cmdName,
 			pattern))) {
                     Tcl_ListObjAppendElement((Tcl_Interp*)NULL,
 			    Tcl_GetObjResult(interp), objPtr);
@@ -387,14 +387,14 @@ Itcl_FindObjectsCmd(
 		    cmdName = Tcl_GetString(objPtr);
                 } else {
                     cmdName = Tcl_GetCommandName(interp, cmd);
-                    objPtr = Tcl_NewStringObj((CONST84 char *)cmdName, -1);
+                    objPtr = Tcl_NewStringObj((const char *)cmdName, -1);
                 }
 
                 Tcl_CreateHashEntry(&unique, (char*)cmd, &newEntry);
 
                 match = 0;
 		if (newEntry &&
-			(!pattern || Tcl_StringMatch((CONST84 char *)cmdName,
+			(!pattern || Tcl_StringMatch((const char *)cmdName,
 			pattern))) {
                     if ((iclsPtr == NULL) ||
 		            (contextIoPtr->iclsPtr == iclsPtr)) {

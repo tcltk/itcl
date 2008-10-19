@@ -24,7 +24,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclInfo.c,v 1.1.2.17 2008/10/17 22:36:43 wiede Exp $
+ *     RCS:  $Id: itclInfo.c,v 1.1.2.18 2008/10/19 16:30:53 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -565,7 +565,7 @@ Itcl_BiInfoFunctionCmd(
     Tcl_Obj *resultPtr = NULL;
     Tcl_Obj *objPtr = NULL;
 
-    static CONST84 char *options[] = {
+    static const char *options[] = {
         "-args", "-body", "-name", "-protection", "-type",
         (char*)NULL
     };
@@ -791,7 +791,7 @@ Itcl_BiInfoVariableCmd(
     Tcl_Obj *resultPtr = NULL;
     Tcl_Obj *objPtr = NULL;
 
-    static CONST84 char *options[] = {
+    static const char *options[] = {
         "-config", "-init", "-name", "-protection", "-type",
         "-value", (char*)NULL
     };
@@ -949,13 +949,13 @@ Itcl_BiInfoVariableCmd(
 
                 case BIvProtectIdx:
                     val = Itcl_ProtectionStr(ivPtr->protection);
-                    objPtr = Tcl_NewStringObj((CONST84 char *)val, -1);
+                    objPtr = Tcl_NewStringObj((const char *)val, -1);
                     break;
 
                 case BIvTypeIdx:
                     val = ((ivPtr->flags & ITCL_COMMON) != 0)
                         ? "common" : "variable";
-                    objPtr = Tcl_NewStringObj((CONST84 char *)val, -1);
+                    objPtr = Tcl_NewStringObj((const char *)val, -1);
                     break;
 
                 case BIvValueIdx:
@@ -980,7 +980,7 @@ Itcl_BiInfoVariableCmd(
                     if (val == NULL) {
                         val = "<undefined>";
                     }
-                    objPtr = Tcl_NewStringObj((CONST84 char *)val, -1);
+                    objPtr = Tcl_NewStringObj((const char *)val, -1);
 		    Tcl_IncrRefCount(objPtr);
                     break;
             }
@@ -1510,7 +1510,7 @@ Itcl_BiInfoOptionCmd(
     Tcl_Obj *objPtr = NULL;
     Tcl_Obj *optionNamePtr;
 
-    static CONST84 char *options[] = {
+    static const char *options[] = {
         "-cgetmethod", "-class", "-configuremethod", "-default",
 	"-name", "-protection", "-resource", "-validatemethod",
         "-value", (char*)NULL
@@ -1688,7 +1688,7 @@ Itcl_BiInfoOptionCmd(
 
                 case BOptProtectIdx:
                     val = Itcl_ProtectionStr(ioptPtr->protection);
-                    objPtr = Tcl_NewStringObj((CONST84 char *)val, -1);
+                    objPtr = Tcl_NewStringObj((const char *)val, -1);
                     break;
 
                 case BOptValueIdx:
@@ -1707,7 +1707,7 @@ Itcl_BiInfoOptionCmd(
                     if (val == NULL) {
                         val = "<undefined>";
                     }
-                    objPtr = Tcl_NewStringObj((CONST84 char *)val, -1);
+                    objPtr = Tcl_NewStringObj((const char *)val, -1);
 		    Tcl_IncrRefCount(objPtr);
                     break;
             }
@@ -1772,7 +1772,7 @@ Itcl_BiInfoComponentCmd(
     Tcl_Obj *objPtr = NULL;
     Tcl_Obj *componentNamePtr;
 
-    static CONST84 char *components[] = {
+    static const char *components[] = {
 	"-name", "-inherit", "-value", (char*)NULL
     };
     enum BCompIdx {
@@ -1906,7 +1906,7 @@ Itcl_BiInfoComponentCmd(
 		    } else {
                         val = "0";
 		    }
-                    objPtr = Tcl_NewStringObj((CONST84 char *)val, -1);
+                    objPtr = Tcl_NewStringObj((const char *)val, -1);
                     break;
 
                 case BCompValueIdx:
@@ -1925,7 +1925,7 @@ Itcl_BiInfoComponentCmd(
                     if (val == NULL) {
                         val = "<undefined>";
                     }
-                    objPtr = Tcl_NewStringObj((CONST84 char *)val, -1);
+                    objPtr = Tcl_NewStringObj((const char *)val, -1);
 		    Tcl_IncrRefCount(objPtr);
                     break;
             }

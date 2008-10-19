@@ -9,7 +9,7 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itclHelpers.c,v 1.1.2.5 2008/10/17 22:36:43 wiede Exp $
+ * RCS: @(#) $Id: itclHelpers.c,v 1.1.2.6 2008/10/19 16:30:53 wiede Exp $
  */
 
 #include "itclInt.h"
@@ -89,8 +89,8 @@ ItclCreateArgList(
 {
     int argc;
     int defaultArgc;
-    CONST84 char **argv;
-    CONST84 char **defaultArgv;
+    const char **argv;
+    const char **defaultArgv;
     ItclArgList *arglistPtr;
     ItclArgList *lastArglistPtr;
     int i;
@@ -106,7 +106,7 @@ ItclCreateArgList(
     *argcPtr = 0;
     *usagePtr = Tcl_NewStringObj("", -1);
     if (str) {
-        if (Tcl_SplitList(interp, (CONST84 char *)str, &argc, &argv)
+        if (Tcl_SplitList(interp, (const char *)str, &argc, &argv)
 	        != TCL_OK) {
 	    return TCL_ERROR;
 	}
@@ -333,7 +333,7 @@ Itcl_CreateArgs(interp, string, objc, objv)
     Tcl_ListObjAppendElement((Tcl_Interp*)NULL, listPtr,
             Tcl_NewStringObj("my", -1));
     Tcl_ListObjAppendElement((Tcl_Interp*)NULL, listPtr,
-        Tcl_NewStringObj((CONST84 char *)string, -1));
+        Tcl_NewStringObj((const char *)string, -1));
 
     for (i=0; i < objc; i++) {
         Tcl_ListObjAppendElement((Tcl_Interp*)NULL, listPtr, objv[i]);
@@ -389,8 +389,8 @@ char *
 ItclTraceUnsetVar(
     ClientData clientData,
     Tcl_Interp *interp,
-    CONST84 char *name1,
-    CONST84 char *name2,
+    const char *name1,
+    const char *name2,
     int flags)
 {
     IctlVarTraceInfo *tracePtr;

@@ -20,7 +20,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itclResolve.c,v 1.1.2.12 2008/10/17 22:36:43 wiede Exp $
+ *     RCS:  $Id: itclResolve.c,v 1.1.2.13 2008/10/19 16:30:53 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -49,13 +49,13 @@ typedef struct Tcl_ResolvedVarInfo {
 } Tcl_ResolvedVarInfo;
 
 typedef int (Tcl_ResolveCompiledVarProc) (Tcl_Interp *interp,
-	CONST84 char *name, int length, Tcl_Namespace *context,
+	const char *name, int length, Tcl_Namespace *context,
 	Tcl_ResolvedVarInfo **rPtr);
 
-typedef int (Tcl_ResolveVarProc) (Tcl_Interp *interp, CONST84 char *name,
+typedef int (Tcl_ResolveVarProc) (Tcl_Interp *interp, const char *name,
 	Tcl_Namespace *context, int flags, Tcl_Var *rPtr);
 
-typedef int (Tcl_ResolveCmdProc) (Tcl_Interp *interp, CONST84 char *name,
+typedef int (Tcl_ResolveCmdProc) (Tcl_Interp *interp, const char *name,
 	Tcl_Namespace *context, int flags, Tcl_Command *rPtr);
 
 typedef struct Tcl_ResolverInfo {
@@ -593,7 +593,7 @@ ItclClassRuntimeVarResolver(
 int
 Itcl_ParseVarResolver(
     Tcl_Interp *interp,        /* current interpreter */
-    CONST84 char* name,        /* name of the variable being accessed */
+    const char* name,        /* name of the variable being accessed */
     Tcl_Namespace *contextNs,  /* namespace context */
     int flags,                 /* TCL_GLOBAL_ONLY => global variable
                                 * TCL_NAMESPACE_ONLY => namespace variable */

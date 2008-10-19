@@ -24,7 +24,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclBuiltin.c,v 1.1.2.31 2008/10/19 14:20:50 wiede Exp $
+ *     RCS:  $Id: itclBuiltin.c,v 1.1.2.32 2008/10/19 16:30:53 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -714,7 +714,7 @@ ItclReportPublicOpt(
             contextIoPtr, ivPtr->iclsPtr);
 
     if (val) {
-        objPtr = Tcl_NewStringObj((CONST84 char *)val, -1);
+        objPtr = Tcl_NewStringObj((const char *)val, -1);
     } else {
         objPtr = Tcl_NewStringObj("<undefined>", -1);
     }
@@ -761,7 +761,7 @@ ItclReportOption(
     val = ItclGetInstanceVar(interp, "itcl_options", Tcl_GetString(ioptPtr->namePtr),
             contextIoPtr, ioptPtr->iclsPtr);
     if (val) {
-        objPtr = Tcl_NewStringObj((CONST84 char *)val, -1);
+        objPtr = Tcl_NewStringObj((const char *)val, -1);
     } else {
         objPtr = Tcl_NewStringObj("<undefined>", -1);
     }

@@ -25,7 +25,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclEnsemble.c,v 1.1.2.9 2008/10/17 22:36:43 wiede Exp $
+ *     RCS:  $Id: itclEnsemble.c,v 1.1.2.10 2008/10/19 16:30:53 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -95,7 +95,7 @@ static void GetEnsemblePartUsage _ANSI_ARGS_((Tcl_Interp *interp,
     Ensemble *ensData, EnsemblePart *ensPart, Tcl_Obj *objPtr));
 
 static int CreateEnsemble _ANSI_ARGS_((Tcl_Interp *interp,
-    Ensemble *parentEnsData, CONST84 char *ensName));
+    Ensemble *parentEnsData, const char *ensName));
 
 static int AddEnsemblePart _ANSI_ARGS_((Tcl_Interp *interp,
     Ensemble* ensData, CONST char* partName, CONST char* usageInfo,
@@ -104,7 +104,7 @@ static int AddEnsemblePart _ANSI_ARGS_((Tcl_Interp *interp,
 
 static void DeleteEnsemble _ANSI_ARGS_((ClientData clientData));
 
-static int FindEnsemble _ANSI_ARGS_((Tcl_Interp *interp, CONST84 char **nameArgv,
+static int FindEnsemble _ANSI_ARGS_((Tcl_Interp *interp, const char **nameArgv,
     int nameArgc, Ensemble** ensDataPtr));
 
 static int CreateEnsemblePart _ANSI_ARGS_((Tcl_Interp *interp,
@@ -236,7 +236,7 @@ Itcl_CreateEnsemble(
     Tcl_Interp *interp,            /* interpreter to be updated */
     CONST char* ensName)           /* name of the new ensemble */
 {
-    CONST84 char **nameArgv = NULL;
+    const char **nameArgv = NULL;
     int nameArgc;
     Ensemble *parentEnsData;
     Tcl_DString buffer;
@@ -244,7 +244,7 @@ Itcl_CreateEnsemble(
     /*
      *  Split the ensemble name into its path components.
      */
-    if (Tcl_SplitList(interp, (CONST84 char *)ensName, &nameArgc,
+    if (Tcl_SplitList(interp, (const char *)ensName, &nameArgc,
 	    &nameArgv) != TCL_OK) {
         goto ensCreateFail;
     }
@@ -341,7 +341,7 @@ Itcl_AddEnsemblePart(
     ClientData clientData,         /* client data associated with part */
     Tcl_CmdDeleteProc *deleteProc) /* procedure used to destroy client data */
 {
-    CONST84 char **nameArgv = NULL;
+    const char **nameArgv = NULL;
     int nameArgc;
     Ensemble *ensData;
     EnsemblePart *ensPart;
@@ -350,7 +350,7 @@ Itcl_AddEnsemblePart(
     /*
      *  Parse the ensemble name and look for a containing ensemble.
      */
-    if (Tcl_SplitList(interp, (CONST84 char *)ensName, &nameArgc,
+    if (Tcl_SplitList(interp, (const char *)ensName, &nameArgc,
 	    &nameArgv) != TCL_OK) {
         goto ensPartFail;
     }
@@ -419,7 +419,7 @@ Itcl_GetEnsemblePart(
     CONST char *partName,          /* name of the desired part */
     Tcl_CmdInfo *infoPtr)          /* returns: info associated with part */
 {
-    CONST84 char **nameArgv = NULL;
+    const char **nameArgv = NULL;
     int nameArgc;
     Ensemble *ensData;
     EnsemblePart *ensPart;
@@ -432,7 +432,7 @@ Itcl_GetEnsemblePart(
      */
     state = Itcl_SaveInterpState(interp, TCL_OK);
 
-    if (Tcl_SplitList(interp, (CONST84 char *)ensName, &nameArgc,
+    if (Tcl_SplitList(interp, (const char *)ensName, &nameArgc,
 	    &nameArgv) != TCL_OK) {
         goto ensGetFail;
     }
@@ -525,7 +525,7 @@ Itcl_GetEnsembleUsage(
     CONST char *ensName,   /* name of the ensemble */
     Tcl_Obj *objPtr)       /* returns: summary of usage info */
 {
-    CONST84 char **nameArgv = NULL;
+    const char **nameArgv = NULL;
     int nameArgc;
     Ensemble *ensData;
     Itcl_InterpState state;
@@ -537,7 +537,7 @@ Itcl_GetEnsembleUsage(
      */
     state = Itcl_SaveInterpState(interp, TCL_OK);
 
-    if (Tcl_SplitList(interp, (CONST84 char *)ensName, &nameArgc,
+    if (Tcl_SplitList(interp, (const char *)ensName, &nameArgc,
 	    &nameArgv) != TCL_OK) {
         goto ensUsageFail;
     }
@@ -785,7 +785,7 @@ static int
 CreateEnsemble(
     Tcl_Interp *interp,            /* interpreter to be updated */
     Ensemble *parentEnsData,       /* parent ensemble or NULL */
-    CONST84 char *ensName)         /* name of the new ensemble */
+    const char *ensName)           /* name of the new ensemble */
 {
     Ensemble *ensData;
     EnsemblePart *ensPart;
@@ -1056,7 +1056,7 @@ DeleteEnsemble(
 static int
 FindEnsemble(
     Tcl_Interp *interp,            /* interpreter containing the ensemble */
-    CONST84 char **nameArgv,       /* path of names leading to ensemble */
+    const char **nameArgv,         /* path of names leading to ensemble */
     int nameArgc,                  /* number of strings in nameArgv */
     Ensemble** ensDataPtr)         /* returns: ensemble data */
 {
@@ -1731,7 +1731,7 @@ Itcl_EnsembleCmd(
             (char*)NULL, TCL_GLOBAL_ONLY);
 
         if (errInfo) {
-            Tcl_AddObjErrorInfo(interp, (CONST84 char *)errInfo, -1);
+            Tcl_AddObjErrorInfo(interp, (const char *)errInfo, -1);
         }
 #endif
 

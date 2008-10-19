@@ -9,7 +9,7 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itclBase.c,v 1.1.2.17 2008/10/17 19:57:03 wiede Exp $
+ * RCS: @(#) $Id: itclBase.c,v 1.1.2.18 2008/10/19 16:30:53 wiede Exp $
  */
 
 #include <stdlib.h>
@@ -420,10 +420,10 @@ ItclCallCCommand(
     }
     result = TCL_ERROR;
     if (argProc != NULL) {
-	CONST84 char **argv;
+	const char **argv;
 	int i;
 
-	argv = (CONST84 char**)ckalloc((unsigned)(objc*sizeof(char*)));
+	argv = (const char**)ckalloc((unsigned)(objc*sizeof(char*)));
 	for (i=1;i<objc;i++) {
 	    argv[i-1] = Tcl_GetString(objv[i]);
 	}
