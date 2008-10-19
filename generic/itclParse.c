@@ -39,7 +39,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclParse.c,v 1.1.2.29 2008/10/17 22:36:43 wiede Exp $
+ *     RCS:  $Id: itclParse.c,v 1.1.2.30 2008/10/19 14:20:50 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -1545,8 +1545,8 @@ Itcl_ClassFilterCmd(
     iclsPtr = (ItclClass*)Itcl_PeekStack(&infoPtr->clsStack);
     if (iclsPtr->flags & ITCL_CLASS) {
         Tcl_AppendResult(interp, "\"", Tcl_GetString(iclsPtr->namePtr),
-	        " is no ::itcl::widget/::itcl::widgetadaptor/::itcl::type.", 
-		" Only these can delegate procs", NULL);
+	        " is no ::itcl::widget/::itcl::widgetadaptor/::itcl::type", 
+		"/::itcl::extendedclass. Only these can have filters", NULL);
 	return TCL_ERROR;
     }
     if (objc < 2) {
@@ -1606,11 +1606,11 @@ Itcl_TypeCmdStart(
     Tcl_Obj *CONST objv[])   /* argument objects */
 {
     ItclShowArgs(1, "Itcl_TypeCmdStart", objc-1, objv);
-    const char *res = Tcl_PkgRequire(interp, "Tk", "8.5", 0);
+    const char *res = Tcl_PkgRequire(interp, "Tk", "8.6", 0);
     if (res == NULL) {
         return TCL_ERROR;
     }
-    res = Tcl_PkgRequire(interp, "ItclWidget", "4.0", 0);
+    res = Tcl_PkgRequire(interp, "ItclWidget", ITCL_VERSION, 0);
     if (res == NULL) {
         return TCL_ERROR;
     }
@@ -1635,11 +1635,11 @@ Itcl_WidgetCmdStart(
     Tcl_Obj *CONST objv[])   /* argument objects */
 {
     ItclShowArgs(1, "Itcl_WidgetCmdStart", objc-1, objv);
-    const char *res = Tcl_PkgRequire(interp, "Tk", "8.5", 0);
+    const char *res = Tcl_PkgRequire(interp, "Tk", "8.6", 0);
     if (res == NULL) {
         return TCL_ERROR;
     }
-    res = Tcl_PkgRequire(interp, "ItclWidget", "4.0", 0);
+    res = Tcl_PkgRequire(interp, "ItclWidget", ITCL_VERSION, 0);
     if (res == NULL) {
         return TCL_ERROR;
     }
@@ -1648,7 +1648,7 @@ Itcl_WidgetCmdStart(
 
 /*
  * ------------------------------------------------------------------------
- *  Itcl_WidgetadaptorCmdStart()
+ *  Itcl_WidgetAdaptorCmdStart()
  *
  *  that is just a dummy command to load package ItclWidget
  *  and then to resend the command and execute it in that package
@@ -1663,12 +1663,12 @@ Itcl_WidgetAdaptorCmdStart(
     int objc,                /* number of arguments */
     Tcl_Obj *CONST objv[])   /* argument objects */
 {
-    ItclShowArgs(1, "Itcl_WidgetAdaptorCmdStart", objc-1, objv);
-    const char *res = Tcl_PkgRequire(interp, "Tk", "8.5", 0);
+    ItclShowArgs(0, "Itcl_WidgetAdaptorCmdStart", objc-1, objv);
+    const char *res = Tcl_PkgRequire(interp, "Tk", "8.6", 0);
     if (res == NULL) {
         return TCL_ERROR;
     }
-    res = Tcl_PkgRequire(interp, "ItclWidget", "4.0", 0);
+    res = Tcl_PkgRequire(interp, "ItclWidget", ITCL_VERSION, 0);
     if (res == NULL) {
         return TCL_ERROR;
     }
@@ -2009,7 +2009,9 @@ ItclCreateComponent(
             return TCL_ERROR;
         }
         ivPtr->flags |= ITCL_COMPONENT;
-	bodyPtr = Tcl_NewStringObj("return [$", -1);
+	const char *str = "if {[llength $args] == 0} { return $hull }";
+	bodyPtr = Tcl_NewStringObj(str, -1);
+	Tcl_AppendToObj(bodyPtr, "\n    return [$", -1);
 	Tcl_AppendToObj(bodyPtr, Tcl_GetString(componentPtr), -1);
 	Tcl_AppendToObj(bodyPtr, " {*}$args]", -1);
         if (ItclCreateMethod(interp, iclsPtr, componentPtr, "args",
@@ -2657,7 +2659,8 @@ Itcl_ClassDelegateOptionCmd(
     iclsPtr = (ItclClass *)Itcl_PeekStack(&infoPtr->clsStack);
     if (iclsPtr->flags & ITCL_CLASS) {
         Tcl_AppendResult(interp, "\"", Tcl_GetString(iclsPtr->namePtr),
-	        " is no ::itcl::widget/::itcl::widgetadaptor/::itcl::type/::itcl::struct.", 
+	        " is no ::itcl::widget/::itcl::widgetadaptor/::itcl::type",
+		"/::itcl::extendedclass.", 
 		" Only these can delegate options", NULL);
 	return TCL_ERROR;
     }
@@ -2862,7 +2865,7 @@ delegate proc * ?to <componentName>? ?using <pattern>? ?except <procs>?";
  * ------------------------------------------------------------------------
  *  Itcl_ClassForwardCmd()
  *
- *  Used to similar to iterp alias to forward the call of a method 
+ *  Used similar to interp alias to forward the call of a method 
  *  to another method within the class
  *
  *  Returns TCL_OK/TCL_ERROR to indicate success/failure.

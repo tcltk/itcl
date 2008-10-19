@@ -23,7 +23,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclCmd.c,v 1.1.2.23 2008/10/17 19:57:03 wiede Exp $
+ *     RCS:  $Id: itclCmd.c,v 1.1.2.24 2008/10/19 14:20:50 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -1340,8 +1340,9 @@ Itcl_NWidgetCmd(
     int result;
 
     infoPtr = (ItclObjectInfo *)clientData;
+    iclsPtr = NULL;
     ItclShowArgs(0, "Itcl_NWidgetCmd", objc-1, objv);
-    result = ItclClassBaseCmd(clientData, interp, ITCL_NWIDGET, objc, objv,
+    result = ItclClassBaseCmd(clientData, interp, ITCL_ECLASS|ITCL_NWIDGET, objc, objv,
             &iclsPtr);
     if (result != TCL_OK) {
         return result;
@@ -1711,6 +1712,7 @@ Itcl_SetComponentCmd(
     int result;
 
     result = TCL_OK;
+    contextIoPtr = NULL;
     infoPtr = (ItclObjectInfo *)clientData;
     ItclShowArgs(1, "Itcl_SetComponentCmd", objc, objv);
     if (objc < 3) {
@@ -1720,6 +1722,11 @@ Itcl_SetComponentCmd(
     }
     name = Tcl_GetStringFromObj(objv[1], (int*)NULL);
     if (Itcl_FindObject(interp, name, &contextIoPtr) != TCL_OK) {
+        return TCL_ERROR;
+    }
+    if (contextIoPtr == NULL) {
+	Tcl_AppendResult(interp, "Itcl_SetComponentCmd contextIoPtr "
+	       "for \"", Tcl_GetString(objv[1]), "\" == NULL", NULL);
         return TCL_ERROR;
     }
     Itcl_InitHierIter(&hier, contextIoPtr->iclsPtr);
@@ -1766,7 +1773,9 @@ fprintf(stderr, "deleting old delegated options\n");
  * ------------------------------------------------------------------------
  *  Itcl_ExtendedClassCmd()
  *
- *  Used to an [incr Tcl] struct
+ *  Used to create an [incr Tcl] extended class.
+ *  An extended class is like a class with additional functionality/
+ *  commands
  *
  *  Returns TCL_OK/TCL_ERROR to indicate success/failure.
  * ------------------------------------------------------------------------

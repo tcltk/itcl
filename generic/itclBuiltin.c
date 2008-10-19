@@ -24,7 +24,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclBuiltin.c,v 1.1.2.30 2008/10/17 19:57:03 wiede Exp $
+ *     RCS:  $Id: itclBuiltin.c,v 1.1.2.31 2008/10/19 14:20:50 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -1016,6 +1016,7 @@ ItclExtendedConfigure(
     ItclObject *contextIoPtr;
 
     Tcl_HashEntry *hPtr;
+    Tcl_HashEntry *hPtr2;
     Tcl_Object oPtr;
     Tcl_Obj *resultPtr;
     Tcl_Obj *objPtr;
@@ -1118,6 +1119,24 @@ fprintf(stderr, "plain configure not yet implemented\n");
     /* first handle delegated options */
     hPtr = Tcl_FindHashEntry(&contextIoPtr->objectDelegatedOptions, (char *)
             objv[1]);
+    if (hPtr == NULL) {
+	Tcl_Obj *objPtr;
+	objPtr = Tcl_NewStringObj("*",1);
+	Tcl_IncrRefCount(objPtr);
+        /* check if all options are delegated */
+        hPtr = Tcl_FindHashEntry(&contextIoPtr->objectDelegatedOptions, (char *)
+                objPtr);
+	Tcl_DecrRefCount(objPtr);
+        if (hPtr != NULL) {
+	    /* now check the exceptions */
+            idoPtr = (ItclDelegatedOption *)Tcl_GetHashValue(hPtr);
+	    hPtr2 = Tcl_FindHashEntry(&idoPtr->exceptions, (char *)objv[1]);
+	    if (hPtr2 != NULL) {
+		/* found in exceptions, so no delegation for this option */
+	        hPtr = NULL;
+	    }
+        }
+    }
     if (hPtr != NULL) {
 	/* the option is delegated */
         idoPtr = (ItclDelegatedOption *)Tcl_GetHashValue(hPtr);
@@ -1141,6 +1160,7 @@ fprintf(stderr, "plain configure not yet implemented\n");
                         infoPtr->object_meta_type);
 	        infoPtr->currContextIclsPtr = ioPtr->iclsPtr;
 	    }
+            ItclShowArgs(1, "delegated eval", objc+1, newObjv);
             result = Tcl_EvalObjv(interp, objc+1, newObjv, TCL_EVAL_DIRECT);
             Tcl_DecrRefCount(newObjv[0]);
             Tcl_DecrRefCount(newObjv[1]);
@@ -1383,6 +1403,7 @@ ItclExtendedCget(
                             infoPtr->object_meta_type);
 	            infoPtr->currContextIclsPtr = ioPtr->iclsPtr;
 	        }
+		ItclShowArgs(1, "DELEGATED EVAL", objc+1, newObjv);
                 result = Tcl_EvalObjv(interp, objc+1, newObjv, TCL_EVAL_DIRECT);
 	        Tcl_DecrRefCount(newObjv[0]);
 	        Tcl_DecrRefCount(newObjv[1]);

@@ -24,7 +24,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann Copyright (c) 2007
  *
- *     RCS:  $Id: itclObject.c,v 1.1.2.36 2008/10/17 22:36:43 wiede Exp $
+ *     RCS:  $Id: itclObject.c,v 1.1.2.37 2008/10/19 14:20:50 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -207,8 +207,8 @@ ItclCreateObject(
         }
         if (ItclInitObjectMethodVariables(interp, ioPtr, iclsPtr, name)
 	        != TCL_OK) {
-	    Tcl_AppendResult(interp, "error in ItclInitObjectMethodVariables",
-	            NULL);
+	    Tcl_AppendResult(interp,
+	            "error in ItclInitObjectMethodVariables", NULL);
             return TCL_ERROR;
         }
     }
@@ -225,10 +225,16 @@ ItclCreateObject(
 	    if (infoPtr->windgetInfoPtr->initObjectOpts != NULL) {
 	        if (infoPtr->windgetInfoPtr->initObjectOpts(interp, ioPtr,
 		        iclsPtr, name)  != TCL_OK) {
-	            Tcl_AppendResult(interp, "error in ItclInitObjectOptions",
-		            NULL);
+	            Tcl_AppendResult(interp,
+		            "error in ItclInitObjectOptions", NULL);
                     return TCL_ERROR;
                 }
+            }
+            if (ItclInitObjectMethodVariables(interp, ioPtr, iclsPtr, name)
+	            != TCL_OK) {
+	        Tcl_AppendResult(interp,
+		        "error in ItclInitObjectMethodVariables", NULL);
+                return TCL_ERROR;
             }
         }
         if (iclsPtr->flags & ITCL_WIDGET) {
