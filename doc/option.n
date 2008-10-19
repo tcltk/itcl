@@ -1,0 +1,49 @@
+'\"
+'\" Copyright (c) 2008 Arnulf Wiedemann
+'\"
+'\" See the file "license.terms" for information on usage and redistribution
+'\" of this file, and for a DISCLAIMER OF ALL WARRANTIES.
+'\"
+'\" RCS: $Id: option.n,v 1.1.2.1 2008/10/19 19:03:59 wiede Exp $
+'\"
+.so man.macros
+.TH option n 4.0 itcl "[incr\ Tcl]"
+.BS
+'\" Note:  do not modify the .SH NAME line immediately below!
+.SH NAME
+option \- define options for extendedclass, widget or widgetadaptor
+.sp
+Parts of this description are "borrowed" from Tcl extension [snit], as the functionality is mostly identical.
+.sp
+\fBWARNING!\fR
+.br
+This is new functionality in [incr Tcl] where the API can still change!!
+.SH SYNOPSIS
+\fBoption \fIoptionSpec\fR ?\fIdefaultValue\fR?
+.br
+\fBoption \fIoptionSpec\fR ?\fIoptions\fR?
+.br
+.sp
+.BE
+
+.SH DESCRIPTION
+.PP
+The \fBoption\fR command is used inside an \fB[incr\ Tcl]\fR
+extendedclass/widget/widgetadaptor definition to define options.
+.sp
+.sp
+.CS
+.CE
+.sp
+.sp
+.CS
+.CE
+
+.PP
+
+.SH EXAMPLE
+.CS
+.CE
+
+.SH KEYWORDS
+option, widget, widgetadaptor, extendedclass

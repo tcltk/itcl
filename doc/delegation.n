@@ -1,0 +1,71 @@
+'\"
+'\" Copyright (c) 2008 Arnulf Wiedemann
+'\"
+'\" See the file "license.terms" for information on usage and redistribution
+'\" of this file, and for a DISCLAIMER OF ALL WARRANTIES.
+'\"
+'\" RCS: $Id: delegation.n,v 1.1.2.1 2008/10/19 19:03:59 wiede Exp $
+'\"
+.so man.macros
+.TH delegation n 4.0 itcl "[incr\ Tcl]"
+.BS
+'\" Note:  do not modify the .SH NAME line immediately below!
+.SH NAME
+delegation \- delegate methods, procs or options to other objects
+.sp
+Parts of this description are "borrowed" from Tcl extension [snit], as the functionality is mostly identical.
+.sp
+\fBWARNING!\fR
+.br
+This is new functionality in [incr Tcl] where the API can still change!!
+.SH SYNOPSIS
+\fBdelegate method \fImethodName\fB to \fIcomponentName\fR ?\fBas \fItargetName\fR?
+.br
+\fBdelegate method \fImethodName ?\fBto \fIcomponentName\fR? \fBusing \fIpattern\fR
+.br
+\fBdelegate method \fI* ?\fBto \fIcomponentName\fR? ?\fBusing \fIpattern\fR? ?\fBexcept \fImethodName methodName ...\fR?
+.sp
+\fBdelegate proc \fIprocName\fB to \fIcomponentName\fR ?\fBas \fItargetName\fR?
+.br
+\fBdelegate proc \fIprocName ?\fBto \fIcomponentName\fR? \fBusing \fIpattern\fR
+.br
+\fBdelegate proc \fI* ?\fBto \fIcomponentName\fR? ?\fBusing \fIpattern\fR? ?\fBexcept \fIprocName procName ...\fR?
+.sp
+\fBdelegate option \fIoptionSpec\fB to \fIcomponentName\fR
+.br
+\fBdelegate option \fIoptionSpec\fB to \fIcomponentName\fR \fBas \fItargetname\fR?
+.br
+\fBdelegate option \fI* \fBto \fIcomponentName\fR
+.br
+\fBdelegate option \fI* \fBto \fIcomponentName\fR \fBexcept \fIoptionName optionname ...\fR
+.br
+.sp
+.BE
+
+.SH DESCRIPTION
+.PP
+The \fBdelegate\fR command is used inside an \fB[incr\ Tcl]\fR
+extendedclass/widget/widgetadaptor definition to delegate methods/procs/options to other objects for handling.
+.sp
+The first form of delegate method delegates method methodName to component componentName. That is, when method methdoNameame is called on an instance of this type, the method and its arguments will be passed to the named component's command instead. That is, the following statement
+.sp
+.CS
+delegate method wag to tail
+.CE
+.sp
+is roughly equivalent to this explicitly defined method:
+.sp
+.CS
+method wag {args} {
+    uplevel $tail wag $args
+}
+.CE
+
+.PP
+
+.SH EXAMPLE
+.CS
+.CE
+
+.SH KEYWORDS
+delegation, option, method, proc
