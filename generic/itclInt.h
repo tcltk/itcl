@@ -9,7 +9,7 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itclInt.h,v 1.17.2.37 2008/10/19 16:30:53 wiede Exp $
+ * RCS: @(#) $Id: itclInt.h,v 1.17.2.38 2008/10/19 16:49:51 wiede Exp $
  */
 
 #include <string.h>
@@ -599,7 +599,7 @@ MODULE_SCOPE void ItclDeleteClassVariablesNamespace(Tcl_Interp *interp,
         ItclClass *iclsPtr);
 MODULE_SCOPE int ItclInfoInit(Tcl_Interp *interp);
 MODULE_SCOPE char * ItclTraceUnsetVar(ClientData clientData, Tcl_Interp *interp,
-	CONST84 char *name1, CONST84 char *name2, int flags);
+	const char *name1, const char *name2, int flags);
 
 struct Tcl_ResolvedVarInfo;
 MODULE_SCOPE int Itcl_ClassCmdResolver(Tcl_Interp *interp, CONST char* name,

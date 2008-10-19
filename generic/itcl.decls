@@ -1,5 +1,5 @@
 # -*- tcl -*-
-# $Id: itcl.decls,v 1.3.2.10 2008/10/17 22:36:43 wiede Exp $
+# $Id: itcl.decls,v 1.3.2.11 2008/10/19 16:49:51 wiede Exp $
 
 # public API
 library itcl
@@ -366,7 +366,7 @@ declare 84 current {
         int objc, Tcl_Obj *CONST objv[])
 }
 declare 85 current {
-    int Itcl_ParseVarResolver (Tcl_Interp *interp, CONST84 char* name, \
+    int Itcl_ParseVarResolver (Tcl_Interp *interp, const char* name, \
         Tcl_Namespace *contextNs, int flags, Tcl_Var* rPtr)
 }
 

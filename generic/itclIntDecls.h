@@ -1,5 +1,5 @@
 /*
- * $Id: itclIntDecls.h,v 1.13.2.10 2008/10/17 22:36:43 wiede Exp $
+ * $Id: itclIntDecls.h,v 1.13.2.11 2008/10/19 16:49:51 wiede Exp $
  *
  * This file is (mostly) automatically generated from itcl.decls.
  */
@@ -278,7 +278,7 @@ ITCLAPI int		Itcl_ClassCommonCmd (ClientData clientData,
 				Tcl_Obj *CONST objv[]);
 /* 85 */
 ITCLAPI int		Itcl_ParseVarResolver (Tcl_Interp * interp, 
-				CONST84 char* name, Tcl_Namespace * contextNs, 
+				const char* name, Tcl_Namespace * contextNs, 
 				int flags, Tcl_Var* rPtr);
 /* 86 */
 ITCLAPI int		Itcl_BiInit (Tcl_Interp * interp);
