@@ -4,7 +4,7 @@
 '\" See the file "license.terms" for information on usage and redistribution
 '\" of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 '\"
-'\" RCS: $Id: component.n,v 1.1.2.1 2008/10/21 17:58:49 wiede Exp $
+'\" RCS: $Id: itclcomponent.n,v 1.1.2.1 2008/10/24 16:08:07 wiede Exp $
 '\"
 .so man.macros
 .TH component n 4.0 itcl "[incr\ Tcl]"

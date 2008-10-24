@@ -1,25 +1,25 @@
 '\"
-'\" Copyright (c) 2008 Arnulf Wiedemann
+'\" Copyright (c) 2008 Arnulf Widemann
 '\"
 '\" See the file "license.terms" for information on usage and redistribution
 '\" of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 '\"
-'\" RCS: $Id: extendedclass.n,v 1.1.2.1 2008/10/19 19:03:59 wiede Exp $
+'\" RCS: $Id: itclwidget.n,v 1.1.2.1 2008/10/24 16:08:07 wiede Exp $
 '\"
 .so man.macros
-.TH extendedclass n "4.0" itcl "[incr\ Tcl]"
+.TH widget n "4.0" itcl "[incr\ Tcl]"
 .BS
 '\" Note:  do not modify the .SH NAME line immediately below!
 .SH NAME
-extendedclass \- create a extendedclass of objects
+widget \- create a widget class of objects
 .sp
 \fBWARNING!\fR
 .br
 This is new functionality in [incr Tcl] where the API can still change!!
 .SH SYNOPSIS
-\fBitcl::extendedclass \fIextendedclassName\fR \fB{
+\fBitcl::widget \fIwidgetName\fR \fB{
 .br
-    \fBinherit \fIbaseExtendedclass\fR ?\fIbaseExtendedclass\fR...?
+    \fBinherit \fIbaseWidget\fR ?\fIbaseWidget\fR...?
 .br
     \fBconstructor \fIargs\fR ?\fIinit\fR? \fIbody\fR
 .br
@@ -65,28 +65,29 @@ This is new functionality in [incr Tcl] where the API can still change!!
 .br
 \fB}\fR
 .sp
-\fIextendedclassName objName\fR ?\fIarg arg ...\fR?
+\fIwidgetName objName\fR ?\fIarg arg ...\fR?
 .sp
 \fIobjName method\fR ?\fIarg arg ...\fR?
 .sp
-\fIextendedclassName::proc ?\fIarg arg ...\fR?
+\fIwidgetName::proc ?\fIarg arg ...\fR?
 .BE
 
 .SH DESCRIPTION
 .PP
-The fundamental construct in \fB[incr\ Tcl]\fR is the extendedclass definition.
-Each extendedclass acts as a template for actual objects that can be created.
-The extendedclass itself is a namespace which contains things common to all
+One of the fundamental constructs in \fB[incr\ Tcl]\fR is the widget definition.
+A widget is like a class with some additional features.
+Each widget acts as a template for actual objects that can be created.
+The widget itself is a namespace which contains things common to all
 objects.  Each object has its own unique bundle of data which contains
-instances of the "variables" defined in the extendedclass definition.  Each
+instances of the "variables" defined in the widget definition.  Each
 object also has a built-in variable named "this", which contains the
-name of the object.  Extendedclasses can also have "common" data members that
-are shared by all objects in a extendedclass.
+name of the object.  Widgets can also have "common" data members that
+are shared by all objects in a widget.
 .PP
-Two types of functions can be included in the extendedclass definition.
+Two types of functions can be included in the widget definition.
 "Methods" are functions which operate on a specific object, and
 therefore have access to both "variables" and "common" data members.
-"Procs" are ordinary procedures in the extendedclass namespace, and only
+"Procs" are ordinary procedures in the widget namespace, and only
 have access to "common" data members.
 .PP
 If the body of any method or proc starts with "\fB@\fR", it is treated
@@ -94,48 +95,48 @@ as the symbolic name for a C procedure.  Otherwise, it is treated as
 a Tcl code script.  See below for details on registering and using
 C procedures.
 .PP
-A extendedclass can only be defined once, although the bodies of extendedclass
+A widget can only be defined once, although the bodies of widget
 methods and procs can be defined again and again for interactive
 debugging.  See the \fBbody\fR and \fBconfigbody\fR commands for
 details.
 .PP
-Each namespace can have its own collection of objects and extendedclasses.
-The list of extendedclasses available in the current context can be queried
-using the "\fBitcl::find extendedclasses\fR" command, and the list of objects,
+Each namespace can have its own collection of objects and widgets.
+The list of widgets available in the current context can be queried
+using the "\fBitcl::find widgets\fR" command, and the list of objects,
 with the "\fBitcl::find objects\fR" command.
 .PP
-A extendedclass can be deleted using the "\fBdelete extendedclass\fR" command.
+A widget can be deleted using the "\fBdelete widget\fR" command.
 Individual objects can be deleted using the "\fBdelete object\fR"
 command.
 
-.SH CLASS DEFINITIONS
+.SH WIDGET DEFINITIONS
 .TP
-\fBextendedclass \fIextendedclassName definition\fR
-Provides the definition for a extendedclass named \fIextendedclassName\fR.  If
-the extendedclass \fIextendedclassName\fR already exists, or if a command called
-\fIextendedclassName\fR exists in the current namespace context, this
-command returns an error.  If the extendedclass definition is successfully
-parsed, \fIextendedclassName\fR becomes a command in the current context,
-handling the creation of objects for this extendedclass.
+\fBwidget \fIwidgetName definition\fR
+Provides the definition for a widget named \fIwidgetName\fR.  If
+the widget \fIwidgetName\fR already exists, or if a command called
+\fIwidgetName\fR exists in the current namespace context, this
+command returns an error.  If the widget definition is successfully
+parsed, \fIwidgetName\fR becomes a command in the current context,
+handling the creation of objects for this widget.
 .PP
-The extendedclass \fIdefinition\fR is evaluated as a series of Tcl
-statements that define elements within the extendedclass.  The following
-extendedclass definition commands are recognized:
+The widget \fIdefinition\fR is evaluated as a series of Tcl
+statements that define elements within the widget.  The following
+widget definition commands are recognized:
 .RS
 .TP
-\fBinherit \fIbaseExtendedclass\fR ?\fIbaseExtendedclass\fR...?
-Causes the current extendedclass to inherit characteristics from one or
-more base extendedclasses.  Extendedclasses must have been defined by a previous
-\fBextendedclass\fR command, or must be available to the auto-loading
-facility (see "AUTO-LOADING" below).  A single extendedclass definition
+\fBinherit \fIbaseWidget\fR ?\fIbaseWidget\fR...?
+Causes the current widget to inherit characteristics from one or
+more base widgets.  Widgets must have been defined by a previous
+\fBwidget\fR command, or must be available to the auto-loading
+facility (see "AUTO-LOADING" below).  A single widget definition
 can contain no more than one \fBinherit\fR command.
 .sp
-The order of \fIbaseExtendedclass\fR names in the \fBinherit\fR list
-affects the name resolution for extendedclass members.  When the same
-member name appears in two or more base extendedclasses, the base extendedclass
+The order of \fIbaseWidget\fR names in the \fBinherit\fR list
+affects the name resolution for widget members.  When the same
+member name appears in two or more base widgets, the base widget
 that appears first in the \fBinherit\fR list takes precedence.
-For example, if extendedclasses "Foo" and "Bar" both contain the member
-"x", and if another extendedclass has the "\fBinherit\fR" statement:
+For example, if widgets "Foo" and "Bar" both contain the member
+"x", and if another widget has the "\fBinherit\fR" statement:
 .CS
 inherit Foo Bar
 .CE
@@ -148,17 +149,17 @@ the constructor, which is automatically invoked whenever an
 object is created.
 .sp
 Before the \fIbody\fR is executed, the
-optional \fIinit\fR statement is used to invoke any base extendedclass
+optional \fIinit\fR statement is used to invoke any base widget
 constructors that require arguments.  Variables in the \fIargs\fR
 specification can be accessed in the \fIinit\fR code fragment,
-and passed to base extendedclass constructors.  After evaluating the
-\fIinit\fR statement, any base extendedclass constructors that have
+and passed to base widget constructors.  After evaluating the
+\fIinit\fR statement, any base widget constructors that have
 not been executed are invoked automatically without arguments.
-This ensures that all base extendedclasses are fully constructed before
+This ensures that all base widgets are fully constructed before
 the constructor \fIbody\fR is executed.  By default, this
 scheme causes constructors to be invoked in order from least-
 to most-specific.  This is exactly the opposite of the order
-that extendedclasses are reported by the \fBinfo heritage\fR command.
+that widgets are reported by the \fBinfo heritage\fR command.
 .sp
 If construction is successful, the constructor always returns
 the object name\-regardless of how the \fIbody\fR is defined\-and
@@ -172,9 +173,9 @@ the object data is destroyed and the object name is removed as a command
 from the interpreter.  If destruction fails, an error message is returned
 and the object remains.
 .sp
-When an object is destroyed, all destructors in its extendedclass hierarchy
+When an object is destroyed, all destructors in its widget hierarchy
 are invoked in order from most- to least-specific.  This is the
-order that the extendedclasses are reported by the "\fBinfo heritage\fR"
+order that the widgets are reported by the "\fBinfo heritage\fR"
 command, and it is exactly the opposite of the default constructor
 order.
 .TP
@@ -188,17 +189,17 @@ information for this method.  The \fBbody\fR command can be used
 to redefine the method body, but the \fIargs\fR list must match
 this specification.
 .sp
-Within the body of another extendedclass method, a method can be invoked
+Within the body of another widget method, a method can be invoked
 like any other command\-simply by using its name.  Outside of the
-extendedclass context, the method name must be prefaced an object name,
+widget context, the method name must be prefaced an object name,
 which provides the context for the data that it manipulates.
-Methods in a base extendedclass that are redefined in the current extendedclass,
-or hidden by another base extendedclass, can be qualified using the
-"\fIextendedclassName\fR::\fImethod\fR" syntax.
+Methods in a base widget that are redefined in the current widget,
+or hidden by another base widget, can be qualified using the
+"\fIwidgetName\fR::\fImethod\fR" syntax.
 .TP
 \fBproc \fIname\fR ?\fIargs\fR? ?\fIbody\fR?
 Declares a proc called \fIname\fR.  A proc is an ordinary procedure
-within the extendedclass namespace.  Unlike a method, a proc is invoked
+within the widget namespace.  Unlike a method, a proc is invoked
 without referring to a specific object.  When the proc \fIbody\fR is
 executed, it will have automatic access only to common data members.
 .sp
@@ -207,17 +208,17 @@ information for this proc.  The \fBbody\fR command can be used
 to redefine the proc body, but the \fIargs\fR list must match
 this specification.
 .sp
-Within the body of another extendedclass method or proc, a proc can be
+Within the body of another widget method or proc, a proc can be
 invoked like any other command\-simply by using its name.
 In any other namespace context, the proc is invoked using a
-qualified name like "\fIextendedclassName\fB::\fIproc\fR".  Procs in
-a base extendedclass that are redefined in the current extendedclass, or hidden
-by another base extendedclass, can also be accessed via their qualified
+qualified name like "\fIwidgetName\fB::\fIproc\fR".  Procs in
+a base widget that are redefined in the current widget, or hidden
+by another base widget, can also be accessed via their qualified
 name.
 .TP
 \fBvariable \fIvarName\fR ?\fIinit\fR? ?\fIconfig\fR?
 Defines an object-specific variable named \fIvarName\fR.  All
-object-specific variables are automatically available in extendedclass
+object-specific variables are automatically available in widget
 methods.  They need not be declared with anything like the
 \fBglobal\fR command.
 .sp
@@ -230,15 +231,15 @@ within the constructor and used as arrays.
 The optional \fIconfig\fR script is only allowed for public variables.
 If specified, this code fragment is executed whenever a public
 variable is modified by the built-in "configure" method.  The
-\fIconfig\fR script can also be specified outside of the extendedclass
+\fIconfig\fR script can also be specified outside of the widget
 definition using the \fBconfigbody\fR command.
 .TP
 \fBcommon \fIvarName\fR ?\fIinit\fR?
 Declares a common variable named \fIvarName\fR.  Common variables
-reside in the extendedclass namespace and are shared by all objects belonging
-to the extendedclass.  They are just like global variables, except that
+reside in the widget namespace and are shared by all objects belonging
+to the widget.  They are just like global variables, except that
 they need not be declared with the usual \fBglobal\fR command.
-They are automatically visible in all extendedclass methods and procs.
+They are automatically visible in all widget methods and procs.
 .sp
 If the optional \fIinit\fR string is specified, it is used as the
 initial value of the variable.  Initialization forces the variable
@@ -247,12 +248,12 @@ hand, can be set with subsequent \fBset\fR and \fBarray\fR commands
 and used as arrays.
 .sp
 Once a common data member has been defined, it can be set using
-\fBset\fR and \fBarray\fR commands within the extendedclass definition.
+\fBset\fR and \fBarray\fR commands within the widget definition.
 This allows common data members to be initialized as arrays.
 For example:
 .CS
-itcl::extendedclass Foo {
-    common boolean
+itcl::widget Foo {
+    protected common boolean
     set boolean(true) 1
     set boolean(false) 0
 }
@@ -266,7 +267,7 @@ objects are created.
 \fBprotected \fIcommand\fR ?\fIarg arg ...\fR?
 .TP
 \fBprivate \fIcommand\fR ?\fIarg arg ...\fR?
-These commands are used to set the protection level for extendedclass
+These commands are used to set the protection level for widget
 members that are created when \fIcommand\fR is evaluated.
 The \fIcommand\fR is usually \fBmethod\fR, \fBproc\fR,
 \fBvariable\fR or\fBcommon\fR, and the remaining \fIarg\fR's
@@ -275,15 +276,15 @@ also be a script containing many different member definitions,
 and the protection level will apply to all of the members
 that are created.
 
-.SH CLASS USAGE
+.SH WIDGET USAGE
 .PP
-Once a extendedclass has been defined, the extendedclass name can be used as a
-command to create new objects belonging to the extendedclass.
+Once a widget has been defined, the widget name can be used as a
+command to create new objects belonging to the widget.
 .TP
-\fIextendedclassName objName\fR ?\fIargs...\fR?
-Creates a new object in extendedclass \fIextendedclassName\fR with the name \fIobjName\fR.
+\fIwidgetName objName\fR ?\fIargs...\fR?
+Creates a new object in widget \fIwidgetName\fR with the name \fIobjName\fR.
 Remaining arguments are passed to the constructor of the most-specific
-extendedclass.  This in turn passes arguments to base extendedclass constructors before
+widget.  This in turn passes arguments to base widget constructors before
 invoking its own body of commands.  If construction is successful, a
 command called \fIobjName\fR is created in the current namespace context,
 and \fIobjName\fR is returned as the result of this operation.
@@ -293,8 +294,8 @@ the object is deleted, and an error is returned.
 .sp
 If \fIobjName\fR contains the string "\fB#auto\fR", that string is
 replaced with an automatically generated name.  Names have the
-form \fIextendedclassName<number>\fR, where the \fIextendedclassName\fR part is
-modified to start with a lowercase letter.  In extendedclass "Toaster",
+form \fIwidgetName<number>\fR, where the \fIwidgetName\fR part is
+modified to start with a lowercase letter.  In widget "Toaster",
 for example, the "\fB#auto\fR" specification would produce names
 like toaster0, toaster1, etc.  Note that "\fB#auto\fR" can be
 also be buried within an object name:
@@ -311,7 +312,7 @@ as a command to invoke methods that operate on the object.
 Invokes a method named \fImethod\fR on an object named \fIobjName\fR.
 Remaining arguments are passed to the argument list for the
 method.  The method name can be "constructor", "destructor",
-any method name appearing in the extendedclass definition, or any of
+any method name appearing in the widget definition, or any of
 the following built-in methods.
 .SH BUILT-IN METHODS
 .TP
@@ -335,37 +336,37 @@ then this method returns the information for that one variable.
 Otherwise, the arguments are treated as \fIoption\fR/\fIvalue\fR
 pairs assigning new values to public variables.  Each variable
 is assigned its new value, and if it has any "config" code associated
-with it, it is executed in the context of the extendedclass where it was
+with it, it is executed in the context of the widget where it was
 defined.  If the "config" code generates an error, the variable
 is set back to its previous value, and the \fBconfigure\fR method
 returns an error.
 .TP
-\fIobjName\fR \fBisa \fIextendedclassName\fR
-Returns non-zero if the given \fIextendedclassName\fR can be found in the
+\fIobjName\fR \fBisa \fIwidgetName\fR
+Returns non-zero if the given \fIwidgetName\fR can be found in the
 object's heritage, and zero otherwise.
 .TP
 \fIobjName\fR \fBinfo \fIoption\fR ?\fIargs...\fR?
 Returns information related to a particular object named
-\fIobjName\fR, or to its extendedclass definition.  The \fIoption\fR
+\fIobjName\fR, or to its widget definition.  The \fIoption\fR
 parameter includes the following things, as well as the options
 recognized by the usual Tcl "info" command:
 .RS
 .TP
-\fIobjName\fR \fBinfo extendedclass\fR
-Returns the name of the most-specific extendedclass for object \fIobjName\fR.
+\fIobjName\fR \fBinfo widget\fR
+Returns the name of the most-specific widget for object \fIobjName\fR.
 .TP
 \fIobjName\fR \fBinfo inherit\fR
-Returns the list of base extendedclasses as they were defined in the
-"\fBinherit\fR" command, or an empty string if this extendedclass
-has no base extendedclasses.
+Returns the list of base widgets as they were defined in the
+"\fBinherit\fR" command, or an empty string if this widget
+has no base widgets.
 .TP
 \fIobjName\fR \fBinfo heritage\fR
-Returns the current extendedclass name and the entire list of base extendedclasses
+Returns the current widget name and the entire list of base widgets
 in the order that they are traversed for member lookup and object
 destruction.
 .TP
 \fIobjName\fR \fBinfo function\fR ?\fIcmdName\fR? ?\fB-protection\fR? ?\fB-type\fR? ?\fB-name\fR? ?\fB-args\fR? ?\fB-body\fR?
-With no arguments, this command returns a list of all extendedclass methods
+With no arguments, this command returns a list of all widgets methods
 and procs.  If \fIcmdName\fR is specified, it returns information
 for a specific method or proc.  If no flags are specified, this
 command returns a list with the following elements:  the protection
@@ -384,13 +385,13 @@ variable, the "config" code is included on this list.  Flags can be
 used to request specific elements from this list.
 
 .SH CHAINING METHODS/PROCS
-Sometimes a base extendedclass has a method or proc that is redefined with
-the same name in a derived extendedclass.  This is a way of making the
-derived extendedclass handle the same operations as the base extendedclass, but
+Sometimes a base widget has a method or proc that is redefined with
+the same name in a derived widget.  This is a way of making the
+derived widget handle the same operations as the base widget, but
 with its own specialized behavior.  For example, suppose we have
-a Toaster extendedclass that looks like this:
+a Toaster widget that looks like this:
 .CS
-itcl::extendedclass Toaster {
+itcl::widget Toaster {
     variable crumbs 0
     method toast {nslices} {
         if {$crumbs > 50} {
@@ -403,11 +404,11 @@ itcl::extendedclass Toaster {
     }
 }
 .CE
-We might create another extendedclass like SmartToaster that redefines
-the "toast" method.  If we want to access the base extendedclass method,
-we can qualify it with the base extendedclass name, to avoid ambiguity:
+We might create another widget like SmartToaster that redefines
+the "toast" method.  If we want to access the base widget method,
+we can qualify it with the base widget name, to avoid ambiguity:
 .CS
-itcl::extendedclass SmartToaster {
+itcl::widget SmartToaster {
     inherit Toaster
     method toast {nslices} {
         if {$crumbs > 40} {
@@ -417,10 +418,10 @@ itcl::extendedclass SmartToaster {
     }
 }
 .CE
-Instead of hard-coding the base extendedclass name, we can use the
+Instead of hard-coding the base widget name, we can use the
 "chain" command like this:
 .CS
-itcl::extendedclass SmartToaster {
+itcl::widget SmartToaster {
     inherit Toaster
     method toast {nslices} {
         if {$crumbs > 40} {
@@ -430,23 +431,23 @@ itcl::extendedclass SmartToaster {
     }
 }
 .CE
-The chain command searches through the extendedclass hierarchy for
-a slightly more generic (base extendedclass) implementation of a method
+The chain command searches through the widget hierarchy for
+a slightly more generic (base widget) implementation of a method
 or proc, and invokes it with the specified arguments.  It starts
-at the current extendedclass context and searches through base extendedclasses
+at the current widget context and searches through base widgets
 in the order that they are reported by the "info heritage" command.
 If another implementation is not found, this command does nothing
 and returns the null string.
 
 .SH AUTO-LOADING
 .PP
-Extendedclass definitions need not be loaded explicitly; they can be loaded as
+Widget definitions need not be loaded explicitly; they can be loaded as
 needed by the usual Tcl auto-loading facility.  Each directory containing
-extendedclass definition files should have an accompanying "tclIndex" file.
+widget definition files should have an accompanying "tclIndex" file.
 Each line in this file identifies a Tcl procedure or \fB[incr\ Tcl]\fR
-extendedclass definition and the file where the definition can be found.
+widget definition and the file where the definition can be found.
 .PP
-For example, suppose a directory contains the definitions for extendedclasses
+For example, suppose a directory contains the definitions for widgets
 "Toaster" and "SmartToaster".  Then the "tclIndex" file for this
 directory would look like:
 .CS
@@ -466,12 +467,12 @@ generate "tclIndex" files.
 .CE
 The auto-loader must be made aware of this directory by appending
 the directory name to the "auto_path" variable.  When this is in
-place, extendedclasses will be auto-loaded as needed when used in an
+place, widgets will be auto-loaded as needed when used in an
 application.
 
 .SH C PROCEDURES
 .PP
-C procedures can be integrated into an \fB[incr\ Tcl]\fR extendedclass
+C procedures can be integrated into an \fB[incr\ Tcl]\fR widget
 definition to implement methods, procs, and the "config" code
 for public variables.  Any body that starts with "\fB@\fR"
 is treated as the symbolic name for a C procedure.
@@ -498,17 +499,17 @@ Tcl_AppInit(interp)
 .CE
 C procedures are implemented just like ordinary Tcl commands.
 See the \fBCrtCommand\fR man page for details.  Within the procedure,
-extendedclass data members can be accessed like ordinary variables
+widget data members can be accessed like ordinary variables
 using \fBTcl_SetVar()\fR, \fBTcl_GetVar()\fR, \fBTcl_TraceVar()\fR,
-etc.  Extendedclass methods and procs can be executed like ordinary commands
+etc.  Widget methods and procs can be executed like ordinary commands
 using \fBTcl_Eval()\fR.  \fB[incr\ Tcl]\fR makes this possible by
 automatically setting up the context before executing the C procedure.
 .PP
 This scheme provides a natural migration path for code development.
-Extendedclasses can be developed quickly using Tcl code to implement the
+Widgets can be developed quickly using Tcl code to implement the
 bodies.  An entire application can be built and tested.  When
 necessary, individual bodies can be implemented with C code to
 improve performance.
 
 .SH KEYWORDS
-extendedclass, object, object-oriented
+widget, object, object-oriented
