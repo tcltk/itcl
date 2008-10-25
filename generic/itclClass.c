@@ -25,7 +25,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann Copyright (c) 2007
  *
- *     RCS:  $Id: itclClass.c,v 1.1.2.25 2008/10/19 16:30:53 wiede Exp $
+ *     RCS:  $Id: itclClass.c,v 1.1.2.26 2008/10/25 19:31:49 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -328,7 +328,7 @@ Itcl_CreateClass(
     iclsPtr->numCommons   = 0;
     iclsPtr->numVariables   = 0;
     iclsPtr->unique   = 0;
-    iclsPtr->flags    = 0;
+    iclsPtr->flags    = infoPtr->currClassFlags;
 
     /*
      *  Initialize the heritage info--each class starts with its
@@ -515,7 +515,7 @@ Itcl_CreateClass(
 	        &newEntry);
         Tcl_SetHashValue(hPtr, (ClientData)ivPtr);
         /* create the options variable */
-        namePtr = Tcl_NewStringObj("itcl_options", 11);
+        namePtr = Tcl_NewStringObj("itcl_options", -1);
         Tcl_IncrRefCount(namePtr);
         if (Itcl_CreateVariable(interp, iclsPtr, namePtr, NULL, NULL,
                 &ivPtr) != TCL_OK) {
@@ -1261,6 +1261,7 @@ FinalizeCreateObject(
     int result)
 {
     Tcl_Obj* objNamePtr = data[0];
+    ItclClass *iclsPtr = data[1];
     char *objName = Tcl_GetString(objNamePtr);
     if (result == TCL_OK) {
 	Tcl_ResetResult(interp);
@@ -1317,7 +1318,10 @@ Itcl_HandleClass(
     char *start;
     char *pos;
     char *match;
+    int result;
 
+    result = TCL_OK;
+    Tcl_ResetResult(interp);
     ItclShowArgs(1, "Itcl_HandleClassCmd", objc, objv);
     /*
      *  If the command is invoked without an object name, then do nothing.
@@ -1431,8 +1435,9 @@ Itcl_HandleClass(
     Tcl_Obj *objNamePtr = Tcl_NewStringObj(objName, -1);
     Tcl_IncrRefCount(objNamePtr);
     Tcl_DStringFree(&buffer);
-    Itcl_NRAddCallback(interp, FinalizeCreateObject, objNamePtr, NULL, NULL, NULL);
-    return ItclCreateObject(interp, Tcl_GetString(objNamePtr), iclsPtr, objc-4, objv+4);
+    Itcl_NRAddCallback(interp, FinalizeCreateObject, objNamePtr, iclsPtr, NULL, NULL);
+    result = ItclCreateObject(interp, Tcl_GetString(objNamePtr), iclsPtr, objc-4, objv+4);
+    return result;
 }
 
 

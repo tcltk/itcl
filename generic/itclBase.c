@@ -9,7 +9,7 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itclBase.c,v 1.1.2.18 2008/10/19 16:30:53 wiede Exp $
+ * RCS: @(#) $Id: itclBase.c,v 1.1.2.19 2008/10/25 19:31:49 wiede Exp $
  */
 
 #include <stdlib.h>
@@ -120,6 +120,8 @@ static char *clazzUnknownBody = "\n\
     }\n\
     set myObj [lindex [::info level 0] 0]\n\
     set cmd [list uplevel 1 ::itcl::parser::handleClass $myObj $mySelf $m {*}[list $args]]\n\
+    set ::errorInfo {}\n\
+    set obj {}\n\
     if {[catch {\n\
         eval $cmd\n\
     } obj errInfo]} {\n\

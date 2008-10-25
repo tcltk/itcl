@@ -39,7 +39,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclParse.c,v 1.1.2.31 2008/10/19 16:30:53 wiede Exp $
+ *     RCS:  $Id: itclParse.c,v 1.1.2.32 2008/10/25 19:31:49 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -641,6 +641,16 @@ ItclClassBaseCmd(
 		if (strcmp(Tcl_GetString(imPtr->codePtr->bodyPtr),
 		        "@itcl-builtin-isa") == 0) {
 		    Tcl_AppendToObj(bodyPtr, "::itcl::builtin::isa", -1);
+		    isDone = 1;
+		}
+		if (strcmp(Tcl_GetString(imPtr->codePtr->bodyPtr),
+		        "@itcl-builtin-hullinstall") == 0) {
+		    Tcl_AppendToObj(bodyPtr, "::itcl::builtin::hullinstall", -1);
+		    isDone = 1;
+		}
+		if (strcmp(Tcl_GetString(imPtr->codePtr->bodyPtr),
+		        "@itcl-builtin-componentinstall") == 0) {
+		    Tcl_AppendToObj(bodyPtr, "::itcl::builtin::componentinstall", -1);
 		    isDone = 1;
 		}
 		if (strncmp(Tcl_GetString(imPtr->codePtr->bodyPtr),
@@ -2112,7 +2122,7 @@ Itcl_ClassComponentCmd(
 	        != TCL_OK) {
 	    return TCL_ERROR;
 	}
-	Tcl_SetStringObj(newObjv[1] , "method", -1);
+	Tcl_SetStringObj(newObjv[0] , "delegate::method", -1);
         if (Itcl_ClassDelegateMethodCmd(infoPtr, interp, newObjc, newObjv)
 	        != TCL_OK) {
 	    return TCL_ERROR;

@@ -24,7 +24,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclBuiltin.c,v 1.1.2.32 2008/10/19 16:30:53 wiede Exp $
+ *     RCS:  $Id: itclBuiltin.c,v 1.1.2.33 2008/10/25 19:31:49 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -33,6 +33,7 @@
  */
 #include "itclInt.h"
 
+Tcl_ObjCmdProc Itcl_BiComponentInstallCmd;
 Tcl_ObjCmdProc ItclExtendedConfigure;
 Tcl_ObjCmdProc ItclExtendedCget;
 Tcl_ObjCmdProc ItclExtendedSetGet;
@@ -49,15 +50,24 @@ typedef struct BiMethod {
 
 static BiMethod BiMethodList[] = {
     { "cget",      "-option",
-                   "@itcl-builtin-cget",  Itcl_BiCgetCmd },
+                   "@itcl-builtin-cget",
+		   Itcl_BiCgetCmd },
     { "configure", "?-option? ?value -option value...?",
-                   "@itcl-builtin-configure",  Itcl_BiConfigureCmd },
+                   "@itcl-builtin-configure",
+		   Itcl_BiConfigureCmd },
+    { "componentinstall",
+            "<component> using <classname> <winpath> ?-option value...?",
+                   "@itcl-builtin-componentinstall",
+		   Itcl_BiComponentInstallCmd },
     { "info",      "???",
-                   "@itcl-builtin-info",  Itcl_BiInfoCmd },
+                   "@itcl-builtin-info",
+		   Itcl_BiInfoCmd },
     { "isa",       "className",
-                   "@itcl-builtin-isa",  Itcl_BiIsaCmd },
+                   "@itcl-builtin-isa",
+		   Itcl_BiIsaCmd },
     { "setget", "varName ?value?",
-                   "@itcl-builtin-setget",  ItclExtendedSetGet },
+                   "@itcl-builtin-setget",
+		   ItclExtendedSetGet },
 };
 static int BiMethodListLen = sizeof(BiMethodList)/sizeof(BiMethod);
 
@@ -959,11 +969,16 @@ ItclBiObjectUnknownCmd(
     int objc,                /* number of arguments */
     Tcl_Obj *CONST objv[])   /* argument objects */
 {
+    FOREACH_HASH_DECLS;
     Tcl_Object oPtr;
     Tcl_Command cmd;
     Tcl_CmdInfo cmdInfo;
+    Tcl_Obj **newObjv;
     ItclObject *ioPtr;
     ItclObjectInfo *infoPtr;
+    ItclComponent *icPtr;
+    const char *val;
+    int result;
 
     ItclShowArgs(1, "ItclBiObjectUnknownCmd", objc, objv);
     cmd = Tcl_GetCommandFromObj(interp, objv[1]);
@@ -974,6 +989,22 @@ ItclBiObjectUnknownCmd(
             ITCL_INTERP_DATA, NULL);
     ioPtr = (ItclObject *)Tcl_ObjectGetMetadata(oPtr,
             infoPtr->object_meta_type);
+    FOREACH_HASH_VALUE(icPtr, &ioPtr->objectComponents) {
+        if (icPtr->flags & ITCL_COMPONENT_INHERIT) {
+	    val = Itcl_GetInstanceVar(interp,
+	            Tcl_GetString(icPtr->namePtr), ioPtr,
+		    icPtr->ivPtr->iclsPtr);
+	    if (val != NULL) {
+                newObjv = (Tcl_Obj **)ckalloc(sizeof(Tcl_Obj *) * (objc -1));
+		newObjv[0] = Tcl_NewStringObj(val, -1);
+		Tcl_IncrRefCount(newObjv[0]);
+		memcpy(newObjv+1, objv+2, sizeof(Tcl_Obj *) * (objc-2));
+                result = Tcl_EvalObjv(interp, objc-1, newObjv, 0);
+		Tcl_DecrRefCount(newObjv[0]);
+	        return result;
+	    }
+	}
+    }
     Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
             "bad option \"", Tcl_GetString(objv[2]), "\": should be one of...",
 	    (char*)NULL);
@@ -1618,3 +1649,88 @@ ItclExtendedSetGet(
     }
     return result;
 }
+/*
+ * ------------------------------------------------------------------------
+ *  Itcl_BiComponentInstallCmd()
+ *
+ *  Invoked whenever the user issues the "componentinstall" method for an
+ *  object.
+ *  Handles the following syntax:
+ *
+ *    componentinstall <componetnName> using <widgetClassName> <widgetPathName>
+ *      ?-option value -option value ...?
+ *
+ * ------------------------------------------------------------------------
+ */
+/* ARGSUSED */
+int
+Itcl_BiComponentInstallCmd(
+    ClientData clientData,   /* class definition */
+    Tcl_Interp *interp,      /* current interpreter */
+    int objc,                /* number of arguments */
+    Tcl_Obj *CONST objv[])   /* argument objects */
+{
+    Tcl_HashEntry *hPtr;
+    char *token;
+
+    ItclClass *contextIclsPtr;
+    ItclObject *contextIoPtr;
+
+    /*
+     *  Make sure that this command is being invoked in the proper
+     *  context.
+     */
+    ItclShowArgs(0, "Itcl_BiComponentInstallCmd", objc, objv);
+    contextIclsPtr = NULL;
+    if (Itcl_GetContext(interp, &contextIclsPtr, &contextIoPtr) != TCL_OK) {
+        return TCL_ERROR;
+    }
+
+    if (contextIoPtr == NULL) {
+        Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+            "improper usage: should be \"object isa className\"",
+            (char*)NULL);
+        return TCL_ERROR;
+    }
+    if (objc < 5) {
+        token = Tcl_GetString(objv[0]);
+        Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+            "wrong # args: should be \"", token, " <componentName> using",
+	    " <widgetClassName> <widgetPathName>",
+	    " ?-option value -option vale ...?\"",
+            (char*)NULL);
+        return TCL_ERROR;
+    }
+
+    /* get component name and check, if it exists */
+    token = Tcl_GetString(objv[1]);
+    if (contextIclsPtr == NULL) {
+        Tcl_AppendResult(interp, "cannot find context class for object \"",
+	        Tcl_GetCommandName(interp, contextIoPtr->accessCmd), "\"",
+		NULL);
+        return TCL_ERROR;
+    }
+    if (!contextIclsPtr->flags & (ITCL_WIDGET|ITCL_WIDGETADAPTOR)) {
+        Tcl_AppendResult(interp, "no such method \"componentinstall\"", NULL);
+	return TCL_ERROR;
+    }
+    hPtr = Tcl_FindHashEntry(&contextIclsPtr->components, (char *)objv[1]);
+    if (hPtr == NULL) {
+	Tcl_AppendResult(interp, "class \"",
+	        Tcl_GetString(contextIclsPtr->namePtr),
+	        "\" has no component \"",
+		Tcl_GetString(objv[1]), "\"", NULL);
+        return TCL_ERROR;
+    }
+    if (contextIclsPtr->infoPtr->windgetInfoPtr != NULL) {
+        if (contextIclsPtr->infoPtr->windgetInfoPtr->componentInst != NULL) {
+            if (contextIclsPtr->infoPtr->windgetInfoPtr->componentInst(
+	            interp, contextIoPtr, contextIclsPtr,
+		    objc, objv) != TCL_OK) {
+	        return TCL_ERROR;
+	    }
+	}
+    }
+    return TCL_OK;
+}
+

@@ -9,7 +9,7 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itclInt.h,v 1.17.2.38 2008/10/19 16:49:51 wiede Exp $
+ * RCS: @(#) $Id: itclInt.h,v 1.17.2.39 2008/10/25 19:31:49 wiede Exp $
  */
 
 #include <string.h>
@@ -108,11 +108,15 @@ typedef int (*InitObjectOptions)(Tcl_Interp *interp,
         struct ItclObject *ioPtr, struct ItclClass *iclsPtr, const char *name);
 typedef int (*DelegationInst)(Tcl_Interp *interp,
         struct ItclObject *ioPtr, struct ItclClass *iclsPtr);
+typedef int (*ComponentInst)(Tcl_Interp *interp,
+        struct ItclObject *ioPtr, struct ItclClass *iclsPtr,
+	int objc, Tcl_Obj *const *objv);
 
 typedef struct ItclWidgetInfo {
     InitObjectOptions initObjectOpts;
     HullAndOptionsInst hullAndOptsInst;
     DelegationInst delegationInst;
+    ComponentInst componentInst;
     Tcl_ObjCmdProc *widgetConfigure;
     Tcl_ObjCmdProc *widgetCget;
 } ItclWidgetInfo;
@@ -229,7 +233,7 @@ typedef struct ItclClass {
     int numVariables;             /* number of variables in this class */
     int unique;                   /* unique number for #auto generation */
     int flags;                    /* maintains class status */
-    int callRefCount;             /* prevent deleting of class if refcount > 1 */
+    int callRefCount;             /* prevent deleting of class if refcount>1 */
 } ItclClass;
 
 #define ITCL_CLASS		        0x0001000
@@ -266,6 +270,9 @@ typedef struct ItclObject {
 				  * variable, value is varPtr */
     Tcl_HashTable objectOptions; /* definitions for all option members
                                      in this object. Look up option namePtr
+                                     names and get back ItclOption* ptrs */
+    Tcl_HashTable objectComponents; /* definitions for all component members
+                                     in this object. Look up component namePtr
                                      names and get back ItclOption* ptrs */
     Tcl_HashTable objectMethodVariables;
                                  /* definitions for all methodvariable members
@@ -627,11 +634,6 @@ MODULE_SCOPE int Itcl_CreateOption (Tcl_Interp *interp, ItclClass *iclsPtr,
 MODULE_SCOPE int Itcl_CreateMethodVariable (Tcl_Interp *interp,
         ItclClass *iclsPtr, Tcl_Obj *name, Tcl_Obj *defaultPtr,
 	Tcl_Obj *callbackPtr, ItclMethodVariable **imvPtr);
-MODULE_SCOPE int ItclInitObjectOptions(Tcl_Interp *interp, ItclObject *ioPtr,
-        ItclClass *iclsPtr, const char *name);
-MODULE_SCOPE int HullAndOptionsInstall(Tcl_Interp *interp, ItclObject *ioPtr,
-        ItclClass *iclsPtr, int objc, Tcl_Obj * const objv[],
-	int *newObjc, Tcl_Obj **newObjv);
 MODULE_SCOPE int DelegationInstall(Tcl_Interp *interp, ItclObject *ioPtr,
         ItclClass *iclsPtr);
 MODULE_SCOPE const char* ItclGetInstanceVar(Tcl_Interp *interp,
@@ -661,8 +663,6 @@ MODULE_SCOPE int Itcl_ClassOptionCmd(ClientData clientData, Tcl_Interp *interp,
         int objc, Tcl_Obj *CONST objv[]);
 MODULE_SCOPE int DelegatedOptionsInstall(Tcl_Interp *interp,
         ItclClass *iclsPtr);
-MODULE_SCOPE int ItclInitObjectOptions(Tcl_Interp *interp, ItclObject *ioPtr,
-         ItclClass *iclsPtr, const char *name);
 MODULE_SCOPE int Itcl_HandleDelegateOptionCmd(Tcl_Interp *interp,
         ItclObject *ioPtr, ItclClass *iclsPtr, ItclDelegatedOption **idoPtrPtr,
         int objc, Tcl_Obj *CONST objv[]);

@@ -24,7 +24,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclInfo.c,v 1.1.2.18 2008/10/19 16:30:53 wiede Exp $
+ *     RCS:  $Id: itclInfo.c,v 1.1.2.19 2008/10/25 19:31:49 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -743,6 +743,11 @@ Itcl_BiInfoFunctionCmd(
 		    }
 		    if (strcmp(Tcl_GetString(imPtr->namePtr), "setget") == 0) {
 			if (!(imPtr->iclsPtr->flags & ITCL_ECLASS)) {
+		            useIt = 0;
+		        }
+		    }
+		    if (strcmp(Tcl_GetString(imPtr->namePtr), "componentinstall") == 0) {
+			if (!(imPtr->iclsPtr->flags & (ITCL_WIDGET|ITCL_WIDGETADAPTOR))) {
 		            useIt = 0;
 		        }
 		    }
