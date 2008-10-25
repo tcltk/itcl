@@ -11,14 +11,14 @@
  * ========================================================================
  *  Author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclWidgetCmd.c,v 1.1.2.1 2007/12/07 20:54:13 wiede Exp $
+ *     RCS:  $Id: itclWidgetCmd.c,v 1.1.2.2 2008/10/25 19:41:49 wiede Exp $
  * ========================================================================
  *           Copyright (c) 2007 Arnulf Wiedemann
  * ------------------------------------------------------------------------
  * See the file "license.terms" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  */
-#include "itclInt.h"
+#include "itclWidgetInt.h"
 
 
 /*
@@ -66,10 +66,8 @@ Itcl_WidgetCmd(
     int objc,                /* number of arguments */
     Tcl_Obj *CONST objv[])   /* argument objects */
 {
-    Tcl_Obj *namePtr;
     ItclClass *iclsPtr;
     ItclObjectInfo *infoPtr;
-    ItclVariable *ivPtr;
     int result;
 
     infoPtr = (ItclObjectInfo *)clientData;
@@ -82,22 +80,6 @@ Itcl_WidgetCmd(
     if (!(iclsPtr->flags &(ITCL_WIDGET_FRAME|ITCL_WIDGET_TOPLEVEL))) {
         iclsPtr->flags |= ITCL_WIDGET_FRAME;
     }
-    /* create the hull component */
-    ItclComponent *icPtr;
-    namePtr = Tcl_NewStringObj("hull", 4);
-    Tcl_IncrRefCount(namePtr);
-    if (ItclCreateComponent(interp, iclsPtr, namePtr, &icPtr) != TCL_OK) {
-        return TCL_ERROR;
-    }
-    /* create the options variable */
-    namePtr = Tcl_NewStringObj("itcl_options", 11);
-    Tcl_IncrRefCount(namePtr);
-    if (Itcl_CreateVariable(interp, iclsPtr, namePtr, NULL, NULL,
-            &ivPtr) != TCL_OK) {
-        return TCL_ERROR;
-    }
-    iclsPtr->numVariables++;
-    Itcl_BuildVirtualTables(iclsPtr);
     return result;
 }
 
@@ -130,15 +112,15 @@ Itcl_WidgetAdaptorCmd(
     ItclShowArgs(0, "Itcl_WidgetAdaptorCmd", objc-1, objv);
     result = ItclClassBaseCmd(clientData, interp, ITCL_WIDGETADAPTOR,
             objc, objv, &iclsPtr);
-    /* create the hull variable */
-    namePtr = Tcl_NewStringObj("hull", 4);
+    /* create the itcl_hull variable */
+    namePtr = Tcl_NewStringObj("itcl_hull", -1);
     Tcl_IncrRefCount(namePtr);
     if (ItclCreateComponent(interp, iclsPtr, namePtr, &icPtr) != TCL_OK) {
         return TCL_ERROR;
     }
     iclsPtr->numVariables++;
-    /* create the options variable */
-    namePtr = Tcl_NewStringObj("itcl_options", 11);
+    /* create the itcl_options variable */
+    namePtr = Tcl_NewStringObj("itcl_options", -1);
     Tcl_IncrRefCount(namePtr);
     if (Itcl_CreateVariable(interp, iclsPtr, namePtr, NULL, NULL,
             &ivPtr) != TCL_OK) {

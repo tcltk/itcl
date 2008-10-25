@@ -11,19 +11,20 @@
  * ========================================================================
  *  Author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclWidgetObject.c,v 1.1.2.1 2007/12/07 20:54:13 wiede Exp $
+ *     RCS:  $Id: itclWidgetObject.c,v 1.1.2.2 2008/10/25 19:41:49 wiede Exp $
  * ========================================================================
  *           Copyright (c) 2007 Arnulf Wiedemann
  * ------------------------------------------------------------------------
  * See the file "license.terms" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  */
-#include "itclInt.h"
+#include "itclWidgetInt.h"
+#include <tk.h>
 
 
 /*
  * ------------------------------------------------------------------------
- *  ItclInitObjectOptions()
+ *  ItclWidgetInitObjectOptions()
  *
  *  Init all instance options 
  *  This is usually invoked automatically
@@ -31,12 +32,47 @@
  * ------------------------------------------------------------------------
  */
 int
-ItclInitObjectOptions(
+ItclWidgetInitObjectOptions(
    Tcl_Interp *interp,
    ItclObject *ioPtr,
    ItclClass *iclsPtr,
    const char *name)
 {
+    Tcl_HashEntry *hPtr;
+    Tcl_HashSearch place;
+    Tk_Window tkMainWin;
+    Tk_Window tkWin;
+    ItclOption *ioptPtr;
+    const char *val;
+
+    /* initialize the options array */
+    tkMainWin = Tk_MainWindow(interp);
+    tkWin = Tk_NameToWindow(interp, Tcl_GetString(ioPtr->namePtr), tkMainWin);
+    if (tkWin == NULL) {
+        Tcl_AppendResult(interp, "window for widget \"",
+	        Tcl_GetString(ioPtr->namePtr), "\" not found", NULL);
+	return TCL_ERROR;
+    }
+    hPtr = Tcl_FirstHashEntry(&iclsPtr->options, &place);
+    while (hPtr) {
+	ioptPtr = (ItclOption*)Tcl_GetHashValue(hPtr);
+        val = Tk_GetOption(tkWin, Tcl_GetString(ioptPtr->resourceNamePtr),
+	        Tcl_GetString(ioptPtr->classNamePtr));
+	if (val != NULL) {
+            val = ItclSetInstanceVar(interp, "itcl_options",
+	            Tcl_GetString(ioptPtr->namePtr), val,
+                    ioPtr, ioPtr->iclsPtr);
+	} else {
+	    if (ioptPtr->defaultValuePtr != NULL) {
+                val = ItclSetInstanceVar(interp, "itcl_options",
+	                Tcl_GetString(ioptPtr->namePtr),
+		        Tcl_GetString(ioptPtr->defaultValuePtr),
+                        ioPtr, ioPtr->iclsPtr);
+	    }
+	}
+        hPtr = Tcl_NextHashEntry(&place);
+    }
+
     return TCL_OK;
 }
 
@@ -68,13 +104,16 @@ HullAndOptionsInstall(
     int i;
 
     ItclShowArgs(1, "HullAndOptionsInstall", objc, objv);
+#ifdef NOTDEF
+// options are initialized in Itcl_BiHullInstallCmd!!
     FOREACH_HASH_VALUE(ioptPtr, &iclsPtr->options) {
-	if (ioptPtr->init != NULL) {
+	if (ioptPtr->defaultValuePtr != NULL) {
 	    ItclSetInstanceVar(interp, "itcl_options",
 	            Tcl_GetString(ioptPtr->namePtr),
-		    Tcl_GetString(ioptPtr->init), ioPtr, iclsPtr);
+		    Tcl_GetString(ioptPtr->defaultValuePtr), ioPtr, iclsPtr);
 	}
     }
+#endif
     widgetClassPtr = iclsPtr->widgetClassPtr;
     foundWclass = 0;
     iclsPtr->infoPtr->buildingWidget = 1;
@@ -86,12 +125,15 @@ HullAndOptionsInstall(
 	    if (((i % 2) == 0) && (i + 1 <= objc)) {
 		widgetClassPtr = objv[i+1];
 		foundWclass = 1;
+#ifdef NOTDEF 
+// FIXME are these some options for the hullinstall command?
 	        newObjv = (Tcl_Obj **)ckalloc(sizeof(Tcl_Obj *)*(objc-1));
 		*newObjc = objc - 2;
 		memcpy(newObjv, objv, i * sizeof(Tcl_Obj *));
 		if (objc-i-2 > 0) {
 		    memcpy(newObjv+i, objv+i+2, (objc-i-2)*sizeof(Tcl_Obj *));
 		}
+#endif
 	    }
 	}
     }
@@ -112,7 +154,6 @@ HullAndOptionsInstall(
     Tcl_IncrRefCount(hullObjv[0]);
     hullObjv[1] = Tcl_NewStringObj("using", -1);
     Tcl_IncrRefCount(hullObjv[1]);
-    hullType = NULL;
     if (iclsPtr->flags & ITCL_WIDGET_FRAME) {
         hullType = "frame";
     }
@@ -137,7 +178,6 @@ HullAndOptionsInstall(
     Tcl_IncrRefCount(hullObjv[3]);
     hullObjv[4] = Tcl_NewStringObj(Tcl_GetString(widgetClassPtr), -1);
     Tcl_IncrRefCount(hullObjv[4]);
-
     result = Itcl_BiHullInstallCmd(iclsPtr, interp, hullObjc, hullObjv);
     Tcl_DecrRefCount(hullObjv[0]);
     Tcl_DecrRefCount(hullObjv[1]);
@@ -145,5 +185,27 @@ HullAndOptionsInstall(
     Tcl_DecrRefCount(hullObjv[3]);
     Tcl_DecrRefCount(hullObjv[4]);
     iclsPtr->infoPtr->buildingWidget = 0;
+    ItclShowArgs(1, "HullAndOptionsInstall END", objc, objv);
     return result;
+}
+
+/*
+ * ------------------------------------------------------------------------
+ *  ComponentInstall()
+ * ------------------------------------------------------------------------
+ */
+
+int
+ComponentInstall(
+    Tcl_Interp *interp,
+    ItclObject *ioPtr,
+    ItclClass *iclsPtr,
+    int objc,
+    Tcl_Obj * const objv[])
+{
+    FOREACH_HASH_DECLS;
+
+    ItclShowArgs(0, "ComponentInstall", objc, objv);
+
+    return TCL_OK;
 }

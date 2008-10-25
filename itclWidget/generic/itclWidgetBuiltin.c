@@ -12,14 +12,14 @@
  * ========================================================================
  *  Author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclWidgetBuiltin.c,v 1.1.2.1 2007/12/07 20:54:13 wiede Exp $
+ *     RCS:  $Id: itclWidgetBuiltin.c,v 1.1.2.2 2008/10/25 19:41:49 wiede Exp $
  * ========================================================================
  *           Copyright (c) 2007 Arnulf Wiedemann
  * ------------------------------------------------------------------------
  * See the file "license.terms" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  */
-#include "itclInt.h"
+#include "itclWidgetInt.h"
 #include <tk.h>
 
 /*
@@ -38,6 +38,8 @@ static BiMethod BiMethodList[] = {
 };
 static int BiMethodListLen = sizeof(BiMethodList)/sizeof(BiMethod);
 
+static char* ItclTraceHullVar(ClientData cdata, Tcl_Interp *interp,
+        const char *name1, const char *name2, int flags);
 
 /*
  * ------------------------------------------------------------------------
@@ -138,6 +140,36 @@ Itcl_InstallWidgetBiMethods(
     }
     return result;
 }
+/*
+ * ------------------------------------------------------------------------
+ *  ItclTraceHullVar()
+ *
+ *  Invoked to handle read/write traces on "hull" variables
+ *
+ *  On write, this procedure returns an error as "hull" may not be modfied
+ * ------------------------------------------------------------------------
+ */
+/* ARGSUSED */
+static char*
+ItclTraceHullVar(
+    ClientData clientData,  /* object instance data */
+    Tcl_Interp *interp,	    /* interpreter managing this variable */
+    const char *name1,    /* variable name */
+    const char *name2,    /* unused */
+    int flags)		    /* flags indicating read/write */
+{
+    ItclObject *ioPtr;
+
+    ioPtr = (ItclObject *)clientData;
+    /*
+     *  Handle write traces "itcl_options"
+     */
+    if ((flags & TCL_TRACE_WRITES) != 0) {
+        return "can't set \"itcl_hull\". The itcl_hull component cannot be redefined";
+    }
+    return NULL;
+}
+
 
 /*
  * ------------------------------------------------------------------------
@@ -233,6 +265,11 @@ Itcl_BiHullInstallCmd(
     tkMainWin = Tk_MainWindow(interp);
     tkWin = Tk_NameToWindow(interp, Tcl_GetString(contextIoPtr->namePtr),
             tkMainWin);
+    if (tkWin == NULL) {
+        Tcl_AppendResult(interp, "cannot find window \"",
+	        Tcl_GetString(contextIoPtr->namePtr), "\"", NULL);
+	return TCL_ERROR;
+    }
     hPtr = Tcl_FirstHashEntry(&iclsPtr->options, &place);
     while (hPtr) {
 	ioptPtr = (ItclOption*)Tcl_GetHashValue(hPtr);
@@ -242,18 +279,19 @@ Itcl_BiHullInstallCmd(
             val = ItclSetInstanceVar(interp, "itcl_options",
 	            Tcl_GetString(ioptPtr->namePtr), val,
                     contextIoPtr, contextIoPtr->iclsPtr);
-	}
-	if (ioptPtr->init != NULL) {
-            val = ItclSetInstanceVar(interp, "itcl_options",
-	            Tcl_GetString(ioptPtr->namePtr),
-		    Tcl_GetString(ioptPtr->init),
-                    contextIoPtr, contextIoPtr->iclsPtr);
+	} else {
+	    if (ioptPtr->defaultValuePtr != NULL) {
+                val = ItclSetInstanceVar(interp, "itcl_options",
+	                Tcl_GetString(ioptPtr->namePtr),
+		        Tcl_GetString(ioptPtr->defaultValuePtr),
+                        contextIoPtr, contextIoPtr->iclsPtr);
+	    }
 	}
         hPtr = Tcl_NextHashEntry(&place);
     }
 
-    /* initialize the hull variable */
-    Tcl_DStringAppend(&buffer, "::itclwidget::internal::hull", -1);
+    /* initialize the itcl_hull variable */
+    Tcl_DStringAppend(&buffer, "::itcl::widget::internal::hull", -1);
     int lgth = strlen(Tcl_DStringValue(&buffer));
     int i;
     i = 0;
@@ -269,28 +307,37 @@ Itcl_BiHullInstallCmd(
             break;
 	}
     }
-    Tcl_RenameCommand(interp, Tcl_GetString(contextIoPtr->namePtr),
+    Itcl_RenameCommand(interp, Tcl_GetString(contextIoPtr->namePtr),
             Tcl_DStringValue(&buffer));
 
-    namePtr = Tcl_NewStringObj("hull", -1);
+    namePtr = Tcl_NewStringObj("itcl_hull", -1);
     Tcl_IncrRefCount(namePtr);
     hPtr = Tcl_FindHashEntry(&contextIoPtr->iclsPtr->variables,
             (char *)namePtr);
     Tcl_DecrRefCount(namePtr);
     if (hPtr == NULL) {
-	Tcl_AppendResult(interp, "cannot find class variable hull", NULL);
+	Tcl_AppendResult(interp, "cannot find class variable itcl_hull", NULL);
         return TCL_ERROR;
     }
     ivPtr =Tcl_GetHashValue(hPtr);
     hPtr = Tcl_FindHashEntry(&contextIoPtr->objectVariables, (char *)ivPtr);
     varPtr = Tcl_GetHashValue(hPtr);
-    val = ItclSetInstanceVar(interp, "hull", NULL, Tcl_DStringValue(&buffer),
-            contextIoPtr, contextIoPtr->iclsPtr);
-    Tcl_DStringFree(&buffer);
+    val = ItclSetInstanceVar(interp, "itcl_hull", NULL,
+            Tcl_DStringValue(&buffer), contextIoPtr, contextIoPtr->iclsPtr);
     if (val == NULL) {
-        Tcl_AppendResult(interp, "cannot set hull for object \"",
+        Tcl_AppendResult(interp, "cannot set itcl_hull for object \"",
             Tcl_GetString(contextIoPtr->namePtr), "\"", NULL);
+        Tcl_DStringFree(&buffer);
         return TCL_ERROR;
     }
+    /* no set the write trace on the itcl_hull variable */
+    Tcl_DStringInit(&buffer);
+    Tcl_DStringAppend(&buffer, Tcl_GetString(contextIoPtr->varNsNamePtr), -1);
+    Tcl_DStringAppend(&buffer, Tcl_GetString(contextIclsPtr->fullNamePtr), -1);
+    Tcl_DStringAppend(&buffer, "::", -1);
+    Tcl_DStringAppend(&buffer, Tcl_GetString(ivPtr->namePtr), -1);
+    Tcl_TraceVar2(interp, Tcl_DStringValue(&buffer), NULL,
+             TCL_TRACE_WRITES, ItclTraceHullVar, contextIoPtr);
+    Tcl_DStringFree(&buffer);
     return result;
 }

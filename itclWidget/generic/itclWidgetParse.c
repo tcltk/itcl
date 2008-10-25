@@ -41,7 +41,7 @@
  *
  *  Author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclWidgetParse.c,v 1.1.2.1 2007/12/07 20:54:13 wiede Exp $
+ *     RCS:  $Id: itclWidgetParse.c,v 1.1.2.2 2008/10/25 19:41:49 wiede Exp $
  * ========================================================================
  *           Copyright (c) 2007  Arnulf Wiedemann
  * ------------------------------------------------------------------------
@@ -50,7 +50,7 @@
  * ------------------------------------------------------------------------
  */
 
-#include "itclInt.h"
+#include "itclWidgetInt.h"
 
 Tcl_ObjCmdProc Itcl_ClassComponentInstallCmd;
 Tcl_ObjCmdProc Itcl_ClassWidgetClassCmd;

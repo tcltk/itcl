@@ -12,11 +12,11 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itclWidgetBase.c,v 1.1.2.1 2007/12/07 20:54:13 wiede Exp $
+ * RCS: @(#) $Id: itclWidgetBase.c,v 1.1.2.2 2008/10/25 19:41:49 wiede Exp $
  */
 
 #include <stdlib.h>
-#include "itclInt.h"
+#include "itclWidgetInt.h"
 #include <tk.h>
 
 extern struct ItclStubAPI itclStubAPI;
@@ -52,25 +52,28 @@ Initialize (
 
     infoPtr = (ItclObjectInfo *)Tcl_GetAssocData(interp,
             ITCL_INTERP_DATA, NULL);
-    nsPtr = Tcl_CreateNamespace(interp, "::itclwidget", NULL, NULL);
+    nsPtr = Tcl_CreateNamespace(interp, "::itcl::widget", NULL, NULL);
     if (nsPtr == NULL) {
-        Tcl_Panic("Itcl: cannot create namespace: \"%s\" \n", "::itclwidget");
+        Tcl_Panic("Itcl: cannot create namespace: \"%s\" \n", "::itcl::widget");
     }
-    nsPtr = Tcl_CreateNamespace(interp, "::itclwidget::internal", NULL, NULL);
+    nsPtr = Tcl_CreateNamespace(interp, "::itcl::widget::internal", NULL, NULL);
     if (nsPtr == NULL) {
-        Tcl_Panic("Itcl: cannot create namespace: \"%s\" \n", "::itclwidget::internal");
+        Tcl_Panic("Itcl: cannot create namespace: \"%s\" \n", "::itcl::widget::internal");
     }
 
-    Tcl_RenameCommand(interp, "::itcl::type", "::itcl::__type");
-    Tcl_RenameCommand(interp, "::itcl::widget", "::itcl::__widget");
-    Tcl_RenameCommand(interp, "::itcl::widgetadaptor",
+    Itcl_RenameCommand(interp, "::itcl::type", "::itcl::__type");
+    Itcl_RenameCommand(interp, "::itcl::widget", "::itcl::__widget");
+    Itcl_RenameCommand(interp, "::itcl::widgetadaptor",
             "::itcl::__widgetadaptor");
     infoPtr->windgetInfoPtr = (ItclWidgetInfo *)ckalloc(sizeof(ItclWidgetInfo));
-    infoPtr->windgetInfoPtr->initObjectOpts = ItclInitObjectOptions;
+    infoPtr->windgetInfoPtr->initObjectOpts = ItclWidgetInitObjectOptions;
     infoPtr->windgetInfoPtr->hullAndOptsInst = HullAndOptionsInstall;
     infoPtr->windgetInfoPtr->delegationInst = DelegationInstall;
-    infoPtr->windgetInfoPtr->widgetConfigure = ItclExtendedConfigure;
-    infoPtr->windgetInfoPtr->widgetCget = ItclExtendedCget;
+    infoPtr->windgetInfoPtr->componentInst = ComponentInstall;
+#ifdef NOTDEF
+    infoPtr->windgetInfoPtr->widgetConfigure = ItclWidgetConfigure;
+    infoPtr->windgetInfoPtr->widgetCget = ItclWidgetCget;
+#endif
     Itcl_WidgetParseInit(interp, infoPtr);
 
     /*
@@ -89,8 +92,8 @@ Initialize (
      *  Set up the variables containing version info.
      */
 
-    Tcl_SetVar(interp, "::itclwidget::version", ITCL_VERSION, TCL_NAMESPACE_ONLY);
-    Tcl_SetVar(interp, "::itclwidget::patchLevel", ITCL_PATCH_LEVEL,
+    Tcl_SetVar(interp, "::itcl::widget::version", ITCL_VERSION, TCL_NAMESPACE_ONLY);
+    Tcl_SetVar(interp, "::itcl::widget::patchLevel", ITCL_PATCH_LEVEL,
             TCL_NAMESPACE_ONLY);
 
 

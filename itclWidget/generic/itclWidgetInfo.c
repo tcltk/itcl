@@ -8,14 +8,14 @@
  * ========================================================================
  *  Author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclWidgetInfo.c,v 1.1.2.1 2007/12/07 20:54:13 wiede Exp $
+ *     RCS:  $Id: itclWidgetInfo.c,v 1.1.2.2 2008/10/25 19:41:49 wiede Exp $
  * ========================================================================
  *           Copyright (c) 2007 Arnulf Wiedemann
  * ------------------------------------------------------------------------
  * See the file "license.terms" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  */
-#include "itclInt.h"
+#include "itclWidgetInt.h"
 
 Tcl_ObjCmdProc ItclBiInfoComponentsCmd;
 Tcl_ObjCmdProc ItclBiInfoComponentCmd;
