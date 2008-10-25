@@ -1,2 +1,3 @@
-if {[catch {package present Tcl }]} return
-package ifneeded itclWidget 4.0  [list load [file join $dir libItclWidget4.0.so] itclWidget] 
+# Tcl package index file, version 1.0
+
+package ifneeded ItclWidget @PACKAGE_VERSION@ [list load [file join $dir "@PKG_LIB_FILE@"] ItclWidget]
