@@ -9,7 +9,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: tcl.m4,v 1.1.2.1 2007/12/07 20:54:13 wiede Exp $
+# RCS: @(#) $Id: tcl.m4,v 1.1.2.2 2008/10/25 19:45:04 wiede Exp $
 
 AC_PREREQ(2.57)
 
@@ -313,298 +313,6 @@ AC_DEFUN([TEA_PATH_TKCONFIG], [
 ])
 
 #------------------------------------------------------------------------
-# TEA_PATH_TCLOOCONFIG --
-#
-#	Locate the tclooConfig.sh file and perform a sanity check on
-#	the Itcl compile flags
-#
-# Arguments:
-#	none
-#
-# Results:
-#
-#	Adds the following arguments to configure:
-#		--with-tcloo=...
-#
-#	Defines the following vars:
-#		TCLOO_BIN_DIR	Full path to the directory containing
-#				the tclooConfig.sh file
-#------------------------------------------------------------------------
-
-AC_DEFUN([TEA_PATH_TCLOOCONFIG], [
-    dnl Make sure we are initialized
-    AC_REQUIRE([TEA_INIT])
-    #
-    # Ok, lets find the tcl configuration
-    # First, look for one uninstalled.
-    # the alternative search directory is invoked by --with-tcloo
-    #
-
-    if test x"${no_tcloo}" = x ; then
-	# we reset no_tcl in case something fails here
-	no_itcl=true
-	AC_ARG_WITH(tcloo,
-	    AC_HELP_STRING([--with-tcloo],
-		[directory containing tcloo configuration (tclooConfig.sh)]),
-	    with_tclooconfig=${withval})
-	AC_MSG_CHECKING([for TclOO configuration])
-	AC_CACHE_VAL(ac_cv_c_tclooconfig,[
-
-	    # First check to see if --with-tcloo was specified.
-	    if test x"${with_tclooconfig}" != x ; then
-		case ${with_tclooconfig} in
-		    */tclooConfig.sh )
-			if test -f ${with_tclooconfig}; then
-			    AC_MSG_WARN([--with-tcloo argument should refer to directory containing tclooConfig.sh, not to tclooConfig.sh itself])
-			    with_tclooconfig=`echo ${with_tclooconfig} | sed 's!/tclooConfig\.sh$!!'`
-			fi ;;
-		esac
-		if test -f "${with_tclooconfig}/tclooConfig.sh" ; then
-		    ac_cv_c_tclooconfig=`(cd ${with_tclooconfig}; pwd)`
-		else
-		    AC_MSG_ERROR([${with_tclooconfig} directory doesn't contain tclooConfig.sh])
-		fi
-	    fi
-
-	    # then check for a private TclOO installation
-	    if test x"${ac_cv_c_tclooconfig}" = x ; then
-		for i in \
-			../tcloo \
-			`ls -dr ../tcloo[[8-9]].[[0-9]].[[0-9]]* 2>/dev/null` \
-			`ls -dr ../tcloo[[8-9]].[[0-9]] 2>/dev/null` \
-			`ls -dr ../tcloo[[8-9]].[[0-9]]* 2>/dev/null` \
-			../../tcloo \
-			`ls -dr ../../tcloo[[8-9]].[[0-9]].[[0-9]]* 2>/dev/null` \
-			`ls -dr ../../tcloo[[8-9]].[[0-9]] 2>/dev/null` \
-			`ls -dr ../../tcloo[[8-9]].[[0-9]]* 2>/dev/null` \
-			../../../tcloo \
-			`ls -dr ../../../tcloo[[8-9]].[[0-9]].[[0-9]]* 2>/dev/null` \
-			`ls -dr ../../../tcl[oo[8-9]].[[0-9]] 2>/dev/null` \
-			`ls -dr ../../../tcloo[[8-9]].[[0-9]]* 2>/dev/null` ; do
-		    if test -f "$i/unix/tclooConfig.sh" ; then
-			ac_cv_c_tclooconfig=`(cd $i/unix; pwd)`
-			break
-		    fi
-		done
-	    fi
-
-	    # on Darwin, check in Framework installation locations
-	    if test "`uname -s`" = "Darwin" -a x"${ac_cv_c_tclooconfig}" = x ; then
-		for i in `ls -d ~/Library/Frameworks 2>/dev/null` \
-			`ls -d /Library/Frameworks 2>/dev/null` \
-			`ls -d /Network/Library/Frameworks 2>/dev/null` \
-			`ls -d /System/Library/Frameworks 2>/dev/null` \
-			; do
-		    if test -f "$i/TclOO.framework/tclooConfig.sh" ; then
-			ac_cv_c_tclooconfig=`(cd $i/TclOO.framework; pwd)`
-			break
-		    fi
-		done
-	    fi
-
-	    # on Windows, check in common installation locations
-	    if test "${TEA_PLATFORM}" = "windows" \
-		-a x"${ac_cv_c_tclooconfig}" = x ; then
-		for i in `ls -d C:/TclOO/lib 2>/dev/null` \
-			`ls -d C:/Progra~1/TclOO/lib 2>/dev/null` \
-			; do
-		    if test -f "$i/tclooConfig.sh" ; then
-			ac_cv_c_tclooconfig=`(cd $i; pwd)`
-			break
-		    fi
-		done
-	    fi
-
-	    # check in a few common install locations
-	    if test x"${ac_cv_c_tclooconfig}" = x ; then
-		for i in `ls -d ${libdir} 2>/dev/null` \
-			`ls -d ${exec_prefix}/lib 2>/dev/null` \
-			`ls -d ${prefix}/lib 2>/dev/null` \
-			`ls -d /usr/local/lib 2>/dev/null` \
-			`ls -d /usr/contrib/lib 2>/dev/null` \
-			`ls -d /usr/lib 2>/dev/null` \
-			; do
-		    if test -f "$i/tclooConfig.sh" ; then
-			ac_cv_c_tclooconfig=`(cd $i; pwd)`
-			break
-		    fi
-		done
-	    fi
-
-	    # check in a few other private locations
-	    if test x"${ac_cv_c_tclooconfig}" = x ; then
-		for i in \
-			${srcdir}/../tcloo \
-			`ls -dr ${srcdir}/../tcloo[[8-9]].[[0-9]].[[0-9]]* 2>/dev/null` \
-			`ls -dr ${srcdir}/../tcloo[[8-9]].[[0-9]] 2>/dev/null` \
-			`ls -dr ${srcdir}/../tcloo[[8-9]].[[0-9]]* 2>/dev/null` ; do
-		    if test -f "$i/unix/tclooConfig.sh" ; then
-		    ac_cv_c_tclooconfig=`(cd $i/unix; pwd)`
-		    break
-		fi
-		done
-	    fi
-	])
-
-	if test x"${ac_cv_c_tclooconfig}" = x ; then
-	    TCLOO_BIN_DIR="# no Tcl configs found"
-	    AC_MSG_WARN([Can't find TclOO configuration definitions])
-	    exit 0
-	else
-	    no_itcl=
-	    TCLOO_BIN_DIR=${ac_cv_c_tclooconfig}
-	    AC_MSG_RESULT([found ${TCLOO_BIN_DIR}/tclooConfig.sh])
-	fi
-    fi
-])
-
-#------------------------------------------------------------------------
-# TEA_PATH_ITCLCONFIG --
-#
-#	Locate the itclConfig.sh file and perform a sanity check on
-#	the Itcl compile flags
-#
-# Arguments:
-#	none
-#
-# Results:
-#
-#	Adds the following arguments to configure:
-#		--with-itcl=...
-#
-#	Defines the following vars:
-#		ITCL_BIN_DIR	Full path to the directory containing
-#				the itclConfig.sh file
-#------------------------------------------------------------------------
-
-AC_DEFUN([TEA_PATH_ITCLCONFIG], [
-    dnl Make sure we are initialized
-    AC_REQUIRE([TEA_INIT])
-    #
-    # Ok, lets find the tcl configuration
-    # First, look for one uninstalled.
-    # the alternative search directory is invoked by --with-itcl
-    #
-
-    if test x"${no_itcl}" = x ; then
-	# we reset no_tcl in case something fails here
-	no_itcl=true
-	AC_ARG_WITH(itcl,
-	    AC_HELP_STRING([--with-itcl],
-		[directory containing tcl configuration (itclConfig.sh)]),
-	    with_itclconfig=${withval})
-	AC_MSG_CHECKING([for Itcl configuration])
-	AC_CACHE_VAL(ac_cv_c_itclconfig,[
-
-	    # First check to see if --with-itcl was specified.
-	    if test x"${with_itclconfig}" != x ; then
-		case ${with_itclconfig} in
-		    */itclConfig.sh )
-			if test -f ${with_itclconfig}; then
-			    AC_MSG_WARN([--with-itcl argument should refer to directory containing itclConfig.sh, not to itclConfig.sh itself])
-			    with_itclconfig=`echo ${with_itclconfig} | sed 's!/itclConfig\.sh$!!'`
-			fi ;;
-		esac
-		if test -f "${with_itclconfig}/itclConfig.sh" ; then
-		    ac_cv_c_itclconfig=`(cd ${with_itclconfig}; pwd)`
-		else
-		    AC_MSG_ERROR([${with_itclconfig} directory doesn't contain itclConfig.sh])
-		fi
-	    fi
-
-	    # then check for a private Itcl installation
-	    if test x"${ac_cv_c_itclconfig}" = x ; then
-		for i in \
-			../itcl \
-			`ls -dr ../itcl[[8-9]].[[0-9]].[[0-9]]* 2>/dev/null` \
-			`ls -dr ../itcl[[8-9]].[[0-9]] 2>/dev/null` \
-			`ls -dr ../itcl[[8-9]].[[0-9]]* 2>/dev/null` \
-			../../itcl \
-			`ls -dr ../../itcl[[8-9]].[[0-9]].[[0-9]]* 2>/dev/null` \
-			`ls -dr ../../itcl[[8-9]].[[0-9]] 2>/dev/null` \
-			`ls -dr ../../itcl[[8-9]].[[0-9]]* 2>/dev/null` \
-			../../../itcl \
-			`ls -dr ../../../itcl[[8-9]].[[0-9]].[[0-9]]* 2>/dev/null` \
-			`ls -dr ../../../itcl[[8-9]].[[0-9]] 2>/dev/null` \
-			`ls -dr ../../../itcl[[8-9]].[[0-9]]* 2>/dev/null` ; do
-		    if test -f "$i/unix/itclConfig.sh" ; then
-			ac_cv_c_itclconfig=`(cd $i/unix; pwd)`
-			break
-		    fi
-		done
-	    fi
-
-	    # on Darwin, check in Framework installation locations
-	    if test "`uname -s`" = "Darwin" -a x"${ac_cv_c_itclconfig}" = x ; then
-		for i in `ls -d ~/Library/Frameworks 2>/dev/null` \
-			`ls -d /Library/Frameworks 2>/dev/null` \
-			`ls -d /Network/Library/Frameworks 2>/dev/null` \
-			`ls -d /System/Library/Frameworks 2>/dev/null` \
-			; do
-		    if test -f "$i/Itcl.framework/itclConfig.sh" ; then
-			ac_cv_c_itclconfig=`(cd $i/Itcl.framework; pwd)`
-			break
-		    fi
-		done
-	    fi
-
-	    # on Windows, check in common installation locations
-	    if test "${TEA_PLATFORM}" = "windows" \
-		-a x"${ac_cv_c_itclconfig}" = x ; then
-		for i in `ls -d C:/Itcl/lib 2>/dev/null` \
-			`ls -d C:/Progra~1/Itcl/lib 2>/dev/null` \
-			; do
-		    if test -f "$i/itclConfig.sh" ; then
-			ac_cv_c_itclconfig=`(cd $i; pwd)`
-			break
-		    fi
-		done
-	    fi
-
-	    # check in a few common install locations
-	    if test x"${ac_cv_c_itclconfig}" = x ; then
-		for i in `ls -d ${libdir} 2>/dev/null` \
-			`ls -d ${exec_prefix}/lib 2>/dev/null` \
-			`ls -d ${prefix}/lib 2>/dev/null` \
-			`ls -d /usr/local/lib 2>/dev/null` \
-			`ls -d /usr/contrib/lib 2>/dev/null` \
-			`ls -d /usr/lib 2>/dev/null` \
-			; do
-		    if test -f "$i/itclConfig.sh" ; then
-			ac_cv_c_itclconfig=`(cd $i; pwd)`
-			break
-		    fi
-		done
-	    fi
-
-	    # check in a few other private locations
-	    if test x"${ac_cv_c_itclconfig}" = x ; then
-		for i in \
-			${srcdir}/../itcl \
-			`ls -dr ${srcdir}/../itcl[[8-9]].[[0-9]].[[0-9]]* 2>/dev/null` \
-			`ls -dr ${srcdir}/../itcl[[8-9]].[[0-9]] 2>/dev/null` \
-			`ls -dr ${srcdir}/../itcl[[8-9]].[[0-9]]* 2>/dev/null` ; do
-		    if test -f "$i/unix/itclConfig.sh" ; then
-		    ac_cv_c_itclconfig=`(cd $i/unix; pwd)`
-		    break
-		fi
-		done
-	    fi
-	])
-
-	if test x"${ac_cv_c_itclconfig}" = x ; then
-	    ITCL_BIN_DIR="# no Tcl configs found"
-	    AC_MSG_WARN([Can't find Itcl configuration definitions])
-	    exit 0
-	else
-	    no_itcl=
-	    ITCL_BIN_DIR=${ac_cv_c_itclconfig}
-	    AC_MSG_RESULT([found ${ITCL_BIN_DIR}/itclConfig.sh])
-	fi
-    fi
-])
-
-#------------------------------------------------------------------------
 # TEA_LOAD_TCLCONFIG --
 #
 #	Load the tclConfig.sh file
@@ -628,7 +336,7 @@ AC_DEFUN([TEA_LOAD_TCLCONFIG], [
 
     if test -f "${TCL_BIN_DIR}/tclConfig.sh" ; then
         AC_MSG_RESULT([loading])
-	. "${TCL_BIN_DIR}/tclConfig.sh"
+	. ${TCL_BIN_DIR}/tclConfig.sh
     else
         AC_MSG_RESULT([could not find ${TCL_BIN_DIR}/tclConfig.sh])
     fi
@@ -643,7 +351,7 @@ AC_DEFUN([TEA_LOAD_TCLCONFIG], [
     # of TCL_BUILD_LIB_SPEC. An extension should make use of TCL_LIB_SPEC
     # instead of TCL_BUILD_LIB_SPEC since it will work with both an
     # installed and uninstalled version of Tcl.
-    if test -f "${TCL_BIN_DIR}/Makefile" ; then
+    if test -f ${TCL_BIN_DIR}/Makefile ; then
         TCL_LIB_SPEC=${TCL_BUILD_LIB_SPEC}
         TCL_STUB_LIB_SPEC=${TCL_BUILD_STUB_LIB_SPEC}
         TCL_STUB_LIB_PATH=${TCL_BUILD_STUB_LIB_PATH}
@@ -653,7 +361,7 @@ AC_DEFUN([TEA_LOAD_TCLCONFIG], [
 	# against Tcl.framework installed in an arbitary location.
 	case ${TCL_DEFS} in
 	    *TCL_FRAMEWORK*)
-		if test -f "${TCL_BIN_DIR}/${TCL_LIB_FILE}"; then
+		if test -f ${TCL_BIN_DIR}/${TCL_LIB_FILE}; then
 		    for i in "`cd ${TCL_BIN_DIR}; pwd`" \
 			     "`cd ${TCL_BIN_DIR}/../..; pwd`"; do
 			if test "`basename "$i"`" = "${TCL_LIB_FILE}.framework"; then
@@ -662,7 +370,7 @@ AC_DEFUN([TEA_LOAD_TCLCONFIG], [
 			fi
 		    done
 		fi
-		if test -f "${TCL_BIN_DIR}/${TCL_STUB_LIB_FILE}"; then
+		if test -f ${TCL_BIN_DIR}/${TCL_STUB_LIB_FILE}; then
 		    TCL_STUB_LIB_SPEC="-L${TCL_BIN_DIR} ${TCL_STUB_LIB_FLAG}"
 		    TCL_STUB_LIB_PATH="${TCL_BIN_DIR}/${TCL_STUB_LIB_FILE}"
 		fi
@@ -716,7 +424,7 @@ AC_DEFUN([TEA_LOAD_TKCONFIG], [
 
     if test -f "${TK_BIN_DIR}/tkConfig.sh" ; then
         AC_MSG_RESULT([loading])
-	. "${TK_BIN_DIR}/tkConfig.sh"
+	. ${TK_BIN_DIR}/tkConfig.sh
     else
         AC_MSG_RESULT([could not find ${TK_BIN_DIR}/tkConfig.sh])
     fi
@@ -731,7 +439,7 @@ AC_DEFUN([TEA_LOAD_TKCONFIG], [
     # of TK_BUILD_LIB_SPEC. An extension should make use of TK_LIB_SPEC
     # instead of TK_BUILD_LIB_SPEC since it will work with both an
     # installed and uninstalled version of Tcl.
-    if test -f "${TK_BIN_DIR}/Makefile" ; then
+    if test -f ${TK_BIN_DIR}/Makefile ; then
         TK_LIB_SPEC=${TK_BUILD_LIB_SPEC}
         TK_STUB_LIB_SPEC=${TK_BUILD_STUB_LIB_SPEC}
         TK_STUB_LIB_PATH=${TK_BUILD_STUB_LIB_PATH}
@@ -741,7 +449,7 @@ AC_DEFUN([TEA_LOAD_TKCONFIG], [
 	# against Tk.framework installed in an arbitary location.
 	case ${TK_DEFS} in
 	    *TK_FRAMEWORK*)
-		if test -f "${TK_BIN_DIR}/${TK_LIB_FILE}"; then
+		if test -f ${TK_BIN_DIR}/${TK_LIB_FILE}; then
 		    for i in "`cd ${TK_BIN_DIR}; pwd`" \
 			     "`cd ${TK_BIN_DIR}/../..; pwd`"; do
 			if test "`basename "$i"`" = "${TK_LIB_FILE}.framework"; then
@@ -750,7 +458,7 @@ AC_DEFUN([TEA_LOAD_TKCONFIG], [
 			fi
 		    done
 		fi
-		if test -f "${TK_BIN_DIR}/${TK_STUB_LIB_FILE}"; then
+		if test -f ${TK_BIN_DIR}/${TK_STUB_LIB_FILE}; then
 		    TK_STUB_LIB_SPEC="-L${TK_BIN_DIR} ${TK_STUB_LIB_FLAG}"
 		    TK_STUB_LIB_PATH="${TK_BIN_DIR}/${TK_STUB_LIB_FILE}"
 		fi
@@ -793,188 +501,6 @@ AC_DEFUN([TEA_LOAD_TKCONFIG], [
 
     AC_SUBST(TK_LIBS)
     AC_SUBST(TK_XINCLUDES)
-])
-
-#------------------------------------------------------------------------
-# TEA_LOAD_TCLOOCONFIG --
-#
-#	Load the tclooConfig.sh file
-#
-# Arguments:
-#	
-#	Requires the following vars to be set:
-#		TCLOO_BIN_DIR
-#
-# Results:
-#
-#	Subst the following vars:
-#		TCLOO_BIN_DIR
-#		TCLOO_SRC_DIR
-#		TCLOO_LIB_FILE
-#
-#------------------------------------------------------------------------
-
-AC_DEFUN([TEA_LOAD_TCLOOCONFIG], [
-    AC_MSG_CHECKING([for existence of ${TCLOO_BIN_DIR}/tclooConfig.sh])
-
-    if test -f "${TCLOO_BIN_DIR}/tclooConfig.sh" ; then
-        AC_MSG_RESULT([loading])
-	. "${TCLOO_BIN_DIR}/tclooConfig.sh"
-    else
-        AC_MSG_RESULT([could not find ${TCLOO_BIN_DIR}/tclooConfig.sh])
-    fi
-
-    # eval is required to do the TCL_DBGX substitution
-    eval "TCLOO_LIB_FILE=\"${TCLOO_LIB_FILE}\""
-    eval "TCLOO_STUB_LIB_FILE=\"${TCLOO_STUB_LIB_FILE}\""
-
-    # If the TCLOO_BIN_DIR is the build directory (not the install directory),
-    # then set the common variable name to the value of the build variables.
-    # For example, the variable TCLOO_LIB_SPEC will be set to the value
-    # of TCLOO_BUILD_LIB_SPEC. An extension should make use of TCLOO_LIB_SPEC
-    # instead of TCLOO_BUILD_LIB_SPEC since it will work with both an
-    # installed and uninstalled version of Tcl.
-    if test -f "${TCLOO_BIN_DIR}/Makefile" ; then
-        TCLOO_LIB_SPEC=${TCLOO_BUILD_LIB_SPEC}
-        TCLOO_STUB_LIB_SPEC=${TCLOO_BUILD_STUB_LIB_SPEC}
-        TCLOO_STUB_LIB_PATH=${TCLOO_BUILD_STUB_LIB_PATH}
-    elif test "`uname -s`" = "Darwin"; then
-	# If Tcl was built as a framework, attempt to use the libraries
-	# from the framework at the given location so that linking works
-	# against Tcl.framework installed in an arbitary location.
-	case ${TCLOO_DEFS} in
-	    *TCLOO_FRAMEWORK*)
-		if test -f "${TCLOO_BIN_DIR}/${TCLOO_LIB_FILE}"; then
-		    for i in "`cd ${TCLOO_BIN_DIR}; pwd`" \
-			     "`cd ${TCLOO_BIN_DIR}/../..; pwd`"; do
-			if test "`basename "$i"`" = "${TCLOO_LIB_FILE}.framework"; then
-			    TCLOO_LIB_SPEC="-F`dirname "$i"` -framework ${TCLOO_LIB_FILE}"
-			    break
-			fi
-		    done
-		fi
-		if test -f "${TCLOO_BIN_DIR}/${TCLOO_STUB_LIB_FILE}"; then
-		    TCLOO_STUB_LIB_SPEC="-L${TCLOO_BIN_DIR} ${TCLOO_STUB_LIB_FLAG}"
-		    TCLOO_STUB_LIB_PATH="${TCLOO_BIN_DIR}/${TCLOO_STUB_LIB_FILE}"
-		fi
-		;;
-	esac
-    fi
-
-    # eval is required to do the TCL_DBGX substitution
-    eval "TCLOO_LIB_FLAG=\"${TCLOO_LIB_FLAG}\""
-    eval "TCLOO_LIB_SPEC=\"${TCLOO_LIB_SPEC}\""
-    eval "TCLOO_STUB_LIB_FLAG=\"${TCLOO_STUB_LIB_FLAG}\""
-    eval "TCLOO_STUB_LIB_SPEC=\"${TCLOO_STUB_LIB_SPEC}\""
-
-    AC_SUBST(TCLOO_VERSION)
-    AC_SUBST(TCLOO_BIN_DIR)
-    AC_SUBST(TCLOO_SRC_DIR)
-
-    AC_SUBST(TCLOO_LIB_FILE)
-    AC_SUBST(TCLOO_LIB_FLAG)
-    AC_SUBST(TCLOO_LIB_SPEC)
-
-    AC_SUBST(TCLOO_STUB_LIB_FILE)
-    AC_SUBST(TCLOO_STUB_LIB_FLAG)
-    AC_SUBST(TCLOO_STUB_LIB_SPEC)
-
-    AC_SUBST(TCLOO_LIBS)
-    AC_SUBST(TCLOO_DEFS)
-    AC_SUBST(TCLOO_EXTRA_CFLAGS)
-    AC_SUBST(TCLOO_LD_FLAGS)
-    AC_SUBST(TCLOO_SHLIB_LD_LIBS)
-])
-
-#------------------------------------------------------------------------
-# TEA_LOAD_ITCLCONFIG --
-#
-#	Load the itclConfig.sh file
-#
-# Arguments:
-#	
-#	Requires the following vars to be set:
-#		ITCL_BIN_DIR
-#
-# Results:
-#
-#	Subst the following vars:
-#		ITCL_BIN_DIR
-#		ITCL_SRC_DIR
-#		ITCL_LIB_FILE
-#
-#------------------------------------------------------------------------
-
-AC_DEFUN([TEA_LOAD_ITCLCONFIG], [
-    AC_MSG_CHECKING([for existence of ${ITCL_BIN_DIR}/itclConfig.sh])
-
-    if test -f "${ITCL_BIN_DIR}/itclConfig.sh" ; then
-        AC_MSG_RESULT([loading ${ITCL_BIN_DIR}/itclConfig.sh])
-	. "${ITCL_BIN_DIR}/itclConfig.sh"
-    else
-        AC_MSG_RESULT([could not find ${ITCL_BIN_DIR}/itclConfig.sh])
-    fi
-
-    # eval is required to do the TCL_DBGX substitution
-    eval "ITCL_LIB_FILE=\"${ITCL_LIB_FILE}\""
-    eval "ITCL_STUB_LIB_FILE=\"${ITCL_STUB_LIB_FILE}\""
-
-    # If the ITCL_BIN_DIR is the build directory (not the install directory),
-    # then set the common variable name to the value of the build variables.
-    # For example, the variable ITCL_LIB_SPEC will be set to the value
-    # of ITCL_BUILD_LIB_SPEC. An extension should make use of ITCL_LIB_SPEC
-    # instead of ITCL_BUILD_LIB_SPEC since it will work with both an
-    # installed and uninstalled version of Tcl.
-    if test -f "${ITCL_BIN_DIR}/Makefile" ; then
-        ITCL_LIB_SPEC=${ITCL_BUILD_LIB_SPEC}
-        ITCL_STUB_LIB_SPEC=${ITCL_BUILD_STUB_LIB_SPEC}
-        ITCL_STUB_LIB_PATH=${ITCL_BUILD_STUB_LIB_PATH}
-    elif test "`uname -s`" = "Darwin"; then
-	# If Tcl was built as a framework, attempt to use the libraries
-	# from the framework at the given location so that linking works
-	# against Tcl.framework installed in an arbitary location.
-	case ${ITCL_DEFS} in
-	    *ITCL_FRAMEWORK*)
-		if test -f "${ITCL_BIN_DIR}/${ITCL_LIB_FILE}"; then
-		    for i in "`cd ${ITCL_BIN_DIR}; pwd`" \
-			     "`cd ${ITCL_BIN_DIR}/../..; pwd`"; do
-			if test "`basename "$i"`" = "${ITCL_LIB_FILE}.framework"; then
-			    ITCL_LIB_SPEC="-F`dirname "$i"` -framework ${ITCL_LIB_FILE}"
-			    break
-			fi
-		    done
-		fi
-		if test -f "${ITCL_BIN_DIR}/${ITCL_STUB_LIB_FILE}"; then
-		    ITCL_STUB_LIB_SPEC="-L${ITCL_BIN_DIR} ${ITCL_STUB_LIB_FLAG}"
-		    ITCL_STUB_LIB_PATH="${ITCL_BIN_DIR}/${ITCL_STUB_LIB_FILE}"
-		fi
-		;;
-	esac
-    fi
-
-    # eval is required to do the TCL_DBGX substitution
-    eval "ITCL_LIB_FLAG=\"${ITCL_LIB_FLAG}\""
-    eval "ITCL_LIB_SPEC=\"${ITCL_LIB_SPEC}\""
-    eval "ITCL_STUB_LIB_FLAG=\"${ITCL_STUB_LIB_FLAG}\""
-    eval "ITCL_STUB_LIB_SPEC=\"${ITCL_STUB_LIB_SPEC}\""
-
-    AC_SUBST(ITCL_VERSION)
-    AC_SUBST(ITCL_BIN_DIR)
-    AC_SUBST(ITCL_SRC_DIR)
-
-    AC_SUBST(ITCL_LIB_FILE)
-    AC_SUBST(ITCL_LIB_FLAG)
-    AC_SUBST(ITCL_LIB_SPEC)
-
-    AC_SUBST(ITCL_STUB_LIB_FILE)
-    AC_SUBST(ITCL_STUB_LIB_FLAG)
-    AC_SUBST(ITCL_STUB_LIB_SPEC)
-
-    AC_SUBST(ITCL_LIBS)
-    AC_SUBST(ITCL_DEFS)
-    AC_SUBST(ITCL_EXTRA_CFLAGS)
-    AC_SUBST(ITCL_LD_FLAGS)
-    AC_SUBST(ITCL_SHLIB_LD_LIBS)
 ])
 
 #------------------------------------------------------------------------
@@ -1702,7 +1228,7 @@ dnl AC_CHECK_TOOL(AR, ar)
 		LD_SEARCH_FLAGS='-R ${LIB_RUNTIME_DIR}'
 	    else
 		if test "$GCC" = "yes" ; then
-		    SHLIB_LD='${CC} -shared'
+		    SHLIB_LD="gcc -shared"
 		else
 		    SHLIB_LD="/bin/ld -bhalt:4 -bM:SRE -bE:lib.exp -H512 -T512 -bnoentry"
 		fi
@@ -1740,7 +1266,7 @@ dnl AC_CHECK_TOOL(AR, ar)
 	    ;;
 	BeOS*)
 	    SHLIB_CFLAGS="-fPIC"
-	    SHLIB_LD='${CC} -nostart'
+	    SHLIB_LD="${CC} -nostart"
 	    SHLIB_LD_LIBS='${LIBS}'
 	    SHLIB_SUFFIX=".so"
 	    DL_OBJS="tclLoadDl.o"
@@ -1765,7 +1291,7 @@ dnl AC_CHECK_TOOL(AR, ar)
 	    ;;
 	BSD/OS-4.*)
 	    SHLIB_CFLAGS="-export-dynamic -fPIC"
-	    SHLIB_LD='${CC} -shared'
+	    SHLIB_LD="cc -shared"
 	    SHLIB_LD_LIBS='${LIBS}'
 	    SHLIB_SUFFIX=".so"
 	    DL_OBJS="tclLoadDl.o"
@@ -1776,7 +1302,7 @@ dnl AC_CHECK_TOOL(AR, ar)
 	    ;;
 	dgux*)
 	    SHLIB_CFLAGS="-K PIC"
-	    SHLIB_LD='${CC} -G'
+	    SHLIB_LD="cc -G"
 	    SHLIB_LD_LIBS=""
 	    SHLIB_SUFFIX=".so"
 	    DL_OBJS="tclLoadDl.o"
@@ -1793,10 +1319,6 @@ dnl AC_CHECK_TOOL(AR, ar)
 
 	    if test "`uname -m`" = "ia64" ; then
 		SHLIB_SUFFIX=".so"
-		# Use newer C++ library for C++ extensions
-		#if test "$GCC" != "yes" ; then
-		#   CPPFLAGS="-AA"
-		#fi
 	    else
 		SHLIB_SUFFIX=".sl"
 	    fi
@@ -1813,7 +1335,7 @@ dnl AC_CHECK_TOOL(AR, ar)
 		LD_LIBRARY_PATH_VAR="SHLIB_PATH"
 	    fi
 	    if test "$GCC" = "yes" ; then
-		SHLIB_LD='${CC} -shared'
+		SHLIB_LD="gcc -shared"
 		SHLIB_LD_LIBS='${LIBS}'
 		LD_SEARCH_FLAGS=${CC_SEARCH_FLAGS}
 	    fi
@@ -1829,7 +1351,7 @@ dnl AC_CHECK_TOOL(AR, ar)
 			hppa64*)
 			    # 64-bit gcc in use.  Fix flags for GNU ld.
 			    do64bit_ok=yes
-			    SHLIB_LD='${CC} -shared'
+			    SHLIB_LD="${CC} -shared"
 			    SHLIB_LD_LIBS='${LIBS}'
 			    CC_SEARCH_FLAGS='-Wl,-rpath,${LIB_RUNTIME_DIR}'
 			    LD_SEARCH_FLAGS=${CC_SEARCH_FLAGS}
@@ -1968,7 +1490,7 @@ dnl AC_CHECK_TOOL(AR, ar)
 	    SHLIB_LD_LIBS='${LIBS}'
 	    SHLIB_SUFFIX=".so"
 
-	    SHLIB_LD='${CC} -shared'
+	    SHLIB_LD="${CC} -shared"
 	    DL_OBJS=""
 	    DL_LIBS="-ldl"
 	    LDFLAGS="$LDFLAGS -Wl,--export-dynamic"
@@ -1983,7 +1505,7 @@ dnl AC_CHECK_TOOL(AR, ar)
 	    SHLIB_LD_LIBS='${LIBS}'
 	    SHLIB_SUFFIX=".so"
 	    CFLAGS_OPTIMIZE=-02
-	    SHLIB_LD='${CC} -shared'
+	    SHLIB_LD="${CC} -shared "
 	    DL_OBJS="tclLoadDl.o"
 	    DL_LIBS="-mshared -ldl"
 	    LD_FLAGS="-Wl,--export-dynamic"
@@ -1992,7 +1514,7 @@ dnl AC_CHECK_TOOL(AR, ar)
 	    ;;
 	MP-RAS-02*)
 	    SHLIB_CFLAGS="-K PIC"
-	    SHLIB_LD='${CC} -G'
+	    SHLIB_LD="cc -G"
 	    SHLIB_LD_LIBS=""
 	    SHLIB_SUFFIX=".so"
 	    DL_OBJS="tclLoadDl.o"
@@ -2002,7 +1524,7 @@ dnl AC_CHECK_TOOL(AR, ar)
 	    ;;
 	MP-RAS-*)
 	    SHLIB_CFLAGS="-K PIC"
-	    SHLIB_LD='${CC} -G'
+	    SHLIB_LD="cc -G"
 	    SHLIB_LD_LIBS=""
 	    SHLIB_SUFFIX=".so"
 	    DL_OBJS="tclLoadDl.o"
@@ -2011,7 +1533,8 @@ dnl AC_CHECK_TOOL(AR, ar)
 	    CC_SEARCH_FLAGS=""
 	    LD_SEARCH_FLAGS=""
 	    ;;
-	NetBSD-1.*|FreeBSD-[[1-2]].*)
+	NetBSD-*|FreeBSD-[[1-2]].*)
+	    # NetBSD/SPARC needs -fPIC, -fpic will not do.
 	    SHLIB_CFLAGS="-fPIC"
 	    SHLIB_LD="ld -Bshareable -x"
 	    SHLIB_LD_LIBS='${LIBS}'
@@ -2038,8 +1561,14 @@ dnl AC_CHECK_TOOL(AR, ar)
 	    TCL_LIB_VERSIONS_OK=nodots
 	    ;;
 	OpenBSD-*)
-	    SHLIB_CFLAGS="-fPIC"
-	    SHLIB_LD='${CC} -shared ${SHLIB_CFLAGS}'
+	    # OpenBSD/SPARC[64] needs -fPIC, -fpic will not do.
+	    case `machine` in
+	    sparc|sparc64)
+		SHLIB_CFLAGS="-fPIC";;
+	    *)
+		SHLIB_CFLAGS="-fpic";;
+	    esac
+	    SHLIB_LD="${CC} -shared ${SHLIB_CFLAGS}"
 	    SHLIB_LD_LIBS='${LIBS}'
 	    SHLIB_SUFFIX=".so"
 	    DL_OBJS="tclLoadDl.o"
@@ -2063,18 +1592,17 @@ dnl AC_CHECK_TOOL(AR, ar)
 	    UNSHARED_LIB_SUFFIX='${TCL_TRIM_DOTS}.a'
 	    TCL_LIB_VERSIONS_OK=nodots
 	    ;;
-	NetBSD-*|FreeBSD-*)
+	FreeBSD-*)
 	    # FreeBSD 3.* and greater have ELF.
-	    # NetBSD 2.* has ELF and can use 'cc -shared' to build shared libs
 	    SHLIB_CFLAGS="-fPIC"
-	    SHLIB_LD='${CC} -shared ${SHLIB_CFLAGS}'
+	    SHLIB_LD="ld -Bshareable -x"
 	    SHLIB_LD_LIBS='${LIBS}'
 	    SHLIB_SUFFIX=".so"
 	    DL_OBJS="tclLoadDl.o"
 	    DL_LIBS=""
 	    LDFLAGS="$LDFLAGS -export-dynamic"
 	    CC_SEARCH_FLAGS='-Wl,-rpath,${LIB_RUNTIME_DIR}'
-	    LD_SEARCH_FLAGS=${CC_SEARCH_FLAGS}
+	    LD_SEARCH_FLAGS='-rpath ${LIB_RUNTIME_DIR}'
 	    if test "${TCL_THREADS}" = "1" ; then
 		# The -pthread needs to go in the CFLAGS, not LIBS
 		LIBS=`echo $LIBS | sed s/-pthread//`
@@ -2153,7 +1681,7 @@ dnl AC_CHECK_TOOL(AR, ar)
 	    DL_LIBS=""
 	    # Don't use -prebind when building for Mac OS X 10.4 or later only:
 	    test "`echo "${MACOSX_DEPLOYMENT_TARGET}" | awk -F '10\\.' '{print int([$]2)}'`" -lt 4 -a \
-		"`echo "${CPPFLAGS}" | awk -F '-mmacosx-version-min=10\\.' '{print int([$]2)}'`" -lt 4 && \
+		"`echo "${CFLAGS}" | awk -F '-mmacosx-version-min=10\\.' '{print int([$]2)}'`" -lt 4 && \
 		LDFLAGS="$LDFLAGS -prebind"
 	    LDFLAGS="$LDFLAGS -headerpad_max_install_names"
 	    AC_CACHE_CHECK([if ld accepts -search_paths_first flag], tcl_cv_ld_search_paths_first, [
@@ -2168,35 +1696,15 @@ dnl AC_CHECK_TOOL(AR, ar)
 	    LD_SEARCH_FLAGS=""
 	    LD_LIBRARY_PATH_VAR="DYLD_LIBRARY_PATH"
 
-	    # TEA specific: for combined 32 & 64 bit fat builds of Tk
-	    # extensions, verify that 64-bit build is possible.
-	    if test "$fat_32_64" = yes && test -n "${TK_BIN_DIR}"; then
-		if test "${TEA_WINDOWINGSYSTEM}" = x11; then
-		    AC_CACHE_CHECK([for 64-bit X11], tcl_cv_lib_x11_64, [
-			for v in CFLAGS CPPFLAGS LDFLAGS; do
-			    eval 'hold_'$v'="$'$v'";'$v'="`echo "$'$v' "|sed -e "s/-arch ppc / /g" -e "s/-arch i386 / /g"`"'
-			done
-			CPPFLAGS="$CPPFLAGS -I/usr/X11R6/include"
-			LDFLAGS="$LDFLAGS -L/usr/X11R6/lib -lX11"
-			AC_TRY_LINK([#include <X11/Xlib.h>], [XrmInitialize();],
-			    tcl_cv_lib_x11_64=yes, tcl_cv_lib_x11_64=no)
-			for v in CFLAGS CPPFLAGS LDFLAGS; do
-			    eval $v'="$hold_'$v'"'
-			done])
-		fi
-		# remove 64-bit arch flags from CFLAGS et al. if configuration
-		# does not support 64-bit.
-		if test "${TEA_WINDOWINGSYSTEM}" = aqua -o "$tcl_cv_lib_x11_64" = no; then
-		    AC_MSG_NOTICE([Removing 64-bit architectures from compiler & linker flags])
-		    for v in CFLAGS CPPFLAGS LDFLAGS; do
-			eval $v'="`echo "$'$v' "|sed -e "s/-arch ppc64 / /g" -e "s/-arch x86_64 / /g"`"'
-		    done
-		fi
-	    fi
+	    # TEA specific: for Tk extensions, remove 64-bit arch flags from
+	    # CFLAGS for combined 32-bit and 64-bit fat builds as neither TkAqua
+	    # nor TkX11 can be built for 64-bit at present.
+	    test "$fat_32_64" = yes && test -n "${TK_BIN_DIR}" && \
+		CFLAGS="`echo "$CFLAGS " | sed -e 's/-arch ppc64 / /g' -e 's/-arch x86_64 / /g'`"
 	    ;;
 	NEXTSTEP-*)
 	    SHLIB_CFLAGS=""
-	    SHLIB_LD='${CC} -nostdlib -r'
+	    SHLIB_LD="cc -nostdlib -r"
 	    SHLIB_LD_LIBS=""
 	    SHLIB_SUFFIX=".so"
 	    DL_OBJS="tclLoadNext.o"
@@ -2303,7 +1811,7 @@ dnl AC_CHECK_TOOL(AR, ar)
 	    ;;
 	SINIX*5.4*)
 	    SHLIB_CFLAGS="-K PIC"
-	    SHLIB_LD='${CC} -G'
+	    SHLIB_LD="cc -G"
 	    SHLIB_LD_LIBS=""
 	    SHLIB_SUFFIX=".so"
 	    DL_OBJS="tclLoadDl.o"
@@ -2350,7 +1858,7 @@ dnl AC_CHECK_TOOL(AR, ar)
 	    DL_OBJS="tclLoadDl.o"
 	    DL_LIBS="-ldl"
 	    if test "$GCC" = "yes" ; then
-		SHLIB_LD='${CC} -shared'
+		SHLIB_LD="$CC -shared"
 		CC_SEARCH_FLAGS='-Wl,-R,${LIB_RUNTIME_DIR}'
 		LD_SEARCH_FLAGS=${CC_SEARCH_FLAGS}
 	    else
@@ -2374,7 +1882,7 @@ dnl AC_CHECK_TOOL(AR, ar)
 		arch=`isainfo`
 		if test "$arch" = "sparcv9 sparc" ; then
 			if test "$GCC" = "yes" ; then
-			    if test "`${CC} -dumpversion | awk -F. '{print [$]1}'`" -lt "3" ; then
+			    if test "`gcc -dumpversion | awk -F. '{print [$]1}'`" -lt "3" ; then
 				AC_MSG_WARN([64bit mode not supported with GCC < 3.2 on $system])
 			    else
 				do64bit_ok=yes
@@ -2415,7 +1923,7 @@ dnl AC_CHECK_TOOL(AR, ar)
 	    DL_OBJS="tclLoadDl.o"
 	    DL_LIBS="-ldl"
 	    if test "$GCC" = "yes" ; then
-		SHLIB_LD='${CC} -shared'
+		SHLIB_LD="$CC -shared"
 		CC_SEARCH_FLAGS='-Wl,-R,${LIB_RUNTIME_DIR}'
 		LD_SEARCH_FLAGS=${CC_SEARCH_FLAGS}
 		if test "$do64bit_ok" = "yes" ; then
@@ -2430,19 +1938,14 @@ dnl AC_CHECK_TOOL(AR, ar)
 		    #CC_SEARCH_FLAGS="${CC_SEARCH_FLAGS},-R,$v9gcclibdir"
 		fi
 	    else
-		case $system in
-		    SunOS-5.[[1-9]][[0-9]]*)
-			SHLIB_LD='${CC} -G -z text';;
-		    *)
-			SHLIB_LD='/usr/ccs/bin/ld -G -z text';;
-		esac
+		SHLIB_LD="/usr/ccs/bin/ld -G -z text"
 		CC_SEARCH_FLAGS='-Wl,-R,${LIB_RUNTIME_DIR}'
 		LD_SEARCH_FLAGS='-R ${LIB_RUNTIME_DIR}'
 	    fi
 	    ;;
 	UNIX_SV* | UnixWare-5*)
 	    SHLIB_CFLAGS="-KPIC"
-	    SHLIB_LD='${CC} -G'
+	    SHLIB_LD="cc -G"
 	    SHLIB_LD_LIBS=""
 	    SHLIB_SUFFIX=".so"
 	    DL_OBJS="tclLoadDl.o"
@@ -3364,8 +2867,6 @@ AC_DEFUN([TEA_ADD_SOURCES], [
 		;;
 	    *)
 		# check for existence - allows for generic/win/unix VPATH
-		# To add more dirs here (like 'src'), you have to update VPATH
-		# in Makefile.in as well
 		if test ! -f "${srcdir}/$i" -a ! -f "${srcdir}/generic/$i" \
 		    -a ! -f "${srcdir}/win/$i" -a ! -f "${srcdir}/unix/$i" \
 		    ; then
@@ -4050,10 +3551,6 @@ AC_DEFUN([TEA_PRIVATE_TK_HEADERS], [
     # We want to ensure these are substituted so as not to require
     # any *_NATIVE vars be defined in the Makefile
     TK_INCLUDES="-I${TK_GENERIC_DIR_NATIVE} -I${TK_PLATFORM_DIR_NATIVE}"
-    # Detect and add ttk subdir
-    if test -d ${TK_SRC_DIR_NATIVE}/generic/ttk; then
-	TK_INCLUDES="${TK_INCLUDES} -I\"${TK_SRC_DIR_NATIVE}/generic/ttk\""
-    fi
     if test "${TEA_WINDOWINGSYSTEM}" = "win32" \
 	-o "${TEA_WINDOWINGSYSTEM}" = "aqua"; then
 	TK_INCLUDES="${TK_INCLUDES} -I${TK_XLIB_DIR_NATIVE}"
@@ -4110,7 +3607,7 @@ AC_DEFUN([TEA_PRIVATE_TK_HEADERS], [
 AC_DEFUN([TEA_PUBLIC_TK_HEADERS], [
     AC_MSG_CHECKING([for Tk public headers])
 
-    AC_ARG_WITH(tkinclude, [  --with-tkinclude        directory containing the public Tk header files], with_tkinclude=${withval})
+    AC_ARG_WITH(tkinclude, [  --with-tkinclude      directory containing the public Tk header files.], with_tkinclude=${withval})
 
     AC_CACHE_VAL(ac_cv_c_tkh, [
 	# Use the value from --with-tkinclude, if it was given
@@ -4191,260 +3688,6 @@ AC_DEFUN([TEA_PUBLIC_TK_HEADERS], [
 ])
 
 #------------------------------------------------------------------------
-# TEA_PUBLIC_TCLOO_HEADERS --
-#
-#	Locate the installed public TclOO header files
-#
-# Arguments:
-#	None.
-#
-# Requires:
-#	CYGPATH must be set
-#
-# Results:
-#
-#	Adds a --with-tkinclude switch to configure.
-#	Result is cached.
-#
-#	Substs the following vars:
-#		TCLOO_INCLUDES
-#------------------------------------------------------------------------
-
-AC_DEFUN([TEA_PUBLIC_TCLOO_HEADERS], [
-    AC_MSG_CHECKING([for TclOO public headers])
-
-    AC_ARG_WITH(tclooinclude, [  --with-tclooinclude        directory containing the public TclOO header files], with_tclooinclude=${withval})
-
-    AC_CACHE_VAL(ac_cv_c_tclooh, [
-	# Use the value from --with-tclooinclude, if it was given
-
-	if test x"${with_tclooinclude}" != x ; then
-	    if test -f "${with_tclooinclude}/tclOO.h" ; then
-		ac_cv_c_tclooh=${with_tclooinclude}
-	    else
-		AC_MSG_ERROR([${with_toonclude} directory does not contain tclOO.h])
-	    fi
-	else
-	    if test "`uname -s`" = "Darwin"; then
-		# If Tk was built as a framework, attempt to use
-		# the framework's Headers directory.
-		case ${TCLOO_DEFS} in
-		    *TCLOO_FRAMEWORK*)
-			list="`ls -d ${TCLOO_BIN_DIR}/Headers 2>/dev/null`"
-			;;
-		esac
-	    fi
-
-	    # Look in the source dir only if TclOO is not installed,
-	    # and in that situation, look there before installed locations.
-	    if test -f "${TCLOO_BIN_DIR}/Makefile" ; then
-		list="$list `ls -d ${TCLOO_SRC_DIR}/generic 2>/dev/null`"
-	    fi
-
-	    # Check order: pkg --prefix location, TclOO's --prefix location,
-	    # relative to directory of tclOOonfig.sh, Tcl's --prefix location, 
-	    # relative to directory of tclConfig.sh.
-
-	    eval "temp_includedir=${includedir}"
-	    list="$list \
-		`ls -d ${temp_includedir}        2>/dev/null` \
-		`ls -d ${TCLOO_PREFIX}/include      2>/dev/null` \
-		`ls -d ${TCLOO_BIN_DIR}/../include  2>/dev/null` \
-		`ls -d ${TCL_PREFIX}/include     2>/dev/null` \
-		`ls -d ${TCL_BIN_DIR}/../include 2>/dev/null`"
-	    if test "${TEA_PLATFORM}" != "windows" -o "$GCC" = "yes"; then
-		list="$list /usr/local/include /usr/include"
-	    fi
-	    for i in $list ; do
-		if test -f "$i/tclOO.h" ; then
-		    ac_cv_c_tclooh=$i
-		    break
-		fi
-	    done
-	fi
-    ])
-
-    # Print a message based on how we determined the include path
-
-    if test x"${ac_cv_c_tclooh}" = x ; then
-	AC_MSG_ERROR([tclOO.h not found.  Please specify its location with --with-tclooinclude])
-    else
-	AC_MSG_RESULT([${ac_cv_c_tclooh}])
-    fi
-
-    # Convert to a native path and substitute into the output files.
-
-    INCLUDE_DIR_NATIVE=`${CYGPATH} ${ac_cv_c_tclooh}`
-
-    TCLOO_INCLUDES=-I\"${INCLUDE_DIR_NATIVE}\"
-    TCLOO_PRIVATE_INCLUDES=${TCLOO_PRIVATE_INCLUDE_SPEC}
-
-    AC_SUBST(TCLOO_INCLUDES)
-    AC_SUBST(TCLOO_PRIVATE_INCLUDES)
-
-])
-
-#------------------------------------------------------------------------
-# TEA_PRIVATE_ITCL_HEADERS --
-#
-#	Locate the private Itcl include files
-#
-# Arguments:
-#
-#	Requires:
-#		ITCL_SRC_DIR	Assumes that TEA_LOAD_ITCLCONFIG has
-#				 already been called.
-#
-# Results:
-#
-#	Substs the following vars:
-#		ITCL_TOP_DIR_NATIVE
-#		ITCL_GENERIC_DIR_NATIVE
-#		ITCL_UNIX_DIR_NATIVE
-#		ITCL_WIN_DIR_NATIVE
-#		ITCL_PLATFORM_DIR_NATIVE
-#		ITCL_BIN_DIR_NATIVE
-#		ITCL_INCLUDES
-#------------------------------------------------------------------------
-
-AC_DEFUN([TEA_PRIVATE_ITCL_HEADERS], [
-    AC_MSG_CHECKING([for Itcl private include files])
-
-    ITCL_SRC_DIR_NATIVE=`${CYGPATH} ${ITCL_SRC_DIR}`
-    ITCL_TOP_DIR_NATIVE=\"${ITCL_SRC_DIR_NATIVE}\"
-    ITCL_GENERIC_DIR_NATIVE=\"${ITCL_SRC_DIR_NATIVE}/generic\"
-    ITCL_UNIX_DIR_NATIVE=\"${ITCL_SRC_DIR_NATIVE}/unix\"
-    ITCL_WIN_DIR_NATIVE=\"${ITCL_SRC_DIR_NATIVE}/win\"
-
-    if test "${TEA_PLATFORM}" = "windows"; then
-	ITCL_PLATFORM_DIR_NATIVE=${ITCL_WIN_DIR_NATIVE}
-    else
-	ITCL_PLATFORM_DIR_NATIVE=${ITCL_UNIX_DIR_NATIVE}
-    fi
-    # We want to ensure these are substituted so as not to require
-    # any *_NATIVE vars be defined in the Makefile
-    ITCL_INCLUDES="-I${ITCL_GENERIC_DIR_NATIVE} -I${ITCL_PLATFORM_DIR_NATIVE}"
-    if test "`uname -s`" = "Darwin"; then
-        # If Tcl was built as a framework, attempt to use
-        # the framework's Headers and PrivateHeaders directories
-        case ${ITCL_DEFS} in
-	    *ITCL_FRAMEWORK*)
-	        if test -d "${ITCL_BIN_DIR}/Headers" -a -d "${ITCL_BIN_DIR}/PrivateHeaders"; then
-	        ITCL_INCLUDES="-I\"${ITCL_BIN_DIR}/Headers\" -I\"${ITCL_BIN_DIR}/PrivateHeaders\" ${TCL_INCLUDES}"; else
-	        ITCL_INCLUDES="${ITCL_INCLUDES} ${ITCL_INCLUDE_SPEC} `echo "${ITCL_INCLUDE_SPEC}" | sed -e 's/Headers/PrivateHeaders/'`"; fi
-	        ;;
-	esac
-    else
-	if test ! -f "${ITCL_SRC_DIR}/generic/itclInt.h" ; then
-	    AC_MSG_ERROR([Cannot find private header itclInt.h in ${ITCL_SRC_DIR}/generic])
-	fi
-    fi
-
-
-    AC_SUBST(ITCL_TOP_DIR_NATIVE)
-    AC_SUBST(ITCL_GENERIC_DIR_NATIVE)
-    AC_SUBST(ITCL_UNIX_DIR_NATIVE)
-    AC_SUBST(ITCL_WIN_DIR_NATIVE)
-    AC_SUBST(ITCL_PLATFORM_DIR_NATIVE)
-
-    AC_SUBST(ITCL_INCLUDES)
-    AC_MSG_RESULT([Using srcdir found in itclConfig.sh: ${ITCL_SRC_DIR}])
-])
-
-#------------------------------------------------------------------------
-# TEA_PUBLIC_ITCL_HEADERS --
-#
-#	Locate the installed public Itcl header files
-#
-# Arguments:
-#	None.
-#
-# Requires:
-#	CYGPATH must be set
-#
-# Results:
-#
-#	Adds a --with-tkinclude switch to configure.
-#	Result is cached.
-#
-#	Substs the following vars:
-#		ITCL_INCLUDES
-#------------------------------------------------------------------------
-
-AC_DEFUN([TEA_PUBLIC_ITCL_HEADERS], [
-    AC_MSG_CHECKING([for Itcl public headers])
-
-    AC_ARG_WITH(itclinclude, [  --with-itclinclude        directory containing the public Itcl header files], with_itclinclude=${withval})
-
-    AC_CACHE_VAL(ac_cv_c_itclh, [
-	# Use the value from --with-itclinclude, if it was given
-
-	if test x"${with_itclinclude}" != x ; then
-	    if test -f "${with_itclinclude}/tclOO.h" ; then
-		ac_cv_c_itclh=${with_itclinclude}
-	    else
-		AC_MSG_ERROR([${with_itclinclude} directory does not contain itcl.h])
-	    fi
-	else
-	    if test "`uname -s`" = "Darwin"; then
-		# If Tk was built as a framework, attempt to use
-		# the framework's Headers directory.
-		case ${ITCL_DEFS} in
-		    *ITCL_FRAMEWORK*)
-			list="`ls -d ${ITCL_BIN_DIR}/Headers 2>/dev/null`"
-			;;
-		esac
-	    fi
-
-	    # Look in the source dir only if Itcl is not installed,
-	    # and in that situation, look there before installed locations.
-	    if test -f "${ITCL_BIN_DIR}/Makefile" ; then
-		list="$list `ls -d ${ITCL_SRC_DIR}/generic 2>/dev/null`"
-	    fi
-
-	    # Check order: pkg --prefix location, Itcl's --prefix location,
-	    # relative to directory of tclOOonfig.sh, Tcl's --prefix location, 
-	    # relative to directory of tclConfig.sh.
-
-	    eval "temp_includedir=${includedir}"
-	    list="$list \
-		`ls -d ${temp_includedir}        2>/dev/null` \
-		`ls -d ${ITCL_PREFIX}/include      2>/dev/null` \
-		`ls -d ${ITCL_BIN_DIR}/../include  2>/dev/null` \
-		`ls -d ${TCL_PREFIX}/include     2>/dev/null` \
-		`ls -d ${TCL_BIN_DIR}/../include 2>/dev/null`"
-	    if test "${TEA_PLATFORM}" != "windows" -o "$GCC" = "yes"; then
-		list="$list /usr/local/include /usr/include"
-	    fi
-	    for i in $list ; do
-		if test -f "$i/itcl.h" ; then
-		    ac_cv_c_itclh=$i
-		    break
-		fi
-	    done
-	fi
-    ])
-
-    # Print a message based on how we determined the include path
-
-    if test x"${ac_cv_c_itclh}" = x ; then
-	AC_MSG_ERROR([itcl.h not found.  Please specify its location with --with-itclinclude])
-    else
-	AC_MSG_RESULT([${ac_cv_c_itclh}])
-    fi
-
-    # Convert to a native path and substitute into the output files.
-
-    INCLUDE_DIR_NATIVE=`${CYGPATH} ${ac_cv_c_itclh}`
-
-    ITCL_INCLUDES=-I\"${INCLUDE_DIR_NATIVE}\"
-
-    AC_SUBST(ITCL_INCLUDES)
-
-])
-
-
-#------------------------------------------------------------------------
 # TEA_PROG_TCLSH
 #	Determine the fully qualified path name of the tclsh executable
 #	in the Tcl build directory or the tclsh installed in a bin
@@ -4484,11 +3727,11 @@ AC_DEFUN([TEA_PROG_TCLSH], [
               `ls -d ${TCL_PREFIX}/bin     2>/dev/null`"
         for i in $list ; do
             if test -f "$i/${TCLSH_PROG}" ; then
-                REAL_TCL_BIN_DIR="`cd "$i"; pwd`/"
+                REAL_TCL_BIN_DIR="`cd "$i"; pwd`"
                 break
             fi
         done
-        TCLSH_PROG="${REAL_TCL_BIN_DIR}${TCLSH_PROG}"
+        TCLSH_PROG="${REAL_TCL_BIN_DIR}/${TCLSH_PROG}"
     fi
     AC_MSG_RESULT([${TCLSH_PROG}])
     AC_SUBST(TCLSH_PROG)
@@ -4534,11 +3777,11 @@ AC_DEFUN([TEA_PROG_WISH], [
               `ls -d ${TK_PREFIX}/bin     2>/dev/null`"
         for i in $list ; do
             if test -f "$i/${WISH_PROG}" ; then
-                REAL_TK_BIN_DIR="`cd "$i"; pwd`/"
+                REAL_TK_BIN_DIR="`cd "$i"; pwd`"
                 break
             fi
         done
-        WISH_PROG="${REAL_TK_BIN_DIR}${WISH_PROG}"
+        WISH_PROG="${REAL_TK_BIN_DIR}/${WISH_PROG}"
     fi
     AC_MSG_RESULT([${WISH_PROG}])
     AC_SUBST(WISH_PROG)
@@ -4682,7 +3925,7 @@ AC_DEFUN([TEA_LOAD_CONFIG], [
 
     if test -f "${$1_BIN_DIR}/$1Config.sh" ; then
         AC_MSG_RESULT([loading])
-	. "${$1_BIN_DIR}/$1Config.sh"
+	. ${$1_BIN_DIR}/$1Config.sh
     else
         AC_MSG_RESULT([file not found])
     fi
@@ -4696,7 +3939,7 @@ AC_DEFUN([TEA_LOAD_CONFIG], [
     # installed and uninstalled version of Tcl.
     #
 
-    if test -f "${$1_BIN_DIR}/Makefile" ; then
+    if test -f ${$1_BIN_DIR}/Makefile ; then
 	AC_MSG_WARN([Found Makefile - using build library specs for $1])
         $1_LIB_SPEC=${$1_BUILD_LIB_SPEC}
         $1_STUB_LIB_SPEC=${$1_BUILD_STUB_LIB_SPEC}
