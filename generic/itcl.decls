@@ -1,5 +1,5 @@
 # -*- tcl -*-
-# $Id: itcl.decls,v 1.3.2.11 2008/10/19 16:49:51 wiede Exp $
+# $Id: itcl.decls,v 1.3.2.12 2008/10/26 21:35:30 wiede Exp $
 
 # public API
 library itcl
@@ -375,7 +375,7 @@ declare 85 current {
 #
 
 declare 86 current {
-    int Itcl_BiInit (Tcl_Interp *interp)
+    int Itcl_BiInit (Tcl_Interp *interp, ItclObjectInfo *infoPtr)
 }
 declare 87 current {
     int Itcl_InstallBiMethods (Tcl_Interp *interp, ItclClass *cdefn)

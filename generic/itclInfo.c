@@ -24,7 +24,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclInfo.c,v 1.1.2.19 2008/10/25 19:31:49 wiede Exp $
+ *     RCS:  $Id: itclInfo.c,v 1.1.2.20 2008/10/26 21:35:30 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -34,39 +34,104 @@
 #include "itclInt.h"
 
 Tcl_ObjCmdProc Itcl_BiInfoExistsCmd;
+Tcl_ObjCmdProc Itcl_BiInfoExtendedClassCmd;
+Tcl_ObjCmdProc Itcl_BiInfoWidgetCmd;
+Tcl_ObjCmdProc Itcl_BiInfoDelegatedCmd;
+Tcl_ObjCmdProc Itcl_BiInfoHullCmd;
 
 typedef struct InfoMethod {
     char* name;              /* method name */
     char* usage;             /* string describing usage */
     Tcl_ObjCmdProc *proc;    /* implementation C proc */
+    int flags;               /* which class commands have it */
 } InfoMethod;
 
 static InfoMethod InfoMethodList[] = {
-    { "args", "procname", Itcl_BiInfoArgsCmd },
-    { "body", "procname", Itcl_BiInfoBodyCmd },
-    { "class", "", Itcl_BiInfoClassCmd },
+    { "args",
+        "procname",
+	Itcl_BiInfoArgsCmd,
+	ITCL_CLASS|ITCL_WIDGET|ITCL_ECLASS
+    },
+    { "body",
+        "procname",
+	Itcl_BiInfoBodyCmd,
+	ITCL_CLASS|ITCL_WIDGET|ITCL_ECLASS
+    },
+    { "class",
+        "",
+	Itcl_BiInfoClassCmd,
+	ITCL_CLASS|ITCL_WIDGET|ITCL_ECLASS
+    },
     { "component",
         "?name? ?-inherit? ?-value?",
-        Itcl_BiInfoComponentCmd },
+        Itcl_BiInfoComponentCmd,
+	ITCL_WIDGET|ITCL_ECLASS
+    },
+    { "delegated",
+        "?name? ?-inherit? ?-value?",
+        Itcl_BiInfoDelegatedCmd,
+	ITCL_WIDGET|ITCL_ECLASS
+    },
     { "function",
         "?name? ?-protection? ?-type? ?-name? ?-args? ?-body?",
-        Itcl_BiInfoFunctionCmd },
-    { "heritage", "", Itcl_BiInfoHeritageCmd },
-    { "inherit", "", Itcl_BiInfoInheritCmd },
+        Itcl_BiInfoFunctionCmd,
+	ITCL_CLASS|ITCL_WIDGET|ITCL_ECLASS
+    },
+    { "heritage",
+        "",
+	Itcl_BiInfoHeritageCmd,
+	ITCL_CLASS|ITCL_WIDGET|ITCL_ECLASS
+    },
+    { "hull",
+        "?name? ?-inherit? ?-value?",
+        Itcl_BiInfoHullCmd,
+	ITCL_WIDGET
+    },
+    { "inherit",
+        "",
+	Itcl_BiInfoInheritCmd,
+	ITCL_CLASS|ITCL_WIDGET|ITCL_ECLASS
+    },
     { "option",
         "?name? ?-protection? ?-resource? ?-class? ?-name? ?-default? \
 ?-cgetmethod? ?-configuremethod? ?-validatemethod? ?-value?",
-        Itcl_BiInfoOptionCmd },
+        Itcl_BiInfoOptionCmd,
+	ITCL_WIDGET|ITCL_ECLASS
+    },
     { "variable",
         "?name? ?-protection? ?-type? ?-name? ?-init? ?-value? ?-config?",
-         Itcl_BiInfoVariableCmd },
-    { "vars", "?pattern?", Itcl_BiInfoVarsCmd },
+        Itcl_BiInfoVariableCmd,
+	ITCL_CLASS|ITCL_WIDGET|ITCL_ECLASS
+    },
+    { "vars",
+        "?pattern?",
+	Itcl_BiInfoVarsCmd,
+	ITCL_CLASS|ITCL_WIDGET|ITCL_ECLASS
+    },
+    { "widget",
+        "?name? ?-protection? ?-type? ?-name? ?-init? ?-value? ?-config?",
+        Itcl_BiInfoWidgetCmd,
+	ITCL_WIDGET
+    },
+    { "extendedclass",
+        "?name? ?-protection? ?-type? ?-name? ?-init? ?-value? ?-config?",
+        Itcl_BiInfoExtendedClassCmd,
+	ITCL_ECLASS
+    },
     /*
      *  Add an error handler to support all of the usual inquiries
      *  for the "info" command in the global namespace.
      */
-    { "@error", "", Itcl_DefaultInfoCmd },
-    { NULL, NULL, NULL }
+    { "@error",
+        "",
+	Itcl_DefaultInfoCmd,
+	0
+    },
+    { NULL,
+        NULL,
+	NULL,
+	0
+    }
 };
 
 struct NameProcMap { const char *name; Tcl_ObjCmdProc *proc; };
@@ -158,13 +223,23 @@ ItclInfoInit(
 void
 ItclGetInfoUsage(
     Tcl_Interp *interp,
-    Tcl_Obj *objPtr)       /* returns: summary of usage info */
+    Tcl_Obj *objPtr,       /* returns: summary of usage info */
+    ItclObjectInfo *infoPtr)
 {
+    Tcl_HashEntry *hPtr;
+    ItclClass *iclsPtr;
     char *spaces = "  ";
     int isOpenEnded = 0;
 
     int i;
 
+    hPtr = Tcl_FindHashEntry(&infoPtr->namespaceClasses, (char *)
+            Tcl_GetCurrentNamespace(interp));
+    if (hPtr == NULL) {
+fprintf(stderr, "cannot get class from namespace\n");
+        return;
+    }
+    iclsPtr = Tcl_GetHashValue(hPtr);
     for (i=0; InfoMethodList[i].name != NULL; i++) {
 	if (strcmp(InfoMethodList[i].name, "vars") == 0) {
 	    /* we don't report that, as it is a special case
@@ -176,14 +251,16 @@ ItclGetInfoUsage(
 	        && strcmp(InfoMethodList[i].name,"@error") == 0) {
             isOpenEnded = 1;
         } else {
-            Tcl_AppendToObj(objPtr, spaces, -1);
-            Tcl_AppendToObj(objPtr, "info ", -1);
-            Tcl_AppendToObj(objPtr, InfoMethodList[i].name, -1);
-	    if (strlen(InfoMethodList[i].usage) > 0) {
-              Tcl_AppendToObj(objPtr, " ", -1);
-              Tcl_AppendToObj(objPtr, InfoMethodList[i].usage, -1);
+	    if (iclsPtr->flags & InfoMethodList[i].flags) {
+                Tcl_AppendToObj(objPtr, spaces, -1);
+                Tcl_AppendToObj(objPtr, "info ", -1);
+                Tcl_AppendToObj(objPtr, InfoMethodList[i].name, -1);
+	        if (strlen(InfoMethodList[i].usage) > 0) {
+                  Tcl_AppendToObj(objPtr, " ", -1);
+                  Tcl_AppendToObj(objPtr, InfoMethodList[i].usage, -1);
+	        }
+                spaces = "\n  ";
 	    }
-            spaces = "\n  ";
         }
     }
     if (isOpenEnded) {
@@ -207,7 +284,7 @@ ItclGetInfoUsage(
 /* ARGSUSED */
 int
 Itcl_BiInfoCmd(
-    ClientData clientData,   /* class definition */
+    ClientData clientData,   /* ItclObjectInfo */
     Tcl_Interp *interp,      /* current interpreter */
     int objc,                /* number of arguments */
     Tcl_Obj *CONST objv[])   /* argument objects */
@@ -217,7 +294,7 @@ Itcl_BiInfoCmd(
         /* produce usage message */
         Tcl_Obj *objPtr = Tcl_NewStringObj(
 	        "wrong # args: should be one of...\n", -1);
-        ItclGetInfoUsage(interp, objPtr);
+        ItclGetInfoUsage(interp, objPtr, (ItclObjectInfo *)clientData);
 	Tcl_SetResult(interp, Tcl_GetString(objPtr), TCL_DYNAMIC);
 	return TCL_ERROR;
     }
@@ -1171,7 +1248,7 @@ Itcl_BiInfoExistsCmd(
 /* ARGSUSED */
 int
 Itcl_BiInfoUnknownCmd(
-    ClientData dummy,        /* not used */
+    ClientData clientData,   /* ItclObjectInfo Ptr */
     Tcl_Interp *interp,      /* current interpreter */
     int objc,                /* number of arguments */
     Tcl_Obj *CONST objv[])   /* argument objects */
@@ -1186,7 +1263,7 @@ Itcl_BiInfoUnknownCmd(
         /* produce usage message */
         Tcl_Obj *objPtr = Tcl_NewStringObj(
 	        "wrong # args: should be one of...\n", -1);
-        ItclGetInfoUsage(interp, objPtr);
+        ItclGetInfoUsage(interp, objPtr, (ItclObjectInfo *)clientData);
 	Tcl_SetResult(interp, Tcl_GetString(objPtr), TCL_DYNAMIC);
         return TCL_ERROR;
     }
@@ -1964,5 +2041,346 @@ Itcl_BiInfoComponentCmd(
 
         Tcl_SetObjResult(interp, resultPtr);
     }
+    return TCL_OK;
+}
+
+/*
+ * ------------------------------------------------------------------------
+ *  Itcl_BiInfoWidgetCmd()
+ *
+ *  Returns information regarding widget classes.
+ *  Handles the following syntax:
+ *
+ *    info widget ?widgetName?
+ *
+ *  If the ?widgetName? is not specified, then a list of all known
+ *  data members is returned.  Otherwise, the information for a
+ *  specific member is returned.  Returns a status TCL_OK/TCL_ERROR
+ *  to indicate success/failure.
+ * ------------------------------------------------------------------------
+ */
+/* ARGSUSED */
+int
+Itcl_BiInfoWidgetCmd(
+    ClientData dummy,        /* not used */
+    Tcl_Interp *interp,      /* current interpreter */
+    int objc,                /* number of arguments */
+    Tcl_Obj *CONST objv[])   /* argument objects */
+{
+    static const char *components[] = {
+	"-name", "-inherit", "-value", (char*)NULL
+    };
+    enum BCompIdx {
+	BCompNameIdx, BCompInheritIdx, BCompValueIdx
+    } *icomplist, icomplistStorage[3];
+
+    static enum BCompIdx DefInfoComponent[3] = {
+        BCompNameIdx,
+        BCompInheritIdx,
+        BCompValueIdx
+    };
+
+    ItclClass *contextIclsPtr;
+    ItclObject *contextIoPtr;
+    ItclObjectInfo *infoPtr;
+
+    Tcl_HashSearch place;
+    Tcl_HashEntry *hPtr;
+    Tcl_Namespace *nsPtr;
+    ItclHierIter hier;
+    ItclClass *iclsPtr;
+    const char *name;
+    int result;
+
+    ItclShowArgs(1, "Itcl_BiInfoWidgetCmd", objc, objv);
+    /*
+     *  If this command is not invoked within a class namespace,
+     *  signal an error.
+     */
+    contextIclsPtr = NULL;
+    if (Itcl_GetContext(interp, &contextIclsPtr, &contextIoPtr) != TCL_OK) {
+        name = Tcl_GetString(objv[0]);
+        Tcl_ResetResult(interp);
+        Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+            "\nget info like this instead 5: ",
+            "\n  namespace eval className { info ", name, "... }",
+            (char*)NULL);
+        return TCL_ERROR;
+    }
+    if (contextIoPtr != NULL) {
+        contextIclsPtr = contextIoPtr->iclsPtr;
+    }
+    nsPtr = Itcl_GetUplevelNamespace(interp, 1);
+    if (nsPtr->parentPtr == NULL) {
+        /* :: namespace */
+	nsPtr = contextIclsPtr->nsPtr;
+    }
+    infoPtr = contextIclsPtr->infoPtr;
+    hPtr = Tcl_FindHashEntry(&infoPtr->namespaceClasses, (char *)nsPtr);
+    if (hPtr == NULL) {
+        Tcl_AppendResult(interp, "cannot find class name for namespace \"",
+	        nsPtr->fullName, "\"", NULL);
+	return TCL_ERROR;
+    }
+    contextIclsPtr = Tcl_GetHashValue(hPtr);
+
+
+
+    return TCL_OK;
+}
+
+
+/*
+ * ------------------------------------------------------------------------
+ *  Itcl_BiInfoExtendedClassCmd()
+ *
+ *  Returns information regarding extendedclasses.
+ *  Handles the following syntax:
+ *
+ *    info extendedclass ?className? 
+ *
+ *  If the ?className? is not specified, then a list of all known
+ *  data members is returned.  Otherwise, the information for a
+ *  specific member is returned.  Returns a status TCL_OK/TCL_ERROR
+ *  to indicate success/failure.
+ * ------------------------------------------------------------------------
+ */
+/* ARGSUSED */
+int
+Itcl_BiInfoExtendedClassCmd(
+    ClientData dummy,        /* not used */
+    Tcl_Interp *interp,      /* current interpreter */
+    int objc,                /* number of arguments */
+    Tcl_Obj *CONST objv[])   /* argument objects */
+{
+    static const char *components[] = {
+	"-name", "-inherit", "-value", (char*)NULL
+    };
+    enum BCompIdx {
+	BCompNameIdx, BCompInheritIdx, BCompValueIdx
+    } *icomplist, icomplistStorage[3];
+
+    static enum BCompIdx DefInfoComponent[3] = {
+        BCompNameIdx,
+        BCompInheritIdx,
+        BCompValueIdx
+    };
+
+    ItclClass *contextIclsPtr;
+    ItclObject *contextIoPtr;
+    ItclObjectInfo *infoPtr;
+
+    Tcl_HashSearch place;
+    Tcl_HashEntry *hPtr;
+    Tcl_Namespace *nsPtr;
+    ItclHierIter hier;
+    ItclClass *iclsPtr;
+    const char *name;
+    int result;
+
+    ItclShowArgs(1, "Itcl_BiInfoExtendedClassCmd", objc, objv);
+    /*
+     *  If this command is not invoked within a class namespace,
+     *  signal an error.
+     */
+    contextIclsPtr = NULL;
+    if (Itcl_GetContext(interp, &contextIclsPtr, &contextIoPtr) != TCL_OK) {
+        name = Tcl_GetString(objv[0]);
+        Tcl_ResetResult(interp);
+        Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+            "\nget info like this instead 5: ",
+            "\n  namespace eval className { info ", name, "... }",
+            (char*)NULL);
+        return TCL_ERROR;
+    }
+    if (contextIoPtr != NULL) {
+        contextIclsPtr = contextIoPtr->iclsPtr;
+    }
+    nsPtr = Itcl_GetUplevelNamespace(interp, 1);
+    if (nsPtr->parentPtr == NULL) {
+        /* :: namespace */
+	nsPtr = contextIclsPtr->nsPtr;
+    }
+    infoPtr = contextIclsPtr->infoPtr;
+    hPtr = Tcl_FindHashEntry(&infoPtr->namespaceClasses, (char *)nsPtr);
+    if (hPtr == NULL) {
+        Tcl_AppendResult(interp, "cannot find class name for namespace \"",
+	        nsPtr->fullName, "\"", NULL);
+	return TCL_ERROR;
+    }
+    contextIclsPtr = Tcl_GetHashValue(hPtr);
+
+
+
+    return TCL_OK;
+}
+
+/*
+ * ------------------------------------------------------------------------
+ *  Itcl_BiInfoDelegatedCmd()
+ *
+ *  Returns information regarding extendedclasses.
+ *  Handles the following syntax:
+ *
+ *    info extendedclass ?className? 
+ *
+ *  If the ?className? is not specified, then a list of all known
+ *  data members is returned.  Otherwise, the information for a
+ *  specific member is returned.  Returns a status TCL_OK/TCL_ERROR
+ *  to indicate success/failure.
+ * ------------------------------------------------------------------------
+ */
+/* ARGSUSED */
+int
+Itcl_BiInfoDelegatedCmd(
+    ClientData dummy,        /* not used */
+    Tcl_Interp *interp,      /* current interpreter */
+    int objc,                /* number of arguments */
+    Tcl_Obj *CONST objv[])   /* argument objects */
+{
+    static const char *components[] = {
+	"-name", "-inherit", "-value", (char*)NULL
+    };
+    enum BCompIdx {
+	BCompNameIdx, BCompInheritIdx, BCompValueIdx
+    } *icomplist, icomplistStorage[3];
+
+    static enum BCompIdx DefInfoComponent[3] = {
+        BCompNameIdx,
+        BCompInheritIdx,
+        BCompValueIdx
+    };
+
+    ItclClass *contextIclsPtr;
+    ItclObject *contextIoPtr;
+    ItclObjectInfo *infoPtr;
+
+    Tcl_HashSearch place;
+    Tcl_HashEntry *hPtr;
+    Tcl_Namespace *nsPtr;
+    ItclHierIter hier;
+    ItclClass *iclsPtr;
+    const char *name;
+    int result;
+
+    ItclShowArgs(1, "Itcl_BiInfoDelegatedCmd", objc, objv);
+    /*
+     *  If this command is not invoked within a class namespace,
+     *  signal an error.
+     */
+    contextIclsPtr = NULL;
+    if (Itcl_GetContext(interp, &contextIclsPtr, &contextIoPtr) != TCL_OK) {
+        name = Tcl_GetString(objv[0]);
+        Tcl_ResetResult(interp);
+        Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+            "\nget info like this instead 5: ",
+            "\n  namespace eval className { info ", name, "... }",
+            (char*)NULL);
+        return TCL_ERROR;
+    }
+    if (contextIoPtr != NULL) {
+        contextIclsPtr = contextIoPtr->iclsPtr;
+    }
+    nsPtr = Itcl_GetUplevelNamespace(interp, 1);
+    if (nsPtr->parentPtr == NULL) {
+        /* :: namespace */
+	nsPtr = contextIclsPtr->nsPtr;
+    }
+    infoPtr = contextIclsPtr->infoPtr;
+    hPtr = Tcl_FindHashEntry(&infoPtr->namespaceClasses, (char *)nsPtr);
+    if (hPtr == NULL) {
+        Tcl_AppendResult(interp, "cannot find class name for namespace \"",
+	        nsPtr->fullName, "\"", NULL);
+	return TCL_ERROR;
+    }
+    contextIclsPtr = Tcl_GetHashValue(hPtr);
+
+
+
+    return TCL_OK;
+}
+
+/*
+ * ------------------------------------------------------------------------
+ *  Itcl_BiInfoHullCmd()
+ *
+ *  Returns information regarding extendedclasses.
+ *  Handles the following syntax:
+ *
+ *    info extendedclass ?className? 
+ *
+ *  If the ?className? is not specified, then a list of all known
+ *  data members is returned.  Otherwise, the information for a
+ *  specific member is returned.  Returns a status TCL_OK/TCL_ERROR
+ *  to indicate success/failure.
+ * ------------------------------------------------------------------------
+ */
+/* ARGSUSED */
+int
+Itcl_BiInfoHullCmd(
+    ClientData dummy,        /* not used */
+    Tcl_Interp *interp,      /* current interpreter */
+    int objc,                /* number of arguments */
+    Tcl_Obj *CONST objv[])   /* argument objects */
+{
+    static const char *components[] = {
+	"-name", "-inherit", "-value", (char*)NULL
+    };
+    enum BCompIdx {
+	BCompNameIdx, BCompInheritIdx, BCompValueIdx
+    } *icomplist, icomplistStorage[3];
+
+    static enum BCompIdx DefInfoComponent[3] = {
+        BCompNameIdx,
+        BCompInheritIdx,
+        BCompValueIdx
+    };
+
+    ItclClass *contextIclsPtr;
+    ItclObject *contextIoPtr;
+    ItclObjectInfo *infoPtr;
+
+    Tcl_HashSearch place;
+    Tcl_HashEntry *hPtr;
+    Tcl_Namespace *nsPtr;
+    ItclHierIter hier;
+    ItclClass *iclsPtr;
+    const char *name;
+    int result;
+
+    ItclShowArgs(1, "Itcl_BiInfoHullCmd", objc, objv);
+    /*
+     *  If this command is not invoked within a class namespace,
+     *  signal an error.
+     */
+    contextIclsPtr = NULL;
+    if (Itcl_GetContext(interp, &contextIclsPtr, &contextIoPtr) != TCL_OK) {
+        name = Tcl_GetString(objv[0]);
+        Tcl_ResetResult(interp);
+        Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+            "\nget info like this instead 5: ",
+            "\n  namespace eval className { info ", name, "... }",
+            (char*)NULL);
+        return TCL_ERROR;
+    }
+    if (contextIoPtr != NULL) {
+        contextIclsPtr = contextIoPtr->iclsPtr;
+    }
+    nsPtr = Itcl_GetUplevelNamespace(interp, 1);
+    if (nsPtr->parentPtr == NULL) {
+        /* :: namespace */
+	nsPtr = contextIclsPtr->nsPtr;
+    }
+    infoPtr = contextIclsPtr->infoPtr;
+    hPtr = Tcl_FindHashEntry(&infoPtr->namespaceClasses, (char *)nsPtr);
+    if (hPtr == NULL) {
+        Tcl_AppendResult(interp, "cannot find class name for namespace \"",
+	        nsPtr->fullName, "\"", NULL);
+	return TCL_ERROR;
+    }
+    contextIclsPtr = Tcl_GetHashValue(hPtr);
+
+
+
     return TCL_OK;
 }

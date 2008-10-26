@@ -8,7 +8,7 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itcl2TclOO.c,v 1.1.2.11 2008/10/16 20:05:44 wiede Exp $
+ * RCS: @(#) $Id: itcl2TclOO.c,v 1.1.2.12 2008/10/26 21:35:30 wiede Exp $
  */
 
 #include <tcl.h>
@@ -162,8 +162,16 @@ Itcl_InvokeProcedureMethod(
     int objc,			/* Number of arguments. */
     Tcl_Obj *const *objv)	/* Arguments as actually seen. */
 {
-    Method *mPtr = clientData;
-    Tcl_Namespace *nsPtr = mPtr->declaringClassPtr->thisPtr->namespacePtr;
+    Tcl_Namespace *nsPtr;
+    Method *mPtr;
+
+    mPtr = clientData;
+    if (mPtr->declaringClassPtr == NULL) {
+	/* that is the case for typemethods */
+        nsPtr = mPtr->declaringObjectPtr->namespacePtr;
+    } else {
+        nsPtr = mPtr->declaringClassPtr->thisPtr->namespacePtr;
+    }
 
     return Tcl_InvokeClassProcedureMethod(interp, mPtr->namePtr, nsPtr,
             mPtr->clientData, objc, objv);
@@ -351,7 +359,7 @@ Itcl_NewForwardMethod(
             flags, nameObj, prefixObj);
 }
 
-static Tcl_Obj *
+Tcl_Obj *
 Itcl_TclOOObjectName(
     Tcl_Interp *interp,
     Object *oPtr)

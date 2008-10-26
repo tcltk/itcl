@@ -20,7 +20,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itclResolve.c,v 1.1.2.14 2008/10/25 19:31:49 wiede Exp $
+ *     RCS:  $Id: itclResolve.c,v 1.1.2.15 2008/10/26 21:35:30 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -131,6 +131,7 @@ Itcl_ClassCmdResolver(
      */
     hPtr = Tcl_FindHashEntry(&iclsPtr->resolveCmds, name);
     if (hPtr == NULL) {
+#ifdef NOTDEF
 	if (!(iclsPtr->flags & ITCL_CLASS)) {
 	    namePtr = Tcl_NewStringObj(name, -1);
 	    Tcl_IncrRefCount(namePtr);
@@ -140,9 +141,12 @@ Itcl_ClassCmdResolver(
 	    }
         }
         if (hPtr == NULL) {
+#endif
             return TCL_CONTINUE;
+#ifdef NOTDEF
         }
         imPtr = (ItclMemberFunc*)Tcl_GetHashValue(hPtr);
+#endif
     } else {
         ItclCmdLookup *clookup;
         clookup = (ItclCmdLookup *)Tcl_GetHashValue(hPtr);

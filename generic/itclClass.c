@@ -25,7 +25,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann Copyright (c) 2007
  *
- *     RCS:  $Id: itclClass.c,v 1.1.2.26 2008/10/25 19:31:49 wiede Exp $
+ *     RCS:  $Id: itclClass.c,v 1.1.2.27 2008/10/26 21:35:30 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -40,9 +40,8 @@ static Tcl_NamespaceDeleteProc* _TclOONamespaceDeleteProc = NULL;
 /*
  *  FORWARD DECLARATIONS
  */
-static void ItclDestroyClass _ANSI_ARGS_((ClientData cdata));
-static void ItclDestroyClassNamesp _ANSI_ARGS_((ClientData cdata));
-static void ItclFreeClass _ANSI_ARGS_((char* cdata));
+static void ItclDestroyClass(ClientData cdata);
+static void ItclFreeClass (char* cdata);
 static void ItclDeleteFunction(ItclMemberFunc *imPtr);
 static void ItclDeleteComponent(ItclComponent *icPtr);
 static void ItclDeleteOption(ItclOption *ioptPtr);
@@ -234,6 +233,7 @@ Itcl_CreateClass(
 	    (Tcl_Namespace*)NULL, /* flags */ 0);
 
     if (classNs != NULL && Itcl_IsClassNamespace(classNs)) {
+fprintf(stderr, "NS!%s!\n", classNs->fullName);
         Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
             "class \"", path, "\" already exists",
             (char*)NULL);
@@ -285,14 +285,10 @@ Itcl_CreateClass(
      *  Allocate class definition data.
      */
     iclsPtr = (ItclClass*)ckalloc(sizeof(ItclClass));
-    iclsPtr->namePtr = NULL;
-    iclsPtr->fullNamePtr = NULL;
+    memset(iclsPtr, 0, sizeof(ItclClass));
     iclsPtr->interp = interp;
     iclsPtr->infoPtr = infoPtr;
     Itcl_PreserveData((ClientData)infoPtr);
-    iclsPtr->nsPtr = NULL;
-    iclsPtr->accessCmd = NULL;
-    iclsPtr->initCode = NULL;
 
     Tcl_InitObjHashTable(&iclsPtr->variables);
     Tcl_InitObjHashTable(&iclsPtr->functions);
@@ -480,7 +476,7 @@ Itcl_CreateClass(
     hPtr = Tcl_CreateHashEntry(&iclsPtr->variables, (char *)namePtr, &newEntry);
     Tcl_SetHashValue(hPtr, (ClientData)ivPtr);
 
-    if (infoPtr->currClassFlags & (ITCL_ECLASS|ITCL_NWIDGET)) {
+    if (infoPtr->currClassFlags & (ITCL_ECLASS|ITCL_NWIDGET|ITCL_TYPE)) {
         /*
          *  Add the built-in "itcl_options" variable to the list of
 	 *  data members.
@@ -527,7 +523,7 @@ Itcl_CreateClass(
         ItclComponent *icPtr;
         namePtr = Tcl_NewStringObj("itcl_hull", 9);
         Tcl_IncrRefCount(namePtr);
-        if (ItclCreateComponent(interp, iclsPtr, namePtr, &icPtr) != TCL_OK) {
+        if (ItclCreateComponent(interp, iclsPtr, namePtr, ITCL_COMMON, &icPtr) != TCL_OK) {
             return TCL_ERROR;
         }
     }
@@ -792,7 +788,7 @@ ItclDestroyClass(
  *  of that data, the class will completely vanish at this point.
  * ------------------------------------------------------------------------
  */
-static void
+void
 ItclDestroyClassNamesp(
     ClientData cdata)  /* class definition to be destroyed */
 {
@@ -1261,7 +1257,6 @@ FinalizeCreateObject(
     int result)
 {
     Tcl_Obj* objNamePtr = data[0];
-    ItclClass *iclsPtr = data[1];
     char *objName = Tcl_GetString(objNamePtr);
     if (result == TCL_OK) {
 	Tcl_ResetResult(interp);

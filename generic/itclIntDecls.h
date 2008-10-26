@@ -1,5 +1,5 @@
 /*
- * $Id: itclIntDecls.h,v 1.13.2.11 2008/10/19 16:49:51 wiede Exp $
+ * $Id: itclIntDecls.h,v 1.13.2.12 2008/10/26 21:35:30 wiede Exp $
  *
  * This file is (mostly) automatically generated from itcl.decls.
  */
@@ -281,7 +281,8 @@ ITCLAPI int		Itcl_ParseVarResolver (Tcl_Interp * interp,
 				const char* name, Tcl_Namespace * contextNs, 
 				int flags, Tcl_Var* rPtr);
 /* 86 */
-ITCLAPI int		Itcl_BiInit (Tcl_Interp * interp);
+ITCLAPI int		Itcl_BiInit (Tcl_Interp * interp,
+                                ItclObjectInfo *infoPtr);
 /* 87 */
 ITCLAPI int		Itcl_InstallBiMethods (Tcl_Interp * interp, 
 				ItclClass * cdefn);

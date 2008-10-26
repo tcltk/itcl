@@ -9,7 +9,7 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itclInt.h,v 1.17.2.39 2008/10/25 19:31:49 wiede Exp $
+ * RCS: @(#) $Id: itclInt.h,v 1.17.2.40 2008/10/26 21:35:30 wiede Exp $
  */
 
 #include <string.h>
@@ -234,6 +234,7 @@ typedef struct ItclClass {
     int unique;                   /* unique number for #auto generation */
     int flags;                    /* maintains class status */
     int callRefCount;             /* prevent deleting of class if refcount>1 */
+    Tcl_Obj *typeConstructorPtr;  /* initialization for types */
 } ItclClass;
 
 #define ITCL_CLASS		        0x0001000
@@ -367,7 +368,6 @@ typedef struct ItclMemberCode {
                                        * variable */
 #define ITCL_HULL_VAR          0x8000 /* non-zero => built-in "itcl_hull"
                                        * variable */
-#define ITCL_CALLED_FROM_EXEC 0x10000 /* non-zero => component */
 
 /*
  *  Instance components.
@@ -589,7 +589,8 @@ MODULE_SCOPE int ItclAfterCallMethod(ClientData clientData, Tcl_Interp *interp,
 MODULE_SCOPE void ItclReportObjectUsage(Tcl_Interp *interp,
         ItclObject *contextIoPtr, Tcl_Namespace *callerNsPtr,
 	Tcl_Namespace *contextNsPtr);
-MODULE_SCOPE void ItclGetInfoUsage(Tcl_Interp *interp, Tcl_Obj *objPtr);
+MODULE_SCOPE void ItclGetInfoUsage(Tcl_Interp *interp, Tcl_Obj *objPtr,
+        ItclObjectInfo *infoPtr);
 MODULE_SCOPE int ItclMapMethodNameProc(Tcl_Interp *interp, Tcl_Object oPtr,
         Tcl_Class *startClsPtr, Tcl_Obj *methodObj);
 MODULE_SCOPE int ItclCreateArgList(Tcl_Interp *interp, const char *str,
@@ -651,7 +652,7 @@ MODULE_SCOPE int ItclCreateMethod(Tcl_Interp* interp, ItclClass *iclsPtr,
 	Tcl_Obj *namePtr, const char* arglist, const char* body,
         ItclMemberFunc **imPtrPtr);
 MODULE_SCOPE int ItclCreateComponent(Tcl_Interp *interp, ItclClass *iclsPtr,
-        Tcl_Obj *componentPtr, ItclComponent **icPtrPtr);
+        Tcl_Obj *componentPtr, int type, ItclComponent **icPtrPtr);
 MODULE_SCOPE int Itcl_WidgetParseInit(Tcl_Interp *interp,
         ItclObjectInfo *infoPtr);
 MODULE_SCOPE int Itcl_WidgetBiInit(Tcl_Interp *interp);
@@ -680,6 +681,7 @@ MODULE_SCOPE ItclOption* ItclNewOption(Tcl_Interp *interp, ItclObject *ioPtr,
         const char *className, char *init, ItclMemberCode *mCodePtr);
 MODULE_SCOPE int ItclParseOption(ItclObjectInfo *infoPtr, Tcl_Interp *interp,
         int objc, Tcl_Obj *CONST objv[], ItclOption **ioptPtrPtr);
+MODULE_SCOPE void ItclDestroyClassNamesp(ClientData cdata);
 
 #include "itcl2TclOO.h"
 #include "itclVarsAndCmds.h"

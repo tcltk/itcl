@@ -23,7 +23,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclCmd.c,v 1.1.2.26 2008/10/25 19:31:49 wiede Exp $
+ *     RCS:  $Id: itclCmd.c,v 1.1.2.27 2008/10/26 21:35:30 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -69,14 +69,19 @@ Itcl_ThisCmd(
     int objc,
     Tcl_Obj *const *objv)
 {
+    FOREACH_HASH_DECLS;
     ClientData clientData2;
     Tcl_Object oPtr;
-    Tcl_HashEntry *hPtr;
+    Tcl_Obj **newObjv;
     ItclClass *iclsPtr;
+    ItclDelegatedFunction *idmPtr;
+    const char *funcName;
+    int result;
 
     if (objc == 1) {
         return Itcl_SelfCmd(clientData,interp, objc, objv);
     }
+    ItclShowArgs(0, "Itcl_ThisCmd", objc, objv);
     iclsPtr = clientData;
     clientData2 = Itcl_GetCallFrameClientData(interp);
     if (clientData2 == NULL) {
@@ -98,6 +103,26 @@ Itcl_ThisCmd(
 	return TCL_OK;
     }
     hPtr = Tcl_FindHashEntry(&iclsPtr->resolveCmds, Tcl_GetString(objv[1]));
+    funcName = Tcl_GetString(objv[1]);
+    if (!(iclsPtr->flags & ITCL_CLASS)) {
+        FOREACH_HASH_VALUE(idmPtr, &iclsPtr->delegatedFunctions) {
+	    if (strcmp(Tcl_GetString(idmPtr->namePtr), funcName) == 0) {
+                newObjv = (Tcl_Obj **)ckalloc(sizeof(Tcl_Obj *) * (objc +1));
+		newObjv[0] = Tcl_NewStringObj("this", -1);
+		Tcl_IncrRefCount(newObjv[0]);
+		const char *val;
+		val = Tcl_GetVar2(interp, Tcl_GetString(idmPtr->icPtr->namePtr), NULL, 0);
+fprintf(stderr, "vl!%p!\n", val);
+		newObjv[1] = Tcl_NewStringObj(val, -1);
+		Tcl_IncrRefCount(newObjv[1]);
+                memcpy(newObjv+1, objv+1, sizeof(Tcl_Obj *) * (objc -1));
+fprintf(stderr, "found delegated method!%s!\n", Tcl_GetString(idmPtr->namePtr));
+ItclShowArgs(0, "EVAL2", objc, newObjv);
+	        result = Tcl_EvalObjv(interp, objc, newObjv, 0);
+	        return result;
+	    }
+	}
+    }
     if (hPtr == NULL) {
 	Tcl_AppendResult(interp, "class \"", iclsPtr->nsPtr->fullName,
 	        "\" has no method: \"", Tcl_GetString(objv[1]), "\"", NULL);
@@ -1799,6 +1824,42 @@ Itcl_ExtendedClassCmd(
     if ((iclsPtr == NULL) && (result == TCL_OK)) {
         ItclShowArgs(0, "Itcl_ExtendedClassCmd", objc-1, objv);
 fprintf(stderr, "Itcl_ExtendedClassCmd!iclsPtr == NULL\n");
+        return TCL_ERROR;
+    }
+    return result;
+}
+
+/*
+ * ------------------------------------------------------------------------
+ *  Itcl_TypeClassCmd()
+ *
+ *  Used to create an [incr Tcl] type class.
+ *  An type class is like a class with additional functionality/
+ *  commands. it has no methods and vars but only the equivalent
+ *  of proc and common namely typemethod and typevariable
+ *
+ *  Returns TCL_OK/TCL_ERROR to indicate success/failure.
+ * ------------------------------------------------------------------------
+ */
+/* ARGSUSED */
+int
+Itcl_TypeClassCmd(
+    ClientData clientData,   /* infoPtr */
+    Tcl_Interp *interp,      /* current interpreter */
+    int objc,                /* number of arguments */
+    Tcl_Obj *CONST objv[])   /* argument objects */
+{
+    ItclClass *iclsPtr;
+    ItclObjectInfo *infoPtr;
+    int result;
+
+    infoPtr = (ItclObjectInfo *)clientData;
+    ItclShowArgs(1, "Itcl_TypeClassCmd", objc-1, objv);
+    result = ItclClassBaseCmd(clientData, interp, ITCL_TYPE, objc, objv,
+            &iclsPtr);
+    if ((iclsPtr == NULL) && (result == TCL_OK)) {
+        ItclShowArgs(0, "Itcl_ExtendedClassCmd", objc-1, objv);
+fprintf(stderr, "Itcl_TypeClassCmd!iclsPtr == NULL\n");
         return TCL_ERROR;
     }
     return result;

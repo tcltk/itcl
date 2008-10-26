@@ -25,7 +25,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclMethod.c,v 1.1.2.23 2008/10/25 19:31:49 wiede Exp $
+ *     RCS:  $Id: itclMethod.c,v 1.1.2.24 2008/10/26 21:35:30 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -736,7 +736,13 @@ Itcl_CreateMemberCode(
 	    if (strcmp(body, "@itcl-builtin-componentinstall") == 0) {
 	        isDone = 1;
 	    }
+	    if (strcmp(body, "@itcl-builtin-destroy") == 0) {
+	        isDone = 1;
+	    }
 	    if (strncmp(body, "@itcl-builtin-setget", 20) == 0) {
+	        isDone = 1;
+	    }
+	    if (strcmp(body, "@itcl-builtin-classunknown") == 0) {
 	        isDone = 1;
 	    }
 	    if (!isDone) {
@@ -1394,8 +1400,6 @@ NRExecMethod(
      *  the method in case it gets deleted during execution.
      */
     Itcl_PreserveData((ClientData)imPtr);
-    /* next line is VERY UGLY HACK !! to make test xxx run */
-    imPtr->flags |= ITCL_CALLED_FROM_EXEC; 
 
     result = Itcl_EvalMemberCode(interp, imPtr, ioPtr, objc, objv);
     Itcl_ReleaseData((ClientData)imPtr);
@@ -1795,11 +1799,17 @@ Itcl_CmdAliasProc(
 	if (strcmp(cmdName, "@itcl-builtin-configure") == 0) {
 	    return Tcl_FindCommand(interp, "::itcl::builtin::configure", NULL, 0);
 	}
+	if (strcmp(cmdName, "@itcl-builtin-destroy") == 0) {
+	    return Tcl_FindCommand(interp, "::itcl::builtin::destroy", NULL, 0);
+	}
 	if (strncmp(cmdName, "@itcl-builtin-setget", 20) == 0) {
 	    return Tcl_FindCommand(interp, "::itcl::builtin::setget", NULL, 0);
 	}
 	if (strcmp(cmdName, "@itcl-builtin-isa") == 0) {
 	    return Tcl_FindCommand(interp, "::itcl::builtin::isa", NULL, 0);
+	}
+	if (strcmp(cmdName, "@itcl-builtin-classunknown") == 0) {
+	    return Tcl_FindCommand(interp, "::itcl::builtin::classunknown", NULL, 0);
 	}
 	if (*cmdName == '@') {
 	    return Tcl_FindCommand(interp,
@@ -1989,7 +1999,7 @@ ItclCheckCallMethod(
 	if (strcmp(Tcl_GetString(imPtr->namePtr), "info") == 0) {
             Tcl_Obj *objPtr = Tcl_NewStringObj(
 	            "wrong # args: should be one of...\n", -1);
-            ItclGetInfoUsage(interp, objPtr);
+            ItclGetInfoUsage(interp, objPtr, imPtr->iclsPtr->infoPtr);
 	    Tcl_SetResult(interp, Tcl_GetString(objPtr), TCL_DYNAMIC);
 	} else {
             Tcl_AppendResult(interp, "wrong # args: should be \"",
@@ -2027,18 +2037,16 @@ ItclCheckCallMethod(
         }
     }
     if (callContextPtr == NULL) {
-	if (ioPtr == NULL) {
-	    Tcl_AppendResult(interp, "ItclCheckCallMethod  ioPtr == NULL", NULL);
-            if (isFinished != NULL) {
-                *isFinished = 1;
-            }
-	    return TCL_ERROR;
-	}
         callContextPtr = (ItclCallContext *)ckalloc(
                 sizeof(ItclCallContext));
-        callContextPtr->objectFlags = ioPtr->flags;
+	if (ioPtr == NULL) {
+            callContextPtr->objectFlags = 0;
+            callContextPtr->ioPtr = NULL;
+	} else {
+            callContextPtr->objectFlags = ioPtr->flags;
+            callContextPtr->ioPtr = ioPtr;
+	}
         callContextPtr->nsPtr = Tcl_GetCurrentNamespace(interp);
-        callContextPtr->ioPtr = ioPtr;
         callContextPtr->imPtr = imPtr;
         callContextPtr->refCount = 1;
     }
@@ -2047,7 +2055,9 @@ ItclCheckCallMethod(
     }
     Itcl_PushStack(callContextPtr, &imPtr->iclsPtr->infoPtr->contextStack);
 
-    ioPtr->callRefCount++;
+    if (ioPtr != NULL) {
+        ioPtr->callRefCount++;
+    }
     imPtr->iclsPtr->callRefCount++;
 //    ioPtr->flags |= ITCL_OBJECT_NO_VARNS_DELETE;
     if (!imPtr->iclsPtr->infoPtr->useOldResolvers) {
@@ -2107,22 +2117,24 @@ ItclAfterCallMethod(
      *  invoke constructors/destructors as needed.
      */
     ioPtr = callContextPtr->ioPtr;
-    if (imPtr->flags & (ITCL_CONSTRUCTOR | ITCL_DESTRUCTOR)) {
-        if ((imPtr->flags & ITCL_DESTRUCTOR) && ioPtr &&
-             ioPtr->destructed) {
-            Tcl_CreateHashEntry(ioPtr->destructed,
-                (char *)imPtr->iclsPtr->namePtr, &newEntry);
+    if (ioPtr != NULL) {
+        imPtr->iclsPtr->callRefCount--;
+        if (imPtr->flags & (ITCL_CONSTRUCTOR | ITCL_DESTRUCTOR)) {
+            if ((imPtr->flags & ITCL_DESTRUCTOR) && ioPtr &&
+                 ioPtr->destructed) {
+                Tcl_CreateHashEntry(ioPtr->destructed,
+                    (char *)imPtr->iclsPtr->namePtr, &newEntry);
+            }
+            if ((imPtr->flags & ITCL_CONSTRUCTOR) && ioPtr &&
+                 ioPtr->constructed) {
+                Tcl_CreateHashEntry(ioPtr->constructed,
+                    (char *)imPtr->iclsPtr->namePtr, &newEntry);
+            }
         }
-        if ((imPtr->flags & ITCL_CONSTRUCTOR) && ioPtr &&
-             ioPtr->constructed) {
-            Tcl_CreateHashEntry(ioPtr->constructed,
-                (char *)imPtr->iclsPtr->namePtr, &newEntry);
+        ioPtr->callRefCount--;
+        if (ioPtr->flags & ITCL_OBJECT_SHOULD_VARNS_DELETE) {
+            ItclDeleteObjectVariablesNamespace(interp, ioPtr);
         }
-    }
-    ioPtr->callRefCount--;
-    imPtr->iclsPtr->callRefCount--;
-    if (ioPtr->flags & ITCL_OBJECT_SHOULD_VARNS_DELETE) {
-        ItclDeleteObjectVariablesNamespace(interp, ioPtr);
     }
     
     callContextPtr->refCount--;

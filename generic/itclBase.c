@@ -9,7 +9,7 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itclBase.c,v 1.1.2.19 2008/10/25 19:31:49 wiede Exp $
+ * RCS: @(#) $Id: itclBase.c,v 1.1.2.20 2008/10/26 21:35:30 wiede Exp $
  */
 
 #include <stdlib.h>
@@ -286,7 +286,7 @@ opt = atoi(res_option);
      *  Create "itcl::builtin" namespace for commands that
      *  are automatically built into class definitions.
      */
-    if (Itcl_BiInit(interp) != TCL_OK) {
+    if (Itcl_BiInit(interp, infoPtr) != TCL_OK) {
         return TCL_ERROR;
     }
 

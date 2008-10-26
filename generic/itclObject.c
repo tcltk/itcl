@@ -24,7 +24,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann Copyright (c) 2007
  *
- *     RCS:  $Id: itclObject.c,v 1.1.2.39 2008/10/25 19:31:49 wiede Exp $
+ *     RCS:  $Id: itclObject.c,v 1.1.2.40 2008/10/26 21:35:30 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -701,9 +701,7 @@ ItclInitObjectVariables(
 	        hPtr2 = Tcl_FindHashEntry(&iclsPtr2->classCommons,
 		        (char *)ivPtr);
 		if (hPtr2 == NULL) {
-	            Itcl_PopCallFrame(interp);
-	            Tcl_DeleteNamespace(varNsPtr);
-		    return TCL_ERROR;
+		    goto errorCleanup;
 		}
 		varPtr = Tcl_GetHashValue(hPtr2);
 	        hPtr2 = Tcl_CreateHashEntry(&ioPtr->objectVariables,
