@@ -1,0 +1,505 @@
+#---------------------------------------------------------------------
+# TITLE:
+#       typeclass.test
+#
+# AUTHOR:
+#       Arnulf Wiedemann with a lot of code form the snit tests by
+#       Will Duquette
+#
+# DESCRIPTION:
+#       Test cases for ::itcl::type command.
+#       Uses the ::tcltest:: harness.
+#
+#       There is at least Tcl 8.6a3 needed
+#
+#    The tests assume tcltest 2.2
+#-----------------------------------------------------------------------
+
+# ### ### ### ######### ######### #########
+## Declare the minimal version of Tcl required to run the package
+## tested by this testsuite, and its dependencies.
+
+proc testsNeedTcl {version} {
+    # This command ensures that a minimum version of Tcl is used to
+    # run the tests in the calling testsuite. If the minimum is not
+    # met by the active interpreter we forcibly bail out of the
+    # testsuite calling the command. The command has to be called
+    # immediately after loading the utilities.
+
+    if {[package vsatisfies [package provide Tcl] $version]} return
+
+    puts "    Aborting the tests found in \"[file tail [info script]]\""
+    puts "    Requiring at least Tcl $version, have [package present Tcl]."
+
+    # This causes a 'return' in the calling scope.
+    return -code return
+}
+
+# ### ### ### ######### ######### #########
+## Declare the minimum version of Tcltest required to run the
+## testsuite.
+
+proc testsNeedTcltest {version} {
+    # This command ensure that a minimum version of the Tcltest
+    # support package is used to run the tests in the calling
+    # testsuite. If the minimum is not met by the loaded package we
+    # forcibly bail out of the testsuite calling the command. The
+    # command has to be called after loading the utilities. The only
+    # command allowed to come before it is 'textNeedTcl' above.
+
+    # Note that this command will try to load a suitable version of
+    # Tcltest if the package has not been loaded yet.
+
+    if {[lsearch [namespace children] ::tcltest] == -1} {
+	if {![catch {
+	    package require tcltest $version
+	}]} {
+	    namespace import -force ::tcltest::*
+	    return
+	}
+    } elseif {[package vcompare [package present tcltest] $version] >= 0} {
+	return
+    }
+
+    puts "    Aborting the tests found in [file tail [info script]]."
+    puts "    Requiring at least tcltest $version, have [package present tcltest]"
+
+    # This causes a 'return' in the calling scope.
+    return -code return
+}
+
+
+testsNeedTcl     8.6
+testsNeedTcltest 2.2
+
+#---------------------------------------------------------------------
+# typeconstructor
+
+::tcltest::loadTestedCommands
+
+if {1} {
+test typeconstructor-1.1 {a typeconstructor can be defined} -body {
+    ::itcl::type dog {
+        typevariable a
+
+        typeconstructor {
+            set a 1
+        }
+
+        typemethod aget {} {
+            return $a
+        }
+    }
+
+    dog aget
+} -cleanup {
+    dog destroy
+} -result {1}
+
+test typeconstructor-1.2 {only one typeconstructor can be defined} -body {
+    ::itcl::type dog {
+        typevariable a
+
+        typeconstructor {
+            set a 1
+        }
+
+        typeconstructor {
+            set a 2
+        }
+    }
+} -returnCodes {
+    error
+} -result {"typeconstructor" already defined in class "::dog"}
+
+test typeconstructor-1.3 {type proc is destroyed on error} -body {
+    catch {
+        type dog {
+            typeconstructor {
+                error "Error creating dog"
+            }
+        }
+    } result
+
+    list [namespace exists ::dog] [info command ::dog]
+} -result {0 {}}
+
+#-----------------------------------------------------------------------
+# Type components
+
+test typecomponent-1.1 {typecomponent defines typevariable} -body {
+    ::itcl::type dog {
+        typecomponent mycomp
+
+        typemethod test {} {
+            return $mycomp
+        }
+    }
+
+    dog test
+} -cleanup {
+    dog destroy
+} -result {}
+
+
+test typecomponent-1.4 {typecomponent -inherit} -body {
+    ::itcl::type dog {
+        typecomponent mycomp -inherit
+
+        typeconstructor {
+            set mycomp string
+        }
+    }
+
+    dog length foo
+} -cleanup {
+    dog destroy
+} -result {3}
+
+#-----------------------------------------------------------------------
+# Typemethod delegation
+
+puts stderr dtypemethod-1.1
+test dtypemethod-1.1 {delegate typemethod to non-existent component} -body {
+    set result ""
+
+    ::itcl::type dog {
+        delegate typemethod foo to bar
+    }
+
+    dog foo
+} -returnCodes {
+    error
+} -result {::dog delegates typemethod "foo" to undefined typecomponent "bar"}
+
+puts stderr dtypemethod-1.2
+test dtypemethod-1.2 {delegating to existing typecomponent} -body {
+    ::itcl::type dog {
+        delegate typemethod length to string
+
+        typeconstructor {
+            set string string
+        }
+    }
+
+    dog length foo
+} -cleanup {
+    dog destroy
+} -result {3}
+
+puts stderr dtypemethod-1.4
+test dtypemethod-1.4 {delegating to existing typecomponent with error} -body {
+    ::itcl::type dog {
+        delegate typemethod length to string
+
+        typeconstructor {
+            set string string
+        }
+    }
+
+    dog length foo bar
+} -cleanup {
+    dog destroy
+} -returnCodes {
+    error
+} -result {wrong # args: should be "dog length string"}
+
+puts stderr dtypemethod-1.5
+test dtypemethod-1.5 {delegating unknown typemethods to existing typecomponent} -body {
+    ::itcl::type dog {
+        delegate typemethod * to string
+
+        typeconstructor {
+            set string string
+        }
+    }
+
+    dog length foo
+} -cleanup {
+    dog destroy
+} -result {3}
+
+puts stderr dtypemethod-1.6a
+test dtypemethod-1.6a {delegating unknown typemethod to existing typecomponent with error} -body {
+    ::itcl::type dog {
+        delegate typemethod * to stringhandler
+
+        typeconstructor {
+            set stringhandler string
+        }
+    }
+
+    dog foo bar
+} -cleanup {
+    dog destroy
+} -returnCodes {
+    error
+} -result {unknown or ambiguous subcommand "foo": must be bytelength, compare, equal, first, index, is, last, length, map, match, range, repeat, replace, reverse, tolower, totitle, toupper, trim, trimleft, trimright, wordend, or wordstart}
+
+puts stderr dtypemethod-1.7
+test dtypemethod-1.7 {can't delegate local typemethod: order 1} -body {
+    ::itcl::type dog {
+        typemethod foo {} {}
+        delegate typemethod foo to bar
+    }
+} -returnCodes {
+    error
+} -result {Error in "delegate typemethod foo...", "foo" has been defined locally.}
+
+puts stderr dtypemethod-1.8
+test dtypemethod-1.8 {can't delegate local typemethod: order 2} -body {
+    ::itcl::type dog {
+        delegate typemethod foo to bar
+        typemethod foo {} {}
+    }
+} -returnCodes {
+    error
+} -result {Error in "typemethod foo...", "foo" has been delegated}
+
+puts stderr dtypemethod-1.10
+test dtypemethod-1.10 {excepted methods are caught properly} -body {
+    ::itcl::type dog {
+        delegate typemethod * to string except {match index}
+
+        typeconstructor {
+            set string string
+        }
+    }
+
+    catch {dog length foo} a
+    catch {dog match foo}  b
+    catch {dog index foo}  c
+
+    list $a $b $c
+} -cleanup {
+    dog destroy
+} -result {3 {unknown subcommand "match": must be length} {unknown subcommand "index": must be length}}
+
+puts stderr dtypemethod-1.11
+test dtypemethod-1.11 {as clause can include arguments} -body {
+    proc tail {a b} {
+        return "<$a $b>"
+    }
+
+    ::itcl::type dog {
+        delegate typemethod wag to tail as {wag briskly}
+
+        typeconstructor {
+            set tail tail
+        }
+    }
+
+    dog wag
+} -cleanup {
+    dog destroy
+    rename tail ""
+} -result {<wag briskly>}
+
+puts stderr dtypemethod-2.1
+test dtypemethod-2.1 {'using "%c %m"' gets normal behavior} -body {
+    ::itcl::type dog {
+        delegate typemethod length to string using {%c %m}
+
+        typeconstructor {
+            set string string
+        }
+    }
+
+    dog length foo
+} -cleanup {
+    dog destroy
+} -result {3}
+
+#end
+}
+
+puts stderr dtypemethod-2.3
+test dtypemethod-2.3 {"%%" is handled properly} -body {
+    proc echo {args} { join $args "|" }
+
+    ::itcl::type dog {
+        delegate typemethod wag using {echo %%m %%%m}
+    }
+
+    dog wag
+} -cleanup {
+    dog destroy
+    rename echo ""
+} -result {%m|%wag}
+
+
+if {0} {
+test component-1.1 {component defines variable} -body {
+    ::itcl::type dog {
+        typecomponent mycomp
+
+        public proc test {} {
+            return $mycomp
+        }
+    }
+
+    dog fido
+    fido test
+} -cleanup {
+    ::itcl::delete object fido
+    ::itcl::delete class dog
+} -result {}
+
+test component-1.2 {component -inherit} -body {
+    ::itcl::extendedclass dog {
+        component mycomp -inherit
+
+        constructor {} {
+            set mycomp string
+        }
+    }
+
+    dog fido
+    fido length foo
+} -cleanup {
+    ::itcl::delete object fido
+    ::itcl::delete class dog
+} -result {3}
+
+test component-1.3 {component -inherit can only have one of it} -body {
+    ::itcl::extendedclass dogbase {
+        component mycompbase -inherit
+    }
+
+    ::itcl::extendedclass dog {
+	inherit dogbase
+        component mycomp -inherit
+
+        constructor {} {
+            set mycomp string
+        }
+    }
+
+    dog fido
+    fido length foo
+} -cleanup {
+    ::itcl::delete class dog
+    ::itcl::delete class dogbase
+} -returnCodes {
+    error
+} -result {object "fido" can only have one component with inherit. Had already component "mycomp" now component "mycompbase"error in ItclInitObjectVariables}
+
+#-----------------------------------------------------------------------
+# Typemethod delegation
+
+test delegatemethod-1.1 {delegate method to non-existent component} -body {
+    set result ""
+
+    ::itcl::extendedclass dog {
+        delegate method foo to bar
+    }
+
+    dog fido
+} -returnCodes {
+    error
+} -cleanup {
+} -result {class "::dog" has no component "bar"}
+
+test delegatemethod-1.2 {delegating to existing component} -body {
+    ::itcl::extendedclass dog {
+	component string
+        delegate method length to string
+
+        constructor {} {
+            set string string
+        }
+    }
+
+    dog fido
+    fido length foo
+} -cleanup {
+    ::itcl::delete object fido
+    ::itcl::delete class dog
+} -result {3}
+
+test delegatemethod-1.3 {delegating to existing component with error} -body {
+    ::itcl::extendedclass dog {
+#	component string
+        delegate method length to string
+
+        constructor {} {
+            set string string
+        }
+    }
+
+    dog fido
+    fido length foo bar
+} -cleanup {
+    ::itcl::delete class dog
+} -returnCodes {
+    error
+} -result {wrong # args: should be "fido length string"}
+
+test delegatemethod-1.5 {delegating unknown methods to existing typecomponent} -body {
+    ::itcl::extendedclass dog {
+#	component string
+        delegate method * to string
+
+        constructor {} {
+            set string string
+        }
+    }
+
+    dog fido
+    fido length foo
+} -cleanup {
+    ::itcl::delete object fido
+    ::itcl::delete class dog
+} -result {3}
+
+test delegatemethod-1.6a {delegating unknown method to existing component with error} -body {
+    ::itcl::extendedclass dog {
+        component stringhandler
+        delegate method * to stringhandler
+
+        constructor {} {
+            set stringhandler string
+        }
+    }
+
+    dog fido
+    fido foo bar
+} -cleanup {
+    ::itcl::delete object fido
+    ::itcl::delete class dog
+} -returnCodes {
+    error
+} -result {unknown or ambiguous subcommand "foo": must be bytelength, compare, equal, first, index, is, last, length, map, match, range, repeat, replace, reverse, tolower, totitle, toupper, trim, trimleft, trimright, wordend, or wordstart}
+
+test delegatemethod-1.7 {can't delegate local method: order 1} -body {
+    ::itcl::extendedclass dog {
+        component bar
+        method foo {} {}
+        delegate method foo to bar
+    }
+} -cleanup {
+    ::itcl::delete class dog
+} -returnCodes {
+    error
+} -result {Error in "delegate method foo...", "foo" has been defined locally.}
+
+test delegatemethod-1.8 {can't delegate local method: order 2} -body {
+    ::itcl::extendedclass dog {
+        component bar
+        delegate method foo to bar
+        method foo {} {}
+    }
+} -cleanup {
+    ::itcl::delete class dog
+} -returnCodes {
+    error
+} -result {Error in "method foo...", "foo" has been delegated}
+
+}
+
+
+#---------------------------------------------------------------------
+# Clean up
+
+::tcltest::cleanupTests
+return
