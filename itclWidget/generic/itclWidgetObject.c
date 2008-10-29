@@ -11,7 +11,7 @@
  * ========================================================================
  *  Author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclWidgetObject.c,v 1.1.2.2 2008/10/25 19:41:49 wiede Exp $
+ *     RCS:  $Id: itclWidgetObject.c,v 1.1.2.3 2008/10/29 20:29:03 wiede Exp $
  * ========================================================================
  *           Copyright (c) 2007 Arnulf Wiedemann
  * ------------------------------------------------------------------------
@@ -92,10 +92,8 @@ HullAndOptionsInstall(
     int *newObjc,
     Tcl_Obj **newObjv)
 {
-    FOREACH_HASH_DECLS;
     Tcl_Obj *widgetClassPtr;
     Tcl_Obj **hullObjv;
-    ItclOption *ioptPtr;
     char *token;
     const char *hullType;
     int hullObjc;
@@ -203,7 +201,6 @@ ComponentInstall(
     int objc,
     Tcl_Obj * const objv[])
 {
-    FOREACH_HASH_DECLS;
 
     ItclShowArgs(0, "ComponentInstall", objc, objv);
 
