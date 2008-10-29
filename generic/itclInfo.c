@@ -24,7 +24,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclInfo.c,v 1.1.2.20 2008/10/26 21:35:30 wiede Exp $
+ *     RCS:  $Id: itclInfo.c,v 1.1.2.21 2008/10/29 20:28:47 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -2067,6 +2067,7 @@ Itcl_BiInfoWidgetCmd(
     int objc,                /* number of arguments */
     Tcl_Obj *CONST objv[])   /* argument objects */
 {
+#ifdef NOTYET
     static const char *components[] = {
 	"-name", "-inherit", "-value", (char*)NULL
     };
@@ -2124,7 +2125,7 @@ Itcl_BiInfoWidgetCmd(
     }
     contextIclsPtr = Tcl_GetHashValue(hPtr);
 
-
+#endif
 
     return TCL_OK;
 }
@@ -2153,6 +2154,7 @@ Itcl_BiInfoExtendedClassCmd(
     int objc,                /* number of arguments */
     Tcl_Obj *CONST objv[])   /* argument objects */
 {
+#ifdef NOTYET
     static const char *components[] = {
 	"-name", "-inherit", "-value", (char*)NULL
     };
@@ -2210,7 +2212,7 @@ Itcl_BiInfoExtendedClassCmd(
     }
     contextIclsPtr = Tcl_GetHashValue(hPtr);
 
-
+#endif
 
     return TCL_OK;
 }
@@ -2238,6 +2240,7 @@ Itcl_BiInfoDelegatedCmd(
     int objc,                /* number of arguments */
     Tcl_Obj *CONST objv[])   /* argument objects */
 {
+#ifdef NOTYET
     static const char *components[] = {
 	"-name", "-inherit", "-value", (char*)NULL
     };
@@ -2295,7 +2298,7 @@ Itcl_BiInfoDelegatedCmd(
     }
     contextIclsPtr = Tcl_GetHashValue(hPtr);
 
-
+#endif
 
     return TCL_OK;
 }
@@ -2323,6 +2326,8 @@ Itcl_BiInfoHullCmd(
     int objc,                /* number of arguments */
     Tcl_Obj *CONST objv[])   /* argument objects */
 {
+    
+#ifdef NOTYET
     static const char *components[] = {
 	"-name", "-inherit", "-value", (char*)NULL
     };
@@ -2380,7 +2385,7 @@ Itcl_BiInfoHullCmd(
     }
     contextIclsPtr = Tcl_GetHashValue(hPtr);
 
-
+#endif
 
     return TCL_OK;
 }

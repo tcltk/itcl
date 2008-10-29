@@ -1,5 +1,5 @@
 /*
- * $Id: itclIntDecls.h,v 1.13.2.12 2008/10/26 21:35:30 wiede Exp $
+ * $Id: itclIntDecls.h,v 1.13.2.13 2008/10/29 20:28:47 wiede Exp $
  *
  * This file is (mostly) automatically generated from itcl.decls.
  */
@@ -281,8 +281,8 @@ ITCLAPI int		Itcl_ParseVarResolver (Tcl_Interp * interp,
 				const char* name, Tcl_Namespace * contextNs, 
 				int flags, Tcl_Var* rPtr);
 /* 86 */
-ITCLAPI int		Itcl_BiInit (Tcl_Interp * interp,
-                                ItclObjectInfo *infoPtr);
+ITCLAPI int		Itcl_BiInit (Tcl_Interp * interp, 
+				ItclObjectInfo * infoPtr);
 /* 87 */
 ITCLAPI int		Itcl_InstallBiMethods (Tcl_Interp * interp, 
 				ItclClass * cdefn);
@@ -602,8 +602,8 @@ typedef struct ItclIntStubs {
     int (*itcl_ClassProcCmd) (ClientData clientData, Tcl_Interp * interp, int objc, Tcl_Obj *CONST objv[]); /* 82 */
     int (*itcl_ClassVariableCmd) (ClientData clientData, Tcl_Interp * interp, int objc, Tcl_Obj *CONST objv[]); /* 83 */
     int (*itcl_ClassCommonCmd) (ClientData clientData, Tcl_Interp * interp, int objc, Tcl_Obj *CONST objv[]); /* 84 */
-    int (*itcl_ParseVarResolver) (Tcl_Interp * interp, CONST char* name, Tcl_Namespace * contextNs, int flags, Tcl_Var* rPtr); /* 85 */
-    int (*itcl_BiInit) (Tcl_Interp * interp); /* 86 */
+    int (*itcl_ParseVarResolver) (Tcl_Interp * interp, const char* name, Tcl_Namespace * contextNs, int flags, Tcl_Var* rPtr); /* 85 */
+    int (*itcl_BiInit) (Tcl_Interp * interp, ItclObjectInfo * infoPtr); /* 86 */
     int (*itcl_InstallBiMethods) (Tcl_Interp * interp, ItclClass * cdefn); /* 87 */
     int (*itcl_BiIsaCmd) (ClientData clientData, Tcl_Interp * interp, int objc, Tcl_Obj *CONST objv[]); /* 88 */
     int (*itcl_BiConfigureCmd) (ClientData clientData, Tcl_Interp * interp, int objc, Tcl_Obj *CONST objv[]); /* 89 */

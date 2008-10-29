@@ -20,7 +20,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itclResolve.c,v 1.1.2.15 2008/10/26 21:35:30 wiede Exp $
+ *     RCS:  $Id: itclResolve.c,v 1.1.2.16 2008/10/29 20:28:47 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -112,7 +112,6 @@ Itcl_ClassCmdResolver(
     ItclObjectInfo *infoPtr;
 
     Tcl_HashEntry *hPtr;
-    Tcl_Obj *namePtr;
     ItclMemberFunc *imPtr;
     int isCmdDeleted;
 
