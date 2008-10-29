@@ -159,7 +159,6 @@ test typecomponent-1.4 {typecomponent -inherit} -body {
 #-----------------------------------------------------------------------
 # Typemethod delegation
 
-puts stderr dtypemethod-1.1
 test dtypemethod-1.1 {delegate typemethod to non-existent component} -body {
     set result ""
 
@@ -172,7 +171,6 @@ test dtypemethod-1.1 {delegate typemethod to non-existent component} -body {
     error
 } -result {::dog delegates typemethod "foo" to undefined typecomponent "bar"}
 
-puts stderr dtypemethod-1.2
 test dtypemethod-1.2 {delegating to existing typecomponent} -body {
     ::itcl::type dog {
         delegate typemethod length to string
@@ -187,7 +185,6 @@ test dtypemethod-1.2 {delegating to existing typecomponent} -body {
     dog destroy
 } -result {3}
 
-puts stderr dtypemethod-1.4
 test dtypemethod-1.4 {delegating to existing typecomponent with error} -body {
     ::itcl::type dog {
         delegate typemethod length to string
@@ -204,7 +201,6 @@ test dtypemethod-1.4 {delegating to existing typecomponent with error} -body {
     error
 } -result {wrong # args: should be "dog length string"}
 
-puts stderr dtypemethod-1.5
 test dtypemethod-1.5 {delegating unknown typemethods to existing typecomponent} -body {
     ::itcl::type dog {
         delegate typemethod * to string
@@ -219,7 +215,6 @@ test dtypemethod-1.5 {delegating unknown typemethods to existing typecomponent} 
     dog destroy
 } -result {3}
 
-puts stderr dtypemethod-1.6a
 test dtypemethod-1.6a {delegating unknown typemethod to existing typecomponent with error} -body {
     ::itcl::type dog {
         delegate typemethod * to stringhandler
@@ -236,7 +231,6 @@ test dtypemethod-1.6a {delegating unknown typemethod to existing typecomponent w
     error
 } -result {unknown or ambiguous subcommand "foo": must be bytelength, compare, equal, first, index, is, last, length, map, match, range, repeat, replace, reverse, tolower, totitle, toupper, trim, trimleft, trimright, wordend, or wordstart}
 
-puts stderr dtypemethod-1.7
 test dtypemethod-1.7 {can't delegate local typemethod: order 1} -body {
     ::itcl::type dog {
         typemethod foo {} {}
@@ -246,7 +240,6 @@ test dtypemethod-1.7 {can't delegate local typemethod: order 1} -body {
     error
 } -result {Error in "delegate typemethod foo...", "foo" has been defined locally.}
 
-puts stderr dtypemethod-1.8
 test dtypemethod-1.8 {can't delegate local typemethod: order 2} -body {
     ::itcl::type dog {
         delegate typemethod foo to bar
@@ -256,7 +249,6 @@ test dtypemethod-1.8 {can't delegate local typemethod: order 2} -body {
     error
 } -result {Error in "typemethod foo...", "foo" has been delegated}
 
-puts stderr dtypemethod-1.10
 test dtypemethod-1.10 {excepted methods are caught properly} -body {
     ::itcl::type dog {
         delegate typemethod * to string except {match index}
@@ -275,7 +267,6 @@ test dtypemethod-1.10 {excepted methods are caught properly} -body {
     dog destroy
 } -result {3 {unknown subcommand "match": must be length} {unknown subcommand "index": must be length}}
 
-puts stderr dtypemethod-1.11
 test dtypemethod-1.11 {as clause can include arguments} -body {
     proc tail {a b} {
         return "<$a $b>"
@@ -295,7 +286,6 @@ test dtypemethod-1.11 {as clause can include arguments} -body {
     rename tail ""
 } -result {<wag briskly>}
 
-puts stderr dtypemethod-2.1
 test dtypemethod-2.1 {'using "%c %m"' gets normal behavior} -body {
     ::itcl::type dog {
         delegate typemethod length to string using {%c %m}
@@ -310,10 +300,21 @@ test dtypemethod-2.1 {'using "%c %m"' gets normal behavior} -body {
     dog destroy
 } -result {3}
 
-#end
-}
+test dtypemethod-2.2 {All relevant 'using' conversions are converted} -body {
+    proc echo {args} {
+        return $args
+    }
 
-puts stderr dtypemethod-2.3
+    ::itcl::type dog {
+        delegate typemethod tail using {echo %% %t %M %m %j %n %w %s %c}
+    }
+
+    dog tail
+} -cleanup {
+    dog destroy
+    rename echo ""
+} -result {% ::dog tail tail tail %n %w %s %c}
+
 test dtypemethod-2.3 {"%%" is handled properly} -body {
     proc echo {args} { join $args "|" }
 
@@ -326,6 +327,68 @@ test dtypemethod-2.3 {"%%" is handled properly} -body {
     dog destroy
     rename echo ""
 } -result {%m|%wag}
+
+test dtypemethod-2.4 {Method "*" and "using"} -body {
+    proc echo {args} { join $args "|" }
+
+    ::itcl::type dog {
+        delegate typemethod * using {echo %m}
+    }
+
+    list [dog wag] [dog bark loudly]
+} -cleanup {
+    dog destroy
+    rename echo ""
+} -result {wag bark|loudly}
+
+test dtypemethod-3.1 {typecomponent names can be changed dynamically} -body {
+    proc echo {args} { join $args "|" }
+
+    ::itcl::type dog {
+        delegate typemethod length to mycomp
+
+        typeconstructor {
+            set mycomp string
+        }
+
+        typemethod switchit {} {
+            set mycomp echo
+        }
+    }
+
+    set a [dog length foo]
+    dog switchit
+    set b [dog length foo]
+
+    list $a $b
+} -cleanup {
+    dog destroy
+    rename echo ""
+} -result {3 length|foo}
+
+#end
+}
+
+test dtypemethod-4.4 {redefinition is OK} -body {
+    ::itcl::type wag {
+        method tail    {} {return "wags tail"}
+        method briskly {} {return "wags tail briskly"}
+    }
+
+    ::itcl::type dog {
+        typeconstructor {
+            set wag [wag #auto]
+        }
+        delegate typemethod tail to wag as tail
+        delegate typemethod tail to wag as briskly
+    }
+
+    dog tail
+} -cleanup {
+    dog destroy
+    wag destroy
+} -result {wags tail briskly}
+
 
 
 if {0} {
