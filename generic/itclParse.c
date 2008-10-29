@@ -39,7 +39,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclParse.c,v 1.1.2.33 2008/10/26 21:35:30 wiede Exp $
+ *     RCS:  $Id: itclParse.c,v 1.1.2.34 2008/10/29 19:59:00 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -757,11 +757,13 @@ ItclClassBaseCmd(
         }
         FOREACH_HASH_VALUE(idmPtr, &iclsPtr->delegatedFunctions) {
 	    const char *val;
-	    val = Tcl_GetVar2(interp,
-	            Tcl_GetString(idmPtr->icPtr->ivPtr->namePtr), NULL, 0);
-	    if (strlen(val) == 0) {
-	         result = TCL_ERROR;
-		 break;
+	    if (idmPtr->icPtr != NULL) {
+	        val = Tcl_GetVar2(interp,
+	                Tcl_GetString(idmPtr->icPtr->ivPtr->namePtr), NULL, 0);
+	        if (strlen(val) == 0) {
+	             result = TCL_ERROR;
+		     break;
+	        }
 	    }
 	}
         Itcl_PopCallFrame(interp);
@@ -2165,7 +2167,6 @@ ItclCreateComponent(
 	Tcl_AppendToObj(bodyPtr, "return [$", -1);
 	Tcl_AppendToObj(bodyPtr, Tcl_GetString(componentPtr), -1);
 	Tcl_AppendToObj(bodyPtr, " {*}$args]", -1);
-fprintf(stderr, "COMP create METHOD\n");
         if (ItclCreateMethod(interp, iclsPtr, componentPtr, "args",
 	        Tcl_GetString(bodyPtr), &imPtr) != TCL_OK) {
             return TCL_ERROR;
@@ -2385,6 +2386,7 @@ delegate method * ?to <componentName>? ?using <pattern>? ?except <methods>?";
         return TCL_ERROR;
     }
     componentPtr = NULL;
+    icPtr = NULL;
     methodName = Tcl_GetString(objv[1]);
     component = NULL;
     targetPtr = NULL;
@@ -2450,11 +2452,6 @@ delegate method * ?to <componentName>? ?using <pattern>? ?except <methods>?";
         hPtr = Tcl_FindHashEntry(&iclsPtr->delegatedFunctions, (char *)
                 methodNamePtr);
     }
-    if (hPtr != NULL) {
-        Tcl_AppendResult(interp, "method \"", methodName,
-	        "\" is already delegated", NULL);
-        return TCL_ERROR;
-    }
 
     if (ioPtr != NULL) {
         Itcl_InitHierIter(&hier, ioPtr->iclsPtr);
@@ -2470,19 +2467,17 @@ delegate method * ?to <componentName>? ?using <pattern>? ?except <methods>?";
         hPtr = Tcl_FindHashEntry(&iclsPtr->components, (char *)componentPtr);
     }
     if (hPtr == NULL) {
-        if (ItclCreateComponent(interp, iclsPtr, componentPtr,
-	        ITCL_COMMON, &icPtr) != TCL_OK) {
-            return TCL_ERROR;
+	if (componentPtr != NULL) {
+            if (ItclCreateComponent(interp, iclsPtr, componentPtr,
+	            ITCL_COMMON, &icPtr) != TCL_OK) {
+                return TCL_ERROR;
+            }
+            hPtr = Tcl_FindHashEntry(&iclsPtr->components, (char *)componentPtr);
         }
-        hPtr = Tcl_FindHashEntry(&iclsPtr->components, (char *)componentPtr);
-#ifdef NOTDEF
-	Tcl_AppendResult(interp, what, " \"", whatName,
-	        "\" has no component \"", Tcl_GetString(componentPtr), "\"",
-		NULL);
-        return TCL_ERROR;
-#endif
     }
-    icPtr = Tcl_GetHashValue(hPtr);
+    if (hPtr != NULL) {
+        icPtr = Tcl_GetHashValue(hPtr);
+    }
     if (*methodName != '*') {
 	/* FIXME !!! */
         /* check for locally defined method */
@@ -2503,9 +2498,6 @@ delegate method * ?to <componentName>? ?using <pattern>? ?except <methods>?";
     memset(idmPtr, 0, sizeof(ItclDelegatedFunction));
     Tcl_InitObjHashTable(&idmPtr->exceptions);
     if (*methodName != '*') {
-        if ((targetPtr == NULL) && (usingPtr == NULL)) {
-	    targetPtr = methodNamePtr;
-	}
         idmPtr->namePtr = methodNamePtr;
 
     } else {
@@ -2944,6 +2936,7 @@ Itcl_ClassDelegateTypeMethodCmd(
 delegate typemethod <typeMethodName> ?to <componentName>? using <pattern>\n\
 delegate typemethod * ?to <componentName>? ?using <pattern>? ?except <typemethods>?";
     componentPtr = NULL;
+    icPtr = NULL;
     infoPtr = (ItclObjectInfo*)clientData;
     iclsPtr = (ItclClass*)Itcl_PeekStack(&infoPtr->clsStack);
     if (iclsPtr->flags & ITCL_CLASS) {
@@ -3011,28 +3004,17 @@ delegate typemethod * ?to <componentName>? ?using <pattern>? ?except <typemethod
     Tcl_IncrRefCount(typeMethodNamePtr);
     hPtr = Tcl_FindHashEntry(&iclsPtr->delegatedFunctions, (char *)
             typeMethodNamePtr);
-    if (hPtr != NULL) {
-        Tcl_AppendResult(interp, "typemethod \"", typeMethodName,
-	        "\" is already delegated", NULL);
-        return TCL_ERROR;
-    }
-
 
     if (componentPtr != NULL) {
-#ifdef NOTDEF
 	hPtr = Tcl_FindHashEntry(&iclsPtr->components, (char *)componentPtr);
 	if (hPtr == NULL) {
-	    Tcl_AppendResult(interp, Tcl_GetString(iclsPtr->fullNamePtr),
-	            " delegates typemethod \"", typeMethodName, 
-		    "\" to undefined typecomponent \"",
-                    Tcl_GetString(componentPtr), "\"", NULL);
-	    return TCL_ERROR;
+            if (ItclCreateComponent(interp, iclsPtr, componentPtr,
+	            ITCL_COMMON, &icPtr) != TCL_OK) {
+                return TCL_ERROR;
+            }
+        } else {
+	    icPtr = Tcl_GetHashValue(hPtr);
 	}
-#endif
-        if (ItclCreateComponent(interp, iclsPtr, componentPtr,
-	        ITCL_COMMON, &icPtr) != TCL_OK) {
-            return TCL_ERROR;
-        }
     } else {
         icPtr = NULL;
     }
@@ -3040,15 +3022,12 @@ delegate typemethod * ?to <componentName>? ?using <pattern>? ?except <typemethod
     memset(idmPtr, 0, sizeof(ItclDelegatedFunction));
     Tcl_InitObjHashTable(&idmPtr->exceptions);
     if (*typeMethodName != '*') {
-        if ((targetPtr == NULL) && (usingPtr == NULL)) {
-	    targetPtr = typeMethodNamePtr;
-	}
 	/* FIXME !!! */
         /* check for locally defined typemethod */
 	hPtr = Tcl_FindHashEntry(&iclsPtr->functions, (char *)typeMethodNamePtr);
 	if (hPtr != NULL) {
 	    Tcl_AppendResult(interp, "Error in \"delegate typemethod ",
-	    typeMethodName, "...\", \"", typeMethodName,
+	            typeMethodName, "...\", \"", typeMethodName,
 	            "\" has been defined locally.", NULL);
 	    return TCL_ERROR;
 	}

@@ -9,7 +9,7 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itclInt.h,v 1.17.2.40 2008/10/26 21:35:30 wiede Exp $
+ * RCS: @(#) $Id: itclInt.h,v 1.17.2.41 2008/10/29 19:59:00 wiede Exp $
  */
 
 #include <string.h>
@@ -682,6 +682,10 @@ MODULE_SCOPE ItclOption* ItclNewOption(Tcl_Interp *interp, ItclObject *ioPtr,
 MODULE_SCOPE int ItclParseOption(ItclObjectInfo *infoPtr, Tcl_Interp *interp,
         int objc, Tcl_Obj *CONST objv[], ItclOption **ioptPtrPtr);
 MODULE_SCOPE void ItclDestroyClassNamesp(ClientData cdata);
+MODULE_SCOPE int ExpandDelegateAs(Tcl_Interp *interp, ItclObject *ioPtr,
+	ItclClass *iclsPtr, ItclDelegatedFunction *idmPtr,
+	const char *funcName, Tcl_Obj *listPtr);
+
 
 #include "itcl2TclOO.h"
 #include "itclVarsAndCmds.h"

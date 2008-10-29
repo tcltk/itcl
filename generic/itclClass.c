@@ -25,7 +25,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann Copyright (c) 2007
  *
- *     RCS:  $Id: itclClass.c,v 1.1.2.27 2008/10/26 21:35:30 wiede Exp $
+ *     RCS:  $Id: itclClass.c,v 1.1.2.28 2008/10/29 19:59:00 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -233,7 +233,6 @@ Itcl_CreateClass(
 	    (Tcl_Namespace*)NULL, /* flags */ 0);
 
     if (classNs != NULL && Itcl_IsClassNamespace(classNs)) {
-fprintf(stderr, "NS!%s!\n", classNs->fullName);
         Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
             "class \"", path, "\" already exists",
             (char*)NULL);
@@ -1256,11 +1255,14 @@ FinalizeCreateObject(
     Tcl_Interp *interp,
     int result)
 {
-    Tcl_Obj* objNamePtr = data[0];
+    Tcl_Obj *objNamePtr = data[0];
+    ItclClass *iclsPtr = data[1];
     char *objName = Tcl_GetString(objNamePtr);
     if (result == TCL_OK) {
-	Tcl_ResetResult(interp);
-        Tcl_SetObjResult(interp, Tcl_NewStringObj(objName, -1));
+	if (!(iclsPtr->flags & ITCL_TYPE)) {
+	    Tcl_ResetResult(interp);
+            Tcl_SetObjResult(interp, Tcl_NewStringObj(objName, -1));
+	}
     }
 
     if (result == TCL_ERROR) {
@@ -1313,9 +1315,7 @@ Itcl_HandleClass(
     char *start;
     char *pos;
     char *match;
-    int result;
 
-    result = TCL_OK;
     Tcl_ResetResult(interp);
     ItclShowArgs(1, "Itcl_HandleClassCmd", objc, objv);
     /*
@@ -1430,9 +1430,10 @@ Itcl_HandleClass(
     Tcl_Obj *objNamePtr = Tcl_NewStringObj(objName, -1);
     Tcl_IncrRefCount(objNamePtr);
     Tcl_DStringFree(&buffer);
-    Itcl_NRAddCallback(interp, FinalizeCreateObject, objNamePtr, iclsPtr, NULL, NULL);
-    result = ItclCreateObject(interp, Tcl_GetString(objNamePtr), iclsPtr, objc-4, objv+4);
-    return result;
+    Itcl_NRAddCallback(interp, FinalizeCreateObject, objNamePtr, iclsPtr,
+            NULL, NULL);
+    return ItclCreateObject(interp, Tcl_GetString(objNamePtr), iclsPtr,
+            objc-4, objv+4);
 }
 
 

@@ -24,7 +24,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclBuiltin.c,v 1.1.2.34 2008/10/26 21:35:30 wiede Exp $
+ *     RCS:  $Id: itclBuiltin.c,v 1.1.2.35 2008/10/29 19:59:00 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -1049,6 +1049,25 @@ ItclBiObjectUnknownCmd(
     return TCL_ERROR;
 }
 
+static int
+CallCreateObject(
+    ClientData data[],
+    Tcl_Interp *interp,
+    int result)
+{
+    ItclClass *iclsPtr = data[0];
+    int objc = PTR2INT(data[1]);
+    Tcl_Obj *const *objv = data[2];
+
+    if (result != TCL_OK) {
+        return result;
+    }
+    result = Itcl_HandleClass(iclsPtr->infoPtr, interp, objc, objv);
+    Tcl_DecrRefCount(objv[2]);
+    Tcl_DecrRefCount(objv[1]);
+    Tcl_DecrRefCount(objv[0]);
+    return result;
+}
 /*
  * ------------------------------------------------------------------------
  *  ItclBiClassUnknownCmd()
@@ -1071,15 +1090,23 @@ ItclBiClassUnknownCmd(
 {
     FOREACH_HASH_DECLS;
     Tcl_Obj **newObjv;
+    Tcl_Obj **lObjv;
+    Tcl_Obj *listPtr;
     ItclClass *iclsPtr;
     ItclObjectInfo *infoPtr;
     ItclComponent *icPtr;
     ItclDelegatedFunction *idmPtr;
     const char *val;
     const char *funcName;
+    int lObjc;
     int result;
+    int offset;
+    int useComponent;
+    int idx;
 
-    ItclShowArgs(0, "ItclBiClassUnknownCmd", objc, objv);
+    ItclShowArgs(1, "ItclBiClassUnknownCmd", objc, objv);
+    listPtr = NULL;
+    useComponent = 1;
     infoPtr = (ItclObjectInfo *)clientData;
     hPtr = Tcl_FindHashEntry(&infoPtr->namespaceClasses,
             (char *)Tcl_GetCurrentNamespace(interp));
@@ -1106,26 +1133,77 @@ fprintf(stderr, "ItclBiClassUnknownCmd cannot find class\n");
     FOREACH_HASH_VALUE(idmPtr, &iclsPtr->delegatedFunctions) {
         if ((strcmp(Tcl_GetString(idmPtr->namePtr), funcName) == 0) ||
 	        (strcmp(Tcl_GetString(idmPtr->namePtr), "*") == 0)) {
-	    val = Tcl_GetVar2(interp, Tcl_GetString(idmPtr->icPtr->namePtr),
-	            NULL, 0);
-	    if (val == NULL) {
+	    val = NULL;
+	    if (idmPtr->icPtr != NULL) {
+	        val = Tcl_GetVar2(interp, Tcl_GetString(idmPtr->icPtr->namePtr),
+	                NULL, 0);
+	        if (val == NULL) {
 fprintf(stderr, "contents of component == NULL\n");
-	        return TCL_ERROR;
+	            return TCL_ERROR;
+	        }
 	    }
+	    offset = 1;
 	    if (strcmp(Tcl_GetString(idmPtr->namePtr), "*") == 0) {
 	        hPtr = Tcl_FindHashEntry(&idmPtr->exceptions, (char *)objv[1]);
+		/* we have no method name in that case in the caller */
 		if (hPtr != NULL) {
 		    Tcl_AppendResult(interp, "unknown subcommand \"",
 		            funcName, "\": must be ", NULL);
 	            return TCL_ERROR;
 		}
+                Tcl_IncrRefCount(idmPtr->namePtr);
+                /* and now for the argument */
+                Tcl_IncrRefCount(idmPtr->namePtr);
 	    }
-            newObjv = (Tcl_Obj **)ckalloc(sizeof(Tcl_Obj *) * (objc));
-	    newObjv[0] = Tcl_NewStringObj(val, -1);
-	    Tcl_IncrRefCount(newObjv[0]);
-	    memcpy(newObjv+1, objv+1, sizeof(Tcl_Obj *) * (objc-1));
-            result = Tcl_EvalObjv(interp, objc, newObjv, 0);
-	    Tcl_DecrRefCount(newObjv[0]);
+	    lObjc = 0;
+	    if ((idmPtr->asPtr != NULL) || (idmPtr->usingPtr != NULL)) {
+		offset++;
+                listPtr = Tcl_NewListObj(0, NULL);
+                result = ExpandDelegateAs(interp, NULL, iclsPtr,
+			idmPtr, funcName, listPtr);
+                if (result != TCL_OK) {
+                    return result;
+                }
+	        result = Tcl_ListObjGetElements(interp, listPtr,
+		        &lObjc, &lObjv);
+	        if (result != TCL_OK) {
+		    return result;
+		}
+		if (idmPtr->usingPtr != NULL) {
+                    useComponent = 0;
+		}
+	    }
+//fprintf(stderr, "OBJC!%d!%d!%d!%d!%d!\n", objc, lObjc, offset, useComponent, (objc + lObjc - offset));
+            newObjv = (Tcl_Obj **)ckalloc(sizeof(Tcl_Obj *) *
+	            (objc + lObjc - offset + useComponent));
+	    if (useComponent) {
+		if ((val == NULL) || (strlen(val) == 0)) {
+		    Tcl_AppendResult(interp, "component \"", 
+			    Tcl_GetString(idmPtr->icPtr->namePtr),
+			    "\" is not initialized", NULL);
+		    return TCL_ERROR;
+		}
+	        newObjv[0] = Tcl_NewStringObj(val, -1);
+	        Tcl_IncrRefCount(newObjv[0]);
+	    }
+	    for (idx = 0; idx < lObjc; idx++) {
+		newObjv[useComponent+idx] = lObjv[idx];
+	        Tcl_IncrRefCount(newObjv[useComponent+idx]);
+	    }
+	    if (objc-offset > 0) {
+                memcpy(newObjv+useComponent+lObjc, objv+offset,
+	                sizeof(Tcl_Obj *) * (objc-offset));
+            }
+ItclShowArgs(1, "EVAL", objc+lObjc-offset+useComponent, newObjv);
+            result = Tcl_EvalObjv(interp, objc+lObjc-offset+useComponent,
+	            newObjv, 0);
+	    if (useComponent) {
+	        Tcl_DecrRefCount(newObjv[0]);
+	    }
+	    for (idx = 0; idx < lObjc; idx++) {
+	        Tcl_DecrRefCount(newObjv[useComponent+idx]);
+	    }
+            /* FIXME need to free listPtr ?? */
 	    if (result == TCL_ERROR) {
 	        const char *resStr;
 		Tcl_Obj *resPtr = Tcl_NewStringObj("", -1);
@@ -1144,12 +1222,26 @@ fprintf(stderr, "contents of component == NULL\n");
 	    return result;
 	}
     }
-    Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
-            "bad option \"", Tcl_GetString(objv[2]), "\": should be one of...",
-	    (char*)NULL);
-// FIXME need ItclReportClassUsage !!
-//    ItclReportObjectUsage(interp, ioPtr, NULL, NULL);
-    return TCL_ERROR;
+    offset = 1;
+    if (strcmp(Tcl_GetString(objv[1]), "create") == 0) {
+	/* allow typeClassName create objectName */
+        offset++;
+    } else {
+	/* allow typeClassName objectName */
+    }
+    newObjv = (Tcl_Obj **)ckalloc(sizeof(Tcl_Obj *) * (objc+3-offset));
+    newObjv[0] = objv[0];
+    Tcl_IncrRefCount(newObjv[0]);
+    newObjv[1] = iclsPtr->namePtr;
+    Tcl_IncrRefCount(newObjv[1]);
+    newObjv[2] = Tcl_NewStringObj(iclsPtr->nsPtr->fullName, -1);
+    Tcl_IncrRefCount(newObjv[2]);
+    memcpy(newObjv+3, objv+offset, (objc-offset) * sizeof(Tcl_Obj *));
+        void *callbackPtr;
+        callbackPtr = Itcl_GetCurrentCallbackPtr(interp);
+    Itcl_NRAddCallback(interp, CallCreateObject, iclsPtr,
+            INT2PTR(objc+3-offset), (ClientData)newObjv, NULL);
+    return Itcl_NRRunCallbacks(interp, callbackPtr);
 }
 
 /*
@@ -1797,7 +1889,7 @@ ItclExtendedSetGet(
  *  object.
  *  Handles the following syntax:
  *
- *    componentinstall <componetnName> using <widgetClassName> <widgetPathName>
+ *    componentinstall <componentName> using <widgetClassName> <widgetPathName>
  *      ?-option value -option value ...?
  *
  * ------------------------------------------------------------------------
@@ -1820,7 +1912,7 @@ Itcl_BiComponentInstallCmd(
      *  Make sure that this command is being invoked in the proper
      *  context.
      */
-    ItclShowArgs(0, "Itcl_BiComponentInstallCmd", objc, objv);
+    ItclShowArgs(1, "Itcl_BiComponentInstallCmd", objc, objv);
     contextIclsPtr = NULL;
     if (Itcl_GetContext(interp, &contextIclsPtr, &contextIoPtr) != TCL_OK) {
         return TCL_ERROR;

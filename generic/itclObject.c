@@ -24,7 +24,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann Copyright (c) 2007
  *
- *     RCS:  $Id: itclObject.c,v 1.1.2.40 2008/10/26 21:35:30 wiede Exp $
+ *     RCS:  $Id: itclObject.c,v 1.1.2.41 2008/10/29 19:59:00 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -392,6 +392,11 @@ ItclCreateObject(
 	Tcl_DecrRefCount(namePtr);
 	Tcl_DecrRefCount(argumentPtr);
 	Tcl_DecrRefCount(bodyPtr);
+        if (iclsPtr->flags & ITCL_TYPE) {
+            Tcl_Obj *objPtr = Tcl_NewObj();
+            Tcl_GetCommandFullName(interp, ioPtr->accessCmd, objPtr);
+            Tcl_AppendResult(interp, Tcl_GetString(objPtr), NULL);
+        }
     } else {
         if (ioPtr->accessCmd != NULL) {
             entry = Tcl_FindHashEntry(&iclsPtr->infoPtr->objects,
@@ -2231,6 +2236,184 @@ ItclMapMethodNameProc(
     Tcl_DStringFree(&buffer);
     return TCL_OK;
 }
+int
+ExpandDelegateAs(
+    Tcl_Interp *interp,
+    ItclObject *ioPtr,
+    ItclClass *iclsPtr,
+    ItclDelegatedFunction *idmPtr,
+    const char *funcName,
+    Tcl_Obj *listPtr)
+{
+    Tcl_Obj *componentNamePtr;
+    const char **argv;
+    int argc;
+    int j;
+
+
+    if (idmPtr->icPtr == NULL) {
+        componentNamePtr = NULL;
+    } else {
+        componentNamePtr = idmPtr->icPtr->namePtr;
+    }
+    if (idmPtr->asPtr != NULL) {
+        Tcl_SplitList(interp, Tcl_GetString(idmPtr->asPtr),
+	        &argc, &argv);
+        for(j=0;j<argc;j++) {
+            Tcl_ListObjAppendElement(interp, listPtr,
+                    Tcl_NewStringObj(argv[j], -1));
+        }
+    } else {
+	if (idmPtr->usingPtr != NULL) {
+	    char *cp;
+	    char *ep;
+	    int hadDoublePercent;
+            Tcl_Obj *strPtr;
+
+	    hadDoublePercent = 0;
+	    cp = Tcl_GetString(idmPtr->usingPtr);
+	    ep = cp;
+	    strPtr = Tcl_NewStringObj("", -1);
+	    while (*ep != '\0') {
+	        if (*ep == '%') {
+		    if (*(ep+1) == '%') {
+			cp++;
+			cp++;
+		        ep++;
+		        ep++;
+			hadDoublePercent = 1;
+			Tcl_AppendToObj(strPtr, "%", -1);
+		        continue;
+		    }
+		    switch (*(ep+1)) {
+		    case 'c':
+			if (componentNamePtr == NULL) {
+			    ep++;
+			    continue;
+			}
+			if (ep-cp-1 > 0) {
+		            Tcl_ListObjAppendElement(interp, listPtr,
+			            Tcl_NewStringObj(cp, ep-cp-1));
+			}
+			Tcl_AppendToObj(strPtr,
+			        Tcl_GetString(componentNamePtr), -1);
+		        break;
+		    case 'j':
+		    case 'm':
+		    case 'M':
+			if (ep-cp-1 > 0) {
+		            Tcl_ListObjAppendElement(interp, listPtr,
+			            Tcl_NewStringObj(cp, ep-cp-1));
+			}
+			if (strcmp(Tcl_GetString(idmPtr->namePtr), "*") == 0) {
+			    Tcl_AppendToObj(strPtr, funcName, -1);
+			} else {
+			    Tcl_AppendToObj(strPtr,
+			            Tcl_GetString(idmPtr->namePtr), -1);
+			}
+		        break;
+		    case 'n':
+			if (iclsPtr->flags & ITCL_TYPE) {
+			    ep++;
+			    continue;
+			} else {
+			    if (ep-cp-1 > 0) {
+		                Tcl_ListObjAppendElement(interp, listPtr,
+			                Tcl_NewStringObj(cp, ep-cp-1));
+			    }
+			    Tcl_AppendToObj(strPtr, iclsPtr->nsPtr->name, -1);
+			}
+		        break;
+		    case 's':
+			if (iclsPtr->flags & ITCL_TYPE) {
+			    ep++;
+			    continue;
+			} else {
+			    if (ep-cp-1 > 0) {
+		                Tcl_ListObjAppendElement(interp, listPtr,
+			                Tcl_NewStringObj(cp, ep-cp-1));
+			    }
+                            Tcl_AppendToObj(strPtr,
+			            Tcl_GetString(ioPtr->namePtr), -1);
+			}
+		        break;
+		    case 't':
+			if (ep-cp-1 > 0) {
+		            Tcl_ListObjAppendElement(interp, listPtr,
+			            Tcl_NewStringObj(cp, ep-cp-1));
+			}
+                        Tcl_AppendToObj(strPtr, iclsPtr->nsPtr->fullName, -1);
+		        break;
+		    case 'w':
+			if (iclsPtr->flags & ITCL_TYPE) {
+			    ep++;
+			    continue;
+			} else {
+			    if (ep-cp-1 > 0) {
+		                Tcl_ListObjAppendElement(interp, listPtr,
+			                Tcl_NewStringObj(cp, ep-cp-1));
+			    }
+			/* FIXME for widget and widgetadaptor need original name here !! */
+//                            Tcl_AppendToObj(strPtr, iclsPtr->nsPtr->fullName, -1);
+		        }
+		        break;
+		    default:
+		      {
+			char buf[2];
+			buf[1] = '\0';
+			sprintf(buf, "%c", *(ep+1));
+			Tcl_AppendResult(interp,
+			        "there is no %%", buf, " substitution",
+				NULL);
+			return TCL_ERROR;
+		        break;
+		      }
+		    }
+		    Tcl_ListObjAppendElement(interp, listPtr, strPtr);
+		    hadDoublePercent = 0;
+		    strPtr = Tcl_NewStringObj("", -1);
+		    ep +=2;
+		    cp = ep;
+		} else {
+		    if (*ep == ' ') {
+                        if (strlen(Tcl_GetString(strPtr)) > 0) {
+			    if (ep-cp == 0) {
+			        Tcl_ListObjAppendElement(interp, listPtr,
+				        strPtr);
+			        strPtr = Tcl_NewStringObj("", -1);
+			    }
+			}
+			if (ep-cp > 0) {
+			    Tcl_AppendToObj(strPtr, cp, ep-cp);
+		            Tcl_ListObjAppendElement(interp, listPtr, strPtr);
+	                    strPtr = Tcl_NewStringObj("", -1);
+			}
+		        while((*ep != '\0') && (*ep == ' ')) {
+			    ep++;
+			}
+			cp = ep;
+		    } else {
+		        ep++;
+		    }
+		}
+	    }
+	    if (cp != ep) {
+		if (*ep == '\0') {
+                    Tcl_ListObjAppendElement(interp, listPtr,
+	                    Tcl_NewStringObj(cp, ep-cp));
+		} else {
+                    Tcl_ListObjAppendElement(interp, listPtr,
+	                    Tcl_NewStringObj(cp, ep-cp-1));
+	        }
+	    }
+	} else {
+            Tcl_ListObjAppendElement(interp, listPtr, idmPtr->namePtr);
+        }
+    }
+//fprintf(stderr, "LIST!%s!\n", Tcl_GetString(listPtr));
+    /* FIXME need to free return args of Split!! */
+    return TCL_OK;
+}
 
 /*
  * ------------------------------------------------------------------------
@@ -2247,129 +2430,22 @@ DelegateFunction(
     ItclDelegatedFunction *idmPtr)
 {
     Tcl_Obj *listPtr;;
-    const char **argv;
-    int argc;
-    int j;
+    int result;
 
     listPtr = Tcl_NewListObj(0, NULL);
-    if (componentNamePtr != NULL) {
-        Tcl_ListObjAppendElement(interp, listPtr, componentNamePtr);
-        Tcl_IncrRefCount(componentNamePtr);
-    }
-    if (idmPtr->asPtr != NULL) {
-        Tcl_SplitList(interp, Tcl_GetString(idmPtr->asPtr),
-	        &argc, &argv);
-        for(j=0;j<argc;j++) {
-            Tcl_ListObjAppendElement(interp, listPtr,
-                    Tcl_NewStringObj(argv[j], -1));
-        }
-    } else {
-	if (idmPtr->usingPtr != NULL) {
-	    char *cp;
-	    char *ep;
-	    cp = Tcl_GetString(idmPtr->usingPtr);
-	    ep = cp;
-	    while (*ep != '\0') {
-	        if (*ep == '%') {
-		    if (*(ep+1) == '%') {
-		        ep++;
-		        continue;
-		    }
-		    switch (*(ep+1)) {
-		    case 'c':
-			if (ep-cp-1 > 0) {
-		            Tcl_ListObjAppendElement(interp, listPtr,
-			            Tcl_NewStringObj(cp, ep-cp-1));
-			}
-			if (idmPtr->icPtr == NULL) {
-			    Tcl_AppendResult(interp,
-			            "no component for %c", NULL);
-			    return TCL_ERROR;
-			}
-		        Tcl_ListObjAppendElement(interp, listPtr,
-			        Tcl_NewStringObj(Tcl_GetString(
-				        componentNamePtr), -1));
-		        break;
-		    case 'm':
-			if (ep-cp-1 > 0) {
-		            Tcl_ListObjAppendElement(interp, listPtr,
-			            Tcl_NewStringObj(cp, ep-cp-1));
-			}
-		        Tcl_ListObjAppendElement(interp, listPtr,
-			        Tcl_NewStringObj(Tcl_GetString(
-				        idmPtr->namePtr), -1));
-		        break;
-		    case 'n':
-			if (ep-cp-1 > 0) {
-		            Tcl_ListObjAppendElement(interp, listPtr,
-			            Tcl_NewStringObj(cp, ep-cp-1));
-			}
-		        Tcl_ListObjAppendElement(interp, listPtr,
-			        Tcl_NewStringObj(iclsPtr->nsPtr->name,
-				        -1));
-		        break;
-		    case 's':
-			if (ep-cp-1 > 0) {
-		            Tcl_ListObjAppendElement(interp, listPtr,
-			            Tcl_NewStringObj(cp, ep-cp-1));
-			}
-		        Tcl_ListObjAppendElement(interp, listPtr,
-			        Tcl_NewStringObj(Tcl_GetString(
-				        ioPtr->namePtr), -1));
-		        break;
-		    case 't':
-			if (ep-cp-1 > 0) {
-		            Tcl_ListObjAppendElement(interp, listPtr,
-			            Tcl_NewStringObj(cp, ep-cp-1));
-			}
-		        Tcl_ListObjAppendElement(interp, listPtr,
-			        Tcl_NewStringObj(
-				        iclsPtr->nsPtr->fullName,
-					-1));
-		        break;
-		    default:
-		      {
-			char buf[2];
-			buf[1] = '\0';
-			sprintf(buf, "%c", *(ep+1));
-			Tcl_AppendResult(interp,
-			        "there is no %%", buf, " substitution",
-				NULL);
-			return TCL_ERROR;
-		        break;
-		      }
-		    }
-		    ep +=2;
-		    cp = ep;
-		} else {
-		    if (*ep == ' ') {
-			if (ep-cp > 0) {
-		            Tcl_ListObjAppendElement(interp, listPtr,
-			            Tcl_NewStringObj(cp, ep-cp));
-			}
-		        while((*ep != '\0') && (*ep == ' ')) {
-			    ep++;
-			}
-			cp = ep;
-		    } else {
-		        ep++;
-		    }
-		}
-	    }
-	    if (cp != ep) {
-                Tcl_ListObjAppendElement(interp, listPtr,
-	                Tcl_NewStringObj(cp, ep-cp-1));
-	    }
-	} else {
-            Tcl_ListObjAppendElement(interp, listPtr, idmPtr->namePtr);
-        }
+    result = ExpandDelegateAs(interp, ioPtr, iclsPtr, idmPtr,
+            Tcl_GetString(idmPtr->namePtr), listPtr);
+    if (result != TCL_OK) {
+        return result;
     }
     Tcl_IncrRefCount(idmPtr->namePtr);
     /* and now for the argument */
     Tcl_IncrRefCount(idmPtr->namePtr);
     Tcl_Method mPtr;
+fprintf(stderr, "FW1!%s!\n", Tcl_GetString(listPtr));
     mPtr = Itcl_NewForwardClassMethod(interp, iclsPtr->clsPtr, 1,
             idmPtr->namePtr, listPtr);
+    /* FIXME need to free listPtr ?? */
     if (mPtr != NULL) {
         return TCL_OK;
     }
