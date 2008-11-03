@@ -9,7 +9,7 @@
 #            mmclennan@lucent.com
 #            http://www.tcltk.com/itcl
 #
-#      RCS:  $Id: itcl.tcl,v 1.10 2008/08/06 22:39:57 msofer Exp $
+#      RCS:  $Id: itcl.tcl,v 1.11 2008/11/03 23:30:38 hobbs Exp $
 # ----------------------------------------------------------------------
 #            Copyright (c) 1993-1998  Lucent Technologies, Inc.
 # ======================================================================
@@ -236,15 +236,29 @@ if {([llength [info commands itcl_class]] == 0)
 #
 
 namespace eval ::itcl {
-    variable UNKNOWN_ORIG [info body ::unknown]
-    variable UNKNOWN_ADD {
-	##########################################################################
-	##########################################################################
+    variable UNKNOWN_ADD_84 {
+	#######################################################################
 	# ADDED BY Itcl
-	#
 	# Itcl requires special handling for [namespace inscope]
 	#
+	set cmd [lindex $args 0]
+	if {[regexp "^:*namespace\[ \t\n\]+inscope" $cmd] && [llength $cmd] == 4} {
 
+	    set arglist [lrange $args 1 end]
+	    set ret [catch {uplevel 1 ::$cmd $arglist} result]
+	    if {$ret == 0} {
+		return $result
+	    } else {
+		return -code $ret -errorcode $errorCode $result
+	    }
+	}
+	#######################################################################
+    }
+    variable UNKNOWN_ADD_85 {
+	#######################################################################
+	# ADDED BY Itcl
+	# Itcl requires special handling for [namespace inscope]
+	#
 	set cmd [lindex $args 0]
 	if {[regexp "^:*namespace\[ \t\n\]+inscope" $cmd] && [llength $cmd] == 4} {
 	    #return -code error "You need an {*}"
@@ -254,9 +268,11 @@ namespace eval ::itcl {
 	    dict incr opts -level
 	    return -options $opts $result
 	}
-	##########################################################################
-	##########################################################################
+	#######################################################################
     }
-    proc ::unknown args "$UNKNOWN_ADD\n$UNKNOWN_ORIG"
-
+    if {[package vsatisfies [package provide Tcl] 8.5]} {
+	proc ::unknown args "$UNKNOWN_ADD_85\n[info body ::unknown]"
+    } else {
+	proc ::unknown args "$UNKNOWN_ADD_84\n[info body ::unknown]"
+    }
 }
