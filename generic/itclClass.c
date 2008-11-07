@@ -25,7 +25,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann Copyright (c) 2007
  *
- *     RCS:  $Id: itclClass.c,v 1.1.2.28 2008/10/29 19:59:00 wiede Exp $
+ *     RCS:  $Id: itclClass.c,v 1.1.2.29 2008/11/07 23:10:04 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -464,6 +464,47 @@ Itcl_CreateClass(
     /*
      *  Add the built-in "this" variable to the list of data members.
      */
+    if (iclsPtr->flags & ITCL_TYPE) {
+        namePtr = Tcl_NewStringObj("type", -1);
+        Tcl_IncrRefCount(namePtr);
+        (void) Itcl_CreateVariable(interp, iclsPtr, namePtr, (char*)NULL,
+            (char*)NULL, &ivPtr);
+        ivPtr->protection = ITCL_PROTECTED;  /* always "protected" */
+        ivPtr->flags |= ITCL_THIS_VAR;       /* mark as "type" variable */
+        hPtr = Tcl_CreateHashEntry(&iclsPtr->variables, (char *)namePtr,
+	        &newEntry);
+        Tcl_SetHashValue(hPtr, (ClientData)ivPtr);
+
+        namePtr = Tcl_NewStringObj("self", -1);
+        Tcl_IncrRefCount(namePtr);
+        (void) Itcl_CreateVariable(interp, iclsPtr, namePtr, (char*)NULL,
+            (char*)NULL, &ivPtr);
+        ivPtr->protection = ITCL_PROTECTED;  /* always "protected" */
+        ivPtr->flags |= ITCL_SELF_VAR;       /* mark as "self" variable */
+        hPtr = Tcl_CreateHashEntry(&iclsPtr->variables, (char *)namePtr,
+	        &newEntry);
+        Tcl_SetHashValue(hPtr, (ClientData)ivPtr);
+
+        namePtr = Tcl_NewStringObj("selfns", -1);
+        Tcl_IncrRefCount(namePtr);
+        (void) Itcl_CreateVariable(interp, iclsPtr, namePtr, (char*)NULL,
+            (char*)NULL, &ivPtr);
+        ivPtr->protection = ITCL_PROTECTED;  /* always "protected" */
+        ivPtr->flags |= ITCL_SELFNS_VAR;     /* mark as "selfns" variable */
+        hPtr = Tcl_CreateHashEntry(&iclsPtr->variables, (char *)namePtr,
+	        &newEntry);
+        Tcl_SetHashValue(hPtr, (ClientData)ivPtr);
+
+        namePtr = Tcl_NewStringObj("win", -1);
+        Tcl_IncrRefCount(namePtr);
+        (void) Itcl_CreateVariable(interp, iclsPtr, namePtr, (char*)NULL,
+            (char*)NULL, &ivPtr);
+        ivPtr->protection = ITCL_PROTECTED;  /* always "protected" */
+        ivPtr->flags |= ITCL_WIN_VAR;        /* mark as "win" variable */
+        hPtr = Tcl_CreateHashEntry(&iclsPtr->variables, (char *)namePtr,
+	        &newEntry);
+        Tcl_SetHashValue(hPtr, (ClientData)ivPtr);
+    }
     namePtr = Tcl_NewStringObj("this", -1);
     Tcl_IncrRefCount(namePtr);
     (void) Itcl_CreateVariable(interp, iclsPtr, namePtr, (char*)NULL,
@@ -472,7 +513,8 @@ Itcl_CreateClass(
     ivPtr->protection = ITCL_PROTECTED;  /* always "protected" */
     ivPtr->flags |= ITCL_THIS_VAR;       /* mark as "this" variable */
 
-    hPtr = Tcl_CreateHashEntry(&iclsPtr->variables, (char *)namePtr, &newEntry);
+    hPtr = Tcl_CreateHashEntry(&iclsPtr->variables, (char *)namePtr,
+            &newEntry);
     Tcl_SetHashValue(hPtr, (ClientData)ivPtr);
 
     if (infoPtr->currClassFlags & (ITCL_ECLASS|ITCL_NWIDGET|ITCL_TYPE)) {

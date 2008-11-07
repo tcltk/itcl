@@ -20,7 +20,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itclResolve.c,v 1.1.2.16 2008/10/29 20:28:47 wiede Exp $
+ *     RCS:  $Id: itclResolve.c,v 1.1.2.17 2008/11/07 23:10:04 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -152,6 +152,34 @@ Itcl_ClassCmdResolver(
         imPtr = clookup->imPtr;
     }
 
+    if (iclsPtr->flags & ITCL_TYPE) {
+	// FIXME check if called from an (instance) method (not from a typemethod) and only then error
+	int isOk = 0;
+	if (strcmp(name, "info") == 0) {
+	    isOk = 1;
+	}
+	if (strcmp(name, "mytypemethod") == 0) {
+	    isOk = 1;
+	}
+	if (strcmp(name, "myproc") == 0) {
+	    isOk = 1;
+	}
+	if (strcmp(name, "mymethod") == 0) {
+	    isOk = 1;
+	}
+	if (! isOk) {
+	    if ((imPtr->flags & ITCL_TYPE_METHOD) != 0) {
+	        Tcl_AppendResult(interp, "invalid command name \"", name,
+	                 "\"", NULL);
+                return TCL_ERROR;
+	    }
+	    if ((imPtr->flags & ITCL_COMMON) == 0) {
+	        Tcl_AppendResult(interp, "invalid command name \"", name,
+	                 "\"", NULL);
+                return TCL_ERROR;
+	    }
+        }
+    }
     /*
      *  Looks like we found an accessible member function.
      *

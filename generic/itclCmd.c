@@ -23,7 +23,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclCmd.c,v 1.1.2.27 2008/10/26 21:35:30 wiede Exp $
+ *     RCS:  $Id: itclCmd.c,v 1.1.2.28 2008/11/07 23:10:04 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -81,7 +81,7 @@ Itcl_ThisCmd(
     if (objc == 1) {
         return Itcl_SelfCmd(clientData,interp, objc, objv);
     }
-    ItclShowArgs(0, "Itcl_ThisCmd", objc, objv);
+    ItclShowArgs(1, "Itcl_ThisCmd", objc, objv);
     iclsPtr = clientData;
     clientData2 = Itcl_GetCallFrameClientData(interp);
     if (clientData2 == NULL) {
@@ -112,12 +112,10 @@ Itcl_ThisCmd(
 		Tcl_IncrRefCount(newObjv[0]);
 		const char *val;
 		val = Tcl_GetVar2(interp, Tcl_GetString(idmPtr->icPtr->namePtr), NULL, 0);
-fprintf(stderr, "vl!%p!\n", val);
 		newObjv[1] = Tcl_NewStringObj(val, -1);
 		Tcl_IncrRefCount(newObjv[1]);
                 memcpy(newObjv+1, objv+1, sizeof(Tcl_Obj *) * (objc -1));
-fprintf(stderr, "found delegated method!%s!\n", Tcl_GetString(idmPtr->namePtr));
-ItclShowArgs(0, "EVAL2", objc, newObjv);
+ItclShowArgs(1, "EVAL2", objc, newObjv);
 	        result = Tcl_EvalObjv(interp, objc, newObjv, 0);
 	        return result;
 	    }
@@ -1849,6 +1847,7 @@ Itcl_TypeClassCmd(
     int objc,                /* number of arguments */
     Tcl_Obj *CONST objv[])   /* argument objects */
 {
+    Tcl_Obj *objPtr;
     ItclClass *iclsPtr;
     ItclObjectInfo *infoPtr;
     int result;
@@ -1862,6 +1861,16 @@ Itcl_TypeClassCmd(
 fprintf(stderr, "Itcl_TypeClassCmd!iclsPtr == NULL\n");
         return TCL_ERROR;
     }
+    if (result != TCL_OK) {
+        return result;
+    }
+    /* we handle create by owerselfs !! */
+    objPtr = Tcl_NewStringObj("oo::objdefine ", -1);
+    Tcl_AppendToObj(objPtr, iclsPtr->nsPtr->fullName, -1);
+    Tcl_AppendToObj(objPtr, " unexport create", -1);
+    Tcl_IncrRefCount(objPtr);
+    result = Tcl_EvalObjEx(interp, objPtr, 0);
+    Tcl_DecrRefCount(objPtr);
+    Tcl_AppendResult(interp, iclsPtr->nsPtr->fullName);
     return result;
 }
-

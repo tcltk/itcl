@@ -25,7 +25,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclMethod.c,v 1.1.2.24 2008/10/26 21:35:30 wiede Exp $
+ *     RCS:  $Id: itclMethod.c,v 1.1.2.25 2008/11/07 23:10:04 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -34,9 +34,14 @@
  */
 #include "itclInt.h"
 
+Tcl_ObjCmdProc Itcl_BiMyProcCmd;
+
 static int EquivArgLists(Tcl_Interp *interp, ItclArgList *origArgs,
         ItclArgList *realArgs);
 static void DeleteArgList(ItclArgList *arglistPtr);
+static int ItclCreateMemberCode(Tcl_Interp* interp, ItclClass *iclsPtr,
+        CONST char* arglist, CONST char* body, ItclMemberCode** mcodePtr,
+        Tcl_Obj *namePtr);
 
 /*
  * ------------------------------------------------------------------------
@@ -468,8 +473,8 @@ Itcl_CreateMemberFunc(
     /*
      *  Try to create the implementation for this command member.
      */
-    if (Itcl_CreateMemberCode(interp, iclsPtr, arglist, body,
-        &mcode) != TCL_OK) {
+    if (ItclCreateMemberCode(interp, iclsPtr, arglist, body,
+        &mcode, namePtr) != TCL_OK) {
 
         Tcl_DeleteHashEntry(entry);
         return TCL_ERROR;
@@ -528,8 +533,25 @@ Itcl_CreateMemberFunc(
 	if (strcmp(name, "isa") == 0) {
             imPtr->codePtr->flags |= ITCL_BUILTIN;
 	}
+	if (strcmp(name, "mytypemethod") == 0) {
+	    imPtr->argcount = 0;
+	    imPtr->maxargcount = -1;
+            imPtr->codePtr->flags |= ITCL_BUILTIN;
+	}
+	if (strcmp(name, "mymethod") == 0) {
+	    imPtr->argcount = 0;
+	    imPtr->maxargcount = -1;
+            imPtr->codePtr->flags |= ITCL_BUILTIN;
+	}
+	if (strcmp(name, "myproc") == 0) {
+	    imPtr->argcount = 0;
+	    imPtr->maxargcount = -1;
+            imPtr->codePtr->flags |= ITCL_BUILTIN;
+            imPtr->flags |= ITCL_COMMON;
+	}
 	if (strcmp(name, "info") == 0) {
             imPtr->codePtr->flags |= ITCL_BUILTIN;
+            imPtr->flags |= ITCL_COMMON;
 	}
     }
     if (strcmp(name, "___constructor_init") == 0) {
@@ -583,8 +605,8 @@ Itcl_ChangeMemberFunc(
     /*
      *  Try to create the implementation for this command member.
      */
-    if (Itcl_CreateMemberCode(interp, imPtr->iclsPtr,
-        arglist, body, &mcode) != TCL_OK) {
+    if (ItclCreateMemberCode(interp, imPtr->iclsPtr,
+        arglist, body, &mcode, imPtr->namePtr) != TCL_OK) {
 
         return TCL_ERROR;
     }
@@ -637,10 +659,16 @@ Itcl_ChangeMemberFunc(
     return TCL_OK;
 }
 
+static const char * type_reserved_words [] = {
+    "type",
+    "self",
+    "selfns",
+    NULL
+};
 
 /*
  * ------------------------------------------------------------------------
- *  Itcl_CreateMemberCode()
+ *  ItclCreateMemberCode()
  *
  *  Creates the data record representing the implementation behind a
  *  class member function.  This includes the argument list and the body
@@ -658,19 +686,22 @@ Itcl_ChangeMemberFunc(
  *  implementation.
  * ------------------------------------------------------------------------
  */
-int
-Itcl_CreateMemberCode(
+static int
+ItclCreateMemberCode(
     Tcl_Interp* interp,            /* interpreter managing this action */
     ItclClass *iclsPtr,              /* class containing this member */
     CONST char* arglist,           /* space-separated list of arg names */
     CONST char* body,              /* body of commands for the method */
-    ItclMemberCode** mcodePtr)     /* returns: pointer to new implementation */
+    ItclMemberCode** mcodePtr,     /* returns: pointer to new implementation */
+    Tcl_Obj *namePtr)
 {
     int argc;
     int maxArgc;
     Tcl_Obj *usagePtr;
     ItclArgList *argListPtr;
     ItclMemberCode *mcode;
+    const char **cPtrPtr;
+    int haveError;
 
     /*
      *  Allocate some space to hold the implementation.
@@ -689,6 +720,41 @@ Itcl_CreateMemberCode(
         mcode->argListPtr = argListPtr;
         mcode->usagePtr = usagePtr;
 	mcode->argumentPtr = Tcl_NewStringObj((const char *)arglist, -1);
+	if (iclsPtr->flags & ITCL_TYPE) {
+	    haveError = 0;
+	    while (argListPtr != NULL) {
+		cPtrPtr = &type_reserved_words[0];
+		while (*cPtrPtr != NULL) {
+	            if ((argListPtr->namePtr != NULL) && 
+		            (strcmp(Tcl_GetString(argListPtr->namePtr),
+		            *cPtrPtr) == 0)) {
+		        haveError = 1;
+		    }
+		    if (haveError) {
+			const char *startStr = "method ";
+			if (iclsPtr->infoPtr->functionFlags &
+			        ITCL_TYPE_METHOD) {
+			    startStr = "typemethod ";
+			}
+			// FIXME should use iclsPtr->infoPtr->functionFlags here
+			if ((namePtr != NULL) &&
+			        (strcmp(Tcl_GetString(namePtr),
+				"constructor") == 0)) {
+			    startStr = "";
+			}
+		        Tcl_AppendResult(interp, startStr, 
+				namePtr == NULL ? "??" :
+			        Tcl_GetString(namePtr),
+				"'s arglist may not contain \"",
+				*cPtrPtr, "\" explicitly", NULL);
+                        Itcl_DeleteMemberCode((char*)mcode);
+                        return TCL_ERROR;
+		    }
+		    cPtrPtr++;
+	        }
+	        argListPtr = argListPtr->nextPtr;
+	    }
+	}
 	Tcl_IncrRefCount(mcode->argumentPtr);
         mcode->flags   |= ITCL_ARG_SPEC;
     } else {
@@ -730,6 +796,18 @@ Itcl_CreateMemberCode(
 	    if (strcmp(body, "@itcl-builtin-isa") == 0) {
 	        isDone = 1;
 	    }
+	    if (strcmp(body, "@itcl-builtin-mytypemethod") == 0) {
+	        isDone = 1;
+	    }
+	    if (strcmp(body, "@itcl-builtin-mymethod") == 0) {
+	        isDone = 1;
+	    }
+	    if (strcmp(body, "@itcl-builtin-myproc") == 0) {
+	        isDone = 1;
+	    }
+	    if (strcmp(body, "@itcl-builtin-callinstance") == 0) {
+	        isDone = 1;
+	    }
 	    if (strcmp(body, "@itcl-builtin-hullinstall") == 0) {
 	        isDone = 1;
 	    }
@@ -748,7 +826,7 @@ Itcl_CreateMemberCode(
 	    if (!isDone) {
                 if (!Itcl_FindC(interp, body+1, &argCmdProc, &objCmdProc,
 		        &cdata)) {
-                    Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+		    Tcl_AppendResult(interp,
                             "no registered C procedure with name \"",
 			    body+1, "\"", (char*)NULL);
                     Itcl_DeleteMemberCode((char*)mcode);
@@ -780,6 +858,38 @@ Itcl_CreateMemberCode(
 
     *mcodePtr = mcode;
     return TCL_OK;
+}
+
+/*
+ * ------------------------------------------------------------------------
+ *  Itcl_CreateMemberCode()
+ *
+ *  Creates the data record representing the implementation behind a
+ *  class member function.  This includes the argument list and the body
+ *  of the function.  If the body is of the form "@name", then it is
+ *  treated as a label for a C procedure registered by Itcl_RegisterC().
+ *
+ *  The implementation is kept by the member function definition, and
+ *  controlled by a preserve/release paradigm.  That way, if it is in
+ *  use while it is being redefined, it will stay around long enough
+ *  to avoid a core dump.
+ *
+ *  If any errors are encountered, this procedure returns TCL_ERROR
+ *  along with an error message in the interpreter.  Otherwise, it
+ *  returns TCL_OK, and "mcodePtr" returns a pointer to the new
+ *  implementation.
+ * ------------------------------------------------------------------------
+ */
+int
+Itcl_CreateMemberCode(
+    Tcl_Interp* interp,            /* interpreter managing this action */
+    ItclClass *iclsPtr,              /* class containing this member */
+    CONST char* arglist,           /* space-separated list of arg names */
+    CONST char* body,              /* body of commands for the method */
+    ItclMemberCode** mcodePtr)     /* returns: pointer to new implementation */
+{
+    return ItclCreateMemberCode(interp, iclsPtr, arglist, body, mcodePtr,
+            NULL);
 }
 
 /*
@@ -1359,12 +1469,10 @@ NRExecMethod(
         return TCL_ERROR;
     }
     if (ioPtr == NULL) {
-	if (strcmp(Tcl_GetString(imPtr->namePtr), "info") != 0) {
-            Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
-                "cannot access object-specific info without an object context",
-                (char*)NULL);
-            return TCL_ERROR;
-        }
+        Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+            "cannot access object-specific info without an object context",
+            (char*)NULL);
+        return TCL_ERROR;
     }
 
     /*
@@ -1807,6 +1915,18 @@ Itcl_CmdAliasProc(
 	}
 	if (strcmp(cmdName, "@itcl-builtin-isa") == 0) {
 	    return Tcl_FindCommand(interp, "::itcl::builtin::isa", NULL, 0);
+	}
+	if (strcmp(cmdName, "@itcl-builtin-mytypemethod") == 0) {
+	    return Tcl_FindCommand(interp, "::itcl::builtin::mytypemethod",
+	            NULL, 0);
+	}
+	if (strcmp(cmdName, "@itcl-builtin-mymethod") == 0) {
+	    return Tcl_FindCommand(interp, "::itcl::builtin::mymethod",
+	            NULL, 0);
+	}
+	if (strcmp(cmdName, "@itcl-builtin-myproc") == 0) {
+	    return Tcl_FindCommand(interp, "::itcl::builtin::myproc",
+	            NULL, 0);
 	}
 	if (strcmp(cmdName, "@itcl-builtin-classunknown") == 0) {
 	    return Tcl_FindCommand(interp, "::itcl::builtin::classunknown", NULL, 0);

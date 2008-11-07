@@ -9,7 +9,7 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itclInt.h,v 1.17.2.41 2008/10/29 19:59:00 wiede Exp $
+ * RCS: @(#) $Id: itclInt.h,v 1.17.2.42 2008/11/07 23:10:04 wiede Exp $
  */
 
 #include <string.h>
@@ -127,6 +127,8 @@ typedef struct ItclObjectInfo {
     Tcl_HashTable classes;          /* list of all known classes */
     Tcl_HashTable namespaceClasses; /* maps from nsPtr to iclsPtr */
     Tcl_HashTable procMethods;      /* maps from procPtr to mFunc */
+    Tcl_HashTable instances;        /* maps from instanceNumber to ioPtr */
+    Tcl_HashTable objectInstances;  /* maps from ioPtr to instanceNumber */
     int protection;                 /* protection level currently in effect */
     int useOldResolvers;            /* whether to use the "old" style
                                      * resolvers or the CallFrame resolvers */
@@ -157,6 +159,9 @@ typedef struct ItclObjectInfo {
                                        ItclExtendedConfigure/-Cget function */
     Tcl_Obj **unparsedObjv;         /* options not parsed by
                                        ItclExtendedConfigure/-Cget function */
+    int functionFlags;              /* used for creating of ItclMemberCode */
+    int numInstances;               /* used for having a unique key for objects
+                                     * for use in mytypemethod etc. */
 } ItclObjectInfo;
 
 typedef struct EnsembleInfo {
@@ -292,6 +297,7 @@ typedef struct ItclObject {
 				     ItclMemberFunc * ptrs */
     Tcl_HashTable contextCache;   /* cache for function contexts */
     Tcl_Obj *namePtr;
+    Tcl_Obj *origNamePtr;         /* the original name before any rename */
     Tcl_Obj *varNsNamePtr;
     Tcl_Object oPtr;             /* the TclOO object */
     Tcl_Resolve *resolvePtr;
@@ -351,23 +357,39 @@ typedef struct ItclMemberCode {
     (((mcode)->flags & ITCL_IMPLEMENT_NONE) == 0)
 
 /*
- *  Flag bits for ItclMember:
+ *  Flag bits for ItclMember: functions and variables
  */
-#define ITCL_CONSTRUCTOR       0x010  /* non-zero => is a constructor */
-#define ITCL_DESTRUCTOR        0x020  /* non-zero => is a destructor */
-#define ITCL_COMMON            0x040  /* non-zero => is a "proc" */
+#define ITCL_COMMON            0x010  /* non-zero => is a "proc" or common
+                                       * variable */
+
+/*
+ *  Flag bits for ItclMember: functions
+ */
+#define ITCL_CONSTRUCTOR       0x020  /* non-zero => is a constructor */
+#define ITCL_DESTRUCTOR        0x040  /* non-zero => is a destructor */
 #define ITCL_ARG_SPEC          0x080  /* non-zero => has an argument spec */
 #define ITCL_BODY_SPEC         0x100  /* non-zero => has an body spec */
-#define ITCL_THIS_VAR          0x200  /* non-zero => built-in "this" variable */
-#define ITCL_CONINIT           0x400  /* non-zero => is a constructor
+#define ITCL_CONINIT           0x200  /* non-zero => is a constructor
                                        * init code */
-#define ITCL_BUILTIN           0x800  /* non-zero => built-in method */
-#define ITCL_OPTION_READONLY   0x1000 /* non-zero => readonly */
-#define ITCL_COMPONENT         0x2000 /* non-zero => component */
-#define ITCL_OPTIONS_VAR       0x4000 /* non-zero => built-in "itcl_options"
+#define ITCL_BUILTIN           0x400  /* non-zero => built-in method */
+#define ITCL_COMPONENT         0x800  /* non-zero => component */
+#define ITCL_TYPE_METHOD       0x1000 /* non-zero => typemethod */
+
+/*
+ *  Flag bits for ItclMember: variables
+ */
+#define ITCL_THIS_VAR          0x20   /* non-zero => built-in "this" variable */
+#define ITCL_OPTIONS_VAR       0x40   /* non-zero => built-in "itcl_options"
                                        * variable */
-#define ITCL_HULL_VAR          0x8000 /* non-zero => built-in "itcl_hull"
+#define ITCL_TYPE_VAR          0x80   /* non-zero => built-in "type" variable */
+#define ITCL_SELF_VAR          0x100  /* non-zero => built-in "self" variable */
+#define ITCL_SELFNS_VAR        0x200  /* non-zero => built-in "selfns"
                                        * variable */
+#define ITCL_WIN_VAR           0x400  /* non-zero => built-in "win" variable */
+#define ITCL_COMPONENT_VAR     0x800  /* non-zero => component variable */
+#define ITCL_HULL_VAR          0x1000 /* non-zero => built-in "itcl_hull"
+                                       * variable */
+#define ITCL_OPTION_READONLY   0x2000 /* non-zero => readonly */
 
 /*
  *  Instance components.
@@ -380,6 +402,7 @@ typedef struct ItclComponent {
 } ItclComponent;
 
 #define ITCL_COMPONENT_INHERIT	0x01
+#define ITCL_COMPONENT_PUBLIC	0x02
 
 typedef struct ItclDelegatedFunction {
     Tcl_Obj *namePtr;

@@ -24,7 +24,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclInfo.c,v 1.1.2.21 2008/10/29 20:28:47 wiede Exp $
+ *     RCS:  $Id: itclInfo.c,v 1.1.2.22 2008/11/07 23:10:04 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -35,6 +35,7 @@
 
 Tcl_ObjCmdProc Itcl_BiInfoExistsCmd;
 Tcl_ObjCmdProc Itcl_BiInfoExtendedClassCmd;
+Tcl_ObjCmdProc Itcl_BiInfoTypeCmd;
 Tcl_ObjCmdProc Itcl_BiInfoWidgetCmd;
 Tcl_ObjCmdProc Itcl_BiInfoDelegatedCmd;
 Tcl_ObjCmdProc Itcl_BiInfoHullCmd;
@@ -75,7 +76,7 @@ static InfoMethod InfoMethodList[] = {
     { "function",
         "?name? ?-protection? ?-type? ?-name? ?-args? ?-body?",
         Itcl_BiInfoFunctionCmd,
-	ITCL_CLASS|ITCL_WIDGET|ITCL_ECLASS
+	ITCL_CLASS|ITCL_WIDGET|ITCL_ECLASS|ITCL_TYPE
     },
     { "heritage",
         "",
@@ -118,6 +119,11 @@ static InfoMethod InfoMethodList[] = {
         Itcl_BiInfoExtendedClassCmd,
 	ITCL_ECLASS
     },
+    { "type",
+        "",
+	Itcl_BiInfoTypeCmd,
+	ITCL_TYPE
+    },
     /*
      *  Add an error handler to support all of the usual inquiries
      *  for the "info" command in the global namespace.
@@ -150,6 +156,8 @@ static const struct NameProcMap infoCmds2[] = {
     { "::itcl::builtin::Info::heritage", Itcl_BiInfoHeritageCmd },
     { "::itcl::builtin::Info::inherit", Itcl_BiInfoInheritCmd },
     { "::itcl::builtin::Info::option", Itcl_BiInfoOptionCmd },
+    { "::itcl::builtin::Info::extendedclass", Itcl_BiInfoExtendedClassCmd },
+    { "::itcl::builtin::Info::type", Itcl_BiInfoTypeCmd },
     { "::itcl::builtin::Info::variable", Itcl_BiInfoVariableCmd },
     { "::itcl::builtin::Info::vars", Itcl_BiInfoVarsCmd },
     { "::itcl::builtin::Info::unknown", Itcl_BiInfoUnknownCmd },
@@ -2389,3 +2397,104 @@ Itcl_BiInfoHullCmd(
 
     return TCL_OK;
 }
+
+/*
+ * ------------------------------------------------------------------------
+ *  Itcl_BiInfoTypeCmd()
+ *
+ *  Returns information regarding the Type for an object.  This command
+ *  can be invoked with or without an object context:
+ *
+ *    <objName> info type   <= returns most-specific class name
+ *    info type             <= returns active namespace name
+ *
+ *  Returns a status TCL_OK/TCL_ERROR to indicate success/failure.
+ * ------------------------------------------------------------------------
+ */
+/* ARGSUSED */
+int
+Itcl_BiInfoTypeCmd(
+    ClientData dummy,     /* not used */
+    Tcl_Interp *interp,   /* current interpreter */
+    int objc,                /* number of arguments */
+    Tcl_Obj *CONST objv[])   /* argument objects */
+{
+    Tcl_Namespace *activeNs = Tcl_GetCurrentNamespace(interp);
+    Tcl_Namespace *contextNs = NULL;
+
+    ItclClass *contextIclsPtr;
+    ItclObject *contextIoPtr;
+
+    char *name;
+
+    ItclShowArgs(1, "Itcl_BiInfoTypeCmd", objc, objv);
+    if (objc != 1) {
+        Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+            "wrong # args: should be \"info type\"",
+            (char*)NULL);
+        return TCL_ERROR;
+    }
+
+    /*
+     *  If this command is not invoked within a class namespace,
+     *  signal an error.
+     */
+    contextIclsPtr = NULL;
+    if (Itcl_GetContext(interp, &contextIclsPtr, &contextIoPtr) != TCL_OK) {
+        /* try it the hard way */
+	ClientData clientData;
+	clientData = Itcl_GetCallFrameClientData(interp);
+        ItclObjectInfo *infoPtr;
+        infoPtr = (ItclObjectInfo *)Tcl_GetAssocData(interp,
+                ITCL_INTERP_DATA, NULL);
+        Tcl_Object oPtr;
+	if (clientData != NULL) {
+            oPtr = Tcl_ObjectContextObject(clientData);
+            contextIoPtr = Tcl_ObjectGetMetadata(oPtr,
+	            infoPtr->object_meta_type);
+            contextIclsPtr = contextIoPtr->iclsPtr;
+	}
+	if ((contextIoPtr == NULL) || (contextIclsPtr == NULL)) {
+	    Tcl_Obj *msg = Tcl_NewStringObj("\nget info like this instead 1: " \
+		    "\n  namespace eval className { info ", -1);
+	    Tcl_AppendStringsToObj(msg, Tcl_GetString(objv[0]), "... }", NULL);
+            Tcl_SetObjResult(interp, msg);
+            return TCL_ERROR;
+        }
+    }
+
+    /*
+     *  If there is an object context, then return the most-specific
+     *  class for the object.  Otherwise, return the class namespace
+     *  name.  Use normal class names when possible.
+     */
+    if (contextIoPtr) {
+        contextNs = contextIoPtr->iclsPtr->nsPtr;
+    } else {
+        assert(contextIclsPtr != NULL);
+        assert(contextIclsPtr->nsPtr != NULL);
+#ifdef NEW_PROTO_RESOLVER
+        contextNs = contextIclsPtr->nsPtr;
+#else
+        if (contextIclsPtr->infoPtr->useOldResolvers) {
+            contextNs = Itcl_GetUplevelNamespace(interp, 1);
+        } else {
+            contextNs = contextIclsPtr->nsPtr;
+        }
+#endif
+    }
+
+    if (contextNs == NULL) {
+        name = activeNs->fullName;
+    } else {
+        if (contextNs->parentPtr == activeNs) {
+            name = contextNs->name;
+        } else {
+            name = contextNs->fullName;
+        }
+    }
+
+    Tcl_SetObjResult(interp, Tcl_NewStringObj(name, -1));
+    return TCL_OK;
+}
+

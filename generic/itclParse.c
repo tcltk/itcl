@@ -39,7 +39,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclParse.c,v 1.1.2.34 2008/10/29 19:59:00 wiede Exp $
+ *     RCS:  $Id: itclParse.c,v 1.1.2.35 2008/11/07 23:10:04 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -63,12 +63,14 @@ static Tcl_CmdDeleteProc ItclFreeParserCommandData;
 static void ItclDelObjectInfo(char* cdata);
 
 Tcl_ObjCmdProc Itcl_ClassCommonCmd;
+Tcl_ObjCmdProc Itcl_ClassTypeVariableCmd;
 Tcl_ObjCmdProc Itcl_ClassConstructorCmd;
 Tcl_ObjCmdProc Itcl_ClassDestructorCmd;
 Tcl_ObjCmdProc Itcl_HandleClass;
 Tcl_ObjCmdProc Itcl_ClassInheritCmd;
 Tcl_ObjCmdProc Itcl_ClassMethodCmd;
 Tcl_ObjCmdProc Itcl_ClassProcCmd;
+Tcl_ObjCmdProc Itcl_ClassTypeMethodCmd;
 Tcl_ObjCmdProc Itcl_ClassVariableCmd;
 Tcl_ObjCmdProc Itcl_ClassProtectionCmd;
 Tcl_ObjCmdProc Itcl_ClassFilterCmd;
@@ -113,8 +115,8 @@ static const struct {
     {"proc", Itcl_ClassProcCmd},
     {"typecomponent", Itcl_ClassTypeComponentCmd},
     {"typeconstructor", Itcl_ClassTypeConstructorCmd},
-    {"typemethod", Itcl_ClassProcCmd},
-    {"typevariable", Itcl_ClassCommonCmd},
+    {"typemethod", Itcl_ClassTypeMethodCmd},
+    {"typevariable", Itcl_ClassTypeVariableCmd},
     {"variable", Itcl_ClassVariableCmd},
     {"handleClass", Itcl_HandleClass},
     {NULL, NULL}
@@ -650,6 +652,22 @@ ItclClassBaseCmd(
 		    isDone = 1;
 		}
 		if (strcmp(Tcl_GetString(imPtr->codePtr->bodyPtr),
+		        "@itcl-builtin-mytypemethod") == 0) {
+		    Tcl_AppendToObj(bodyPtr, "::itcl::builtin::mytypemethod",
+		            -1);
+		    isDone = 1;
+		}
+		if (strcmp(Tcl_GetString(imPtr->codePtr->bodyPtr),
+		        "@itcl-builtin-mymethod") == 0) {
+		    Tcl_AppendToObj(bodyPtr, "::itcl::builtin::mymethod", -1);
+		    isDone = 1;
+		}
+		if (strcmp(Tcl_GetString(imPtr->codePtr->bodyPtr),
+		        "@itcl-builtin-myproc") == 0) {
+		    Tcl_AppendToObj(bodyPtr, "::itcl::builtin::myproc", -1);
+		    isDone = 1;
+		}
+		if (strcmp(Tcl_GetString(imPtr->codePtr->bodyPtr),
 		        "@itcl-builtin-hullinstall") == 0) {
 		    Tcl_AppendToObj(bodyPtr, "::itcl::builtin::hullinstall", -1);
 		    isDone = 1;
@@ -760,7 +778,7 @@ ItclClassBaseCmd(
 	    if (idmPtr->icPtr != NULL) {
 	        val = Tcl_GetVar2(interp,
 	                Tcl_GetString(idmPtr->icPtr->ivPtr->namePtr), NULL, 0);
-	        if (strlen(val) == 0) {
+	        if ((val == NULL) || (strlen(val) == 0)) {
 	             result = TCL_ERROR;
 		     break;
 	        }
@@ -1348,7 +1366,7 @@ Itcl_ClassProcCmd(
 
     if (iclsPtr->flags & ITCL_TYPE) {
 	const char *name = Tcl_GetString(namePtr);
-        /* check if the typemethod is alrready delegated */
+        /* check if the typemethod is already delegated */
         FOREACH_HASH_VALUE(idmPtr, &iclsPtr->delegatedFunctions) {
 	    if (strcmp(Tcl_GetString(idmPtr->namePtr), name) == 0) {
 	        Tcl_AppendResult(interp, "Error in \"typemethod ", name,
@@ -1363,6 +1381,78 @@ Itcl_ClassProcCmd(
     return TCL_OK;
 }
 
+
+/*
+ * ------------------------------------------------------------------------
+ *  Itcl_ClassTypeMethodCmd()
+ *
+ *  Invoked by Tcl during the parsing of a class definition whenever
+ *  the "proc" command is invoked to define a common class proc.
+ *  A "proc" is like a "method", but only has access to "common"
+ *  class variables.  Handles the following syntax:
+ *
+ *      typemethod <name> ?<arglist>? ?<body>?
+ *
+ * ------------------------------------------------------------------------
+ */
+int
+Itcl_ClassTypeMethodCmd(
+    ClientData clientData,   /* info for all known objects */
+    Tcl_Interp *interp,      /* current interpreter */
+    int objc,                /* number of arguments */
+    Tcl_Obj *CONST objv[])   /* argument objects */
+{
+    FOREACH_HASH_DECLS;
+    Tcl_Obj *namePtr;
+    ItclObjectInfo *infoPtr;
+    ItclClass *iclsPtr;
+    ItclDelegatedFunction *idmPtr;
+    char *arglist;
+    char *body;
+
+    ItclShowArgs(1, "Itcl_ClassProcCmd", objc, objv);
+
+    if (objc < 2 || objc > 4) {
+        Tcl_WrongNumArgs(interp, 1, objv, "name ?args? ?body?");
+        return TCL_ERROR;
+    }
+
+    infoPtr = (ItclObjectInfo*)clientData;
+    iclsPtr = (ItclClass*)Itcl_PeekStack(&infoPtr->clsStack);
+    namePtr = objv[1];
+
+    arglist = NULL;
+    body = NULL;
+    if (objc >= 3) {
+        arglist = Tcl_GetString(objv[2]);
+    }
+    if (objc >= 4) {
+        body = Tcl_GetString(objv[3]);
+    }
+
+    if (iclsPtr->flags & ITCL_TYPE) {
+	const char *name = Tcl_GetString(namePtr);
+        /* check if the typemethod is already delegated */
+        FOREACH_HASH_VALUE(idmPtr, &iclsPtr->delegatedFunctions) {
+	    if (strcmp(Tcl_GetString(idmPtr->namePtr), name) == 0) {
+	        Tcl_AppendResult(interp, "Error in \"typemethod ", name,
+		        "...\", \"", name, "\" has been delegated", NULL);
+                return TCL_ERROR;
+	    }
+	}
+    }
+    iclsPtr->infoPtr->functionFlags = ITCL_TYPE_METHOD;
+    if (Itcl_CreateProc(interp, iclsPtr, namePtr, arglist, body) != TCL_OK) {
+	iclsPtr->infoPtr->functionFlags = 0;
+        return TCL_ERROR;
+    }
+    iclsPtr->infoPtr->functionFlags = 0;
+    hPtr = Tcl_FindHashEntry(&iclsPtr->functions, (char *)namePtr);
+    ItclMemberFunc *imPtr;
+    imPtr = Tcl_GetHashValue(hPtr);
+    imPtr->flags |= ITCL_TYPE_METHOD;
+    return TCL_OK;
+}
 
 /*
  * ------------------------------------------------------------------------
@@ -1549,12 +1639,14 @@ ItclInitClassCommon(
  *
  * ------------------------------------------------------------------------
  */
-int
-Itcl_ClassCommonCmd(
+static int
+ItclClassCommonCmd(
     ClientData clientData,   /* info for all known objects */
     Tcl_Interp *interp,      /* current interpreter */
     int objc,                /* number of arguments */
-    Tcl_Obj *CONST objv[])   /* argument objects */
+    Tcl_Obj *CONST objv[],   /* argument objects */
+    int protection,
+    ItclVariable **ivPtrPtr)
 {
     ItclShowArgs(2, "Itcl_ClassCommonCmd", objc, objv);
     ItclObjectInfo *infoPtr = (ItclObjectInfo*)clientData;
@@ -1563,6 +1655,7 @@ Itcl_ClassCommonCmd(
     Tcl_Obj *namePtr;
     char *initStr;
 
+    *ivPtrPtr = NULL;
     if ((objc < 2) || (objc > 3)) {
         Tcl_WrongNumArgs(interp, 1, objv, "varname ?init?");
         return TCL_ERROR;
@@ -1589,7 +1682,63 @@ Itcl_ClassCommonCmd(
             &ivPtr) != TCL_OK) {
         return TCL_ERROR;
     }
+    if (protection != 0) {
+        ivPtr->protection = protection;
+    }
+    *ivPtrPtr = ivPtr;
     return ItclInitClassCommon(interp, iclsPtr, ivPtr, initStr);
+}
+
+/*
+ * ------------------------------------------------------------------------
+ *  Itcl_ClassTypeVariableCmd()
+ *
+ *  Invoked by Tcl during the parsing of a class definition whenever
+ *  the "typevariable" command is invoked to define a variable that is
+ *  common to all objects in the class.  Handles the following syntax:
+ *
+ *      typevariable <varname> ?<init>?
+ *
+ * ------------------------------------------------------------------------
+ */
+int
+Itcl_ClassTypeVariableCmd(
+    ClientData clientData,   /* info for all known objects */
+    Tcl_Interp *interp,      /* current interpreter */
+    int objc,                /* number of arguments */
+    Tcl_Obj *CONST objv[])   /* argument objects */
+{
+    ItclVariable *ivPtr;
+
+    ivPtr = NULL;
+    ItclShowArgs(2, "Itcl_ClassTypeVariableCmd", objc, objv);
+    return ItclClassCommonCmd(clientData, interp, objc, objv, ITCL_PUBLIC,
+            &ivPtr);
+}
+
+/*
+ * ------------------------------------------------------------------------
+ *  Itcl_ClassCommonCmd()
+ *
+ *  Invoked by Tcl during the parsing of a class definition whenever
+ *  the "common" command is invoked to define a variable that is
+ *  common to all objects in the class.  Handles the following syntax:
+ *
+ *      common <varname> ?<init>?
+ *
+ * ------------------------------------------------------------------------
+ */
+int
+Itcl_ClassCommonCmd(
+    ClientData clientData,   /* info for all known objects */
+    Tcl_Interp *interp,      /* current interpreter */
+    int objc,                /* number of arguments */
+    Tcl_Obj *CONST objv[])   /* argument objects */
+{
+    ItclVariable *ivPtr;
+
+    ItclShowArgs(2, "Itcl_ClassTypeVariableCmd", objc, objv);
+    return ItclClassCommonCmd(clientData, interp, objc, objv, 0, &ivPtr);
 }
 
 
@@ -2159,7 +2308,7 @@ ItclCreateComponent(
 	        isWidgetHullVar = 1;
 	    }
 	}
-        ivPtr->flags |= ITCL_COMPONENT;
+        ivPtr->flags |= ITCL_COMPONENT_VAR;
 	const char *str = "";
 	if (isWidgetHullVar) {
 	    str = "if {[llength $args] == 0} { return $itcl_hull }\n";
@@ -2214,8 +2363,13 @@ ItclHandleClassComponent(
     ItclClass *iclsPtr;
     ItclComponent *icPtr;
     const char *usage;
+    const char *public;
     int inherit;
+    int haveInherit;
+    int havePublic;
     int newObjc;
+    int haveValue;
+    int i;
 
     ItclShowArgs(1, "Itcl_ClassComponentCmd", objc, objv);
     if (icPtrPtr != NULL) {
@@ -2223,24 +2377,71 @@ ItclHandleClassComponent(
     }
     infoPtr = (ItclObjectInfo*)clientData;
     iclsPtr = (ItclClass*)Itcl_PeekStack(&infoPtr->clsStack);
-    usage = "component ?-inherit?";
+    usage = "component ?-public <typemethod>? ?-inherit ?<flag>??";
     if (iclsPtr->flags & ITCL_CLASS) {
         Tcl_AppendResult(interp, "\"", Tcl_GetString(iclsPtr->namePtr),
-	        " is no ::itcl::widget/::itcl::widgetadaptor/::itcl::type.", 
+	        " is no ::itcl::extendedclass/::itcl::widget",
+		"/::itcl::widgetadaptor/::itcl::type.", 
 		" Only these can have components", NULL);
 	return TCL_ERROR;
     }
-    if ((objc != 2) && (objc != 3)) {
+    if ((objc < 2) && (objc > 6)) {
         Tcl_AppendResult(interp, "wrong # args should be: ", usage, NULL);
         return TCL_ERROR;
     }
     inherit = 0;
-    if (objc == 3) {
-        if (strcmp(Tcl_GetString(objv[2]), "-inherit") != 0) {
-            Tcl_AppendResult(interp, "wrong syntax should be: ", usage, NULL);
-            return TCL_ERROR;
+    haveInherit = 0;
+    public = NULL;
+    havePublic = 0;
+    for (i = 2; i < objc; i++) {
+        if (strcmp(Tcl_GetString(objv[i]), "-inherit") == 0) {
+	    if (haveInherit) {
+                Tcl_AppendResult(interp, "wrong syntax should be: ",
+		        usage, NULL);
+                return TCL_ERROR;
+	    }
+	    haveValue = 0;
+	    inherit = 1;
+	    if (i < objc - 1) {
+	        if (strcmp(Tcl_GetString(objv[i + 1]), "yes") == 0) {
+		    haveValue = 1;
+		}
+	        if (strcmp(Tcl_GetString(objv[i + 1]), "YES") == 0) {
+		    haveValue = 1;
+		}
+	        if (strcmp(Tcl_GetString(objv[i + 1]), "no") == 0) {
+		    haveValue = 1;
+		    inherit = 0;
+		}
+	        if (strcmp(Tcl_GetString(objv[i + 1]), "NO") == 0) {
+		    haveValue = 1;
+		    inherit = 0;
+		}
+	    }
+	    if (haveValue) {
+	        i++;
+	    }
+	    haveInherit = 1;
+	} else {
+            if (strcmp(Tcl_GetString(objv[i]), "-public") == 0) {
+	        if (havePublic) {
+                    Tcl_AppendResult(interp, "wrong syntax should be: ",
+		            usage, NULL);
+                    return TCL_ERROR;
+	        }
+	        havePublic = 1;
+	        if (i >= objc - 1) {
+                    Tcl_AppendResult(interp, "wrong syntax should be: ",
+		            usage, NULL);
+                    return TCL_ERROR;
+		}
+            } else {
+                Tcl_AppendResult(interp, "wrong syntax should be: ",
+		        usage, NULL);
+                return TCL_ERROR;
+	    }
 	}
-        inherit = 1;
+	i++;
     }
     if (ItclCreateComponent(interp, iclsPtr, objv[1], ITCL_COMMON,
             &icPtr) != TCL_OK) {
@@ -2271,6 +2472,29 @@ ItclHandleClassComponent(
 	Tcl_DecrRefCount(newObjv[1]);
 	Tcl_DecrRefCount(newObjv[2]);
 	Tcl_DecrRefCount(newObjv[3]);
+        ckfree((char *)newObjv);
+    }
+    if (public != NULL) {
+        icPtr->flags |= ITCL_COMPONENT_PUBLIC;
+	newObjc = 4;
+	newObjv = (Tcl_Obj **)ckalloc(sizeof(Tcl_Obj*)*newObjc);
+	newObjv[0] = Tcl_NewStringObj("delegate::method", -1);
+	Tcl_IncrRefCount(newObjv[0]);
+	newObjv[1] = Tcl_NewStringObj(public, -1);
+	Tcl_IncrRefCount(newObjv[1]);
+	newObjv[2] = Tcl_NewStringObj("to", -1);
+	Tcl_IncrRefCount(newObjv[2]);
+	newObjv[3] = objv[1];
+	Tcl_IncrRefCount(newObjv[3]);
+        if (Itcl_ClassDelegateMethodCmd(infoPtr, interp, newObjc, newObjv)
+	        != TCL_OK) {
+	    return TCL_ERROR;
+	}
+	Tcl_DecrRefCount(newObjv[0]);
+	Tcl_DecrRefCount(newObjv[1]);
+	Tcl_DecrRefCount(newObjv[2]);
+	Tcl_DecrRefCount(newObjv[3]);
+        ckfree((char *)newObjv);
     }
     if (icPtrPtr != NULL) {
         *icPtrPtr = icPtr;

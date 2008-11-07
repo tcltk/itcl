@@ -9,7 +9,7 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itclBase.c,v 1.1.2.20 2008/10/26 21:35:30 wiede Exp $
+ * RCS: @(#) $Id: itclBase.c,v 1.1.2.21 2008/11/07 23:10:04 wiede Exp $
  */
 
 #include <stdlib.h>
@@ -226,6 +226,8 @@ Initialize (
     Tcl_InitObjHashTable(&infoPtr->classes);
     Tcl_InitHashTable(&infoPtr->namespaceClasses, TCL_ONE_WORD_KEYS);
     Tcl_InitHashTable(&infoPtr->procMethods, TCL_ONE_WORD_KEYS);
+    Tcl_InitObjHashTable(&infoPtr->instances);
+    Tcl_InitHashTable(&infoPtr->objectInstances, TCL_ONE_WORD_KEYS);
     infoPtr->ensembleInfo = (EnsembleInfo *)ckalloc(sizeof(EnsembleInfo));
     memset(infoPtr->ensembleInfo, 0, sizeof(EnsembleInfo));
     Tcl_InitHashTable(&infoPtr->ensembleInfo->ensembles, TCL_ONE_WORD_KEYS);
