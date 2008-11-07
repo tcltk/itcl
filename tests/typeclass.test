@@ -72,14 +72,112 @@ proc testsNeedTcltest {version} {
 testsNeedTcl     8.6
 testsNeedTcltest 2.2
 
-#---------------------------------------------------------------------
-# typeconstructor
+interp alias {} type {} ::itcl::type
 
 ::tcltest::loadTestedCommands
 
 if {1} {
+
+#-----------------------------------------------------------------------
+# type destruction
+
+test typedestruction-1.1 {type command is deleted} -body {
+    type dog { }
+    dog destroy
+    info command ::dog
+} -result {}
+
+test typedestruction-1.2 {instance commands are deleted} -body {
+    type dog { }
+
+    dog create spot
+    dog destroy
+    info command ::spot
+} -result {}
+
+test typedestruction-1.3 {type namespace is deleted} -body {
+    type dog { }
+    dog destroy
+    namespace exists ::dog
+} -result {0}
+
+test typedestruction-1.4 {type proc is destroyed on error} -body {
+    catch {type dog {
+        error "Error creating dog"
+    }} result
+
+    list [namespace exists ::dog] [info command ::dog]
+} -result {0 {}}
+
+#-----------------------------------------------------------------------
+# type and typemethods
+
+test type-1.1 {type names get qualified} -body {
+    type dog {}
+} -cleanup {
+    dog destroy
+} -result {::dog}
+
+test type-1.2 {typemethods can be defined} -body {
+    type dog {
+        typemethod foo {a b} {
+            return [list $a $b]
+        }
+    }
+
+    dog foo 1 2
+} -cleanup {
+    dog destroy
+} -result {1 2}
+
+test type-1.3 {upvar works in typemethods} -body {
+    type dog {
+        typemethod goodname {varname} {
+            upvar $varname myvar
+            set myvar spot
+        }
+    }
+
+    set thename fido
+    dog goodname thename
+    set thename
+} -cleanup {
+    dog destroy
+    unset thename
+} -result {spot}
+
+test type-1.4 {typemethod args can't include type} -body {
+    type dog {
+        typemethod foo {a type b} { }
+    }
+} -returnCodes error -result {typemethod foo's arglist may not contain "type" explicitly}
+
+test type-1.5 {typemethod args can't include self} -body {
+    type dog {
+        typemethod foo {a self b} { }
+    }
+} -returnCodes error -result {typemethod foo's arglist may not contain "self" explicitly}
+
+test type-1.6 {typemethod args can span multiple lines} -body {
+    # This case caused an error at definition time in 0.9 because the
+    # arguments were included in a comment in the compile script, and
+    # the subsequent lines weren't commented.
+    type dog {
+        typemethod foo {
+            a
+            b
+        } { }
+    }
+} -cleanup {
+    dog destroy
+} -result {::dog}
+
+
+#---------------------------------------------------------------------
+# typeconstructor
+
 test typeconstructor-1.1 {a typeconstructor can be defined} -body {
-    ::itcl::type dog {
+    type dog {
         typevariable a
 
         typeconstructor {
@@ -97,7 +195,7 @@ test typeconstructor-1.1 {a typeconstructor can be defined} -body {
 } -result {1}
 
 test typeconstructor-1.2 {only one typeconstructor can be defined} -body {
-    ::itcl::type dog {
+    type dog {
         typevariable a
 
         typeconstructor {
@@ -128,7 +226,7 @@ test typeconstructor-1.3 {type proc is destroyed on error} -body {
 # Type components
 
 test typecomponent-1.1 {typecomponent defines typevariable} -body {
-    ::itcl::type dog {
+    type dog {
         typecomponent mycomp
 
         typemethod test {} {
@@ -142,9 +240,9 @@ test typecomponent-1.1 {typecomponent defines typevariable} -body {
 } -result {}
 
 
-test typecomponent-1.4 {typecomponent -inherit} -body {
-    ::itcl::type dog {
-        typecomponent mycomp -inherit
+test typecomponent-1.4 {typecomponent -inherit yes} -body {
+    type dog {
+        typecomponent mycomp -inherit yes
 
         typeconstructor {
             set mycomp string
@@ -162,7 +260,7 @@ test typecomponent-1.4 {typecomponent -inherit} -body {
 test dtypemethod-1.1 {delegate typemethod to non-existent component} -body {
     set result ""
 
-    ::itcl::type dog {
+    type dog {
         delegate typemethod foo to bar
     }
 
@@ -172,7 +270,7 @@ test dtypemethod-1.1 {delegate typemethod to non-existent component} -body {
 } -result {::dog delegates typemethod "foo" to undefined typecomponent "bar"}
 
 test dtypemethod-1.2 {delegating to existing typecomponent} -body {
-    ::itcl::type dog {
+    type dog {
         delegate typemethod length to string
 
         typeconstructor {
@@ -186,7 +284,7 @@ test dtypemethod-1.2 {delegating to existing typecomponent} -body {
 } -result {3}
 
 test dtypemethod-1.4 {delegating to existing typecomponent with error} -body {
-    ::itcl::type dog {
+    type dog {
         delegate typemethod length to string
 
         typeconstructor {
@@ -202,7 +300,7 @@ test dtypemethod-1.4 {delegating to existing typecomponent with error} -body {
 } -result {wrong # args: should be "dog length string"}
 
 test dtypemethod-1.5 {delegating unknown typemethods to existing typecomponent} -body {
-    ::itcl::type dog {
+    type dog {
         delegate typemethod * to string
 
         typeconstructor {
@@ -216,7 +314,7 @@ test dtypemethod-1.5 {delegating unknown typemethods to existing typecomponent} 
 } -result {3}
 
 test dtypemethod-1.6a {delegating unknown typemethod to existing typecomponent with error} -body {
-    ::itcl::type dog {
+    type dog {
         delegate typemethod * to stringhandler
 
         typeconstructor {
@@ -232,7 +330,7 @@ test dtypemethod-1.6a {delegating unknown typemethod to existing typecomponent w
 } -result {unknown or ambiguous subcommand "foo": must be bytelength, compare, equal, first, index, is, last, length, map, match, range, repeat, replace, reverse, tolower, totitle, toupper, trim, trimleft, trimright, wordend, or wordstart}
 
 test dtypemethod-1.7 {can't delegate local typemethod: order 1} -body {
-    ::itcl::type dog {
+    type dog {
         typemethod foo {} {}
         delegate typemethod foo to bar
     }
@@ -241,7 +339,7 @@ test dtypemethod-1.7 {can't delegate local typemethod: order 1} -body {
 } -result {Error in "delegate typemethod foo...", "foo" has been defined locally.}
 
 test dtypemethod-1.8 {can't delegate local typemethod: order 2} -body {
-    ::itcl::type dog {
+    type dog {
         delegate typemethod foo to bar
         typemethod foo {} {}
     }
@@ -250,7 +348,7 @@ test dtypemethod-1.8 {can't delegate local typemethod: order 2} -body {
 } -result {Error in "typemethod foo...", "foo" has been delegated}
 
 test dtypemethod-1.10 {excepted methods are caught properly} -body {
-    ::itcl::type dog {
+    type dog {
         delegate typemethod * to string except {match index}
 
         typeconstructor {
@@ -272,7 +370,7 @@ test dtypemethod-1.11 {as clause can include arguments} -body {
         return "<$a $b>"
     }
 
-    ::itcl::type dog {
+    type dog {
         delegate typemethod wag to tail as {wag briskly}
 
         typeconstructor {
@@ -287,7 +385,7 @@ test dtypemethod-1.11 {as clause can include arguments} -body {
 } -result {<wag briskly>}
 
 test dtypemethod-2.1 {'using "%c %m"' gets normal behavior} -body {
-    ::itcl::type dog {
+    type dog {
         delegate typemethod length to string using {%c %m}
 
         typeconstructor {
@@ -305,7 +403,7 @@ test dtypemethod-2.2 {All relevant 'using' conversions are converted} -body {
         return $args
     }
 
-    ::itcl::type dog {
+    type dog {
         delegate typemethod tail using {echo %% %t %M %m %j %n %w %s %c}
     }
 
@@ -318,7 +416,7 @@ test dtypemethod-2.2 {All relevant 'using' conversions are converted} -body {
 test dtypemethod-2.3 {"%%" is handled properly} -body {
     proc echo {args} { join $args "|" }
 
-    ::itcl::type dog {
+    type dog {
         delegate typemethod wag using {echo %%m %%%m}
     }
 
@@ -331,7 +429,7 @@ test dtypemethod-2.3 {"%%" is handled properly} -body {
 test dtypemethod-2.4 {Method "*" and "using"} -body {
     proc echo {args} { join $args "|" }
 
-    ::itcl::type dog {
+    type dog {
         delegate typemethod * using {echo %m}
     }
 
@@ -344,7 +442,7 @@ test dtypemethod-2.4 {Method "*" and "using"} -body {
 test dtypemethod-3.1 {typecomponent names can be changed dynamically} -body {
     proc echo {args} { join $args "|" }
 
-    ::itcl::type dog {
+    type dog {
         delegate typemethod length to mycomp
 
         typeconstructor {
@@ -366,16 +464,13 @@ test dtypemethod-3.1 {typecomponent names can be changed dynamically} -body {
     rename echo ""
 } -result {3 length|foo}
 
-#end
-}
-
 test dtypemethod-4.4 {redefinition is OK} -body {
-    ::itcl::type wag {
+    type wag {
         method tail    {} {return "wags tail"}
         method briskly {} {return "wags tail briskly"}
     }
 
-    ::itcl::type dog {
+    type dog {
         typeconstructor {
             set wag [wag #auto]
         }
@@ -390,10 +485,508 @@ test dtypemethod-4.4 {redefinition is OK} -body {
 } -result {wags tail briskly}
 
 
+#-----------------------------------------------------------------------
+# type creation
+
+test creation-1.1 {type instance names get qualified} -body {
+    type dog { }
+
+    dog create spot
+} -cleanup {
+    dog destroy
+} -result {::spot}
+
+test creation-1.2 {type instance names can be generated} -body {
+    type dog { }
+
+    dog create my#auto
+} -cleanup {
+    dog destroy
+} -result {::mydog0}
+
+test creation-1.3 {"create" method is optional} -body {
+    type dog { }
+
+    dog fido
+} -cleanup {
+    dog destroy
+} -result {::fido}
+
+test creation-1.4 {constructor arg can't be type} -body {
+    type dog {
+        constructor {type} { }
+    }
+} -returnCodes {
+    error
+} -result {constructor's arglist may not contain "type" explicitly}
+
+test creation-1.5 {constructor arg can't be self} -body {
+    type dog {
+        constructor {self} { }
+    }
+} -returnCodes {
+    error
+} -result {constructor's arglist may not contain "self" explicitly}
+
+test creation-1.6 {weird names are OK} -body {
+    # I.e., names with non-identifier characters
+    type confused-dog {
+        method meow {} {
+            return "$self meows."
+        }
+    }
+
+    confused-dog spot
+    spot meow
+} -cleanup {
+    confused-dog destroy
+} -result {::spot meows.}
+
+#-----------------------------------------------------------------------
+# procs
+
+test proc-1.1 {proc args can span multiple lines} -body {
+    # This case caused an error at definition time in 0.9 because the
+    # arguments were included in a comment in the compile script, and
+    # the subsequent lines weren't commented.
+    type dog {
+        proc foo {
+            a
+            b
+        } { }
+    }
+} -cleanup {
+    dog destroy
+} -result {::dog}
+
+#-----------------------------------------------------------------------
+# methods
+
+test method-1.1 {methods get called} -body {
+    type dog {
+        method bark {} {
+            return "$self barks"
+        }
+    }
+
+    dog create spot
+    spot bark
+} -cleanup {
+    dog destroy
+} -result {::spot barks}
+
+test method-1.2 {methods can call other methods} -body {
+    type dog {
+        method bark {} {
+            return "$self barks."
+        }
+
+        method chase {quarry} {
+            return "$self chases $quarry; [$self bark]"
+        }
+    }
+
+    dog create spot
+    spot chase cat
+} -cleanup {
+    dog destroy
+} -result {::spot chases cat; ::spot barks.}
+
+test method-1.3 {instances can call one another} -body {
+    type dog {
+        method bark {} {
+            return "$self barks."
+        }
+
+        method chase {quarry} {
+            return "$self chases $quarry; [$quarry bark] [$self bark]"
+        }
+    }
+
+    dog create spot
+    dog create fido
+    spot chase ::fido
+} -cleanup {
+    dog destroy
+} -result {::spot chases ::fido; ::fido barks. ::spot barks.}
+
+test method-1.4 {upvar works in methods} -body {
+    type dog {
+        method goodname {varname} {
+            upvar $varname myvar
+            set myvar spot
+        }
+    }
+
+    dog create fido
+    set thename fido
+    fido goodname thename
+    set thename
+} -cleanup {
+    dog destroy
+} -result {spot}
+
+test method-1.6 {unknown methods get an error } -body {
+    type dog { }
+
+    dog create spot
+    set result ""
+    spot chase
+} -cleanup {
+    dog destroy
+} -returnCodes {
+    error
+} -result {bad option "chase": should be one of...
+  spot callinstance <instancename>
+  spot cget -option
+  spot configure ?-option? ?value -option value...?
+  spot destroy
+  spot isa className
+  spot mymethod
+  spot mytypemethod
+  spot unknown}
+
+test method-1.7 {info type method returns the object's type} -body {
+    type dog { }
+
+    dog create spot
+    spot info type
+} -cleanup {
+    dog destroy
+} -result {::dog}
+
+test method-1.8 {instance method can call type method} -body {
+    type dog {
+        typemethod hello {} {
+            return "Hello"
+        }
+        method helloworld {} {
+            return "[$type hello], World!"
+        }
+    }
+
+    dog create spot
+    spot helloworld
+} -cleanup {
+    dog destroy
+} -result {Hello, World!}
+
+test method-1.9 {type methods must be qualified} -body {
+    type dog {
+        typemethod hello {} {
+            return "Hello"
+        }
+        method helloworld {} {
+            return "[hello], World!"
+        }
+    }
+
+    dog create spot
+    spot helloworld
+} -cleanup {
+    dog destroy
+} -returnCodes {
+    error
+} -result {invalid command name "hello"}
+
+test method-1.11 {too few arguments} -body {
+    type dog {
+        method bark {volume} { }
+    }
+
+    dog create spot
+    spot bark
+} -cleanup {
+    dog destroy
+} -returnCodes {
+    error
+} -result {wrong # args: should be "spot bark volume"}
+
+test method-1.13 {too many arguments} -body {
+    type dog {
+        method bark {volume} { }
+    }
+
+    dog create spot
+
+    spot bark really loud
+} -cleanup {
+    dog destroy
+} -returnCodes {
+    error
+} -result {wrong # args: should be "spot bark volume"}
+
+test method-1.14 {method args can't include type} -body {
+    type dog {
+        method foo {a type b} { }
+    }
+} -returnCodes {
+    error
+} -result {method foo's arglist may not contain "type" explicitly}
+
+test method-1.15 {method args can't include self} -body {
+    type dog {
+        method foo {a self b} { }
+    }
+} -returnCodes {
+    error
+} -result {method foo's arglist may not contain "self" explicitly}
+
+test method-1.16 {method args can span multiple lines} -body {
+    # This case caused an error at definition time in 0.9 because the
+    # arguments were included in a comment in the compile script, and
+    # the subsequent lines weren't commented.
+    type dog {
+        method foo {
+                    a
+                    b
+                } { }
+    }
+} -cleanup {
+    dog destroy
+} -result {::dog}
+
+#-----------------------------------------------------------------------
+# mymethod and renaming
+
+test rename-1.1 {mymethod uses name of instance name variable} -body {
+    type dog {
+        method mymethod {} {
+            list [mymethod] [mymethod "A B"] [mymethod A B]
+        }
+    }
+
+    dog fido
+    fido mymethod
+} -cleanup {
+    dog destroy
+} -result {{::itcl::callinstance ItclInst17} {::itcl::callinstance ItclInst17 {A B}} {::itcl::callinstance ItclInst17 A B}}
+
+
+test rename-1.2 {instances can be renamed} -body {
+    type dog {
+        method names {} {
+            list [mymethod] $selfns $win $self
+        }
+    }
+
+    dog fido
+    set a [fido names]
+    rename fido spot
+    set b [spot names]
+
+    concat $a $b
+} -cleanup {
+    dog destroy
+} -result {{::itcl::callinstance ItclInst18} ::itcl::internal::variables::fido ::fido ::fido {::itcl::callinstance ItclInst18} ::itcl::internal::variables::fido ::fido ::spot}
+
+test rename-1.3 {rename to "" deletes an instance} -body {
+    type dog { }
+
+    dog fido
+    rename fido ""
+    namespace children ::dog
+} -cleanup {
+    dog destroy
+} -result {}
+
+test rename-1.4 {rename to "" deletes an instance even after a rename} -body {
+    type dog { }
+
+    dog fido
+    rename fido spot
+    rename spot ""
+    namespace children ::dog
+} -cleanup {
+    dog destroy
+} -result {}
+
+test rename-1.5 {creating an object twice destroys the first instance} -body {
+    type dog {
+        typemethod x {} {}
+    }
+
+    dog fido
+    set a [namespace children ::itcl::internal::variables::fido]
+    dog fido
+    set b [namespace children ::itcl::internal::variables::fido]
+    fido destroy
+    set c [namespace which ::dog]
+
+    list $a $b $c
+} -cleanup {
+#    dog destroy ; # is it correct that ::dog is already destroyed by fido destroy?
+} -result {::itcl::internal::variables::fido::dog ::itcl::internal::variables::fido::dog {}}
+
+#-----------------------------------------------------------------------
+# mymethod actually works
+
+test mymethod-1.1 {run mymethod handler} -body {
+    type foo {
+        option -command {}
+        method runcmd {} {
+            eval [linsert $itcl_options(-command) end $self snarf]
+            return
+        }
+    }
+    type bar {
+        variable sub
+        constructor {args} {
+            set sub [foo fubar -command [mymethod Handler]]
+            return
+        }
+
+        method Handler {args} {
+            set ::RES $args
+        }
+
+        method test {} {
+            $sub runcmd
+            return
+        }
+    }
+
+    set ::RES {}
+    bar boogle
+    boogle test
+    set ::RES
+} -cleanup {
+    bar destroy
+    foo destroy
+} -result {::bar::fubar snarf}
+test typevariable-1.2 {undefined typevariables are OK} -body {
+    type dog {
+        typevariable theValue
+        method tset {value} {
+            set theValue $value
+        }
+
+        method tget {} {
+            return $theValue
+        }
+    }
+
+    dog create spot
+    dog create fido
+    spot tset Howdy
+
+    list [spot tget] [fido tget] ;# FIXME [set ::dog::theValue]
+} -cleanup {
+    dog destroy
+} -result {Howdy Howdy}
+
+test typevariable-1.3 {predefined typevariables are OK} -body {
+    type dog {
+        typevariable greeting Hello
+
+        method tget {} {
+            return $greeting
+        }
+    }
+
+    dog create spot
+    dog create fido
+
+    list [spot tget] [fido tget] ;# FIXME [set ::dog::greeting]
+} -cleanup {
+    dog destroy
+} -result {Hello Hello}
+
+test typevariable-1.4 {typevariables can be arrays} -body {
+    type dog {
+        typevariable greetings
+
+        method fill {} {
+            set greetings(a) Hi
+            set greetings(b) Howdy
+        }
+    }
+
+    dog create spot
+    spot fill
+    list $::dog::greetings(a) $::dog::greetings(b)
+} -cleanup {
+    dog destroy
+} -result {Hi Howdy}
+
+test typevariable-1.5 {typevariables can used in typemethods} -body {
+    type dog {
+        typevariable greetings Howdy
+
+        typemethod greet {} {
+            return $greetings
+        }
+    }
+
+    dog greet
+} -cleanup {
+    dog destroy
+} -result {Howdy}
+
+test typevariable-1.6 {typevariables can used in procs} -body {
+    type dog {
+        typevariable greetings Howdy
+
+        method greet {} {
+            return [realGreet]
+        }
+
+        proc realGreet {} {
+            return $greetings
+        }
+    }
+
+    dog create spot
+    spot greet
+} -cleanup {
+    dog destroy
+} -result {Howdy}
+
+#-----------------------------------------------------------------------
+# myproc
+
+test myproc-1.1 {myproc qualifies proc names} -body {
+    type dog {
+        proc foo {} {}
+
+        typemethod getit {} {
+            return [myproc foo]
+        }
+    }
+
+    dog getit
+} -cleanup {
+    dog destroy
+} -result {::dog::foo}
+
+test ivariable-1.4 {defined instance variables need not be declared} -body {
+    type dog {
+        variable greetings
+
+        method put {} {
+            set greetings Howdy
+        }
+
+        method get {} {
+            return $greetings
+        }
+    }
+
+    dog create spot
+    spot put
+    spot get
+} -cleanup {
+    dog destroy
+} -result {Howdy}
+
+
+# end
+}
+
 
 if {0} {
 test component-1.1 {component defines variable} -body {
-    ::itcl::type dog {
+    type dog {
         typecomponent mycomp
 
         public proc test {} {
@@ -404,7 +997,7 @@ test component-1.1 {component defines variable} -body {
     dog fido
     fido test
 } -cleanup {
-    ::itcl::delete object fido
+    delete object fido
     ::itcl::delete class dog
 } -result {}
 
