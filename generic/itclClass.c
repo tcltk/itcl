@@ -25,7 +25,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann Copyright (c) 2007
  *
- *     RCS:  $Id: itclClass.c,v 1.1.2.29 2008/11/07 23:10:04 wiede Exp $
+ *     RCS:  $Id: itclClass.c,v 1.1.2.30 2008/11/08 23:40:12 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -985,7 +985,7 @@ ItclFreeClass(
      *  appear multiple times in the table (for x, foo::x, etc.)
      *  so each one has a reference count.
      */
-//    Tcl_InitHashTable(&varTable, TCL_STRING_KEYS);
+/*    Tcl_InitHashTable(&varTable, TCL_STRING_KEYS); */
 
     FOREACH_HASH_VALUE(vlookup, &iclsPtr->resolveVars) {
         if (--vlookup->usage == 0) {
@@ -997,7 +997,7 @@ ItclFreeClass(
         }
     }
 
-//    TclDeleteVars((Interp*)iclsPtr->interp, &varTable);
+/*    TclDeleteVars((Interp*)iclsPtr->interp, &varTable); */
     Tcl_DeleteHashTable(&iclsPtr->resolveVars);
 
     /*

@@ -25,7 +25,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclEnsemble.c,v 1.1.2.10 2008/10/19 16:30:53 wiede Exp $
+ *     RCS:  $Id: itclEnsemble.c,v 1.1.2.11 2008/11/08 23:40:12 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -486,7 +486,7 @@ Itcl_IsEnsemble(
     Tcl_CmdInfo* infoPtr)  /* command info from Tcl_GetCommandInfo() */
 {
     if (infoPtr) {
-// FIXME use CMD and Tcl_IsEnsemble!!
+/* FIXME use CMD and Tcl_IsEnsemble!! */
         return (infoPtr->deleteProc == DeleteEnsemble);
     }
     return 0;
@@ -905,7 +905,6 @@ fprintf(stderr, "error in creating namespace: %s \n", Tcl_DStringValue(&buffer))
     toObjPtr = Tcl_NewStringObj(Tcl_DStringValue(&buffer), -1);
     Tcl_DictObjPut(NULL, mapDict, Tcl_NewStringObj(ensName, -1), toObjPtr);
     ensData->cmd		= ensPart->cmdPtr;
-//    ensData->cmd		= parentEnsData->cmd;
     ensData->parent		= ensPart;
 
     return TCL_OK;
@@ -2083,8 +2082,6 @@ if (ensPart->clientData == NULL) {
     return TCL_ERROR;
 }
         Itcl_NRAddCallback(interp, CallInvokeEnsembleMethod, nsPtr, ensPart, INT2PTR(objc), (ClientData)objv);
-//        result = Tcl_InvokeNamespaceProc(interp, (Tcl_Proc)ensPart->clientData,
-//	        nsPtr, ensPart->namePtr, objc, objv);
     } else {
         Itcl_NRAddCallback(interp, CallInvokeEnsembleMethod2, ensPart, INT2PTR(objc), (ClientData)objv, NULL);
     }
@@ -2124,7 +2121,9 @@ fprintf(stderr, "EnsembleUnknownCmd, ensemble not found!%s!\n", Tcl_GetString(ob
     hPtr = Tcl_FindHashEntry(&infoPtr->ensembleInfo->ensembles, (char *)cmd);
     if (hPtr == NULL) {
 /* FIXME !!! */
-//fprintf(stderr, "EnsembleUnknownCmd, ensemble struct not found!%s!\n", Tcl_GetString(objv[1]));
+/*
+fprintf(stderr, "EnsembleUnknownCmd, ensemble struct not found!%s!\n", Tcl_GetString(objv[1]));
+*/
         return TCL_ERROR;
     }
     ensData = (Ensemble *)Tcl_GetHashValue(hPtr);

@@ -24,7 +24,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclInfo.c,v 1.1.2.22 2008/11/07 23:10:04 wiede Exp $
+ *     RCS:  $Id: itclInfo.c,v 1.1.2.23 2008/11/08 23:40:12 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -1323,7 +1323,7 @@ Itcl_BiInfoBodyCmd(
 	Tcl_AppendResult(interp,
 	        "wrong # args: should be \"info body function\"",
 	        NULL);
-//        Tcl_WrongNumArgs(interp, 1, objv, "function");
+/*        Tcl_WrongNumArgs(interp, 1, objv, "function"); */
         return TCL_ERROR;
     }
 
@@ -1438,7 +1438,7 @@ Itcl_BiInfoArgsCmd(
 /* FIXME !!! */
 #ifdef NOTDEF
         Proc *procPtr;
-//        CompiledLocal *localPtr;
+/*        CompiledLocal *localPtr; */
 
         procPtr = TclFindProc((Interp*)interp, name);
         if (procPtr == NULL) {

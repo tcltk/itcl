@@ -1,7 +1,7 @@
 /*
  * itclBase.c --
  *
- * This file contains the C-implemented startup part of a
+ * This file contains the C-implemented startup part of an
  * Itcl implemenatation
  *
  * Copyright (c) 2007 by Arnulf P. Wiedemann
@@ -9,11 +9,12 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itclBase.c,v 1.1.2.21 2008/11/07 23:10:04 wiede Exp $
+ * RCS: @(#) $Id: itclBase.c,v 1.1.2.22 2008/11/08 23:40:12 wiede Exp $
  */
 
 #include <stdlib.h>
 #include "itclInt.h"
+#include <tclOODecls.h>
 
 extern struct ItclStubAPI itclStubAPI;
 
@@ -165,8 +166,6 @@ AddClassUnknowMethod(
  * ------------------------------------------------------------------------
  */
 
-const char *TclOOInitializeStubs(Tcl_Interp *interp, const char *version,
-        int epoch, int revision);
 int ItclVarsAndCommandResolveInit(Tcl_Interp *interp);
 
 static int
@@ -176,11 +175,13 @@ Initialize (
     Tcl_Namespace *nsPtr;
     Tcl_Namespace *itclNs;
     ItclObjectInfo *infoPtr;
+    const char * ret;
 
     if (Tcl_InitStubs(interp, TCL_VERSION, 0) == NULL) {
         return TCL_ERROR;
     }
-    const char * ret = TclOOInitializeStubs(interp, TCLOO_VERSION, 0, 0);
+
+    ret = Tcl_OOInitStubs(interp);
     if (ret == NULL) {
         return TCL_ERROR;
     }
@@ -444,10 +445,11 @@ ItclCallCCommand(
                 ITCL_INTERP_DATA, NULL);
 
 /* FIXME have to use ItclCallContext here !!! */
-//	Itcl_PushStack(callerNsPtr, &infoPtr->namespaceStack);
+/*	Itcl_PushStack(callerNsPtr, &infoPtr->namespaceStack); */
         result = (*objProc)(cData, interp, Itcl_GetCallFrameObjc(interp)-1,
 	        Itcl_GetCallFrameObjv(interp)+1);
-//	Itcl_PopStack(&infoPtr->namespaceStack);
+/*	Itcl_PopStack(&infoPtr->namespaceStack); */
     }
     return result;
 }
+

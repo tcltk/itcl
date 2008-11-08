@@ -1,5 +1,5 @@
 /*
- * $Id: itclStubLib.c,v 1.9.2.3 2007/09/09 11:04:20 wiede Exp $
+ * $Id: itclStubLib.c,v 1.9.2.4 2008/11/08 23:40:12 wiede Exp $
  * SOURCE: tk/generic/tkStubLib.c, version 1.9 2004/03/17
  */
 
@@ -50,23 +50,9 @@ Itcl_InitStubs(
     }
 
     if (!stubsPtr || !intStubsPtr) {
-//    if (!stubsPtr) {
 	errMsg = "missing stub table pointer";
 	goto error;
     }
-#ifdef NOTDEF
-    if (stubsPtr->epoch != epoch || intStubsPtr->epoch != epoch) {
-    if (stubsPtr->epoch != epoch) {
-	errMsg = "epoch number mismatch";
-	goto error;
-    }
-    if (stubsPtr->revision < revision || intStubsPtr->revision < revision) {
-    if (stubsPtr->revision < revision) {
-	errMsg = "require later revision";
-	goto error;
-    }
-#endif
-
     itclStubsPtr = stubsPtr;
     itclIntStubsPtr = intStubsPtr;
     return actualVersion;

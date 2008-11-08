@@ -23,7 +23,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclCmd.c,v 1.1.2.28 2008/11/07 23:10:04 wiede Exp $
+ *     RCS:  $Id: itclCmd.c,v 1.1.2.29 2008/11/08 23:40:12 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -1155,7 +1155,7 @@ Itcl_FilterAddCmd(
     int result;
 
     ItclShowArgs(1, "Itcl_FilterCmd", objc, objv);
-//    Tcl_Namespace *contextNs = Tcl_GetCurrentNamespace(interp);
+/*    Tcl_Namespace *contextNs = Tcl_GetCurrentNamespace(interp); */
 /* FIXME need to change the chain command to do the same here as the TclOO next command !! */
     if (objc < 3) {
         Tcl_WrongNumArgs(interp, 1, objv, "<className> <filterName> ?<filterName> ...?");
@@ -1194,7 +1194,7 @@ Itcl_FilterDeleteCmd(
     Tcl_Obj *CONST objv[])   /* argument objects */
 {
     ItclShowArgs(1, "Itcl_FilterDeleteCmd", objc, objv);
-//    Tcl_Namespace *contextNs = Tcl_GetCurrentNamespace(interp);
+/*    Tcl_Namespace *contextNs = Tcl_GetCurrentNamespace(interp); */
 
     Tcl_AppendResult(interp, "::itcl::filter delete command not yet implemented", NULL);
     return TCL_ERROR;
@@ -1267,7 +1267,7 @@ Itcl_ForwardDeleteCmd(
     Tcl_Obj *CONST objv[])   /* argument objects */
 {
     ItclShowArgs(1, "Itcl_ForwardDeleteCmd", objc, objv);
-//    Tcl_Namespace *contextNs = Tcl_GetCurrentNamespace(interp);
+/*    Tcl_Namespace *contextNs = Tcl_GetCurrentNamespace(interp); */
 
     Tcl_AppendResult(interp, "::itcl::forward delete command not yet implemented", NULL);
     return TCL_ERROR;
@@ -1335,7 +1335,7 @@ Itcl_MixinDeleteCmd(
     Tcl_Obj *CONST objv[])   /* argument objects */
 {
     ItclShowArgs(1, "Itcl_MixinDeleteCmd", objc, objv);
-//    Tcl_Namespace *contextNs = Tcl_GetCurrentNamespace(interp);
+/*    Tcl_Namespace *contextNs = Tcl_GetCurrentNamespace(interp); */
 
     Tcl_AppendResult(interp, "::itcl::mixin delete command not yet implemented", NULL);
     return TCL_ERROR;

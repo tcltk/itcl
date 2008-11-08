@@ -39,7 +39,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclParse.c,v 1.1.2.35 2008/11/07 23:10:04 wiede Exp $
+ *     RCS:  $Id: itclParse.c,v 1.1.2.36 2008/11/08 23:40:12 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -61,6 +61,8 @@ typedef struct ProtectionCmdInfo {
  */
 static Tcl_CmdDeleteProc ItclFreeParserCommandData;
 static void ItclDelObjectInfo(char* cdata);
+static int ItclInitClassCommon(Tcl_Interp *interp, ItclClass *iclsPtr,
+        ItclVariable *ivPtr, const char *initStr);
 
 Tcl_ObjCmdProc Itcl_ClassCommonCmd;
 Tcl_ObjCmdProc Itcl_ClassTypeVariableCmd;
@@ -626,7 +628,7 @@ ItclClassBaseCmd(
 	    argumentPtr = imPtr->codePtr->argumentPtr;
 	    bodyPtr = imPtr->codePtr->bodyPtr;
 	    if (imPtr->codePtr->flags & ITCL_BUILTIN) {
-// FIXME MEMORY leak!!
+/* FIXME MEMORY leak!! */
 	        argumentPtr = Tcl_NewStringObj("args", -1);
 		int isDone;
 		isDone = 0;
@@ -660,6 +662,28 @@ ItclClassBaseCmd(
 		if (strcmp(Tcl_GetString(imPtr->codePtr->bodyPtr),
 		        "@itcl-builtin-mymethod") == 0) {
 		    Tcl_AppendToObj(bodyPtr, "::itcl::builtin::mymethod", -1);
+		    isDone = 1;
+		}
+		if (strcmp(Tcl_GetString(imPtr->codePtr->bodyPtr),
+		        "@itcl-builtin-myvar") == 0) {
+		    Tcl_AppendToObj(bodyPtr, "::itcl::builtin::myvar", -1);
+		    isDone = 1;
+		}
+		if (strcmp(Tcl_GetString(imPtr->codePtr->bodyPtr),
+		        "@itcl-builtin-mytypevar") == 0) {
+		    Tcl_AppendToObj(bodyPtr, "::itcl::builtin::mytypevar", -1);
+		    isDone = 1;
+		}
+		if (strcmp(Tcl_GetString(imPtr->codePtr->bodyPtr),
+		        "@itcl-builtin-callinstance") == 0) {
+		    Tcl_AppendToObj(bodyPtr, "::itcl::builtin::callinstance",
+		            -1);
+		    isDone = 1;
+		}
+		if (strcmp(Tcl_GetString(imPtr->codePtr->bodyPtr),
+		        "@itcl-builtin-getinstancevar") == 0) {
+		    Tcl_AppendToObj(bodyPtr, "::itcl::builtin::getinstancevar",
+		            -1);
 		    isDone = 1;
 		}
 		if (strcmp(Tcl_GetString(imPtr->codePtr->bodyPtr),
@@ -712,6 +736,11 @@ ItclClassBaseCmd(
 	        Tcl_SetHashValue(hPtr2, imPtr);
 	    }
 	    if (iclsPtr->flags & ITCL_TYPE) {
+		if (argumentPtr == NULL) {
+fprintf(stderr, "ARG!%s!%p!\n", Tcl_GetString(imPtr->namePtr), argumentPtr);
+		    /* FIXME check why argumentPtr is NULL for destructor!! */
+		    argumentPtr = Tcl_NewStringObj("", -1);
+		}
 	        imPtr->tmPtr = (ClientData)Itcl_NewProcMethod(interp,
 	            iclsPtr->oPtr, ItclCheckCallMethod, ItclAfterCallMethod,
                     ItclProcErrorProc, imPtr, imPtr->namePtr, argumentPtr,
@@ -1410,7 +1439,7 @@ Itcl_ClassTypeMethodCmd(
     char *arglist;
     char *body;
 
-    ItclShowArgs(1, "Itcl_ClassProcCmd", objc, objv);
+    ItclShowArgs(1, "Itcl_ClassTypeMethodCmd", objc, objv);
 
     if (objc < 2 || objc > 4) {
         Tcl_WrongNumArgs(interp, 1, objv, "name ?args? ?body?");
@@ -1473,30 +1502,57 @@ Itcl_ClassVariableCmd(
     int objc,                /* number of arguments */
     Tcl_Obj *CONST objv[])   /* argument objects */
 {
-    ItclShowArgs(2, "Itcl_ClassVariableCmd", objc, objv);
+    Tcl_Obj *namePtr;
     ItclObjectInfo *infoPtr = (ItclObjectInfo*)clientData;
     ItclClass *iclsPtr = (ItclClass*)Itcl_PeekStack(&infoPtr->clsStack);
-
-    int pLevel;
     ItclVariable *ivPtr;
-    Tcl_Obj *namePtr;
     char *init;
     char *config;
+    char *arrayInitStr;
+    char *usageStr;
+    int pLevel;
+    int haveError;
+    int haveArrayInit;
+    int result;
 
+    result = TCL_OK;
+    haveError = 0;
+    haveArrayInit = 0;
+    usageStr = NULL;
+    arrayInitStr = NULL;
+    ItclShowArgs(1, "Itcl_ClassVariableCmd", objc, objv);
     pLevel = Itcl_Protection(interp, 0);
-
-    if (pLevel == ITCL_PUBLIC) {
-        if (objc < 2 || objc > 4) {
-            Tcl_WrongNumArgs(interp, 1, objv, "name ?init? ?config?");
-            return TCL_ERROR;
-        }
-    } else {
-        if ((objc < 2) || (objc > 3)) {
-            Tcl_WrongNumArgs(interp, 1, objv, "name ?init?");
-            return TCL_ERROR;
+    if (iclsPtr->flags & ITCL_TYPE) {
+        if (objc > 2) {
+	    if (strcmp(Tcl_GetString(objv[2]), "-array") == 0) {
+	        if (objc == 4) {
+		    arrayInitStr = Tcl_GetString(objv[3]);
+		    haveArrayInit = 1;
+		} else {
+		    haveError = 1;
+		    usageStr = "varname ?init|-array init?";
+		}
+	    }
+	}
+    }
+    if (!haveError && !haveArrayInit) {
+        if (pLevel == ITCL_PUBLIC) {
+            if (objc < 2 || objc > 4) {
+	        usageStr = "name ?init? ?config?";
+	        haveError = 1;
+            }
+        } else {
+            if ((objc < 2) || (objc > 3)) {
+	        usageStr = "name ?init?";
+	        haveError = 1;
+            }
         }
     }
 
+    if (haveError) {
+        Tcl_WrongNumArgs(interp, 1, objv, usageStr);
+        return TCL_ERROR;
+    }
     /*
      *  Make sure that the variable name does not contain anything
      *  goofy like a "::" scope qualifier.
@@ -1511,20 +1567,27 @@ Itcl_ClassVariableCmd(
 
     init   = NULL;
     config = NULL;
-    if (objc >= 3) {
-        init = Tcl_GetString(objv[2]);
-    }
-    if (objc >= 4) {
-        config = Tcl_GetString(objv[3]);
+    if (!haveArrayInit) {
+        if (objc >= 3) {
+            init = Tcl_GetString(objv[2]);
+        }
+        if (objc >= 4) {
+            config = Tcl_GetString(objv[3]);
+        }
     }
 
     if (Itcl_CreateVariable(interp, iclsPtr, namePtr, init, config,
             &ivPtr) != TCL_OK) {
         return TCL_ERROR;
     }
+    if (haveArrayInit) {
+        ivPtr->arrayInitPtr = Tcl_NewStringObj(arrayInitStr, -1);
+    } else {
+        ivPtr->arrayInitPtr = NULL;
+    }
     iclsPtr->numVariables++;
 
-    return TCL_OK;
+    return result;
 }
 
 
@@ -1536,7 +1599,7 @@ Itcl_ClassVariableCmd(
  *
  * ------------------------------------------------------------------------
  */
-int
+static int
 ItclInitClassCommon(
     Tcl_Interp *interp,
     ItclClass *iclsPtr,
@@ -1623,6 +1686,29 @@ ItclInitClassCommon(
             return TCL_ERROR;
         }
     }
+    if (ivPtr->arrayInitPtr != NULL) {
+	int i;
+	int argc;
+	const char **argv;
+	const char *val;
+        Tcl_DStringAppend(&buffer, "::", -1);
+        Tcl_DStringAppend(&buffer, Tcl_GetString(ivPtr->namePtr), -1);
+	result = Tcl_SplitList(interp, Tcl_GetString(ivPtr->arrayInitPtr),
+	        &argc, &argv);
+	for (i = 0; i < argc; i++) {
+            val = Tcl_SetVar2(interp, Tcl_DStringValue(&buffer), argv[i],
+                    argv[i + 1], TCL_NAMESPACE_ONLY);
+            if (!val) {
+                Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+                    "cannot initialize common variable \"",
+                    Tcl_GetString(ivPtr->namePtr), "\"",
+                    (char*)NULL);
+                return TCL_ERROR;
+            }
+	    i++;
+        }
+        ckfree((char *)argv);
+    }
     Tcl_DStringFree(&buffer);
     return TCL_OK;
 }
@@ -1648,19 +1734,47 @@ ItclClassCommonCmd(
     int protection,
     ItclVariable **ivPtrPtr)
 {
-    ItclShowArgs(2, "Itcl_ClassCommonCmd", objc, objv);
     ItclObjectInfo *infoPtr = (ItclObjectInfo*)clientData;
     ItclClass *iclsPtr = (ItclClass*)Itcl_PeekStack(&infoPtr->clsStack);
     ItclVariable *ivPtr;
     Tcl_Obj *namePtr;
+    char *arrayInitStr;
+    char *usageStr;
     char *initStr;
+    int haveError;
+    int haveArrayInit;
+    int result;
 
+    result = TCL_OK;
+    haveError = 0;
+    haveArrayInit = 0;
+    usageStr = NULL;
+    arrayInitStr = NULL;
     *ivPtrPtr = NULL;
-    if ((objc < 2) || (objc > 3)) {
-        Tcl_WrongNumArgs(interp, 1, objv, "varname ?init?");
+    ItclShowArgs(2, "Itcl_ClassCommonCmd", objc, objv);
+    if (iclsPtr->flags & ITCL_TYPE) {
+        if (objc > 2) {
+	    if (strcmp(Tcl_GetString(objv[2]), "-array") == 0) {
+	        if (objc == 4) {
+		    arrayInitStr = Tcl_GetString(objv[3]);
+		    haveArrayInit = 1;
+		} else {
+		    haveError = 1;
+		    usageStr = "varname ?init|-array init?";
+		}
+	    }
+	}
+    }
+    if (!haveError && !haveArrayInit) {
+        if ((objc < 2) || (objc > 3)) {
+	    usageStr = "varname ?init?";
+	    haveError = 1;
+        }
+    }
+    if (haveError) {
+        Tcl_WrongNumArgs(interp, 1, objv, usageStr);
         return TCL_ERROR;
     }
-
     /*
      *  Make sure that the variable name does not contain anything
      *  goofy like a "::" scope qualifier.
@@ -1674,8 +1788,10 @@ ItclClassCommonCmd(
     }
 
     initStr = NULL;
-    if (objc >= 3) {
-        initStr = Tcl_GetString(objv[2]);
+    if (!haveArrayInit) {
+        if (objc >= 3) {
+            initStr = Tcl_GetString(objv[2]);
+        }
     }
 
     if (Itcl_CreateVariable(interp, iclsPtr, namePtr, initStr, (char*)NULL,
@@ -1684,6 +1800,11 @@ ItclClassCommonCmd(
     }
     if (protection != 0) {
         ivPtr->protection = protection;
+    }
+    if (haveArrayInit) {
+        ivPtr->arrayInitPtr = Tcl_NewStringObj(arrayInitStr, -1);
+    } else {
+        ivPtr->arrayInitPtr = NULL;
     }
     *ivPtrPtr = ivPtr;
     return ItclInitClassCommon(interp, iclsPtr, ivPtr, initStr);
@@ -1711,7 +1832,7 @@ Itcl_ClassTypeVariableCmd(
     ItclVariable *ivPtr;
 
     ivPtr = NULL;
-    ItclShowArgs(2, "Itcl_ClassTypeVariableCmd", objc, objv);
+    ItclShowArgs(1, "Itcl_ClassTypeVariableCmd", objc, objv);
     return ItclClassCommonCmd(clientData, interp, objc, objv, ITCL_PUBLIC,
             &ivPtr);
 }
@@ -1799,8 +1920,9 @@ ItclDelObjectInfo(
     Tcl_DeleteHashTable(&infoPtr->objects);
 
     Itcl_DeleteStack(&infoPtr->clsStack);
-// FIXME !!!
-// free class_meta_type and object_meta_type
+/* FIXME !!!
+ free class_meta_type and object_meta_type
+*/
     ckfree((char*)infoPtr);
 }
 
@@ -2696,7 +2818,8 @@ delegate method * ?to <componentName>? ?using <pattern>? ?except <methods>?";
 	            ITCL_COMMON, &icPtr) != TCL_OK) {
                 return TCL_ERROR;
             }
-            hPtr = Tcl_FindHashEntry(&iclsPtr->components, (char *)componentPtr);
+            hPtr = Tcl_FindHashEntry(&iclsPtr->components,
+	            (char *)componentPtr);
         }
     }
     if (hPtr != NULL) {
@@ -2709,8 +2832,9 @@ delegate method * ?to <componentName>? ?using <pattern>? ?except <methods>?";
 	if (ioPtr != NULL) {
 	} else {
 	    /* FIXME !! have to check the hierarchy !! */
-//	    hPtr = Tcl_FindHashEntry(&iclsPtr->functions,
-//	            (char *)methodNamePtr);
+/*	    hPtr = Tcl_FindHashEntry(&iclsPtr->functions, 
+	            (char *)methodNamePtr);
+*/
 	}
 	if (hPtr != NULL) {
 	    Tcl_AppendResult(interp, "method \"", methodName,
@@ -2871,6 +2995,7 @@ Itcl_HandleDelegateOptionCmd(
         return TCL_ERROR;
     }
     componentPtr = NULL;
+    icPtr = NULL;
     if (ioPtr != NULL) {
         what = "object";
 	whatName = Tcl_GetCommandName(interp, ioPtr->accessCmd);
@@ -2984,17 +3109,23 @@ Itcl_HandleDelegateOptionCmd(
         hPtr = Tcl_FindHashEntry(&iclsPtr->components, (char *)componentPtr);
     }
     if (hPtr == NULL) {
-	Tcl_AppendResult(interp, what, " \"", whatName,
-	        "\" has no component \"", Tcl_GetString(componentPtr), "\"",
-		NULL);
-        return TCL_ERROR;
+	if (componentPtr != NULL) {
+            if (ItclCreateComponent(interp, iclsPtr, componentPtr,
+	            ITCL_COMMON, &icPtr) != TCL_OK) {
+                return TCL_ERROR;
+            }
+            hPtr = Tcl_FindHashEntry(&iclsPtr->components,
+	            (char *)componentPtr);
+        }
     }
-    icPtr = Tcl_GetHashValue(hPtr);
+    if (hPtr != NULL) {
+        icPtr = Tcl_GetHashValue(hPtr);
+    }
     if (*option != '*') {
 	/* FIXME !!! */
 	/* check for locally defined option */
         /* check for valid option name */
-        // ItclIsValidOptionName(option);
+        /* ItclIsValidOptionName(option); */
 	if (ioPtr != NULL) {
 	    hPtr = Tcl_FindHashEntry(&ioPtr->objectOptions,
 	            (char *)optionNamePtr);

@@ -9,7 +9,7 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itclInt.h,v 1.17.2.42 2008/11/07 23:10:04 wiede Exp $
+ * RCS: @(#) $Id: itclInt.h,v 1.17.2.43 2008/11/08 23:40:12 wiede Exp $
  */
 
 #include <string.h>
@@ -448,6 +448,7 @@ typedef struct ItclVariable {
     int flags;                  /* flags describing member (see below) */
     ItclMemberCode *codePtr;    /* code associated with member */
     Tcl_Obj *init;              /* initial value */
+    Tcl_Obj *arrayInitPtr;      /* initial value if variable should be array */
 } ItclVariable;
 
 
