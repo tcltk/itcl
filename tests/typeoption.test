@@ -1,0 +1,513 @@
+#---------------------------------------------------------------------
+# TITLE:
+#       typefunction.test
+#
+# AUTHOR:
+#       Arnulf Wiedemann with a lot of code form the snit tests by
+#       Will Duquette
+#
+# DESCRIPTION:
+#       Test cases for ::itcl::type proc, method, typemethod commands.
+#       Uses the ::tcltest:: harness.
+#
+#       There is at least Tcl 8.6a3 needed
+#
+#    The tests assume tcltest 2.2
+#-----------------------------------------------------------------------
+
+# ### ### ### ######### ######### #########
+## Declare the minimal version of Tcl required to run the package
+## tested by this testsuite, and its dependencies.
+
+proc testsNeedTcl {version} {
+    # This command ensures that a minimum version of Tcl is used to
+    # run the tests in the calling testsuite. If the minimum is not
+    # met by the active interpreter we forcibly bail out of the
+    # testsuite calling the command. The command has to be called
+    # immediately after loading the utilities.
+
+    if {[package vsatisfies [package provide Tcl] $version]} return
+
+    puts "    Aborting the tests found in \"[file tail [info script]]\""
+    puts "    Requiring at least Tcl $version, have [package present Tcl]."
+
+    # This causes a 'return' in the calling scope.
+    return -code return
+}
+
+# ### ### ### ######### ######### #########
+## Declare the minimum version of Tcltest required to run the
+## testsuite.
+
+proc testsNeedTcltest {version} {
+    # This command ensure that a minimum version of the Tcltest
+    # support package is used to run the tests in the calling
+    # testsuite. If the minimum is not met by the loaded package we
+    # forcibly bail out of the testsuite calling the command. The
+    # command has to be called after loading the utilities. The only
+    # command allowed to come before it is 'textNeedTcl' above.
+
+    # Note that this command will try to load a suitable version of
+    # Tcltest if the package has not been loaded yet.
+
+    if {[lsearch [namespace children] ::tcltest] == -1} {
+	if {![catch {
+	    package require tcltest $version
+	}]} {
+	    namespace import -force ::tcltest::*
+	    return
+	}
+    } elseif {[package vcompare [package present tcltest] $version] >= 0} {
+	return
+    }
+
+    puts "    Aborting the tests found in [file tail [info script]]."
+    puts "    Requiring at least tcltest $version, have [package present tcltest]"
+
+    # This causes a 'return' in the calling scope.
+    return -code return
+}
+
+
+testsNeedTcl     8.6
+testsNeedTcltest 2.2
+
+interp alias {} type {} ::itcl::type
+
+::tcltest::loadTestedCommands
+
+#-----------------------------------------------------------------------
+# Options
+
+test option-1.1 {options get default values} -body {
+    type dog {
+        option -color golden
+    }
+
+    dog create spot
+    spot cget -color
+} -cleanup {
+    dog destroy
+} -result {golden}
+
+test option-1.2 {options can be set} -body {
+    type dog {
+        option -color golden
+    }
+
+    dog create spot
+    spot configure -color black
+    spot cget -color
+} -cleanup {
+    dog destroy
+} -result {black}
+
+test option-1.3 {multiple options can be set} -body {
+    type dog {
+        option -color golden
+        option -akc 0
+    }
+
+    dog create spot
+    spot configure -color brown -akc 1
+    list [spot cget -color] [spot cget -akc]
+} -cleanup {
+    dog destroy
+} -result {brown 1}
+
+test option-1.4 {options can be retrieved as instance variable} -body {
+    type dog {
+        option -color golden
+        option -akc 0
+
+        method listopts {} {
+            list $itcl_options(-color) $itcl_options(-akc)
+        }
+    }
+
+    dog create spot
+    spot configure -color black -akc 1
+    spot listopts
+} -cleanup {
+    dog destroy
+} -result {black 1}
+
+test option-1.5 {options can be set as an instance variable} -body {
+    type dog {
+        option -color golden
+        option -akc 0
+
+        method setopts {} {
+            set itcl_options(-color) black
+            set itcl_options(-akc) 1
+        }
+    }
+
+    dog create spot
+    spot setopts
+    list [spot cget -color] [spot cget -akc]
+} -cleanup {
+    dog destroy
+} -result {black 1}
+
+test option-1.6 {options can be set at creation time} -body {
+    type dog {
+        option -color golden
+        option -akc 0
+    }
+
+    dog create spot -color white -akc 1
+    list [spot cget -color] [spot cget -akc]
+} -cleanup {
+    dog destroy
+} -result {white 1}
+
+test option-1.7 {undefined option: cget} -body {
+    type dog {
+        option -color golden
+        option -akc 0
+    }
+
+    dog create spot
+    spot cget -colour
+} -returnCodes {
+    error
+} -cleanup {
+    dog destroy
+} -result {unknown option "-colour"}
+
+test option-1.8 {undefined option: configure} -body {
+    type dog {
+        option -color golden
+        option -akc 0
+    }
+
+    dog create spot
+    spot configure -colour blue
+} -returnCodes {
+    error
+} -cleanup {
+    dog destroy
+} -result {unknown option "-colour"}
+
+test option-1.9 {options default to ""} -body {
+    type dog {
+        option -color
+    }
+
+
+    dog create spot
+    spot cget -color
+} -cleanup {
+    dog destroy
+} -result {<undefined>}
+
+test option-1.10 {spaces allowed in option defaults} -body {
+    type dog {
+        option -breed "golden retriever"
+    }
+    dog fido
+    fido cget -breed
+} -cleanup {
+    dog destroy
+} -result {golden retriever}
+
+test option-1.11 {brackets allowed in option defaults} -body {
+    type dog {
+        option -regexp {[a-z]+}
+    }
+
+    dog fido
+    fido cget -regexp
+} -cleanup {
+    dog destroy
+} -result {[a-z]+}
+
+test option-2.1 {configure returns info, local options only} -constraints {
+    notyet_configure
+} -body {
+    type dog {
+        option -color black
+        option -akc 1
+    }
+
+    dog create spot
+    spot configure -color red
+    spot configure -akc 0
+    spot configure
+} -cleanup {
+    dog destroy
+} -result {{-color color Color black red} {-akc akc Akc 1 0}}
+
+test option-2.2 {configure -opt returns info, local options only} -body {
+    type dog {
+        option -color black
+        option -akc 1
+    }
+
+    dog create spot
+    spot configure -color red
+    spot configure -color
+} -cleanup {
+    dog destroy
+} -result {-color color Color black red}
+
+test option-2.3 {configure -opt returns info, explicit options} -body {
+    type papers {
+        option -akcflag 1
+    }
+
+    type dog {
+        option -color black
+        delegate option -akc to papers as -akcflag
+        constructor {args} {
+            set papers [papers create $self.papers]
+        }
+
+        destructor {
+            catch {$self.papers destroy}
+        }
+    }
+
+    dog create spot
+    spot configure -akc 0
+    spot configure -akc
+} -cleanup {
+    dog destroy
+} -result {-akc akc Akc 1 0}
+test option-2.4 {configure -unknownopt} -body {
+    type papers {
+        option -akcflag 1
+    }
+
+    type dog {
+        option -color black
+        delegate option -akc to papers as -akcflag
+        constructor {args} {
+            set papers [papers create $self.papers]
+        }
+
+        destructor {
+            catch {$self.papers destroy}
+        }
+    }
+
+    dog create spot
+    spot configure -foo
+} -returnCodes {
+    error
+} -cleanup {
+    dog destroy
+    dog destroy
+    papers destroy
+} -result {unknown option "-foo"}
+
+test option-2.5 {configure returns info, unknown options} -constraints {
+    notyet_tk
+} -body {
+    widgetadaptor myframe {
+        option -foo a
+        delegate option -width to hull
+        delegate option * to hull
+        constructor {args} {
+            installhull [frame $self]
+        }
+    }
+
+    myframe .frm
+    set a [.frm configure -foo]
+    set b [.frm configure -width]
+    set c [.frm configure -height]
+    destroy .frm
+    tkbide
+
+    list $a $b $c
+
+} -cleanup {
+    myframe destroy
+} -result {{-foo foo Foo a a} {-width width Width 0 0} {-height height Height 0 0}}
+
+test option-2.6 {configure -opt unknown to implicit component} -constraints {
+    notyet_tk
+} -body {
+    widgetadaptor myframe {
+        delegate option * to hull
+        constructor {args} {
+            installhull [frame $self]
+        }
+    }
+    myframe .frm
+    catch {.frm configure -quux} result
+    destroy .frm
+    tkbide
+    set result
+} -cleanup {
+    myframe destroy
+} -result {unknown option "-quux"}
+
+test option-3.1 {set option resource name explicitly} -body {
+    type dog {
+        option {-tailcolor tailColor} black
+    }
+
+    dog fido
+
+    fido configure -tailcolor
+} -cleanup {
+    dog destroy
+} -result {-tailcolor tailColor TailColor black black}
+
+test option-3.2 {set option class name explicitly} -body {
+    type dog {
+        option {-tailcolor tailcolor TailColor} black
+    }
+
+    dog fido
+
+    fido configure -tailcolor
+} -cleanup {
+    dog destroy
+} -result {-tailcolor tailcolor TailColor black black}
+
+test option-3.3 {delegated option's names come from owner} -body {
+    type tail {
+        option -color black
+    }
+
+    type dog {
+        delegate option -tailcolor to tail as -color
+
+        constructor {args} {
+            set tail [tail fidotail]
+        }
+    }
+
+    dog fido
+
+    fido configure -tailcolor
+} -cleanup {
+    dog destroy
+    tail destroy
+} -result {-tailcolor tailcolor Tailcolor black black}
+
+test option-3.4 {delegated option's resource name set explicitly} -body {
+    type tail {
+        option -color black
+    }
+
+    type dog {
+        delegate option {-tailcolor tailColor} to tail as -color
+
+        constructor {args} {
+            set tail [tail fidotail]
+        }
+    }
+
+    dog fido
+
+    fido configure -tailcolor
+} -cleanup {
+    dog destroy
+    tail destroy
+} -result {-tailcolor tailColor TailColor black black}
+
+test option-3.5 {delegated option's class name set explicitly} -body {
+    type tail {
+        option -color black
+    }
+
+    type dog {
+        delegate option {-tailcolor tailcolor TailColor} to tail as -color
+
+        constructor {args} {
+            set tail [tail fidotail]
+        }
+    }
+
+    dog fido
+
+    fido configure -tailcolor
+} -cleanup {
+    dog destroy
+    tail destroy
+} -result {-tailcolor tailcolor TailColor black black}
+
+test option-3.6 {delegated option's default comes from component} -body {
+    type tail {
+        option -color black
+    }
+
+    type dog {
+        delegate option -tailcolor to tail as -color
+
+        constructor {args} {
+            set tail [tail fidotail -color red]
+        }
+    }
+
+    dog fido
+
+    fido configure -tailcolor
+} -cleanup {
+    dog destroy
+    tail destroy
+} -result {-tailcolor tailcolor Tailcolor black red}
+
+test option-4.1 {local option name must begin with hyphen} -body {
+    type dog {
+        option nohyphen
+    }
+} -returnCodes {
+    error
+} -result {Error in "option nohyphen...", badly named option "nohyphen"}
+
+test option-4.2 {local option name must be lower case} -body {
+    type dog {
+        option -Upper
+    }
+} -returnCodes {
+    error
+} -result {Error in "option -Upper...", badly named option "-Upper"}
+
+test option-4.3 {local option name may not contain spaces} -body {
+    type dog {
+        option {"-with space"}
+    }
+} -returnCodes {
+    error
+} -result {Error in "option {"-with space"}...", badly named option "-with space"}
+
+test option-4.4 {delegated option name must begin with hyphen} -body {
+    type dog {
+        delegate option nohyphen to tail
+    }
+} -returnCodes {
+    error
+} -result {Error in "delegate option nohyphen...", badly named option "nohyphen"}
+
+test option-4.5 {delegated option name must be lower case} -body {
+    type dog {
+        delegate option -Upper to tail
+    }
+} -returnCodes {
+    error
+} -result {Error in "delegate option -Upper...", badly named option "-Upper"}
+
+test option-4.6 {delegated option name may not contain spaces} -body {
+    type dog {
+        delegate option {"-with space"} to tail
+    }
+} -returnCodes {
+    error
+} -result {Error in "delegate option {"-with space"}...", badly named option "-with space"}
+
+
+
+
+
+
+#---------------------------------------------------------------------
+# Clean up
+
+::tcltest::cleanupTests
+return
