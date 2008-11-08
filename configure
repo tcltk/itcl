@@ -6675,7 +6675,7 @@ echo "$as_me: error: could not find header file '${srcdir}/$i'" >&2;}
 
 
 
-    PKG_CFLAGS="$PKG_CFLAGS "
+    PKG_CFLAGS="$PKG_CFLAGS -DUSE_TCLOO_STUBS"
 
 
 
