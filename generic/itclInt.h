@@ -9,7 +9,7 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itclInt.h,v 1.17.2.43 2008/11/08 23:40:12 wiede Exp $
+ * RCS: @(#) $Id: itclInt.h,v 1.17.2.44 2008/11/09 21:21:30 wiede Exp $
  */
 
 #include <string.h>
@@ -98,8 +98,8 @@ struct ItclClass;
 struct ItclObject;
 struct ItclMemberFunc;
 struct EnsembleInfo;
-struct ItclDelegatedOptionInfo;
-struct ItclDelegatedMethodInfo;
+struct ItclDelegatedOption;
+struct ItclDelegatedFunction;
 
 typedef int (*HullAndOptionsInst)(Tcl_Interp *interp,
         struct ItclObject *ioPtr, struct ItclClass *iclsPtr, int objc,
@@ -124,6 +124,7 @@ typedef struct ItclWidgetInfo {
 typedef struct ItclObjectInfo {
     Tcl_Interp *interp;             /* interpreter that manages this info */
     Tcl_HashTable objects;          /* list of all known objects */
+    Tcl_HashTable objectNames;      /* list of known objects using namePtr */
     Tcl_HashTable classes;          /* list of all known classes */
     Tcl_HashTable namespaceClasses; /* maps from nsPtr to iclsPtr */
     Tcl_HashTable procMethods;      /* maps from procPtr to mFunc */
@@ -162,6 +163,8 @@ typedef struct ItclObjectInfo {
     int functionFlags;              /* used for creating of ItclMemberCode */
     int numInstances;               /* used for having a unique key for objects
                                      * for use in mytypemethod etc. */
+    struct ItclDelegatedOption *currIdoPtr;
+                                    /* the current delegated option info */
 } ItclObjectInfo;
 
 typedef struct EnsembleInfo {
@@ -205,11 +208,11 @@ typedef struct ItclClass {
     Tcl_HashTable delegatedOptions; /* definitions for all delegated options
                                      in this class.  Look up simple string
                                      names and get back
-				     ItclDelegatedOptionInfo * ptrs */
+				     ItclDelegatedOption * ptrs */
     Tcl_HashTable delegatedFunctions; /* definitions for all delegated methods
                                      or procs in this class.  Look up simple
 				     string names and get back
-				     ItclDelegatedMethodInfo * ptrs */
+				     ItclDelegatedFunction * ptrs */
     Tcl_HashTable methodVariables; /* definitions for all methodvariable members
                                      in this class.  Look up simple string
                                      names and get back
@@ -236,6 +239,7 @@ typedef struct ItclClass {
     Tcl_Class  clsPtr;            /* TclOO class */
     int numCommons;               /* number of commons in this class */
     int numVariables;             /* number of variables in this class */
+    int numOptions;               /* number of options in this class */
     int unique;                   /* unique number for #auto generation */
     int flags;                    /* maintains class status */
     int callRefCount;             /* prevent deleting of class if refcount>1 */
@@ -664,6 +668,9 @@ MODULE_SCOPE int DelegationInstall(Tcl_Interp *interp, ItclObject *ioPtr,
 MODULE_SCOPE const char* ItclGetInstanceVar(Tcl_Interp *interp,
         const char *name, const char *name2, ItclObject *contextIoPtr,
 	ItclClass *contextIclsPtr);
+MODULE_SCOPE const char* ItclGetCommonInstanceVar(Tcl_Interp *interp,
+        const char *name, const char *name2, ItclObject *contextIoPtr,
+	ItclClass *contextIclsPtr);
 MODULE_SCOPE const char* ItclSetInstanceVar(Tcl_Interp *interp,
         const char *name, const char *name2, const char *value,
 	ItclObject *contextIoPtr, ItclClass *contextIclsPtr);
@@ -709,6 +716,8 @@ MODULE_SCOPE void ItclDestroyClassNamesp(ClientData cdata);
 MODULE_SCOPE int ExpandDelegateAs(Tcl_Interp *interp, ItclObject *ioPtr,
 	ItclClass *iclsPtr, ItclDelegatedFunction *idmPtr,
 	const char *funcName, Tcl_Obj *listPtr);
+MODULE_SCOPE int ItclCheckForInitializedComponents(Tcl_Interp *interp,
+        ItclClass *iclsPtr, ItclObject *ioPtr);
 
 
 #include "itcl2TclOO.h"

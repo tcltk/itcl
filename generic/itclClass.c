@@ -25,7 +25,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann Copyright (c) 2007
  *
- *     RCS:  $Id: itclClass.c,v 1.1.2.30 2008/11/08 23:40:12 wiede Exp $
+ *     RCS:  $Id: itclClass.c,v 1.1.2.31 2008/11/09 21:21:30 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -1311,7 +1311,12 @@ FinalizeCreateObject(
 	Tcl_Obj *objPtr;
 	
 	objPtr = Tcl_NewStringObj("-level 2", -1);
-	result = Tcl_SetReturnOptions(interp, objPtr);
+	/* result = Tcl_SetReturnOptions(interp, objPtr); */
+	if (!(iclsPtr->flags & ITCL_TYPE)) {
+	    result = Tcl_SetReturnOptions(interp, objPtr);
+	} else {
+	    Tcl_SetReturnOptions(interp, objPtr);
+	}
     }
     Tcl_DecrRefCount(objNamePtr);
     return result;
@@ -1345,18 +1350,18 @@ Itcl_HandleClass(
     int objc,                /* number of arguments */
     Tcl_Obj *CONST objv[])   /* argument objects */
 {
+    Tcl_DString buffer;  /* buffer used to build object names */
     ItclClass *iclsPtr;
     ItclObjectInfo *infoPtr = (ItclObjectInfo *)clientData;
     Tcl_HashEntry *hPtr;
-
     char unique[256];    /* buffer used for unique part of object names */
-    Tcl_DString buffer;  /* buffer used to build object names */
     char *token;
     char *objName;
     char tmp;
     char *start;
     char *pos;
     char *match;
+    int result;
 
     Tcl_ResetResult(interp);
     ItclShowArgs(1, "Itcl_HandleClassCmd", objc, objv);
@@ -1474,8 +1479,9 @@ Itcl_HandleClass(
     Tcl_DStringFree(&buffer);
     Itcl_NRAddCallback(interp, FinalizeCreateObject, objNamePtr, iclsPtr,
             NULL, NULL);
-    return ItclCreateObject(interp, Tcl_GetString(objNamePtr), iclsPtr,
+    result = ItclCreateObject(interp, Tcl_GetString(objNamePtr), iclsPtr,
             objc-4, objv+4);
+    return result;
 }
 
 
@@ -1925,6 +1931,7 @@ Itcl_CreateOption(
     }
 #endif
         
+    iclsPtr->numOptions++;
     ioptPtr->iclsPtr = iclsPtr;
     ioptPtr->codePtr = mCodePtr;
     ioptPtr->fullNamePtr = Tcl_NewStringObj(

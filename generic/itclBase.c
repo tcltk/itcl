@@ -9,7 +9,7 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itclBase.c,v 1.1.2.22 2008/11/08 23:40:12 wiede Exp $
+ * RCS: @(#) $Id: itclBase.c,v 1.1.2.23 2008/11/09 21:21:30 wiede Exp $
  */
 
 #include <stdlib.h>
@@ -224,6 +224,7 @@ Initialize (
     infoPtr->object_meta_type->deleteProc = ItclDeleteObjectMetadata;
     infoPtr->object_meta_type->cloneProc = NULL;
     Tcl_InitHashTable(&infoPtr->objects, TCL_ONE_WORD_KEYS);
+    Tcl_InitObjHashTable(&infoPtr->objectNames);
     Tcl_InitObjHashTable(&infoPtr->classes);
     Tcl_InitHashTable(&infoPtr->namespaceClasses, TCL_ONE_WORD_KEYS);
     Tcl_InitHashTable(&infoPtr->procMethods, TCL_ONE_WORD_KEYS);

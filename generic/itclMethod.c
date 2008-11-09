@@ -25,7 +25,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclMethod.c,v 1.1.2.26 2008/11/08 23:40:12 wiede Exp $
+ *     RCS:  $Id: itclMethod.c,v 1.1.2.27 2008/11/09 21:21:30 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -1905,6 +1905,13 @@ Itcl_InvokeMethodIfExists(
         if (contextClassPtr->flags & ITCL_TYPE) {
 	    if (strcmp(name, "constructor") == 0) {
                 if (objc > 0) {
+                    if (contextClassPtr->numOptions == 0) {
+			Tcl_AppendResult(interp, "type \"",
+			        Tcl_GetString(contextClassPtr->namePtr),
+				"\" has no options, but constructor has",
+				" option arguments", NULL);
+		        return TCL_ERROR;
+		    }
                     if (Itcl_PushCallFrame(interp, &frame,
 		            contextClassPtr->nsPtr,
 		            /*isProcCallFrame*/0) != TCL_OK) {
