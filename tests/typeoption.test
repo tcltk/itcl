@@ -274,7 +274,9 @@ test option-2.3 {configure -opt returns info, explicit options} -body {
     spot configure -akc
 } -cleanup {
     dog destroy
+    papers destroy
 } -result {-akc akc Akc 1 0}
+
 test option-2.4 {configure -unknownopt} -body {
     type papers {
         option -akcflag 1
@@ -297,7 +299,6 @@ test option-2.4 {configure -unknownopt} -body {
 } -returnCodes {
     error
 } -cleanup {
-    dog destroy
     dog destroy
     papers destroy
 } -result {unknown option "-foo"}
@@ -459,7 +460,7 @@ test option-4.1 {local option name must begin with hyphen} -body {
     }
 } -returnCodes {
     error
-} -result {Error in "option nohyphen...", badly named option "nohyphen"}
+} -result {bad option name "nohyphen", options must start with a "-"}
 
 test option-4.2 {local option name must be lower case} -body {
     type dog {
@@ -467,7 +468,7 @@ test option-4.2 {local option name must be lower case} -body {
     }
 } -returnCodes {
     error
-} -result {Error in "option -Upper...", badly named option "-Upper"}
+} -result {bad option name "-Upper" , options must not contain uppercase characters}
 
 test option-4.3 {local option name may not contain spaces} -body {
     type dog {
@@ -475,7 +476,7 @@ test option-4.3 {local option name may not contain spaces} -body {
     }
 } -returnCodes {
     error
-} -result {Error in "option {"-with space"}...", badly named option "-with space"}
+} -result {bad option name "-with space", option names must not contain " "}
 
 test option-4.4 {delegated option name must begin with hyphen} -body {
     type dog {
@@ -483,7 +484,7 @@ test option-4.4 {delegated option name must begin with hyphen} -body {
     }
 } -returnCodes {
     error
-} -result {Error in "delegate option nohyphen...", badly named option "nohyphen"}
+} -result {bad delegated option name "nohyphen", options must start with a "-"}
 
 test option-4.5 {delegated option name must be lower case} -body {
     type dog {
@@ -491,7 +492,7 @@ test option-4.5 {delegated option name must be lower case} -body {
     }
 } -returnCodes {
     error
-} -result {Error in "delegate option -Upper...", badly named option "-Upper"}
+} -result {bad option name "-Upper" , options must not contain uppercase characters}
 
 test option-4.6 {delegated option name may not contain spaces} -body {
     type dog {
@@ -499,7 +500,83 @@ test option-4.6 {delegated option name may not contain spaces} -body {
     }
 } -returnCodes {
     error
-} -result {Error in "delegate option {"-with space"}...", badly named option "-with space"}
+} -result {bad option name "-with space", option names must not contain " "}
+
+test option-5.1 {local widget options read from option database} -constraints {
+    notyet_tk
+} -body {
+    widget dog {
+        option -foo a
+        option -bar b
+
+        typeconstructor {
+            option add *Dog.bar bb
+        }
+    }
+
+    dog .fido
+    set a [.fido cget -foo]
+    set b [.fido cget -bar]
+    destroy .fido
+    tkbide
+
+    list $a $b
+
+} -cleanup {
+    dog destroy
+} -result {a bb}
+
+test option-5.2 {local option database values available in constructor} -constraints {
+    notyet_tk
+} -body {
+    widget dog {
+        option -bar b
+        variable saveit
+
+        typeconstructor {
+            option add *Dog.bar bb
+        }
+
+        constructor {args} {
+            set saveit $options(-bar)
+        }
+
+        method getit {} {
+            return $saveit
+        }
+    }
+
+    dog .fido
+    set result [.fido getit]
+    destroy .fido
+    tkbide
+
+    set result
+} -cleanup {
+    dog destroy
+} -result {bb}
+
+test option-6.1 {if no options, no options variable} -body {
+    type dog {
+        variable dummy
+    }
+
+    dog spot
+    spot info vars itcl_options
+} -cleanup {
+    dog destroy
+} -result {}
+
+test option-6.2 {if no options, no options methods} -body {
+    type dog {
+        variable dummy
+    }
+
+    dog spot
+    spot info function c*
+} -cleanup {
+    dog destroy
+} -result {}
 
 
 

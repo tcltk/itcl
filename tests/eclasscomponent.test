@@ -146,6 +146,7 @@ test delegatemethod-1.1 {delegate method to non-existent component} -body {
 } -returnCodes {
     error
 } -cleanup {
+   dog destroy
 } -result {class "::dog" has no component "bar"}
 
 test delegatemethod-1.2 {delegating to existing component} -body {
