@@ -76,7 +76,6 @@ testsNeedTcltest 2.2
 
 ::tcltest::loadTestedCommands
 
-if {1} {
 test component-1.1 {component defines variable} -body {
     ::itcl::extendedclass dog {
         protected component mycomp
@@ -147,7 +146,7 @@ test delegatemethod-1.1 {delegate method to non-existent component} -body {
     error
 } -cleanup {
    dog destroy
-} -result {class "::dog" has no component "bar"}
+} -result {::dog ::fido delegates method "foo" to undefined component "bar"}
 
 test delegatemethod-1.2 {delegating to existing component} -body {
     ::itcl::extendedclass dog {
@@ -226,11 +225,9 @@ test delegatemethod-1.7 {can't delegate local method: order 1} -body {
         method foo {} {}
         delegate method foo to bar
     }
-} -cleanup {
-    ::itcl::delete class dog
 } -returnCodes {
     error
-} -result {Error in "delegate method foo...", "foo" has been defined locally.}
+} -result {method "foo" has been defined locally}
 
 test delegatemethod-1.8 {can't delegate local method: order 2} -body {
     ::itcl::extendedclass dog {
@@ -238,15 +235,10 @@ test delegatemethod-1.8 {can't delegate local method: order 2} -body {
         delegate method foo to bar
         method foo {} {}
     }
-} -cleanup {
-    ::itcl::delete class dog
 } -returnCodes {
     error
-} -result {Error in "method foo...", "foo" has been delegated}
+} -result {method "foo" has been delegated}
 
-
-# end
-}
 
 #---------------------------------------------------------------------
 # Clean up
