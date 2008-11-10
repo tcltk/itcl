@@ -565,8 +565,6 @@ test dmethod-2.1 {'using "%c %m"' gets normal behavior} -body {
     tail destroy
 } -result {wagged briskly}
 
-puts stderr dmethod-2.2
-if {0} {
 test dmethod-2.2 {All 'using' conversions are converted} -body {
     proc echo {args} { return $args }
 
@@ -577,11 +575,12 @@ test dmethod-2.2 {All 'using' conversions are converted} -body {
     dog spot
 
     spot tail wag
+} -constraints {
+    notyet_multipart_method
 } -cleanup {
     dog destroy
     rename echo ""
 } -result {% ::dog {tail wag} wag tail_wag ::dog::Snit_inst1 ::spot ::spot %c}
-}
 
 test dmethod-2.3 {"%%" is handled properly} -body {
     proc echo {args} { join $args "|" }
@@ -598,7 +597,6 @@ test dmethod-2.3 {"%%" is handled properly} -body {
     rename echo ""
 } -result {%m|%wag}
 
-puts stderr dmethod-2.4
 test dmethod-2.4 {Method "*" and "using"} -body {
     proc echo {args} { join $args "|" }
 
@@ -614,8 +612,6 @@ test dmethod-2.4 {Method "*" and "using"} -body {
     rename echo ""
 } -result {wag bark|loudly}
 
-
-puts stderr dmethod-3.1
 test dmethod-3.1 {component names can be changed dynamically} -body {
     type tail1 {
         method wag {}    {return "wagged"}
@@ -664,7 +660,7 @@ test doption-1.1 {delegate option to non-existent component} -body {
     error
 } -cleanup {
     dog destroy
-} -result {component "bar" is undefined in ::dog ::spot}
+} -result {component "bar" is undefined, needed for option "-foo"}
 
 test doption-1.2 {delegating option to existing component: cget} -body {
     type cat {
@@ -684,8 +680,6 @@ test doption-1.2 {delegating option to existing component: cget} -body {
     dog create spot
     spot cget -color
 } -cleanup {
-hershey destroy
-spot destroy
     dog destroy
     cat destroy
 } -result {black}
@@ -700,7 +694,7 @@ test doption-1.3 {delegating option to existing component: configure} -body {
     type dog {
         constructor {args} {
             set catthing ::hershey
-            $self configurelist $args
+            $self configure {*}$args
         }
 
         delegate option -color to catthing
@@ -726,7 +720,7 @@ test doption-1.4 {delegating unknown options to existing component} -body {
 
             # Note: must do this after components are defined; this
             # may be a problem.
-            $self configurelist $args
+            $self configure {*}$args
         }
 
         delegate option * to catthing
@@ -803,7 +797,7 @@ test doption-1.9 {can't delegate local option: order 2} -body {
     }
 } -returnCodes {
     error
-} -result {Error in "option -color...", cannot define "-color" locally, it has been delegated}
+} -result {cannot define option "-color" locally, it has already been delegated}
 
 test doption-1.10 {excepted options are caught properly on cget} -body {
     type tail {
