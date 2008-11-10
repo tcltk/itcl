@@ -39,7 +39,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclParse.c,v 1.1.2.37 2008/11/09 21:21:30 wiede Exp $
+ *     RCS:  $Id: itclParse.c,v 1.1.2.38 2008/11/10 13:52:00 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -2151,13 +2151,16 @@ ItclParseOption(
     ItclObjectInfo *infoPtr, /* info for all known objects */
     Tcl_Interp *interp,      /* current interpreter */
     int objc,                /* number of arguments */
-    Tcl_Obj *CONST objv[],   /* argument objects */
+    Tcl_Obj *const objv[],   /* argument objects */
+    ItclClass *iclsPtr,
+    ItclObject *ioPtr,
     ItclOption **ioptPtrPtr) /* where the otpion info is found */
 {
-    ItclOption *ioptPtr;
     Tcl_Obj *classNamePtr;
     Tcl_Obj *nameSpecPtr;
     Tcl_Obj **newObjv;
+    Tcl_HashEntry *hPtr;
+    ItclOption *ioptPtr;
     char *init;
     char *defaultValue;
     char *cgetMethod;
@@ -2168,6 +2171,7 @@ ItclParseOption(
     char *validateMethodVar;
     char *token;
     char *usage;
+    const char *optionName;
     const char **argv;
     const char *name;
     const char *resourceName;
@@ -2179,6 +2183,7 @@ ItclParseOption(
     int foundOption;
     int i;
 
+    ItclShowArgs(1, "ItclParseOption", objc, objv);
     pLevel = Itcl_Protection(interp, 0);
 
     usage = "namespec ?init? ?-default value? ?-readonly? ?-cgetmethod methodName? ?-cgetmethodvar varName? ?-configuremethod methodName? ?-configuremethodvar varName? ?-validatemethod methodName? ?-validatemethodvar varName";
@@ -2203,6 +2208,26 @@ ItclParseOption(
     validateMethodVar = NULL;
     readOnly = 0;
     newObjc = 0;
+    optionName = Tcl_GetString(objv[1]);
+    if (iclsPtr != NULL) {
+        /* check for already delegated!! */
+        hPtr = Tcl_FindHashEntry(&iclsPtr->delegatedOptions, (char *)objv[1]);
+	if (hPtr != NULL) {
+	    Tcl_AppendResult(interp, "cannot define option \"", optionName,
+	            "\" locally, it has already been delegated", NULL);
+	    return TCL_ERROR;
+	}
+    }
+    if (ioPtr != NULL) {
+        /* check for already delegated!! */
+        hPtr = Tcl_FindHashEntry(&ioPtr->objectDelegatedOptions,
+	        (char *)objv[1]);
+	if (hPtr != NULL) {
+	    Tcl_AppendResult(interp, "cannot define option \"", optionName,
+	            "\" locally, it has already been delegated", NULL);
+	    return TCL_ERROR;
+	}
+    }
     newObjv = (Tcl_Obj **)ckalloc(sizeof(Tcl_Obj *)*objc);
     for (i=1; i<objc; i++) {
         token = Tcl_GetString(objv[i]);
@@ -2430,7 +2455,8 @@ Itcl_ClassOptionCmd(
 	return TCL_ERROR;
     }
 
-    if (ItclParseOption(infoPtr, interp, objc, objv, &ioptPtr) != TCL_OK) {
+    if (ItclParseOption(infoPtr, interp, objc, objv, iclsPtr, NULL,
+            &ioptPtr) != TCL_OK) {
 	return TCL_ERROR;
     }
 
@@ -2489,12 +2515,12 @@ ItclCreateComponent(
 	const char *str = "";
 	if (isWidgetHullVar) {
 	    str = "if {[llength $args] == 0} { return $itcl_hull }\n";
-	bodyPtr = Tcl_NewStringObj(str, -1);
-	Tcl_AppendToObj(bodyPtr, "return [$", -1);
-	Tcl_AppendToObj(bodyPtr, Tcl_GetString(componentPtr), -1);
-	Tcl_AppendToObj(bodyPtr, " {*}$args]", -1);
-        if (ItclCreateMethod(interp, iclsPtr, componentPtr, "args",
-	        Tcl_GetString(bodyPtr), &imPtr) != TCL_OK) {
+	    bodyPtr = Tcl_NewStringObj(str, -1);
+	    Tcl_AppendToObj(bodyPtr, "return [$", -1);
+	    Tcl_AppendToObj(bodyPtr, Tcl_GetString(componentPtr), -1);
+	    Tcl_AppendToObj(bodyPtr, " {*}$args]", -1);
+            if (ItclCreateMethod(interp, iclsPtr, componentPtr, "args",
+	            Tcl_GetString(bodyPtr), &imPtr) != TCL_OK) {
             return TCL_ERROR;
         }
         imPtr->flags |= ITCL_COMPONENT;

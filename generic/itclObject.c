@@ -24,7 +24,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann Copyright (c) 2007
  *
- *     RCS:  $Id: itclObject.c,v 1.1.2.44 2008/11/09 21:21:30 wiede Exp $
+ *     RCS:  $Id: itclObject.c,v 1.1.2.45 2008/11/10 13:52:00 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -304,6 +304,7 @@ ItclCreateObject(
     if (ioPtr->oPtr == NULL) {
 	/* NEED TO FREE STUFF HERE !! */
 	infoPtr->currIoPtr = saveCurrIoPtr;
+fprintf(stderr, "after Tcl_NewObjectInstance oPtr == NULL\n");
         return TCL_ERROR;
     }
     Tcl_ObjectSetMethodNameMapper(ioPtr->oPtr, ItclMapMethodNameProc);
@@ -832,6 +833,25 @@ ItclInitObjectVariables(
 		        Tcl_GetString(ivPtr->namePtr), vlookup->classVarInfoPtr,
 			varPtr, varNsPtr);
 #endif
+	    }
+	    if (ivPtr->flags & ITCL_COMPONENT_VAR) {
+	        if (ivPtr->flags & ITCL_COMMON) {
+                    Tcl_Obj *objPtr2;
+		    objPtr2 = Tcl_NewStringObj(ITCL_VARIABLES_NAMESPACE, -1);
+                    Tcl_AppendToObj(objPtr2,
+		            Tcl_GetString(ivPtr->iclsPtr->fullNamePtr), -1);
+                    Tcl_AppendToObj(objPtr2, "::", -1);
+                    Tcl_AppendToObj(objPtr2, varName, -1);
+                    Tcl_TraceVar2(interp,
+                            Tcl_GetString(objPtr2), NULL,
+	                    TCL_TRACE_WRITES, ItclTraceComponentVar,
+	                    (ClientData)ioPtr);
+		} else {
+                    Tcl_TraceVar2(interp,
+		            varName, NULL,
+	                    TCL_TRACE_WRITES, ItclTraceComponentVar,
+	                    (ClientData)ioPtr);
+	        }
 	    }
             entry = Tcl_NextHashEntry(&place);
         }
@@ -1966,14 +1986,28 @@ ItclTraceComponentVar(
     const char *name2,    /* unused */
     int flags)		    /* flags indicating read/write */
 {
+    Tcl_HashEntry *hPtr;
     ItclObject *ioPtr;
     ItclOption *ioptPtr;
+    Tcl_Obj *objPtr;
 
 /* FIXME !!! */
-/* don't know yet if ItclTraceComponentVar is really needed !! */
 /* FIXME should free memory on unset or rename!! */
     if (cdata != NULL) {
         ioPtr = (ItclObject*)cdata;
+        objPtr = Tcl_NewStringObj(name1, -1);
+	hPtr = Tcl_FindHashEntry(&ioPtr->objectComponents, (char *)objPtr);
+        /* FIXME need to redo the delegation for this component !! */
+/*
+fprintf(stderr, "COMPTRACE!%s!%p!\n", name1, hPtr);
+*/
+        /*
+         *  Handle write traces
+         */
+        if ((flags & TCL_TRACE_WRITES) != 0) {
+            return NULL;
+        }
+
     } else {
         ioptPtr = (ItclOption*)cdata;
         /*
@@ -2479,7 +2513,9 @@ ExpandDelegateAs(
     Tcl_Obj *listPtr)
 {
     Tcl_Obj *componentNamePtr;
+    Tcl_Obj *objPtr;
     const char **argv;
+    const char *val;
     int argc;
     int j;
 
@@ -2528,8 +2564,15 @@ ExpandDelegateAs(
 		            Tcl_ListObjAppendElement(interp, listPtr,
 			            Tcl_NewStringObj(cp, ep-cp-1));
 			}
-			Tcl_AppendToObj(strPtr,
+                        objPtr = Tcl_NewStringObj(ITCL_VARIABLES_NAMESPACE, -1);
+                        Tcl_AppendToObj(objPtr, iclsPtr->nsPtr->fullName, -1);
+                        Tcl_AppendToObj(objPtr, "::", -1);
+                        Tcl_AppendToObj(objPtr,
 			        Tcl_GetString(componentNamePtr), -1);
+                        val = Tcl_GetVar2(interp, Tcl_GetString(objPtr),
+			        NULL, 0);
+			Tcl_AppendToObj(strPtr,
+			        val, -1);
 		        break;
 		    case 'j':
 		    case 'm':
@@ -2670,7 +2713,9 @@ DelegateFunction(
 
     listPtr = Tcl_NewListObj(0, NULL);
     if (componentValuePtr != NULL) {
-        Tcl_ListObjAppendElement(interp, listPtr, componentValuePtr);
+	if (idmPtr->usingPtr == NULL) {
+            Tcl_ListObjAppendElement(interp, listPtr, componentValuePtr);
+        }
     }
     result = ExpandDelegateAs(interp, ioPtr, iclsPtr, idmPtr,
             Tcl_GetString(idmPtr->namePtr), listPtr);
@@ -2689,6 +2734,14 @@ DelegateFunction(
             return TCL_OK;
         }
     }
+    if (idmPtr->usingPtr != NULL) {
+        mPtr = Itcl_NewForwardClassMethod(interp, iclsPtr->clsPtr, 1,
+                idmPtr->namePtr, listPtr);
+        if (mPtr != NULL) {
+            return TCL_OK;
+        }
+    }
+fprintf(stderr, "componentValuePtr == NULL && usingPtr == NULL\n");
     return TCL_ERROR;
 }
 

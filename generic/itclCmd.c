@@ -23,7 +23,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclCmd.c,v 1.1.2.29 2008/11/08 23:40:12 wiede Exp $
+ *     RCS:  $Id: itclCmd.c,v 1.1.2.30 2008/11/10 13:52:00 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -1519,7 +1519,8 @@ Itcl_AddObjectOptionCmd(
         return TCL_ERROR;
     }
     infoPtr->protection = pLevel;
-    if (ItclParseOption(infoPtr, interp, objc-3, objv+3, &ioptPtr) != TCL_OK) {
+    if (ItclParseOption(infoPtr, interp, objc-3, objv+3, NULL, ioPtr,
+             &ioptPtr) != TCL_OK) {
 	return TCL_ERROR;
     }
     objPtr = Tcl_NewObj();
