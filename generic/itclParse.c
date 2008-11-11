@@ -39,7 +39,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclParse.c,v 1.1.2.39 2008/11/11 11:26:08 wiede Exp $
+ *     RCS:  $Id: itclParse.c,v 1.1.2.40 2008/11/11 11:36:11 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -867,7 +867,7 @@ ItclCheckForInitializedComponents(
 	                    Tcl_GetString(idmPtr->icPtr->ivPtr->namePtr),
 		            NULL, 0);
 		}
-		if (strlen(val) == 0) {
+		if ((ioPtr != NULL) && (strlen(val) == 0)) {
 		    val = ItclGetInstanceVar(
 			    ioPtr->iclsPtr->interp,
 			    "itcl_hull", NULL, ioPtr,
@@ -903,6 +903,11 @@ ItclCheckForInitializedComponents(
         if (idmPtr->flags & ITCL_TYPE_METHOD) {
             startStr = "type";
         }
+	/* FIXME there somtimes is a message for widgetadaptor:
+	 * can't read "itcl_hull": no such variable
+	 * have to check why
+	 */
+	Tcl_ResetResult(interp);
         Tcl_AppendResult(interp, Tcl_GetString(iclsPtr->fullNamePtr),
 		sepStr, objectStr, " delegates ", startStr, "method \"",
 	        Tcl_GetString(idmPtr->namePtr),
