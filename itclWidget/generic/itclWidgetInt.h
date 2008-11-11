@@ -9,7 +9,7 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itclWidgetInt.h,v 1.1.2.1 2008/10/25 19:43:04 wiede Exp $
+ * RCS: @(#) $Id: itclWidgetInt.h,v 1.1.2.2 2008/11/11 11:37:36 wiede Exp $
  */
 
 #include <string.h>
@@ -21,15 +21,18 @@
 MODULE_SCOPE int HullAndOptionsInstall(Tcl_Interp *interp, ItclObject *ioPtr,
         ItclClass *iclsPtr, int objc, Tcl_Obj * const objv[],
 	int *newObjc, Tcl_Obj **newObjv);
-MODULE_SCOPE int ComponentInstall(Tcl_Interp *interp, ItclObject *ioPtr,
+MODULE_SCOPE int InstallComponent(Tcl_Interp *interp, ItclObject *ioPtr,
         ItclClass *iclsPtr, int objc, Tcl_Obj * const objv[]);
+MODULE_SCOPE int Itcl_BiInstallHullCmd (ClientData clientData,
+        Tcl_Interp *interp, int objc, Tcl_Obj *CONST objv[]);
 MODULE_SCOPE int ItclWidgetConfigure(ClientData clientData, Tcl_Interp *interp,
         int objc, Tcl_Obj *const objv[]);
 MODULE_SCOPE int ItclWidgetCget(ClientData clientData, Tcl_Interp *interp,
         int objc, Tcl_Obj *const objv[]);
 MODULE_SCOPE int Itcl_WidgetParseInit(Tcl_Interp *interp,
         ItclObjectInfo *infoPtr);
-MODULE_SCOPE int Itcl_WidgetBiInit(Tcl_Interp *interp);
-MODULE_SCOPE int ItclWidgetInfoInit(Tcl_Interp *interp);
+MODULE_SCOPE int Itcl_WidgetBiInit(Tcl_Interp *interp, ItclObjectInfo *infoPtr);
+MODULE_SCOPE int ItclWidgetInfoInit(Tcl_Interp *interp,
+        ItclObjectInfo *infoPtr);
 MODULE_SCOPE int ItclWidgetInitObjectOptions(Tcl_Interp *interp,
         ItclObject *ioPtr, ItclClass *iclsPtr, const char *name);

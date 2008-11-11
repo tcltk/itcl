@@ -12,7 +12,7 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itclWidgetBase.c,v 1.1.2.2 2008/10/25 19:41:49 wiede Exp $
+ * RCS: @(#) $Id: itclWidgetBase.c,v 1.1.2.3 2008/11/11 11:37:36 wiede Exp $
  */
 
 #include <stdlib.h>
@@ -69,7 +69,7 @@ Initialize (
     infoPtr->windgetInfoPtr->initObjectOpts = ItclWidgetInitObjectOptions;
     infoPtr->windgetInfoPtr->hullAndOptsInst = HullAndOptionsInstall;
     infoPtr->windgetInfoPtr->delegationInst = DelegationInstall;
-    infoPtr->windgetInfoPtr->componentInst = ComponentInstall;
+    infoPtr->windgetInfoPtr->componentInst = InstallComponent;
 #ifdef NOTDEF
     infoPtr->windgetInfoPtr->widgetConfigure = ItclWidgetConfigure;
     infoPtr->windgetInfoPtr->widgetCget = ItclWidgetCget;
@@ -80,11 +80,11 @@ Initialize (
      *  Create "itcl::builtin" namespace for commands that
      *  are automatically built into class definitions.
      */
-    if (Itcl_WidgetBiInit(interp) != TCL_OK) {
+    if (Itcl_WidgetBiInit(interp, infoPtr) != TCL_OK) {
         return TCL_ERROR;
     }
 
-    if (ItclWidgetInfoInit(interp) != TCL_OK) {
+    if (ItclWidgetInfoInit(interp, infoPtr) != TCL_OK) {
         return TCL_ERROR;
     }
 

@@ -8,7 +8,7 @@
  * ========================================================================
  *  Author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclWidgetInfo.c,v 1.1.2.2 2008/10/25 19:41:49 wiede Exp $
+ *     RCS:  $Id: itclWidgetInfo.c,v 1.1.2.3 2008/11/11 11:37:36 wiede Exp $
  * ========================================================================
  *           Copyright (c) 2007 Arnulf Wiedemann
  * ------------------------------------------------------------------------
@@ -79,15 +79,13 @@ static const struct NameProcMap infoCmds2[] = {
  */
 int
 ItclWidgetInfoInit(
-    Tcl_Interp *interp)      /* current interpreter */
+    Tcl_Interp *interp,      /* current interpreter */
+    ItclObjectInfo *infoPtr)
 {
     Tcl_Namespace *nsPtr;
     Tcl_Command cmd;
     int i;
 
-    ItclObjectInfo *infoPtr;
-    infoPtr = (ItclObjectInfo *)Tcl_GetAssocData(interp,
-            ITCL_INTERP_DATA, NULL);
     for (i=0 ; infoCmds2[i].name!=NULL ; i++) {
         Tcl_CreateObjCommand(interp, infoCmds2[i].name,
                 infoCmds2[i].proc, infoPtr, NULL);

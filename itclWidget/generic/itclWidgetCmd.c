@@ -11,7 +11,7 @@
  * ========================================================================
  *  Author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclWidgetCmd.c,v 1.1.2.2 2008/10/25 19:41:49 wiede Exp $
+ *     RCS:  $Id: itclWidgetCmd.c,v 1.1.2.3 2008/11/11 11:37:36 wiede Exp $
  * ========================================================================
  *           Copyright (c) 2007 Arnulf Wiedemann
  * ------------------------------------------------------------------------
@@ -66,6 +66,7 @@ Itcl_WidgetCmd(
     int objc,                /* number of arguments */
     Tcl_Obj *CONST objv[])   /* argument objects */
 {
+    Tcl_Obj *objPtr;
     ItclClass *iclsPtr;
     ItclObjectInfo *infoPtr;
     int result;
@@ -80,6 +81,15 @@ Itcl_WidgetCmd(
     if (!(iclsPtr->flags &(ITCL_WIDGET_FRAME|ITCL_WIDGET_TOPLEVEL))) {
         iclsPtr->flags |= ITCL_WIDGET_FRAME;
     }
+
+    /* we handle create by owerselfs !! allow classunknown to handle that */
+    objPtr = Tcl_NewStringObj("oo::objdefine ", -1);
+    Tcl_AppendToObj(objPtr, iclsPtr->nsPtr->fullName, -1);
+    Tcl_AppendToObj(objPtr, " unexport create", -1);
+    Tcl_IncrRefCount(objPtr);
+    result = Tcl_EvalObjEx(interp, objPtr, 0);
+    Tcl_DecrRefCount(objPtr);
+    Tcl_AppendResult(interp, iclsPtr->nsPtr->fullName);
     return result;
 }
 
@@ -102,31 +112,33 @@ Itcl_WidgetAdaptorCmd(
     Tcl_Obj *CONST objv[])   /* argument objects */
 {
     Tcl_Obj *namePtr;
+    Tcl_Obj *objPtr;
     ItclClass *iclsPtr;
     ItclObjectInfo *infoPtr;
     ItclComponent *icPtr;
-    ItclVariable *ivPtr;
     int result;
 
     infoPtr = (ItclObjectInfo *)clientData;
-    ItclShowArgs(0, "Itcl_WidgetAdaptorCmd", objc-1, objv);
+    ItclShowArgs(1, "Itcl_WidgetAdaptorCmd", objc-1, objv);
     result = ItclClassBaseCmd(clientData, interp, ITCL_WIDGETADAPTOR,
             objc, objv, &iclsPtr);
     /* create the itcl_hull variable */
     namePtr = Tcl_NewStringObj("itcl_hull", -1);
     Tcl_IncrRefCount(namePtr);
-    if (ItclCreateComponent(interp, iclsPtr, namePtr, &icPtr) != TCL_OK) {
-        return TCL_ERROR;
-    }
-    iclsPtr->numVariables++;
-    /* create the itcl_options variable */
-    namePtr = Tcl_NewStringObj("itcl_options", -1);
-    Tcl_IncrRefCount(namePtr);
-    if (Itcl_CreateVariable(interp, iclsPtr, namePtr, NULL, NULL,
-            &ivPtr) != TCL_OK) {
+    if (ItclCreateComponent(interp, iclsPtr, namePtr, ITCL_COMMON, &icPtr) !=
+            TCL_OK) {
         return TCL_ERROR;
     }
     iclsPtr->numVariables++;
     Itcl_BuildVirtualTables(iclsPtr);
+
+    /* we handle create by owerselfs !! allow classunknown to handle that */
+    objPtr = Tcl_NewStringObj("oo::objdefine ", -1);
+    Tcl_AppendToObj(objPtr, iclsPtr->nsPtr->fullName, -1);
+    Tcl_AppendToObj(objPtr, " unexport create", -1);
+    Tcl_IncrRefCount(objPtr);
+    result = Tcl_EvalObjEx(interp, objPtr, 0);
+    Tcl_DecrRefCount(objPtr);
+    Tcl_AppendResult(interp, iclsPtr->nsPtr->fullName);
     return result;
 }

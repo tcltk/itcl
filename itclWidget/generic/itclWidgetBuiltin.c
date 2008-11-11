@@ -4,7 +4,7 @@
  *  DESCRIPTION:  Object-Oriented Extensions to Tcl
  *
  *  These procedures handle built-in class methods, including the
- *  "hullinstall" method for package ItclWidget
+ *  "installhull" method for package ItclWidget
  *
  * This implementation is based mostly on the ideas of snit
  * whose author is William Duquette.
@@ -12,7 +12,7 @@
  * ========================================================================
  *  Author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclWidgetBuiltin.c,v 1.1.2.2 2008/10/25 19:41:49 wiede Exp $
+ *     RCS:  $Id: itclWidgetBuiltin.c,v 1.1.2.3 2008/11/11 11:37:36 wiede Exp $
  * ========================================================================
  *           Copyright (c) 2007 Arnulf Wiedemann
  * ------------------------------------------------------------------------
@@ -33,8 +33,8 @@ typedef struct BiMethod {
 } BiMethod;
 
 static BiMethod BiMethodList[] = {
-    { "hullinstall", "using widgetType ?arg ...?",
-                   "@itcl-builtin-hullinstall",  Itcl_BiHullInstallCmd },
+    { "installhull", "using widgetType ?arg ...?",
+                   "@itcl-builtin-installhull",  Itcl_BiInstallHullCmd },
 };
 static int BiMethodListLen = sizeof(BiMethodList)/sizeof(BiMethod);
 
@@ -55,7 +55,8 @@ static char* ItclTraceHullVar(ClientData cdata, Tcl_Interp *interp,
  */
 int
 Itcl_WidgetBiInit(
-    Tcl_Interp *interp)      /* current interpreter */
+    Tcl_Interp *interp,      /* current interpreter */
+    ItclObjectInfo *infoPtr)
 {
     Tcl_DString buffer;
     int i;
@@ -71,7 +72,7 @@ Itcl_WidgetBiInit(
 	Tcl_DStringAppend(&buffer, "::itcl::builtin::", -1);
 	Tcl_DStringAppend(&buffer, BiMethodList[i].name, -1);
         Tcl_CreateObjCommand(interp, Tcl_DStringValue(&buffer),
-	        BiMethodList[i].proc, (ClientData)NULL,
+	        BiMethodList[i].proc, (ClientData)infoPtr,
 		(Tcl_CmdDeleteProc*)NULL);
     }
     Tcl_DStringFree(&buffer);
@@ -173,46 +174,49 @@ ItclTraceHullVar(
 
 /*
  * ------------------------------------------------------------------------
- *  Itcl_BiHullInstallCmd()
+ *  Itcl_BiInstallHullCmd()
  *
- *  Invoked whenever the user issues the "hullinstall" method for an object.
+ *  Invoked whenever the user issues the "installhull" method for an object.
  *  Handles the following syntax:
  *
- *    <objName> hullinstall using <widgetType> ?arg ...?
+ *    <objName> installhall using <widgetType> ?arg ...?
+ *    <objName> installhall name
  *
  * ------------------------------------------------------------------------
  */
 /* ARGSUSED */
 int
-Itcl_BiHullInstallCmd(
-    ClientData clientData,   /* class definition */
+Itcl_BiInstallHullCmd(
+    ClientData clientData,   /* ItclObjectInfo *Ptr */
     Tcl_Interp *interp,      /* current interpreter */
     int objc,                /* number of arguments */
-    Tcl_Obj *CONST objv[])   /* argument objects */
+    Tcl_Obj *const objv[])   /* argument objects */
 {
     Tcl_HashEntry *hPtr;
     Tcl_Obj *namePtr;
     Tcl_Var varPtr;
     Tcl_HashSearch place;
+    Tcl_DString buffer;
     Tk_Window tkMainWin;
     Tk_Window tkWin;
-    ItclClass *iclsPtr;
+    ItclClass *contextIclsPtr;
+    ItclObject *contextIoPtr;
+    ItclObjectInfo *infoPtr;
     ItclVariable *ivPtr;
     ItclOption *ioptPtr;
     const char *val;
     const char *widgetType;
     const char *className;
+    const char *widgetName;
     char *token;
+    int shortForm;
     int result;
 
-    ItclClass *contextIclsPtr;
-    ItclObject *contextIoPtr;
-
-    ItclShowArgs(1, "Itcl_BiHullInstallCmd", objc, objv);
-    iclsPtr = (ItclClass *)clientData;
-    if (iclsPtr->infoPtr->buildingWidget) {
-        contextIclsPtr = iclsPtr;
-	contextIoPtr = iclsPtr->infoPtr->currIoPtr;
+    ItclShowArgs(1, "Itcl_BiInstallHullCmd", objc, objv);
+    infoPtr = (ItclObjectInfo *)clientData;
+    if (infoPtr->buildingWidget) {
+	contextIoPtr = infoPtr->currIoPtr;
+        contextIclsPtr = contextIoPtr->iclsPtr;
     } else {
         /*
          *  Make sure that this command is being invoked in the proper
@@ -227,50 +231,58 @@ Itcl_BiHullInstallCmd(
     if (contextIoPtr == NULL) {
         Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
             "improper usage: should be \"", 
-	    "object hullinstall using <widgetType> ?arg ...?\"",
+	    "object installhull using <widgetType> ?arg ...?\"",
             (char*)NULL);
         return TCL_ERROR;
     }
     if (objc < 5) {
-        token = Tcl_GetString(objv[0]);
-        Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
-            "wrong # args: should be \"object ", token,
-	    " using <widgetType> ?arg ...?\"", (char*)NULL);
-        return TCL_ERROR;
+	if (objc != 2) {
+            token = Tcl_GetString(objv[0]);
+            Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+                "wrong # args: should be \"object ", token,
+	        "name|using <widgetType> ?arg ...?\"", (char*)NULL);
+            return TCL_ERROR;
+        } 
     }
-    widgetType = Tcl_GetString(objv[2]);
-    if (strcmp(Tcl_GetString(objv[3]), "-class") != 0) {
-        token = Tcl_GetString(objv[0]);
-        Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
-            "wrong # args: should be \"object ", token,
-            " using <widgetType> ?arg ...?\"", (char*)NULL);
-        return TCL_ERROR;
+    shortForm = 0;
+    widgetName = Tcl_GetString(contextIoPtr->namePtr);
+    if (objc == 2) {
+        shortForm = 1;
+        widgetName = Tcl_GetString(objv[1]);
     }
-    className = Tcl_GetString(objv[4]);
-    Tcl_DString buffer;
     Tcl_DStringInit(&buffer);
-    Tcl_DStringAppend(&buffer, widgetType, -1);
-
-    Tcl_DStringAppend(&buffer, " ", 1);
-    Tcl_DStringAppend(&buffer, Tcl_GetString(contextIoPtr->namePtr), -1);
-    Tcl_DStringAppend(&buffer, " -class ", 8);
-    Tcl_DStringAppend(&buffer, className, -1);
-    result = Tcl_Eval(interp, Tcl_DStringValue(&buffer));
-    Tcl_DStringFree(&buffer);
-    if (result != TCL_OK) {
-        return result;
+    if (!shortForm) {
+        widgetType = Tcl_GetString(objv[2]);
+        if (strcmp(Tcl_GetString(objv[3]), "-class") != 0) {
+            token = Tcl_GetString(objv[0]);
+            Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+                "wrong # args: should be \"object ", token,
+                " using <widgetType> ?arg ...?\"", (char*)NULL);
+            return TCL_ERROR;
+        }
+        className = Tcl_GetString(objv[4]);
+        Tcl_DStringAppend(&buffer, widgetType, -1);
+        Tcl_DStringAppend(&buffer, " ", 1);
+        Tcl_DStringAppend(&buffer, Tcl_GetString(contextIoPtr->namePtr), -1);
+        Tcl_DStringAppend(&buffer, " -class ", 8);
+        Tcl_DStringAppend(&buffer, className, -1);
+        result = Tcl_Eval(interp, Tcl_DStringValue(&buffer));
+        Tcl_DStringFree(&buffer);
+        if (result != TCL_OK) {
+            return result;
+        }
     }
 
     /* initialize the options array */
     tkMainWin = Tk_MainWindow(interp);
-    tkWin = Tk_NameToWindow(interp, Tcl_GetString(contextIoPtr->namePtr),
+    tkWin = Tk_NameToWindow(interp, widgetName,
             tkMainWin);
     if (tkWin == NULL) {
         Tcl_AppendResult(interp, "cannot find window \"",
 	        Tcl_GetString(contextIoPtr->namePtr), "\"", NULL);
 	return TCL_ERROR;
     }
-    hPtr = Tcl_FirstHashEntry(&iclsPtr->options, &place);
+    hPtr = Tcl_FirstHashEntry(&contextIclsPtr->options, &place);
     while (hPtr) {
 	ioptPtr = (ItclOption*)Tcl_GetHashValue(hPtr);
         val = Tk_GetOption(tkWin, Tcl_GetString(ioptPtr->resourceNamePtr),
@@ -307,7 +319,8 @@ Itcl_BiHullInstallCmd(
             break;
 	}
     }
-    Itcl_RenameCommand(interp, Tcl_GetString(contextIoPtr->namePtr),
+    contextIoPtr->hullWindowNamePtr = Tcl_NewStringObj(widgetName, -1);
+    Itcl_RenameCommand(interp, widgetName,
             Tcl_DStringValue(&buffer));
 
     namePtr = Tcl_NewStringObj("itcl_hull", -1);
@@ -330,7 +343,7 @@ Itcl_BiHullInstallCmd(
         Tcl_DStringFree(&buffer);
         return TCL_ERROR;
     }
-    /* no set the write trace on the itcl_hull variable */
+    /* now set the write trace on the itcl_hull variable */
     Tcl_DStringInit(&buffer);
     Tcl_DStringAppend(&buffer, Tcl_GetString(contextIoPtr->varNsNamePtr), -1);
     Tcl_DStringAppend(&buffer, Tcl_GetString(contextIclsPtr->fullNamePtr), -1);

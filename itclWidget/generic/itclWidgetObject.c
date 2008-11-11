@@ -11,7 +11,7 @@
  * ========================================================================
  *  Author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclWidgetObject.c,v 1.1.2.3 2008/10/29 20:29:03 wiede Exp $
+ *     RCS:  $Id: itclWidgetObject.c,v 1.1.2.4 2008/11/11 11:37:36 wiede Exp $
  * ========================================================================
  *           Copyright (c) 2007 Arnulf Wiedemann
  * ------------------------------------------------------------------------
@@ -47,7 +47,9 @@ ItclWidgetInitObjectOptions(
 
     /* initialize the options array */
     tkMainWin = Tk_MainWindow(interp);
-    tkWin = Tk_NameToWindow(interp, Tcl_GetString(ioPtr->namePtr), tkMainWin);
+    const char *widgetName;
+    widgetName = Tcl_GetString(ioPtr->hullWindowNamePtr);
+    tkWin = Tk_NameToWindow(interp, widgetName, tkMainWin);
     if (tkWin == NULL) {
         Tcl_AppendResult(interp, "window for widget \"",
 	        Tcl_GetString(ioPtr->namePtr), "\" not found", NULL);
@@ -103,7 +105,7 @@ HullAndOptionsInstall(
 
     ItclShowArgs(1, "HullAndOptionsInstall", objc, objv);
 #ifdef NOTDEF
-// options are initialized in Itcl_BiHullInstallCmd!!
+// options are initialized in Itcl_BiInstallHullCmd!!
     FOREACH_HASH_VALUE(ioptPtr, &iclsPtr->options) {
 	if (ioptPtr->defaultValuePtr != NULL) {
 	    ItclSetInstanceVar(interp, "itcl_options",
@@ -124,7 +126,7 @@ HullAndOptionsInstall(
 		widgetClassPtr = objv[i+1];
 		foundWclass = 1;
 #ifdef NOTDEF 
-// FIXME are these some options for the hullinstall command?
+// FIXME are these some options for the installhull command?
 	        newObjv = (Tcl_Obj **)ckalloc(sizeof(Tcl_Obj *)*(objc-1));
 		*newObjc = objc - 2;
 		memcpy(newObjv, objv, i * sizeof(Tcl_Obj *));
@@ -148,7 +150,7 @@ HullAndOptionsInstall(
     }
     hullObjc = 5;
     hullObjv = (Tcl_Obj **)ckalloc(sizeof(Tcl_Obj *)*hullObjc);
-    hullObjv[0] = Tcl_NewStringObj("hullinstall", -1);
+    hullObjv[0] = Tcl_NewStringObj("installhull", -1);
     Tcl_IncrRefCount(hullObjv[0]);
     hullObjv[1] = Tcl_NewStringObj("using", -1);
     Tcl_IncrRefCount(hullObjv[1]);
@@ -176,7 +178,7 @@ HullAndOptionsInstall(
     Tcl_IncrRefCount(hullObjv[3]);
     hullObjv[4] = Tcl_NewStringObj(Tcl_GetString(widgetClassPtr), -1);
     Tcl_IncrRefCount(hullObjv[4]);
-    result = Itcl_BiHullInstallCmd(iclsPtr, interp, hullObjc, hullObjv);
+    result = Itcl_BiInstallHullCmd(iclsPtr, interp, hullObjc, hullObjv);
     Tcl_DecrRefCount(hullObjv[0]);
     Tcl_DecrRefCount(hullObjv[1]);
     Tcl_DecrRefCount(hullObjv[2]);
@@ -189,12 +191,12 @@ HullAndOptionsInstall(
 
 /*
  * ------------------------------------------------------------------------
- *  ComponentInstall()
+ *  InstallComponent()
  * ------------------------------------------------------------------------
  */
 
 int
-ComponentInstall(
+InstallComponent(
     Tcl_Interp *interp,
     ItclObject *ioPtr,
     ItclClass *iclsPtr,
@@ -202,7 +204,7 @@ ComponentInstall(
     Tcl_Obj * const objv[])
 {
 
-    ItclShowArgs(0, "ComponentInstall", objc, objv);
+    ItclShowArgs(1, "InstallComponent", objc, objv);
 
     return TCL_OK;
 }
