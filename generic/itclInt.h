@@ -9,7 +9,7 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itclInt.h,v 1.17.2.45 2008/11/10 13:52:00 wiede Exp $
+ * RCS: @(#) $Id: itclInt.h,v 1.17.2.46 2008/11/11 11:26:08 wiede Exp $
  */
 
 #include <string.h>
@@ -307,6 +307,8 @@ typedef struct ItclObject {
     Tcl_Resolve *resolvePtr;
     int flags;
     int callRefCount;             /* prevent deleting of object if refcount > 1 */
+    Tcl_Obj *hullWindowNamePtr;   /* the window path name for the hull
+                                   * (before renaming in installhull) */
 } ItclObject;
 
 #define ITCL_OBJECT_IS_DELETED           0x01
@@ -656,8 +658,6 @@ MODULE_SCOPE int ItclSetParserResolver(Tcl_Namespace *nsPtr);
 MODULE_SCOPE void ItclProcErrorProc(Tcl_Interp *interp, Tcl_Obj *procNameObj);
 MODULE_SCOPE int ItclClassBaseCmd(ClientData clientData, Tcl_Interp *interp,
 	int flags, int objc, Tcl_Obj *CONST objv[], ItclClass **iclsPtrPtr);
-MODULE_SCOPE int Itcl_BiHullInstallCmd (ClientData clientData,
-        Tcl_Interp *interp, int objc, Tcl_Obj *CONST objv[]);
 MODULE_SCOPE int Itcl_CreateOption (Tcl_Interp *interp, ItclClass *iclsPtr,
 	ItclOption *ioptPtr);
 MODULE_SCOPE int Itcl_CreateMethodVariable (Tcl_Interp *interp,
@@ -686,8 +686,6 @@ MODULE_SCOPE int ItclCreateComponent(Tcl_Interp *interp, ItclClass *iclsPtr,
         Tcl_Obj *componentPtr, int type, ItclComponent **icPtrPtr);
 MODULE_SCOPE int Itcl_WidgetParseInit(Tcl_Interp *interp,
         ItclObjectInfo *infoPtr);
-MODULE_SCOPE int Itcl_WidgetBiInit(Tcl_Interp *interp);
-MODULE_SCOPE int ItclWidgetInfoInit(Tcl_Interp *interp);
 MODULE_SCOPE void ItclDeleteObjectMetadata(ClientData clientData);
 MODULE_SCOPE void ItclDeleteClassMetadata(ClientData clientData);
 MODULE_SCOPE void ItclDeleteArgList(ItclArgList *arglistPtr);

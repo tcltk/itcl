@@ -25,7 +25,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclMethod.c,v 1.1.2.27 2008/11/09 21:21:30 wiede Exp $
+ *     RCS:  $Id: itclMethod.c,v 1.1.2.28 2008/11/11 11:26:08 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -776,7 +776,7 @@ ItclCreateMemberCode(
         mcode->argListPtr = argListPtr;
         mcode->usagePtr = usagePtr;
 	mcode->argumentPtr = Tcl_NewStringObj((const char *)arglist, -1);
-	if (iclsPtr->flags & ITCL_TYPE) {
+	if (iclsPtr->flags & (ITCL_TYPE|ITCL_WIDGETADAPTOR)) {
 	    haveError = 0;
 	    while (argListPtr != NULL) {
 		cPtrPtr = &type_reserved_words[0];
@@ -879,10 +879,10 @@ ItclCreateMemberCode(
 	    if (strcmp(body, "@itcl-builtin-getinstancevar") == 0) {
 	        isDone = 1;
 	    }
-	    if (strcmp(body, "@itcl-builtin-hullinstall") == 0) {
+	    if (strcmp(body, "@itcl-builtin-installhull") == 0) {
 	        isDone = 1;
 	    }
-	    if (strcmp(body, "@itcl-builtin-componentinstall") == 0) {
+	    if (strcmp(body, "@itcl-builtin-installcomponent") == 0) {
 	        isDone = 1;
 	    }
 	    if (strcmp(body, "@itcl-builtin-destroy") == 0) {
@@ -1863,8 +1863,6 @@ Itcl_InvokeMethodIfExists(
     int objc,                     /* number of arguments */
     Tcl_Obj *CONST objv[])        /* argument objects */
 {
-    int result = TCL_OK;
-
     Tcl_HashEntry *entry;
     Tcl_Obj *cmdlinePtr;
     Tcl_Obj **cmdlinev;
@@ -1872,6 +1870,7 @@ Itcl_InvokeMethodIfExists(
     Tcl_CallFrame frame;
     ItclMemberFunc *imPtr;
     int cmdlinec;
+    int result = TCL_OK;
 
     ItclShowArgs(1, "Itcl_InvokeMethodIfExists", objc, objv);
     Tcl_Obj *objPtr = Tcl_NewStringObj(name, -1);
@@ -1897,12 +1896,13 @@ Itcl_InvokeMethodIfExists(
 	if (contextObjectPtr->oPtr == NULL) {
             return TCL_ERROR;
 	}
+ItclShowArgs(1, "Itcl_EvalMemberCode", cmdlinec, cmdlinev);
         result = Itcl_EvalMemberCode(interp, imPtr, contextObjectPtr,
 	        cmdlinec, cmdlinev);
         Itcl_ReleaseData((ClientData)imPtr);
         Tcl_DecrRefCount(cmdlinePtr);
     } else {
-        if (contextClassPtr->flags & ITCL_TYPE) {
+        if (contextClassPtr->flags & (ITCL_TYPE|ITCL_WIDGETADAPTOR)) {
 	    if (strcmp(name, "constructor") == 0) {
                 if (objc > 0) {
                     if (contextClassPtr->numOptions == 0) {

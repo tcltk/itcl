@@ -24,7 +24,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclBuiltin.c,v 1.1.2.39 2008/11/10 13:52:00 wiede Exp $
+ *     RCS:  $Id: itclBuiltin.c,v 1.1.2.40 2008/11/11 11:26:08 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -33,7 +33,7 @@
  */
 #include "itclInt.h"
 
-Tcl_ObjCmdProc Itcl_BiComponentInstallCmd;
+Tcl_ObjCmdProc Itcl_BiInstallComponentCmd;
 Tcl_ObjCmdProc Itcl_BiDestroyCmd;
 Tcl_ObjCmdProc Itcl_BiCallInstanceCmd;
 Tcl_ObjCmdProc Itcl_BiGetInstanceVarCmd;
@@ -70,43 +70,43 @@ static BiMethod BiMethodList[] = {
         "<instancename>",
         "@itcl-builtin-callinstance",
         Itcl_BiCallInstanceCmd,
-	ITCL_ECLASS|ITCL_TYPE|ITCL_WIDGET
+	ITCL_ECLASS|ITCL_TYPE|ITCL_WIDGET|ITCL_WIDGETADAPTOR
     },
     { "getinstancevar",
         "<instancename>",
         "@itcl-builtin-getinstancevar",
         Itcl_BiGetInstanceVarCmd,
-	ITCL_ECLASS|ITCL_TYPE|ITCL_WIDGET
+	ITCL_ECLASS|ITCL_TYPE|ITCL_WIDGET|ITCL_WIDGETADAPTOR
     },
     { "cget",
         "-option",
         "@itcl-builtin-cget",
         Itcl_BiCgetCmd,
-	ITCL_CLASS|ITCL_ECLASS|ITCL_TYPE|ITCL_WIDGET
+	ITCL_CLASS|ITCL_ECLASS|ITCL_TYPE|ITCL_WIDGET|ITCL_WIDGETADAPTOR
     },
     { "configure",
         "?-option? ?value -option value...?",
         "@itcl-builtin-configure",
         Itcl_BiConfigureCmd,
-	ITCL_CLASS|ITCL_ECLASS|ITCL_TYPE|ITCL_WIDGET
+	ITCL_CLASS|ITCL_ECLASS|ITCL_TYPE|ITCL_WIDGET|ITCL_WIDGETADAPTOR
     },
-    { "componentinstall",
+    { "installcomponent",
         "<component> using <classname> <winpath> ?-option value...?",
-        "@itcl-builtin-componentinstall",
-        Itcl_BiComponentInstallCmd,
+        "@itcl-builtin-installcomponent",
+        Itcl_BiInstallComponentCmd,
 	ITCL_WIDGET
     },
     { "destroy",
         "",
         "@itcl-builtin-destroy",
         Itcl_BiDestroyCmd,
-	ITCL_TYPE|ITCL_WIDGET
+	ITCL_TYPE|ITCL_WIDGET|ITCL_WIDGETADAPTOR
     },
     { "info",
         "???",
         "@itcl-builtin-info",
 	Itcl_BiInfoCmd,
-	ITCL_CLASS|ITCL_ECLASS|ITCL_TYPE|ITCL_WIDGET
+	ITCL_CLASS|ITCL_ECLASS|ITCL_TYPE|ITCL_WIDGET|ITCL_WIDGETADAPTOR
     },
     { "isa",
         "className",
@@ -118,31 +118,31 @@ static BiMethod BiMethodList[] = {
         "",
         "@itcl-builtin-mymethod",
         Itcl_BiMyMethodCmd,
-	ITCL_ECLASS|ITCL_TYPE|ITCL_WIDGET
+	ITCL_ECLASS|ITCL_TYPE|ITCL_WIDGET|ITCL_WIDGETADAPTOR
     },
     { "myvar",
         "",
         "@itcl-builtin-myvar",
         Itcl_BiMyVarCmd,
-	ITCL_ECLASS|ITCL_TYPE|ITCL_WIDGET
+	ITCL_ECLASS|ITCL_TYPE|ITCL_WIDGET|ITCL_WIDGETADAPTOR
     },
     { "myproc",
         "",
         "@itcl-builtin-myproc",
         Itcl_BiMyProcCmd,
-	ITCL_ECLASS|ITCL_TYPE|ITCL_WIDGET
+	ITCL_ECLASS|ITCL_TYPE|ITCL_WIDGET|ITCL_WIDGETADAPTOR
     },
     { "mytypemethod",
         "",
         "@itcl-builtin-mytypemethod",
         Itcl_BiMyTypeMethodCmd,
-	ITCL_ECLASS|ITCL_TYPE|ITCL_WIDGET
+	ITCL_ECLASS|ITCL_TYPE|ITCL_WIDGET|ITCL_WIDGETADAPTOR
     },
     { "mytypevar",
         "",
         "@itcl-builtin-mytypevar",
         Itcl_BiMyTypeVarCmd,
-	ITCL_ECLASS|ITCL_TYPE|ITCL_WIDGET
+	ITCL_ECLASS|ITCL_TYPE|ITCL_WIDGET|ITCL_WIDGETADAPTOR
     },
     { "setget",
         "varName ?value?",
@@ -154,7 +154,7 @@ static BiMethod BiMethodList[] = {
         "",
         "@itcl-builtin-classunknown",
         ItclBiClassUnknownCmd,
-	ITCL_TYPE
+	ITCL_TYPE|ITCL_WIDGET|ITCL_WIDGETADAPTOR
     },
 };
 static int BiMethodListLen = sizeof(BiMethodList)/sizeof(BiMethod);
@@ -1604,12 +1604,12 @@ ItclExtendedConfigure(
 	    val = ItclGetInstanceVar(interp, Tcl_GetString(icPtr->namePtr),
 	            NULL, contextIoPtr, contextIclsPtr);
             if (val != NULL) {
-	        newObjv = (Tcl_Obj **)ckalloc(sizeof(Tcl_Obj *)*(objc+2));
+	        newObjv = (Tcl_Obj **)ckalloc(sizeof(Tcl_Obj *)*(objc+5));
 	        newObjv[0] = Tcl_NewStringObj(val, -1);
 	        Tcl_IncrRefCount(newObjv[0]);
-	        newObjv[1] = Tcl_NewStringObj("configure", 9);
+	        newObjv[1] = Tcl_NewStringObj("configure", -1);
 	        Tcl_IncrRefCount(newObjv[1]);
-	        for(i=2;i<objc;i++) {
+	        for(i=1;i<objc;i++) {
 	            newObjv[i+1] = objv[i];
                 }
 		objPtr = Tcl_NewStringObj(val, -1);
@@ -1620,8 +1620,8 @@ ItclExtendedConfigure(
                             infoPtr->object_meta_type);
 	            infoPtr->currContextIclsPtr = ioPtr->iclsPtr;
 	        }
-		ItclShowArgs(1, "EXTENDED CONFIGURE EVAL1", objc, newObjv);
-                result = Tcl_EvalObjv(interp, objc, newObjv, TCL_EVAL_DIRECT);
+		ItclShowArgs(1, "EXTENDED CONFIGURE EVAL1", objc+1, newObjv);
+                result = Tcl_EvalObjv(interp, objc+1, newObjv, TCL_EVAL_DIRECT);
                 Tcl_DecrRefCount(newObjv[0]);
                 Tcl_DecrRefCount(newObjv[1]);
                 ckfree((char *)newObjv);
@@ -2187,20 +2187,20 @@ ItclExtendedSetGet(
 }
 /*
  * ------------------------------------------------------------------------
- *  Itcl_BiComponentInstallCmd()
+ *  Itcl_BiInstallComponentCmd()
  *
- *  Invoked whenever the user issues the "componentinstall" method for an
+ *  Invoked whenever the user issues the "installcomponent" method for an
  *  object.
  *  Handles the following syntax:
  *
- *    componentinstall <componentName> using <widgetClassName> <widgetPathName>
+ *    installcomponent <componentName> using <widgetClassName> <widgetPathName>
  *      ?-option value -option value ...?
  *
  * ------------------------------------------------------------------------
  */
 /* ARGSUSED */
 int
-Itcl_BiComponentInstallCmd(
+Itcl_BiInstallComponentCmd(
     ClientData clientData,   /* class definition */
     Tcl_Interp *interp,      /* current interpreter */
     int objc,                /* number of arguments */
@@ -2216,7 +2216,7 @@ Itcl_BiComponentInstallCmd(
      *  Make sure that this command is being invoked in the proper
      *  context.
      */
-    ItclShowArgs(1, "Itcl_BiComponentInstallCmd", objc, objv);
+    ItclShowArgs(1, "Itcl_BiInstallComponentCmd", objc, objv);
     contextIclsPtr = NULL;
     if (Itcl_GetContext(interp, &contextIclsPtr, &contextIoPtr) != TCL_OK) {
         return TCL_ERROR;
@@ -2224,7 +2224,7 @@ Itcl_BiComponentInstallCmd(
 
     if (contextIoPtr == NULL) {
         Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
-            "improper usage: should be \"object componentinstall \"",
+            "improper usage: should be \"object installcomponent \"",
             (char*)NULL);
         return TCL_ERROR;
     }
@@ -2247,7 +2247,7 @@ Itcl_BiComponentInstallCmd(
         return TCL_ERROR;
     }
     if (!contextIclsPtr->flags & (ITCL_WIDGET|ITCL_WIDGETADAPTOR)) {
-        Tcl_AppendResult(interp, "no such method \"componentinstall\"", NULL);
+        Tcl_AppendResult(interp, "no such method \"installcomponent\"", NULL);
 	return TCL_ERROR;
     }
     hPtr = Tcl_FindHashEntry(&contextIclsPtr->components, (char *)objv[1]);

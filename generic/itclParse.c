@@ -39,7 +39,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclParse.c,v 1.1.2.38 2008/11/10 13:52:00 wiede Exp $
+ *     RCS:  $Id: itclParse.c,v 1.1.2.39 2008/11/11 11:26:08 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -691,13 +691,15 @@ ItclClassBaseCmd(
 		    isDone = 1;
 		}
 		if (strcmp(Tcl_GetString(imPtr->codePtr->bodyPtr),
-		        "@itcl-builtin-hullinstall") == 0) {
-		    Tcl_AppendToObj(bodyPtr, "::itcl::builtin::hullinstall", -1);
+		        "@itcl-builtin-installhull") == 0) {
+		    Tcl_AppendToObj(bodyPtr, "::itcl::builtin::installhull",
+		            -1);
 		    isDone = 1;
 		}
 		if (strcmp(Tcl_GetString(imPtr->codePtr->bodyPtr),
-		        "@itcl-builtin-componentinstall") == 0) {
-		    Tcl_AppendToObj(bodyPtr, "::itcl::builtin::componentinstall", -1);
+		        "@itcl-builtin-installcomponent") == 0) {
+		    Tcl_AppendToObj(bodyPtr,
+		            "::itcl::builtin::installcomponent", -1);
 		    isDone = 1;
 		}
 		if (strcmp(Tcl_GetString(imPtr->codePtr->bodyPtr),
@@ -734,7 +736,7 @@ ItclClassBaseCmd(
 	    if (isNewEntry) {
 	        Tcl_SetHashValue(hPtr2, imPtr);
 	    }
-	    if (iclsPtr->flags & ITCL_TYPE) {
+	    if (iclsPtr->flags & (ITCL_TYPE|ITCL_WIDGET|ITCL_WIDGETADAPTOR)) {
 		if (argumentPtr == NULL) {
 		    /* FIXME check why argumentPtr is NULL for destructor!! */
 		    argumentPtr = Tcl_NewStringObj("", -1);
@@ -756,7 +758,7 @@ ItclClassBaseCmd(
             Tcl_DStringInit(&buffer);
         }
     }
-    if (iclsPtr->flags & ITCL_TYPE) {
+    if (iclsPtr->flags & (ITCL_TYPE|ITCL_WIDGETADAPTOR)) {
 	/* initialize the typecomponents and typevariables */
         if (Itcl_PushCallFrame(interp, &frame, iclsPtr->nsPtr,
                 /*isProcCallFrame*/0) != TCL_OK) {
@@ -793,7 +795,7 @@ ItclClassBaseCmd(
 	}
     }
     result = TCL_OK;
-    if (iclsPtr->flags & ITCL_TYPE) {
+    if (iclsPtr->flags & (ITCL_TYPE|ITCL_WIDGETADAPTOR)) {
 	if (ItclCheckForInitializedComponents(interp, iclsPtr, NULL) !=
 	        TCL_OK) {
 	    goto errorReturn;
@@ -846,16 +848,42 @@ ItclCheckForInitializedComponents(
 	if (ioPtr == NULL) {
             if (!(idmPtr->flags & ITCL_TYPE_METHOD)) {
 	        doCheck = 0;
+	        ioPtr = iclsPtr->infoPtr->currIoPtr;
 	    }
 	}
 	if (doCheck) {
 	    if (idmPtr->icPtr != NULL) {
-	        val = Tcl_GetVar2(interp,
-	                Tcl_GetString(idmPtr->icPtr->ivPtr->namePtr),
-		        NULL, 0);
+		if (idmPtr->icPtr->ivPtr->flags & ITCL_COMMON) {
+		    Tcl_Obj *objPtr;
+		    objPtr = Tcl_NewStringObj(ITCL_VARIABLES_NAMESPACE, -1);
+		    Tcl_AppendToObj(objPtr, Tcl_GetString(
+		            idmPtr->icPtr->ivPtr->iclsPtr->fullNamePtr), -1);
+		    Tcl_AppendToObj(objPtr, "::", -1);
+		    Tcl_AppendToObj(objPtr, Tcl_GetString(
+		            idmPtr->icPtr->ivPtr->namePtr), -1);
+	            val = Tcl_GetVar2(interp, Tcl_GetString(objPtr), NULL, 0);
+		} else {
+	            val = Tcl_GetVar2(interp,
+	                    Tcl_GetString(idmPtr->icPtr->ivPtr->namePtr),
+		            NULL, 0);
+		}
+		if (strlen(val) == 0) {
+		    val = ItclGetInstanceVar(
+			    ioPtr->iclsPtr->interp,
+			    "itcl_hull", NULL, ioPtr,
+			    iclsPtr);
+                }
 	        if ((val == NULL) || (strlen(val) == 0)) {
-	             result = TCL_ERROR;
-		     break;
+	            if (iclsPtr->flags & ITCL_WIDGETADAPTOR) {
+	                if (strcmp (Tcl_GetString(idmPtr->icPtr->namePtr),
+			        "itcl_hull") == 0) {
+		            /* maybe that will be initialized in constructor
+			     * later on */
+	                    continue;
+	                }
+	            }
+	            result = TCL_ERROR;
+		    break;
 	        }
 	    }
 	}
@@ -1447,7 +1475,7 @@ Itcl_ClassProcCmd(
         body = Tcl_GetString(objv[3]);
     }
 
-    if (iclsPtr->flags & ITCL_TYPE) {
+    if (iclsPtr->flags & (ITCL_TYPE|ITCL_WIDGETADAPTOR)) {
 	const char *name = Tcl_GetString(namePtr);
         /* check if the typemethod is already delegated */
         FOREACH_HASH_VALUE(idmPtr, &iclsPtr->delegatedFunctions) {
@@ -1513,7 +1541,7 @@ Itcl_ClassTypeMethodCmd(
         body = Tcl_GetString(objv[3]);
     }
 
-    if (iclsPtr->flags & ITCL_TYPE) {
+    if (iclsPtr->flags & (ITCL_TYPE|ITCL_WIDGETADAPTOR)) {
 	const char *name = Tcl_GetString(namePtr);
         /* check if the typemethod is already delegated */
         FOREACH_HASH_VALUE(idmPtr, &iclsPtr->delegatedFunctions) {
@@ -1576,7 +1604,7 @@ Itcl_ClassVariableCmd(
     arrayInitStr = NULL;
     ItclShowArgs(1, "Itcl_ClassVariableCmd", objc, objv);
     pLevel = Itcl_Protection(interp, 0);
-    if (iclsPtr->flags & ITCL_TYPE) {
+    if (iclsPtr->flags & (ITCL_TYPE|ITCL_WIDGETADAPTOR)) {
         if (objc > 2) {
 	    if (strcmp(Tcl_GetString(objv[2]), "-array") == 0) {
 	        if (objc == 4) {
@@ -1806,7 +1834,7 @@ ItclClassCommonCmd(
     arrayInitStr = NULL;
     *ivPtrPtr = NULL;
     ItclShowArgs(2, "Itcl_ClassCommonCmd", objc, objv);
-    if (iclsPtr->flags & ITCL_TYPE) {
+    if (iclsPtr->flags & (ITCL_TYPE|ITCL_WIDGETADAPTOR)) {
         if (objc > 2) {
 	    if (strcmp(Tcl_GetString(objv[2]), "-array") == 0) {
 	        if (objc == 4) {
@@ -2122,7 +2150,7 @@ Itcl_WidgetAdaptorCmdStart(
     int objc,                /* number of arguments */
     Tcl_Obj *CONST objv[])   /* argument objects */
 {
-    ItclShowArgs(0, "Itcl_WidgetAdaptorCmdStart", objc-1, objv);
+    ItclShowArgs(1, "Itcl_WidgetAdaptorCmdStart", objc-1, objv);
     const char *res = Tcl_PkgRequire(interp, "Tk", "8.6", 0);
     if (res == NULL) {
         return TCL_ERROR;
@@ -2491,6 +2519,10 @@ ItclCreateComponent(
     int isNew;
 
     isWidgetHullVar = 0;
+    if (iclsPtr == NULL) {
+	Tcl_AppendResult(interp, "INTERNAL ERROR in ItclCreateComponent, iclsPtr == NULL", NULL);
+        return TCL_ERROR;
+    }
     hPtr = Tcl_CreateHashEntry(&iclsPtr->components, (char *)componentPtr,
             &isNew);
     if (isNew) {
@@ -2504,7 +2536,7 @@ ItclCreateComponent(
 	        return result;
 	    }
 	}
-	if (iclsPtr->flags & ITCL_WIDGET) {
+	if (iclsPtr->flags & (ITCL_WIDGET|ITCL_WIDGETADAPTOR)) {
 	    if (strcmp(Tcl_GetString(componentPtr), "itcl_hull") == 0) {
 	        /* special built in itcl_hull variable */
 	        ivPtr->flags |= ITCL_HULL_VAR;

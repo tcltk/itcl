@@ -24,7 +24,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann Copyright (c) 2007
  *
- *     RCS:  $Id: itclObject.c,v 1.1.2.45 2008/11/10 13:52:00 wiede Exp $
+ *     RCS:  $Id: itclObject.c,v 1.1.2.46 2008/11/11 11:26:08 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -156,7 +156,7 @@ ItclCreateObject(
     int newEntry;
 
     ItclShowArgs(1, "ItclCreateObject", objc, objv);
-    if (iclsPtr->flags & ITCL_TYPE) {
+    if (iclsPtr->flags & (ITCL_TYPE|ITCL_WIDGETADAPTOR)) {
         /* check, if the object already exists and if yes delete it silently */
 	cmdPtr = Tcl_FindCommand(interp, name, NULL, 0);
 	if (cmdPtr != NULL) {
@@ -238,8 +238,8 @@ ItclCreateObject(
 	result = TCL_ERROR;
         goto errorReturn;
     }
-    if (iclsPtr->flags & (ITCL_ECLASS|ITCL_NWIDGET|ITCL_WIDGET|ITCL_TYPE)) {
-	if (iclsPtr->flags & (ITCL_ECLASS|ITCL_TYPE)) {
+    if (iclsPtr->flags & (ITCL_ECLASS|ITCL_NWIDGET|ITCL_WIDGET|ITCL_TYPE|ITCL_WIDGETADAPTOR)) {
+	if (iclsPtr->flags & (ITCL_ECLASS|ITCL_TYPE|ITCL_WIDGETADAPTOR)) {
             ItclInitExtendedClassOptions(interp, ioPtr);
             if (ItclInitObjectOptions(interp, ioPtr, iclsPtr, name) != TCL_OK) {
 	        Tcl_AppendResult(interp, "error in ItclInitObjectOptions",
@@ -271,22 +271,6 @@ ItclCreateObject(
 	        }
 	    }
         }
-        if (iclsPtr->flags & (ITCL_WIDGETADAPTOR)) {
-            /* 
-             * set all the init values for options
-             */
-
-	    if (infoPtr->windgetInfoPtr->initObjectOpts != NULL) {
-	        if (infoPtr->windgetInfoPtr->initObjectOpts(interp, ioPtr,
-		        iclsPtr, name)  != TCL_OK) {
-	            Tcl_AppendResult(interp,
-		            "error in ItclWidgetInitObjectOptions", NULL);
-		    infoPtr->currIoPtr = saveCurrIoPtr;
-		    result = TCL_ERROR;
-                    goto errorReturn;
-                }
-            }
-	}
         if (iclsPtr->flags & (ITCL_WIDGET|ITCL_WIDGETADAPTOR)) {
             if (ItclInitObjectMethodVariables(interp, ioPtr, iclsPtr, name)
 	            != TCL_OK) {
@@ -405,7 +389,25 @@ fprintf(stderr, "after Tcl_NewObjectInstance oPtr == NULL\n");
         result = Itcl_RestoreInterpState(interp, istate);
     }
 
-    if (iclsPtr->flags & (ITCL_ECLASS|ITCL_TYPE)) {
+    if (infoPtr->windgetInfoPtr != NULL) {
+        if (iclsPtr->flags & (ITCL_WIDGETADAPTOR)) {
+            /* 
+             * set all the init values for options
+             */
+
+	    if (infoPtr->windgetInfoPtr->initObjectOpts != NULL) {
+	        if (infoPtr->windgetInfoPtr->initObjectOpts(interp, ioPtr,
+		        iclsPtr, name)  != TCL_OK) {
+	            Tcl_AppendResult(interp,
+		            "error in ItclWidgetInitObjectOptions", NULL);
+		    infoPtr->currIoPtr = saveCurrIoPtr;
+		    result = TCL_ERROR;
+                    goto errorReturn;
+                }
+            }
+	}
+    }
+    if (iclsPtr->flags & (ITCL_ECLASS|ITCL_TYPE|ITCL_WIDGETADAPTOR)) {
 	/* FIXME have to check for hierarchy if ITCL_ECLASS !! */
 	if (ItclCheckForInitializedComponents(interp, ioPtr->iclsPtr,
 	        ioPtr) != TCL_OK) {
@@ -463,7 +465,7 @@ fprintf(stderr, "after Tcl_NewObjectInstance oPtr == NULL\n");
 	Tcl_DecrRefCount(namePtr);
 	Tcl_DecrRefCount(argumentPtr);
 	Tcl_DecrRefCount(bodyPtr);
-        if (iclsPtr->flags & ITCL_TYPE) {
+        if (iclsPtr->flags & (ITCL_TYPE|ITCL_WIDGETADAPTOR)) {
             Tcl_Obj *objPtr = Tcl_NewObj();
             Tcl_GetCommandFullName(interp, ioPtr->accessCmd, objPtr);
             Tcl_AppendResult(interp, Tcl_GetString(objPtr), NULL);
@@ -1218,9 +1220,25 @@ CallDestructBase(
     Tcl_Interp *interp,
     int result)
 {
+    Tcl_Obj *objPtr;
     ItclObject *contextIoPtr = data[0];
     int flags = PTR2INT(data[1]);
-    return ItclDestructBase(interp, contextIoPtr, contextIoPtr->iclsPtr, flags);
+
+    if (result != TCL_OK) {
+        return result;
+    }
+    result = ItclDestructBase(interp, contextIoPtr, contextIoPtr->iclsPtr, flags);
+    if (result != TCL_OK) {
+        return result;
+    }
+    /* destroy the hull */
+    if (contextIoPtr->hullWindowNamePtr != NULL) {
+        objPtr = Tcl_NewStringObj("destroy ", -1);
+        Tcl_AppendToObj(objPtr,
+	        Tcl_GetString(contextIoPtr->hullWindowNamePtr), -1);
+        result = Tcl_EvalObjEx(interp, objPtr, 0);
+    }
+    return result;
 }
 /*
  * ------------------------------------------------------------------------
@@ -1525,7 +1543,7 @@ ItclGetInstanceVar(
     Tcl_DStringAppend(&buffer, Tcl_GetString(contextIoPtr->varNsNamePtr), -1);
     doAppend = 1;
     if ((contextIclsPtr == NULL) || (contextIclsPtr->flags &
-            (ITCL_ECLASS|ITCL_TYPE))) {
+            (ITCL_ECLASS|ITCL_TYPE|ITCL_WIDGETADAPTOR))) {
         if (strcmp(name1, "itcl_options") == 0) {
 	    doAppend = 0;
         }
@@ -1596,7 +1614,7 @@ ItclGetCommonInstanceVar(
     Tcl_DStringAppend(&buffer, ITCL_VARIABLES_NAMESPACE, -1);
     doAppend = 1;
     if ((contextIclsPtr == NULL) || (contextIclsPtr->flags &
-            (ITCL_ECLASS|ITCL_TYPE))) {
+            (ITCL_ECLASS|ITCL_TYPE|ITCL_WIDGETADAPTOR))) {
         if (strcmp(name1, "itcl_options") == 0) {
 	    doAppend = 0;
         }
@@ -1692,7 +1710,7 @@ ItclSetInstanceVar(
     Tcl_DStringAppend(&buffer, Tcl_GetString(contextIoPtr->varNsNamePtr), -1);
     doAppend = 1;
     if ((contextIclsPtr == NULL) ||
-            (contextIclsPtr->flags & (ITCL_ECLASS|ITCL_WIDGET|ITCL_TYPE))) {
+            (contextIclsPtr->flags & (ITCL_ECLASS|ITCL_WIDGET|ITCL_TYPE|ITCL_WIDGETADAPTOR))) {
         if (strcmp(name1, "itcl_options") == 0) {
 	    doAppend = 0;
         }
@@ -1782,8 +1800,10 @@ ItclReportObjectUsage(
 	                        imPtr = NULL;
 			    }
 		        }
-                        if (strcmp(body, "@itcl-builtin-componentinstall") == 0) {
-			    if (!(imPtr->iclsPtr->flags & (ITCL_WIDGET|ITCL_WIDGETADAPTOR))) {
+                        if (strcmp(body, "@itcl-builtin-installcomponent")
+			        == 0) {
+			    if (!(imPtr->iclsPtr->flags &
+			            (ITCL_WIDGET|ITCL_WIDGETADAPTOR))) {
 	                        imPtr = NULL;
 			    }
 		        }
@@ -1883,8 +1903,28 @@ ItclTraceThisVar(
 	        isDone = 1;
 	    }
 	    if (!isDone && (strcmp(name1, "self") == 0)) {
-                Tcl_GetCommandFullName(contextIoPtr->iclsPtr->interp,
-                        contextIoPtr->accessCmd, objPtr);
+		if (contextIoPtr->iclsPtr->flags &
+		        (ITCL_WIDGET|ITCL_WIDGETADAPTOR)) {
+		    const char *objectName;
+                    Tcl_Obj *objPtr2;
+
+		    objectName = ItclGetInstanceVar(
+			    contextIoPtr->iclsPtr->interp,
+			    "itcl_hull", NULL, contextIoPtr,
+			    contextIoPtr->iclsPtr);
+		    if (strlen(objectName) == 0) {
+                        Tcl_GetCommandFullName(contextIoPtr->iclsPtr->interp,
+                                contextIoPtr->accessCmd, objPtr);
+			/* strip of the leading "::" */
+			objPtr2 = Tcl_NewStringObj(Tcl_GetString(objPtr)+2, -1);
+                        objPtr = objPtr2;
+		    } else {
+		        Tcl_SetStringObj(objPtr, objectName, -1);
+		    }
+		} else {
+                    Tcl_GetCommandFullName(contextIoPtr->iclsPtr->interp,
+                            contextIoPtr->accessCmd, objPtr);
+		}
 	        isDone = 1;
 	    }
 	    if (!isDone && (strcmp(name1, "selfns") == 0)) {
@@ -2262,7 +2302,7 @@ ItclObjectCmd(
     callbackPtr = Itcl_GetCurrentCallbackPtr(interp);
     newObjv = NULL;
     if (methodNamePtr != NULL) {
-	if (iclsPtr->flags & ITCL_TYPE) {
+	if (iclsPtr->flags & (ITCL_TYPE|ITCL_WIDGETADAPTOR)) {
 	    char *myName;
 	    /* special handling for mytypemethod, mymethod, myproc */
 	    myName = Tcl_GetString(methodNamePtr);

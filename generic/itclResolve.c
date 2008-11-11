@@ -20,7 +20,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itclResolve.c,v 1.1.2.18 2008/11/08 23:40:12 wiede Exp $
+ *     RCS:  $Id: itclResolve.c,v 1.1.2.19 2008/11/11 11:26:08 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -151,7 +151,7 @@ Itcl_ClassCmdResolver(
         imPtr = clookup->imPtr;
     }
 
-    if (iclsPtr->flags & ITCL_TYPE) {
+    if (iclsPtr->flags & (ITCL_TYPE|ITCL_WIDGET|ITCL_WIDGETADAPTOR)) {
 	/* FIXME check if called from an (instance) method (not from a typemethod) and only then error */
 	int isOk = 0;
 	if (strcmp(name, "info") == 0) {

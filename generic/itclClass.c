@@ -25,7 +25,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann Copyright (c) 2007
  *
- *     RCS:  $Id: itclClass.c,v 1.1.2.31 2008/11/09 21:21:30 wiede Exp $
+ *     RCS:  $Id: itclClass.c,v 1.1.2.32 2008/11/11 11:26:08 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -474,7 +474,9 @@ Itcl_CreateClass(
         hPtr = Tcl_CreateHashEntry(&iclsPtr->variables, (char *)namePtr,
 	        &newEntry);
         Tcl_SetHashValue(hPtr, (ClientData)ivPtr);
+    }
 
+    if (iclsPtr->flags & (ITCL_TYPE|ITCL_WIDGET|ITCL_WIDGETADAPTOR)) {
         namePtr = Tcl_NewStringObj("self", -1);
         Tcl_IncrRefCount(namePtr);
         (void) Itcl_CreateVariable(interp, iclsPtr, namePtr, (char*)NULL,
@@ -517,7 +519,8 @@ Itcl_CreateClass(
             &newEntry);
     Tcl_SetHashValue(hPtr, (ClientData)ivPtr);
 
-    if (infoPtr->currClassFlags & (ITCL_ECLASS|ITCL_NWIDGET|ITCL_TYPE)) {
+    if (infoPtr->currClassFlags &
+            (ITCL_ECLASS|ITCL_NWIDGET|ITCL_TYPE|ITCL_WIDGETADAPTOR)) {
         /*
          *  Add the built-in "itcl_options" variable to the list of
 	 *  data members.
@@ -551,15 +554,18 @@ Itcl_CreateClass(
         hPtr = Tcl_CreateHashEntry(&iclsPtr->variables, (char *)namePtr,
 	        &newEntry);
         Tcl_SetHashValue(hPtr, (ClientData)ivPtr);
+#ifdef NOTDEF
         /* create the options variable */
+fprintf(stderr, "itcl_options1\n");
         namePtr = Tcl_NewStringObj("itcl_options", -1);
         Tcl_IncrRefCount(namePtr);
         if (Itcl_CreateVariable(interp, iclsPtr, namePtr, NULL, NULL,
                 &ivPtr) != TCL_OK) {
             return TCL_ERROR;
         }
+#endif
     }
-    if (infoPtr->currClassFlags & ITCL_WIDGET) {
+    if (infoPtr->currClassFlags & (ITCL_WIDGET|ITCL_WIDGETADAPTOR)) {
         /* create the itcl_hull component */
         ItclComponent *icPtr;
         namePtr = Tcl_NewStringObj("itcl_hull", 9);
@@ -1301,7 +1307,7 @@ FinalizeCreateObject(
     ItclClass *iclsPtr = data[1];
     char *objName = Tcl_GetString(objNamePtr);
     if (result == TCL_OK) {
-	if (!(iclsPtr->flags & ITCL_TYPE)) {
+	if (!(iclsPtr->flags & (ITCL_TYPE|ITCL_WIDGETADAPTOR))) {
 	    Tcl_ResetResult(interp);
             Tcl_SetObjResult(interp, Tcl_NewStringObj(objName, -1));
 	}
@@ -1312,7 +1318,7 @@ FinalizeCreateObject(
 	
 	objPtr = Tcl_NewStringObj("-level 2", -1);
 	/* result = Tcl_SetReturnOptions(interp, objPtr); */
-	if (!(iclsPtr->flags & ITCL_TYPE)) {
+	if (!(iclsPtr->flags & (ITCL_TYPE|ITCL_WIDGETADAPTOR))) {
 	    result = Tcl_SetReturnOptions(interp, objPtr);
 	} else {
 	    Tcl_SetReturnOptions(interp, objPtr);
