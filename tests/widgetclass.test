@@ -1,0 +1,518 @@
+#---------------------------------------------------------------------
+# TITLE:
+#       typefunction.test
+#
+# AUTHOR:
+#       Arnulf Wiedemann with a lot of code form the snit tests by
+#       Will Duquette
+#
+# DESCRIPTION:
+#       Test cases for ::itcl::type proc, method, typemethod commands.
+#       Uses the ::tcltest:: harness.
+#
+#       There is at least Tcl 8.6a3 needed
+#
+#    The tests assume tcltest 2.2
+#-----------------------------------------------------------------------
+
+# ### ### ### ######### ######### #########
+## Declare the minimal version of Tcl required to run the package
+## tested by this testsuite, and its dependencies.
+
+proc testsNeedTcl {version} {
+    # This command ensures that a minimum version of Tcl is used to
+    # run the tests in the calling testsuite. If the minimum is not
+    # met by the active interpreter we forcibly bail out of the
+    # testsuite calling the command. The command has to be called
+    # immediately after loading the utilities.
+
+    if {[package vsatisfies [package provide Tcl] $version]} return
+
+    puts "    Aborting the tests found in \"[file tail [info script]]\""
+    puts "    Requiring at least Tcl $version, have [package present Tcl]."
+
+    # This causes a 'return' in the calling scope.
+    return -code return
+}
+
+# ### ### ### ######### ######### #########
+## Declare the minimum version of Tcltest required to run the
+## testsuite.
+
+proc testsNeedTcltest {version} {
+    # This command ensure that a minimum version of the Tcltest
+    # support package is used to run the tests in the calling
+    # testsuite. If the minimum is not met by the loaded package we
+    # forcibly bail out of the testsuite calling the command. The
+    # command has to be called after loading the utilities. The only
+    # command allowed to come before it is 'textNeedTcl' above.
+
+    # Note that this command will try to load a suitable version of
+    # Tcltest if the package has not been loaded yet.
+
+    if {[lsearch [namespace children] ::tcltest] == -1} {
+	if {![catch {
+	    package require tcltest $version
+	}]} {
+	    namespace import -force ::tcltest::*
+	    return
+	}
+    } elseif {[package vcompare [package present tcltest] $version] >= 0} {
+	return
+    }
+
+    puts "    Aborting the tests found in [file tail [info script]]."
+    puts "    Requiring at least tcltest $version, have [package present tcltest]"
+
+    # This causes a 'return' in the calling scope.
+    return -code return
+}
+
+# Set up for Tk tests: enter the event loop long enough to catch
+# any bgerrors.
+proc tkbide {{msg "tkbide"} {msec 500}} {
+    set ::bideVar 0
+    set ::bideError ""
+    set ::bideErrorInfo ""
+    # It looks like update idletasks does the job.
+    if {0} {
+        after $msec {set ::bideVar 1}
+        tkwait variable ::bideVar
+    }
+    update idletasks
+    if {"" != $::bideError} {
+        error "$msg: $::bideError" $::bideErrorInfo
+    }
+}
+
+
+
+testsNeedTcl     8.6
+testsNeedTcltest 2.2
+
+interp alias {} type {} ::itcl::type
+interp alias {} widget {} ::itcl::widget
+interp alias {} widgetadaptor {} ::itcl::widgetadaptor
+
+package require Tk 8.6
+
+# Marks tests which are only for Tk.
+tcltest::testConstraint tk [info exists tk_version]
+
+::tcltest::loadTestedCommands
+
+#-----------------------------------------------------------------------
+# Widgets
+
+# A widget is just a widgetadaptor with an automatically created hull
+# component (a Tk frame).  So the widgetadaptor tests apply; all we
+# need to test here is the frame creation.
+
+if {0} {
+test widget-1.1 {creating a widget} -constraints {
+    tk
+} -body {
+    widget myframe {
+        delegate method * to itcl_hull
+        delegate option * to itcl_hull
+    }
+
+    myframe create .frm -background green
+
+    set a [.frm cget -background]
+    set b [.frm itcl_hull]
+
+    destroy .frm
+    tkbide
+    list $a $b
+} -cleanup {
+    myframe destroy
+} -result {green ::itcl::widget::internal::hull1.frm}
+
+test widget-2.1 {can't redefine hull} -constraints {
+    tk
+} -body {
+    # there is no need to define or set itcl_hull as that is done automatically
+    widget myframe {
+        method resethull {} { set itcl_hull "" }
+    }
+
+    myframe .frm
+
+    .frm resethull
+} -returnCodes {
+    error
+} -cleanup {
+    myframe destroy
+} -result {can't set "itcl_hull": The itcl_hull component cannot be redefined}
+
+
+#-----------------------------------------------------------------------
+# install
+#
+# The install command is used to install widget components, while getting
+# options for the option database.
+
+test install-1.1 {installed components are created properly} -constraints {
+    tk
+} -body {
+    widget myframe {
+        # Delegate an option just to make sure the component variable
+        # exists.
+        delegate option -font to text
+
+        constructor {args} {
+            installcomponent text using text $win.text -background green
+        }
+
+        method getit {} {
+            $win.text cget -background
+        }
+    }
+
+    myframe .frm
+    set a [.frm getit]
+    destroy .frm
+    tkbide
+    set a
+} -cleanup {
+    myframe destroy
+} -result {green}
+
+test install-1.2 {installed components are saved properly} -constraints {
+    tk
+} -body {
+    widget myframe {
+        # Delegate an option just to make sure the component variable
+        # exists.
+        delegate option -font to text
+
+        constructor {args} {
+            installcomponent text using text $win.text -background green
+        }
+
+        method getit {} {
+            $text cget -background
+        }
+    }
+
+    myframe .frm
+    set a [.frm getit]
+    destroy .frm
+    tkbide
+    set a
+} -cleanup {
+    myframe destroy
+} -result {green}
+
+test install-1.3 {can't install until hull exists} -constraints {
+    tk
+} -body {
+    widgetadaptor myframe {
+        # Delegate an option just to make sure the component variable
+        # exists.
+        delegate option -font to text
+
+        constructor {args} {
+            installcomponent text using text $win.text -background green
+        }
+    }
+
+    myframe .frm
+} -returnCodes {
+    error
+} -cleanup {
+    myframe destroy
+} -result {cannot install "text before "itcl_hull" exists}
+
+test install-1.4 {install queries option database} -constraints {
+    tk
+} -body {
+    widget myframe {
+        delegate option -font to text
+
+        typeconstructor {
+            option add *Myframe.font Courier
+        }
+
+        constructor {args} {
+            installcomponent text using text $win.text 
+        }
+    }
+
+    myframe .frm
+    set a [.frm cget -font]
+    destroy .frm
+    tkbide
+    set a
+} -cleanup {
+    myframe destroy
+} -result {Courier}
+
+test install-1.5 {explicit options override option database} -constraints {
+    tk
+} -body {
+    widget myframe {
+        delegate option -font to text
+
+        typeconstructor {
+            option add *Myframe.font Courier
+        }
+
+        constructor {args} {
+            installcomponent text using text $win.text -font Times
+        }
+    }
+
+    myframe .frm
+    set a [.frm cget -font]
+    destroy .frm
+    tkbide
+    set a
+} -cleanup {
+    myframe destroy
+} -result {Times}
+
+test install-1.6 {option db works with targetted options} -constraints {
+    tk
+} -body {
+    widget myframe {
+        delegate option -textfont to text as -font
+
+        typeconstructor {
+            option add *Myframe.textfont Courier
+        }
+
+        constructor {args} {
+            installcomponent text using text $win.text
+        }
+    }
+
+    myframe .frm
+    set a [.frm cget -textfont]
+    destroy .frm
+    tkbide
+    set a
+} -cleanup {
+    myframe destroy
+} -result {Courier}
+
+# end
+}
+
+test install-1.7 {install works for snit::types} -body {
+    type tail {
+        option -tailcolor black
+    }
+
+    type dog {
+        delegate option -tailcolor to tail
+
+        constructor {args} {
+            installcomponent tail using tail $self.tail
+        }
+    }
+
+    dog fido
+    fido cget -tailcolor
+} -cleanup {
+    dog destroy
+    tail destroy
+} -result {black}
+
+if {0} {
+test install-1.8 {install can install non-widget components} -constraints {
+    tk
+} -body {
+    type dog {
+        option -tailcolor black
+    }
+
+    widget myframe {
+        delegate option -tailcolor to thedog
+
+        typeconstructor {
+            option add *Myframe.tailcolor green
+        }
+
+        constructor {args} {
+            installcomponent thedog using dog $win.dog
+        }
+    }
+
+    myframe .frm
+    set a [.frm cget -tailcolor]
+    destroy .frm
+    tkbide
+    set a
+
+} -cleanup {
+    dog destroy
+    myframe destroy
+} -result {green}
+
+test install-1.9 {ok if no options are delegated to component} -constraints {
+    tk
+} -body {
+    type dog {
+        option -tailcolor black
+    }
+
+    widget myframe {
+        constructor {args} {
+            installcomponent thedog using dog $win.dog
+        }
+    }
+
+    myframe .frm
+    destroy .frm
+    tkbide
+
+    # Test passes if no error is raised.
+    list ok
+} -cleanup {
+    myframe destroy
+    dog destroy
+} -result {ok}
+
+test install-2.1 {
+    delegate option * for a non-shadowed option.  The text widget's
+    -foreground and -font options should be set according to what's
+    in the option database on the widgetclass.
+} -constraints {
+    tk
+} -body {
+    widget myframe {
+        delegate option * to text
+
+        typeconstructor {
+            option add *Myframe.foreground red
+            option add *Myframe.font {Times 14}
+        }
+
+        constructor {args} {
+            installcomponent text using text $win.text
+        }
+    }
+
+    myframe .frm
+    set a [.frm cget -foreground]
+    set b [.frm cget -font]
+    destroy .frm
+    tkbide
+
+    list $a $b
+} -cleanup {
+    myframe destroy
+} -result {red {Times 14}}
+
+test install-2.2 {
+    Delegate option * for a shadowed option.  Foreground is declared
+    as a non-delegated option, hence it will pick up the option database
+    default.  -foreground is not included in the "delegate option *", so
+    the text widget's -foreground option will not be set from the
+    option database.
+} -constraints {
+    tk
+} -body {
+    widget myframe {
+        option -foreground white
+        delegate option * to text
+
+        typeconstructor {
+            option add *Myframe.foreground red
+        }
+
+        constructor {args} {
+            installcomponent text using text $win.text
+        }
+
+        method getit {} {
+            $text cget -foreground
+        }
+    }
+
+    myframe .frm
+    set a [.frm cget -foreground]
+    set b [.frm getit]
+    destroy .frm
+    tkbide
+
+    expr {![string equal $a $b]}
+} -cleanup {
+    myframe destroy
+} -result {1}
+
+test install-2.3 {
+    Delegate option * for a creation option.  Because the text widget's
+    -foreground is set explicitly by the constructor, that always
+    overrides the option database.
+} -constraints {
+    tk
+} -body {
+    widget myframe {
+        delegate option * to text
+
+        typeconstructor {
+            option add *Myframe.foreground red
+        }
+
+        constructor {args} {
+            installcomponent text using text $win.text -foreground blue
+        }
+    }
+
+    myframe .frm
+    set a [.frm cget -foreground]
+    destroy .frm
+    tkbide
+
+    set a
+} -cleanup {
+    myframe destroy
+} -result {blue}
+
+test install-2.4 {
+    Delegate option * with an excepted option.  Because the text widget's
+    -state is excepted, it won't be set from the option database.
+} -constraints {
+    tk
+} -body {
+    widget myframe {
+        delegate option * to text except -state
+
+        typeconstructor {
+            option add *Myframe.foreground red
+            option add *Myframe.state disabled
+        }
+
+        constructor {args} {
+            installcomponent text using text $win.text
+        }
+
+        method getstate {} {
+            $text cget -state
+        }
+    }
+
+    myframe .frm
+    set a [.frm getstate]
+    destroy .frm
+    tkbide
+
+    set a
+} -cleanup {
+    myframe destroy
+} -result {normal}
+
+
+# end
+}
+
+
+
+#---------------------------------------------------------------------
+# Clean up
+
+::tcltest::cleanupTests
+return
