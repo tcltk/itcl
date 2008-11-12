@@ -12,7 +12,7 @@
  * ========================================================================
  *  Author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclWidgetBuiltin.c,v 1.1.2.3 2008/11/11 11:37:36 wiede Exp $
+ *     RCS:  $Id: itclWidgetBuiltin.c,v 1.1.2.4 2008/11/12 21:31:42 wiede Exp $
  * ========================================================================
  *           Copyright (c) 2007 Arnulf Wiedemann
  * ------------------------------------------------------------------------
@@ -250,6 +250,12 @@ Itcl_BiInstallHullCmd(
         shortForm = 1;
         widgetName = Tcl_GetString(objv[1]);
     }
+    const char *wName;
+    wName = strstr(widgetName, "::");
+    if (wName != NULL) {
+        widgetName = wName + 2;
+    }
+
     Tcl_DStringInit(&buffer);
     if (!shortForm) {
         widgetType = Tcl_GetString(objv[2]);
@@ -275,13 +281,16 @@ Itcl_BiInstallHullCmd(
 
     /* initialize the options array */
     tkMainWin = Tk_MainWindow(interp);
-    tkWin = Tk_NameToWindow(interp, widgetName,
-            tkMainWin);
+    tkWin = Tk_NameToWindow(interp, widgetName, tkMainWin);
     if (tkWin == NULL) {
+          /* FIXME maybe it is not a window, need to find out how to check better */
+#ifdef NOTDEF
         Tcl_AppendResult(interp, "cannot find window \"",
 	        Tcl_GetString(contextIoPtr->namePtr), "\"", NULL);
 	return TCL_ERROR;
+#endif
     }
+if (tkWin != NULL) {
     hPtr = Tcl_FirstHashEntry(&contextIclsPtr->options, &place);
     while (hPtr) {
 	ioptPtr = (ItclOption*)Tcl_GetHashValue(hPtr);
@@ -301,7 +310,9 @@ Itcl_BiInstallHullCmd(
 	}
         hPtr = Tcl_NextHashEntry(&place);
     }
+}
 
+Tcl_ResetResult(interp);
     /* initialize the itcl_hull variable */
     Tcl_DStringAppend(&buffer, "::itcl::widget::internal::hull", -1);
     int lgth = strlen(Tcl_DStringValue(&buffer));
@@ -320,9 +331,11 @@ Itcl_BiInstallHullCmd(
 	}
     }
     contextIoPtr->hullWindowNamePtr = Tcl_NewStringObj(widgetName, -1);
+//fprintf(stderr, "REN!%s!%s!\n", widgetName, Tcl_DStringValue(&buffer));
     Itcl_RenameCommand(interp, widgetName,
             Tcl_DStringValue(&buffer));
 
+Tcl_ResetResult(interp);
     namePtr = Tcl_NewStringObj("itcl_hull", -1);
     Tcl_IncrRefCount(namePtr);
     hPtr = Tcl_FindHashEntry(&contextIoPtr->iclsPtr->variables,

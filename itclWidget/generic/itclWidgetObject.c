@@ -11,7 +11,7 @@
  * ========================================================================
  *  Author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclWidgetObject.c,v 1.1.2.4 2008/11/11 11:37:36 wiede Exp $
+ *     RCS:  $Id: itclWidgetObject.c,v 1.1.2.5 2008/11/12 21:31:42 wiede Exp $
  * ========================================================================
  *           Copyright (c) 2007 Arnulf Wiedemann
  * ------------------------------------------------------------------------
@@ -51,6 +51,11 @@ ItclWidgetInitObjectOptions(
     widgetName = Tcl_GetString(ioPtr->hullWindowNamePtr);
     tkWin = Tk_NameToWindow(interp, widgetName, tkMainWin);
     if (tkWin == NULL) {
+/* seems to be no widget */
+Tcl_ResetResult(interp);
+return TCL_OK;
+    }
+    if (tkWin == NULL) {
         Tcl_AppendResult(interp, "window for widget \"",
 	        Tcl_GetString(ioPtr->namePtr), "\" not found", NULL);
 	return TCL_ERROR;
@@ -74,6 +79,7 @@ ItclWidgetInitObjectOptions(
 	}
         hPtr = Tcl_NextHashEntry(&place);
     }
+Tcl_ResetResult(interp);
 
     return TCL_OK;
 }
@@ -178,7 +184,9 @@ HullAndOptionsInstall(
     Tcl_IncrRefCount(hullObjv[3]);
     hullObjv[4] = Tcl_NewStringObj(Tcl_GetString(widgetClassPtr), -1);
     Tcl_IncrRefCount(hullObjv[4]);
-    result = Itcl_BiInstallHullCmd(iclsPtr, interp, hullObjc, hullObjv);
+    ItclShowArgs(1, "installhull", hullObjc, hullObjv);
+    result = Itcl_BiInstallHullCmd(iclsPtr->infoPtr, interp,
+            hullObjc, hullObjv);
     Tcl_DecrRefCount(hullObjv[0]);
     Tcl_DecrRefCount(hullObjv[1]);
     Tcl_DecrRefCount(hullObjv[2]);
@@ -203,8 +211,100 @@ InstallComponent(
     int objc,
     Tcl_Obj * const objv[])
 {
+    FOREACH_HASH_DECLS;
+    Tk_Window tkMainWin;
+    Tk_Window tkWin;
+    Tcl_Obj ** newObjv;
+    ItclDelegatedOption *idoPtr;
+    const char *componentName;
+    const char *componentValue;
+    const char *usageStr;
+    const char *widgetName;
+    const char *val;
+    int i;
+    int j;
+    int numOpts;
+    int result;
 
     ItclShowArgs(1, "InstallComponent", objc, objv);
+    usageStr = "usage: installcomponent <componentName> using <widgetType> <widgetPath> ?-option value ...?";
+    if (objc < 4) {
+        Tcl_AppendResult(interp, usageStr, NULL);
+	return TCL_ERROR;
+    }
+    if (strcmp(Tcl_GetString(objv[2]), "using") != 0) {
+        Tcl_AppendResult(interp, usageStr, NULL);
+	return TCL_ERROR;
+    }
+    componentName = Tcl_GetString(objv[1]);
+    val = ItclGetInstanceVar(interp, "itcl_hull", NULL, ioPtr, iclsPtr);
+    if ((val != NULL) && (strlen(val) == 0)) {
+	Tcl_AppendResult(interp, "cannot install \"", componentName,
+	        " before \"itcl_hull\" exists", NULL);
+        return TCL_ERROR;
+    }
+    /* check for delegated option and ask the option database for the values */
+    /* first check for number of delegated options */
+    numOpts = 0;
+    FOREACH_HASH_VALUE(idoPtr, &ioPtr->objectDelegatedOptions) {
+        numOpts++;
+    }
+    widgetName = Tcl_GetString(ioPtr->namePtr);
+    tkMainWin = Tk_MainWindow(interp);
+    tkWin = Tk_NameToWindow(interp, widgetName, tkMainWin);
+    if (tkWin == NULL) {
+        Tcl_AppendResult(interp, "InstallComponent: cannot get window",
+                " info for \"", widgetName, "\"", NULL);
+        return TCL_ERROR;
+    }
+    newObjv = (Tcl_Obj **)ckalloc(sizeof(Tcl_Obj *) *
+           (objc - 3 + (numOpts * 2)));
+    /* insert delegated options before any options on the command line */
+    for (j = 3; j < objc; j++) {
+	if (*Tcl_GetString(objv[j]) == '-') {
+	   break;
+	}
+        newObjv[j - 3] = objv[j];
+    }
+    i = j - 3;
+    FOREACH_HASH_VALUE(idoPtr, &ioPtr->objectDelegatedOptions) {
+	val = Tk_GetOption(tkWin,
+	        Tcl_GetString(idoPtr->resourceNamePtr),
+	        Tcl_GetString(idoPtr->classNamePtr));
+	if (val == NULL) {
+	    Tcl_AppendResult(interp, "cannot get option \"",
+	            Tcl_GetString(idoPtr->resourceNamePtr),
+		    "\"", NULL);
+	}
+	if (idoPtr->asPtr != NULL) {
+            newObjv[i] = idoPtr->asPtr;
+	} else {
+            newObjv[i] = idoPtr->namePtr;
+	}
+	Tcl_IncrRefCount(newObjv[i]);
+	i++;
+        newObjv[i] = Tcl_NewStringObj(val, -1);
+	Tcl_IncrRefCount(newObjv[i]);
+	i++;
+        
+    }
+    for ( ;j < objc; j++) {
+        newObjv[i] = objv[j];
+        i++;
+    }
+    ItclShowArgs(0, "InstallComponent", objc - 3 + (numOpts * 2), newObjv);
+    result = Tcl_EvalObjv(interp, objc - 3 + (numOpts * 2), newObjv, 0);
+    if (result != TCL_OK) {
+        return result;
+    }
+    componentValue = Tcl_GetStringResult(interp);
+    Tcl_Obj *objPtr;
+    objPtr = Tcl_NewStringObj(ITCL_VARIABLES_NAMESPACE, -1);
+    Tcl_AppendToObj(objPtr, Tcl_GetString(iclsPtr->fullNamePtr), -1);
+    Tcl_AppendToObj(objPtr, "::", -1);
+    Tcl_AppendToObj(objPtr, componentName, -1);
 
+    Tcl_SetVar2(interp, Tcl_GetString(objPtr), NULL, componentValue, 0);
+//    ItclSetInstanceVar(interp, componentName, NULL, componentValue, ioPtr, iclsPtr);
     return TCL_OK;
 }
