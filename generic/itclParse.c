@@ -39,7 +39,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclParse.c,v 1.1.2.40 2008/11/11 11:36:11 wiede Exp $
+ *     RCS:  $Id: itclParse.c,v 1.1.2.41 2008/11/12 21:31:19 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -671,6 +671,11 @@ ItclClassBaseCmd(
 		if (strcmp(Tcl_GetString(imPtr->codePtr->bodyPtr),
 		        "@itcl-builtin-mytypevar") == 0) {
 		    Tcl_AppendToObj(bodyPtr, "::itcl::builtin::mytypevar", -1);
+		    isDone = 1;
+		}
+		if (strcmp(Tcl_GetString(imPtr->codePtr->bodyPtr),
+		        "@itcl-builtin-itcl_hull") == 0) {
+		    Tcl_AppendToObj(bodyPtr, "::itcl::builtin::itcl_hull", -1);
 		    isDone = 1;
 		}
 		if (strcmp(Tcl_GetString(imPtr->codePtr->bodyPtr),
@@ -2514,11 +2519,11 @@ ItclCreateComponent(
     int type,
     ItclComponent **icPtrPtr)
 {
-    Tcl_Obj *bodyPtr;
+//    Tcl_Obj *bodyPtr;
     Tcl_HashEntry *hPtr;
     ItclComponent *icPtr;
     ItclVariable *ivPtr;
-    ItclMemberFunc *imPtr;
+//    ItclMemberFunc *imPtr;
     int isWidgetHullVar;
     int result;
     int isNew;
@@ -2549,22 +2554,6 @@ ItclCreateComponent(
 	    }
 	}
         ivPtr->flags |= ITCL_COMPONENT_VAR;
-	const char *str = "";
-	if (isWidgetHullVar) {
-	    str = "if {[llength $args] == 0} { return $itcl_hull }\n";
-	    bodyPtr = Tcl_NewStringObj(str, -1);
-	    Tcl_AppendToObj(bodyPtr, "return [$", -1);
-	    Tcl_AppendToObj(bodyPtr, Tcl_GetString(componentPtr), -1);
-	    Tcl_AppendToObj(bodyPtr, " {*}$args]", -1);
-            if (ItclCreateMethod(interp, iclsPtr, componentPtr, "args",
-	            Tcl_GetString(bodyPtr), &imPtr) != TCL_OK) {
-            return TCL_ERROR;
-        }
-        imPtr->flags |= ITCL_COMPONENT;
-	if (type & ITCL_COMMON) {
-            imPtr->flags |= ITCL_COMMON;
-	}
-	}
         icPtr = (ItclComponent *)ckalloc(sizeof(ItclComponent));
         memset(icPtr, 0, sizeof(ItclComponent));
         icPtr->namePtr = componentPtr;

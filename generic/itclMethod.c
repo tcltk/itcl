@@ -25,7 +25,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclMethod.c,v 1.1.2.28 2008/11/11 11:26:08 wiede Exp $
+ *     RCS:  $Id: itclMethod.c,v 1.1.2.29 2008/11/12 21:31:19 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -458,16 +458,15 @@ ItclCreateMemberFunc(
     char *name;
     ItclMemberFunc *imPtr;
     ItclMemberCode *mcode;
-    Tcl_HashEntry *entry;
+    Tcl_HashEntry *hPtr;
 
     /*
      *  Add the member function to the list of functions for
      *  the class.  Make sure that a member function with the
      *  same name doesn't already exist.
      */
-    entry = Tcl_CreateHashEntry(&iclsPtr->functions, (char *)namePtr, &newEntry);
-
-    if (!newEntry) {
+    hPtr = Tcl_CreateHashEntry(&iclsPtr->functions, (char *)namePtr, &newEntry);
+    if (!hPtr) {
         Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
             "\"", Tcl_GetString(namePtr), "\" already defined in class \"",
             Tcl_GetString(iclsPtr->fullNamePtr), "\"",
@@ -481,7 +480,7 @@ ItclCreateMemberFunc(
     if (ItclCreateMemberCode(interp, iclsPtr, arglist, body,
         &mcode, namePtr, flags) != TCL_OK) {
 
-        Tcl_DeleteHashEntry(entry);
+        Tcl_DeleteHashEntry(hPtr);
         return TCL_ERROR;
     }
 
@@ -560,6 +559,12 @@ ItclCreateMemberFunc(
 	    imPtr->maxargcount = -1;
             imPtr->codePtr->flags |= ITCL_BUILTIN;
 	}
+	if (strcmp(name, "itcl_hull") == 0) {
+	    imPtr->argcount = 0;
+	    imPtr->maxargcount = -1;
+            imPtr->codePtr->flags |= ITCL_BUILTIN;
+            imPtr->flags |= ITCL_COMPONENT;
+	}
 	if (strcmp(name, "callinstance") == 0) {
 	    imPtr->argcount = 0;
 	    imPtr->maxargcount = -1;
@@ -575,6 +580,16 @@ ItclCreateMemberFunc(
 	    imPtr->maxargcount = -1;
             imPtr->codePtr->flags |= ITCL_BUILTIN;
             imPtr->flags |= ITCL_COMMON;
+	}
+	if (strcmp(name, "installhull") == 0) {
+	    imPtr->argcount = 0;
+	    imPtr->maxargcount = -1;
+            imPtr->codePtr->flags |= ITCL_BUILTIN;
+	}
+	if (strcmp(name, "installcomponent") == 0) {
+	    imPtr->argcount = 0;
+	    imPtr->maxargcount = -1;
+            imPtr->codePtr->flags |= ITCL_BUILTIN;
 	}
 	if (strcmp(name, "info") == 0) {
             imPtr->codePtr->flags |= ITCL_BUILTIN;
@@ -594,7 +609,7 @@ ItclCreateMemberFunc(
         iclsPtr->destructor = imPtr;
     }
 
-    Tcl_SetHashValue(entry, (ClientData)imPtr);
+    Tcl_SetHashValue(hPtr, (ClientData)imPtr);
     Itcl_PreserveData((ClientData)imPtr);
     Itcl_EventuallyFree((ClientData)imPtr, Itcl_DeleteMemberFunc);
 
@@ -871,6 +886,9 @@ ItclCreateMemberCode(
 	        isDone = 1;
 	    }
 	    if (strcmp(body, "@itcl-builtin-myvar") == 0) {
+	        isDone = 1;
+	    }
+	    if (strcmp(body, "@itcl-builtin-itcl_hull") == 0) {
 	        isDone = 1;
 	    }
 	    if (strcmp(body, "@itcl-builtin-callinstance") == 0) {
@@ -1528,7 +1546,7 @@ NRExecMethod(
     ItclClass *iclsPtr;
     ItclObject *ioPtr;
 
-    ItclShowArgs(1, "Itcl_ExecMethod", objc, objv);
+    ItclShowArgs(1, "NRExecMethod", objc, objv);
 
     /*
      *  Make sure that the current namespace context includes an
@@ -1621,7 +1639,7 @@ NRExecProc(
     ItclMemberFunc *imPtr = (ItclMemberFunc*)clientData;
     int result = TCL_OK;
 
-    ItclShowArgs(1, "Itcl_ExecProc", objc, objv);
+    ItclShowArgs(1, "NRExecProc", objc, objv);
 
     /*
      *  Make sure that this command member can be accessed from
@@ -1863,7 +1881,7 @@ Itcl_InvokeMethodIfExists(
     int objc,                     /* number of arguments */
     Tcl_Obj *CONST objv[])        /* argument objects */
 {
-    Tcl_HashEntry *entry;
+    Tcl_HashEntry *hPtr;
     Tcl_Obj *cmdlinePtr;
     Tcl_Obj **cmdlinev;
     Tcl_Obj **newObjv;
@@ -1874,10 +1892,10 @@ Itcl_InvokeMethodIfExists(
 
     ItclShowArgs(1, "Itcl_InvokeMethodIfExists", objc, objv);
     Tcl_Obj *objPtr = Tcl_NewStringObj(name, -1);
-    entry = Tcl_FindHashEntry(&contextClassPtr->functions, (char *)objPtr);
+    hPtr = Tcl_FindHashEntry(&contextClassPtr->functions, (char *)objPtr);
 
-    if (entry) {
-        imPtr  = (ItclMemberFunc*)Tcl_GetHashValue(entry);
+    if (hPtr) {
+        imPtr  = (ItclMemberFunc*)Tcl_GetHashValue(hPtr);
 
         /*
          *  Prepend the method name to the list of arguments.
@@ -1902,15 +1920,23 @@ ItclShowArgs(1, "Itcl_EvalMemberCode", cmdlinec, cmdlinev);
         Itcl_ReleaseData((ClientData)imPtr);
         Tcl_DecrRefCount(cmdlinePtr);
     } else {
-        if (contextClassPtr->flags & (ITCL_TYPE|ITCL_WIDGETADAPTOR)) {
+        if (contextClassPtr->flags & (ITCL_TYPE|ITCL_WIDGET|ITCL_WIDGETADAPTOR)) {
 	    if (strcmp(name, "constructor") == 0) {
                 if (objc > 0) {
                     if (contextClassPtr->numOptions == 0) {
-			Tcl_AppendResult(interp, "type \"",
-			        Tcl_GetString(contextClassPtr->namePtr),
-				"\" has no options, but constructor has",
-				" option arguments", NULL);
-		        return TCL_ERROR;
+			/* check if all options are delegeted */
+			Tcl_Obj *objPtr;
+			objPtr = Tcl_NewStringObj("*", -1);
+			hPtr = Tcl_FindHashEntry(
+			        &contextClassPtr->delegatedOptions,
+				(char *)objPtr);
+			if (hPtr == NULL) {
+			    Tcl_AppendResult(interp, "type \"",
+			            Tcl_GetString(contextClassPtr->namePtr),
+				    "\" has no options, but constructor has",
+				    " option arguments", NULL);
+		            return TCL_ERROR;
+		        }
 		    }
                     if (Itcl_PushCallFrame(interp, &frame,
 		            contextClassPtr->nsPtr,
@@ -1925,6 +1951,7 @@ ItclShowArgs(1, "Itcl_EvalMemberCode", cmdlinec, cmdlinev);
 		    newObjv[1] = Tcl_NewStringObj("configure", -1);
 		    Tcl_IncrRefCount(newObjv[1]);
 		    memcpy(newObjv + 2, objv, (objc * sizeof(Tcl_Obj *)));
+		    ItclShowArgs(1, "DEFAULT Constructor", objc + 2, newObjv);
 		    result = Tcl_EvalObjv(interp, objc + 2, newObjv, 0);
 		    Tcl_DecrRefCount(newObjv[1]);
 		    Tcl_DecrRefCount(newObjv[0]);
@@ -2038,6 +2065,10 @@ Itcl_CmdAliasProc(
 	}
 	if (strcmp(cmdName, "@itcl-builtin-myvar") == 0) {
 	    return Tcl_FindCommand(interp, "::itcl::builtin::myvar",
+	            NULL, 0);
+	}
+	if (strcmp(cmdName, "@itcl-builtin-itcl_hull") == 0) {
+	    return Tcl_FindCommand(interp, "::itcl::builtin::itcl_hull",
 	            NULL, 0);
 	}
 	if (strcmp(cmdName, "@itcl-builtin-callinstance") == 0) {

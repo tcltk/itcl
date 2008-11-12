@@ -25,7 +25,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann Copyright (c) 2007
  *
- *     RCS:  $Id: itclClass.c,v 1.1.2.32 2008/11/11 11:26:08 wiede Exp $
+ *     RCS:  $Id: itclClass.c,v 1.1.2.33 2008/11/12 21:31:19 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -1307,7 +1307,7 @@ FinalizeCreateObject(
     ItclClass *iclsPtr = data[1];
     char *objName = Tcl_GetString(objNamePtr);
     if (result == TCL_OK) {
-	if (!(iclsPtr->flags & (ITCL_TYPE|ITCL_WIDGETADAPTOR))) {
+	if (!(iclsPtr->flags & (ITCL_TYPE|ITCL_WIDGET|ITCL_WIDGETADAPTOR))) {
 	    Tcl_ResetResult(interp);
             Tcl_SetObjResult(interp, Tcl_NewStringObj(objName, -1));
 	}

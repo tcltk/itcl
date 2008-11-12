@@ -24,7 +24,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclBuiltin.c,v 1.1.2.40 2008/11/11 11:26:08 wiede Exp $
+ *     RCS:  $Id: itclBuiltin.c,v 1.1.2.41 2008/11/12 21:31:19 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -42,6 +42,7 @@ Tcl_ObjCmdProc Itcl_BiMyMethodCmd;
 Tcl_ObjCmdProc Itcl_BiMyProcCmd;
 Tcl_ObjCmdProc Itcl_BiMyTypeVarCmd;
 Tcl_ObjCmdProc Itcl_BiMyVarCmd;
+Tcl_ObjCmdProc Itcl_BiItclHullCmd;
 Tcl_ObjCmdProc ItclExtendedConfigure;
 Tcl_ObjCmdProc ItclExtendedCget;
 Tcl_ObjCmdProc ItclExtendedSetGet;
@@ -91,7 +92,7 @@ static BiMethod BiMethodList[] = {
 	ITCL_CLASS|ITCL_ECLASS|ITCL_TYPE|ITCL_WIDGET|ITCL_WIDGETADAPTOR
     },
     { "installcomponent",
-        "<component> using <classname> <winpath> ?-option value...?",
+        "<componentName> using <classname> <winpath> ?-option value...?",
         "@itcl-builtin-installcomponent",
         Itcl_BiInstallComponentCmd,
 	ITCL_WIDGET
@@ -101,6 +102,12 @@ static BiMethod BiMethodList[] = {
         "@itcl-builtin-destroy",
         Itcl_BiDestroyCmd,
 	ITCL_TYPE|ITCL_WIDGET|ITCL_WIDGETADAPTOR
+    },
+    { "itcl_hull",
+        "",
+        "@itcl-builtin-itcl_hull",
+        Itcl_BiItclHullCmd,
+	ITCL_WIDGET|ITCL_WIDGETADAPTOR
     },
     { "info",
         "???",
@@ -1119,6 +1126,7 @@ ItclBiClassUnknownCmd(
     int offset;
     int useComponent;
     int doCheck;
+    int isItclHull;
     int isLocal;
     int idx;
 
@@ -1134,7 +1142,8 @@ fprintf(stderr, "ItclBiClassUnknownCmd cannot find class\n");
         return TCL_ERROR;
     }
     iclsPtr = Tcl_GetHashValue(hPtr);
-    if (strcmp(Tcl_GetString(objv[1]), "create") == 0) {
+    funcName = Tcl_GetString(objv[1]);
+    if (strcmp(funcName, "create") == 0) {
         /* check if we have a user method create. If not, it is the builtin
 	 * create method and we don't need to check for delegation
 	 * and components with ITCL_COMPONENT_INHERIT
@@ -1144,22 +1153,28 @@ fprintf(stderr, "ItclBiClassUnknownCmd cannot find class\n");
 	    doCheck = 0;
         }
     }
-    FOREACH_HASH_VALUE(icPtr, &iclsPtr->components) {
-        if (icPtr->flags & ITCL_COMPONENT_INHERIT) {
-	    val = Tcl_GetVar2(interp, Tcl_GetString(icPtr->namePtr), NULL, 0);
-	    if (val != NULL) {
-                newObjv = (Tcl_Obj **)ckalloc(sizeof(Tcl_Obj *) * (objc));
-		newObjv[0] = Tcl_NewStringObj(val, -1);
-		Tcl_IncrRefCount(newObjv[0]);
-		memcpy(newObjv+1, objv+1, sizeof(Tcl_Obj *) * (objc-1));
-                ItclShowArgs(1, "UK EVAL1", objc, newObjv);
-                result = Tcl_EvalObjv(interp, objc, newObjv, 0);
-		Tcl_DecrRefCount(newObjv[0]);
-	        return result;
-	    }
-	}
+    isItclHull = 0;
+    if (strcmp(funcName, "itcl_hull") == 0) {
+        isItclHull = 1;
     }
-    funcName = Tcl_GetString(objv[1]);
+    if (!isItclHull) {
+        FOREACH_HASH_VALUE(icPtr, &iclsPtr->components) {
+            if (icPtr->flags & ITCL_COMPONENT_INHERIT) {
+	        val = Tcl_GetVar2(interp, Tcl_GetString(icPtr->namePtr),
+		        NULL, 0);
+	        if (val != NULL) {
+                    newObjv = (Tcl_Obj **)ckalloc(sizeof(Tcl_Obj *) * (objc));
+		    newObjv[0] = Tcl_NewStringObj(val, -1);
+		    Tcl_IncrRefCount(newObjv[0]);
+		    memcpy(newObjv+1, objv+1, sizeof(Tcl_Obj *) * (objc-1));
+                    ItclShowArgs(1, "UK EVAL1", objc, newObjv);
+                    result = Tcl_EvalObjv(interp, objc, newObjv, 0);
+		    Tcl_DecrRefCount(newObjv[0]);
+	            return result;
+	        }
+	    }
+        }
+    }
     /* from a class object only typemethods can be called directly
      * if delegated, so check for that, otherwise create an object
      */
@@ -1179,7 +1194,7 @@ fprintf(stderr, "ItclBiClassUnknownCmd cannot find class\n");
 	    break;
 	}
     }
-    if (isLocal) {
+    if (isLocal && !isItclHull) {
         FOREACH_HASH_VALUE(idmPtr, &iclsPtr->delegatedFunctions) {
             if ((strcmp(Tcl_GetString(idmPtr->namePtr), funcName) == 0) ||
 	            (strcmp(Tcl_GetString(idmPtr->namePtr), "*") == 0)) {
@@ -1289,7 +1304,17 @@ fprintf(stderr, "OBJC!%d!%d!%d!%d!%d!\n", objc, lObjc, offset, useComponent, (ob
         }
     }
     offset = 1;
-    if (strcmp(Tcl_GetString(objv[1]), "create") == 0) {
+    if (strcmp(funcName, "itcl_hull") == 0) {
+        hPtr = Tcl_FindHashEntry(&iclsPtr->resolveCmds, (char *)objv[1]);
+	if (hPtr == NULL) {
+	    Tcl_AppendResult(interp, "INTERNAL ERROR ",
+		    "cannot find itcl_hull method", NULL);
+	    return TCL_ERROR;
+	}
+	result = Itcl_ExecProc(Tcl_GetHashValue(hPtr), interp, objc, objv);
+	return result;
+    }
+    if (strcmp(funcName, "create") == 0) {
         /* allow typeClassName create objectName */
         offset++;
     } else {
@@ -1304,6 +1329,7 @@ fprintf(stderr, "OBJC!%d!%d!%d!%d!%d!\n", objc, lObjc, offset, useComponent, (ob
     Tcl_IncrRefCount(newObjv[2]);
     memcpy(newObjv+3, objv+offset, (objc-offset) * sizeof(Tcl_Obj *));
     callbackPtr = Itcl_GetCurrentCallbackPtr(interp);
+ItclShowArgs(1, "CREATE", objc+3-offset, newObjv);
     Itcl_NRAddCallback(interp, CallCreateObject, iclsPtr,
             INT2PTR(objc+3-offset), (ClientData)newObjv, NULL);
     return Itcl_NRRunCallbacks(interp, callbackPtr);
@@ -1670,9 +1696,13 @@ fprintf(stderr, "plain configure not yet implemented\n");
             val = ItclGetInstanceVar(interp, Tcl_GetString(icPtr->namePtr),
                     NULL, contextIoPtr, icPtr->ivPtr->iclsPtr);
         }
-        if (val != NULL) {
+        if ((val == NULL) || (strlen(val) == 0)) {
+            val = ItclGetInstanceVar(interp, Tcl_GetString(icPtr->namePtr),
+                    NULL, contextIoPtr, icPtr->ivPtr->iclsPtr);
+        }
+        if ((val != NULL) && (strlen(val) > 0)) {
 	    if (idoPtr->asPtr != NULL) {
-            icPtr->ivPtr->iclsPtr->infoPtr->currIdoPtr = idoPtr;
+                icPtr->ivPtr->iclsPtr->infoPtr->currIdoPtr = idoPtr;
 	    }
 	    newObjv = (Tcl_Obj **)ckalloc(sizeof(Tcl_Obj *)*(objc+2));
 	    newObjv[0] = Tcl_NewStringObj(val, -1);
@@ -1706,7 +1736,11 @@ fprintf(stderr, "plain configure not yet implemented\n");
 	        infoPtr->currContextIclsPtr = NULL;
 	    }
             return result;
-        }
+        } else {
+	    Tcl_AppendResult(interp, "INTERNAL ERROR component not found",
+	            " in ItclExtendedConfigure delegated option", NULL);
+	    return TCL_ERROR;
+	}
     }
 
     if (objc == 2) {
@@ -2003,7 +2037,16 @@ ItclExtendedCget(
 	    newObjv[1] = Tcl_NewStringObj("cget", 4);
 	    Tcl_IncrRefCount(newObjv[1]);
 	    for(i=1;i<objc;i++) {
-	        newObjv[i+1] = objv[i];
+		if (strcmp(Tcl_GetString(idoPtr->namePtr),
+		        Tcl_GetString(objv[i])) == 0) {
+		    if (idoPtr->asPtr != NULL) {
+		        newObjv[i+1] = idoPtr->asPtr;
+		    } else {
+	                newObjv[i+1] = objv[i];
+		    }
+		} else {
+	            newObjv[i+1] = objv[i];
+	        }
 	    }
 	    objPtr = Tcl_NewStringObj(val, -1);
 	    Tcl_IncrRefCount(objPtr);
@@ -2013,6 +2056,7 @@ ItclExtendedCget(
                         infoPtr->object_meta_type);
 	        infoPtr->currContextIclsPtr = ioPtr->iclsPtr;
 	    }
+	    ItclShowArgs(0, "ExtendedCget delegated option", objc+1, newObjv);
             result = Tcl_EvalObjv(interp, objc+1, newObjv, TCL_EVAL_DIRECT);
 	    Tcl_DecrRefCount(newObjv[0]);
 	    Tcl_DecrRefCount(newObjv[1]);
@@ -2216,7 +2260,6 @@ Itcl_BiInstallComponentCmd(
      *  Make sure that this command is being invoked in the proper
      *  context.
      */
-    ItclShowArgs(1, "Itcl_BiInstallComponentCmd", objc, objv);
     contextIclsPtr = NULL;
     if (Itcl_GetContext(interp, &contextIclsPtr, &contextIoPtr) != TCL_OK) {
         return TCL_ERROR;
@@ -2229,7 +2272,8 @@ Itcl_BiInstallComponentCmd(
         return TCL_ERROR;
     }
     if (objc < 5) {
-        token = Tcl_GetString(objv[0]);
+	/* FIXME strip off the :: parts here properly*/
+        token = Tcl_GetString(objv[0])+2;
         Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
             "wrong # args: should be \"", token, " <componentName> using",
 	    " <widgetClassName> <widgetPathName>",
@@ -2729,6 +2773,46 @@ Itcl_BiMyVarCmd(
 	Tcl_AppendToObj(resultPtr, "::", -1);
 	Tcl_AppendToObj(resultPtr, Tcl_GetString(objv[1]), -1);
 	Tcl_SetObjResult(interp, resultPtr);
+    }
+    return TCL_OK;
+}
+/*
+ * ------------------------------------------------------------------------
+ *  Itcl_BiItclHullCmd()
+ *
+ *  Invoked when a user calls itcl_hull
+ *
+ *  Handles the following syntax:
+ *
+ *    itcl_hull ?arg arg ...?
+ *
+ * ------------------------------------------------------------------------
+ */
+/* ARGSUSED */
+int
+Itcl_BiItclHullCmd(
+    ClientData clientData,   /* class definition */
+    Tcl_Interp *interp,      /* current interpreter */
+    int objc,                /* number of arguments */
+    Tcl_Obj *CONST objv[])   /* argument objects */
+{
+    ItclClass *contextIclsPtr;
+    ItclObject *contextIoPtr;
+    const char *val;
+
+    /*
+     *  Make sure that this command is being invoked in the proper
+     *  context.
+     */
+    ItclShowArgs(1, "Itcl_BiItclHullCmd", objc, objv);
+    contextIclsPtr = NULL;
+    if (Itcl_GetContext(interp, &contextIclsPtr, &contextIoPtr) != TCL_OK) {
+        return TCL_ERROR;
+    }
+    if (contextIoPtr != NULL) {
+        val = ItclGetInstanceVar(interp, "itcl_hull", NULL,
+	        contextIoPtr, contextIclsPtr);
+	Tcl_SetObjResult(interp, Tcl_NewStringObj(val, -1));
     }
     return TCL_OK;
 }
