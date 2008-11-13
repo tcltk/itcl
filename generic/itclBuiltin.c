@@ -24,7 +24,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclBuiltin.c,v 1.1.2.42 2008/11/13 00:09:29 wiede Exp $
+ *     RCS:  $Id: itclBuiltin.c,v 1.1.2.43 2008/11/13 19:58:33 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -1558,12 +1558,10 @@ ItclExtendedConfigure(
     int objc,                /* number of arguments */
     Tcl_Obj *CONST objv[])   /* argument objects */
 {
-    ItclClass *contextIclsPtr;
-    ItclObject *contextIoPtr;
-
-    Tcl_HashEntry *hPtr;
+    FOREACH_HASH_DECLS;
     Tcl_HashEntry *hPtr2;
     Tcl_Object oPtr;
+    Tcl_Obj *listPtr;
     Tcl_Obj *resultPtr;
     Tcl_Obj *objPtr;
     Tcl_Obj *methodNamePtr;
@@ -1571,6 +1569,8 @@ ItclExtendedConfigure(
     Tcl_Namespace *saveNsPtr;
     Tcl_Namespace *evalNsPtr;
     Tcl_Obj **newObjv;
+    ItclClass *contextIclsPtr;
+    ItclObject *contextIoPtr;
     ItclVarLookup *vlookup;
     ItclDelegatedFunction *idmPtr;
     ItclDelegatedOption *idoPtr;
@@ -1661,8 +1661,27 @@ ItclExtendedConfigure(
     }
     /* now do the hard work */
     if (objc == 1) {
-fprintf(stderr, "plain configure not yet implemented\n");
-        return TCL_ERROR;
+        listPtr = Tcl_NewListObj(0, NULL);
+	FOREACH_HASH_VALUE(ioptPtr, &contextIoPtr->objectOptions) {
+	    objPtr = Tcl_NewListObj(0, NULL);
+	    Tcl_ListObjAppendElement(interp, objPtr,
+	            Tcl_NewStringObj(Tcl_GetString(ioptPtr->namePtr), -1));
+	    Tcl_ListObjAppendElement(interp, objPtr,
+	            Tcl_NewStringObj(
+		    Tcl_GetString(ioptPtr->resourceNamePtr), -1));
+	    Tcl_ListObjAppendElement(interp, objPtr,
+	            Tcl_NewStringObj(Tcl_GetString(ioptPtr->classNamePtr), -1));
+	    if (ioptPtr->defaultValuePtr != NULL) {
+	        Tcl_ListObjAppendElement(interp, objPtr, Tcl_NewStringObj(
+		        Tcl_GetString(ioptPtr->defaultValuePtr), -1));
+	    } else {
+	        Tcl_ListObjAppendElement(interp, objPtr,
+		        Tcl_NewStringObj("", -1));
+	    }
+	    Tcl_ListObjAppendElement(interp, listPtr, objPtr);
+	}
+	Tcl_SetObjResult(interp, listPtr);
+        return TCL_OK;
     }
     /* first handle delegated options */
     hPtr = Tcl_FindHashEntry(&contextIoPtr->objectDelegatedOptions, (char *)
@@ -1865,9 +1884,8 @@ fprintf(stderr, "plain configure not yet implemented\n");
 	    }
 	} else {
 	    if (ItclSetInstanceVar(interp, "itcl_options",
-	            Tcl_GetString(objv[i]),
-	            Tcl_GetString(objv[i+1]), contextIoPtr, ioptPtr->iclsPtr)
-		    == NULL) {
+	            Tcl_GetString(objv[i]), Tcl_GetString(objv[i+1]),
+		    contextIoPtr, ioptPtr->iclsPtr) == NULL) {
 		result = TCL_ERROR;
 fprintf(stderr, "BRK3!%s!\n", Tcl_GetStringResult(interp));
 	        break;
@@ -1908,6 +1926,7 @@ ItclExtendedCget(
     Tcl_Obj *CONST objv[])   /* argument objects */
 {
     Tcl_HashEntry *hPtr;
+    Tcl_HashEntry *hPtr2;
     Tcl_Obj *objPtr2;
     Tcl_Obj *objPtr;
     Tcl_Object oPtr;
@@ -2002,13 +2021,16 @@ ItclExtendedCget(
     /* first handle delegated options */
     hPtr = Tcl_FindHashEntry(&contextIoPtr->objectDelegatedOptions, (char *)
             objv[1]);
+    hPtr2 = NULL;
     if (hPtr == NULL) {
 	objPtr2 = Tcl_NewStringObj("*", -1);
         /* check for "*" option delegated */
         hPtr = Tcl_FindHashEntry(&contextIoPtr->objectDelegatedOptions, (char *)
                 objPtr2);
+        hPtr2 = Tcl_FindHashEntry(&contextIoPtr->objectOptions, (char *)
+                objv[1]);
     }
-    if (hPtr != NULL) {
+    if ((hPtr != NULL) && (hPtr2 == NULL)){
 	/* the option is delegated */
         idoPtr = (ItclDelegatedOption *)Tcl_GetHashValue(hPtr);
 	/* if the option is in the exceptions, do nothing */
@@ -2019,13 +2041,8 @@ ItclExtendedCget(
 	}
         icPtr = idoPtr->icPtr;
 	if (icPtr->ivPtr->flags & ITCL_COMMON) {
-	    Tcl_Obj *objPtr2;
-	    objPtr2 = Tcl_NewStringObj(ITCL_VARIABLES_NAMESPACE, -1);
-	    Tcl_AppendToObj(objPtr2,
-	            Tcl_GetString(icPtr->ivPtr->iclsPtr->fullNamePtr), -1);
-	    Tcl_AppendToObj(objPtr2, "::", -1);
-	    Tcl_AppendToObj(objPtr2, Tcl_GetString(icPtr->namePtr), -1);
-	    val = Tcl_GetVar2(interp, Tcl_GetString(objPtr2), NULL, 0);
+            val = ItclGetInstanceVar(interp, Tcl_GetString(icPtr->namePtr),
+                    NULL, contextIoPtr, icPtr->ivPtr->iclsPtr);
 	} else {
             val = ItclGetInstanceVar(interp, Tcl_GetString(icPtr->namePtr),
                     NULL, contextIoPtr, icPtr->ivPtr->iclsPtr);
@@ -2077,12 +2094,11 @@ ItclExtendedCget(
     }
 
     /* now look if it is an option at all */
-    hPtr = Tcl_FindHashEntry(&contextIoPtr->objectOptions, (char *) objv[1]);
-    if (hPtr == NULL) {
+    if (hPtr2 == NULL) {
 	/* no option at all, let the normal configure do the job */
 	return TCL_CONTINUE;
     }
-    ioptPtr = (ItclOption *)Tcl_GetHashValue(hPtr);
+    ioptPtr = (ItclOption *)Tcl_GetHashValue(hPtr2);
     result = TCL_CONTINUE;
     if (ioptPtr->cgetMethodPtr != NULL) {
         newObjv = (Tcl_Obj **)ckalloc(sizeof(Tcl_Obj *)*2);

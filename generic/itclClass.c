@@ -25,7 +25,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann Copyright (c) 2007
  *
- *     RCS:  $Id: itclClass.c,v 1.1.2.33 2008/11/12 21:31:19 wiede Exp $
+ *     RCS:  $Id: itclClass.c,v 1.1.2.34 2008/11/13 19:58:33 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -554,23 +554,15 @@ Itcl_CreateClass(
         hPtr = Tcl_CreateHashEntry(&iclsPtr->variables, (char *)namePtr,
 	        &newEntry);
         Tcl_SetHashValue(hPtr, (ClientData)ivPtr);
-#ifdef NOTDEF
-        /* create the options variable */
-fprintf(stderr, "itcl_options1\n");
-        namePtr = Tcl_NewStringObj("itcl_options", -1);
-        Tcl_IncrRefCount(namePtr);
-        if (Itcl_CreateVariable(interp, iclsPtr, namePtr, NULL, NULL,
-                &ivPtr) != TCL_OK) {
-            return TCL_ERROR;
-        }
-#endif
     }
     if (infoPtr->currClassFlags & (ITCL_WIDGET|ITCL_WIDGETADAPTOR)) {
         /* create the itcl_hull component */
         ItclComponent *icPtr;
         namePtr = Tcl_NewStringObj("itcl_hull", 9);
         Tcl_IncrRefCount(namePtr);
-        if (ItclCreateComponent(interp, iclsPtr, namePtr, ITCL_COMMON, &icPtr) != TCL_OK) {
+	/* itcl_hull must not be an ITCL_COMMON!! */
+        if (ItclCreateComponent(interp, iclsPtr, namePtr, 0, &icPtr) !=
+	        TCL_OK) {
             return TCL_ERROR;
         }
     }

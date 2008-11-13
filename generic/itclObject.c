@@ -24,7 +24,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann Copyright (c) 2007
  *
- *     RCS:  $Id: itclObject.c,v 1.1.2.48 2008/11/13 00:09:29 wiede Exp $
+ *     RCS:  $Id: itclObject.c,v 1.1.2.49 2008/11/13 19:58:33 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -1563,11 +1563,16 @@ ItclGetInstanceVar(
     ItclObject *contextIoPtr,  /* current object */
     ItclClass *contextIclsPtr) /* name is interpreted in this scope */
 {
+    Tcl_HashEntry *hPtr;
     Tcl_CallFrame frame;
     Tcl_CallFrame *framePtr;
     Tcl_Namespace *nsPtr;
     Tcl_DString buffer;
-    CONST char *val;
+    ItclClass *iclsPtr;
+    ItclVariable *ivPtr;
+    ItclVarLookup *vlookup;
+    const char *val;
+    int isItclOptions;
     int doAppend;
 
     /*
@@ -1582,17 +1587,45 @@ ItclGetInstanceVar(
         return NULL;
     }
 
+    /* get the variable definition to check if that is an ITCL_COMMON */
+    if (contextIclsPtr == NULL) {
+        iclsPtr = contextIoPtr->iclsPtr;
+    } else {
+        iclsPtr = contextIclsPtr;
+    }
+    hPtr = Tcl_FindHashEntry(&iclsPtr->resolveVars, (char *)name1);
+    if (hPtr != NULL) {
+        vlookup = Tcl_GetHashValue(hPtr);
+        ivPtr = vlookup->ivPtr;
+    } else {
+/*
+fprintf(stderr, "ItclSetInstanceVar cannot get ivPtr!%s!%s!\n", iclsPtr->nsPtr->fullName, name1);
+*/
+    }
     /*
      *  Install the object context and access the data member
      *  like any other variable.
      */
+    isItclOptions = 0;
+    if (strcmp(name1, "itcl_options") == 0) {
+        isItclOptions = 1;
+    }
     Tcl_DStringInit(&buffer);
     Tcl_DStringAppend(&buffer, Tcl_GetString(contextIoPtr->varNsNamePtr), -1);
     doAppend = 1;
     if ((contextIclsPtr == NULL) || (contextIclsPtr->flags &
-            (ITCL_ECLASS|ITCL_TYPE|ITCL_WIDGETADAPTOR))) {
-        if (strcmp(name1, "itcl_options") == 0) {
+            (ITCL_ECLASS|ITCL_TYPE|ITCL_WIDGET|ITCL_WIDGETADAPTOR))) {
+        if (isItclOptions) {
 	    doAppend = 0;
+        }
+    }
+    if (ivPtr->flags & ITCL_COMMON) {
+	if (!isItclOptions) {
+            Tcl_DStringSetLength(&buffer, 0);
+	    if (ivPtr->protection != ITCL_PUBLIC) {
+	        Tcl_DStringAppend(&buffer, ITCL_VARIABLES_NAMESPACE, -1);
+	    }
+	    doAppend = 1;
         }
     }
     if (doAppend) {
@@ -1607,6 +1640,7 @@ ItclGetInstanceVar(
 	Itcl_PushCallFrame(interp, framePtr, nsPtr, /*isProcCallFrame*/0);
         val = Tcl_GetVar2(interp, (const char *)name1, (char*)name2,
 	        TCL_LEAVE_ERR_MSG);
+// fprintf(stderr, "GETINSTV!%s!%s!%s!%s!\n", nsPtr->fullName, name1, name2 == NULL ? "(nil)" : name2, val == NULL ? "(nil)" : val);
         Itcl_PopCallFrame(interp);
     }
 
@@ -1730,13 +1764,19 @@ ItclSetInstanceVar(
     ItclObject *contextIoPtr,  /* current object */
     ItclClass *contextIclsPtr) /* name is interpreted in this scope */
 {
+    Tcl_HashEntry *hPtr;
     Tcl_CallFrame frame;
     Tcl_CallFrame *framePtr;
     Tcl_Namespace *nsPtr;
     Tcl_DString buffer;
-    CONST char *val;
+    ItclVariable *ivPtr;
+    ItclVarLookup *vlookup;
+    ItclClass *iclsPtr;
+    const char *val;
+    int isItclOptions;
     int doAppend;
 
+    ivPtr = NULL;
     /*
      *  Make sure that the current namespace context includes an
      *  object that is being manipulated.
@@ -1748,18 +1788,49 @@ ItclSetInstanceVar(
             (char*)NULL);
         return NULL;
     }
+// fprintf(stderr, "SETINSTV!%s!%s!%s!\n", Tcl_GetString(contextIoPtr->namePtr), name1, name2 == NULL ? "(nil)" : name2);
 
+    /* get the variable definition to check if that is an ITCL_COMMON */
+    if (contextIclsPtr == NULL) {
+        iclsPtr = contextIoPtr->iclsPtr;
+    } else {
+        iclsPtr = contextIclsPtr;
+    }
+    hPtr = Tcl_FindHashEntry(&iclsPtr->resolveVars, (char *)name1);
+    if (hPtr != NULL) {
+        vlookup = Tcl_GetHashValue(hPtr);
+        ivPtr = vlookup->ivPtr;
+    } else {
+/*
+fprintf(stderr, "ItclSetInstanceVar cannot get ivPtr!%s!%s!\n", iclsPtr->nsPtr->fullName, name1);
+*/
+        return NULL;
+    }
     /*
      *  Install the object context and access the data member
      *  like any other variable.
      */
+    isItclOptions = 0;
+    if (strcmp(name1, "itcl_options") == 0) {
+        isItclOptions = 1;
+    }
     Tcl_DStringInit(&buffer);
     Tcl_DStringAppend(&buffer, Tcl_GetString(contextIoPtr->varNsNamePtr), -1);
     doAppend = 1;
     if ((contextIclsPtr == NULL) ||
-            (contextIclsPtr->flags & (ITCL_ECLASS|ITCL_WIDGET|ITCL_TYPE|ITCL_WIDGETADAPTOR))) {
-        if (strcmp(name1, "itcl_options") == 0) {
+            (contextIclsPtr->flags & (ITCL_ECLASS|ITCL_TYPE|
+	    ITCL_WIDGET|ITCL_WIDGETADAPTOR))) {
+        if (isItclOptions) {
 	    doAppend = 0;
+        }
+    }
+    if (ivPtr->flags & ITCL_COMMON) {
+	if (!isItclOptions) {
+            Tcl_DStringSetLength(&buffer, 0);
+	    if (ivPtr->protection != ITCL_PUBLIC) {
+	        Tcl_DStringAppend(&buffer, ITCL_VARIABLES_NAMESPACE, -1);
+	    }
+	    doAppend = 1;
         }
     }
     if (doAppend) {
@@ -1771,6 +1842,7 @@ ItclSetInstanceVar(
     val = NULL;
     if (nsPtr != NULL) {
 	framePtr = &frame;
+// fprintf(stderr, "SETINSTV2!%s!%s!%s!%s!\n", name1, name2 == NULL ? "(nil)" : name2, nsPtr->fullName, value);
 	Itcl_PushCallFrame(interp, framePtr, nsPtr, /*isProcCallFrame*/0);
         val = Tcl_SetVar2(interp, (const char *)name1, (char*)name2,
 	        value, TCL_LEAVE_ERR_MSG);

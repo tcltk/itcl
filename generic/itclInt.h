@@ -9,7 +9,7 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itclInt.h,v 1.17.2.47 2008/11/12 21:31:19 wiede Exp $
+ * RCS: @(#) $Id: itclInt.h,v 1.17.2.48 2008/11/13 19:58:33 wiede Exp $
  */
 
 #include <string.h>
@@ -117,8 +117,6 @@ typedef struct ItclWidgetInfo {
     HullAndOptionsInst hullAndOptsInst;
     DelegationInst delegationInst;
     ComponentInst componentInst;
-    Tcl_ObjCmdProc *widgetConfigure;
-    Tcl_ObjCmdProc *widgetCget;
 } ItclWidgetInfo;
 
 typedef struct ItclObjectInfo {

@@ -20,7 +20,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itclResolve.c,v 1.1.2.20 2008/11/12 21:31:19 wiede Exp $
+ *     RCS:  $Id: itclResolve.c,v 1.1.2.21 2008/11/13 19:58:33 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -590,6 +590,9 @@ ItclClassRuntimeVarResolver(
     if ((vlookup->ivPtr->flags & ITCL_COMMON) != 0) {
 	hPtr = Tcl_FindHashEntry(&vlookup->ivPtr->iclsPtr->classCommons,
 	        (char *)vlookup->ivPtr);
+if (strcmp(Tcl_GetString(vlookup->ivPtr->namePtr), "itcl_hull") == 0) {
+hPtr = NULL;
+}
 	if (hPtr != NULL) {
 #ifdef VAR_DEBUG
   fprintf(stderr, "CRVAR!%s!%s!ret1!%d!\n", Tcl_GetCurrentNamespace(interp)->fullName, Tcl_GetString(vlookup->ivPtr->namePtr), vlookup->ivPtr->protection);

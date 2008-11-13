@@ -39,7 +39,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclParse.c,v 1.1.2.41 2008/11/12 21:31:19 wiede Exp $
+ *     RCS:  $Id: itclParse.c,v 1.1.2.42 2008/11/13 19:58:33 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -872,7 +872,7 @@ ItclCheckForInitializedComponents(
 	                    Tcl_GetString(idmPtr->icPtr->ivPtr->namePtr),
 		            NULL, 0);
 		}
-		if ((ioPtr != NULL) && (strlen(val) == 0)) {
+		if ((ioPtr != NULL) && ((val != NULL) && (strlen(val) == 0))) {
 		    val = ItclGetInstanceVar(
 			    ioPtr->iclsPtr->interp,
 			    "itcl_hull", NULL, ioPtr,
