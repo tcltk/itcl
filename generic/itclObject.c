@@ -24,7 +24,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann Copyright (c) 2007
  *
- *     RCS:  $Id: itclObject.c,v 1.1.2.47 2008/11/12 21:31:19 wiede Exp $
+ *     RCS:  $Id: itclObject.c,v 1.1.2.48 2008/11/13 00:09:29 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -966,7 +966,6 @@ ItclInitObjectOptions(
 	    hPtr2 = Tcl_CreateHashEntry(&ioPtr->objectOptions,
 	            (char *)ioptPtr->namePtr, &isNew);
 	    if (isNew) {
-fprintf(stderr, "ItclInitObjectOptions!%s!\n", Tcl_GetString(ioptPtr->namePtr));
 		Tcl_SetHashValue(hPtr2, ioptPtr);
                 itclOptionsName = Tcl_GetString(ioptPtr->namePtr);
                 Tcl_DStringInit(&buffer);
@@ -2451,10 +2450,12 @@ ItclObjectCmd(
         Tcl_IncrRefCount(newObjv[0]);
         Tcl_IncrRefCount(newObjv[1]);
         memcpy(newObjv+incr+1, objv+1, (sizeof(Tcl_Obj*)*(objc-1)));
-        Itcl_NRAddCallback(interp, CallPublicObjectCmd, oPtr, clsPtr, INT2PTR(objc+incr), newObjv);
+        Itcl_NRAddCallback(interp, CallPublicObjectCmd, oPtr, clsPtr,
+	        INT2PTR(objc+incr), newObjv);
 
     } else {
-        Itcl_NRAddCallback(interp, CallPublicObjectCmd, oPtr, clsPtr, INT2PTR(objc), (ClientData)objv);
+        Itcl_NRAddCallback(interp, CallPublicObjectCmd, oPtr, clsPtr,
+	        INT2PTR(objc), (ClientData)objv);
     }
 
     result = Itcl_NRRunCallbacks(interp, callbackPtr);

@@ -24,7 +24,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclBuiltin.c,v 1.1.2.41 2008/11/12 21:31:19 wiede Exp $
+ *     RCS:  $Id: itclBuiltin.c,v 1.1.2.42 2008/11/13 00:09:29 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -2056,7 +2056,7 @@ ItclExtendedCget(
                         infoPtr->object_meta_type);
 	        infoPtr->currContextIclsPtr = ioPtr->iclsPtr;
 	    }
-	    ItclShowArgs(0, "ExtendedCget delegated option", objc+1, newObjv);
+	    ItclShowArgs(1, "ExtendedCget delegated option", objc+1, newObjv);
             result = Tcl_EvalObjv(interp, objc+1, newObjv, TCL_EVAL_DIRECT);
 	    Tcl_DecrRefCount(newObjv[0]);
 	    Tcl_DecrRefCount(newObjv[1]);
@@ -2250,12 +2250,21 @@ Itcl_BiInstallComponentCmd(
     int objc,                /* number of arguments */
     Tcl_Obj *CONST objv[])   /* argument objects */
 {
-    Tcl_HashEntry *hPtr;
-    char *token;
-
+    FOREACH_HASH_DECLS;
+    Tcl_Obj ** newObjv;
     ItclClass *contextIclsPtr;
     ItclObject *contextIoPtr;
+    ItclDelegatedOption *idoPtr;
+    ItclComponent *icPtr;
+    const char *usageStr;
+    const char *componentName;
+    const char *componentValue;
+    char *token;
+    int numOpts;
+    int result;
 
+
+    ItclShowArgs(1, "Itcl_BiInstallComponentCmd", objc, objv);
     /*
      *  Make sure that this command is being invoked in the proper
      *  context.
@@ -2296,20 +2305,61 @@ Itcl_BiInstallComponentCmd(
     }
     hPtr = Tcl_FindHashEntry(&contextIclsPtr->components, (char *)objv[1]);
     if (hPtr == NULL) {
+	numOpts = 0;
+	FOREACH_HASH_VALUE(idoPtr, &contextIoPtr->objectDelegatedOptions) {
+	    numOpts++;
+	}
+	if (numOpts == 0) {
+	    /* there are no delegated options, so no problem that the
+	     * component does not exist. We have nothing to do */
+	    return TCL_OK;
+	}
 	Tcl_AppendResult(interp, "class \"",
 	        Tcl_GetString(contextIclsPtr->namePtr),
 	        "\" has no component \"",
 		Tcl_GetString(objv[1]), "\"", NULL);
         return TCL_ERROR;
     }
-    if (contextIclsPtr->infoPtr->windgetInfoPtr != NULL) {
-        if (contextIclsPtr->infoPtr->windgetInfoPtr->componentInst != NULL) {
-            if (contextIclsPtr->infoPtr->windgetInfoPtr->componentInst(
-	            interp, contextIoPtr, contextIclsPtr,
-		    objc, objv) != TCL_OK) {
-	        return TCL_ERROR;
+    icPtr = Tcl_GetHashValue(hPtr);
+    if (contextIclsPtr->flags & ITCL_TYPE) {
+        usageStr = "usage: installcomponent <componentName> using <widgetType> <widgetPath> ?-option value ...?";
+        if (objc < 4) {
+            Tcl_AppendResult(interp, usageStr, NULL);
+	    return TCL_ERROR;
+        }
+        if (strcmp(Tcl_GetString(objv[2]), "using") != 0) {
+            Tcl_AppendResult(interp, usageStr, NULL);
+	    return TCL_ERROR;
+        }
+        componentName = Tcl_GetString(objv[1]);
+        /* as it is no widget, we don't need to check for delegated option */
+        newObjv = (Tcl_Obj **)ckalloc(sizeof(Tcl_Obj *) * (objc - 3));
+        memcpy(newObjv, objv + 3, sizeof(Tcl_Obj *) * ((objc - 3)));
+        ItclShowArgs(1, "BiInstallComponent", objc - 3, newObjv);
+        result = Tcl_EvalObjv(interp, objc - 3, newObjv, 0);
+        if (result != TCL_OK) {
+            return result;
+        }
+        componentValue = Tcl_GetStringResult(interp);
+        Tcl_Obj *objPtr;
+        objPtr = Tcl_NewStringObj(ITCL_VARIABLES_NAMESPACE, -1);
+        Tcl_AppendToObj(objPtr, Tcl_GetString(contextIclsPtr->fullNamePtr), -1);
+        Tcl_AppendToObj(objPtr, "::", -1);
+        Tcl_AppendToObj(objPtr, componentName, -1);
+
+        Tcl_SetVar2(interp, Tcl_GetString(objPtr), NULL, componentValue, 0);
+
+    } else {
+        if (contextIclsPtr->infoPtr->windgetInfoPtr != NULL) {
+            if (contextIclsPtr->infoPtr->windgetInfoPtr->componentInst !=
+	            NULL) {
+                if (contextIclsPtr->infoPtr->windgetInfoPtr->componentInst(
+	                interp, contextIoPtr, contextIclsPtr,
+		        objc, objv) != TCL_OK) {
+	            return TCL_ERROR;
+	        }
 	    }
-	}
+        }
     }
     return TCL_OK;
 }
