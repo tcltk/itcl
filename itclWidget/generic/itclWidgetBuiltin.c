@@ -12,7 +12,7 @@
  * ========================================================================
  *  Author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclWidgetBuiltin.c,v 1.1.2.4 2008/11/12 21:31:42 wiede Exp $
+ *     RCS:  $Id: itclWidgetBuiltin.c,v 1.1.2.5 2008/11/13 00:06:55 wiede Exp $
  * ========================================================================
  *           Copyright (c) 2007 Arnulf Wiedemann
  * ------------------------------------------------------------------------
@@ -346,16 +346,21 @@ Tcl_ResetResult(interp);
         return TCL_ERROR;
     }
     ivPtr =Tcl_GetHashValue(hPtr);
-    hPtr = Tcl_FindHashEntry(&contextIoPtr->objectVariables, (char *)ivPtr);
-    varPtr = Tcl_GetHashValue(hPtr);
-    val = ItclSetInstanceVar(interp, "itcl_hull", NULL,
-            Tcl_DStringValue(&buffer), contextIoPtr, contextIoPtr->iclsPtr);
-    if (val == NULL) {
-        Tcl_AppendResult(interp, "cannot set itcl_hull for object \"",
-            Tcl_GetString(contextIoPtr->namePtr), "\"", NULL);
-        Tcl_DStringFree(&buffer);
-        return TCL_ERROR;
+    if (ivPtr->initted <= 1) {
+        ivPtr->initted = 0;
+        hPtr = Tcl_FindHashEntry(&contextIoPtr->objectVariables, (char *)ivPtr);
+        varPtr = Tcl_GetHashValue(hPtr);
+        val = ItclSetInstanceVar(interp, "itcl_hull", NULL,
+                Tcl_DStringValue(&buffer), contextIoPtr, contextIoPtr->iclsPtr);
+        ivPtr->initted = 2;
+        if (val == NULL) {
+            Tcl_AppendResult(interp, "cannot set itcl_hull for object \"",
+                Tcl_GetString(contextIoPtr->namePtr), "\"", NULL);
+            Tcl_DStringFree(&buffer);
+            return TCL_ERROR;
+        }
     }
+#ifdef NOTDEF
     /* now set the write trace on the itcl_hull variable */
     Tcl_DStringInit(&buffer);
     Tcl_DStringAppend(&buffer, Tcl_GetString(contextIoPtr->varNsNamePtr), -1);
@@ -365,5 +370,6 @@ Tcl_ResetResult(interp);
     Tcl_TraceVar2(interp, Tcl_DStringValue(&buffer), NULL,
              TCL_TRACE_WRITES, ItclTraceHullVar, contextIoPtr);
     Tcl_DStringFree(&buffer);
+#endif
     return result;
 }
