@@ -11,7 +11,7 @@
  * ========================================================================
  *  Author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclWidgetObject.c,v 1.1.2.6 2008/11/13 00:06:55 wiede Exp $
+ *     RCS:  $Id: itclWidgetObject.c,v 1.1.2.7 2008/11/13 19:56:13 wiede Exp $
  * ========================================================================
  *           Copyright (c) 2007 Arnulf Wiedemann
  * ------------------------------------------------------------------------
@@ -110,16 +110,6 @@ HullAndOptionsInstall(
     int i;
 
     ItclShowArgs(1, "HullAndOptionsInstall", objc, objv);
-#ifdef NOTDEF
-// options are initialized in Itcl_BiInstallHullCmd!!
-    FOREACH_HASH_VALUE(ioptPtr, &iclsPtr->options) {
-	if (ioptPtr->defaultValuePtr != NULL) {
-	    ItclSetInstanceVar(interp, "itcl_options",
-	            Tcl_GetString(ioptPtr->namePtr),
-		    Tcl_GetString(ioptPtr->defaultValuePtr), ioPtr, iclsPtr);
-	}
-    }
-#endif
     widgetClassPtr = iclsPtr->widgetClassPtr;
     foundWclass = 0;
     iclsPtr->infoPtr->buildingWidget = 1;
@@ -215,7 +205,9 @@ InstallComponent(
     Tk_Window tkMainWin;
     Tk_Window tkWin;
     Tcl_Obj ** newObjv;
+    Tcl_Obj *objPtr;
     ItclDelegatedOption *idoPtr;
+    ItclDelegatedOption *starOptionPtr;
     const char *componentName;
     const char *componentValue;
     const char *usageStr;
@@ -223,6 +215,11 @@ InstallComponent(
     const char *widgetType;
     const char *widgetPath;
     const char *val;
+    const char **argv;
+    const char **argv2;
+    int numUsedOpts;
+    int argc;
+    int argc2;
     int i;
     int j;
     int startIdx;
@@ -230,6 +227,9 @@ InstallComponent(
     int numOpts;
     int result;
 
+    newObjv = NULL;
+    starOptionPtr = NULL;
+    numUsedOpts = 0;
     ItclShowArgs(1, "InstallComponent", objc, objv);
     usageStr = "usage: installcomponent <componentName> using <widgetType> <widgetPath> ?-option value ...?";
     if (objc < 5) {
@@ -256,6 +256,7 @@ InstallComponent(
     FOREACH_HASH_VALUE(idoPtr, &ioPtr->objectDelegatedOptions) {
 	if (strcmp(Tcl_GetString(idoPtr->namePtr), "*") == 0) {
 	    starOption = 1;
+	    starOptionPtr = idoPtr;
 	} else {
             numOpts++;
         }
@@ -270,12 +271,6 @@ InstallComponent(
     }
     startIdx = 3;
     if (starOption) {
-        Tcl_Obj *objPtr;
-	const char **argv;
-	const char **argv2;
-	int numUsedOpts;
-	int argc;
-	int argc2;
 
 	objPtr = Tcl_NewStringObj(widgetType, -1);
 	Tcl_IncrRefCount(objPtr);
@@ -292,11 +287,6 @@ InstallComponent(
 	objPtr = Tcl_NewStringObj(widgetPath, -1);
 	Tcl_AppendToObj(objPtr, " configure", -1);
         result = Tcl_EvalObjEx(interp, objPtr, 0);
-	if (result != TCL_OK) {
-	    /* seems to be no widget so do nothing */
-	    Tcl_ResetResult(interp);
-	    return TCL_OK;
-	}
 	startIdx = 5;
         Tcl_SplitList(interp, Tcl_GetStringResult(interp), &argc, &argv);
         newObjv = (Tcl_Obj **)ckalloc(sizeof(Tcl_Obj *) *
@@ -314,21 +304,36 @@ InstallComponent(
 	numUsedOpts = 0;
 	for (numOpts = 0; numOpts < argc; numOpts++) {
             Tcl_SplitList(interp, argv[numOpts], &argc2, &argv2);
-            if (argc > 2) {
+            if (argc2 > 2) {
+		Tcl_Obj *objPtr;
+
 	        val = Tk_GetOption(tkWin, argv2[1], argv2[2]);
 	        if (val != NULL) {
-		    if (strcmp(val, argv2[3]) != 0) {
-			numUsedOpts++;
-                        newObjv[i] = Tcl_NewStringObj(argv2[0], -1);
-	                Tcl_IncrRefCount(newObjv[i]);
-	                i++;
-                        newObjv[i] = Tcl_NewStringObj(val, -1);
-	                Tcl_IncrRefCount(newObjv[i]);
-	                i++;
+		    objPtr = Tcl_NewStringObj(argv2[0], -1);
+		    hPtr = Tcl_FindHashEntry(&ioPtr->objectOptions,
+		            (char *)objPtr);
+		    if(hPtr == NULL) {
+			if (starOptionPtr != NULL) {
+		            hPtr = Tcl_FindHashEntry(&starOptionPtr->exceptions,
+		                    (char *)objPtr);
+			}
+		    }
+		    if(hPtr == NULL) {
+		        if (strcmp(val, argv2[3]) != 0) {
+			    numUsedOpts++;
+                            newObjv[i] = Tcl_NewStringObj(argv2[0], -1);
+	                    Tcl_IncrRefCount(newObjv[i]);
+	                    i++;
+                            newObjv[i] = Tcl_NewStringObj(val, -1);
+	                    Tcl_IncrRefCount(newObjv[i]);
+	                    i++;
+		        }
 		    }
 		}
 	    }
+	    ckfree((char *)argv2);
 	}
+	ckfree((char *)argv);
         for ( ;j < objc; j++) {
             newObjv[i] = objv[j];
             i++;
@@ -365,7 +370,7 @@ InstallComponent(
                 newObjv[i] = Tcl_NewStringObj(val, -1);
 	        Tcl_IncrRefCount(newObjv[i]);
 	        i++;
-                
+                numUsedOpts++;
             }
         }
         for ( ;j < objc; j++) {
@@ -373,25 +378,29 @@ InstallComponent(
             i++;
         }
     }
-    ItclShowArgs(1, "InstallComponent", objc - startIdx + (numOpts * 2),
+    if (numUsedOpts > 0) {
+    ItclShowArgs(1, "InstallComponent EVAL", objc - startIdx + (numOpts * 2),
             newObjv);
     result = Tcl_EvalObjv(interp, objc - startIdx + (numOpts * 2), newObjv, 0);
     ckfree((char *)newObjv);
     if (result != TCL_OK) {
         return result;
     }
+    }
     if (starOption) {
         componentValue = widgetPath;
     } else {
         componentValue = Tcl_GetStringResult(interp);
     }
-    Tcl_Obj *objPtr;
+    /* FIXME need something like ItclSetInstanceCommonVar here */
     objPtr = Tcl_NewStringObj(ITCL_VARIABLES_NAMESPACE, -1);
     Tcl_AppendToObj(objPtr, Tcl_GetString(iclsPtr->fullNamePtr), -1);
     Tcl_AppendToObj(objPtr, "::", -1);
     Tcl_AppendToObj(objPtr, componentName, -1);
-
     Tcl_SetVar2(interp, Tcl_GetString(objPtr), NULL, componentValue, 0);
-//    ItclSetInstanceVar(interp, componentName, NULL, componentValue, ioPtr, iclsPtr);
+
+//fprintf(stderr, "SET!%s!%s!\n", componentName, componentValue);
+//    ItclSetInstanceVar(interp, componentName, NULL, componentValue,
+//            ioPtr, iclsPtr);
     return TCL_OK;
 }

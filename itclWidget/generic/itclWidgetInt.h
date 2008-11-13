@@ -9,7 +9,7 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itclWidgetInt.h,v 1.1.2.2 2008/11/11 11:37:36 wiede Exp $
+ * RCS: @(#) $Id: itclWidgetInt.h,v 1.1.2.3 2008/11/13 19:56:13 wiede Exp $
  */
 
 #include <string.h>
@@ -17,6 +17,8 @@
 #include <tcl.h>
 #include <tclOO.h>
 #include "itclInt.h"
+
+#define ITCL_WIDGETS_NAMESPACE "::itcl::internal::widgets"
 
 MODULE_SCOPE int HullAndOptionsInstall(Tcl_Interp *interp, ItclObject *ioPtr,
         ItclClass *iclsPtr, int objc, Tcl_Obj * const objv[],

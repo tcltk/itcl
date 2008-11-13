@@ -12,7 +12,7 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itclWidgetBase.c,v 1.1.2.3 2008/11/11 11:37:36 wiede Exp $
+ * RCS: @(#) $Id: itclWidgetBase.c,v 1.1.2.4 2008/11/13 19:56:13 wiede Exp $
  */
 
 #include <stdlib.h>
@@ -56,9 +56,10 @@ Initialize (
     if (nsPtr == NULL) {
         Tcl_Panic("Itcl: cannot create namespace: \"%s\" \n", "::itcl::widget");
     }
-    nsPtr = Tcl_CreateNamespace(interp, "::itcl::widget::internal", NULL, NULL);
+    nsPtr = Tcl_CreateNamespace(interp, ITCL_WIDGETS_NAMESPACE, NULL, NULL);
     if (nsPtr == NULL) {
-        Tcl_Panic("Itcl: cannot create namespace: \"%s\" \n", "::itcl::widget::internal");
+        Tcl_Panic("Itcl: cannot create namespace: \"%s\" \n",
+	        "::itcl::widget::internal");
     }
 
     Itcl_RenameCommand(interp, "::itcl::type", "::itcl::__type");
@@ -70,10 +71,6 @@ Initialize (
     infoPtr->windgetInfoPtr->hullAndOptsInst = HullAndOptionsInstall;
     infoPtr->windgetInfoPtr->delegationInst = DelegationInstall;
     infoPtr->windgetInfoPtr->componentInst = InstallComponent;
-#ifdef NOTDEF
-    infoPtr->windgetInfoPtr->widgetConfigure = ItclWidgetConfigure;
-    infoPtr->windgetInfoPtr->widgetCget = ItclWidgetCget;
-#endif
     Itcl_WidgetParseInit(interp, infoPtr);
 
     /*
