@@ -76,6 +76,7 @@ interp alias {} type {} ::itcl::type
 
 ::tcltest::loadTestedCommands
 
+if {1} {
 #-----------------------------------------------------------------------
 # Options
 
@@ -223,9 +224,7 @@ test option-1.11 {brackets allowed in option defaults} -body {
     dog destroy
 } -result {[a-z]+}
 
-test option-2.1 {configure returns info, local options only} -constraints {
-    notyet_configure
-} -body {
+test option-2.1 {configure returns info, local options only} -body {
     type dog {
         option -color black
         option -akc 1
@@ -302,49 +301,6 @@ test option-2.4 {configure -unknownopt} -body {
     dog destroy
     papers destroy
 } -result {unknown option "-foo"}
-
-test option-2.5 {configure returns info, unknown options} -constraints {
-    notyet_tk
-} -body {
-    widgetadaptor myframe {
-        option -foo a
-        delegate option -width to hull
-        delegate option * to hull
-        constructor {args} {
-            installhull [frame $self]
-        }
-    }
-
-    myframe .frm
-    set a [.frm configure -foo]
-    set b [.frm configure -width]
-    set c [.frm configure -height]
-    destroy .frm
-    tkbide
-
-    list $a $b $c
-
-} -cleanup {
-    myframe destroy
-} -result {{-foo foo Foo a a} {-width width Width 0 0} {-height height Height 0 0}}
-
-test option-2.6 {configure -opt unknown to implicit component} -constraints {
-    notyet_tk
-} -body {
-    widgetadaptor myframe {
-        delegate option * to hull
-        constructor {args} {
-            installhull [frame $self]
-        }
-    }
-    myframe .frm
-    catch {.frm configure -quux} result
-    destroy .frm
-    tkbide
-    set result
-} -cleanup {
-    myframe destroy
-} -result {unknown option "-quux"}
 
 test option-3.1 {set option resource name explicitly} -body {
     type dog {
@@ -502,60 +458,6 @@ test option-4.6 {delegated option name may not contain spaces} -body {
     error
 } -result {bad option name "-with space", option names must not contain " "}
 
-test option-5.1 {local widget options read from option database} -constraints {
-    notyet_tk
-} -body {
-    widget dog {
-        option -foo a
-        option -bar b
-
-        typeconstructor {
-            option add *Dog.bar bb
-        }
-    }
-
-    dog .fido
-    set a [.fido cget -foo]
-    set b [.fido cget -bar]
-    destroy .fido
-    tkbide
-
-    list $a $b
-
-} -cleanup {
-    dog destroy
-} -result {a bb}
-
-test option-5.2 {local option database values available in constructor} -constraints {
-    notyet_tk
-} -body {
-    widget dog {
-        option -bar b
-        variable saveit
-
-        typeconstructor {
-            option add *Dog.bar bb
-        }
-
-        constructor {args} {
-            set saveit $options(-bar)
-        }
-
-        method getit {} {
-            return $saveit
-        }
-    }
-
-    dog .fido
-    set result [.fido getit]
-    destroy .fido
-    tkbide
-
-    set result
-} -cleanup {
-    dog destroy
-} -result {bb}
-
 test option-6.1 {if no options, no options variable} -body {
     type dog {
         variable dummy
@@ -578,6 +480,137 @@ test option-6.2 {if no options, no options methods} -body {
     dog destroy
 } -result {}
 
+# end
+}
+
+#-----------------------------------------------------------------------
+# option -validatemethod
+
+test validatemethod-1.1 {Validate method is called} -body {
+    type dog {
+        variable flag 0
+
+        option -color \
+            -default black \
+            -validatemethod ValidateColor
+
+        method ValidateColor {option value} {
+            set flag 1
+        }
+
+        method getflag {} {
+            return $flag
+        }
+    }
+
+    dog fido -color brown
+    fido getflag
+} -cleanup {
+    dog destroy
+} -result {1}
+
+if {1} {
+test validatemethod-1.2 {Validate method gets correct arguments} -body {
+    type dog {
+        option -color \
+            -default black \
+            -validatemethod ValidateColor
+
+        method ValidateColor {option value} {
+            if {![string equal $option "-color"] ||
+                ![string equal $value "brown"]} {
+                error "Expected '-color brown'"
+            }
+        }
+    }
+
+    dog fido -color brown
+} -cleanup {
+    dog destroy
+} -result {::fido}
+
+test validatemethod-1.4 {Invalid -validatemethod causes error} -body {
+    type dog {
+        option -foo -default bar -validatemethod bogus
+    }
+
+    dog fido
+    fido configure -foo quux
+} -returnCodes {
+    error
+} -cleanup {
+    dog destroy
+} -result {invalid command name "bogus"}
+
+test validatemethod-1.5 {hierarchical -validatemethod} -body {
+    type dog {
+        option -foo -default bar -validatemethod {Val Opt}
+
+        method {Val Opt} {option value} {
+            error "Dummy"
+        }
+    }
+
+    dog fido -foo value
+} -returnCodes {
+    error
+} -cleanup {
+    dog destroy
+} -result {Dummy}
+
+
+
+#-----------------------------------------------------------------------
+# option -readonly semantics
+
+test optionreadonly-1.1 {Readonly options can be set at creation time} -body {
+    type dog {
+        option -color \
+            -default black \
+            -readonly true
+    }
+
+    dog fido -color brown
+
+    fido cget -color
+} -cleanup {
+    dog destroy
+} -result {brown}
+
+test optionreadonly-1.2 {Readonly options can't be set after creation} -body {
+    type dog {
+        option -color \
+            -default black \
+            -readonly true
+    }
+
+    dog fido
+
+    fido configure -color brown
+} -returnCodes {
+    error
+} -cleanup {
+    dog destroy
+} -result {option -color can only be set at instance creation}
+
+test optionreadonly-1.3 {Readonly options can't be set after creation} -body {
+    type dog {
+        option -color \
+            -default black \
+            -readonly true
+    }
+
+    dog fido -color yellow
+
+    fido configure -color brown
+} -returnCodes {
+    error
+} -cleanup {
+    dog destroy
+} -result {option -color can only be set at instance creation}
+
+# end
+}
 
 
 
