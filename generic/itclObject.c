@@ -24,7 +24,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann Copyright (c) 2007
  *
- *     RCS:  $Id: itclObject.c,v 1.1.2.49 2008/11/13 19:58:33 wiede Exp $
+ *     RCS:  $Id: itclObject.c,v 1.1.2.50 2008/11/14 23:26:59 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -138,7 +138,7 @@ ObjectRenamedTrace(
 int
 ItclCreateObject(
     Tcl_Interp *interp,      /* interpreter mananging new object */
-    CONST char* name,        /* name of new object */
+    const char* name,        /* name of new object */
     ItclClass *iclsPtr,        /* class for new object */
     int objc,                /* number of arguments */
     Tcl_Obj *CONST objv[])   /* argument objects */
@@ -156,10 +156,13 @@ ItclCreateObject(
     ItclObject *ioPtr;
     Itcl_InterpState istate;
     const char *nsName;
+    const char *objName;
+    char unique[256];    /* buffer used for unique part of object names */
     int newObjc;
     int newEntry;
 
     ItclShowArgs(1, "ItclCreateObject", objc, objv);
+    saveCurrIoPtr = NULL;
     if (iclsPtr->flags & (ITCL_TYPE|ITCL_WIDGETADAPTOR)) {
         /* check, if the object already exists and if yes delete it silently */
 	cmdPtr = Tcl_FindCommand(interp, name, NULL, 0);
@@ -233,7 +236,6 @@ ItclCreateObject(
      */
 
     if (ItclInitObjectVariables(interp, ioPtr, iclsPtr, name) != TCL_OK) {
-	Tcl_AppendResult(interp, "error in ItclInitObjectVariables", NULL);
 	result = TCL_ERROR;
         goto errorReturn;
     }
@@ -288,7 +290,38 @@ ItclCreateObject(
             }
         }
     }
-    ioPtr->oPtr = Tcl_NewObjectInstance(interp, iclsPtr->clsPtr, name,
+    objName = name;
+    if (iclsPtr->flags & ITCL_WIDGETADAPTOR) {
+        /* use a temporary name here as widgetadaptors often hijack the
+	 * name for use in installhull. Rename it after the constructor has
+	 * been run to the wanted name
+	 */
+        /*
+         *  Add a unique part, and keep
+         *  incrementing a counter until a valid name is found.
+         */
+        do {
+	    Tcl_CmdInfo dummy;
+
+            sprintf(unique,"%.200s_%d", name, iclsPtr->unique++);
+            unique[0] = tolower(unique[0]);
+
+            Tcl_DStringTrunc(&buffer, 0);
+            Tcl_DStringAppend(&buffer, unique, -1);
+            objName = Tcl_DStringValue(&buffer);
+
+	    /*
+	     * [Fix 227811] Check for any command with the
+	     * given name, not only objects.
+	     */
+
+            if (Tcl_GetCommandInfo (interp, objName, &dummy) == 0) {
+                break;  /* if an error is found, bail out! */
+            }
+        } while (1);
+	ioPtr->createNamePtr = Tcl_NewStringObj(objName, -1);
+    }
+    ioPtr->oPtr = Tcl_NewObjectInstance(interp, iclsPtr->clsPtr, objName,
             iclsPtr->nsPtr->fullName, /* objc */-1, /* objv */NULL,
 	    /* skip */0);
     if (ioPtr->oPtr == NULL) {
@@ -395,6 +428,12 @@ fprintf(stderr, "after Tcl_NewObjectInstance oPtr == NULL\n");
         result = Itcl_RestoreInterpState(interp, istate);
     }
 
+    if (iclsPtr->flags & ITCL_WIDGETADAPTOR) {
+        Itcl_RenameCommand(interp, objName, name);
+        ioPtr->createNamePtr = NULL;
+        Tcl_TraceCommand(interp, Tcl_GetString(ioPtr->namePtr),
+                TCL_TRACE_RENAME|TCL_TRACE_DELETE, ObjectRenamedTrace, ioPtr);
+    }
     if (infoPtr->windgetInfoPtr != NULL) {
         if (iclsPtr->flags & (ITCL_WIDGETADAPTOR)) {
             /* 
@@ -2137,34 +2176,63 @@ static char*
 ItclTraceComponentVar(
     ClientData cdata,	    /* object instance data */
     Tcl_Interp *interp,	    /* interpreter managing this variable */
-    const char *name1,    /* variable name */
-    const char *name2,    /* unused */
+    const char *name1,      /* variable name */
+    const char *name2,      /* unused */
     int flags)		    /* flags indicating read/write */
 {
-    Tcl_HashEntry *hPtr;
-    ItclObject *ioPtr;
-    ItclOption *ioptPtr;
+    FOREACH_HASH_DECLS;
+    Tcl_HashEntry *hPtr2;
     Tcl_Obj *objPtr;
+    Tcl_Obj *namePtr;
+    Tcl_Obj *componentValuePtr;
+    ItclObject *ioPtr;
+    ItclComponent *icPtr;
+    ItclDelegatedFunction *idmPtr;
+    const char *val;
 
-/* FIXME !!! */
 /* FIXME should free memory on unset or rename!! */
     if (cdata != NULL) {
         ioPtr = (ItclObject*)cdata;
         objPtr = Tcl_NewStringObj(name1, -1);
 	hPtr = Tcl_FindHashEntry(&ioPtr->objectComponents, (char *)objPtr);
-        /* FIXME need to redo the delegation for this component !! */
-/*
-fprintf(stderr, "COMPTRACE!%s!%p!\n", name1, hPtr);
-*/
+
+
         /*
          *  Handle write traces
          */
         if ((flags & TCL_TRACE_WRITES) != 0) {
+            /* need to redo the delegation for this component !! */
+            if (hPtr == NULL) {
+                return " INTERNAL ERROR cannot get component to write to";
+            }
+            icPtr = Tcl_GetHashValue(hPtr);
+	    val = ItclGetInstanceVar(interp, name1, NULL, ioPtr,
+                    ioPtr->iclsPtr);
+	    componentValuePtr = Tcl_NewStringObj(val, -1);
+            Tcl_IncrRefCount(componentValuePtr);
+	    namePtr = Tcl_NewStringObj(name1, -1);
+            FOREACH_HASH_VALUE(idmPtr, &ioPtr->iclsPtr->delegatedFunctions) {
+                if (idmPtr->icPtr == icPtr) {
+		    hPtr2 = Tcl_FindHashEntry(&idmPtr->exceptions,
+		            (char *)namePtr);
+                    if (hPtr2 == NULL) {
+                        DelegateFunction(interp, ioPtr, ioPtr->iclsPtr,
+                                  componentValuePtr, idmPtr);
+		     }
+	        }
+	    }
+	    Tcl_DecrRefCount(componentValuePtr);
+	    Tcl_DecrRefCount(namePtr);
             return NULL;
+        }
+        /*
+         *  Handle read traces
+         */
+        if ((flags & TCL_TRACE_READS) != 0) {
         }
 
     } else {
-        ioptPtr = (ItclOption*)cdata;
+        icPtr = (ItclComponent *)cdata;
         /*
          *  Handle read traces 
          */

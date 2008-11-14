@@ -9,7 +9,7 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itclInt.h,v 1.17.2.48 2008/11/13 19:58:33 wiede Exp $
+ * RCS: @(#) $Id: itclInt.h,v 1.17.2.49 2008/11/14 23:26:59 wiede Exp $
  */
 
 #include <string.h>
@@ -163,6 +163,9 @@ typedef struct ItclObjectInfo {
                                      * for use in mytypemethod etc. */
     struct ItclDelegatedOption *currIdoPtr;
                                     /* the current delegated option info */
+    int inOptionHandling;           /* used to indicate for type/widget ...
+                                     * that there is an option processing
+				     * and methods are allowed to be called */
 } ItclObjectInfo;
 
 typedef struct EnsembleInfo {
@@ -300,6 +303,10 @@ typedef struct ItclObject {
     Tcl_HashTable contextCache;   /* cache for function contexts */
     Tcl_Obj *namePtr;
     Tcl_Obj *origNamePtr;         /* the original name before any rename */
+    Tcl_Obj *createNamePtr;       /* the temp name before any rename
+                                   * mostly used for widgetadaptor
+				   * because that hijackes the name
+				   * often when installing the hull */
     Tcl_Obj *varNsNamePtr;
     Tcl_Object oPtr;             /* the TclOO object */
     Tcl_Resolve *resolvePtr;
@@ -307,6 +314,8 @@ typedef struct ItclObject {
     int callRefCount;             /* prevent deleting of object if refcount > 1 */
     Tcl_Obj *hullWindowNamePtr;   /* the window path name for the hull
                                    * (before renaming in installhull) */
+    int destructorHasBeenCalled;  /* is set when the destructor is called
+                                   * to avoid callin destructor twice */
 } ItclObject;
 
 #define ITCL_OBJECT_IS_DELETED           0x01

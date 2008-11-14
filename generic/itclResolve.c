@@ -20,7 +20,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itclResolve.c,v 1.1.2.21 2008/11/13 19:58:33 wiede Exp $
+ *     RCS:  $Id: itclResolve.c,v 1.1.2.22 2008/11/14 23:26:59 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -28,49 +28,6 @@
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  */
 #include "itclInt.h"
-
-#ifdef NOTDEF
-struct Tcl_ResolvedVarInfo;
-
-typedef Tcl_Var (Tcl_ResolveRuntimeVarProc)(Tcl_Interp *interp,
-	struct Tcl_ResolvedVarInfo *vinfoPtr);
-
-typedef void (Tcl_ResolveVarDeleteProc)(struct Tcl_ResolvedVarInfo *vinfoPtr);
-
-/*
- * The following structure encapsulates the routines needed to resolve a
- * variable reference at runtime. Any variable specific state will typically
- * be appended to this structure.
- */
-
-typedef struct Tcl_ResolvedVarInfo {
-    Tcl_ResolveRuntimeVarProc *fetchProc;
-    Tcl_ResolveVarDeleteProc *deleteProc;
-} Tcl_ResolvedVarInfo;
-
-typedef int (Tcl_ResolveCompiledVarProc) (Tcl_Interp *interp,
-	const char *name, int length, Tcl_Namespace *context,
-	Tcl_ResolvedVarInfo **rPtr);
-
-typedef int (Tcl_ResolveVarProc) (Tcl_Interp *interp, const char *name,
-	Tcl_Namespace *context, int flags, Tcl_Var *rPtr);
-
-typedef int (Tcl_ResolveCmdProc) (Tcl_Interp *interp, const char *name,
-	Tcl_Namespace *context, int flags, Tcl_Command *rPtr);
-
-typedef struct Tcl_ResolverInfo {
-    Tcl_ResolveCmdProc *cmdResProc;
-				/* Procedure handling command name
-				 * resolution. */
-    Tcl_ResolveVarProc *varResProc;
-				/* Procedure handling variable name resolution
-				 * for variables that can only be handled at
-				 * runtime. */
-    Tcl_ResolveCompiledVarProc *compiledVarResProc;
-				/* Procedure handling variable name resolution
-				 * at compile time. */
-} Tcl_ResolverInfo;
-#endif
 
 /*
  * This structure is a subclass of Tcl_ResolvedVarInfo that contains the
@@ -112,6 +69,7 @@ Itcl_ClassCmdResolver(
     ItclClass *iclsPtr;
     ItclObjectInfo *infoPtr;
     ItclMemberFunc *imPtr;
+    int inOptionHandling;
     int isCmdDeleted;
 
     if ((name[0] == 't') && (strcmp(name, "this") == 0)) {
@@ -190,7 +148,8 @@ Itcl_ClassCmdResolver(
 	                 "\"", NULL);
                 return TCL_ERROR;
 	    }
-	    if ((imPtr->flags & ITCL_COMMON) == 0) {
+	    inOptionHandling = imPtr->iclsPtr->infoPtr->inOptionHandling;
+	    if (((imPtr->flags & ITCL_COMMON) == 0) && !inOptionHandling) {
 		/* a method cannot be called directly in ITCL_TYPE
 		 * so look, if there is a corresponding proc in the
 		 * namespace one level up (i.e. for example ::). If yes
@@ -199,7 +158,10 @@ Itcl_ClassCmdResolver(
                 Tcl_Namespace *nsPtr2;
 		Tcl_Command cmdPtr;
 		nsPtr2 = Itcl_GetUplevelNamespace(interp, 1);
-		cmdPtr = Tcl_FindCommand(interp, name, nsPtr2, 0);
+		cmdPtr = NULL;
+		if (nsPtr != nsPtr2) {
+		    cmdPtr = Tcl_FindCommand(interp, name, nsPtr2, 0);
+                }
 		if (cmdPtr != NULL) {
 		    *rPtr = cmdPtr;
 		    return TCL_OK;
@@ -501,7 +463,7 @@ Itcl_ClassCompiledVarResolver(
     hPtr = Tcl_FindHashEntry(&infoPtr->namespaceClasses, (char *)nsPtr);
     if (hPtr == NULL) {
 #ifdef VAR_DEBUG
-  fprintf(stderr, "CCVAR!%s!ret1\n", name);
+  fprintf(stderr, "CCVAR!%s!ret1!NS!%s!\n", name, nsPtr->fullName);
 #endif
         return TCL_CONTINUE;
     }
@@ -590,9 +552,6 @@ ItclClassRuntimeVarResolver(
     if ((vlookup->ivPtr->flags & ITCL_COMMON) != 0) {
 	hPtr = Tcl_FindHashEntry(&vlookup->ivPtr->iclsPtr->classCommons,
 	        (char *)vlookup->ivPtr);
-if (strcmp(Tcl_GetString(vlookup->ivPtr->namePtr), "itcl_hull") == 0) {
-hPtr = NULL;
-}
 	if (hPtr != NULL) {
 #ifdef VAR_DEBUG
   fprintf(stderr, "CRVAR!%s!%s!ret1!%d!\n", Tcl_GetCurrentNamespace(interp)->fullName, Tcl_GetString(vlookup->ivPtr->namePtr), vlookup->ivPtr->protection);
@@ -622,9 +581,14 @@ hPtr = NULL;
 #ifdef VAR_DEBUG
   fprintf(stderr, "CRVAR!%s!ret3\n", Tcl_GetString(vlookup->ivPtr->namePtr));
 #endif
-        return NULL;
+	if (iclsPtr->infoPtr->currIoPtr != NULL) {
+	    contextIoPtr = iclsPtr->infoPtr->currIoPtr;
+	} else {
+            return NULL;
+        }
+    } else {
+        contextIoPtr = callContextPtr->ioPtr;
     }
-    contextIoPtr = callContextPtr->ioPtr;
     if (contextIoPtr != NULL) {
         if (contextIoPtr->iclsPtr != vlookup->ivPtr->iclsPtr) {
             hPtr = Tcl_FindHashEntry(&contextIoPtr->iclsPtr->resolveVars,

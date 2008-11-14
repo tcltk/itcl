@@ -23,7 +23,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclCmd.c,v 1.1.2.30 2008/11/10 13:52:00 wiede Exp $
+ *     RCS:  $Id: itclCmd.c,v 1.1.2.31 2008/11/14 23:26:59 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -1821,8 +1821,7 @@ Itcl_ExtendedClassCmd(
     result = ItclClassBaseCmd(clientData, interp, ITCL_ECLASS, objc, objv,
             &iclsPtr);
     if ((iclsPtr == NULL) && (result == TCL_OK)) {
-        ItclShowArgs(0, "Itcl_ExtendedClassCmd", objc-1, objv);
-fprintf(stderr, "Itcl_ExtendedClassCmd!iclsPtr == NULL\n");
+        ItclShowArgs(0, "Itcl_ExtendedClassCmd iclsPtr == NULL", objc-1, objv);
         return TCL_ERROR;
     }
     return result;
@@ -1858,8 +1857,7 @@ Itcl_TypeClassCmd(
     result = ItclClassBaseCmd(clientData, interp, ITCL_TYPE, objc, objv,
             &iclsPtr);
     if ((iclsPtr == NULL) && (result == TCL_OK)) {
-        ItclShowArgs(0, "Itcl_ExtendedClassCmd", objc-1, objv);
-fprintf(stderr, "Itcl_TypeClassCmd!iclsPtr == NULL\n");
+        ItclShowArgs(0, "Itcl_TypeClassCmd iclsPtr == NULL", objc-1, objv);
         return TCL_ERROR;
     }
     if (result != TCL_OK) {

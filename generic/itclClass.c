@@ -25,7 +25,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann Copyright (c) 2007
  *
- *     RCS:  $Id: itclClass.c,v 1.1.2.34 2008/11/13 19:58:33 wiede Exp $
+ *     RCS:  $Id: itclClass.c,v 1.1.2.35 2008/11/14 23:26:59 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -566,7 +566,6 @@ Itcl_CreateClass(
             return TCL_ERROR;
         }
     }
-
     /*
      *  Create a command in the current namespace to manage the class:
      *    <className>

@@ -39,7 +39,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclParse.c,v 1.1.2.42 2008/11/13 19:58:33 wiede Exp $
+ *     RCS:  $Id: itclParse.c,v 1.1.2.43 2008/11/14 23:26:59 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -803,6 +803,7 @@ ItclClassBaseCmd(
     if (iclsPtr->flags & (ITCL_TYPE|ITCL_WIDGETADAPTOR)) {
 	if (ItclCheckForInitializedComponents(interp, iclsPtr, NULL) !=
 	        TCL_OK) {
+	    result = TCL_ERROR;
 	    goto errorReturn;
 	}
     }
