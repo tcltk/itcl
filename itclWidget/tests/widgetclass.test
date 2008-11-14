@@ -92,7 +92,6 @@ testsNeedTcltest 2.2
 
 interp alias {} type {} ::itcl::type
 interp alias {} widget {} ::itcl::widget
-interp alias {} widgetadaptor {} ::itcl::widgetadaptor
 
 package require Tk 8.6
 
@@ -204,26 +203,6 @@ test install-1.2 {installed components are saved properly} -constraints {
 } -cleanup {
     myframe destroy
 } -result {green}
-
-test install-1.3 {can't install until hull exists} -constraints {
-    tk
-} -body {
-    widgetadaptor myframe {
-        # Delegate an option just to make sure the component variable
-        # exists.
-        delegate option -font to text
-
-        constructor {args} {
-            installcomponent text using text $win.text -background green
-        }
-    }
-
-    myframe .frm
-} -returnCodes {
-    error
-} -cleanup {
-    myframe destroy
-} -result {cannot install "text before "itcl_hull" exists}
 
 test install-1.4 {install queries option database} -constraints {
     tk
@@ -551,6 +530,10 @@ test installhull-1.1 {
     myframe destroy
 } -result {red 123}
 
+# end
+}
+
+puts stderr installhull-1.2
 test installhull-1.2 {
     Options delegated to a widget's itcl_hull frame with a different name are
     initialized from the option database.
@@ -561,7 +544,7 @@ test installhull-1.2 {
         delegate option -mainbackground to itcl_hull as -background
 
         typeconstructor {
-            option add *Myframe.mainbackground red
+            option add *Myframe.mainbackground green
         }
     }
 
@@ -572,107 +555,8 @@ test installhull-1.2 {
     set a
 } -cleanup {
     myframe destroy
-} -result {red}
+} -result {green}
 
-# end
-}
-
-test installhull-1.3 {
-    options delegated to a widgetadaptor's itcl_hull frame
-    with the same name are
-    initialized from the option database.  Note that there's no
-    explicit code in Snit to do this; there's no way to change the
-    adapted hull widget's -class, so the widget is simply being
-    initialized normally.
-} -constraints {
-    tk
-} -body {
-    widgetadaptor myframe {
-        delegate option -background to itcl_hull
-
-        typeconstructor {
-            option add *Frame.background red
-            option add *Frame.width 123
-        }
-
-        constructor {args} {
-            installhull using frame
-        }
-
-        method getwid {} {
-            $itcl_hull cget -width
-        }
-    }
-
-    myframe .frm
-    set a [.frm cget -background]
-    set b [.frm getwid]
-    destroy .frm
-    tkbide
-    list $a $b
-} -cleanup {
-    myframe destroy
-} -result {red 123}
-
-test installhull-1.4 {
-    Options delegated to a widget's itcl_hull frame with a different name are
-    initialized from the option database.
-} -constraints {
-    tk
-} -body {
-    widgetadaptor myframe {
-        delegate option -mainbackground to itcl_hull as -background
-
-        typeconstructor {
-            option add *Frame.mainbackground red
-        }
-
-        constructor {args} {
-            installhull using frame
-        }
-    }
-
-    myframe .frm
-    set a [.frm cget -mainbackground]
-    destroy .frm
-    tkbide
-    set a
-} -cleanup {
-    myframe destroy
-} -result {red}
-
-test installhull-1.5 {
-    Option values read from the option database are overridden by options
-    explicitly passed, even if delegated under a different name.
-} -constraints {
-    tk
-} -body {
-    widgetadaptor myframe {
-        delegate option -mainbackground to itcl_hull as -background
-
-        typeconstructor {
-            option add *Frame.mainbackground red
-            option add *Frame.width 123
-        }
-
-        constructor {args} {
-            installhull using frame -background green -width 321
-        }
-
-        method getwid {} {
-            $itcl_hull cget -width
-        }
-    }
-
-    myframe .frm
-    set a [.frm cget -mainbackground]
-    set b [.frm getwid]
-    destroy .frm
-    tkbide
-    list $a $b
-} -cleanup {
-    myframe destroy
-} -result {green 321}
 
 
 test option-5.1 {local widget options read from option database} -constraints {

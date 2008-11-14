@@ -109,7 +109,7 @@ test widgetadaptor-1.1 {creating a widget: hull hijacking} -constraints {
 } -body {
     widgetadaptor mylabel {
         constructor {args} {
-            installhull [label ${self}l]
+            installhull [label $self]
             $self configure {*}$args
         }
 
@@ -134,7 +134,7 @@ test widgetadaptor-1.2 {destroying a widget with destroy} -constraints {
 } -body {
     widgetadaptor mylabel {
         constructor {} {
-            installhull [label ${self}l]
+            installhull [label $self]
         }
     }
 
@@ -146,14 +146,14 @@ test widgetadaptor-1.2 {destroying a widget with destroy} -constraints {
     list $a $b
 } -cleanup {
     mylabel destroy
-} -result {{::itcl::internal::variables::.label ::itcl::internal::variables::mylabel} {::itcl::internal::variables::.label ::itcl::internal::variables::mylabel}}
+} -result {{::itcl::internal::variables::.label ::itcl::internal::variables::mylabel} ::itcl::internal::variables::mylabel}
 
 test widgetadaptor-1.3 {destroying two widgets of the same type with destroy} -constraints {
     tk
 } -body {
     widgetadaptor mylabel {
         constructor {} {
-            installhull [label ${self}l]
+            installhull [label $self]
         }
     }
 
@@ -167,12 +167,12 @@ test widgetadaptor-1.3 {destroying two widgets of the same type with destroy} -c
     list $a $b
 } -cleanup {
     mylabel destroy
-} -result {{::itcl::internal::variables::.lab1 ::itcl::internal::variables::mylabel ::itcl::internal::variables::.lab2} {::itcl::internal::variables::.lab1 ::itcl::internal::variables::mylabel ::itcl::internal::variables::.lab2}}
+} -result {{::itcl::internal::variables::.lab1 ::itcl::internal::variables::mylabel ::itcl::internal::variables::.lab2} ::itcl::internal::variables::mylabel}
 
 test widgetadaptor-1.4 {destroying a widget with rename, then destroy type} -body {
     widgetadaptor mylabel {
         constructor {} {
-            installhull [label ${self}l]
+            installhull [label $self]
         }
     }
 
@@ -189,7 +189,7 @@ test widgetadaptor-1.4 {destroying a widget with rename, then destroy type} -bod
 test widgetadaptor-1.5 {destroying two widgets of the same type with rename} -body {
     widgetadaptor mylabel {
         constructor {} {
-            installhull [label ${self}l]
+            installhull [label $self]
         }
     }
 
@@ -209,7 +209,7 @@ test widgetadaptor-1.6 {create/destroy twice, with destroy} -constraints {
 } -body {
     widgetadaptor mylabel {
         constructor {} {
-            installhull [label ${self}l]
+            installhull [label $self]
         }
     }
 
@@ -225,12 +225,12 @@ test widgetadaptor-1.6 {create/destroy twice, with destroy} -constraints {
     mylabel destroy
     tkbide
     list $a $b $c
-} -result {{::itcl::internal::variables::.lab1 ::itcl::internal::variables::mylabel} {::itcl::internal::variables::.lab1 ::itcl::internal::variables::mylabel} {::itcl::internal::variables::.lab1 ::itcl::internal::variables::mylabel}}
+} -result {{::itcl::internal::variables::.lab1 ::itcl::internal::variables::mylabel} {::itcl::internal::variables::.lab1 ::itcl::internal::variables::mylabel} ::itcl::internal::variables::mylabel}
 
 test widgetadaptor-1.7 {create/destroy twice, with rename} -body {
     widgetadaptor mylabel {
         constructor {} {
-            installhull [label ${self}l]
+            installhull [label $self]
         }
     }
 
@@ -253,7 +253,7 @@ test widgetadaptor-1.8 {"create" is optional} -constraints {
 } -body {
     widgetadaptor mylabel {
         constructor {args} {
-            installhull [label ${self}l]
+            installhull [label $self]
         }
         method howdy {} {return "Howdy!"}
     }
@@ -273,7 +273,7 @@ test widgetadaptor-1.10 {"create" is optional, but must be a valid name} -constr
 } -body {
     widgetadaptor mylabel {
         constructor {args} {
-            installhull [label ${self}l]
+            installhull [label $self]
         }
         method howdy {} {return "Howdy!"}
     }
@@ -283,7 +283,7 @@ test widgetadaptor-1.10 {"create" is optional, but must be a valid name} -constr
     set result
 } -cleanup {
     mylabel destroy
-} -result {bad window path name "fool"}
+} -result {bad window path name "foo"}
 
 test widgetadaptor-1.11 {user-defined destructors are called} -constraints {
     tk
@@ -292,12 +292,11 @@ test widgetadaptor-1.11 {user-defined destructors are called} -constraints {
         typevariable flag ""
 
         constructor {args} {
-            installhull [label ${self}l]
+            installhull [label $self]
             set flag "created $self"
         }
 
         destructor {
-puts stderr "DEST CALLED"
             set flag "destroyed $self"
         }
 
@@ -313,14 +312,14 @@ puts stderr "DEST CALLED"
     list $a [mylabel getflag]
 } -cleanup {
     mylabel destroy
-} -result {{created .label} {destroyed .label}}
+} -result {{created ::itcl::internal::widgets::hull1.label} {destroyed ::itcl::internal::widgets::hull1.label}}
 
 test widgetadaptor-1.13 {destroy method not defined for widget types} -constraints {
     tk
 } -body {
     widgetadaptor mylabel {
         constructor {args} {
-            installhull [label ${self}l]
+            installhull [label $self]
         }
     }
 
@@ -338,7 +337,7 @@ test widgetadaptor-1.14 {hull can be repeatedly renamed} -constraints {
 } -body {
     widgetadaptor basetype {
         constructor {args} {
-            installhull [label ${self}l]
+            installhull [label $self]
         }
 
         method basemethod {} { return "basemethod" }
@@ -346,13 +345,13 @@ test widgetadaptor-1.14 {hull can be repeatedly renamed} -constraints {
 
     widgetadaptor w1 {
         constructor {args} {
-            installhull [basetype create ${self}l2]
+            installhull [basetype create $self]
         }
     }
 
     widgetadaptor w2 {
         constructor {args} {
-            installhull [w1 ${self}l3]
+            installhull [w1 $self]
         }
     }
 
@@ -371,7 +370,7 @@ test widgetadaptor-1.15 {widget names can be generated} -constraints {
 } -body {
     widgetadaptor unique {
         constructor {args} {
-            installhull [label ${self}l]
+            installhull [label $self]
         }
     }
 
@@ -383,15 +382,12 @@ test widgetadaptor-1.15 {widget names can be generated} -constraints {
     unique destroy
 } -result {.unique0}
 
-# end
-}
-
 test widgetadaptor-1.16 {snit::widgetadaptor as hull} -constraints {
     tk
 } -body {
     widgetadaptor mylabel {
         constructor {args} {
-            installhull [label ${self}l]
+            installhull [label $self]
 	    if {[llength $args]} {
                 $self configure {*}$args
 	    }
@@ -404,7 +400,7 @@ test widgetadaptor-1.16 {snit::widgetadaptor as hull} -constraints {
 
     widgetadaptor mylabel2 {
         constructor {args} {
-            installhull [mylabel ${self}l2]
+            installhull [mylabel $self]
                 $self configure {*}$args
         }
         method method2 {} {
@@ -429,13 +425,12 @@ test widgetadaptor-1.16 {snit::widgetadaptor as hull} -constraints {
 
     tkbide
     list $a $b $c $d $e
-} -result {{method2: method1} {Some Text} {More Text} {::itcl::internal::variables::.labell2 ::itcl::internal::variables::mylabel2 ::itcl::internal::variables::.label ::itcl::internal::variables::mylabel} {::itcl::internal::variables::.labell2 ::itcl::internal::variables::mylabel2 ::itcl::internal::variables::mylabel}}
+} -result {{method2: method1} {Some Text} {More Text} {::itcl::internal::variables::mylabel2 ::itcl::internal::variables::.label ::itcl::internal::variables::mylabel} {::itcl::internal::variables::mylabel2 ::itcl::internal::variables::.label ::itcl::internal::variables::mylabel}}
 
-if {1} {
 test widgetadaptor-1.17 {snit::widgetadaptor as hull; use rename} -body {
     widgetadaptor mylabel {
         constructor {args} {
-            installhull [label ${self}l]
+            installhull [label $self]
             $self configure {*}$args
         }
         method method1 {} {
@@ -446,7 +441,7 @@ test widgetadaptor-1.17 {snit::widgetadaptor as hull; use rename} -body {
 
     widgetadaptor mylabel2 {
         constructor {args} {
-            installhull [mylabel ${self}l2]
+            installhull [mylabel $self]
             $self configure {*}$args
         }
         method method2 {} {
@@ -471,7 +466,7 @@ test widgetadaptor-1.17 {snit::widgetadaptor as hull; use rename} -body {
 
     tkbide
     list $a $b $c $d $e
-} -result {{method2: method1} {Some Text} {More Text} {::itcl::internal::variables::.labell2 ::itcl::internal::variables::mylabel2 ::itcl::internal::variables::.label ::itcl::internal::variables::mylabel} {::itcl::internal::variables::mylabel2 ::itcl::internal::variables::mylabel}}
+} -result {{method2: method1} {Some Text} {More Text} {::itcl::internal::variables::mylabel2 ::itcl::internal::variables::.label ::itcl::internal::variables::mylabel} {::itcl::internal::variables::mylabel2 ::itcl::internal::variables::mylabel}}
 
 test widgetadaptor-1.18 {BWidget Label as hull} -constraints {
     bwidget
@@ -519,8 +514,122 @@ test widgetadaptor-1.19 {error in widgetadaptor constructor} -constraints {
 } -result {Simulated Error}
 
 
-#end
-}
+test install-1.3 {can't install until hull exists} -constraints {
+    tk 
+} -body {
+    widgetadaptor myframe {
+        # Delegate an option just to make sure the component variable
+        # exists.
+        delegate option -font to text
+
+        constructor {args} {
+            installcomponent text using text $win.text -background green
+        }
+    }
+
+    myframe .frm
+} -returnCodes {
+    error
+} -cleanup {
+    myframe destroy
+} -result {cannot install "text before "itcl_hull" exists}
+
+test installhull-1.3 {
+    options delegated to a widgetadaptor's itcl_hull frame
+    with the same name are
+    initialized from the option database.  Note that there's no
+    explicit code in Snit to do this; there's no way to change the
+    adapted hull widget's -class, so the widget is simply being
+    initialized normally.
+} -constraints {
+    tk
+} -body {
+    widgetadaptor myframe {
+        delegate option -background to itcl_hull
+
+        typeconstructor {
+            option add *Frame.background red
+            option add *Frame.width 123
+        }
+
+        constructor {args} {
+            installhull using frame
+        }
+
+        method getwid {} {
+            $itcl_hull cget -width
+        }
+    }
+
+    myframe .frm
+    set a [.frm cget -background]
+    set b [.frm getwid]
+    destroy .frm
+    tkbide
+    list $a $b
+} -cleanup {
+    myframe destroy
+} -result {red 123}
+
+test installhull-1.4 {
+    Options delegated to a widget's itcl_hull frame with a different name are
+    initialized from the option database.
+} -constraints {
+    tk
+} -body {
+    widgetadaptor myframe {
+        delegate option -mainbackground to itcl_hull as -background
+
+        typeconstructor {
+            option add *Frame.mainbackground red
+        }
+
+        constructor {args} {
+            installhull using frame
+        }
+    }
+
+    myframe .frm
+    set a [.frm cget -mainbackground]
+    destroy .frm
+    tkbide
+    set a
+} -cleanup {
+    myframe destroy
+} -result {red}
+
+test installhull-1.5 {
+    Option values read from the option database are overridden by options
+    explicitly passed, even if delegated under a different name.
+} -constraints {
+    tk
+} -body {
+    widgetadaptor myframe {
+        delegate option -mainbackground to itcl_hull as -background
+
+        typeconstructor {
+            option add *Frame.mainbackground red
+            option add *Frame.width 123
+        }
+
+        constructor {args} {
+            installhull using frame -background green -width 321
+        }
+
+        method getwid {} {
+            $itcl_hull cget -width
+        }
+    }
+
+    myframe .frm
+    set a [.frm cget -mainbackground]
+    set b [.frm getwid]
+    destroy .frm
+    tkbide
+    list $a $b
+} -cleanup {
+    myframe destroy
+} -result {green 321}
 
 test option-2.5 {configure returns info, unknown options} -constraints {
     tk
@@ -530,7 +639,9 @@ test option-2.5 {configure returns info, unknown options} -constraints {
         delegate option -width to itcl_hull
         delegate option * to itcl_hull
         constructor {args} {
-            installhull [frame ${self}l]
+	    # need to reset because of test installhull-1.5
+            option add *Frame.width 0
+            installhull [frame $self]
         }
     }
 
@@ -551,9 +662,9 @@ test option-2.6 {configure -opt unknown to implicit component} -constraints {
     tk
 } -body {
     widgetadaptor myframe {
-        delegate option * to hitcl_ull
+        delegate option * to itcl_hull
         constructor {args} {
-            installhull [frame ${self}l]
+            installhull [frame $self]
         }
     }
     myframe .frm
@@ -564,6 +675,9 @@ test option-2.6 {configure -opt unknown to implicit component} -constraints {
 } -cleanup {
     myframe destroy
 } -result {unknown option "-quux"}
+
+# end
+}
 
 #---------------------------------------------------------------------
 # Clean up
