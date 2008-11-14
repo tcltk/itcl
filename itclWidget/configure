@@ -676,17 +676,6 @@ TCL_DEFS
 TCL_EXTRA_CFLAGS
 TCL_LD_FLAGS
 TCL_SHLIB_LD_LIBS
-TK_VERSION
-TK_BIN_DIR
-TK_SRC_DIR
-TK_LIB_FILE
-TK_LIB_FLAG
-TK_LIB_SPEC
-TK_STUB_LIB_FILE
-TK_STUB_LIB_FLAG
-TK_STUB_LIB_SPEC
-TK_LIBS
-TK_XINCLUDES
 itcl_VERSION
 itcl_BIN_DIR
 itcl_SRC_DIR
@@ -713,9 +702,22 @@ MATH_LIBS
 PKG_SOURCES
 PKG_OBJECTS
 CLEANFILES
+TCL_TOP_DIR_NATIVE
+TCL_GENERIC_DIR_NATIVE
+TCL_UNIX_DIR_NATIVE
+TCL_WIN_DIR_NATIVE
+TCL_BMAP_DIR_NATIVE
+TCL_TOOL_DIR_NATIVE
+TCL_PLATFORM_DIR_NATIVE
 TCL_INCLUDES
-TK_INCLUDES
-XMKMF
+ITCL_TOP_DIR_NATIVE
+ITCL_GENERIC_DIR_NATIVE
+ITCL_UNIX_DIR_NATIVE
+ITCL_WIN_DIR_NATIVE
+ITCL_BMAP_DIR_NATIVE
+ITCL_TOOL_DIR_NATIVE
+ITCL_PLATFORM_DIR_NATIVE
+ITCL_INCLUDES
 SHARED_BUILD
 AR
 CELIB_DIR
@@ -737,10 +739,16 @@ MAKE_SHARED_LIB
 MAKE_STATIC_LIB
 MAKE_STUB_LIB
 RANLIB_STUB
-itclWidgetstub_LIB_FILE
+itclWidget_STUB_LIB_FILE
 itclWidget_LIB_FILE
 TCLSH_PROG
-WISH_PROG
+itclWidget_BUILD_LIB_SPEC
+itclWidget_LIB_SPEC
+itclWidget_BUILD_STUB_LIB_SPEC
+itclWidget_STUB_LIB_SPEC
+itclWidget_BUILD_STUB_LIB_PATH
+itclWidget_STUB_LIB_PATH
+itclWidget_SRC_DIR
 LTLIBOBJS'
 ac_subst_files=''
       ac_precious_vars='build_alias
@@ -751,8 +759,7 @@ CFLAGS
 LDFLAGS
 LIBS
 CPPFLAGS
-CPP
-XMKMF'
+CPP'
 
 
 # Initialize some variables set by options.
@@ -1311,10 +1318,6 @@ Fine tuning of the installation directories:
 _ACEOF
 
   cat <<\_ACEOF
-
-X features:
-  --x-includes=DIR    X include files are in DIR
-  --x-libraries=DIR   X library files are in DIR
 _ACEOF
 fi
 
@@ -1340,11 +1343,7 @@ Optional Packages:
   --without-PACKAGE       do not use PACKAGE (same as --with-PACKAGE=no)
   --with-tcl              directory containing tcl configuration
                           (tclConfig.sh)
-  --with-tk               directory containing tk configuration (tkConfig.sh)
   --with-itcl              directory containing itcl configuration (itclConfig.sh)
-  --with-tclinclude       directory containing the public Tcl header files
-  --with-tkinclude      directory containing the public Tk header files.
-  --with-x                use the X Window System
   --with-celib=DIR        use Windows/CE support library from DIR
 
 Some influential environment variables:
@@ -1356,7 +1355,6 @@ Some influential environment variables:
   CPPFLAGS    C/C++/Objective C preprocessor flags, e.g. -I<include dir> if
               you have headers in a nonstandard directory <include dir>
   CPP         C preprocessor
-  XMKMF       Path to xmkmf, Makefile generator for X Window System
 
 Use these variables to override the choices made by `configure' or to help
 it to find libraries and programs with nonstandard names/locations.
@@ -1915,7 +1913,7 @@ CONFIG_CLEAN_FILES=
 if test ! -d $srcdir/tclconfig ; then
     if test -d $srcdir/../tclconfig ; then
         $LN_S $srcdir/../tclconfig tclconfig
-	CONFIG_CLEAN_FILES=tclconfig
+        CONFIG_CLEAN_FILES=tclconfig
     fi
 fi
 
@@ -2169,238 +2167,6 @@ echo "${ECHO_T}could not find ${TCL_BIN_DIR}/tclConfig.sh" >&6; }
 
 
 
-#--------------------------------------------------------------------
-# Load the tkConfig.sh file
-#--------------------------------------------------------------------
-
-
-    #
-    # Ok, lets find the tk configuration
-    # First, look for one uninstalled.
-    # the alternative search directory is invoked by --with-tk
-    #
-
-    if test x"${no_tk}" = x ; then
-	# we reset no_tk in case something fails here
-	no_tk=true
-
-# Check whether --with-tk was given.
-if test "${with_tk+set}" = set; then
-  withval=$with_tk; with_tkconfig=${withval}
-fi
-
-	{ echo "$as_me:$LINENO: checking for Tk configuration" >&5
-echo $ECHO_N "checking for Tk configuration... $ECHO_C" >&6; }
-	if test "${ac_cv_c_tkconfig+set}" = set; then
-  echo $ECHO_N "(cached) $ECHO_C" >&6
-else
-
-
-	    # First check to see if --with-tkconfig was specified.
-	    if test x"${with_tkconfig}" != x ; then
-		case ${with_tkconfig} in
-		    */tkConfig.sh )
-			if test -f ${with_tkconfig}; then
-			    { echo "$as_me:$LINENO: WARNING: --with-tk argument should refer to directory containing tkConfig.sh, not to tkConfig.sh itself" >&5
-echo "$as_me: WARNING: --with-tk argument should refer to directory containing tkConfig.sh, not to tkConfig.sh itself" >&2;}
-			    with_tkconfig=`echo ${with_tkconfig} | sed 's!/tkConfig\.sh$!!'`
-			fi ;;
-		esac
-		if test -f "${with_tkconfig}/tkConfig.sh" ; then
-		    ac_cv_c_tkconfig=`(cd ${with_tkconfig}; pwd)`
-		else
-		    { { echo "$as_me:$LINENO: error: ${with_tkconfig} directory doesn't contain tkConfig.sh" >&5
-echo "$as_me: error: ${with_tkconfig} directory doesn't contain tkConfig.sh" >&2;}
-   { (exit 1); exit 1; }; }
-		fi
-	    fi
-
-	    # then check for a private Tk library
-	    if test x"${ac_cv_c_tkconfig}" = x ; then
-		for i in \
-			../tk \
-			`ls -dr ../tk[8-9].[0-9].[0-9]* 2>/dev/null` \
-			`ls -dr ../tk[8-9].[0-9] 2>/dev/null` \
-			`ls -dr ../tk[8-9].[0-9]* 2>/dev/null` \
-			../../tk \
-			`ls -dr ../../tk[8-9].[0-9].[0-9]* 2>/dev/null` \
-			`ls -dr ../../tk[8-9].[0-9] 2>/dev/null` \
-			`ls -dr ../../tk[8-9].[0-9]* 2>/dev/null` \
-			../../../tk \
-			`ls -dr ../../../tk[8-9].[0-9].[0-9]* 2>/dev/null` \
-			`ls -dr ../../../tk[8-9].[0-9] 2>/dev/null` \
-			`ls -dr ../../../tk[8-9].[0-9]* 2>/dev/null` ; do
-		    if test -f "$i/unix/tkConfig.sh" ; then
-			ac_cv_c_tkconfig=`(cd $i/unix; pwd)`
-			break
-		    fi
-		done
-	    fi
-
-	    # on Darwin, check in Framework installation locations
-	    if test "`uname -s`" = "Darwin" -a x"${ac_cv_c_tkconfig}" = x ; then
-		for i in `ls -d ~/Library/Frameworks 2>/dev/null` \
-			`ls -d /Library/Frameworks 2>/dev/null` \
-			`ls -d /Network/Library/Frameworks 2>/dev/null` \
-			`ls -d /System/Library/Frameworks 2>/dev/null` \
-			; do
-		    if test -f "$i/Tk.framework/tkConfig.sh" ; then
-			ac_cv_c_tkconfig=`(cd $i/Tk.framework; pwd)`
-			break
-		    fi
-		done
-	    fi
-
-	    # check in a few common install locations
-	    if test x"${ac_cv_c_tkconfig}" = x ; then
-		for i in `ls -d ${libdir} 2>/dev/null` \
-			`ls -d ${exec_prefix}/lib 2>/dev/null` \
-			`ls -d ${prefix}/lib 2>/dev/null` \
-			`ls -d /usr/local/lib 2>/dev/null` \
-			`ls -d /usr/contrib/lib 2>/dev/null` \
-			`ls -d /usr/lib 2>/dev/null` \
-			; do
-		    if test -f "$i/tkConfig.sh" ; then
-			ac_cv_c_tkconfig=`(cd $i; pwd)`
-			break
-		    fi
-		done
-	    fi
-
-	    # on Windows, check in common installation locations
-	    if test "${TEA_PLATFORM}" = "windows" \
-		-a x"${ac_cv_c_tkconfig}" = x ; then
-		for i in `ls -d C:/Tcl/lib 2>/dev/null` \
-			`ls -d C:/Progra~1/Tcl/lib 2>/dev/null` \
-			; do
-		    if test -f "$i/tkConfig.sh" ; then
-			ac_cv_c_tkconfig=`(cd $i; pwd)`
-			break
-		    fi
-		done
-	    fi
-
-	    # check in a few other private locations
-	    if test x"${ac_cv_c_tkconfig}" = x ; then
-		for i in \
-			${srcdir}/../tk \
-			`ls -dr ${srcdir}/../tk[8-9].[0-9].[0-9]* 2>/dev/null` \
-			`ls -dr ${srcdir}/../tk[8-9].[0-9] 2>/dev/null` \
-			`ls -dr ${srcdir}/../tk[8-9].[0-9]* 2>/dev/null` ; do
-		    if test -f "$i/unix/tkConfig.sh" ; then
-			ac_cv_c_tkconfig=`(cd $i/unix; pwd)`
-			break
-		    fi
-		done
-	    fi
-
-fi
-
-
-	if test x"${ac_cv_c_tkconfig}" = x ; then
-	    TK_BIN_DIR="# no Tk configs found"
-	    { echo "$as_me:$LINENO: WARNING: Can't find Tk configuration definitions" >&5
-echo "$as_me: WARNING: Can't find Tk configuration definitions" >&2;}
-	    exit 0
-	else
-	    no_tk=
-	    TK_BIN_DIR=${ac_cv_c_tkconfig}
-	    { echo "$as_me:$LINENO: result: found ${TK_BIN_DIR}/tkConfig.sh" >&5
-echo "${ECHO_T}found ${TK_BIN_DIR}/tkConfig.sh" >&6; }
-	fi
-    fi
-
-
-    { echo "$as_me:$LINENO: checking for existence of ${TK_BIN_DIR}/tkConfig.sh" >&5
-echo $ECHO_N "checking for existence of ${TK_BIN_DIR}/tkConfig.sh... $ECHO_C" >&6; }
-
-    if test -f "${TK_BIN_DIR}/tkConfig.sh" ; then
-        { echo "$as_me:$LINENO: result: loading" >&5
-echo "${ECHO_T}loading" >&6; }
-	. ${TK_BIN_DIR}/tkConfig.sh
-    else
-        { echo "$as_me:$LINENO: result: could not find ${TK_BIN_DIR}/tkConfig.sh" >&5
-echo "${ECHO_T}could not find ${TK_BIN_DIR}/tkConfig.sh" >&6; }
-    fi
-
-    # eval is required to do the TK_DBGX substitution
-    eval "TK_LIB_FILE=\"${TK_LIB_FILE}\""
-    eval "TK_STUB_LIB_FILE=\"${TK_STUB_LIB_FILE}\""
-
-    # If the TK_BIN_DIR is the build directory (not the install directory),
-    # then set the common variable name to the value of the build variables.
-    # For example, the variable TK_LIB_SPEC will be set to the value
-    # of TK_BUILD_LIB_SPEC. An extension should make use of TK_LIB_SPEC
-    # instead of TK_BUILD_LIB_SPEC since it will work with both an
-    # installed and uninstalled version of Tcl.
-    if test -f ${TK_BIN_DIR}/Makefile ; then
-        TK_LIB_SPEC=${TK_BUILD_LIB_SPEC}
-        TK_STUB_LIB_SPEC=${TK_BUILD_STUB_LIB_SPEC}
-        TK_STUB_LIB_PATH=${TK_BUILD_STUB_LIB_PATH}
-    elif test "`uname -s`" = "Darwin"; then
-	# If Tk was built as a framework, attempt to use the libraries
-	# from the framework at the given location so that linking works
-	# against Tk.framework installed in an arbitary location.
-	case ${TK_DEFS} in
-	    *TK_FRAMEWORK*)
-		if test -f ${TK_BIN_DIR}/${TK_LIB_FILE}; then
-		    for i in "`cd ${TK_BIN_DIR}; pwd`" \
-			     "`cd ${TK_BIN_DIR}/../..; pwd`"; do
-			if test "`basename "$i"`" = "${TK_LIB_FILE}.framework"; then
-			    TK_LIB_SPEC="-F`dirname "$i"` -framework ${TK_LIB_FILE}"
-			    break
-			fi
-		    done
-		fi
-		if test -f ${TK_BIN_DIR}/${TK_STUB_LIB_FILE}; then
-		    TK_STUB_LIB_SPEC="-L${TK_BIN_DIR} ${TK_STUB_LIB_FLAG}"
-		    TK_STUB_LIB_PATH="${TK_BIN_DIR}/${TK_STUB_LIB_FILE}"
-		fi
-		;;
-	esac
-    fi
-
-    # eval is required to do the TK_DBGX substitution
-    eval "TK_LIB_FLAG=\"${TK_LIB_FLAG}\""
-    eval "TK_LIB_SPEC=\"${TK_LIB_SPEC}\""
-    eval "TK_STUB_LIB_FLAG=\"${TK_STUB_LIB_FLAG}\""
-    eval "TK_STUB_LIB_SPEC=\"${TK_STUB_LIB_SPEC}\""
-
-    # Ensure windowingsystem is defined
-    if test "${TEA_PLATFORM}" = "unix" ; then
-	case ${TK_DEFS} in
-	    *MAC_OSX_TK*)
-
-cat >>confdefs.h <<\_ACEOF
-#define MAC_OSX_TK 1
-_ACEOF
-
-		TEA_WINDOWINGSYSTEM="aqua"
-		;;
-	    *)
-		TEA_WINDOWINGSYSTEM="x11"
-		;;
-	esac
-    elif test "${TEA_PLATFORM}" = "windows" ; then
-	TEA_WINDOWINGSYSTEM="win32"
-    fi
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
     #
     # Ok, lets find the itcl configuration
@@ -2552,12 +2318,10 @@ echo "$as_me: WARNING: Found Makefile - using build library specs for itcl" >&2;
 
 
 
-ITCL_INCLUDES="-I\"`${CYGPATH} ${itcl_SRC_DIR}/generic`\""
-
-#--------------------------------------------------------------------
+#-----------------------------------------------------------------------
 # Handle the --prefix=... option by defaulting to what Tcl gave.
-# Must be called after TEA_LOAD_TCLCONFIG and before $prefix is used.
-#--------------------------------------------------------------------
+# Must be called after TEA_LOAD_TCLCONFIG and before TEA_SETUP_COMPILER.
+#-----------------------------------------------------------------------
 
 
     if test "${prefix}" = "NONE"; then
@@ -2586,12 +2350,12 @@ echo "$as_me: --exec-prefix defaulting to ${prefix}" >&6;}
     fi
 
 
-#------------------------------------------------------------------------
+#-----------------------------------------------------------------------
 # Standard compiler checks.
 # This sets up CC by using the CC env var, or looks for gcc otherwise.
 # This also calls AC_PROG_CC, AC_PROG_INSTALL and a few others to create
 # the basic setup necessary to compile executables.
-#------------------------------------------------------------------------
+#-----------------------------------------------------------------------
 
 
     # Don't put any macros that use the compiler (e.g. AC_TRY_COMPILE)
@@ -6988,6 +6752,7 @@ done
 #-----------------------------------------------------------------------
 
 
+
     vars="
                 itclWidgetBase.c
 	        itclWidgetBuiltin.c
@@ -7030,7 +6795,9 @@ echo "$as_me: error: could not find source file '$i'" >&2;}
 
 
 
-    vars=""
+    vars="
+                generic/itclWidgetInt.h
+		"
     for i in $vars; do
 	# check for existence, be strict because it is installed
 	if test ! -f "${srcdir}/$i" ; then
@@ -7043,7 +6810,7 @@ echo "$as_me: error: could not find header file '${srcdir}/$i'" >&2;}
 
 
 
-    vars="${ITCL_INCLUDES} -I\"`${CYGPATH} ${srcdir}/generic`\""
+    vars="-I. -I\"`${CYGPATH} ${srcdir}/generic`\""
     for i in $vars; do
 	PKG_INCLUDES="$PKG_INCLUDES $i"
     done
@@ -7061,10 +6828,34 @@ echo "$as_me: error: could not find header file '${srcdir}/$i'" >&2;}
 
 
 
-    PKG_CFLAGS="$PKG_CFLAGS "
+    PKG_CFLAGS="$PKG_CFLAGS -DUSE_TCLOO_STUBS -DUSE_ITCL_SUBS -I${itcl_INCLUDE_DIR}"
 
 
-#TEA_ADD_STUB_SOURCES([itclWidgetStubLib.c])
+
+    vars="itclWidgetStubLib.c"
+    for i in $vars; do
+	# check for existence - allows for generic/win/unix VPATH
+	if test ! -f "${srcdir}/$i" -a ! -f "${srcdir}/generic/$i" \
+	    -a ! -f "${srcdir}/win/$i" -a ! -f "${srcdir}/unix/$i" \
+	    ; then
+	    { { echo "$as_me:$LINENO: error: could not find stub source file '$i'" >&5
+echo "$as_me: error: could not find stub source file '$i'" >&2;}
+   { (exit 1); exit 1; }; }
+	fi
+	PKG_STUB_SOURCES="$PKG_STUB_SOURCES $i"
+	# this assumes it is in a VPATH dir
+	i=`basename $i`
+	# handle user calling this before or after TEA_SETUP_COMPILER
+	if test x"${OBJEXT}" != x ; then
+	    j="`echo $i | sed -e 's/\.[^.]*$//'`.${OBJEXT}"
+	else
+	    j="`echo $i | sed -e 's/\.[^.]*$//'`.\${OBJEXT}"
+	fi
+	PKG_STUB_OBJECTS="$PKG_STUB_OBJECTS $j"
+    done
+
+
+
 
     vars=""
     for i in $vars; do
@@ -7138,6 +6929,7 @@ echo "$as_me: error: could not find source file '$i'" >&2;}
 
 else
     CLEANFILES=
+    #TEA_ADD_SOURCES([])
 fi
 
 
@@ -7153,643 +6945,110 @@ fi
 # of private headers
 #--------------------------------------------------------------------
 
+#TEA_PUBLIC_TCL_HEADERS
 
-    { echo "$as_me:$LINENO: checking for Tcl public headers" >&5
-echo $ECHO_N "checking for Tcl public headers... $ECHO_C" >&6; }
+    { echo "$as_me:$LINENO: checking for Tcl private include files" >&5
+echo $ECHO_N "checking for Tcl private include files... $ECHO_C" >&6; }
 
+    TCL_SRC_DIR_NATIVE=`${CYGPATH} ${TCL_SRC_DIR}`
+    TCL_TOP_DIR_NATIVE=\"${TCL_SRC_DIR_NATIVE}\"
+    TCL_GENERIC_DIR_NATIVE=\"${TCL_SRC_DIR_NATIVE}/generic\"
+    TCL_UNIX_DIR_NATIVE=\"${TCL_SRC_DIR_NATIVE}/unix\"
+    TCL_WIN_DIR_NATIVE=\"${TCL_SRC_DIR_NATIVE}/win\"
+    TCL_BMAP_DIR_NATIVE=\"${TCL_SRC_DIR_NATIVE}/bitmaps\"
+    TCL_TOOL_DIR_NATIVE=\"${TCL_SRC_DIR_NATIVE}/tools\"
+    TCL_COMPAT_DIR_NATIVE=\"${TCL_SRC_DIR_NATIVE}/compat\"
 
-# Check whether --with-tclinclude was given.
-if test "${with_tclinclude+set}" = set; then
-  withval=$with_tclinclude; with_tclinclude=${withval}
-fi
-
-
-    if test "${ac_cv_c_tclh+set}" = set; then
-  echo $ECHO_N "(cached) $ECHO_C" >&6
-else
-
-	# Use the value from --with-tclinclude, if it was given
-
-	if test x"${with_tclinclude}" != x ; then
-	    if test -f "${with_tclinclude}/tcl.h" ; then
-		ac_cv_c_tclh=${with_tclinclude}
-	    else
-		{ { echo "$as_me:$LINENO: error: ${with_tclinclude} directory does not contain tcl.h" >&5
-echo "$as_me: error: ${with_tclinclude} directory does not contain tcl.h" >&2;}
-   { (exit 1); exit 1; }; }
-	    fi
-	else
-	    if test "`uname -s`" = "Darwin"; then
-		# If Tcl was built as a framework, attempt to use
-		# the framework's Headers directory
-		case ${TCL_DEFS} in
-		    *TCL_FRAMEWORK*)
-			list="`ls -d ${TCL_BIN_DIR}/Headers 2>/dev/null`"
-			;;
-		esac
-	    fi
-
-	    # Look in the source dir only if Tcl is not installed,
-	    # and in that situation, look there before installed locations.
-	    if test -f "${TCL_BIN_DIR}/Makefile" ; then
-		list="$list `ls -d ${TCL_SRC_DIR}/generic 2>/dev/null`"
-	    fi
-
-	    # Check order: pkg --prefix location, Tcl's --prefix location,
-	    # relative to directory of tclConfig.sh.
-
-	    eval "temp_includedir=${includedir}"
-	    list="$list \
-		`ls -d ${temp_includedir}        2>/dev/null` \
-		`ls -d ${TCL_PREFIX}/include     2>/dev/null` \
-		`ls -d ${TCL_BIN_DIR}/../include 2>/dev/null`"
-	    if test "${TEA_PLATFORM}" != "windows" -o "$GCC" = "yes"; then
-		list="$list /usr/local/include /usr/include"
-		if test x"${TCL_INCLUDE_SPEC}" != x ; then
-		    d=`echo "${TCL_INCLUDE_SPEC}" | sed -e 's/^-I//'`
-		    list="$list `ls -d ${d} 2>/dev/null`"
-		fi
-	    fi
-	    for i in $list ; do
-		if test -f "$i/tcl.h" ; then
-		    ac_cv_c_tclh=$i
-		    break
-		fi
-	    done
-	fi
-
-fi
-
-
-    # Print a message based on how we determined the include path
-
-    if test x"${ac_cv_c_tclh}" = x ; then
-	{ { echo "$as_me:$LINENO: error: tcl.h not found.  Please specify its location with --with-tclinclude" >&5
-echo "$as_me: error: tcl.h not found.  Please specify its location with --with-tclinclude" >&2;}
-   { (exit 1); exit 1; }; }
+    if test "${TEA_PLATFORM}" = "windows"; then
+	TCL_PLATFORM_DIR_NATIVE=${TCL_WIN_DIR_NATIVE}
     else
-	{ echo "$as_me:$LINENO: result: ${ac_cv_c_tclh}" >&5
-echo "${ECHO_T}${ac_cv_c_tclh}" >&6; }
+	TCL_PLATFORM_DIR_NATIVE=${TCL_UNIX_DIR_NATIVE}
     fi
-
-    # Convert to a native path and substitute into the output files.
-
-    INCLUDE_DIR_NATIVE=`${CYGPATH} ${ac_cv_c_tclh}`
-
-    TCL_INCLUDES=-I\"${INCLUDE_DIR_NATIVE}\"
-
-
-
-#TEA_PRIVATE_TCL_HEADERS
-
-
-    { echo "$as_me:$LINENO: checking for Tk public headers" >&5
-echo $ECHO_N "checking for Tk public headers... $ECHO_C" >&6; }
-
-
-# Check whether --with-tkinclude was given.
-if test "${with_tkinclude+set}" = set; then
-  withval=$with_tkinclude; with_tkinclude=${withval}
-fi
-
-
-    if test "${ac_cv_c_tkh+set}" = set; then
-  echo $ECHO_N "(cached) $ECHO_C" >&6
-else
-
-	# Use the value from --with-tkinclude, if it was given
-
-	if test x"${with_tkinclude}" != x ; then
-	    if test -f "${with_tkinclude}/tk.h" ; then
-		ac_cv_c_tkh=${with_tkinclude}
-	    else
-		{ { echo "$as_me:$LINENO: error: ${with_tkinclude} directory does not contain tk.h" >&5
-echo "$as_me: error: ${with_tkinclude} directory does not contain tk.h" >&2;}
+    # We want to ensure these are substituted so as not to require
+    # any *_NATIVE vars be defined in the Makefile
+    TCL_INCLUDES="-I${TCL_GENERIC_DIR_NATIVE} -I${TCL_PLATFORM_DIR_NATIVE}"
+    if test "`uname -s`" = "Darwin"; then
+        # If Tcl was built as a framework, attempt to use
+        # the framework's Headers and PrivateHeaders directories
+        case ${TCL_DEFS} in
+	    *TCL_FRAMEWORK*)
+	        if test -d "${TCL_BIN_DIR}/Headers" -a -d "${TCL_BIN_DIR}/PrivateHeaders"; then
+	        TCL_INCLUDES="-I\"${TCL_BIN_DIR}/Headers\" -I\"${TCL_BIN_DIR}/PrivateHeaders\" ${TCL_INCLUDES}"; else
+	        TCL_INCLUDES="${TCL_INCLUDES} ${TCL_INCLUDE_SPEC} `echo "${TCL_INCLUDE_SPEC}" | sed -e 's/Headers/PrivateHeaders/'`"; fi
+	        ;;
+	esac
+    else
+	if test ! -f "${TCL_SRC_DIR}/generic/tclInt.h" ; then
+	    { { echo "$as_me:$LINENO: error: Cannot find private header tclInt.h in ${TCL_SRC_DIR}" >&5
+echo "$as_me: error: Cannot find private header tclInt.h in ${TCL_SRC_DIR}" >&2;}
    { (exit 1); exit 1; }; }
-	    fi
-	else
-	    if test "`uname -s`" = "Darwin"; then
-		# If Tk was built as a framework, attempt to use
-		# the framework's Headers directory.
-		case ${TK_DEFS} in
-		    *TK_FRAMEWORK*)
-			list="`ls -d ${TK_BIN_DIR}/Headers 2>/dev/null`"
-			;;
-		esac
-	    fi
-
-	    # Look in the source dir only if Tk is not installed,
-	    # and in that situation, look there before installed locations.
-	    if test -f "${TK_BIN_DIR}/Makefile" ; then
-		list="$list `ls -d ${TK_SRC_DIR}/generic 2>/dev/null`"
-	    fi
-
-	    # Check order: pkg --prefix location, Tk's --prefix location,
-	    # relative to directory of tkConfig.sh, Tcl's --prefix location,
-	    # relative to directory of tclConfig.sh.
-
-	    eval "temp_includedir=${includedir}"
-	    list="$list \
-		`ls -d ${temp_includedir}        2>/dev/null` \
-		`ls -d ${TK_PREFIX}/include      2>/dev/null` \
-		`ls -d ${TK_BIN_DIR}/../include  2>/dev/null` \
-		`ls -d ${TCL_PREFIX}/include     2>/dev/null` \
-		`ls -d ${TCL_BIN_DIR}/../include 2>/dev/null`"
-	    if test "${TEA_PLATFORM}" != "windows" -o "$GCC" = "yes"; then
-		list="$list /usr/local/include /usr/include"
-	    fi
-	    for i in $list ; do
-		if test -f "$i/tk.h" ; then
-		    ac_cv_c_tkh=$i
-		    break
-		fi
-	    done
 	fi
+    fi
 
-fi
 
 
-    # Print a message based on how we determined the include path
 
-    if test x"${ac_cv_c_tkh}" = x ; then
-	{ { echo "$as_me:$LINENO: error: tk.h not found.  Please specify its location with --with-tkinclude" >&5
-echo "$as_me: error: tk.h not found.  Please specify its location with --with-tkinclude" >&2;}
+
+
+
+
+
+
+
+    { echo "$as_me:$LINENO: result: Using srcdir found in tclConfig.sh: ${TCL_SRC_DIR}" >&5
+echo "${ECHO_T}Using srcdir found in tclConfig.sh: ${TCL_SRC_DIR}" >&6; }
+
+
+    { echo "$as_me:$LINENO: checking for Itcl private include files" >&5
+echo $ECHO_N "checking for Itcl private include files... $ECHO_C" >&6; }
+
+    ITCL_SRC_DIR_NATIVE=`${CYGPATH} ${ITCL_SRC_DIR}`
+    ITCL_TOP_DIR_NATIVE=\"${ITCL_SRC_DIR_NATIVE}\"
+    ITCL_GENERIC_DIR_NATIVE=\"${ITCL_SRC_DIR_NATIVE}/generic\"
+    ITCL_UNIX_DIR_NATIVE=\"${ITCL_SRC_DIR_NATIVE}\"
+    ITCL_WIN_DIR_NATIVE=\"${ITCL_SRC_DIR_NATIVE}/win\"
+    ITCL_BMAP_DIR_NATIVE=\"${ITCL_SRC_DIR_NATIVE}/bitmaps\"
+    ITCL_TOOL_DIR_NATIVE=\"${ITCL_SRC_DIR_NATIVE}/tools\"
+    ITCL_COMPAT_DIR_NATIVE=\"${ITCL_SRC_DIR_NATIVE}/compat\"
+
+    if test "${TEA_PLATFORM}" = "windows"; then
+	ITCL_PLATFORM_DIR_NATIVE=${ITCL_WIN_DIR_NATIVE}
+    else
+	ITCL_PLATFORM_DIR_NATIVE=${ITCL_UNIX_DIR_NATIVE}
+    fi
+    # We want to ensure these are substituted so as not to require
+    # any *_NATIVE vars be defined in the Makefile
+    ITCL_INCLUDES="-I${ITCL_GENERIC_DIR_NATIVE} -I${ITCL_PLATFORM_DIR_NATIVE}"
+    if test "`uname -s`" = "Darwin"; then
+        # If Tcl was built as a framework, attempt to use
+        # the framework's Headers and PrivateHeaders directories
+        case ${ITCL_DEFS} in
+	    *ITCL_FRAMEWORK*)
+	        if test -d "${ITCL_BIN_DIR}/Headers" -a -d "${ITCL_BIN_DIR}/PrivateHeaders"; then
+	        ITCL_INCLUDES="-I\"${ITCL_BIN_DIR}/Headers\" -I\"${ITCL_BIN_DIR}/PrivateHeaders\" ${TCL_INCLUDES}"; else
+	        ITCL_INCLUDES="${ITCL_INCLUDES} ${ITCL_INCLUDE_SPEC} `echo "${ITCL_INCLUDE_SPEC}" | sed -e 's/Headers/PrivateHeaders/'`"; fi
+	        ;;
+	esac
+    else
+	if test ! -f "${ITCL_SRC_DIR}/generic/itclInt.h" ; then
+	    { { echo "$as_me:$LINENO: error: Cannot find private header itclInt.h in ${ITCL_SRC_DIR}" >&5
+echo "$as_me: error: Cannot find private header itclInt.h in ${ITCL_SRC_DIR}" >&2;}
    { (exit 1); exit 1; }; }
-    else
-	{ echo "$as_me:$LINENO: result: ${ac_cv_c_tkh}" >&5
-echo "${ECHO_T}${ac_cv_c_tkh}" >&6; }
-    fi
-
-    # Convert to a native path and substitute into the output files.
-
-    INCLUDE_DIR_NATIVE=`${CYGPATH} ${ac_cv_c_tkh}`
-
-    TK_INCLUDES=-I\"${INCLUDE_DIR_NATIVE}\"
-
-
-
-    if test "${TEA_WINDOWINGSYSTEM}" = "win32" \
-	-o "${TEA_WINDOWINGSYSTEM}" = "aqua"; then
-	# On Windows and Aqua, we need the X compat headers
-	{ echo "$as_me:$LINENO: checking for X11 header files" >&5
-echo $ECHO_N "checking for X11 header files... $ECHO_C" >&6; }
-	if test ! -r "${INCLUDE_DIR_NATIVE}/X11/Xlib.h"; then
-	    INCLUDE_DIR_NATIVE="`${CYGPATH} ${TK_SRC_DIR}/xlib`"
-	    TK_XINCLUDES=-I\"${INCLUDE_DIR_NATIVE}\"
-
-	fi
-	{ echo "$as_me:$LINENO: result: ${INCLUDE_DIR_NATIVE}" >&5
-echo "${ECHO_T}${INCLUDE_DIR_NATIVE}" >&6; }
-    fi
-
-#TEA_PRIVATE_TK_HEADERS
-
-#--------------------------------------------------------------------
-# For Unix/Tk builds, make sure that the X libraries/headers are found.
-#--------------------------------------------------------------------
-
-
-    if test "${TEA_WINDOWINGSYSTEM}" = "x11" ; then
-
-    { echo "$as_me:$LINENO: checking for X" >&5
-echo $ECHO_N "checking for X... $ECHO_C" >&6; }
-
-
-# Check whether --with-x was given.
-if test "${with_x+set}" = set; then
-  withval=$with_x;
-fi
-
-# $have_x is `yes', `no', `disabled', or empty when we do not yet know.
-if test "x$with_x" = xno; then
-  # The user explicitly disabled X.
-  have_x=disabled
-else
-  case $x_includes,$x_libraries in #(
-    *\'*) { { echo "$as_me:$LINENO: error: Cannot use X directory names containing '" >&5
-echo "$as_me: error: Cannot use X directory names containing '" >&2;}
-   { (exit 1); exit 1; }; };; #(
-    *,NONE | NONE,*) if test "${ac_cv_have_x+set}" = set; then
-  echo $ECHO_N "(cached) $ECHO_C" >&6
-else
-  # One or both of the vars are not set, and there is no cached value.
-ac_x_includes=no ac_x_libraries=no
-rm -f -r conftest.dir
-if mkdir conftest.dir; then
-  cd conftest.dir
-  cat >Imakefile <<'_ACEOF'
-incroot:
-	@echo incroot='${INCROOT}'
-usrlibdir:
-	@echo usrlibdir='${USRLIBDIR}'
-libdir:
-	@echo libdir='${LIBDIR}'
-_ACEOF
-  if (export CC; ${XMKMF-xmkmf}) >/dev/null 2>/dev/null && test -f Makefile; then
-    # GNU make sometimes prints "make[1]: Entering...", which would confuse us.
-    for ac_var in incroot usrlibdir libdir; do
-      eval "ac_im_$ac_var=\`\${MAKE-make} $ac_var 2>/dev/null | sed -n 's/^$ac_var=//p'\`"
-    done
-    # Open Windows xmkmf reportedly sets LIBDIR instead of USRLIBDIR.
-    for ac_extension in a so sl; do
-      if test ! -f "$ac_im_usrlibdir/libX11.$ac_extension" &&
-	 test -f "$ac_im_libdir/libX11.$ac_extension"; then
-	ac_im_usrlibdir=$ac_im_libdir; break
-      fi
-    done
-    # Screen out bogus values from the imake configuration.  They are
-    # bogus both because they are the default anyway, and because
-    # using them would break gcc on systems where it needs fixed includes.
-    case $ac_im_incroot in
-	/usr/include) ac_x_includes= ;;
-	*) test -f "$ac_im_incroot/X11/Xos.h" && ac_x_includes=$ac_im_incroot;;
-    esac
-    case $ac_im_usrlibdir in
-	/usr/lib | /lib) ;;
-	*) test -d "$ac_im_usrlibdir" && ac_x_libraries=$ac_im_usrlibdir ;;
-    esac
-  fi
-  cd ..
-  rm -f -r conftest.dir
-fi
-
-# Standard set of common directories for X headers.
-# Check X11 before X11Rn because it is often a symlink to the current release.
-ac_x_header_dirs='
-/usr/X11/include
-/usr/X11R6/include
-/usr/X11R5/include
-/usr/X11R4/include
-
-/usr/include/X11
-/usr/include/X11R6
-/usr/include/X11R5
-/usr/include/X11R4
-
-/usr/local/X11/include
-/usr/local/X11R6/include
-/usr/local/X11R5/include
-/usr/local/X11R4/include
-
-/usr/local/include/X11
-/usr/local/include/X11R6
-/usr/local/include/X11R5
-/usr/local/include/X11R4
-
-/usr/X386/include
-/usr/x386/include
-/usr/XFree86/include/X11
-
-/usr/include
-/usr/local/include
-/usr/unsupported/include
-/usr/athena/include
-/usr/local/x11r5/include
-/usr/lpp/Xamples/include
-
-/usr/openwin/include
-/usr/openwin/share/include'
-
-if test "$ac_x_includes" = no; then
-  # Guess where to find include files, by looking for Xlib.h.
-  # First, try using that file with no special directory specified.
-  cat >conftest.$ac_ext <<_ACEOF
-/* confdefs.h.  */
-_ACEOF
-cat confdefs.h >>conftest.$ac_ext
-cat >>conftest.$ac_ext <<_ACEOF
-/* end confdefs.h.  */
-#include <X11/Xlib.h>
-_ACEOF
-if { (ac_try="$ac_cpp conftest.$ac_ext"
-case "(($ac_try" in
-  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
-  *) ac_try_echo=$ac_try;;
-esac
-eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
-  (eval "$ac_cpp conftest.$ac_ext") 2>conftest.er1
-  ac_status=$?
-  grep -v '^ *+' conftest.er1 >conftest.err
-  rm -f conftest.er1
-  cat conftest.err >&5
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } >/dev/null && {
-	 test -z "$ac_c_preproc_warn_flag$ac_c_werror_flag" ||
-	 test ! -s conftest.err
-       }; then
-  # We can compile using X headers with no special include directory.
-ac_x_includes=
-else
-  echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
-
-  for ac_dir in $ac_x_header_dirs; do
-  if test -r "$ac_dir/X11/Xlib.h"; then
-    ac_x_includes=$ac_dir
-    break
-  fi
-done
-fi
-
-rm -f conftest.err conftest.$ac_ext
-fi # $ac_x_includes = no
-
-if test "$ac_x_libraries" = no; then
-  # Check for the libraries.
-  # See if we find them without any special options.
-  # Don't add to $LIBS permanently.
-  ac_save_LIBS=$LIBS
-  LIBS="-lX11 $LIBS"
-  cat >conftest.$ac_ext <<_ACEOF
-/* confdefs.h.  */
-_ACEOF
-cat confdefs.h >>conftest.$ac_ext
-cat >>conftest.$ac_ext <<_ACEOF
-/* end confdefs.h.  */
-#include <X11/Xlib.h>
-int
-main ()
-{
-XrmInitialize ()
-  ;
-  return 0;
-}
-_ACEOF
-rm -f conftest.$ac_objext conftest$ac_exeext
-if { (ac_try="$ac_link"
-case "(($ac_try" in
-  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
-  *) ac_try_echo=$ac_try;;
-esac
-eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
-  (eval "$ac_link") 2>conftest.er1
-  ac_status=$?
-  grep -v '^ *+' conftest.er1 >conftest.err
-  rm -f conftest.er1
-  cat conftest.err >&5
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } && {
-	 test -z "$ac_c_werror_flag" ||
-	 test ! -s conftest.err
-       } && test -s conftest$ac_exeext &&
-       $as_test_x conftest$ac_exeext; then
-  LIBS=$ac_save_LIBS
-# We can link X programs with no special library path.
-ac_x_libraries=
-else
-  echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
-
-	LIBS=$ac_save_LIBS
-for ac_dir in `echo "$ac_x_includes $ac_x_header_dirs" | sed s/include/lib/g`
-do
-  # Don't even attempt the hair of trying to link an X program!
-  for ac_extension in a so sl; do
-    if test -r "$ac_dir/libX11.$ac_extension"; then
-      ac_x_libraries=$ac_dir
-      break 2
-    fi
-  done
-done
-fi
-
-rm -f core conftest.err conftest.$ac_objext conftest_ipa8_conftest.oo \
-      conftest$ac_exeext conftest.$ac_ext
-fi # $ac_x_libraries = no
-
-case $ac_x_includes,$ac_x_libraries in #(
-  no,* | *,no | *\'*)
-    # Didn't find X, or a directory has "'" in its name.
-    ac_cv_have_x="have_x=no";; #(
-  *)
-    # Record where we found X for the cache.
-    ac_cv_have_x="have_x=yes\
-	ac_x_includes='$ac_x_includes'\
-	ac_x_libraries='$ac_x_libraries'"
-esac
-fi
-;; #(
-    *) have_x=yes;;
-  esac
-  eval "$ac_cv_have_x"
-fi # $with_x != no
-
-if test "$have_x" != yes; then
-  { echo "$as_me:$LINENO: result: $have_x" >&5
-echo "${ECHO_T}$have_x" >&6; }
-  no_x=yes
-else
-  # If each of the values was on the command line, it overrides each guess.
-  test "x$x_includes" = xNONE && x_includes=$ac_x_includes
-  test "x$x_libraries" = xNONE && x_libraries=$ac_x_libraries
-  # Update the cache value to reflect the command line values.
-  ac_cv_have_x="have_x=yes\
-	ac_x_includes='$x_includes'\
-	ac_x_libraries='$x_libraries'"
-  { echo "$as_me:$LINENO: result: libraries $x_libraries, headers $x_includes" >&5
-echo "${ECHO_T}libraries $x_libraries, headers $x_includes" >&6; }
-fi
-
-    not_really_there=""
-    if test "$no_x" = ""; then
-	if test "$x_includes" = ""; then
-	    cat >conftest.$ac_ext <<_ACEOF
-/* confdefs.h.  */
-_ACEOF
-cat confdefs.h >>conftest.$ac_ext
-cat >>conftest.$ac_ext <<_ACEOF
-/* end confdefs.h.  */
-#include <X11/XIntrinsic.h>
-_ACEOF
-if { (ac_try="$ac_cpp conftest.$ac_ext"
-case "(($ac_try" in
-  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
-  *) ac_try_echo=$ac_try;;
-esac
-eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
-  (eval "$ac_cpp conftest.$ac_ext") 2>conftest.er1
-  ac_status=$?
-  grep -v '^ *+' conftest.er1 >conftest.err
-  rm -f conftest.er1
-  cat conftest.err >&5
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } >/dev/null && {
-	 test -z "$ac_c_preproc_warn_flag$ac_c_werror_flag" ||
-	 test ! -s conftest.err
-       }; then
-  :
-else
-  echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
-
-  not_really_there="yes"
-fi
-
-rm -f conftest.err conftest.$ac_ext
-	else
-	    if test ! -r $x_includes/X11/Intrinsic.h; then
-		not_really_there="yes"
-	    fi
 	fi
     fi
-    if test "$no_x" = "yes" -o "$not_really_there" = "yes"; then
-	{ echo "$as_me:$LINENO: checking for X11 header files" >&5
-echo $ECHO_N "checking for X11 header files... $ECHO_C" >&6; }
-	found_xincludes="no"
-	cat >conftest.$ac_ext <<_ACEOF
-/* confdefs.h.  */
-_ACEOF
-cat confdefs.h >>conftest.$ac_ext
-cat >>conftest.$ac_ext <<_ACEOF
-/* end confdefs.h.  */
-#include <X11/Intrinsic.h>
-_ACEOF
-if { (ac_try="$ac_cpp conftest.$ac_ext"
-case "(($ac_try" in
-  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
-  *) ac_try_echo=$ac_try;;
-esac
-eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
-  (eval "$ac_cpp conftest.$ac_ext") 2>conftest.er1
-  ac_status=$?
-  grep -v '^ *+' conftest.er1 >conftest.err
-  rm -f conftest.er1
-  cat conftest.err >&5
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } >/dev/null && {
-	 test -z "$ac_c_preproc_warn_flag$ac_c_werror_flag" ||
-	 test ! -s conftest.err
-       }; then
-  found_xincludes="yes"
-else
-  echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
 
-  found_xincludes="no"
-fi
 
-rm -f conftest.err conftest.$ac_ext
-	if test "$found_xincludes" = "no"; then
-	    dirs="/usr/unsupported/include /usr/local/include /usr/X386/include /usr/X11R6/include /usr/X11R5/include /usr/include/X11R5 /usr/include/X11R4 /usr/openwin/include /usr/X11/include /usr/sww/include"
-	    for i in $dirs ; do
-		if test -r $i/X11/Intrinsic.h; then
-		    { echo "$as_me:$LINENO: result: $i" >&5
-echo "${ECHO_T}$i" >&6; }
-		    XINCLUDES=" -I$i"
-		    found_xincludes="yes"
-		    break
-		fi
-	    done
-	fi
-    else
-	if test "$x_includes" != ""; then
-	    XINCLUDES="-I$x_includes"
-	    found_xincludes="yes"
-	fi
-    fi
-    if test found_xincludes = "no"; then
-	{ echo "$as_me:$LINENO: result: couldn't find any!" >&5
-echo "${ECHO_T}couldn't find any!" >&6; }
-    fi
 
-    if test "$no_x" = yes; then
-	{ echo "$as_me:$LINENO: checking for X11 libraries" >&5
-echo $ECHO_N "checking for X11 libraries... $ECHO_C" >&6; }
-	XLIBSW=nope
-	dirs="/usr/unsupported/lib /usr/local/lib /usr/X386/lib /usr/X11R6/lib /usr/X11R5/lib /usr/lib/X11R5 /usr/lib/X11R4 /usr/openwin/lib /usr/X11/lib /usr/sww/X11/lib"
-	for i in $dirs ; do
-	    if test -r $i/libX11.a -o -r $i/libX11.so -o -r $i/libX11.sl; then
-		{ echo "$as_me:$LINENO: result: $i" >&5
-echo "${ECHO_T}$i" >&6; }
-		XLIBSW="-L$i -lX11"
-		x_libraries="$i"
-		break
-	    fi
-	done
-    else
-	if test "$x_libraries" = ""; then
-	    XLIBSW=-lX11
-	else
-	    XLIBSW="-L$x_libraries -lX11"
-	fi
-    fi
-    if test "$XLIBSW" = nope ; then
-	{ echo "$as_me:$LINENO: checking for XCreateWindow in -lXwindow" >&5
-echo $ECHO_N "checking for XCreateWindow in -lXwindow... $ECHO_C" >&6; }
-if test "${ac_cv_lib_Xwindow_XCreateWindow+set}" = set; then
-  echo $ECHO_N "(cached) $ECHO_C" >&6
-else
-  ac_check_lib_save_LIBS=$LIBS
-LIBS="-lXwindow  $LIBS"
-cat >conftest.$ac_ext <<_ACEOF
-/* confdefs.h.  */
-_ACEOF
-cat confdefs.h >>conftest.$ac_ext
-cat >>conftest.$ac_ext <<_ACEOF
-/* end confdefs.h.  */
 
-/* Override any GCC internal prototype to avoid an error.
-   Use char because int might match the return type of a GCC
-   builtin and then its argument prototype would still apply.  */
-#ifdef __cplusplus
-extern "C"
-#endif
-char XCreateWindow ();
-int
-main ()
-{
-return XCreateWindow ();
-  ;
-  return 0;
-}
-_ACEOF
-rm -f conftest.$ac_objext conftest$ac_exeext
-if { (ac_try="$ac_link"
-case "(($ac_try" in
-  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
-  *) ac_try_echo=$ac_try;;
-esac
-eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
-  (eval "$ac_link") 2>conftest.er1
-  ac_status=$?
-  grep -v '^ *+' conftest.er1 >conftest.err
-  rm -f conftest.er1
-  cat conftest.err >&5
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } && {
-	 test -z "$ac_c_werror_flag" ||
-	 test ! -s conftest.err
-       } && test -s conftest$ac_exeext &&
-       $as_test_x conftest$ac_exeext; then
-  ac_cv_lib_Xwindow_XCreateWindow=yes
-else
-  echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
 
-	ac_cv_lib_Xwindow_XCreateWindow=no
-fi
 
-rm -f core conftest.err conftest.$ac_objext conftest_ipa8_conftest.oo \
-      conftest$ac_exeext conftest.$ac_ext
-LIBS=$ac_check_lib_save_LIBS
-fi
-{ echo "$as_me:$LINENO: result: $ac_cv_lib_Xwindow_XCreateWindow" >&5
-echo "${ECHO_T}$ac_cv_lib_Xwindow_XCreateWindow" >&6; }
-if test $ac_cv_lib_Xwindow_XCreateWindow = yes; then
-  XLIBSW=-lXwindow
-fi
 
-    fi
-    if test "$XLIBSW" = nope ; then
-	{ echo "$as_me:$LINENO: result: could not find any!  Using -lX11." >&5
-echo "${ECHO_T}could not find any!  Using -lX11." >&6; }
-	XLIBSW=-lX11
-    fi
-    if test x"${XLIBSW}" != x ; then
-	PKG_LIBS="${PKG_LIBS} ${XLIBSW}"
-    fi
 
-    fi
+
+
+
+    { echo "$as_me:$LINENO: result: Using srcdir found in itclConfig.sh: ${ITCL_SRC_DIR}" >&5
+echo "${ECHO_T}Using srcdir found in itclConfig.sh: ${ITCL_SRC_DIR}" >&6; }
 
 
 #--------------------------------------------------------------------
@@ -7802,6 +7061,7 @@ echo "${ECHO_T}could not find any!  Using -lX11." >&6; }
 cat >>confdefs.h <<\_ACEOF
 #define TCL_THREADS 1
 _ACEOF
+
 
 #--------------------------------------------------------------------
 # Check whether --enable-threads or --disable-threads was given.
@@ -10655,14 +9915,6 @@ if test "${SHARED_BUILD}" = "1" ; then
 #define USE_TCL_STUBS 1
 _ACEOF
 
-    cat >>confdefs.h <<\_ACEOF
-#define USE_TK_STUBS 1
-_ACEOF
-
-    cat >>confdefs.h <<\_ACEOF
-#define USE_ITCL_STUBS 1
-_ACEOF
-
 fi
 
 #--------------------------------------------------------------------
@@ -10746,22 +9998,13 @@ fi
 
 #--------------------------------------------------------------------
 # __CHANGE__
-# Add platform libs to LIBS or SHLIB_LD_LIBS as necessary.
-#--------------------------------------------------------------------
-
-if test "${TEA_PLATFORM}" = "windows" -a "$GCC" != "yes" ; then
-    SHLIB_LD_LIBS="${SHLIB_LD_LIBS} \"`${CYGPATH} ${itcl_STUB_LIB_PATH}`\""
-else
-    SHLIB_LD_LIBS="${SHLIB_LD_LIBS} ${itcl_STUB_LIB_SPEC}"
-fi
-
-#--------------------------------------------------------------------
-# __CHANGE__
 # Change the name from exampeA_LIB_FILE to match your package name.
 # Use the stub_LIB_FILE substitution if your package creates a stub
 # library.
 #--------------------------------------------------------------------
 
+itclWidget_STUB_LIB_FILE=${PKG_STUB_LIB_FILE}
+itclWidget_LIB_FILE=${PKG_LIB_FILE}
 
 
 
@@ -10806,36 +10049,37 @@ echo "${ECHO_T}${TCLSH_PROG}" >&6; }
 
 
 
-    { echo "$as_me:$LINENO: checking for wish" >&5
-echo $ECHO_N "checking for wish... $ECHO_C" >&6; }
-    if test -f "${TK_BIN_DIR}/Makefile" ; then
-        # tkConfig.sh is in Tk build directory
-        if test "${TEA_PLATFORM}" = "windows"; then
-            WISH_PROG="${TK_BIN_DIR}/wish${TK_MAJOR_VERSION}${TK_MINOR_VERSION}${TK_DBGX}${EXEEXT}"
-        else
-            WISH_PROG="${TK_BIN_DIR}/wish"
-        fi
-    else
-        # tkConfig.sh is in install location
-        if test "${TEA_PLATFORM}" = "windows"; then
-            WISH_PROG="wish${TK_MAJOR_VERSION}${TK_MINOR_VERSION}${TK_DBGX}${EXEEXT}"
-        else
-            WISH_PROG="wish${TK_MAJOR_VERSION}.${TK_MINOR_VERSION}${TK_DBGX}"
-        fi
-        list="`ls -d ${TK_BIN_DIR}/../bin 2>/dev/null` \
-              `ls -d ${TK_BIN_DIR}/..     2>/dev/null` \
-              `ls -d ${TK_PREFIX}/bin     2>/dev/null`"
-        for i in $list ; do
-            if test -f "$i/${WISH_PROG}" ; then
-                REAL_TK_BIN_DIR="`cd "$i"; pwd`"
-                break
-            fi
-        done
-        WISH_PROG="${REAL_TK_BIN_DIR}/${WISH_PROG}"
-    fi
-    { echo "$as_me:$LINENO: result: ${WISH_PROG}" >&5
-echo "${ECHO_T}${WISH_PROG}" >&6; }
+#--------------------------------------------------------------------
+# These are for itclWidgetWidgetConfig.sh
+#--------------------------------------------------------------------
 
+# pkglibdir must be a fully qualified path and (not ${exec_prefix}/lib)
+eval pkglibdir="${libdir}/${PACKAGE_NAME}${PACKAGE_VERSION}"
+if test "${TCL_LIB_VERSIONS_OK}" = "ok"; then
+    eval itclWidget_LIB_FLAG="-lItcl${PACKAGE_VERSION}${DBGX}"
+    eval itclWidget_STUB_LIB_FLAG="-lItclstub${PACKAGE_VERSION}${DBGX}"
+else
+    eval itclWidget_LIB_FLAG="-lItcl`echo ${PACKAGE_VERSION} | tr -d .`${DBGX}"
+    eval itclWidget_STUB_LIB_FLAG="-lItclstub`echo ${PACKAGE_VERSION} | tr -d .`${DBGX}"
+fi
+itclWidget_BUILD_LIB_SPEC="-L`pwd` ${itclWidget_LIB_FLAG}"
+itclWidget_LIB_SPEC="-L${pkglibdir} ${itclWidget_LIB_FLAG}"
+
+itclWidget_BUILD_STUB_LIB_SPEC="-L`pwd` ${itclWidget_STUB_LIB_FLAG}"
+itclWidget_STUB_LIB_SPEC="-L${pkglibdir} ${itclWidget_STUB_LIB_FLAG}"
+itclWidget_BUILD_STUB_LIB_PATH="`pwd`/${itclWidget_STUB_LIB_FILE}"
+itclWidget_STUB_LIB_PATH="${pkglibdir}/${itclWidget_STUB_LIB_FILE}"
+
+
+
+
+
+
+
+
+# itclWidget_SRC_DIR must be a fully qualified path
+eval itclWidget_SRC_DIR="$srcdir"
+itclWidget_SRC_DIR=`cd "${itclWidget_SRC_DIR}"; pwd`
 
 
 #--------------------------------------------------------------------
@@ -11540,17 +10784,6 @@ TCL_DEFS!$TCL_DEFS$ac_delim
 TCL_EXTRA_CFLAGS!$TCL_EXTRA_CFLAGS$ac_delim
 TCL_LD_FLAGS!$TCL_LD_FLAGS$ac_delim
 TCL_SHLIB_LD_LIBS!$TCL_SHLIB_LD_LIBS$ac_delim
-TK_VERSION!$TK_VERSION$ac_delim
-TK_BIN_DIR!$TK_BIN_DIR$ac_delim
-TK_SRC_DIR!$TK_SRC_DIR$ac_delim
-TK_LIB_FILE!$TK_LIB_FILE$ac_delim
-TK_LIB_FLAG!$TK_LIB_FLAG$ac_delim
-TK_LIB_SPEC!$TK_LIB_SPEC$ac_delim
-TK_STUB_LIB_FILE!$TK_STUB_LIB_FILE$ac_delim
-TK_STUB_LIB_FLAG!$TK_STUB_LIB_FLAG$ac_delim
-TK_STUB_LIB_SPEC!$TK_STUB_LIB_SPEC$ac_delim
-TK_LIBS!$TK_LIBS$ac_delim
-TK_XINCLUDES!$TK_XINCLUDES$ac_delim
 itcl_VERSION!$itcl_VERSION$ac_delim
 itcl_BIN_DIR!$itcl_BIN_DIR$ac_delim
 itcl_SRC_DIR!$itcl_SRC_DIR$ac_delim
@@ -11573,6 +10806,17 @@ SET_MAKE!$SET_MAKE$ac_delim
 RANLIB!$RANLIB$ac_delim
 GREP!$GREP$ac_delim
 EGREP!$EGREP$ac_delim
+MATH_LIBS!$MATH_LIBS$ac_delim
+PKG_SOURCES!$PKG_SOURCES$ac_delim
+PKG_OBJECTS!$PKG_OBJECTS$ac_delim
+CLEANFILES!$CLEANFILES$ac_delim
+TCL_TOP_DIR_NATIVE!$TCL_TOP_DIR_NATIVE$ac_delim
+TCL_GENERIC_DIR_NATIVE!$TCL_GENERIC_DIR_NATIVE$ac_delim
+TCL_UNIX_DIR_NATIVE!$TCL_UNIX_DIR_NATIVE$ac_delim
+TCL_WIN_DIR_NATIVE!$TCL_WIN_DIR_NATIVE$ac_delim
+TCL_BMAP_DIR_NATIVE!$TCL_BMAP_DIR_NATIVE$ac_delim
+TCL_TOOL_DIR_NATIVE!$TCL_TOOL_DIR_NATIVE$ac_delim
+TCL_PLATFORM_DIR_NATIVE!$TCL_PLATFORM_DIR_NATIVE$ac_delim
 _ACEOF
 
   if test `sed -n "s/.*$ac_delim\$/X/p" conf$$subs.sed | grep -c X` = 97; then
@@ -11614,13 +10858,15 @@ _ACEOF
 ac_delim='%!_!# '
 for ac_last_try in false false false false false :; do
   cat >conf$$subs.sed <<_ACEOF
-MATH_LIBS!$MATH_LIBS$ac_delim
-PKG_SOURCES!$PKG_SOURCES$ac_delim
-PKG_OBJECTS!$PKG_OBJECTS$ac_delim
-CLEANFILES!$CLEANFILES$ac_delim
 TCL_INCLUDES!$TCL_INCLUDES$ac_delim
-TK_INCLUDES!$TK_INCLUDES$ac_delim
-XMKMF!$XMKMF$ac_delim
+ITCL_TOP_DIR_NATIVE!$ITCL_TOP_DIR_NATIVE$ac_delim
+ITCL_GENERIC_DIR_NATIVE!$ITCL_GENERIC_DIR_NATIVE$ac_delim
+ITCL_UNIX_DIR_NATIVE!$ITCL_UNIX_DIR_NATIVE$ac_delim
+ITCL_WIN_DIR_NATIVE!$ITCL_WIN_DIR_NATIVE$ac_delim
+ITCL_BMAP_DIR_NATIVE!$ITCL_BMAP_DIR_NATIVE$ac_delim
+ITCL_TOOL_DIR_NATIVE!$ITCL_TOOL_DIR_NATIVE$ac_delim
+ITCL_PLATFORM_DIR_NATIVE!$ITCL_PLATFORM_DIR_NATIVE$ac_delim
+ITCL_INCLUDES!$ITCL_INCLUDES$ac_delim
 SHARED_BUILD!$SHARED_BUILD$ac_delim
 AR!$AR$ac_delim
 CELIB_DIR!$CELIB_DIR$ac_delim
@@ -11642,14 +10888,20 @@ MAKE_SHARED_LIB!$MAKE_SHARED_LIB$ac_delim
 MAKE_STATIC_LIB!$MAKE_STATIC_LIB$ac_delim
 MAKE_STUB_LIB!$MAKE_STUB_LIB$ac_delim
 RANLIB_STUB!$RANLIB_STUB$ac_delim
-itclWidgetstub_LIB_FILE!$itclWidgetstub_LIB_FILE$ac_delim
+itclWidget_STUB_LIB_FILE!$itclWidget_STUB_LIB_FILE$ac_delim
 itclWidget_LIB_FILE!$itclWidget_LIB_FILE$ac_delim
 TCLSH_PROG!$TCLSH_PROG$ac_delim
-WISH_PROG!$WISH_PROG$ac_delim
+itclWidget_BUILD_LIB_SPEC!$itclWidget_BUILD_LIB_SPEC$ac_delim
+itclWidget_LIB_SPEC!$itclWidget_LIB_SPEC$ac_delim
+itclWidget_BUILD_STUB_LIB_SPEC!$itclWidget_BUILD_STUB_LIB_SPEC$ac_delim
+itclWidget_STUB_LIB_SPEC!$itclWidget_STUB_LIB_SPEC$ac_delim
+itclWidget_BUILD_STUB_LIB_PATH!$itclWidget_BUILD_STUB_LIB_PATH$ac_delim
+itclWidget_STUB_LIB_PATH!$itclWidget_STUB_LIB_PATH$ac_delim
+itclWidget_SRC_DIR!$itclWidget_SRC_DIR$ac_delim
 LTLIBOBJS!$LTLIBOBJS$ac_delim
 _ACEOF
 
-  if test `sed -n "s/.*$ac_delim\$/X/p" conf$$subs.sed | grep -c X` = 33; then
+  if test `sed -n "s/.*$ac_delim\$/X/p" conf$$subs.sed | grep -c X` = 41; then
     break
   elif $ac_last_try; then
     { { echo "$as_me:$LINENO: error: could not make $CONFIG_STATUS" >&5
