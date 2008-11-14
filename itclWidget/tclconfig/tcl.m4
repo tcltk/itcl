@@ -9,7 +9,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: tcl.m4,v 1.1.2.2 2008/10/25 19:45:04 wiede Exp $
+# RCS: @(#) $Id: tcl.m4,v 1.1.2.3 2008/11/14 11:56:53 wiede Exp $
 
 AC_PREREQ(2.57)
 
@@ -3423,6 +3423,80 @@ AC_DEFUN([TEA_PRIVATE_TCL_HEADERS], [
 
     AC_SUBST(TCL_INCLUDES)
     AC_MSG_RESULT([Using srcdir found in tclConfig.sh: ${TCL_SRC_DIR}])
+])
+
+#------------------------------------------------------------------------
+# TEA_PRIVATE_ITCL_HEADERS --
+#
+#	Locate the private Itcl include files
+#
+# Arguments:
+#
+#	Requires:
+#		ITCL_SRC_DIR	Assumes that TEA_LOAD_ITCLCONFIG has
+#				 already been called.
+#
+# Results:
+#
+#	Substs the following vars:
+#		ITCL_TOP_DIR_NATIVE
+#		ITCL_GENERIC_DIR_NATIVE
+#		ITCL_UNIX_DIR_NATIVE
+#		ITCL_WIN_DIR_NATIVE
+#		ITCL_BMAP_DIR_NATIVE
+#		ITCL_TOOL_DIR_NATIVE
+#		ITCL_PLATFORM_DIR_NATIVE
+#		ITCL_BIN_DIR_NATIVE
+#		ITCL_INCLUDES
+#------------------------------------------------------------------------
+
+AC_DEFUN([TEA_PRIVATE_ITCL_HEADERS], [
+    AC_MSG_CHECKING([for Itcl private include files])
+
+    ITCL_SRC_DIR_NATIVE=`${CYGPATH} ${ITCL_SRC_DIR}`
+    ITCL_TOP_DIR_NATIVE=\"${ITCL_SRC_DIR_NATIVE}\"
+    ITCL_GENERIC_DIR_NATIVE=\"${ITCL_SRC_DIR_NATIVE}/generic\"
+    ITCL_UNIX_DIR_NATIVE=\"${ITCL_SRC_DIR_NATIVE}\"
+    ITCL_WIN_DIR_NATIVE=\"${ITCL_SRC_DIR_NATIVE}/win\"
+    ITCL_BMAP_DIR_NATIVE=\"${ITCL_SRC_DIR_NATIVE}/bitmaps\"
+    ITCL_TOOL_DIR_NATIVE=\"${ITCL_SRC_DIR_NATIVE}/tools\"
+    ITCL_COMPAT_DIR_NATIVE=\"${ITCL_SRC_DIR_NATIVE}/compat\"
+
+    if test "${TEA_PLATFORM}" = "windows"; then
+	ITCL_PLATFORM_DIR_NATIVE=${ITCL_WIN_DIR_NATIVE}
+    else
+	ITCL_PLATFORM_DIR_NATIVE=${ITCL_UNIX_DIR_NATIVE}
+    fi
+    # We want to ensure these are substituted so as not to require
+    # any *_NATIVE vars be defined in the Makefile
+    ITCL_INCLUDES="-I${ITCL_GENERIC_DIR_NATIVE} -I${ITCL_PLATFORM_DIR_NATIVE}"
+    if test "`uname -s`" = "Darwin"; then
+        # If Tcl was built as a framework, attempt to use
+        # the framework's Headers and PrivateHeaders directories
+        case ${ITCL_DEFS} in
+	    *ITCL_FRAMEWORK*)
+	        if test -d "${ITCL_BIN_DIR}/Headers" -a -d "${ITCL_BIN_DIR}/PrivateHeaders"; then
+	        ITCL_INCLUDES="-I\"${ITCL_BIN_DIR}/Headers\" -I\"${ITCL_BIN_DIR}/PrivateHeaders\" ${TCL_INCLUDES}"; else
+	        ITCL_INCLUDES="${ITCL_INCLUDES} ${ITCL_INCLUDE_SPEC} `echo "${ITCL_INCLUDE_SPEC}" | sed -e 's/Headers/PrivateHeaders/'`"; fi
+	        ;;
+	esac
+    else
+	if test ! -f "${ITCL_SRC_DIR}/generic/itclInt.h" ; then
+	    AC_MSG_ERROR([Cannot find private header itclInt.h in ${ITCL_SRC_DIR}])
+	fi
+    fi
+
+
+    AC_SUBST(ITCL_TOP_DIR_NATIVE)
+    AC_SUBST(ITCL_GENERIC_DIR_NATIVE)
+    AC_SUBST(ITCL_UNIX_DIR_NATIVE)
+    AC_SUBST(ITCL_WIN_DIR_NATIVE)
+    AC_SUBST(ITCL_BMAP_DIR_NATIVE)
+    AC_SUBST(ITCL_TOOL_DIR_NATIVE)
+    AC_SUBST(ITCL_PLATFORM_DIR_NATIVE)
+
+    AC_SUBST(ITCL_INCLUDES)
+    AC_MSG_RESULT([Using srcdir found in itclConfig.sh: ${ITCL_SRC_DIR}])
 ])
 
 #------------------------------------------------------------------------
