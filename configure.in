@@ -253,6 +253,12 @@ eval itcl_SRC_DIR="$srcdir"
 itcl_SRC_DIR=`cd "${itcl_SRC_DIR}"; pwd`
 AC_SUBST(itcl_SRC_DIR)
 
+eval itcl_INCLUDE_DIR="${itcl_SRC_DIR}/generic"
+AC_SUBST(itcl_INCLUDE_DIR)
+
+eval itcl_INCLUDE_SPEC="${itcl_SRC_DIR}/generic"
+AC_SUBST(itcl_INCLUDE_SPEC)
+
 #--------------------------------------------------------------------
 # Finally, substitute all of the various values into the Makefile.
 #--------------------------------------------------------------------

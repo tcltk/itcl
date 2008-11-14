@@ -733,6 +733,8 @@ itcl_STUB_LIB_SPEC
 itcl_BUILD_STUB_LIB_PATH
 itcl_STUB_LIB_PATH
 itcl_SRC_DIR
+itcl_INCLUDE_DIR
+itcl_INCLUDE_SPEC
 LTLIBOBJS'
 ac_subst_files=''
       ac_precious_vars='build_alias
@@ -9877,6 +9879,12 @@ eval itcl_SRC_DIR="$srcdir"
 itcl_SRC_DIR=`cd "${itcl_SRC_DIR}"; pwd`
 
 
+eval itcl_INCLUDE_DIR="${itcl_SRC_DIR}/generic"
+
+
+eval itcl_INCLUDE_SPEC="${itcl_SRC_DIR}/generic"
+
+
 #--------------------------------------------------------------------
 # Finally, substitute all of the various values into the Makefile.
 #--------------------------------------------------------------------
@@ -10677,10 +10685,12 @@ itcl_STUB_LIB_SPEC!$itcl_STUB_LIB_SPEC$ac_delim
 itcl_BUILD_STUB_LIB_PATH!$itcl_BUILD_STUB_LIB_PATH$ac_delim
 itcl_STUB_LIB_PATH!$itcl_STUB_LIB_PATH$ac_delim
 itcl_SRC_DIR!$itcl_SRC_DIR$ac_delim
+itcl_INCLUDE_DIR!$itcl_INCLUDE_DIR$ac_delim
+itcl_INCLUDE_SPEC!$itcl_INCLUDE_SPEC$ac_delim
 LTLIBOBJS!$LTLIBOBJS$ac_delim
 _ACEOF
 
-  if test `sed -n "s/.*$ac_delim\$/X/p" conf$$subs.sed | grep -c X` = 25; then
+  if test `sed -n "s/.*$ac_delim\$/X/p" conf$$subs.sed | grep -c X` = 27; then
     break
   elif $ac_last_try; then
     { { echo "$as_me:$LINENO: error: could not make $CONFIG_STATUS" >&5
