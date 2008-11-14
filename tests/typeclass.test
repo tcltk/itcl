@@ -383,7 +383,6 @@ test rename-1.5 {creating an object twice destroys the first instance} -body {
 } -result {::itcl::internal::variables::fido::dog ::itcl::internal::variables::fido::dog {}}
 
 
-if {0} {
 test component-1.1 {component defines variable} -body {
     type dog {
         typecomponent mycomp
@@ -396,12 +395,12 @@ test component-1.1 {component defines variable} -body {
     dog fido
     fido test
 } -cleanup {
-    delete object fido
-    ::itcl::delete class dog
+    fido destroy
+    dog destroy
 } -result {}
 
 test component-1.2 {component -inherit} -body {
-    ::itcl::extendedclass dog {
+    type dog {
         component mycomp -inherit
 
         constructor {} {
@@ -412,16 +411,16 @@ test component-1.2 {component -inherit} -body {
     dog fido
     fido length foo
 } -cleanup {
-    ::itcl::delete object fido
-    ::itcl::delete class dog
+    fido destroy
+    dog destroy
 } -result {3}
 
 test component-1.3 {component -inherit can only have one of it} -body {
-    ::itcl::extendedclass dogbase {
+    type dogbase {
         component mycompbase -inherit
     }
 
-    ::itcl::extendedclass dog {
+    type dog {
 	inherit dogbase
         component mycomp -inherit
 
@@ -433,124 +432,12 @@ test component-1.3 {component -inherit can only have one of it} -body {
     dog fido
     fido length foo
 } -cleanup {
-    ::itcl::delete class dog
-    ::itcl::delete class dogbase
+    dog destroy
+    dogbase destroy
 } -returnCodes {
     error
-} -result {object "fido" can only have one component with inherit. Had already component "mycomp" now component "mycompbase"error in ItclInitObjectVariables}
+} -result {object "fido" can only have one component with inherit. Had already component "mycomp" now component "mycompbase"}
 
-#-----------------------------------------------------------------------
-# Typemethod delegation
-
-test delegatemethod-1.1 {delegate method to non-existent component} -body {
-    set result ""
-
-    ::itcl::extendedclass dog {
-        delegate method foo to bar
-    }
-
-    dog fido
-} -returnCodes {
-    error
-} -cleanup {
-} -result {class "::dog" has no component "bar"}
-
-test delegatemethod-1.2 {delegating to existing component} -body {
-    ::itcl::extendedclass dog {
-	component string
-        delegate method length to string
-
-        constructor {} {
-            set string string
-        }
-    }
-
-    dog fido
-    fido length foo
-} -cleanup {
-    ::itcl::delete object fido
-    ::itcl::delete class dog
-} -result {3}
-
-test delegatemethod-1.3 {delegating to existing component with error} -body {
-    ::itcl::extendedclass dog {
-#	component string
-        delegate method length to string
-
-        constructor {} {
-            set string string
-        }
-    }
-
-    dog fido
-    fido length foo bar
-} -cleanup {
-    ::itcl::delete class dog
-} -returnCodes {
-    error
-} -result {wrong # args: should be "fido length string"}
-
-test delegatemethod-1.5 {delegating unknown methods to existing typecomponent} -body {
-    ::itcl::extendedclass dog {
-#	component string
-        delegate method * to string
-
-        constructor {} {
-            set string string
-        }
-    }
-
-    dog fido
-    fido length foo
-} -cleanup {
-    ::itcl::delete object fido
-    ::itcl::delete class dog
-} -result {3}
-
-test delegatemethod-1.6a {delegating unknown method to existing component with error} -body {
-    ::itcl::extendedclass dog {
-        component stringhandler
-        delegate method * to stringhandler
-
-        constructor {} {
-            set stringhandler string
-        }
-    }
-
-    dog fido
-    fido foo bar
-} -cleanup {
-    ::itcl::delete object fido
-    ::itcl::delete class dog
-} -returnCodes {
-    error
-} -result {unknown or ambiguous subcommand "foo": must be bytelength, compare, equal, first, index, is, last, length, map, match, range, repeat, replace, reverse, tolower, totitle, toupper, trim, trimleft, trimright, wordend, or wordstart}
-
-test delegatemethod-1.7 {can't delegate local method: order 1} -body {
-    ::itcl::extendedclass dog {
-        component bar
-        method foo {} {}
-        delegate method foo to bar
-    }
-} -cleanup {
-    ::itcl::delete class dog
-} -returnCodes {
-    error
-} -result {Error in "delegate method foo...", "foo" has been defined locally.}
-
-test delegatemethod-1.8 {can't delegate local method: order 2} -body {
-    ::itcl::extendedclass dog {
-        component bar
-        delegate method foo to bar
-        method foo {} {}
-    }
-} -cleanup {
-    ::itcl::delete class dog
-} -returnCodes {
-    error
-} -result {Error in "method foo...", "foo" has been delegated}
-
-}
 
 #-----------------------------------------------------------------------
 # constructor

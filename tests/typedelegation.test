@@ -77,9 +77,11 @@ interp alias {} type {} ::itcl::type
 ::tcltest::loadTestedCommands
 
 
+if {1} {
 #-----------------------------------------------------------------------
 # Typemethod delegation
 
+puts stderr dtypemethod-1.1
 test dtypemethod-1.1 {delegate typemethod to non-existent component} -body {
     set result ""
 
@@ -92,6 +94,7 @@ test dtypemethod-1.1 {delegate typemethod to non-existent component} -body {
     error
 } -result {::dog delegates typemethod "foo" to undefined typecomponent "bar"}
 
+puts stderr dtypemethod-1.2
 test dtypemethod-1.2 {delegating to existing typecomponent} -body {
     type dog {
         delegate typemethod length to string
@@ -926,14 +929,13 @@ test doption-1.14 {configure query skips excepted options} -body {
     cat fifi
 
     fifi configure
-} -constraints {
-    notyet_configure
 } -cleanup {
     cat destroy
     tail destroy
 } -result {{-d d D d d} {-a a A a a}}
 
-
+# end
+}
 
 #---------------------------------------------------------------------
 # Clean up
