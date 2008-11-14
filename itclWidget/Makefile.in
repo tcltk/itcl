@@ -12,7 +12,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: Makefile.in,v 1.1.2.2 2008/10/25 19:51:33 wiede Exp $
+# RCS: @(#) $Id: Makefile.in,v 1.1.2.3 2008/11/14 11:54:21 wiede Exp $
 
 #========================================================================
 # The names of the source files is defined in the configure script.
@@ -37,30 +37,11 @@ PKG_TCL_SOURCES = @PKG_TCL_SOURCES@
 
 #========================================================================
 # This is a list of header files to be installed
-# the C-source files include itclInt.h, which needs itclIntDecls.h,
+# itk.h includes itclInt.h, which needs itclIntDecls.h,
 # so we must install them.
 #========================================================================
 
 PKG_HEADERS	= @PKG_HEADERS@
-
-#========================================================================
-# Nothing of the variables below this line should need to be changed.
-# Please check the TARGETS section below to make sure the make targets
-# are correct.
-#========================================================================
-
-itclWidget_LIB_FILE	= @itclWidget_LIB_FILE@
-itclWidgetstub_LIB_FILE = @itclWidgetstub_LIB_FILE@
-itclstub_LIB_FILE = @itclstub_LIB_FILE@
-
-#========================================================================
-# Add additional lines to handle any additional AC_SUBST cases that
-# have been added to the configure script.
-#========================================================================
-
-ITCL_WIDGET_GENERIC_DIR_NATIVE	= @ITCL_WIDGET_GENERIC_DIR_NATIVE@
-ITCL_WIDGET_UNIX_DIR_NATIVE	= @ITCL_WIDGET_UNIX_DIR_NATIVE@
-ITCL_WIDGET_WIN_DIR_NATIVE	= @ITCL_WIDGET_WIN_DIR_NATIVE@
 
 #========================================================================
 # Nothing of the variables below this line need to be changed.  Please
@@ -77,7 +58,7 @@ ITCL_WIDGET_WIN_DIR_NATIVE	= @ITCL_WIDGET_WIN_DIR_NATIVE@
 PKG_LIB_FILE	= @PKG_LIB_FILE@
 PKG_STUB_LIB_FILE = @PKG_STUB_LIB_FILE@
 
-lib_BINARIES	= $(PKG_LIB_FILE)
+lib_BINARIES	= $(PKG_LIB_FILE) $(PKG_STUB_LIB_FILE)
 BINARIES	= $(lib_BINARIES)
 
 SHELL		= @SHELL@
@@ -129,11 +110,8 @@ STLIB_LD	= @STLIB_LD@
 TCL_DEFS	= @TCL_DEFS@
 TCL_BIN_DIR	= @TCL_BIN_DIR@
 TCL_SRC_DIR	= @TCL_SRC_DIR@
-TK_SRC_DIR	= @TK_SRC_DIR@
-TK_BIN_DIR	= @TK_BIN_DIR@
-# This is necessary for packages that use private headers
+# This is necessary for packages that use private Tcl headers
 TCL_TOP_DIR_NATIVE = @TCL_TOP_DIR_NATIVE@
-TK_TOP_DIR_NATIVE = @TK_TOP_DIR_NATIVE@
 
 # Not used, but retained for reference of what libs Tcl required
 TCL_LIBS	= @TCL_LIBS@
@@ -145,25 +123,22 @@ TCL_LIBS	= @TCL_LIBS@
 # require for testing here (like TCLX_LIBRARY).
 #========================================================================
 
-EXTRA_PATH	= $(top_builddir):$(TCL_BIN_DIR):$(TK_BIN_DIR)
-TCLSH_ENV	= TCL_LIBRARY=`@CYGPATH@ $(TCL_SRC_DIR)/library` \
-		  TK_LIBRARY=`@CYGPATH@ $(TK_SRC_DIR)/library` \
-		  ITCL_LIBRARY=`@CYGPATH@ @itcl_SRC_DIR@/library` \
-		  ITCL_WIDGET_LIBRARY=`@CYGPATH@ $(srcdir)/library` \
+EXTRA_PATH	= $(top_builddir):$(TCL_BIN_DIR)
+TCLSH_ENV	= TCL_LIBRARY=`@CYGPATH@ $(TCL_SRC_DIR)/library`
+PKG_ENV		= ITCL_LIBRARY=`@CYGPATH@ $(srcdir)/library` \
 		  @LD_LIBRARY_PATH_VAR@="$(EXTRA_PATH):$(@LD_LIBRARY_PATH_VAR@)" \
 		  PATH="$(EXTRA_PATH):$(PATH)" \
-		  TCLLIBPATH="$(top_builddir) @itcl_BIN_DIR@"
-TCLSH_PROG	= @TCLSH_PROG@
-WISH_PROG	= @WISH_PROG@
-TCLSH		= $(TCLSH_ENV) $(TCLSH_PROG)
-WISH		= $(TCLSH_ENV) $(WISH_PROG)
+		  TCLLIBPATH="$(top_builddir)"
+TCLSH_PROG	= $(TCLSH_ENV) @TCLSH_PROG@
+TCLSH		= $(PKG_ENV) $(TCLSH_PROG)
+SHARED_BUILD	= @SHARED_BUILD@
 
-INCLUDES	= @PKG_INCLUDES@ @TCL_INCLUDES@ @TK_INCLUDES@ @TK_XINCLUDES@
+INCLUDES	= @PKG_INCLUDES@ @TCL_INCLUDES@ @ITCL_INCLUDES@
 
 PKG_CFLAGS	= @PKG_CFLAGS@
 
 DEFS		= @DEFS@ $(PKG_CFLAGS) \
-		  -DITCL_WIDGET_LIBRARY=\"$(pkglibdir)\"
+		  -DITCL_LIBRARY=\"$(pkglibdir)\"
 
 CONFIG_CLEAN_FILES = @CONFIG_CLEAN_FILES@ Makefile itclWidgetConfig.sh pkgIndex.tcl
 
@@ -233,13 +208,17 @@ install-doc: doc
 	done
 
 test: binaries libraries
-	$(WISH) `@CYGPATH@ $(srcdir)/tests/all.tcl` -load "package require ItclWidget" $(TESTFLAGS) | cat
+	$(TCLSH) `@CYGPATH@ $(srcdir)/tests/all.tcl` -load "package require Itcl" $(TESTFLAGS)
+
+genstubs: $(srcdir)/tools/genStubs.tcl $(srcdir)/generic/itcl.decls
+	@echo $(TCLSH) $(srcdir)/tools/genStubs.tcl $(srcdir)/generic $(srcdir)/generic/itcl.decls
+	@$(TCLSH) $(srcdir)/tools/genStubs.tcl $(srcdir)/generic $(srcdir)/generic/itcl.decls
 
 shell: binaries libraries
-	@$(WISH) $(SCRIPT)
+	@$(TCLSH) $(SCRIPT)
 
 gdb:
-	$(TCLSH_ENV) gdb $(WISH_PROG) $(SCRIPT)
+	$(TCLSH_ENV) gdb $(TCLSH_PROG) $(SCRIPT)
 
 depend:
 
@@ -270,8 +249,8 @@ $(PKG_STUB_LIB_FILE): $(PKG_STUB_OBJECTS)
 # containing your extension.  If your sources are in a subdirectory,
 # you will have to modify the paths to reflect this:
 #
-# exampleA.$(OBJEXT): $(srcdir)/src/win/exampleA.c
-# 	$(COMPILE) -c `@CYGPATH@ $(srcdir)/src/win/exampleA.c` -o $@
+# exampleA.$(OBJEXT): $(srcdir)/generic/exampleA.c
+# 	$(COMPILE) -c `@CYGPATH@ $(srcdir)/generic/exampleA.c` -o $@
 #
 # Setting the VPATH variable to a list of paths will cause the makefile
 # to look into these paths when resolving .c to .obj dependencies.
@@ -310,7 +289,7 @@ dist: dist-clean doc
 	chmod 664 $(DIST_DIR)/tclconfig/tcl.m4
 	chmod +x $(DIST_DIR)/tclconfig/install-sh
 
-	list='demos doc examples generic library tests win win/rc'; \
+	list='doc generic library tests win win/rc'; \
 	for p in $$list; do \
 	    if test -d $(srcdir)/$$p ; then \
 		mkdir $(DIST_DIR)/$$p; \
@@ -395,7 +374,7 @@ install-lib-binaries:
 	  fi; \
 	done
 	$(INSTALL_DATA) pkgIndex.tcl $(DESTDIR)$(pkglibdir)
-	: $(INSTALL_DATA) itclWidgetConfig.sh $(DESTDIR)$(libdir)
+	$(INSTALL_DATA) itclWidgetConfig.sh $(DESTDIR)$(libdir)
 
 #========================================================================
 # Install binary executables (e.g. .exe files)
