@@ -85,8 +85,6 @@ proc tkbide {{msg "tkbide"} {msec 500}} {
     }
 }
 
-
-
 testsNeedTcl     8.6
 testsNeedTcltest 2.2
 
