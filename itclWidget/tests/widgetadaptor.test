@@ -679,6 +679,89 @@ test option-2.6 {configure -opt unknown to implicit component} -constraints {
 # end
 }
 
+test iinfo-6.5 {info options with unknown delegated options} -constraints {
+    tk
+} -body {
+    widgetadaptor myframe {
+        option -foo a
+        delegate option * to itcl_hull
+        constructor {args} {
+            installhull [frame $self]
+        }
+    }
+    myframe .frm
+
+    set a [lsort [.frm info options]]
+    destroy .frm
+    tkbide
+    set a
+} -cleanup {
+    myframe destroy
+} -result {-background -bd -bg -borderwidth -class -colormap -container -cursor -foo -height -highlightbackground -highlightcolor -highlightthickness -padx -pady -relief -takefocus -visual -width}
+
+test iinfo-6.7 {info options with exceptions} -constraints {
+    tk
+} -body {
+    widgetadaptor myframe {
+        option -foo a
+        delegate option * to itcl_hull except -background
+        constructor {args} {
+            installhull [frame $self]
+        }
+    }
+    myframe .frm
+
+    set a [lsort [.frm info options]]
+    destroy .frm
+    tkbide
+    set a
+} -cleanup {
+    myframe destroy
+} -result {-bd -bg -borderwidth -class -colormap -container -cursor -foo -height -highlightbackground -highlightcolor -highlightthickness -padx -pady -relief -takefocus -visual -width}
+
+test iinfo-6.8 {info options with pattern} -constraints {
+    tk
+} -body {
+    widgetadaptor myframe {
+        option -foo a
+        delegate option * to itcl_hull
+        constructor {args} {
+            installhull [frame $self]
+        }
+    }
+    myframe .frm
+
+    set a [lsort [.frm info options -c*]]
+    destroy .frm
+    tkbide
+    set a
+} -cleanup {
+    myframe destroy
+} -result {-class -colormap -container -cursor}
+
+test tinfo-3.2 {widget info instances} -constraints {
+    tk
+} -body {
+    widgetadaptor mylabel {
+        constructor {args} {
+            installhull [label $self]
+        }
+    }
+
+    mylabel .lab1
+    mylabel .lab2
+
+    set result [mylabel info instances]
+
+    destroy .lab1
+    destroy .lab2
+    tkbide
+
+    lsort $result
+} -cleanup {
+    mylabel destroy
+} -result {.lab1 .lab2}
+
 #---------------------------------------------------------------------
 # Clean up
 
