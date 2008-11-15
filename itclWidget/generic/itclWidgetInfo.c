@@ -8,7 +8,7 @@
  * ========================================================================
  *  Author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclWidgetInfo.c,v 1.1.2.3 2008/11/11 11:37:36 wiede Exp $
+ *     RCS:  $Id: itclWidgetInfo.c,v 1.1.2.4 2008/11/15 23:38:52 wiede Exp $
  * ========================================================================
  *           Copyright (c) 2007 Arnulf Wiedemann
  * ------------------------------------------------------------------------
@@ -36,13 +36,13 @@ typedef struct InfoMethod {
 } InfoMethod;
 
 static InfoMethod InfoMethodList[] = {
-    { "components", "", ItclBiInfoComponentsCmd },
-    { "component", "componentname", ItclBiInfoComponentCmd },
-    { "options", "", ItclBiInfoOptionsCmd },
-    { "option", "?", ItclBiInfoOptionCmd },
-    { "types", "", ItclBiInfoTypesCmd },
-    { "widgets", "", ItclBiInfoWidgetsCmd },
-    { "widgetadaptors", "", ItclBiInfoWidgetAdaptorsCmd },
+    { "_components", "", ItclBiInfoComponentsCmd },
+    { "_component", "componentname", ItclBiInfoComponentCmd },
+    { "_options", "", ItclBiInfoOptionsCmd },
+    { "_option", "?", ItclBiInfoOptionCmd },
+    { "_types", "", ItclBiInfoTypesCmd },
+    { "_widgets", "", ItclBiInfoWidgetsCmd },
+    { "_widgetadaptors", "", ItclBiInfoWidgetAdaptorsCmd },
     { NULL, NULL, NULL }
 };
 #endif
@@ -54,13 +54,13 @@ struct NameProcMap { const char *name; Tcl_ObjCmdProc *proc; };
  */
 
 static const struct NameProcMap infoCmds2[] = {
-    { "::itcl::builtin::Info::components", ItclBiInfoComponentsCmd },
-    { "::itcl::builtin::Info::component", ItclBiInfoComponentCmd },
-    { "::itcl::builtin::Info::options", ItclBiInfoOptionsCmd },
-    { "::itcl::builtin::Info::option", ItclBiInfoOptionCmd },
-    { "::itcl::builtin::Info::types", ItclBiInfoTypesCmd },
-    { "::itcl::builtin::Info::widgets", ItclBiInfoWidgetsCmd },
-    { "::itcl::builtin::Info::widgetadapters", ItclBiInfoWidgetAdaptorsCmd },
+    { "::itcl::builtin::Info::_components", ItclBiInfoComponentsCmd },
+    { "::itcl::builtin::Info::_component", ItclBiInfoComponentCmd },
+    { "::itcl::builtin::Info::_options", ItclBiInfoOptionsCmd },
+    { "::itcl::builtin::Info::_option", ItclBiInfoOptionCmd },
+    { "::itcl::builtin::Info::_types", ItclBiInfoTypesCmd },
+    { "::itcl::builtin::Info::_widgets", ItclBiInfoWidgetsCmd },
+    { "::itcl::builtin::Info::_widgetadapters", ItclBiInfoWidgetAdaptorsCmd },
     { NULL, NULL }
 };
 
