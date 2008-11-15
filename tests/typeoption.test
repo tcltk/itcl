@@ -1,6 +1,6 @@
 #---------------------------------------------------------------------
 # TITLE:
-#       typefunction.test
+#       typeoption.test
 #
 # AUTHOR:
 #       Arnulf Wiedemann with a lot of code form the snit tests by
@@ -475,7 +475,7 @@ test option-6.2 {if no options, no options methods} -body {
     }
 
     dog spot
-    spot info function c*
+    spot info methods c*
 } -cleanup {
     dog destroy
 } -result {}
