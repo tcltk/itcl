@@ -39,7 +39,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclParse.c,v 1.1.2.43 2008/11/14 23:26:59 wiede Exp $
+ *     RCS:  $Id: itclParse.c,v 1.1.2.44 2008/11/15 23:42:48 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -1615,7 +1615,7 @@ Itcl_ClassVariableCmd(
     arrayInitStr = NULL;
     ItclShowArgs(1, "Itcl_ClassVariableCmd", objc, objv);
     pLevel = Itcl_Protection(interp, 0);
-    if (iclsPtr->flags & (ITCL_TYPE|ITCL_WIDGETADAPTOR)) {
+    if (iclsPtr->flags & (ITCL_TYPE|ITCL_WIDGET|ITCL_WIDGETADAPTOR)) {
         if (objc > 2) {
 	    if (strcmp(Tcl_GetString(objv[2]), "-array") == 0) {
 	        if (objc == 4) {
@@ -1672,6 +1672,9 @@ Itcl_ClassVariableCmd(
     if (Itcl_CreateVariable(interp, iclsPtr, namePtr, init, config,
             &ivPtr) != TCL_OK) {
         return TCL_ERROR;
+    }
+    if (iclsPtr->flags & (ITCL_TYPE|ITCL_WIDGET|ITCL_WIDGETADAPTOR)) {
+        ivPtr->flags |= ITCL_VARIABLE;
     }
     if (haveArrayInit) {
         ivPtr->arrayInitPtr = Tcl_NewStringObj(arrayInitStr, -1);
@@ -3050,6 +3053,7 @@ delegate method * ?to <componentName>? ?using <pattern>? ?except <methods>?";
     if (result != TCL_OK) {
         return result;
     }
+    idmPtr->flags |= ITCL_METHOD;
     hPtr = Tcl_CreateHashEntry(&iclsPtr->delegatedFunctions,
             (char *)idmPtr->namePtr, &isNew);
     Tcl_SetHashValue(hPtr, idmPtr);

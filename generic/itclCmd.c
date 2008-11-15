@@ -23,7 +23,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclCmd.c,v 1.1.2.31 2008/11/14 23:26:59 wiede Exp $
+ *     RCS:  $Id: itclCmd.c,v 1.1.2.32 2008/11/15 23:42:48 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -155,17 +155,18 @@ Itcl_FindClassesCmd(
     Tcl_Namespace *globalNs = Tcl_GetGlobalNamespace(interp);
     int forceFullNames = 0;
 
-    char *pattern;
-    CONST char *cmdName;
-    int newEntry, handledActiveNs;
     Tcl_HashTable unique;
     Tcl_HashEntry *entry;
     Tcl_HashSearch place;
-    Itcl_Stack search;
     Tcl_Command cmd;
     Tcl_Command originalCmd;
     Tcl_Namespace *nsPtr;
     Tcl_Obj *objPtr;
+    Itcl_Stack search;
+    char *pattern;
+    const char *cmdName;
+    int newEntry;
+    int handledActiveNs;
 
     ItclShowArgs(2, "Itcl_FindClassesCmd", objc, objv);
     if (objc > 2) {
@@ -233,8 +234,8 @@ Itcl_FindClassesCmd(
                 Tcl_CreateHashEntry(&unique, (char*)cmd, &newEntry);
 
                 if (newEntry &&
-			(!pattern || Tcl_StringMatch((const char *)cmdName,
-			pattern))) {
+			((pattern == NULL) ||
+			Tcl_StringMatch((const char *)cmdName, pattern))) {
                     Tcl_ListObjAppendElement((Tcl_Interp*)NULL,
 			    Tcl_GetObjResult(interp), objPtr);
                 } else {

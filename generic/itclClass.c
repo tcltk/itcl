@@ -25,7 +25,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann Copyright (c) 2007
  *
- *     RCS:  $Id: itclClass.c,v 1.1.2.35 2008/11/14 23:26:59 wiede Exp $
+ *     RCS:  $Id: itclClass.c,v 1.1.2.36 2008/11/15 23:42:48 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -520,7 +520,7 @@ Itcl_CreateClass(
     Tcl_SetHashValue(hPtr, (ClientData)ivPtr);
 
     if (infoPtr->currClassFlags &
-            (ITCL_ECLASS|ITCL_NWIDGET|ITCL_TYPE|ITCL_WIDGETADAPTOR)) {
+            (ITCL_ECLASS|ITCL_TYPE|ITCL_WIDGETADAPTOR|ITCL_WIDGET)) {
         /*
          *  Add the built-in "itcl_options" variable to the list of
 	 *  data members.

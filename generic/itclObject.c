@@ -24,7 +24,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann Copyright (c) 2007
  *
- *     RCS:  $Id: itclObject.c,v 1.1.2.50 2008/11/14 23:26:59 wiede Exp $
+ *     RCS:  $Id: itclObject.c,v 1.1.2.51 2008/11/15 23:42:48 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -161,6 +161,7 @@ ItclCreateObject(
     int newObjc;
     int newEntry;
 
+    infoPtr = NULL;
     ItclShowArgs(1, "ItclCreateObject", objc, objv);
     saveCurrIoPtr = NULL;
     if (iclsPtr->flags & (ITCL_TYPE|ITCL_WIDGETADAPTOR)) {
@@ -553,7 +554,9 @@ errorReturn:
      *  Destroy the "constructed" table in the object data, since
      *  it is no longer needed.
      */
-    infoPtr->currIoPtr = saveCurrIoPtr;
+    if (infoPtr != NULL) {
+        infoPtr->currIoPtr = saveCurrIoPtr;
+    }
     Tcl_DeleteHashTable(ioPtr->constructed);
     ckfree((char*)ioPtr->constructed);
     ioPtr->constructed = NULL;
@@ -1632,6 +1635,7 @@ ItclGetInstanceVar(
     } else {
         iclsPtr = contextIclsPtr;
     }
+    ivPtr = NULL;
     hPtr = Tcl_FindHashEntry(&iclsPtr->resolveVars, (char *)name1);
     if (hPtr != NULL) {
         vlookup = Tcl_GetHashValue(hPtr);
@@ -1658,7 +1662,7 @@ fprintf(stderr, "ItclSetInstanceVar cannot get ivPtr!%s!%s!\n", iclsPtr->nsPtr->
 	    doAppend = 0;
         }
     }
-    if (ivPtr->flags & ITCL_COMMON) {
+    if ((ivPtr != NULL) && (ivPtr->flags & ITCL_COMMON)) {
 	if (!isItclOptions) {
             Tcl_DStringSetLength(&buffer, 0);
 	    if (ivPtr->protection != ITCL_PUBLIC) {

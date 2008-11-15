@@ -25,7 +25,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclMethod.c,v 1.1.2.29 2008/11/12 21:31:19 wiede Exp $
+ *     RCS:  $Id: itclMethod.c,v 1.1.2.30 2008/11/15 23:42:48 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -372,6 +372,7 @@ ItclCreateMethod(
         return TCL_ERROR;
     }
 
+    imPtr->flags |= ITCL_METHOD;
     Itcl_PreserveData((ClientData)imPtr);
     if (imPtrPtr != NULL) {
         *imPtrPtr = imPtr;

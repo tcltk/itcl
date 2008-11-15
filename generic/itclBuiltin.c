@@ -24,7 +24,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclBuiltin.c,v 1.1.2.44 2008/11/14 23:26:59 wiede Exp $
+ *     RCS:  $Id: itclBuiltin.c,v 1.1.2.45 2008/11/15 23:42:48 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -1157,7 +1157,7 @@ fprintf(stderr, "ItclBiClassUnknownCmd cannot find class\n");
     if (strcmp(funcName, "itcl_hull") == 0) {
         isItclHull = 1;
     }
-    if (!isItclHull) {
+    if (!isItclHull && doCheck) {
         FOREACH_HASH_VALUE(icPtr, &iclsPtr->components) {
             if (icPtr->flags & ITCL_COMPONENT_INHERIT) {
 	        val = Tcl_GetVar2(interp, Tcl_GetString(icPtr->namePtr),
@@ -1180,21 +1180,23 @@ fprintf(stderr, "ItclBiClassUnknownCmd cannot find class\n");
      */
     hPtr = NULL;
     isLocal = 0;
-    FOREACH_HASH_VALUE(idmPtr, &iclsPtr->delegatedFunctions) {
-        if (strcmp(Tcl_GetString(idmPtr->namePtr), funcName) == 0) {
-	    if (idmPtr->flags & ITCL_TYPE_METHOD) {
-	       isLocal = 1;
+    if (doCheck) {
+        FOREACH_HASH_VALUE(idmPtr, &iclsPtr->delegatedFunctions) {
+            if (strcmp(Tcl_GetString(idmPtr->namePtr), funcName) == 0) {
+	        if (idmPtr->flags & ITCL_TYPE_METHOD) {
+	           isLocal = 1;
+	        }
+	        break;
+            }
+            if (strcmp(Tcl_GetString(idmPtr->namePtr), "*") == 0) {
+	        if (idmPtr->flags & ITCL_TYPE_METHOD) {
+	           isLocal = 1;
+	        }
+	        break;
 	    }
-	    break;
         }
-        if (strcmp(Tcl_GetString(idmPtr->namePtr), "*") == 0) {
-	    if (idmPtr->flags & ITCL_TYPE_METHOD) {
-	       isLocal = 1;
-	    }
-	    break;
-	}
     }
-    if (isLocal && !isItclHull) {
+    if (isLocal && !isItclHull && doCheck) {
         FOREACH_HASH_VALUE(idmPtr, &iclsPtr->delegatedFunctions) {
             if ((strcmp(Tcl_GetString(idmPtr->namePtr), funcName) == 0) ||
 	            (strcmp(Tcl_GetString(idmPtr->namePtr), "*") == 0)) {
