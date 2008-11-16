@@ -24,7 +24,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclInfo.c,v 1.1.2.25 2008/11/15 23:42:48 wiede Exp $
+ *     RCS:  $Id: itclInfo.c,v 1.1.2.26 2008/11/16 16:28:37 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -33,23 +33,29 @@
  */
 #include "itclInt.h"
 
+Tcl_ObjCmdProc Itcl_BiInfoComponentsCmd;
+Tcl_ObjCmdProc Itcl_BiInfoDefaultCmd;
+Tcl_ObjCmdProc Itcl_BiInfoDelegatedCmd;
 Tcl_ObjCmdProc Itcl_BiInfoExistsCmd;
 Tcl_ObjCmdProc Itcl_BiInfoExtendedClassCmd;
-Tcl_ObjCmdProc Itcl_BiInfoTypeCmd;
-Tcl_ObjCmdProc Itcl_BiInfoWidgetCmd;
-Tcl_ObjCmdProc Itcl_BiInfoDelegatedCmd;
-Tcl_ObjCmdProc Itcl_BiInfoItclHullCmd;
-
-Tcl_ObjCmdProc Itcl_BiInfoDefaultCmd;
 Tcl_ObjCmdProc Itcl_BiInfoInstancesCmd;
+Tcl_ObjCmdProc Itcl_BiInfoItclHullCmd;
 Tcl_ObjCmdProc Itcl_BiInfoMethodCmd;
 Tcl_ObjCmdProc Itcl_BiInfoMethodsCmd;
 Tcl_ObjCmdProc Itcl_BiInfoOptionsCmd;
+Tcl_ObjCmdProc Itcl_BiInfoTypeCmd;
 Tcl_ObjCmdProc Itcl_BiInfoTypeMethodCmd;
 Tcl_ObjCmdProc Itcl_BiInfoTypeMethodsCmd;
+Tcl_ObjCmdProc Itcl_BiInfoTypesCmd;
 Tcl_ObjCmdProc Itcl_BiInfoTypeVarsCmd;
 Tcl_ObjCmdProc Itcl_BiInfoVariablesCmd;
 Tcl_ObjCmdProc Itcl_BiInfoWidgetadaptorCmd;
+Tcl_ObjCmdProc Itcl_BiInfoWidgetCmd;
+Tcl_ObjCmdProc Itcl_BiInfoDelegatedOptionsCmd;
+Tcl_ObjCmdProc Itcl_BiInfoDelegatedMethodsCmd;
+Tcl_ObjCmdProc Itcl_BiInfoDelegatedTypeMethodsCmd;
+Tcl_ObjCmdProc Itcl_ErrorDelegatedInfoCmd;
+Tcl_ObjCmdProc Itcl_BiInfoDelegatedUnknownCmd;
 
 typedef struct InfoMethod {
     char* name;              /* method name */
@@ -79,6 +85,11 @@ static InfoMethod InfoMethodList[] = {
         Itcl_BiInfoComponentCmd,
 	ITCL_TYPE|ITCL_WIDGETADAPTOR|ITCL_WIDGET|ITCL_ECLASS
     },
+    { "components",
+        "?pattern?",
+	Itcl_BiInfoComponentsCmd,
+	ITCL_TYPE|ITCL_WIDGETADAPTOR|ITCL_WIDGET|ITCL_ECLASS
+    },
     { "default",
         "method aname varname",
 	Itcl_BiInfoDefaultCmd,
@@ -103,6 +114,11 @@ static InfoMethod InfoMethodList[] = {
         "",
 	Itcl_BiInfoHeritageCmd,
 	ITCL_CLASS|ITCL_WIDGET|ITCL_ECLASS
+    },
+    { "hulltypes",
+        "?pattern?",
+        NULL /* Itcl_BiInfoInstancesCmd */,
+	ITCL_WIDGETADAPTOR|ITCL_WIDGET
     },
     { "itcl_hull",
         "?name? ?-inherit? ?-value?",
@@ -155,6 +171,11 @@ static InfoMethod InfoMethodList[] = {
 	Itcl_BiInfoTypeMethodsCmd,
 	ITCL_TYPE|ITCL_WIDGETADAPTOR|ITCL_WIDGET|ITCL_ECLASS
     },
+    { "types",
+        "?pattern?",
+	Itcl_BiInfoTypesCmd,
+	ITCL_TYPE|ITCL_WIDGETADAPTOR|ITCL_WIDGET|ITCL_ECLASS
+    },
     { "typevariable",
         "?name? ?-protection? ?-type? ?-name? ?-init? ?-value? ?-config?",
         Itcl_BiInfoVariableCmd,
@@ -185,9 +206,24 @@ static InfoMethod InfoMethodList[] = {
         Itcl_BiInfoWidgetCmd,
 	ITCL_WIDGET
     },
+    { "widgets",
+        "?pattern?",
+	NULL /* ItclBiInfoWidgetsCmd */,
+	ITCL_WIDGET
+    },
+    { "widgetclasses",
+        "?pattern?",
+	NULL /* ItclBiInfoWidgetclassesCmd */,
+	ITCL_WIDGET
+    },
     { "widgetadaptor",
         "",
         Itcl_BiInfoWidgetadaptorCmd,
+	ITCL_WIDGETADAPTOR
+    },
+    { "widgetadaptors",
+        "?pattern?",
+	NULL /* ItclBiInfoWidgetAdaptorsCmd */,
 	ITCL_WIDGETADAPTOR
     },
     /*
@@ -208,6 +244,13 @@ static InfoMethod InfoMethodList[] = {
 
 struct NameProcMap { const char *name; Tcl_ObjCmdProc *proc; };
 
+struct NameProcMap2 {
+    char* name;              /* method name */
+    char* usage;             /* string describing usage */
+    Tcl_ObjCmdProc *proc;    /* implementation C proc */
+    int flags;               /* which class commands have it */
+};
+
 /*
  * List of commands that are used to implement the [info object] subcommands.
  */
@@ -217,6 +260,7 @@ static const struct NameProcMap infoCmds2[] = {
     { "::itcl::builtin::Info::body", Itcl_BiInfoBodyCmd },
     { "::itcl::builtin::Info::class", Itcl_BiInfoClassCmd },
     { "::itcl::builtin::Info::component", Itcl_BiInfoComponentCmd },
+    { "::itcl::builtin::Info::components", Itcl_BiInfoComponentsCmd },
     { "::itcl::builtin::Info::default", Itcl_BiInfoDefaultCmd },
     { "::itcl::builtin::Info::delegated", Itcl_BiInfoDelegatedCmd },
     { "::itcl::builtin::Info::exists", Itcl_BiInfoExistsCmd },
@@ -233,6 +277,7 @@ static const struct NameProcMap infoCmds2[] = {
     { "::itcl::builtin::Info::type", Itcl_BiInfoTypeCmd },
     { "::itcl::builtin::Info::typemethod", Itcl_BiInfoTypeMethodCmd },
     { "::itcl::builtin::Info::typemethods", Itcl_BiInfoTypeMethodsCmd },
+    { "::itcl::builtin::Info::types", Itcl_BiInfoTypesCmd },
     { "::itcl::builtin::Info::typevars", Itcl_BiInfoTypeVarsCmd },
     { "::itcl::builtin::Info::variable", Itcl_BiInfoVariableCmd },
     { "::itcl::builtin::Info::variables", Itcl_BiInfoVariablesCmd },
@@ -246,6 +291,40 @@ static const struct NameProcMap infoCmds2[] = {
      */
     { "::itcl::builtin::Info::@error", Itcl_DefaultInfoCmd },
     { NULL, NULL }
+};
+
+static const struct NameProcMap2 infoCmdsDelegated2[] = {
+    { "::itcl::builtin::Info::delegated::methods",
+	"?pattern?",
+        Itcl_BiInfoDelegatedMethodsCmd,
+        ITCL_TYPE|ITCL_WIDGETADAPTOR|ITCL_WIDGET|ITCL_ECLASS
+    },
+    { "::itcl::builtin::Info::delegated::typemethods",
+	"?pattern?",
+        Itcl_BiInfoDelegatedTypeMethodsCmd,
+        ITCL_TYPE|ITCL_WIDGETADAPTOR|ITCL_WIDGET|ITCL_ECLASS
+    },
+    { "::itcl::builtin::Info::delegated::options",
+	"?pattern?",
+        Itcl_BiInfoDelegatedOptionsCmd,
+        ITCL_TYPE|ITCL_WIDGETADAPTOR|ITCL_WIDGET|ITCL_ECLASS
+    },
+    { "::itcl::builtin::Info::delegated::unknown",
+	"",
+        Itcl_BiInfoDelegatedUnknownCmd,
+        ITCL_TYPE|ITCL_WIDGETADAPTOR|ITCL_WIDGET|ITCL_ECLASS
+    },
+    /*
+     *  Add an error handler to support all of the usual inquiries
+     *  for the "info" command in the global namespace.
+     */
+    {
+        "::itcl::builtin::Info::delegated::@error",
+	"",
+	Itcl_ErrorDelegatedInfoCmd,
+	0
+    },
+    { NULL, NULL, NULL, 0 }
 };
 
 
@@ -267,6 +346,8 @@ ItclInfoInit(
 {
     Tcl_Namespace *nsPtr;
     Tcl_Command cmd;
+    Tcl_Obj *unkObjPtr;
+    Tcl_Obj *ensObjPtr;
     int i;
 
     ItclObjectInfo *infoPtr;
@@ -287,9 +368,9 @@ ItclInfoInit(
         Tcl_CreateObjCommand(interp, infoCmds2[i].name,
                 infoCmds2[i].proc, infoPtr, NULL);
     }
-    Tcl_Obj *ensObjPtr = Tcl_NewStringObj("::itcl::builtin::Info", -1);
+    ensObjPtr = Tcl_NewStringObj("::itcl::builtin::Info", -1);
     Tcl_IncrRefCount(ensObjPtr);
-    Tcl_Obj *unkObjPtr = Tcl_NewStringObj("::itcl::builtin::Info::unknown", -1);
+    unkObjPtr = Tcl_NewStringObj("::itcl::builtin::Info::unknown", -1);
     Tcl_IncrRefCount(unkObjPtr);
     if (Tcl_SetEnsembleUnknownHandler(NULL,
             Tcl_FindEnsemble(interp, ensObjPtr, TCL_LEAVE_ERR_MSG),
@@ -298,6 +379,37 @@ ItclInfoInit(
     }
     Tcl_DecrRefCount(ensObjPtr);
     Tcl_DecrRefCount(unkObjPtr);
+
+    /*
+     * Build the ensemble used to implement [info delegated].
+     */
+
+    nsPtr = Tcl_CreateNamespace(interp, "::itcl::builtin::Info::delegated",
+            NULL, NULL);
+    if (nsPtr == NULL) {
+        Tcl_Panic("ITCL: error in creating namespace: ::itcl::builtin::Info::delegated \n");
+    }
+    cmd = Tcl_CreateEnsemble(interp, nsPtr->fullName, nsPtr,
+        TCL_ENSEMBLE_PREFIX);
+    Tcl_Export(interp, nsPtr, "[a-z]*", 1);
+    for (i=0 ; infoCmdsDelegated2[i].name!=NULL ; i++) {
+        Tcl_CreateObjCommand(interp, infoCmdsDelegated2[i].name,
+                infoCmdsDelegated2[i].proc, infoPtr, NULL);
+    }
+    ensObjPtr = Tcl_NewStringObj("::itcl::builtin::Info::delegated",
+            -1);
+    Tcl_IncrRefCount(ensObjPtr);
+    unkObjPtr = Tcl_NewStringObj(
+            "::itcl::builtin::Info::delegated::unknown", -1);
+    Tcl_IncrRefCount(unkObjPtr);
+    if (Tcl_SetEnsembleUnknownHandler(NULL,
+            Tcl_FindEnsemble(interp, ensObjPtr, TCL_LEAVE_ERR_MSG),
+	    unkObjPtr) != TCL_OK) {
+        return TCL_ERROR;
+    }
+    Tcl_DecrRefCount(ensObjPtr);
+    Tcl_DecrRefCount(unkObjPtr);
+
     return TCL_OK;
 }
 
@@ -355,6 +467,73 @@ fprintf(stderr, "cannot get class from namespace\n");
             "\n...and others described on the man page", -1);
     }
 }
+
+/*
+ * ------------------------------------------------------------------------
+ *  ItclGetInfoDelegatedUsage()
+ *
+ * ------------------------------------------------------------------------
+  */
+void
+ItclGetInfoDelegatedUsage(
+    Tcl_Interp *interp,
+    Tcl_Obj *objPtr,       /* returns: summary of usage info */
+    ItclObjectInfo *infoPtr)
+{
+    Tcl_HashEntry *hPtr;
+    ItclClass *iclsPtr;
+    const char *name;
+    const char *lastName;
+    char *spaces = "  ";
+    int isOpenEnded = 0;
+
+    int i;
+
+    hPtr = Tcl_FindHashEntry(&infoPtr->namespaceClasses, (char *)
+            Tcl_GetCurrentNamespace(interp));
+    if (hPtr == NULL) {
+fprintf(stderr, "cannot get class from namespace\n");
+        return;
+    }
+    iclsPtr = Tcl_GetHashValue(hPtr);
+    for (i=0; infoCmdsDelegated2[i].name != NULL; i++) {
+	name = infoCmdsDelegated2[i].name;
+	lastName = name;
+	while (name != NULL) {
+	    name = strstr(name, "::");
+	    if (name == NULL) {
+	        break;
+	    }
+	    name += 2;
+	    lastName = name;
+	}
+	name = lastName;
+	if (strcmp(name, "unknown") == 0) {
+	    /* we don't report that, as it is a special case */
+	    continue;
+	}
+        if (*name == '@'
+	        && strcmp(name,"@error") == 0) {
+            isOpenEnded = 1;
+        } else {
+	    if (iclsPtr->flags & infoCmdsDelegated2[i].flags) {
+                Tcl_AppendToObj(objPtr, spaces, -1);
+                Tcl_AppendToObj(objPtr, "info ", -1);
+                Tcl_AppendToObj(objPtr, name, -1);
+	        if (strlen(infoCmdsDelegated2[i].usage) > 0) {
+                  Tcl_AppendToObj(objPtr, " ", -1);
+                  Tcl_AppendToObj(objPtr, infoCmdsDelegated2[i].usage, -1);
+	        }
+                spaces = "\n  ";
+	    }
+        }
+    }
+    if (isOpenEnded) {
+        Tcl_AppendToObj(objPtr,
+            "\n...and others described on the man page", -1);
+    }
+}
+
 
 
 /*
@@ -2897,7 +3076,7 @@ Itcl_BiInfoMethodsCmd(
 /* ARGSUSED */
 int
 Itcl_BiInfoOptionsCmd(
-    ClientData cleintData, /* ItclObjectInfo Ptr */
+    ClientData clientData, /* ItclObjectInfo Ptr */
     Tcl_Interp *interp,    /* current interpreter */
     int objc,              /* number of arguments */
     Tcl_Obj *const objv[]) /* argument objects */
@@ -2987,6 +3166,124 @@ Itcl_BiInfoOptionsCmd(
 		}
 	    }
 	}
+    }
+    Tcl_SetObjResult(interp, listPtr);
+    return TCL_OK;
+}
+
+/*
+ * ------------------------------------------------------------------------
+ *  Itcl_BiInfoTypesCmd()
+ *
+ *  Returns information regarding the Type for an object.  This command
+ *  can be invoked with or without an object context:
+ *
+ *
+ *  Returns a status TCL_OK/TCL_ERROR to indicate success/failure.
+ * ------------------------------------------------------------------------
+ */
+/* ARGSUSED */
+int
+Itcl_BiInfoTypesCmd(
+    ClientData clientData, /* ItclObjectInfo Ptr */
+    Tcl_Interp *interp,    /* current interpreter */
+    int objc,              /* number of arguments */
+    Tcl_Obj *const objv[]) /* argument objects */
+{
+    FOREACH_HASH_DECLS;
+    Tcl_Obj *listPtr;
+    ItclObjectInfo *infoPtr;
+    ItclClass *iclsPtr;
+    const char *name;
+    const char *pattern;
+
+    ItclShowArgs(1, "Itcl_BiInfoTypesCmd", objc, objv);
+    infoPtr = (ItclObjectInfo *)clientData;
+    iclsPtr = NULL;
+    pattern = NULL;
+    if (objc > 2) {
+	Tcl_AppendResult(interp, "wrong # args should be: info types ",
+	        "?pattern?", NULL);
+        return TCL_ERROR;
+    }
+    if (objc == 2) {
+        pattern = Tcl_GetString(objv[1]);
+    }
+    listPtr = Tcl_NewListObj(0, NULL);
+    FOREACH_HASH_VALUE(iclsPtr, &infoPtr->classes) {
+	if (iclsPtr->flags & ITCL_TYPE) {
+	    name = Tcl_GetString(iclsPtr->namePtr);
+	    Tcl_IncrRefCount(iclsPtr->namePtr);
+	    if ((pattern == NULL) ||
+                     Tcl_StringMatch(name, pattern)) {
+                Tcl_ListObjAppendElement(interp, listPtr, iclsPtr->namePtr);
+            }
+        }
+    }
+    Tcl_SetObjResult(interp, listPtr);
+    return TCL_OK;
+}
+
+/*
+ * ------------------------------------------------------------------------
+ *  Itcl_BiInfoComponentsCmd()
+ *
+ *  Returns information regarding the Components for an object.  This command
+ *  can be invoked with or without an object context:
+ *
+ *
+ *  Returns a status TCL_OK/TCL_ERROR to indicate success/failure.
+ * ------------------------------------------------------------------------
+ */
+/* ARGSUSED */
+int
+Itcl_BiInfoComponentsCmd(
+    ClientData clientData, /* ItclObjectInfo Ptr */
+    Tcl_Interp *interp,    /* current interpreter */
+    int objc,              /* number of arguments */
+    Tcl_Obj *const objv[]) /* argument objects */
+{
+    FOREACH_HASH_DECLS;
+    Tcl_Obj *listPtr;
+    ItclObjectInfo *infoPtr;
+    ItclObject *ioPtr;
+    ItclClass *iclsPtr;
+    ItclComponent *icPtr;
+    const char *name;
+    const char *pattern;
+
+    ItclShowArgs(1, "Itcl_BiInfoComponentsCmd", objc, objv);
+    infoPtr = (ItclObjectInfo *)clientData;
+    iclsPtr = NULL;
+    pattern = NULL;
+    if (Itcl_GetContext(interp, &iclsPtr, &ioPtr) != TCL_OK) {
+        Tcl_AppendResult(interp, "cannot get context ", (char*)NULL);
+        return TCL_ERROR;
+    }
+    if (ioPtr != NULL) {
+        iclsPtr = ioPtr->iclsPtr;
+    }
+    if (iclsPtr == NULL) {
+        Tcl_AppendResult(interp, "INTERNAL ERROR in Itcl_BiInfoComponentsCmd", 
+	        " iclsPtr == NULL", NULL);
+        return TCL_ERROR;
+    }
+    if (objc > 2) {
+	Tcl_AppendResult(interp, "wrong # args should be: info components ",
+	        "?pattern?", NULL);
+        return TCL_ERROR;
+    }
+    if (objc == 2) {
+        pattern = Tcl_GetString(objv[1]);
+    }
+    listPtr = Tcl_NewListObj(0, NULL);
+    FOREACH_HASH_VALUE(icPtr, &iclsPtr->components) {
+    name = Tcl_GetString(icPtr->namePtr);
+    Tcl_IncrRefCount(icPtr->namePtr);
+    if ((pattern == NULL) ||
+                 Tcl_StringMatch(name, pattern)) {
+            Tcl_ListObjAppendElement(interp, listPtr, icPtr->namePtr);
+        }
     }
     Tcl_SetObjResult(interp, listPtr);
     return TCL_OK;
@@ -3140,8 +3437,8 @@ Itcl_BiInfoTypeVarsCmd(
     int objc,              /* number of arguments */
     Tcl_Obj *const objv[]) /* argument objects */
 {
-    ItclShowArgs(0, "Itcl_BiInfoTypeVarsCmd", objc, objv);
-fprintf(stderr, "Itcl_BiInfoTypeVarsCmd not yet implemented\n");
+    ItclShowArgs(1, "Itcl_BiInfoTypeVarsCmd", objc, objv);
+fprintf(stderr, "WARNING Itcl_BiInfoTypeVarsCmd not yet implemented\n");
     return TCL_OK;
 }
 
@@ -3283,3 +3580,281 @@ Itcl_BiInfoInstancesCmd(
     Tcl_SetObjResult(interp, listPtr);
     return TCL_OK;
 }
+
+/*
+ * ------------------------------------------------------------------------
+ *  Itcl_BiInfoDelegatedOptionsCmd()
+ *
+ *  Returns information regarding delegated options.  This command
+ *  can be invoked with or without an object context:
+ *
+ *
+ *  Returns a status TCL_OK/TCL_ERROR to indicate success/failure.
+ * ------------------------------------------------------------------------
+ */
+/* ARGSUSED */
+int
+Itcl_BiInfoDelegatedOptionsCmd(
+    ClientData clientData, /* ItclObjectInfo Ptr */
+    Tcl_Interp *interp,    /* current interpreter */
+    int objc,              /* number of arguments */
+    Tcl_Obj *const objv[]) /* argument objects */
+{
+    FOREACH_HASH_DECLS;
+    Tcl_Obj *listPtr;
+    Tcl_Obj *objPtr;
+    Tcl_Obj *objPtr2;
+    ItclObject *ioPtr;
+    ItclClass *iclsPtr;
+    ItclDelegatedOption *idoPtr;
+    const char *name;
+    const char *pattern;
+
+    ItclShowArgs(1, "Itcl_BiInfoDelegatedOptionsCmd", objc, objv);
+    pattern = NULL;
+    if (objc > 2) {
+	Tcl_AppendResult(interp, "wrong # args should be: info delegated ",
+	        "options ?pattern?", NULL);
+        return TCL_ERROR;
+    }
+
+    if (objc == 2) {
+        pattern = Tcl_GetString(objv[1]);
+    }
+    if (Itcl_GetContext(interp, &iclsPtr, &ioPtr) != TCL_OK) {
+        return TCL_ERROR;
+    }
+    if (ioPtr != NULL) {
+        iclsPtr = ioPtr->iclsPtr;
+    }
+    listPtr = Tcl_NewListObj(0, NULL);
+    FOREACH_HASH_VALUE(idoPtr, &iclsPtr->delegatedOptions) {
+	if (iclsPtr->flags &
+	        (ITCL_TYPE|ITCL_WIDGETADAPTOR|ITCL_WIDGET|ITCL_ECLASS)) {
+	    name = Tcl_GetString(idoPtr->namePtr);
+	    Tcl_IncrRefCount(idoPtr->namePtr);
+	    if ((pattern == NULL) ||
+                     Tcl_StringMatch(name, pattern)) {
+		objPtr = Tcl_NewListObj(0, NULL);
+                Tcl_ListObjAppendElement(interp, objPtr,
+	                idoPtr->namePtr);
+		if (idoPtr->icPtr != NULL) {
+                    Tcl_ListObjAppendElement(interp, objPtr,
+	                    idoPtr->icPtr->namePtr);
+		} else {
+		    objPtr2 = Tcl_NewStringObj("", -1);
+		    Tcl_IncrRefCount(objPtr2);
+                    Tcl_ListObjAppendElement(interp, objPtr, objPtr2);
+		}
+                Tcl_ListObjAppendElement(interp, listPtr, objPtr);
+	    }
+        }
+    }
+    Tcl_SetObjResult(interp, listPtr);
+    return TCL_OK;
+}
+
+/*
+ * ------------------------------------------------------------------------
+ *  Itcl_BiInfoDelegatedMethodsCmd()
+ *
+ *  Returns information regarding delegated methods.  This command
+ *  can be invoked with or without an object context:
+ *
+ *
+ *  Returns a status TCL_OK/TCL_ERROR to indicate success/failure.
+ * ------------------------------------------------------------------------
+ */
+/* ARGSUSED */
+int
+Itcl_BiInfoDelegatedMethodsCmd(
+    ClientData clientData, /* ItclObjectInfo Ptr */
+    Tcl_Interp *interp,    /* current interpreter */
+    int objc,              /* number of arguments */
+    Tcl_Obj *const objv[]) /* argument objects */
+{
+    FOREACH_HASH_DECLS;
+    Tcl_Obj *listPtr;
+    Tcl_Obj *objPtr;
+    Tcl_Obj *objPtr2;
+    ItclObject *ioPtr;
+    ItclClass *iclsPtr;
+    ItclDelegatedFunction *idmPtr;
+    const char *name;
+    const char *pattern;
+
+    ItclShowArgs(1, "Itcl_BiInfoDelegatedMethodsCmd", objc, objv);
+    pattern = NULL;
+    if (objc > 2) {
+	Tcl_AppendResult(interp, "wrong # args should be: info delegated ",
+	        "methods ?pattern?", NULL);
+        return TCL_ERROR;
+    }
+
+    if (objc == 2) {
+        pattern = Tcl_GetString(objv[1]);
+    }
+    if (Itcl_GetContext(interp, &iclsPtr, &ioPtr) != TCL_OK) {
+        return TCL_ERROR;
+    }
+    if (ioPtr != NULL) {
+        iclsPtr = ioPtr->iclsPtr;
+    }
+    listPtr = Tcl_NewListObj(0, NULL);
+    FOREACH_HASH_VALUE(idmPtr, &iclsPtr->delegatedFunctions) {
+	if (iclsPtr->flags &
+	        (ITCL_TYPE|ITCL_WIDGETADAPTOR|ITCL_WIDGET|ITCL_ECLASS)) {
+	    name = Tcl_GetString(idmPtr->namePtr);
+	    Tcl_IncrRefCount(idmPtr->namePtr);
+	    if ((pattern == NULL) ||
+                     Tcl_StringMatch(name, pattern)) {
+		if ((idmPtr->flags & ITCL_TYPE_METHOD) == 0) {
+		    objPtr = Tcl_NewListObj(0, NULL);
+                    Tcl_ListObjAppendElement(interp, objPtr,
+	                    idmPtr->namePtr);
+		    if (idmPtr->icPtr != NULL) {
+                        Tcl_ListObjAppendElement(interp, objPtr,
+	                        idmPtr->icPtr->namePtr);
+		    } else {
+		        objPtr2 = Tcl_NewStringObj("", -1);
+		        Tcl_IncrRefCount(objPtr2);
+                        Tcl_ListObjAppendElement(interp, objPtr, objPtr2);
+		    }
+                    Tcl_ListObjAppendElement(interp, listPtr, objPtr);
+	       }
+	    }
+        }
+    }
+    Tcl_SetObjResult(interp, listPtr);
+    return TCL_OK;
+}
+
+/*
+ * ------------------------------------------------------------------------
+ *  Itcl_BiInfoTypeMethodsCmd()
+ *
+ *  Returns information regarding delegated type methods.  This command
+ *  can be invoked with or without an object context:
+ *
+ *
+ *  Returns a status TCL_OK/TCL_ERROR to indicate success/failure.
+ * ------------------------------------------------------------------------
+ */
+/* ARGSUSED */
+int
+Itcl_BiInfoDelegatedTypeMethodsCmd(
+    ClientData clientData, /* ItclObjectInfo Ptr */
+    Tcl_Interp *interp,    /* current interpreter */
+    int objc,              /* number of arguments */
+    Tcl_Obj *const objv[]) /* argument objects */
+{
+    FOREACH_HASH_DECLS;
+    Tcl_Obj *listPtr;
+    Tcl_Obj *objPtr;
+    Tcl_Obj *objPtr2;
+    ItclObject *ioPtr;
+    ItclClass *iclsPtr;
+    ItclDelegatedFunction *idmPtr;
+    const char *name;
+    const char *pattern;
+
+    ItclShowArgs(1, "Itcl_BiInfoDelegatedTypeMethodsCmd", objc, objv);
+    pattern = NULL;
+    if (objc > 2) {
+	Tcl_AppendResult(interp, "wrong # args should be: info delegated ",
+	        "typemethods ?pattern?", NULL);
+        return TCL_ERROR;
+    }
+
+    if (objc == 2) {
+        pattern = Tcl_GetString(objv[1]);
+    }
+    if (Itcl_GetContext(interp, &iclsPtr, &ioPtr) != TCL_OK) {
+        return TCL_ERROR;
+    }
+    if (ioPtr != NULL) {
+        iclsPtr = ioPtr->iclsPtr;
+    }
+    listPtr = Tcl_NewListObj(0, NULL);
+    FOREACH_HASH_VALUE(idmPtr, &iclsPtr->delegatedFunctions) {
+	if (iclsPtr->flags &
+	        (ITCL_TYPE|ITCL_WIDGETADAPTOR|ITCL_WIDGET|ITCL_ECLASS)) {
+	    name = Tcl_GetString(idmPtr->namePtr);
+	    Tcl_IncrRefCount(idmPtr->namePtr);
+	    if ((pattern == NULL) ||
+                     Tcl_StringMatch(name, pattern)) {
+		if (idmPtr->flags & ITCL_TYPE_METHOD) {
+		    objPtr = Tcl_NewListObj(0, NULL);
+                    Tcl_ListObjAppendElement(interp, objPtr,
+	                    idmPtr->namePtr);
+		    if (idmPtr->icPtr != NULL) {
+                        Tcl_ListObjAppendElement(interp, objPtr,
+	                        idmPtr->icPtr->namePtr);
+		    } else {
+		            objPtr2 = Tcl_NewStringObj("", -1);
+		        Tcl_IncrRefCount(objPtr2);
+                        Tcl_ListObjAppendElement(interp, objPtr, objPtr2);
+		    }
+                    Tcl_ListObjAppendElement(interp, listPtr, objPtr);
+	        }
+	    }
+        }
+    }
+    Tcl_SetObjResult(interp, listPtr);
+    return TCL_OK;
+}
+
+/*
+ * ------------------------------------------------------------------------
+ *  Itcl_BiInfoInstancesCmd()
+ *
+ *  Returns information regarding instances.  This command
+ *  can be invoked with or without an object context:
+ *
+ *
+ *  Returns a status TCL_OK/TCL_ERROR to indicate success/failure.
+ * ------------------------------------------------------------------------
+ */
+/* ARGSUSED */
+int
+Itcl_ErrorDelegatedInfoCmd(
+    ClientData clientData, /* ItclObjectInfo Ptr */
+    Tcl_Interp *interp,    /* current interpreter */
+    int objc,              /* number of arguments */
+    Tcl_Obj *const objv[]) /* argument objects */
+{
+    ItclShowArgs(0, "Itcl_ErrorDelegatedInfoCmd", objc, objv);
+    /* produce usage message */
+    Tcl_Obj *objPtr = Tcl_NewStringObj(
+           "wrong # args: should be one of...\n", -1);
+    ItclGetInfoDelegatedUsage(interp, objPtr, (ItclObjectInfo *)clientData);
+    Tcl_SetResult(interp, Tcl_GetString(objPtr), TCL_DYNAMIC);
+    return TCL_ERROR;
+}
+
+/*
+ * ------------------------------------------------------------------------
+ *  Itcl_BiInfoDelegatedUnknownCmd()
+ *
+ *  the unknown handler for the ::itcl::builtin::Info::delagted ensemble
+ * ------------------------------------------------------------------------
+ */
+/* ARGSUSED */
+int
+Itcl_BiInfoDelegatedUnknownCmd(
+    ClientData clientData,   /* ItclObjectInfo Ptr */
+    Tcl_Interp *interp,      /* current interpreter */
+    int objc,                /* number of arguments */
+    Tcl_Obj *const objv[])   /* argument objects */
+{
+    Tcl_Obj *objPtr;
+
+    ItclShowArgs(1, "Itcl_BiInfoDelegatedUnknownCmd", objc, objv);
+    /* produce usage message */
+    objPtr = Tcl_NewStringObj(
+            "wrong # args: should be one of...\n", -1);
+    ItclGetInfoDelegatedUsage(interp, objPtr, (ItclObjectInfo *)clientData);
+    Tcl_SetResult(interp, Tcl_GetString(objPtr), TCL_DYNAMIC);
+    return TCL_ERROR;
+}
+
