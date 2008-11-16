@@ -760,6 +760,62 @@ test tinfo-3.2 {widget info instances} -constraints {
     mylabel destroy
 } -result {.lab1 .lab2}
 
+test widgetclass-1.2 {can't set widgetclass for snit::widgetadaptors} -constraints {
+    tk
+} -body {
+    widgetadaptor dog {
+        widgetclass Dog
+    }
+} -returnCodes {
+    error
+} -result {can't set widgetclass for ::itcl::widgetadaptor}
+
+test hulltype-1.2 {can't set hulltype for snit::widgetadaptors} -constraints {
+    tk
+} -body {
+    widgetadaptor dog {
+        hulltype Dog
+    }
+} -returnCodes {
+    error
+} -result {can't set hulltype for ::itcl::widgetadaptor}
+
+test wainfo-10.1 {widgetadaptor info widgetadaptors} -body {
+    widgetadaptor dog {
+    }
+
+    widgetadaptor cat {
+    }
+
+    lsort [dog info widgetadaptors]
+} -cleanup {
+    dog destroy
+    cat destroy
+} -result {cat dog}
+
+test wainfo-10.2 {widgetadaptor info components} -body {
+    widgetadaptor dog {
+        component comp1
+        component comp2
+    }
+
+    widgetadaptor cat {
+        component comp1
+        component comp1a
+    }
+
+    set a [lsort [dog info components]]
+    set b [lsort [cat info components]]
+    list $a $b
+} -cleanup {
+    dog destroy
+    cat destroy
+} -result {{comp1 comp2 itcl_hull} {comp1 comp1a itcl_hull}}
+
+
+
+
+
 #---------------------------------------------------------------------
 # Clean up
 
