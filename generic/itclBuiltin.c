@@ -24,7 +24,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclBuiltin.c,v 1.1.2.45 2008/11/15 23:42:48 wiede Exp $
+ *     RCS:  $Id: itclBuiltin.c,v 1.1.2.46 2008/11/16 16:22:11 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -2456,8 +2456,10 @@ Itcl_BiDestroyCmd(
     int objc,                /* number of arguments */
     Tcl_Obj *CONST objv[])   /* argument objects */
 {
+    Tcl_Obj **newObjv;
     ItclClass *contextIclsPtr;
     ItclObject *contextIoPtr;
+    int result;
 
     /*
      *  Make sure that this command is being invoked in the proper
@@ -2470,22 +2472,32 @@ Itcl_BiDestroyCmd(
         return TCL_ERROR;
     }
 
-    if (objc != 1) {
-        Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
-            "wrong # args: should be \"", Tcl_GetString(objv[0]), (char*)NULL);
-        return TCL_ERROR;
-    }
-
     if (contextIclsPtr == NULL) {
         Tcl_AppendResult(interp, "cannot find context class for object \"",
 	        Tcl_GetCommandName(interp, contextIoPtr->accessCmd), "\"",
 		NULL);
         return TCL_ERROR;
     }
-    if (!contextIclsPtr->flags & (ITCL_TYPE|ITCL_WIDGET|ITCL_WIDGETADAPTOR)) {
-        Tcl_AppendResult(interp, "no such method \"destroy\"", NULL);
-	return TCL_ERROR;
+    if (!(contextIclsPtr->flags &
+            (ITCL_TYPE|ITCL_WIDGET|ITCL_WIDGETADAPTOR))) {
+	/* try to execute destroy in uplevel namespace */
+	newObjv = (Tcl_Obj **)ckalloc(sizeof(Tcl_Obj *) * (objc + 2));
+	newObjv[0] = Tcl_NewStringObj("uplevel", -1);
+	Tcl_IncrRefCount(newObjv[0]);
+	newObjv[1] = Tcl_NewStringObj("1", -1);
+	Tcl_IncrRefCount(newObjv[1]);
+	memcpy(newObjv + 2, objv, sizeof(Tcl_Obj *) * objc);
+        result = Tcl_EvalObjv(interp, objc + 2, newObjv, 0);
+	Tcl_DecrRefCount(newObjv[1]);
+	Tcl_DecrRefCount(newObjv[0]);
+	return result;
     }
+    if (objc != 1) {
+        Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+            "wrong # args: should be \"", Tcl_GetString(objv[0]), (char*)NULL);
+        return TCL_ERROR;
+    }
+
     if (contextIoPtr != NULL) {
         Tcl_Obj *objPtr = Tcl_NewObj();
         Tcl_GetCommandFullName(interp, contextIoPtr->accessCmd, objPtr);
