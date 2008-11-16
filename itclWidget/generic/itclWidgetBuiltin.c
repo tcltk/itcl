@@ -12,7 +12,7 @@
  * ========================================================================
  *  Author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclWidgetBuiltin.c,v 1.1.2.6 2008/11/13 19:56:13 wiede Exp $
+ *     RCS:  $Id: itclWidgetBuiltin.c,v 1.1.2.7 2008/11/16 16:26:04 wiede Exp $
  * ========================================================================
  *           Copyright (c) 2007 Arnulf Wiedemann
  * ------------------------------------------------------------------------
@@ -186,8 +186,8 @@ Itcl_InstallWidgetBiMethods(
  *  Invoked whenever the user issues the "installhull" method for an object.
  *  Handles the following syntax:
  *
- *    installhall using <widgetType> ?arg ...?
- *    installhall name
+ *    installhull using <widgetType> ?arg ...?
+ *    installhull name
  *
  * ------------------------------------------------------------------------
  */

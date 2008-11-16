@@ -11,7 +11,7 @@
  * ========================================================================
  *  Author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclWidgetObject.c,v 1.1.2.7 2008/11/13 19:56:13 wiede Exp $
+ *     RCS:  $Id: itclWidgetObject.c,v 1.1.2.8 2008/11/16 16:26:04 wiede Exp $
  * ========================================================================
  *           Copyright (c) 2007 Arnulf Wiedemann
  * ------------------------------------------------------------------------
@@ -121,15 +121,6 @@ HullAndOptionsInstall(
 	    if (((i % 2) == 0) && (i + 1 <= objc)) {
 		widgetClassPtr = objv[i+1];
 		foundWclass = 1;
-#ifdef NOTDEF 
-// FIXME are these some options for the installhull command?
-	        newObjv = (Tcl_Obj **)ckalloc(sizeof(Tcl_Obj *)*(objc-1));
-		*newObjc = objc - 2;
-		memcpy(newObjv, objv, i * sizeof(Tcl_Obj *));
-		if (objc-i-2 > 0) {
-		    memcpy(newObjv+i, objv+i+2, (objc-i-2)*sizeof(Tcl_Obj *));
-		}
-#endif
 	    }
 	}
     }
@@ -150,23 +141,10 @@ HullAndOptionsInstall(
     Tcl_IncrRefCount(hullObjv[0]);
     hullObjv[1] = Tcl_NewStringObj("using", -1);
     Tcl_IncrRefCount(hullObjv[1]);
-    if (iclsPtr->flags & ITCL_WIDGET_FRAME) {
+    if (iclsPtr->hullTypePtr == NULL) {
         hullType = "frame";
-    }
-    if (iclsPtr->flags & ITCL_WIDGET_LABEL_FRAME) {
-        hullType = "labelframe";
-    }
-    if (iclsPtr->flags & ITCL_WIDGET_TOPLEVEL) {
-        hullType = "toplevel";
-    }
-    if (iclsPtr->flags & ITCL_WIDGET_TTK_FRAME) {
-        hullType = "ttk::frame";
-    }
-    if (iclsPtr->flags & ITCL_WIDGET_TTK_LABEL_FRAME) {
-        hullType = "ttk::labelframe";
-    }
-    if (iclsPtr->flags & ITCL_WIDGET_TTK_TOPLEVEL) {
-        hullType = "ttk::toplevel";
+    } else {
+        hullType = Tcl_GetString(iclsPtr->hullTypePtr);
     }
     hullObjv[2] = Tcl_NewStringObj(hullType, -1);
     Tcl_IncrRefCount(hullObjv[2]);

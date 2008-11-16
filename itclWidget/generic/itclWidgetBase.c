@@ -12,7 +12,7 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itclWidgetBase.c,v 1.1.2.4 2008/11/13 19:56:13 wiede Exp $
+ * RCS: @(#) $Id: itclWidgetBase.c,v 1.1.2.5 2008/11/16 16:26:04 wiede Exp $
  */
 
 #include <stdlib.h>
@@ -62,7 +62,6 @@ Initialize (
 	        "::itcl::widget::internal");
     }
 
-    Itcl_RenameCommand(interp, "::itcl::type", "::itcl::__type");
     Itcl_RenameCommand(interp, "::itcl::widget", "::itcl::__widget");
     Itcl_RenameCommand(interp, "::itcl::widgetadaptor",
             "::itcl::__widgetadaptor");

@@ -8,7 +8,7 @@
  * ========================================================================
  *  Author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclWidgetInfo.c,v 1.1.2.4 2008/11/15 23:38:52 wiede Exp $
+ *     RCS:  $Id: itclWidgetInfo.c,v 1.1.2.5 2008/11/16 16:26:04 wiede Exp $
  * ========================================================================
  *           Copyright (c) 2007 Arnulf Wiedemann
  * ------------------------------------------------------------------------
@@ -17,35 +17,20 @@
  */
 #include "itclWidgetInt.h"
 
-Tcl_ObjCmdProc ItclBiInfoComponentsCmd;
-Tcl_ObjCmdProc ItclBiInfoComponentCmd;
-Tcl_ObjCmdProc ItclBiInfoOptionsCmd;
-Tcl_ObjCmdProc ItclBiInfoOptionCmd;
-Tcl_ObjCmdProc ItclBiInfoDelegateCmd;
-Tcl_ObjCmdProc ItclBiInfoDelegateMethodCmd;
-Tcl_ObjCmdProc ItclBiInfoDelegateOptionCmd;
-Tcl_ObjCmdProc ItclBiInfoTypesCmd;
+Tcl_ObjCmdProc ItclBiInfoHullTypesCmd;
+Tcl_ObjCmdProc ItclBiInfoWidgetClassesCmd;
 Tcl_ObjCmdProc ItclBiInfoWidgetsCmd;
 Tcl_ObjCmdProc ItclBiInfoWidgetAdaptorsCmd;
 
-#ifdef NOTDEF
-typedef struct InfoMethod {
-    char* name;              /* method name */
-    char* usage;             /* string describing usage */
-    Tcl_ObjCmdProc *proc;    /* implementation C proc */
-} InfoMethod;
-
-static InfoMethod InfoMethodList[] = {
-    { "_components", "", ItclBiInfoComponentsCmd },
-    { "_component", "componentname", ItclBiInfoComponentCmd },
-    { "_options", "", ItclBiInfoOptionsCmd },
-    { "_option", "?", ItclBiInfoOptionCmd },
-    { "_types", "", ItclBiInfoTypesCmd },
-    { "_widgets", "", ItclBiInfoWidgetsCmd },
-    { "_widgetadaptors", "", ItclBiInfoWidgetAdaptorsCmd },
-    { NULL, NULL, NULL }
+static const char *hullTypes[] = {
+    "frame",
+    "toplevel",
+    "labelframe",
+    "ttk:frame",
+    "ttk:toplevel",
+    "ttk:labelframe",
+    NULL
 };
-#endif
 
 struct NameProcMap { const char *name; Tcl_ObjCmdProc *proc; };
 
@@ -54,13 +39,10 @@ struct NameProcMap { const char *name; Tcl_ObjCmdProc *proc; };
  */
 
 static const struct NameProcMap infoCmds2[] = {
-    { "::itcl::builtin::Info::_components", ItclBiInfoComponentsCmd },
-    { "::itcl::builtin::Info::_component", ItclBiInfoComponentCmd },
-    { "::itcl::builtin::Info::_options", ItclBiInfoOptionsCmd },
-    { "::itcl::builtin::Info::_option", ItclBiInfoOptionCmd },
-    { "::itcl::builtin::Info::_types", ItclBiInfoTypesCmd },
-    { "::itcl::builtin::Info::_widgets", ItclBiInfoWidgetsCmd },
-    { "::itcl::builtin::Info::_widgetadapters", ItclBiInfoWidgetAdaptorsCmd },
+    { "::itcl::builtin::Info::hulltypes", ItclBiInfoHullTypesCmd },
+    { "::itcl::builtin::Info::widgetclasses", ItclBiInfoWidgetClassesCmd },
+    { "::itcl::builtin::Info::widgets", ItclBiInfoWidgetsCmd },
+    { "::itcl::builtin::Info::widgetadaptors", ItclBiInfoWidgetAdaptorsCmd },
     { NULL, NULL }
 };
 
@@ -82,137 +64,190 @@ ItclWidgetInfoInit(
     Tcl_Interp *interp,      /* current interpreter */
     ItclObjectInfo *infoPtr)
 {
-    Tcl_Namespace *nsPtr;
-    Tcl_Command cmd;
     int i;
 
     for (i=0 ; infoCmds2[i].name!=NULL ; i++) {
         Tcl_CreateObjCommand(interp, infoCmds2[i].name,
                 infoCmds2[i].proc, infoPtr, NULL);
     }
-    nsPtr = Tcl_CreateNamespace(interp, "::itcl::builtin::Info::delegate", NULL, NULL);
-    if (nsPtr == NULL) {
-        Tcl_Panic("ITCL: error in creating namespace: ::itcl::builtin::Info::delegate\n");
+    return TCL_OK;
+}
+
+int
+ItclBiInfoHullTypesCmd(
+    ClientData clientData,   /* info for all known objects */
+    Tcl_Interp *interp,      /* current interpreter */
+    int objc,                /* number of arguments */
+    Tcl_Obj *const objv[])   /* argument objects */
+{
+    Tcl_Obj *listPtr;
+    Tcl_Obj *objPtr;
+    ItclObjectInfo *infoPtr;
+    ItclClass *iclsPtr;
+    const char **cPtrPtr;
+    const char *name;
+    const char *pattern;
+
+    ItclShowArgs(0, "ItclBiInfoHullTypesCmd", objc, objv);
+    infoPtr = (ItclObjectInfo *)clientData;
+    iclsPtr = NULL;
+    pattern = NULL;
+    if (objc > 2) {
+	Tcl_AppendResult(interp, "wrong # args should be: info hulltypes ",
+	        "?pattern?", NULL);
+        return TCL_ERROR;
     }
-    cmd = Tcl_CreateEnsemble(interp, nsPtr->fullName, nsPtr,
-        TCL_ENSEMBLE_PREFIX);
-    Tcl_Export(interp, nsPtr, "[a-z]*", 1);
-    Tcl_CreateObjCommand(interp, "::itcl::builtin::Info::delegate::method",
-                ItclBiInfoDelegateMethodCmd, infoPtr, NULL);
-    Tcl_CreateObjCommand(interp, "::itcl::builtin::Info::delegate::option",
-                ItclBiInfoDelegateOptionCmd, infoPtr, NULL);
-
+    if (objc == 2) {
+        pattern = Tcl_GetString(objv[1]);
+    }
+    listPtr = Tcl_NewListObj(0, NULL);
+    cPtrPtr = hullTypes;
+    while (*cPtrPtr != NULL) {
+	name = *cPtrPtr;
+        objPtr = Tcl_NewStringObj(name, -1);
+        Tcl_IncrRefCount(objPtr);
+        if ((pattern == NULL) ||
+                 Tcl_StringMatch(name, pattern)) {
+            Tcl_ListObjAppendElement(interp, listPtr, objPtr);
+        }
+        cPtrPtr++;
+    }
+    Tcl_SetObjResult(interp, listPtr);
     return TCL_OK;
 }
 
 int
-ItclBiInfoComponentsCmd(
+ItclBiInfoWidgetClassesCmd(
     ClientData clientData,   /* info for all known objects */
     Tcl_Interp *interp,      /* current interpreter */
     int objc,                /* number of arguments */
-    Tcl_Obj *CONST objv[])   /* argument objects */
+    Tcl_Obj *const objv[])   /* argument objects */
 {
-    ItclShowArgs(0, "ItclBiInfoComponentsCmd", objc, objv);
-    
+    FOREACH_HASH_DECLS;
+    Tcl_HashEntry *hPtr2;
+    Tcl_Obj *listPtr;
+    Tcl_HashTable  wClasses;
+    ItclObjectInfo *infoPtr;
+    ItclClass *iclsPtr;
+    const char *name;
+    const char *pattern;
+    int isNew;
+
+    ItclShowArgs(1, "ItclBiInfoWidgetClassesCmd", objc, objv);
+    infoPtr = (ItclObjectInfo *)clientData;
+    iclsPtr = NULL;
+    pattern = NULL;
+    if (objc > 2) {
+	Tcl_AppendResult(interp, "wrong # args should be: info widgetclasses ",
+	        "?pattern?", NULL);
+        return TCL_ERROR;
+    }
+
+    if (objc == 2) {
+        pattern = Tcl_GetString(objv[1]);
+    }
+    Tcl_InitObjHashTable(&wClasses);
+    listPtr = Tcl_NewListObj(0, NULL);
+    FOREACH_HASH_VALUE(iclsPtr, &infoPtr->classes) {
+	if (iclsPtr->flags & ITCL_WIDGET) {
+	    if (iclsPtr->widgetClassPtr != NULL) {
+	        hPtr2 = Tcl_CreateHashEntry(&wClasses,
+	                (char *)iclsPtr->widgetClassPtr, &isNew);
+	        if (isNew) {
+	            name = Tcl_GetString(iclsPtr->widgetClassPtr);
+	            Tcl_IncrRefCount(iclsPtr->widgetClassPtr);
+	            if ((pattern == NULL) ||
+                             Tcl_StringMatch(name, pattern)) {
+                        Tcl_ListObjAppendElement(interp, listPtr,
+		                iclsPtr->widgetClassPtr);
+	            }
+	        }
+            }
+        }
+    }
+    Tcl_DeleteHashTable(&wClasses);
+    Tcl_SetObjResult(interp, listPtr);
     return TCL_OK;
 }
-    
-int
-ItclBiInfoComponentCmd(
-    ClientData clientData,   /* info for all known objects */
-    Tcl_Interp *interp,      /* current interpreter */
-    int objc,                /* number of arguments */
-    Tcl_Obj *CONST objv[])   /* argument objects */
-{
-    ItclShowArgs(0, "ItclBiInfoComponentCmd", objc, objv);
-    
-    return TCL_OK;
-}
-int
-ItclBiInfoOptionsCmd(
-    ClientData clientData,   /* info for all known objects */
-    Tcl_Interp *interp,      /* current interpreter */
-    int objc,                /* number of arguments */
-    Tcl_Obj *CONST objv[])   /* argument objects */
-{
-    ItclShowArgs(0, "ItclBiInfoOptionsCmd", objc, objv);
-    
-    return TCL_OK;
-}
-int
-ItclBiInfoOptionCmd(
-    ClientData clientData,   /* info for all known objects */
-    Tcl_Interp *interp,      /* current interpreter */
-    int objc,                /* number of arguments */
-    Tcl_Obj *CONST objv[])   /* argument objects */
-{
-    ItclShowArgs(0, "ItclBiInfoOptionCmd", objc, objv);
-    
-    return TCL_OK;
-}
-int
-ItclBiInfoDelegateCmd(
-    ClientData clientData,   /* info for all known objects */
-    Tcl_Interp *interp,      /* current interpreter */
-    int objc,                /* number of arguments */
-    Tcl_Obj *CONST objv[])   /* argument objects */
-{
-    ItclShowArgs(0, "ItclBiInfoDelegateCmd", objc, objv);
-    
-    return TCL_OK;
-}
-int
-ItclBiInfoDelegateMethodCmd(
-    ClientData clientData,   /* info for all known objects */
-    Tcl_Interp *interp,      /* current interpreter */
-    int objc,                /* number of arguments */
-    Tcl_Obj *CONST objv[])   /* argument objects */
-{
-    ItclShowArgs(0, "ItclBiInfoDelegateMethodCmd", objc, objv);
-    
-    return TCL_OK;
-}
-int
-ItclBiInfoDelegateOptionCmd(
-    ClientData clientData,   /* info for all known objects */
-    Tcl_Interp *interp,      /* current interpreter */
-    int objc,                /* number of arguments */
-    Tcl_Obj *CONST objv[])   /* argument objects */
-{
-    ItclShowArgs(0, "ItclBiInfoDelegateOptionCmd", objc, objv);
-    
-    return TCL_OK;
-}
-int
-ItclBiInfoTypesCmd(
-    ClientData clientData,   /* info for all known objects */
-    Tcl_Interp *interp,      /* current interpreter */
-    int objc,                /* number of arguments */
-    Tcl_Obj *CONST objv[])   /* argument objects */
-{
-    ItclShowArgs(0, "ItclBiInfoTypesCmd", objc, objv);
-    
-    return TCL_OK;
-}
+
 int
 ItclBiInfoWidgetsCmd(
     ClientData clientData,   /* info for all known objects */
     Tcl_Interp *interp,      /* current interpreter */
     int objc,                /* number of arguments */
-    Tcl_Obj *CONST objv[])   /* argument objects */
+    Tcl_Obj *const objv[])   /* argument objects */
 {
-    ItclShowArgs(0, "ItclBiInfoWidgetsCmd", objc, objv);
-    
+    FOREACH_HASH_DECLS;
+    Tcl_Obj *listPtr;
+    ItclObjectInfo *infoPtr;
+    ItclClass *iclsPtr;
+    const char *name;
+    const char *pattern;
+
+    ItclShowArgs(1, "ItclBiInfoWidgetsCmd", objc, objv);
+    infoPtr = (ItclObjectInfo *)clientData;
+    iclsPtr = NULL;
+    pattern = NULL;
+    if (objc > 2) {
+	Tcl_AppendResult(interp, "wrong # args should be: info widgets ",
+	        "?pattern?", NULL);
+        return TCL_ERROR;
+    }
+    if (objc == 2) {
+        pattern = Tcl_GetString(objv[1]);
+    }
+    listPtr = Tcl_NewListObj(0, NULL);
+    FOREACH_HASH_VALUE(iclsPtr, &infoPtr->classes) {
+	if (iclsPtr->flags & ITCL_WIDGET) {
+	    name = Tcl_GetString(iclsPtr->namePtr);
+	    Tcl_IncrRefCount(iclsPtr->namePtr);
+	    if ((pattern == NULL) ||
+                     Tcl_StringMatch(name, pattern)) {
+                Tcl_ListObjAppendElement(interp, listPtr, iclsPtr->namePtr);
+            }
+        }
+    }
+    Tcl_SetObjResult(interp, listPtr);
     return TCL_OK;
 }
+
 int
 ItclBiInfoWidgetAdaptorsCmd(
     ClientData clientData,   /* info for all known objects */
     Tcl_Interp *interp,      /* current interpreter */
     int objc,                /* number of arguments */
-    Tcl_Obj *CONST objv[])   /* argument objects */
+    Tcl_Obj *const objv[])   /* argument objects */
 {
-    ItclShowArgs(0, "ItclBiInfoTypesCmd", objc, objv);
-    
+    FOREACH_HASH_DECLS;
+    Tcl_Obj *listPtr;
+    ItclObjectInfo *infoPtr;
+    ItclClass *iclsPtr;
+    const char *name;
+    const char *pattern;
+
+    ItclShowArgs(1, "ItclBiInfoWidgetadaptorsCmd", objc, objv);
+    infoPtr = (ItclObjectInfo *)clientData;
+    iclsPtr = NULL;
+    pattern = NULL;
+    if (objc > 2) {
+	Tcl_AppendResult(interp, "wrong # args should be: info widgetadaptors ",
+	        "?pattern?", NULL);
+        return TCL_ERROR;
+    }
+    if (objc == 2) {
+        pattern = Tcl_GetString(objv[1]);
+    }
+    listPtr = Tcl_NewListObj(0, NULL);
+    FOREACH_HASH_VALUE(iclsPtr, &infoPtr->classes) {
+	if (iclsPtr->flags & ITCL_WIDGETADAPTOR) {
+	    name = Tcl_GetString(iclsPtr->namePtr);
+	    Tcl_IncrRefCount(iclsPtr->namePtr);
+	    if ((pattern == NULL) ||
+                     Tcl_StringMatch(name, pattern)) {
+                Tcl_ListObjAppendElement(interp, listPtr, iclsPtr->namePtr);
+            }
+        }
+    }
+    Tcl_SetObjResult(interp, listPtr);
     return TCL_OK;
 }

@@ -11,7 +11,7 @@
  * ========================================================================
  *  Author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclWidgetCmd.c,v 1.1.2.3 2008/11/11 11:37:36 wiede Exp $
+ *     RCS:  $Id: itclWidgetCmd.c,v 1.1.2.4 2008/11/16 16:26:04 wiede Exp $
  * ========================================================================
  *           Copyright (c) 2007 Arnulf Wiedemann
  * ------------------------------------------------------------------------
@@ -78,9 +78,6 @@ Itcl_WidgetCmd(
     if (result != TCL_OK) {
         return result;
     }
-    if (!(iclsPtr->flags &(ITCL_WIDGET_FRAME|ITCL_WIDGET_TOPLEVEL))) {
-        iclsPtr->flags |= ITCL_WIDGET_FRAME;
-    }
 
     /* we handle create by owerselfs !! allow classunknown to handle that */
     objPtr = Tcl_NewStringObj("oo::objdefine ", -1);
@@ -122,6 +119,9 @@ Itcl_WidgetAdaptorCmd(
     ItclShowArgs(1, "Itcl_WidgetAdaptorCmd", objc-1, objv);
     result = ItclClassBaseCmd(clientData, interp, ITCL_WIDGETADAPTOR,
             objc, objv, &iclsPtr);
+    if (result != TCL_OK) {
+        return result;
+    }
     /* create the itcl_hull variable */
     namePtr = Tcl_NewStringObj("itcl_hull", -1);
     Tcl_IncrRefCount(namePtr);
