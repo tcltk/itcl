@@ -608,6 +608,29 @@ test destroy-1.3 {user-defined destructors are called} -body {
     dog destroy
 } -result {{created ::spot} {destroyed ::spot}}
 
+#-----------------------------------------------------------------------
+# Setting the widget class explicitly
+
+test widgetclass-1.1 {can't set widgetclass for snit::types} -body {
+    type dog {
+        widgetclass Dog
+    }
+} -returnCodes {
+    error
+} -result {can't set widgetclass for ::itcl::type}
+
+#-----------------------------------------------------------------------
+# hulltype statement
+
+test hulltype-1.1 {can't set hulltype for snit::types} -body {
+    type dog {
+        hulltype Dog
+    }
+} -returnCodes {
+    error
+} -result {can't set hulltype for ::itcl::type}
+
+
 
 
 
