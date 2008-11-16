@@ -25,7 +25,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclMethod.c,v 1.1.2.30 2008/11/15 23:42:48 wiede Exp $
+ *     RCS:  $Id: itclMethod.c,v 1.1.2.31 2008/11/16 16:32:32 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -583,6 +583,11 @@ ItclCreateMemberFunc(
             imPtr->flags |= ITCL_COMMON;
 	}
 	if (strcmp(name, "installhull") == 0) {
+	    imPtr->argcount = 0;
+	    imPtr->maxargcount = -1;
+            imPtr->codePtr->flags |= ITCL_BUILTIN;
+	}
+	if (strcmp(name, "destroy") == 0) {
 	    imPtr->argcount = 0;
 	    imPtr->maxargcount = -1;
             imPtr->codePtr->flags |= ITCL_BUILTIN;

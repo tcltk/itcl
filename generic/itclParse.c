@@ -39,7 +39,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclParse.c,v 1.1.2.44 2008/11/15 23:42:48 wiede Exp $
+ *     RCS:  $Id: itclParse.c,v 1.1.2.45 2008/11/16 16:32:32 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -98,6 +98,8 @@ Tcl_ObjCmdProc Itcl_ClassDelegateTypeMethodCmd;
 Tcl_ObjCmdProc Itcl_ClassForwardCmd;
 Tcl_ObjCmdProc Itcl_ClassMethodVariableCmd;
 Tcl_ObjCmdProc Itcl_ClassTypeConstructorCmd;
+Tcl_ObjCmdProc Itcl_ClassHullTypeCmd;
+Tcl_ObjCmdProc Itcl_ClassWidgetClassCmd;
 
 static const struct {
     const char *name;
@@ -109,10 +111,12 @@ static const struct {
     {"destructor", Itcl_ClassDestructorCmd},
     {"filter", Itcl_ClassFilterCmd},
     {"forward", Itcl_ClassForwardCmd},
-    {"mixin", Itcl_ClassMixinCmd},
+    {"handleClass", Itcl_HandleClass},
+    {"hulltype", Itcl_ClassHullTypeCmd},
     {"inherit", Itcl_ClassInheritCmd},
     {"method", Itcl_ClassMethodCmd},
     {"methodvariable", Itcl_ClassMethodVariableCmd},
+    {"mixin", Itcl_ClassMixinCmd},
     {"option", Itcl_ClassOptionCmd},
     {"proc", Itcl_ClassProcCmd},
     {"typecomponent", Itcl_ClassTypeComponentCmd},
@@ -120,7 +124,7 @@ static const struct {
     {"typemethod", Itcl_ClassTypeMethodCmd},
     {"typevariable", Itcl_ClassTypeVariableCmd},
     {"variable", Itcl_ClassVariableCmd},
-    {"handleClass", Itcl_HandleClass},
+    {"widgetclass", Itcl_ClassWidgetClassCmd},
     {NULL, NULL}
 };
 
@@ -653,6 +657,18 @@ ItclClassBaseCmd(
 		    isDone = 1;
 		}
 		if (strcmp(Tcl_GetString(imPtr->codePtr->bodyPtr),
+		        "@itcl-builtin-getinstancevar") == 0) {
+		    Tcl_AppendToObj(bodyPtr, "::itcl::builtin::getinstancevar",
+		            -1);
+		    isDone = 1;
+		}
+		if (!iclsPtr->flags &
+		        (ITCL_TYPE|ITCL_WIDGETADAPTOR|
+			ITCL_WIDGET|ITCL_ECLASS)) {
+		    continue;
+		}
+		/* now the builtin stuff for snit functionality */
+		if (strcmp(Tcl_GetString(imPtr->codePtr->bodyPtr),
 		        "@itcl-builtin-mytypemethod") == 0) {
 		    Tcl_AppendToObj(bodyPtr, "::itcl::builtin::mytypemethod",
 		            -1);
@@ -685,12 +701,6 @@ ItclClassBaseCmd(
 		    isDone = 1;
 		}
 		if (strcmp(Tcl_GetString(imPtr->codePtr->bodyPtr),
-		        "@itcl-builtin-getinstancevar") == 0) {
-		    Tcl_AppendToObj(bodyPtr, "::itcl::builtin::getinstancevar",
-		            -1);
-		    isDone = 1;
-		}
-		if (strcmp(Tcl_GetString(imPtr->codePtr->bodyPtr),
 		        "@itcl-builtin-myproc") == 0) {
 		    Tcl_AppendToObj(bodyPtr, "::itcl::builtin::myproc", -1);
 		    isDone = 1;
@@ -709,7 +719,8 @@ ItclClassBaseCmd(
 		}
 		if (strcmp(Tcl_GetString(imPtr->codePtr->bodyPtr),
 		        "@itcl-builtin-classunknown") == 0) {
-		    Tcl_AppendToObj(bodyPtr, "::itcl::builtin::classunknown", -1);
+		    Tcl_AppendToObj(bodyPtr, "::itcl::builtin::classunknown",
+		            -1);
 		    isDone = 1;
 		}
 		if (strcmp(Tcl_GetString(imPtr->codePtr->bodyPtr),
@@ -2534,8 +2545,11 @@ ItclCreateComponent(
 
     isWidgetHullVar = 0;
     if (iclsPtr == NULL) {
+	return TCL_OK;
+#ifdef NOTDEF
 	Tcl_AppendResult(interp, "INTERNAL ERROR in ItclCreateComponent, iclsPtr == NULL", NULL);
         return TCL_ERROR;
+#endif
     }
     hPtr = Tcl_CreateHashEntry(&iclsPtr->components, (char *)componentPtr,
             &isNew);

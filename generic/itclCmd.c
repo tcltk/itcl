@@ -23,7 +23,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclCmd.c,v 1.1.2.32 2008/11/15 23:42:48 wiede Exp $
+ *     RCS:  $Id: itclCmd.c,v 1.1.2.33 2008/11/16 16:32:32 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -1873,4 +1873,149 @@ Itcl_TypeClassCmd(
     Tcl_DecrRefCount(objPtr);
     Tcl_AppendResult(interp, iclsPtr->nsPtr->fullName);
     return result;
+}
+
+/*
+ * ------------------------------------------------------------------------
+ *  Itcl_ClassHullTypeCmd()
+ *
+ *  Used to set a hulltype for a widget
+ *
+ *  Returns TCL_OK/TCL_ERROR to indicate success/failure.
+ * ------------------------------------------------------------------------
+ */
+/* ARGSUSED */
+int
+Itcl_ClassHullTypeCmd(
+    ClientData clientData,   /* infoPtr */
+    Tcl_Interp *interp,      /* current interpreter */
+    int objc,                /* number of arguments */
+    Tcl_Obj *CONST objv[])   /* argument objects */
+{
+    ItclClass *iclsPtr;
+    ItclObjectInfo *infoPtr;
+    const char *hullTypeName;
+    int correctArg;
+    int result;
+
+    result = TCL_OK;
+    infoPtr = (ItclObjectInfo *)clientData;
+    iclsPtr = (ItclClass*)Itcl_PeekStack(&infoPtr->clsStack);
+    ItclShowArgs(1, "Itcl_ClassHullTypeCmd", objc-1, objv);
+    if (iclsPtr->flags & ITCL_TYPE) {
+        Tcl_AppendResult(interp, "can't set hulltype for ::itcl::type",
+	        NULL);
+        return TCL_ERROR;
+    }
+    if (iclsPtr->flags & ITCL_WIDGETADAPTOR) {
+        Tcl_AppendResult(interp, "can't set hulltype for ",
+	        "::itcl::widgetadaptor", NULL);
+        return TCL_ERROR;
+    }
+    if (objc != 2) {
+	Tcl_AppendResult(interp, "wrong # args should be: hulltype ",
+	        "<hullTypeName>", NULL);
+        return TCL_ERROR;
+    }
+    if (iclsPtr->flags & ITCL_WIDGET) {
+        hullTypeName = Tcl_GetString(objv[1]);
+        if (iclsPtr->hullTypePtr != NULL) {
+	    Tcl_AppendResult(interp, "too many hulltype statements", NULL);
+	    return TCL_ERROR;
+	}
+        correctArg = 0;
+        if (strcmp(hullTypeName, "frame") == 0) {
+	    iclsPtr->flags |= ITCL_WIDGET_FRAME;
+            correctArg = 1;
+        }
+        if (strcmp(hullTypeName, "labelframe") == 0) {
+	    iclsPtr->flags |= ITCL_WIDGET_LABEL_FRAME;
+            correctArg = 1;
+        }
+        if (strcmp(hullTypeName, "toplevel") == 0) {
+	    iclsPtr->flags |= ITCL_WIDGET_TOPLEVEL;
+            correctArg = 1;
+        }
+        if (strcmp(hullTypeName, "ttk::frame") == 0) {
+	    iclsPtr->flags |= ITCL_WIDGET_TTK_FRAME;
+            correctArg = 1;
+        }
+        if (strcmp(hullTypeName, "ttk::labelframe") == 0) {
+	    iclsPtr->flags |= ITCL_WIDGET_TTK_LABEL_FRAME;
+            correctArg = 1;
+        }
+        if (strcmp(hullTypeName, "ttk::toplevel") == 0) {
+	    iclsPtr->flags |= ITCL_WIDGET_TTK_TOPLEVEL;
+            correctArg = 1;
+        }
+        if (!correctArg) {
+            Tcl_AppendResult(interp,
+	            "syntax: must be hulltype frame|toplevel|labelframe|",
+		    "ttk::frame|ttk::toplevel|ttk::labelframe", NULL);
+            return TCL_ERROR;
+        }
+        iclsPtr->hullTypePtr = Tcl_NewStringObj(hullTypeName, -1);
+	Tcl_IncrRefCount(iclsPtr->hullTypePtr);
+        return TCL_OK;
+    }
+    Tcl_AppendResult(interp, "invalid command name \"hulltype\"", NULL);
+    return TCL_ERROR;
+}
+
+/*
+ * ------------------------------------------------------------------------
+ *  Itcl_ClassWidgetClassCmd()
+ *
+ *  Used to set a widgetclass for a widget
+ *
+ *  Returns TCL_OK/TCL_ERROR to indicate success/failure.
+ * ------------------------------------------------------------------------
+ */
+/* ARGSUSED */
+int
+Itcl_ClassWidgetClassCmd(
+    ClientData clientData,   /* infoPtr */
+    Tcl_Interp *interp,      /* current interpreter */
+    int objc,                /* number of arguments */
+    Tcl_Obj *CONST objv[])   /* argument objects */
+{
+    ItclClass *iclsPtr;
+    ItclObjectInfo *infoPtr;
+    const char *widgetClassName;
+
+    infoPtr = (ItclObjectInfo *)clientData;
+    iclsPtr = (ItclClass*)Itcl_PeekStack(&infoPtr->clsStack);
+    ItclShowArgs(1, "Itcl_ClassWidgetClassCmd", objc-1, objv);
+    if (iclsPtr->flags & ITCL_TYPE) {
+        Tcl_AppendResult(interp, "can't set widgetclass for ::itcl::type",
+	        NULL);
+        return TCL_ERROR;
+    }
+    if (iclsPtr->flags & ITCL_WIDGETADAPTOR) {
+        Tcl_AppendResult(interp, "can't set widgetclass for ",
+	        "::itcl::widgetadaptor", NULL);
+        return TCL_ERROR;
+    }
+    if (objc != 2) {
+	Tcl_AppendResult(interp, "wrong # args should be: widgetclass ",
+	        "<widgetClassName>", NULL);
+        return TCL_ERROR;
+    }
+    if (iclsPtr->flags & ITCL_WIDGET) {
+        widgetClassName = Tcl_GetString(objv[1]);
+	if (! isupper(*widgetClassName)) {
+	    Tcl_AppendResult(interp, "widgetclass \"", widgetClassName,
+	            "\" does not begin with an uppercase letter", NULL);
+            return TCL_ERROR;
+	}
+        if (iclsPtr->widgetClassPtr != NULL) {
+	    Tcl_AppendResult(interp, "too many widgetclass statements", NULL);
+	    return TCL_ERROR;
+	}
+        iclsPtr->widgetClassPtr = Tcl_NewStringObj(widgetClassName, -1);
+	Tcl_IncrRefCount(iclsPtr->widgetClassPtr);
+        return TCL_OK;
+    }
+    Tcl_AppendResult(interp, "invalid command name \"widgetclass\"", NULL);
+    return TCL_ERROR;
 }

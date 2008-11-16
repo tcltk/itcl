@@ -25,7 +25,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann Copyright (c) 2007
  *
- *     RCS:  $Id: itclClass.c,v 1.1.2.36 2008/11/15 23:42:48 wiede Exp $
+ *     RCS:  $Id: itclClass.c,v 1.1.2.37 2008/11/16 16:32:32 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -315,14 +315,6 @@ Itcl_CreateClass(
     iclsPtr->resolvePtr->cmdProcPtr = Itcl_CmdAliasProc;
     iclsPtr->resolvePtr->varProcPtr = Itcl_VarAliasProc;
     iclsPtr->resolvePtr->clientData = resolveInfoPtr;
-
-    iclsPtr->constructor = NULL;
-    iclsPtr->destructor = NULL;
-    iclsPtr->constructorInit = NULL;
-    iclsPtr->widgetClassPtr = NULL;
-    iclsPtr->numCommons   = 0;
-    iclsPtr->numVariables   = 0;
-    iclsPtr->unique   = 0;
     iclsPtr->flags    = infoPtr->currClassFlags;
 
     /*
@@ -1073,6 +1065,13 @@ ItclFreeClass(
      */
     if (iclsPtr->widgetClassPtr != NULL) {
         Tcl_DecrRefCount(iclsPtr->widgetClassPtr);
+    }
+
+    /*
+     *  Free up the widget hulltype name
+     */
+    if (iclsPtr->hullTypePtr != NULL) {
+        Tcl_DecrRefCount(iclsPtr->hullTypePtr);
     }
 
     /*
