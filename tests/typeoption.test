@@ -464,7 +464,7 @@ test option-6.1 {if no options, no options variable} -body {
     }
 
     dog spot
-    spot info vars itcl_options
+    spot info vars
 } -cleanup {
     dog destroy
 } -result {}

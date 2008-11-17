@@ -202,7 +202,7 @@ test iinfo-4.1 {object info vars} -body {
     lsort [spot info vars]
 } -cleanup {
     dog destroy
-} -result {::dog::Snit_inst1::hervar ::dog::Snit_inst1::hisvar}
+} -result {hisvar}
 
 test iinfo-4.2 {object info vars with pattern} -body {
     type dog {
