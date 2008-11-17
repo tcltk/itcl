@@ -12,7 +12,7 @@
  * ========================================================================
  *  Author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclWidgetBuiltin.c,v 1.1.2.7 2008/11/16 16:26:04 wiede Exp $
+ *     RCS:  $Id: itclWidgetBuiltin.c,v 1.1.2.8 2008/11/17 21:26:32 wiede Exp $
  * ========================================================================
  *           Copyright (c) 2007 Arnulf Wiedemann
  * ------------------------------------------------------------------------
@@ -213,7 +213,10 @@ Itcl_BiInstallHullCmd(
     ItclObjectInfo *infoPtr;
     ItclVariable *ivPtr;
     ItclOption *ioptPtr;
+    ItclDelegatedOption *idoPtr;
     const char *val;
+    const char *itclHull;
+    const char *component;
     const char *widgetType;
     const char *className;
     const char *widgetName;
@@ -222,12 +225,16 @@ Itcl_BiInstallHullCmd(
     int newObjc;
     int lgth;
     int i;
+    int iOpts;
+    int noOptionSet;
     int shortForm;
     int numOptArgs;
     int optsStartIdx;
     int result;
 
     result = TCL_OK;
+    tkWin = NULL;
+    component = NULL;
     ItclShowArgs(1, "Itcl_BiInstallHullCmd", objc, objv);
     infoPtr = (ItclObjectInfo *)clientData;
     if (infoPtr->buildingWidget) {
@@ -272,17 +279,13 @@ Itcl_BiInstallHullCmd(
         widgetName = wName + 2;
     }
 
+    optsStartIdx = 3;
     if (!shortForm) {
 	widgetNamePtr = Tcl_NewStringObj(widgetName, -1);
-	if (contextIclsPtr->flags & ITCL_WIDGETADAPTOR) {
-	/* FIXME that code is only temporary until hijacking of hull works */
-	    Tcl_AppendToObj(widgetNamePtr, "___", -1);
-	}
 	widgetName = Tcl_GetString(widgetNamePtr);
         widgetType = Tcl_GetString(objv[2]);
 	classNamePtr = NULL;
 	className = NULL;
-	optsStartIdx = 3;
 	if (objc > 3) {
             if (strcmp(Tcl_GetString(objv[3]), "-class") == 0) {
                 className = Tcl_GetString(objv[4]);
@@ -306,8 +309,9 @@ Itcl_BiInstallHullCmd(
 	newObjv[3] = Tcl_NewStringObj(className, -1);
 	Tcl_IncrRefCount(newObjv[3]);
 	i = 4;
-	for (; optsStartIdx < objc; optsStartIdx++, i++) {
-	    newObjv[i] = objv[optsStartIdx];
+	iOpts = optsStartIdx;
+	for (; iOpts < objc; iOpts++, i++) {
+	    newObjv[i] = objv[iOpts];
 	    Tcl_IncrRefCount(newObjv[i]);
 	}
 	ItclShowArgs(1, "HullCreate", newObjc + numOptArgs, newObjv);
@@ -400,6 +404,69 @@ Itcl_BiInstallHullCmd(
                 Tcl_GetString(contextIoPtr->namePtr), "\"", NULL);
             Tcl_DStringFree(&buffer);
             return TCL_ERROR;
+        }
+    }
+    itclHull = ItclGetInstanceVar(interp, "itcl_hull", NULL,
+            contextIoPtr, contextIoPtr->iclsPtr);
+    /* now initialize the delegated options from the option database */
+    if (itclHull != NULL) {
+        tkMainWin = Tk_MainWindow(interp);
+        tkWin = Tk_NameToWindow(interp, origWidgetName, tkMainWin);
+        if (tkWin != NULL) {
+            FOREACH_HASH_VALUE(idoPtr, &contextIclsPtr->delegatedOptions) {
+		val = NULL;
+		if (idoPtr->resourceNamePtr == NULL) {
+		    /* that is the case when delegating "*" */
+		    continue;
+		}
+		/* check if not in the comman line options */
+		/* these have higher priority */
+		const char *optionName;
+		optionName = Tcl_GetString(idoPtr->namePtr);
+		if (idoPtr->asPtr != NULL) {
+		    optionName = Tcl_GetString(idoPtr->asPtr);
+		}
+		noOptionSet = 0;
+		for (i = optsStartIdx; i < objc; i += 2) {
+		    if (strcmp(optionName, Tcl_GetString(objv[i])) == 0) {
+		        noOptionSet = 1;
+		        break;
+		    }
+		}
+		if (noOptionSet) {
+		    break;
+		}
+                val = Tk_GetOption(tkWin,
+		        Tcl_GetString(idoPtr->resourceNamePtr),
+		        idoPtr->classNamePtr == NULL ? NULL :
+		        Tcl_GetString(idoPtr->classNamePtr));
+	        if (val != NULL) {
+	            newObjv = (Tcl_Obj **)ckalloc(sizeof(Tcl_Obj *) * 4);
+                    component = ItclGetInstanceVar(interp,
+		            Tcl_GetString(idoPtr->icPtr->namePtr), NULL,
+                            contextIoPtr, contextIoPtr->iclsPtr);
+		    if ((component != NULL) && (strlen(component) > 0)) {
+		        newObjv[0] = Tcl_NewStringObj(component, -1);
+		        Tcl_IncrRefCount(newObjv[0]);
+		        newObjv[1] = Tcl_NewStringObj("configure", -1);
+		        Tcl_IncrRefCount(newObjv[1]);
+		        if (idoPtr->asPtr == NULL) {
+		            newObjv[2] = idoPtr->namePtr;
+		        } else {
+		            newObjv[2] = idoPtr->asPtr;
+		        }
+		        Tcl_IncrRefCount(newObjv[2]);
+		        newObjv[3] = Tcl_NewStringObj(val, -1);
+		        Tcl_IncrRefCount(newObjv[3]);
+                        ItclShowArgs(0, "SET OPTION", 4, newObjv);
+                        result = Tcl_EvalObjv(interp, 4, newObjv, 0);
+		        Tcl_DecrRefCount(newObjv[3]);
+		        Tcl_DecrRefCount(newObjv[2]);
+		        Tcl_DecrRefCount(newObjv[1]);
+		        Tcl_DecrRefCount(newObjv[0]);
+	            }
+	        }
+	    }
         }
     }
     return result;
