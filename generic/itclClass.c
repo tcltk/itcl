@@ -25,7 +25,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann Copyright (c) 2007
  *
- *     RCS:  $Id: itclClass.c,v 1.1.2.37 2008/11/16 16:32:32 wiede Exp $
+ *     RCS:  $Id: itclClass.c,v 1.1.2.38 2008/11/17 21:38:05 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -822,16 +822,21 @@ void
 ItclDestroyClassNamesp(
     ClientData cdata)  /* class definition to be destroyed */
 {
-    ItclClass *iclsPtr = (ItclClass*)cdata;
+    Tcl_HashEntry *hPtr;
+    Tcl_HashEntry *hPtr2;
+    Tcl_HashSearch place;
+    ItclClass *iclsPtr;
     ItclObject *contextObj;
     Itcl_ListElem *elem;
     Itcl_ListElem *belem;
     ItclClass *iclsPtr2;
     ItclClass *basePtr;
     ItclClass *derivedPtr;
-    Tcl_HashEntry *hPtr;
-    Tcl_HashSearch place;
+    ItclObjectInfo *infoPtr;
 
+    iclsPtr = (ItclClass*)cdata;
+    infoPtr = iclsPtr->infoPtr;
+    hPtr2 = Tcl_FindHashEntry(&infoPtr->classes, (char *)iclsPtr->fullNamePtr);
     /*
      *  Destroy all derived classes, since these lose their meaning
      *  when the base class goes away.
@@ -918,6 +923,9 @@ ItclDestroyClassNamesp(
      *  Release the namespace's claim on the class definition.
      */
     Itcl_ReleaseData((ClientData)iclsPtr);
+    if (hPtr2 != NULL) {
+        Tcl_DeleteHashEntry(hPtr2);
+    }
 }
 
 

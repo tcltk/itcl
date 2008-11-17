@@ -24,7 +24,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclInfo.c,v 1.1.2.27 2008/11/17 16:24:48 wiede Exp $
+ *     RCS:  $Id: itclInfo.c,v 1.1.2.28 2008/11/17 21:38:05 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -1405,11 +1405,17 @@ Itcl_BiInfoVarsCmd(
     ItclObjectInfo *infoPtr;
     ItclClass *iclsPtr;
     ItclVariable *ivPtr;
+    const char *pattern;
+    const char *name;
     int useGlobalInfo;
-    int result = TCL_OK;
+    int hasPattern;
+    int result;
 
     ItclShowArgs(1, "Itcl_BiInfoVars", objc, objv);
+    result = TCL_OK;
+    hasPattern = 0;
     useGlobalInfo = 1;
+    pattern = NULL;
     infoPtr = (ItclObjectInfo *)clientData;
     nsPtr = Tcl_GetCurrentNamespace(interp);
     if (nsPtr != NULL) {
@@ -1419,7 +1425,11 @@ Itcl_BiInfoVarsCmd(
             iclsPtr = Tcl_GetHashValue(hPtr);
 	    if (iclsPtr->flags & (ITCL_TYPE|ITCL_WIDGETADAPTOR|ITCL_WIDGET)) {
 	        /* don't use the ::tcl::info::vars command */
+		hasPattern = 1;
 	        useGlobalInfo = 0;
+	        if (objc == 2) {
+		    pattern = Tcl_GetString(objv[1]);
+		}
 	    }
         }
     }
@@ -1435,10 +1445,17 @@ Itcl_BiInfoVarsCmd(
 	listPtr = Tcl_NewListObj(0, NULL);
 	FOREACH_HASH_VALUE(ivPtr, &iclsPtr->variables) {
 	    if ((ivPtr->flags & (ITCL_TYPE_VAR|ITCL_VARIABLE)) != 0) {
+		name = Tcl_GetString(ivPtr->namePtr);
 		Tcl_IncrRefCount(ivPtr->namePtr);
-	        Tcl_ListObjAppendElement(interp, listPtr, ivPtr->namePtr);
+                if ((pattern == NULL) ||
+		        Tcl_StringMatch((const char *)name, pattern)) {
+	            Tcl_ListObjAppendElement(interp, listPtr, ivPtr->namePtr);
+	        }
             }
 	}
+	/* always add the itcl_options variable */
+        Tcl_ListObjAppendElement(interp, listPtr,
+	        Tcl_NewStringObj("itcl_options", -1));
         Tcl_SetObjResult(interp, listPtr);
         return TCL_OK;
     }
@@ -1475,7 +1492,6 @@ Itcl_BiInfoVarsCmd(
 		numElems = 0;
 /* FIXME !! should perhaps skip ___DO_NOT_DELETE_THIS_VARIABLE here !! */
 		FOREACH_HASH_VALUE(ivPtr, &iclsPtr->variables) {
-fprintf(stderr, "VAR!%s!0x%08x!\n", Tcl_GetString(ivPtr->namePtr), ivPtr->flags);
 		    if ((ivPtr->flags & (ITCL_TYPE_VAR|ITCL_VARIABLE)) != 0) {
 			    if (head != NULL) {
 			        namePtr = ivPtr->fullNamePtr;
