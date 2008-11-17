@@ -39,7 +39,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclParse.c,v 1.1.2.45 2008/11/16 16:32:32 wiede Exp $
+ *     RCS:  $Id: itclParse.c,v 1.1.2.46 2008/11/17 16:24:48 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -2806,6 +2806,74 @@ Itcl_ClassTypeComponentCmd(
 
 /*
  * ------------------------------------------------------------------------
+ *  ItclCreateDelegatedFunction()
+ *
+ *  Install a delegated function for a class
+ *
+ * ------------------------------------------------------------------------
+ */
+int
+ItclCreateDelegatedFunction(
+    Tcl_Interp *interp,
+    Tcl_Obj *methodNamePtr,
+    ItclComponent *icPtr,
+    Tcl_Obj *targetPtr,
+    Tcl_Obj *usingPtr,
+    Tcl_Obj *exceptionsPtr,
+    ItclDelegatedFunction **idmPtrPtr)
+{
+    Tcl_HashEntry *hPtr;
+    ItclDelegatedFunction *idmPtr;
+    const char **argv;
+    int argc;
+    int isNew;
+    int i;
+
+    idmPtr = (ItclDelegatedFunction *)ckalloc(sizeof(ItclDelegatedFunction));
+    memset(idmPtr, 0, sizeof(ItclDelegatedFunction));
+    Tcl_InitObjHashTable(&idmPtr->exceptions);
+    idmPtr->namePtr = methodNamePtr;
+    Tcl_IncrRefCount(idmPtr->namePtr);
+    idmPtr->icPtr = icPtr;
+    idmPtr->asPtr = targetPtr;
+    if (idmPtr->asPtr != NULL) {
+        Tcl_IncrRefCount(idmPtr->asPtr);
+    }
+    idmPtr->usingPtr = usingPtr;
+    if (idmPtr->usingPtr != NULL) {
+        Tcl_IncrRefCount(idmPtr->usingPtr);
+    }
+    if (exceptionsPtr != NULL) {
+        if (Tcl_SplitList(interp, Tcl_GetString(exceptionsPtr), &argc, &argv)
+	        != TCL_OK) {
+	    return TCL_ERROR;
+	}
+        for(i = 0; i < argc; i++) {
+	    Tcl_Obj *objPtr;
+	    objPtr = Tcl_NewStringObj(argv[i], -1);
+	    Tcl_IncrRefCount(objPtr);
+	    hPtr = Tcl_CreateHashEntry(&idmPtr->exceptions, (char *)objPtr,
+	            &isNew);
+#ifdef NOTDEF
+	    hPtr2 = Tcl_FindHashEntry(&iclsPtr->functions, (char *)objPtr);
+/* FIXME !!! can only be done after a class/widget has been parsed completely !! */
+	    if (hPtr2 == NULL) {
+	        Tcl_AppendResult(interp, "no such method: \"",
+		        Tcl_GetString(objPtr), "\" found for delegation", NULL);
+	        return TCL_ERROR;
+	    }
+	    Tcl_SetHashValue(hPtr, Tcl_GetHashValue(hPtr2));
+#endif
+	}
+    }
+    if (idmPtrPtr != NULL) {
+        *idmPtrPtr = idmPtr;
+    }
+    return TCL_OK;
+}
+
+/*
+ * ------------------------------------------------------------------------
  *  Itcl_HandleDelegateMethodCmd()
  *
  *  Invoked by Tcl during the parsing of a class definition whenever
@@ -2825,7 +2893,7 @@ Itcl_HandleDelegateMethodCmd(
     ItclDelegatedFunction **idmPtrPtr,
                              /* where to return idoPtr */
     int objc,                /* number of arguments */
-    Tcl_Obj *CONST objv[])   /* argument objects */
+    Tcl_Obj *const objv[])   /* argument objects */
 {
     Tcl_Obj *methodNamePtr;
     Tcl_Obj *componentPtr;
@@ -2834,19 +2902,16 @@ Itcl_HandleDelegateMethodCmd(
     Tcl_Obj *exceptionsPtr;
     Tcl_HashEntry *hPtr;
     ItclComponent *icPtr;
-    ItclDelegatedFunction *idmPtr;
     ItclHierIter hier;
     const char *usageStr;
     const char *methodName;
     const char *component;
     const char *token;
-    const char **argv;
-    char *what;
     const char *whatName;
-    int argc;
-    int foundOpt;
-    int isNew;
+    char *what;
+    int result;
     int i;
+    int foundOpt;
 
     ItclShowArgs(1, "Itcl_HandleDelegateMethodCmd", objc, objv);
     usageStr = "delegate method <methodName> to <componentName> ?as <targetName>?\n\
@@ -2975,52 +3040,9 @@ delegate method * ?to <componentName>? ?using <pattern>? ?except <methods>?";
 	    return TCL_ERROR;
 	}
     }
-    idmPtr = (ItclDelegatedFunction *)ckalloc(sizeof(ItclDelegatedFunction));
-    memset(idmPtr, 0, sizeof(ItclDelegatedFunction));
-    Tcl_InitObjHashTable(&idmPtr->exceptions);
-    if (*methodName != '*') {
-        idmPtr->namePtr = methodNamePtr;
-
-    } else {
-        idmPtr->namePtr = methodNamePtr;
-    }
-    Tcl_IncrRefCount(idmPtr->namePtr);
-    idmPtr->icPtr = icPtr;
-    idmPtr->asPtr = targetPtr;
-    if (idmPtr->asPtr != NULL) {
-        Tcl_IncrRefCount(idmPtr->asPtr);
-    }
-    idmPtr->usingPtr = usingPtr;
-    if (idmPtr->usingPtr != NULL) {
-        Tcl_IncrRefCount(idmPtr->usingPtr);
-    }
-    if (exceptionsPtr != NULL) {
-        if (Tcl_SplitList(interp, Tcl_GetString(exceptionsPtr), &argc, &argv)
-	        != TCL_OK) {
-	    return TCL_ERROR;
-	}
-        for(i=0;i<argc;i++) {
-	    Tcl_Obj *objPtr;
-	    objPtr = Tcl_NewStringObj(argv[i], -1);
-	    Tcl_IncrRefCount(objPtr);
-	    hPtr = Tcl_CreateHashEntry(&idmPtr->exceptions, (char *)objPtr,
-	            &isNew);
-#ifdef NOTDEF
-	    hPtr2 = Tcl_FindHashEntry(&iclsPtr->functions, (char *)objPtr);
-/* FIXME !!! can only be done after a class/widget has been parsed completely !! */
-	    if (hPtr2 == NULL) {
-	        Tcl_AppendResult(interp, "no such method: \"",
-		        Tcl_GetString(objPtr), "\" found for delegation", NULL);
-	        return TCL_ERROR;
-	    }
-	    Tcl_SetHashValue(hPtr, Tcl_GetHashValue(hPtr2));
-#endif
-	}
-    }
-    if (idmPtrPtr != NULL) {
-        *idmPtrPtr = idmPtr;
-    }
-    return TCL_OK;
+    result = ItclCreateDelegatedFunction(interp, methodNamePtr, icPtr,
+            targetPtr, usingPtr, exceptionsPtr, idmPtrPtr);
+    return result;
 }
 
 /*

@@ -9,7 +9,7 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itclInt.h,v 1.17.2.51 2008/11/16 16:32:32 wiede Exp $
+ * RCS: @(#) $Id: itclInt.h,v 1.17.2.52 2008/11/17 16:24:48 wiede Exp $
  */
 
 #include <string.h>
@@ -731,6 +731,11 @@ MODULE_SCOPE int ExpandDelegateAs(Tcl_Interp *interp, ItclObject *ioPtr,
 	const char *funcName, Tcl_Obj *listPtr);
 MODULE_SCOPE int ItclCheckForInitializedComponents(Tcl_Interp *interp,
         ItclClass *iclsPtr, ItclObject *ioPtr);
+MODULE_SCOPE int ItclCreateDelegatedFunction(Tcl_Interp *interp,
+        Tcl_Obj *methodNamePtr, ItclComponent *icPtr, Tcl_Obj *targetPtr,
+	Tcl_Obj *usingPtr, Tcl_Obj *exceptionsPtr,
+	ItclDelegatedFunction **idmPtrPtr);
+
 
 
 #include "itcl2TclOO.h"

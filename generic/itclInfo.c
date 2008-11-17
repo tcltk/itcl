@@ -24,7 +24,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclInfo.c,v 1.1.2.26 2008/11/16 16:28:37 wiede Exp $
+ *     RCS:  $Id: itclInfo.c,v 1.1.2.27 2008/11/17 16:24:48 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -561,7 +561,7 @@ Itcl_BiInfoCmd(
         Tcl_Obj *objPtr = Tcl_NewStringObj(
 	        "wrong # args: should be one of...\n", -1);
         ItclGetInfoUsage(interp, objPtr, (ItclObjectInfo *)clientData);
-	Tcl_SetResult(interp, Tcl_GetString(objPtr), TCL_DYNAMIC);
+	Tcl_SetObjResult(interp, objPtr);
 	return TCL_ERROR;
     }
     return ItclEnsembleSubCmd(clientData, interp, "::info itclinfo",
@@ -1398,24 +1398,55 @@ Itcl_BiInfoVarsCmd(
     int objc,              /* number of arguments */
     Tcl_Obj *const objv[]) /* argument objects */
 {
-    Tcl_Obj **newObjv;
     FOREACH_HASH_DECLS;
+    Tcl_Obj *listPtr;
+    Tcl_Obj **newObjv;
+    Tcl_Namespace *nsPtr;
+    ItclObjectInfo *infoPtr;
+    ItclClass *iclsPtr;
+    ItclVariable *ivPtr;
+    int useGlobalInfo;
     int result = TCL_OK;
 
     ItclShowArgs(1, "Itcl_BiInfoVars", objc, objv);
-    newObjv = (Tcl_Obj **)ckalloc(sizeof(Tcl_Obj *)*(objc));
-    newObjv[0] = Tcl_NewStringObj("::tcl::info::vars", -1);
-    Tcl_IncrRefCount(newObjv[0]);
-    memcpy(newObjv+1, objv+1, sizeof(Tcl_Obj *)*(objc-1));
-    result = Tcl_EvalObjv(interp, objc, newObjv, 0);
-    Tcl_DecrRefCount(newObjv[0]);
-    ckfree((char *)newObjv);
+    useGlobalInfo = 1;
+    infoPtr = (ItclObjectInfo *)clientData;
+    nsPtr = Tcl_GetCurrentNamespace(interp);
+    if (nsPtr != NULL) {
+        hPtr = Tcl_FindHashEntry(&infoPtr->namespaceClasses,
+                (char *)nsPtr);
+	if (hPtr != NULL) {
+            iclsPtr = Tcl_GetHashValue(hPtr);
+	    if (iclsPtr->flags & (ITCL_TYPE|ITCL_WIDGETADAPTOR|ITCL_WIDGET)) {
+	        /* don't use the ::tcl::info::vars command */
+	        useGlobalInfo = 0;
+	    }
+        }
+    }
+    if (useGlobalInfo) {
+        newObjv = (Tcl_Obj **)ckalloc(sizeof(Tcl_Obj *)*(objc));
+        newObjv[0] = Tcl_NewStringObj("::tcl::info::vars", -1);
+        Tcl_IncrRefCount(newObjv[0]);
+        memcpy(newObjv+1, objv+1, sizeof(Tcl_Obj *)*(objc-1));
+        result = Tcl_EvalObjv(interp, objc, newObjv, 0);
+        Tcl_DecrRefCount(newObjv[0]);
+        ckfree((char *)newObjv);
+    } else {
+	listPtr = Tcl_NewListObj(0, NULL);
+	FOREACH_HASH_VALUE(ivPtr, &iclsPtr->variables) {
+	    if ((ivPtr->flags & (ITCL_TYPE_VAR|ITCL_VARIABLE)) != 0) {
+		Tcl_IncrRefCount(ivPtr->namePtr);
+	        Tcl_ListObjAppendElement(interp, listPtr, ivPtr->namePtr);
+            }
+	}
+        Tcl_SetObjResult(interp, listPtr);
+        return TCL_OK;
+    }
     if (objc < 2) {
         return result;
     }
     if (result == TCL_OK) {
 	Tcl_DString buffer;
-	Tcl_Namespace *nsPtr;
 	char *head;
 	char *tail;
         /* check if the pattern contains a class namespace
@@ -1429,9 +1460,6 @@ Itcl_BiInfoVarsCmd(
             nsPtr = Tcl_FindNamespace(interp, head, NULL, 0);
         }
 	if ((nsPtr != NULL) && Itcl_IsClassNamespace(nsPtr)) {
-	    ItclObjectInfo *infoPtr;
-	    ItclClass *iclsPtr;
-	    ItclVariable *ivPtr;
 	    infoPtr = Tcl_GetAssocData(interp, ITCL_INTERP_DATA, NULL);
 	    hPtr = Tcl_FindHashEntry(&infoPtr->namespaceClasses,
 	            (char *)nsPtr);
@@ -1447,6 +1475,7 @@ Itcl_BiInfoVarsCmd(
 		numElems = 0;
 /* FIXME !! should perhaps skip ___DO_NOT_DELETE_THIS_VARIABLE here !! */
 		FOREACH_HASH_VALUE(ivPtr, &iclsPtr->variables) {
+fprintf(stderr, "VAR!%s!0x%08x!\n", Tcl_GetString(ivPtr->namePtr), ivPtr->flags);
 		    if ((ivPtr->flags & (ITCL_TYPE_VAR|ITCL_VARIABLE)) != 0) {
 			    if (head != NULL) {
 			        namePtr = ivPtr->fullNamePtr;
@@ -1473,7 +1502,6 @@ Itcl_BiInfoVarsCmd(
 	    }
 	}
     }
-
     return result;
 }
 
@@ -1542,7 +1570,7 @@ Itcl_BiInfoUnknownCmd(
         Tcl_Obj *objPtr = Tcl_NewStringObj(
 	        "wrong # args: should be one of...\n", -1);
         ItclGetInfoUsage(interp, objPtr, (ItclObjectInfo *)clientData);
-	Tcl_SetResult(interp, Tcl_GetString(objPtr), TCL_DYNAMIC);
+	Tcl_SetObjResult(interp, objPtr);
         return TCL_ERROR;
     }
     listObj = Tcl_NewListObj(-1, NULL);
@@ -3828,7 +3856,7 @@ Itcl_ErrorDelegatedInfoCmd(
     Tcl_Obj *objPtr = Tcl_NewStringObj(
            "wrong # args: should be one of...\n", -1);
     ItclGetInfoDelegatedUsage(interp, objPtr, (ItclObjectInfo *)clientData);
-    Tcl_SetResult(interp, Tcl_GetString(objPtr), TCL_DYNAMIC);
+    Tcl_SetObjResult(interp, objPtr);
     return TCL_ERROR;
 }
 
@@ -3854,7 +3882,7 @@ Itcl_BiInfoDelegatedUnknownCmd(
     objPtr = Tcl_NewStringObj(
             "wrong # args: should be one of...\n", -1);
     ItclGetInfoDelegatedUsage(interp, objPtr, (ItclObjectInfo *)clientData);
-    Tcl_SetResult(interp, Tcl_GetString(objPtr), TCL_DYNAMIC);
+    Tcl_SetObjResult(interp, objPtr);
     return TCL_ERROR;
 }
 

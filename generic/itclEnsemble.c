@@ -25,7 +25,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclEnsemble.c,v 1.1.2.11 2008/11/08 23:40:12 wiede Exp $
+ *     RCS:  $Id: itclEnsemble.c,v 1.1.2.12 2008/11/17 16:24:48 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -2132,7 +2132,7 @@ fprintf(stderr, "EnsembleUnknownCmd, ensemble struct not found!%s!\n", Tcl_GetSt
         Tcl_Obj *objPtr = Tcl_NewStringObj(
                 "wrong # args: should be one of...\n", -1);
         GetEnsembleUsage(interp, ensData, objPtr);
-        Tcl_SetResult(interp, Tcl_GetString(objPtr), TCL_DYNAMIC);
+        Tcl_SetObjResult(interp, objPtr);
         return TCL_ERROR;
     }
     if (FindEnsemblePart(interp, ensData, "@error", &ensPart) != TCL_OK) {

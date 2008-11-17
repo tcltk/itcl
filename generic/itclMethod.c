@@ -25,7 +25,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclMethod.c,v 1.1.2.31 2008/11/16 16:32:32 wiede Exp $
+ *     RCS:  $Id: itclMethod.c,v 1.1.2.32 2008/11/17 16:24:48 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -2277,7 +2277,7 @@ ItclCheckCallMethod(
             Tcl_Obj *objPtr = Tcl_NewStringObj(
 	            "wrong # args: should be one of...\n", -1);
             ItclGetInfoUsage(interp, objPtr, imPtr->iclsPtr->infoPtr);
-	    Tcl_SetResult(interp, Tcl_GetString(objPtr), TCL_DYNAMIC);
+	    Tcl_SetObjResult(interp, objPtr);
 	} else {
             Tcl_AppendResult(interp, "wrong # args: should be \"",
 	            Tcl_GetString(cObjv[0]), " ",
