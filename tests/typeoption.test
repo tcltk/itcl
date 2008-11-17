@@ -458,16 +458,16 @@ test option-4.6 {delegated option name may not contain spaces} -body {
     error
 } -result {bad option name "-with space", option names must not contain " "}
 
-test option-6.1 {if no options, no options variable} -body {
+test option-6.1a {itcl_options variable is always there} -body {
     type dog {
         variable dummy
     }
 
     dog spot
-    spot info vars
+    spot info vars itcl_options
 } -cleanup {
     dog destroy
-} -result {}
+} -result {itcl_options}
 
 test option-6.2 {if no options, no options methods} -body {
     type dog {

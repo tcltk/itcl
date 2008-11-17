@@ -202,7 +202,7 @@ test iinfo-4.1 {object info vars} -body {
     lsort [spot info vars]
 } -cleanup {
     dog destroy
-} -result {hisvar}
+} -result {hisvar itcl_options}
 
 test iinfo-4.2 {object info vars with pattern} -body {
     type dog {
@@ -218,16 +218,16 @@ test iinfo-4.2 {object info vars with pattern} -body {
     spot info vars "*his*"
 } -cleanup {
     dog destroy
-} -result {hisvar}
+} -result {hisvar itcl_options}
 
-test iinfo-5.1 {object info no vars defined} -body {
+test iinfo-5.1 {object info no vars defined besides itcl_options} -body {
     type dog { }
 
     dog create spot
     list [spot info vars] [spot info typevars]
 } -cleanup {
     dog destroy
-} -result {{} {}}
+} -result {itcl_options {}}
 
 test iinfo-6.1 {info options with no options} -body {
     type dog { }

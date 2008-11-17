@@ -100,7 +100,6 @@ tcltest::testConstraint tk [info exists tk_version]
 
 ::tcltest::loadTestedCommands
 
-if {1} {
 #-----------------------------------------------------------------------
 # Widgets
 
@@ -530,10 +529,6 @@ test installhull-1.1 {
     myframe destroy
 } -result {red 123}
 
-# end
-}
-
-puts stderr installhull-1.2
 test installhull-1.2 {
     Options delegated to a widget's itcl_hull frame with a different name are
     initialized from the option database.
@@ -753,8 +748,13 @@ test hulltype-1.5 {hulltype can only be defined once} -constraints {
 test hulltype-2.1 {list of valid hulltypes} -constraints {
     tk
 } -body {
-    lsort $::snit::hulltypes
-} -result {frame labelframe tk::frame tk::labelframe tk::toplevel toplevel ttk::frame ttk::labelframe}
+    type dog {
+    }
+
+    lsort [dog info hulltypes]
+} -cleanup {
+    dog destroy
+} -result {frame labelframe toplevel ttk:frame ttk:labelframe ttk:toplevel}
 
 test winfo-10.1 {widget info widgets} -body {
     widget dog {
@@ -802,7 +802,6 @@ test winfo-10.3 {widget info widgetclasses} -body {
     dog destroy
     cat destroy
 } -result {CatWidget DogWidget}
-
 
 
 #---------------------------------------------------------------------

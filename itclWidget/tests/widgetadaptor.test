@@ -596,6 +596,7 @@ test installhull-1.4 {
     myframe destroy
 } -result {red}
 
+puts stderr installhull-1.5
 test installhull-1.5 {
     Option values read from the option database are overridden by options
     explicitly passed, even if delegated under a different name.
