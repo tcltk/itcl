@@ -24,7 +24,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclInfo.c,v 1.1.2.28 2008/11/17 21:38:05 wiede Exp $
+ *     RCS:  $Id: itclInfo.c,v 1.1.2.29 2008/11/23 20:23:32 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -3254,7 +3254,7 @@ Itcl_BiInfoTypesCmd(
         pattern = Tcl_GetString(objv[1]);
     }
     listPtr = Tcl_NewListObj(0, NULL);
-    FOREACH_HASH_VALUE(iclsPtr, &infoPtr->classes) {
+    FOREACH_HASH_VALUE(iclsPtr, &infoPtr->nameClasses) {
 	if (iclsPtr->flags & ITCL_TYPE) {
 	    name = Tcl_GetString(iclsPtr->namePtr);
 	    Tcl_IncrRefCount(iclsPtr->namePtr);

@@ -25,7 +25,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclMethod.c,v 1.1.2.32 2008/11/17 16:24:48 wiede Exp $
+ *     RCS:  $Id: itclMethod.c,v 1.1.2.33 2008/11/23 20:23:32 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -373,7 +373,7 @@ ItclCreateMethod(
     }
 
     imPtr->flags |= ITCL_METHOD;
-    Itcl_PreserveData((ClientData)imPtr);
+//    Itcl_PreserveData((ClientData)imPtr);
     if (imPtrPtr != NULL) {
         *imPtrPtr = imPtr;
     }
@@ -424,8 +424,7 @@ Itcl_CreateProc(
      *  Mark procs as "common".  This distinguishes them from methods.
      */
     imPtr->flags |= ITCL_COMMON;
-
-    Itcl_PreserveData((ClientData)imPtr);
+//    Itcl_PreserveData((ClientData)imPtr);
     return TCL_OK;
 }
 
@@ -445,6 +444,12 @@ Itcl_CreateProc(
  *  member function.
  * ------------------------------------------------------------------------
  */
+void Itcl_DeleteMemberFunc2 (
+    char *cdata)
+{
+    Itcl_DeleteMemberFunc(cdata);
+}
+
 static int
 ItclCreateMemberFunc(
     Tcl_Interp* interp,            /* interpreter managing this action */
@@ -494,6 +499,7 @@ ItclCreateMemberFunc(
     imPtr = (ItclMemberFunc*)ckalloc(sizeof(ItclMemberFunc));
     memset(imPtr, 0, sizeof(ItclMemberFunc));
     imPtr->iclsPtr    = iclsPtr;
+    imPtr->infoPtr    = iclsPtr->infoPtr;
     imPtr->protection = Itcl_Protection(interp, 0);
     imPtr->namePtr    = Tcl_NewStringObj(Tcl_GetString(namePtr), -1);
     Tcl_IncrRefCount(imPtr->namePtr);
@@ -617,7 +623,7 @@ ItclCreateMemberFunc(
 
     Tcl_SetHashValue(hPtr, (ClientData)imPtr);
     Itcl_PreserveData((ClientData)imPtr);
-    Itcl_EventuallyFree((ClientData)imPtr, Itcl_DeleteMemberFunc);
+    Itcl_EventuallyFree((ClientData)imPtr, Itcl_DeleteMemberFunc2);
 
     *imPtrPtr = imPtr;
     return TCL_OK;
@@ -998,10 +1004,11 @@ Itcl_CreateMemberCode(
  */
 void
 Itcl_DeleteMemberCode(
-    char* cdata)  /* pointer to member function definition */
+    char* cdata)  /* pointer to member code definition */
 {
-    ItclMemberCode* mCodePtr = (ItclMemberCode*)cdata;
-
+    ItclMemberCode* mCodePtr;
+    
+    mCodePtr = (ItclMemberCode*)cdata;
     if (mCodePtr == NULL) {
         return;
     }
@@ -1013,6 +1020,9 @@ Itcl_DeleteMemberCode(
     }
     if (mCodePtr->argumentPtr != NULL) {
         Tcl_DecrRefCount(mCodePtr->argumentPtr);
+    }
+    if (mCodePtr->bodyPtr != NULL) {
+        Tcl_DecrRefCount(mCodePtr->bodyPtr);
     }
     /* do NOT free mCodePtr->bodyPtr here !! that is done in TclOO!! */
     ckfree((char*)mCodePtr);
@@ -1229,6 +1239,7 @@ Itcl_EvalMemberCode(
     }
 
 evalMemberCodeDone:
+    Itcl_ReleaseData((ClientData)mcode);
     return result;
 }
 /*
@@ -1603,7 +1614,6 @@ NRExecMethod(
      *  the method in case it gets deleted during execution.
      */
     Itcl_PreserveData((ClientData)imPtr);
-
     result = Itcl_EvalMemberCode(interp, imPtr, ioPtr, objc, objv);
     Itcl_ReleaseData((ClientData)imPtr);
     return result;
@@ -2235,6 +2245,10 @@ ItclCheckCallMethod(
     oPtr = NULL;
     hPtr = NULL;
     imPtr = (ItclMemberFunc *)clientData;
+    Itcl_PreserveData(imPtr);
+    if (imPtr->codePtr != NULL) {
+        Itcl_PreserveData(imPtr->codePtr);
+    }
     if (imPtr->flags & ITCL_CONSTRUCTOR) {
         ioPtr = imPtr->iclsPtr->infoPtr->currIoPtr;
     } else {
@@ -2248,13 +2262,14 @@ ItclCheckCallMethod(
                 if (isFinished != NULL) {
                     *isFinished = 0;
                 }
-                return TCL_OK;
+		return TCL_OK;
             }
 	    Tcl_AppendResult(interp,
 	            "ItclCheckCallMethod cannot get context object (NULL)",
                     " for ", Tcl_GetString(imPtr->fullNamePtr),
 		    NULL);
-	    return TCL_ERROR;
+	    result = TCL_ERROR;
+	    goto finishReturn;
 	}
         oPtr = Tcl_ObjectContextObject(contextPtr);
 	ioPtr = Tcl_ObjectGetMetadata(oPtr,
@@ -2268,7 +2283,8 @@ ItclCheckCallMethod(
         if (isFinished != NULL) {
             *isFinished = 1;
         }
-        return TCL_ERROR;
+	result = TCL_ERROR;
+	goto finishReturn;
     }
     int cObjc = Itcl_GetCallFrameObjc(interp);
     Tcl_Obj *const * cObjv = Itcl_GetCallFrameObjv(interp);
@@ -2287,7 +2303,8 @@ ItclCheckCallMethod(
         if (isFinished != NULL) {
             *isFinished = 1;
         }
-        return TCL_ERROR;
+	result = TCL_ERROR;
+	goto finishReturn;
     }
     isNew = 0;
     callContextPtr = NULL;
@@ -2334,6 +2351,8 @@ ItclCheckCallMethod(
 
     if (ioPtr != NULL) {
         ioPtr->callRefCount++;
+	Itcl_PreserveData(ioPtr);
+	Itcl_PreserveData(ioPtr->iclsPtr);
     }
     imPtr->iclsPtr->callRefCount++;
     if (!imPtr->iclsPtr->infoPtr->useOldResolvers) {
@@ -2343,6 +2362,12 @@ ItclCheckCallMethod(
 
     if (isFinished != NULL) {
         *isFinished = 0;
+    }
+    return result;
+finishReturn:
+    Itcl_ReleaseData(imPtr);
+    if (imPtr->codePtr != NULL) {
+        Itcl_ReleaseData(imPtr->codePtr);
     }
     return result;
 }
@@ -2368,23 +2393,26 @@ ItclAfterCallMethod(
     ItclMemberFunc *imPtr;
     ItclCallContext *callContextPtr;
     int newEntry;
+    int result;
 
     oPtr = NULL;
     imPtr = (ItclMemberFunc *)clientData;
 
     callContextPtr = NULL;
     if (contextPtr != NULL) {
-        callContextPtr = Itcl_PopStack(&imPtr->iclsPtr->infoPtr->contextStack);
+        callContextPtr = Itcl_PopStack(&imPtr->infoPtr->contextStack);
     }
     if (callContextPtr == NULL) {
         if ((imPtr->flags & ITCL_COMMON) ||
                 (imPtr->codePtr->flags & ITCL_BUILTIN)) {
-            return call_result;
+	    result = call_result;
+	    goto finishReturn;
         }
 	Tcl_AppendResult(interp,
 	        "ItclAfterCallMethod cannot get context object (NULL)",
                 " for ", Tcl_GetString(imPtr->fullNamePtr), NULL);
-        return TCL_ERROR;
+	result = TCL_ERROR;
+	goto finishReturn;
     }
     /*
      *  If this is a constructor or destructor, and if it is being
@@ -2421,11 +2449,19 @@ ItclAfterCallMethod(
             if (hPtr == NULL) {
                 ckfree((char *)callContextPtr);
 	    }
+            Itcl_ReleaseData(ioPtr->iclsPtr);
+            Itcl_ReleaseData(ioPtr);
         } else {
             ckfree((char *)callContextPtr);
         }
     }
-    return call_result;
+    result = call_result;
+finishReturn:
+    if (imPtr->codePtr != NULL) {
+        Itcl_ReleaseData(imPtr->codePtr);
+    }
+    Itcl_ReleaseData(imPtr);
+    return result;
 }
 
 void
@@ -2433,13 +2469,14 @@ ItclProcErrorProc(
     Tcl_Interp *interp,
     Tcl_Obj *procNameObj)
 {
+    Tcl_Obj *objPtr;
+    Tcl_Namespace *upNsPtr;
+    Tcl_HashEntry *hPtr;
     ItclObjectInfo *infoPtr;
     ItclCallContext *callContextPtr;
     ItclMemberFunc *imPtr;
     ItclObject *contextIoPtr;
     ItclClass *currIclsPtr;
-    Tcl_Obj *objPtr;
-    Tcl_Namespace *upNsPtr;
     char num[20];
     int constructorStackIndex;
     int constructorStackSize;
@@ -2507,6 +2544,7 @@ ItclProcErrorProc(
             }
         }
 	if (imPtr->flags & ITCL_DESTRUCTOR) {
+	    contextIoPtr->flags = 0;
 	    Tcl_AppendToObj(objPtr, "while deleting object \"", -1);
             Tcl_GetCommandFullName(interp, contextIoPtr->accessCmd, objPtr);
             Tcl_AppendToObj(objPtr, "\" in ", -1);
@@ -2518,10 +2556,13 @@ ItclProcErrorProc(
 	if (!(imPtr->flags & (ITCL_CONSTRUCTOR|ITCL_DESTRUCTOR|ITCL_CONINIT))) {
             Tcl_AppendToObj(objPtr, "(", -1);
 
-            if ((contextIoPtr != NULL) && (contextIoPtr->accessCmd)) {
+	    hPtr = Tcl_FindHashEntry(&infoPtr->objects, (char *)contextIoPtr);
+	    if (hPtr != NULL) {
+              if ((contextIoPtr != NULL) && (contextIoPtr->accessCmd)) {
                 Tcl_AppendToObj(objPtr, "object \"", -1);
                 Tcl_GetCommandFullName(interp, contextIoPtr->accessCmd, objPtr);
                 Tcl_AppendToObj(objPtr, "\" ", -1);
+              }
             }
 
             if ((imPtr->flags & ITCL_COMMON) != 0) {

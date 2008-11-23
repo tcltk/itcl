@@ -9,7 +9,7 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itclInt.h,v 1.17.2.52 2008/11/17 16:24:48 wiede Exp $
+ * RCS: @(#) $Id: itclInt.h,v 1.17.2.53 2008/11/23 20:23:32 wiede Exp $
  */
 
 #include <string.h>
@@ -77,6 +77,28 @@
 #define ITCL_VARIABLES_NAMESPACE "::itcl::internal::variables"
 #define ITCL_COMMANDS_NAMESPACE "::itcl::internal::commands"
 
+#ifdef ITCL_PRESERVE_DEBUG
+#define ITCL_PRESERVE_BUCKET_SIZE 50
+#define ITCL_PRESERVE_INCR 1
+#define ITCL_PRESERVE_DECR -1
+#define ITCL_PRESERVE_DELETED 0
+
+typedef struct ItclPreserveInfoEntry {
+    int type;
+    int line;
+    const char * fileName;
+} ItclPreserveInfoEntry;
+
+typedef struct ItclPreserveInfo {
+    int refCount;
+    ClientData clientData;
+    int size;
+    int numEntries;
+    ItclPreserveInfoEntry *entries;
+} ItclPreserveInfo;
+
+#endif
+
 typedef struct ItclFoundation {
     Itcl_Stack methodCallStack;
     Tcl_Command dispatchCommand;
@@ -121,13 +143,19 @@ typedef struct ItclWidgetInfo {
 
 typedef struct ItclObjectInfo {
     Tcl_Interp *interp;             /* interpreter that manages this info */
-    Tcl_HashTable objects;          /* list of all known objects */
+    Tcl_HashTable objects;          /* list of all known objects key is 
+                                     * ioPtr */
+    Tcl_HashTable objectCmds;       /* list of known objects using accessCmd */
     Tcl_HashTable objectNames;      /* list of known objects using namePtr */
-    Tcl_HashTable classes;          /* list of all known classes */
+    Tcl_HashTable classes;          /* list of all known classes,
+                                     * key is iclsPtr */
+    Tcl_HashTable nameClasses;      /* maps from fullNamePtr to iclsPtr */
     Tcl_HashTable namespaceClasses; /* maps from nsPtr to iclsPtr */
     Tcl_HashTable procMethods;      /* maps from procPtr to mFunc */
     Tcl_HashTable instances;        /* maps from instanceNumber to ioPtr */
     Tcl_HashTable objectInstances;  /* maps from ioPtr to instanceNumber */
+    Tcl_HashTable myEnsembles;      /* maps from ensemble name (::itcl::find)
+                                     * etc. to ensemble pathName */
     int protection;                 /* protection level currently in effect */
     int useOldResolvers;            /* whether to use the "old" style
                                      * resolvers or the CallFrame resolvers */
@@ -177,12 +205,37 @@ typedef struct EnsembleInfo {
 /*
  *  Representation for each [incr Tcl] class.
  */
+#define ITCL_CLASS		              0x1
+#define ITCL_TYPE		              0x2
+#define ITCL_WIDGET		              0x4
+#define ITCL_WIDGETADAPTOR	              0x8
+#define ITCL_ECLASS		             0x10
+#define ITCL_NWIDGET		             0x20
+#define ITCL_WIDGET_FRAME	             0x40
+#define ITCL_WIDGET_LABEL_FRAME	             0x80
+#define ITCL_WIDGET_TOPLEVEL	            0x100
+#define ITCL_WIDGET_TTK_FRAME               0x200
+#define ITCL_WIDGET_TTK_LABEL_FRAME	    0x400
+#define ITCL_WIDGET_TTK_TOPLEVEL            0x800
+#define ITCL_CLASS_IS_DELETED              0x1000
+#define ITCL_CLASS_IS_DESTROYED            0x2000
+#define ITCL_CLASS_NS_IS_DESTROYED         0x4000
+#define ITCL_CLASS_IS_RENAMED              0x8000
+#define ITCL_CLASS_IS_FREED               0x10000
+#define ITCL_CLASS_DERIVED_RELEASED       0x20000
+#define ITCL_CLASS_NS_TEARDOWN            0x40000
+#define ITCL_CLASS_NO_VARNS_DELETE        0x80000
+#define ITCL_CLASS_SHOULD_VARNS_DELETE   0x100000
+#define ITCL_CLASS_CONSTRUCT_ERROR       0x200000
+
+
 typedef struct ItclClass {
     Tcl_Obj *namePtr;             /* class name */
     Tcl_Obj *fullNamePtr;         /* fully qualified class name */
     Tcl_Interp *interp;           /* interpreter that manages this info */
     Tcl_Namespace *nsPtr;         /* namespace representing class scope */
     Tcl_Command accessCmd;        /* access command for creating instances */
+    Tcl_Command thisCmd;          /* needed for deletion of class */
 
     struct ItclObjectInfo *infoPtr;
                                   /* info about all known objects
@@ -249,24 +302,19 @@ typedef struct ItclClass {
     Tcl_Obj *typeConstructorPtr;  /* initialization for types */
 } ItclClass;
 
-#define ITCL_CLASS		        0x0001000
-#define ITCL_WIDGET		        0x0002000
-#define ITCL_WIDGETADAPTOR	        0x0004000
-#define ITCL_TYPE		        0x0008000
-#define ITCL_ECLASS		        0x0010000
-#define ITCL_NWIDGET		        0x0020000
-#define ITCL_WIDGET_FRAME	        0x0040000
-#define ITCL_WIDGET_LABEL_FRAME	        0x0080000
-#define ITCL_WIDGET_TOPLEVEL	        0x0100000
-#define ITCL_WIDGET_TTK_FRAME           0x0200000
-#define ITCL_WIDGET_TTK_LABEL_FRAME	0x0400000
-#define ITCL_WIDGET_TTK_TOPLEVEL        0x1000000
-#define ITCL_CLASS_NS_TEARDOWN          0x2000000
-
 typedef struct ItclHierIter {
     ItclClass *current;           /* current position in hierarchy */
     Itcl_Stack stack;             /* stack used for traversal */
 } ItclHierIter;
+
+#define ITCL_OBJECT_IS_DELETED           0x01
+#define ITCL_OBJECT_IS_DESTRUCTED        0x02
+#define ITCL_OBJECT_IS_DESTROYED         0x04
+#define ITCL_OBJECT_IS_RENAMED           0x08
+#define ITCL_OBJECT_CLASS_DESTRUCTED     0x10
+#define ITCL_TCLOO_OBJECT_IS_DELETED     0x20
+#define ITCL_OBJECT_DESTRUCT_ERROR       0x40
+#define ITCL_OBJECT_SHOULD_VARNS_DELETE  0x80
 
 /*
  *  Representation for each [incr Tcl] object.
@@ -309,6 +357,8 @@ typedef struct ItclObject {
                                    * mostly used for widgetadaptor
 				   * because that hijackes the name
 				   * often when installing the hull */
+    Tcl_Interp *interp;
+    ItclObjectInfo *infoPtr;
     Tcl_Obj *varNsNamePtr;
     Tcl_Object oPtr;             /* the TclOO object */
     Tcl_Resolve *resolvePtr;
@@ -319,16 +369,6 @@ typedef struct ItclObject {
     int destructorHasBeenCalled;  /* is set when the destructor is called
                                    * to avoid callin destructor twice */
 } ItclObject;
-
-#define ITCL_OBJECT_IS_DELETED           0x01
-#define ITCL_OBJECT_IS_DESTRUCTED        0x02
-#define ITCL_OBJECT_IS_RENAMED           0x04
-#define ITCL_OBJECT_SHOULD_VARNS_DELETE  0x08
-#define ITCL_TCLOO_OBJECT_IS_DELETED     0x10
-#define ITCL_CLASS_NO_VARNS_DELETE       0x100
-#define ITCL_CLASS_SHOULD_VARNS_DELETE   0x200
-#define ITCL_CLASS_DELETE_CALLED         0x400
-#define ITCL_CLASS_DELETED               0x800
 
 #define ITCL_IGNORE_ERRS  0x002  /* useful for construction/destruction */
 
@@ -389,7 +429,7 @@ typedef struct ItclMemberCode {
 #define ITCL_BUILTIN           0x400  /* non-zero => built-in method */
 #define ITCL_COMPONENT         0x800  /* non-zero => component */
 #define ITCL_TYPE_METHOD       0x1000 /* non-zero => typemethod */
-#define ITCL_METHOD            0x2000 /* non-zero => typemethod */
+#define ITCL_METHOD            0x2000 /* non-zero => method */
 
 /*
  *  Flag bits for ItclMember: variables
@@ -439,6 +479,7 @@ typedef struct ItclMemberFunc {
     ItclClass* iclsPtr;         /* class containing this member */
     int protection;             /* protection level */
     int flags;                  /* flags describing member (see above) */
+    ItclObjectInfo *infoPtr;
     ItclMemberCode *codePtr;    /* code associated with member */
     Tcl_Command accessCmd;       /* Tcl command installed for this function */
     int argcount;                /* number of args in arglist */
@@ -461,11 +502,12 @@ typedef struct ItclVariable {
     Tcl_Obj *namePtr;           /* member name */
     Tcl_Obj *fullNamePtr;       /* member name with "class::" qualifier */
     ItclClass *iclsPtr;         /* class containing this member */
-    int protection;             /* protection level */
-    int flags;                  /* flags describing member (see below) */
+    ItclObjectInfo *infoPtr;
     ItclMemberCode *codePtr;    /* code associated with member */
     Tcl_Obj *init;              /* initial value */
     Tcl_Obj *arrayInitPtr;      /* initial value if variable should be array */
+    int protection;             /* protection level */
+    int flags;                  /* flags describing member (see below) */
     int initted;                /* is set when first time initted, to check 
                                  * for example itcl_hull var, which can be only
 				 * initialized once */
@@ -735,6 +777,7 @@ MODULE_SCOPE int ItclCreateDelegatedFunction(Tcl_Interp *interp,
         Tcl_Obj *methodNamePtr, ItclComponent *icPtr, Tcl_Obj *targetPtr,
 	Tcl_Obj *usingPtr, Tcl_Obj *exceptionsPtr,
 	ItclDelegatedFunction **idmPtrPtr);
+MODULE_SCOPE void ItclDeleteDelegatedOption(char *cdata);
 
 
 

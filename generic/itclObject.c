@@ -24,7 +24,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann Copyright (c) 2007
  *
- *     RCS:  $Id: itclObject.c,v 1.1.2.51 2008/11/15 23:42:48 wiede Exp $
+ *     RCS:  $Id: itclObject.c,v 1.1.2.52 2008/11/23 20:23:32 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -103,16 +103,26 @@ ObjectRenamedTrace(
     int flags)                  /* Why was the object deleted? */
 {
     ItclObject *ioPtr = clientData;
+    Itcl_InterpState istate;
 
     if (newName != NULL) {
+        return;
+    }
+    if (ioPtr->flags & ITCL_OBJECT_CLASS_DESTRUCTED) {
         return;
     }
     ioPtr->flags |= ITCL_OBJECT_IS_RENAMED;
     if (ioPtr->flags & ITCL_TCLOO_OBJECT_IS_DELETED) {
         ioPtr->oPtr = NULL;
     }
-    if (!(ioPtr->flags & (ITCL_OBJECT_IS_DELETED|ITCL_OBJECT_IS_DESTRUCTED))) {
-        ItclDestroyObject(ioPtr);
+    if (!(ioPtr->flags & ITCL_OBJECT_CLASS_DESTRUCTED)) {
+        /*
+         *  Attempt to destruct the object, but ignore any errors.
+         */
+        istate = Itcl_SaveInterpState(ioPtr->interp, 0);
+        Itcl_DestructObject(ioPtr->interp, ioPtr, ITCL_IGNORE_ERRS);
+        Itcl_RestoreInterpState(ioPtr->interp, istate);
+        ioPtr->flags |= ITCL_OBJECT_CLASS_DESTRUCTED;
     }
 }
 
@@ -148,7 +158,7 @@ ItclCreateObject(
     Tcl_DString buffer;
     Tcl_CmdInfo cmdInfo;
     Tcl_Command cmdPtr;
-    Tcl_HashEntry *entry;
+    Tcl_HashEntry *hPtr;
     Tcl_Obj **newObjv;
     Tcl_Obj *objPtr;
     ItclObjectInfo *infoPtr;
@@ -177,12 +187,15 @@ ItclCreateObject(
     /* just init for the case of none ItclWidget objects */
     newObjc = objc;
     newObjv = (Tcl_Obj **)objv;
+    infoPtr = iclsPtr->infoPtr;
     /*
      *  Create a new object and initialize it.
      */
     ioPtr = (ItclObject*)ckalloc(sizeof(ItclObject));
     memset(ioPtr, 0, sizeof(ItclObject));
     ioPtr->iclsPtr = iclsPtr;
+    ioPtr->interp = interp;
+    ioPtr->infoPtr = infoPtr;
     Itcl_PreserveData((ClientData)iclsPtr);
 
     ioPtr->constructed = (Tcl_HashTable*)ckalloc(sizeof(Tcl_HashTable));
@@ -266,7 +279,6 @@ ItclCreateObject(
         }
     }
 
-    infoPtr = iclsPtr->infoPtr;
     saveCurrIoPtr = infoPtr->currIoPtr;
     infoPtr->currIoPtr = ioPtr;
     if (infoPtr->windgetInfoPtr != NULL) {
@@ -326,8 +338,9 @@ ItclCreateObject(
             iclsPtr->nsPtr->fullName, /* objc */-1, /* objv */NULL,
 	    /* skip */0);
     if (ioPtr->oPtr == NULL) {
-	/* NEED TO FREE STUFF HERE !! */
 	infoPtr->currIoPtr = saveCurrIoPtr;
+        Itcl_ReleaseData((ClientData)ioPtr);
+        Itcl_ReleaseData((ClientData)ioPtr);
 fprintf(stderr, "after Tcl_NewObjectInstance oPtr == NULL\n");
         return TCL_ERROR;
     }
@@ -354,9 +367,13 @@ fprintf(stderr, "after Tcl_NewObjectInstance oPtr == NULL\n");
             ioPtr);
 
     /* make the object known, if it is used in the constructor already! */
-    entry = Tcl_CreateHashEntry(&iclsPtr->infoPtr->objects,
+    hPtr = Tcl_CreateHashEntry(&iclsPtr->infoPtr->objectCmds,
         (char*)ioPtr->accessCmd, &newEntry);
-    Tcl_SetHashValue(entry, (ClientData)ioPtr);
+    Tcl_SetHashValue(hPtr, (ClientData)ioPtr);
+
+    hPtr = Tcl_CreateHashEntry(&iclsPtr->infoPtr->objects,
+        (char*)ioPtr, &newEntry);
+    Tcl_SetHashValue(hPtr, (ClientData)ioPtr);
 
     /* make the object instance known, for use as unique key if the object */
     /* is renamed. Used by mytypemethod etc. */
@@ -365,12 +382,12 @@ fprintf(stderr, "after Tcl_NewObjectInstance oPtr == NULL\n");
     /* FIXME need to free that when deleting object and to remove the entries!! */
     objPtr = Tcl_NewStringObj(str, -1);
     Tcl_IncrRefCount(objPtr);
-    entry = Tcl_CreateHashEntry(&iclsPtr->infoPtr->instances,
+    hPtr = Tcl_CreateHashEntry(&iclsPtr->infoPtr->instances,
         (char*)objPtr, &newEntry);
-    Tcl_SetHashValue(entry, (ClientData)ioPtr);
-    entry = Tcl_CreateHashEntry(&iclsPtr->infoPtr->objectInstances,
+    Tcl_SetHashValue(hPtr, (ClientData)ioPtr);
+    hPtr = Tcl_CreateHashEntry(&iclsPtr->infoPtr->objectInstances,
         (char*)ioPtr, &newEntry);
-    Tcl_SetHashValue(entry, (ClientData)objPtr);
+    Tcl_SetHashValue(hPtr, (ClientData)objPtr);
     iclsPtr->infoPtr->numInstances++;
 
     /*
@@ -394,6 +411,8 @@ fprintf(stderr, "after Tcl_NewObjectInstance oPtr == NULL\n");
         /* result = Itcl_RestoreInterpState(interp, istate); */
         Itcl_RestoreInterpState(interp, istate);
 	infoPtr->currIoPtr = saveCurrIoPtr;
+	/* need this for 2 ReleaseData at errorReturn!! */
+        Itcl_PreserveData(ioPtr);
         goto errorReturn;
     }
 
@@ -485,12 +504,15 @@ fprintf(stderr, "after Tcl_NewObjectInstance oPtr == NULL\n");
 		goto errorReturn;
 	    }
 	}
-        entry = Tcl_CreateHashEntry(&iclsPtr->infoPtr->objects,
+        hPtr = Tcl_CreateHashEntry(&iclsPtr->infoPtr->objectCmds,
             (char*)ioPtr->accessCmd, &newEntry);
-        Tcl_SetHashValue(entry, (ClientData)ioPtr);
-        entry = Tcl_CreateHashEntry(&iclsPtr->infoPtr->objectNames,
+        Tcl_SetHashValue(hPtr, (ClientData)ioPtr);
+        hPtr = Tcl_CreateHashEntry(&iclsPtr->infoPtr->objects,
+            (char*)ioPtr, &newEntry);
+        Tcl_SetHashValue(hPtr, (ClientData)ioPtr);
+        hPtr = Tcl_CreateHashEntry(&iclsPtr->infoPtr->objectNames,
             (char*)ioPtr->namePtr, &newEntry);
-        Tcl_SetHashValue(entry, (ClientData)ioPtr);
+        Tcl_SetHashValue(hPtr, (ClientData)ioPtr);
 
         /* add the objects unknow command to handle all unknown sub commands */
 	ClientData pmPtr;
@@ -536,10 +558,10 @@ fprintf(stderr, "after Tcl_NewObjectInstance oPtr == NULL\n");
 	}
     } else {
         if (ioPtr->accessCmd != NULL) {
-            entry = Tcl_FindHashEntry(&iclsPtr->infoPtr->objects,
+            hPtr = Tcl_FindHashEntry(&iclsPtr->infoPtr->objectCmds,
                 (char*)ioPtr->accessCmd);
-	    if (entry != NULL) {
-                Tcl_DeleteHashEntry(entry);
+	    if (hPtr != NULL) {
+                Tcl_DeleteHashEntry(hPtr);
 	    }
         }
     }
@@ -548,7 +570,6 @@ fprintf(stderr, "after Tcl_NewObjectInstance oPtr == NULL\n");
      *  Release the object.  If it was destructed above, it will
      *  die at this point.
      */
-errorReturn:
     /*
      *  At this point, the object is fully constructed or there was an error.
      *  Destroy the "constructed" table in the object data, since
@@ -560,6 +581,23 @@ errorReturn:
     Tcl_DeleteHashTable(ioPtr->constructed);
     ckfree((char*)ioPtr->constructed);
     ioPtr->constructed = NULL;
+    Itcl_ReleaseData((ClientData)ioPtr);
+    return result;
+errorReturn:
+    /*
+     *  At this point, the object is fully constructed or there was an error.
+     *  Destroy the "constructed" table in the object data, since
+     *  it is no longer needed.
+     */
+    if (infoPtr != NULL) {
+        infoPtr->currIoPtr = saveCurrIoPtr;
+    }
+    if (ioPtr->constructed != NULL) {
+        Tcl_DeleteHashTable(ioPtr->constructed);
+        ckfree((char*)ioPtr->constructed);
+        ioPtr->constructed = NULL;
+    }
+    Itcl_ReleaseData((ClientData)ioPtr);
     Itcl_ReleaseData((ClientData)ioPtr);
     return result;
 }
@@ -1211,10 +1249,9 @@ Itcl_DeleteObject(
     Tcl_Interp *interp,      /* interpreter mananging object */
     ItclObject *contextIoPtr)  /* object to be deleted */
 {
-    ItclClass *iclsPtr = (ItclClass*)contextIoPtr->iclsPtr;
-
-    Tcl_HashEntry *entry;
     Tcl_CmdInfo cmdInfo;
+    Tcl_GetCommandInfoFromToken(contextIoPtr->accessCmd, &cmdInfo);
+    Tcl_HashEntry *hPtr;
 
     contextIoPtr->flags |= ITCL_OBJECT_IS_DELETED;
     Itcl_PreserveData((ClientData)contextIoPtr);
@@ -1224,31 +1261,36 @@ Itcl_DeleteObject(
      */
     if (Itcl_DestructObject(interp, contextIoPtr, 0) != TCL_OK) {
         Itcl_ReleaseData((ClientData)contextIoPtr);
-	contextIoPtr->flags |= ITCL_TCLOO_OBJECT_IS_DELETED;
+	contextIoPtr->flags |=
+	        ITCL_TCLOO_OBJECT_IS_DELETED|ITCL_OBJECT_DESTRUCT_ERROR;
         return TCL_ERROR;
     }
 
     /*
      *  Remove the object from the global list.
      */
-    entry = Tcl_FindHashEntry(&iclsPtr->infoPtr->objects,
-        (char*)contextIoPtr->accessCmd);
+    hPtr = Tcl_FindHashEntry(&contextIoPtr->infoPtr->objects,
+        (char*)contextIoPtr);
 
-    if (entry) {
-        Tcl_DeleteHashEntry(entry);
+    if (hPtr) {
+        Tcl_DeleteHashEntry(hPtr);
     }
 
+//    Itcl_ReleaseData((ClientData)contextIoPtr->iclsPtr);
     /*
      *  Change the object's access command so that it can be
      *  safely deleted without attempting to destruct the object
      *  again.  Then delete the access command.  If this is
      *  the last use of the object data, the object will die here.
      */
+    if ((contextIoPtr->accessCmd != NULL) && (!(contextIoPtr->flags &
+            (ITCL_OBJECT_IS_RENAMED)))) {
     if (Tcl_GetCommandInfoFromToken(contextIoPtr->accessCmd, &cmdInfo) == 1) {
         cmdInfo.deleteProc = Itcl_ReleaseData;
 	Tcl_SetCommandInfoFromToken(contextIoPtr->accessCmd, &cmdInfo);
 
         Tcl_DeleteCommandFromToken(interp, contextIoPtr->accessCmd);
+    }
     }
     contextIoPtr->oPtr = NULL;
     contextIoPtr->accessCmd = NULL;
@@ -1299,7 +1341,6 @@ FinalizeDeleteObject(
     Tcl_DeleteHashTable(contextIoPtr->destructed);
     ckfree((char*)contextIoPtr->destructed);
     contextIoPtr->destructed = NULL;
-        
     return result;
 }
 
@@ -1352,18 +1393,7 @@ Itcl_DestructObject(
     int result;
 
     if ((contextIoPtr->flags & (ITCL_OBJECT_IS_DESTRUCTED))) {
-        if (contextIoPtr->destructed) {
-            if ((flags & ITCL_IGNORE_ERRS) == 0) {
-                Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
-                    "can't delete an object while it is being destructed",
-                    (char*)NULL);
-                return TCL_ERROR;
-            }
             return TCL_OK;
-        }
-    }
-    if (contextIoPtr->accessCmd == NULL) {
-        return TCL_OK;
     }
     contextIoPtr->flags |= ITCL_OBJECT_IS_DESTRUCTED;
     /*
@@ -2341,20 +2371,23 @@ ItclDestroyObject(
     ClientData cdata)  /* object instance data */
 {
     ItclObject *contextIoPtr = (ItclObject*)cdata;
-    ItclClass *iclsPtr = (ItclClass*)contextIoPtr->iclsPtr;
-    Tcl_HashEntry *entry;
+    Tcl_HashEntry *hPtr;
     Itcl_InterpState istate;
 
-    if (contextIoPtr->accessCmd == NULL) {
-	/* object has already been destroyed !! */
+    if (contextIoPtr->flags & ITCL_OBJECT_IS_DESTROYED) {
         return;
     }
-    /*
-     *  Attempt to destruct the object, but ignore any errors.
-     */
-    istate = Itcl_SaveInterpState(iclsPtr->interp, 0);
-    Itcl_DestructObject(iclsPtr->interp, contextIoPtr, ITCL_IGNORE_ERRS);
-    Itcl_RestoreInterpState(iclsPtr->interp, istate);
+    contextIoPtr->flags |= ITCL_OBJECT_IS_DESTROYED;
+
+    if (!(contextIoPtr->flags & ITCL_OBJECT_IS_DESTRUCTED)) {
+        /*
+         *  Attempt to destruct the object, but ignore any errors.
+         */
+        istate = Itcl_SaveInterpState(contextIoPtr->interp, 0);
+        Itcl_DestructObject(contextIoPtr->interp, contextIoPtr,
+                ITCL_IGNORE_ERRS);
+        Itcl_RestoreInterpState(contextIoPtr->interp, istate);
+    }
 
     /*
      *  Now, remove the object from the global object list.
@@ -2363,15 +2396,14 @@ ItclDestroyObject(
      *  won't work properly.
      */
     if (contextIoPtr->accessCmd != NULL) {
-        entry = Tcl_FindHashEntry(&iclsPtr->infoPtr->objects,
-            (char*)contextIoPtr->accessCmd);
+        hPtr = Tcl_FindHashEntry(&contextIoPtr->infoPtr->objects,
+            (char*)contextIoPtr);
 
-        if (entry) {
-            Tcl_DeleteHashEntry(entry);
+        if (hPtr) {
+            Tcl_DeleteHashEntry(hPtr);
         }
         contextIoPtr->accessCmd = NULL;
     }
-
     Itcl_ReleaseData((ClientData)contextIoPtr);
 }
 
@@ -2388,12 +2420,8 @@ static void
 ItclFreeObject(
     char * cdata)  /* object instance data */
 {
-    ItclObject *contextObj = (ItclObject*)cdata;
+    ItclObject *ioPtr = (ItclObject*)cdata;
 
-    if (contextObj->accessCmd == NULL) {
-	/* object has already been freed */
-        return;
-    }
     /*
      *  Install the class namespace and object context so that
      *  the object's data members can be destroyed via simple
@@ -2406,17 +2434,17 @@ ItclFreeObject(
      *    from below.
      */
 
-    if (contextObj->constructed) {
-        Tcl_DeleteHashTable(contextObj->constructed);
-        ckfree((char*)contextObj->constructed);
+    if (ioPtr->constructed) {
+        Tcl_DeleteHashTable(ioPtr->constructed);
+        ckfree((char*)ioPtr->constructed);
     }
-    if (contextObj->destructed) {
-        Tcl_DeleteHashTable(contextObj->destructed);
-        ckfree((char*)contextObj->destructed);
+    if (ioPtr->destructed) {
+        Tcl_DeleteHashTable(ioPtr->destructed);
+        ckfree((char*)ioPtr->destructed);
     }
-    Itcl_ReleaseData((ClientData)contextObj->iclsPtr);
+    Itcl_ReleaseData((ClientData)ioPtr->iclsPtr);
 
-    ckfree((char*)contextObj);
+    ckfree((char*)ioPtr);
 }
 
 /*
@@ -2686,7 +2714,7 @@ GetClassFromClassName(
     /* as a last chance try with className in hash table */
     objPtr = Tcl_NewStringObj(className, -1);
     Tcl_IncrRefCount(objPtr);
-    hPtr = Tcl_FindHashEntry(&iclsPtr->infoPtr->classes, (char *)objPtr);
+    hPtr = Tcl_FindHashEntry(&iclsPtr->infoPtr->nameClasses, (char *)objPtr);
     if (hPtr != NULL) {
         iclsPtr = Tcl_GetHashValue(hPtr);
     } else {
@@ -2728,11 +2756,26 @@ ItclMapMethodNameProc(
             ITCL_INTERP_DATA, NULL);
     ioPtr = (ItclObject *)Tcl_ObjectGetMetadata(oPtr,
             infoPtr->object_meta_type);
-    if (ioPtr == NULL) {
+    hPtr = Tcl_FindHashEntry(&infoPtr->objects, (char *)ioPtr);
+    if ((hPtr == NULL) || (ioPtr == NULL)) {
         /* try to get the class (if a class is creating an object) */
         iclsPtr = (ItclClass *)Tcl_ObjectGetMetadata(oPtr,
             infoPtr->class_meta_type);
+        hPtr = Tcl_FindHashEntry(&infoPtr->classes, (char *)iclsPtr);
+	if (hPtr == NULL) {
+	    char str[20];
+	    sprintf(str, "%p", iclsPtr);
+	    Tcl_AppendResult(interp, "context class has vanished", str, NULL);
+            return TCL_ERROR;
+	}
     } else {
+        hPtr = Tcl_FindHashEntry(&infoPtr->classes, (char *)ioPtr->iclsPtr);
+	if (hPtr == NULL) {
+	    char str[20];
+	    sprintf(str, "%p", ioPtr->iclsPtr);
+	    Tcl_AppendResult(interp, "context class has vanished", str, NULL);
+            return TCL_ERROR;
+	}
         iclsPtr = ioPtr->iclsPtr;
     }
     sp = Tcl_GetString(methodObj);
@@ -3066,6 +3109,7 @@ DelegatedOptionsInstall(
 	        if (Tcl_FindHashEntry(&idoPtr->exceptions,
 		        (char *)idoPtr->namePtr) == NULL) {
 		    ioptPtr->idoPtr = idoPtr;
+		    Itcl_PreserveData(ioptPtr->idoPtr);
 		}
 	    }
 	    search = search2;

@@ -23,7 +23,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclCmd.c,v 1.1.2.33 2008/11/16 16:32:32 wiede Exp $
+ *     RCS:  $Id: itclCmd.c,v 1.1.2.34 2008/11/23 20:23:32 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -153,10 +153,8 @@ Itcl_FindClassesCmd(
 {
     Tcl_Namespace *activeNs = Tcl_GetCurrentNamespace(interp);
     Tcl_Namespace *globalNs = Tcl_GetGlobalNamespace(interp);
-    int forceFullNames = 0;
-
     Tcl_HashTable unique;
-    Tcl_HashEntry *entry;
+    Tcl_HashEntry *hPtr;
     Tcl_HashSearch place;
     Tcl_Command cmd;
     Tcl_Command originalCmd;
@@ -167,6 +165,7 @@ Itcl_FindClassesCmd(
     const char *cmdName;
     int newEntry;
     int handledActiveNs;
+    int forceFullNames = 0;
 
     ItclShowArgs(2, "Itcl_FindClassesCmd", objc, objv);
     if (objc > 2) {
@@ -201,10 +200,10 @@ Itcl_FindClassesCmd(
             continue;
         }
 
-        entry = Tcl_FirstHashEntry(Tcl_GetNamespaceCommandTable(nsPtr),
+        hPtr = Tcl_FirstHashEntry(Tcl_GetNamespaceCommandTable(nsPtr),
 	        &place);
-        while (entry) {
-            cmd = (Tcl_Command)Tcl_GetHashValue(entry);
+        while (hPtr) {
+            cmd = (Tcl_Command)Tcl_GetHashValue(hPtr);
             if (Itcl_IsClass(cmd)) {
                 originalCmd = Tcl_GetOriginalCommand(cmd);
 
@@ -244,7 +243,7 @@ Itcl_FindClassesCmd(
 		}
 
             }
-            entry = Tcl_NextHashEntry(&place);
+            hPtr = Tcl_NextHashEntry(&place);
         }
         handledActiveNs = 1;  /* don't process the active namespace twice */
 
@@ -252,10 +251,10 @@ Itcl_FindClassesCmd(
          *  Push any child namespaces onto the stack and continue
          *  the search in those namespaces.
          */
-        entry = Tcl_FirstHashEntry(Tcl_GetNamespaceChildTable(nsPtr), &place);
-        while (entry != NULL) {
-            Itcl_PushStack(Tcl_GetHashValue(entry), &search);
-            entry = Tcl_NextHashEntry(&place);
+        hPtr = Tcl_FirstHashEntry(Tcl_GetNamespaceChildTable(nsPtr), &place);
+        while (hPtr != NULL) {
+            Itcl_PushStack(Tcl_GetHashValue(hPtr), &search);
+            hPtr = Tcl_NextHashEntry(&place);
         }
     }
     Tcl_DeleteHashTable(&unique);
@@ -1224,7 +1223,7 @@ Itcl_ForwardAddCmd(
     ItclObjectInfo *infoPtr;
     ItclClass *iclsPtr;
 
-    ItclShowArgs(0, "Itcl_ForwardAddCmd", objc, objv);
+    ItclShowArgs(1, "Itcl_ForwardAddCmd", objc, objv);
     if (objc < 3) {
         Tcl_WrongNumArgs(interp, 1, objv, "<forwardName> <targetName> ?<arg> ...?");
         return TCL_ERROR;
@@ -1233,7 +1232,7 @@ Itcl_ForwardAddCmd(
     iclsPtr = (ItclClass*)Itcl_PeekStack(&infoPtr->clsStack);
     if (iclsPtr == NULL) {
 	Tcl_HashEntry *hPtr;
-        hPtr = Tcl_FindHashEntry(&infoPtr->classes, (char *)objv[1]);
+        hPtr = Tcl_FindHashEntry(&infoPtr->nameClasses, (char *)objv[1]);
 	if (hPtr == NULL) {
 	    Tcl_AppendResult(interp, "class: \"", Tcl_GetString(objv[1]),
 	            "\" not found", NULL);
@@ -1405,13 +1404,13 @@ Itcl_AddOptionCmd(
 
     result = TCL_OK;
     infoPtr = (ItclObjectInfo *)clientData;
-    ItclShowArgs(0, "Itcl_AddOptionCmd", objc, objv);
+    ItclShowArgs(1, "Itcl_AddOptionCmd", objc, objv);
     if (objc < 4) {
         Tcl_WrongNumArgs(interp, 1, objv, 
 	        "className protection option optionName ...");
 	return TCL_ERROR;
     }
-    hPtr = Tcl_FindHashEntry(&infoPtr->classes, (char *)objv[1]);
+    hPtr = Tcl_FindHashEntry(&infoPtr->nameClasses, (char *)objv[1]);
     if (hPtr == NULL) {
 	Tcl_AppendResult(interp, "class \"", Tcl_GetString(objv[1]),
 	        "\" not found", NULL);
@@ -1496,7 +1495,7 @@ Itcl_AddObjectOptionCmd(
 	        "\" not found", NULL);
         return TCL_ERROR;
     }
-    hPtr = Tcl_FindHashEntry(&infoPtr->objects, (char *)cmd);
+    hPtr = Tcl_FindHashEntry(&infoPtr->objectCmds, (char *)cmd);
     if (hPtr == NULL) {
 	Tcl_AppendResult(interp, "object \"", Tcl_GetString(objv[1]),
 	        "\" not found", NULL);
@@ -1582,7 +1581,7 @@ Itcl_AddDelegatedOptionCmd(
 	        "\" not found", NULL);
         return TCL_ERROR;
     }
-    hPtr = Tcl_FindHashEntry(&infoPtr->objects, (char *)cmd);
+    hPtr = Tcl_FindHashEntry(&infoPtr->objectCmds, (char *)cmd);
     if (hPtr == NULL) {
 	Tcl_AppendResult(interp, "object \"", Tcl_GetString(objv[1]),
 	        "\" not found", NULL);
@@ -1646,7 +1645,7 @@ Itcl_AddDelegatedFunctionCmd(
 	        "\" not found", NULL);
         return TCL_ERROR;
     }
-    hPtr = Tcl_FindHashEntry(&infoPtr->objects, (char *)cmd);
+    hPtr = Tcl_FindHashEntry(&infoPtr->objectCmds, (char *)cmd);
     if (hPtr == NULL) {
 	Tcl_AppendResult(interp, "object \"", Tcl_GetString(objv[1]),
 	        "\" not found", NULL);
@@ -1773,7 +1772,6 @@ Itcl_SetComponentCmd(
             contextIoPtr, contextIclsPtr);
     if ((val != NULL) && (strlen(val) != 0)) {
         /* delete delegated options to the old component here !! */
-fprintf(stderr, "deleting old delegated options\n");
         Itcl_InitHierIter(&hier, contextIoPtr->iclsPtr);
         while ((iclsPtr = Itcl_AdvanceHierIter(&hier)) != NULL) {
             FOREACH_HASH_VALUE(idoPtr, &iclsPtr->delegatedOptions) {

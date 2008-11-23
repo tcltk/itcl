@@ -25,7 +25,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclEnsemble.c,v 1.1.2.12 2008/11/17 16:24:48 wiede Exp $
+ *     RCS:  $Id: itclEnsemble.c,v 1.1.2.13 2008/11/23 20:23:32 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -88,42 +88,29 @@ static int EnsembleUnknownCmd(ClientData dummy, Tcl_Interp *interp,
 /*
  *  Forward declarations for the procedures used in this file.
  */
-static void GetEnsembleUsage _ANSI_ARGS_((Tcl_Interp *interp,
-    Ensemble *ensData, Tcl_Obj *objPtr));
-
-static void GetEnsemblePartUsage _ANSI_ARGS_((Tcl_Interp *interp,
-    Ensemble *ensData, EnsemblePart *ensPart, Tcl_Obj *objPtr));
-
-static int CreateEnsemble _ANSI_ARGS_((Tcl_Interp *interp,
-    Ensemble *parentEnsData, const char *ensName));
-
-static int AddEnsemblePart _ANSI_ARGS_((Tcl_Interp *interp,
+static void GetEnsembleUsage (Tcl_Interp *interp,
+    Ensemble *ensData, Tcl_Obj *objPtr);
+static void GetEnsemblePartUsage (Tcl_Interp *interp,
+    Ensemble *ensData, EnsemblePart *ensPart, Tcl_Obj *objPtr);
+static int CreateEnsemble (Tcl_Interp *interp,
+    Ensemble *parentEnsData, const char *ensName);
+static int AddEnsemblePart (Tcl_Interp *interp,
     Ensemble* ensData, CONST char* partName, CONST char* usageInfo,
     Tcl_ObjCmdProc *objProc, ClientData clientData,
-    Tcl_CmdDeleteProc *deleteProc, int flags, EnsemblePart **rVal));
-
-static void DeleteEnsemble _ANSI_ARGS_((ClientData clientData));
-
-static int FindEnsemble _ANSI_ARGS_((Tcl_Interp *interp, const char **nameArgv,
-    int nameArgc, Ensemble** ensDataPtr));
-
-static int CreateEnsemblePart _ANSI_ARGS_((Tcl_Interp *interp,
-    Ensemble *ensData, CONST char* partName, EnsemblePart **ensPartPtr));
-
-static void DeleteEnsemblePart _ANSI_ARGS_((EnsemblePart *ensPart));
-
-static int FindEnsemblePart _ANSI_ARGS_((Tcl_Interp *interp,
-    Ensemble *ensData, CONST char* partName, EnsemblePart **rensPart));
-
-static int FindEnsemblePartIndex _ANSI_ARGS_((Ensemble *ensData,
-    CONST char *partName, int *posPtr));
-
-static void ComputeMinChars _ANSI_ARGS_((Ensemble *ensData, int pos));
-
-static EnsembleParser* GetEnsembleParser _ANSI_ARGS_((Tcl_Interp *interp));
-
-static void DeleteEnsParser _ANSI_ARGS_((ClientData clientData,
-    Tcl_Interp* interp));
+    Tcl_CmdDeleteProc *deleteProc, int flags, EnsemblePart **rVal);
+static void DeleteEnsemble (ClientData clientData);
+static int FindEnsemble (Tcl_Interp *interp, const char **nameArgv,
+    int nameArgc, Ensemble** ensDataPtr);
+static int CreateEnsemblePart (Tcl_Interp *interp,
+    Ensemble *ensData, CONST char* partName, EnsemblePart **ensPartPtr);
+static void DeleteEnsemblePart (ClientData clientData);
+static int FindEnsemblePart (Tcl_Interp *interp,
+    Ensemble *ensData, CONST char* partName, EnsemblePart **rensPart);
+static int FindEnsemblePartIndex (Ensemble *ensData,
+    CONST char *partName, int *posPtr);
+static void ComputeMinChars (Ensemble *ensData, int pos);
+static EnsembleParser* GetEnsembleParser (Tcl_Interp *interp);
+static void DeleteEnsParser (ClientData clientData, Tcl_Interp* interp);
 
 #ifdef NOTDEF
 static void
@@ -136,7 +123,8 @@ DumpEnsemble(
 
     ensData2 = ensData;
     while (1) {
-        fprintf(stderr, "ENS!%s!%d!\n", Tcl_GetCommandName(interp, ensData2->cmd), ensData2->numParts);
+        fprintf(stderr, "ENS!%s!%d!\n",
+	        Tcl_GetCommandName(interp, ensData2->cmd), ensData2->numParts);
         for (i=0; i<ensData2->numParts; i++) {
             fprintf(stderr, "  %d!%s!\n", i, ensData2->parts[i]->name);
         }
@@ -787,12 +775,14 @@ CreateEnsemble(
     Ensemble *parentEnsData,       /* parent ensemble or NULL */
     const char *ensName)           /* name of the new ensemble */
 {
-    Ensemble *ensData;
-    EnsemblePart *ensPart;
+    Tcl_Obj *objPtr;
+    Tcl_DString buffer;
     Tcl_HashEntry *hPtr;
     Tcl_InterpDeleteProc *procPtr;
-    Tcl_DString buffer;
     ItclObjectInfo *infoPtr;
+    Ensemble *ensData;
+    EnsemblePart *ensPart;
+    int result;
     int isNew;
 
     /*
@@ -816,12 +806,11 @@ CreateEnsemble(
     sprintf(buf, "%d", ensData->ensembleId);
     Tcl_DStringAppend(&buffer, buf, -1);
     ensData->nsPtr = Tcl_CreateNamespace(interp, Tcl_DStringValue(&buffer),
-            NULL, NULL);
+            ensData, DeleteEnsemble);
 /* FIXME !!! */
 if (ensData->nsPtr == NULL) {
 fprintf(stderr, "error in creating namespace: %s \n", Tcl_DStringValue(&buffer));
 }
-    Tcl_DStringFree(&buffer);
 
     /*
      *  If there is no parent data, then this is a top-level
@@ -839,7 +828,8 @@ fprintf(stderr, "error in creating namespace: %s \n", Tcl_DStringValue(&buffer))
         hPtr = Tcl_CreateHashEntry(&infoPtr->ensembleInfo->ensembles,
                 (char *)ensData->cmd, &isNew);
 	if (hPtr == NULL) {
-	    return TCL_ERROR;
+	    result = TCL_ERROR;
+	    goto finish;
 	}
         Tcl_SetHashValue(hPtr, (ClientData)ensData);
         Tcl_Obj *unkObjPtr = Tcl_NewStringObj(ITCL_COMMANDS_NAMESPACE, -1);
@@ -847,11 +837,15 @@ fprintf(stderr, "error in creating namespace: %s \n", Tcl_DStringValue(&buffer))
         Tcl_IncrRefCount(unkObjPtr);
         if (Tcl_SetEnsembleUnknownHandler(NULL, ensData->cmd,
                 unkObjPtr) != TCL_OK) {
-            return TCL_ERROR;
+	    result = TCL_ERROR;
+	    goto finish;
         }
         Tcl_DecrRefCount(unkObjPtr);
 
-        return TCL_OK;
+	objPtr = Tcl_NewStringObj(Tcl_DStringValue(&buffer), -1);
+	Tcl_SetObjResult(interp, objPtr);
+        result = TCL_OK;
+        goto finish;
     }
 
     /*
@@ -861,7 +855,8 @@ fprintf(stderr, "error in creating namespace: %s \n", Tcl_DStringValue(&buffer))
     if (CreateEnsemblePart(interp, parentEnsData, ensName, &ensPart)
         != TCL_OK) {
         DeleteEnsemble((ClientData)ensData);
-        return TCL_ERROR;
+        result = TCL_ERROR;
+        goto finish;
     }
     Tcl_DStringInit(&buffer);
     Tcl_DStringAppend(&buffer, infoPtr->ensembleInfo->ensembleNsPtr->fullName, -1);
@@ -870,7 +865,6 @@ fprintf(stderr, "error in creating namespace: %s \n", Tcl_DStringValue(&buffer))
     Tcl_DStringAppend(&buffer, buf, -1);
     Tcl_DStringAppend(&buffer, "::", 2);
     Tcl_DStringAppend(&buffer, ensName, -1);
-    Tcl_Obj *objPtr;
     objPtr = Tcl_NewStringObj(Tcl_DStringValue(&buffer), -1);
     Tcl_IncrRefCount(objPtr);
     hPtr = Tcl_CreateHashEntry(&infoPtr->ensembleInfo->subEnsembles,
@@ -884,7 +878,8 @@ fprintf(stderr, "error in creating namespace: %s \n", Tcl_DStringValue(&buffer))
     hPtr = Tcl_CreateHashEntry(&infoPtr->ensembleInfo->ensembles,
             (char *)ensPart->cmdPtr, &isNew);
     if (hPtr == NULL) {
-        return TCL_ERROR;
+        result = TCL_ERROR;
+        goto finish;
     }
     Tcl_SetHashValue(hPtr, (ClientData)ensData);
     Tcl_Obj *unkObjPtr = Tcl_NewStringObj(ITCL_COMMANDS_NAMESPACE, -1);
@@ -892,7 +887,8 @@ fprintf(stderr, "error in creating namespace: %s \n", Tcl_DStringValue(&buffer))
     Tcl_IncrRefCount(unkObjPtr);
     if (Tcl_SetEnsembleUnknownHandler(NULL, ensPart->cmdPtr,
             unkObjPtr) != TCL_OK) {
-        return TCL_ERROR;
+        result = TCL_ERROR;
+        goto finish;
     }
     Tcl_DecrRefCount(unkObjPtr);
 
@@ -906,8 +902,11 @@ fprintf(stderr, "error in creating namespace: %s \n", Tcl_DStringValue(&buffer))
     Tcl_DictObjPut(NULL, mapDict, Tcl_NewStringObj(ensName, -1), toObjPtr);
     ensData->cmd		= ensPart->cmdPtr;
     ensData->parent		= ensPart;
+    result = TCL_OK;
 
-    return TCL_OK;
+finish:
+    Tcl_DStringFree(&buffer);
+    return result;
 }
 
 
@@ -984,7 +983,7 @@ AddEnsemblePart(
     Tcl_AppendToObj(toObjPtr, partName, -1);
     Tcl_DictObjPut(NULL, mapDict, Tcl_NewStringObj(partName, -1), toObjPtr);
     cmd = Tcl_CreateObjCommand(interp, Tcl_GetString(toObjPtr),
-            EnsembleSubCmd, ensPart, NULL);
+            EnsembleSubCmd, ensPart, DeleteEnsemblePart);
     if (cmd == NULL) {
         return TCL_ERROR;
     }
@@ -1250,24 +1249,23 @@ CreateEnsemblePart(
  */
 static void
 DeleteEnsemblePart(
-    EnsemblePart *ensPart)     /* part being destroyed */
+    ClientData clientData)     /* part being destroyed */
 {
-    int i, pos;
     Tcl_Command cmdPtr;
     Ensemble *ensData;
-    Tcl_CmdInfo cmdInfo;
+    EnsemblePart *ensPart;
+    int i;
+    int pos;
 
+    ensPart = (EnsemblePart *)clientData;
     cmdPtr = ensPart->cmdPtr;
 
     /*
      *  If this part has a delete proc, then call it to free
      *  up the client data.
      */
-    if (Tcl_GetCommandInfoFromToken(cmdPtr, &cmdInfo) != 1) {
-        return;
-    }
-    if ((cmdInfo.deleteData != NULL) && (cmdInfo.deleteProc != NULL)) {
-        (*cmdInfo.deleteProc)(cmdInfo.deleteData);
+    if ((ensPart->deleteProc != NULL) && (ensPart->clientData != NULL)) {
+        (*ensPart->deleteProc)(ensPart->clientData);
     }
     ckfree((char*)cmdPtr);
 
@@ -2114,7 +2112,9 @@ EnsembleUnknownCmd(
     cmd = Tcl_GetCommandFromObj(interp, objv[1]);
 /* FIXME !!! */
     if (cmd == NULL) {
+/*
 fprintf(stderr, "EnsembleUnknownCmd, ensemble not found!%s!\n", Tcl_GetString(objv[1]));
+*/
         return TCL_ERROR;
     }
     infoPtr = Tcl_GetAssocData(interp, ITCL_INTERP_DATA, &procPtr);

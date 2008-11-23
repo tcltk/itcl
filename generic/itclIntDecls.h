@@ -1,5 +1,5 @@
 /*
- * $Id: itclIntDecls.h,v 1.13.2.13 2008/10/29 20:28:47 wiede Exp $
+ * $Id: itclIntDecls.h,v 1.13.2.14 2008/11/23 20:23:32 wiede Exp $
  *
  * This file is (mostly) automatically generated from itcl.decls.
  */
@@ -145,7 +145,7 @@ ITCLAPI int		Itcl_CreateVariable (Tcl_Interp * interp,
 				char * init, char * config, 
 				ItclVariable ** ivPtr);
 /* 40 */
-ITCLAPI void		Itcl_DeleteVariable (ItclVariable * ivPtr);
+ITCLAPI void		Itcl_DeleteVariable (char * cdata);
 /* 41 */
 ITCLAPI CONST char*	Itcl_GetCommonVar (Tcl_Interp * interp, 
 				CONST char * name, ItclClass * contextClass);
@@ -557,7 +557,7 @@ typedef struct ItclIntStubs {
     void (*reserved37)(void);
     void (*itcl_BuildVirtualTables) (ItclClass * iclsPtr); /* 38 */
     int (*itcl_CreateVariable) (Tcl_Interp * interp, ItclClass * iclsPtr, Tcl_Obj * name, char * init, char * config, ItclVariable ** ivPtr); /* 39 */
-    void (*itcl_DeleteVariable) (ItclVariable * ivPtr); /* 40 */
+    void (*itcl_DeleteVariable) (char * cdata); /* 40 */
     CONST char* (*itcl_GetCommonVar) (Tcl_Interp * interp, CONST char * name, ItclClass * contextClass); /* 41 */
     void (*reserved42)(void);
     void (*reserved43)(void);

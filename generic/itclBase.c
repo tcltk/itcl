@@ -9,12 +9,22 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itclBase.c,v 1.1.2.23 2008/11/09 21:21:30 wiede Exp $
+ * RCS: @(#) $Id: itclBase.c,v 1.1.2.24 2008/11/23 20:23:32 wiede Exp $
  */
 
 #include <stdlib.h>
 #include "itclInt.h"
 #include <tclOODecls.h>
+
+Tcl_ObjCmdProc ItclFinishCmd;
+
+#ifdef OBJ_REF_COUNT_DEBUG
+Tcl_ObjCmdProc ItclDumpRefCountInfo;
+#endif
+
+#ifdef ITCL_PRESERVE_DEBUG
+Tcl_ObjCmdProc ItclDumpPreserveInfo;
+#endif
 
 extern struct ItclStubAPI itclStubAPI;
 
@@ -130,6 +140,35 @@ static char *clazzUnknownBody = "\n\
     }\n\
     return $obj\n\
 ";
+
+#define ITCL_IS_ENSEMBLE 0x1
+
+typedef struct ItclCmdsInfo {
+    const char *name;
+    int flags;
+} ItclCmdsInfo;
+static ItclCmdsInfo itclCmds [] = {
+    { "::itcl::class", 0},
+    { "::itcl::find", ITCL_IS_ENSEMBLE},
+    { "::itcl::delete", ITCL_IS_ENSEMBLE},
+    { "::itcl::is", ITCL_IS_ENSEMBLE},
+    { "::itcl::filter", ITCL_IS_ENSEMBLE},
+    { "::itcl::forward", ITCL_IS_ENSEMBLE},
+    { "::itcl::mixin", ITCL_IS_ENSEMBLE},
+    { "::itcl::type", 0},
+    { "::itcl::widget", 0},
+    { "::itcl::widgetadaptor", 0},
+    { "::itcl::nwidget", 0},
+    { "::itcl::addoption", 0},
+    { "::itcl::addobjectoption", 0},
+    { "::itcl::adddelegatedoption", 0},
+    { "::itcl::adddelegatedmethod", 0},
+    { "::itcl::addcomponent", 0},
+    { "::itcl::setcomponent", 0},
+    { "::itcl::extendedclass", 0},
+    { "::itcl::parser::delegate", ITCL_IS_ENSEMBLE},
+    { NULL, 0},
+};
 
 /*
  * ------------------------------------------------------------------------
@@ -155,6 +194,12 @@ AddClassUnknowMethod(
         Tcl_Panic("cannot add class method unknown");
     }
     return TCL_OK;
+}
+void
+FreeItclObjectInfo(
+    ClientData cdata)
+{
+fprintf(stderr, "@@@@ FreeItclObjectInfo called\n");
 }
 /*
  * ------------------------------------------------------------------------
@@ -196,6 +241,24 @@ Initialize (
         Tcl_Panic("Itcl: cannot create namespace: \"%s::methodset\" \n",
 	        ITCL_NAMESPACE);
     }
+
+    Tcl_CreateObjCommand(interp,
+            ITCL_NAMESPACE"::finish",
+            ItclFinishCmd, NULL, NULL);
+    /* for debugging only !!! */
+#ifdef OBJ_REF_COUNT_DEBUG
+    Tcl_CreateObjCommand(interp,
+            ITCL_NAMESPACE"::dumprefcountinfo",
+            ItclDumpRefCountInfo, NULL, NULL);
+#endif
+
+#ifdef ITCL_PRESERVE_DEBUG
+    Tcl_CreateObjCommand(interp,
+            ITCL_NAMESPACE"::dumppreserveinfo",
+            ItclDumpPreserveInfo, NULL, NULL);
+#endif
+    /* END for debugging only !!! */
+
     Tcl_CreateObjCommand(interp,
             ITCL_NAMESPACE"::methodset::callCCommand",
             ItclCallCCommand, NULL, NULL);
@@ -224,12 +287,15 @@ Initialize (
     infoPtr->object_meta_type->deleteProc = ItclDeleteObjectMetadata;
     infoPtr->object_meta_type->cloneProc = NULL;
     Tcl_InitHashTable(&infoPtr->objects, TCL_ONE_WORD_KEYS);
+    Tcl_InitHashTable(&infoPtr->objectCmds, TCL_ONE_WORD_KEYS);
     Tcl_InitObjHashTable(&infoPtr->objectNames);
-    Tcl_InitObjHashTable(&infoPtr->classes);
+    Tcl_InitHashTable(&infoPtr->classes, TCL_ONE_WORD_KEYS);
+    Tcl_InitObjHashTable(&infoPtr->nameClasses);
     Tcl_InitHashTable(&infoPtr->namespaceClasses, TCL_ONE_WORD_KEYS);
     Tcl_InitHashTable(&infoPtr->procMethods, TCL_ONE_WORD_KEYS);
     Tcl_InitObjHashTable(&infoPtr->instances);
     Tcl_InitHashTable(&infoPtr->objectInstances, TCL_ONE_WORD_KEYS);
+    Tcl_InitObjHashTable(&infoPtr->myEnsembles);
     infoPtr->ensembleInfo = (EnsembleInfo *)ckalloc(sizeof(EnsembleInfo));
     memset(infoPtr->ensembleInfo, 0, sizeof(EnsembleInfo));
     Tcl_InitHashTable(&infoPtr->ensembleInfo->ensembles, TCL_ONE_WORD_KEYS);
@@ -254,7 +320,7 @@ opt = atoi(res_option);
     Itcl_InitStack(&infoPtr->constructorStack);
 
     Tcl_SetAssocData(interp, ITCL_INTERP_DATA,
-        (Tcl_InterpDeleteProc*)NULL, (ClientData)infoPtr);
+        (Tcl_InterpDeleteProc*)FreeItclObjectInfo, (ClientData)infoPtr);
 
     Itcl_PreserveData((ClientData)infoPtr);
 
@@ -454,3 +520,73 @@ ItclCallCCommand(
     return result;
 }
 
+int
+ItclFinishCmd(
+    ClientData clientData,   /* unused */
+    Tcl_Interp *interp,      /* current interpreter */
+    int objc,                /* number of arguments */
+    Tcl_Obj *CONST objv[])   /* argument objects */
+{
+    FOREACH_HASH_DECLS;
+    Tcl_Namespace *nsPtr;
+    Tcl_Obj *objPtr;
+    ItclObjectInfo *infoPtr;
+    ItclCmdsInfo *iciPtr;
+    int i;
+    int result;
+
+    ItclShowArgs(0, "ItclFinishCmd", objc, objv);
+    infoPtr = Tcl_GetAssocData(interp, ITCL_INTERP_DATA, NULL);
+    for (i = 0; ;i++) {
+        iciPtr = &itclCmds[i];
+        if (iciPtr->name == NULL) {
+	    break;
+	}
+        result = Itcl_RenameCommand(interp, iciPtr->name, "");
+        iciPtr++;
+    }
+    FOREACH_HASH_VALUE(objPtr, &infoPtr->myEnsembles) {
+	nsPtr = Tcl_FindNamespace(interp, Tcl_GetString(objPtr), NULL, 0);
+	if (nsPtr != NULL) {
+            Tcl_DeleteNamespace(nsPtr);
+	}
+    }
+    nsPtr = Tcl_FindNamespace(interp, "::itcl::parser", NULL, 0);
+    if (nsPtr != NULL) {
+        Tcl_DeleteNamespace(nsPtr);
+    }
+    Itcl_ReleaseData((ClientData)infoPtr);
+    return TCL_OK;
+}
+
+#ifdef OBJ_REF_COUNT_DEBUG
+void Tcl_DbDumpRefCountInfo(const char *fileName);
+
+int
+ItclDumpRefCountInfo(
+    ClientData clientData,   /* unused */
+    Tcl_Interp *interp,      /* current interpreter */
+    int objc,                /* number of arguments */
+    Tcl_Obj *CONST objv[])   /* argument objects */
+{
+    ItclShowArgs(1, "ItclDumpRefCountInfo", objc, objv);
+    Tcl_DbDumpRefCountInfo(NULL);
+    return TCL_OK;
+}
+#endif
+
+#ifdef ITCL_PRESERVE_DEBUG
+void Itcl_DbDumpPreserveInfo(const char *fileName);
+
+int
+ItclDumpPreserveInfo(
+    ClientData clientData,   /* unused */
+    Tcl_Interp *interp,      /* current interpreter */
+    int objc,                /* number of arguments */
+    Tcl_Obj *CONST objv[])   /* argument objects */
+{
+    ItclShowArgs(0, "ItclDumpPreserveInfo", objc, objv);
+    Itcl_DbDumpPreserveInfo(NULL);
+    return TCL_OK;
+}
+#endif

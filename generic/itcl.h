@@ -13,7 +13,7 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itcl.h,v 1.31.2.4 2008/10/17 17:15:17 wiede Exp $
+ * RCS: @(#) $Id: itcl.h,v 1.31.2.5 2008/11/23 20:23:32 wiede Exp $
  */
 
 /*
@@ -159,6 +159,15 @@ typedef struct Itcl_InterpState_ *Itcl_InterpState;
  */
 
 #include "itclDecls.h"
+
+#ifdef ITCL_PRESERVE_DEBUG
+#undef Itcl_PreserveData
+#undef Itcl_ReleaseData
+void ItclDbgPreserveData(ClientData cdata, int line, const char *file);
+void ItclDbgReleaseData(ClientData cdata, int line, const char *file);
+#define Itcl_PreserveData(addr) ItclDbgPreserveData(addr, __LINE__, __FILE__)
+#define Itcl_ReleaseData(addr) ItclDbgReleaseData(addr, __LINE__, __FILE__)
+#endif
 
 #undef TCL_STORAGE_CLASS
 #define TCL_STORAGE_CLASS DLLIMPORT

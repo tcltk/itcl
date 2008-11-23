@@ -1,5 +1,5 @@
 # -*- tcl -*-
-# $Id: itcl.decls,v 1.3.2.12 2008/10/26 21:35:30 wiede Exp $
+# $Id: itcl.decls,v 1.3.2.13 2008/11/23 20:23:32 wiede Exp $
 
 # public API
 library itcl
@@ -225,7 +225,7 @@ declare 39 current {
         Tcl_Obj *name, char *init, char *config, ItclVariable **ivPtr)
 }
 declare 40 current {
-    void Itcl_DeleteVariable (ItclVariable *ivPtr)
+    void Itcl_DeleteVariable (char *cdata)
 }
 declare 41 current {
     CONST char* Itcl_GetCommonVar (Tcl_Interp *interp, CONST char *name, \

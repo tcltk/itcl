@@ -23,7 +23,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclUtil.c,v 1.1.2.8 2008/10/19 16:30:53 wiede Exp $
+ *     RCS:  $Id: itclUtil.c,v 1.1.2.9 2008/11/23 20:23:32 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -31,6 +31,7 @@
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  */
 #include "itclInt.h"
+#include <malloc.h>
 
 /*
  *  POOL OF LIST ELEMENTS FOR LINKED LIST
@@ -57,6 +58,10 @@ typedef struct InterpState {
 
 #define TCL_STATE_VALID 0x01233210  /* magic bit pattern for validation */
 
+#ifdef ITCL_PRESERVE_DEBUG
+static Tcl_HashTable itclPreserveInfos;
+static int itclPreserveInfoInitted = 0;
+#endif
 
 
 /*
@@ -535,6 +540,42 @@ Itcl_EventuallyFree(
     return;
 
 }
+#ifdef ITCL_PRESERVE_DEBUG
+void
+Itcl_DbDumpPreserveInfo(
+    const char *fileName)
+{
+    FOREACH_HASH_DECLS;
+    FILE *fd;
+    ItclPreserveInfo *ipiPtr;
+    ItclPreserveInfoEntry *ipiePtr;
+    int j;
+
+    if (fileName == NULL) {
+        fd = stderr;
+    } else {
+        fd = fopen(fileName, "w");
+    }
+    fprintf(fd, "type\taddr\tfile\tline\n");
+    FOREACH_HASH_VALUE(ipiPtr, &itclPreserveInfos) {
+	if (ipiPtr->refCount == 0) {
+	    continue;
+	}
+	fprintf(stderr, "DAT!%p!%d!\n", ipiPtr->clientData, ipiPtr->refCount);
+        for (j = 0; j < ipiPtr->numEntries; j++) {
+            ipiePtr = &ipiPtr->entries[j];
+            if (ipiePtr->type != ITCL_PRESERVE_DELETED) {
+                fprintf(fd, "%s\t%p\t%s\t%d\n", 
+                        ipiePtr->type == ITCL_PRESERVE_INCR ? "INCR" : "DECR",
+                        ipiPtr->clientData, ipiePtr->fileName, ipiePtr->line);
+            }
+        }
+    }
+    if (fd != stderr) {
+        fclose(fd);
+    }
+}
+#endif
 
 /*
  * ------------------------------------------------------------------------
@@ -548,9 +589,63 @@ Itcl_EventuallyFree(
  *  freed.
  * ------------------------------------------------------------------------
  */
+#ifdef ITCL_PRESERVE_DEBUG
 void
-Itcl_PreserveData(cdata)
-    ClientData cdata;      /* data to be preserved */
+ItclDbgPreserveData(
+    ClientData cdata,     /* data to be preserved */
+    int line,
+    const char *file)
+{
+
+    /*
+     *  If the clientData value is NULL, do nothing.
+     */
+    if (cdata == NULL) {
+        return;
+    }
+    {
+	Tcl_HashEntry *hPtr;
+        ItclPreserveInfo *ipiPtr;
+        ItclPreserveInfoEntry *ipiePtr;
+	int isNew;
+
+        if (!itclPreserveInfoInitted) {
+            Tcl_InitHashTable(&itclPreserveInfos, TCL_ONE_WORD_KEYS);
+            itclPreserveInfoInitted = 1;
+        }
+	hPtr = Tcl_CreateHashEntry(&itclPreserveInfos, cdata, &isNew);
+	if (isNew) {
+	    ipiPtr = (ItclPreserveInfo *)malloc(sizeof(ItclPreserveInfo));
+	    ipiPtr->refCount = 0;
+	    ipiPtr->size = ITCL_PRESERVE_BUCKET_SIZE;
+	    ipiPtr->numEntries = 0;
+	    ipiPtr->clientData = cdata;
+	    ipiPtr->entries = (ItclPreserveInfoEntry *)malloc(
+	            sizeof(ItclPreserveInfoEntry) * ipiPtr->size);
+	    Tcl_SetHashValue(hPtr, ipiPtr);
+	}
+	ipiPtr = Tcl_GetHashValue(hPtr);
+        if (ipiPtr->numEntries >= ipiPtr->size) {
+            ipiPtr->size += ITCL_PRESERVE_BUCKET_SIZE;
+            ipiPtr->entries = (ItclPreserveInfoEntry *)
+                    realloc((char *)ipiPtr->entries,
+                    sizeof(ItclPreserveInfoEntry) *
+                    ipiPtr->size);
+        }
+        ipiePtr = &ipiPtr->entries[ipiPtr->numEntries++];
+        ipiePtr->type = ITCL_PRESERVE_INCR;
+        ipiePtr->line = line;
+        ipiePtr->fileName = file;
+        ipiPtr->refCount++;
+    }
+
+    Tcl_Preserve(cdata);
+    return;
+}
+# else
+void
+Itcl_PreserveData(
+    ClientData cdata)     /* data to be preserved */
 {
 
     /*
@@ -562,6 +657,7 @@ Itcl_PreserveData(cdata)
     Tcl_Preserve(cdata);
     return;
 }
+#endif
 
 /*
  * ------------------------------------------------------------------------
@@ -573,9 +669,63 @@ Itcl_PreserveData(cdata)
  *  automatically freed.
  * ------------------------------------------------------------------------
  */
+#ifdef ITCL_PRESERVE_DEBUG
 void
-Itcl_ReleaseData(cdata)
-    ClientData cdata;      /* data to be released */
+ItclDbgReleaseData(
+    ClientData cdata,      /* data to be released */
+    int line,
+    const char *file)
+{
+
+    int noDelete = 0;
+
+    /*
+     *  If the clientData value is NULL, do nothing.
+     */
+    if (cdata == NULL) {
+        return;
+    }
+    {
+	Tcl_HashEntry *hPtr;
+        ItclPreserveInfo *ipiPtr;
+        ItclPreserveInfoEntry *ipiePtr;
+
+        if (!itclPreserveInfoInitted) {
+            Tcl_InitHashTable(&itclPreserveInfos, TCL_ONE_WORD_KEYS);
+            itclPreserveInfoInitted = 1;
+        }
+	hPtr = Tcl_FindHashEntry(&itclPreserveInfos, cdata);
+	if (hPtr != NULL) {
+	    ipiPtr = Tcl_GetHashValue(hPtr);
+            if (ipiPtr->numEntries >= ipiPtr->size) {
+                ipiPtr->size += ITCL_PRESERVE_BUCKET_SIZE;
+                ipiPtr->entries = (ItclPreserveInfoEntry *)
+                        realloc((char *)ipiPtr->entries,
+                        sizeof(ItclPreserveInfoEntry) *
+                        ipiPtr->size);
+            }
+            ipiePtr = &ipiPtr->entries[ipiPtr->numEntries++];
+            ipiePtr->type = ITCL_PRESERVE_DECR;
+            ipiePtr->line = line;
+            ipiePtr->fileName = file;
+            ipiPtr->refCount--;
+if (ipiPtr->refCount < 0) {
+fprintf(stderr, "REFCOUNT < 0 for: %p!\n", cdata);
+noDelete = 1;
+}
+        } else {
+fprintf(stderr, "ReleaseData no entry found for: %p %d %s\n", cdata, line, file);
+	}
+    }
+if (!noDelete) {
+    Tcl_Release(cdata);
+}
+    return;
+}
+#else
+void
+Itcl_ReleaseData(
+    ClientData cdata)      /* data to be released */
 {
 
     /*
@@ -587,7 +737,7 @@ Itcl_ReleaseData(cdata)
     Tcl_Release(cdata);
     return;
 }
-
+#endif
 
 /*
  * ------------------------------------------------------------------------
@@ -998,3 +1148,21 @@ Itcl_DecodeScopedCommand(
     return TCL_OK;
 }
 
+#ifdef ITCL_PRESERVE_DEBUG
+#undef Itcl_PreserveData
+#undef Itcl_ReleaseData
+
+void
+Itcl_PreserveData(
+    ClientData cdata)
+{
+    ItclDbgPreserveData(cdata, 0, "");
+}
+
+void
+Itcl_ReleaseData(
+    ClientData cdata)
+{
+    ItclDbgReleaseData(cdata, 0, "");
+}
+#endif

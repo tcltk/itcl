@@ -25,7 +25,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann Copyright (c) 2007
  *
- *     RCS:  $Id: itclClass.c,v 1.1.2.38 2008/11/17 21:38:05 wiede Exp $
+ *     RCS:  $Id: itclClass.c,v 1.1.2.39 2008/11/23 20:23:32 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -36,15 +36,18 @@
 
 EXTERN Tcl_ObjCmdProc Itcl_ThisCmd;
 static Tcl_NamespaceDeleteProc* _TclOONamespaceDeleteProc = NULL;
+static void ItclDeleteOption(char *cdata);
 
 /*
  *  FORWARD DECLARATIONS
  */
 static void ItclDestroyClass(ClientData cdata);
+//void ItclDestroyClassNamesp(ClientData cdata);
 static void ItclFreeClass (char* cdata);
 static void ItclDeleteFunction(ItclMemberFunc *imPtr);
 static void ItclDeleteComponent(ItclComponent *icPtr);
-static void ItclDeleteOption(ItclOption *ioptPtr);
+static void ItclDeleteOption(char *cdata);
+
 #ifdef NOTDEF
 static void ItclDeleteDelegatedOption(ItclDelegatedOption *idoPtr);
 #endif
@@ -58,11 +61,32 @@ static void ItclDeleteDelegatedFunction(ItclDelegatedFunction *idmPtr);
  * ------------------------------------------------------------------------
  */
 
-void Itcl_DeleteMemberFunc (char *cdata) {
+void Itcl_DeleteMemberFunc (
+    char *cdata)
+{
     /* needed for stubs compatibility */
+    ItclMemberFunc *imPtr;
+
+    imPtr = (ItclMemberFunc *)cdata;
     ItclDeleteFunction((ItclMemberFunc *)cdata);
 }
 
+/*
+ * ------------------------------------------------------------------------
+ *  ItclDestroyClass2()
+ *
+ * ------------------------------------------------------------------------
+ */
+
+static void
+ItclDestroyClass2(
+    ClientData clientData)      /* The class being deleted. */
+{
+    ItclClass *iclsPtr;
+
+    iclsPtr = clientData;
+    ItclDestroyClassNamesp(iclsPtr);
+}
 
 /*
  * ------------------------------------------------------------------------
@@ -79,10 +103,41 @@ ClassRenamedTrace(
     const char *newName,        /* Always NULL ??. not for itk!! */
     int flags)                  /* Why was the object deleted? */
 {
-    /* FIXME !! maybe not needed at all !! */
+    Tcl_HashEntry *hPtr;
+    Tcl_DString buffer;
+    Tcl_Namespace *nsPtr;
+    ItclObjectInfo *infoPtr;
+    ItclClass *iclsPtr;
+    
     if (newName != NULL) {
         return;
     }
+    iclsPtr = clientData;
+
+    infoPtr = Tcl_GetAssocData(interp, ITCL_INTERP_DATA, NULL);
+    hPtr = Tcl_FindHashEntry(&infoPtr->classes, (char *)iclsPtr);
+    if (hPtr == NULL) {
+        return;
+    }
+    if (iclsPtr->flags & ITCL_CLASS_IS_RENAMED) {
+        return;
+    }
+    iclsPtr->flags |= ITCL_CLASS_IS_RENAMED;
+    Itcl_PreserveData(iclsPtr);
+    /* delete the namespace for the common variables */
+    Tcl_DStringInit(&buffer);
+    Tcl_DStringAppend(&buffer, ITCL_VARIABLES_NAMESPACE, -1);
+    Tcl_DStringAppend(&buffer, Tcl_GetString(iclsPtr->fullNamePtr), -1);
+    nsPtr = Tcl_FindNamespace(interp, Tcl_DStringValue(&buffer), NULL, 0);
+    Tcl_DStringFree(&buffer);
+    if (nsPtr != NULL) {
+        Tcl_DeleteNamespace(nsPtr);
+    }
+    if (!(iclsPtr->flags & ITCL_CLASS_NS_IS_DESTROYED)) {
+        ItclDestroyClassNamesp(iclsPtr);
+    }
+    Itcl_ReleaseData(iclsPtr);
+    return;
 }
 
 
@@ -97,67 +152,12 @@ void
 ItclDeleteClassMetadata(
     ClientData clientData)
 {
-#ifdef NOTDEF
-    Tcl_Command cmd;
-    Tcl_CmdInfo cmdInfo;
-#endif
+    /* do we need that at all ? */
+return;
     ItclClass *iclsPtr;
 
     iclsPtr = clientData;
-#ifdef NOTDEF
-    cmd = Tcl_GetObjectCommand(iclsPtr->oPtr);
-    if (iclsPtr->accessCmd != NULL) {
-        Tcl_GetCommandInfoFromToken(iclsPtr->accessCmd, &cmdInfo);
-        cmdInfo.deleteProc = NULL;
-        Tcl_SetCommandInfoFromToken(cmd, &cmdInfo);
-    }
-#endif
-    iclsPtr->flags |= ITCL_CLASS_DELETE_CALLED;
-#ifdef NOTDEF
-    Itcl_ReleaseData(clientData);
-#endif
 }
-
-/*
- * ------------------------------------------------------------------------
- *  ClassNamespaceDeleted()
- *
- * ------------------------------------------------------------------------
- */
-static char *
-ClassNamespaceDeleted(
-    ClientData clientData,
-    Tcl_Interp *interp,
-    const char *part1,
-    const char *part2,
-    int flags)
-{
-    Tcl_DString buffer;
-    Tcl_Namespace *nsPtr;
-    ItclClass *iclsPtr;
-    
-    iclsPtr = clientData;
-
-    if (iclsPtr->nsPtr == NULL) {
-        return NULL;
-    }
-    if (iclsPtr->flags & ITCL_CLASS_DELETED) {
-        return NULL;
-    }
-    iclsPtr->nsPtr = NULL;
-    /* delete the namespace for the common variables */
-    Tcl_DStringInit(&buffer);
-    Tcl_DStringAppend(&buffer, ITCL_VARIABLES_NAMESPACE, -1);
-    Tcl_DStringAppend(&buffer, Tcl_GetString(iclsPtr->fullNamePtr), -1);
-    nsPtr = Tcl_FindNamespace(interp, Tcl_DStringValue(&buffer), NULL, 0);
-    Tcl_DStringFree(&buffer);
-    if (nsPtr != NULL) {
-        Tcl_DeleteNamespace(nsPtr);
-    }
-    ItclDestroyClassNamesp(iclsPtr);
-    return NULL;
-}
-
 
 static int
 CallNewObjectInstance(
@@ -331,6 +331,7 @@ Itcl_CreateClass(
      *  namespace already exists, then replace any existing client
      *  data with the class data.
      */
+
     Itcl_PreserveData((ClientData)iclsPtr);
 
     nameObjPtr = Tcl_NewStringObj("", 0);
@@ -350,15 +351,20 @@ Itcl_CreateClass(
         }
     }
     callbackPtr = Itcl_GetCurrentCallbackPtr(interp);
+    /*
+     *  Create a command in the current namespace to manage the class:
+     *    <className>
+     *    <className> <objName> ?<constructor-args>?
+     */
     Itcl_NRAddCallback(interp, CallNewObjectInstance, infoPtr,
             (ClientData)path, &oPtr, nameObjPtr);
     result = Itcl_NRRunCallbacks(interp, callbackPtr);
     if (result == TCL_ERROR) {
         return TCL_ERROR;
     }
-    Tcl_ObjectSetMetadata((Tcl_Object) oPtr, infoPtr->class_meta_type, iclsPtr);
     iclsPtr->clsPtr = Tcl_GetObjectAsClass(oPtr);
     iclsPtr->oPtr = oPtr;
+    Tcl_ObjectSetMetadata(iclsPtr->oPtr, infoPtr->class_meta_type, iclsPtr);
     Tcl_ObjectSetMethodNameMapper(iclsPtr->oPtr, ItclMapMethodNameProc);
     cmd = Tcl_GetObjectCommand(iclsPtr->oPtr);
     Tcl_GetCommandInfoFromToken(cmd, &cmdInfo);
@@ -370,23 +376,16 @@ Itcl_CreateClass(
     if (_TclOONamespaceDeleteProc == NULL) {
         _TclOONamespaceDeleteProc = classNs->deleteProc;
     }
-    Tcl_DStringInit(&buffer);
-    Tcl_DStringAppend(&buffer, classNs->fullName, -1);
-    Tcl_DStringAppend(&buffer, "::___DO_NOT_DELETE_THIS_VARIABLE", -1);
-    Tcl_SetVar(interp, Tcl_DStringValue(&buffer), "1", 0);
-    Tcl_TraceVar(interp, Tcl_DStringValue(&buffer), TCL_TRACE_UNSETS,
-            ClassNamespaceDeleted, iclsPtr);
 
+    Itcl_EventuallyFree((ClientData)iclsPtr, ItclFreeClass);
 
     if (classNs == NULL) {
 	Tcl_AppendResult(interp,
 	        "ITCL: cannot create/get class namespace for class \"",
 		Tcl_GetString(iclsPtr->fullNamePtr), "\"", NULL);
-        Itcl_ReleaseData((ClientData)iclsPtr);
         return TCL_ERROR;
     }
 
-    Itcl_EventuallyFree((ClientData)iclsPtr, ItclFreeClass);
     if (iclsPtr->infoPtr->useOldResolvers) {
 #ifdef NEW_PROTO_RESOLVER
         Itcl_SetNamespaceResolvers(classNs,
@@ -411,12 +410,12 @@ Itcl_CreateClass(
     iclsPtr->fullNamePtr = Tcl_NewStringObj(classNs->fullName, -1);
     Tcl_IncrRefCount(iclsPtr->fullNamePtr);
 
-    hPtr = Tcl_CreateHashEntry(&infoPtr->classes, (char *)iclsPtr->fullNamePtr,
-            &newEntry);
+    hPtr = Tcl_CreateHashEntry(&infoPtr->nameClasses,
+            (char *)iclsPtr->fullNamePtr, &newEntry);
     if (hPtr == NULL) {
 	Tcl_AppendResult(interp,
-	        "ITCL: cannot create hash entry in infoPtr->classes for class \"",
-		Tcl_GetString(iclsPtr->fullNamePtr), "\"", NULL);
+	        "ITCL: cannot create hash entry in infoPtr->nameClasses for ",
+		"class \"", Tcl_GetString(iclsPtr->fullNamePtr), "\"", NULL);
 	return TCL_ERROR;
     }
     Tcl_SetHashValue(hPtr, (ClientData)iclsPtr);
@@ -426,6 +425,16 @@ Itcl_CreateClass(
     if (hPtr == NULL) {
 	Tcl_AppendResult(interp,
 	        "ITCL: cannot create hash entry in infoPtr->namespaceClasses",
+		" for class \"", 
+		Tcl_GetString(iclsPtr->fullNamePtr), "\"", NULL);
+	return TCL_ERROR;
+    }
+    Tcl_SetHashValue(hPtr, (ClientData)iclsPtr);
+
+    hPtr = Tcl_CreateHashEntry(&infoPtr->classes, (char *)iclsPtr, &newEntry);
+    if (hPtr == NULL) {
+	Tcl_AppendResult(interp,
+	        "ITCL: cannot create hash entry in infoPtr->classes",
 		" for class \"", 
 		Tcl_GetString(iclsPtr->fullNamePtr), "\"", NULL);
 	return TCL_ERROR;
@@ -445,14 +454,23 @@ Itcl_CreateClass(
 	Tcl_DStringValue(&buffer), "\"", NULL);
         return TCL_ERROR;
     }
+
+    /*
+     *  Add the built-in "this" command to the list of function members.
+     */
     Tcl_DStringInit(&buffer);
     Tcl_DStringAppend(&buffer, Tcl_GetString(iclsPtr->fullNamePtr), -1);
     Tcl_DStringAppend(&buffer, "::this", -1);
-    Tcl_CreateObjCommand(interp,
-            Tcl_DStringValue(&buffer),
+    iclsPtr->thisCmd = Tcl_CreateObjCommand(interp, Tcl_DStringValue(&buffer),
             Itcl_ThisCmd, iclsPtr, NULL);
-
+    Tcl_DStringInit(&buffer);
+    /* the ___this command is just to notify when a namespace is deleted */
+    Tcl_DStringAppend(&buffer, Tcl_GetString(iclsPtr->fullNamePtr), -1);
+    Tcl_DStringAppend(&buffer, "::___this", -1);
+    iclsPtr->thisCmd = Tcl_CreateObjCommand(interp, Tcl_DStringValue(&buffer),
+            Itcl_ThisCmd, iclsPtr, ItclDestroyClass2);
     Tcl_DStringFree(&buffer);
+
     /*
      *  Add the built-in "this" variable to the list of data members.
      */
@@ -558,13 +576,8 @@ Itcl_CreateClass(
             return TCL_ERROR;
         }
     }
-    /*
-     *  Create a command in the current namespace to manage the class:
-     *    <className>
-     *    <className> <objName> ?<constructor-args>?
-     */
-    Itcl_PreserveData((ClientData)iclsPtr);
 
+    Itcl_PreserveData((ClientData)iclsPtr);
     iclsPtr->accessCmd = Tcl_GetObjectCommand(oPtr);
     Tcl_TraceCommand(interp, Tcl_GetCommandName(interp, iclsPtr->accessCmd),
                 TCL_TRACE_RENAME|TCL_TRACE_DELETE, ClassRenamedTrace, iclsPtr);
@@ -586,6 +599,7 @@ ItclDeleteClassVariablesNamespace(
     Tcl_Interp *interp,
     ItclClass *iclsPtr)
 {
+return;
     Tcl_DString buffer;
     Tcl_Namespace *varNsPtr;
 
@@ -611,15 +625,25 @@ CallDeleteOneObject(
     Tcl_Interp *interp,
     int result)
 {
-    ItclClass *iclsPtr2 = NULL;
-    ItclObject *contextIoPtr;
     Tcl_HashEntry *hPtr;
     Tcl_HashSearch place;
     Tcl_DString buffer;
+    ItclClass *iclsPtr2 = NULL;
+    ItclObject *contextIoPtr;
     ItclClass *iclsPtr = data[0];
+    ItclObjectInfo *infoPtr = data[1];
     void *callbackPtr;
+    int classIsDeleted;
     
     if (result != TCL_OK) {
+        return result;
+    }
+    classIsDeleted = 0;
+    hPtr = Tcl_FindHashEntry(&infoPtr->classes, (char *)iclsPtr);
+    if (hPtr == NULL) {
+        classIsDeleted = 1;
+    }
+    if (classIsDeleted) {
         return result;
     }
     /*
@@ -629,7 +653,7 @@ CallDeleteOneObject(
      * is therefore not allowed anymore.
      */
 
-    hPtr = Tcl_FirstHashEntry(&iclsPtr->infoPtr->objects, &place);
+    hPtr = Tcl_FirstHashEntry(&infoPtr->objects, &place);
     if (hPtr) {
         contextIoPtr = (ItclObject*)Tcl_GetHashValue(hPtr);
 
@@ -647,34 +671,25 @@ CallDeleteOneObject(
             }
 
             Itcl_NRAddCallback(interp, CallDeleteOneObject, iclsPtr,
-	            NULL, NULL, NULL);
+	            infoPtr, NULL, NULL);
             return Itcl_NRRunCallbacks(interp, callbackPtr);
         }
 
     }
 
-    /*
-     *  Destroy the namespace associated with this class.
-     *
-     *  TRICKY NOTE:
-     *    The cleanup procedure associated with the namespace is
-     *    invoked automatically.  It does all of the same things
-     *    above, but it also disconnects this class from its
-     *    base-class lists, and removes the class access command.
-     */
-    if (iclsPtr->nsPtr != NULL) {
-        Tcl_DeleteNamespace(iclsPtr->nsPtr);
-        ItclDeleteClassVariablesNamespace(interp, iclsPtr);
-    }
     return TCL_OK;
 
 deleteClassFail:
-    Tcl_DStringInit(&buffer);
-    Tcl_DStringAppend(&buffer, "\n    (while deleting class \"", -1);
-    Tcl_DStringAppend(&buffer, iclsPtr2->nsPtr->fullName, -1);
-    Tcl_DStringAppend(&buffer, "\")", -1);
-    Tcl_AddErrorInfo(interp, Tcl_DStringValue(&buffer));
-    Tcl_DStringFree(&buffer);
+    /* check if class is not yet deleted */
+    hPtr = Tcl_FindHashEntry(&infoPtr->classes, (char *)iclsPtr2);
+    if (hPtr != NULL) {
+        Tcl_DStringInit(&buffer);
+        Tcl_DStringAppend(&buffer, "\n    (while deleting class \"", -1);
+        Tcl_DStringAppend(&buffer, iclsPtr2->nsPtr->fullName, -1);
+        Tcl_DStringAppend(&buffer, "\")", -1);
+        Tcl_AddErrorInfo(interp, Tcl_DStringValue(&buffer));
+        Tcl_DStringFree(&buffer);
+    }
     return TCL_ERROR;
 }
 
@@ -684,13 +699,26 @@ CallDeleteOneClass(
     Tcl_Interp *interp,
     int result)
 {
+    Tcl_HashEntry *hPtr;
     Tcl_DString buffer;
     ItclClass *iclsPtr = data[0];
+    ItclObjectInfo *infoPtr = data[1];
+    int isDerivedReleased;
 
     if (result != TCL_OK) {
         return result;
     }
+    isDerivedReleased = iclsPtr->flags & ITCL_CLASS_DERIVED_RELEASED;
     result = Itcl_DeleteClass(interp, iclsPtr);
+    if (!isDerivedReleased) {
+	if (result == TCL_OK) {
+	    hPtr = Tcl_FindHashEntry(&infoPtr->classes, (char *)iclsPtr);
+	    if (hPtr != NULL) {
+	        /* release from derived reference */
+                Itcl_ReleaseData((char *)iclsPtr);
+	    }
+        }
+    }
     if (result == TCL_OK) {
         return TCL_OK;
     }
@@ -721,15 +749,23 @@ Itcl_DeleteClass(
     Tcl_Interp *interp,     /* interpreter managing this class */
     ItclClass *iclsPtr)    /* class */
 {
+    Tcl_HashEntry *hPtr;
+    ItclObjectInfo *infoPtr;
     ItclClass *iclsPtr2 = NULL;
-
     Itcl_ListElem *elem;
-    int result;
     void *callbackPtr;
+    int result;
 
-    if (iclsPtr->flags & ITCL_CLASS_DELETE_CALLED) {
+    infoPtr = Tcl_GetAssocData(interp, ITCL_INTERP_DATA, NULL);
+    hPtr = Tcl_FindHashEntry(&infoPtr->classes, (char *)iclsPtr);
+    if (hPtr == NULL) {
+	/* class has already been deleted */
         return TCL_OK;
     }
+    if (iclsPtr->flags & ITCL_CLASS_IS_DELETED) {
+        return TCL_OK;
+    }
+    iclsPtr->flags |= ITCL_CLASS_IS_DELETED;
     /*
      *  Destroy all derived classes, since these lose their meaning
      *  when the base class goes away.  If anything goes wrong,
@@ -744,8 +780,8 @@ Itcl_DeleteClass(
         elem = Itcl_NextListElem(elem);  /* advance here--elem will go away */
 
         callbackPtr = Itcl_GetCurrentCallbackPtr(interp);
-        Itcl_NRAddCallback(interp, CallDeleteOneClass, iclsPtr2, NULL,
-	        NULL, NULL);
+        Itcl_NRAddCallback(interp, CallDeleteOneClass, iclsPtr2,
+	        iclsPtr2->infoPtr, NULL, NULL);
         result = Itcl_NRRunCallbacks(interp, callbackPtr);
         if (result != TCL_OK) {
             return result;
@@ -767,9 +803,24 @@ Itcl_DeleteClass(
      * otherwise we return at the end of the enrolled loop.
      */
     callbackPtr = Itcl_GetCurrentCallbackPtr(interp);
-    Itcl_NRAddCallback(interp, CallDeleteOneObject, iclsPtr, NULL, NULL, NULL);
-    return Itcl_NRRunCallbacks(interp, callbackPtr);
-
+    Itcl_NRAddCallback(interp, CallDeleteOneObject, iclsPtr,
+            iclsPtr->infoPtr, NULL, NULL);
+    result = Itcl_NRRunCallbacks(interp, callbackPtr);
+    if (result != TCL_OK) {
+        return result;
+    }
+    /*
+     *  Destroy the namespace associated with this class.
+     *
+     *  TRICKY NOTE:
+     *    The cleanup procedure associated with the namespace is
+     *    invoked automatically.  It does all of the same things
+     *    above, but it also disconnects this class from its
+     *    base-class lists, and removes the class access command.
+     */
+    ItclDeleteClassVariablesNamespace(interp, iclsPtr);
+    Tcl_DeleteNamespace(iclsPtr->nsPtr);
+    return TCL_OK;
 }
 
 
@@ -792,15 +843,13 @@ ItclDestroyClass(
 {
     ItclClass *iclsPtr = (ItclClass*)cdata;
 
-    if (iclsPtr->accessCmd == NULL) {
+    if (iclsPtr->flags & ITCL_CLASS_IS_DESTROYED) {
         return;
     }
-    iclsPtr->accessCmd = NULL;
-    if (iclsPtr->nsPtr != NULL) {
-        if (iclsPtr->flags & ITCL_CLASS_DELETED) {
-            Tcl_DeleteNamespace(iclsPtr->nsPtr);
-            iclsPtr->nsPtr = NULL;
-        }
+    iclsPtr->flags |= ITCL_CLASS_IS_DESTROYED;
+    if (!(iclsPtr->flags & ITCL_CLASS_NS_IS_DESTROYED)) {
+        iclsPtr->accessCmd = NULL;
+        Tcl_DeleteNamespace(iclsPtr->nsPtr);
     }
     Itcl_ReleaseData((ClientData)iclsPtr);
 }
@@ -825,8 +874,9 @@ ItclDestroyClassNamesp(
     Tcl_HashEntry *hPtr;
     Tcl_HashEntry *hPtr2;
     Tcl_HashSearch place;
+    Tcl_Command cmdPtr;
     ItclClass *iclsPtr;
-    ItclObject *contextObj;
+    ItclObject *ioPtr;
     Itcl_ListElem *elem;
     Itcl_ListElem *belem;
     ItclClass *iclsPtr2;
@@ -835,8 +885,13 @@ ItclDestroyClassNamesp(
     ItclObjectInfo *infoPtr;
 
     iclsPtr = (ItclClass*)cdata;
+    if (iclsPtr->flags & ITCL_CLASS_NS_IS_DESTROYED) {
+        return;
+    }
+    iclsPtr->flags |= ITCL_CLASS_NS_IS_DESTROYED;
     infoPtr = iclsPtr->infoPtr;
-    hPtr2 = Tcl_FindHashEntry(&infoPtr->classes, (char *)iclsPtr->fullNamePtr);
+    hPtr2 = Tcl_FindHashEntry(&infoPtr->nameClasses,
+            (char *)iclsPtr->fullNamePtr);
     /*
      *  Destroy all derived classes, since these lose their meaning
      *  when the base class goes away.
@@ -849,7 +904,6 @@ ItclDestroyClassNamesp(
         iclsPtr2 = (ItclClass*)Itcl_GetListValue(elem);
 	if (iclsPtr2->nsPtr != NULL) {
             Tcl_DeleteNamespace(iclsPtr2->nsPtr);
-            iclsPtr2->nsPtr = NULL;
         }
 
 	/* As the first namespace is now destroyed we have to get the
@@ -867,19 +921,24 @@ ItclDestroyClassNamesp(
      */
     hPtr = Tcl_FirstHashEntry(&iclsPtr->infoPtr->objects, &place);
     while (hPtr) {
-        contextObj = (ItclObject*)Tcl_GetHashValue(hPtr);
-        if (contextObj->iclsPtr == iclsPtr) {
-            Tcl_DeleteCommandFromToken(iclsPtr->interp, contextObj->accessCmd);
-	    contextObj->accessCmd = NULL;
-	    /*
-	     * Fix 227804: Whenever an object to delete was found we
-	     * have to reset the search to the beginning as the
-	     * current entry in the search was deleted and accessing it
-	     * is therefore not allowed anymore.
-	     */
+        ioPtr = (ItclObject*)Tcl_GetHashValue(hPtr);
+        if (ioPtr->iclsPtr == iclsPtr) {
+	    if ((ioPtr->accessCmd != NULL) && (!(ioPtr->flags &
+	            (ITCL_OBJECT_IS_DESTRUCTED)))) {
+		Itcl_PreserveData(ioPtr);
+                Tcl_DeleteCommandFromToken(iclsPtr->interp, ioPtr->accessCmd);
+	        ioPtr->accessCmd = NULL;
+		Itcl_ReleaseData(ioPtr);
+	        /*
+	         * Fix 227804: Whenever an object to delete was found we
+	         * have to reset the search to the beginning as the
+	         * current entry in the search was deleted and accessing it
+	         * is therefore not allowed anymore.
+	         */
 
-	    hPtr = Tcl_FirstHashEntry(&iclsPtr->infoPtr->objects, &place);
-	    continue;
+	        hPtr = Tcl_FirstHashEntry(&iclsPtr->infoPtr->objects, &place);
+	        continue;
+	    }
         }
         hPtr = Tcl_NextHashEntry(&place);
     }
@@ -896,7 +955,8 @@ ItclDestroyClassNamesp(
         while (elem) {
             derivedPtr = (ItclClass*)Itcl_GetListValue(elem);
             if (derivedPtr == iclsPtr) {
-                Itcl_ReleaseData(Itcl_GetListValue(elem));
+		derivedPtr->flags |= ITCL_CLASS_DERIVED_RELEASED;
+                Itcl_ReleaseData(derivedPtr);
                 elem = Itcl_DeleteListElem(elem);
             } else {
                 elem = Itcl_NextListElem(elem);
@@ -912,10 +972,11 @@ ItclDestroyClassNamesp(
     if (iclsPtr->accessCmd) {
         Tcl_CmdInfo cmdInfo;
 	if (Tcl_GetCommandInfoFromToken(iclsPtr->accessCmd, &cmdInfo) == 1) {
-	    if (cmdInfo.deleteProc != NULL) {
-                Tcl_DeleteCommandFromToken(iclsPtr->interp, iclsPtr->accessCmd);
-	    }
+	    cmdPtr = iclsPtr->accessCmd;
 	    iclsPtr->accessCmd = NULL;
+	    if (cmdInfo.deleteProc != NULL) {
+                Tcl_DeleteCommandFromToken(iclsPtr->interp, cmdPtr);
+	    }
         }
     }
 
@@ -923,9 +984,6 @@ ItclDestroyClassNamesp(
      *  Release the namespace's claim on the class definition.
      */
     Itcl_ReleaseData((ClientData)iclsPtr);
-    if (hPtr2 != NULL) {
-        Tcl_DeleteHashEntry(hPtr2);
-    }
 }
 
 
@@ -956,14 +1014,10 @@ ItclFreeClass(
     int found;
     found = 0;
 
-    if (!(iclsPtr->flags & ITCL_CLASS_DELETE_CALLED)) {
-	Itcl_PreserveData(iclsPtr);
+    if (iclsPtr->flags & ITCL_CLASS_IS_FREED) {
         return;
     }
-    if (iclsPtr->flags & ITCL_CLASS_DELETED) {
-        return;
-    }
-    iclsPtr->flags |= ITCL_CLASS_DELETED;
+    iclsPtr->flags |= ITCL_CLASS_IS_FREED;
 
     /*
      *  Tear down the list of derived classes.  This list should
@@ -994,7 +1048,6 @@ ItclFreeClass(
         }
     }
 
-/*    TclDeleteVars((Interp*)iclsPtr->interp, &varTable); */
     Tcl_DeleteHashTable(&iclsPtr->resolveVars);
 
     /*
@@ -1006,7 +1059,7 @@ ItclFreeClass(
      *  Delete all variable definitions.
      */
     FOREACH_HASH_VALUE(ivPtr, &iclsPtr->variables) {
-        Itcl_DeleteVariable(ivPtr);
+        Itcl_ReleaseData(ivPtr);
     }
     Tcl_DeleteHashTable(&iclsPtr->variables);
 
@@ -1014,7 +1067,7 @@ ItclFreeClass(
      *  Delete all option definitions.
      */
     FOREACH_HASH_VALUE(ioptPtr, &iclsPtr->options) {
-        ItclDeleteOption(ioptPtr);
+        Itcl_ReleaseData(ioptPtr);
     }
     Tcl_DeleteHashTable(&iclsPtr->options);
 
@@ -1030,7 +1083,14 @@ ItclFreeClass(
      *  Delete all function definitions.
      */
     FOREACH_HASH_VALUE(imPtr, &iclsPtr->functions) {
-        Itcl_ReleaseData(imPtr);
+	/* functions have Itcl_ReleaseData as deleteProc in the 
+	 * Tcl_Command structure of the class namespace !!
+	 * but if there was an error during parsing of the class body
+	 * the Tcl_Commands have not yet been built, so release here
+	 */
+	if (imPtr->iclsPtr->flags & ITCL_CLASS_CONSTRUCT_ERROR) {
+            Itcl_ReleaseData(imPtr);
+	}
     }
     Tcl_DeleteHashTable(&iclsPtr->functions);
 
@@ -1060,6 +1120,26 @@ ItclFreeClass(
     }
     Itcl_DeleteList(&iclsPtr->bases);
     Tcl_DeleteHashTable(&iclsPtr->heritage);
+
+    /* remove owerself from the all classes entry */
+    hPtr = Tcl_FindHashEntry(&iclsPtr->infoPtr->nameClasses,
+            (char *)iclsPtr->fullNamePtr);
+    if (hPtr != NULL) {
+        Tcl_DeleteHashEntry(hPtr);
+    }
+
+    /* remove owerself from the all namespaceClasses entry */
+    hPtr = Tcl_FindHashEntry(&iclsPtr->infoPtr->namespaceClasses,
+            (char *)iclsPtr->nsPtr);
+    if (hPtr != NULL) {
+        Tcl_DeleteHashEntry(hPtr);
+    }
+
+    /* remove owerself from the all classes entry */
+    hPtr = Tcl_FindHashEntry(&iclsPtr->infoPtr->classes, (char *)iclsPtr);
+    if (hPtr != NULL) {
+        Tcl_DeleteHashEntry(hPtr);
+    }
 
     /* FIXME !!!
       free classCommons
@@ -1380,7 +1460,7 @@ Itcl_HandleClass(
         return TCL_OK;
     }
 
-    hPtr = Tcl_FindHashEntry(&infoPtr->classes, (char *)objv[2]);
+    hPtr = Tcl_FindHashEntry(&infoPtr->nameClasses, (char *)objv[2]);
     if (hPtr == NULL) {
         Tcl_AppendResult(interp, "no such class: \"",
 	        Tcl_GetString(objv[1]), "\"", NULL);
@@ -1850,6 +1930,7 @@ Itcl_CreateVariable(
     ivPtr = (ItclVariable*)ckalloc(sizeof(ItclVariable));
     memset(ivPtr, 0, sizeof(ItclVariable));
     ivPtr->iclsPtr      = iclsPtr;
+    ivPtr->infoPtr      = iclsPtr->infoPtr;
     ivPtr->protection   = Itcl_Protection(interp, 0);
     ivPtr->codePtr      = mCodePtr;
     ivPtr->namePtr      = namePtr;
@@ -1872,6 +1953,8 @@ Itcl_CreateVariable(
     }
 
     Tcl_SetHashValue(hPtr, (ClientData)ivPtr);
+    Itcl_PreserveData((ClientData)ivPtr);
+    Itcl_EventuallyFree((ClientData)ivPtr, Itcl_DeleteVariable);
 
     *ivPtrPtr = ivPtr;
     return TCL_OK;
@@ -1944,6 +2027,8 @@ Itcl_CreateOption(
     Tcl_AppendToObj(ioptPtr->fullNamePtr, Tcl_GetString(ioptPtr->namePtr), -1);
     Tcl_IncrRefCount(ioptPtr->fullNamePtr);
     Tcl_SetHashValue(hPtr, (ClientData)ioptPtr);
+    Itcl_PreserveData((ClientData)ioptPtr);
+    Itcl_EventuallyFree((ClientData)ioptPtr, ItclDeleteOption);
     return TCL_OK;
 }
 
@@ -2165,18 +2250,83 @@ Itcl_AdvanceHierIter(
  */
 void
 Itcl_DeleteVariable(
-    ItclVariable *ivPtr)   /* variable definition to be destroyed */
+    char *cdata)   /* variable definition to be destroyed */
 {
+    Tcl_HashEntry *hPtr;
+    ItclVariable *ivPtr;
+
+    ivPtr = (ItclVariable *)cdata;
+    hPtr = Tcl_FindHashEntry(&ivPtr->infoPtr->classes, (char *)ivPtr->iclsPtr);
+    if (hPtr != NULL) {
+	/* unlink owerself from list of class variables */
+        hPtr = Tcl_FindHashEntry(&ivPtr->iclsPtr->variables,
+                (char *)ivPtr->namePtr);
+        if (hPtr != NULL) {
+            Tcl_DeleteHashEntry(hPtr);
+        }
+    }
+    if (ivPtr->codePtr != NULL) {
+        Itcl_ReleaseData(ivPtr->codePtr);
+    }
     Tcl_DecrRefCount(ivPtr->namePtr);
     Tcl_DecrRefCount(ivPtr->fullNamePtr);
-
-    if (ivPtr->codePtr != NULL) {
-        Itcl_ReleaseData((ClientData)ivPtr->codePtr);
-    }
     if (ivPtr->init) {
         Tcl_DecrRefCount(ivPtr->init);
     }
+    if (ivPtr->arrayInitPtr) {
+        Tcl_DecrRefCount(ivPtr->arrayInitPtr);
+    }
     ckfree((char*)ivPtr);
+}
+
+/*
+ * ------------------------------------------------------------------------
+ *  ItclDeleteOption()
+ *
+ *  Destroys a option definition created by Itcl_CreateOption(),
+ *  freeing all resources associated with it.
+ * ------------------------------------------------------------------------
+ */
+static void
+ItclDeleteOption(
+    char *cdata)   /* option definition to be destroyed */
+{
+    ItclOption *ioptPtr;
+
+    ioptPtr = (ItclOption *)cdata;
+    Tcl_DecrRefCount(ioptPtr->namePtr);
+    Tcl_DecrRefCount(ioptPtr->fullNamePtr);
+    if (ioptPtr->resourceNamePtr != NULL) {
+        Tcl_DecrRefCount(ioptPtr->resourceNamePtr);
+    }
+    if (ioptPtr->resourceNamePtr != NULL) {
+        Tcl_DecrRefCount(ioptPtr->classNamePtr);
+    }
+
+    Itcl_ReleaseData(ioptPtr->codePtr); 
+    if (ioptPtr->defaultValuePtr != NULL) {
+        Tcl_DecrRefCount(ioptPtr->defaultValuePtr);
+    }
+    if (ioptPtr->cgetMethodPtr != NULL) {
+        Tcl_DecrRefCount(ioptPtr->cgetMethodPtr);
+    }
+    if (ioptPtr->cgetMethodVarPtr != NULL) {
+        Tcl_DecrRefCount(ioptPtr->cgetMethodVarPtr);
+    }
+    if (ioptPtr->configureMethodPtr != NULL) {
+        Tcl_DecrRefCount(ioptPtr->configureMethodPtr);
+    }
+    if (ioptPtr->configureMethodVarPtr != NULL) {
+        Tcl_DecrRefCount(ioptPtr->configureMethodVarPtr);
+    }
+    if (ioptPtr->validateMethodPtr != NULL) {
+        Tcl_DecrRefCount(ioptPtr->validateMethodPtr);
+    }
+    if (ioptPtr->validateMethodVarPtr != NULL) {
+        Tcl_DecrRefCount(ioptPtr->validateMethodVarPtr);
+    }
+    Itcl_ReleaseData(ioptPtr->idoPtr);
+    ckfree((char*)ioptPtr);
 }
 
 /*
@@ -2190,11 +2340,22 @@ static void
 ItclDeleteFunction(
     ItclMemberFunc *imPtr)
 {
+    Tcl_HashEntry *hPtr;
+
+    hPtr = Tcl_FindHashEntry(&imPtr->infoPtr->classes, (char *)imPtr->iclsPtr);
+    if (hPtr != NULL) {
+	/* unlink owerself from list of class functions */
+        hPtr = Tcl_FindHashEntry(&imPtr->iclsPtr->functions,
+                (char *)imPtr->namePtr);
+        if (hPtr != NULL) {
+            Tcl_DeleteHashEntry(hPtr);
+        }
+    }
+    if (imPtr->codePtr != NULL) {
+        Itcl_ReleaseData(imPtr->codePtr);
+    }
     Tcl_DecrRefCount(imPtr->namePtr);
     Tcl_DecrRefCount(imPtr->fullNamePtr);
-    if (imPtr->codePtr != NULL) {
-        Itcl_ReleaseData((ClientData)imPtr->codePtr);
-    }
     if (imPtr->usagePtr != NULL) {
         Tcl_DecrRefCount(imPtr->usagePtr);
     }
@@ -2232,65 +2393,38 @@ ItclDeleteComponent(
 
 /*
  * ------------------------------------------------------------------------
- *  ItclDeleteOption()
- *
- *  free data associated with an option
- * ------------------------------------------------------------------------
- */
-static void
-ItclDeleteOption(
-    ItclOption *ioptPtr)
-{
-    Tcl_DecrRefCount(ioptPtr->namePtr);
-    Tcl_DecrRefCount(ioptPtr->fullNamePtr);
-    Tcl_DecrRefCount(ioptPtr->resourceNamePtr);
-    Tcl_DecrRefCount(ioptPtr->classNamePtr);
-    if (ioptPtr->codePtr != NULL) {
-        Itcl_ReleaseData((ClientData)ioptPtr->codePtr);
-    }
-    if (ioptPtr->defaultValuePtr != NULL) {
-        Tcl_DecrRefCount(ioptPtr->defaultValuePtr);
-    }
-    if (ioptPtr->defaultValuePtr != NULL) {
-        Tcl_DecrRefCount(ioptPtr->cgetMethodPtr);
-    }
-    if (ioptPtr->configureMethodPtr != NULL) {
-        Tcl_DecrRefCount(ioptPtr->configureMethodPtr);
-    }
-    if (ioptPtr->validateMethodPtr != NULL) {
-        Tcl_DecrRefCount(ioptPtr->validateMethodPtr);
-    }
-    ckfree((char*)ioptPtr);
-}
-#ifdef NOTDEF
-
-/*
- * ------------------------------------------------------------------------
  *  ItclDeleteDelegatedOption()
  *
  *  free data associated with a delegated option
  * ------------------------------------------------------------------------
  */
-static void
+void
 ItclDeleteDelegatedOption(
-    ItclDelegatedOption *idoPtr)
+    char *cdata)
 {
     Tcl_Obj *objPtr;
     FOREACH_HASH_DECLS;
+    ItclDelegatedOption *idoPtr;
 
+    idoPtr = (ItclDelegatedOption *)cdata;
     Tcl_DecrRefCount(idoPtr->namePtr);
-    Tcl_DecrRefCount(idoPtr->resourceNamePtr);
-    Tcl_DecrRefCount(idoPtr->classNamePtr);
+    if (idoPtr->resourceNamePtr != NULL) {
+        Tcl_DecrRefCount(idoPtr->resourceNamePtr);
+    }
+    if (idoPtr->classNamePtr != NULL) {
+        Tcl_DecrRefCount(idoPtr->classNamePtr);
+    }
     if (idoPtr->asPtr != NULL) {
         Tcl_DecrRefCount(idoPtr->asPtr);
     }
     FOREACH_HASH_VALUE(objPtr, &idoPtr->exceptions) {
-        Tcl_DecrRefCount(objPtr);
+	if (objPtr != NULL) {
+            Tcl_DecrRefCount(objPtr);
+        }
     }
     Tcl_DeleteHashTable(&idoPtr->exceptions);
     ckfree((char *)idoPtr);
 }
-#endif
 
 /*
  * ------------------------------------------------------------------------
@@ -2313,7 +2447,9 @@ static void ItclDeleteDelegatedFunction(
         Tcl_DecrRefCount(idmPtr->usingPtr);
     }
     FOREACH_HASH_VALUE(objPtr, &idmPtr->exceptions) {
-        Tcl_DecrRefCount(objPtr);
+	if (objPtr != NULL) {
+            Tcl_DecrRefCount(objPtr);
+        }
     }
     Tcl_DeleteHashTable(&idmPtr->exceptions);
     ckfree((char *)idmPtr);
