@@ -11,7 +11,7 @@
  * ========================================================================
  *  Author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclWidgetCmd.c,v 1.1.2.4 2008/11/16 16:26:04 wiede Exp $
+ *     RCS:  $Id: itclWidgetCmd.c,v 1.1.2.5 2008/11/23 19:54:53 wiede Exp $
  * ========================================================================
  *           Copyright (c) 2007 Arnulf Wiedemann
  * ------------------------------------------------------------------------
@@ -86,7 +86,9 @@ Itcl_WidgetCmd(
     Tcl_IncrRefCount(objPtr);
     result = Tcl_EvalObjEx(interp, objPtr, 0);
     Tcl_DecrRefCount(objPtr);
-    Tcl_AppendResult(interp, iclsPtr->nsPtr->fullName);
+    objPtr = Tcl_GetObjResult(interp);
+    Tcl_AppendToObj(objPtr, iclsPtr->nsPtr->fullName, -1);
+    Tcl_SetObjResult(interp, objPtr);
     return result;
 }
 
@@ -139,6 +141,8 @@ Itcl_WidgetAdaptorCmd(
     Tcl_IncrRefCount(objPtr);
     result = Tcl_EvalObjEx(interp, objPtr, 0);
     Tcl_DecrRefCount(objPtr);
-    Tcl_AppendResult(interp, iclsPtr->nsPtr->fullName);
+    objPtr = Tcl_GetObjResult(interp);
+    Tcl_AppendToObj(objPtr, iclsPtr->nsPtr->fullName, -1);
+    Tcl_SetObjResult(interp, objPtr);
     return result;
 }

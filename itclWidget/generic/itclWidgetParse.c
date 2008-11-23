@@ -41,7 +41,7 @@
  *
  *  Author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclWidgetParse.c,v 1.1.2.3 2008/11/16 16:23:35 wiede Exp $
+ *     RCS:  $Id: itclWidgetParse.c,v 1.1.2.4 2008/11/23 19:54:53 wiede Exp $
  * ========================================================================
  *           Copyright (c) 2007  Arnulf Wiedemann
  * ------------------------------------------------------------------------
@@ -82,8 +82,6 @@ Itcl_WidgetParseInit(
     Tcl_DString buffer;
     int i;
 
-    Itcl_PreserveData((ClientData)infoPtr);
-
     /*
      *  Add commands for parsing class definitions.
      */
@@ -97,12 +95,14 @@ Itcl_WidgetParseInit(
     }
 
     Tcl_CreateObjCommand(interp, "::itcl::widget", Itcl_WidgetCmd,
-        (ClientData)infoPtr, (Tcl_CmdDeleteProc*)NULL);
-    Itcl_PreserveData((ClientData)infoPtr);
+        (ClientData)infoPtr, Itcl_ReleaseData);
+    /* don't need to call Itcl_PreserveData, as that has been done by the 
+     * Itcl_WidgetCmdStart command already, which we overwrite here !! */
 
     Tcl_CreateObjCommand(interp, "::itcl::widgetadaptor", Itcl_WidgetAdaptorCmd,
-        (ClientData)infoPtr, (Tcl_CmdDeleteProc*)NULL);
-    Itcl_PreserveData((ClientData)infoPtr);
+        (ClientData)infoPtr, Itcl_ReleaseData);
+    /* don't need to call Itcl_PreserveData, as that has been done by the 
+     * Itcl_WidgetAdaptorCmdStart command already, which we overwrite here !! */
 
 
     return TCL_OK;

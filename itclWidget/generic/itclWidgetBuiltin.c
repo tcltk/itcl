@@ -12,7 +12,7 @@
  * ========================================================================
  *  Author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclWidgetBuiltin.c,v 1.1.2.8 2008/11/17 21:26:32 wiede Exp $
+ *     RCS:  $Id: itclWidgetBuiltin.c,v 1.1.2.9 2008/11/23 19:54:53 wiede Exp $
  * ========================================================================
  *           Copyright (c) 2007 Arnulf Wiedemann
  * ------------------------------------------------------------------------
@@ -61,16 +61,21 @@ void ItclHullContentsDeleted(
     const char *newName,
     int flags)
 {
+    Tcl_HashEntry *hPtr;
+    ItclObjectInfo *infoPtr;
     ItclObject *ioPtr;
     int result;
 
     ioPtr = (ItclObject *)clientData;
+    infoPtr = Tcl_GetAssocData(interp, ITCL_INTERP_DATA, NULL);
+    hPtr = Tcl_FindHashEntry(&infoPtr->objects, ioPtr);
+    if (hPtr == NULL) {
+       /* object has already been deleted */
+       return TCL_OK;
+    }
     if (newName == NULL) {
         /* delete the object which has this as a itcl_hull contents */
-/*
-fprintf(stderr, " DELETE OBJECT!%s!%s!\n", Tcl_GetString(ioPtr->namePtr), Tcl_GetString(ioPtr->origNamePtr));
-*/
-        result = Itcl_RenameCommand(ioPtr->iclsPtr->interp,
+        result = Itcl_RenameCommand(ioPtr->interp,
 	        Tcl_GetString(ioPtr->origNamePtr), NULL);
 /*
 fprintf(stderr, "RES!%d!%s!\n", result, Tcl_GetStringResult(ioPtr->iclsPtr->interp));
