@@ -24,7 +24,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclBuiltin.c,v 1.1.2.48 2008/11/23 20:23:32 wiede Exp $
+ *     RCS:  $Id: itclBuiltin.c,v 1.1.2.49 2008/11/23 20:49:30 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -2680,7 +2680,6 @@ Itcl_BiDestroyCmd(
     } else {
 	Itcl_PreserveData(contextIclsPtr);
         result = Itcl_DeleteClass(interp, contextIclsPtr);
-//        ItclDestroyClassNamesp(contextIclsPtr);
         Itcl_ReleaseData(contextIclsPtr);
     }
     return result;

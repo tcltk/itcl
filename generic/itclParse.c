@@ -39,7 +39,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclParse.c,v 1.1.2.47 2008/11/23 20:23:32 wiede Exp $
+ *     RCS:  $Id: itclParse.c,v 1.1.2.48 2008/11/23 20:49:30 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -2593,11 +2593,9 @@ ItclCreateComponent(
     int type,
     ItclComponent **icPtrPtr)
 {
-//    Tcl_Obj *bodyPtr;
     Tcl_HashEntry *hPtr;
     ItclComponent *icPtr;
     ItclVariable *ivPtr;
-//    ItclMemberFunc *imPtr;
     int isWidgetHullVar;
     int result;
     int isNew;

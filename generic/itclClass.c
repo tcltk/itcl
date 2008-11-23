@@ -25,7 +25,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann Copyright (c) 2007
  *
- *     RCS:  $Id: itclClass.c,v 1.1.2.39 2008/11/23 20:23:32 wiede Exp $
+ *     RCS:  $Id: itclClass.c,v 1.1.2.40 2008/11/23 20:49:30 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -42,7 +42,6 @@ static void ItclDeleteOption(char *cdata);
  *  FORWARD DECLARATIONS
  */
 static void ItclDestroyClass(ClientData cdata);
-//void ItclDestroyClassNamesp(ClientData cdata);
 static void ItclFreeClass (char* cdata);
 static void ItclDeleteFunction(ItclMemberFunc *imPtr);
 static void ItclDeleteComponent(ItclComponent *icPtr);

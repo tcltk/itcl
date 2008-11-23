@@ -9,7 +9,7 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itclBase.c,v 1.1.2.24 2008/11/23 20:23:32 wiede Exp $
+ * RCS: @(#) $Id: itclBase.c,v 1.1.2.25 2008/11/23 20:49:30 wiede Exp $
  */
 
 #include <stdlib.h>
@@ -197,9 +197,18 @@ AddClassUnknowMethod(
 }
 void
 FreeItclObjectInfo(
-    ClientData cdata)
+    ClientData clientData)
 {
+    ItclObjectInfo *infoPtr;
+
+    infoPtr = (ItclObjectInfo *)clientData;
+    /* need somehow to determine the interpreter and use a per interp
+     * ItclObjectInfo structure !!
+     * then can call ItclFinishCmd here
+     */
+/*
 fprintf(stderr, "@@@@ FreeItclObjectInfo called\n");
+*/
 }
 /*
  * ------------------------------------------------------------------------

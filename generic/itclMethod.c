@@ -25,7 +25,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclMethod.c,v 1.1.2.33 2008/11/23 20:23:32 wiede Exp $
+ *     RCS:  $Id: itclMethod.c,v 1.1.2.34 2008/11/23 20:49:30 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -373,7 +373,6 @@ ItclCreateMethod(
     }
 
     imPtr->flags |= ITCL_METHOD;
-//    Itcl_PreserveData((ClientData)imPtr);
     if (imPtrPtr != NULL) {
         *imPtrPtr = imPtr;
     }
@@ -424,7 +423,6 @@ Itcl_CreateProc(
      *  Mark procs as "common".  This distinguishes them from methods.
      */
     imPtr->flags |= ITCL_COMMON;
-//    Itcl_PreserveData((ClientData)imPtr);
     return TCL_OK;
 }
 

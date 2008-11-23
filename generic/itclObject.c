@@ -24,7 +24,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann Copyright (c) 2007
  *
- *     RCS:  $Id: itclObject.c,v 1.1.2.52 2008/11/23 20:23:32 wiede Exp $
+ *     RCS:  $Id: itclObject.c,v 1.1.2.53 2008/11/23 20:49:30 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -1276,7 +1276,6 @@ Itcl_DeleteObject(
         Tcl_DeleteHashEntry(hPtr);
     }
 
-//    Itcl_ReleaseData((ClientData)contextIoPtr->iclsPtr);
     /*
      *  Change the object's access command so that it can be
      *  safely deleted without attempting to destruct the object
@@ -1713,7 +1712,9 @@ fprintf(stderr, "ItclSetInstanceVar cannot get ivPtr!%s!%s!\n", iclsPtr->nsPtr->
 	Itcl_PushCallFrame(interp, framePtr, nsPtr, /*isProcCallFrame*/0);
         val = Tcl_GetVar2(interp, (const char *)name1, (char*)name2,
 	        TCL_LEAVE_ERR_MSG);
-// fprintf(stderr, "GETINSTV!%s!%s!%s!%s!\n", nsPtr->fullName, name1, name2 == NULL ? "(nil)" : name2, val == NULL ? "(nil)" : val);
+/*
+fprintf(stderr, "GETINSTV!%s!%s!%s!%s!\n", nsPtr->fullName, name1, name2 == NULL ? "(nil)" : name2, val == NULL ? "(nil)" : val);
+*/
         Itcl_PopCallFrame(interp);
     }
 
@@ -1861,7 +1862,9 @@ ItclSetInstanceVar(
             (char*)NULL);
         return NULL;
     }
-// fprintf(stderr, "SETINSTV!%s!%s!%s!\n", Tcl_GetString(contextIoPtr->namePtr), name1, name2 == NULL ? "(nil)" : name2);
+/*
+fprintf(stderr, "SETINSTV!%s!%s!%s!\n", Tcl_GetString(contextIoPtr->namePtr), name1, name2 == NULL ? "(nil)" : name2);
+*/
 
     /* get the variable definition to check if that is an ITCL_COMMON */
     if (contextIclsPtr == NULL) {
@@ -1915,7 +1918,9 @@ fprintf(stderr, "ItclSetInstanceVar cannot get ivPtr!%s!%s!\n", iclsPtr->nsPtr->
     val = NULL;
     if (nsPtr != NULL) {
 	framePtr = &frame;
-// fprintf(stderr, "SETINSTV2!%s!%s!%s!%s!\n", name1, name2 == NULL ? "(nil)" : name2, nsPtr->fullName, value);
+/*
+fprintf(stderr, "SETINSTV2!%s!%s!%s!%s!\n", name1, name2 == NULL ? "(nil)" : name2, nsPtr->fullName, value);
+*/
 	Itcl_PushCallFrame(interp, framePtr, nsPtr, /*isProcCallFrame*/0);
         val = Tcl_SetVar2(interp, (const char *)name1, (char*)name2,
 	        value, TCL_LEAVE_ERR_MSG);
