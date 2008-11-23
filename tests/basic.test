@@ -6,17 +6,17 @@
 #            mmclennan@lucent.com
 #            http://www.tcltk.com/itcl
 #
-#      RCS:  $Id: basic.test,v 1.12.2.2 2008/10/17 17:10:57 wiede Exp $
+#      RCS:  $Id: basic.test,v 1.12.2.3 2008/11/23 20:29:59 wiede Exp $
 # ----------------------------------------------------------------------
 #            Copyright (c) 1993-1998  Lucent Technologies, Inc.
 # ======================================================================
 # See the file "license.terms" for information on usage and
 # redistribution of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 
-if {[lsearch [namespace children] ::tcltest] == -1} {
-    package require tcltest 2.1
+#if {[lsearch [namespace children] ::tcltest] == -1} {
+    package require tcltest 2.2
     namespace import -force ::tcltest::test
-}
+#}
 
 ::tcltest::loadTestedCommands
 
@@ -27,7 +27,7 @@ test basic-1.0 {empty string as class name should fail but not crash} {
 # ----------------------------------------------------------------------
 #  Simple class definition
 # ----------------------------------------------------------------------
-test basic-1.1 {define a simple class} {
+test basic-1.1 {define a simple class} -body {
     itcl::class Counter {
         constructor {args} {
             incr num
@@ -47,7 +47,7 @@ test basic-1.1 {define a simple class} {
         protected variable val 0
         private common num 0
     }
-} ""
+} -result {}
 
 test basic-1.2 {class is now defined} {
     itcl::find classes Counter
@@ -130,9 +130,13 @@ test basic-1.19 {classes can be unicode} {
     itcl::class \u6210bcd { method foo args { return "bar" } }
     \u6210bcd #auto
 } \u6210bcd0
+
 test basic-1.20 {classes can be unicode} {
     \u6210bcd0 foo
 } bar
+
+::itcl::delete class \u6210bcd
+
 
 # ----------------------------------------------------------------------
 #  #auto names
@@ -184,9 +188,6 @@ test basic-2.7 {"#auto" with :: at front of name inside method inside namespace}
     set result
 } {::autoCheck0}
 
-# ----------------------------------------------------------------------
-#  Simple object use
-# ----------------------------------------------------------------------
 test basic-3.1 {object access command works} {
     Counter c
     list [c ++] [c ++] [c ++]
@@ -226,6 +227,7 @@ test basic-3.8 {obsolete syntax is no longer allowed} {
 [incr Tcl] no longer supports this syntax.
 Instead, remove the spaces from your procedure invocations:
   Counter::num ?args?}}
+
 
 # ----------------------------------------------------------------------
 #  Classes can be destroyed and redefined
@@ -267,6 +269,7 @@ test basic-4.6 {when a class is destroyed, its objects are deleted} {
          [lsort [itcl::find objects counter*]]
 } {{counter0 counter1} {} {}}
 
+
 # ----------------------------------------------------------------------
 #  Namespace variables
 # ----------------------------------------------------------------------
@@ -296,7 +299,7 @@ test basic-5.2 {create an object for the tests} {
 
 test basic-5.3 {common variables live in the namespace} {
     lsort [info vars ::test_globals::*]
-} {::test_globals::___DO_NOT_DELETE_THIS_VARIABLE ::test_globals::g1 ::test_globals::g2}
+} {::test_globals::g1 ::test_globals::g2}
 
 test basic-5.4 {common variables can be referenced transparently} {
     list [catch {test_globals0 do set g1} msg] $msg
@@ -329,6 +332,9 @@ test basic-5.9 {variable names can have ":" in them} {
     test_globals::setval ::test:global:2 g2
     namespace eval :: {info globals test:global:2}
 } {test:global:2}
+
+::itcl::delete class test_globals
+
 
 # ----------------------------------------------------------------------
 #  Array variables
@@ -402,6 +408,8 @@ test basic-6.7 {common variables can be unset} {
 test basic-6.8 {common variables can be redefined} {
     test_arrays0 do set undefined "scalar"
 } {scalar}
+
+::itcl::delete class test_arrays
 
 ::tcltest::cleanupTests
 return

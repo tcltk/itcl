@@ -6,7 +6,7 @@
 #            mmclennan@lucent.com
 #            http://www.tcltk.com/itcl
 #
-#      RCS:  $Id: body.test,v 1.4 2004/02/12 18:09:50 davygrvy Exp $
+#      RCS:  $Id: body.test,v 1.4.2.1 2008/11/23 20:29:59 wiede Exp $
 # ----------------------------------------------------------------------
 #            Copyright (c) 1993-1998  Lucent Technologies, Inc.
 # ======================================================================
@@ -131,6 +131,7 @@ test body-1.11 {redefined body really does change} {
          [test_body0 override "test #2"]
 } {{override: test #1} {} {new: test #2}}
 
+
 # ----------------------------------------------------------------------
 #  Test "body" command with inheritance
 # ----------------------------------------------------------------------
@@ -151,6 +152,8 @@ test body-2.2 {redefine a method in a derived class} {
 test body-2.3 {try to redefine a method that was not declared} {
     list [catch {itcl::body test_ibody::one {x} {return "new"}} msg] $msg
 } {1 {function "one" is not defined in class "::test_ibody"}}
+
+::itcl::delete class test_body
 
 # ----------------------------------------------------------------------
 #  Test "configbody" command
@@ -220,7 +223,8 @@ test body-4.3 {try to redefine a body for a variable that was not declared} {
 # ----------------------------------------------------------------------
 #  Clean up
 # ----------------------------------------------------------------------
-itcl::delete class test_body test_cbody
+
+itcl::delete class test_cbody
 
 ::tcltest::cleanupTests
 return

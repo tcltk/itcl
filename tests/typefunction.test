@@ -400,7 +400,6 @@ test mytypemethod-1.1 {mytypemethod qualifies typemethods} -body {
             return [mytypemethod this x y]
         }
     }
-
     list [dog a] [dog b] [dog c] [dog d]
 } -cleanup {
     dog destroy

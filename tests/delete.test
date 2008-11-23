@@ -6,7 +6,7 @@
 #            mmclennan@lucent.com
 #            http://www.tcltk.com/itcl
 #
-#      RCS:  $Id: delete.test,v 1.4 2004/02/12 18:09:50 davygrvy Exp $
+#      RCS:  $Id: delete.test,v 1.4.2.1 2008/11/23 20:29:59 wiede Exp $
 # ----------------------------------------------------------------------
 #            Copyright (c) 1993-1998  Lucent Technologies, Inc.
 # ======================================================================
@@ -138,6 +138,7 @@ test delete-3.3 {deleting a class namespace is like deleting a class} {
 test delete-3.4 {object destructors get invoked, even during catastrophe} {
     lsort $test_delete_watch
 } {::test_delete0 ::test_delete1 ::test_delete2 ::test_delete_base0 ::test_delete_base1 ::test_delete_base2}
+
 
 # ----------------------------------------------------------------------
 #  Self-destructing objects

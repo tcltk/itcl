@@ -4,7 +4,7 @@
 #   AUTHOR:  Wolfgang Groﬂer, Arnulf Wiedemann
 #            wolfgang@grosser-erding.de, arnulf@wiedemann-pri.de
 #
-#      RCS:  $Id: general1.test,v 1.1.2.1 2008/11/15 23:56:00 wiede Exp $
+#      RCS:  $Id: general1.test,v 1.1.2.2 2008/11/23 20:29:59 wiede Exp $
 # ----------------------------------------------------------------------
 #            Copyright (c) Wolfgang Groﬂer, Arnulf Wiedemann
 # ======================================================================
@@ -16,9 +16,6 @@ if {[lsearch [namespace children] ::tcltest] == -1} {
     namespace import -force ::tcltest::test
 }
 
-#if {[catch {package require Itcl}]} {
-catch {load /home/arnulf/SOURCES/tcl-tip257-itcl4/unix/libitcl4.0.so}
-#}
 
 ::tcltest::loadTestedCommands
 
@@ -241,6 +238,8 @@ test general1-1.20 {*cannot* read private variable from inherited class} {
 if {0} {
 c publicC
 }
+
+::itcl::delete class ClassA
 
 ::tcltest::cleanupTests
 return

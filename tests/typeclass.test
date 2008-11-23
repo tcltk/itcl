@@ -170,7 +170,6 @@ test type-1.6 {typemethod args can span multiple lines} -body {
     dog destroy
 } -result {::dog}
 
-
 #---------------------------------------------------------------------
 # typeconstructor
 
@@ -438,7 +437,6 @@ test component-1.3 {component -inherit can only have one of it} -body {
     error
 } -result {object "fido" can only have one component with inherit. Had already component "mycomp" now component "mycompbase"}
 
-
 #-----------------------------------------------------------------------
 # constructor
 
@@ -629,9 +627,6 @@ test hulltype-1.1 {can't set hulltype for snit::types} -body {
 } -returnCodes {
     error
 } -result {can't set hulltype for ::itcl::type}
-
-
-
 
 
 #---------------------------------------------------------------------

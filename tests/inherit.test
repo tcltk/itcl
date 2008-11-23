@@ -6,7 +6,7 @@
 #            mmclennan@lucent.com
 #            http://www.tcltk.com/itcl
 #
-#      RCS:  $Id: inherit.test,v 1.5 2004/02/12 18:09:50 davygrvy Exp $
+#      RCS:  $Id: inherit.test,v 1.5.2.1 2008/11/23 20:29:59 wiede Exp $
 # ----------------------------------------------------------------------
 #            Copyright (c) 1993-1998  Lucent Technologies, Inc.
 # ======================================================================
@@ -126,6 +126,7 @@ test inherit-1.7 {destruction ok if destructors are missing} {
     set ::test_cd_watch ""
     list [itcl::delete object test_cd_skip0] [set ::test_cd_watch]
 } {{} {{skip destruct} {bar destruct} {geek destruct}}}
+
 
 test inherit-1.8 {errors during construction are cleaned up and reported} {
     global errorInfo test_cd_watch
@@ -567,6 +568,8 @@ test inherit-7.4 {cannot have more than one inherit statement} {
         }
     } msg] $msg
 } {1 {inheritance "test_inherit_base1 " already defined for class "::bogus"}}
+
+::itcl::delete class test_inherit_base1 test_inherit_base2
 
 # ----------------------------------------------------------------------
 #  Multiple base class error detection
