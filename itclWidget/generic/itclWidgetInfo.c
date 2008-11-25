@@ -8,7 +8,7 @@
  * ========================================================================
  *  Author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclWidgetInfo.c,v 1.1.2.5 2008/11/16 16:26:04 wiede Exp $
+ *     RCS:  $Id: itclWidgetInfo.c,v 1.1.2.6 2008/11/25 19:19:51 wiede Exp $
  * ========================================================================
  *           Copyright (c) 2007 Arnulf Wiedemann
  * ------------------------------------------------------------------------
@@ -105,7 +105,6 @@ ItclBiInfoHullTypesCmd(
     while (*cPtrPtr != NULL) {
 	name = *cPtrPtr;
         objPtr = Tcl_NewStringObj(name, -1);
-        Tcl_IncrRefCount(objPtr);
         if ((pattern == NULL) ||
                  Tcl_StringMatch(name, pattern)) {
             Tcl_ListObjAppendElement(interp, listPtr, objPtr);
@@ -241,7 +240,6 @@ ItclBiInfoWidgetAdaptorsCmd(
     FOREACH_HASH_VALUE(iclsPtr, &infoPtr->classes) {
 	if (iclsPtr->flags & ITCL_WIDGETADAPTOR) {
 	    name = Tcl_GetString(iclsPtr->namePtr);
-	    Tcl_IncrRefCount(iclsPtr->namePtr);
 	    if ((pattern == NULL) ||
                      Tcl_StringMatch(name, pattern)) {
                 Tcl_ListObjAppendElement(interp, listPtr, iclsPtr->namePtr);

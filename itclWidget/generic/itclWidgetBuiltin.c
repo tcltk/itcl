@@ -12,7 +12,7 @@
  * ========================================================================
  *  Author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclWidgetBuiltin.c,v 1.1.2.10 2008/11/23 20:47:55 wiede Exp $
+ *     RCS:  $Id: itclWidgetBuiltin.c,v 1.1.2.11 2008/11/25 19:19:51 wiede Exp $
  * ========================================================================
  *           Copyright (c) 2007 Arnulf Wiedemann
  * ------------------------------------------------------------------------
@@ -207,7 +207,6 @@ Itcl_BiInstallHullCmd(
     FOREACH_HASH_DECLS;
     Tcl_Obj *namePtr;
     Tcl_Obj *classNamePtr;
-    Tcl_Obj *widgetNamePtr;
     Tcl_Var varPtr;
     Tcl_DString buffer;
     Tcl_Obj **newObjv;
@@ -286,8 +285,6 @@ Itcl_BiInstallHullCmd(
 
     optsStartIdx = 3;
     if (!shortForm) {
-	widgetNamePtr = Tcl_NewStringObj(widgetName, -1);
-	widgetName = Tcl_GetString(widgetNamePtr);
         widgetType = Tcl_GetString(objv[2]);
 	classNamePtr = NULL;
 	className = NULL;
@@ -306,13 +303,9 @@ Itcl_BiInstallHullCmd(
 	newObjv = (Tcl_Obj **)ckalloc(sizeof(Tcl_Obj *) *
 	        (newObjc + numOptArgs));
 	newObjv[0] = Tcl_NewStringObj(widgetType, -1);
-	Tcl_IncrRefCount(newObjv[0]);
-	newObjv[1] = widgetNamePtr;
-	Tcl_IncrRefCount(newObjv[1]);
+	newObjv[1] = Tcl_NewStringObj(widgetName, -1);
 	newObjv[2] = Tcl_NewStringObj("-class", -1);
-	Tcl_IncrRefCount(newObjv[2]);
 	newObjv[3] = Tcl_NewStringObj(className, -1);
-	Tcl_IncrRefCount(newObjv[3]);
 	i = 4;
 	iOpts = optsStartIdx;
 	for (; iOpts < objc; iOpts++, i++) {
@@ -324,10 +317,6 @@ Itcl_BiInstallHullCmd(
 	for (i = newObjc + numOptArgs - 1; i > 3; i--) {
 	    Tcl_DecrRefCount(newObjv[i]);
 	}
-	Tcl_IncrRefCount(newObjv[3]);
-	Tcl_IncrRefCount(newObjv[2]);
-	Tcl_IncrRefCount(newObjv[1]);
-	Tcl_IncrRefCount(newObjv[0]);
 	ckfree((char *)newObjv);
 	if (classNamePtr != NULL) {
 	    Tcl_DecrRefCount(classNamePtr);
@@ -359,7 +348,6 @@ Itcl_BiInstallHullCmd(
 		}
 	    }
         }
-        Tcl_DecrRefCount(widgetNamePtr);
     }
 
     /* initialize the itcl_hull variable */

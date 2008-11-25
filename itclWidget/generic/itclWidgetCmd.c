@@ -11,7 +11,7 @@
  * ========================================================================
  *  Author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclWidgetCmd.c,v 1.1.2.5 2008/11/23 19:54:53 wiede Exp $
+ *     RCS:  $Id: itclWidgetCmd.c,v 1.1.2.6 2008/11/25 19:19:51 wiede Exp $
  * ========================================================================
  *           Copyright (c) 2007 Arnulf Wiedemann
  * ------------------------------------------------------------------------
@@ -126,7 +126,7 @@ Itcl_WidgetAdaptorCmd(
     }
     /* create the itcl_hull variable */
     namePtr = Tcl_NewStringObj("itcl_hull", -1);
-    Tcl_IncrRefCount(namePtr);
+//    Tcl_IncrRefCount(namePtr);
     if (ItclCreateComponent(interp, iclsPtr, namePtr, ITCL_COMMON, &icPtr) !=
             TCL_OK) {
         return TCL_ERROR;

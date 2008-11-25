@@ -11,7 +11,7 @@
  * ========================================================================
  *  Author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclWidgetObject.c,v 1.1.2.8 2008/11/16 16:26:04 wiede Exp $
+ *     RCS:  $Id: itclWidgetObject.c,v 1.1.2.9 2008/11/25 19:19:51 wiede Exp $
  * ========================================================================
  *           Copyright (c) 2007 Arnulf Wiedemann
  * ------------------------------------------------------------------------
@@ -133,7 +133,6 @@ HullAndOptionsInstall(
 	buf[1] = '\0';
 	Tcl_AppendToObj(widgetClassPtr, buf, -1);
 	Tcl_AppendToObj(widgetClassPtr, cp+1, -1);
-	Tcl_IncrRefCount(widgetClassPtr);
     }
     hullObjc = 5;
     hullObjv = (Tcl_Obj **)ckalloc(sizeof(Tcl_Obj *)*hullObjc);
@@ -300,10 +299,8 @@ InstallComponent(
 		        if (strcmp(val, argv2[3]) != 0) {
 			    numUsedOpts++;
                             newObjv[i] = Tcl_NewStringObj(argv2[0], -1);
-	                    Tcl_IncrRefCount(newObjv[i]);
 	                    i++;
                             newObjv[i] = Tcl_NewStringObj(val, -1);
-	                    Tcl_IncrRefCount(newObjv[i]);
 	                    i++;
 		        }
 		    }
