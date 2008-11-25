@@ -25,7 +25,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann Copyright (c) 2007
  *
- *     RCS:  $Id: itclClass.c,v 1.1.2.40 2008/11/23 20:49:30 wiede Exp $
+ *     RCS:  $Id: itclClass.c,v 1.1.2.41 2008/11/25 19:16:07 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -475,7 +475,6 @@ Itcl_CreateClass(
      */
     if (iclsPtr->flags & ITCL_TYPE) {
         namePtr = Tcl_NewStringObj("type", -1);
-        Tcl_IncrRefCount(namePtr);
         (void) Itcl_CreateVariable(interp, iclsPtr, namePtr, (char*)NULL,
             (char*)NULL, &ivPtr);
         ivPtr->protection = ITCL_PROTECTED;  /* always "protected" */
@@ -487,7 +486,6 @@ Itcl_CreateClass(
 
     if (iclsPtr->flags & (ITCL_TYPE|ITCL_WIDGET|ITCL_WIDGETADAPTOR)) {
         namePtr = Tcl_NewStringObj("self", -1);
-        Tcl_IncrRefCount(namePtr);
         (void) Itcl_CreateVariable(interp, iclsPtr, namePtr, (char*)NULL,
             (char*)NULL, &ivPtr);
         ivPtr->protection = ITCL_PROTECTED;  /* always "protected" */
@@ -497,7 +495,6 @@ Itcl_CreateClass(
         Tcl_SetHashValue(hPtr, (ClientData)ivPtr);
 
         namePtr = Tcl_NewStringObj("selfns", -1);
-        Tcl_IncrRefCount(namePtr);
         (void) Itcl_CreateVariable(interp, iclsPtr, namePtr, (char*)NULL,
             (char*)NULL, &ivPtr);
         ivPtr->protection = ITCL_PROTECTED;  /* always "protected" */
@@ -507,7 +504,6 @@ Itcl_CreateClass(
         Tcl_SetHashValue(hPtr, (ClientData)ivPtr);
 
         namePtr = Tcl_NewStringObj("win", -1);
-        Tcl_IncrRefCount(namePtr);
         (void) Itcl_CreateVariable(interp, iclsPtr, namePtr, (char*)NULL,
             (char*)NULL, &ivPtr);
         ivPtr->protection = ITCL_PROTECTED;  /* always "protected" */
@@ -517,7 +513,6 @@ Itcl_CreateClass(
         Tcl_SetHashValue(hPtr, (ClientData)ivPtr);
     }
     namePtr = Tcl_NewStringObj("this", -1);
-    Tcl_IncrRefCount(namePtr);
     (void) Itcl_CreateVariable(interp, iclsPtr, namePtr, (char*)NULL,
             (char*)NULL, &ivPtr);
 
@@ -535,7 +530,6 @@ Itcl_CreateClass(
 	 *  data members.
          */
         namePtr = Tcl_NewStringObj("itcl_options", -1);
-        Tcl_IncrRefCount(namePtr);
         (void) Itcl_CreateVariable(interp, iclsPtr, namePtr, (char*)NULL,
                 (char*)NULL, &ivPtr);
 
@@ -553,7 +547,6 @@ Itcl_CreateClass(
          *  Add the built-in "thiswin" variable to the list of data members.
          */
         namePtr = Tcl_NewStringObj("thiswin", -1);
-        Tcl_IncrRefCount(namePtr);
         (void) Itcl_CreateVariable(interp, iclsPtr, namePtr, (char*)NULL,
                 (char*)NULL, &ivPtr);
 
@@ -568,7 +561,6 @@ Itcl_CreateClass(
         /* create the itcl_hull component */
         ItclComponent *icPtr;
         namePtr = Tcl_NewStringObj("itcl_hull", 9);
-        Tcl_IncrRefCount(namePtr);
 	/* itcl_hull must not be an ITCL_COMMON!! */
         if (ItclCreateComponent(interp, iclsPtr, namePtr, 0, &icPtr) !=
 	        TCL_OK) {
@@ -999,7 +991,9 @@ static void
 ItclFreeClass(
     char *cdata)  /* class definition to be destroyed */
 {
-    ItclClass *iclsPtr = (ItclClass*)cdata;
+    FOREACH_HASH_DECLS;
+    Tcl_HashSearch place;
+    ItclClass *iclsPtr;
     ItclClass *iclsPtr2;
     ItclMemberFunc *imPtr;
     ItclVariable *ivPtr;
@@ -1009,10 +1003,10 @@ ItclFreeClass(
     ItclDelegatedFunction *idmPtr;
     Itcl_ListElem *elem;
     ItclVarLookup *vlookup;
-    FOREACH_HASH_DECLS;
     int found;
-    found = 0;
 
+    found = 0;
+    iclsPtr = (ItclClass*)cdata;
     if (iclsPtr->flags & ITCL_CLASS_IS_FREED) {
         return;
     }
@@ -1057,7 +1051,13 @@ ItclFreeClass(
     /*
      *  Delete all variable definitions.
      */
-    FOREACH_HASH_VALUE(ivPtr, &iclsPtr->variables) {
+    while (1) {
+        hPtr = Tcl_FirstHashEntry(&iclsPtr->variables, &place);
+        if (hPtr == NULL) {
+            break;
+        }
+        ivPtr = Tcl_GetHashValue(hPtr);
+	Tcl_DeleteHashEntry(hPtr);
         Itcl_ReleaseData(ivPtr);
     }
     Tcl_DeleteHashTable(&iclsPtr->variables);
@@ -1065,7 +1065,13 @@ ItclFreeClass(
     /*
      *  Delete all option definitions.
      */
-    FOREACH_HASH_VALUE(ioptPtr, &iclsPtr->options) {
+    while (1) {
+        hPtr = Tcl_FirstHashEntry(&iclsPtr->options, &place);
+        if (hPtr == NULL) {
+            break;
+        }
+        ioptPtr = Tcl_GetHashValue(hPtr);
+	Tcl_DeleteHashEntry(hPtr);
         Itcl_ReleaseData(ioptPtr);
     }
     Tcl_DeleteHashTable(&iclsPtr->options);
@@ -1073,7 +1079,13 @@ ItclFreeClass(
     /*
      *  Delete all components
      */
-    FOREACH_HASH_VALUE(icPtr, &iclsPtr->components) {
+    while (1) {
+        hPtr = Tcl_FirstHashEntry(&iclsPtr->components, &place);
+        if (hPtr == NULL) {
+            break;
+        }
+        icPtr = Tcl_GetHashValue(hPtr);
+	Tcl_DeleteHashEntry(hPtr);
         ItclDeleteComponent(icPtr);
     }
     Tcl_DeleteHashTable(&iclsPtr->components);
@@ -1159,6 +1171,14 @@ ItclFreeClass(
      */
     if (iclsPtr->hullTypePtr != NULL) {
         Tcl_DecrRefCount(iclsPtr->hullTypePtr);
+    }
+
+    /*
+     *  Free up the type typeconstrutor code
+     */
+
+    if (iclsPtr->typeConstructorPtr != NULL) {
+        Tcl_DecrRefCount(iclsPtr->typeConstructorPtr);
     }
 
     /*
@@ -1904,7 +1924,6 @@ Itcl_CreateVariable(
             (char*)NULL);
         return TCL_ERROR;
     }
-    Tcl_IncrRefCount(namePtr);
 
     /*
      *  If this variable has some "config" code, try to capture
@@ -1944,7 +1963,7 @@ Itcl_CreateVariable(
         ivPtr->protection = ITCL_PROTECTED;
     }
 
-    if (init) {
+    if (init != NULL) {
         ivPtr->init = Tcl_NewStringObj(init, -1);
         Tcl_IncrRefCount(ivPtr->init);
     } else {

@@ -24,7 +24,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann Copyright (c) 2007
  *
- *     RCS:  $Id: itclObject.c,v 1.1.2.53 2008/11/23 20:49:30 wiede Exp $
+ *     RCS:  $Id: itclObject.c,v 1.1.2.54 2008/11/25 19:16:07 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -381,7 +381,6 @@ fprintf(stderr, "after Tcl_NewObjectInstance oPtr == NULL\n");
     sprintf(str, "ItclInst%d", iclsPtr->infoPtr->numInstances);
     /* FIXME need to free that when deleting object and to remove the entries!! */
     objPtr = Tcl_NewStringObj(str, -1);
-    Tcl_IncrRefCount(objPtr);
     hPtr = Tcl_CreateHashEntry(&iclsPtr->infoPtr->instances,
         (char*)objPtr, &newEntry);
     Tcl_SetHashValue(hPtr, (ClientData)ioPtr);
@@ -2083,8 +2082,6 @@ ItclTraceThisVar(
      */
     if ((flags & TCL_TRACE_READS) != 0) {
         objPtr = Tcl_NewStringObj("", -1);
-        Tcl_IncrRefCount(objPtr);
-
 	if (strcmp(name1, "this") == 0) {
             if (contextIoPtr->accessCmd) {
                 Tcl_GetCommandFullName(contextIoPtr->iclsPtr->interp,
@@ -2425,6 +2422,7 @@ static void
 ItclFreeObject(
     char * cdata)  /* object instance data */
 {
+    Tcl_HashEntry *hPtr;
     ItclObject *ioPtr = (ItclObject*)cdata;
 
     /*
@@ -2439,6 +2437,7 @@ ItclFreeObject(
      *    from below.
      */
 
+    Itcl_ReleaseData((ClientData)ioPtr->iclsPtr);
     if (ioPtr->constructed) {
         Tcl_DeleteHashTable(ioPtr->constructed);
         ckfree((char*)ioPtr->constructed);
@@ -2447,8 +2446,29 @@ ItclFreeObject(
         Tcl_DeleteHashTable(ioPtr->destructed);
         ckfree((char*)ioPtr->destructed);
     }
-    Itcl_ReleaseData((ClientData)ioPtr->iclsPtr);
-
+    Tcl_DeleteHashTable(&ioPtr->objectVariables);
+    Tcl_DeleteHashTable(&ioPtr->objectOptions);
+    Tcl_DeleteHashTable(&ioPtr->objectComponents);
+    Tcl_DeleteHashTable(&ioPtr->objectMethodVariables);
+    Tcl_DeleteHashTable(&ioPtr->objectDelegatedOptions);
+    Tcl_DeleteHashTable(&ioPtr->objectDelegatedFunctions);
+    hPtr = Tcl_FindHashEntry(&ioPtr->infoPtr->objectNames,
+            (char *)ioPtr->namePtr);
+    if (hPtr != NULL) {
+        Tcl_DeleteHashEntry(hPtr);
+    }
+    Tcl_DecrRefCount(ioPtr->namePtr);
+    Tcl_DecrRefCount(ioPtr->origNamePtr);
+    if (ioPtr->createNamePtr != NULL) {
+        Tcl_DecrRefCount(ioPtr->createNamePtr);
+    }
+    if (ioPtr->hullWindowNamePtr != NULL) {
+        Tcl_DecrRefCount(ioPtr->hullWindowNamePtr);
+    }
+    Tcl_DecrRefCount(ioPtr->varNsNamePtr);
+    if (ioPtr->resolvePtr != NULL) {
+        ckfree((char*)ioPtr->resolvePtr);
+    }
     ckfree((char*)ioPtr);
 }
 
@@ -2542,7 +2562,6 @@ ItclObjectCmd(
 	        &className, &tail);
         if (className != NULL) {
             methodNamePtr = Tcl_NewStringObj(tail, -1);
-	    Tcl_IncrRefCount(methodNamePtr);
 	    /* look for the class in the hierarchy */
 	    cp = className;
 	    if ((*cp == ':') && (*(cp+1) == ':')) {
@@ -2573,7 +2592,6 @@ ItclObjectCmd(
     if (isDirectCall) {
 	if (!found) {
             methodNamePtr = objv[0];
-            Tcl_IncrRefCount(methodNamePtr);
         }
     }
     callbackPtr = Itcl_GetCurrentCallbackPtr(interp);
@@ -2624,8 +2642,6 @@ ItclObjectCmd(
         newObjv = (Tcl_Obj **)ckalloc(sizeof(Tcl_Obj *)*(objc+incr));
         newObjv[0] = Tcl_NewStringObj("my", 2);
         newObjv[1] = methodNamePtr;
-        Tcl_IncrRefCount(newObjv[0]);
-        Tcl_IncrRefCount(newObjv[1]);
         memcpy(newObjv+incr+1, objv+1, (sizeof(Tcl_Obj*)*(objc-1)));
         Itcl_NRAddCallback(interp, CallPublicObjectCmd, oPtr, clsPtr,
 	        INT2PTR(objc+incr), newObjv);
@@ -2637,9 +2653,6 @@ ItclObjectCmd(
 
     result = Itcl_NRRunCallbacks(interp, callbackPtr);
     if (methodNamePtr != NULL) {
-        Tcl_DecrRefCount(newObjv[0]);
-        Tcl_DecrRefCount(newObjv[1]);
-        Tcl_DecrRefCount(methodNamePtr);
         ckfree((char *)newObjv);
     }
     return result;
@@ -3065,9 +3078,6 @@ DelegateFunction(
         return result;
     }
     val = Tcl_GetString(listPtr);
-    Tcl_IncrRefCount(idmPtr->namePtr);
-    /* and now for the argument */
-    Tcl_IncrRefCount(idmPtr->namePtr);
     Tcl_Method mPtr;
     if (componentValuePtr != NULL) {
         mPtr = Itcl_NewForwardClassMethod(interp, iclsPtr->clsPtr, 1,

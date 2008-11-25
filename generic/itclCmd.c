@@ -23,7 +23,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclCmd.c,v 1.1.2.34 2008/11/23 20:23:32 wiede Exp $
+ *     RCS:  $Id: itclCmd.c,v 1.1.2.35 2008/11/25 19:16:07 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -1869,7 +1869,8 @@ Itcl_TypeClassCmd(
     Tcl_IncrRefCount(objPtr);
     result = Tcl_EvalObjEx(interp, objPtr, 0);
     Tcl_DecrRefCount(objPtr);
-    Tcl_AppendResult(interp, iclsPtr->nsPtr->fullName);
+    objPtr = Tcl_NewStringObj(iclsPtr->nsPtr->fullName, -1);
+    Tcl_SetObjResult(interp, objPtr);
     return result;
 }
 

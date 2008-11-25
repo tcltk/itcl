@@ -25,7 +25,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclEnsemble.c,v 1.1.2.13 2008/11/23 20:23:32 wiede Exp $
+ *     RCS:  $Id: itclEnsemble.c,v 1.1.2.14 2008/11/25 19:16:07 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -834,13 +834,11 @@ fprintf(stderr, "error in creating namespace: %s \n", Tcl_DStringValue(&buffer))
         Tcl_SetHashValue(hPtr, (ClientData)ensData);
         Tcl_Obj *unkObjPtr = Tcl_NewStringObj(ITCL_COMMANDS_NAMESPACE, -1);
         Tcl_AppendToObj(unkObjPtr, "::ensembles::unknown", -1);
-        Tcl_IncrRefCount(unkObjPtr);
         if (Tcl_SetEnsembleUnknownHandler(NULL, ensData->cmd,
                 unkObjPtr) != TCL_OK) {
 	    result = TCL_ERROR;
 	    goto finish;
         }
-        Tcl_DecrRefCount(unkObjPtr);
 
 	objPtr = Tcl_NewStringObj(Tcl_DStringValue(&buffer), -1);
 	Tcl_SetObjResult(interp, objPtr);
@@ -866,7 +864,6 @@ fprintf(stderr, "error in creating namespace: %s \n", Tcl_DStringValue(&buffer))
     Tcl_DStringAppend(&buffer, "::", 2);
     Tcl_DStringAppend(&buffer, ensName, -1);
     objPtr = Tcl_NewStringObj(Tcl_DStringValue(&buffer), -1);
-    Tcl_IncrRefCount(objPtr);
     hPtr = Tcl_CreateHashEntry(&infoPtr->ensembleInfo->subEnsembles,
             (char *)objPtr, &isNew);
     if (isNew) {
@@ -884,13 +881,11 @@ fprintf(stderr, "error in creating namespace: %s \n", Tcl_DStringValue(&buffer))
     Tcl_SetHashValue(hPtr, (ClientData)ensData);
     Tcl_Obj *unkObjPtr = Tcl_NewStringObj(ITCL_COMMANDS_NAMESPACE, -1);
     Tcl_AppendToObj(unkObjPtr, "::ensembles::unknown", -1);
-    Tcl_IncrRefCount(unkObjPtr);
     if (Tcl_SetEnsembleUnknownHandler(NULL, ensPart->cmdPtr,
             unkObjPtr) != TCL_OK) {
         result = TCL_ERROR;
         goto finish;
     }
-    Tcl_DecrRefCount(unkObjPtr);
 
     Tcl_Obj *mapDict;
     Tcl_Obj *toObjPtr;
@@ -967,7 +962,6 @@ AddEnsemblePart(
         strcpy(ensPart->usage, usageInfo);
     }
     ensPart->namePtr = Tcl_NewStringObj(ensPart->name, -1);
-    Tcl_IncrRefCount(ensPart->namePtr);
     ensPart->objProc = objProc;
     ensPart->clientData = clientData;
     ensPart->deleteProc = deleteProc;
@@ -978,7 +972,6 @@ AddEnsemblePart(
         mapDict = Tcl_NewObj();
     }
     toObjPtr = Tcl_NewStringObj(ensData->nsPtr->fullName, -1);
-    Tcl_IncrRefCount(toObjPtr);
     Tcl_AppendToObj(toObjPtr, "::", 2);
     Tcl_AppendToObj(toObjPtr, partName, -1);
     Tcl_DictObjPut(NULL, mapDict, Tcl_NewStringObj(partName, -1), toObjPtr);
@@ -1084,9 +1077,7 @@ FindEnsemble(
      *  ensemble.
      */
     objPtr = Tcl_NewStringObj(nameArgv[0], -1);
-    Tcl_IncrRefCount(objPtr);
     cmdPtr = Tcl_FindEnsemble(interp, objPtr, 0);
-    Tcl_DecrRefCount(objPtr);
 
     if (cmdPtr == NULL) {
         Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
@@ -2147,7 +2138,6 @@ fprintf(stderr, "FindEnsemblePart error\n");
 	Tcl_ListObjAppendElement(NULL, listPtr, objv[1]);
 	Tcl_ListObjAppendElement(NULL, listPtr, Tcl_NewStringObj("@error", -1));
 	Tcl_ListObjAppendElement(NULL, listPtr, objv[2]);
-        Tcl_IncrRefCount(listPtr);
 	Tcl_SetObjResult(interp, listPtr);
         return TCL_OK;
     }

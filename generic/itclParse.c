@@ -39,7 +39,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclParse.c,v 1.1.2.48 2008/11/23 20:49:30 wiede Exp $
+ *     RCS:  $Id: itclParse.c,v 1.1.2.49 2008/11/25 19:16:07 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -234,7 +234,6 @@ Itcl_ParseInit(
     objPtr = Tcl_GetObjResult(interp);
     Tcl_IncrRefCount(objPtr);
     hPtr = Tcl_CreateHashEntry(&infoPtr->myEnsembles, (char *)namePtr, &isNew);
-    Tcl_DecrRefCount(namePtr);
     Tcl_SetHashValue(hPtr, objPtr);
 
     if (Itcl_AddEnsemblePart(interp, "::itcl::find",
@@ -265,7 +264,6 @@ Itcl_ParseInit(
     objPtr = Tcl_GetObjResult(interp);
     Tcl_IncrRefCount(objPtr);
     hPtr = Tcl_CreateHashEntry(&infoPtr->myEnsembles, (char *)namePtr, &isNew);
-    Tcl_DecrRefCount(namePtr);
     Tcl_SetHashValue(hPtr, objPtr);
 
     if (Itcl_AddEnsemblePart(interp, "::itcl::delete",
@@ -295,7 +293,6 @@ Itcl_ParseInit(
     objPtr = Tcl_GetObjResult(interp);
     Tcl_IncrRefCount(objPtr);
     hPtr = Tcl_CreateHashEntry(&infoPtr->myEnsembles, (char *)namePtr, &isNew);
-    Tcl_DecrRefCount(namePtr);
     Tcl_SetHashValue(hPtr, objPtr);
 
     if (Itcl_AddEnsemblePart(interp, "::itcl::is",
@@ -344,7 +341,6 @@ Itcl_ParseInit(
     objPtr = Tcl_GetObjResult(interp);
     Tcl_IncrRefCount(objPtr);
     hPtr = Tcl_CreateHashEntry(&infoPtr->myEnsembles, (char *)namePtr, &isNew);
-    Tcl_DecrRefCount(namePtr);
     Tcl_SetHashValue(hPtr, objPtr);
 
     Itcl_PreserveData((ClientData)infoPtr);
@@ -359,7 +355,6 @@ Itcl_ParseInit(
     objPtr = Tcl_GetObjResult(interp);
     Tcl_IncrRefCount(objPtr);
     hPtr = Tcl_CreateHashEntry(&infoPtr->myEnsembles, (char *)namePtr, &isNew);
-    Tcl_DecrRefCount(namePtr);
     Tcl_SetHashValue(hPtr, objPtr);
 
     if (Itcl_AddEnsemblePart(interp, "::itcl::forward",
@@ -388,7 +383,6 @@ Itcl_ParseInit(
     objPtr = Tcl_GetObjResult(interp);
     Tcl_IncrRefCount(objPtr);
     hPtr = Tcl_CreateHashEntry(&infoPtr->myEnsembles, (char *)namePtr, &isNew);
-    Tcl_DecrRefCount(namePtr);
     Tcl_SetHashValue(hPtr, objPtr);
 
     if (Itcl_AddEnsemblePart(interp, "::itcl::mixin",
@@ -414,10 +408,8 @@ Itcl_ParseInit(
         return TCL_ERROR;
     }
     namePtr = Tcl_NewStringObj("::itcl::stubs", -1);
-    objPtr = Tcl_GetObjResult(interp);
-    Tcl_IncrRefCount(objPtr);
+    objPtr = Tcl_NewStringObj(Tcl_GetStringResult(interp), -1);
     hPtr = Tcl_CreateHashEntry(&infoPtr->myEnsembles, (char *)namePtr, &isNew);
-    Tcl_DecrRefCount(namePtr);
     Tcl_SetHashValue(hPtr, objPtr);
 
     if (Itcl_AddEnsemblePart(interp, "::itcl::import::stub",
@@ -488,7 +480,6 @@ Itcl_ParseInit(
     objPtr = Tcl_GetObjResult(interp);
     Tcl_IncrRefCount(objPtr);
     hPtr = Tcl_CreateHashEntry(&infoPtr->myEnsembles, (char *)namePtr, &isNew);
-    Tcl_DecrRefCount(namePtr);
     Tcl_SetHashValue(hPtr, objPtr);
 
     if (Itcl_AddEnsemblePart(interp, "::itcl::parser::delegate",
@@ -2908,7 +2899,6 @@ ItclCreateDelegatedFunction(
         for(i = 0; i < argc; i++) {
 	    Tcl_Obj *objPtr;
 	    objPtr = Tcl_NewStringObj(argv[i], -1);
-	    Tcl_IncrRefCount(objPtr);
 	    hPtr = Tcl_CreateHashEntry(&idmPtr->exceptions, (char *)objPtr,
 	            &isNew);
 #ifdef NOTDEF
@@ -3042,7 +3032,6 @@ delegate method * ?to <componentName>? ?using <pattern>? ?except <methods>?";
     }
     /* check for already delegated */
     methodNamePtr = Tcl_NewStringObj(methodName, -1);
-    Tcl_IncrRefCount(methodNamePtr);
     if (ioPtr != NULL) {
         hPtr = Tcl_FindHashEntry(&ioPtr->objectDelegatedFunctions, (char *)
                 methodNamePtr);
@@ -3423,7 +3412,6 @@ Itcl_HandleDelegateOptionCmd(
         for(i=0;i<argc;i++) {
 	    Tcl_Obj *objPtr;
 	    objPtr = Tcl_NewStringObj(argv[i], -1);
-	    Tcl_IncrRefCount(objPtr);
 	    hPtr = Tcl_CreateHashEntry(&idoPtr->exceptions, (char *)objPtr,
 	            &isNew);
 #ifdef NOTDEF
@@ -3607,7 +3595,6 @@ delegate typemethod * ?to <componentName>? ?using <pattern>? ?except <typemethod
     }
     /* check for already delegated */
     typeMethodNamePtr = Tcl_NewStringObj(typeMethodName, -1);
-    Tcl_IncrRefCount(typeMethodNamePtr);
     hPtr = Tcl_FindHashEntry(&iclsPtr->delegatedFunctions, (char *)
             typeMethodNamePtr);
 
@@ -3637,6 +3624,7 @@ delegate typemethod * ?to <componentName>? ?using <pattern>? ?except <typemethod
 	            "\" has been defined locally.", NULL);
 	    return TCL_ERROR;
 	}
+        Tcl_IncrRefCount(typeMethodNamePtr);
         idmPtr->namePtr = typeMethodNamePtr;
 
     } else {
@@ -3661,7 +3649,6 @@ delegate typemethod * ?to <componentName>? ?using <pattern>? ?except <typemethod
         for(i=0;i<argc;i++) {
 	    Tcl_Obj *objPtr;
 	    objPtr = Tcl_NewStringObj(argv[i], -1);
-	    Tcl_IncrRefCount(objPtr);
 	    hPtr2 = Tcl_FindHashEntry(&iclsPtr->functions, (char *)objPtr);
 /* FIXME !!! can only be done after a class/widget has been parsed completely !! */
 #ifdef NOTDEF
@@ -3890,7 +3877,6 @@ Itcl_ClassTypeConstructorCmd(
 
     iclsPtr->typeConstructorPtr = Tcl_NewStringObj(Tcl_GetString(objv[1]), -1);
     Tcl_IncrRefCount(iclsPtr->typeConstructorPtr);
-    /* FIXME need to Tcl_DecrRefCount(iclsPtr->typeConstructorPtr)  when deleting class !! */
     return TCL_OK;
 }
 

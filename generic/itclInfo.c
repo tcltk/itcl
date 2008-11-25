@@ -24,7 +24,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclInfo.c,v 1.1.2.29 2008/11/23 20:23:32 wiede Exp $
+ *     RCS:  $Id: itclInfo.c,v 1.1.2.30 2008/11/25 19:16:07 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -375,6 +375,7 @@ ItclInfoInit(
     if (Tcl_SetEnsembleUnknownHandler(NULL,
             Tcl_FindEnsemble(interp, ensObjPtr, TCL_LEAVE_ERR_MSG),
 	    unkObjPtr) != TCL_OK) {
+        Tcl_DecrRefCount(unkObjPtr);
         return TCL_ERROR;
     }
     Tcl_DecrRefCount(ensObjPtr);
@@ -401,14 +402,12 @@ ItclInfoInit(
     Tcl_IncrRefCount(ensObjPtr);
     unkObjPtr = Tcl_NewStringObj(
             "::itcl::builtin::Info::delegated::unknown", -1);
-    Tcl_IncrRefCount(unkObjPtr);
     if (Tcl_SetEnsembleUnknownHandler(NULL,
             Tcl_FindEnsemble(interp, ensObjPtr, TCL_LEAVE_ERR_MSG),
 	    unkObjPtr) != TCL_OK) {
         return TCL_ERROR;
     }
     Tcl_DecrRefCount(ensObjPtr);
-    Tcl_DecrRefCount(unkObjPtr);
 
     return TCL_OK;
 }
@@ -1331,7 +1330,6 @@ Itcl_BiInfoVariableCmd(
                         val = "<undefined>";
                     }
                     objPtr = Tcl_NewStringObj((const char *)val, -1);
-		    Tcl_IncrRefCount(objPtr);
                     break;
             }
 
@@ -1350,7 +1348,6 @@ Itcl_BiInfoVariableCmd(
          *  "this" variable only once, for the most-specific class.
          */
         resultPtr = Tcl_NewListObj(0, (Tcl_Obj**)NULL);
-	Tcl_IncrRefCount(resultPtr);
         Itcl_InitHierIter(&hier, contextIclsPtr);
         while ((iclsPtr=Itcl_AdvanceHierIter(&hier)) != NULL) {
             entry = Tcl_FirstHashEntry(&iclsPtr->variables, &place);
@@ -1446,7 +1443,6 @@ Itcl_BiInfoVarsCmd(
 	FOREACH_HASH_VALUE(ivPtr, &iclsPtr->variables) {
 	    if ((ivPtr->flags & (ITCL_TYPE_VAR|ITCL_VARIABLE)) != 0) {
 		name = Tcl_GetString(ivPtr->namePtr);
-		Tcl_IncrRefCount(ivPtr->namePtr);
                 if ((pattern == NULL) ||
 		        Tcl_StringMatch((const char *)name, pattern)) {
 	            Tcl_ListObjAppendElement(interp, listPtr, ivPtr->namePtr);
@@ -2945,11 +2941,9 @@ Itcl_BiInfoDefaultCmd(
 		        Tcl_AppendToObj(objPtr, returnVarName, -1);
 		        returnVarName = Tcl_GetString(objPtr);
 		    }
+                    Tcl_IncrRefCount(argListPtr->defaultValuePtr);
 	            Tcl_SetVar2Ex(interp, returnVarName, NULL,
 		            argListPtr->defaultValuePtr, 0);
-		    if (objPtr != NULL) {
-		        Tcl_DecrRefCount(objPtr);
-		    }
 		    Tcl_SetResult(interp, "1", NULL);
 		    return TCL_OK;
 	        } else {
@@ -3097,7 +3091,6 @@ Itcl_BiInfoMethodsCmd(
         if (idmPtr->flags & ITCL_METHOD) {
 	    if ((pattern == NULL) ||
                      Tcl_StringMatch((const char *)name, pattern)) {
-	        Tcl_IncrRefCount(idmPtr->namePtr);
 	        Tcl_ListObjAppendElement(interp, listPtr, idmPtr->namePtr);
 	    }
         }
@@ -3163,7 +3156,6 @@ Itcl_BiInfoOptionsCmd(
     listPtr = Tcl_NewListObj(0, NULL);
     FOREACH_HASH_VALUE(ioptPtr, &ioPtr->objectOptions) {
 	name = Tcl_GetString(ioptPtr->namePtr);
-	Tcl_IncrRefCount(ioptPtr->namePtr);
 	if ((pattern == NULL) ||
                  Tcl_StringMatch(name, pattern)) {
             Tcl_ListObjAppendElement(interp, listPtr, ioptPtr->namePtr);
@@ -3172,7 +3164,6 @@ Itcl_BiInfoOptionsCmd(
     FOREACH_HASH_VALUE(idoPtr, &ioPtr->objectDelegatedOptions) {
 	name = Tcl_GetString(idoPtr->namePtr);
 	if (strcmp(name, "*") != 0) {
-	    Tcl_IncrRefCount(idoPtr->namePtr);
 	    if ((pattern == NULL) ||
                      Tcl_StringMatch(name, pattern)) {
                 Tcl_ListObjAppendElement(interp, listPtr, idoPtr->namePtr);
@@ -3323,7 +3314,6 @@ Itcl_BiInfoComponentsCmd(
     listPtr = Tcl_NewListObj(0, NULL);
     FOREACH_HASH_VALUE(icPtr, &iclsPtr->components) {
     name = Tcl_GetString(icPtr->namePtr);
-    Tcl_IncrRefCount(icPtr->namePtr);
     if ((pattern == NULL) ||
                  Tcl_StringMatch(name, pattern)) {
             Tcl_ListObjAppendElement(interp, listPtr, icPtr->namePtr);
@@ -3431,7 +3421,6 @@ Itcl_BiInfoTypeMethodsCmd(
         if (imPtr->flags & ITCL_TYPE_METHOD) {
 	    if ((pattern == NULL) ||
                      Tcl_StringMatch((const char *)name, pattern)) {
-	        Tcl_IncrRefCount(imPtr->namePtr);
 	        Tcl_ListObjAppendElement(interp, listPtr, imPtr->namePtr);
 	    }
 	}
@@ -3453,7 +3442,6 @@ Itcl_BiInfoTypeMethodsCmd(
         if (idmPtr->flags & ITCL_TYPE_METHOD) {
 	    if ((pattern == NULL) ||
                      Tcl_StringMatch((const char *)name, pattern)) {
-	        Tcl_IncrRefCount(idmPtr->namePtr);
 	        Tcl_ListObjAppendElement(interp, listPtr, idmPtr->namePtr);
 	    }
         }
@@ -3676,7 +3664,6 @@ Itcl_BiInfoDelegatedOptionsCmd(
 	if (iclsPtr->flags &
 	        (ITCL_TYPE|ITCL_WIDGETADAPTOR|ITCL_WIDGET|ITCL_ECLASS)) {
 	    name = Tcl_GetString(idoPtr->namePtr);
-	    Tcl_IncrRefCount(idoPtr->namePtr);
 	    if ((pattern == NULL) ||
                      Tcl_StringMatch(name, pattern)) {
 		objPtr = Tcl_NewListObj(0, NULL);
@@ -3824,7 +3811,6 @@ Itcl_BiInfoDelegatedTypeMethodsCmd(
 	if (iclsPtr->flags &
 	        (ITCL_TYPE|ITCL_WIDGETADAPTOR|ITCL_WIDGET|ITCL_ECLASS)) {
 	    name = Tcl_GetString(idmPtr->namePtr);
-	    Tcl_IncrRefCount(idmPtr->namePtr);
 	    if ((pattern == NULL) ||
                      Tcl_StringMatch(name, pattern)) {
 		if (idmPtr->flags & ITCL_TYPE_METHOD) {

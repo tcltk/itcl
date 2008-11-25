@@ -9,7 +9,7 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itclStubs.c,v 1.1.2.2 2007/09/09 11:04:20 wiede Exp $
+ * RCS: @(#) $Id: itclStubs.c,v 1.1.2.3 2008/11/25 19:16:07 wiede Exp $
  */
 
 #include <string.h>
@@ -200,15 +200,8 @@ ItclHandleStubCmd(
      *  Try to autoload the real command for this stub.
      */
     objAutoLoad[0] = Tcl_NewStringObj("::auto_load", -1);
-    Tcl_IncrRefCount(objAutoLoad[0]);
     objAutoLoad[1] = cmdNamePtr;
-    Tcl_IncrRefCount(objAutoLoad[1]);
-
     result = Tcl_EvalObjv(interp, 2, objAutoLoad, 0);
-
-    Tcl_DecrRefCount(objAutoLoad[0]);
-    Tcl_DecrRefCount(objAutoLoad[1]);
-
     if (result != TCL_OK) {
         Tcl_DecrRefCount(cmdNamePtr);
         return TCL_ERROR;

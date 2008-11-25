@@ -9,7 +9,7 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itclHelpers.c,v 1.1.2.6 2008/10/19 16:30:53 wiede Exp $
+ * RCS: @(#) $Id: itclHelpers.c,v 1.1.2.7 2008/11/25 19:16:07 wiede Exp $
  */
 
 #include "itclInt.h"
@@ -163,7 +163,6 @@ ItclCreateArgList(
 	    }
 	    arglistPtr->namePtr = 
 	            Tcl_NewStringObj(defaultArgv[0], -1);
-	    Tcl_IncrRefCount(arglistPtr->namePtr);
 	    (*maxArgcPtr)++;
 	    if (defaultArgc == 1) {
 		(*argcPtr)++;
@@ -178,7 +177,6 @@ ItclCreateArgList(
 	    } else {
 	        arglistPtr->defaultValuePtr = 
 		        Tcl_NewStringObj(defaultArgv[1], -1);
-	        Tcl_IncrRefCount(arglistPtr->defaultValuePtr);
 	        Tcl_AppendToObj(*usagePtr, "?", 1);
 	        Tcl_AppendToObj(*usagePtr, defaultArgv[0], -1);
 	        Tcl_AppendToObj(*usagePtr, "?", 1);
@@ -198,7 +196,6 @@ ItclCreateArgList(
     if (hadArgsArgument) {
         *maxArgcPtr = -1;
     }
-    Tcl_IncrRefCount(*usagePtr);
     return result;
 }
 
@@ -339,7 +336,6 @@ Itcl_CreateArgs(interp, string, objc, objv)
         Tcl_ListObjAppendElement((Tcl_Interp*)NULL, listPtr, objv[i]);
     }
 
-    Tcl_IncrRefCount(listPtr);
     return listPtr;
 }
 

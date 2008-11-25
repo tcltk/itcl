@@ -25,7 +25,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclMethod.c,v 1.1.2.34 2008/11/23 20:49:30 wiede Exp $
+ *     RCS:  $Id: itclMethod.c,v 1.1.2.35 2008/11/25 19:16:07 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -525,6 +525,7 @@ ItclCreateMemberFunc(
         ItclCreateArgList(interp, arglist, &imPtr->argcount,
 	        &imPtr->maxargcount, &imPtr->usagePtr,
 		&imPtr->argListPtr, imPtr, NULL);
+        Tcl_IncrRefCount(imPtr->usagePtr);
     }
 
     name = Tcl_GetString(namePtr);
@@ -1011,7 +1012,7 @@ Itcl_DeleteMemberCode(
         return;
     }
     if (mCodePtr->argListPtr != NULL) {
-        DeleteArgList(mCodePtr->argListPtr);
+        ItclDeleteArgList(mCodePtr->argListPtr);
     }
     if (mCodePtr->usagePtr != NULL) {
         Tcl_DecrRefCount(mCodePtr->usagePtr);
@@ -1239,33 +1240,6 @@ Itcl_EvalMemberCode(
 evalMemberCodeDone:
     Itcl_ReleaseData((ClientData)mcode);
     return result;
-}
-/*
- * ------------------------------------------------------------------------
- *  DeleteArgList()
- * ------------------------------------------------------------------------
- */
-
-static void
-DeleteArgList(
-    ItclArgList *arglistPtr)	/* first argument in arg list chain */
-{
-    ItclArgList *currPtr;
-    ItclArgList *nextPtr;
-
-/* FIXME !!! */
-return;
-    currPtr=arglistPtr;
-    while (currPtr != NULL) {
-	if (currPtr->defaultValuePtr != NULL) {
-	    Tcl_DecrRefCount(currPtr->defaultValuePtr);
-	}
-	Tcl_DecrRefCount(currPtr->namePtr);
-        nextPtr = currPtr->nextPtr;
-        ckfree((char *)currPtr);
-        currPtr=nextPtr;
-    }
-    return;
 }
 
 /*

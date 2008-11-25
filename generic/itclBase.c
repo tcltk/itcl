@@ -9,7 +9,7 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itclBase.c,v 1.1.2.25 2008/11/23 20:49:30 wiede Exp $
+ * RCS: @(#) $Id: itclBase.c,v 1.1.2.26 2008/11/25 19:16:07 wiede Exp $
  */
 
 #include <stdlib.h>
@@ -536,9 +536,11 @@ ItclFinishCmd(
     int objc,                /* number of arguments */
     Tcl_Obj *CONST objv[])   /* argument objects */
 {
-    FOREACH_HASH_DECLS;
+    Tcl_HashEntry *hPtr;
+    Tcl_HashSearch place;
     Tcl_Namespace *nsPtr;
     Tcl_Obj *objPtr;
+    Tcl_Obj *ensObjPtr;
     ItclObjectInfo *infoPtr;
     ItclCmdsInfo *iciPtr;
     int i;
@@ -554,22 +556,36 @@ ItclFinishCmd(
         result = Itcl_RenameCommand(interp, iciPtr->name, "");
         iciPtr++;
     }
-    FOREACH_HASH_VALUE(objPtr, &infoPtr->myEnsembles) {
-	nsPtr = Tcl_FindNamespace(interp, Tcl_GetString(objPtr), NULL, 0);
-	if (nsPtr != NULL) {
-            Tcl_DeleteNamespace(nsPtr);
+    while (1) {
+        hPtr = Tcl_FirstHashEntry(&infoPtr->myEnsembles, &place);
+	if (hPtr == NULL) {
+	    break;
+	}
+        objPtr = Tcl_GetHashValue(hPtr);
+	if (objPtr != NULL) {
+	    nsPtr = Tcl_FindNamespace(interp, Tcl_GetString(objPtr), NULL, 0);
+	    if (nsPtr != NULL) {
+               Tcl_DeleteNamespace(nsPtr);
+	    }
+	    Tcl_DeleteHashEntry(hPtr);
+            Tcl_DecrRefCount(objPtr);
 	}
     }
     nsPtr = Tcl_FindNamespace(interp, "::itcl::parser", NULL, 0);
     if (nsPtr != NULL) {
         Tcl_DeleteNamespace(nsPtr);
     }
+    ensObjPtr = Tcl_NewStringObj("::itcl::builtin::Info", -1);
+    Tcl_SetEnsembleUnknownHandler(NULL,
+            Tcl_FindEnsemble(interp, ensObjPtr, TCL_LEAVE_ERR_MSG),
+	    NULL);
+    Tcl_DecrRefCount(ensObjPtr);
     Itcl_ReleaseData((ClientData)infoPtr);
     return TCL_OK;
 }
 
 #ifdef OBJ_REF_COUNT_DEBUG
-void Tcl_DbDumpRefCountInfo(const char *fileName);
+void Tcl_DbDumpRefCountInfo(const char *fileName, int noDeleted);
 
 int
 ItclDumpRefCountInfo(
@@ -578,8 +594,16 @@ ItclDumpRefCountInfo(
     int objc,                /* number of arguments */
     Tcl_Obj *CONST objv[])   /* argument objects */
 {
-    ItclShowArgs(1, "ItclDumpRefCountInfo", objc, objv);
-    Tcl_DbDumpRefCountInfo(NULL);
+    int noDeleted;
+
+    noDeleted = 0;
+    if (objc > 0) {
+        if (strcmp(Tcl_GetString(objv[1]), "-nodeleted") == 0) {
+	    noDeleted = 1;
+	}
+    }
+    ItclShowArgs(0, "ItclDumpRefCountInfo", objc, objv);
+    Tcl_DbDumpRefCountInfo(NULL, noDeleted);
     return TCL_OK;
 }
 #endif
