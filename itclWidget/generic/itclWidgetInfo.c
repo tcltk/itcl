@@ -8,7 +8,7 @@
  * ========================================================================
  *  Author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclWidgetInfo.c,v 1.1.2.6 2008/11/25 19:19:51 wiede Exp $
+ *     RCS:  $Id: itclWidgetInfo.c,v 1.1.2.7 2008/11/26 21:15:10 wiede Exp $
  * ========================================================================
  *           Copyright (c) 2007 Arnulf Wiedemann
  * ------------------------------------------------------------------------
@@ -154,7 +154,6 @@ ItclBiInfoWidgetClassesCmd(
 	                (char *)iclsPtr->widgetClassPtr, &isNew);
 	        if (isNew) {
 	            name = Tcl_GetString(iclsPtr->widgetClassPtr);
-	            Tcl_IncrRefCount(iclsPtr->widgetClassPtr);
 	            if ((pattern == NULL) ||
                              Tcl_StringMatch(name, pattern)) {
                         Tcl_ListObjAppendElement(interp, listPtr,
