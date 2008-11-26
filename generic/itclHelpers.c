@@ -9,7 +9,7 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itclHelpers.c,v 1.1.2.7 2008/11/25 19:16:07 wiede Exp $
+ * RCS: @(#) $Id: itclHelpers.c,v 1.1.2.8 2008/11/26 21:14:42 wiede Exp $
  */
 
 #include "itclInt.h"
@@ -431,6 +431,5 @@ ItclCapitalize(
     buf[1] = '\0';
     objPtr = Tcl_NewStringObj(buf, -1);
     Tcl_AppendToObj(objPtr, str+1, -1);
-    Tcl_IncrRefCount(objPtr);
     return objPtr;
 }

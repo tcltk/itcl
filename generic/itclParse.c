@@ -39,7 +39,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclParse.c,v 1.1.2.49 2008/11/25 19:16:07 wiede Exp $
+ *     RCS:  $Id: itclParse.c,v 1.1.2.50 2008/11/26 21:14:42 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -2489,7 +2489,8 @@ ItclParseOption(
     Tcl_IncrRefCount(ioptPtr->namePtr);
     ioptPtr->resourceNamePtr = Tcl_NewStringObj(resourceName, -1);
     Tcl_IncrRefCount(ioptPtr->resourceNamePtr);
-    ioptPtr->classNamePtr = classNamePtr;
+    ioptPtr->classNamePtr = Tcl_NewStringObj(Tcl_GetString(classNamePtr), -1);
+    Tcl_IncrRefCount(ioptPtr->classNamePtr);
 
     if (init) {
         ioptPtr->defaultValuePtr = Tcl_NewStringObj(init, -1);
@@ -2880,7 +2881,7 @@ ItclCreateDelegatedFunction(
     idmPtr = (ItclDelegatedFunction *)ckalloc(sizeof(ItclDelegatedFunction));
     memset(idmPtr, 0, sizeof(ItclDelegatedFunction));
     Tcl_InitObjHashTable(&idmPtr->exceptions);
-    idmPtr->namePtr = methodNamePtr;
+    idmPtr->namePtr = Tcl_NewStringObj(Tcl_GetString(methodNamePtr), -1);
     Tcl_IncrRefCount(idmPtr->namePtr);
     idmPtr->icPtr = icPtr;
     idmPtr->asPtr = targetPtr;
@@ -3266,7 +3267,6 @@ Itcl_HandleDelegateOptionCmd(
     }
     if (argc > 2) {
        classNamePtr = Tcl_NewStringObj(argv[2], -1);
-       Tcl_IncrRefCount(classNamePtr);
     }
     component = NULL;
     targetPtr = NULL;
@@ -3392,7 +3392,9 @@ Itcl_HandleDelegateOptionCmd(
 	}
         idoPtr->namePtr = optionNamePtr;
         idoPtr->resourceNamePtr = resourceNamePtr;
-        idoPtr->classNamePtr = classNamePtr;
+        idoPtr->classNamePtr = Tcl_NewStringObj(
+	        Tcl_GetString(classNamePtr), -1);
+	Tcl_IncrRefCount(idoPtr->classNamePtr);
 
     } else {
         idoPtr->namePtr = optionNamePtr;
@@ -3624,8 +3626,8 @@ delegate typemethod * ?to <componentName>? ?using <pattern>? ?except <typemethod
 	            "\" has been defined locally.", NULL);
 	    return TCL_ERROR;
 	}
-        Tcl_IncrRefCount(typeMethodNamePtr);
-        idmPtr->namePtr = typeMethodNamePtr;
+        idmPtr->namePtr = Tcl_NewStringObj(Tcl_GetString(typeMethodNamePtr), -1);
+        Tcl_IncrRefCount(idmPtr->namePtr);
 
     } else {
         typeMethodNamePtr = Tcl_NewStringObj("*", -1);

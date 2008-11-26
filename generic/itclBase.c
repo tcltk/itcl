@@ -9,7 +9,7 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itclBase.c,v 1.1.2.26 2008/11/25 19:16:07 wiede Exp $
+ * RCS: @(#) $Id: itclBase.c,v 1.1.2.27 2008/11/26 21:14:42 wiede Exp $
  */
 
 #include <stdlib.h>
@@ -184,7 +184,6 @@ AddClassUnknowMethod(
 {
     ClientData pmPtr;
     Tcl_Obj *namePtr = Tcl_NewStringObj("unknown", -1);
-    Tcl_IncrRefCount(namePtr);
     Tcl_Obj *argumentPtr = Tcl_NewStringObj("m args", -1);
     Tcl_IncrRefCount(argumentPtr);
     Tcl_Obj *bodyPtr = Tcl_NewStringObj(clazzUnknownBody, -1);

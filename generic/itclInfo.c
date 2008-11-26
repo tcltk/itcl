@@ -24,7 +24,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclInfo.c,v 1.1.2.30 2008/11/25 19:16:07 wiede Exp $
+ *     RCS:  $Id: itclInfo.c,v 1.1.2.31 2008/11/26 21:14:42 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -369,17 +369,13 @@ ItclInfoInit(
                 infoCmds2[i].proc, infoPtr, NULL);
     }
     ensObjPtr = Tcl_NewStringObj("::itcl::builtin::Info", -1);
-    Tcl_IncrRefCount(ensObjPtr);
     unkObjPtr = Tcl_NewStringObj("::itcl::builtin::Info::unknown", -1);
-    Tcl_IncrRefCount(unkObjPtr);
     if (Tcl_SetEnsembleUnknownHandler(NULL,
             Tcl_FindEnsemble(interp, ensObjPtr, TCL_LEAVE_ERR_MSG),
 	    unkObjPtr) != TCL_OK) {
         Tcl_DecrRefCount(unkObjPtr);
         return TCL_ERROR;
     }
-    Tcl_DecrRefCount(ensObjPtr);
-    Tcl_DecrRefCount(unkObjPtr);
 
     /*
      * Build the ensemble used to implement [info delegated].
@@ -843,7 +839,9 @@ Itcl_BiInfoHeritageCmd(
         if (contextIoPtr != NULL) {
             if (upNsPtr != contextIclsPtr->nsPtr) {
 	        Tcl_HashEntry *hPtr;
-	        hPtr = Tcl_FindHashEntry(&imPtr->iclsPtr->infoPtr->namespaceClasses, (char *)upNsPtr);
+	        hPtr = Tcl_FindHashEntry(
+		        &imPtr->iclsPtr->infoPtr->namespaceClasses,
+			(char *)upNsPtr);
 	        if (hPtr != NULL) {
 	            contextIclsPtr = Tcl_GetHashValue(hPtr);
 	        } else {
@@ -1017,16 +1015,20 @@ Itcl_BiInfoFunctionCmd(
                 case BIfArgsIdx:
                     if (mcode && mcode->argListPtr) {
 			if (imPtr->usagePtr == NULL) {
-                            objPtr = mcode->usagePtr;
+                            objPtr = Tcl_NewStringObj(
+			            Tcl_GetString(mcode->usagePtr), -1);
 			} else {
-                            objPtr = imPtr->usagePtr;
+                            objPtr = Tcl_NewStringObj(
+			            Tcl_GetString(imPtr->usagePtr), -1);
 		        }
                     } else {
 		        if ((imPtr->flags & ITCL_ARG_SPEC) != 0) {
 			    if (imPtr->usagePtr == NULL) {
-                                objPtr = mcode->usagePtr;
+                                objPtr = Tcl_NewStringObj(
+				        Tcl_GetString(mcode->usagePtr), -1);
 			    } else {
-			        objPtr = imPtr->usagePtr;
+			        objPtr = Tcl_NewStringObj(
+				        Tcl_GetString(imPtr->usagePtr), -1);
 			    }
                         } else {
                             objPtr = Tcl_NewStringObj("<undefined>", -1);
@@ -1036,14 +1038,16 @@ Itcl_BiInfoFunctionCmd(
 
                 case BIfBodyIdx:
                     if (mcode && Itcl_IsMemberCodeImplemented(mcode)) {
-                        objPtr = mcode->bodyPtr;
+                        objPtr = Tcl_NewStringObj(
+			        Tcl_GetString(mcode->bodyPtr), -1);
                     } else {
                         objPtr = Tcl_NewStringObj("<undefined>", -1);
                     }
                     break;
 
                 case BIfNameIdx:
-                    objPtr = imPtr->fullNamePtr;
+                    objPtr = Tcl_NewStringObj(
+		            Tcl_GetString(imPtr->fullNamePtr), -1);
                     break;
 
                 case BIfProtectIdx:
@@ -1097,7 +1101,8 @@ Itcl_BiInfoFunctionCmd(
 		    }
 		}
 		if (useIt) {
-                    objPtr = imPtr->fullNamePtr;
+                    objPtr = Tcl_NewStringObj(
+		            Tcl_GetString(imPtr->fullNamePtr), -1);
                     Tcl_ListObjAppendElement((Tcl_Interp*)NULL,
 		            resultPtr, objPtr);
                 }
@@ -1262,8 +1267,10 @@ Itcl_BiInfoVariableCmd(
         for (i=0 ; i < objc; i++) {
             switch (ivlist[i]) {
                 case BIvConfigIdx:
-                    if (ivPtr->codePtr && Itcl_IsMemberCodeImplemented(ivPtr->codePtr)) {
-                        objPtr = ivPtr->codePtr->bodyPtr;
+                    if (ivPtr->codePtr &&
+		            Itcl_IsMemberCodeImplemented(ivPtr->codePtr)) {
+                        objPtr = Tcl_NewStringObj(
+			        Tcl_GetString(ivPtr->codePtr->bodyPtr), -1);
                     } else {
                         objPtr = Tcl_NewStringObj("", -1);
                     }
@@ -1275,7 +1282,8 @@ Itcl_BiInfoVariableCmd(
                      *  report the object name as its initialization string.
                      */
                     if ((ivPtr->flags & ITCL_THIS_VAR) != 0) {
-                        if ((contextIoPtr != NULL) && (contextIoPtr->accessCmd != NULL)) {
+                        if ((contextIoPtr != NULL) &&
+			        (contextIoPtr->accessCmd != NULL)) {
                             objPtr = Tcl_NewStringObj((char*)NULL, 0);
                             Tcl_GetCommandFullName(
                                 contextIoPtr->iclsPtr->interp,
@@ -1285,7 +1293,8 @@ Itcl_BiInfoVariableCmd(
                         }
                     } else {
 		        if (vlookup->ivPtr->init) {
-			    objPtr = vlookup->ivPtr->init;
+			    objPtr = Tcl_NewStringObj(
+			            Tcl_GetString(vlookup->ivPtr->init), -1);
                         } else {
                             objPtr = Tcl_NewStringObj("<undefined>", -1);
 		        }
@@ -1293,7 +1302,8 @@ Itcl_BiInfoVariableCmd(
                     break;
 
                 case BIvNameIdx:
-                    objPtr = ivPtr->fullNamePtr;
+                    objPtr = Tcl_NewStringObj(
+		            Tcl_GetString(ivPtr->fullNamePtr), -1);
                     break;
 
                 case BIvProtectIdx:
@@ -1355,12 +1365,14 @@ Itcl_BiInfoVariableCmd(
                 ivPtr = (ItclVariable*)Tcl_GetHashValue(entry);
                 if ((ivPtr->flags & ITCL_THIS_VAR) != 0) {
                     if (iclsPtr == contextIclsPtr) {
-                        objPtr = ivPtr->fullNamePtr;
+                        objPtr = Tcl_NewStringObj(
+			        Tcl_GetString(ivPtr->fullNamePtr), -1);
                         Tcl_ListObjAppendElement((Tcl_Interp*)NULL,
                             resultPtr, objPtr);
                     }
                 } else {
-                    objPtr = ivPtr->fullNamePtr;
+                    objPtr = Tcl_NewStringObj(
+		            Tcl_GetString(ivPtr->fullNamePtr), -1);
                     Tcl_ListObjAppendElement((Tcl_Interp*)NULL,
                         resultPtr, objPtr);
                 }
@@ -1490,9 +1502,11 @@ Itcl_BiInfoVarsCmd(
 		FOREACH_HASH_VALUE(ivPtr, &iclsPtr->variables) {
 		    if ((ivPtr->flags & (ITCL_TYPE_VAR|ITCL_VARIABLE)) != 0) {
 			    if (head != NULL) {
-			        namePtr = ivPtr->fullNamePtr;
+			        namePtr = Tcl_NewStringObj(
+				        Tcl_GetString(ivPtr->fullNamePtr), -1);
 			    } else {
-			        namePtr = ivPtr->namePtr;
+			        namePtr = Tcl_NewStringObj(
+				        Tcl_GetString(ivPtr->namePtr), -1);
 			    }
 		            Tcl_ListObjAppendElement(interp, resultListPtr,
 			            namePtr);
@@ -1501,9 +1515,11 @@ Itcl_BiInfoVarsCmd(
 		    if ((ivPtr->flags & ITCL_COMMON) != 0) {
 		        if (ivPtr->protection != ITCL_PUBLIC) {
 			    if (head != NULL) {
-			        namePtr = ivPtr->fullNamePtr;
+			        namePtr = Tcl_NewStringObj(
+				        Tcl_GetString(ivPtr->fullNamePtr), -1);
 			    } else {
-			        namePtr = ivPtr->namePtr;
+			        namePtr = Tcl_NewStringObj(
+				        Tcl_GetString(ivPtr->namePtr), -1);
 			    }
 		            Tcl_ListObjAppendElement(interp, resultListPtr,
 			            namePtr);
@@ -1708,7 +1724,7 @@ Itcl_BiInfoBodyCmd(
          *  Return a string describing the implementation.
          */
         if (mcode && Itcl_IsMemberCodeImplemented(mcode)) {
-            objPtr = mcode->bodyPtr;
+            objPtr = Tcl_NewStringObj(Tcl_GetString(mcode->bodyPtr), -1);
         } else {
             objPtr = Tcl_NewStringObj("<undefined>", -1);
         }
@@ -1848,10 +1864,10 @@ Itcl_BiInfoArgsCmd(
          *  Return a string describing the argument list.
          */
         if (mcode && mcode->argListPtr != NULL) {
-            objPtr = imPtr->usagePtr;
+            objPtr = Tcl_NewStringObj(Tcl_GetString(imPtr->usagePtr), -1);
         } else {
             if ((imPtr->flags & ITCL_ARG_SPEC) != 0) {
-                objPtr = imPtr->usagePtr;
+                objPtr = Tcl_NewStringObj(Tcl_GetString(imPtr->usagePtr), -1);
             } else {
                 objPtr = Tcl_NewStringObj("<undefined>", -1);
             }
@@ -1928,7 +1944,8 @@ Itcl_DefaultInfoCmd(
      *  then we got a "bad option" error message.  Add the options
      *  for the current ensemble to the error message.
      */
-    if (result != TCL_OK && strncmp(Tcl_GetStringResult(interp),"bad option",10) == 0) {
+    if (result != TCL_OK &&
+            strncmp(Tcl_GetStringResult(interp),"bad option",10) == 0) {
         resultPtr = Tcl_GetObjResult(interp);
         Tcl_AppendToObj(resultPtr, "\nor", -1);
         Itcl_GetEnsembleUsageForObj(interp, objv[0], resultPtr);
@@ -2090,7 +2107,8 @@ Itcl_BiInfoOptionCmd(
             switch (ioptlist[i]) {
                 case BOptCgetMethodIdx:
                     if (ioptPtr->cgetMethodPtr) {
-                        objPtr = ioptPtr->cgetMethodPtr;
+                        objPtr = Tcl_NewStringObj(
+			        Tcl_GetString(ioptPtr->cgetMethodPtr), -1);
                     } else {
                         objPtr = Tcl_NewStringObj("", -1);
                     }
@@ -2098,7 +2116,8 @@ Itcl_BiInfoOptionCmd(
 
                 case BOptConfigureMethodIdx:
                     if (ioptPtr->configureMethodPtr) {
-                        objPtr = ioptPtr->configureMethodPtr;
+                        objPtr = Tcl_NewStringObj(
+			        Tcl_GetString(ioptPtr->configureMethodPtr), -1);
                     } else {
                         objPtr = Tcl_NewStringObj("", -1);
                     }
@@ -2106,7 +2125,8 @@ Itcl_BiInfoOptionCmd(
 
                 case BOptValidateMethodIdx:
                     if (ioptPtr->validateMethodPtr) {
-                        objPtr = ioptPtr->validateMethodPtr;
+                        objPtr = Tcl_NewStringObj(
+			        Tcl_GetString(ioptPtr->validateMethodPtr), -1);
                     } else {
                         objPtr = Tcl_NewStringObj("", -1);
                     }
@@ -2114,7 +2134,8 @@ Itcl_BiInfoOptionCmd(
 
                 case BOptResourceIdx:
                     if (ioptPtr->resourceNamePtr) {
-                        objPtr = ioptPtr->resourceNamePtr;
+                        objPtr = Tcl_NewStringObj(
+			        Tcl_GetString(ioptPtr->resourceNamePtr), -1);
                     } else {
                         objPtr = Tcl_NewStringObj("", -1);
                     }
@@ -2122,7 +2143,8 @@ Itcl_BiInfoOptionCmd(
 
                 case BOptClassIdx:
                     if (ioptPtr->classNamePtr) {
-                        objPtr = ioptPtr->classNamePtr;
+                        objPtr = Tcl_NewStringObj(
+			        Tcl_GetString(ioptPtr->classNamePtr), -1);
                     } else {
                         objPtr = Tcl_NewStringObj("", -1);
                     }
@@ -2130,14 +2152,16 @@ Itcl_BiInfoOptionCmd(
 
                 case BOptDefaultIdx:
 		    if (ioptPtr->defaultValuePtr != NULL) {
-		        objPtr = ioptPtr->defaultValuePtr;
+		        objPtr = Tcl_NewStringObj(
+			        Tcl_GetString(ioptPtr->defaultValuePtr), -1);
                     } else {
                         objPtr = Tcl_NewStringObj("<undefined>", -1);
 		    }
                     break;
 
                 case BOptNameIdx:
-                    objPtr = ioptPtr->fullNamePtr;
+                    objPtr = Tcl_NewStringObj(
+		            Tcl_GetString(ioptPtr->fullNamePtr), -1);
                     break;
 
                 case BOptProtectIdx:
@@ -2351,7 +2375,8 @@ Itcl_BiInfoComponentCmd(
         for (i=0 ; i < objc; i++) {
             switch (icomplist[i]) {
                 case BCompNameIdx:
-                    objPtr = icPtr->ivPtr->fullNamePtr;
+                    objPtr = Tcl_NewStringObj(
+		            Tcl_GetString(icPtr->ivPtr->fullNamePtr), -1);
                     break;
 
                 case BCompInheritIdx:
@@ -2404,7 +2429,8 @@ Itcl_BiInfoComponentCmd(
             hPtr = Tcl_FirstHashEntry(&iclsPtr->components, &place);
             while (hPtr) {
                 icPtr = (ItclComponent *)Tcl_GetHashValue(hPtr);
-                objPtr = icPtr->ivPtr->fullNamePtr;
+                objPtr = Tcl_NewStringObj(
+		        Tcl_GetString(icPtr->ivPtr->fullNamePtr), -1);
                 Tcl_ListObjAppendElement((Tcl_Interp*)NULL, resultPtr, objPtr);
                 hPtr = Tcl_NextHashEntry(&place);
             }
@@ -3073,7 +3099,8 @@ Itcl_BiInfoMethodsCmd(
 	    if ((pattern == NULL) ||
                      Tcl_StringMatch((const char *)name, pattern)) {
 	        Tcl_IncrRefCount(imPtr->namePtr);
-	        Tcl_ListObjAppendElement(interp, listPtr, imPtr->namePtr);
+	        Tcl_ListObjAppendElement(interp, listPtr,
+		        Tcl_NewStringObj(Tcl_GetString(imPtr->namePtr), -1));
 	    }
 	}
     }
@@ -3091,7 +3118,8 @@ Itcl_BiInfoMethodsCmd(
         if (idmPtr->flags & ITCL_METHOD) {
 	    if ((pattern == NULL) ||
                      Tcl_StringMatch((const char *)name, pattern)) {
-	        Tcl_ListObjAppendElement(interp, listPtr, idmPtr->namePtr);
+	        Tcl_ListObjAppendElement(interp, listPtr,
+		        Tcl_NewStringObj(Tcl_GetString(idmPtr->namePtr), -1));
 	    }
         }
     }
@@ -3158,7 +3186,8 @@ Itcl_BiInfoOptionsCmd(
 	name = Tcl_GetString(ioptPtr->namePtr);
 	if ((pattern == NULL) ||
                  Tcl_StringMatch(name, pattern)) {
-            Tcl_ListObjAppendElement(interp, listPtr, ioptPtr->namePtr);
+            Tcl_ListObjAppendElement(interp, listPtr,
+	            Tcl_NewStringObj(Tcl_GetString(ioptPtr->namePtr), -1));
         }
     }
     FOREACH_HASH_VALUE(idoPtr, &ioPtr->objectDelegatedOptions) {
@@ -3166,7 +3195,8 @@ Itcl_BiInfoOptionsCmd(
 	if (strcmp(name, "*") != 0) {
 	    if ((pattern == NULL) ||
                      Tcl_StringMatch(name, pattern)) {
-                Tcl_ListObjAppendElement(interp, listPtr, idoPtr->namePtr);
+                Tcl_ListObjAppendElement(interp, listPtr,
+		        Tcl_NewStringObj(Tcl_GetString(idoPtr->namePtr), -1));
 	    }
         } else {
 	    if (idoPtr->icPtr == NULL) {
@@ -3251,7 +3281,8 @@ Itcl_BiInfoTypesCmd(
 	    Tcl_IncrRefCount(iclsPtr->namePtr);
 	    if ((pattern == NULL) ||
                      Tcl_StringMatch(name, pattern)) {
-                Tcl_ListObjAppendElement(interp, listPtr, iclsPtr->namePtr);
+                Tcl_ListObjAppendElement(interp, listPtr,
+		        Tcl_NewStringObj(Tcl_GetString(iclsPtr->namePtr), -1));
             }
         }
     }
@@ -3316,7 +3347,8 @@ Itcl_BiInfoComponentsCmd(
     name = Tcl_GetString(icPtr->namePtr);
     if ((pattern == NULL) ||
                  Tcl_StringMatch(name, pattern)) {
-            Tcl_ListObjAppendElement(interp, listPtr, icPtr->namePtr);
+            Tcl_ListObjAppendElement(interp, listPtr,
+	            Tcl_NewStringObj(Tcl_GetString(icPtr->namePtr), -1));
         }
     }
     Tcl_SetObjResult(interp, listPtr);
@@ -3421,7 +3453,8 @@ Itcl_BiInfoTypeMethodsCmd(
         if (imPtr->flags & ITCL_TYPE_METHOD) {
 	    if ((pattern == NULL) ||
                      Tcl_StringMatch((const char *)name, pattern)) {
-	        Tcl_ListObjAppendElement(interp, listPtr, imPtr->namePtr);
+	        Tcl_ListObjAppendElement(interp, listPtr,
+		        Tcl_NewStringObj(Tcl_GetString(imPtr->namePtr), -1));
 	    }
 	}
     }
@@ -3442,7 +3475,8 @@ Itcl_BiInfoTypeMethodsCmd(
         if (idmPtr->flags & ITCL_TYPE_METHOD) {
 	    if ((pattern == NULL) ||
                      Tcl_StringMatch((const char *)name, pattern)) {
-	        Tcl_ListObjAppendElement(interp, listPtr, idmPtr->namePtr);
+	        Tcl_ListObjAppendElement(interp, listPtr,
+		        Tcl_NewStringObj(Tcl_GetString(idmPtr->namePtr), -1));
 	    }
         }
     }
@@ -3736,7 +3770,6 @@ Itcl_BiInfoDelegatedMethodsCmd(
 	if (iclsPtr->flags &
 	        (ITCL_TYPE|ITCL_WIDGETADAPTOR|ITCL_WIDGET|ITCL_ECLASS)) {
 	    name = Tcl_GetString(idmPtr->namePtr);
-	    Tcl_IncrRefCount(idmPtr->namePtr);
 	    if ((pattern == NULL) ||
                      Tcl_StringMatch(name, pattern)) {
 		if ((idmPtr->flags & ITCL_TYPE_METHOD) == 0) {

@@ -24,7 +24,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann Copyright (c) 2007
  *
- *     RCS:  $Id: itclObject.c,v 1.1.2.54 2008/11/25 19:16:07 wiede Exp $
+ *     RCS:  $Id: itclObject.c,v 1.1.2.55 2008/11/26 21:14:42 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -889,7 +889,8 @@ ItclInitObjectVariables(
 		    } else {
 	              if (ivPtr->init != NULL) {
 		        if (Tcl_ObjSetVar2(interp, ivPtr->namePtr, NULL,
-		            ivPtr->init, TCL_NAMESPACE_ONLY) == NULL) {
+		            Tcl_NewStringObj(Tcl_GetString(ivPtr->init), -1),
+			    TCL_NAMESPACE_ONLY) == NULL) {
 			    goto errorCleanup;
 	                }
 	              }
