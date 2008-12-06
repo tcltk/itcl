@@ -24,7 +24,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclInfo.c,v 1.1.2.31 2008/11/26 21:14:42 wiede Exp $
+ *     RCS:  $Id: itclInfo.c,v 1.1.2.32 2008/12/06 23:05:47 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -348,6 +348,7 @@ ItclInfoInit(
     Tcl_Command cmd;
     Tcl_Obj *unkObjPtr;
     Tcl_Obj *ensObjPtr;
+    int result;
     int i;
 
     ItclObjectInfo *infoPtr;
@@ -374,8 +375,10 @@ ItclInfoInit(
             Tcl_FindEnsemble(interp, ensObjPtr, TCL_LEAVE_ERR_MSG),
 	    unkObjPtr) != TCL_OK) {
         Tcl_DecrRefCount(unkObjPtr);
+        Tcl_DecrRefCount(ensObjPtr);
         return TCL_ERROR;
     }
+    Tcl_DecrRefCount(ensObjPtr);
 
     /*
      * Build the ensemble used to implement [info delegated].
@@ -398,14 +401,14 @@ ItclInfoInit(
     Tcl_IncrRefCount(ensObjPtr);
     unkObjPtr = Tcl_NewStringObj(
             "::itcl::builtin::Info::delegated::unknown", -1);
+    result = TCL_OK;
     if (Tcl_SetEnsembleUnknownHandler(NULL,
             Tcl_FindEnsemble(interp, ensObjPtr, TCL_LEAVE_ERR_MSG),
 	    unkObjPtr) != TCL_OK) {
-        return TCL_ERROR;
+        result = TCL_ERROR;
     }
     Tcl_DecrRefCount(ensObjPtr);
-
-    return TCL_OK;
+    return result;
 }
 
 /*
@@ -970,7 +973,10 @@ Itcl_BiInfoFunctionCmd(
      *  Return info for a specific command.
      */
     if (cmdName) {
-        entry = Tcl_FindHashEntry(&contextIclsPtr->resolveCmds, cmdName);
+	objPtr = Tcl_NewStringObj(cmdName, -1);
+        entry = Tcl_FindHashEntry(&contextIclsPtr->resolveCmds, (char *)objPtr);
+	Tcl_DecrRefCount(objPtr);
+	objPtr = NULL;
         if (entry == NULL) {
             Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
                 "\"", cmdName, "\" isn't a member function in class \"",
@@ -1324,6 +1330,9 @@ Itcl_BiInfoVariableCmd(
                                 ivPtr->iclsPtr);
                     } else {
 		        if (contextIoPtr == NULL) {
+                            if (objc > 1) {
+			        Tcl_DecrRefCount(resultPtr);
+			    }
                             Tcl_ResetResult(interp);
                             Tcl_AppendResult(interp,
                                     "cannot access object-specific info ",
@@ -1346,11 +1355,12 @@ Itcl_BiInfoVariableCmd(
             if (objc == 1) {
                 resultPtr = objPtr;
             } else {
-                Tcl_ListObjAppendElement((Tcl_Interp*)NULL, resultPtr,
-                    objPtr);
+                Tcl_ListObjAppendElement((Tcl_Interp*)NULL, resultPtr, objPtr);
             }
         }
-        Tcl_SetObjResult(interp, resultPtr);
+	Tcl_ResetResult(interp);
+	Tcl_AppendResult(interp, Tcl_GetString(resultPtr), NULL);
+	Tcl_DecrRefCount(resultPtr);
     } else {
 
         /*
@@ -1699,7 +1709,9 @@ Itcl_BiInfoBodyCmd(
     }
 
     name = Tcl_GetString(objv[1]);
-    hPtr = Tcl_FindHashEntry(&contextIclsPtr->resolveCmds, name);
+    objPtr = Tcl_NewStringObj(name, -1);
+    hPtr = Tcl_FindHashEntry(&contextIclsPtr->resolveCmds, (char *)objPtr);
+    Tcl_DecrRefCount(objPtr);
     hPtr2 = NULL;
     if (hPtr == NULL) {
 	if (contextIclsPtr->flags &
@@ -1840,7 +1852,9 @@ Itcl_BiInfoArgsCmd(
 
 
 
-    hPtr = Tcl_FindHashEntry(&contextIclsPtr->resolveCmds, name);
+    objPtr = Tcl_NewStringObj(name, -1);
+    hPtr = Tcl_FindHashEntry(&contextIclsPtr->resolveCmds, (char *)objPtr);
+    Tcl_DecrRefCount(objPtr);
     hPtr2 = NULL;
     if (hPtr == NULL) {
 	if (contextIclsPtr->flags &

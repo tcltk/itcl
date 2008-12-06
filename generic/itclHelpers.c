@@ -9,7 +9,7 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itclHelpers.c,v 1.1.2.8 2008/11/26 21:14:42 wiede Exp $
+ * RCS: @(#) $Id: itclHelpers.c,v 1.1.2.9 2008/12/06 23:05:47 wiede Exp $
  */
 
 #include "itclInt.h"
@@ -317,25 +317,28 @@ Itcl_EvalArgs(
  * ------------------------------------------------------------------------
  */
 Tcl_Obj*
-Itcl_CreateArgs(interp, string, objc, objv)
-    Tcl_Interp *interp;      /* current interpreter */
-    CONST char *string;      /* first command word */
-    int objc;                /* number of arguments */
-    Tcl_Obj *CONST objv[];   /* argument objects */
+Itcl_CreateArgs(
+    Tcl_Interp *interp,      /* current interpreter */
+    const char *string,      /* first command word */
+    int objc,                /* number of arguments */
+    Tcl_Obj *const objv[])   /* argument objects */
 {
     int i;
     Tcl_Obj *listPtr;
+    Tcl_Obj *objPtr;
 
+    ItclShowArgs(1, "Itcl_CreateArgs", objc, objv);
     listPtr = Tcl_NewListObj(0, (Tcl_Obj**)NULL);
-    Tcl_ListObjAppendElement((Tcl_Interp*)NULL, listPtr,
-            Tcl_NewStringObj("my", -1));
-    Tcl_ListObjAppendElement((Tcl_Interp*)NULL, listPtr,
-        Tcl_NewStringObj((const char *)string, -1));
+    objPtr = Tcl_NewStringObj("my", -1);
+    Tcl_IncrRefCount(objPtr);
+    Tcl_ListObjAppendElement((Tcl_Interp*)NULL, listPtr, objPtr);
+    objPtr = Tcl_NewStringObj(string, -1);
+    Tcl_IncrRefCount(objPtr);
+    Tcl_ListObjAppendElement((Tcl_Interp*)NULL, listPtr, objPtr);
 
     for (i=0; i < objc; i++) {
         Tcl_ListObjAppendElement((Tcl_Interp*)NULL, listPtr, objv[i]);
     }
-
     return listPtr;
 }
 
@@ -411,6 +414,7 @@ ItclTraceUnsetVar(
 	    Tcl_DeleteHashEntry(hPtr);
 	}
     }
+    ckfree((char *)tracePtr);
     return NULL;
 }
 

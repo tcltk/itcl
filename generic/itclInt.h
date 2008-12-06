@@ -9,7 +9,7 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itclInt.h,v 1.17.2.53 2008/11/23 20:23:32 wiede Exp $
+ * RCS: @(#) $Id: itclInt.h,v 1.17.2.54 2008/12/06 23:05:47 wiede Exp $
  */
 
 #include <string.h>
@@ -194,6 +194,11 @@ typedef struct ItclObjectInfo {
     int inOptionHandling;           /* used to indicate for type/widget ...
                                      * that there is an option processing
 				     * and methods are allowed to be called */
+            /* these are the Tcl_Obj Ptrs for the clazz unknown procedure */
+	    /* need to store them to be able to free them at the end */
+    Tcl_Obj *unknownNamePtr;
+    Tcl_Obj *unknownArgumentPtr;
+    Tcl_Obj *unknownBodyPtr;
 } ItclObjectInfo;
 
 typedef struct EnsembleInfo {
@@ -486,6 +491,7 @@ typedef struct ItclMemberFunc {
     int maxargcount;             /* max number of args in arglist */
     Tcl_Obj *usagePtr;          /* usage string for error messages */
     Tcl_Obj *argumentPtr;       /* the function arguments */
+    Tcl_Obj *builtinArgumentPtr; /* the function arguments for builtin functions */
     Tcl_Obj *origArgsPtr;       /* the argument string of the original definition */
     Tcl_Obj *bodyPtr;           /* the function body */
     ItclArgList *argListPtr;    /* the parsed arguments */
@@ -778,6 +784,8 @@ MODULE_SCOPE int ItclCreateDelegatedFunction(Tcl_Interp *interp,
 	Tcl_Obj *usingPtr, Tcl_Obj *exceptionsPtr,
 	ItclDelegatedFunction **idmPtrPtr);
 MODULE_SCOPE void ItclDeleteDelegatedOption(char *cdata);
+MODULE_SCOPE void Itcl_FinishList();
+
 
 
 

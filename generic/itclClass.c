@@ -25,7 +25,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann Copyright (c) 2007
  *
- *     RCS:  $Id: itclClass.c,v 1.1.2.41 2008/11/25 19:16:07 wiede Exp $
+ *     RCS:  $Id: itclClass.c,v 1.1.2.42 2008/12/06 23:05:47 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -295,11 +295,11 @@ Itcl_CreateClass(
     Tcl_InitObjHashTable(&iclsPtr->delegatedOptions);
     Tcl_InitObjHashTable(&iclsPtr->delegatedFunctions);
     Tcl_InitObjHashTable(&iclsPtr->methodVariables);
+    Tcl_InitObjHashTable(&iclsPtr->resolveCmds);
 
     iclsPtr->numInstanceVars = 0;
     Tcl_InitHashTable(&iclsPtr->classCommons, TCL_ONE_WORD_KEYS);
     Tcl_InitHashTable(&iclsPtr->resolveVars, TCL_ONE_WORD_KEYS);
-    Tcl_InitHashTable(&iclsPtr->resolveCmds, TCL_ONE_WORD_KEYS);
     Tcl_InitHashTable(&iclsPtr->contextCache, TCL_ONE_WORD_KEYS);
 
     Itcl_InitList(&iclsPtr->bases);
@@ -334,6 +334,7 @@ Itcl_CreateClass(
     Itcl_PreserveData((ClientData)iclsPtr);
 
     nameObjPtr = Tcl_NewStringObj("", 0);
+    Tcl_IncrRefCount(nameObjPtr);
     if ((path[0] != ':') && (path[1] != ':')) {
         Tcl_Namespace *currNsPtr = Tcl_GetCurrentNamespace(interp);
         Tcl_AppendToObj(nameObjPtr, currNsPtr->fullName, -1);
@@ -359,7 +360,8 @@ Itcl_CreateClass(
             (ClientData)path, &oPtr, nameObjPtr);
     result = Itcl_NRRunCallbacks(interp, callbackPtr);
     if (result == TCL_ERROR) {
-        return TCL_ERROR;
+	result = TCL_ERROR;
+        goto errorOut;
     }
     iclsPtr->clsPtr = Tcl_GetObjectAsClass(oPtr);
     iclsPtr->oPtr = oPtr;
@@ -415,7 +417,8 @@ Itcl_CreateClass(
 	Tcl_AppendResult(interp,
 	        "ITCL: cannot create hash entry in infoPtr->nameClasses for ",
 		"class \"", Tcl_GetString(iclsPtr->fullNamePtr), "\"", NULL);
-	return TCL_ERROR;
+	result = TCL_ERROR;
+        goto errorOut;
     }
     Tcl_SetHashValue(hPtr, (ClientData)iclsPtr);
 
@@ -426,7 +429,8 @@ Itcl_CreateClass(
 	        "ITCL: cannot create hash entry in infoPtr->namespaceClasses",
 		" for class \"", 
 		Tcl_GetString(iclsPtr->fullNamePtr), "\"", NULL);
-	return TCL_ERROR;
+	result = TCL_ERROR;
+        goto errorOut;
     }
     Tcl_SetHashValue(hPtr, (ClientData)iclsPtr);
 
@@ -436,7 +440,8 @@ Itcl_CreateClass(
 	        "ITCL: cannot create hash entry in infoPtr->classes",
 		" for class \"", 
 		Tcl_GetString(iclsPtr->fullNamePtr), "\"", NULL);
-	return TCL_ERROR;
+	result = TCL_ERROR;
+        goto errorOut;
     }
     Tcl_SetHashValue(hPtr, (ClientData)iclsPtr);
 
@@ -451,7 +456,8 @@ Itcl_CreateClass(
             NULL, 0) == NULL) {
 	Tcl_AppendResult(interp, "ITCL: cannot create variables namespace \"",
 	Tcl_DStringValue(&buffer), "\"", NULL);
-        return TCL_ERROR;
+	result = TCL_ERROR;
+        goto errorOut;
     }
 
     /*
@@ -564,7 +570,8 @@ Itcl_CreateClass(
 	/* itcl_hull must not be an ITCL_COMMON!! */
         if (ItclCreateComponent(interp, iclsPtr, namePtr, 0, &icPtr) !=
 	        TCL_OK) {
-            return TCL_ERROR;
+	    result = TCL_ERROR;
+            goto errorOut;
         }
     }
 
@@ -575,7 +582,10 @@ Itcl_CreateClass(
     /* FIXME should set the class objects unknown command to Itcl_HandleClass */
 
     *rPtr = iclsPtr;
-    return TCL_OK;
+    result = TCL_OK;
+errorOut:
+    Tcl_DecrRefCount(nameObjPtr);
+    return result;
 }
 
 
@@ -1003,6 +1013,7 @@ ItclFreeClass(
     ItclDelegatedFunction *idmPtr;
     Itcl_ListElem *elem;
     ItclVarLookup *vlookup;
+    ItclCmdLookup *clookupPtr;
     int found;
 
     found = 0;
@@ -1046,6 +1057,15 @@ ItclFreeClass(
     /*
      *  Tear down the virtual method table...
      */
+    while (1) {
+        hPtr = Tcl_FirstHashEntry(&iclsPtr->resolveCmds, &place);
+        if (hPtr == NULL) {
+            break;
+        }
+        clookupPtr = Tcl_GetHashValue(hPtr);
+        ckfree((char *)clookupPtr);
+	Tcl_DeleteHashEntry(hPtr);
+    }
     Tcl_DeleteHashTable(&iclsPtr->resolveCmds);
 
     /*
@@ -1197,6 +1217,10 @@ ItclFreeClass(
         if (iclsPtr2 == iclsPtr) {
 	    Tcl_DeleteHashEntry(hPtr);
 	}
+    }
+    if (iclsPtr->resolvePtr != NULL) {
+        ckfree((char *)iclsPtr->resolvePtr->clientData);
+        ckfree((char *)iclsPtr->resolvePtr);
     }
     ckfree((char*)iclsPtr);
 }
@@ -1402,11 +1426,10 @@ FinalizeCreateObject(
 {
     Tcl_Obj *objNamePtr = data[0];
     ItclClass *iclsPtr = data[1];
-    char *objName = Tcl_GetString(objNamePtr);
     if (result == TCL_OK) {
 	if (!(iclsPtr->flags & (ITCL_TYPE|ITCL_WIDGET|ITCL_WIDGETADAPTOR))) {
 	    Tcl_ResetResult(interp);
-            Tcl_SetObjResult(interp, Tcl_NewStringObj(objName, -1));
+            Tcl_AppendResult(interp, Tcl_GetString(objNamePtr), NULL);
 	}
     }
 
@@ -1451,12 +1474,13 @@ Itcl_HandleClass(
     ClientData clientData,   /* class definition */
     Tcl_Interp *interp,      /* current interpreter */
     int objc,                /* number of arguments */
-    Tcl_Obj *CONST objv[])   /* argument objects */
+    Tcl_Obj *const objv[])   /* argument objects */
 {
     Tcl_DString buffer;  /* buffer used to build object names */
-    ItclClass *iclsPtr;
-    ItclObjectInfo *infoPtr = (ItclObjectInfo *)clientData;
+    Tcl_Obj *objNamePtr;
     Tcl_HashEntry *hPtr;
+    ItclClass *iclsPtr;
+    ItclObjectInfo *infoPtr;
     char unique[256];    /* buffer used for unique part of object names */
     char *token;
     char *objName;
@@ -1466,6 +1490,7 @@ Itcl_HandleClass(
     char *match;
     int result;
 
+    infoPtr = (ItclObjectInfo *)clientData;
     Tcl_ResetResult(interp);
     ItclShowArgs(1, "Itcl_HandleClassCmd", objc, objv);
     /*
@@ -1577,7 +1602,7 @@ Itcl_HandleClass(
      *  Try to create a new object.  If successful, return the
      *  object name as the result of this command.
      */
-    Tcl_Obj *objNamePtr = Tcl_NewStringObj(objName, -1);
+    objNamePtr = Tcl_NewStringObj(objName, -1);
     Tcl_IncrRefCount(objNamePtr);
     Tcl_DStringFree(&buffer);
     Itcl_NRAddCallback(interp, FinalizeCreateObject, objNamePtr, iclsPtr,
@@ -1617,17 +1642,19 @@ Itcl_BuildVirtualTables(
 {
     Tcl_HashEntry *hPtr;
     Tcl_HashSearch place;
+    Tcl_Namespace* nsPtr;
+    Tcl_DString buffer, buffer2;
+    Tcl_Obj *objPtr;
     ItclVarLookup *vlookup;
     ItclVariable *ivPtr;
     ItclMemberFunc *imPtr;
     ItclHierIter hier;
     ItclClass *iclsPtr2;
-    ItclClassVarInfo *icviPtr;
+    ItclCmdLookup *clookupPtr;
 #ifdef NEW_PROTO_RESOLVER
+    ItclClassVarInfo *icviPtr;
     ItclClassCmdInfo *icciPtr;
 #endif
-    Tcl_Namespace* nsPtr;
-    Tcl_DString buffer, buffer2;
     int newEntry;
 
     Tcl_DStringInit(&buffer);
@@ -1700,6 +1727,7 @@ Itcl_BuildVirtualTables(
 		    vlookup->varNum = iclsPtr->numInstanceVars++;
 	        }
 	    }
+#ifdef NEW_PROTO_RESOLVER
 	    icviPtr = (ItclClassVarInfo *)ckalloc(
 	            sizeof(ItclClassVarInfo));
 	    icviPtr->type = type;
@@ -1707,7 +1735,6 @@ Itcl_BuildVirtualTables(
 	    icviPtr->nsPtr = iclsPtr->nsPtr;
 	    icviPtr->declaringNsPtr = iclsPtr2->nsPtr;
 	    icviPtr->varNum = vlookup->varNum;
-#ifdef NEW_PROTO_RESOLVER
 	    ClientData clientData2;
             clientData2 = Itcl_RegisterClassVariable(
 	            iclsPtr->infoPtr->interp, iclsPtr2->nsPtr,
@@ -1802,8 +1829,17 @@ Itcl_BuildVirtualTables(
     /*
      *  Clear the command resolution table.
      */
+    while (1) {
+        hPtr = Tcl_FirstHashEntry(&iclsPtr->resolveCmds, &place);
+        if (hPtr == NULL) {
+            break;
+        }
+        clookupPtr = Tcl_GetHashValue(hPtr);
+        ckfree((char *)clookupPtr);
+	Tcl_DeleteHashEntry(hPtr);
+    }
     Tcl_DeleteHashTable(&iclsPtr->resolveCmds);
-    Tcl_InitHashTable(&iclsPtr->resolveCmds, TCL_STRING_KEYS);
+    Tcl_InitObjHashTable(&iclsPtr->resolveCmds);
 
     /*
      *  Scan through all classes in the hierarchy, from most to
@@ -1831,15 +1867,15 @@ Itcl_BuildVirtualTables(
             nsPtr = iclsPtr2->nsPtr;
 
             while (1) {
+		objPtr = Tcl_NewStringObj(Tcl_DStringValue(&buffer), -1);
                 hPtr = Tcl_CreateHashEntry(&iclsPtr->resolveCmds,
-                    Tcl_DStringValue(&buffer), &newEntry);
+                        (char *)objPtr, &newEntry);
 
                 if (newEntry) {
-		    ItclCmdLookup *clookup;
-		    clookup = (ItclCmdLookup *)ckalloc(sizeof(ItclCmdLookup));
-		    memset(clookup, 0, sizeof(ItclCmdLookup));
-		    clookup->imPtr = imPtr;
-                    Tcl_SetHashValue(hPtr, (ClientData)clookup);
+		    clookupPtr = (ItclCmdLookup *)ckalloc(sizeof(ItclCmdLookup));
+		    memset(clookupPtr, 0, sizeof(ItclCmdLookup));
+		    clookupPtr->imPtr = imPtr;
+                    Tcl_SetHashValue(hPtr, (ClientData)clookupPtr);
 #ifdef NEW_PROTO_RESOLVER
                     int type = CMD_TYPE_METHOD;
 	            if (imPtr->flags & ITCL_COMMON) {
@@ -1855,10 +1891,12 @@ Itcl_BuildVirtualTables(
                     clientData2 = Itcl_RegisterClassCommand(
 	                    iclsPtr->infoPtr->interp, iclsPtr->nsPtr,
 		            Tcl_GetString(imPtr->namePtr), icciPtr);
-		    clookup->classCmdInfoPtr = clientData2;
-		    clookup->cmdPtr = imPtr->accessCmd;
+		    clookupPtr->classCmdInfoPtr = clientData2;
+		    clookupPtr->cmdPtr = imPtr->accessCmd;
 #endif
-                }
+                } else {
+		    Tcl_DecrRefCount(objPtr);
+		}
 
                 if (nsPtr == NULL) {
                     break;
@@ -1877,7 +1915,6 @@ Itcl_BuildVirtualTables(
         iclsPtr2 = Itcl_AdvanceHierIter(&hier);
     }
     Itcl_DeleteHierIter(&hier);
-
     Tcl_DStringFree(&buffer);
     Tcl_DStringFree(&buffer2);
 }
@@ -2382,6 +2419,9 @@ ItclDeleteFunction(
     }
     if (imPtr->origArgsPtr != NULL) {
         Tcl_DecrRefCount(imPtr->origArgsPtr);
+    }
+    if (imPtr->builtinArgumentPtr != NULL) {
+        Tcl_DecrRefCount(imPtr->builtinArgumentPtr);
     }
     if (imPtr->bodyPtr != NULL) {
         Tcl_DecrRefCount(imPtr->bodyPtr);

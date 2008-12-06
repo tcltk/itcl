@@ -1,5 +1,5 @@
 # -*- tcl -*-
-# $Id: itcl.decls,v 1.3.2.13 2008/11/23 20:23:32 wiede Exp $
+# $Id: itcl.decls,v 1.3.2.14 2008/12/06 23:05:46 wiede Exp $
 
 # public API
 library itcl
@@ -146,8 +146,8 @@ declare 13 current {
     int Itcl_EvalArgs (Tcl_Interp *interp, int objc, Tcl_Obj *CONST objv[])
 }
 declare 14 current {
-    Tcl_Obj* Itcl_CreateArgs (Tcl_Interp *interp, CONST char *string,
-        int objc, Tcl_Obj *CONST objv[])
+    Tcl_Obj* Itcl_CreateArgs (Tcl_Interp *interp, const char *string,
+        int objc, Tcl_Obj *const objv[])
 }
 declare 17 current {
     int Itcl_GetContext (Tcl_Interp *interp, ItclClass **iclsPtrPtr, \

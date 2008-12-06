@@ -20,7 +20,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itclResolve.c,v 1.1.2.23 2008/11/23 20:23:32 wiede Exp $
+ *     RCS:  $Id: itclResolve.c,v 1.1.2.24 2008/12/06 23:05:47 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -66,6 +66,7 @@ Itcl_ClassCmdResolver(
     Tcl_Command *rPtr)		/* returns: resolved command */
 {
     Tcl_HashEntry *hPtr;
+    Tcl_Obj *objPtr;
     ItclClass *iclsPtr;
     ItclObjectInfo *infoPtr;
     ItclMemberFunc *imPtr;
@@ -86,7 +87,9 @@ Itcl_ClassCmdResolver(
      *  If the command is a member function
      */
     imPtr = NULL;
-    hPtr = Tcl_FindHashEntry(&iclsPtr->resolveCmds, name);
+    objPtr = Tcl_NewStringObj(name, -1);
+    hPtr = Tcl_FindHashEntry(&iclsPtr->resolveCmds, (char *)objPtr);
+    Tcl_DecrRefCount(objPtr);
     if (hPtr == NULL) {
 #ifdef NOTDEF
 	if (!(iclsPtr->flags & ITCL_CLASS)) {

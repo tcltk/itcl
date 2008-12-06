@@ -23,7 +23,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclUtil.c,v 1.1.2.9 2008/11/23 20:23:32 wiede Exp $
+ *     RCS:  $Id: itclUtil.c,v 1.1.2.10 2008/12/06 23:05:47 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -267,8 +267,8 @@ Itcl_DeleteList(listPtr)
  * ------------------------------------------------------------------------
  */
 Itcl_ListElem*
-Itcl_CreateListElem(listPtr)
-    Itcl_List *listPtr;     /* list that will contain this new element */
+Itcl_CreateListElem(
+    Itcl_List *listPtr)     /* list that will contain this new element */
 {
     Itcl_ListElem *elemPtr;
 
@@ -276,8 +276,7 @@ Itcl_CreateListElem(listPtr)
         elemPtr = listPool;
         listPool = elemPtr->next;
         --listPoolLen;
-    }
-    else {
+    } else {
         elemPtr = (Itcl_ListElem*)ckalloc((unsigned)sizeof(Itcl_ListElem));
     }
     elemPtr->owner = listPtr;
@@ -314,18 +313,19 @@ Itcl_DeleteListElem(elemPtr)
     }
 
     listPtr = elemPtr->owner;
-    if (elemPtr == listPtr->head)
+    if (elemPtr == listPtr->head) {
         listPtr->head = elemPtr->next;
-    if (elemPtr == listPtr->tail)
+    }
+    if (elemPtr == listPtr->tail) {
         listPtr->tail = elemPtr->prev;
+    }
     --listPtr->num;
 
     if (listPoolLen < ITCL_LIST_POOL_SIZE) {
         elemPtr->next = listPool;
         listPool = elemPtr;
         ++listPoolLen;
-    }
-    else {
+    } else {
         ckfree((char*)elemPtr);
     }
     return nextPtr;
@@ -500,6 +500,28 @@ Itcl_SetListValue(elemPtr,val)
     assert(elemPtr != NULL);
 
     elemPtr->value = val;
+}
+
+
+/*
+ * ------------------------------------------------------------------------
+ *  Itcl_FinishList()
+ *
+ *  free all memory used in the list pool
+ * ------------------------------------------------------------------------
+ */
+void
+Itcl_FinishList()
+{
+    Itcl_ListElem *listPtr;
+    Itcl_ListElem *elemPtr;
+    
+    listPtr = listPool;
+    while (listPtr != NULL) {
+        elemPtr = listPtr;
+	listPtr = elemPtr->next;
+	ckfree((char *)elemPtr);
+    }
 }
 
 
@@ -1052,7 +1074,7 @@ Itcl_CanAccessFunc(
 
         if (Tcl_FindHashEntry(&iclsPtr->heritage, (char*)fromIclsPtr)) {
             entry = Tcl_FindHashEntry(&fromIclsPtr->resolveCmds,
-                Tcl_GetString(imPtr->namePtr));
+                (char *)imPtr->namePtr);
 
             if (entry) {
 		ItclCmdLookup *clookup;
@@ -1093,13 +1115,16 @@ Itcl_DecodeScopedCommand(
     Tcl_Namespace **rNsPtr,	/* returns: namespace for scoped value */
     char **rCmdPtr)		/* returns: simple command word */
 {
-    Tcl_Namespace *nsPtr = NULL;
+    Tcl_Namespace *nsPtr;
     char *cmdName;
-    int len = strlen(name);
-    CONST char *pos;
-    int listc, result;
+    const char *pos;
     const char **listv;
-
+    int listc;
+    int result;
+    int len;
+    
+    nsPtr = NULL;
+    len = strlen(name);
     cmdName = ckalloc((unsigned)strlen(name)+1);
     strcpy(cmdName, name);
 
@@ -1123,10 +1148,10 @@ Itcl_DecodeScopedCommand(
                     nsPtr = Tcl_FindNamespace(interp, listv[2],
                         (Tcl_Namespace*)NULL, TCL_LEAVE_ERR_MSG);
 
-                    if (!nsPtr) {
+                    if (nsPtr == NULL) {
                         result = TCL_ERROR;
                     } else {
-			ckfree(cmdName);
+		        ckfree(cmdName);
                         cmdName = ckalloc((unsigned)(strlen(listv[3])+1));
                         strcpy(cmdName, listv[3]);
                     }
@@ -1138,6 +1163,7 @@ Itcl_DecodeScopedCommand(
                 char msg[512];
                 sprintf(msg, "\n    (while decoding scoped command \"%.400s\")", name);
                 Tcl_AddObjErrorInfo(interp, msg, -1);
+		ckfree(cmdName);
                 return TCL_ERROR;
             }
 	}

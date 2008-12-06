@@ -8,7 +8,7 @@
  * ========================================================================
  *  AUTHOR:  Arnulf Wiedemann
  *
- *     RCS:  $Id: itclVarsAndCmds.c,v 1.1.2.2 2008/11/08 23:40:12 wiede Exp $
+ *     RCS:  $Id: itclVarsAndCmds.c,v 1.1.2.3 2008/12/06 23:05:47 wiede Exp $
  * ========================================================================
  *           Copyright (c) Arnulf Wiedemann
  * ------------------------------------------------------------------------
@@ -20,18 +20,21 @@
 #include "itclInt.h"
 #include "itclVCInt.h"
 
+#ifdef NEW_PROTO_RESOLVER
 static void
 ItclDeleteResolveInfo(
     ClientData clientData,
     Tcl_Interp *interp)
 {
-/* FIXME need to free stuff here */
+    ckfree((char *)clientData);
 }
+#endif
 
 int
 ItclVarsAndCommandResolveInit(
     Tcl_Interp *interp)
 {
+#ifdef NEW_PROTO_RESOLVER
     ItclResolvingInfo *iriPtr;
 
     /*
@@ -55,6 +58,7 @@ ItclVarsAndCommandResolveInit(
             Itcl_CheckClassCommandProtection);
     Itcl_SetClassVariableProtectionCallback(interp, NULL,
             Itcl_CheckClassVariableProtection);
+#endif
     return TCL_OK;
 }
 

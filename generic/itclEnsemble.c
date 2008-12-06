@@ -25,7 +25,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclEnsemble.c,v 1.1.2.14 2008/11/25 19:16:07 wiede Exp $
+ *     RCS:  $Id: itclEnsemble.c,v 1.1.2.15 2008/12/06 23:05:47 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -947,6 +947,7 @@ AddEnsemblePart(
 {
     Tcl_Obj *mapDict;
     Tcl_Obj *toObjPtr;
+    Tcl_Obj *objPtr;
     Tcl_Command cmd;
     EnsemblePart *ensPart;
 
@@ -974,17 +975,15 @@ AddEnsemblePart(
     toObjPtr = Tcl_NewStringObj(ensData->nsPtr->fullName, -1);
     Tcl_AppendToObj(toObjPtr, "::", 2);
     Tcl_AppendToObj(toObjPtr, partName, -1);
-    Tcl_DictObjPut(NULL, mapDict, Tcl_NewStringObj(partName, -1), toObjPtr);
+    objPtr = Tcl_NewStringObj(partName, -1);
+    Tcl_DictObjPut(NULL, mapDict, objPtr, toObjPtr);
     cmd = Tcl_CreateObjCommand(interp, Tcl_GetString(toObjPtr),
             EnsembleSubCmd, ensPart, DeleteEnsemblePart);
     if (cmd == NULL) {
         return TCL_ERROR;
     }
     Tcl_SetEnsembleMappingDict(interp, ensData->cmd, mapDict);
-
-
     *rVal = ensPart;
-
     return TCL_OK;
 }
 
@@ -1078,6 +1077,7 @@ FindEnsemble(
      */
     objPtr = Tcl_NewStringObj(nameArgv[0], -1);
     cmdPtr = Tcl_FindEnsemble(interp, objPtr, 0);
+    Tcl_DecrRefCount(objPtr);
 
     if (cmdPtr == NULL) {
         Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
@@ -1275,6 +1275,7 @@ DeleteEnsemblePart(
     /*
      *  Free the memory associated with the part.
      */
+    Tcl_DecrRefCount(ensPart->namePtr);
     if (ensPart->usage) {
         ckfree(ensPart->usage);
     }

@@ -23,7 +23,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclCmd.c,v 1.1.2.35 2008/11/25 19:16:07 wiede Exp $
+ *     RCS:  $Id: itclCmd.c,v 1.1.2.36 2008/12/06 23:05:47 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -102,7 +102,7 @@ Itcl_ThisCmd(
         Tcl_SetObjResult(interp, namePtr);
 	return TCL_OK;
     }
-    hPtr = Tcl_FindHashEntry(&iclsPtr->resolveCmds, Tcl_GetString(objv[1]));
+    hPtr = Tcl_FindHashEntry(&iclsPtr->resolveCmds, (char *)objv[1]);
     funcName = Tcl_GetString(objv[1]);
     if (!(iclsPtr->flags & ITCL_CLASS)) {
         FOREACH_HASH_VALUE(idmPtr, &iclsPtr->delegatedFunctions) {
@@ -1030,7 +1030,7 @@ Itcl_IsObjectCmd(
      *  decode it.
      */
     if (Itcl_DecodeScopedCommand(interp, name, &contextNs, &cmdName)
-        != TCL_OK) {
+            != TCL_OK) {
         return TCL_ERROR;
     }
 
@@ -1041,6 +1041,7 @@ Itcl_IsObjectCmd(
      */
     if (cmd == NULL || ! Itcl_IsObject(cmd)) {
         Tcl_SetObjResult(interp, Tcl_NewBooleanObj(0));
+	ckfree((char *)cmdName);
         return TCL_OK;
     }
 
@@ -1053,6 +1054,7 @@ Itcl_IsObjectCmd(
             contextObj = (ItclObject*)cmdInfo.objClientData;
             if (! Itcl_ObjectIsa(contextObj, iclsPtr)) {
                 Tcl_SetObjResult(interp, Tcl_NewBooleanObj(0));
+	        ckfree((char *)cmdName);
                 return TCL_OK;
             }
         }

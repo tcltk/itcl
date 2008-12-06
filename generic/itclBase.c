@@ -9,7 +9,7 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itclBase.c,v 1.1.2.27 2008/11/26 21:14:42 wiede Exp $
+ * RCS: @(#) $Id: itclBase.c,v 1.1.2.28 2008/12/06 23:05:47 wiede Exp $
  */
 
 #include <stdlib.h>
@@ -183,12 +183,13 @@ AddClassUnknowMethod(
     Tcl_Class clsPtr)
 {
     ClientData pmPtr;
-    Tcl_Obj *namePtr = Tcl_NewStringObj("unknown", -1);
-    Tcl_Obj *argumentPtr = Tcl_NewStringObj("m args", -1);
-    Tcl_IncrRefCount(argumentPtr);
-    Tcl_Obj *bodyPtr = Tcl_NewStringObj(clazzUnknownBody, -1);
+
+    infoPtr->unknownNamePtr = Tcl_NewStringObj("unknown", -1);
+    infoPtr->unknownArgumentPtr = Tcl_NewStringObj("m args", -1);
+    infoPtr->unknownBodyPtr = Tcl_NewStringObj(clazzUnknownBody, -1);
     ClientData tmPtr = (ClientData)Itcl_NewProcClassMethod(interp,
-        clsPtr, NULL, NULL, NULL, NULL, namePtr, argumentPtr, bodyPtr, &pmPtr);
+        clsPtr, NULL, NULL, NULL, NULL, infoPtr->unknownNamePtr,
+	infoPtr->unknownArgumentPtr, infoPtr->unknownBodyPtr, &pmPtr);
     if (tmPtr == NULL) {
         Tcl_Panic("cannot add class method unknown");
     }
@@ -227,6 +228,7 @@ Initialize (
 {
     Tcl_Namespace *nsPtr;
     Tcl_Namespace *itclNs;
+    Tcl_Obj *objPtr;
     ItclObjectInfo *infoPtr;
     const char * ret;
 
@@ -338,8 +340,9 @@ opt = atoi(res_option);
     if (Tcl_Eval(interp, clazzClassScript) != TCL_OK) {
         Tcl_Panic("cannot create Itcl root class ::itcl::clazz");
     }
-    Tcl_Obj *objPtr = Tcl_NewStringObj("::itcl::clazz", -1);
+    objPtr = Tcl_NewStringObj("::itcl::clazz", -1);
     infoPtr->clazzObjectPtr = Tcl_GetObjectFromObj(interp, objPtr);
+    Tcl_DecrRefCount(objPtr);
     if (infoPtr->clazzObjectPtr == NULL) {
         Tcl_AppendResult(interp,
                 "ITCL: cannot get Object for ::itcl::clazz for class \"",
@@ -570,6 +573,16 @@ ItclFinishCmd(
             Tcl_DecrRefCount(objPtr);
 	}
     }
+
+    while (1) {
+        hPtr = Tcl_FirstHashEntry(&infoPtr->instances, &place);
+	if (hPtr == NULL) {
+	    break;
+	}
+	Tcl_DeleteHashEntry(hPtr);
+    }
+    Tcl_DeleteHashTable(&infoPtr->instances);
+
     nsPtr = Tcl_FindNamespace(interp, "::itcl::parser", NULL, 0);
     if (nsPtr != NULL) {
         Tcl_DeleteNamespace(nsPtr);
@@ -579,7 +592,16 @@ ItclFinishCmd(
             Tcl_FindEnsemble(interp, ensObjPtr, TCL_LEAVE_ERR_MSG),
 	    NULL);
     Tcl_DecrRefCount(ensObjPtr);
+    Tcl_DecrRefCount(infoPtr->unknownNamePtr);
+    /* FIXME need double Decr, don't know why !! */
+    Tcl_DecrRefCount(infoPtr->unknownNamePtr);
+    Tcl_DecrRefCount(infoPtr->unknownArgumentPtr);
+    Tcl_DecrRefCount(infoPtr->unknownBodyPtr);
+    ckfree((char *)infoPtr->ensembleInfo);
+    ckfree((char *)infoPtr->object_meta_type);
+    ckfree((char *)infoPtr->class_meta_type);
     Itcl_ReleaseData((ClientData)infoPtr);
+    Itcl_FinishList();
     return TCL_OK;
 }
 

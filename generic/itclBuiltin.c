@@ -24,7 +24,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclBuiltin.c,v 1.1.2.50 2008/11/25 19:16:07 wiede Exp $
+ *     RCS:  $Id: itclBuiltin.c,v 1.1.2.51 2008/12/06 23:05:47 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -186,6 +186,8 @@ Itcl_BiInit(
 {
     Tcl_Namespace *itclBiNs;
     Tcl_DString buffer;
+    Tcl_Obj *objPtr;
+    Tcl_Obj *objPtr2;
     int i;
 
     /*
@@ -236,11 +238,15 @@ Itcl_BiInit(
 
         Tcl_GetEnsembleMappingDict(NULL, infoCmd, &mapDict);
         if (mapDict != NULL) {
-            Tcl_DictObjPut(NULL, mapDict, Tcl_NewStringObj("itclinfo", -1),
-                    Tcl_NewStringObj("::itcl::builtin::Info", -1));
+/* FIXME memeory leak */
+	    objPtr = Tcl_NewStringObj("itclinfo", -1);
+	    objPtr2 = Tcl_NewStringObj("::itcl::builtin::Info", -1);
+            Tcl_DictObjPut(NULL, mapDict, objPtr, objPtr2);
 /* FIXME !!! need to restore ::tcl::Info_vars if Itcl is unloaded !! */
-            Tcl_DictObjPut(NULL, mapDict, Tcl_NewStringObj("vars", -1),
-                    Tcl_NewStringObj("::itcl::builtin::Info::vars", -1));
+/* FIXME memeory leak */
+	    objPtr = Tcl_NewStringObj("vars", -1);
+	    objPtr2 = Tcl_NewStringObj("::itcl::builtin::Info::vars", -1);
+            Tcl_DictObjPut(NULL, mapDict, objPtr, objPtr2);
             Tcl_SetEnsembleMappingDict(interp, infoCmd, mapDict);
         }
     }
@@ -310,6 +316,7 @@ Itcl_InstallBiMethods(
 	    }
         }
     }
+    Tcl_DecrRefCount(objPtr);
     return result;
 }
 
@@ -2053,8 +2060,10 @@ ItclExtendedConfigure(
 			"\"", NULL);
 		return TCL_ERROR;
 	    }
+	    objPtr = Tcl_NewStringObj(val, -1);
 	    hPtr = Tcl_FindHashEntry(&contextIoPtr->iclsPtr->resolveCmds,
-	        (char *)val);
+	        (char *)objPtr);
+	    Tcl_DecrRefCount(objPtr);
             if (hPtr != NULL) {
 		ItclMemberFunc *imPtr;
 		ItclCmdLookup *clookup;

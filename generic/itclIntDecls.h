@@ -1,5 +1,5 @@
 /*
- * $Id: itclIntDecls.h,v 1.13.2.14 2008/11/23 20:23:32 wiede Exp $
+ * $Id: itclIntDecls.h,v 1.13.2.15 2008/12/06 23:05:47 wiede Exp $
  *
  * This file is (mostly) automatically generated from itcl.decls.
  */
@@ -70,8 +70,8 @@ ITCLAPI int		Itcl_EvalArgs (Tcl_Interp * interp, int objc,
 				Tcl_Obj *CONST objv[]);
 /* 14 */
 ITCLAPI Tcl_Obj*	Itcl_CreateArgs (Tcl_Interp * interp, 
-				CONST char * string, int objc, 
-				Tcl_Obj *CONST objv[]);
+				const char * string, int objc, 
+				Tcl_Obj *const objv[]);
 /* Slot 15 is reserved */
 /* Slot 16 is reserved */
 /* 17 */

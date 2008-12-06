@@ -39,7 +39,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclParse.c,v 1.1.2.50 2008/11/26 21:14:42 wiede Exp $
+ *     RCS:  $Id: itclParse.c,v 1.1.2.51 2008/12/06 23:05:47 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -686,7 +686,13 @@ ItclClassBaseCmd(
 		int isDone;
 		isDone = 0;
 /* FIXME next 2 lines are MEMORY leak!! */
-	        argumentPtr = Tcl_NewStringObj("args", -1);
+		if (imPtr->builtinArgumentPtr == NULL) {
+	            argumentPtr = Tcl_NewStringObj("args", -1);
+		    imPtr->builtinArgumentPtr = argumentPtr;
+		    Tcl_IncrRefCount(imPtr->builtinArgumentPtr);
+		} else {
+		    argumentPtr = imPtr->builtinArgumentPtr;
+		}
 	        bodyPtr = Tcl_NewStringObj("return [", -1);
 		if (strcmp(Tcl_GetString(imPtr->codePtr->bodyPtr),
 		        "@itcl-builtin-cget") == 0) {

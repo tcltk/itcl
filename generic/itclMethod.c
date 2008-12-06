@@ -25,7 +25,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclMethod.c,v 1.1.2.35 2008/11/25 19:16:07 wiede Exp $
+ *     RCS:  $Id: itclMethod.c,v 1.1.2.36 2008/12/06 23:05:47 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -38,7 +38,6 @@ Tcl_ObjCmdProc Itcl_BiMyProcCmd;
 
 static int EquivArgLists(Tcl_Interp *interp, ItclArgList *origArgs,
         ItclArgList *realArgs);
-static void DeleteArgList(ItclArgList *arglistPtr);
 static int ItclCreateMemberCode(Tcl_Interp* interp, ItclClass *iclsPtr,
         CONST char* arglist, CONST char* body, ItclMemberCode** mcodePtr,
         Tcl_Obj *namePtr, int flags);
@@ -74,17 +73,17 @@ NRBodyCmd(
     int objc,                /* number of arguments */
     Tcl_Obj *const *objv)    /* argument objects */
 {
-    int status = TCL_OK;
-
+    Tcl_HashEntry *entry;
+    Tcl_DString buffer;
+    Tcl_Obj *objPtr;
+    ItclClass *iclsPtr;
+    ItclMemberFunc *imPtr;
     char *head;
     char *tail;
     char *token;
     char *arglist;
     char *body;
-    ItclClass *iclsPtr;
-    ItclMemberFunc *imPtr;
-    Tcl_HashEntry *entry;
-    Tcl_DString buffer;
+    int status = TCL_OK;
 
     ItclShowArgs(2, "Itcl_BodyCmd", objc, objv);
     if (objc != 4) {
@@ -126,7 +125,9 @@ NRBodyCmd(
      */
 
     imPtr = NULL;
-    entry = Tcl_FindHashEntry(&iclsPtr->resolveCmds, tail);
+    objPtr = Tcl_NewStringObj(tail, -1);
+    entry = Tcl_FindHashEntry(&iclsPtr->resolveCmds, (char *)objPtr);
+    Tcl_DecrRefCount(objPtr);
     if (entry) {
 	ItclCmdLookup *clookup;
 	clookup = (ItclCmdLookup *)Tcl_GetHashValue(entry);
@@ -1106,15 +1107,16 @@ CallItclObjectCmd(
 {
     ItclMemberFunc *imPtr = data[0];
     Tcl_Object oPtr = data[1];
-    int objc = PTR2INT(data[2]);
     Tcl_Obj **objv = data[3];
-
+    int objc = PTR2INT(data[2]);
+    
     if (oPtr != NULL) {
-        return ItclObjectCmd(imPtr, interp, oPtr, imPtr->iclsPtr->clsPtr,
+        result =  ItclObjectCmd(imPtr, interp, oPtr, imPtr->iclsPtr->clsPtr,
                 objc, objv);
     } else {
-        return ItclObjectCmd(imPtr, interp, NULL, NULL, objc, objv);
+        result = ItclObjectCmd(imPtr, interp, NULL, NULL, objc, objv);
     }
+    return result;
 }
 /*
  * ------------------------------------------------------------------------
@@ -1151,6 +1153,7 @@ Itcl_EvalMemberCode(
     int objc,                 /* number of arguments */
     Tcl_Obj *CONST objv[])    /* argument objects */
 {
+    Tcl_Object oPtr;
     ItclMemberCode *mcode;
     void *callbackPtr;
     int result = TCL_OK;
@@ -1227,12 +1230,12 @@ Itcl_EvalMemberCode(
         if ((mcode->flags & ITCL_IMPLEMENT_TCL) != 0) {
             callbackPtr = Itcl_GetCurrentCallbackPtr(interp);
 	    if (imPtr->flags & (ITCL_CONSTRUCTOR|ITCL_DESTRUCTOR)) {
-                Itcl_NRAddCallback(interp, CallItclObjectCmd, imPtr,
-                        contextIoPtr->oPtr, INT2PTR(objc), (void *)objv);
+	        oPtr = contextIoPtr->oPtr;
 	    } else {
-                Itcl_NRAddCallback(interp, CallItclObjectCmd, imPtr,
-                        NULL, INT2PTR(objc), (void *)objv);
+		oPtr = NULL;
             }
+            Itcl_NRAddCallback(interp, CallItclObjectCmd, imPtr, oPtr,
+	            INT2PTR(objc), (void *)objv);
             result = Itcl_NRRunCallbacks(interp, callbackPtr);
          }
     }
@@ -1424,12 +1427,12 @@ Itcl_GetMemberFuncUsage(
     ItclObject *contextIoPtr,   /* invoked with respect to this object */
     Tcl_Obj *objPtr)            /* returns: string showing usage */
 {
-    int argcount;
-    char *name;
-    char *arglist;
     Tcl_HashEntry *entry;
     ItclMemberFunc *mf;
     ItclClass *iclsPtr;
+    char *name;
+    char *arglist;
+    int argcount;
 
     /*
      *  If the command is a method and an object context was
@@ -1443,7 +1446,9 @@ Itcl_GetMemberFuncUsage(
 
             iclsPtr = (ItclClass*)contextIoPtr->iclsPtr;
             mf = NULL;
-            entry = Tcl_FindHashEntry(&iclsPtr->resolveCmds, "constructor");
+	    objPtr = Tcl_NewStringObj("constructor", -1);
+            entry = Tcl_FindHashEntry(&iclsPtr->resolveCmds, (char *)objPtr);
+	    Tcl_DecrRefCount(objPtr);
             if (entry) {
 		ItclCmdLookup *clookup;
 		clookup = (ItclCmdLookup *)Tcl_GetHashValue(entry);
@@ -1571,7 +1576,7 @@ NRExecMethod(
     if (strstr(token, "::") == NULL) {
 	if (ioPtr != NULL) {
             entry = Tcl_FindHashEntry(&ioPtr->iclsPtr->resolveCmds,
-                Tcl_GetString(imPtr->namePtr));
+                (char *)imPtr->namePtr);
 
             if (entry) {
 		ItclCmdLookup *clookup;
@@ -1791,6 +1796,9 @@ Itcl_ConstructBase(
         Itcl_NRAddCallback(interp, CallPublicObjectCmd, contextClass,
 	        INT2PTR(cmdlinec), cmdlinev, NULL);
         result = Itcl_NRRunCallbacks(interp, callbackPtr);
+	Tcl_DecrRefCount(cmdlinev[0]);
+	Tcl_DecrRefCount(cmdlinev[1]);
+	Tcl_DecrRefCount(cmdlinePtr);
         if (result != TCL_OK) {
 	    return result;
 	}
@@ -1876,12 +1884,13 @@ Itcl_InvokeMethodIfExists(
     Tcl_CallFrame frame;
     ItclMemberFunc *imPtr;
     int cmdlinec;
+    int i;
     int result = TCL_OK;
 
     ItclShowArgs(1, "Itcl_InvokeMethodIfExists", objc, objv);
     Tcl_Obj *objPtr = Tcl_NewStringObj(name, -1);
     hPtr = Tcl_FindHashEntry(&contextClassPtr->functions, (char *)objPtr);
-
+    Tcl_DecrRefCount(objPtr);
     if (hPtr) {
         imPtr  = (ItclMemberFunc*)Tcl_GetHashValue(hPtr);
 
@@ -1900,11 +1909,13 @@ Itcl_InvokeMethodIfExists(
         Itcl_PreserveData((ClientData)imPtr);
 
 	if (contextObjectPtr->oPtr == NULL) {
+            Tcl_DecrRefCount(cmdlinePtr);
             return TCL_ERROR;
 	}
-ItclShowArgs(1, "Itcl_EvalMemberCode", cmdlinec, cmdlinev);
         result = Itcl_EvalMemberCode(interp, imPtr, contextObjectPtr,
 	        cmdlinec, cmdlinev);
+	Tcl_DecrRefCount(cmdlinev[0]);
+	Tcl_DecrRefCount(cmdlinev[1]);
         Itcl_ReleaseData((ClientData)imPtr);
         Tcl_DecrRefCount(cmdlinePtr);
     } else {
@@ -1992,6 +2003,7 @@ Itcl_CmdAliasProc(
     ClientData clientData)
 {
     Tcl_HashEntry *hPtr;
+    Tcl_Obj *objPtr;
     ItclObjectInfo *infoPtr;
     ItclClass *iclsPtr;
     ItclObject *ioPtr;
@@ -2012,7 +2024,9 @@ Itcl_CmdAliasProc(
 	return NULL;
     }
     iclsPtr = Tcl_GetHashValue(hPtr);
-    hPtr = Tcl_FindHashEntry(&iclsPtr->resolveCmds, cmdName);
+    objPtr = Tcl_NewStringObj(cmdName, -1);
+    hPtr = Tcl_FindHashEntry(&iclsPtr->resolveCmds, (char *)objPtr);
+    Tcl_DecrRefCount(objPtr);
     if (hPtr == NULL) {
 	if (strcmp(cmdName, "info") == 0) {
 	    return Tcl_FindCommand(interp, "::itcl::builtin::Info", NULL, 0);
