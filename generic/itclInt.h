@@ -9,7 +9,7 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itclInt.h,v 1.17.2.54 2008/12/06 23:05:47 wiede Exp $
+ * RCS: @(#) $Id: itclInt.h,v 1.17.2.55 2008/12/07 22:52:16 wiede Exp $
  */
 
 #include <string.h>
@@ -199,6 +199,11 @@ typedef struct ItclObjectInfo {
     Tcl_Obj *unknownNamePtr;
     Tcl_Obj *unknownArgumentPtr;
     Tcl_Obj *unknownBodyPtr;
+    Tcl_Obj *infoVarsPtr;
+    Tcl_Obj *infoVars2Ptr;
+    Tcl_Obj *infoVars3Ptr;
+    Tcl_Obj *infoVars4Ptr;
+    Tcl_Obj *typeDestructorArgumentPtr;
 } ItclObjectInfo;
 
 typedef struct EnsembleInfo {
@@ -785,6 +790,7 @@ MODULE_SCOPE int ItclCreateDelegatedFunction(Tcl_Interp *interp,
 	ItclDelegatedFunction **idmPtrPtr);
 MODULE_SCOPE void ItclDeleteDelegatedOption(char *cdata);
 MODULE_SCOPE void Itcl_FinishList();
+MODULE_SCOPE void ItclDeleteDelegatedFunction(ItclDelegatedFunction *idmPtr);
 
 
 
