@@ -25,7 +25,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclMethod.c,v 1.1.2.36 2008/12/06 23:05:47 wiede Exp $
+ *     RCS:  $Id: itclMethod.c,v 1.1.2.37 2008/12/07 21:44:38 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -454,8 +454,8 @@ ItclCreateMemberFunc(
     Tcl_Interp* interp,            /* interpreter managing this action */
     ItclClass *iclsPtr,            /* class definition */
     Tcl_Obj *namePtr,              /* name of new member */
-    CONST char* arglist,           /* space-separated list of arg names */
-    CONST char* body,              /* body of commands for the method */
+    const char* arglist,           /* space-separated list of arg names */
+    const char* body,              /* body of commands for the method */
     ItclMemberFunc** imPtrPtr,     /* returns: pointer to new method defn */
     int flags)
 {
@@ -523,6 +523,7 @@ ItclCreateMemberFunc(
         imPtr->flags |= ITCL_ARG_SPEC;
     }
     if (mcode->argListPtr) {
+fprintf(stderr, "creamemberfunc!%s!%s!\n", Tcl_GetString(namePtr), arglist);
         ItclCreateArgList(interp, arglist, &imPtr->argcount,
 	        &imPtr->maxargcount, &imPtr->usagePtr,
 		&imPtr->argListPtr, imPtr, NULL);
@@ -772,8 +773,8 @@ static int
 ItclCreateMemberCode(
     Tcl_Interp* interp,            /* interpreter managing this action */
     ItclClass *iclsPtr,            /* class containing this member */
-    CONST char* arglist,           /* space-separated list of arg names */
-    CONST char* body,              /* body of commands for the method */
+    const char* arglist,           /* space-separated list of arg names */
+    const char* body,              /* body of commands for the method */
     ItclMemberCode** mcodePtr,     /* returns: pointer to new implementation */
     Tcl_Obj *namePtr,
     int flags)
@@ -793,6 +794,7 @@ ItclCreateMemberCode(
     memset(mcode, 0, sizeof(ItclMemberCode));
 
     if (arglist) {
+fprintf(stderr, "membercode!%s!%s!\n", Tcl_GetString(namePtr), arglist);
         if (ItclCreateArgList(interp, arglist, &argc, &maxArgc, &usagePtr,
 	        &argListPtr, NULL, NULL) != TCL_OK) {
             Itcl_DeleteMemberCode((char*)mcode);
@@ -1884,7 +1886,6 @@ Itcl_InvokeMethodIfExists(
     Tcl_CallFrame frame;
     ItclMemberFunc *imPtr;
     int cmdlinec;
-    int i;
     int result = TCL_OK;
 
     ItclShowArgs(1, "Itcl_InvokeMethodIfExists", objc, objv);
@@ -1929,6 +1930,7 @@ Itcl_InvokeMethodIfExists(
 			hPtr = Tcl_FindHashEntry(
 			        &contextClassPtr->delegatedOptions,
 				(char *)objPtr);
+			Tcl_DecrRefCount(objPtr);
 			if (hPtr == NULL) {
 			    Tcl_AppendResult(interp, "type \"",
 			            Tcl_GetString(contextClassPtr->namePtr),
@@ -1954,6 +1956,7 @@ Itcl_InvokeMethodIfExists(
 		    result = Tcl_EvalObjv(interp, objc + 2, newObjv, 0);
 		    Tcl_DecrRefCount(newObjv[1]);
 		    Tcl_DecrRefCount(newObjv[0]);
+		    ckfree((char *)newObjv);
 		    Itcl_PopCallFrame(interp);
 	        }
 	    }
@@ -2476,11 +2479,11 @@ ItclProcErrorProc(
     isFirstLoop = 1;
     upNsPtr = Itcl_GetUplevelNamespace(interp, 1);
     constructorStackIndex = -1;
+    objPtr = NULL;
     while ((callContextPtr != NULL) && (loopCnt > 0)) {
 	imPtr = callContextPtr->imPtr;
         contextIoPtr = callContextPtr->ioPtr;
         objPtr = Tcl_NewStringObj("\n    ", -1);
-        Tcl_IncrRefCount(objPtr);
 
         if (imPtr->flags & ITCL_CONSTRUCTOR) {
 	    /* have to look for classes in construction where the constructor
@@ -2572,17 +2575,20 @@ ItclProcErrorProc(
 	    if (Tcl_DictObjGet(interp, dictPtr, keyPtr, &valuePtr) != TCL_OK) {
 	        /* how should we handle an error ? */
 		Tcl_DecrRefCount(keyPtr);
+                Tcl_DecrRefCount(objPtr);
 		return;
 	    }
             if (valuePtr == NULL) {
 	        /* how should we handle an error ? */
 		Tcl_DecrRefCount(keyPtr);
+                Tcl_DecrRefCount(objPtr);
 		return;
 	    }
             if (Tcl_GetIntFromObj(interp, valuePtr, &lineNo) != TCL_OK) {
 	        /* how should we handle an error ? */
 		Tcl_DecrRefCount(keyPtr);
 	        Tcl_DecrRefCount(valuePtr);
+                Tcl_DecrRefCount(objPtr);
 		return;
 	    }
 	    Tcl_DecrRefCount(keyPtr);
@@ -2597,6 +2603,10 @@ ItclProcErrorProc(
 
         Tcl_AddErrorInfo(interp, Tcl_GetString(objPtr));
         Tcl_DecrRefCount(objPtr);
+	objPtr = NULL;
         loopCnt--;
+    }
+    if (objPtr != NULL) {
+        Tcl_DecrRefCount(objPtr);
     }
 }

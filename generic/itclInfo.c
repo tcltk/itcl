@@ -24,7 +24,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclInfo.c,v 1.1.2.32 2008/12/06 23:05:47 wiede Exp $
+ *     RCS:  $Id: itclInfo.c,v 1.1.2.33 2008/12/07 21:44:38 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -340,6 +340,14 @@ static const struct NameProcMap2 infoCmdsDelegated2[] = {
  *  Returns TCL_OK/TCL_ERROR to indicate success/failure.
  * ------------------------------------------------------------------------
  */
+void
+ItclDeleteInfoSubCmd(
+    ClientData clientData)
+{
+/*
+fprintf(stderr, "ItclDeleteInfoSubCmd!%p!\n", clientData);
+*/
+}
 int
 ItclInfoInit(
     Tcl_Interp *interp)      /* current interpreter */
@@ -367,7 +375,7 @@ ItclInfoInit(
     Tcl_Export(interp, nsPtr, "[a-z]*", 1);
     for (i=0 ; infoCmds2[i].name!=NULL ; i++) {
         Tcl_CreateObjCommand(interp, infoCmds2[i].name,
-                infoCmds2[i].proc, infoPtr, NULL);
+                infoCmds2[i].proc, infoPtr, ItclDeleteInfoSubCmd);
     }
     ensObjPtr = Tcl_NewStringObj("::itcl::builtin::Info", -1);
     unkObjPtr = Tcl_NewStringObj("::itcl::builtin::Info::unknown", -1);
@@ -398,7 +406,6 @@ ItclInfoInit(
     }
     ensObjPtr = Tcl_NewStringObj("::itcl::builtin::Info::delegated",
             -1);
-    Tcl_IncrRefCount(ensObjPtr);
     unkObjPtr = Tcl_NewStringObj(
             "::itcl::builtin::Info::delegated::unknown", -1);
     result = TCL_OK;

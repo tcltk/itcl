@@ -39,7 +39,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclParse.c,v 1.1.2.51 2008/12/06 23:05:47 wiede Exp $
+ *     RCS:  $Id: itclParse.c,v 1.1.2.52 2008/12/07 21:44:38 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -100,6 +100,7 @@ Tcl_ObjCmdProc Itcl_ClassMethodVariableCmd;
 Tcl_ObjCmdProc Itcl_ClassTypeConstructorCmd;
 Tcl_ObjCmdProc Itcl_ClassHullTypeCmd;
 Tcl_ObjCmdProc Itcl_ClassWidgetClassCmd;
+Tcl_ObjCmdProc Itcl_EnsembleDeleteCmd;
 
 static const struct {
     const char *name;
@@ -277,6 +278,14 @@ Itcl_ParseInit(
     if (Itcl_AddEnsemblePart(interp, "::itcl::delete",
             "object", "name ?name...?",
             Itcl_DelObjectCmd,
+            (ClientData)infoPtr, Itcl_ReleaseData) != TCL_OK) {
+        return TCL_ERROR;
+    }
+    Itcl_PreserveData((ClientData)infoPtr);
+
+    if (Itcl_AddEnsemblePart(interp, "::itcl::delete",
+            "ensemble", "name ?name...?",
+            Itcl_EnsembleDeleteCmd,
             (ClientData)infoPtr, Itcl_ReleaseData) != TCL_OK) {
         return TCL_ERROR;
     }
@@ -811,8 +820,9 @@ ItclClassBaseCmd(
 	    }
 	    if (iclsPtr->flags & (ITCL_TYPE|ITCL_WIDGET|ITCL_WIDGETADAPTOR)) {
 		if (argumentPtr == NULL) {
-		    /* FIXME check why argumentPtr is NULL for destructor!! */
-		    argumentPtr = Tcl_NewStringObj("", -1);
+		    argumentPtr = iclsPtr->infoPtr->typeDestructorArgumentPtr;
+		    imPtr->codePtr->argumentPtr = argumentPtr;
+		    Tcl_IncrRefCount(argumentPtr);
 		}
 	        imPtr->tmPtr = (ClientData)Itcl_NewProcMethod(interp,
 	            iclsPtr->oPtr, ItclCheckCallMethod, ItclAfterCallMethod,
@@ -936,6 +946,7 @@ ItclCheckForInitializedComponents(
 		    Tcl_AppendToObj(objPtr, Tcl_GetString(
 		            idmPtr->icPtr->ivPtr->namePtr), -1);
 	            val = Tcl_GetVar2(interp, Tcl_GetString(objPtr), NULL, 0);
+		    Tcl_DecrRefCount(objPtr);
 		} else {
 	            val = Tcl_GetVar2(interp,
 	                    Tcl_GetString(idmPtr->icPtr->ivPtr->namePtr),
@@ -2290,6 +2301,7 @@ ItclParseOption(
     int readOnly;
     int newObjc;
     int foundOption;
+    int result;
     int i;
 
     ItclShowArgs(1, "ItclParseOption", objc, objv);
@@ -2308,6 +2320,8 @@ ItclParseOption(
 	}
     }
 
+    argv = NULL;
+    newObjv = NULL;
     defaultValue = NULL;
     cgetMethod = NULL;
     configureMethod = NULL;
@@ -2324,7 +2338,8 @@ ItclParseOption(
 	if (hPtr != NULL) {
 	    Tcl_AppendResult(interp, "cannot define option \"", optionName,
 	            "\" locally, it has already been delegated", NULL);
-	    return TCL_ERROR;
+	    result = TCL_ERROR;
+	    goto errorOut;
 	}
     }
     if (ioPtr != NULL) {
@@ -2334,7 +2349,8 @@ ItclParseOption(
 	if (hPtr != NULL) {
 	    Tcl_AppendResult(interp, "cannot define option \"", optionName,
 	            "\" locally, it has already been delegated", NULL);
-	    return TCL_ERROR;
+	    result = TCL_ERROR;
+	    goto errorOut;
 	}
     }
     newObjv = (Tcl_Obj **)ckalloc(sizeof(Tcl_Obj *)*objc);
@@ -2344,7 +2360,8 @@ ItclParseOption(
 	if (*token == '-') {
 	    if (objc < i+1) {
                 Tcl_WrongNumArgs(interp, 1, objv, usage);
-	        return TCL_ERROR;
+	        result = TCL_ERROR;
+	        goto errorOut;
 	    }
 	    if (strcmp(token, "-default") == 0) {
 	        foundOption = 1;
@@ -2406,25 +2423,29 @@ ItclParseOption(
         Tcl_AppendResult(interp,
 	        "option -cgetmethod and -cgetmethodvar cannot be used both",
 		NULL);
-	return TCL_ERROR;
+        result = TCL_ERROR;
+        goto errorOut;
     }
     if ((configureMethod != NULL) && (configureMethodVar != NULL)) {
         Tcl_AppendResult(interp,
 	        "option -configuremethod and -configuremethodvar",
 		"cannot be used both",
 		NULL);
-	return TCL_ERROR;
+        result = TCL_ERROR;
+        goto errorOut;
     }
     if ((validateMethod != NULL) && (validateMethodVar != NULL)) {
         Tcl_AppendResult(interp,
 	        "option -validatemethod and -validatemethodvar",
 		"cannot be used both",
 		NULL);
-	return TCL_ERROR;
+        result = TCL_ERROR;
+        goto errorOut;
     }
     if (newObjc < 1) {
         Tcl_AppendResult(interp, usage, NULL);
-	return TCL_ERROR;
+        result = TCL_ERROR;
+        goto errorOut;
     }
     resourceName = NULL;
     className = NULL;
@@ -2432,13 +2453,15 @@ ItclParseOption(
     nameSpecPtr = newObjv[0];
     token = Tcl_GetString(nameSpecPtr);
     if (Tcl_SplitList(interp, (const char *)token, &argc, &argv) != TCL_OK) {
-        return TCL_ERROR;
+        result = TCL_ERROR;
+        goto errorOut;
     }
     name = argv[0];
     if (*name != '-') {
 	Tcl_AppendResult(interp, "bad option name \"", name,
 	        "\", options must start with a \"-\"", NULL);
-        return TCL_ERROR;
+        result = TCL_ERROR;
+        goto errorOut;
     }
 
     /*
@@ -2449,13 +2472,15 @@ ItclParseOption(
         Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
                 "bad option name \"", name,
 	        "\", option names must not contain \"::\"", (char*)NULL);
-        return TCL_ERROR;
+        result = TCL_ERROR;
+        goto errorOut;
     }
     if (strstr(name, " ")) {
         Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
                 "bad option name \"", name,
 	        "\", option names must not contain \" \"", (char*)NULL);
-        return TCL_ERROR;
+        result = TCL_ERROR;
+        goto errorOut;
     }
     const char *cp;
     cp = name;
@@ -2463,7 +2488,8 @@ ItclParseOption(
         if (isupper(*cp)) {
 	    Tcl_AppendResult(interp, "bad option name \"", name, "\" ",
 	            ", options must not contain uppercase characters", NULL);
-            return TCL_ERROR;
+            result = TCL_ERROR;
+            goto errorOut;
 	}
 	cp++;
     }
@@ -2492,11 +2518,13 @@ ItclParseOption(
         ioptPtr->protection = ITCL_PROTECTED;
     }
     ioptPtr->namePtr      = Tcl_NewStringObj(name, -1);
+fprintf(stderr, "PARSE OPT!%s!%p!\n", name, ioptPtr->namePtr);
     Tcl_IncrRefCount(ioptPtr->namePtr);
     ioptPtr->resourceNamePtr = Tcl_NewStringObj(resourceName, -1);
     Tcl_IncrRefCount(ioptPtr->resourceNamePtr);
     ioptPtr->classNamePtr = Tcl_NewStringObj(Tcl_GetString(classNamePtr), -1);
     Tcl_IncrRefCount(ioptPtr->classNamePtr);
+    Tcl_DecrRefCount(classNamePtr);
 
     if (init) {
         ioptPtr->defaultValuePtr = Tcl_NewStringObj(init, -1);
@@ -2530,10 +2558,16 @@ ItclParseOption(
         ioptPtr->flags |= ITCL_OPTION_READONLY;
     }
 
-    ckfree((char *)argv);
-    ckfree((char *)newObjv);
     *ioptPtrPtr = ioptPtr;
-    return TCL_OK;
+    result = TCL_OK;
+errorOut:
+    if (argv != NULL) {
+        ckfree((char *)argv);
+    }
+    if (newObjv != NULL) {
+        ckfree((char *)newObjv);
+    }
+    return result;
 }
 
 /*
@@ -3090,11 +3124,14 @@ delegate method * ?to <componentName>? ?using <pattern>? ?except <methods>?";
 	if (hPtr != NULL) {
 	    Tcl_AppendResult(interp, "method \"", methodName,
 	            "\" has been defined locally", NULL);
-	    return TCL_ERROR;
+	    result = TCL_ERROR;
+	    goto errorOut;
 	}
     }
     result = ItclCreateDelegatedFunction(interp, methodNamePtr, icPtr,
             targetPtr, usingPtr, exceptionsPtr, idmPtrPtr);
+errorOut:
+    Tcl_DecrRefCount(methodNamePtr);
     return result;
 }
 
@@ -3225,16 +3262,19 @@ Itcl_HandleDelegateOptionCmd(
     if ((argc < 1) || (isStarOption && (argc > 1))) {
         Tcl_AppendResult(interp, "<optionDef> must be either \"*\" or ",
 	       "\"<optionName> <resourceName> <className>\"", NULL);
+	ckfree((char *)argv);
 	return TCL_ERROR;
     }
     if (isStarOption && (argc > 3)) {
         Tcl_AppendResult(interp, "<optionDef> syntax should be: ",
 	       "\"<optionName> <resourceName> <className>\"", NULL);
+	ckfree((char *)argv);
 	return TCL_ERROR;
     }
     if ((*option != '-') && !isStarOption) {
 	Tcl_AppendResult(interp, "bad delegated option name \"", option,
 	        "\", options must start with a \"-\"", NULL);
+	ckfree((char *)argv);
         return TCL_ERROR;
     }
     /*
@@ -3245,12 +3285,14 @@ Itcl_HandleDelegateOptionCmd(
         Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
                 "bad option name \"", option,
 	        "\", option names must not contain \"::\"", (char*)NULL);
+	ckfree((char *)argv);
         return TCL_ERROR;
     }
     if (strstr(option, " ")) {
         Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
                 "bad option name \"", option,
 	        "\", option names must not contain \" \"", (char*)NULL);
+	ckfree((char *)argv);
         return TCL_ERROR;
     }
     const char *cp;
@@ -3259,6 +3301,7 @@ Itcl_HandleDelegateOptionCmd(
         if (isupper(*cp)) {
 	    Tcl_AppendResult(interp, "bad option name \"", option, "\" ",
 	            ", options must not contain uppercase characters", NULL);
+	    ckfree((char *)argv);
             return TCL_ERROR;
 	}
 	cp++;
@@ -3281,7 +3324,7 @@ Itcl_HandleDelegateOptionCmd(
         token = Tcl_GetString(objv[i]);
 	if (i+1 == objc) {
 	    Tcl_AppendResult(interp, "wrong # args should be ", usageStr, NULL);
-	    return TCL_ERROR;
+	    goto errorOut1;
 	}
 	foundOpt = 0;
 	if (strcmp(token, "to") == 0) {
@@ -3303,25 +3346,18 @@ Itcl_HandleDelegateOptionCmd(
         if (!foundOpt) {
 	    Tcl_AppendResult(interp, "bad option \"", token, "\" should be ",
 	            usageStr, NULL);
-	    return TCL_ERROR;
+	    goto errorOut1;
 	}
     }
     if (component == NULL) {
 	Tcl_AppendResult(interp, "missing to should be: ", usageStr, NULL);
-	return TCL_ERROR;
+	goto errorOut1;
     }
     if ((*option == '*') && (targetPtr != NULL)) {
 	Tcl_AppendResult(interp,
 	        "cannot specify \"as\" with \"delegate option *\"", NULL);
-	return TCL_ERROR;
+	goto errorOut1;
     }
-#ifdef NOTDEF
-    if ((*option == '*') && (exceptionsPtr != NULL)) {
-	Tcl_AppendResult(interp,
-	        "cannot specify \"except\" with \"delegate option *\"", NULL);
-	return TCL_ERROR;
-    }
-#endif
     /* check for already delegated */
     allOptionNamePtr = Tcl_NewStringObj("*", -1);
     Tcl_IncrRefCount(allOptionNamePtr);
@@ -3336,7 +3372,7 @@ Itcl_HandleDelegateOptionCmd(
     if (hPtr != NULL) {
         Tcl_AppendResult(interp, "option \"", option,
 	        "\" is already delegated", NULL);
-        return TCL_ERROR;
+	goto errorOut1;
     }
 
     if (ioPtr != NULL) {
@@ -3356,7 +3392,7 @@ Itcl_HandleDelegateOptionCmd(
 	if (componentPtr != NULL) {
             if (ItclCreateComponent(interp, iclsPtr, componentPtr,
 	            ITCL_COMMON, &icPtr) != TCL_OK) {
-                return TCL_ERROR;
+	        goto errorOut1;
             }
             hPtr = Tcl_FindHashEntry(&iclsPtr->components,
 	            (char *)componentPtr);
@@ -3379,6 +3415,7 @@ Itcl_HandleDelegateOptionCmd(
 	if (hPtr != NULL) {
 	    Tcl_AppendResult(interp, "option \"", option,
 	            "\" has been defined locally", NULL);
+	    goto errorOut1;
 	    return TCL_ERROR;
 	}
     }
@@ -3401,6 +3438,7 @@ Itcl_HandleDelegateOptionCmd(
         idoPtr->classNamePtr = Tcl_NewStringObj(
 	        Tcl_GetString(classNamePtr), -1);
 	Tcl_IncrRefCount(idoPtr->classNamePtr);
+	Tcl_DecrRefCount(classNamePtr);
 
     } else {
         idoPtr->namePtr = optionNamePtr;
@@ -3415,29 +3453,32 @@ Itcl_HandleDelegateOptionCmd(
     if (exceptionsPtr != NULL) {
         if (Tcl_SplitList(interp, Tcl_GetString(exceptionsPtr), &argc, &argv)
 	        != TCL_OK) {
-	    return TCL_ERROR;
+	    goto errorOut2;
 	}
         for(i=0;i<argc;i++) {
 	    Tcl_Obj *objPtr;
 	    objPtr = Tcl_NewStringObj(argv[i], -1);
 	    hPtr = Tcl_CreateHashEntry(&idoPtr->exceptions, (char *)objPtr,
 	            &isNew);
-#ifdef NOTDEF
-	    hPtr2 = Tcl_FindHashEntry(&iclsPtr->options, (char *)objPtr);
-/* FIXME !!! can only be done after a class/widget has been parsed completely !! */
-	    if (hPtr2 == NULL) {
-	        Tcl_AppendResult(interp, "no such option: \"",
-		        Tcl_GetString(objPtr), "\" found for delegation", NULL);
-	        return TCL_ERROR;
-	    }
-	    Tcl_SetHashValue(hPtr, Tcl_GetHashValue(hPtr2));
-#endif
 	}
     }
     if (idoPtrPtr != NULL) {
         *idoPtrPtr = idoPtr;
     }
+    ckfree((char *)argv);
     return TCL_OK;
+errorOut2:
+    /* FIXME need to decr additional refCount's !! */
+errorOut1:
+    Tcl_DecrRefCount(optionNamePtr);
+    if (resourceNamePtr != NULL) {
+        Tcl_DecrRefCount(resourceNamePtr);
+    }
+    if (classNamePtr != NULL) {
+        Tcl_DecrRefCount(classNamePtr);
+    }
+    ckfree((char *)argv);
+    return TCL_ERROR;
 }
 
 /*
@@ -3518,7 +3559,6 @@ Itcl_ClassDelegateTypeMethodCmd(
     Tcl_Obj *usingPtr;
     Tcl_Obj *exceptionsPtr;
     Tcl_HashEntry *hPtr;
-    Tcl_HashEntry *hPtr2;
     ItclObjectInfo *infoPtr;
     ItclClass *iclsPtr;
     ItclComponent *icPtr;
@@ -3527,8 +3567,6 @@ Itcl_ClassDelegateTypeMethodCmd(
     const char *typeMethodName;
     const char *component;
     const char *token;
-    const char **argv;
-    int argc;
     int foundOpt;
     int isNew;
     int i;
@@ -3601,11 +3639,6 @@ delegate typemethod * ?to <componentName>? ?using <pattern>? ?except <typemethod
 	        "cannot specify \"as\" with \"delegate typemethod *\"", NULL);
 	return TCL_ERROR;
     }
-    /* check for already delegated */
-    typeMethodNamePtr = Tcl_NewStringObj(typeMethodName, -1);
-    hPtr = Tcl_FindHashEntry(&iclsPtr->delegatedFunctions, (char *)
-            typeMethodNamePtr);
-
     if (componentPtr != NULL) {
 	hPtr = Tcl_FindHashEntry(&iclsPtr->components, (char *)componentPtr);
 	if (hPtr == NULL) {
@@ -3622,6 +3655,7 @@ delegate typemethod * ?to <componentName>? ?using <pattern>? ?except <typemethod
     idmPtr = (ItclDelegatedFunction *)ckalloc(sizeof(ItclDelegatedFunction));
     memset(idmPtr, 0, sizeof(ItclDelegatedFunction));
     Tcl_InitObjHashTable(&idmPtr->exceptions);
+    typeMethodNamePtr = Tcl_NewStringObj(typeMethodName, -1);
     if (*typeMethodName != '*') {
 	/* FIXME !!! */
         /* check for locally defined typemethod */
@@ -3630,15 +3664,21 @@ delegate typemethod * ?to <componentName>? ?using <pattern>? ?except <typemethod
 	    Tcl_AppendResult(interp, "Error in \"delegate typemethod ",
 	            typeMethodName, "...\", \"", typeMethodName,
 	            "\" has been defined locally.", NULL);
+            Tcl_DeleteHashTable(&idmPtr->exceptions);
+	    ckfree((char *)idmPtr);
+	    Tcl_DecrRefCount(typeMethodNamePtr);
 	    return TCL_ERROR;
 	}
         idmPtr->namePtr = Tcl_NewStringObj(Tcl_GetString(typeMethodNamePtr), -1);
+fprintf(stderr, "TM!%s!%p!\n", Tcl_GetString(typeMethodNamePtr), idmPtr->namePtr);
         Tcl_IncrRefCount(idmPtr->namePtr);
 
     } else {
+	Tcl_DecrRefCount(typeMethodNamePtr);
         typeMethodNamePtr = Tcl_NewStringObj("*", -1);
 	Tcl_IncrRefCount(typeMethodNamePtr);
         idmPtr->namePtr = typeMethodNamePtr;
+	Tcl_IncrRefCount(typeMethodNamePtr);
     }
     idmPtr->icPtr = icPtr;
     idmPtr->asPtr = targetPtr;
@@ -3649,32 +3689,15 @@ delegate typemethod * ?to <componentName>? ?using <pattern>? ?except <typemethod
     if (idmPtr->usingPtr != NULL) {
         Tcl_IncrRefCount(idmPtr->usingPtr);
     }
-    if (exceptionsPtr != NULL) {
-        if (Tcl_SplitList(interp, Tcl_GetString(exceptionsPtr), &argc, &argv)
-	        != TCL_OK) {
-	    return TCL_ERROR;
-	}
-        for(i=0;i<argc;i++) {
-	    Tcl_Obj *objPtr;
-	    objPtr = Tcl_NewStringObj(argv[i], -1);
-	    hPtr2 = Tcl_FindHashEntry(&iclsPtr->functions, (char *)objPtr);
-/* FIXME !!! can only be done after a class/widget has been parsed completely !! */
-#ifdef NOTDEF
-	    if (hPtr2 == NULL) {
-	        Tcl_AppendResult(interp, "no such method: \"",
-		        Tcl_GetString(objPtr), "\" found for delegation", NULL);
-	        return TCL_ERROR;
-	    }
-	    hPtr = Tcl_CreateHashEntry(&idmPtr->exceptions, (char *)objPtr,
-	            &isNew);
-	    Tcl_SetHashValue(hPtr, Tcl_GetHashValue(hPtr2));
-#endif
-	}
-    }
     idmPtr->flags = ITCL_COMMON|ITCL_TYPE_METHOD;
     hPtr = Tcl_CreateHashEntry(&iclsPtr->delegatedFunctions,
             (char *)idmPtr->namePtr, &isNew);
+    if (!isNew) {
+        ItclDeleteDelegatedFunction((ItclDelegatedFunction *)
+	        Tcl_GetHashValue(hPtr));
+    }
     Tcl_SetHashValue(hPtr, idmPtr);
+    Tcl_DecrRefCount(typeMethodNamePtr);
     return TCL_OK;
 }
 /*

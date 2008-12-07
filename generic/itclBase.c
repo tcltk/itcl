@@ -9,7 +9,7 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itclBase.c,v 1.1.2.28 2008/12/06 23:05:47 wiede Exp $
+ * RCS: @(#) $Id: itclBase.c,v 1.1.2.29 2008/12/07 21:44:38 wiede Exp $
  */
 
 #include <stdlib.h>
@@ -282,6 +282,7 @@ Initialize (
      *  it to the itcl namespace for ownership.
      */
     infoPtr = (ItclObjectInfo*)ckalloc(sizeof(ItclObjectInfo));
+fprintf(stderr, "ITCL Initialize!%p!%p!\n", interp, infoPtr);
     memset(infoPtr, 0, sizeof(ItclObjectInfo));
     infoPtr->interp = interp;
     infoPtr->class_meta_type = (Tcl_ObjectMetadataType *)ckalloc(
@@ -317,6 +318,8 @@ Initialize (
     infoPtr->currContextIclsPtr = NULL;
     infoPtr->currClassFlags = 0;
     infoPtr->buildingWidget = 0;
+    infoPtr->typeDestructorArgumentPtr = Tcl_NewStringObj("", -1);
+    Tcl_IncrRefCount(infoPtr->typeDestructorArgumentPtr);
 char *res_option = getenv("ITCL_USE_OLD_RESOLVERS");
 int opt;
 if (res_option == NULL) {
@@ -542,20 +545,24 @@ ItclFinishCmd(
     Tcl_HashSearch place;
     Tcl_Namespace *nsPtr;
     Tcl_Obj *objPtr;
+    Tcl_Obj *objPtr2;
     Tcl_Obj *ensObjPtr;
+    Tcl_Command infoCmd;
     ItclObjectInfo *infoPtr;
     ItclCmdsInfo *iciPtr;
     int i;
     int result;
 
-    ItclShowArgs(0, "ItclFinishCmd", objc, objv);
+    ItclShowArgs(1, "ItclFinishCmd", objc, objv);
     infoPtr = Tcl_GetAssocData(interp, ITCL_INTERP_DATA, NULL);
     for (i = 0; ;i++) {
         iciPtr = &itclCmds[i];
         if (iciPtr->name == NULL) {
 	    break;
 	}
-        result = Itcl_RenameCommand(interp, iciPtr->name, "");
+	if ((iciPtr->flags & ITCL_IS_ENSEMBLE) == 0) {
+            result = Itcl_RenameCommand(interp, iciPtr->name, "");
+	}
         iciPtr++;
     }
     while (1) {
@@ -564,11 +571,13 @@ ItclFinishCmd(
 	    break;
 	}
         objPtr = Tcl_GetHashValue(hPtr);
-	if (objPtr != NULL) {
+        objPtr2 = (Tcl_Obj *)Tcl_GetHashKey(&infoPtr->myEnsembles, hPtr);
+	if (objPtr2 != NULL) {
 	    nsPtr = Tcl_FindNamespace(interp, Tcl_GetString(objPtr), NULL, 0);
 	    if (nsPtr != NULL) {
                Tcl_DeleteNamespace(nsPtr);
 	    }
+	    Itcl_RenameCommand(interp, Tcl_GetString(objPtr2), "");
 	    Tcl_DeleteHashEntry(hPtr);
             Tcl_DecrRefCount(objPtr);
 	}
@@ -587,20 +596,56 @@ ItclFinishCmd(
     if (nsPtr != NULL) {
         Tcl_DeleteNamespace(nsPtr);
     }
+
     ensObjPtr = Tcl_NewStringObj("::itcl::builtin::Info", -1);
     Tcl_SetEnsembleUnknownHandler(NULL,
             Tcl_FindEnsemble(interp, ensObjPtr, TCL_LEAVE_ERR_MSG),
 	    NULL);
     Tcl_DecrRefCount(ensObjPtr);
+
+    /* remove the itclinfo and vars entry from the info dict */
+    infoCmd = Tcl_FindCommand(interp, "info", NULL, TCL_GLOBAL_ONLY);
+    if (infoCmd != NULL && Tcl_IsEnsemble(infoCmd)) {
+        Tcl_Obj *mapDict;
+
+        Tcl_GetEnsembleMappingDict(NULL, infoCmd, &mapDict);
+        if (mapDict != NULL) {
+	    /* FIXME have to figure out why the refCount of
+	     * ::itcl::builtin::Info
+	     * and ::itcl::builtin::Info::vars is 2 and 1 for vars here !! */
+            Tcl_DecrRefCount(infoPtr->infoVars2Ptr);
+            Tcl_DecrRefCount(infoPtr->infoVars3Ptr);
+            Tcl_DecrRefCount(infoPtr->infoVars4Ptr);
+
+
+            objPtr = Tcl_NewStringObj("itclinfo", -1);
+	    Tcl_DictObjRemove(interp, mapDict, objPtr);
+	    Tcl_DecrRefCount(objPtr);
+            objPtr = Tcl_NewStringObj("vars", -1);
+	    Tcl_DictObjRemove(interp, mapDict, objPtr);
+	    Tcl_DecrRefCount(objPtr);
+            objPtr = Tcl_NewStringObj("vars", -1);
+	    Tcl_DictObjPut(interp, mapDict, objPtr, infoPtr->infoVarsPtr);
+	    Tcl_DecrRefCount(objPtr);
+	    Tcl_SetEnsembleMappingDict(interp, infoCmd, mapDict);
+        }
+    }
+
+    Tcl_DecrRefCount(infoPtr->typeDestructorArgumentPtr);
+
+    /* remove the unknown method from top class */
     Tcl_DecrRefCount(infoPtr->unknownNamePtr);
     /* FIXME need double Decr, don't know why !! */
     Tcl_DecrRefCount(infoPtr->unknownNamePtr);
     Tcl_DecrRefCount(infoPtr->unknownArgumentPtr);
     Tcl_DecrRefCount(infoPtr->unknownBodyPtr);
+
     ckfree((char *)infoPtr->ensembleInfo);
     ckfree((char *)infoPtr->object_meta_type);
     ckfree((char *)infoPtr->class_meta_type);
     Itcl_ReleaseData((ClientData)infoPtr);
+
+    /* clean up list pool */
     Itcl_FinishList();
     return TCL_OK;
 }

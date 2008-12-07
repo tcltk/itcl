@@ -24,7 +24,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann Copyright (c) 2007
  *
- *     RCS:  $Id: itclObject.c,v 1.1.2.56 2008/12/06 23:05:47 wiede Exp $
+ *     RCS:  $Id: itclObject.c,v 1.1.2.57 2008/12/07 21:44:38 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -556,6 +556,7 @@ fprintf(stderr, "after Tcl_NewObjectInstance oPtr == NULL\n");
             } else {
                 Tcl_AppendResult(interp, Tcl_GetString(objPtr), NULL);
 	    }
+	    Tcl_DecrRefCount(objPtr);
 	}
     } else {
         if (ioPtr->accessCmd != NULL) {
@@ -984,6 +985,7 @@ ItclInitObjectVariables(
 	                            TCL_TRACE_WRITES, ItclTraceComponentVar,
 	                            (ClientData)ioPtr);
 		        }
+		        Tcl_DecrRefCount(objPtr2);
 		    } else {
                         Tcl_TraceVar2(interp,
 		                varName, NULL,
@@ -2245,7 +2247,7 @@ ItclTraceComponentVar(
         ioPtr = (ItclObject*)cdata;
         objPtr = Tcl_NewStringObj(name1, -1);
 	hPtr = Tcl_FindHashEntry(&ioPtr->objectComponents, (char *)objPtr);
-
+        Tcl_DecrRefCount(objPtr);
 
         /*
          *  Handle write traces
@@ -2695,6 +2697,7 @@ ItclObjectCmd(
     result = Itcl_NRRunCallbacks(interp, callbackPtr);
     if (methodNamePtr != NULL) {
         ckfree((char *)newObjv);
+        Tcl_DecrRefCount(methodNamePtr);
     }
     if (myPtr != NULL) {
         Tcl_DecrRefCount(myPtr);
@@ -2938,6 +2941,7 @@ ExpandDelegateAs(
 	    int hadDoublePercent;
             Tcl_Obj *strPtr;
 
+	    strPtr = NULL;
 	    hadDoublePercent = 0;
 	    cp = Tcl_GetString(idmPtr->usingPtr);
 	    ep = cp;
@@ -2970,6 +2974,7 @@ ExpandDelegateAs(
 			        Tcl_GetString(componentNamePtr), -1);
                         val = Tcl_GetVar2(interp, Tcl_GetString(objPtr),
 			        NULL, 0);
+			Tcl_DecrRefCount(objPtr);
 			Tcl_AppendToObj(strPtr,
 			        val, -1);
 		        break;
@@ -3040,8 +3045,10 @@ ExpandDelegateAs(
 			Tcl_AppendResult(interp,
 			        "there is no %%", buf, " substitution",
 				NULL);
+			if (strPtr != NULL) {
+			    Tcl_DecrRefCount(strPtr);
+			}
 			return TCL_ERROR;
-		        break;
 		      }
 		    }
 		    Tcl_ListObjAppendElement(interp, listPtr, strPtr);
@@ -3081,6 +3088,9 @@ ExpandDelegateAs(
 	                    Tcl_NewStringObj(cp, ep-cp-1));
 	        }
 	    }
+	    if (strPtr != NULL) {
+	        Tcl_DecrRefCount(strPtr);
+	    }
 	} else {
             Tcl_ListObjAppendElement(interp, listPtr, idmPtr->namePtr);
         }
@@ -3119,6 +3129,7 @@ DelegateFunction(
     result = ExpandDelegateAs(interp, ioPtr, iclsPtr, idmPtr,
             Tcl_GetString(idmPtr->namePtr), listPtr);
     if (result != TCL_OK) {
+	Tcl_DecrRefCount(listPtr);
         return result;
     }
     val = Tcl_GetString(listPtr);
@@ -3237,6 +3248,7 @@ DelegationInstall(
 	        /* FIXME need code here!!! */
 	    }
 	    val = Tcl_GetVar2(interp, Tcl_GetString(objPtr), NULL, 0);
+	    Tcl_DecrRefCount(objPtr);
 	    componentValuePtr = Tcl_NewStringObj(val, -1);
             Tcl_IncrRefCount(componentValuePtr);
 	} else {

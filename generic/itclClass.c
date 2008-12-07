@@ -25,7 +25,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann Copyright (c) 2007
  *
- *     RCS:  $Id: itclClass.c,v 1.1.2.42 2008/12/06 23:05:47 wiede Exp $
+ *     RCS:  $Id: itclClass.c,v 1.1.2.43 2008/12/07 21:44:38 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -46,11 +46,6 @@ static void ItclFreeClass (char* cdata);
 static void ItclDeleteFunction(ItclMemberFunc *imPtr);
 static void ItclDeleteComponent(ItclComponent *icPtr);
 static void ItclDeleteOption(char *cdata);
-
-#ifdef NOTDEF
-static void ItclDeleteDelegatedOption(ItclDelegatedOption *idoPtr);
-#endif
-static void ItclDeleteDelegatedFunction(ItclDelegatedFunction *idmPtr);
 
 
 /*
@@ -2349,6 +2344,7 @@ ItclDeleteOption(
     ItclOption *ioptPtr;
 
     ioptPtr = (ItclOption *)cdata;
+fprintf(stderr, "DEL OPT!%s!%p!%d!\n", Tcl_GetString(ioptPtr->namePtr), ioptPtr->namePtr, Itcl_GetRefCount(ioptPtr->namePtr));
     Tcl_DecrRefCount(ioptPtr->namePtr);
     Tcl_DecrRefCount(ioptPtr->fullNamePtr);
     if (ioptPtr->resourceNamePtr != NULL) {
@@ -2491,7 +2487,7 @@ ItclDeleteDelegatedOption(
  *  free data associated with a delegated function
  * ------------------------------------------------------------------------
  */
-static void ItclDeleteDelegatedFunction(
+void ItclDeleteDelegatedFunction(
     ItclDelegatedFunction *idmPtr)
 {
     Tcl_Obj *objPtr;
