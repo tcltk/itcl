@@ -25,7 +25,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclMethod.c,v 1.1.2.37 2008/12/07 21:44:38 wiede Exp $
+ *     RCS:  $Id: itclMethod.c,v 1.1.2.38 2008/12/07 21:50:48 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -523,7 +523,6 @@ ItclCreateMemberFunc(
         imPtr->flags |= ITCL_ARG_SPEC;
     }
     if (mcode->argListPtr) {
-fprintf(stderr, "creamemberfunc!%s!%s!\n", Tcl_GetString(namePtr), arglist);
         ItclCreateArgList(interp, arglist, &imPtr->argcount,
 	        &imPtr->maxargcount, &imPtr->usagePtr,
 		&imPtr->argListPtr, imPtr, NULL);
@@ -794,7 +793,6 @@ ItclCreateMemberCode(
     memset(mcode, 0, sizeof(ItclMemberCode));
 
     if (arglist) {
-fprintf(stderr, "membercode!%s!%s!\n", Tcl_GetString(namePtr), arglist);
         if (ItclCreateArgList(interp, arglist, &argc, &maxArgc, &usagePtr,
 	        &argListPtr, NULL, NULL) != TCL_OK) {
             Itcl_DeleteMemberCode((char*)mcode);

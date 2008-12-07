@@ -39,7 +39,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclParse.c,v 1.1.2.52 2008/12/07 21:44:38 wiede Exp $
+ *     RCS:  $Id: itclParse.c,v 1.1.2.53 2008/12/07 21:50:48 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -2518,7 +2518,6 @@ ItclParseOption(
         ioptPtr->protection = ITCL_PROTECTED;
     }
     ioptPtr->namePtr      = Tcl_NewStringObj(name, -1);
-fprintf(stderr, "PARSE OPT!%s!%p!\n", name, ioptPtr->namePtr);
     Tcl_IncrRefCount(ioptPtr->namePtr);
     ioptPtr->resourceNamePtr = Tcl_NewStringObj(resourceName, -1);
     Tcl_IncrRefCount(ioptPtr->resourceNamePtr);
@@ -3670,7 +3669,6 @@ delegate typemethod * ?to <componentName>? ?using <pattern>? ?except <typemethod
 	    return TCL_ERROR;
 	}
         idmPtr->namePtr = Tcl_NewStringObj(Tcl_GetString(typeMethodNamePtr), -1);
-fprintf(stderr, "TM!%s!%p!\n", Tcl_GetString(typeMethodNamePtr), idmPtr->namePtr);
         Tcl_IncrRefCount(idmPtr->namePtr);
 
     } else {
