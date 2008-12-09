@@ -9,7 +9,7 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itclBase.c,v 1.1.2.31 2008/12/09 12:09:01 wiede Exp $
+ * RCS: @(#) $Id: itclBase.c,v 1.1.2.32 2008/12/09 23:58:21 wiede Exp $
  */
 
 #include <stdlib.h>
@@ -154,7 +154,9 @@ static ItclCmdsInfo itclCmds [] = {
     { "::itcl::is", ITCL_IS_ENSEMBLE},
     { "::itcl::filter", ITCL_IS_ENSEMBLE},
     { "::itcl::forward", ITCL_IS_ENSEMBLE},
+    { "::itcl::import::stub", ITCL_IS_ENSEMBLE},
     { "::itcl::mixin", ITCL_IS_ENSEMBLE},
+    { "::itcl::parser::delegate", ITCL_IS_ENSEMBLE},
     { "::itcl::type", 0},
     { "::itcl::widget", 0},
     { "::itcl::widgetadaptor", 0},
@@ -559,8 +561,8 @@ ItclFinishCmd(
     Tcl_HashEntry *hPtr;
     Tcl_HashSearch place;
     Tcl_Namespace *nsPtr;
+    Tcl_Obj **newObjv;
     Tcl_Obj *objPtr;
-    Tcl_Obj *objPtr2;
     Tcl_Obj *ensObjPtr;
     Tcl_Command cmdPtr;
     Tcl_Obj *mapDict;
@@ -586,6 +588,8 @@ ItclFinishCmd(
 	    checkMemoryLeaks = 1;
 	}
     }
+    newObjv = (Tcl_Obj **)ckalloc(sizeof(Tcl_Obj *) * 2);
+    newObjv[0] = Tcl_NewStringObj("my", -1);;
     for (i = 0; ;i++) {
         iciPtr = &itclCmds[i];
         if (iciPtr->name == NULL) {
@@ -593,9 +597,16 @@ ItclFinishCmd(
 	}
 	if ((iciPtr->flags & ITCL_IS_ENSEMBLE) == 0) {
             result = Itcl_RenameCommand(interp, iciPtr->name, "");
+	} else {
+	    objPtr = Tcl_NewStringObj(iciPtr->name, -1);
+            newObjv[1] = objPtr;
+	    Itcl_EnsembleDeleteCmd(infoPtr, infoPtr->interp, 2, newObjv);
+	    Tcl_DecrRefCount(objPtr);
 	}
         iciPtr++;
     }
+    Tcl_DecrRefCount(newObjv[0]);
+    ckfree((char *)newObjv);
 
     /* remove the unknow handler, to free the reference to the
      * Tcl_Obj with the name of it */
@@ -606,24 +617,6 @@ ItclFinishCmd(
     }
     Tcl_DecrRefCount(ensObjPtr);
 
-
-    while (1) {
-        hPtr = Tcl_FirstHashEntry(&infoPtr->myEnsembles, &place);
-	if (hPtr == NULL) {
-	    break;
-	}
-        objPtr = Tcl_GetHashValue(hPtr);
-        objPtr2 = (Tcl_Obj *)Tcl_GetHashKey(&infoPtr->myEnsembles, hPtr);
-	if (objPtr2 != NULL) {
-	    nsPtr = Tcl_FindNamespace(interp, Tcl_GetString(objPtr), NULL, 0);
-	    if (nsPtr != NULL) {
-               Tcl_DeleteNamespace(nsPtr);
-	    }
-	    Itcl_RenameCommand(interp, Tcl_GetString(objPtr2), "");
-	    Tcl_DeleteHashEntry(hPtr);
-            Tcl_DecrRefCount(objPtr);
-	}
-    }
 
     while (1) {
         hPtr = Tcl_FirstHashEntry(&infoPtr->instances, &place);
@@ -722,7 +715,9 @@ ItclFinishCmd(
         Tcl_DecrRefCount(infoPtr->unknownBodyPtr);
     }
 
-    ckfree((char *)infoPtr->ensembleInfo);
+    /* cleanup ensemble info */
+    ItclFinishEnsemble(infoPtr);
+
     ckfree((char *)infoPtr->object_meta_type);
     ckfree((char *)infoPtr->class_meta_type);
 
