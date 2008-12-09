@@ -9,7 +9,7 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itclInt.h,v 1.17.2.55 2008/12/07 22:52:16 wiede Exp $
+ * RCS: @(#) $Id: itclInt.h,v 1.17.2.56 2008/12/09 23:51:54 wiede Exp $
  */
 
 #include <string.h>
@@ -791,7 +791,9 @@ MODULE_SCOPE int ItclCreateDelegatedFunction(Tcl_Interp *interp,
 MODULE_SCOPE void ItclDeleteDelegatedOption(char *cdata);
 MODULE_SCOPE void Itcl_FinishList();
 MODULE_SCOPE void ItclDeleteDelegatedFunction(ItclDelegatedFunction *idmPtr);
-
+MODULE_SCOPE void ItclFinishEnsemble(ItclObjectInfo *infoPtr);
+MODULE_SCOPE int Itcl_EnsembleDeleteCmd(ClientData clientData,
+        Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]);
 
 
 

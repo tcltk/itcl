@@ -9,7 +9,7 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itclStubs.c,v 1.1.2.4 2008/11/26 21:14:42 wiede Exp $
+ * RCS: @(#) $Id: itclStubs.c,v 1.1.2.5 2008/12/09 23:51:54 wiede Exp $
  */
 
 #include <string.h>
@@ -226,10 +226,14 @@ ItclHandleStubCmd(
     (void) Tcl_ListObjGetElements((Tcl_Interp*)NULL, cmdlinePtr,
         &cmdlinec, &cmdlinev);
 
+    Tcl_DecrRefCount(cmdNamePtr);
     Tcl_ResetResult(interp);
     result = Tcl_EvalObjv(interp, cmdlinec-1, cmdlinev+1, TCL_EVAL_DIRECT);
+    Tcl_DecrRefCount(cmdlinev[0]);
+    Tcl_DecrRefCount(cmdlinev[1]);
     Tcl_DecrRefCount(cmdlinePtr);
 
+    Tcl_DecrRefCount(objAutoLoad[0]);
     return result;
 }
 

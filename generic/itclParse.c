@@ -39,7 +39,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclParse.c,v 1.1.2.53 2008/12/07 21:50:48 wiede Exp $
+ *     RCS:  $Id: itclParse.c,v 1.1.2.54 2008/12/09 23:51:54 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -236,6 +236,7 @@ Itcl_ParseInit(
     Tcl_IncrRefCount(objPtr);
     hPtr = Tcl_CreateHashEntry(&infoPtr->myEnsembles, (char *)namePtr, &isNew);
     Tcl_SetHashValue(hPtr, objPtr);
+    Tcl_DecrRefCount(namePtr);
 
     if (Itcl_AddEnsemblePart(interp, "::itcl::find",
             "classes", "?pattern?",
@@ -266,6 +267,7 @@ Itcl_ParseInit(
     Tcl_IncrRefCount(objPtr);
     hPtr = Tcl_CreateHashEntry(&infoPtr->myEnsembles, (char *)namePtr, &isNew);
     Tcl_SetHashValue(hPtr, objPtr);
+    Tcl_DecrRefCount(namePtr);
 
     if (Itcl_AddEnsemblePart(interp, "::itcl::delete",
             "class", "name ?name...?",
@@ -303,6 +305,7 @@ Itcl_ParseInit(
     Tcl_IncrRefCount(objPtr);
     hPtr = Tcl_CreateHashEntry(&infoPtr->myEnsembles, (char *)namePtr, &isNew);
     Tcl_SetHashValue(hPtr, objPtr);
+    Tcl_DecrRefCount(namePtr);
 
     if (Itcl_AddEnsemblePart(interp, "::itcl::is",
             "class", "name", Itcl_IsClassCmd,
@@ -351,6 +354,7 @@ Itcl_ParseInit(
     Tcl_IncrRefCount(objPtr);
     hPtr = Tcl_CreateHashEntry(&infoPtr->myEnsembles, (char *)namePtr, &isNew);
     Tcl_SetHashValue(hPtr, objPtr);
+    Tcl_DecrRefCount(namePtr);
 
     Itcl_PreserveData((ClientData)infoPtr);
 
@@ -365,6 +369,7 @@ Itcl_ParseInit(
     Tcl_IncrRefCount(objPtr);
     hPtr = Tcl_CreateHashEntry(&infoPtr->myEnsembles, (char *)namePtr, &isNew);
     Tcl_SetHashValue(hPtr, objPtr);
+    Tcl_DecrRefCount(namePtr);
 
     if (Itcl_AddEnsemblePart(interp, "::itcl::forward",
             "add", "objectOrClass srcCommand targetCommand ? options ... ?",
@@ -393,6 +398,7 @@ Itcl_ParseInit(
     Tcl_IncrRefCount(objPtr);
     hPtr = Tcl_CreateHashEntry(&infoPtr->myEnsembles, (char *)namePtr, &isNew);
     Tcl_SetHashValue(hPtr, objPtr);
+    Tcl_DecrRefCount(namePtr);
 
     if (Itcl_AddEnsemblePart(interp, "::itcl::mixin",
             "add", "objectOrClass class ? class ... ?",
@@ -417,9 +423,10 @@ Itcl_ParseInit(
         return TCL_ERROR;
     }
     namePtr = Tcl_NewStringObj("::itcl::stubs", -1);
-    objPtr = Tcl_NewStringObj(Tcl_GetStringResult(interp), -1);
+    objPtr = Tcl_GetObjResult(interp);
     hPtr = Tcl_CreateHashEntry(&infoPtr->myEnsembles, (char *)namePtr, &isNew);
     Tcl_SetHashValue(hPtr, objPtr);
+    Tcl_DecrRefCount(namePtr);
 
     if (Itcl_AddEnsemblePart(interp, "::itcl::import::stub",
             "create", "name", Itcl_StubCreateCmd,
@@ -490,6 +497,7 @@ Itcl_ParseInit(
     Tcl_IncrRefCount(objPtr);
     hPtr = Tcl_CreateHashEntry(&infoPtr->myEnsembles, (char *)namePtr, &isNew);
     Tcl_SetHashValue(hPtr, objPtr);
+    Tcl_DecrRefCount(namePtr);
 
     if (Itcl_AddEnsemblePart(interp, "::itcl::parser::delegate",
             "method", "name to targetName as scipt using script",
