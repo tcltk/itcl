@@ -24,7 +24,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclBuiltin.c,v 1.1.2.52 2008/12/07 21:44:38 wiede Exp $
+ *     RCS:  $Id: itclBuiltin.c,v 1.1.2.53 2008/12/09 12:01:03 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -187,7 +187,7 @@ Itcl_BiInit(
     Tcl_Namespace *itclBiNs;
     Tcl_DString buffer;
     Tcl_Obj *objPtr;
-    Tcl_Obj *objPtr2;
+//    Tcl_Obj *objPtr2;
     Tcl_Obj *mapDict;
     Tcl_Command infoCmd;
     int result;
@@ -236,26 +236,27 @@ Itcl_BiInit(
 
     infoCmd = Tcl_FindCommand(interp, "info", NULL, TCL_GLOBAL_ONLY);
     if (infoCmd != NULL && Tcl_IsEnsemble(infoCmd)) {
-
         Tcl_GetEnsembleMappingDict(NULL, infoCmd, &mapDict);
         if (mapDict != NULL) {
-	    objPtr = Tcl_NewStringObj("vars", -1);
-            result = Tcl_DictObjGet(interp, mapDict, objPtr,
+            infoPtr->infoVars4Ptr =
+	            Tcl_NewStringObj("vars", -1);
+	    Tcl_IncrRefCount(infoPtr->infoVars4Ptr);
+            result = Tcl_DictObjGet(interp, mapDict, infoPtr->infoVars4Ptr,
 	            &infoPtr->infoVarsPtr);
-	    Tcl_IncrRefCount(infoPtr->infoVarsPtr);
-            Tcl_DecrRefCount(objPtr);
 	    objPtr = Tcl_NewStringObj("itclinfo", -1);
-	    objPtr2 = Tcl_NewStringObj("::itcl::builtin::Info", -1);
-            Tcl_DictObjPut(NULL, mapDict, objPtr, objPtr2);
+	    infoPtr->infoVars2Ptr =
+	            Tcl_NewStringObj("::itcl::builtin::Info", -1);
 	    /* FIXME see comment in itclBase.c ItclFinishCmd */
-            infoPtr->infoVars2Ptr = objPtr2;
-	    objPtr = Tcl_NewStringObj("vars", -1);
-	    objPtr2 = Tcl_NewStringObj("::itcl::builtin::Info::vars", -1);
-            Tcl_DictObjPut(NULL, mapDict, objPtr, objPtr2);
+	    Tcl_IncrRefCount(infoPtr->infoVars2Ptr);
+            Tcl_DictObjPut(NULL, mapDict, objPtr, infoPtr->infoVars2Ptr);
+
+	    infoPtr->infoVars3Ptr =
+	            Tcl_NewStringObj("::itcl::builtin::Info::vars", -1);
+	    /* FIXME see comment in itclBase.c ItclFinishCmd */
+	    Tcl_IncrRefCount(infoPtr->infoVars3Ptr);
+            Tcl_DictObjPut(NULL, mapDict, infoPtr->infoVars4Ptr,
+	            infoPtr->infoVars3Ptr);
             Tcl_SetEnsembleMappingDict(interp, infoCmd, mapDict);
-	    /* FIXME see comment in itclBase.c ItclFinishCmd */
-            infoPtr->infoVars3Ptr = objPtr2;
-            infoPtr->infoVars4Ptr = objPtr;
         }
     }
 
@@ -1039,23 +1040,25 @@ NRBiChainCmd(
              *         methods by passing the full name as
              *         the command argument.
              */
-            cmdlinePtr = Itcl_CreateArgs(interp, Tcl_GetString(imPtr->fullNamePtr),
-                objc-1, objv+1);
+
+            cmdlinePtr = Itcl_CreateArgs(interp,
+	            Tcl_GetString(imPtr->fullNamePtr), objc-1, objv+1);
 
 	    int my_objc;
             (void) Tcl_ListObjGetElements((Tcl_Interp*)NULL, cmdlinePtr,
                 &my_objc, &newobjv);
 
 	    if (imPtr->flags & ITCL_CONSTRUCTOR) {
-		Tcl_DecrRefCount(newobjv[0]);
-		newobjv[0] = Tcl_NewStringObj(Tcl_GetCommandName(interp,
-                        contextIclsPtr->infoPtr->currIoPtr->accessCmd), -1);
-		Tcl_IncrRefCount(newobjv[0]);
 		contextIoPtr = imPtr->iclsPtr->infoPtr->currIoPtr;
             }
             ItclShowArgs(1, "___chain", objc-1, newobjv+1);
             result = Itcl_EvalMemberCode(interp, imPtr, contextIoPtr,
 	            my_objc-1, newobjv+1);
+	    /* release "my" part and next arg which is added by
+	     * Itcl_CreateArgs */
+	    Tcl_DecrRefCount(newobjv[1]);
+	    Tcl_DecrRefCount(newobjv[0]);
+            /* release the rest */
             Tcl_DecrRefCount(cmdlinePtr);
             break;
         }

@@ -24,7 +24,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclInfo.c,v 1.1.2.33 2008/12/07 21:44:38 wiede Exp $
+ *     RCS:  $Id: itclInfo.c,v 1.1.2.34 2008/12/09 12:01:03 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -566,7 +566,8 @@ Itcl_BiInfoCmd(
         Tcl_Obj *objPtr = Tcl_NewStringObj(
 	        "wrong # args: should be one of...\n", -1);
         ItclGetInfoUsage(interp, objPtr, (ItclObjectInfo *)clientData);
-	Tcl_SetObjResult(interp, objPtr);
+        Tcl_SetResult(interp, Tcl_GetString(objPtr), TCL_VOLATILE);
+        Tcl_DecrRefCount(objPtr);
 	return TCL_ERROR;
     }
     return ItclEnsembleSubCmd(clientData, interp, "::info itclinfo",
@@ -596,7 +597,7 @@ Itcl_BiInfoClassCmd(
 {
     Tcl_Namespace *activeNs = Tcl_GetCurrentNamespace(interp);
     Tcl_Namespace *contextNs = NULL;
-
+    Tcl_Obj *objPtr;
     ItclClass *contextIclsPtr;
     ItclObject *contextIoPtr;
 
@@ -668,8 +669,9 @@ Itcl_BiInfoClassCmd(
             name = contextNs->fullName;
         }
     }
-
-    Tcl_SetObjResult(interp, Tcl_NewStringObj(name, -1));
+    objPtr = Tcl_NewStringObj(name, -1);
+    Tcl_SetResult(interp, Tcl_GetString(objPtr), TCL_VOLATILE);
+    Tcl_DecrRefCount(objPtr);
     return TCL_OK;
 }
 
@@ -774,7 +776,8 @@ Itcl_BiInfoInheritCmd(
         elem = Itcl_NextListElem(elem);
     }
 
-    Tcl_SetObjResult(interp, listPtr);
+    Tcl_SetResult(interp, Tcl_GetString(listPtr), TCL_VOLATILE);
+    Tcl_DecrRefCount(listPtr);
     return TCL_OK;
 }
 
@@ -883,7 +886,8 @@ return TCL_ERROR;
     }
     Itcl_DeleteHierIter(&hier);
 
-    Tcl_SetObjResult(interp, listPtr);
+    Tcl_SetResult(interp, Tcl_GetString(listPtr), TCL_VOLATILE);
+    Tcl_DecrRefCount(listPtr);
     return TCL_OK;
 }
 
@@ -1081,7 +1085,8 @@ Itcl_BiInfoFunctionCmd(
                 Tcl_ListObjAppendElement((Tcl_Interp*)NULL, resultPtr, objPtr);
             }
         }
-        Tcl_SetObjResult(interp, resultPtr);
+        Tcl_SetResult(interp, Tcl_GetString(resultPtr), TCL_VOLATILE);
+        Tcl_DecrRefCount(resultPtr);
     } else {
 
         /*
@@ -1125,7 +1130,8 @@ Itcl_BiInfoFunctionCmd(
         }
         Itcl_DeleteHierIter(&hier);
 
-        Tcl_SetObjResult(interp, resultPtr);
+        Tcl_SetResult(interp, Tcl_GetString(resultPtr), TCL_VOLATILE);
+        Tcl_DecrRefCount(resultPtr);
     }
     return TCL_OK;
 }
@@ -1398,7 +1404,8 @@ Itcl_BiInfoVariableCmd(
         }
         Itcl_DeleteHierIter(&hier);
 
-        Tcl_SetObjResult(interp, resultPtr);
+        Tcl_SetResult(interp, Tcl_GetString(resultPtr), TCL_VOLATILE);
+        Tcl_DecrRefCount(resultPtr);
     }
     return TCL_OK;
 }
@@ -1481,7 +1488,8 @@ Itcl_BiInfoVarsCmd(
 	/* always add the itcl_options variable */
         Tcl_ListObjAppendElement(interp, listPtr,
 	        Tcl_NewStringObj("itcl_options", -1));
-        Tcl_SetObjResult(interp, listPtr);
+        Tcl_SetResult(interp, Tcl_GetString(listPtr), TCL_VOLATILE);
+        Tcl_DecrRefCount(listPtr);
         return TCL_OK;
     }
     if (objc < 2) {
@@ -1615,7 +1623,8 @@ Itcl_BiInfoUnknownCmd(
         Tcl_Obj *objPtr = Tcl_NewStringObj(
 	        "wrong # args: should be one of...\n", -1);
         ItclGetInfoUsage(interp, objPtr, (ItclObjectInfo *)clientData);
-	Tcl_SetObjResult(interp, objPtr);
+	Tcl_SetResult(interp, Tcl_GetString(objPtr), TCL_VOLATILE);
+        Tcl_DecrRefCount(objPtr);
         return TCL_ERROR;
     }
     listObj = Tcl_NewListObj(-1, NULL);
@@ -1630,7 +1639,8 @@ Itcl_BiInfoUnknownCmd(
     Tcl_ListObjAppendElement(interp, listObj, objPtr);
     objPtr = Tcl_NewStringObj(Tcl_GetString(objv[2]), -1);
     Tcl_ListObjAppendElement(interp, listObj, objPtr);
-    Tcl_SetObjResult(interp, listObj);
+    Tcl_SetResult(interp, Tcl_GetString(listObj), TCL_VOLATILE);
+    Tcl_DecrRefCount(listObj);
     return result;
 }
 
@@ -1757,10 +1767,12 @@ Itcl_BiInfoBodyCmd(
 	Tcl_AppendToObj(objPtr, " \"", -1);
 	Tcl_AppendToObj(objPtr, name, -1);
 	Tcl_AppendToObj(objPtr, "\"", -1);
-        Tcl_SetObjResult(interp, objPtr);
+        Tcl_SetResult(interp, Tcl_GetString(objPtr), TCL_VOLATILE);
+        Tcl_DecrRefCount(objPtr);
         return TCL_ERROR;
     }
-    Tcl_SetObjResult(interp, objPtr);
+    Tcl_SetResult(interp, Tcl_GetString(objPtr), TCL_VOLATILE);
+    Tcl_DecrRefCount(objPtr);
     return TCL_OK;
 }
 
@@ -1903,10 +1915,12 @@ Itcl_BiInfoArgsCmd(
 	Tcl_AppendToObj(objPtr, " \"", -1);
 	Tcl_AppendToObj(objPtr, name, -1);
 	Tcl_AppendToObj(objPtr, "\"", -1);
-        Tcl_SetObjResult(interp, objPtr);
+        Tcl_SetResult(interp, Tcl_GetString(objPtr), TCL_VOLATILE);
+        Tcl_DecrRefCount(objPtr);
         return TCL_ERROR;
     }
-    Tcl_SetObjResult(interp, objPtr);
+    Tcl_SetResult(interp, Tcl_GetString(objPtr), TCL_VOLATILE);
+    Tcl_DecrRefCount(objPtr);
     return TCL_OK;
 }
 
@@ -2218,7 +2232,8 @@ Itcl_BiInfoOptionCmd(
                     objPtr);
             }
         }
-        Tcl_SetObjResult(interp, resultPtr);
+        Tcl_SetResult(interp, Tcl_GetString(resultPtr), TCL_VOLATILE);
+        Tcl_DecrRefCount(resultPtr);
     } else {
 
         /*
@@ -2238,7 +2253,8 @@ Itcl_BiInfoOptionCmd(
         }
         Itcl_DeleteHierIter(&hier);
 
-        Tcl_SetObjResult(interp, resultPtr);
+        Tcl_SetResult(interp, Tcl_GetString(resultPtr), TCL_VOLATILE);
+        Tcl_DecrRefCount(resultPtr);
     }
     return TCL_OK;
 }
@@ -2437,7 +2453,8 @@ Itcl_BiInfoComponentCmd(
                     objPtr);
             }
         }
-        Tcl_SetObjResult(interp, resultPtr);
+        Tcl_SetResult(interp, Tcl_GetString(resultPtr), TCL_VOLATILE);
+        Tcl_DecrRefCount(resultPtr);
     } else {
 
         /*
@@ -2458,7 +2475,8 @@ Itcl_BiInfoComponentCmd(
         }
         Itcl_DeleteHierIter(&hier);
 
-        Tcl_SetObjResult(interp, resultPtr);
+        Tcl_SetResult(interp, Tcl_GetString(resultPtr), TCL_VOLATILE);
+        Tcl_DecrRefCount(resultPtr);
     }
     return TCL_OK;
 }
@@ -2831,10 +2849,9 @@ Itcl_BiInfoTypeCmd(
 {
     Tcl_Namespace *activeNs = Tcl_GetCurrentNamespace(interp);
     Tcl_Namespace *contextNs = NULL;
-
+    Tcl_Obj *objPtr;
     ItclClass *contextIclsPtr;
     ItclObject *contextIoPtr;
-
     char *name;
 
     ItclShowArgs(1, "Itcl_BiInfoTypeCmd", objc, objv);
@@ -2868,7 +2885,8 @@ Itcl_BiInfoTypeCmd(
 	    Tcl_Obj *msg = Tcl_NewStringObj("\nget info like this instead 1: " \
 		    "\n  namespace eval className { info ", -1);
 	    Tcl_AppendStringsToObj(msg, Tcl_GetString(objv[0]), "... }", NULL);
-            Tcl_SetObjResult(interp, msg);
+            Tcl_SetResult(interp, Tcl_GetString(msg), TCL_VOLATILE);
+            Tcl_DecrRefCount(msg);
             return TCL_ERROR;
         }
     }
@@ -2903,8 +2921,9 @@ Itcl_BiInfoTypeCmd(
             name = contextNs->fullName;
         }
     }
-
-    Tcl_SetObjResult(interp, Tcl_NewStringObj(name, -1));
+    objPtr = Tcl_NewStringObj(name, -1);
+    Tcl_SetResult(interp, Tcl_GetString(objPtr), TCL_VOLATILE);
+    Tcl_DecrRefCount(objPtr);
     return TCL_OK;
 }
 
@@ -2929,6 +2948,9 @@ Itcl_BiInfoDefaultCmd(
     Tcl_Obj *const objv[]) /* argument objects */
 {
     FOREACH_HASH_DECLS;
+    Tcl_Namespace *nsPtr;
+    Tcl_Obj *objPtr;
+    Tcl_Obj *objPtr2;
     ItclObject *ioPtr;
     ItclClass *iclsPtr;
     ItclMemberFunc *imPtr;
@@ -2969,8 +2991,6 @@ Itcl_BiInfoDefaultCmd(
 	while (argListPtr != NULL) {
 	    if (strcmp(argName, Tcl_GetString(argListPtr->namePtr)) == 0) {
 	        if (argListPtr->defaultValuePtr != NULL) {
-		    Tcl_Namespace *nsPtr;
-		    Tcl_Obj *objPtr;
 		    objPtr = NULL;
 		    nsPtr = Itcl_GetUplevelNamespace(interp, 1);
 		    if (nsPtr == NULL) {
@@ -2979,6 +2999,7 @@ Itcl_BiInfoDefaultCmd(
 				NULL);
 		        return TCL_ERROR;
 		    }
+		    objPtr = NULL;
 		    if ((returnVarName[0] != ':') &
 		            (returnVarName[1] != ':')) {
 		        objPtr = Tcl_NewStringObj(nsPtr->fullName, -1);
@@ -2988,9 +3009,11 @@ Itcl_BiInfoDefaultCmd(
 		        Tcl_AppendToObj(objPtr, returnVarName, -1);
 		        returnVarName = Tcl_GetString(objPtr);
 		    }
-                    Tcl_IncrRefCount(argListPtr->defaultValuePtr);
-	            Tcl_SetVar2Ex(interp, returnVarName, NULL,
-		            argListPtr->defaultValuePtr, 0);
+	            Tcl_SetVar2(interp, returnVarName, NULL,
+		            Tcl_GetString(argListPtr->defaultValuePtr), 0);
+		    if (objPtr != NULL) {
+		        Tcl_DecrRefCount(objPtr);
+		    }
 		    Tcl_SetResult(interp, "1", NULL);
 		    return TCL_OK;
 	        } else {
@@ -3119,7 +3142,6 @@ Itcl_BiInfoMethodsCmd(
 	        !(imPtr->codePtr->flags & ITCL_BUILTIN)) {
 	    if ((pattern == NULL) ||
                      Tcl_StringMatch((const char *)name, pattern)) {
-	        Tcl_IncrRefCount(imPtr->namePtr);
 	        Tcl_ListObjAppendElement(interp, listPtr,
 		        Tcl_NewStringObj(Tcl_GetString(imPtr->namePtr), -1));
 	    }
@@ -3144,7 +3166,8 @@ Itcl_BiInfoMethodsCmd(
 	    }
         }
     }
-    Tcl_SetObjResult(interp, listPtr);
+    Tcl_SetResult(interp, Tcl_GetString(listPtr), TCL_VOLATILE);
+    Tcl_DecrRefCount(listPtr);
     return TCL_OK;
 }
 
@@ -3253,7 +3276,8 @@ Itcl_BiInfoOptionsCmd(
 	    }
 	}
     }
-    Tcl_SetObjResult(interp, listPtr);
+    Tcl_SetResult(interp, Tcl_GetString(listPtr), TCL_VOLATILE);
+    Tcl_DecrRefCount(listPtr);
     return TCL_OK;
 }
 
@@ -3299,7 +3323,6 @@ Itcl_BiInfoTypesCmd(
     FOREACH_HASH_VALUE(iclsPtr, &infoPtr->nameClasses) {
 	if (iclsPtr->flags & ITCL_TYPE) {
 	    name = Tcl_GetString(iclsPtr->namePtr);
-	    Tcl_IncrRefCount(iclsPtr->namePtr);
 	    if ((pattern == NULL) ||
                      Tcl_StringMatch(name, pattern)) {
                 Tcl_ListObjAppendElement(interp, listPtr,
@@ -3307,7 +3330,8 @@ Itcl_BiInfoTypesCmd(
             }
         }
     }
-    Tcl_SetObjResult(interp, listPtr);
+    Tcl_SetResult(interp, Tcl_GetString(listPtr), TCL_VOLATILE);
+    Tcl_DecrRefCount(listPtr);
     return TCL_OK;
 }
 
@@ -3365,14 +3389,15 @@ Itcl_BiInfoComponentsCmd(
     }
     listPtr = Tcl_NewListObj(0, NULL);
     FOREACH_HASH_VALUE(icPtr, &iclsPtr->components) {
-    name = Tcl_GetString(icPtr->namePtr);
-    if ((pattern == NULL) ||
+        name = Tcl_GetString(icPtr->namePtr);
+        if ((pattern == NULL) ||
                  Tcl_StringMatch(name, pattern)) {
             Tcl_ListObjAppendElement(interp, listPtr,
 	            Tcl_NewStringObj(Tcl_GetString(icPtr->namePtr), -1));
         }
     }
-    Tcl_SetObjResult(interp, listPtr);
+    Tcl_SetResult(interp, Tcl_GetString(listPtr), TCL_VOLATILE);
+    Tcl_DecrRefCount(listPtr);
     return TCL_OK;
 }
 
@@ -3501,7 +3526,8 @@ Itcl_BiInfoTypeMethodsCmd(
 	    }
         }
     }
-    Tcl_SetObjResult(interp, listPtr);
+    Tcl_SetResult(interp, Tcl_GetString(listPtr), TCL_VOLATILE);
+    Tcl_DecrRefCount(listPtr);
     return TCL_OK;
 }
 
@@ -3661,10 +3687,13 @@ Itcl_BiInfoInstancesCmd(
 	    if ((pattern == NULL) ||
                      Tcl_StringMatch(Tcl_GetString(objPtr), pattern)) {
 	        Tcl_ListObjAppendElement(interp, listPtr, objPtr);
+	    } else {
+	        Tcl_DecrRefCount(objPtr);
 	    }
         }
     }
-    Tcl_SetObjResult(interp, listPtr);
+    Tcl_SetResult(interp, Tcl_GetString(listPtr), TCL_VOLATILE);
+    Tcl_DecrRefCount(listPtr);
     return TCL_OK;
 }
 
@@ -3736,7 +3765,8 @@ Itcl_BiInfoDelegatedOptionsCmd(
 	    }
         }
     }
-    Tcl_SetObjResult(interp, listPtr);
+    Tcl_SetResult(interp, Tcl_GetString(listPtr), TCL_VOLATILE);
+    Tcl_DecrRefCount(listPtr);
     return TCL_OK;
 }
 
@@ -3810,7 +3840,8 @@ Itcl_BiInfoDelegatedMethodsCmd(
 	    }
         }
     }
-    Tcl_SetObjResult(interp, listPtr);
+    Tcl_SetResult(interp, Tcl_GetString(listPtr), TCL_VOLATILE);
+    Tcl_DecrRefCount(listPtr);
     return TCL_OK;
 }
 
@@ -3884,7 +3915,8 @@ Itcl_BiInfoDelegatedTypeMethodsCmd(
 	    }
         }
     }
-    Tcl_SetObjResult(interp, listPtr);
+    Tcl_SetResult(interp, Tcl_GetString(listPtr), TCL_VOLATILE);
+    Tcl_DecrRefCount(listPtr);
     return TCL_OK;
 }
 
@@ -3912,7 +3944,8 @@ Itcl_ErrorDelegatedInfoCmd(
     Tcl_Obj *objPtr = Tcl_NewStringObj(
            "wrong # args: should be one of...\n", -1);
     ItclGetInfoDelegatedUsage(interp, objPtr, (ItclObjectInfo *)clientData);
-    Tcl_SetObjResult(interp, objPtr);
+    Tcl_SetResult(interp, Tcl_GetString(objPtr), TCL_VOLATILE);
+    Tcl_DecrRefCount(objPtr);
     return TCL_ERROR;
 }
 
@@ -3938,7 +3971,8 @@ Itcl_BiInfoDelegatedUnknownCmd(
     objPtr = Tcl_NewStringObj(
             "wrong # args: should be one of...\n", -1);
     ItclGetInfoDelegatedUsage(interp, objPtr, (ItclObjectInfo *)clientData);
-    Tcl_SetObjResult(interp, objPtr);
+    Tcl_SetResult(interp, Tcl_GetString(objPtr), TCL_VOLATILE);
+    Tcl_DecrRefCount(objPtr);
     return TCL_ERROR;
 }
 
