@@ -9,7 +9,7 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itclBase.c,v 1.1.2.30 2008/12/07 21:50:48 wiede Exp $
+ * RCS: @(#) $Id: itclBase.c,v 1.1.2.31 2008/12/09 12:09:01 wiede Exp $
  */
 
 #include <stdlib.h>
@@ -185,8 +185,11 @@ AddClassUnknowMethod(
     ClientData pmPtr;
 
     infoPtr->unknownNamePtr = Tcl_NewStringObj("unknown", -1);
+    Tcl_IncrRefCount(infoPtr->unknownNamePtr);
     infoPtr->unknownArgumentPtr = Tcl_NewStringObj("m args", -1);
+    Tcl_IncrRefCount(infoPtr->unknownArgumentPtr);
     infoPtr->unknownBodyPtr = Tcl_NewStringObj(clazzUnknownBody, -1);
+    Tcl_IncrRefCount(infoPtr->unknownBodyPtr);
     ClientData tmPtr = (ClientData)Itcl_NewProcClassMethod(interp,
         clsPtr, NULL, NULL, NULL, NULL, infoPtr->unknownNamePtr,
 	infoPtr->unknownArgumentPtr, infoPtr->unknownBodyPtr, &pmPtr);
@@ -195,6 +198,15 @@ AddClassUnknowMethod(
     }
     return TCL_OK;
 }
+
+/*
+ * ------------------------------------------------------------------------
+ *  FreeItclObjectInfo()
+ *
+ *  called when an interp is deleted to free up memory
+ *
+ * ------------------------------------------------------------------------
+ */
 void
 FreeItclObjectInfo(
     ClientData clientData)
@@ -202,14 +214,9 @@ FreeItclObjectInfo(
     ItclObjectInfo *infoPtr;
 
     infoPtr = (ItclObjectInfo *)clientData;
-    /* need somehow to determine the interpreter and use a per interp
-     * ItclObjectInfo structure !!
-     * then can call ItclFinishCmd here
-     */
-/*
-fprintf(stderr, "@@@@ FreeItclObjectInfo called\n");
-*/
+    ItclFinishCmd(infoPtr, infoPtr->interp, 0, NULL);
 }
+
 /*
  * ------------------------------------------------------------------------
  *  Initialize()
@@ -532,13 +539,22 @@ ItclCallCCommand(
     }
     return result;
 }
-
+
+/*
+ * ------------------------------------------------------------------------
+ *  ItclFinishCmd()
+ *
+ *  called when an interp is deleted to free up memory or called explicitly
+ *  to check memory leaks
+ *
+ * ------------------------------------------------------------------------
+ */
 int
 ItclFinishCmd(
     ClientData clientData,   /* unused */
     Tcl_Interp *interp,      /* current interpreter */
     int objc,                /* number of arguments */
-    Tcl_Obj *CONST objv[])   /* argument objects */
+    Tcl_Obj *const objv[])   /* argument objects */
 {
     Tcl_HashEntry *hPtr;
     Tcl_HashSearch place;
@@ -546,14 +562,30 @@ ItclFinishCmd(
     Tcl_Obj *objPtr;
     Tcl_Obj *objPtr2;
     Tcl_Obj *ensObjPtr;
-    Tcl_Command infoCmd;
+    Tcl_Command cmdPtr;
+    Tcl_Obj *mapDict;
     ItclObjectInfo *infoPtr;
     ItclCmdsInfo *iciPtr;
+    int checkMemoryLeaks;
     int i;
     int result;
 
     ItclShowArgs(1, "ItclFinishCmd", objc, objv);
     infoPtr = Tcl_GetAssocData(interp, ITCL_INTERP_DATA, NULL);
+    if (infoPtr == NULL) {
+        infoPtr = (ItclObjectInfo *)clientData;
+    }
+    checkMemoryLeaks = 0;
+    if (objc > 1) {
+        if (strcmp(Tcl_GetString(objv[1]), "checkmemoryleaks") == 0) {
+	    /* if we have that option, the namespace of the Tcl ensembles
+	     * is not teared down, so we have to simulate it here to
+	     * have the correct reference counts for infoPtr->infoVars2Ptr
+	     * infoPtr->infoVars3Ptr and infoPtr->infoVars4Ptr
+	     */
+	    checkMemoryLeaks = 1;
+	}
+    }
     for (i = 0; ;i++) {
         iciPtr = &itclCmds[i];
         if (iciPtr->name == NULL) {
@@ -564,6 +596,17 @@ ItclFinishCmd(
 	}
         iciPtr++;
     }
+
+    /* remove the unknow handler, to free the reference to the
+     * Tcl_Obj with the name of it */
+    ensObjPtr = Tcl_NewStringObj("::itcl::builtin::Info::delegated", -1);
+    cmdPtr = Tcl_FindEnsemble(interp, ensObjPtr, TCL_LEAVE_ERR_MSG);
+    if (cmdPtr != NULL) {
+        Tcl_SetEnsembleUnknownHandler(NULL, cmdPtr, NULL);
+    }
+    Tcl_DecrRefCount(ensObjPtr);
+
+
     while (1) {
         hPtr = Tcl_FirstHashEntry(&infoPtr->myEnsembles, &place);
 	if (hPtr == NULL) {
@@ -596,62 +639,112 @@ ItclFinishCmd(
         Tcl_DeleteNamespace(nsPtr);
     }
 
+    mapDict = NULL;
     ensObjPtr = Tcl_NewStringObj("::itcl::builtin::Info", -1);
-    Tcl_SetEnsembleUnknownHandler(NULL,
-            Tcl_FindEnsemble(interp, ensObjPtr, TCL_LEAVE_ERR_MSG),
-	    NULL);
+    if (Tcl_FindNamespace(interp, Tcl_GetString(ensObjPtr), NULL, 0) != NULL) {
+        Tcl_SetEnsembleUnknownHandler(NULL,
+                Tcl_FindEnsemble(interp, ensObjPtr, TCL_LEAVE_ERR_MSG),
+	        NULL);
+    }
     Tcl_DecrRefCount(ensObjPtr);
 
     /* remove the itclinfo and vars entry from the info dict */
-    infoCmd = Tcl_FindCommand(interp, "info", NULL, TCL_GLOBAL_ONLY);
-    if (infoCmd != NULL && Tcl_IsEnsemble(infoCmd)) {
-        Tcl_Obj *mapDict;
-
-        Tcl_GetEnsembleMappingDict(NULL, infoCmd, &mapDict);
+    /* and replace it by the original one */
+    cmdPtr = Tcl_FindCommand(interp, "info", NULL, TCL_GLOBAL_ONLY);
+    if (cmdPtr != NULL && Tcl_IsEnsemble(cmdPtr)) {
+        Tcl_GetEnsembleMappingDict(NULL, cmdPtr, &mapDict);
         if (mapDict != NULL) {
-	    /* FIXME have to figure out why the refCount of
-	     * ::itcl::builtin::Info
-	     * and ::itcl::builtin::Info::vars is 2 and 1 for vars here !! */
-            Tcl_DecrRefCount(infoPtr->infoVars2Ptr);
-            Tcl_DecrRefCount(infoPtr->infoVars3Ptr);
-            Tcl_DecrRefCount(infoPtr->infoVars4Ptr);
 
+            objPtr = Tcl_NewStringObj("vars", -1);
+	    Tcl_DictObjRemove(interp, mapDict, objPtr);
+	    Tcl_DictObjPut(interp, mapDict, objPtr, infoPtr->infoVars4Ptr);
+	    Tcl_DecrRefCount(objPtr);
 
             objPtr = Tcl_NewStringObj("itclinfo", -1);
 	    Tcl_DictObjRemove(interp, mapDict, objPtr);
 	    Tcl_DecrRefCount(objPtr);
-            objPtr = Tcl_NewStringObj("vars", -1);
-	    Tcl_DictObjRemove(interp, mapDict, objPtr);
-	    Tcl_DecrRefCount(objPtr);
-            objPtr = Tcl_NewStringObj("vars", -1);
-	    Tcl_DictObjPut(interp, mapDict, objPtr, infoPtr->infoVarsPtr);
-	    Tcl_DecrRefCount(objPtr);
-	    Tcl_SetEnsembleMappingDict(interp, infoCmd, mapDict);
+	    Tcl_SetEnsembleMappingDict(interp, cmdPtr, mapDict);
         }
+    }
+    /* FIXME have to figure out why the refCount of
+     * ::itcl::builtin::Info
+     * and ::itcl::builtin::Info::vars and vars is 2 here !! */
+    /* seems to be as the tclOO commands are not yet deleted ?? */
+    Tcl_DecrRefCount(infoPtr->infoVars2Ptr);
+    Tcl_DecrRefCount(infoPtr->infoVars3Ptr);
+    Tcl_DecrRefCount(infoPtr->infoVars4Ptr);
+    if (checkMemoryLeaks) {
+        Tcl_DecrRefCount(infoPtr->infoVars2Ptr);
+        Tcl_DecrRefCount(infoPtr->infoVars3Ptr);
+        Tcl_DecrRefCount(infoPtr->infoVars4Ptr);
+    /* see comment above */
     }
 
     Tcl_DecrRefCount(infoPtr->typeDestructorArgumentPtr);
 
+    Tcl_Eval(infoPtr->interp,
+            "::oo::define ::itcl::clazz deletemethod unknown");
+
+    /* first have to look for the remaining memory leaks, then remove the next ifdef */
+#ifdef LATER
+    Itcl_RenameCommand(infoPtr->interp, "::itcl::clazz", "");
+
+    /* tear down ::itcl namespace (this includes ::itcl::parser namespace) */
+    nsPtr = Tcl_FindNamespace(infoPtr->interp, "::itcl::parser", NULL, 0);
+    if (nsPtr != NULL) {
+        Tcl_DeleteNamespace(nsPtr);
+    }
+    nsPtr = Tcl_FindNamespace(infoPtr->interp, "::itcl::import", NULL, 0);
+    if (nsPtr != NULL) {
+        Tcl_DeleteNamespace(nsPtr);
+    }
+    nsPtr = Tcl_FindNamespace(infoPtr->interp, "::itcl::methodset", NULL, 0);
+    if (nsPtr != NULL) {
+        Tcl_DeleteNamespace(nsPtr);
+    }
+    nsPtr = Tcl_FindNamespace(infoPtr->interp, "::itcl::internal", NULL, 0);
+    if (nsPtr != NULL) {
+        Tcl_DeleteNamespace(nsPtr);
+    }
+    nsPtr = Tcl_FindNamespace(infoPtr->interp, "::itcl::builtin", NULL, 0);
+    if (nsPtr != NULL) {
+        Tcl_DeleteNamespace(nsPtr);
+    }
+#endif
     /* remove the unknown method from top class */
-    Tcl_DecrRefCount(infoPtr->unknownNamePtr);
-    /* FIXME need double Decr, don't know why !! */
-    Tcl_DecrRefCount(infoPtr->unknownNamePtr);
-    Tcl_DecrRefCount(infoPtr->unknownArgumentPtr);
-    Tcl_DecrRefCount(infoPtr->unknownBodyPtr);
+    if (infoPtr->unknownNamePtr != NULL) {
+        Tcl_DecrRefCount(infoPtr->unknownNamePtr);
+    }
+    if (infoPtr->unknownArgumentPtr != NULL) {
+        Tcl_DecrRefCount(infoPtr->unknownArgumentPtr);
+    }
+    if (infoPtr->unknownBodyPtr != NULL) {
+        Tcl_DecrRefCount(infoPtr->unknownBodyPtr);
+    }
 
     ckfree((char *)infoPtr->ensembleInfo);
     ckfree((char *)infoPtr->object_meta_type);
     ckfree((char *)infoPtr->class_meta_type);
-    Itcl_ReleaseData((ClientData)infoPtr);
 
     /* clean up list pool */
     Itcl_FinishList();
+
+    Itcl_ReleaseData((ClientData)infoPtr);
     return TCL_OK;
 }
 
 #ifdef OBJ_REF_COUNT_DEBUG
 void Tcl_DbDumpRefCountInfo(const char *fileName, int noDeleted);
 
+
+/*
+ * ------------------------------------------------------------------------
+ *  ItclDumpRefCountInfo()
+ *
+ *  debugging routine to check for memory leaks in use of Tcl_Obj's
+ *
+ * ------------------------------------------------------------------------
+ */
 int
 ItclDumpRefCountInfo(
     ClientData clientData,   /* unused */
@@ -662,7 +755,7 @@ ItclDumpRefCountInfo(
     int noDeleted;
 
     noDeleted = 0;
-    if (objc > 0) {
+    if (objc > 1) {
         if (strcmp(Tcl_GetString(objv[1]), "-nodeleted") == 0) {
 	    noDeleted = 1;
 	}
@@ -676,6 +769,16 @@ ItclDumpRefCountInfo(
 #ifdef ITCL_PRESERVE_DEBUG
 void Itcl_DbDumpPreserveInfo(const char *fileName);
 
+
+/*
+ * ------------------------------------------------------------------------
+ *  ItclDumpPreserveInfo()
+ *
+ *  debugging routine to check for memory leaks in use of Itcl_PreserveData
+ *  and Itcl_ReleaseData
+ *
+ * ------------------------------------------------------------------------
+ */
 int
 ItclDumpPreserveInfo(
     ClientData clientData,   /* unused */

@@ -25,7 +25,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclMethod.c,v 1.1.2.38 2008/12/07 21:50:48 wiede Exp $
+ *     RCS:  $Id: itclMethod.c,v 1.1.2.39 2008/12/09 12:11:24 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -1918,7 +1918,8 @@ Itcl_InvokeMethodIfExists(
         Itcl_ReleaseData((ClientData)imPtr);
         Tcl_DecrRefCount(cmdlinePtr);
     } else {
-        if (contextClassPtr->flags & (ITCL_TYPE|ITCL_WIDGET|ITCL_WIDGETADAPTOR)) {
+        if (contextClassPtr->flags &
+	        (ITCL_TYPE|ITCL_WIDGET|ITCL_WIDGETADAPTOR)) {
 	    if (strcmp(name, "constructor") == 0) {
                 if (objc > 0) {
                     if (contextClassPtr->numOptions == 0) {
