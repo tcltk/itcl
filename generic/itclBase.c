@@ -9,7 +9,7 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itclBase.c,v 1.1.2.32 2008/12/09 23:58:21 wiede Exp $
+ * RCS: @(#) $Id: itclBase.c,v 1.1.2.33 2008/12/10 13:22:23 wiede Exp $
  */
 
 #include <stdlib.h>
@@ -721,6 +721,9 @@ ItclFinishCmd(
     ckfree((char *)infoPtr->object_meta_type);
     ckfree((char *)infoPtr->class_meta_type);
 
+    Itcl_DeleteStack(&infoPtr->clsStack);
+    Itcl_DeleteStack(&infoPtr->contextStack);
+    Itcl_DeleteStack(&infoPtr->constructorStack);
     /* clean up list pool */
     Itcl_FinishList();
 
