@@ -39,7 +39,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclParse.c,v 1.1.2.54 2008/12/09 23:51:54 wiede Exp $
+ *     RCS:  $Id: itclParse.c,v 1.1.2.55 2008/12/11 11:22:33 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -668,9 +668,16 @@ ItclClassBaseCmd(
     Itcl_PopStack(&infoPtr->clsStack);
 
     if (result != TCL_OK) {
+	Tcl_Obj *options = Tcl_GetReturnOptions(interp, result);
+	Tcl_Obj *key = Tcl_NewStringObj("-errorline", -1);
+	Tcl_Obj *stackTrace;
+	Tcl_IncrRefCount(key);
+	Tcl_DictObjGet(NULL, options, key, &stackTrace);
+	Tcl_DecrRefCount(key);
         char msg[256];
-        sprintf(msg, "\n    (class \"%.200s\" body line %d)",
-            className, interp->errorLine);
+        sprintf(msg, "\n    (class \"%.200s\" body line %s)",
+            className, Tcl_GetString(stackTrace));
+/*	    interp->errorLine); */
         Tcl_AddErrorInfo(interp, msg);
 	iclsPtr->flags |= ITCL_CLASS_CONSTRUCT_ERROR;
         result = TCL_ERROR;
@@ -1336,10 +1343,17 @@ Itcl_ClassProtectionCmd(
             result = TCL_ERROR;
         } else {
 	    if (result != TCL_OK) {
+	        Tcl_Obj *options = Tcl_GetReturnOptions(interp, result);
+	        Tcl_Obj *key = Tcl_NewStringObj("-errorline", -1);
+	        Tcl_Obj *stackTrace;
+	        Tcl_IncrRefCount(key);
+	        Tcl_DictObjGet(NULL, options, key, &stackTrace);
+	        Tcl_DecrRefCount(key);
                 char mesg[256], *token;
                 token = Tcl_GetString(objv[0]);
-                sprintf(mesg, "\n    (%.100s body line %d)", token,
-		        interp->errorLine);
+                sprintf(mesg, "\n    (%.100s body line %s)", token,
+                        Tcl_GetString(stackTrace));
+/*		        interp->errorLine); */
                 Tcl_AddErrorInfo(interp, mesg);
             }
         }
@@ -2197,7 +2211,7 @@ Itcl_TypeCmdStart(
     if (res == NULL) {
         return TCL_ERROR;
     }
-    res = Tcl_PkgRequire(interp, "ItclWidget", ITCL_VERSION, 0);
+    res = Tcl_PkgRequire(interp, "itclwidget", ITCL_VERSION, 0);
     if (res == NULL) {
         return TCL_ERROR;
     }
@@ -2226,7 +2240,7 @@ Itcl_WidgetCmdStart(
     if (res == NULL) {
         return TCL_ERROR;
     }
-    res = Tcl_PkgRequire(interp, "ItclWidget", ITCL_VERSION, 0);
+    res = Tcl_PkgRequire(interp, "itclwidget", ITCL_VERSION, 0);
     if (res == NULL) {
         return TCL_ERROR;
     }
@@ -2255,7 +2269,7 @@ Itcl_WidgetAdaptorCmdStart(
     if (res == NULL) {
         return TCL_ERROR;
     }
-    res = Tcl_PkgRequire(interp, "ItclWidget", ITCL_VERSION, 0);
+    res = Tcl_PkgRequire(interp, "itclwidget", ITCL_VERSION, 0);
     if (res == NULL) {
         return TCL_ERROR;
     }

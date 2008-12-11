@@ -25,7 +25,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclEnsemble.c,v 1.1.2.17 2008/12/10 13:22:23 wiede Exp $
+ *     RCS:  $Id: itclEnsemble.c,v 1.1.2.18 2008/12/11 11:22:33 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -1815,9 +1815,16 @@ Itcl_EnsembleCmd(
 #endif
 
         if (objc == 3) {
+	    Tcl_Obj *options = Tcl_GetReturnOptions(interp, status);
+	    Tcl_Obj *key = Tcl_NewStringObj("-errorline", -1);
+	    Tcl_Obj *stackTrace;
+	    Tcl_IncrRefCount(key);
+	    Tcl_DictObjGet(NULL, options, key, &stackTrace);
+	    Tcl_DecrRefCount(key);
             char msg[128];
-            sprintf(msg, "\n    (\"ensemble\" body line %d)",
-                ensInfo->parser->errorLine);
+            sprintf(msg, "\n    (\"ensemble\" body line %s)",
+                Tcl_GetString(stackTrace));
+/*                ensInfo->parser->errorLine); */
             Tcl_AddObjErrorInfo(interp, msg, -1);
         }
     }
