@@ -98,7 +98,6 @@ interp alias {} type {} ::itcl::type
 
 ::tcltest::loadTestedCommands
 
-if {1} {
 #-----------------------------------------------------------------------
 # Instance Introspection
 
@@ -651,6 +650,7 @@ test tinfo-1.2 {type info too few args} -body {
   info variables ?pattern?
 ...and others described on the man page}
 
+
 test tinfo-1.3 {type info too many args} -body {
     type dog { }
 
@@ -1075,10 +1075,6 @@ test tinfo-10.7 {type info delegated otpions} -body {
 } -cleanup {
     dog destroy
 } -result {{* comp3} {-bar comp2} {-foo comp1}}
-
-# end
-}
-
 
 
 #---------------------------------------------------------------------
