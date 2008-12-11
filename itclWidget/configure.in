@@ -10,7 +10,7 @@
 # so you can encode the package version directly into the source files.
 #-----------------------------------------------------------------------
 
-AC_INIT([ItclWidget], [4.0])
+AC_INIT([itclwidget], [4.0])
 
 #--------------------------------------------------------------------
 # Call TEA_INIT as the first TEA_ macro to set up initial vars.
@@ -216,11 +216,11 @@ TEA_PROG_TCLSH
 # pkglibdir must be a fully qualified path and (not ${exec_prefix}/lib)
 eval pkglibdir="${libdir}/${PACKAGE_NAME}${PACKAGE_VERSION}"
 if test "${TCL_LIB_VERSIONS_OK}" = "ok"; then
-    eval itclWidget_LIB_FLAG="-lItcl${PACKAGE_VERSION}${DBGX}"
-    eval itclWidget_STUB_LIB_FLAG="-lItclstub${PACKAGE_VERSION}${DBGX}"
+    eval itclWidget_LIB_FLAG="-litcl${PACKAGE_VERSION}${DBGX}"
+    eval itclWidget_STUB_LIB_FLAG="-litclstub${PACKAGE_VERSION}${DBGX}"
 else
-    eval itclWidget_LIB_FLAG="-lItcl`echo ${PACKAGE_VERSION} | tr -d .`${DBGX}"
-    eval itclWidget_STUB_LIB_FLAG="-lItclstub`echo ${PACKAGE_VERSION} | tr -d .`${DBGX}"
+    eval itclWidget_LIB_FLAG="-litcl`echo ${PACKAGE_VERSION} | tr -d .`${DBGX}"
+    eval itclWidget_STUB_LIB_FLAG="-litclstub`echo ${PACKAGE_VERSION} | tr -d .`${DBGX}"
 fi
 itclWidget_BUILD_LIB_SPEC="-L`pwd` ${itclWidget_LIB_FLAG}"
 itclWidget_LIB_SPEC="-L${pkglibdir} ${itclWidget_LIB_FLAG}"
