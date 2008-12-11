@@ -4,7 +4,7 @@
 #   AUTHOR:  Wolfgang Groﬂer, Arnulf Wiedemann
 #            wolfgang@grosser-erding.de, arnulf@wiedemann-pri.de
 #
-#      RCS:  $Id: general1.test,v 1.1.2.2 2008/11/23 20:29:59 wiede Exp $
+#      RCS:  $Id: general1.test,v 1.1.2.3 2008/12/11 11:38:52 wiede Exp $
 # ----------------------------------------------------------------------
 #            Copyright (c) Wolfgang Groﬂer, Arnulf Wiedemann
 # ======================================================================
@@ -207,7 +207,6 @@ test general1-1.14 {can indirect calls through middle class} {
     set ::test_cd_watch ""
     list [catch {classC0 doC doB doA primA} msg] $msg [catch {classC0 doC doB doA promA} msg] $msg [catch {classC0 doC doB doA pubmA} msg] $msg
 } {0 {primA privA} 0 {primA privA promA provA} 0 {primA privA promA provA pubmA pubvA}}
-puts stderr "1.14"
 
 test general1-1.15 {*cannot* indirect private calls through middle class} {
     set ::test_cd_watch ""

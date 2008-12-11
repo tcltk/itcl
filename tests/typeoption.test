@@ -76,7 +76,6 @@ interp alias {} type {} ::itcl::type
 
 ::tcltest::loadTestedCommands
 
-if {1} {
 #-----------------------------------------------------------------------
 # Options
 
@@ -604,12 +603,6 @@ test optionreadonly-1.3 {Readonly options can't be set after creation} -body {
 } -cleanup {
     dog destroy
 } -result {option "-color" can only be set at instance creation}
-
-# end
-}
-
-
-
 
 
 #---------------------------------------------------------------------

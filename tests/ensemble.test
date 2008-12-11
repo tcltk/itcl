@@ -6,7 +6,7 @@
 #            mmclennan@lucent.com
 #            http://www.tcltk.com/itcl
 #
-#      RCS:  $Id: ensemble.test,v 1.5 2004/02/12 18:09:50 davygrvy Exp $
+#      RCS:  $Id: ensemble.test,v 1.5.2.1 2008/12/11 11:38:52 wiede Exp $
 # ----------------------------------------------------------------------
 #            Copyright (c) 1993-1998  Lucent Technologies, Inc.
 # ======================================================================
@@ -34,6 +34,7 @@ test ensemble-1.2 {creating a new ensemble} {
         }
     }
 } ""
+
 test ensemble-1.3 {adding to an existing ensemble} {
     itcl::ensemble test_numbers part three {x y z} {
         return "three: $x $y $z"
@@ -105,6 +106,7 @@ test ensemble-1.11 {part argument errors are handled gracefully} {
     invoked from within
 "itcl::ensemble test_numbers {part foo {{}} {}}"}}
 
+puts 2.0
 test ensemble-2.0 {defining subensembles} {
     itcl::ensemble test_numbers {
         ensemble hex {
@@ -193,6 +195,8 @@ test ensemble-3.1 {the error handler part shows up as generic "...and"} {
   test_numbers three x y z
   test_numbers two x y
 ...and others described on the man page}}
+
+::itcl::delete ensemble test_numbers
 
 ::tcltest::cleanupTests
 return
