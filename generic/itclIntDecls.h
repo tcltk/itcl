@@ -1,5 +1,5 @@
 /*
- * $Id: itclIntDecls.h,v 1.13.2.15 2008/12/06 23:05:47 wiede Exp $
+ * $Id: itclIntDecls.h,v 1.13.2.16 2008/12/11 11:23:21 wiede Exp $
  *
  * This file is (mostly) automatically generated from itcl.decls.
  */
@@ -14,7 +14,7 @@ extern const char *Itcl_InitStubs(
 	interp, ITCL_VERSION, 1)
 #else
 
-#define Itcl_InitStubs(interp,version,exact) Tcl_PkgRequire(interp,"Itcl",version, exact)
+#define Itcl_InitStubs(interp,version,exact) Tcl_PkgRequire(interp,"itcl",version, exact)
 
 #endif
 #endif

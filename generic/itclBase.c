@@ -9,7 +9,7 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itclBase.c,v 1.1.2.33 2008/12/10 13:22:23 wiede Exp $
+ * RCS: @(#) $Id: itclBase.c,v 1.1.2.34 2008/12/11 11:23:21 wiede Exp $
  */
 
 #include <stdlib.h>
@@ -41,34 +41,34 @@ namespace eval ::itcl {\n\
         if {[info exists library]} {\n\
             lappend dirs $library\n\
         } else {\n\
-            if {[catch {uplevel #0 source -rsrc Itcl}] == 0} {\n\
+            if {[catch {uplevel #0 source -rsrc itcl}] == 0} {\n\
                 return\n\
             }\n\
             set dirs {}\n\
             if {[info exists env(ITCL_LIBRARY)]} {\n\
                 lappend dirs $env(ITCL_LIBRARY)\n\
             }\n\
-            lappend dirs [file join [file dirname $tcl_library] Itcl$version]\n\
+            lappend dirs [file join [file dirname $tcl_library] itcl$version]\n\
             set bindir [file dirname [info nameofexecutable]]\n\
 	    lappend dirs [file join . library]\n\
-            lappend dirs [file join $bindir .. lib Itcl$version]\n\
+            lappend dirs [file join $bindir .. lib itcl$version]\n\
             lappend dirs [file join $bindir .. library]\n\
             lappend dirs [file join $bindir .. .. library]\n\
-            lappend dirs [file join $bindir .. .. Itcl library]\n\
-            lappend dirs [file join $bindir .. .. .. Itcl library]\n\
+            lappend dirs [file join $bindir .. .. itcl library]\n\
+            lappend dirs [file join $bindir .. .. .. itcl library]\n\
             lappend dirs [file join $bindir .. .. itcl-ng itcl library]\n\
             # On MacOSX, check the directories in the tcl_pkgPath\n\
             if {[string equal $::tcl_platform(platform) \"unix\"] && \
                     [string equal $::tcl_platform(os) \"Darwin\"]} {\n\
                 foreach d $::tcl_pkgPath {\n\
-                    lappend dirs [file join $d Itcl$version]\n\
+                    lappend dirs [file join $d itcl$version]\n\
                 }\n\
             }\n\
             # On *nix, check the directories in the tcl_pkgPath\n\
             if {[string equal $::tcl_platform(platform) \"unix\"]} {\n\
                 foreach d $::tcl_pkgPath {\n\
                     lappend dirs $d\n\
-                    lappend dirs [file join $d Itcl$version]\n\
+                    lappend dirs [file join $d itcl$version]\n\
                 }\n\
             }\n\
         }\n\
@@ -425,7 +425,7 @@ opt = atoi(res_option);
      *  Package is now loaded.
      */
 
-    return Tcl_PkgProvideEx(interp, "Itcl", ITCL_VERSION, &itclStubAPI);
+    return Tcl_PkgProvideEx(interp, "itcl", ITCL_VERSION, &itclStubAPI);
 }
 
 /*

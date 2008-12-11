@@ -1,5 +1,5 @@
 /*
- * $Id: itclStubLib.c,v 1.9.2.4 2008/11/08 23:40:12 wiede Exp $
+ * $Id: itclStubLib.c,v 1.9.2.5 2008/12/11 11:23:21 wiede Exp $
  * SOURCE: tk/generic/tkStubLib.c, version 1.9 2004/03/17
  */
 
@@ -36,7 +36,7 @@ const char *
 Itcl_InitStubs(
     Tcl_Interp *interp, const char *version, int exact)
 {
-    const char *packageName = "Itcl";
+    const char *packageName = "itcl";
     const char *errMsg = NULL;
     ClientData clientData = NULL;
     const char *actualVersion =
