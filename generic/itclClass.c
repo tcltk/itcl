@@ -25,7 +25,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann Copyright (c) 2007
  *
- *     RCS:  $Id: itclClass.c,v 1.1.2.45 2008/12/12 19:15:48 wiede Exp $
+ *     RCS:  $Id: itclClass.c,v 1.1.2.46 2008/12/12 22:30:31 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -1931,7 +1931,7 @@ Itcl_BuildVirtualTables(
 	            (char *)idmPtr->namePtr);
 	    if (hPtr == NULL) {
 	        hPtr = Tcl_CreateHashEntry(&iclsPtr->delegatedFunctions,
-		        (char *)objPtr, &newEntry);
+		        (char *)idmPtr->namePtr, &newEntry);
                 Tcl_SetHashValue(hPtr, idmPtr);
 	    }
             hPtr = Tcl_NextHashEntry(&place);
