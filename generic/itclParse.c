@@ -39,7 +39,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclParse.c,v 1.1.2.56 2008/12/12 13:11:42 wiede Exp $
+ *     RCS:  $Id: itclParse.c,v 1.1.2.57 2008/12/12 19:15:48 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -927,7 +927,7 @@ errorReturn:
  * ------------------------------------------------------------------------
  *  ItclCheckForInitializedComponents()
  *
- *  check if all components for delegation exist and are initilaized
+ *  check if all components for delegation exist and are initialized
  * ------------------------------------------------------------------------
  */
 int
@@ -3025,6 +3025,7 @@ Itcl_HandleDelegateMethodCmd(
     Tcl_Obj *usingPtr;
     Tcl_Obj *exceptionsPtr;
     Tcl_HashEntry *hPtr;
+    ItclClass *iclsPtr2;
     ItclComponent *icPtr;
     ItclHierIter hier;
     const char *usageStr;
@@ -3117,20 +3118,31 @@ delegate method * ?to <componentName>? ?using <pattern>? ?except <methods>?";
                 methodNamePtr);
     }
 
+    hPtr = NULL;
     if (ioPtr != NULL) {
-        Itcl_InitHierIter(&hier, ioPtr->iclsPtr);
-	while ((iclsPtr = Itcl_AdvanceHierIter(&hier)) != NULL) {
-	    hPtr = Tcl_FindHashEntry(&iclsPtr->components,
-	            (char *)componentPtr);
-            if (hPtr != NULL) {
-	        break;
+	if (componentPtr != NULL) {
+            Itcl_InitHierIter(&hier, ioPtr->iclsPtr);
+	    while ((iclsPtr = Itcl_AdvanceHierIter(&hier)) != NULL) {
+	        hPtr = Tcl_FindHashEntry(&iclsPtr->components,
+	                (char *)componentPtr);
+                if (hPtr != NULL) {
+	            break;
+	        }
 	    }
-	}
-	Itcl_DeleteHierIter(&hier);
+	    Itcl_DeleteHierIter(&hier);
+        }
     } else {
 	if (componentPtr != NULL) {
-            hPtr = Tcl_FindHashEntry(&iclsPtr->components,
-	            (char *)componentPtr);
+	    iclsPtr2 = iclsPtr;
+            Itcl_InitHierIter(&hier, iclsPtr2);
+	    while ((iclsPtr2 = Itcl_AdvanceHierIter(&hier)) != NULL) {
+	        hPtr = Tcl_FindHashEntry(&iclsPtr2->components,
+	                (char *)componentPtr);
+                if (hPtr != NULL) {
+	            break;
+	        }
+	    }
+	    Itcl_DeleteHierIter(&hier);
         }
     }
     if (hPtr == NULL) {

@@ -25,7 +25,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann Copyright (c) 2007
  *
- *     RCS:  $Id: itclClass.c,v 1.1.2.44 2008/12/07 21:50:48 wiede Exp $
+ *     RCS:  $Id: itclClass.c,v 1.1.2.45 2008/12/12 19:15:48 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -1064,20 +1064,6 @@ ItclFreeClass(
     Tcl_DeleteHashTable(&iclsPtr->resolveCmds);
 
     /*
-     *  Delete all variable definitions.
-     */
-    while (1) {
-        hPtr = Tcl_FirstHashEntry(&iclsPtr->variables, &place);
-        if (hPtr == NULL) {
-            break;
-        }
-        ivPtr = Tcl_GetHashValue(hPtr);
-	Tcl_DeleteHashEntry(hPtr);
-        Itcl_ReleaseData(ivPtr);
-    }
-    Tcl_DeleteHashTable(&iclsPtr->variables);
-
-    /*
      *  Delete all option definitions.
      */
     while (1) {
@@ -1090,20 +1076,6 @@ ItclFreeClass(
         Itcl_ReleaseData(ioptPtr);
     }
     Tcl_DeleteHashTable(&iclsPtr->options);
-
-    /*
-     *  Delete all components
-     */
-    while (1) {
-        hPtr = Tcl_FirstHashEntry(&iclsPtr->components, &place);
-        if (hPtr == NULL) {
-            break;
-        }
-        icPtr = Tcl_GetHashValue(hPtr);
-	Tcl_DeleteHashEntry(hPtr);
-        ItclDeleteComponent(icPtr);
-    }
-    Tcl_DeleteHashTable(&iclsPtr->components);
 
     /*
      *  Delete all function definitions.
@@ -1132,9 +1104,41 @@ ItclFreeClass(
      *  Delete all delegated functions.
      */
     FOREACH_HASH_VALUE(idmPtr, &iclsPtr->delegatedFunctions) {
-        ItclDeleteDelegatedFunction(idmPtr);
+	if (idmPtr->icPtr != NULL) {
+	    if (idmPtr->icPtr->ivPtr->iclsPtr == iclsPtr) {
+                ItclDeleteDelegatedFunction(idmPtr);
+	    }
+	}
     }
     Tcl_DeleteHashTable(&iclsPtr->delegatedFunctions);
+
+    /*
+     *  Delete all components
+     */
+    while (1) {
+        hPtr = Tcl_FirstHashEntry(&iclsPtr->components, &place);
+        if (hPtr == NULL) {
+            break;
+        }
+        icPtr = Tcl_GetHashValue(hPtr);
+	Tcl_DeleteHashEntry(hPtr);
+        ItclDeleteComponent(icPtr);
+    }
+    Tcl_DeleteHashTable(&iclsPtr->components);
+
+    /*
+     *  Delete all variable definitions.
+     */
+    while (1) {
+        hPtr = Tcl_FirstHashEntry(&iclsPtr->variables, &place);
+        if (hPtr == NULL) {
+            break;
+        }
+        ivPtr = Tcl_GetHashValue(hPtr);
+	Tcl_DeleteHashEntry(hPtr);
+        Itcl_ReleaseData(ivPtr);
+    }
+    Tcl_DeleteHashTable(&iclsPtr->variables);
 
     /*
      *  Release the claim on all base classes.
@@ -1643,6 +1647,7 @@ Itcl_BuildVirtualTables(
     ItclVarLookup *vlookup;
     ItclVariable *ivPtr;
     ItclMemberFunc *imPtr;
+    ItclDelegatedFunction *idmPtr;
     ItclHierIter hier;
     ItclClass *iclsPtr2;
     ItclCmdLookup *clookupPtr;
@@ -1910,6 +1915,31 @@ Itcl_BuildVirtualTables(
         iclsPtr2 = Itcl_AdvanceHierIter(&hier);
     }
     Itcl_DeleteHierIter(&hier);
+
+    /*
+     *  Scan through all classes in the hierarchy, from most to
+     *  least specific.  Look for the first (most-specific) definition
+     *  of each delegated member function, and enter it into the table.
+     */
+    Itcl_InitHierIter(&hier, iclsPtr);
+    iclsPtr2 = Itcl_AdvanceHierIter(&hier);
+    while (iclsPtr2 != NULL) {
+        hPtr = Tcl_FirstHashEntry(&iclsPtr2->delegatedFunctions, &place);
+        while (hPtr) {
+            idmPtr = (ItclDelegatedFunction *)Tcl_GetHashValue(hPtr);
+	    hPtr = Tcl_FindHashEntry(&iclsPtr->delegatedFunctions,
+	            (char *)idmPtr->namePtr);
+	    if (hPtr == NULL) {
+	        hPtr = Tcl_CreateHashEntry(&iclsPtr->delegatedFunctions,
+		        (char *)objPtr, &newEntry);
+                Tcl_SetHashValue(hPtr, idmPtr);
+	    }
+            hPtr = Tcl_NextHashEntry(&place);
+        }
+        iclsPtr2 = Itcl_AdvanceHierIter(&hier);
+    }
+    Itcl_DeleteHierIter(&hier);
+
     Tcl_DStringFree(&buffer);
     Tcl_DStringFree(&buffer2);
 }

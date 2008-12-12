@@ -24,7 +24,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann Copyright (c) 2007
  *
- *     RCS:  $Id: itclObject.c,v 1.1.2.58 2008/12/10 13:22:23 wiede Exp $
+ *     RCS:  $Id: itclObject.c,v 1.1.2.59 2008/12/12 19:15:48 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -506,13 +506,13 @@ fprintf(stderr, "after Tcl_NewObjectInstance oPtr == NULL\n");
 	    }
 	}
         hPtr = Tcl_CreateHashEntry(&iclsPtr->infoPtr->objectCmds,
-            (char*)ioPtr->accessCmd, &newEntry);
+                (char*)ioPtr->accessCmd, &newEntry);
         Tcl_SetHashValue(hPtr, (ClientData)ioPtr);
         hPtr = Tcl_CreateHashEntry(&iclsPtr->infoPtr->objects,
-            (char*)ioPtr, &newEntry);
+                (char*)ioPtr, &newEntry);
         Tcl_SetHashValue(hPtr, (ClientData)ioPtr);
         hPtr = Tcl_CreateHashEntry(&iclsPtr->infoPtr->objectNames,
-            (char*)ioPtr->namePtr, &newEntry);
+                (char*)ioPtr->namePtr, &newEntry);
         Tcl_SetHashValue(hPtr, (ClientData)ioPtr);
 
         /* add the objects unknow command to handle all unknown sub commands */
@@ -538,7 +538,7 @@ fprintf(stderr, "after Tcl_NewObjectInstance oPtr == NULL\n");
             Tcl_Obj *objPtr = Tcl_NewObj();
             Tcl_GetCommandFullName(interp, ioPtr->accessCmd, objPtr);
             if (iclsPtr->flags & ITCL_WIDGETADAPTOR) {
-	        /* skip over the leeding :: */
+	        /* skip over the leading :: */
 		char *objName;
 		char *lastObjName;
 		lastObjName = Tcl_GetString(objPtr);
@@ -2254,6 +2254,9 @@ ItclTraceComponentVar(
          *  Handle write traces
          */
         if ((flags & TCL_TRACE_WRITES) != 0) {
+	    if (ioPtr->noComponentTrace) {
+	        return NULL;
+	    }
             /* need to redo the delegation for this component !! */
             if (hPtr == NULL) {
                 return " INTERNAL ERROR cannot get component to write to";
@@ -2261,6 +2264,9 @@ ItclTraceComponentVar(
             icPtr = Tcl_GetHashValue(hPtr);
 	    val = ItclGetInstanceVar(interp, name1, NULL, ioPtr,
                     ioPtr->iclsPtr);
+	    if ((val == NULL) || (strlen(val) == 0)) {
+	        return " INTERNAL ERROR cannot get value for component";
+	    }
 	    componentValuePtr = Tcl_NewStringObj(val, -1);
             Tcl_IncrRefCount(componentValuePtr);
 	    namePtr = Tcl_NewStringObj(name1, -1);
@@ -3225,6 +3231,7 @@ DelegationInstall(
 
     result = TCL_OK;
     delegateAll = 0;
+    ioPtr->noComponentTrace = 1;
     noDelegate = ITCL_CONSTRUCTOR|ITCL_DESTRUCTOR|ITCL_COMPONENT;
     componentValuePtr = NULL;
     FOREACH_HASH_VALUE(idmPtr, &iclsPtr->delegatedFunctions) {
@@ -3239,13 +3246,15 @@ DelegationInstall(
 	     */
             if (idmPtr->icPtr->ivPtr->flags & ITCL_COMMON) {
 	        objPtr = Tcl_NewStringObj(ITCL_VARIABLES_NAMESPACE, -1);
-	        Tcl_AppendToObj(objPtr, iclsPtr->nsPtr->fullName, -1);
+	        Tcl_AppendToObj(objPtr,
+		        idmPtr->icPtr->ivPtr->iclsPtr->nsPtr->fullName, -1);
 	        Tcl_AppendToObj(objPtr, "::", -1);
 	        Tcl_AppendToObj(objPtr,
 		        Tcl_GetString(idmPtr->icPtr->namePtr), -1);
 	    } else {
 	        objPtr = Tcl_NewStringObj(Tcl_GetString(ioPtr->varNsNamePtr),
 		        -1);
+fprintf(stderr, "need code here\n");
 	        /* FIXME need code here!!! */
 	    }
 	    val = Tcl_GetVar2(interp, Tcl_GetString(objPtr), NULL, 0);
@@ -3259,6 +3268,7 @@ DelegationInstall(
 	    result = DelegateFunction(interp, ioPtr, iclsPtr,
 	            componentValuePtr, idmPtr);
 	    if (result != TCL_OK) {
+                ioPtr->noComponentTrace = 0;
 	        return result;
 	    }
 	} else {
@@ -3316,6 +3326,7 @@ DelegationInstall(
             Tcl_DecrRefCount(componentValuePtr);
         }
     }
+    ioPtr->noComponentTrace = 0;
     result = DelegatedOptionsInstall(interp, iclsPtr);
     return result;
 }
