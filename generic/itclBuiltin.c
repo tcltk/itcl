@@ -24,7 +24,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclBuiltin.c,v 1.1.2.53 2008/12/09 12:01:03 wiede Exp $
+ *     RCS:  $Id: itclBuiltin.c,v 1.1.2.54 2008/12/12 13:11:42 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -2064,12 +2064,16 @@ ItclExtendedConfigure(
 	    }
 	}
         if (ioptPtr->validateMethodPtr != NULL) {
-	    newObjv = (Tcl_Obj **)ckalloc(sizeof(Tcl_Obj *)*3);
+	    newObjv = (Tcl_Obj **)ckalloc(sizeof(Tcl_Obj *) * 3);
 	    newObjv[0] = ioptPtr->validateMethodPtr;
 	    newObjv[1] = objv[i];
 	    newObjv[2] = objv[i+1];
 	    infoPtr->inOptionHandling = 1;
+	    saveNsPtr = Tcl_GetCurrentNamespace(interp);
+	    Itcl_SetCallFrameNamespace(interp, contextIclsPtr->nsPtr);
+            ItclShowArgs(1, "EVAL validatemethod", 3, newObjv);
             result = Tcl_EvalObjv(interp, 3, newObjv, TCL_EVAL_DIRECT);
+	    Itcl_SetCallFrameNamespace(interp, saveNsPtr);
 	    infoPtr->inOptionHandling = 0;
             ckfree((char *)newObjv);
 	    if (result != TCL_OK) {
@@ -2122,6 +2126,7 @@ ItclExtendedConfigure(
 	    Tcl_IncrRefCount(newObjv[2]);
 	    saveNsPtr = Tcl_GetCurrentNamespace(interp);
 	    Itcl_SetCallFrameNamespace(interp, evalNsPtr);
+            ItclShowArgs(1, "EVAL configuremethod", 3, newObjv);
             result = Tcl_EvalObjv(interp, 3, newObjv, TCL_EVAL_DIRECT);
 	    Tcl_DecrRefCount(newObjv[0]);
 	    Tcl_DecrRefCount(newObjv[1]);

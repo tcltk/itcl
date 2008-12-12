@@ -39,7 +39,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclParse.c,v 1.1.2.55 2008/12/11 11:22:33 wiede Exp $
+ *     RCS:  $Id: itclParse.c,v 1.1.2.56 2008/12/12 13:11:42 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -594,6 +594,7 @@ ItclClassBaseCmd(
     char *className;
     int isNewEntry;
     int result;
+    int noCleanup;
 
     infoPtr = (ItclObjectInfo*)clientData;
     if (iclsPtrPtr != NULL) {
@@ -667,19 +668,26 @@ ItclClassBaseCmd(
     }
     Itcl_PopStack(&infoPtr->clsStack);
 
+    noCleanup = 0;
     if (result != TCL_OK) {
 	Tcl_Obj *options = Tcl_GetReturnOptions(interp, result);
 	Tcl_Obj *key = Tcl_NewStringObj("-errorline", -1);
 	Tcl_Obj *stackTrace;
+	stackTrace = NULL;
 	Tcl_IncrRefCount(key);
 	Tcl_DictObjGet(NULL, options, key, &stackTrace);
 	Tcl_DecrRefCount(key);
         char msg[256];
-        sprintf(msg, "\n    (class \"%.200s\" body line %s)",
-            className, Tcl_GetString(stackTrace));
-/*	    interp->errorLine); */
+	if (stackTrace == NULL) {
+            sprintf(msg, "\n    error while parsing class \"%.200s\" body %s",
+                className, Tcl_GetString(objv[2]));
+	    noCleanup = 1;
+	} else {
+            sprintf(msg, "\n    (class \"%.200s\" body line %s)",
+                className, Tcl_GetString(stackTrace));
+	    iclsPtr->flags |= ITCL_CLASS_CONSTRUCT_ERROR;
+	}
         Tcl_AddErrorInfo(interp, msg);
-	iclsPtr->flags |= ITCL_CLASS_CONSTRUCT_ERROR;
         result = TCL_ERROR;
         goto errorReturn;
     }
@@ -909,7 +917,9 @@ ItclClassBaseCmd(
     }
     return result;
 errorReturn:
-    Tcl_DeleteNamespace(iclsPtr->nsPtr);
+    if (!noCleanup) {
+        Tcl_DeleteNamespace(iclsPtr->nsPtr);
+    }
     return result;
 }
 
@@ -1346,15 +1356,20 @@ Itcl_ClassProtectionCmd(
 	        Tcl_Obj *options = Tcl_GetReturnOptions(interp, result);
 	        Tcl_Obj *key = Tcl_NewStringObj("-errorline", -1);
 	        Tcl_Obj *stackTrace;
+	        stackTrace = NULL;
 	        Tcl_IncrRefCount(key);
 	        Tcl_DictObjGet(NULL, options, key, &stackTrace);
 	        Tcl_DecrRefCount(key);
-                char mesg[256], *token;
-                token = Tcl_GetString(objv[0]);
-                sprintf(mesg, "\n    (%.100s body line %s)", token,
-                        Tcl_GetString(stackTrace));
-/*		        interp->errorLine); */
-                Tcl_AddErrorInfo(interp, mesg);
+                char msg[256], *token;
+	        if (stackTrace == NULL) {
+                    sprintf(msg, "\n    error while parsing class \"%.200s\"",
+                        Tcl_GetString(objv[0]));
+		} else {
+                    token = Tcl_GetString(objv[0]);
+                    sprintf(msg, "\n    (%.100s body line %s)", token,
+                            Tcl_GetString(stackTrace));
+		}
+                Tcl_AddErrorInfo(interp, msg);
             }
         }
     }
