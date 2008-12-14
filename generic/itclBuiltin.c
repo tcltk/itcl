@@ -24,7 +24,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclBuiltin.c,v 1.1.2.55 2008/12/14 15:26:08 wiede Exp $
+ *     RCS:  $Id: itclBuiltin.c,v 1.1.2.56 2008/12/14 15:29:42 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -187,7 +187,6 @@ Itcl_BiInit(
     Tcl_Namespace *itclBiNs;
     Tcl_DString buffer;
     Tcl_Obj *objPtr;
-//    Tcl_Obj *objPtr2;
     Tcl_Obj *mapDict;
     Tcl_Command infoCmd;
     int result;
