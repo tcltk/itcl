@@ -20,7 +20,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itclResolve.c,v 1.1.2.24 2008/12/06 23:05:47 wiede Exp $
+ *     RCS:  $Id: itclResolve.c,v 1.1.2.25 2008/12/14 15:30:32 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -67,12 +67,17 @@ Itcl_ClassCmdResolver(
 {
     Tcl_HashEntry *hPtr;
     Tcl_Obj *objPtr;
+    Tcl_Obj *namePtr;
     ItclClass *iclsPtr;
     ItclObjectInfo *infoPtr;
     ItclMemberFunc *imPtr;
+    ItclDelegatedFunction *idmPtr;
     int inOptionHandling;
     int isCmdDeleted;
 
+/*
+fprintf(stderr, "RCMD1!%s!%s!\n", nsPtr->fullName, name);
+*/
     if ((name[0] == 't') && (strcmp(name, "this") == 0)) {
         return TCL_CONTINUE;
     }
@@ -95,18 +100,34 @@ Itcl_ClassCmdResolver(
 	if (!(iclsPtr->flags & ITCL_CLASS)) {
 	    namePtr = Tcl_NewStringObj(name, -1);
 	    Tcl_IncrRefCount(namePtr);
+/* FIXME have to check what to do here or what is possible */
 	    hPtr = Tcl_FindHashEntry(&iclsPtr->components, (char *)namePtr);
 	    Tcl_DecrRefCount(namePtr);
             if (hPtr != NULL) {
 	    }
         }
+#endif
+	if ((iclsPtr->flags & ITCL_ECLASS)) {
+	    namePtr = Tcl_NewStringObj(name, -1);
+	    hPtr = Tcl_FindHashEntry(&iclsPtr->delegatedFunctions,
+	            (char *)namePtr);
+	    if (hPtr != NULL) {
+	        idmPtr = Tcl_GetHashValue(hPtr);
+/*
+fprintf(stderr, "RCMD:found delegated function!%s!\n", name);
+*/
+                objPtr = Tcl_NewStringObj("unknown", -1);
+                hPtr = Tcl_FindHashEntry(&iclsPtr->resolveCmds, (char *)objPtr);
+                Tcl_DecrRefCount(objPtr);
+	    }
+	    Tcl_DecrRefCount(namePtr);
+	}
         if (hPtr == NULL) {
-#endif
             return TCL_CONTINUE;
-#ifdef NOTDEF
         }
-        imPtr = (ItclMemberFunc*)Tcl_GetHashValue(hPtr);
-#endif
+        ItclCmdLookup *clookup;
+        clookup = (ItclCmdLookup *)Tcl_GetHashValue(hPtr);
+        imPtr = clookup->imPtr;
     } else {
         ItclCmdLookup *clookup;
         clookup = (ItclCmdLookup *)Tcl_GetHashValue(hPtr);
