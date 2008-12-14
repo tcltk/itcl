@@ -24,7 +24,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclBuiltin.c,v 1.1.2.54 2008/12/12 13:11:42 wiede Exp $
+ *     RCS:  $Id: itclBuiltin.c,v 1.1.2.55 2008/12/14 15:26:08 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -161,7 +161,7 @@ static BiMethod BiMethodList[] = {
         "",
         "@itcl-builtin-classunknown",
         ItclBiClassUnknownCmd,
-	ITCL_TYPE|ITCL_WIDGET|ITCL_WIDGETADAPTOR
+	ITCL_ECLASS|ITCL_TYPE|ITCL_WIDGET|ITCL_WIDGETADAPTOR
     },
 };
 static int BiMethodListLen = sizeof(BiMethodList)/sizeof(BiMethod);

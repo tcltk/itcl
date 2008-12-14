@@ -23,7 +23,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclCmd.c,v 1.1.2.37 2008/12/09 12:01:03 wiede Exp $
+ *     RCS:  $Id: itclCmd.c,v 1.1.2.38 2008/12/14 15:26:08 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -76,6 +76,7 @@ Itcl_ThisCmd(
     ItclClass *iclsPtr;
     ItclDelegatedFunction *idmPtr;
     const char *funcName;
+    const char *val;
     int result;
 
     if (objc == 1) {
@@ -107,16 +108,39 @@ Itcl_ThisCmd(
     if (!(iclsPtr->flags & ITCL_CLASS)) {
         FOREACH_HASH_VALUE(idmPtr, &iclsPtr->delegatedFunctions) {
 	    if (strcmp(Tcl_GetString(idmPtr->namePtr), funcName) == 0) {
-                newObjv = (Tcl_Obj **)ckalloc(sizeof(Tcl_Obj *) * (objc +1));
-		newObjv[0] = Tcl_NewStringObj("this", -1);
-		Tcl_IncrRefCount(newObjv[0]);
-		const char *val;
-		val = Tcl_GetVar2(interp, Tcl_GetString(idmPtr->icPtr->namePtr), NULL, 0);
-		newObjv[1] = Tcl_NewStringObj(val, -1);
-		Tcl_IncrRefCount(newObjv[1]);
-                memcpy(newObjv+1, objv+1, sizeof(Tcl_Obj *) * (objc -1));
-ItclShowArgs(1, "EVAL2", objc, newObjv);
-	        result = Tcl_EvalObjv(interp, objc, newObjv, 0);
+		if (idmPtr->icPtr == NULL) {
+		    if (idmPtr->usingPtr != NULL) {
+                        newObjv = (Tcl_Obj **)ckalloc(sizeof(Tcl_Obj *) * objc);
+		        newObjv[0] = idmPtr->usingPtr;
+		        Tcl_IncrRefCount(newObjv[0]);
+                        memcpy(newObjv+1, objv+2, sizeof(Tcl_Obj *) *
+			         (objc - 2));
+ItclShowArgs(1, "EVAL2", objc - 1, newObjv);
+	                result = Tcl_EvalObjv(interp, objc - 1, newObjv, 0);
+		        Tcl_DecrRefCount(newObjv[0]);
+		        ckfree((char *)newObjv);
+		    } else {
+		       Tcl_AppendResult(interp,
+		               "delegate as not yet implemented in",
+			       " this method!", NULL);
+		       return TCL_ERROR;
+		    }
+		} else {
+                    newObjv = (Tcl_Obj **)ckalloc(sizeof(Tcl_Obj *) *
+		            (objc + 1));
+		    newObjv[0] = Tcl_NewStringObj("this", -1);
+		    Tcl_IncrRefCount(newObjv[0]);
+		    val = Tcl_GetVar2(interp,
+		            Tcl_GetString(idmPtr->icPtr->namePtr), NULL, 0);
+		    newObjv[1] = Tcl_NewStringObj(val, -1);
+		    Tcl_IncrRefCount(newObjv[1]);
+                    memcpy(newObjv+2, objv+1, sizeof(Tcl_Obj *) * (objc -1));
+ItclShowArgs(1, "EVAL2", objc+1, newObjv);
+	            result = Tcl_EvalObjv(interp, objc+1, newObjv, 0);
+		    Tcl_DecrRefCount(newObjv[1]);
+		    Tcl_DecrRefCount(newObjv[0]);
+		    ckfree((char *)newObjv);
+		}
 	        return result;
 	    }
 	}
