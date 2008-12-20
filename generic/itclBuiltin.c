@@ -24,7 +24,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclBuiltin.c,v 1.1.2.56 2008/12/14 15:29:42 wiede Exp $
+ *     RCS:  $Id: itclBuiltin.c,v 1.1.2.57 2008/12/20 22:25:50 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -1181,6 +1181,7 @@ ItclBiClassUnknownCmd(
     Tcl_Obj *listPtr;
     Tcl_Obj *objPtr;
     Tcl_Obj *resPtr;
+    Tcl_DString buffer;
     ItclClass *iclsPtr;
     ItclObjectInfo *infoPtr;
     ItclComponent *icPtr;
@@ -1310,10 +1311,27 @@ fprintf(stderr, "ItclBiClassUnknownCmd cannot find class\n");
 	    idmPtr = Tcl_GetHashValue(hPtr);
 	    val = NULL;
 	    if (idmPtr->icPtr != NULL) {
-	        val = Tcl_GetVar2(interp,
-	                Tcl_GetString(idmPtr->icPtr->namePtr), NULL, 0);
+                if (idmPtr->icPtr->ivPtr->flags & ITCL_COMMON) {
+	            val = Tcl_GetVar2(interp,
+	                    Tcl_GetString(idmPtr->icPtr->namePtr), NULL, 0);
+		} else {
+                    ItclClass *contextIclsPtr;
+                    ItclObject *contextIoPtr;
+                    contextIclsPtr = NULL;
+                    contextIoPtr = NULL;
+                    Itcl_GetContext(interp, &contextIclsPtr, &contextIoPtr);
+                    Tcl_DStringInit(&buffer);
+                    Tcl_DStringAppend(&buffer,
+                            Tcl_GetString(contextIoPtr->varNsNamePtr), -1);
+                    Tcl_DStringAppend(&buffer,
+                            Tcl_GetString(idmPtr->icPtr->ivPtr->fullNamePtr),
+                            -1);
+                    val = Tcl_GetVar2(interp, Tcl_DStringValue(&buffer),
+                            NULL, 0);
+		    Tcl_DStringFree(&buffer);
+		}
 	        if (val == NULL) {
-fprintf(stderr, "contents of component == NULL\n");
+fprintf(stderr, "ItclBiClassUnknownCmd contents of component == NULL\n");
 	            return TCL_ERROR;
 	        }
 	    }
@@ -1442,6 +1460,7 @@ ItclBiObjectUnknownCmd(
     Tcl_Obj *listPtr;
     Tcl_Obj *objPtr;
     Tcl_Obj *resPtr;
+    Tcl_DString buffer;
     ItclObject *ioPtr;
     ItclClass *iclsPtr;
     ItclObjectInfo *infoPtr;
@@ -1509,19 +1528,25 @@ ItclBiObjectUnknownCmd(
         }
     }
     isTypeMethod = 0;
+    found = 0;
     FOREACH_HASH_VALUE(idmPtr, &iclsPtr->delegatedFunctions) {
         if (strcmp(Tcl_GetString(idmPtr->namePtr), funcName) == 0) {
             if (idmPtr->flags & ITCL_TYPE_METHOD) {
 	       isTypeMethod = 1;
 	    }
+	    found = 1;
 	    break;
         }
         if (strcmp(Tcl_GetString(idmPtr->namePtr), "*") == 0) {
             if (idmPtr->flags & ITCL_TYPE_METHOD) {
 	       isTypeMethod = 1;
 	    }
+	    found = 1;
 	    break;
 	}
+    }
+    if (! found) {
+        idmPtr = NULL;
     }
     iclsPtr = ioPtr->iclsPtr;
     found = 0;
@@ -1581,21 +1606,28 @@ ItclBiObjectUnknownCmd(
             Tcl_AppendToObj(objPtr, "::", -1);
             Tcl_AppendToObj(objPtr,
 	            Tcl_GetString(idmPtr->icPtr->namePtr), -1);
+            val = Tcl_GetVar2(interp, Tcl_GetString(objPtr), NULL, 0);
+	    Tcl_DecrRefCount(objPtr);
         } else {
-            objPtr = Tcl_NewStringObj(Tcl_GetString(ioPtr->varNsNamePtr),
-	            -1);
-            /* FIXME need code here!!! */
+            Tcl_DStringInit(&buffer);
+            Tcl_DStringAppend(&buffer,
+                    Tcl_GetString(ioPtr->varNsNamePtr), -1);
+            Tcl_DStringAppend(&buffer,
+                    Tcl_GetString(idmPtr->icPtr->ivPtr->fullNamePtr), -1);
+            val = Tcl_GetVar2(interp, Tcl_DStringValue(&buffer),
+                    NULL, 0);
+	    Tcl_DStringFree(&buffer);
         }
-        val = Tcl_GetVar2(interp, Tcl_GetString(objPtr), NULL, 0);
-	Tcl_DecrRefCount(objPtr);
+/*
+fprintf(stderr, "UKOBJ!%s!%p!%s!\n", Tcl_GetString(idmPtr->namePtr), idmPtr->icPtr, val);
+*/
+
         if (val == NULL) {
-fprintf(stderr, "contents of component == NULL\n");
+fprintf(stderr, "ItclBiObjectUnknownCmd contents of component == NULL\n");
             return TCL_ERROR;
         }
     }
-/*
-fprintf(stderr, "UK!%s!%p!%s!\n", Tcl_GetString(idmPtr->namePtr), idmPtr->icPtr, val);
-*/
+
     offset = 2;
     if (isStar) {
         hPtr = Tcl_FindHashEntry(&idmPtr->exceptions, (char *)objv[2]);
@@ -1647,6 +1679,7 @@ fprintf(stderr, "UK!%s!%p!%s!\n", Tcl_GetString(idmPtr->namePtr), idmPtr->icPtr,
 /*
 fprintf(stderr, "OBJC!%d!%d!%d!%d!%d!\n", objc, lObjc, offset, useComponent, (objc + lObjc - offset));
 */
+
     if (useComponent) {
 	if ((val == NULL) || (strlen(val) == 0)) {
 	    Tcl_AppendResult(interp, "component \"", 
@@ -1948,7 +1981,8 @@ ItclExtendedConfigure(
 	/* the option is delegated */
         idoPtr = (ItclDelegatedOption *)Tcl_GetHashValue(hPtr);
         icPtr = idoPtr->icPtr;
-        val = ItclGetInstanceVar(interp, Tcl_GetString(icPtr->namePtr),
+        val = ItclGetInstanceVar(interp,
+	        Tcl_GetString(icPtr->ivPtr->namePtr),
                 NULL, contextIoPtr, icPtr->ivPtr->iclsPtr);
         if ((val != NULL) && (strlen(val) > 0)) {
 	    if (idoPtr->asPtr != NULL) {
@@ -1990,7 +2024,8 @@ ItclExtendedConfigure(
             return result;
         } else {
 	    Tcl_AppendResult(interp, "INTERNAL ERROR component not found",
-	            " in ItclExtendedConfigure delegated option", NULL);
+	            " or not set in ItclExtendedConfigure delegated option",
+		    NULL);
 	    return TCL_ERROR;
 	}
     }

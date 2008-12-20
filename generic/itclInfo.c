@@ -24,7 +24,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclInfo.c,v 1.1.2.35 2008/12/11 11:21:41 wiede Exp $
+ *     RCS:  $Id: itclInfo.c,v 1.1.2.36 2008/12/20 22:25:50 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -3195,6 +3195,7 @@ Itcl_BiInfoOptionsCmd(
     Tcl_Obj *listPtr2;
     Tcl_Obj *objPtr;
     Tcl_Obj **lObjv;
+    Tcl_HashTable *tablePtr;
     ItclObject *ioPtr;
     ItclClass *iclsPtr;
     ItclOption *ioptPtr;
@@ -3225,7 +3226,12 @@ Itcl_BiInfoOptionsCmd(
         pattern = Tcl_GetString(objv[1]);
     }
     listPtr = Tcl_NewListObj(0, NULL);
-    FOREACH_HASH_VALUE(ioptPtr, &ioPtr->objectOptions) {
+    if (ioPtr == NULL) {
+        tablePtr = &iclsPtr->options;
+    } else {
+        tablePtr = &ioPtr->objectOptions;
+    }
+    FOREACH_HASH_VALUE(ioptPtr, tablePtr) {
 	name = Tcl_GetString(ioptPtr->namePtr);
 	if ((pattern == NULL) ||
                  Tcl_StringMatch(name, pattern)) {
@@ -3233,13 +3239,18 @@ Itcl_BiInfoOptionsCmd(
 	            Tcl_NewStringObj(Tcl_GetString(ioptPtr->namePtr), -1));
         }
     }
-    FOREACH_HASH_VALUE(idoPtr, &ioPtr->objectDelegatedOptions) {
-	name = Tcl_GetString(idoPtr->namePtr);
+    if (ioPtr == NULL) {
+        tablePtr = &iclsPtr->delegatedOptions;
+    } else {
+        tablePtr = &ioPtr->objectDelegatedOptions;
+    }
+    FOREACH_HASH_VALUE(idoPtr, tablePtr) {
+        name = Tcl_GetString(idoPtr->namePtr);
 	if (strcmp(name, "*") != 0) {
 	    if ((pattern == NULL) ||
-                     Tcl_StringMatch(name, pattern)) {
+                    Tcl_StringMatch(name, pattern)) {
                 Tcl_ListObjAppendElement(interp, listPtr,
-		        Tcl_NewStringObj(Tcl_GetString(idoPtr->namePtr), -1));
+	                Tcl_NewStringObj(Tcl_GetString(idoPtr->namePtr), -1));
 	    }
         } else {
 	    if (idoPtr->icPtr == NULL) {

@@ -24,7 +24,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann Copyright (c) 2007
  *
- *     RCS:  $Id: itclObject.c,v 1.1.2.59 2008/12/12 19:15:48 wiede Exp $
+ *     RCS:  $Id: itclObject.c,v 1.1.2.60 2008/12/20 22:25:50 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -399,6 +399,7 @@ fprintf(stderr, "after Tcl_NewObjectInstance oPtr == NULL\n");
      *  not called out explicitly in "initCode" code fragments are
      *  invoked implicitly without arguments.
      */
+    ItclShowArgs(1, "OBJCONS", newObjc, newObjv);
     result = Itcl_InvokeMethodIfExists(interp, "constructor",
         iclsPtr, ioPtr, newObjc, newObjv);
     if (result != TCL_OK) {
@@ -1684,7 +1685,7 @@ ItclGetInstanceVar(
         ivPtr = vlookup->ivPtr;
     } else {
 /*
-fprintf(stderr, "ItclSetInstanceVar cannot get ivPtr!%s!%s!\n", iclsPtr->nsPtr->fullName, name1);
+fprintf(stderr, "ItclGetInstanceVar cannot get ivPtr!%s!%s!\n", iclsPtr->nsPtr->fullName, name1);
 */
     }
     /*
@@ -3220,6 +3221,7 @@ DelegationInstall(
     Tcl_HashEntry *hPtr2;
     Tcl_HashSearch search2;
     Tcl_Obj *componentValuePtr;
+    Tcl_DString buffer;
     ItclDelegatedFunction *idmPtr;
     ItclMemberFunc *imPtr;
     FOREACH_HASH_DECLS;
@@ -3251,14 +3253,17 @@ DelegationInstall(
 	        Tcl_AppendToObj(objPtr, "::", -1);
 	        Tcl_AppendToObj(objPtr,
 		        Tcl_GetString(idmPtr->icPtr->namePtr), -1);
+	        val = Tcl_GetVar2(interp, Tcl_GetString(objPtr), NULL, 0);
+	        Tcl_DecrRefCount(objPtr);
 	    } else {
-	        objPtr = Tcl_NewStringObj(Tcl_GetString(ioPtr->varNsNamePtr),
-		        -1);
-fprintf(stderr, "need code here\n");
-	        /* FIXME need code here!!! */
+                Tcl_DStringInit(&buffer);
+                Tcl_DStringAppend(&buffer,
+                        Tcl_GetString(ioPtr->varNsNamePtr), -1);
+                Tcl_DStringAppend(&buffer,
+                        Tcl_GetString(idmPtr->icPtr->ivPtr->fullNamePtr), -1);
+                val = Tcl_GetVar2(interp,
+                            Tcl_DStringValue(&buffer), NULL, 0);
 	    }
-	    val = Tcl_GetVar2(interp, Tcl_GetString(objPtr), NULL, 0);
-	    Tcl_DecrRefCount(objPtr);
 	    componentValuePtr = Tcl_NewStringObj(val, -1);
             Tcl_IncrRefCount(componentValuePtr);
 	} else {

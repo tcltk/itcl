@@ -39,7 +39,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclParse.c,v 1.1.2.57 2008/12/12 19:15:48 wiede Exp $
+ *     RCS:  $Id: itclParse.c,v 1.1.2.58 2008/12/20 22:25:50 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -938,6 +938,7 @@ ItclCheckForInitializedComponents(
 {
     FOREACH_HASH_DECLS;
     Tcl_CallFrame frame;
+    Tcl_DString buffer;
     ItclDelegatedFunction *idmPtr;
     int result;
     int doCheck;
@@ -973,9 +974,15 @@ ItclCheckForInitializedComponents(
 	            val = Tcl_GetVar2(interp, Tcl_GetString(objPtr), NULL, 0);
 		    Tcl_DecrRefCount(objPtr);
 		} else {
-	            val = Tcl_GetVar2(interp,
-	                    Tcl_GetString(idmPtr->icPtr->ivPtr->namePtr),
+		    Tcl_DStringInit(&buffer);
+		    Tcl_DStringAppend(&buffer,
+		            Tcl_GetString(ioPtr->varNsNamePtr), -1);
+		    Tcl_DStringAppend(&buffer,
+		            Tcl_GetString(idmPtr->icPtr->ivPtr->fullNamePtr),
+			    -1);
+	            val = Tcl_GetVar2(interp, Tcl_DStringValue(&buffer),
 		            NULL, 0);
+		    Tcl_DStringFree(&buffer);
 		}
 		if ((ioPtr != NULL) && ((val != NULL) && (strlen(val) == 0))) {
 		    val = ItclGetInstanceVar(
@@ -2741,6 +2748,7 @@ ItclHandleClassComponent(
     int havePublic;
     int newObjc;
     int haveValue;
+    int storageClass;
     int i;
 
     ItclShowArgs(1, "Itcl_ClassComponentCmd", objc, objv);
@@ -2807,6 +2815,7 @@ ItclHandleClassComponent(
 		            usage, NULL);
                     return TCL_ERROR;
 		}
+	        public = Tcl_GetString(objv[i + 1]);
             } else {
                 Tcl_AppendResult(interp, "wrong syntax should be: ",
 		        usage, NULL);
@@ -2815,7 +2824,11 @@ ItclHandleClassComponent(
 	}
 	i++;
     }
-    if (ItclCreateComponent(interp, iclsPtr, objv[1], ITCL_COMMON,
+    storageClass = ITCL_COMMON;
+    if (iclsPtr->flags & ITCL_ECLASS) {
+        storageClass = 0;
+    }
+    if (ItclCreateComponent(interp, iclsPtr, objv[1], storageClass,
             &icPtr) != TCL_OK) {
         return TCL_ERROR;
     }
@@ -2858,6 +2871,7 @@ ItclHandleClassComponent(
 	Tcl_IncrRefCount(newObjv[2]);
 	newObjv[3] = objv[1];
 	Tcl_IncrRefCount(newObjv[3]);
+        ItclShowArgs(1, "COMPPUB", newObjc, newObjv);
         if (Itcl_ClassDelegateMethodCmd(infoPtr, interp, newObjc, newObjv)
 	        != TCL_OK) {
 	    return TCL_ERROR;

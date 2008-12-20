@@ -25,7 +25,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclMethod.c,v 1.1.2.39 2008/12/09 12:11:24 wiede Exp $
+ *     RCS:  $Id: itclMethod.c,v 1.1.2.40 2008/12/20 22:25:50 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -1901,6 +1901,7 @@ Itcl_InvokeMethodIfExists(
         (void) Tcl_ListObjGetElements((Tcl_Interp*)NULL, cmdlinePtr,
             &cmdlinec, &cmdlinev);
 
+ItclShowArgs(1, "EMC", cmdlinec, cmdlinev);
         /*
          *  Execute the code for the method.  Be careful to protect
          *  the method in case it gets deleted during execution.
