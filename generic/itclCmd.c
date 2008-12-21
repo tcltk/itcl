@@ -23,7 +23,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclCmd.c,v 1.1.2.38 2008/12/14 15:26:08 wiede Exp $
+ *     RCS:  $Id: itclCmd.c,v 1.1.2.39 2008/12/21 21:29:30 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -787,6 +787,11 @@ Itcl_ScopeCmd(
 	    }
         }
 
+        if (contextIoPtr == NULL) {
+	    if (infoPtr->currIoPtr != NULL) {
+	        contextIoPtr = infoPtr->currIoPtr;
+	    }
+	}
         if (contextIoPtr == NULL) {
             Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
                 "can't scope variable \"", token,
