@@ -24,7 +24,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann Copyright (c) 2007
  *
- *     RCS:  $Id: itclObject.c,v 1.1.2.60 2008/12/20 22:25:50 wiede Exp $
+ *     RCS:  $Id: itclObject.c,v 1.1.2.61 2008/12/21 21:16:27 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -2838,7 +2838,7 @@ ItclMapMethodNameProc(
 	if (hPtr == NULL) {
 	    char str[20];
 	    sprintf(str, "%p", iclsPtr);
-	    Tcl_AppendResult(interp, "context class has vanished", str, NULL);
+	    Tcl_AppendResult(interp, "context class has vanished 1", str, NULL);
             return TCL_ERROR;
 	}
     } else {
@@ -2846,7 +2846,7 @@ ItclMapMethodNameProc(
 	if (hPtr == NULL) {
 	    char str[20];
 	    sprintf(str, "%p", ioPtr->iclsPtr);
-	    Tcl_AppendResult(interp, "context class has vanished", str, NULL);
+	    Tcl_AppendResult(interp, "context class has vanished 2", str, NULL);
             return TCL_ERROR;
 	}
         iclsPtr = ioPtr->iclsPtr;
