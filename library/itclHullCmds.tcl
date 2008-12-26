@@ -6,7 +6,7 @@
 # ----------------------------------------------------------------------
 #   AUTHOR:  Arnulf P. Wiedemann
 #
-#      RCS:  $Id: itclHullCmds.tcl,v 1.1.2.1 2008/12/26 16:06:07 wiede Exp $
+#      RCS:  $Id: itclHullCmds.tcl,v 1.1.2.2 2008/12/26 18:10:31 wiede Exp $
 # ----------------------------------------------------------------------
 #            Copyright (c) 2008  Arnulf P. Wiedemann
 # ======================================================================
@@ -25,22 +25,34 @@ proc createhull {widget_type path args} {
     rename $this ${tmp}_
     set options [list]
     foreach {option_name value} $args {
-        switch -- $option_name {
-        -class {
+        switch -glob -- $option_name {
+        -* {
             lappend options $option_name $value
           }
         default {
+	    return -code error "bad option name\"$option_name\" options must start with a \"-\""
           }
         }
     }
     set my_win [string trimleft $path {:}]
-    set widget [uplevel 1 $widget_type $my_win {*}$options]
+    set cmd [list $widget_type $my_win]
+    if {[llength $options] > 0} {
+        lappend cmd {*}$options
+    }
+    set widget [uplevel 1 $cmd]
     set opts [uplevel 1 info delegated options]
-puts stderr "OPTS!$my_win!$opts!"
-    set my_opt [option get $my_win width *]
-puts stderr "my_opt!$my_opt!"
-    if {$my_opt ne ""} {
-        $my_win configure -width $my_opt
+    foreach entry $opts {
+        foreach {optName compName} $entry break
+	if {$compName eq "itcl_hull"} {
+	    set optInfos [uplevel 1 info delegated option $optName]
+	    set realOptName [lindex $optInfos 4]
+	    # strip off the "-" at the beginning
+	    set myOptName [string range $realOptName 1 end]
+            set my_opt_val [option get $my_win $myOptName *]
+            if {$my_opt_val ne ""} {
+                $my_win configure -$myOptName $my_opt_val
+            }
+	}
     }
     set idx 1
     while {1} {
@@ -50,15 +62,44 @@ puts stderr "my_opt!$my_opt!"
 	}
         incr idx
     }
-puts stderr "USING!$widgetName!"
     rename $tmp $widgetName
     uplevel 1 set itcl_hull $widgetName
     rename ${tmp}_ $tmp
     return $my_win
 }
 
-proc setupcomponent {args} {
-puts stderr "setupcomponent called $args!"
+proc setupcomponent {comp using widget_type path args} {
+    set options [list]
+    foreach {option_name value} $args {
+        switch -glob -- $option_name {
+        -* {
+            lappend options $option_name $value
+          }
+        default {
+	    return -code error "bad option name\"$option_name\" options must start with a \"-\""
+          }
+        }
+    }
+    set cmd [list $widget_type $path]
+    if {[llength $options] > 0} {
+        lappend cmd {*}$options
+    }
+    set my_comp [uplevel 1 $cmd]
+    uplevel 1 set $comp $my_comp
+    set opts [uplevel 1 info delegated options]
+    foreach entry $opts {
+        foreach {optName compName} $entry break
+	if {$compName eq $my_comp} {
+	    set optInfos [uplevel 1 info delegated option $optName]
+	    set realOptName [lindex $optInfos 4]
+	    # strip off the "-" at the beginning
+	    set myOptName [string range $realOptName 1 end]
+            set my_opt_val [option get $my_win $myOptName *]
+            if {$my_opt_val ne ""} {
+                $my_comp configure -$myOptName $my_opt_val
+            }
+	}
+    }
 }
 
 }
