@@ -24,7 +24,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclInfo.c,v 1.1.2.36 2008/12/20 22:25:50 wiede Exp $
+ *     RCS:  $Id: itclInfo.c,v 1.1.2.37 2008/12/26 18:18:21 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -54,6 +54,9 @@ Tcl_ObjCmdProc Itcl_BiInfoWidgetCmd;
 Tcl_ObjCmdProc Itcl_BiInfoDelegatedOptionsCmd;
 Tcl_ObjCmdProc Itcl_BiInfoDelegatedMethodsCmd;
 Tcl_ObjCmdProc Itcl_BiInfoDelegatedTypeMethodsCmd;
+Tcl_ObjCmdProc Itcl_BiInfoDelegatedOptionCmd;
+Tcl_ObjCmdProc Itcl_BiInfoDelegatedMethodCmd;
+Tcl_ObjCmdProc Itcl_BiInfoDelegatedTypeMethodCmd;
 Tcl_ObjCmdProc Itcl_ErrorDelegatedInfoCmd;
 Tcl_ObjCmdProc Itcl_BiInfoDelegatedUnknownCmd;
 
@@ -308,6 +311,21 @@ static const struct NameProcMap2 infoCmdsDelegated2[] = {
 	"?pattern?",
         Itcl_BiInfoDelegatedOptionsCmd,
         ITCL_TYPE|ITCL_WIDGETADAPTOR|ITCL_WIDGET|ITCL_ECLASS
+    },
+    { "::itcl::builtin::Info::delegated::method",
+	"methodName",
+        Itcl_BiInfoDelegatedMethodCmd,
+        ITCL_ECLASS
+    },
+    { "::itcl::builtin::Info::delegated::typemethod",
+	"methodName",
+        Itcl_BiInfoDelegatedTypeMethodCmd,
+        ITCL_ECLASS
+    },
+    { "::itcl::builtin::Info::delegated::option",
+	"methodName",
+        Itcl_BiInfoDelegatedOptionCmd,
+        ITCL_ECLASS
     },
     { "::itcl::builtin::Info::delegated::unknown",
 	"",
@@ -631,8 +649,8 @@ Itcl_BiInfoClassCmd(
             contextIclsPtr = contextIoPtr->iclsPtr;
 	}
 	if ((contextIoPtr == NULL) || (contextIclsPtr == NULL)) {
-	    Tcl_Obj *msg = Tcl_NewStringObj("\nget info like this instead 1: " \
-		    "\n  namespace eval className { info ", -1);
+	    Tcl_Obj *msg = Tcl_NewStringObj("\nget info like this instead: " \
+		    "\n  namespace eval className { info class", -1);
 	    Tcl_AppendStringsToObj(msg, Tcl_GetString(objv[0]), "... }", NULL);
             Tcl_SetObjResult(interp, msg);
             return TCL_ERROR;
@@ -722,8 +740,8 @@ Itcl_BiInfoInheritCmd(
         char *name = Tcl_GetString(objv[0]);
         Tcl_ResetResult(interp);
         Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
-            "\nget info like this instead 2: ",
-            "\n  namespace eval className { info ", name, "... }",
+            "\nget info like this instead: ",
+            "\n  namespace eval className { info inherit", name, "... }",
             (char*)NULL);
         return TCL_ERROR;
     }
@@ -831,8 +849,8 @@ Itcl_BiInfoHeritageCmd(
         name = Tcl_GetString(objv[0]);
         Tcl_ResetResult(interp);
         Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
-            "\nget info like this instead 3: ",
-            "\n  namespace eval className { info ", name, "... }",
+            "\nget info like this instead: ",
+            "\n  namespace eval className { info heritage", name, "... }",
             (char*)NULL);
         return TCL_ERROR;
     }
@@ -959,8 +977,8 @@ Itcl_BiInfoFunctionCmd(
         name = Tcl_GetString(objv[0]);
         Tcl_ResetResult(interp);
         Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
-            "\nget info like this instead 4: ",
-            "\n  namespace eval className { info ", name, "... }",
+            "\nget info like this instead: ",
+            "\n  namespace eval className { info function", name, "... }",
             (char*)NULL);
         return TCL_ERROR;
     }
@@ -1214,8 +1232,8 @@ Itcl_BiInfoVariableCmd(
         name = Tcl_GetString(objv[0]);
         Tcl_ResetResult(interp);
         Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
-            "\nget info like this instead 5: ",
-            "\n  namespace eval className { info ", name, "... }",
+            "\nget info like this instead: ",
+            "\n  namespace eval className { info variable", name, "... }",
             (char*)NULL);
         return TCL_ERROR;
     }
@@ -1704,8 +1722,8 @@ Itcl_BiInfoBodyCmd(
         name = Tcl_GetString(objv[0]);
         Tcl_ResetResult(interp);
         Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
-            "\nget info like this instead 6: ",
-            "\n  namespace eval className { info ", name, "... }",
+            "\nget info like this instead: ",
+            "\n  namespace eval className { info body", name, "... }",
             (char*)NULL);
         return TCL_ERROR;
     }
@@ -1848,8 +1866,8 @@ Itcl_BiInfoArgsCmd(
         name = Tcl_GetString(objv[0]);
         Tcl_ResetResult(interp);
         Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
-            "\nget info like this instead 7: ",
-            "\n  namespace eval className { info ", name, "... }",
+            "\nget info like this instead: ",
+            "\n  namespace eval className { info args", name, "... }",
             (char*)NULL);
         return TCL_ERROR;
     }
@@ -2064,8 +2082,8 @@ Itcl_BiInfoOptionCmd(
         name = Tcl_GetString(objv[0]);
         Tcl_ResetResult(interp);
         Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
-            "\nget info like this instead 5: ",
-            "\n  namespace eval className { info ", name, "... }",
+            "\nget info like this instead: ",
+            "\n  namespace eval className { info option", name, "... }",
             (char*)NULL);
         return TCL_ERROR;
     }
@@ -2325,8 +2343,8 @@ Itcl_BiInfoComponentCmd(
         name = Tcl_GetString(objv[0]);
         Tcl_ResetResult(interp);
         Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
-            "\nget info like this instead 5: ",
-            "\n  namespace eval className { info ", name, "... }",
+            "\nget info like this instead: ",
+            "\n  namespace eval className { info component", name, "... }",
             (char*)NULL);
         return TCL_ERROR;
     }
@@ -2540,8 +2558,8 @@ Itcl_BiInfoWidgetCmd(
         name = Tcl_GetString(objv[0]);
         Tcl_ResetResult(interp);
         Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
-            "\nget info like this instead 5: ",
-            "\n  namespace eval className { info ", name, "... }",
+            "\nget info like this instead: ",
+            "\n  namespace eval className { info widget", name, "... }",
             (char*)NULL);
         return TCL_ERROR;
     }
@@ -2627,8 +2645,8 @@ Itcl_BiInfoExtendedClassCmd(
         name = Tcl_GetString(objv[0]);
         Tcl_ResetResult(interp);
         Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
-            "\nget info like this instead 5: ",
-            "\n  namespace eval className { info ", name, "... }",
+            "\nget info like this instead: ",
+            "\n  namespace eval className { info extendedclass", name, "... }",
             (char*)NULL);
         return TCL_ERROR;
     }
@@ -2713,8 +2731,8 @@ Itcl_BiInfoDelegatedCmd(
         name = Tcl_GetString(objv[0]);
         Tcl_ResetResult(interp);
         Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
-            "\nget info like this instead 5: ",
-            "\n  namespace eval className { info ", name, "... }",
+            "\nget info like this instead: ",
+            "\n  namespace eval className { info delegated", name, "... }",
             (char*)NULL);
         return TCL_ERROR;
     }
@@ -2799,8 +2817,8 @@ Itcl_BiInfoItclHullCmd(
         name = Tcl_GetString(objv[0]);
         Tcl_ResetResult(interp);
         Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
-            "\nget info like this instead 5: ",
-            "\n  namespace eval className { info ", name, "... }",
+            "\nget info like this instead: ",
+            "\n  namespace eval className { info hull", name, "... }",
             (char*)NULL);
         return TCL_ERROR;
     }
@@ -2882,8 +2900,8 @@ Itcl_BiInfoTypeCmd(
             contextIclsPtr = contextIoPtr->iclsPtr;
 	}
 	if ((contextIoPtr == NULL) || (contextIclsPtr == NULL)) {
-	    Tcl_Obj *msg = Tcl_NewStringObj("\nget info like this instead 1: " \
-		    "\n  namespace eval className { info ", -1);
+	    Tcl_Obj *msg = Tcl_NewStringObj("\nget info like this instead: " \
+		    "\n  namespace eval className { info type", -1);
 	    Tcl_AppendStringsToObj(msg, Tcl_GetString(objv[0]), "... }", NULL);
             Tcl_SetResult(interp, Tcl_GetString(msg), TCL_VOLATILE);
             Tcl_DecrRefCount(msg);
@@ -3985,4 +4003,298 @@ Itcl_BiInfoDelegatedUnknownCmd(
     Tcl_DecrRefCount(objPtr);
     return TCL_ERROR;
 }
+
+/*
+ * ------------------------------------------------------------------------
+ *  Itcl_BiInfoDelegatedOptionCmd()
+ *
+ *  Returns information regarding class options.
+ *  Handles the following syntax:
+ *
+ *    info delegated option ?optionName? ?-name? ?-resource? ?-class?
+ *        ?-component? ?-as? ?-exceptions?
+ *
+ *  If the ?optionName? is not specified, then a list of all known
+ *  data members is returned.  Otherwise, the information for a
+ *  specific member is returned.  Returns a status TCL_OK/TCL_ERROR
+ *  to indicate success/failure.
+ * ------------------------------------------------------------------------
+ */
+/* ARGSUSED */
+int
+Itcl_BiInfoDelegatedOptionCmd(
+    ClientData clientData, /* ItclObjectInfo Ptr */
+    Tcl_Interp *interp,    /* current interpreter */
+    int objc,              /* number of arguments */
+    Tcl_Obj *const objv[]) /* argument objects */
+{
+    FOREACH_HASH_DECLS;
+    char *optionName = NULL;
+    Tcl_Obj *resultPtr = NULL;
+    Tcl_Obj *objPtr = NULL;
+    Tcl_Obj *optionNamePtr;
 
+    static const char *options[] = {
+        "-as", "-class", "-component", "-exceptions",
+	"-name", "-resource", (char*)NULL
+    };
+    enum BOptIdx {
+        BOptAsIdx, BOptClassIdx, BOptComponentIdx, BOptExceptionsIdx,
+	BOptNameIdx, BOptResourceIdx
+    } *ioptlist, ioptlistStorage[6];
+
+    static enum BOptIdx DefInfoOption[6] = {
+        BOptNameIdx,
+        BOptResourceIdx,
+        BOptClassIdx,
+        BOptComponentIdx,
+        BOptAsIdx,
+        BOptExceptionsIdx
+    };
+
+    Tcl_HashSearch place;
+    Tcl_Namespace *nsPtr;
+    ItclClass *contextIclsPtr;
+    ItclObject *contextIoPtr;
+    ItclObjectInfo *infoPtr;
+    ItclDelegatedOption *idoptPtr;
+    ItclHierIter hier;
+    ItclClass *iclsPtr;
+    const char *name;
+    int i;
+    int result;
+
+    ItclShowArgs(1, "Itcl_BiInfoDelegatedOptionCmd", objc, objv);
+    /*
+     *  If this command is not invoked within a class namespace,
+     *  signal an error.
+     */
+    contextIclsPtr = NULL;
+    if (Itcl_GetContext(interp, &contextIclsPtr, &contextIoPtr) != TCL_OK) {
+        name = Tcl_GetString(objv[0]);
+        Tcl_ResetResult(interp);
+        Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+            "\nget info like this instead: ",
+            "\n  namespace eval className { info delegated option",
+	    name, "... }", (char*)NULL);
+        return TCL_ERROR;
+    }
+    if (contextIoPtr != NULL) {
+        contextIclsPtr = contextIoPtr->iclsPtr;
+    }
+    nsPtr = Itcl_GetUplevelNamespace(interp, 1);
+    infoPtr = contextIclsPtr->infoPtr;
+    hPtr = Tcl_FindHashEntry(&infoPtr->namespaceClasses, (char *)nsPtr);
+    if (hPtr == NULL) {
+        Tcl_AppendResult(interp, "cannot find class name for namespace \"",
+	        nsPtr->fullName, "\"", NULL);
+	return TCL_ERROR;
+    }
+    contextIclsPtr = Tcl_GetHashValue(hPtr);
+
+    /*
+     *  Process args:
+     *  ?optionName? ?-name? ?-resource? ?-class?
+     * ?-as? ?-exceptions?
+     */
+    objv++;  /* skip over command name */
+    objc--;
+
+    if (objc > 0) {
+        optionName = Tcl_GetString(*objv);
+        objc--;
+	objv++;
+    }
+
+    /*
+     *  Return info for a specific option.
+     */
+    if (optionName) {
+	optionNamePtr = Tcl_NewStringObj(optionName, -1);
+        hPtr = Tcl_FindHashEntry(&contextIoPtr->objectDelegatedOptions,
+	        (char *)optionNamePtr);
+        if (hPtr == NULL) {
+            Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+                 "\"", optionName, "\" isn't an option in object \"",
+                Tcl_GetString(contextIoPtr->namePtr), "\"",
+                (char*)NULL);
+            return TCL_ERROR;
+        }
+        idoptPtr = (ItclDelegatedOption*)Tcl_GetHashValue(hPtr);
+
+        /*
+         *  By default, return everything.
+         */
+        if (objc == 0) {
+            ioptlist = DefInfoOption;
+            objc = 6;
+        } else {
+
+            /*
+             *  Otherwise, scan through all remaining flags and
+             *  figure out what to return.
+             */
+            ioptlist = &ioptlistStorage[0];
+            for (i=0 ; i < objc; i++) {
+                result = Tcl_GetIndexFromObj(interp, objv[i],
+                    options, "option", 0, (int*)(&ioptlist[i]));
+                if (result != TCL_OK) {
+                    return TCL_ERROR;
+                }
+            }
+        }
+
+        if (objc > 1) {
+            resultPtr = Tcl_NewListObj(0, (Tcl_Obj**)NULL);
+        }
+
+        for (i=0 ; i < objc; i++) {
+            switch (ioptlist[i]) {
+                case BOptAsIdx:
+                    if (idoptPtr->asPtr) {
+                        objPtr = Tcl_NewStringObj(
+			        Tcl_GetString(idoptPtr->asPtr), -1);
+                    } else {
+                        objPtr = Tcl_NewStringObj("", -1);
+                    }
+                    break;
+
+                case BOptExceptionsIdx:
+		    {
+		    Tcl_Obj *entryObj;
+		    int hadEntries;
+		    hadEntries = 0;
+		    objPtr = Tcl_NewListObj(0, NULL);
+		    FOREACH_HASH_VALUE(entryObj, &idoptPtr->exceptions) {
+			Tcl_ListObjAppendElement(interp, objPtr, entryObj);
+		    }
+		    if (!hadEntries) {
+                        objPtr = Tcl_NewStringObj("", -1);
+                    }
+                    }
+                    break;
+                case BOptResourceIdx:
+                    if (idoptPtr->resourceNamePtr) {
+                        objPtr = Tcl_NewStringObj(
+			        Tcl_GetString(idoptPtr->resourceNamePtr), -1);
+                    } else {
+                        objPtr = Tcl_NewStringObj("", -1);
+                    }
+                    break;
+
+                case BOptClassIdx:
+                    if (idoptPtr->classNamePtr) {
+                        objPtr = Tcl_NewStringObj(
+			        Tcl_GetString(idoptPtr->classNamePtr), -1);
+                    } else {
+                        objPtr = Tcl_NewStringObj("", -1);
+                    }
+                    break;
+
+                case BOptComponentIdx:
+                    if (idoptPtr->icPtr != NULL) {
+                        objPtr = Tcl_NewStringObj(
+			        Tcl_GetString(idoptPtr->icPtr->namePtr), -1);
+                    } else {
+                        objPtr = Tcl_NewStringObj("", -1);
+                    }
+                    break;
+
+                case BOptNameIdx:
+                    objPtr = Tcl_NewStringObj(
+		            Tcl_GetString(idoptPtr->namePtr), -1);
+                    break;
+
+            }
+
+            if (objc == 1) {
+                resultPtr = objPtr;
+            } else {
+                Tcl_ListObjAppendElement((Tcl_Interp*)NULL, resultPtr,
+                    objPtr);
+            }
+        }
+        Tcl_SetResult(interp, Tcl_GetString(resultPtr), TCL_VOLATILE);
+        Tcl_DecrRefCount(resultPtr);
+    } else {
+
+        /*
+         *  Return the list of available options.
+         */
+        resultPtr = Tcl_NewListObj(0, (Tcl_Obj**)NULL);
+	Tcl_IncrRefCount(resultPtr);
+        Itcl_InitHierIter(&hier, contextIclsPtr);
+        while ((iclsPtr=Itcl_AdvanceHierIter(&hier)) != NULL) {
+            hPtr = Tcl_FirstHashEntry(&iclsPtr->delegatedOptions, &place);
+            while (hPtr) {
+                idoptPtr = (ItclDelegatedOption*)Tcl_GetHashValue(hPtr);
+                objPtr = idoptPtr->namePtr;
+                Tcl_ListObjAppendElement((Tcl_Interp*)NULL, resultPtr, objPtr);
+                hPtr = Tcl_NextHashEntry(&place);
+            }
+        }
+        Itcl_DeleteHierIter(&hier);
+
+        Tcl_SetResult(interp, Tcl_GetString(resultPtr), TCL_VOLATILE);
+        Tcl_DecrRefCount(resultPtr);
+    }
+    return TCL_OK;
+}
+
+/*
+ * ------------------------------------------------------------------------
+ *  Itcl_BiInfoDelegatedMethodCmd()
+ *
+ *  Returns information regarding class options.
+ *  Handles the following syntax:
+ *
+ *    info delegated method ?methodName? ?-name?
+ *        ?-component? ?-as? ?-exceptions?
+ *
+ *  If the ?optionName? is not specified, then a list of all known
+ *  data members is returned.  Otherwise, the information for a
+ *  specific member is returned.  Returns a status TCL_OK/TCL_ERROR
+ *  to indicate success/failure.
+ * ------------------------------------------------------------------------
+ */
+/* ARGSUSED */
+int
+Itcl_BiInfoDelegatedMethodCmd(
+    ClientData clientData, /* ItclObjectInfo Ptr */
+    Tcl_Interp *interp,    /* current interpreter */
+    int objc,              /* number of arguments */
+    Tcl_Obj *const objv[]) /* argument objects */
+{
+
+    ItclShowArgs(0, "Itcl_BiInfoDelegatedMethodCmd not yet implemented", objc, objv);
+    return TCL_OK;
+}
+
+/*
+ * ------------------------------------------------------------------------
+ *  Itcl_BiInfoDelegatedTypeMethodCmd()
+ *
+ *  Returns information regarding class options.
+ *  Handles the following syntax:
+ *
+ *    info delegated typemethod ?methodName? ?-name?
+ *        ?-component? ?-as? ?-exceptions?
+ *
+ *  If the ?optionName? is not specified, then a list of all known
+ *  data members is returned.  Otherwise, the information for a
+ *  specific member is returned.  Returns a status TCL_OK/TCL_ERROR
+ *  to indicate success/failure.
+ * ------------------------------------------------------------------------
+ */
+/* ARGSUSED */
+int
+Itcl_BiInfoDelegatedTypeMethodCmd(
+    ClientData clientData, /* ItclObjectInfo Ptr */
+    Tcl_Interp *interp,    /* current interpreter */
+    int objc,              /* number of arguments */
+    Tcl_Obj *const objv[]) /* argument objects */
+{
+
+    ItclShowArgs(0, "Itcl_BiInfoDelegatedTypeMethodCmd not yet implemented", objc, objv);
+    return TCL_OK;
+}
