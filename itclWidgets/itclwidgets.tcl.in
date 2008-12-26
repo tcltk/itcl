@@ -1,0 +1,34 @@
+#
+# itclwidgets.tcl
+# ----------------------------------------------------------------------
+#  AUTHOR: Arnulf P. Wiedemann
+#
+#  @(#) $Id: itclwidgets.tcl.in,v 1.1.2.1 2008/12/26 23:17:58 wiede Exp $
+# ----------------------------------------------------------------------
+#                Copyright (c) 2008  Arnulf P. Wiedemann
+# ======================================================================
+# See the file "license.terms" for information on usage and
+# redistribution of this file, and for a DISCLAIMER OF ALL WARRANTIES.
+
+package require Tcl 8.6
+package require Tk 8.6
+package require itcl @ITCL_VERSION@
+
+namespace eval ::itcl::widgets {
+    namespace export *
+
+    variable library [file dirname [info script]]
+    variable version @PACKAGE_VERSION@
+
+    lappend auto_path $itcl::widgets::library
+    variable subdir
+    foreach subdir {generic scripts} {
+        if {[file isdirectory [file join $itcl::widgets::library $subdir]]} {
+            lappend auto_path [file join $itcl::widgets::library $subdir]
+        }
+    }
+    unset subdir
+}
+
+package provide itclwidgets $itcl::widgets::version
+

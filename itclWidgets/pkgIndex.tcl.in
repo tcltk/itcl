@@ -1,0 +1,3 @@
+# Tcl package index file, version 1.0
+
+package ifneeded itclwidgets @PACKAGE_VERSION@ [list source [file join $dir itclwidgets.tcl]]
