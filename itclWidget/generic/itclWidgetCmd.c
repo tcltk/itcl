@@ -11,7 +11,7 @@
  * ========================================================================
  *  Author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclWidgetCmd.c,v 1.1.2.6 2008/11/25 19:19:51 wiede Exp $
+ *     RCS:  $Id: itclWidgetCmd.c,v 1.1.2.7 2008/12/26 16:18:52 wiede Exp $
  * ========================================================================
  *           Copyright (c) 2007 Arnulf Wiedemann
  * ------------------------------------------------------------------------
@@ -20,34 +20,6 @@
  */
 #include "itclWidgetInt.h"
 
-
-/*
- * ------------------------------------------------------------------------
- *  Itcl_TypeCmd()
- *
- *  Used to an [incr Tcl] type
- *
- *  Returns TCL_OK/TCL_ERROR to indicate success/failure.
- * ------------------------------------------------------------------------
- */
-/* ARGSUSED */
-int
-Itcl_TypeCmd(
-    ClientData clientData,   /* infoPtr */
-    Tcl_Interp *interp,      /* current interpreter */
-    int objc,                /* number of arguments */
-    Tcl_Obj *CONST objv[])   /* argument objects */
-{
-    ItclClass *iclsPtr;
-    ItclObjectInfo *infoPtr;
-    int result;
-
-    infoPtr = (ItclObjectInfo *)clientData;
-    ItclShowArgs(1, "Itcl_TypeCmd", objc-1, objv);
-    result = ItclClassBaseCmd(clientData, interp, ITCL_TYPE, objc, objv,
-            &iclsPtr);
-    return result;
-}
 
 /*
  * ------------------------------------------------------------------------
@@ -60,11 +32,11 @@ Itcl_TypeCmd(
  */
 /* ARGSUSED */
 int
-Itcl_WidgetCmd(
+_Itcl_WidgetCmd(
     ClientData clientData,   /* infoPtr */
     Tcl_Interp *interp,      /* current interpreter */
     int objc,                /* number of arguments */
-    Tcl_Obj *CONST objv[])   /* argument objects */
+    Tcl_Obj *const objv[])   /* argument objects */
 {
     Tcl_Obj *objPtr;
     ItclClass *iclsPtr;
@@ -104,11 +76,11 @@ Itcl_WidgetCmd(
  */
 /* ARGSUSED */
 int
-Itcl_WidgetAdaptorCmd(
+_Itcl_WidgetAdaptorCmd(
     ClientData clientData,   /* infoPtr */
     Tcl_Interp *interp,      /* current interpreter */
     int objc,                /* number of arguments */
-    Tcl_Obj *CONST objv[])   /* argument objects */
+    Tcl_Obj *const objv[])   /* argument objects */
 {
     Tcl_Obj *namePtr;
     Tcl_Obj *objPtr;
@@ -126,7 +98,6 @@ Itcl_WidgetAdaptorCmd(
     }
     /* create the itcl_hull variable */
     namePtr = Tcl_NewStringObj("itcl_hull", -1);
-//    Tcl_IncrRefCount(namePtr);
     if (ItclCreateComponent(interp, iclsPtr, namePtr, ITCL_COMMON, &icPtr) !=
             TCL_OK) {
         return TCL_ERROR;

@@ -12,7 +12,7 @@
  * ========================================================================
  *  Author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclWidgetBuiltin.c,v 1.1.2.11 2008/11/25 19:19:51 wiede Exp $
+ *     RCS:  $Id: itclWidgetBuiltin.c,v 1.1.2.12 2008/12/26 16:18:52 wiede Exp $
  * ========================================================================
  *           Copyright (c) 2007 Arnulf Wiedemann
  * ------------------------------------------------------------------------
@@ -74,7 +74,7 @@ void ItclHullContentsDeleted(
        return;
     }
     if (newName == NULL) {
-        /* delete the object which has this as a itcl_hull contents */
+        /* delete the object which has this as an itcl_hull contents */
         result = Itcl_RenameCommand(ioPtr->interp,
 	        Tcl_GetString(ioPtr->origNamePtr), NULL);
 /*
@@ -368,7 +368,9 @@ Itcl_BiInstallHullCmd(
 	}
     }
     contextIoPtr->hullWindowNamePtr = Tcl_NewStringObj(widgetName, -1);
-/* fprintf(stderr, "REN!%s!%s!\n", widgetName, Tcl_DStringValue(&buffer)); */
+/*
+fprintf(stderr, "REN!%s!%s!\n", widgetName, Tcl_DStringValue(&buffer)); 
+*/
     Itcl_RenameCommand(interp, widgetName,
             Tcl_DStringValue(&buffer));
     result = Tcl_TraceCommand(interp, Tcl_DStringValue(&buffer),
@@ -412,7 +414,7 @@ Itcl_BiInstallHullCmd(
 		    /* that is the case when delegating "*" */
 		    continue;
 		}
-		/* check if not in the comman line options */
+		/* check if not in the command line options */
 		/* these have higher priority */
 		const char *optionName;
 		optionName = Tcl_GetString(idoPtr->namePtr);
@@ -451,7 +453,7 @@ Itcl_BiInstallHullCmd(
 		        Tcl_IncrRefCount(newObjv[2]);
 		        newObjv[3] = Tcl_NewStringObj(val, -1);
 		        Tcl_IncrRefCount(newObjv[3]);
-                        ItclShowArgs(0, "SET OPTION", 4, newObjv);
+                        ItclShowArgs(1, "SET OPTION", 4, newObjv);
                         result = Tcl_EvalObjv(interp, 4, newObjv, 0);
 		        Tcl_DecrRefCount(newObjv[3]);
 		        Tcl_DecrRefCount(newObjv[2]);

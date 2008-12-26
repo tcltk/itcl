@@ -12,7 +12,7 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itclWidgetBase.c,v 1.1.2.6 2008/12/11 11:23:47 wiede Exp $
+ * RCS: @(#) $Id: itclWidgetBase.c,v 1.1.2.7 2008/12/26 16:18:52 wiede Exp $
  */
 
 #include <stdlib.h>
@@ -62,15 +62,11 @@ Initialize (
 	        "::itcl::widget::internal");
     }
 
-    Itcl_RenameCommand(interp, "::itcl::widget", "::itcl::__widget");
-    Itcl_RenameCommand(interp, "::itcl::widgetadaptor",
-            "::itcl::__widgetadaptor");
     infoPtr->windgetInfoPtr = (ItclWidgetInfo *)ckalloc(sizeof(ItclWidgetInfo));
     infoPtr->windgetInfoPtr->initObjectOpts = ItclWidgetInitObjectOptions;
     infoPtr->windgetInfoPtr->hullAndOptsInst = HullAndOptionsInstall;
     infoPtr->windgetInfoPtr->delegationInst = DelegationInstall;
     infoPtr->windgetInfoPtr->componentInst = InstallComponent;
-    Itcl_WidgetParseInit(interp, infoPtr);
 
     /*
      *  Create "itcl::builtin" namespace for commands that
