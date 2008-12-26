@@ -97,7 +97,7 @@ TEA_ADD_INCLUDES([-I. -I\"`${CYGPATH} ${srcdir}/generic`\"])
 TEA_ADD_LIBS([])
 TEA_ADD_CFLAGS([-DUSE_TCLOO_STUBS])
 TEA_ADD_STUB_SOURCES(itclStubLib.c)
-TEA_ADD_TCL_SOURCES([library/itcl.tcl])
+TEA_ADD_TCL_SOURCES([library/itcl.tcl library/itclWidget.tcl library/itclHullCmds.tcl])
 
 #--------------------------------------------------------------------
 # __CHANGE__
