@@ -24,7 +24,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann Copyright (c) 2007
  *
- *     RCS:  $Id: itclObject.c,v 1.1.2.61 2008/12/21 21:16:27 wiede Exp $
+ *     RCS:  $Id: itclObject.c,v 1.1.2.62 2008/12/26 16:05:26 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -106,6 +106,7 @@ ObjectRenamedTrace(
     Itcl_InterpState istate;
 
     if (newName != NULL) {
+	/* FIXME should enter the new name in the hashtables for objects etc. */
         return;
     }
     if (ioPtr->flags & ITCL_OBJECT_CLASS_DESTRUCTED) {
@@ -2768,6 +2769,9 @@ GetClassFromClassName(
     Tcl_HashEntry *hPtr;
     ItclClass *basePtr;
     Itcl_ListElem *elem;
+    const char *chkPtr;
+    int chkLgth;
+    int lgth;
 
     /* look for the class in the hierarchy */
     /* first check the class itself */
@@ -2781,6 +2785,21 @@ GetClassFromClassName(
 	basePtr = GetClassFromClassName(className, basePtr);
 	if (basePtr != NULL) {
 	    return basePtr;
+	}
+        elem = Itcl_NextListElem(elem);
+    }
+    /* now try to match the classes full name last part with the className */
+    lgth = strlen(className);
+    elem = Itcl_FirstListElem(&iclsPtr->bases);
+    while (elem != NULL) {
+        basePtr = (ItclClass*)Itcl_GetListValue(elem);
+	chkPtr = basePtr->nsPtr->fullName;
+	chkLgth = strlen(chkPtr);
+	if (chkLgth >= lgth) {
+	    chkPtr = chkPtr + chkLgth - lgth;
+	    if (strcmp(chkPtr, className) == 0) {
+	        return basePtr;
+	    }
 	}
         elem = Itcl_NextListElem(elem);
     }
@@ -2822,6 +2841,9 @@ ItclMapMethodNameProc(
     char *tail;
     char *sp;
 
+/*
+fprintf(stderr, "ItclMapMethodNameProc!%s!\n", Tcl_GetString(methodObj));
+*/
     iclsPtr = NULL;
     iclsPtr2 = NULL;
     methodName = NULL;
@@ -3288,6 +3310,12 @@ DelegationInstall(
 	            continue;
 	        }
                 if (strcmp(methodName, "isa") == 0) {
+	            continue;
+	        }
+                if (strcmp(methodName, "createhull") == 0) {
+	            continue;
+	        }
+                if (strcmp(methodName, "setupcomponent") == 0) {
 	            continue;
 	        }
                 if (strcmp(methodName, "mytypemethod") == 0) {

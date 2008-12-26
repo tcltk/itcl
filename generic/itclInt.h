@@ -9,7 +9,7 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itclInt.h,v 1.17.2.57 2008/12/12 19:15:48 wiede Exp $
+ * RCS: @(#) $Id: itclInt.h,v 1.17.2.58 2008/12/26 16:05:26 wiede Exp $
  */
 
 #include <string.h>
@@ -196,6 +196,12 @@ typedef struct ItclObjectInfo {
 				     * and methods are allowed to be called */
             /* these are the Tcl_Obj Ptrs for the clazz unknown procedure */
 	    /* need to store them to be able to free them at the end */
+    int itclWidgetInitted;          /* set to 1 if itclWidget.tcl has already
+                                     * been called
+				     */
+    int itclHullCmdsInitted;        /* set to 1 if itclHullCmds.tcl has already
+                                     * been called
+				     */
     Tcl_Obj *unknownNamePtr;
     Tcl_Obj *unknownArgumentPtr;
     Tcl_Obj *unknownBodyPtr;
@@ -237,6 +243,7 @@ typedef struct EnsembleInfo {
 #define ITCL_CLASS_NO_VARNS_DELETE        0x80000
 #define ITCL_CLASS_SHOULD_VARNS_DELETE   0x100000
 #define ITCL_CLASS_CONSTRUCT_ERROR       0x200000
+#define ITCL_CLASS_DESTRUCTOR_CALLED     0x400000
 
 
 typedef struct ItclClass {

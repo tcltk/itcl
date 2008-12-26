@@ -39,7 +39,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclParse.c,v 1.1.2.58 2008/12/20 22:25:50 wiede Exp $
+ *     RCS:  $Id: itclParse.c,v 1.1.2.59 2008/12/26 16:05:26 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -48,6 +48,64 @@
  */
 #include "itclInt.h"
 
+static char initWidgetScript[] = "\n\
+namespace eval ::itcl {\n\
+    proc _find_widget_init {} {\n\
+        global env tcl_library\n\
+        variable library\n\
+        variable version\n\
+        rename _find_widget_init {}\n\
+        if {[info exists library]} {\n\
+            lappend dirs $library\n\
+        } else {\n\
+            if {[catch {uplevel #0 source -rsrc itcl}] == 0} {\n\
+                return\n\
+            }\n\
+            set dirs {}\n\
+            if {[info exists env(ITCL_LIBRARY)]} {\n\
+                lappend dirs $env(ITCL_LIBRARY)\n\
+            }\n\
+            lappend dirs [file join [file dirname $tcl_library] itcl$version]\n\
+            set bindir [file dirname [info nameofexecutable]]\n\
+	    lappend dirs [file join . library]\n\
+            lappend dirs [file join $bindir .. lib itcl$version]\n\
+            lappend dirs [file join $bindir .. library]\n\
+            lappend dirs [file join $bindir .. .. library]\n\
+            lappend dirs [file join $bindir .. .. itcl library]\n\
+            lappend dirs [file join $bindir .. .. .. itcl library]\n\
+            lappend dirs [file join $bindir .. .. itcl-ng itcl library]\n\
+            # On MacOSX, check the directories in the tcl_pkgPath\n\
+            if {[string equal $::tcl_platform(platform) \"unix\"] && \
+                    [string equal $::tcl_platform(os) \"Darwin\"]} {\n\
+                foreach d $::tcl_pkgPath {\n\
+                    lappend dirs [file join $d itcl$version]\n\
+                }\n\
+            }\n\
+            # On *nix, check the directories in the tcl_pkgPath\n\
+            if {[string equal $::tcl_platform(platform) \"unix\"]} {\n\
+                foreach d $::tcl_pkgPath {\n\
+                    lappend dirs $d\n\
+                    lappend dirs [file join $d itcl$version]\n\
+                }\n\
+            }\n\
+        }\n\
+        foreach i $dirs {\n\
+            set library $i\n\
+            set itclfile [file join $i itclWidget.tcl]\n\
+            if {![catch {uplevel #0 [list source $itclfile]} msg]} {\n\
+                return\n\
+            }\n\
+        }\n\
+        set msg \"Can't find a usable itclWidget.tcl in the following directories:\n\"\n\
+        append msg \"    $dirs\n\"\n\
+        append msg \"This probably means that Itcl/Tcl weren't installed properly.\n\"\n\
+        append msg \"If you know where the Itcl library directory was installed,\n\"\n\
+        append msg \"you can set the environment variable ITCL_LIBRARY to point\n\"\n\
+        append msg \"to the library directory.\n\"\n\
+        error $msg\n\
+    }\n\
+    _find_widget_init\n\
+}";
 /*
  *  Info needed for public/protected/private commands:
  */
@@ -77,9 +135,8 @@ Tcl_ObjCmdProc Itcl_ClassVariableCmd;
 Tcl_ObjCmdProc Itcl_ClassProtectionCmd;
 Tcl_ObjCmdProc Itcl_ClassFilterCmd;
 Tcl_ObjCmdProc Itcl_ClassMixinCmd;
-Tcl_ObjCmdProc Itcl_TypeCmdStart;
-Tcl_ObjCmdProc Itcl_WidgetCmdStart;
-Tcl_ObjCmdProc Itcl_WidgetAdaptorCmdStart;
+Tcl_ObjCmdProc Itcl_WidgetCmd;
+Tcl_ObjCmdProc Itcl_WidgetAdaptorCmd;
 Tcl_ObjCmdProc Itcl_ClassOptionCmd;
 Tcl_ObjCmdProc Itcl_NWidgetCmd;
 Tcl_ObjCmdProc Itcl_ExtendedClassCmd;
@@ -120,7 +177,7 @@ static const struct {
     {"mixin", Itcl_ClassMixinCmd},
     {"option", Itcl_ClassOptionCmd},
     {"proc", Itcl_ClassProcCmd},
-    {"typecomponent", Itcl_ClassTypeComponentCmd},
+    {"typecomponent", Itcl_ClassTypeComponentCmd },
     {"typeconstructor", Itcl_ClassTypeConstructorCmd},
     {"typemethod", Itcl_ClassTypeMethodCmd},
     {"typevariable", Itcl_ClassTypeVariableCmd},
@@ -443,11 +500,11 @@ Itcl_ParseInit(
         (ClientData)infoPtr, Itcl_ReleaseData);
     Itcl_PreserveData((ClientData)infoPtr);
 
-    Tcl_CreateObjCommand(interp, "::itcl::widget", Itcl_WidgetCmdStart,
+    Tcl_CreateObjCommand(interp, "::itcl::widget", Itcl_WidgetCmd,
         (ClientData)infoPtr, Itcl_ReleaseData);
     Itcl_PreserveData((ClientData)infoPtr);
 
-    Tcl_CreateObjCommand(interp, "::itcl::widgetadaptor", Itcl_WidgetAdaptorCmdStart,
+    Tcl_CreateObjCommand(interp, "::itcl::widgetadaptor", Itcl_WidgetAdaptorCmd,
         (ClientData)infoPtr, Itcl_ReleaseData);
     Itcl_PreserveData((ClientData)infoPtr);
 
@@ -744,6 +801,16 @@ ItclClassBaseCmd(
 		if (strcmp(Tcl_GetString(imPtr->codePtr->bodyPtr),
 		        "@itcl-builtin-isa") == 0) {
 		    Tcl_AppendToObj(bodyPtr, "::itcl::builtin::isa", -1);
+		    isDone = 1;
+		}
+		if (strcmp(Tcl_GetString(imPtr->codePtr->bodyPtr),
+		        "@itcl-builtin-createhull") == 0) {
+		    Tcl_AppendToObj(bodyPtr, "::itcl::builtin::createhull", -1);
+		    isDone = 1;
+		}
+		if (strcmp(Tcl_GetString(imPtr->codePtr->bodyPtr),
+		        "@itcl-builtin-setupcomponent") == 0) {
+		    Tcl_AppendToObj(bodyPtr, "::itcl::builtin::setupcomponent", -1);
 		    isDone = 1;
 		}
 		if (strcmp(Tcl_GetString(imPtr->codePtr->bodyPtr),
@@ -2213,7 +2280,7 @@ Itcl_ClassMixinCmd(
 
 /*
  * ------------------------------------------------------------------------
- *  Itcl_TypeCmdStart()
+ *  Itcl_WidgetCmd()
  *
  *  that is just a dummy command to load package ItclWidget
  *  and then to resend the command and execute it in that package
@@ -2222,27 +2289,48 @@ Itcl_ClassMixinCmd(
  * ------------------------------------------------------------------------
  */
 int
-Itcl_TypeCmdStart(
+Itcl_WidgetCmd(
     ClientData clientData,   /* info for all known objects */
     Tcl_Interp *interp,      /* current interpreter */
     int objc,                /* number of arguments */
     Tcl_Obj *CONST objv[])   /* argument objects */
 {
-    ItclShowArgs(1, "Itcl_TypeCmdStart", objc-1, objv);
-    const char *res = Tcl_PkgRequire(interp, "Tk", "8.6", 0);
-    if (res == NULL) {
-        return TCL_ERROR;
+    Tcl_Obj *objPtr;
+    ItclClass *iclsPtr;
+    ItclObjectInfo *infoPtr;
+    int result;
+
+    ItclShowArgs(1, "Itcl_WidgetCmd", objc-1, objv);
+    infoPtr = (ItclObjectInfo *)clientData;
+    if (!infoPtr->itclWidgetInitted) {
+        result =  Tcl_Eval(interp, initWidgetScript);
+        if (result != TCL_OK) {
+            return result;
+        }
+        infoPtr->itclWidgetInitted = 1;
     }
-    res = Tcl_PkgRequire(interp, "itclwidget", ITCL_VERSION, 0);
-    if (res == NULL) {
-        return TCL_ERROR;
+    result = ItclClassBaseCmd(clientData, interp, ITCL_WIDGET, objc, objv,
+            &iclsPtr);
+    if (result != TCL_OK) {
+        return result;
     }
-    return Tcl_EvalObjv(interp, objc, objv, 0);
+
+    /* we handle create by owerselfs !! allow classunknown to handle that */
+    objPtr = Tcl_NewStringObj("oo::objdefine ", -1);
+    Tcl_AppendToObj(objPtr, iclsPtr->nsPtr->fullName, -1);
+    Tcl_AppendToObj(objPtr, " unexport create", -1);
+    Tcl_IncrRefCount(objPtr);
+    result = Tcl_EvalObjEx(interp, objPtr, 0);
+    Tcl_DecrRefCount(objPtr);
+    objPtr = Tcl_GetObjResult(interp);
+    Tcl_AppendToObj(objPtr, iclsPtr->nsPtr->fullName, -1);
+    Tcl_SetObjResult(interp, objPtr);
+    return result;
 }
 
 /*
  * ------------------------------------------------------------------------
- *  Itcl_WidgetCmdStart()
+ *  Itcl_WidgetAdaptorCmd()
  *
  *  that is just a dummy command to load package ItclWidget
  *  and then to resend the command and execute it in that package
@@ -2251,51 +2339,53 @@ Itcl_TypeCmdStart(
  * ------------------------------------------------------------------------
  */
 int
-Itcl_WidgetCmdStart(
+Itcl_WidgetAdaptorCmd(
     ClientData clientData,   /* info for all known objects */
     Tcl_Interp *interp,      /* current interpreter */
     int objc,                /* number of arguments */
     Tcl_Obj *CONST objv[])   /* argument objects */
 {
-    ItclShowArgs(1, "Itcl_WidgetCmdStart", objc-1, objv);
-    const char *res = Tcl_PkgRequire(interp, "Tk", "8.6", 0);
-    if (res == NULL) {
+    Tcl_Obj *namePtr;
+    Tcl_Obj *objPtr;
+    ItclClass *iclsPtr;
+    ItclObjectInfo *infoPtr;
+    ItclComponent *icPtr;
+    int result;
+
+    ItclShowArgs(1, "Itcl_WidgetAdaptorCmd", objc-1, objv);
+    infoPtr = (ItclObjectInfo *)clientData;
+    if (!infoPtr->itclWidgetInitted) {
+        result =  Tcl_Eval(interp, initWidgetScript);
+        if (result != TCL_OK) {
+            return result;
+        }
+        infoPtr->itclWidgetInitted = 1;
+    }
+    result = ItclClassBaseCmd(clientData, interp, ITCL_WIDGETADAPTOR,
+            objc, objv, &iclsPtr);
+    if (result != TCL_OK) {
+        return result;
+    }
+    /* create the itcl_hull variable */
+    namePtr = Tcl_NewStringObj("itcl_hull", -1);
+    if (ItclCreateComponent(interp, iclsPtr, namePtr, ITCL_COMMON, &icPtr) !=
+            TCL_OK) {
         return TCL_ERROR;
     }
-    res = Tcl_PkgRequire(interp, "itclwidget", ITCL_VERSION, 0);
-    if (res == NULL) {
-        return TCL_ERROR;
-    }
-    return Tcl_EvalObjv(interp, objc, objv, 0);
-}
-
-/*
- * ------------------------------------------------------------------------
- *  Itcl_WidgetAdaptorCmdStart()
- *
- *  that is just a dummy command to load package ItclWidget
- *  and then to resend the command and execute it in that package
- *  package ItclWidget is renaming the Tcl command!!
- *
- * ------------------------------------------------------------------------
- */
-int
-Itcl_WidgetAdaptorCmdStart(
-    ClientData clientData,   /* info for all known objects */
-    Tcl_Interp *interp,      /* current interpreter */
-    int objc,                /* number of arguments */
-    Tcl_Obj *CONST objv[])   /* argument objects */
-{
-    ItclShowArgs(1, "Itcl_WidgetAdaptorCmdStart", objc-1, objv);
-    const char *res = Tcl_PkgRequire(interp, "Tk", "8.6", 0);
-    if (res == NULL) {
-        return TCL_ERROR;
-    }
-    res = Tcl_PkgRequire(interp, "itclwidget", ITCL_VERSION, 0);
-    if (res == NULL) {
-        return TCL_ERROR;
-    }
-    return Tcl_EvalObjv(interp, objc, objv, 0);
+    iclsPtr->numVariables++;
+    Itcl_BuildVirtualTables(iclsPtr);
+
+    /* we handle create by owerselfs !! allow classunknown to handle that */
+    objPtr = Tcl_NewStringObj("oo::objdefine ", -1);
+    Tcl_AppendToObj(objPtr, iclsPtr->nsPtr->fullName, -1);
+    Tcl_AppendToObj(objPtr, " unexport create", -1);
+    Tcl_IncrRefCount(objPtr);
+    result = Tcl_EvalObjEx(interp, objPtr, 0);
+    Tcl_DecrRefCount(objPtr);
+    objPtr = Tcl_GetObjResult(interp);
+    Tcl_AppendToObj(objPtr, iclsPtr->nsPtr->fullName, -1);
+    Tcl_SetObjResult(interp, objPtr);
+    return result;
 }
 
 /*
@@ -2633,6 +2723,8 @@ Itcl_ClassOptionCmd(
     Tcl_Obj *CONST objv[])   /* argument objects */
 {
     ItclOption *ioptPtr;
+    const char *tkPackage;
+    const char *tkVersion;
 
     ItclShowArgs(1, "Itcl_ClassOptionCmd", objc, objv);
     ItclObjectInfo *infoPtr = (ItclObjectInfo*)clientData;
@@ -2642,6 +2734,19 @@ Itcl_ClassOptionCmd(
 	return TCL_ERROR;
     }
 
+    if ((objc > 1) && (strcmp(Tcl_GetString(objv[1]), "add") == 0)) {
+	tkVersion = "8.6";
+        tkPackage = Tcl_PkgPresent(interp, "Tk", tkVersion, 0);
+        if (tkPackage == NULL) {
+	    tkPackage = Tcl_PkgRequire(interp, "Tk", tkVersion, 0);
+	}
+	if (tkPackage == NULL) {
+	    Tcl_AppendResult(interp, "cannot load package Tk", tkVersion,
+	            NULL);
+	    return TCL_ERROR;
+	}
+        return Tcl_EvalObjv(interp, objc, objv, TCL_EVAL_GLOBAL);
+    }
     if (ItclParseOption(infoPtr, interp, objc, objv, iclsPtr, NULL,
             &ioptPtr) != TCL_OK) {
 	return TCL_ERROR;
@@ -3025,7 +3130,7 @@ ItclCreateDelegatedFunction(
 int
 Itcl_HandleDelegateMethodCmd(
     Tcl_Interp *interp,      /* current interpreter */
-    ItclObject *ioPtr,       /* != NULL for ::itcl::adddelgatedmethod 
+    ItclObject *ioPtr,       /* != NULL for ::itcl::adddelegatedmethod 
                                 otherwise NULL */
     ItclClass *iclsPtr,      /* != NULL for delegate method otherwise NULL */
     ItclDelegatedFunction **idmPtrPtr,
@@ -3254,7 +3359,7 @@ delegate method * ?to <componentName>? ?using <pattern>? ?except <methods>?";
  *
  *  Invoked by Tcl during the parsing of a class definition whenever
  *  the "delegate option" command is invoked to define a delegated option
- *  or if ::itcl::adddelegateoption is called with an itcl object
+ *  or if ::itcl::adddelegatedoption is called with an itcl object
  *  Handles the following syntax:
  *
  *      delegate option ...
@@ -3971,4 +4076,3 @@ Itcl_ClassTypeConstructorCmd(
     Tcl_IncrRefCount(iclsPtr->typeConstructorPtr);
     return TCL_OK;
 }
-

@@ -25,7 +25,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclMethod.c,v 1.1.2.40 2008/12/20 22:25:50 wiede Exp $
+ *     RCS:  $Id: itclMethod.c,v 1.1.2.41 2008/12/26 16:05:26 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -544,6 +544,16 @@ ItclCreateMemberFunc(
 	if (strcmp(name, "isa") == 0) {
             imPtr->codePtr->flags |= ITCL_BUILTIN;
 	}
+	if (strcmp(name, "createhull") == 0) {
+	    imPtr->argcount = 0;
+	    imPtr->maxargcount = -1;
+            imPtr->codePtr->flags |= ITCL_BUILTIN;
+	}
+	if (strcmp(name, "setupcomponent") == 0) {
+	    imPtr->argcount = 0;
+	    imPtr->maxargcount = -1;
+            imPtr->codePtr->flags |= ITCL_BUILTIN;
+	}
 	if (strcmp(name, "mytypemethod") == 0) {
 	    imPtr->argcount = 0;
 	    imPtr->maxargcount = -1;
@@ -883,6 +893,12 @@ ItclCreateMemberCode(
 	        isDone = 1;
 	    }
 	    if (strcmp(body, "@itcl-builtin-isa") == 0) {
+	        isDone = 1;
+	    }
+	    if (strcmp(body, "@itcl-builtin-createhull") == 0) {
+	        isDone = 1;
+	    }
+	    if (strcmp(body, "@itcl-builtin-setupcomponent") == 0) {
 	        isDone = 1;
 	    }
 	    if (strcmp(body, "@itcl-builtin-mytypemethod") == 0) {
@@ -1887,6 +1903,15 @@ Itcl_InvokeMethodIfExists(
     int result = TCL_OK;
 
     ItclShowArgs(1, "Itcl_InvokeMethodIfExists", objc, objv);
+#ifdef NOTDEF
+if (strcmp(name, "destructor") == 0) {
+if (contextClassPtr->flags & ITCL_CLASS_DESTRUCTOR_CALLED) {
+    return TCL_OK;
+}
+fprintf(stderr, "NS!%s!0x%08x!\n", contextClassPtr->nsPtr->fullName, contextClassPtr->flags);
+contextClassPtr->flags |= ITCL_CLASS_DESTRUCTOR_CALLED;
+}
+#endif
     Tcl_Obj *objPtr = Tcl_NewStringObj(name, -1);
     hPtr = Tcl_FindHashEntry(&contextClassPtr->functions, (char *)objPtr);
     Tcl_DecrRefCount(objPtr);
@@ -2051,6 +2076,12 @@ Itcl_CmdAliasProc(
 	}
 	if (strcmp(cmdName, "@itcl-builtin-isa") == 0) {
 	    return Tcl_FindCommand(interp, "::itcl::builtin::isa", NULL, 0);
+	}
+	if (strcmp(cmdName, "@itcl-builtin-createhull") == 0) {
+	    return Tcl_FindCommand(interp, "::itcl::builtin::createhull", NULL, 0);
+	}
+	if (strcmp(cmdName, "@itcl-builtin-setupcomponent") == 0) {
+	    return Tcl_FindCommand(interp, "::itcl::builtin::setupcomponent", NULL, 0);
 	}
 	if (strcmp(cmdName, "@itcl-builtin-mytypemethod") == 0) {
 	    return Tcl_FindCommand(interp, "::itcl::builtin::mytypemethod",

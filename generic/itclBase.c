@@ -9,7 +9,7 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itclBase.c,v 1.1.2.34 2008/12/11 11:23:21 wiede Exp $
+ * RCS: @(#) $Id: itclBase.c,v 1.1.2.35 2008/12/26 16:05:26 wiede Exp $
  */
 
 #include <stdlib.h>
@@ -34,7 +34,6 @@ static char initScript[] = "\n\
 namespace eval ::itcl {\n\
     proc _find_init {} {\n\
         global env tcl_library\n\
-        variable arnulf\n\
         variable library\n\
         variable version\n\
         rename _find_init {}\n\
@@ -425,6 +424,7 @@ opt = atoi(res_option);
      *  Package is now loaded.
      */
 
+    Tcl_PkgProvideEx(interp, "Itcl", ITCL_VERSION, &itclStubAPI);
     return Tcl_PkgProvideEx(interp, "itcl", ITCL_VERSION, &itclStubAPI);
 }
 

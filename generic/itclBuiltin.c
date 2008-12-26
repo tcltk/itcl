@@ -24,7 +24,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclBuiltin.c,v 1.1.2.57 2008/12/20 22:25:50 wiede Exp $
+ *     RCS:  $Id: itclBuiltin.c,v 1.1.2.58 2008/12/26 16:05:26 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -32,6 +32,66 @@
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  */
 #include "itclInt.h"
+
+static char initHullCmdsScript[] = "\n\
+namespace eval ::itcl {\n\
+    proc _find_hull_init {} {\n\
+        global env tcl_library\n\
+        variable library\n\
+        variable version\n\
+        rename _find_hull_init {}\n\
+        if {[info exists library]} {\n\
+            lappend dirs $library\n\
+        } else {\n\
+            if {[catch {uplevel #0 source -rsrc itcl}] == 0} {\n\
+                return\n\
+            }\n\
+            set dirs {}\n\
+            if {[info exists env(ITCL_LIBRARY)]} {\n\
+                lappend dirs $env(ITCL_LIBRARY)\n\
+            }\n\
+            lappend dirs [file join [file dirname $tcl_library] itcl$version]\n\
+            set bindir [file dirname [info nameofexecutable]]\n\
+	    lappend dirs [file join . library]\n\
+            lappend dirs [file join $bindir .. lib itcl$version]\n\
+            lappend dirs [file join $bindir .. library]\n\
+            lappend dirs [file join $bindir .. .. library]\n\
+            lappend dirs [file join $bindir .. .. itcl library]\n\
+            lappend dirs [file join $bindir .. .. .. itcl library]\n\
+            lappend dirs [file join $bindir .. .. itcl-ng itcl library]\n\
+            # On MacOSX, check the directories in the tcl_pkgPath\n\
+            if {[string equal $::tcl_platform(platform) \"unix\"] && \
+                    [string equal $::tcl_platform(os) \"Darwin\"]} {\n\
+                foreach d $::tcl_pkgPath {\n\
+                    lappend dirs [file join $d itcl$version]\n\
+                }\n\
+            }\n\
+            # On *nix, check the directories in the tcl_pkgPath\n\
+            if {[string equal $::tcl_platform(platform) \"unix\"]} {\n\
+                foreach d $::tcl_pkgPath {\n\
+                    lappend dirs $d\n\
+                    lappend dirs [file join $d itcl$version]\n\
+                }\n\
+            }\n\
+        }\n\
+        foreach i $dirs {\n\
+            set library $i\n\
+            set itclfile [file join $i itclHullCmds.tcl]\n\
+            if {![catch {uplevel #0 [list source $itclfile]} msg]} {\n\
+                return\n\
+            }\n\
+puts stderr \"MSG!$msg!\"\n\
+        }\n\
+        set msg \"Can't find a usable itclHullCmds.tcl in the following directories:\n\"\n\
+        append msg \"    $dirs\n\"\n\
+        append msg \"This probably means that Itcl/Tcl weren't installed properly.\n\"\n\
+        append msg \"If you know where the Itcl library directory was installed,\n\"\n\
+        append msg \"you can set the environment variable ITCL_LIBRARY to point\n\"\n\
+        append msg \"to the library directory.\n\"\n\
+        error $msg\n\
+    }\n\
+    _find_hull_init\n\
+}";
 
 Tcl_ObjCmdProc Itcl_BiInstallComponentCmd;
 Tcl_ObjCmdProc Itcl_BiDestroyCmd;
@@ -46,6 +106,8 @@ Tcl_ObjCmdProc Itcl_BiItclHullCmd;
 Tcl_ObjCmdProc ItclExtendedConfigure;
 Tcl_ObjCmdProc ItclExtendedCget;
 Tcl_ObjCmdProc ItclExtendedSetGet;
+Tcl_ObjCmdProc Itcl_BiCreateHullCmd;
+Tcl_ObjCmdProc Itcl_BiSetupComponentCmd;
 
 /*
  *  FORWARD DECLARATIONS
@@ -162,6 +224,18 @@ static BiMethod BiMethodList[] = {
         "@itcl-builtin-classunknown",
         ItclBiClassUnknownCmd,
 	ITCL_ECLASS|ITCL_TYPE|ITCL_WIDGET|ITCL_WIDGETADAPTOR
+    },
+    {"setupcomponent",
+        "componentName using widgetType widgetPath ?optionName value ...?",
+        "@itcl-builtin-setupcomponent",
+        Itcl_BiSetupComponentCmd,
+	ITCL_ECLASS
+    },
+    {"createhull",
+        "widgetType widgetPath ?-class className? ?optionName value ...?",
+        "@itcl-builtin-createhull",
+        Itcl_BiCreateHullCmd,
+	ITCL_ECLASS
     },
 };
 static int BiMethodListLen = sizeof(BiMethodList)/sizeof(BiMethod);
@@ -3183,4 +3257,74 @@ Itcl_BiItclHullCmd(
 	Tcl_SetObjResult(interp, Tcl_NewStringObj(val, -1));
     }
     return TCL_OK;
+}
+
+/*
+ * ------------------------------------------------------------------------
+ *  Itcl_BiCreateHullCmd()
+ *
+ *  Invoked by Tcl normally during evaluating constructor 
+ *  the "createhull" command is invoked to install and setup an
+ *  ::itcl::extendedclass itcl_hull
+ *  for an object.  Handles the following syntax:
+ *
+ *      createhull <widget_type> <widget_path> ?-class <widgetClassName>?
+ *          ?<optionName> <optionValue> <optionName> <optionValue> ...?
+ *
+ * ------------------------------------------------------------------------
+ */
+int
+Itcl_BiCreateHullCmd(
+    ClientData clientData,   /* info for all known objects */
+    Tcl_Interp *interp,      /* current interpreter */
+    int objc,                /* number of arguments */
+    Tcl_Obj *const objv[])   /* argument objects */
+{
+    int result;
+
+    ItclShowArgs(0, "Itcl_BiCreateHullCmd", objc, objv);
+    ItclObjectInfo *infoPtr = (ItclObjectInfo*)clientData;
+    if (!infoPtr->itclHullCmdsInitted) {
+        result =  Tcl_Eval(interp, initHullCmdsScript);
+        if (result != TCL_OK) {
+            return result;
+        }
+        infoPtr->itclHullCmdsInitted = 1;
+    }
+    return Tcl_EvalObjv(interp, objc, objv, 0);
+}
+
+/*
+ * ------------------------------------------------------------------------
+ *  Itcl_BiSetupComponentCmd()
+ *
+ *  Invoked by Tcl during evaluating constructor whenever
+ *  the "setupcomponent" command is invoked to install and setup an
+ *  ::itcl::extendedclass component
+ *  for an object.  Handles the following syntax:
+ *
+ *      setupcomponent <componentName> using <widgetType> <widget_path>
+ *          ?<optionName> <optionValue> <optionName> <optionValue> ...?
+ *
+ * ------------------------------------------------------------------------
+ */
+int
+Itcl_BiSetupComponentCmd(
+    ClientData clientData,   /* info for all known objects */
+    Tcl_Interp *interp,      /* current interpreter */
+    int objc,                /* number of arguments */
+    Tcl_Obj *const objv[])   /* argument objects */
+{
+    int result;
+
+    ItclShowArgs(0, "Itcl_BiSetupComponentCmd", objc, objv);
+    ItclObjectInfo *infoPtr = (ItclObjectInfo*)clientData;
+    if (!infoPtr->itclHullCmdsInitted) {
+        result =  Tcl_Eval(interp, initHullCmdsScript);
+        if (result != TCL_OK) {
+            return result;
+        }
+        infoPtr->itclHullCmdsInitted = 1;
+    }
+    return Tcl_EvalObjv(interp, objc, objv, 0);
 }

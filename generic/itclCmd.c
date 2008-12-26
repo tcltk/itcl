@@ -23,7 +23,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclCmd.c,v 1.1.2.39 2008/12/21 21:29:30 wiede Exp $
+ *     RCS:  $Id: itclCmd.c,v 1.1.2.40 2008/12/26 16:05:26 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -905,14 +905,16 @@ Itcl_CodeCmd(
     ClientData dummy,        /* unused */
     Tcl_Interp *interp,      /* current interpreter */
     int objc,                /* number of arguments */
-    Tcl_Obj *CONST objv[])   /* argument objects */
+    Tcl_Obj *const objv[])   /* argument objects */
 {
     Tcl_Namespace *contextNs = Tcl_GetCurrentNamespace(interp);
 
-    int pos;
+    Tcl_Obj *listPtr;
+    Tcl_Obj *objPtr;
     char *token;
-    Tcl_Obj *listPtr, *objPtr;
+    int pos;
 
+    ItclShowArgs(1, "Itcl_CodeCmd", objc, objv);
     /*
      *  Handle flags like "-namespace"...
      */
