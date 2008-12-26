@@ -6706,7 +6706,7 @@ echo "$as_me: error: could not find stub source file '$i'" >&2;}
 
 
 
-    vars="library/itcl.tcl"
+    vars="library/itcl.tcl library/itclWidget.tcl library/itclHullCmds.tcl"
     for i in $vars; do
 	# check for existence, be strict because it is installed
 	if test ! -f "${srcdir}/$i" ; then
