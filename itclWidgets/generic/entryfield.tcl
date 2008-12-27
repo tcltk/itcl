@@ -16,16 +16,25 @@
 #    Copyright (c) 1995 DSC Technologies Corporation
 # ----------------------------------------------------------------------
 #
-#   @(#) $Id: entryfield.tcl,v 1.1.2.1 2008/12/26 22:17:51 wiede Exp $
+#   @(#) $Id: entryfield.tcl,v 1.1.2.2 2008/12/27 19:44:12 wiede Exp $
 # ======================================================================
 
 package require itcl
 
 namespace eval ::itcl::widgets {
 
+#
+# Provide a lowercase access method for the Entryfield class.
+#
+proc entryfield {pathName args} {
+    uplevel ::itcl::widgets::Entryfield $pathName $args
+}
+
+
+
 ::itcl::extendedclass Entryfield {
-    component itcl_hull
-    component itcl_interior
+    inherit ::itcl::widgets::Labeledwidget
+
     component entry
     protected component efchildsite
 
@@ -60,10 +69,9 @@ namespace eval ::itcl::widgets {
 } ; # end Entryfield
 
 ::itcl::body Entryfield::constructor {args} {
-    set win [createhull frame $this -class [info class]]
-    setupcomponent entry using entry $win.entry
-    setupcomponent efchildsite using frame $win.efchildsite
-    pack $win.entry $win.efchildsite -side left
+    setupcomponent entry using entry $itcl_interior.entry
+    setupcomponent efchildsite using frame $itcl_interior.efchildsite
+    pack $itcl_interior.entry $itcl_interior.efchildsite -side left
     set itcl_interior $efchildsite
     # Entryfield instance bindings.
     bind $entry <KeyPress> [::itcl::code $this _keyPress %a %K %s]
