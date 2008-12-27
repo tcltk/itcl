@@ -25,7 +25,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann Copyright (c) 2007
  *
- *     RCS:  $Id: itclClass.c,v 1.1.2.46 2008/12/12 22:30:31 wiede Exp $
+ *     RCS:  $Id: itclClass.c,v 1.1.2.47 2008/12/27 19:35:24 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -2468,9 +2468,18 @@ static void
 ItclDeleteComponent(
     ItclComponent *icPtr)
 {
+    Tcl_Obj *objPtr;
+    FOREACH_HASH_DECLS;
+
     Tcl_DecrRefCount(icPtr->namePtr);
     /* the variable and the command are freed when freeing variables,
      * functions */
+    FOREACH_HASH_VALUE(objPtr, &icPtr->keptOptions) {
+	if (objPtr != NULL) {
+            Tcl_DecrRefCount(objPtr);
+        }
+    }
+    Tcl_DeleteHashTable(&icPtr->keptOptions);
     ckfree((char*)icPtr);
 }
 

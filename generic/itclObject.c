@@ -24,7 +24,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann Copyright (c) 2007
  *
- *     RCS:  $Id: itclObject.c,v 1.1.2.62 2008/12/26 16:05:26 wiede Exp $
+ *     RCS:  $Id: itclObject.c,v 1.1.2.63 2008/12/27 19:35:24 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -1038,15 +1038,15 @@ ItclInitObjectOptions(
    const char *name)
 {
     Tcl_DString buffer;
-    ItclClass *iclsPtr2;
-    ItclHierIter hier;
-    ItclOption *ioptPtr;
-    ItclDelegatedOption *idoPtr;
     Tcl_HashEntry *hPtr;
     Tcl_HashEntry *hPtr2;;
     Tcl_HashSearch place;
     Tcl_CallFrame frame;
     Tcl_Namespace *varNsPtr;
+    ItclClass *iclsPtr2;
+    ItclHierIter hier;
+    ItclOption *ioptPtr;
+    ItclDelegatedOption *idoPtr;
     const char *itclOptionsName;
     int isNew;
 
@@ -3313,6 +3313,9 @@ DelegationInstall(
 	            continue;
 	        }
                 if (strcmp(methodName, "createhull") == 0) {
+	            continue;
+	        }
+                if (strcmp(methodName, "keepcomponentoption") == 0) {
 	            continue;
 	        }
                 if (strcmp(methodName, "setupcomponent") == 0) {

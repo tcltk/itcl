@@ -24,7 +24,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclBuiltin.c,v 1.1.2.58 2008/12/26 16:05:26 wiede Exp $
+ *     RCS:  $Id: itclBuiltin.c,v 1.1.2.59 2008/12/27 19:35:23 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -108,6 +108,7 @@ Tcl_ObjCmdProc ItclExtendedCget;
 Tcl_ObjCmdProc ItclExtendedSetGet;
 Tcl_ObjCmdProc Itcl_BiCreateHullCmd;
 Tcl_ObjCmdProc Itcl_BiSetupComponentCmd;
+Tcl_ObjCmdProc Itcl_BiKeepComponentOptionCmd;
 
 /*
  *  FORWARD DECLARATIONS
@@ -163,7 +164,7 @@ static BiMethod BiMethodList[] = {
         "",
         "@itcl-builtin-destroy",
         Itcl_BiDestroyCmd,
-	ITCL_TYPE|ITCL_WIDGET|ITCL_WIDGETADAPTOR
+	ITCL_ECLASS|ITCL_TYPE|ITCL_WIDGET|ITCL_WIDGETADAPTOR
     },
     { "itcl_hull",
         "",
@@ -224,6 +225,12 @@ static BiMethod BiMethodList[] = {
         "@itcl-builtin-classunknown",
         ItclBiClassUnknownCmd,
 	ITCL_ECLASS|ITCL_TYPE|ITCL_WIDGET|ITCL_WIDGETADAPTOR
+    },
+    {"keepcomponentoption",
+        "componentName optionName ?optionName ...?",
+        "@itcl-builtin-keepcomponentoption",
+        Itcl_BiKeepComponentOptionCmd,
+	ITCL_ECLASS
     },
     {"setupcomponent",
         "componentName using widgetType widgetPath ?optionName value ...?",
@@ -1855,12 +1862,14 @@ ItclExtendedConfigure(
     Tcl_Obj *CONST objv[])   /* argument objects */
 {
     FOREACH_HASH_DECLS;
+    Tcl_HashTable unique;
     Tcl_HashEntry *hPtr2;
     Tcl_Object oPtr;
     Tcl_Obj *listPtr;
     Tcl_Obj *listPtr2;
     Tcl_Obj *resultPtr;
     Tcl_Obj *objPtr;
+    Tcl_Obj *optNamePtr;
     Tcl_Obj *methodNamePtr;
     Tcl_Obj *configureMethodPtr;
     Tcl_Obj **lObjv;
@@ -1883,6 +1892,8 @@ ItclExtendedConfigure(
     int lObjc;
     int lObjc2;
     int i;
+    int j;
+    int isNew;
     int result;
 
     ItclShowArgs(1, "ItclExtendedConfigure", objc, objv);
@@ -1965,9 +1976,15 @@ ItclExtendedConfigure(
     Tcl_DecrRefCount(methodNamePtr);
     /* now do the hard work */
     if (objc == 1) {
+	Tcl_InitObjHashTable(&unique);
 	/* plain configure */
         listPtr = Tcl_NewListObj(0, NULL);
 	FOREACH_HASH_VALUE(ioptPtr, &contextIoPtr->objectOptions) {
+	    hPtr2 = Tcl_CreateHashEntry(&unique,
+	            (char *)ioptPtr->namePtr, &isNew);
+	    if (!isNew) {
+	        continue;
+	    }
 	    objPtr = Tcl_NewListObj(0, NULL);
 	    Tcl_ListObjAppendElement(interp, objPtr,
 	            Tcl_NewStringObj(Tcl_GetString(ioptPtr->namePtr), -1));
@@ -2015,10 +2032,57 @@ ItclExtendedConfigure(
 		            &lObjc2, &lObjv2);
 			hPtr = Tcl_FindHashEntry(&idoPtr->exceptions,
 			        (char *)lObjv2[0]);
+			optNamePtr = lObjv2[0];
 			if (hPtr == NULL) {
-			    /* add the option */
-	                    Tcl_ListObjAppendElement(interp, listPtr, objPtr);
-			}
+			    if (icPtr->haveKeptOptions) {
+			        hPtr = Tcl_FindHashEntry(&icPtr->keptOptions,
+				        (char *)lObjv2[0]);
+				if (hPtr == NULL) {
+				   if (idoPtr->asPtr != NULL) {
+				       if (strcmp(Tcl_GetString(idoPtr->asPtr),
+				               Tcl_GetString(lObjv2[0])) == 0) {
+					    hPtr = Tcl_FindHashEntry(
+					        &icPtr->keptOptions,
+					        (char *)idoPtr->namePtr);
+				           if (hPtr == NULL) {
+				               /* not in kept list, so ignore */
+				               continue;
+				           }
+					   optNamePtr = idoPtr->namePtr;
+				           objPtr = Tcl_NewListObj(0, NULL);
+	                                   Tcl_ListObjAppendElement(interp,
+					       objPtr, Tcl_NewStringObj(
+					       Tcl_GetString(idoPtr->namePtr),
+					       -1));
+	                                   Tcl_ListObjAppendElement(interp,
+					       objPtr, Tcl_NewStringObj(
+		                               Tcl_GetString(
+					       idoPtr->resourceNamePtr), -1));
+	                                   Tcl_ListObjAppendElement(interp,
+					       objPtr, Tcl_NewStringObj(
+					       Tcl_GetString(
+					       idoPtr->classNamePtr), -1));
+                                           for (j = 3; j < lObjc2; j++) {
+	                                       Tcl_ListObjAppendElement(interp,
+					           objPtr, Tcl_NewStringObj(
+						   Tcl_GetString(lObjv2[j]),
+						   -1));
+					   }
+			               }
+			            }
+			        }
+				if (hPtr != NULL) {
+	                            hPtr2 = Tcl_CreateHashEntry(&unique,
+	                                    (char *)optNamePtr, &isNew);
+	                            if (!isNew) {
+	                                continue;
+	                            }
+			            /* add the option */
+	                            Tcl_ListObjAppendElement(interp, listPtr,
+				            objPtr);
+			        }
+			    }
+		        }
 		    }
 		}
 	    }
@@ -2788,7 +2852,7 @@ Itcl_BiDestroyCmd(
         return TCL_ERROR;
     }
     if (!(contextIclsPtr->flags &
-            (ITCL_TYPE|ITCL_WIDGET|ITCL_WIDGETADAPTOR))) {
+            (ITCL_ECLASS|ITCL_TYPE|ITCL_WIDGET|ITCL_WIDGETADAPTOR))) {
 	/* try to execute destroy in uplevel namespace */
 	newObjv = (Tcl_Obj **)ckalloc(sizeof(Tcl_Obj *) * (objc + 2));
 	newObjv[0] = Tcl_NewStringObj("uplevel", -1);
@@ -2810,6 +2874,7 @@ Itcl_BiDestroyCmd(
     if (contextIoPtr != NULL) {
         Tcl_Obj *objPtr = Tcl_NewObj();
         Tcl_GetCommandFullName(interp, contextIoPtr->accessCmd, objPtr);
+fprintf(stderr, "DESTROY!%s!\n", Tcl_GetString(objPtr));
         Itcl_RenameCommand(interp, Tcl_GetString(objPtr), "");
 	Tcl_DecrRefCount(objPtr);
         result = TCL_OK;
@@ -3282,7 +3347,7 @@ Itcl_BiCreateHullCmd(
 {
     int result;
 
-    ItclShowArgs(0, "Itcl_BiCreateHullCmd", objc, objv);
+    ItclShowArgs(1, "Itcl_BiCreateHullCmd", objc, objv);
     ItclObjectInfo *infoPtr = (ItclObjectInfo*)clientData;
     if (!infoPtr->itclHullCmdsInitted) {
         result =  Tcl_Eval(interp, initHullCmdsScript);
@@ -3317,7 +3382,7 @@ Itcl_BiSetupComponentCmd(
 {
     int result;
 
-    ItclShowArgs(0, "Itcl_BiSetupComponentCmd", objc, objv);
+    ItclShowArgs(1, "Itcl_BiSetupComponentCmd", objc, objv);
     ItclObjectInfo *infoPtr = (ItclObjectInfo*)clientData;
     if (!infoPtr->itclHullCmdsInitted) {
         result =  Tcl_Eval(interp, initHullCmdsScript);
@@ -3327,4 +3392,111 @@ Itcl_BiSetupComponentCmd(
         infoPtr->itclHullCmdsInitted = 1;
     }
     return Tcl_EvalObjv(interp, objc, objv, 0);
+}
+
+/*
+ * ------------------------------------------------------------------------
+ *  Itcl_BiKeepComponentOptionCmd()
+ *
+ *  Invoked by Tcl during evaluating constructor whenever
+ *  the "keepcomponentoption" command is invoked to list the options
+ *  to be kept when and ::itcl::extendedclass component has been setup
+ *  for an object.  Handles the following syntax:
+ *
+ *      keepcomponentoption <componentName> <optionName> ?<optionName> ...?
+ *
+ * ------------------------------------------------------------------------
+ */
+int
+Itcl_BiKeepComponentOptionCmd(
+    ClientData clientData,   /* info for all known objects */
+    Tcl_Interp *interp,      /* current interpreter */
+    int objc,                /* number of arguments */
+    Tcl_Obj *const objv[])   /* argument objects */
+{
+    Tcl_HashEntry *hPtr;
+    Tcl_HashEntry *hPtr2;
+    Tcl_Obj *objPtr;
+    ItclClass *iclsPtr;
+    ItclObject *ioPtr;
+    ItclDelegatedOption *idoPtr;
+    ItclComponent *icPtr;
+    const char *val;
+    int idx;
+    int isNew;
+    int result;
+
+    ItclShowArgs(1, "Itcl_BiKeepComponentOptionCmd", objc, objv);
+    ItclObjectInfo *infoPtr = (ItclObjectInfo*)clientData;
+    if (!infoPtr->itclHullCmdsInitted) {
+        result =  Tcl_Eval(interp, initHullCmdsScript);
+        if (result != TCL_OK) {
+            return result;
+        }
+        infoPtr->itclHullCmdsInitted = 1;
+    }
+    iclsPtr = NULL;
+    if (Itcl_GetContext(interp, &iclsPtr, &ioPtr) != TCL_OK) {
+        return TCL_ERROR;
+    }
+    if (objc < 3) {
+	Tcl_AppendResult(interp, "wrong # args, should be: ",
+	        "keepcomponentoption component option ?option ...?", NULL);
+        return TCL_ERROR;
+    }
+    if (ioPtr != NULL) {
+        hPtr = Tcl_FindHashEntry(&ioPtr->objectComponents, (char *)objv[1]);
+        if (hPtr == NULL) {
+	    Tcl_AppendResult(interp,
+	            "keepcomponentoption cannot find component \"",
+	            Tcl_GetString(objv[1]), "\"", NULL);
+	    return TCL_ERROR;
+	}
+        icPtr = Tcl_GetHashValue(hPtr);
+	icPtr->haveKeptOptions = 1;
+	for (idx = 2; idx < objc; idx++) {
+	    hPtr = Tcl_CreateHashEntry(&icPtr->keptOptions, (char *)objv[idx],
+	            &isNew);
+            if (isNew) {
+	        Tcl_SetHashValue(hPtr, objv[idx]);
+	    }
+	    hPtr2 = Tcl_CreateHashEntry(&ioPtr->objectDelegatedOptions,
+	            (char *)objv[idx], &isNew);
+	    if (isNew) {
+		idoPtr = (ItclDelegatedOption *)ckalloc(sizeof(
+		        ItclDelegatedOption));
+		memset(idoPtr, 0, sizeof(ItclDelegatedOption));
+		Tcl_InitObjHashTable(&idoPtr->exceptions);
+		idoPtr->namePtr = objv[idx];
+		Tcl_IncrRefCount(idoPtr->namePtr);
+		idoPtr->resourceNamePtr = NULL;
+		if (idoPtr->resourceNamePtr != NULL) {
+		    Tcl_IncrRefCount(idoPtr->resourceNamePtr);
+		}
+		idoPtr->classNamePtr = NULL;
+		if (idoPtr->classNamePtr != NULL) {
+		    Tcl_IncrRefCount(idoPtr->classNamePtr);
+		}
+		idoPtr->icPtr = icPtr;
+		idoPtr->ioptPtr = NULL;
+		Tcl_SetHashValue(hPtr2, idoPtr);
+                val = ItclGetInstanceVar(interp, Tcl_GetString(icPtr->namePtr),
+		        NULL, ioPtr, iclsPtr);
+		if (val != NULL) {
+                    objPtr = Tcl_NewStringObj(val, -1);
+                    Tcl_AppendToObj(objPtr, " cget ", -1);
+                    Tcl_AppendToObj(objPtr, Tcl_GetString(objv[idx]), -1);
+                    Tcl_IncrRefCount(objPtr);
+                    result = Tcl_EvalObjEx(interp, objPtr, 0);
+                    Tcl_DecrRefCount(objPtr);
+		    if (result == TCL_OK) {
+		        ItclSetInstanceVar(interp, "itcl_options",
+		                Tcl_GetString(objv[idx]),
+			        Tcl_GetStringResult(interp), ioPtr, iclsPtr);
+		    }
+                }
+            }
+        }
+    }
+    return TCL_OK;
 }

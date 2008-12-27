@@ -39,7 +39,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclParse.c,v 1.1.2.59 2008/12/26 16:05:26 wiede Exp $
+ *     RCS:  $Id: itclParse.c,v 1.1.2.60 2008/12/27 19:35:24 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -806,6 +806,11 @@ ItclClassBaseCmd(
 		if (strcmp(Tcl_GetString(imPtr->codePtr->bodyPtr),
 		        "@itcl-builtin-createhull") == 0) {
 		    Tcl_AppendToObj(bodyPtr, "::itcl::builtin::createhull", -1);
+		    isDone = 1;
+		}
+		if (strcmp(Tcl_GetString(imPtr->codePtr->bodyPtr),
+		        "@itcl-builtin-keepcomponentoption") == 0) {
+		    Tcl_AppendToObj(bodyPtr, "::itcl::builtin::keepcomponentoption", -1);
 		    isDone = 1;
 		}
 		if (strcmp(Tcl_GetString(imPtr->codePtr->bodyPtr),
@@ -2811,6 +2816,7 @@ ItclCreateComponent(
         ivPtr->flags |= ITCL_COMPONENT_VAR;
         icPtr = (ItclComponent *)ckalloc(sizeof(ItclComponent));
         memset(icPtr, 0, sizeof(ItclComponent));
+	Tcl_InitObjHashTable(&icPtr->keptOptions);
         icPtr->namePtr = componentPtr;
         Tcl_IncrRefCount(icPtr->namePtr);
         icPtr->ivPtr = ivPtr;

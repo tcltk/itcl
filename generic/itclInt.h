@@ -9,7 +9,7 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itclInt.h,v 1.17.2.58 2008/12/26 16:05:26 wiede Exp $
+ * RCS: @(#) $Id: itclInt.h,v 1.17.2.59 2008/12/27 19:35:24 wiede Exp $
  */
 
 #include <string.h>
@@ -475,6 +475,8 @@ typedef struct ItclComponent {
     Tcl_Obj *namePtr;           /* member name */
     struct ItclVariable *ivPtr; /* variable for this component */
     int flags;
+    int haveKeptOptions;
+    Tcl_HashTable keptOptions;  /* table of options to keep */
 } ItclComponent;
 
 #define ITCL_COMPONENT_INHERIT	0x01

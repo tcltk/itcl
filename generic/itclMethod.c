@@ -25,7 +25,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclMethod.c,v 1.1.2.41 2008/12/26 16:05:26 wiede Exp $
+ *     RCS:  $Id: itclMethod.c,v 1.1.2.42 2008/12/27 19:35:24 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -549,6 +549,11 @@ ItclCreateMemberFunc(
 	    imPtr->maxargcount = -1;
             imPtr->codePtr->flags |= ITCL_BUILTIN;
 	}
+	if (strcmp(name, "keepcomponentoption") == 0) {
+	    imPtr->argcount = 0;
+	    imPtr->maxargcount = -1;
+            imPtr->codePtr->flags |= ITCL_BUILTIN;
+	}
 	if (strcmp(name, "setupcomponent") == 0) {
 	    imPtr->argcount = 0;
 	    imPtr->maxargcount = -1;
@@ -896,6 +901,9 @@ ItclCreateMemberCode(
 	        isDone = 1;
 	    }
 	    if (strcmp(body, "@itcl-builtin-createhull") == 0) {
+	        isDone = 1;
+	    }
+	    if (strcmp(body, "@itcl-builtin-keepcomponentoption") == 0) {
 	        isDone = 1;
 	    }
 	    if (strcmp(body, "@itcl-builtin-setupcomponent") == 0) {
@@ -2079,6 +2087,9 @@ Itcl_CmdAliasProc(
 	}
 	if (strcmp(cmdName, "@itcl-builtin-createhull") == 0) {
 	    return Tcl_FindCommand(interp, "::itcl::builtin::createhull", NULL, 0);
+	}
+	if (strcmp(cmdName, "@itcl-builtin-keepcomponentoption") == 0) {
+	    return Tcl_FindCommand(interp, "::itcl::builtin::keepcomponentoption", NULL, 0);
 	}
 	if (strcmp(cmdName, "@itcl-builtin-setupcomponent") == 0) {
 	    return Tcl_FindCommand(interp, "::itcl::builtin::setupcomponent", NULL, 0);

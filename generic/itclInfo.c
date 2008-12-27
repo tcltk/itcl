@@ -24,7 +24,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclInfo.c,v 1.1.2.37 2008/12/26 18:18:21 wiede Exp $
+ *     RCS:  $Id: itclInfo.c,v 1.1.2.38 2008/12/27 19:35:24 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -3967,7 +3967,7 @@ Itcl_ErrorDelegatedInfoCmd(
     int objc,              /* number of arguments */
     Tcl_Obj *const objv[]) /* argument objects */
 {
-    ItclShowArgs(0, "Itcl_ErrorDelegatedInfoCmd", objc, objv);
+    ItclShowArgs(1, "Itcl_ErrorDelegatedInfoCmd", objc, objv);
     /* produce usage message */
     Tcl_Obj *objPtr = Tcl_NewStringObj(
            "wrong # args: should be one of...\n", -1);
