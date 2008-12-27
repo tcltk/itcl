@@ -6,7 +6,7 @@
 # ----------------------------------------------------------------------
 #   AUTHOR:  Arnulf P. Wiedemann
 #
-#      RCS:  $Id: itclHullCmds.tcl,v 1.1.2.2 2008/12/26 18:10:31 wiede Exp $
+#      RCS:  $Id: itclHullCmds.tcl,v 1.1.2.3 2008/12/27 19:36:38 wiede Exp $
 # ----------------------------------------------------------------------
 #            Copyright (c) 2008  Arnulf P. Wiedemann
 # ======================================================================
@@ -14,6 +14,23 @@
 # redistribution of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 
 package require Tk 8.6
+
+namespace eval ::itcl::internal::commands {
+
+proc widgetDeleted {oldName newName op} {
+    # The widget is beeing deleted, so we have to delete the object
+    # which had the widget as itcl_hull too!
+    # We have to get the real name from for example
+    # ::itcl::internal::widgets::hull1.lw
+    # we need only .lw here
+
+    set cmdName [namespace tail $oldName]
+    set flds [split $cmdName {.}]
+    set cmdName .[lindex $flds end]
+    rename $cmdName {}
+}
+
+}
 
 namespace eval ::itcl::builtin {
 
@@ -40,6 +57,7 @@ proc createhull {widget_type path args} {
         lappend cmd {*}$options
     }
     set widget [uplevel 1 $cmd]
+    trace add command $widget delete ::itcl::internal::commands::widgetDeleted
     set opts [uplevel 1 info delegated options]
     foreach entry $opts {
         foreach {optName compName} $entry break
