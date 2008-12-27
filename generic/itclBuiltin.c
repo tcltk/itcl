@@ -24,7 +24,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclBuiltin.c,v 1.1.2.59 2008/12/27 19:35:23 wiede Exp $
+ *     RCS:  $Id: itclBuiltin.c,v 1.1.2.60 2008/12/27 20:27:15 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -2080,7 +2080,12 @@ ItclExtendedConfigure(
 			            /* add the option */
 	                            Tcl_ListObjAppendElement(interp, listPtr,
 				            objPtr);
+			        } else {
 			        }
+			    } else {
+			        /* add the option */
+	                        Tcl_ListObjAppendElement(interp, listPtr,
+				        objPtr);
 			    }
 		        }
 		    }
@@ -2088,6 +2093,7 @@ ItclExtendedConfigure(
 	    }
 	}
 	Tcl_SetObjResult(interp, listPtr);
+	Tcl_DeleteHashTable(&unique);
         return TCL_OK;
     }
     /* first handle delegated options */
@@ -2874,7 +2880,6 @@ Itcl_BiDestroyCmd(
     if (contextIoPtr != NULL) {
         Tcl_Obj *objPtr = Tcl_NewObj();
         Tcl_GetCommandFullName(interp, contextIoPtr->accessCmd, objPtr);
-fprintf(stderr, "DESTROY!%s!\n", Tcl_GetString(objPtr));
         Itcl_RenameCommand(interp, Tcl_GetString(objPtr), "");
 	Tcl_DecrRefCount(objPtr);
         result = TCL_OK;
