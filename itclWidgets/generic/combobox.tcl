@@ -27,7 +27,7 @@
 #		Copyright (c) 1995	John S. Sigler
 #		Copyright (c) 1997	Mitch Gorman
 # ----------------------------------------------------------------------
-#   @(#) $Id: combobox.tcl,v 1.1.2.1 2008/12/27 19:38:59 wiede Exp $
+#   @(#) $Id: combobox.tcl,v 1.1.2.2 2008/12/28 12:11:46 wiede Exp $
 # ======================================================================
 
 package require itcl
@@ -53,8 +53,6 @@ proc combobox {pathName args} {
 ::itcl::extendedclass Combobox {
     inherit ::itcl::widgets::Entryfield
 
-    component itcl_hull
-    component itcl_interior
     component list
     component arrowBtn
     component popup
@@ -617,7 +615,7 @@ proc combobox {pathName args} {
 	# The following commented line of code overwrites the -command
 	# option when passed into the constructor.  The order of calls
 	# in the constructor is:
-	# 	1) eval itk_initalize $args (initializes -command)
+	# 	1) uplevel 0 configure $args (initializes -command)
 	#       2) _doLayout
 	#       3) _createComponents (overwrites -command)
 	# The solution is to only set the -command option if it hasn't
@@ -631,33 +629,30 @@ proc combobox {pathName args} {
 	}
 	
 	# arrow button to popup the list
-	itk_component add arrowBtn {
-	    button $itk_interior.arrowBtn -borderwidth 2 \
+	setupcomponent arrowBtn using \
+	    button $itcl_interior.arrowBtn -borderwidth 2 \
 		-width 15 -height 15 -image downarrow \
-		-command [itcl::code $this _toggleList] -state $itk_option(-state)
-	}
+		-command [itcl::code $this _toggleList] \
+		-state $itcl_options(-state)
 	
 	# popup list container
-	itk_component add popup {
-	    toplevel $itk_interior.popup
-	} {
-	    keep -background -cursor
-	}
-	wm withdraw $itk_interior.popup
+	setupcomponent popup using toplevel $itk_interior.popup
+	keepcomponentoption popup -background -cursor
+	wm withdraw $popup
 	
 	# the listbox
-	itk_component add list {
-	    iwidgets::Scrolledlistbox $itk_interior.popup.list -exportselection no \
+	setupcomponent list using
+	    ::itcl::widgets::Scrolledlistbox $itcl_interior.popup.list \
+	        -exportselection no \
 		-vscrollmode dynamic -hscrollmode dynamic -selectmode browse
-	} {
-	    keep -background -borderwidth -cursor -foreground \
+	keepcomponentoption -background -borderwidth -cursor -foreground \
 		-highlightcolor -highlightthickness \
 		-hscrollmode -selectbackground \
 		-selectborderwidth -selectforeground -textbackground \
 		-textfont -vscrollmode
-	    rename -height -listheight listHeight Height
-	    rename -cursor -popupcursor popupCursor Cursor
-	}
+#	    rename -height -listheight listHeight Height
+#	    rename -cursor -popupcursor popupCursor Cursor
+
 	# mode specific bindings
 	_dropdownBindings
 
@@ -669,23 +664,22 @@ proc combobox {pathName args} {
     } else {
 	# --- build a simple combobox ---
 	configure -childsitepos s
-	itk_component add list {
-	    iwidgets::Scrolledlistbox $itk_interior.list -exportselection no \
+	setcomponent list using
+	    ::itcl::widgets::Scrolledlistbox $itcl_interior.list \
+	        -exportselection no \
 		-vscrollmode dynamic -hscrollmode dynamic 
-	} {
-	    keep -background -borderwidth -cursor -foreground \
+	keepcomponentoption -background -borderwidth -cursor -foreground \
 		-highlightcolor -highlightthickness \
 		-hscrollmode -selectbackground \
 		-selectborderwidth -selectforeground -textbackground \
 		-textfont -visibleitems -vscrollmode 
-	    rename -height -listheight listHeight Height
-	}
+#	    rename -height -listheight listHeight Height
 	# add mode specific bindings
 	_simpleBindings
     }
 
     # popup cursor applies only to the list within the combobox
-    configure -popupcursor $itk_option(-popupcursor)
+    configure -popupcursor $itcl_options(-popupcursor)
 
     # add mode independent bindings
     _commonBindings

@@ -16,7 +16,7 @@
 #    Copyright (c) 1995 DSC Technologies Corporation
 # ----------------------------------------------------------------------
 #
-#   @(#) $Id: entryfield.tcl,v 1.1.2.3 2008/12/28 00:06:24 wiede Exp $
+#   @(#) $Id: entryfield.tcl,v 1.1.2.4 2008/12/28 12:11:46 wiede Exp $
 # ======================================================================
 
 package require itcl
@@ -35,7 +35,6 @@ proc entryfield {pathName args} {
 ::itcl::extendedclass Entryfield {
     inherit ::itcl::widgets::Labeledwidget
 
-    component itcl_hull
     component entry
     protected component efchildsite
 
