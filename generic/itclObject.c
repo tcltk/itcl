@@ -24,7 +24,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann Copyright (c) 2007
  *
- *     RCS:  $Id: itclObject.c,v 1.1.2.63 2008/12/27 19:35:24 wiede Exp $
+ *     RCS:  $Id: itclObject.c,v 1.1.2.64 2008/12/28 21:42:18 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -126,6 +126,7 @@ ObjectRenamedTrace(
         ioPtr->flags |= ITCL_OBJECT_CLASS_DESTRUCTED;
     }
 }
+/* #define DEBUG_OBJECT_CONSTRUCTION */
 
 /*
  * ------------------------------------------------------------------------
@@ -252,11 +253,17 @@ ItclCreateObject(
 
     if (ItclInitObjectVariables(interp, ioPtr, iclsPtr, name) != TCL_OK) {
 	result = TCL_ERROR;
+#ifdef DEBUG_OBJECT_CONSTRUCTION
+fprintf(stderr, "errorReturn1!%d!%s!\n", result, Tcl_GetStringResult(interp));
+#endif
         goto errorReturn;
     }
     if (ItclInitObjectCommands(interp, ioPtr, iclsPtr, name) != TCL_OK) {
 	Tcl_AppendResult(interp, "error in ItclInitObjectCommands", NULL);
 	result = TCL_ERROR;
+#ifdef DEBUG_OBJECT_CONSTRUCTION
+fprintf(stderr, "errorReturn2\n");
+#endif
         goto errorReturn;
     }
     if (iclsPtr->flags & (ITCL_ECLASS|ITCL_NWIDGET|ITCL_WIDGET|
@@ -268,6 +275,9 @@ ItclCreateObject(
 	        Tcl_AppendResult(interp, "error in ItclInitObjectOptions",
 		        NULL);
 	        result = TCL_ERROR;
+#ifdef DEBUG_OBJECT_CONSTRUCTION
+fprintf(stderr, "errorReturn3\n");
+#endif
                 goto errorReturn;
             }
         }
@@ -276,6 +286,9 @@ ItclCreateObject(
 	    Tcl_AppendResult(interp,
 	            "error in ItclInitObjectMethodVariables", NULL);
 	    result = TCL_ERROR;
+#ifdef DEBUG_OBJECT_CONSTRUCTION
+fprintf(stderr, "errorReturn4\n");
+#endif
             goto errorReturn;
         }
     }
@@ -289,6 +302,9 @@ ItclCreateObject(
 		        iclsPtr, objc, objv, &newObjc, newObjv) != TCL_OK) {
 		    infoPtr->currIoPtr = saveCurrIoPtr;
 	            result = TCL_ERROR;
+#ifdef DEBUG_OBJECT_CONSTRUCTION
+fprintf(stderr, "errorReturn5\n");
+#endif
                     goto errorReturn;
 	        }
 	    }
@@ -300,6 +316,9 @@ ItclCreateObject(
 		        "error in ItclInitObjectMethodVariables", NULL);
 		infoPtr->currIoPtr = saveCurrIoPtr;
 		result = TCL_ERROR;
+#ifdef DEBUG_OBJECT_CONSTRUCTION
+fprintf(stderr, "errorReturn6\n");
+#endif
                 goto errorReturn;
             }
         }
@@ -343,7 +362,9 @@ ItclCreateObject(
         ItclDeleteObjectVariablesNamespace(interp, ioPtr);
         Itcl_ReleaseData((ClientData)ioPtr);
         Itcl_ReleaseData((ClientData)ioPtr);
+#ifdef DEBUG_OBJECT_CONSTRUCTION
 fprintf(stderr, "after Tcl_NewObjectInstance oPtr == NULL\n");
+#endif
         return TCL_ERROR;
     }
     Tcl_ObjectSetMethodNameMapper(ioPtr->oPtr, ItclMapMethodNameProc);
@@ -400,21 +421,26 @@ fprintf(stderr, "after Tcl_NewObjectInstance oPtr == NULL\n");
      *  not called out explicitly in "initCode" code fragments are
      *  invoked implicitly without arguments.
      */
-    ItclShowArgs(1, "OBJCONS", newObjc, newObjv);
+    ItclShowArgs(1, "OBJECTCONSTRUCTOR", newObjc, newObjv);
     result = Itcl_InvokeMethodIfExists(interp, "constructor",
         iclsPtr, ioPtr, newObjc, newObjv);
     if (result != TCL_OK) {
+#ifdef DEBUG_OBJECT_CONSTRUCTION
+fprintf(stderr, "after CALLCONSTRUCTOR!%d!%s!\n", result, Tcl_GetStringResult(interp));
+#endif
         istate = Itcl_SaveInterpState(interp, result);
 	ItclDeleteObjectVariablesNamespace(interp, ioPtr);
 	if (ioPtr->accessCmd != (Tcl_Command) NULL) {
 	    Tcl_DeleteCommandFromToken(interp, ioPtr->accessCmd);
 	    ioPtr->accessCmd = NULL;
 	}
-        /* result = Itcl_RestoreInterpState(interp, istate); */
-        Itcl_RestoreInterpState(interp, istate);
+        result = Itcl_RestoreInterpState(interp, istate);
 	infoPtr->currIoPtr = saveCurrIoPtr;
 	/* need this for 2 ReleaseData at errorReturn!! */
         Itcl_PreserveData(ioPtr);
+#ifdef DEBUG_OBJECT_CONSTRUCTION
+fprintf(stderr, "errorReturn7\n");
+#endif
         goto errorReturn;
     }
 
@@ -436,6 +462,9 @@ fprintf(stderr, "after Tcl_NewObjectInstance oPtr == NULL\n");
      *  state, since the destructors may generate errors of their own.
      */
     if (result != TCL_OK) {
+#ifdef DEBUG_OBJECT_CONSTRUCTION
+fprintf(stderr, "after constructor1!%d!%s!\n", result, Tcl_GetStringResult(interp));
+#endif
         istate = Itcl_SaveInterpState(interp, result);
 
 	/* Bug 227824.
@@ -449,6 +478,12 @@ fprintf(stderr, "after Tcl_NewObjectInstance oPtr == NULL\n");
 	    ioPtr->accessCmd = NULL;
 	}
         result = Itcl_RestoreInterpState(interp, istate);
+	/* need this for 2 ReleaseData at errorReturn!! */
+        Itcl_PreserveData(ioPtr);
+#ifdef DEBUG_OBJECT_CONSTRUCTION
+fprintf(stderr, "errorReturn8\n");
+#endif
+        goto errorReturn;
     }
 
     if (iclsPtr->flags & ITCL_WIDGETADAPTOR) {
@@ -470,6 +505,9 @@ fprintf(stderr, "after Tcl_NewObjectInstance oPtr == NULL\n");
 		            "error in ItclWidgetInitObjectOptions", NULL);
 		    infoPtr->currIoPtr = saveCurrIoPtr;
 		    result = TCL_ERROR;
+#ifdef DEBUG_OBJECT_CONSTRUCTION
+fprintf(stderr, "errorReturn9\n");
+#endif
                     goto errorReturn;
                 }
             }
@@ -477,17 +515,24 @@ fprintf(stderr, "after Tcl_NewObjectInstance oPtr == NULL\n");
     }
     if (iclsPtr->flags & (ITCL_ECLASS|ITCL_TYPE|ITCL_WIDGETADAPTOR)) {
 	/* FIXME have to check for hierarchy if ITCL_ECLASS !! */
-	if (ItclCheckForInitializedComponents(interp, ioPtr->iclsPtr,
-	        ioPtr) != TCL_OK) {
+	result = ItclCheckForInitializedComponents(interp, ioPtr->iclsPtr,
+	        ioPtr);
+	if (result != TCL_OK) {
+#ifdef DEBUG_OBJECT_CONSTRUCTION
+fprintf(stderr, "ItclCheckForInitializedComponents!%d!%s!\n", result, Tcl_GetStringResult(interp));
+#endif
             istate = Itcl_SaveInterpState(interp, result);
-	    ItclDeleteObjectVariablesNamespace(interp, ioPtr);
 	    if (ioPtr->accessCmd != (Tcl_Command) NULL) {
 	        Tcl_DeleteCommandFromToken(interp, ioPtr->accessCmd);
 	        ioPtr->accessCmd = NULL;
 	    }
-            /* result = Itcl_RestoreInterpState(interp, istate); */
-            Itcl_RestoreInterpState(interp, istate);
-	    result = TCL_ERROR;
+            result = Itcl_RestoreInterpState(interp, istate);
+	    /* need this for 2 ReleaseData at errorReturn!! */
+            Itcl_PreserveData(ioPtr);
+#ifdef DEBUG_OBJECT_CONSTRUCTION
+fprintf(stderr, "errorReturn10\n");
+#endif
+            goto errorReturn;
 	}
     }
 
@@ -504,6 +549,9 @@ fprintf(stderr, "after Tcl_NewObjectInstance oPtr == NULL\n");
         if (!(ioPtr->iclsPtr->flags & ITCL_CLASS)) {
 	    result = DelegationInstall(interp, ioPtr, iclsPtr);
 	    if (result != TCL_OK) {
+#ifdef DEBUG_OBJECT_CONSTRUCTION
+fprintf(stderr, "errorReturn11\n");
+#endif
 		goto errorReturn;
 	    }
 	}
@@ -587,9 +635,10 @@ fprintf(stderr, "after Tcl_NewObjectInstance oPtr == NULL\n");
     ioPtr->constructed = NULL;
     Itcl_ReleaseData((ClientData)ioPtr);
     return result;
+
 errorReturn:
     /*
-     *  At this point, the object is fully constructed or there was an error.
+     *  At this point, the object is not constructed as there was an error.
      *  Destroy the "constructed" table in the object data, since
      *  it is no longer needed.
      */
@@ -2695,10 +2744,12 @@ ItclObjectCmd(
         newObjv[0] = myPtr;
         newObjv[1] = methodNamePtr;
         memcpy(newObjv+incr+1, objv+1, (sizeof(Tcl_Obj*)*(objc-1)));
+	ItclShowArgs(1, "run CallPublicObjectCmd1", objc+incr, newObjv);
         Itcl_NRAddCallback(interp, CallPublicObjectCmd, oPtr, clsPtr,
 	        INT2PTR(objc+incr), newObjv);
 
     } else {
+	ItclShowArgs(1, "run CallPublicObjectCmd2", objc, objv);
         Itcl_NRAddCallback(interp, CallPublicObjectCmd, oPtr, clsPtr,
 	        INT2PTR(objc), (ClientData)objv);
     }
