@@ -16,7 +16,7 @@
 #    Copyright (c) 1995 DSC Technologies Corporation
 # ----------------------------------------------------------------------
 #
-#   @(#) $Id: entryfield.tcl,v 1.1.2.5 2008/12/28 15:42:30 wiede Exp $
+#   @(#) $Id: entryfield.tcl,v 1.1.2.6 2008/12/28 21:37:16 wiede Exp $
 # ======================================================================
 
 package require itcl
@@ -316,25 +316,28 @@ proc entryfield {pathName args} {
 ::itcl::body Entryfield::configValidate {option value} {
     switch $value {
     {} {
-        set itcl_options(-validate) {}
+        set itcl_options($option) {}
       }
     numeric {
-        set itcl_options(-validate) "::itcl::widgets::Entryfield::numeric %c"
+        set itcl_options($option) "::itcl::widgets::Entryfield::numeric %c"
       }
     integer {
-        set itcl_options(-validate) "::itcl::widgets::Entryfield::integer %P"
+        set itcl_options($option) "::itcl::widgets::Entryfield::integer %P"
       }
     hexadecimal {
-        set itcl_options(-validate) "::itcl::widgets::Entryfield::hexadecimal %P"
+        set itcl_options($option) "::itcl::widgets::Entryfield::hexadecimal %P"
       }
     real {
-        set itcl_options(-validate) "::itcl::widgets::Entryfield::real %P"
+        set itcl_options($option) "::itcl::widgets::Entryfield::real %P"
       }
     alphabetic {
-        set itcl_options(-validate) "::itcl::widgets::Entryfield::alphabetic %c"
+        set itcl_options($option) "::itcl::widgets::Entryfield::alphabetic %c"
       }
     alphanumeric {
-        set itcl_options(-validate) "::itcl::widgets::Entryfield::alphanumeric %c"
+        set itcl_options($option) "::itcl::widgets::Entryfield::alphanumeric %c"
+      }
+    default {
+        set itcl_options($option) $value
       }
     }
 }
