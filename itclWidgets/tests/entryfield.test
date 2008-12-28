@@ -11,7 +11,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# @(#) $Id: entryfield.test,v 1.1.2.1 2008/12/27 19:40:56 wiede Exp $
+# @(#) $Id: entryfield.test,v 1.1.2.2 2008/12/28 00:05:45 wiede Exp $
 
 package require tcltest
 namespace import -force ::tcltest::*
@@ -56,7 +56,7 @@ incr c
 #
 test Entryfield-2.$o {configuration option} {
     llength [.ef configure]
-} {40}
+} {39}
 
 incr o
 
@@ -113,8 +113,8 @@ foreach test {
     {-sticky sw sw}
     {-sticky news news}
     {-textbackground GhostWhite GhostWhite} 
-    {-validate numeric {::iwidgets::Entryfield::numeric %c}} 
-    {-validate alphabetic {::iwidgets::Entryfield::alphabetic %c}} 
+    {-validate numeric {::itcl::widgets::Entryfield::numeric %c}} 
+    {-validate alphabetic {::itcl::widgets::Entryfield::alphabetic %c}} 
     {-width 30 30}} {
 	set option [lindex $test 0]
 	test Entryfield-2.$o "configuration options, $option" {
