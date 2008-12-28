@@ -11,7 +11,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# @(#) $Id: scrolledlistbox.test,v 1.1.2.1 2008/12/28 15:43:53 wiede Exp $
+# @(#) $Id: scrolledlistbox.test,v 1.1.2.2 2008/12/28 21:34:29 wiede Exp $
 
 package require tcltest
 namespace import -force ::tcltest::*
@@ -110,7 +110,6 @@ foreach test {
     {-height 0 0}} {
 	set option [lindex $test 0]
 	test Scrolledlistbox-2.$o "configuration options, $option" {
-puts stderr "tt!.slb configure $option [lindex $test 1]!"
 	    .slb configure $option [lindex $test 1]
 	    lindex [.slb configure $option] 4
 	} [lindex $test 2]
