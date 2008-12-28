@@ -9,7 +9,7 @@
 #            mmclennan@lucent.com
 #            http://www.tcltk.com/itcl
 #
-#      RCS:  $Id: itcl.tcl,v 1.7 2007/07/05 00:23:10 hobbs Exp $
+#      RCS:  $Id: itcl.tcl,v 1.7.2.1 2008/12/28 21:46:55 wiede Exp $
 # ----------------------------------------------------------------------
 #            Copyright (c) 1993-1998  Lucent Technologies, Inc.
 # ======================================================================
@@ -50,7 +50,7 @@ proc ::itcl::local {class name args} {
 # USAGE:  itcl::class name body
 # Adds an entry for the given class declaration.
 #
-foreach cmd {itcl::class class} {
+foreach cmd {itcl::class class itcl::type type ictl::widget widget itcl::widgetadaptor widgetadaptor itcl::extendedclass extendedclass} {
     auto_mkindex_parser::command $cmd {name body} {
 	variable index
 	variable scriptFile
