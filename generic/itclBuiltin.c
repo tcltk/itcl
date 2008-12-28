@@ -24,7 +24,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclBuiltin.c,v 1.1.2.60 2008/12/27 20:27:15 wiede Exp $
+ *     RCS:  $Id: itclBuiltin.c,v 1.1.2.61 2008/12/28 00:33:23 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -2121,7 +2121,7 @@ ItclExtendedConfigure(
      */
     hPtr2 = Tcl_FindHashEntry(&contextIoPtr->objectOptions,
             (char *)objv[1]);
-    if ((hPtr != NULL) && (hPtr2 == NULL)) {
+    if ((objc <= 3) && (hPtr != NULL) && (hPtr2 == NULL)) {
 	/* the option is delegated */
         idoPtr = (ItclDelegatedOption *)Tcl_GetHashValue(hPtr);
         icPtr = idoPtr->icPtr;
@@ -2209,6 +2209,61 @@ ItclExtendedConfigure(
 	}
         hPtr = Tcl_FindHashEntry(&contextIoPtr->objectOptions,
 	        (char *) objv[i]);
+        if (hPtr == NULL) {
+            hPtr = Tcl_FindHashEntry(&contextIoPtr->objectDelegatedOptions,
+	            (char *) objv[i]);
+            if (hPtr != NULL) {
+	        /* the option is delegated */
+                idoPtr = (ItclDelegatedOption *)Tcl_GetHashValue(hPtr);
+                icPtr = idoPtr->icPtr;
+                val = ItclGetInstanceVar(interp,
+	                Tcl_GetString(icPtr->ivPtr->namePtr),
+                        NULL, contextIoPtr, icPtr->ivPtr->iclsPtr);
+                if ((val != NULL) && (strlen(val) > 0)) {
+	            if (idoPtr->asPtr != NULL) {
+                        icPtr->ivPtr->iclsPtr->infoPtr->currIdoPtr = idoPtr;
+	            }
+	            newObjv = (Tcl_Obj **)ckalloc(sizeof(Tcl_Obj *)*(objc+2));
+	            newObjv[0] = Tcl_NewStringObj(val, -1);
+	            Tcl_IncrRefCount(newObjv[0]);
+	            newObjv[1] = Tcl_NewStringObj("configure", 9);
+	            Tcl_IncrRefCount(newObjv[1]);
+	            if (idoPtr->asPtr != NULL) {
+	                newObjv[2] = idoPtr->asPtr;
+	            } else {
+	                newObjv[2] = objv[i];
+	            }
+	            Tcl_IncrRefCount(newObjv[2]);
+	            newObjv[3] = objv[i+1];
+	            objPtr = Tcl_NewStringObj(val, -1);
+	            Tcl_IncrRefCount(objPtr);
+	            oPtr = Tcl_GetObjectFromObj(interp, objPtr);
+	            if (oPtr != NULL) {
+                        ioPtr = (ItclObject *)Tcl_ObjectGetMetadata(oPtr,
+                                infoPtr->object_meta_type);
+	                infoPtr->currContextIclsPtr = ioPtr->iclsPtr;
+	            }
+	            Tcl_DecrRefCount(objPtr);
+                    ItclShowArgs(1, "extended eval delegated option", 4,
+		            newObjv);
+                    result = Tcl_EvalObjv(interp, 4, newObjv, TCL_EVAL_DIRECT);
+	            Tcl_DecrRefCount(newObjv[2]);
+                    Tcl_DecrRefCount(newObjv[1]);
+                    Tcl_DecrRefCount(newObjv[0]);
+                    ckfree((char *)newObjv);
+                    icPtr->ivPtr->iclsPtr->infoPtr->currIdoPtr = NULL;
+	            if (oPtr != NULL) {
+	                infoPtr->currContextIclsPtr = NULL;
+	            }
+                    continue;
+                } else {
+	            Tcl_AppendResult(interp, "INTERNAL ERROR component not ",
+		            "found or not set in ItclExtendedConfigure ",
+			    "delegated option", NULL);
+	            return TCL_ERROR;
+	        }
+	    }
+	}
         if (hPtr == NULL) {
 	    infoPtr->unparsedObjc += 2;
 	    if (infoPtr->unparsedObjv == NULL) {
