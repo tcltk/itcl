@@ -9,14 +9,14 @@
 # see file license.terms in the top directory
 #
 # ----------------------------------------------------------------------
-# This code is derived/reimplemented from the iwidgets package
+# This code is derived/reimplemented from the iwidgets package Entryfield
 # written by:
 #    Sue Yockey               E-mail: yockey@acm.org
 #    Mark L. Ulferts          E-mail: mulferts@austin.dsccc.com
 #    Copyright (c) 1995 DSC Technologies Corporation
 # ----------------------------------------------------------------------
 #
-#   @(#) $Id: entryfield.tcl,v 1.1.2.4 2008/12/28 12:11:46 wiede Exp $
+#   @(#) $Id: entryfield.tcl,v 1.1.2.5 2008/12/28 15:42:30 wiede Exp $
 # ======================================================================
 
 package require itcl

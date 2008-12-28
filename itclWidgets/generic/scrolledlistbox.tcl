@@ -6,32 +6,20 @@
 # which scrollbars are displayed and the method, i.e. statically,
 # dynamically, or none at all.  
 #
-# ----------------------------------------------------------------------
-#  AUTHOR: Mark L. Ulferts             EMAIL: mulferts@austin.dsccc.com
+# Author: Arnulf P. Wiedemann
+# Copyright (c) 2008 for the reimplemented version
 #
-#  @(#) $Id: scrolledlistbox.tcl,v 1.1.2.1 2008/12/28 12:10:38 wiede Exp $
+# see file license.terms in the top directory
+#
 # ----------------------------------------------------------------------
-#            Copyright (c) 1995 DSC Technologies Corporation
-# ======================================================================
-# Permission to use, copy, modify, distribute and license this software 
-# and its documentation for any purpose, and without fee or written 
-# agreement with DSC, is hereby granted, provided that the above copyright 
-# notice appears in all copies and that both the copyright notice and 
-# warranty disclaimer below appear in supporting documentation, and that 
-# the names of DSC Technologies Corporation or DSC Communications 
-# Corporation not be used in advertising or publicity pertaining to the 
-# software without specific, written prior permission.
-# 
-# DSC DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE, INCLUDING 
-# ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, AND NON-
-# INFRINGEMENT. THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, AND THE
-# AUTHORS AND DISTRIBUTORS HAVE NO OBLIGATION TO PROVIDE MAINTENANCE, 
-# SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS. IN NO EVENT SHALL 
-# DSC BE LIABLE FOR ANY SPECIAL, INDIRECT OR CONSEQUENTIAL DAMAGES OR 
-# ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, 
-# WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTUOUS ACTION,
-# ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS 
-# SOFTWARE.
+# This code is derived/reimplemented from the iwidgets package Scrolledlistbox
+# written by:
+#
+#    Mark L. Ulferts          E-mail: mulferts@austin.dsccc.com
+#    Copyright (c) 1995 DSC Technologies Corporation
+# ----------------------------------------------------------------------
+#
+#   @(#) $Id: scrolledlistbox.tcl,v 1.1.2.2 2008/12/28 15:42:30 wiede Exp $
 # ======================================================================
 
 namespace eval ::itcl::widgets {
@@ -51,7 +39,7 @@ option add *Scrolledlistbox.labelPos n widgetDefault
 # ------------------------------------------------------------------
 #                          SCROLLEDLISTBOX
 # ------------------------------------------------------------------
-::itcl::class ::itcl::widgets::Scrolledlistbox {
+::itcl::extendedclass ::itcl::widgets::Scrolledlistbox {
     inherit ::itcl::widgets::Scrolledwidget
 
     #
@@ -90,10 +78,14 @@ option add *Scrolledlistbox.labelPos n widgetDefault
 
     option [list -dblclickcommand dblClickCommand Command] -default {}
     option [list -selectioncommand selectionCommand Command] -default {}
-    option [list -width width Width] -default 0 -configurecommand configWidth
-    option [list -height height Height] -default 0 -configurecommand configHeight
-    option [list -visibleitems visibleItems VisibleItems] -default 20x10 -configurecommand configVisibleitems
-    option [list -state state State] -default normal -configurecommand configState
+    option [list -width width Width] -default 0 -configuremethod configWidth
+    option [list -height height Height] -default 0 -configuremethod configHeight
+    option [list -visibleitems visibleItems VisibleItems] -default 20x10 -configuremethod configVisibleitems
+    option [list -state state State] -default normal -configuremethod configState
+
+    delegate option [list -textfont textFont Font] to listbox as -font
+    delegate option [list -textbackground textBackground Background] to listbox as -background
+    delegate option [list -background background Background] to listbox as -highlightbackground
 
     constructor {args} {}
     destructor {}
@@ -101,6 +93,9 @@ option add *Scrolledlistbox.labelPos n widgetDefault
     protected method _makeSelection {} 
     protected method _dblclick {} 
     protected method _fixIndex {index}
+    protected method configHeight {option value}
+    protected method configWidth {option value}
+    protected method configVisibleitems {option value}
     protected method configState {option value}
 
     public method curselection {} 
@@ -141,12 +136,12 @@ option add *Scrolledlistbox.labelPos n widgetDefault
     # 
     # Create the listbox.
     #
-    setupcomponent listbox using listbox $itk_interior.listbox \
+    setupcomponent listbox using listbox $itcl_interior.listbox \
         -width 1 -height 1 \
         -xscrollcommand \
-        [itcl::code $this _scrollWidget $itk_interior.horizsb] \
+        [itcl::code $this _scrollWidget $itcl_interior.horizsb] \
         -yscrollcommand \
-        [itcl::code $this _scrollWidget $itk_interior.vertsb]
+        [itcl::code $this _scrollWidget $itcl_interior.vertsb]
     keepcomponentoption listbox -activebackground -activerelief -background \
         -borderwidth -cursor -elementborderwidth -foreground -highlightcolor \
 	-highlightthickness -jump -labelfont -selectbackground \
@@ -249,6 +244,7 @@ option add *Scrolledlistbox.labelPos n widgetDefault
     } else {
         configure -visibleitems $itcl_options(-visibleitems)
     }
+    set itcl_options($option) $value
 }
 
 # ------------------------------------------------------------------
@@ -316,7 +312,6 @@ option add *Scrolledlistbox.labelPos n widgetDefault
         
             $listbox configure -width $chars -height $lines
         }
-    
     } else {
         error "bad visibleitems option \"$value\": should be widthxheight"
     }
@@ -499,7 +494,7 @@ option add *Scrolledlistbox.labelPos n widgetDefault
     set rlist {}
     if {[selecteditemcount] > 0} {
         set cursels [$listbox curselection]
-        switch $itcl_options(-selectmode) {
+        switch [$listbox cget -selectmode] {
         single -
         browse {
             set rlist [$listbox get $cursels]

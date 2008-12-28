@@ -8,33 +8,25 @@
 # is used and the vertical scrollbar is in row 0, column 2 and the
 # horizontal scrollbar in row 2, column 0.
 #
-# ----------------------------------------------------------------------
-#  AUTHOR: Mark Ulferts                        mulferts@austin.dsccc.com 
-#
-#  @(#) $Id: scrolledwidget.tcl,v 1.1.2.1 2008/12/28 12:10:38 wiede Exp $
-# ----------------------------------------------------------------------
-#            Copyright (c) 1997 DSC Technologies Corporation
-# ======================================================================
-# Permission to use, copy, modify, distribute and license this software 
-# and its documentation for any purpose, and without fee or written 
-# agreement with DSC, is hereby granted, provided that the above copyright 
-# notice appears in all copies and that both the copyright notice and 
-# warranty disclaimer below appear in supporting documentation, and that 
-# the names of DSC Technologies Corporation or DSC Communications 
-# Corporation not be used in advertising or publicity pertaining to the 
-# software without specific, written prior permission.
+# Author: Arnulf P. Wiedemann
+# Copyright (c) 2008 for the reimplemented version
 # 
-# DSC DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE, INCLUDING 
-# ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, AND NON-
-# INFRINGEMENT. THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, AND THE
-# AUTHORS AND DISTRIBUTORS HAVE NO OBLIGATION TO PROVIDE MAINTENANCE, 
-# SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS. IN NO EVENT SHALL 
-# DSC BE LIABLE FOR ANY SPECIAL, INDIRECT OR CONSEQUENTIAL DAMAGES OR 
-# ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, 
-# WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTUOUS ACTION,
-# ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS 
-# SOFTWARE.
+# see file license.terms in the top directory
+#
+# ----------------------------------------------------------------------
+# This code is derived/reimplemented from the iwidgets package Scrolledwidget
+# written by:
+#    Mark L. Ulferts          E-mail: mulferts@austin.dsccc.com
+#    Copyright (c) 1995 DSC Technologies Corporation
+# ----------------------------------------------------------------------
+#   @(#) $Id: scrolledwidget.tcl,v 1.1.2.2 2008/12/28 15:42:30 wiede Exp $
 # ======================================================================
+
+package require Tk
+#
+# Use option database to override default resources of base classes.
+#
+option add *Scrolledwidget.labelPos n widgetDefault
 
 namespace eval ::itcl::widgets {
 
@@ -76,25 +68,20 @@ proc ::itcl::widgets::scrolledwidget {pathName args} {
     protected method _vertScrollbarDisplay {mode} 
     protected method _horizScrollbarDisplay {mode} 
     protected method _configureEvent {}
-    proetcted method configSbwidth {option value}
-    proetcted method configScrollmargin {option value}
-    proetcted method configHscrollmode {option value}
-    proetcted method configVscrollmode {option value}
-    proetcted method configHeight {option value}
-    proetcted method configWidth {option value}
+    protected method configSbwidth {option value}
+    protected method configScrollmargin {option value}
+    protected method configHscrollmode {option value}
+    protected method configVscrollmode {option value}
+    protected method configHeight {option value}
+    protected method configWidth {option value}
+
 
 }
-
-#
-# Use option database to override default resources of base classes.
-#
-option add *Scrolledwidget.labelPos n widgetDefault
 
 # ------------------------------------------------------------------
 #                        CONSTRUCTOR
 # ------------------------------------------------------------------
-::itcl::body ::itcl::widgets::Scrolledwidget::constructor {args} {
-
+::itcl::body Scrolledwidget::constructor {args} {
     #
     # Turn off the borderwidth on the hull and save off the 
     # interior for later use.
@@ -121,7 +108,7 @@ option add *Scrolledwidget.labelPos n widgetDefault
     # 
     # Create the vertical scroll bar
     #
-    setupcomponent vertsb using scrollbar $itk_interior.vertsb -orient vertical 
+    setupcomponent vertsb using scrollbar $itcl_interior.vertsb -orient vertical 
     keepcomponentoption vertsb -background -borderwidth -cursor \
         -highlightcolor -highlightthickness -activebackground -activerelief \
 	-jump -troughcolor -labelfont -foreground
@@ -131,13 +118,12 @@ option add *Scrolledwidget.labelPos n widgetDefault
     #
     # Create the horizontal scrollbar
     #
-    setupcomponent horizsb using scrollbar $itk_interior.horizsb -orient horizontal 
+    setupcomponent horizsb using scrollbar $itcl_interior.horizsb -orient horizontal 
     keepcomponentoption horizsb -background -borderwidth -cursor \
         -highlightcolor -highlightthickness -activebackground -activerelief \
 	-jump -troughcolor -labelfont -foreground
     keepcomponentoption horizsb -borderwidth -elementborderwidth -jump -relief 
 #	rename -highlightbackground -background background Background
-    }
     
     #
     # Initialize the widget based on the command line options.
@@ -148,7 +134,7 @@ option add *Scrolledwidget.labelPos n widgetDefault
 }
 
 # ------------------------------------------------------------------
-#                           DESTURCTOR
+#                           DESTRUCTOR
 # ------------------------------------------------------------------
 ::itcl::body ::itcl::widgets::Scrolledwidget::destructor {} {
 }
@@ -181,6 +167,7 @@ option add *Scrolledwidget.labelPos n widgetDefault
     if {$_vmode == "on"} {
 	grid columnconfigure $_interior 1 -minsize $pixels
     }
+    set itcl_options($option) $value
 }
 
 # ------------------------------------------------------------------
@@ -211,7 +198,7 @@ option add *Scrolledwidget.labelPos n widgetDefault
 # Enable/disable display and mode of horizontal scrollbars.
 # ------------------------------------------------------------------
 ::itcl::body Scrolledwidget::configHscrollmode {option value} {
-    switch $itcl_options(-hscrollmode) {
+    switch $value {
     static {
         _horizScrollbarDisplay on
     }
@@ -234,8 +221,8 @@ option add *Scrolledwidget.labelPos n widgetDefault
 # specified in any of the forms acceptable to Tk_GetPixels.  
 # ------------------------------------------------------------------
 ::itcl::body Scrolledwidget::configWidth {option value} {
-    $_interior configure -width [winfo pixels $_interior $value] 
     set itcl_options($option) $value
+    $_interior configure -width [winfo pixels $_interior $value] 
 }
 
 # ------------------------------------------------------------------
