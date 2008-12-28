@@ -16,7 +16,7 @@
 #    Copyright (c) 1995 DSC Technologies Corporation
 # ----------------------------------------------------------------------
 #
-#   @(#) $Id: entryfield.tcl,v 1.1.2.2 2008/12/27 19:44:12 wiede Exp $
+#   @(#) $Id: entryfield.tcl,v 1.1.2.3 2008/12/28 00:06:24 wiede Exp $
 # ======================================================================
 
 package require itcl
@@ -35,23 +35,22 @@ proc entryfield {pathName args} {
 ::itcl::extendedclass Entryfield {
     inherit ::itcl::widgets::Labeledwidget
 
+    component itcl_hull
     component entry
     protected component efchildsite
 
     option -childsitepos childSitePos Position -default e -configuremethod configChildsite
-    option -command command Command -default {}
-    option -fixed fixed Fixed -default 0
-    option -focuscommand focusCommand Command -default {}
-    option -invalid invalid Command -default {bell}
-    option -pasting pasting Behaviour -default 1 -configuremethod configPasting
-    option -validate validate Command -default {}
+    option [list -command command Command] -default {}
+    option [list -fixed fixed Fixed] -default 0 -configuremethod configFixed
+    option [list -focuscommand focusCommand Command] -default {}
+    option [list -invalid invalid Command] -default {bell}
+    option [list -pasting pasting Behaviour] -default 1 -configuremethod configPasting
+    option [list -validate validate Command] -default {} -configuremethod configValidate
 
     delegate method * to entry except [list configure cget childsite]
-    delegate option -hullwidth to itcl_hull as -width
-    delegate option -textfont to entry as -font
-    delegate option -background to entry as -highlightbackground
-    delegate option -textbackground to entry as -background
-    delegate option * to entry except [list -childsitepos -command -fixed -focuscommand -invalid -pasting -validate -textfont]
+    delegate option [list -textfont textFont Font] to entry as -font
+    delegate option [list -background background Background] to entry as -highlightbackground
+    delegate option [list -textbackground textBackground Background] to entry as -background
 
     constructor {args} {}
 
@@ -62,15 +61,31 @@ proc entryfield {pathName args} {
     protected method _keyPress {char sym state}
     protected method configChildsite {option value}
     protected method configPasting {option value}
+    protected method configValidate {option value}
+    protected method configFixed {option value}
 
     public method childsite {}
     public method clear {}
 
+    protected proc numeric {char}
+    protected proc integer {string}
+    protected proc alphabetic {char}
+    protected proc alphanumeric {char}
+    protected proc hexadecimal {string}
+    protected proc real {string}
 } ; # end Entryfield
 
 ::itcl::body Entryfield::constructor {args} {
     setupcomponent entry using entry $itcl_interior.entry
+    keepcomponentoption entry -borderwidth -cursor -exportselection \
+            -foreground -highlightcolor \
+	    -highlightthickness -insertbackground -insertborderwidth \
+	    -insertofftime -insertontime -insertwidth -justify \
+	    -relief -selectbackground -selectborderwidth \
+	    -selectforeground -show -state -textvariable -width
+
     setupcomponent efchildsite using frame $itcl_interior.efchildsite
+
     pack $itcl_interior.entry $itcl_interior.efchildsite -side left
     set itcl_interior $efchildsite
     # Entryfield instance bindings.
@@ -113,7 +128,6 @@ proc entryfield {pathName args} {
 }
 
 ::itcl::body Entryfield::_keyPress {char sym state} {
-puts stderr "_keyPress!$char!$sym!$state!"
     # a Return key invokes the optionally specified command option.
     if {$sym eq "Return"} {
         if {$itcl_options(-command) eq ""} {
@@ -203,6 +217,24 @@ puts stderr "_keyPress!$char!$sym!$state!"
 }
 
 # ------------------------------------------------------------------
+# OPTION: -fixed
+#
+# Restrict entry to 0 (unlimited) chars.  The value is the maximum 
+# number of chars the user may type into the field, regardles of 
+# field width, i.e. the field width may be 20, but the user will 
+# only be able to type -fixed number of characters into it (or 
+# unlimited if -fixed = 0).
+# ------------------------------------------------------------------
+::itcl::body Entryfield::configFixed {option value} {
+    if {[regexp {[^0-9]} $value] || ($value < 0)} {
+	error "bad fixed option \"$value\", should be positive integer"
+    }
+    set itcl_options($option) $value
+    return 1
+}
+
+
+# ------------------------------------------------------------------
 # OPTION: -pasting
 #
 # Allows the developer to enable and disable pasting into the entry
@@ -271,8 +303,39 @@ puts stderr "_keyPress!$char!$sym!$state!"
 	grid columnconfigure $parent 1 -weight 1
       }
     default {
-        error "bad childsite option \"$itcl_options(-childsitepos)\":
-	        should be n, e, s, or w"
+        error "bad childsite option \"$value\": should be n, e, s, or w"
+      }
+    }
+    set itcl_options($option) $value
+}
+
+# ------------------------------------------------------------------
+# OPTION: -validate
+#
+# Specify a command to be executed for the validation of Entryfields.
+# ------------------------------------------------------------------
+::itcl::body Entryfield::configValidate {option value} {
+    switch $value {
+    {} {
+        set itcl_options(-validate) {}
+      }
+    numeric {
+        set itcl_options(-validate) "::itcl::widgets::Entryfield::numeric %c"
+      }
+    integer {
+        set itcl_options(-validate) "::itcl::widgets::Entryfield::integer %P"
+      }
+    hexadecimal {
+        set itcl_options(-validate) "::itcl::widgets::Entryfield::hexadecimal %P"
+      }
+    real {
+        set itcl_options(-validate) "::itcl::widgets::Entryfield::real %P"
+      }
+    alphabetic {
+        set itcl_options(-validate) "::itcl::widgets::Entryfield::alphabetic %c"
+      }
+    alphanumeric {
+        set itcl_options(-validate) "::itcl::widgets::Entryfield::alphanumeric %c"
       }
     }
 }
@@ -282,8 +345,68 @@ puts stderr "_keyPress!$char!$sym!$state!"
 }
 
 ::itcl::body Entryfield::clear {} {
-    delete 0 end
-    icursor 0
+    $entry delete 0 end
+    $entry icursor 0
+}
+
+# ------------------------------------------------------------------
+# PROCEDURE: numeric char
+#
+# The numeric procedure validates character input for a given 
+# Entryfield to be numeric and returns the result.
+# ------------------------------------------------------------------
+::itcl::body Entryfield::numeric {char} {
+    return [regexp {[0-9]} $char]
+}
+
+# ------------------------------------------------------------------
+# PROCEDURE: integer string
+#
+# The integer procedure validates character input for a given 
+# Entryfield to be integer and returns the result.
+# ------------------------------------------------------------------
+::itcl::body Entryfield::integer {string} {
+    return [regexp {^[-+]?[0-9]*$} $string]
+}
+
+# ------------------------------------------------------------------
+# PROCEDURE: alphabetic char
+#
+# The alphabetic procedure validates character input for a given 
+# Entryfield to be alphabetic and returns the result.
+# ------------------------------------------------------------------
+::itcl::body Entryfield::alphabetic {char} {
+    return [regexp -nocase {[a-z]} $char]
+}
+
+# ------------------------------------------------------------------
+# PROCEDURE: alphanumeric char
+#
+# The alphanumeric procedure validates character input for a given 
+# Entryfield to be alphanumeric and returns the result.
+# ------------------------------------------------------------------
+::itcl::body Entryfield::alphanumeric {char} {
+    return [regexp -nocase {[0-9a-z]} $char]
+}
+
+# ------------------------------------------------------------------
+# PROCEDURE: hexadecimal string
+#
+# The hexadecimal procedure validates character input for a given 
+# Entryfield to be hexadecimal and returns the result.
+# ------------------------------------------------------------------
+::itcl::body Entryfield::hexadecimal {string} {
+    return [regexp {^(0x)?[0-9a-fA-F]*$} $string]
+}
+
+# ------------------------------------------------------------------
+# PROCEDURE: real string
+#
+# The real procedure validates character input for a given Entryfield
+# to be real and returns the result.
+# ------------------------------------------------------------------
+::itcl::body Entryfield::real {string} {
+    return [regexp {^[-+]?[0-9]*\.?[0-9]*([0-9]\.?[eE][-+]?[0-9]*)?$} $string]
 }
 
 } ; # end ::itcl::widgets
