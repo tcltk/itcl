@@ -19,7 +19,7 @@
 #    Copyright (c) 1995 DSC Technologies Corporation
 # ----------------------------------------------------------------------
 #
-#   @(#) $Id: scrolledlistbox.tcl,v 1.1.2.2 2008/12/28 15:42:30 wiede Exp $
+#   @(#) $Id: scrolledlistbox.tcl,v 1.1.2.3 2008/12/28 21:36:20 wiede Exp $
 # ======================================================================
 
 namespace eval ::itcl::widgets {
@@ -79,7 +79,9 @@ option add *Scrolledlistbox.labelPos n widgetDefault
     option [list -dblclickcommand dblClickCommand Command] -default {}
     option [list -selectioncommand selectionCommand Command] -default {}
     option [list -width width Width] -default 0 -configuremethod configWidth
-    option [list -height height Height] -default 0 -configuremethod configHeight
+#    option [list -height height Height] -default 0 -configuremethod configHeight
+# for Combobox problem of not yet being able to set the -default of an option
+    option [list -height height Height] -default 150 -configuremethod configHeight
     option [list -visibleitems visibleItems VisibleItems] -default 20x10 -configuremethod configVisibleitems
     option [list -state state State] -default normal -configuremethod configState
 
@@ -119,6 +121,18 @@ option add *Scrolledlistbox.labelPos n widgetDefault
     public method yview {args} 
     public method itemconfigure {args}
 
+public method component {which} {
+    switch $which {
+    listbox -
+    vertsb -
+    horizsb {
+         return [set $which]
+      }
+    default {
+         error "scrolledlistbox has no component: \"$which\""
+      }
+    }
+}
 }
 
 # ------------------------------------------------------------------

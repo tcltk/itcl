@@ -27,7 +27,7 @@
 #		Copyright (c) 1995	John S. Sigler
 #		Copyright (c) 1997	Mitch Gorman
 # ----------------------------------------------------------------------
-#   @(#) $Id: combobox.tcl,v 1.1.2.2 2008/12/28 12:11:46 wiede Exp $
+#   @(#) $Id: combobox.tcl,v 1.1.2.3 2008/12/28 21:36:20 wiede Exp $
 # ======================================================================
 
 package require itcl
@@ -65,27 +65,28 @@ proc combobox {pathName args} {
     option -dropdown dropdown Dropdown -default true -configuremethod configDropdown
     option -editable editable Editable -default true -configuremethod configEditable
     option -grab grab Grab -default local -configuremethod configGrab
-    option -listheight listHeight Height -default 150
+#    option -listheight listHeight Height -default 150
     option -margin margin Margin -default 1 -configuremethod configMargin
-    option -popupcursor popupCursor Cursor -default arrow
+#    option -popupcursor popupCursor Cursor -default arrow
     option -selectioncommand selectionCommand SelectionCommand -default {}
     option -state state State -default normal -configuremethod configState
     option -unique unique Unique -default true -configuremethod configUnique
 
     delegate option -background to arrowBtn
     delegate option -borderwidth to arrowBtn
-    delegate option -cursor to arrowBtn
-    delegate option -state to arrowBtn
+#    delegate option -cursor to arrowBtn
+#    delegate option -state to arrowBtn
     delegate option -highlightcolor to arrowBtn
     delegate option -highlightthickness to arrowBtn
-    delegate option -arrowrelief arrowRelief Relief to arrowBtn as -relief
-    delegate option -background background Background to arrowBtn as -highlightbackground
+#    delegate option [list -arrowrelief arrowRelief Relief] to arrowBtn as -relief
+    delegate option [list -background background Background] to arrowBtn as -highlightbackground
+    delegate option [list -listheight listHeight Height] to list as -height 
+    delegate option [list -popupcursor popupCursor Cursor] to arrowBtn as -cursor 
 
     delegate method justify to list
     delegate method see to list
     delegate method sort to list
     delegate method size to list
-    delegate method sort to list
     delegate method xview to list
     delegate method yview to list
 
@@ -130,13 +131,7 @@ proc combobox {pathName args} {
     public method getcurselection {}
     public method insert {component index args}
     public method invoke {}
-    public method justify {direction}
-    public method see {index}
     public method selection {option first {last {}}}
-    public method size {}
-    public method sort {{mode ascending}}
-    public method xview {args}
-    public method yview {args}
 
     private variable _doit 0;
     private variable _inbs 0;
@@ -164,7 +159,29 @@ proc combobox {pathName args} {
 
     # configure args
     if {[llength $args]  > 0} {
-        uplevel 0 configure $args
+	# filter out the options, we can configure right now
+	# the delegated options are collected in my_other_opts
+	# FIXME should configure them in _createComponents!!
+	# or need a mechanism like itk_initialize, to prepare the options
+	# for later use!
+        set all_options [info options]
+        set all_delegated_options [info delegated options]
+        set xx [dict create {*}$args]
+	set my_opts [list]
+	set my_other_opts [list]
+        foreach optName [dict keys $xx] {
+	    if {[lsearch $all_options $optName] >= 0} {
+		if {[lsearch $all_delegated_options $optName] >= 0} {
+	            lappend my_other_opts $optName [dict get $xx $optName]
+		} else {
+	            lappend my_opts $optName [dict get $xx $optName]
+	        }
+	    } else {
+	        lappend my_other_opts $optName [dict get $xx $optName]
+	    }
+        }
+#        uplevel 0 configure $args
+        uplevel 0 configure $my_opts
     }
     
     # create components that are dependent on options 
@@ -230,6 +247,7 @@ proc combobox {pathName args} {
         error "bad completion option \"$value\": should be boolean"
       }
     }
+    set itcl_options($option) $value
 }
 
 # --------------------------------------------------------------------
@@ -272,6 +290,7 @@ proc combobox {pathName args} {
         error "bad dropdown option \"$value\": should be boolean"
       }
     }
+    set itcl_options($option) $value
 }
 
 # --------------------------------------------------------------------
@@ -301,6 +320,7 @@ proc combobox {pathName args} {
         error "bad editable option \"$value\": should be boolean"
       }
     }
+    set itcl_options($option) $value
 }
 
 # --------------------------------------------------------------------
@@ -309,7 +329,7 @@ proc combobox {pathName args} {
 # grab-state of megawidget
 # --------------------------------------------------------------------
 ::itcl::body Combobox::configGrab {option value} {
-    switch -- $itk_option(-grab) {
+    switch -- $value {
     local {
       }
     global {
@@ -317,7 +337,8 @@ proc combobox {pathName args} {
     default {
         error "bad grab value \"$value\": must be global or local"
       }
-   }
+    }
+    set itcl_options($option) $value
 }
 
 # --------------------------------------------------------------------
@@ -328,6 +349,7 @@ proc combobox {pathName args} {
 # --------------------------------------------------------------------
 ::itcl::body Combobox::configMargin {option value} {
     grid columnconfigure $itcl_interior 0 -minsize $value
+    set itcl_options($option) $value
 }
 
 
@@ -361,12 +383,13 @@ proc combobox {pathName args} {
         $entry configure -state readonly
       }
     default {
-        error "bad state value \"$value\": must be normal  or disabled"
+        error "bad state \"$value\": must be disabled, normal, or readonly"
       }
     }
     if {[info exists arrowBtn]} {
 	$arrowBtn configure -state $value
     }
+    set itcl_options($option) $value
 }
 
 # --------------------------------------------------------------------
@@ -391,6 +414,7 @@ proc combobox {pathName args} {
         error "bad unique value \"$value\": should be boolean"
       }
     }
+    set itcl_options($option) $value
 }
 
 # =================================================================
@@ -407,14 +431,14 @@ proc combobox {pathName args} {
 ::itcl::body Combobox::clear {{component all}} {
     switch -- $component {
     entry {
-	    itcl::widgets::Entryfield::clear
+	    Entryfield::clear
       }
     list {
         delete list 0 end
       }
     all {
         delete list 0 end
-        itcl::widgets::Entryfield::clear
+        Entryfield::clear
       }
     default {
         error "bad Combobox component \"$component\":\
@@ -449,7 +473,7 @@ proc combobox {pathName args} {
         if {$last == {}} {
             set last [expr {$first + 1}]
         }
-        itcl::widgets::Entryfield::delete $first $last
+        $entry delete $first $last
       }
     list {
         _deleteList $first $last
@@ -472,7 +496,7 @@ proc combobox {pathName args} {
 ::itcl::body Combobox::get {{index {}}} {
     # no args means to get the current text in the entry field area
     if {$index == {}} {
-	itcl::widgets::Entryfield::get
+	$entry get
     } else {
 	uplevel 0 $list get $index
     }
@@ -524,14 +548,14 @@ proc combobox {pathName args} {
 				   with too many arguments"
         } else {
 	    if {$itcl_options(-state) == "normal"} {
-	        uplevel 0 itcl::widgets::Entryfield::insert $index $args
-	        [itcl::code $this _lookup ""]
+	        uplevel 0 $entry insert $index $args
+	        uplevel 0 [itcl::code $this _lookup ""]
 	    }
         }
       }
     list {
         if {$itcl_options(-state) == "normal"} {
-	    eval $list insert $index $args
+	    uplevel 0 $list insert $index $args
         }
       }
     default {
@@ -554,7 +578,7 @@ proc combobox {pathName args} {
 	$list selection set $first
 	set rtn ""
     } else {
-	set rtn [uplevel 0 $ist selection $option $first $last]
+	set rtn [uplevel 0 $list selection $option $first $last]
     }
     set _currItem $first
 
@@ -633,25 +657,23 @@ proc combobox {pathName args} {
 	    button $itcl_interior.arrowBtn -borderwidth 2 \
 		-width 15 -height 15 -image downarrow \
 		-command [itcl::code $this _toggleList] \
-		-state $itcl_options(-state)
+		-state $itcl_options(-state) -cursor arrow
 	
 	# popup list container
-	setupcomponent popup using toplevel $itk_interior.popup
+	setupcomponent popup using toplevel $itcl_interior.popup
 	keepcomponentoption popup -background -cursor
 	wm withdraw $popup
 	
 	# the listbox
-	setupcomponent list using
+	uplevel 2 setupcomponent list using \
 	    ::itcl::widgets::Scrolledlistbox $itcl_interior.popup.list \
 	        -exportselection no \
 		-vscrollmode dynamic -hscrollmode dynamic -selectmode browse
-	keepcomponentoption -background -borderwidth -cursor -foreground \
+	keepcomponentoption list -background -borderwidth -cursor -foreground \
 		-highlightcolor -highlightthickness \
 		-hscrollmode -selectbackground \
 		-selectborderwidth -selectforeground -textbackground \
 		-textfont -vscrollmode
-#	    rename -height -listheight listHeight Height
-#	    rename -cursor -popupcursor popupCursor Cursor
 
 	# mode specific bindings
 	_dropdownBindings
@@ -664,22 +686,21 @@ proc combobox {pathName args} {
     } else {
 	# --- build a simple combobox ---
 	configure -childsitepos s
-	setcomponent list using
+	setupcomponent list using \
 	    ::itcl::widgets::Scrolledlistbox $itcl_interior.list \
 	        -exportselection no \
 		-vscrollmode dynamic -hscrollmode dynamic 
-	keepcomponentoption -background -borderwidth -cursor -foreground \
+	keepcomponentoption list -background -borderwidth -cursor -foreground \
 		-highlightcolor -highlightthickness \
 		-hscrollmode -selectbackground \
 		-selectborderwidth -selectforeground -textbackground \
 		-textfont -visibleitems -vscrollmode 
-#	    rename -height -listheight listHeight Height
 	# add mode specific bindings
 	_simpleBindings
     }
 
     # popup cursor applies only to the list within the combobox
-    configure -popupcursor $itcl_options(-popupcursor)
+    catch {configure -popupcursor [cget -popupcursor]}
 
     # add mode independent bindings
     _commonBindings
@@ -756,7 +777,7 @@ proc combobox {pathName args} {
 	set flip true
 	set relief "-relief sunken"
     } else {
-	set relief "-relief $itk_option(-arrowrelief)"
+	set relief "-relief $itcl_options(-arrowrelief)"
     }
 
     if {$flip} {
@@ -860,10 +881,10 @@ proc combobox {pathName args} {
 	error "bad option \"$when\": should be now or later"
     }
 
-    if {$-dropdown} {
+    if {$itcl_options(-dropdown)} {
 	grid configure $list -row 1 -column 0 -sticky news
 	_resizeArrow
-        grid config $arrowBtn -row 0 -column 1 -sticky nsew
+        grid configure $arrowBtn -row 0 -column 1 -sticky nsew
     } else {
 	# size and pack list hack
 	grid configure $entry -row 0 -column 0 -sticky ew
