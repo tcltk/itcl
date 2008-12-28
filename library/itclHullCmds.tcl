@@ -6,7 +6,7 @@
 # ----------------------------------------------------------------------
 #   AUTHOR:  Arnulf P. Wiedemann
 #
-#      RCS:  $Id: itclHullCmds.tcl,v 1.1.2.3 2008/12/27 19:36:38 wiede Exp $
+#      RCS:  $Id: itclHullCmds.tcl,v 1.1.2.4 2008/12/28 00:30:37 wiede Exp $
 # ----------------------------------------------------------------------
 #            Copyright (c) 2008  Arnulf P. Wiedemann
 # ======================================================================
@@ -81,7 +81,7 @@ proc createhull {widget_type path args} {
         incr idx
     }
     rename $tmp $widgetName
-    uplevel 1 set itcl_hull $widgetName
+    uplevel 2 set itcl_hull $widgetName
     rename ${tmp}_ $tmp
     return $my_win
 }
@@ -103,7 +103,8 @@ proc setupcomponent {comp using widget_type path args} {
         lappend cmd {*}$options
     }
     set my_comp [uplevel 1 $cmd]
-    uplevel 1 set $comp $my_comp
+    set cmd [list set $comp $my_comp]
+    uplevel 2 $cmd
     set opts [uplevel 1 info delegated options]
     foreach entry $opts {
         foreach {optName compName} $entry break
