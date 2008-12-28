@@ -24,7 +24,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclBuiltin.c,v 1.1.2.61 2008/12/28 00:33:23 wiede Exp $
+ *     RCS:  $Id: itclBuiltin.c,v 1.1.2.62 2008/12/28 21:43:11 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -2912,16 +2912,20 @@ Itcl_BiDestroyCmd(
 		NULL);
         return TCL_ERROR;
     }
-    if (!(contextIclsPtr->flags &
+    if ((objc > 1) || !(contextIclsPtr->flags &
             (ITCL_ECLASS|ITCL_TYPE|ITCL_WIDGET|ITCL_WIDGETADAPTOR))) {
 	/* try to execute destroy in uplevel namespace */
 	newObjv = (Tcl_Obj **)ckalloc(sizeof(Tcl_Obj *) * (objc + 2));
 	newObjv[0] = Tcl_NewStringObj("uplevel", -1);
 	Tcl_IncrRefCount(newObjv[0]);
-	newObjv[1] = Tcl_NewStringObj("1", -1);
+	newObjv[1] = Tcl_NewStringObj("#0", -1);
 	Tcl_IncrRefCount(newObjv[1]);
-	memcpy(newObjv + 2, objv, sizeof(Tcl_Obj *) * objc);
+	newObjv[2] = Tcl_NewStringObj("destroy", -1);
+	Tcl_IncrRefCount(newObjv[2]);
+	memcpy(newObjv + 3, objv + 1, sizeof(Tcl_Obj *) * (objc - 1));
+        ItclShowArgs(1, "DESTROY", objc + 2, newObjv);
         result = Tcl_EvalObjv(interp, objc + 2, newObjv, 0);
+	Tcl_DecrRefCount(newObjv[2]);
 	Tcl_DecrRefCount(newObjv[1]);
 	Tcl_DecrRefCount(newObjv[0]);
 	return result;

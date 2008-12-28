@@ -39,7 +39,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclParse.c,v 1.1.2.60 2008/12/27 19:35:24 wiede Exp $
+ *     RCS:  $Id: itclParse.c,v 1.1.2.61 2008/12/28 21:43:11 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -2446,7 +2446,17 @@ ItclParseOption(
     ItclShowArgs(1, "ItclParseOption", objc, objv);
     pLevel = Itcl_Protection(interp, 0);
 
-    usage = "namespec ?init? ?-default value? ?-readonly? ?-cgetmethod methodName? ?-cgetmethodvar varName? ?-configuremethod methodName? ?-configuremethodvar varName? ?-validatemethod methodName? ?-validatemethodvar varName";
+    usage = "namespec \
+?init? \
+?-default value? \
+?-readonly? \
+?-cgetmethod methodName? \
+?-cgetmethodvar varName? \
+?-configuremethod methodName? \
+?-configuremethodvar varName? \
+?-validatemethod methodName? \
+?-validatemethodvar varName";
+
     if (pLevel == ITCL_PUBLIC) {
         if (objc < 2 || objc > 11) {
             Tcl_WrongNumArgs(interp, 1, objv, usage);
@@ -2493,7 +2503,9 @@ ItclParseOption(
 	}
     }
     newObjv = (Tcl_Obj **)ckalloc(sizeof(Tcl_Obj *)*objc);
-    for (i=1; i<objc; i++) {
+    newObjv[newObjc] = objv[1];
+    newObjc++;
+    for (i=2; i<objc; i++) {
         token = Tcl_GetString(objv[i]);
 	foundOption = 0;
 	if (*token == '-') {
@@ -2551,6 +2563,11 @@ ItclParseOption(
 	        }
 	      }
 	    }
+	    if (!foundOption) {
+		Tcl_AppendResult(interp, "funny option command option: \"",
+		    token, "\"", NULL);
+	        return TCL_ERROR;
+	    }
 	}
 	if (!foundOption) {
 	    newObjv[newObjc] = objv[i];
@@ -2582,7 +2599,7 @@ ItclParseOption(
         goto errorOut;
     }
     if (newObjc < 1) {
-        Tcl_AppendResult(interp, usage, NULL);
+        Tcl_AppendResult(interp, "usage: option ", usage, NULL);
         result = TCL_ERROR;
         goto errorOut;
     }
