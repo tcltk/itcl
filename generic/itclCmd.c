@@ -23,7 +23,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclCmd.c,v 1.1.2.40 2008/12/26 16:05:26 wiede Exp $
+ *     RCS:  $Id: itclCmd.c,v 1.1.2.41 2008/12/28 21:46:14 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -1773,9 +1773,9 @@ Itcl_SetComponentCmd(
     contextIoPtr = NULL;
     infoPtr = (ItclObjectInfo *)clientData;
     ItclShowArgs(1, "Itcl_SetComponentCmd", objc, objv);
-    if (objc < 3) {
+    if (objc < 4) {
         Tcl_WrongNumArgs(interp, 1, objv, 
-	        "className componentName");
+	        "objectName componentName value");
 	return TCL_ERROR;
     }
     name = Tcl_GetStringFromObj(objv[1], (int*)NULL);
