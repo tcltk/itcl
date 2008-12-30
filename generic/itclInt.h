@@ -9,7 +9,7 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itclInt.h,v 1.17.2.59 2008/12/27 19:35:24 wiede Exp $
+ * RCS: @(#) $Id: itclInt.h,v 1.17.2.60 2008/12/30 13:05:06 wiede Exp $
  */
 
 #include <string.h>
@@ -317,6 +317,7 @@ typedef struct ItclClass {
     int flags;                    /* maintains class status */
     int callRefCount;             /* prevent deleting of class if refcount>1 */
     Tcl_Obj *typeConstructorPtr;  /* initialization for types */
+    int destructorHasBeenCalled;  /* prevent multiple invocations of destrcutor */
 } ItclClass;
 
 typedef struct ItclHierIter {
@@ -351,7 +352,7 @@ typedef struct ItclObject {
                                      names and get back ItclOption* ptrs */
     Tcl_HashTable objectComponents; /* definitions for all component members
                                      in this object. Look up component namePtr
-                                     names and get back ItclOption* ptrs */
+                                     names and get back ItclComponent* ptrs */
     Tcl_HashTable objectMethodVariables;
                                  /* definitions for all methodvariable members
                                      in this object. Look up methodvariable
