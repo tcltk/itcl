@@ -23,7 +23,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclCmd.c,v 1.1.2.41 2008/12/28 21:46:14 wiede Exp $
+ *     RCS:  $Id: itclCmd.c,v 1.1.2.42 2008/12/30 13:03:38 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -1730,13 +1730,161 @@ Itcl_AddComponentCmd(
     int objc,                /* number of arguments */
     Tcl_Obj *CONST objv[])   /* argument objects */
 {
+    Tcl_HashEntry *hPtr;
+    Tcl_DString buffer;
+    Tcl_DString buffer2;
+    Tcl_Namespace *varNsPtr;
+    Tcl_Namespace *nsPtr;
+    Tcl_CallFrame frame;
+    Tcl_Var varPtr;
+    ItclVarLookup *vlookup;
     ItclObjectInfo *infoPtr;
+    ItclObject *contextIoPtr;
+    ItclClass *contextIclsPtr;
+    ItclComponent *icPtr;
+    ItclVariable *ivPtr;
+    const char *varName;
+    const char *name;
+    int isNew;
     int result;
 
     result = TCL_OK;
+    contextIoPtr = NULL;
     infoPtr = (ItclObjectInfo *)clientData;
     ItclShowArgs(1, "Itcl_AddComponentCmd", objc, objv);
-fprintf(stderr, "not yet implemented\n");
+    if (objc < 3) {
+        Tcl_WrongNumArgs(interp, 1, objv, 
+	        "objectName componentName");
+	return TCL_ERROR;
+    }
+    if (Itcl_FindObject(interp, Tcl_GetString(objv[1]), &contextIoPtr)
+            != TCL_OK) {
+        return TCL_ERROR;
+    }
+    if (contextIoPtr == NULL) {
+	Tcl_AppendResult(interp, "Itcl_AddComponentCmd contextIoPtr "
+	       "for \"", Tcl_GetString(objv[1]), "\" == NULL", NULL);
+        return TCL_ERROR;
+    }
+    contextIclsPtr = contextIoPtr->iclsPtr;
+    hPtr = Tcl_CreateHashEntry(&contextIoPtr->objectComponents, (char *)objv[2],
+            &isNew);
+    if (!isNew) {
+	Tcl_AppendResult(interp, "Itcl_AddComponentCmd component \"",
+	        Tcl_GetString(objv[2]), "\" already exists for object \"",
+		Tcl_GetString(objv[1]), "\"", NULL);
+        return TCL_ERROR;
+    }
+    if (ItclCreateComponent(interp, contextIclsPtr, objv[2], 0,
+            &icPtr) != TCL_OK) {
+        return TCL_ERROR;
+    }
+    contextIclsPtr->numVariables++;
+    Tcl_SetHashValue(hPtr, icPtr);
+    Tcl_DStringInit(&buffer);
+    Tcl_DStringAppend(&buffer, ITCL_VARIABLES_NAMESPACE, -1);
+    name = Tcl_GetString(contextIoPtr->namePtr);
+    if ((name[0] != ':') && (name[1] != ':')) {
+            Tcl_DStringAppend(&buffer, "::", 2);
+    }
+    Tcl_DStringAppend(&buffer, name, -1);
+    Tcl_DStringAppend(&buffer, contextIclsPtr->nsPtr->fullName, -1);
+    varNsPtr = Tcl_FindNamespace(interp, Tcl_DStringValue(&buffer),
+        NULL, 0);
+    hPtr = Tcl_FindHashEntry(&contextIclsPtr->variables, (char *)objv[2]);
+    if (hPtr == NULL) {
+	Tcl_AppendResult(interp, "Itcl_AddComponentCmd cannont find component",
+	        " \"", Tcl_GetString(objv[2]), "\"in class variables", NULL);
+        return TCL_ERROR;
+    }
+    ivPtr = Tcl_GetHashValue(hPtr);
+    /* add entries to the virtual tables */
+    vlookup = (ItclVarLookup *)ckalloc(sizeof(ItclVarLookup));
+    vlookup->ivPtr = ivPtr;
+    vlookup->usage = 0;
+    vlookup->leastQualName = NULL;
+
+    /*
+     *  If this variable is PRIVATE to another class scope,
+     *  then mark it as "inaccessible".
+     */
+    vlookup->accessible = (ivPtr->protection != ITCL_PRIVATE ||
+        ivPtr->iclsPtr == contextIclsPtr);
+
+    int type = VAR_TYPE_VARIABLE;
+    if (ivPtr->flags & ITCL_COMMON) {
+        type = VAR_TYPE_COMMON;
+    }
+    vlookup->varNum = contextIclsPtr->numInstanceVars++;
+    /*
+     *  Create all possible names for this variable and enter
+     *  them into the variable resolution table:
+     *     var
+     *     class::var
+     *     namesp1::class::var
+     *     namesp2::namesp1::class::var
+     *     ...
+     */
+    Tcl_DStringSetLength(&buffer, 0);
+    Tcl_DStringAppend(&buffer, Tcl_GetString(ivPtr->namePtr), -1);
+    nsPtr = contextIclsPtr->nsPtr;
+
+    Tcl_DStringInit(&buffer2);
+    while (1) {
+        hPtr = Tcl_CreateHashEntry(&contextIclsPtr->resolveVars,
+            Tcl_DStringValue(&buffer), &isNew);
+
+        if (isNew) {
+            Tcl_SetHashValue(hPtr, (ClientData)vlookup);
+            vlookup->usage++;
+
+            if (!vlookup->leastQualName) {
+                vlookup->leastQualName =
+                    Tcl_GetHashKey(&contextIclsPtr->resolveVars, hPtr);
+            }
+#ifdef NEW_PROTO_RESOLVER
+            Itcl_RegisterClassVariable(contextIclsPtr->infoPtr->interp,
+                     contextIclsPtr->nsPtr, Tcl_DStringValue(&buffer),
+                     vlookup->classVarInfoPtr);
+#endif
+        }
+
+        if (nsPtr == NULL) {
+            break;
+        }
+        Tcl_DStringSetLength(&buffer2, 0);
+        Tcl_DStringAppend(&buffer2, Tcl_DStringValue(&buffer), -1);
+        Tcl_DStringSetLength(&buffer, 0);
+        Tcl_DStringAppend(&buffer, nsPtr->name, -1);
+        Tcl_DStringAppend(&buffer, "::", -1);
+        Tcl_DStringAppend(&buffer, Tcl_DStringValue(&buffer2), -1);
+
+        nsPtr = nsPtr->parentPtr;
+    }
+
+
+
+    varName = Tcl_GetString(ivPtr->namePtr);
+    /* now initialize the variables which have an init value */
+    if (Itcl_PushCallFrame(interp, &frame, varNsPtr,
+        /*isProcCallFrame*/0) != TCL_OK) {
+        return TCL_ERROR;
+    }
+    if (Tcl_SetVar2(interp, varName, NULL,
+            "", TCL_NAMESPACE_ONLY) == NULL) {
+        Tcl_AppendResult(interp, "INTERNAL ERROR cannot set",
+                " variable \"", varName, "\"\n", NULL);
+        result = TCL_ERROR;
+    }
+    Itcl_PopCallFrame(interp);
+    varPtr = Tcl_NewNamespaceVar(interp, varNsPtr,
+            Tcl_GetString(ivPtr->namePtr));
+    hPtr = Tcl_CreateHashEntry(&contextIoPtr->objectVariables,
+            (char *)ivPtr, &isNew);
+    if (isNew) {
+        Tcl_SetHashValue(hPtr, varPtr);
+    } else {
+    }
     return result;
 }
 
