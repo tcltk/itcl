@@ -24,7 +24,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann Copyright (c) 2007
  *
- *     RCS:  $Id: itclObject.c,v 1.1.2.64 2008/12/28 21:42:18 wiede Exp $
+ *     RCS:  $Id: itclObject.c,v 1.1.2.65 2008/12/30 13:07:52 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -889,7 +889,7 @@ ItclInitObjectVariables(
 		if (isNew) {
 		    Tcl_SetHashValue(hPtr2, icPtr);
 		}
-                /* this is component variable */
+                /* this is a component variable */
 		/* FIXME initialize it to the empty string */
 		/* the initialization  is arguable, should it be done? */
                 if (Tcl_SetVar2(interp, varName, NULL,
@@ -2695,6 +2695,18 @@ ItclObjectCmd(
     }
     callbackPtr = Itcl_GetCurrentCallbackPtr(interp);
     newObjv = NULL;
+    if (imPtr->flags & ITCL_DESTRUCTOR) {
+        if (iclsPtr->destructorHasBeenCalled) {
+            /* for now just return TCL_OK */
+#ifdef DEBUG_OBJECT_CONSTRUCTION
+fprintf(stderr, "destructor!%s!called more than once!!\n", Tcl_GetString(imPtr->fullNamePtr));
+#endif
+	    result = TCL_OK;
+	    goto nothingTodo;
+	} else {
+	    iclsPtr->destructorHasBeenCalled = 1;
+	}
+    }
     if (methodNamePtr != NULL) {
 	if (iclsPtr->flags & (ITCL_TYPE|ITCL_WIDGETADAPTOR)) {
 	    char *myName;
@@ -2755,6 +2767,7 @@ ItclObjectCmd(
     }
 
     result = Itcl_NRRunCallbacks(interp, callbackPtr);
+nothingTodo:
     if (methodNamePtr != NULL) {
         ckfree((char *)newObjv);
         Tcl_DecrRefCount(methodNamePtr);
