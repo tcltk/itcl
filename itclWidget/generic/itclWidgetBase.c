@@ -12,7 +12,7 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itclWidgetBase.c,v 1.1.2.8 2008/12/31 21:14:11 wiede Exp $
+ * RCS: @(#) $Id: itclWidgetBase.c,v 1.1.2.9 2008/12/31 22:50:50 wiede Exp $
  */
 
 #include <stdlib.h>
@@ -46,7 +46,7 @@ Initialize (
     if (Tk_InitStubs(interp, "8.5", 0) == NULL) {
         return TCL_ERROR;
     }
-    if (Itcl_InitStubs(interp, ITCL_VERSION, 0) == NULL) {
+    if (Itcl_InitStubs(interp, ITCL_PATCH_LEVEL, 1) == NULL) {
         return TCL_ERROR;
     }
 
