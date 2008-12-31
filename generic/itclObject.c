@@ -24,7 +24,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann Copyright (c) 2007
  *
- *     RCS:  $Id: itclObject.c,v 1.1.2.65 2008/12/30 13:07:52 wiede Exp $
+ *     RCS:  $Id: itclObject.c,v 1.1.2.66 2008/12/31 13:33:11 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -2696,10 +2696,10 @@ ItclObjectCmd(
     callbackPtr = Itcl_GetCurrentCallbackPtr(interp);
     newObjv = NULL;
     if (imPtr->flags & ITCL_DESTRUCTOR) {
-        if (iclsPtr->destructorHasBeenCalled) {
+        if (iclsPtr->destructorHasBeenCalled && (iclsPtr->callRefCount < 0)) {
             /* for now just return TCL_OK */
 #ifdef DEBUG_OBJECT_CONSTRUCTION
-fprintf(stderr, "destructor!%s!called more than once!!\n", Tcl_GetString(imPtr->fullNamePtr));
+fprintf(stderr, "destructor!%s!called more than once!!!callRefCount!%d!\n", Tcl_GetString(imPtr->fullNamePtr), iclsPtr->callRefCount);
 #endif
 	    result = TCL_OK;
 	    goto nothingTodo;
