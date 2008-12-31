@@ -734,30 +734,6 @@ test doption-1.4 {delegating unknown options to existing component} -body {
     cat destroy
 } -result {blue blue}
 
-test doption-1.5 {can't oncget for delegated option} -body {
-    type dog {
-        delegate option -color to catthing
-
-        oncget -color { }
-    }
-} -constraints {
-    deprecated
-} -returnCodes {
-    error
-} -result {Error in "oncget -color...", option "-color" is delegated}
-
-test doption-1.6 {can't onconfigure for delegated option} -body {
-    type dog {
-        delegate option -color to catthing
-
-        onconfigure -color {value} { }
-    }
-} -constraints {
-    deprecated
-} -returnCodes {
-    error
-} -result {onconfigure -color: option "-color" is delegated}
-
 test doption-1.7 {delegating unknown options to existing component: error} -body {
     type cat {
         option -color "black"
