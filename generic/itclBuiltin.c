@@ -24,7 +24,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclBuiltin.c,v 1.1.2.62 2008/12/28 21:43:11 wiede Exp $
+ *     RCS:  $Id: itclBuiltin.c,v 1.1.2.63 2008/12/31 21:02:53 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -1268,6 +1268,7 @@ ItclBiClassUnknownCmd(
     ItclComponent *icPtr;
     ItclDelegatedFunction *idmPtr;
     ItclDelegatedFunction *idmPtr2;
+    ItclDelegatedFunction *starIdmPtr;
     const char *resStr;
     const char *val;
     const char *funcName;
@@ -1288,11 +1289,13 @@ ItclBiClassUnknownCmd(
     isStar = 0;
     isTypeMethod = 0;
     isItclHull = 0;
+    starIdmPtr = NULL;
     infoPtr = (ItclObjectInfo *)clientData;
     hPtr = Tcl_FindHashEntry(&infoPtr->namespaceClasses,
             (char *)Tcl_GetCurrentNamespace(interp));
     if (hPtr == NULL) {
-fprintf(stderr, "ItclBiClassUnknownCmd cannot find class\n");
+        Tcl_AppendResult(interp, "INTERNAL ERROR: ItclBiClassUnknownCmd ",
+	        "cannot find class\n", NULL);
         return TCL_ERROR;
     }
     iclsPtr = Tcl_GetHashValue(hPtr);
@@ -1345,6 +1348,7 @@ fprintf(stderr, "ItclBiClassUnknownCmd cannot find class\n");
             if (idmPtr->flags & ITCL_TYPE_METHOD) {
 	       isTypeMethod = 1;
 	    }
+	    starIdmPtr = idmPtr;
 	    break;
 	}
     }
@@ -1367,7 +1371,7 @@ fprintf(stderr, "ItclBiClassUnknownCmd cannot find class\n");
 	}
 	if (isStar) {
             /* check if the function is in the exceptions */
-	    hPtr2 = Tcl_FindHashEntry(&idmPtr->exceptions, (char *)objv[1]);
+	    hPtr2 = Tcl_FindHashEntry(&starIdmPtr->exceptions, (char *)objv[1]);
 	    if (hPtr2 != NULL) {
 		objPtr = Tcl_NewStringObj("unknown subcommand \"", -1);
 		Tcl_AppendToObj(objPtr, funcName, -1);
@@ -1412,7 +1416,9 @@ fprintf(stderr, "ItclBiClassUnknownCmd cannot find class\n");
 		    Tcl_DStringFree(&buffer);
 		}
 	        if (val == NULL) {
-fprintf(stderr, "ItclBiClassUnknownCmd contents of component == NULL\n");
+                    Tcl_AppendResult(interp, "INTERNAL ERROR: ",
+		            "ItclBiClassUnknownCmd contents ",
+		            "of component == NULL\n", NULL);
 	            return TCL_ERROR;
 	        }
 	    }
