@@ -6,7 +6,7 @@
 #            mmclennan@lucent.com
 #            http://www.tcltk.com/itcl
 #
-#      RCS:  $Id: delete.test,v 1.4.2.1 2008/11/23 20:29:59 wiede Exp $
+#      RCS:  $Id: delete.test,v 1.4.2.2 2008/12/31 13:23:11 wiede Exp $
 # ----------------------------------------------------------------------
 #            Copyright (c) 1993-1998  Lucent Technologies, Inc.
 # ======================================================================
@@ -14,7 +14,7 @@
 # redistribution of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 
 if {[lsearch [namespace children] ::tcltest] == -1} {
-    package require tcltest 2.1
+    package require tcltest 2.2
     namespace import -force ::tcltest::test
 }
 
@@ -143,7 +143,7 @@ test delete-3.4 {object destructors get invoked, even during catastrophe} {
 # ----------------------------------------------------------------------
 #  Self-destructing objects
 # ----------------------------------------------------------------------
-test basic-4.1 {define a class where objects destroy themselves} {
+test delete-4.1 {define a class where objects destroy themselves} {
     itcl::class test_delete {
         public variable x ""
         public variable deletecommand ""
@@ -160,17 +160,20 @@ test basic-4.1 {define a class where objects destroy themselves} {
     }
 } {}
 
-test basic-4.2 {an object can delete itself} {
+test delete-4.2 {an object can delete itself
+} -body {
     set obj [test_delete #auto -x "data stays"]
     list [$obj killme {return $x}] [itcl::find objects -isa test_delete]
-} {{data stays} {}}
+} -constraints {
+    only_working_in_itcl3.4
+} -result {{data stays} {}}
 
-test basic-4.3 {the "this" variable becomes null after delete} {
+test delete-4.3 {the "this" variable becomes null after delete} {
     set obj [test_delete #auto]
     list [$obj killme {return $this}] [itcl::find objects -isa test_delete]
 } {{} {}}
 
-test basic-4.4 {an object being destructed can't be deleted} {
+test delete-4.4 {an object being destructed can't be deleted} {
     set obj [test_delete #auto -deletecommand {itcl::delete object $this}]
     list [catch {itcl::delete object $obj} msg] $msg
 } {1 {can't delete an object while it is being destructed}}
