@@ -6,7 +6,7 @@
 #            mmclennan@lucent.com
 #            http://www.tcltk.com/itcl
 #
-#      RCS:  $Id: scope.test,v 1.4.2.2 2007/09/10 15:42:35 wiede Exp $
+#      RCS:  $Id: scope.test,v 1.4.2.3 2008/12/31 13:26:45 wiede Exp $
 # ----------------------------------------------------------------------
 #            Copyright (c) 1993-1998  Lucent Technologies, Inc.
 # ======================================================================
@@ -174,7 +174,7 @@ test scope-3.7 {code command provides access to methods} {
     set result ""
     foreach mname {prim prom pubm} {
         set cmd [test_scope0 mcontext eval itcl::code \$this $mname]
-        lappend result $cmd [$cmd 1 2 3]
+        lappend result $cmd [uplevel 0 $cmd 1 2 3]
     }
     set result
 } {{namespace inscope ::test_scope {::test_scope0 prim}} {prim: 1 2 3} {namespace inscope ::test_scope {::test_scope0 prom}} {prom: 1 2 3} {namespace inscope ::test_scope {::test_scope0 pubm}} {pubm: 1 2 3}}
