@@ -20,7 +20,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itclResolve.c,v 1.1.2.26 2008/12/31 13:30:51 wiede Exp $
+ *     RCS:  $Id: itclResolve.c,v 1.1.2.27 2008/12/31 17:11:02 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -608,7 +608,7 @@ ItclClassRuntimeVarResolver(
     callContextPtr = Itcl_PeekStack(&iclsPtr->infoPtr->contextStack);
     if (callContextPtr == NULL) {
 #ifdef VAR_DEBUG
-  fprintf(stderr, "CRVAR!%s!ret2\n", Tcl_GetString(vlookup->ivPtr->namePtr));
+  fprintf(stderr, "CRVAR!%s!ret2\n", Tcl_GetString(vlookup->ivPtr->fullNamePtr));
 #endif
         return NULL;
     }
@@ -626,12 +626,15 @@ ItclClassRuntimeVarResolver(
     }
     if (contextIoPtr != NULL) {
         if (contextIoPtr->iclsPtr != vlookup->ivPtr->iclsPtr) {
-            hPtr = Tcl_FindHashEntry(&contextIoPtr->iclsPtr->resolveVars,
-                Tcl_GetString(vlookup->ivPtr->namePtr));
+	    if (strcmp(Tcl_GetString(vlookup->ivPtr->namePtr), "this") == 0) {
+	        /* only for the this variable we need the one of the
+		 * contextIoPtr class */
+                hPtr = Tcl_FindHashEntry(&contextIoPtr->iclsPtr->resolveVars,
+                        Tcl_GetString(vlookup->ivPtr->namePtr));
 
-            if (hPtr != NULL) {
-                vlookup = (ItclVarLookup*)Tcl_GetHashValue(hPtr);
-            } else {
+                if (hPtr != NULL) {
+                    vlookup = (ItclVarLookup*)Tcl_GetHashValue(hPtr);
+	        }
 	    }
         }
         hPtr = Tcl_FindHashEntry(&contextIoPtr->objectVariables,
@@ -689,7 +692,7 @@ ItclClassRuntimeVarResolver(
     } else {
     }
 #ifdef VAR_DEBUG
-  fprintf(stderr, "CRVAR!%s!ret7\n", Tcl_GetString(vlookup->ivPtr->namePtr));
+  fprintf(stderr, "CRVAR!%s!ret7\n", Tcl_GetString(vlookup->ivPtr->fullNamePtr));
 #endif
     return NULL;
 }
