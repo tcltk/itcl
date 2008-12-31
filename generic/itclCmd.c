@@ -23,7 +23,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclCmd.c,v 1.1.2.42 2008/12/30 13:03:38 wiede Exp $
+ *     RCS:  $Id: itclCmd.c,v 1.1.2.43 2008/12/31 13:29:22 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -121,8 +121,8 @@ ItclShowArgs(1, "EVAL2", objc - 1, newObjv);
 		        ckfree((char *)newObjv);
 		    } else {
 		       Tcl_AppendResult(interp,
-		               "delegate as not yet implemented in",
-			       " this method!", NULL);
+		               "delegate has not yet been implemented in",
+			       ": \"this\" method/command!", NULL);
 		       return TCL_ERROR;
 		    }
 		} else {
