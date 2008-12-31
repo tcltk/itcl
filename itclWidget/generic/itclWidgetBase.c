@@ -12,7 +12,7 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itclWidgetBase.c,v 1.1.2.7 2008/12/26 16:18:52 wiede Exp $
+ * RCS: @(#) $Id: itclWidgetBase.c,v 1.1.2.8 2008/12/31 21:14:11 wiede Exp $
  */
 
 #include <stdlib.h>
@@ -93,7 +93,7 @@ Initialize (
      *  Package is now loaded.
      */
 
-    return Tcl_PkgProvideEx(interp, "itclwidget", ITCL_VERSION, &itclStubAPI);
+    return Tcl_PkgProvideEx(interp, "itclwidget", ITCL_PATCH_LEVEL, &itclStubAPI);
 }
 
 /*
