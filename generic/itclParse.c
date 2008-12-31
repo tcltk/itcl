@@ -39,7 +39,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclParse.c,v 1.1.2.62 2008/12/31 15:45:55 wiede Exp $
+ *     RCS:  $Id: itclParse.c,v 1.1.2.63 2008/12/31 21:05:55 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -3366,7 +3366,8 @@ delegate method * ?to <componentName>? ?using <pattern>? ?except <methods>?";
     iclsPtr = (ItclClass*)Itcl_PeekStack(&infoPtr->clsStack);
     if (iclsPtr->flags & ITCL_CLASS) {
         Tcl_AppendResult(interp, "\"", Tcl_GetString(iclsPtr->namePtr),
-	        " is no ::itcl::widget/::itcl::widgetadaptor/::itcl::type.", 
+	        " is no ::itcl::widget/::itcl::widgetadaptor/::itcl::type",
+		"/::itcl::extendedclass.", 
 		" Only these can delegate methods", NULL);
 	return TCL_ERROR;
     }
@@ -3763,7 +3764,9 @@ Itcl_ClassDelegateTypeMethodCmd(
     const char *typeMethodName;
     const char *component;
     const char *token;
+    const char **argv;
     int foundOpt;
+    int argc;
     int isNew;
     int i;
 
@@ -3855,7 +3858,8 @@ delegate typemethod * ?to <componentName>? ?using <pattern>? ?except <typemethod
     if (*typeMethodName != '*') {
 	/* FIXME !!! */
         /* check for locally defined typemethod */
-	hPtr = Tcl_FindHashEntry(&iclsPtr->functions, (char *)typeMethodNamePtr);
+	hPtr = Tcl_FindHashEntry(&iclsPtr->functions,
+	        (char *)typeMethodNamePtr);
 	if (hPtr != NULL) {
 	    Tcl_AppendResult(interp, "Error in \"delegate typemethod ",
 	            typeMethodName, "...\", \"", typeMethodName,
@@ -3865,16 +3869,27 @@ delegate typemethod * ?to <componentName>? ?using <pattern>? ?except <typemethod
 	    Tcl_DecrRefCount(typeMethodNamePtr);
 	    return TCL_ERROR;
 	}
-        idmPtr->namePtr = Tcl_NewStringObj(Tcl_GetString(typeMethodNamePtr), -1);
+        idmPtr->namePtr = Tcl_NewStringObj(
+	        Tcl_GetString(typeMethodNamePtr), -1);
         Tcl_IncrRefCount(idmPtr->namePtr);
-
-        idmPtr->flags |= ITCL_TYPE_METHOD;
     } else {
 	Tcl_DecrRefCount(typeMethodNamePtr);
         typeMethodNamePtr = Tcl_NewStringObj("*", -1);
 	Tcl_IncrRefCount(typeMethodNamePtr);
         idmPtr->namePtr = typeMethodNamePtr;
 	Tcl_IncrRefCount(typeMethodNamePtr);
+        if (exceptionsPtr != NULL) {
+            if (Tcl_SplitList(interp, Tcl_GetString(exceptionsPtr),
+	            &argc, &argv) != TCL_OK) {
+	        return TCL_ERROR;
+	    }
+            for(i = 0; i < argc; i++) {
+	        Tcl_Obj *objPtr;
+	        objPtr = Tcl_NewStringObj(argv[i], -1);
+	        hPtr = Tcl_CreateHashEntry(&idmPtr->exceptions, (char *)objPtr,
+	                &isNew);
+	    }
+        }
     }
     idmPtr->icPtr = icPtr;
     idmPtr->asPtr = targetPtr;
