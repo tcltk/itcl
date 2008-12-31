@@ -566,23 +566,6 @@ test dmethod-2.1 {'using "%c %m"' gets normal behavior} -body {
     tail destroy
 } -result {wagged briskly}
 
-test dmethod-2.2 {All 'using' conversions are converted} -body {
-    proc echo {args} { return $args }
-
-    type dog {
-        delegate method {tail wag} using {echo %% %t %M %m %j %n %w %s %c}
-    }
-
-    dog spot
-
-    spot tail wag
-} -constraints {
-    notyet_multipart_method
-} -cleanup {
-    dog destroy
-    rename echo ""
-} -result {% ::dog {tail wag} wag tail_wag ::dog::Snit_inst1 ::spot ::spot %c}
-
 test dmethod-2.3 {"%%" is handled properly} -body {
     proc echo {args} { join $args "|" }
 
