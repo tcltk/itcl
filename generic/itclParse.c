@@ -39,7 +39,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclParse.c,v 1.1.2.61 2008/12/28 21:43:11 wiede Exp $
+ *     RCS:  $Id: itclParse.c,v 1.1.2.62 2008/12/31 15:45:55 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -2121,11 +2121,16 @@ Itcl_ClassTypeVariableCmd(
     Tcl_Obj *CONST objv[])   /* argument objects */
 {
     ItclVariable *ivPtr;
+    int result;
 
     ivPtr = NULL;
     ItclShowArgs(1, "Itcl_ClassTypeVariableCmd", objc, objv);
-    return ItclClassCommonCmd(clientData, interp, objc, objv, ITCL_PUBLIC,
+    result = ItclClassCommonCmd(clientData, interp, objc, objv, ITCL_PUBLIC,
             &ivPtr);
+    if (ivPtr != NULL) {
+        ivPtr->flags |= ITCL_TYPE_VARIABLE;
+    }
+    return result;
 }
 
 /*
@@ -3320,6 +3325,7 @@ delegate method * ?to <componentName>? ?using <pattern>? ?except <methods>?";
     }
     result = ItclCreateDelegatedFunction(interp, methodNamePtr, icPtr,
             targetPtr, usingPtr, exceptionsPtr, idmPtrPtr);
+    (*idmPtrPtr)->flags |= ITCL_METHOD;
 errorOut:
     Tcl_DecrRefCount(methodNamePtr);
     return result;
@@ -3862,6 +3868,7 @@ delegate typemethod * ?to <componentName>? ?using <pattern>? ?except <typemethod
         idmPtr->namePtr = Tcl_NewStringObj(Tcl_GetString(typeMethodNamePtr), -1);
         Tcl_IncrRefCount(idmPtr->namePtr);
 
+        idmPtr->flags |= ITCL_TYPE_METHOD;
     } else {
 	Tcl_DecrRefCount(typeMethodNamePtr);
         typeMethodNamePtr = Tcl_NewStringObj("*", -1);
