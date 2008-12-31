@@ -9,7 +9,7 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itclBase.c,v 1.1.2.35 2008/12/26 16:05:26 wiede Exp $
+ * RCS: @(#) $Id: itclBase.c,v 1.1.2.36 2008/12/31 20:58:36 wiede Exp $
  */
 
 #include <stdlib.h>
@@ -424,8 +424,8 @@ opt = atoi(res_option);
      *  Package is now loaded.
      */
 
-    Tcl_PkgProvideEx(interp, "Itcl", ITCL_VERSION, &itclStubAPI);
-    return Tcl_PkgProvideEx(interp, "itcl", ITCL_VERSION, &itclStubAPI);
+    Tcl_PkgProvideEx(interp, "Itcl", ITCL_PATCH_LEVEL, &itclStubAPI);
+    return Tcl_PkgProvideEx(interp, "itcl", ITCL_PATCH_LEVEL, &itclStubAPI);
 }
 
 /*
