@@ -328,48 +328,6 @@ test ivariable-1.6 {instance variables can be initialized in the definition} -bo
     dog destroy
 } -result {{Hi Howdy} {}}
 
-test ivariable-1.7 {variable is illegal when selfns is undefined} -constraints {
-  notyet
-} -body {
-    type dog {
-        method caller {} {
-            callee
-        }
-        proc callee {} {
-            variable foo
-        }
-    }
-
-    dog create spot
-
-    spot caller
-} -returnCodes {
-    error
-} -cleanup {
-    dog destroy
-} -result {can't read "selfns": no such variable}
-
-test ivariable-1.8 {myvar is illegal when selfns is undefined} -constraints {
-  notyet
-} -body {
-    type dog {
-        method caller {} {
-            callee
-        }
-        proc callee {} {
-            myvar foo
-        }
-    }
-
-    dog create spot
-
-    spot caller
-} -returnCodes {
-    error
-} -cleanup {
-    dog destroy
-} -result {can't read "selfns": no such variable}
-
 test ivariable-1.9 {procs which define selfns see instance variables} -body {
     type dog {
         variable greeting Howdy
