@@ -126,7 +126,7 @@ test iinfo-1.2 {object info too few args} -body {
   info typemethod ?name? ?-protection? ?-type? ?-name? ?-args? ?-body?
   info typemethods ?pattern?
   info types ?pattern?
-  info typevariable ?name? ?-protection? ?-type? ?-name? ?-init? ?-value? ?-config?
+  info typevariable ?name? ?-protection? ?-type? ?-name? ?-init? ?-value?
   info typevars ?pattern?
   info variable ?name? ?-protection? ?-type? ?-name? ?-init? ?-value? ?-config?
   info variables ?pattern?
@@ -156,16 +156,14 @@ test iinfo-2.1 {object info type} -body {
 test iinfo-3.1 {object info typevars} -body {
     type dog {
         typevariable thisvar 1
+        typevariable thatvar 2
 
         constructor {args} {
-            typevariable thatvar 2
         }
     }
 
     dog create spot
     lsort [spot info typevars]
-} -constraints {
-    notyet
 } -cleanup {
     dog destroy
 } -result {::dog::thatvar ::dog::thisvar}
@@ -173,19 +171,32 @@ test iinfo-3.1 {object info typevars} -body {
 test iinfo-3.2 {object info typevars with pattern} -body {
     type dog {
         typevariable thisvar 1
+        typevariable thatvar 2
 
         constructor {args} {
-            typevariable thatvar 2
         }
     }
 
     dog create spot
     spot info typevars *this*
-} -constraints {
-    notyet
 } -cleanup {
     dog destroy
 } -result {::dog::thisvar}
+
+test iinfo-3.1a {object info typevarable} -body {
+    type dog {
+        typevariable thisvar 1
+        typevariable thatvar 2
+
+        constructor {args} {
+        }
+    }
+
+    dog create spot
+    spot info typevariable thatvar -name -protection -type -init -value
+} -cleanup {
+    dog destroy
+} -result {::dog::thatvar public common 2 2}
 
 test iinfo-4.1 {object info vars} -body {
     type dog {
@@ -340,6 +351,30 @@ test iinfo-7.5 {info typemethods, with hierarchical typemethods} -body {
     dog destroy
 } -result {{comp bar} {comp foo} create destroy info}
 
+test iinfo-7.5a {info typemethod} -body {
+    type dog {
+        typemethod tail {args} { set a b }
+    }
+
+    dog create spot
+
+    lsort [spot info typemethod]
+} -cleanup {
+    dog destroy
+} -result {::dog::tail}
+
+test iinfo-7.5b {info typemethod with options} -body {
+    type dog {
+        typemethod tail {args} { set a b }
+    }
+
+    dog create spot
+
+    spot info typemethod tail -name -protection -args -body -type
+} -cleanup {
+    dog destroy
+} -result {::dog::tail public {?arg arg ...?} { set a b } typemethod}
+
 
 test iinfo-8.1 {info methods, simple case} -body {
     type dog { }
@@ -360,6 +395,30 @@ test iinfo-8.2 {info methods, with pattern} -body {
 } -cleanup {
     dog destroy
 } -result {info}
+
+test iinfo-8.1a {info method} -body {
+    type dog {
+        method tail {args} { set a b }
+    }
+
+    dog spot
+
+    lsort [spot info method]
+} -cleanup {
+    dog destroy
+} -result {::dog::callinstance ::dog::cget ::dog::configure ::dog::destroy ::dog::getinstancevar ::dog::info ::dog::isa ::dog::mymethod ::dog::myproc ::dog::mytypemethod ::dog::mytypevar ::dog::myvar ::dog::tail ::dog::unknown}
+
+test iinfo-8.1b {info method with options} -body {
+    type dog {
+        method tail {args} { set a b }
+    }
+
+    dog spot
+
+    spot info method tail -name -protection -args -body -type
+} -cleanup {
+    dog destroy
+} -result {::dog::tail public {?arg arg ...?} { set a b } method}
 
 test iinfo-8.3 {info methods, with explicit methods} -body {
     type dog {
@@ -644,7 +703,7 @@ test tinfo-1.2 {type info too few args} -body {
   info typemethod ?name? ?-protection? ?-type? ?-name? ?-args? ?-body?
   info typemethods ?pattern?
   info types ?pattern?
-  info typevariable ?name? ?-protection? ?-type? ?-name? ?-init? ?-value? ?-config?
+  info typevariable ?name? ?-protection? ?-type? ?-name? ?-init? ?-value?
   info typevars ?pattern?
   info variable ?name? ?-protection? ?-type? ?-name? ?-init? ?-value? ?-config?
   info variables ?pattern?
@@ -664,16 +723,14 @@ test tinfo-1.3 {type info too many args} -body {
 test tinfo-2.1 {type info typevars} -body {
     type dog {
         typevariable thisvar 1
+        typevariable thatvar 2
 
         constructor {args} {
-            typevariable thatvar 2
         }
     }
 
     dog create spot
     lsort [dog info typevars]
-} -constraints {
-    notyet
 } -cleanup {
     dog destroy
 } -result {::dog::thatvar ::dog::thisvar}
@@ -717,16 +774,14 @@ test tinfo-3.4 {type info instances with pattern} -body {
 test tinfo-4.1 {type info typevars with pattern} -body {
     type dog {
         typevariable thisvar 1
+        typevariable thatvar 2
 
         constructor {args} {
-            typevariable thatvar 2
         }
     }
 
     dog create spot
     dog info typevars *this*
-} -constraints {
-    notyet
 } -cleanup {
     dog destroy
 } -result {::dog::thisvar}
@@ -1034,6 +1089,86 @@ test tinfo-10.5 {type info delegated methods} -body {
 } -cleanup {
     dog destroy
 } -result {{tail comp2} {wag comp1}}
+
+test tinfo-10.5a {type info delegated method} -body {
+    type dog {
+        component comp1
+        component comp2
+        delegate method wag to comp1
+        delegate method tail to comp2
+        delegate typemethod typewag to comp1
+        delegate typemethod typetail to comp2
+        typeconstructor {
+	    set comp1 string
+	    set comp2 string
+        }
+    }
+
+
+    lsort [dog info delegated method]
+} -cleanup {
+    dog destroy
+} -result {tail wag}
+
+test tinfo-10.5b {type info delegated method with options} -body {
+    type dog {
+        component comp1
+        component comp2
+        delegate method wag to comp1
+        delegate method tail to comp2
+        delegate typemethod typewag to comp1
+        delegate typemethod typetail to comp2
+        typeconstructor {
+	    set comp1 string
+	    set comp2 string
+        }
+    }
+
+
+    dog info delegated method wag -name -component -using -as -exceptions
+} -cleanup {
+    dog destroy
+} -result {wag comp1 {} {} {}}
+
+test tinfo-10.5c {type info delegated typemethod} -body {
+    type dog {
+        component comp1
+        component comp2
+        delegate method wag to comp1
+        delegate method tail to comp2
+        delegate typemethod typewag to comp1
+        delegate typemethod typetail to comp2
+        typeconstructor {
+	    set comp1 string
+	    set comp2 string
+        }
+    }
+
+
+    lsort [dog info delegated typemethod]
+} -cleanup {
+    dog destroy
+} -result {typetail typewag}
+
+test tinfo-10.5d {type info delegated typemethod with options} -body {
+    type dog {
+        component comp1
+        component comp2
+        delegate method wag to comp1
+        delegate method tail to comp2
+        delegate typemethod typewag to comp1
+        delegate typemethod typetail to comp2
+        typeconstructor {
+	    set comp1 string
+	    set comp2 string
+        }
+    }
+
+
+    dog info delegated typemethod typewag -name -component -using -as -exceptions
+} -cleanup {
+    dog destroy
+} -result {typewag comp1 {} {} {}}
 
 test tinfo-10.6 {type info delegated typemethods} -body {
     type dog {
