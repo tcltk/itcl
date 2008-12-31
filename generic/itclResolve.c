@@ -20,7 +20,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itclResolve.c,v 1.1.2.25 2008/12/14 15:30:32 wiede Exp $
+ *     RCS:  $Id: itclResolve.c,v 1.1.2.26 2008/12/31 13:30:51 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -377,10 +377,13 @@ Itcl_ClassVarResolver(
      */
     hPtr = Tcl_FindHashEntry(&infoPtr->objects, (char *)contextIoPtr);
     if (hPtr == NULL) {
+	return TCL_CONTINUE;
+#ifdef NOTDEF
 	char str[20];
 	sprintf(str, "%p", contextIoPtr);
 	Tcl_AppendResult(interp, "contextIoPtr has vanished!!", str, NULL);
         return TCL_ERROR;
+#endif
     }
     if (contextIoPtr->iclsPtr != vlookup->ivPtr->iclsPtr) {
 	if (strcmp(Tcl_GetString(vlookup->ivPtr->namePtr), "this") == 0) {
