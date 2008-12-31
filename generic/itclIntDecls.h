@@ -1,5 +1,5 @@
 /*
- * $Id: itclIntDecls.h,v 1.13.2.16 2008/12/11 11:23:21 wiede Exp $
+ * $Id: itclIntDecls.h,v 1.13.2.17 2008/12/31 22:41:55 wiede Exp $
  *
  * This file is (mostly) automatically generated from itcl.decls.
  */
@@ -11,7 +11,7 @@
 extern const char *Itcl_InitStubs(
 	Tcl_Interp *, const char *version, int exact);
 #define Itcl_InitStubs(interp,version,exact) Itcl_InitStubs( \
-	interp, ITCL_VERSION, 1)
+	interp, ITCL_PATCH_LEVEL, 1)
 #else
 
 #define Itcl_InitStubs(interp,version,exact) Tcl_PkgRequire(interp,"itcl",version, exact)
@@ -531,7 +531,7 @@ typedef struct ItclIntStubs {
     void (*itcl_ParseNamespPath) (CONST char * name, Tcl_DString * buffer, char ** head, char ** tail); /* 11 */
     int (*itcl_DecodeScopedCommand) (Tcl_Interp * interp, CONST char * name, Tcl_Namespace ** rNsPtr, char ** rCmdPtr); /* 12 */
     int (*itcl_EvalArgs) (Tcl_Interp * interp, int objc, Tcl_Obj *CONST objv[]); /* 13 */
-    Tcl_Obj* (*itcl_CreateArgs) (Tcl_Interp * interp, CONST char * string, int objc, Tcl_Obj *CONST objv[]); /* 14 */
+    Tcl_Obj* (*itcl_CreateArgs) (Tcl_Interp * interp, const char * string, int objc, Tcl_Obj *const objv[]); /* 14 */
     void (*reserved15)(void);
     void (*reserved16)(void);
     int (*itcl_GetContext) (Tcl_Interp * interp, ItclClass ** iclsPtrPtr, ItclObject ** ioPtrPtr); /* 17 */

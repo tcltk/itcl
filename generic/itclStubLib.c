@@ -1,5 +1,5 @@
 /*
- * $Id: itclStubLib.c,v 1.9.2.5 2008/12/11 11:23:21 wiede Exp $
+ * $Id: itclStubLib.c,v 1.9.2.6 2008/12/31 22:41:55 wiede Exp $
  * SOURCE: tk/generic/tkStubLib.c, version 1.9 2004/03/17
  */
 
@@ -34,7 +34,9 @@ const ItclIntStubs *itclIntStubsPtr;
 
 const char *
 Itcl_InitStubs(
-    Tcl_Interp *interp, const char *version, int exact)
+    Tcl_Interp *interp,
+    const char *version,
+    int exact)
 {
     const char *packageName = "itcl";
     const char *errMsg = NULL;
@@ -42,10 +44,13 @@ Itcl_InitStubs(
     const char *actualVersion =
 	    Tcl_PkgRequireEx(interp, packageName, version, exact, &clientData);
     struct ItclStubAPI *stubsAPIPtr = clientData;
+    if (clientData == NULL) {
+        return NULL;
+    }
     ItclStubs *stubsPtr = stubsAPIPtr->stubsPtr;
     ItclIntStubs *intStubsPtr = stubsAPIPtr->intStubsPtr;
 
-    if (!actualVersion) {
+    if (actualVersion == NULL) {
 	return NULL;
     }
 

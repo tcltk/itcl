@@ -39,7 +39,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclParse.c,v 1.1.2.63 2008/12/31 21:05:55 wiede Exp $
+ *     RCS:  $Id: itclParse.c,v 1.1.2.64 2008/12/31 22:41:55 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -53,7 +53,7 @@ namespace eval ::itcl {\n\
     proc _find_widget_init {} {\n\
         global env tcl_library\n\
         variable library\n\
-        variable version\n\
+        variable patchLevel\n\
         rename _find_widget_init {}\n\
         if {[info exists library]} {\n\
             lappend dirs $library\n\
@@ -65,10 +65,10 @@ namespace eval ::itcl {\n\
             if {[info exists env(ITCL_LIBRARY)]} {\n\
                 lappend dirs $env(ITCL_LIBRARY)\n\
             }\n\
-            lappend dirs [file join [file dirname $tcl_library] itcl$version]\n\
+            lappend dirs [file join [file dirname $tcl_library] itcl$patchLevel]\n\
             set bindir [file dirname [info nameofexecutable]]\n\
 	    lappend dirs [file join . library]\n\
-            lappend dirs [file join $bindir .. lib itcl$version]\n\
+            lappend dirs [file join $bindir .. lib itcl$patchLevel]\n\
             lappend dirs [file join $bindir .. library]\n\
             lappend dirs [file join $bindir .. .. library]\n\
             lappend dirs [file join $bindir .. .. itcl library]\n\
@@ -78,14 +78,14 @@ namespace eval ::itcl {\n\
             if {[string equal $::tcl_platform(platform) \"unix\"] && \
                     [string equal $::tcl_platform(os) \"Darwin\"]} {\n\
                 foreach d $::tcl_pkgPath {\n\
-                    lappend dirs [file join $d itcl$version]\n\
+                    lappend dirs [file join $d itcl$patchLevel]\n\
                 }\n\
             }\n\
             # On *nix, check the directories in the tcl_pkgPath\n\
             if {[string equal $::tcl_platform(platform) \"unix\"]} {\n\
                 foreach d $::tcl_pkgPath {\n\
                     lappend dirs $d\n\
-                    lappend dirs [file join $d itcl$version]\n\
+                    lappend dirs [file join $d itcl$patchLevel]\n\
                 }\n\
             }\n\
         }\n\
