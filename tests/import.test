@@ -6,7 +6,7 @@
 #            mmclennan@lucent.com
 #            http://www.tcltk.com/itcl
 #
-#      RCS:  $Id: import.test,v 1.6.2.3 2008/10/17 19:52:57 wiede Exp $
+#      RCS:  $Id: import.test,v 1.6.2.4 2008/12/31 13:24:42 wiede Exp $
 # ----------------------------------------------------------------------
 #            Copyright (c) 1993-1998  Lucent Technologies, Inc.
 # ======================================================================
@@ -14,7 +14,7 @@
 # redistribution of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 
 if {[lsearch [namespace children] ::tcltest] == -1} {
-    package require tcltest 2.1
+    package require tcltest 2.2
     namespace import -force ::tcltest::test
 }
 
@@ -25,7 +25,14 @@ if {[lsearch [namespace children] ::tcltest] == -1} {
 # ----------------------------------------------------------------------
 test import-1.1 {basic syntax for "stub" command} {
     list [catch {itcl::import::stub} result] $result
-} {1 {wrong # args: should be one of...
+} {1 {wrong # args: should be "itcl::import::stub subcommand ?arg ...?"}}
+
+test import-1.1a {basic syntax for "stub" command
+} -body {
+    list [catch {itcl::import::stub} result] $result
+} -constraints {
+    needs_frq_1773103
+} -result {1 {wrong # args: should be one of...
   stub create name
   stub exists name}}
 
@@ -128,7 +135,8 @@ test import-2.3 {stubs can be autoloaded and imported links remain} {
     }
 } {{::test::foo1: 1 2 3 4} ::test::foo1 ::test::foo1 ::test::foo1 0}
 
-test import-2.4 {itcl::class handles stubs correctly} {
+test import-2.4 {itcl::class handles stubs correctly
+} -body {
     $interp eval {
         proc auto_load {cmd {namespace {}}} {
             itcl::class $cmd { }
@@ -141,7 +149,9 @@ test import-2.4 {itcl::class handles stubs correctly} {
              [namespace origin ::user3::foo2] \
              [itcl::import::stub exists ::test::foo2]
     }
-} {x ::test::foo2 ::test::foo2 ::test::foo2 ::test::foo2 0}
+} -constraints {
+    needs_fix_in_TclOO
+} -result {x ::test::foo2 ::test::foo2 ::test::foo2 ::test::foo2 0}
 
 test import-2.5 {itcl::class will overwrite stubs in an existing namespace} {
     $interp eval {

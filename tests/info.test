@@ -6,7 +6,7 @@
 #            mmclennan@lucent.com
 #            http://www.tcltk.com/itcl
 #
-#      RCS:  $Id: info.test,v 1.6.2.3 2008/10/27 21:28:16 wiede Exp $
+#      RCS:  $Id: info.test,v 1.6.2.4 2008/12/31 13:24:42 wiede Exp $
 # ----------------------------------------------------------------------
 #            Copyright (c) 1993-1998  Lucent Technologies, Inc.
 # ======================================================================
@@ -14,7 +14,7 @@
 # redistribution of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 
 if {[lsearch [namespace children] ::tcltest] == -1} {
-    package require tcltest 2.1
+    package require tcltest 2.2
     namespace import -force ::tcltest::test
 }
 
@@ -71,7 +71,14 @@ test info-1.1 {define a simple class} {
 
 test info-1.2 {info: errors trigger usage info} {
     list [catch {namespace eval test_info {info}} msg] $msg
-} {1 {wrong # args: should be one of...
+} {1 {wrong # args: should be "::itcl::builtin::Info subcommand ?arg ...?"}}
+
+test info-1.2a {info: errors trigger usage info
+} -body {
+    list [catch {namespace eval test_info {info}} msg] $msg
+} -constraints {
+    needs_frq_1773103
+} -result {1 {wrong # args: should be one of...
   info args procname
   info body procname
   info class

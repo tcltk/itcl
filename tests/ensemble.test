@@ -6,7 +6,7 @@
 #            mmclennan@lucent.com
 #            http://www.tcltk.com/itcl
 #
-#      RCS:  $Id: ensemble.test,v 1.5.2.1 2008/12/11 11:38:52 wiede Exp $
+#      RCS:  $Id: ensemble.test,v 1.5.2.2 2008/12/31 13:24:42 wiede Exp $
 # ----------------------------------------------------------------------
 #            Copyright (c) 1993-1998  Lucent Technologies, Inc.
 # ======================================================================
@@ -14,7 +14,7 @@
 # redistribution of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 
 if {[lsearch [namespace children] ::tcltest] == -1} {
-    package require tcltest 2.1
+    package require tcltest 2.2
     namespace import -force ::tcltest::test
 }
 
@@ -106,7 +106,6 @@ test ensemble-1.11 {part argument errors are handled gracefully} {
     invoked from within
 "itcl::ensemble test_numbers {part foo {{}} {}}"}}
 
-puts 2.0
 test ensemble-2.0 {defining subensembles} {
     itcl::ensemble test_numbers {
         ensemble hex {
@@ -150,7 +149,14 @@ test ensemble-2.2 {invoking sub-ensemble parts} {
 
 test ensemble-2.3 {errors from sub-ensembles} {
     list [catch "test_numbers hex" msg] $msg
-} {1 {wrong # args: should be one of...
+} {1 {wrong # args: should be "test_numbers hex subcommand ?arg ...?"}}
+
+test ensemble-2.3a {errors from sub-ensembles
+} -body {
+    list [catch "test_numbers hex" msg] $msg
+} -constraints {
+    needs_frq_1773103
+} -result {1 {wrong # args: should be one of...
   test_numbers hex base
   test_numbers hex digits ?arg arg ...?}}
 
@@ -164,7 +170,14 @@ test ensemble-2.5 {invoking sub-ensemble parts} {
 
 test ensemble-2.6 {errors from sub-ensembles} {
     list [catch "test_numbers octal" msg] $msg
-} {1 {wrong # args: should be one of...
+} {1 {wrong # args: should be "test_numbers octal subcommand ?arg ...?"}}
+
+test ensemble-2.6a {errors from sub-ensembles
+} -body {
+    list [catch "test_numbers octal" msg] $msg
+} -constraints {
+    needs_frq_1773103
+} -result {1 {wrong # args: should be one of...
   test_numbers octal base
   test_numbers octal digits ?prefix? ?arg arg ...?}}
 
@@ -188,7 +201,14 @@ test ensemble-3.0 {an error handler part can be used to handle errors} {
 
 test ensemble-3.1 {the error handler part shows up as generic "...and"} {
     list [catch {test_numbers} msg] $msg
-} {1 {wrong # args: should be one of...
+} {1 {wrong # args: should be "test_numbers subcommand ?arg ...?"}}
+
+test ensemble-3.1a {the error handler part shows up as generic "...and"
+} -body {
+    list [catch {test_numbers} msg] $msg
+} -constraints {
+    needs_frq_1773103
+} -result {1 {wrong # args: should be one of...
   test_numbers hex option ?arg arg ...?
   test_numbers octal option ?arg arg ...?
   test_numbers one x
