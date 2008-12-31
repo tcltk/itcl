@@ -23,7 +23,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclCmd.c,v 1.1.2.43 2008/12/31 13:29:22 wiede Exp $
+ *     RCS:  $Id: itclCmd.c,v 1.1.2.44 2008/12/31 21:04:26 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -574,6 +574,11 @@ CallDeleteObject(
     int result)
 {
     ItclObject *contextIoPtr = data[0];
+    if (contextIoPtr->destructorHasBeenCalled) {
+	Tcl_AppendResult(interp, "can't delete an object while it is being ",
+	        "destructed", NULL);
+        return TCL_ERROR;
+    }
     if (result == TCL_OK) {
         result = Itcl_DeleteObject(interp, contextIoPtr);
     }
