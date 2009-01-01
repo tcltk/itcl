@@ -6,7 +6,7 @@
 #            mmclennan@lucent.com
 #            http://www.tcltk.com/itcl
 #
-#      RCS:  $Id: import.test,v 1.6.2.4 2008/12/31 13:24:42 wiede Exp $
+#      RCS:  $Id: import.test,v 1.6.2.5 2009/01/01 19:39:19 wiede Exp $
 # ----------------------------------------------------------------------
 #            Copyright (c) 1993-1998  Lucent Technologies, Inc.
 # ======================================================================
@@ -150,11 +150,15 @@ test import-2.4 {itcl::class handles stubs correctly
              [itcl::import::stub exists ::test::foo2]
     }
 } -constraints {
-    needs_fix_in_TclOO
+    needs_bug_2481109_fix_in_TclOO
 } -result {x ::test::foo2 ::test::foo2 ::test::foo2 ::test::foo2 0}
 
 test import-2.5 {itcl::class will overwrite stubs in an existing namespace} {
     $interp eval {
+        proc auto_load {cmd {namespace {}}} {
+            itcl::class $cmd { }
+            return 1
+        }
         namespace eval test::buried { }
         itcl::import::stub create ::test::buried
         itcl::import::stub create ::test::buried::stub
