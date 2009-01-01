@@ -6,7 +6,7 @@
 #            mmclennan@lucent.com
 #            http://www.tcltk.com/itcl
 #
-#      RCS:  $Id: namespace.test,v 1.5.2.1 2008/12/31 13:24:42 wiede Exp $
+#      RCS:  $Id: namespace.test,v 1.5.2.2 2009/01/01 19:37:03 wiede Exp $
 # ----------------------------------------------------------------------
 #            Copyright (c) 1993-1998  Lucent Technologies, Inc.
 # ======================================================================
@@ -87,7 +87,7 @@ test namespace-1.7 {can create an object that shadows a command in the global na
          [catch {itcl::find objects *lreplace} msg] $msg \
          [namespace eval test_ns_1 {namespace which lreplace}]
 } -constraints {
-  needs_fix_in_TclOO
+  needs_bug_2481109_fix_in_TclOO
 } -result {0 lreplace 0 ::test_ns_1::lreplace ::test_ns_1::lreplace}
 
 namespace delete test_ns_1 test_ns_2
