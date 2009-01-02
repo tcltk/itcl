@@ -6,7 +6,7 @@
 #            mmclennan@lucent.com
 #            http://www.tcltk.com/itcl
 #
-#      RCS:  $Id: info.test,v 1.6.2.5 2009/01/02 19:12:12 dgp Exp $
+#      RCS:  $Id: info.test,v 1.6.2.6 2009/01/02 22:56:49 dgp Exp $
 # ----------------------------------------------------------------------
 #            Copyright (c) 1993-1998  Lucent Technologies, Inc.
 # ======================================================================
@@ -225,7 +225,7 @@ test info-2.16 {flag syntax errors} {
 # ----------------------------------------------------------------------
 #  Member functions
 # ----------------------------------------------------------------------
-test basic-3.1 {info: all functions} {
+test info-3.1 {info: all functions} {
     lsort [ti info function]
 } {::test_info::constructor ::test_info::defm ::test_info::defp ::test_info::destructor ::test_info::prim ::test_info::prip ::test_info::prom ::test_info::prop ::test_info::pubm ::test_info::pubp ::test_info::uninitm ::test_info::uninitp ::test_info_base::base ::test_info_base::cget ::test_info_base::configure ::test_info_base::do ::test_info_base::isa}
 

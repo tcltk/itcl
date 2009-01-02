@@ -259,7 +259,7 @@ test creation-1.6 {weird names are OK} -body {
 #-----------------------------------------------------------------------
 # renaming
 
-test rename-1.1 {mymethod uses name of instance name variable} -body {
+test typeclass-rename-1.1 {mymethod uses name of instance name variable} -body {
     type dog {
         method mymethod {} {
             list [mymethod] [mymethod "A B"] [mymethod A B]
@@ -270,10 +270,10 @@ test rename-1.1 {mymethod uses name of instance name variable} -body {
     fido mymethod
 } -cleanup {
     dog destroy
-} -result {{::itcl::builtin::callinstance ItclInst5} {::itcl::builtin::callinstance ItclInst5 {A B}} {::itcl::builtin::callinstance ItclInst5 A B}}
+} -match glob -result {{::itcl::builtin::callinstance ItclInst*} {::itcl::builtin::callinstance ItclInst* {A B}} {::itcl::builtin::callinstance ItclInst* A B}}
 
 
-test rename-1.2 {instances can be renamed} -body {
+test typeclass-rename-1.2 {instances can be renamed} -body {
     type dog {
         method names {} {
             list [mymethod] $selfns $win $self
@@ -288,7 +288,7 @@ test rename-1.2 {instances can be renamed} -body {
     concat $a $b
 } -cleanup {
     dog destroy
-} -result {{::itcl::builtin::callinstance ItclInst6} ::itcl::internal::variables::fido::dog fido ::fido {::itcl::builtin::callinstance ItclInst6} ::itcl::internal::variables::fido::dog fido ::spot}
+} -match glob -result {{::itcl::builtin::callinstance ItclInst*} ::itcl::internal::variables::fido::dog fido ::fido {::itcl::builtin::callinstance ItclInst*} ::itcl::internal::variables::fido::dog fido ::spot}
 
 test rename-1.3 {rename to "" deletes an instance} -body {
     type dog { }
@@ -329,7 +329,7 @@ test rename-1.5 {creating an object twice destroys the first instance} -body {
 } -result {::itcl::internal::variables::fido::dog ::itcl::internal::variables::fido::dog {}}
 
 
-test component-1.1 {component defines variable} -body {
+test typeclass-component-1.1 {component defines variable} -body {
     type dog {
         typecomponent mycomp
 
@@ -345,7 +345,7 @@ test component-1.1 {component defines variable} -body {
     dog destroy
 } -result {}
 
-test component-1.2 {component -inherit} -body {
+test typeclass-component-1.2 {component -inherit} -body {
     type dog {
         component mycomp -inherit
 
@@ -361,7 +361,7 @@ test component-1.2 {component -inherit} -body {
     dog destroy
 } -result {3}
 
-test component-1.3 {component -inherit can only have one of it} -body {
+test typeclass-component-1.3 {component -inherit can only have one of it} -body {
     type dogbase {
         component mycompbase -inherit
     }
