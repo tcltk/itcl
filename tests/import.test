@@ -6,18 +6,15 @@
 #            mmclennan@lucent.com
 #            http://www.tcltk.com/itcl
 #
-#      RCS:  $Id: import.test,v 1.6.2.5 2009/01/01 19:39:19 wiede Exp $
+#      RCS:  $Id: import.test,v 1.6.2.6 2009/01/02 19:12:12 dgp Exp $
 # ----------------------------------------------------------------------
 #            Copyright (c) 1993-1998  Lucent Technologies, Inc.
 # ======================================================================
 # See the file "license.terms" for information on usage and
 # redistribution of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 
-if {[lsearch [namespace children] ::tcltest] == -1} {
-    package require tcltest 2.2
-    namespace import -force ::tcltest::test
-}
-
+package require tcltest 2.2
+namespace import ::tcltest::test
 ::tcltest::loadTestedCommands
 
 # ----------------------------------------------------------------------

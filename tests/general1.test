@@ -4,19 +4,15 @@
 #   AUTHOR:  Wolfgang Groﬂer, Arnulf Wiedemann
 #            wolfgang@grosser-erding.de, arnulf@wiedemann-pri.de
 #
-#      RCS:  $Id: general1.test,v 1.1.2.3 2008/12/11 11:38:52 wiede Exp $
+#      RCS:  $Id: general1.test,v 1.1.2.4 2009/01/02 19:12:12 dgp Exp $
 # ----------------------------------------------------------------------
 #            Copyright (c) Wolfgang Groﬂer, Arnulf Wiedemann
 # ======================================================================
 # See the file "license.terms" for information on usage and
 # redistribution of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 
-if {[lsearch [namespace children] ::tcltest] == -1} {
-    package require tcltest 2.1
-    namespace import -force ::tcltest::test
-}
-
-
+package require tcltest 2.1
+namespace import ::tcltest::test
 ::tcltest::loadTestedCommands
 
 # ----------------------------------------------------------------------
