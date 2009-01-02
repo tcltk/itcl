@@ -39,7 +39,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclParse.c,v 1.1.2.64 2008/12/31 22:41:55 wiede Exp $
+ *     RCS:  $Id: itclParse.c,v 1.1.2.65 2009/01/02 22:11:48 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -664,6 +664,7 @@ ItclClassBaseCmd(
     ItclShowArgs(1, "ItclClassBaseCmd", objc, objv);
     className = Tcl_GetString(objv[1]);
 
+    noCleanup = 0;
     /*
      *  Find the namespace to use as a parser for the class definition.
      *  If for some reason it is destroyed, bail out here.
