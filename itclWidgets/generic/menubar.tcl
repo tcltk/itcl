@@ -37,7 +37,7 @@
 #
 #  CURRENT MAINTAINER: Chad Smith --> csmith@adc.com or itclguy@yahoo.com
 #
-#  @(#) $Id: menubar.tcl,v 1.1.2.1 2008/12/29 22:02:01 wiede Exp $
+#  @(#) $Id: menubar.tcl,v 1.1.2.2 2009/01/02 22:17:15 wiede Exp $
 # ----------------------------------------------------------------------
 #            Copyright (c) 1995 DSC Technologies Corporation
 # ======================================================================
@@ -66,9 +66,9 @@
 #
 # Use option database to override default resources.
 #
-option add *Menubar*Menu*tearOff         false        widgetDefault
-option add *Menubar*Menubutton*relief    flat         widgetDefault
-option add *Menubar*Menu*relief          raised       widgetDefault
+option add *Menubar*Menu*tearOff       false    widgetDefault
+option add *Menubar*Menubutton*relief  flat     widgetDefault
+option add *Menubar*Menu*relief        raised   widgetDefault
 
 namespace eval ::itcl::widgets {
 
@@ -109,9 +109,9 @@ proc ::itcl::widgets::menubar { args } {
     private variable _parseLevel 0        ;# The parse level depth
     private variable _callerLevel #0      ;# abs level of caller
     private variable _pathMap             ;# Array indexed by Menubar's path
-                                      ;# naming, yields tk menu path
+                                          ;# naming, yields tk menu path
     private variable _entryIndex -1       ;# current entry help is displayed
-                                      ;# for during help <motion> events
+                                          ;# for during help <motion> events
     private variable _tkMenuPath          ;# last tk menu being added to
     private variable _ourMenuPath         ;# our last valid path constructed.
     private variable _menuOption          ;# The -menu option
@@ -181,16 +181,12 @@ proc ::itcl::widgets::menubar { args } {
     # might want to make -relief and -bd options with defaults
     setupcomponent menubar using frame $itcl_interior.menubar -relief raised -bd 2
     keepcomponentoption menubar -cursor -background -width -height
-puts stderr 111
     pack $menubar -fill both -expand yes
     # Map our pathname to class to the actual menubar frame
-puts stderr 222
     set _pathMap(.) $menubar
-puts stderr 333!$args!
     if {[llength $args] > 0} {
         uplevel 0 configure $args
     }
-puts stderr 444
     #
     # HACK HACK HACK
     # Tk expects some variables to be defined and due to some
@@ -226,22 +222,17 @@ puts stderr 444
 	if {! [catch {_parsePath .0}]} {
 	    delete .0 .last
 	} 
-puts stderr a
 	#
 	# Determine the context level to evaluate the option string at
 	#
 	set _callerLevel [_getCallerLevel]
-puts stderr b!$_callerLevel!
 	#
 	# Parse the option string in their scope, then execute it in
 	# our scope.
 	#
 	incr _parseLevel
-puts stderr c!$_parseLevel!
 	_substEvalStr value
-puts stderr d!$value
 	if {[catch {uplevel 0 $value} msg]} {
-puts stderr "MSG!$msg!"
 	}
 	# reset so that we know we aren't parsing in a scope currently.
 	incr _parseLevel -1
@@ -321,7 +312,6 @@ puts stderr "MSG!$msg!"
 #
 # -------------------------------------------------------------
 ::itcl::body Menubar::add {type path args} {
-puts stderr "Menubar::add!$type!$path!$args!"
     if {![regexp \
             {^(menubutton|command|cascade|separator|radiobutton|checkbutton)$} \
             $type]} {
@@ -337,17 +327,16 @@ puts stderr "Menubar::add!$type!$path!$args!"
                 or be an integer"
     }
 
-    # ,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-    # OK, either add a menu
-    # '''''''''''''''''''''''''''''''''''''''''''''''''''''
-puts stderr 22
     if {$type eq "menubutton"} {
+        # ,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+        # add a menu
+        # '''''''''''''''''''''''''''''''''''''''''''''''''''''
 	# grab the last component name (the menu name)
 	uplevel 0 _addMenuButton $segName $args
-	# ,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-	# Or add an entry
-	# '''''''''''''''''''''''''''''''''''''''''''''''''''''
     } else {
+	# ,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+	# add an entry
+	# '''''''''''''''''''''''''''''''''''''''''''''''''''''
 	uplevel 0 _addEntry $type $path $args
     }
 }
@@ -371,12 +360,12 @@ puts stderr 22
 # ponentPathName2 is ignored.
 #
 # -------------------------------------------------------------
-::itcl::body Menubar::delete { args } {
+::itcl::body Menubar::delete {args} {
 
     # ,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
     # Handle out of bounds in arg lengths
     # '''''''''''''''''''''''''''''''''''''''''''''''''''''
-    if {[llength $args] > 0 && [llength $args] <=2} {
+    if {([llength $args] > 0) && ([llength $args] <= 2)} {
 
 	# Path Conversions
 	# '''''''''''''''''''''''''''''''''''''''''''''''''''''
@@ -617,7 +606,7 @@ puts stderr 22
     set len [llength $args]
     if {$len < 1 || $len > 2} {
 	error "wrong # args: should be \
-		\"$itk_component(hull) path ?mode?> <pattern>\""
+		\"$itcl_hull path ?mode?> <pattern>\""
     }
 
     set pathList [array names _pathMap]
@@ -645,7 +634,7 @@ puts stderr 22
         # Case: wrong # arguments
         # '''''''''''''''''''''''''''''''''''''''''''''''''''''
         error "wrong # args: \
-	    should be \"$itk_component(hull) path ?-glob? ?-regexp? pattern\""
+	    should be \"$itcl_hull path ?-glob? ?-regexp? pattern\""
       }
     }
     return $found
@@ -754,7 +743,6 @@ puts stderr 22
 # menubutton
 # -------------------------------------------------------------
 ::itcl::body Menubar::menubutton {menuName args} {
-puts stderr "Menubar::menubutton!$menuName!$args!"
     uplevel 0 "add menubutton .$menuName $args"
 }
 
@@ -841,7 +829,7 @@ puts stderr "Menubar::menubutton!$menuName!$args!"
 # naming it $sepName.
 #
 # -------------------------------------------------------------
-::itcl::body Menubar::separator { sepName args } {
+::itcl::body Menubar::separator {sepName args} {
     uplevel 0 $_tkMenuPath add separator
     set _pathMap($_ourMenuPath.$sepName) [_getPdIndex $_tkMenuPath end]
 }
@@ -886,17 +874,16 @@ puts stderr "Menubar::menubutton!$menuName!$args!"
 #
 # -------------------------------------------------------------
 ::itcl::body Menubar::_addMenuButton {buttonName args} {
-puts stderr Menubar::_addMenuButton!$buttonName!$args!"
-    uplevel 0 "_makeMenuButton $buttonName $args"
+    set realButtonName [uplevel 0 _makeMenuButton $buttonName $args]
     #,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
     # Pack at end, adjust for help buttonName
     # ''''''''''''''''''''''''''''''''''
     if {$buttonName eq "help"} {
-	pack [set $buttonName] -side right
+	pack $realButtonName -side right
     } else {
-	pack [set $buttonName] -side left
+	pack $realButtonName -side left
     }
-    return [set $buttonName]
+    return $realButtonName
 }
 
 # -------------------------------------------------------------
@@ -930,7 +917,6 @@ puts stderr Menubar::_addMenuButton!$buttonName!$args!"
 #
 # -------------------------------------------------------------
 ::itcl::body Menubar::_makeMenuButton {buttonName args} {
-puts stderr "Menubar::_makeMenuButton!$buttonName!$args!"
     #,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
     # Capture the -menu option if present
     # '''''''''''''''''''''''''''''''''''
@@ -949,12 +935,15 @@ puts stderr "Menubar::_makeMenuButton!$buttonName!$args!"
     #,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
     # Create menubutton component
     # ''''''''''''''''''''''''''''''''
-puts stderr "::itcl::addcomponent!$this!$buttonName!"
-    ::itcl::addcomponent $this $buttonName
-puts stderr a1
-    setupcomponent $buttonName using ::menubutton $menubar.$buttonName {*}$args
-puts stderr a2
-    keepcomponentoption $buttonName \
+    set my_prefix ""
+    regsub -all {[.]} $menubar {_} my_prefix
+    if {[string length $my_prefix] > 0} {
+        append my_prefix "_"
+    }
+puts stderr "RB!${my_prefix}$buttonName!$buttonName!"
+    ::itcl::addcomponent $this ${my_prefix}$buttonName
+    setupcomponent ${my_prefix}$buttonName using ::menubutton $menubar.$buttonName {*}$args
+    keepcomponentoption ${my_prefix}$buttonName \
                 -activebackground \
                 -activeforeground \
                 -anchor \
@@ -971,16 +960,13 @@ puts stderr a2
                 -padx \
                 -pady \
                 -wraplength
-puts stderr a3
-    set _pathMap(.$buttonName) [set $buttonName]
-puts stderr a4
+    set _pathMap(.$buttonName) [set ${my_prefix}$buttonName]
     _makeMenu \
 	    $buttonName-menu \
-	    [set $buttonName].menu \
+	    [set ${my_prefix}$buttonName].menu \
 	    .$buttonName \
 	    $menuEvalStr
-puts stderr a5
-    return [set $buttonName]
+    return [set ${my_prefix}$buttonName]
 }
 
 # -------------------------------------------------------------
@@ -990,7 +976,7 @@ puts stderr a5
 # Creates a menu.
 # It then evaluates the $menuEvalStr to create entries on the menu.
 #
-# Assumes the existence of $itk_component($buttonName)
+# Assumes the existence of $$buttonName
 #
 # -------------------------------------------------------------
 ::itcl::body Menubar::_makeMenu {componentName widgetName menuPath menuEvalStr} {
@@ -1113,24 +1099,27 @@ puts stderr a5
 # deletes a single Menu (menubutton and menu pane with entries)
 #
 # -------------------------------------------------------------
-::itcl::body Menubar::_deleteAMenu { path } {
+::itcl::body Menubar::_deleteAMenu {path} {
     # We will normalize the path to not include the '.menu' if
     # it is on the path already.
     regsub {[.]menu$} $path "" menuButtonPath
     regsub {.*[.]} $menuButtonPath "" buttonName
+puts stderr "PA![set _pathMap(.$buttonName)]!"
+    set myButtonName [set _pathMap(.$buttonName)]
+    regsub -all {[.]} $myButtonName {_} myButtonName
     # Loop through and destroy any cascades, etc on menu.
     set entryList [_getEntryList $menuButtonPath]
     foreach entry $entryList {
 	_deleteEntry $entry
     }
     # Delete the menubutton and menu components...
-    destroy [set $buttonName]-menu
-    destroy [set $buttonNamer]
+    destroy [set $myButtonName]-menu
+    destroy [set $myButtonName]
 
     # This is because of some itcl bug that doesn't delete
     # the component on the destroy in some cases...
-    catch {delete [set $buttonName]-menu}
-    catch {delete [set $buttonName]}
+#    catch {delete [set $buttonName]-menu}
+#    catch {delete [set $buttonName]}
     
     # unset our paths
     _unsetPaths $menuButtonPath
@@ -1754,8 +1743,8 @@ puts stderr a5
 # -------------------------------------------------------------
 ::itcl::body Menubar::_getMenuList {} {
     # get the menus that are packed
-    set tkPathList [pack slaves $itk_component(menubar)]
-    regsub -- {[.]} $itk_component(hull) "" mbName
+    set tkPathList [pack slaves $menubar]
+    regsub -- {[.]} [namespace tail $this] "" mbName
     regsub -all -- "\[.\]$mbName\[.\]menubar\[.\]" $tkPathList "." menuPathList
     return $menuPathList
 }
@@ -1811,12 +1800,13 @@ puts stderr a5
 # keywords 'last' and 'end' as well as numeric digits.
 #
 # -------------------------------------------------------------
-::itcl::body Menubar::_parsePath { path } {
+::itcl::body Menubar::_parsePath {path} {
     set segments [split [string trimleft $path .] .]
     set concatPath ""
     foreach seg $segments {
 	set concatPath [_getSymbolicPath $concatPath $seg]
-	if {[catch {set _pathMap($concatPath)}]}{
+	if {[catch {set _pathMap($concatPath)} msg]} {
+puts stderr "_parsePath!$path!$concatPath!$msg!"
 	    error "bad path: \"$path\" does not exist. \"$seg\" not valid"
 	}
     }
@@ -1838,12 +1828,14 @@ puts stderr a5
 #	It is hard to know this upfront so it seems harder to generalize.
 #
 # -------------------------------------------------------------
-::itcl::body Menubar::_getSymbolicPath { parent segment } {
+::itcl::body Menubar::_getSymbolicPath {parent segment} {
     # if the segment is a number, then look it up positionally
     # MATCH numeric index
     if {[regexp {^[0-9]+$} $segment]} {
-	# if we have no parent, then we area menubutton
+	# if we have no parent, then we are a menubutton
 	if {$parent eq {}} {
+puts stderr "_getMenuList![_getMenuList]!"
+parray _pathMap
 	    set returnPath [lindex [_getMenuList] $segment]
 	} else {
 	    set returnPath [lindex [_getEntryList $parent.menu] $segment]
