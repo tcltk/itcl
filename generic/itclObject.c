@@ -24,7 +24,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann Copyright (c) 2007
  *
- *     RCS:  $Id: itclObject.c,v 1.1.2.66 2008/12/31 13:33:11 wiede Exp $
+ *     RCS:  $Id: itclObject.c,v 1.1.2.67 2009/01/02 22:10:13 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -425,9 +425,16 @@ fprintf(stderr, "after Tcl_NewObjectInstance oPtr == NULL\n");
     result = Itcl_InvokeMethodIfExists(interp, "constructor",
         iclsPtr, ioPtr, newObjc, newObjv);
     if (result != TCL_OK) {
+        int constructorStackSize;
 #ifdef DEBUG_OBJECT_CONSTRUCTION
 fprintf(stderr, "after CALLCONSTRUCTOR!%d!%s!\n", result, Tcl_GetStringResult(interp));
 #endif
+	/* clean up the constructor stack */
+        constructorStackSize = Itcl_GetStackSize(&infoPtr->constructorStack);
+	while (constructorStackSize > 0) {
+	    Itcl_PopStack(&infoPtr->constructorStack);
+	    constructorStackSize--;
+	}
         istate = Itcl_SaveInterpState(interp, result);
 	ItclDeleteObjectVariablesNamespace(interp, ioPtr);
 	if (ioPtr->accessCmd != (Tcl_Command) NULL) {
