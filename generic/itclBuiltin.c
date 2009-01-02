@@ -24,7 +24,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclBuiltin.c,v 1.1.2.64 2008/12/31 22:41:55 wiede Exp $
+ *     RCS:  $Id: itclBuiltin.c,v 1.1.2.65 2009/01/02 18:05:44 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -1870,6 +1870,7 @@ ItclExtendedConfigure(
     FOREACH_HASH_DECLS;
     Tcl_HashTable unique;
     Tcl_HashEntry *hPtr2;
+    Tcl_HashEntry *hPtr3;
     Tcl_Object oPtr;
     Tcl_Obj *listPtr;
     Tcl_Obj *listPtr2;
@@ -1884,6 +1885,7 @@ ItclExtendedConfigure(
     Tcl_Namespace *saveNsPtr;
     Tcl_Namespace *evalNsPtr;
     ItclClass *contextIclsPtr;
+    ItclComponent *componentIcPtr;
     ItclObject *contextIoPtr;
     ItclVarLookup *vlookup;
     ItclDelegatedFunction *idmPtr;
@@ -2102,6 +2104,7 @@ ItclExtendedConfigure(
 	Tcl_DeleteHashTable(&unique);
         return TCL_OK;
     }
+    hPtr2 = NULL;
     /* first handle delegated options */
     hPtr = Tcl_FindHashEntry(&contextIoPtr->objectDelegatedOptions, (char *)
             objv[1]);
@@ -2123,16 +2126,35 @@ ItclExtendedConfigure(
 	    }
         }
     }
+    componentIcPtr = NULL;
     /* check if it is not a local option defined before delegate option "*"
      */
     hPtr2 = Tcl_FindHashEntry(&contextIoPtr->objectOptions,
             (char *)objv[1]);
+    if (hPtr != NULL) {
+        idoPtr = (ItclDelegatedOption *)Tcl_GetHashValue(hPtr);
+        icPtr = idoPtr->icPtr;
+        if (icPtr != NULL) {
+	    if (icPtr->haveKeptOptions) {
+	        hPtr3 = Tcl_FindHashEntry(&icPtr->keptOptions, (char *)objv[1]);
+                if (hPtr3 != NULL) {
+		    /* ignore if it is an object option */
+		    hPtr2 = NULL;
+                    componentIcPtr = icPtr;
+	        }
+	    }
+	}
+    }
     if ((objc <= 3) && (hPtr != NULL) && (hPtr2 == NULL)) {
 	/* the option is delegated */
         idoPtr = (ItclDelegatedOption *)Tcl_GetHashValue(hPtr);
-        icPtr = idoPtr->icPtr;
+	if (componentIcPtr != NULL) {
+	    icPtr = componentIcPtr;
+	} else {
+            icPtr = idoPtr->icPtr;
+	}
         val = ItclGetInstanceVar(interp,
-	        Tcl_GetString(icPtr->ivPtr->namePtr),
+	        Tcl_GetString(icPtr->namePtr),
                 NULL, contextIoPtr, icPtr->ivPtr->iclsPtr);
         if ((val != NULL) && (strlen(val) > 0)) {
 	    if (idoPtr->asPtr != NULL) {
@@ -2161,7 +2183,8 @@ ItclExtendedConfigure(
 	        infoPtr->currContextIclsPtr = ioPtr->iclsPtr;
 	    }
 	    Tcl_DecrRefCount(objPtr);
-            ItclShowArgs(1, "extended eval delegated option", objc+1, newObjv);
+            ItclShowArgs(1, "extended eval delegated option", objc + 1,
+	            newObjv);
             result = Tcl_EvalObjv(interp, objc+1, newObjv, TCL_EVAL_DIRECT);
 	    Tcl_DecrRefCount(newObjv[2]);
             Tcl_DecrRefCount(newObjv[1]);
