@@ -25,7 +25,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclMethod.c,v 1.1.2.43 2008/12/31 21:04:26 wiede Exp $
+ *     RCS:  $Id: itclMethod.c,v 1.1.2.44 2009/01/02 22:11:05 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -2520,6 +2520,7 @@ ItclProcErrorProc(
     infoPtr = (ItclObjectInfo *)Tcl_GetAssocData(interp,
             ITCL_INTERP_DATA, NULL);
     callContextPtr = Itcl_PeekStack(&infoPtr->contextStack);
+    currIclsPtr = NULL;
     loopCnt = 1;
     isFirstLoop = 1;
     upNsPtr = Itcl_GetUplevelNamespace(interp, 1);
