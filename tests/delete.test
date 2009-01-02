@@ -6,7 +6,7 @@
 #            mmclennan@lucent.com
 #            http://www.tcltk.com/itcl
 #
-#      RCS:  $Id: delete.test,v 1.4.2.2 2008/12/31 13:23:11 wiede Exp $
+#      RCS:  $Id: delete.test,v 1.4.2.3 2009/01/02 18:21:23 dgp Exp $
 # ----------------------------------------------------------------------
 #            Copyright (c) 1993-1998  Lucent Technologies, Inc.
 # ======================================================================
@@ -183,7 +183,7 @@ namespace delete test_delete
 # ----------------------------------------------------------------------
 #  Delete objects using path names and scoped values
 # ----------------------------------------------------------------------
-test basic-5.1 {define a simple class} {
+test delete-5.1 {define a simple class} {
     itcl::class test_delete_name {
         private variable x 0
         method test {x} {
@@ -192,19 +192,19 @@ test basic-5.1 {define a simple class} {
     }
 } {}
 
-test basic-5.2 {delete using a qualified name} {
+test delete-5.2 {delete using a qualified name} {
     namespace eval test_delete2 {test_delete_name #auto}
     set cmd {itcl::delete object test_delete2::test_delete_name0}
     list [catch $cmd msg] $msg [itcl::find objects -isa test_delete_name]
 } {0 {} {}}
 
-test basic-5.3 {delete using a scoped value} {
+test delete-5.3 {delete using a scoped value} {
     set obj [namespace eval test_delete2 {itcl::code [test_delete_name #auto]}]
     set cmd [list itcl::delete object $obj]
     list [catch $cmd msg] $msg [itcl::find objects -isa test_delete_name]
 } {0 {} {}}
 
-test basic-5.4 {scoped command names are decoded properly} {
+test delete-5.4 {scoped command names are decoded properly} {
     list [catch {itcl::delete object {namespace inscope ::xyzzy xxx}} msg] $msg \
          [catch {itcl::delete object {namespace inscope :: xxx yyy}} msg] $msg \
          [catch {itcl::delete object {namespace inscope :: xyzzy}} msg] $msg

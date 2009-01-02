@@ -239,7 +239,7 @@ test delegatemethod-1.8 {can't delegate local method: order 2} -body {
     error
 } -result {method "foo" has been delegated}
 
-test delegatemethod-1.8 {can't delegate local method: order 2} -body {
+test delegatemethod-1.9 {can't delegate local method: order 2} -body {
     ::itcl::extendedclass dog {
         component bar
         delegate method foo to bar
