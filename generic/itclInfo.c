@@ -24,7 +24,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclInfo.c,v 1.1.2.39 2008/12/31 15:47:41 wiede Exp $
+ *     RCS:  $Id: itclInfo.c,v 1.1.2.40 2009/01/02 13:01:04 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -39,7 +39,7 @@ Tcl_ObjCmdProc Itcl_BiInfoDelegatedCmd;
 Tcl_ObjCmdProc Itcl_BiInfoExistsCmd;
 Tcl_ObjCmdProc Itcl_BiInfoExtendedClassCmd;
 Tcl_ObjCmdProc Itcl_BiInfoInstancesCmd;
-Tcl_ObjCmdProc Itcl_BiInfoItclHullCmd;
+Tcl_ObjCmdProc Itcl_BiInfoHullTypeCmd;
 Tcl_ObjCmdProc Itcl_BiInfoMethodCmd;
 Tcl_ObjCmdProc Itcl_BiInfoMethodsCmd;
 Tcl_ObjCmdProc Itcl_BiInfoOptionsCmd;
@@ -119,14 +119,14 @@ static InfoMethod InfoMethodList[] = {
 	Itcl_BiInfoHeritageCmd,
 	ITCL_CLASS|ITCL_WIDGET|ITCL_ECLASS
     },
+    { "hulltype",
+        "",
+	Itcl_BiInfoHullTypeCmd,
+	ITCL_WIDGET
+    },
     { "hulltypes",
         "?pattern?",
-        NULL /* Itcl_BiInfoInstancesCmd */,
-	ITCL_WIDGETADAPTOR|ITCL_WIDGET
-    },
-    { "itcl_hull",
-        "?name? ?-inherit? ?-value?",
-        Itcl_BiInfoItclHullCmd,
+        NULL /* this is in package itclWidget */,
 	ITCL_WIDGETADAPTOR|ITCL_WIDGET
     },
     { "inherit",
@@ -151,7 +151,9 @@ static InfoMethod InfoMethodList[] = {
     },
     { "option",
         "?name? ?-protection? ?-resource? ?-class? ?-name? ?-default? \
-?-cgetmethod? ?-configuremethod? ?-validatemethod? ?-value?",
+?-cgetmethod? ?-configuremethod? ?-validatemethod? \
+?-cgetmethodvar? ?-configuremethodvar? ?-validatemethodvar? \
+?-value?",
         Itcl_BiInfoOptionCmd,
 	ITCL_WIDGET|ITCL_ECLASS
     },
@@ -271,7 +273,7 @@ static const struct NameProcMap infoCmds2[] = {
     { "::itcl::builtin::Info::extendedclass", Itcl_BiInfoExtendedClassCmd },
     { "::itcl::builtin::Info::function", Itcl_BiInfoFunctionCmd },
     { "::itcl::builtin::Info::heritage", Itcl_BiInfoHeritageCmd },
-    { "::itcl::builtin::Info::itcl_hull", Itcl_BiInfoItclHullCmd },
+    { "::itcl::builtin::Info::hulltype", Itcl_BiInfoHullTypeCmd },
     { "::itcl::builtin::Info::inherit", Itcl_BiInfoInheritCmd },
     { "::itcl::builtin::Info::instances", Itcl_BiInfoInstancesCmd },
     { "::itcl::builtin::Info::method", Itcl_BiInfoMethodCmd },
@@ -2040,34 +2042,49 @@ Itcl_BiInfoOptionCmd(
     Tcl_Obj *optionNamePtr;
 
     static const char *options[] = {
-        "-cgetmethod", "-class", "-configuremethod", "-default",
-	"-name", "-protection", "-resource", "-validatemethod",
+        "-cgetmethod", "-cgetmethodvar","-class", 
+	"-configuremethod", "-configuremethodvar",
+	"-default",
+	"-name", "-protection", "-resource",
+	"-validatemethod", "-validatemethodvar",
         "-value", (char*)NULL
     };
     enum BOptIdx {
-        BOptCgetMethodIdx, BOptClassIdx, BOptConfigureMethodIdx, BOptDefaultIdx,
-	BOptNameIdx, BOptProtectIdx, BOptResourceIdx, BOptValidateMethodIdx,
+        BOptCgetMethodIdx,
+        BOptCgetMethodVarIdx,
+	BOptClassIdx,
+	BOptConfigureMethodIdx,
+	BOptConfigureMethodVarIdx,
+	BOptDefaultIdx,
+	BOptNameIdx,
+	BOptProtectIdx,
+	BOptResourceIdx,
+	BOptValidateMethodIdx,
+	BOptValidateMethodVarIdx,
 	BOptValueIdx
-    } *ioptlist, ioptlistStorage[9];
+    } *ioptlist, ioptlistStorage[12];
 
-    static enum BOptIdx DefInfoOption[9] = {
+    static enum BOptIdx DefInfoOption[12] = {
         BOptProtectIdx,
         BOptNameIdx,
         BOptResourceIdx,
         BOptClassIdx,
         BOptDefaultIdx,
         BOptCgetMethodIdx,
+        BOptCgetMethodVarIdx,
         BOptConfigureMethodIdx,
+        BOptConfigureMethodVarIdx,
         BOptValidateMethodIdx,
+        BOptValidateMethodVarIdx,
         BOptValueIdx
     };
 
     Tcl_HashSearch place;
     Tcl_HashEntry *hPtr;
-    Tcl_Namespace *nsPtr;
+//    Tcl_Namespace *nsPtr;
     ItclClass *contextIclsPtr;
     ItclObject *contextIoPtr;
-    ItclObjectInfo *infoPtr;
+//    ItclObjectInfo *infoPtr;
     ItclOption *ioptPtr;
     ItclHierIter hier;
     ItclClass *iclsPtr;
@@ -2094,6 +2111,7 @@ Itcl_BiInfoOptionCmd(
     if (contextIoPtr != NULL) {
         contextIclsPtr = contextIoPtr->iclsPtr;
     }
+#ifdef NOTDEF
     nsPtr = Itcl_GetUplevelNamespace(interp, 1);
     infoPtr = contextIclsPtr->infoPtr;
     hPtr = Tcl_FindHashEntry(&infoPtr->namespaceClasses, (char *)nsPtr);
@@ -2103,11 +2121,13 @@ Itcl_BiInfoOptionCmd(
 	return TCL_ERROR;
     }
     contextIclsPtr = Tcl_GetHashValue(hPtr);
+#endif
 
     /*
      *  Process args:
      *  ?optionName? ?-protection? ?-name? ?-resource? ?-class?
-     * ?-default? ?-cgetmethod? ?-configuremethod? ?-validatemethod? ?-value?
+     * ?-default? ?-cgetmethod? ?-cgetmethodvar? ?-configuremethod?
+     * ?-configuremethodvar? ?-validatemethod? ?-validatemethodvar? ?-value?
      */
     objv++;  /* skip over command name */
     objc--;
@@ -2171,6 +2191,15 @@ Itcl_BiInfoOptionCmd(
                     }
                     break;
 
+                case BOptCgetMethodVarIdx:
+                    if (ioptPtr->cgetMethodVarPtr) {
+                        objPtr = Tcl_NewStringObj(
+			        Tcl_GetString(ioptPtr->cgetMethodVarPtr), -1);
+                    } else {
+                        objPtr = Tcl_NewStringObj("", -1);
+                    }
+                    break;
+
                 case BOptConfigureMethodIdx:
                     if (ioptPtr->configureMethodPtr) {
                         objPtr = Tcl_NewStringObj(
@@ -2180,10 +2209,30 @@ Itcl_BiInfoOptionCmd(
                     }
                     break;
 
+                case BOptConfigureMethodVarIdx:
+                    if (ioptPtr->configureMethodVarPtr) {
+                        objPtr = Tcl_NewStringObj(
+			        Tcl_GetString(ioptPtr->configureMethodVarPtr),
+				-1);
+                    } else {
+                        objPtr = Tcl_NewStringObj("", -1);
+                    }
+                    break;
+
                 case BOptValidateMethodIdx:
                     if (ioptPtr->validateMethodPtr) {
                         objPtr = Tcl_NewStringObj(
 			        Tcl_GetString(ioptPtr->validateMethodPtr), -1);
+                    } else {
+                        objPtr = Tcl_NewStringObj("", -1);
+                    }
+                    break;
+
+                case BOptValidateMethodVarIdx:
+                    if (ioptPtr->validateMethodVarPtr) {
+                        objPtr = Tcl_NewStringObj(
+			        Tcl_GetString(ioptPtr->validateMethodVarPtr),
+				-1);
                     } else {
                         objPtr = Tcl_NewStringObj("", -1);
                     }
@@ -2387,7 +2436,11 @@ Itcl_BiInfoComponentCmd(
      */
     if (componentName) {
 	componentNamePtr = Tcl_NewStringObj(componentName, -1);
-	Itcl_InitHierIter(&hier, contextIoPtr->iclsPtr);
+	if (contextIoPtr != NULL) {
+	    Itcl_InitHierIter(&hier, contextIoPtr->iclsPtr);
+	} else {
+	    Itcl_InitHierIter(&hier, contextIclsPtr);
+	}
 	while ((iclsPtr = Itcl_AdvanceHierIter(&hier)) != NULL) {
 	    hPtr = Tcl_FindHashEntry(&iclsPtr->components,
 	            (char *)componentNamePtr);
@@ -2526,66 +2579,87 @@ Itcl_BiInfoWidgetCmd(
     int objc,              /* number of arguments */
     Tcl_Obj *const objv[]) /* argument objects */
 {
-#ifdef NOTYET
-    static const char *components[] = {
-	"-name", "-inherit", "-value", (char*)NULL
-    };
-    enum BCompIdx {
-	BCompNameIdx, BCompInheritIdx, BCompValueIdx
-    } *icomplist, icomplistStorage[3];
-
-    static enum BCompIdx DefInfoComponent[3] = {
-        BCompNameIdx,
-        BCompInheritIdx,
-        BCompValueIdx
-    };
-
+    Tcl_Namespace *activeNs = Tcl_GetCurrentNamespace(interp);
+    Tcl_Namespace *contextNs = NULL;
+    Tcl_Obj *objPtr;
     ItclClass *contextIclsPtr;
     ItclObject *contextIoPtr;
-    ItclObjectInfo *infoPtr;
-
-    Tcl_HashSearch place;
-    Tcl_HashEntry *hPtr;
-    Tcl_Namespace *nsPtr;
-    ItclHierIter hier;
-    ItclClass *iclsPtr;
-    const char *name;
-    int result;
+    char *name;
 
     ItclShowArgs(1, "Itcl_BiInfoWidgetCmd", objc, objv);
+    if (objc != 1) {
+        Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+            "wrong # args: should be \"info widget\"",
+            (char*)NULL);
+        return TCL_ERROR;
+    }
+
     /*
      *  If this command is not invoked within a class namespace,
      *  signal an error.
      */
     contextIclsPtr = NULL;
     if (Itcl_GetContext(interp, &contextIclsPtr, &contextIoPtr) != TCL_OK) {
-        name = Tcl_GetString(objv[0]);
-        Tcl_ResetResult(interp);
-        Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
-            "\nget info like this instead: ",
-            "\n  namespace eval className { info widget", name, "... }",
-            (char*)NULL);
+        /* try it the hard way */
+	ClientData clientData;
+	clientData = Itcl_GetCallFrameClientData(interp);
+        ItclObjectInfo *infoPtr;
+        infoPtr = (ItclObjectInfo *)Tcl_GetAssocData(interp,
+                ITCL_INTERP_DATA, NULL);
+        Tcl_Object oPtr;
+	if (clientData != NULL) {
+            oPtr = Tcl_ObjectContextObject(clientData);
+            contextIoPtr = Tcl_ObjectGetMetadata(oPtr,
+	            infoPtr->object_meta_type);
+            contextIclsPtr = contextIoPtr->iclsPtr;
+	}
+	if ((contextIoPtr == NULL) || (contextIclsPtr == NULL)) {
+	    Tcl_Obj *msg = Tcl_NewStringObj("\nget info like this instead: " \
+		    "\n  namespace eval className { info widget", -1);
+	    Tcl_AppendStringsToObj(msg, Tcl_GetString(objv[0]), "... }", NULL);
+            Tcl_SetResult(interp, Tcl_GetString(msg), TCL_VOLATILE);
+            Tcl_DecrRefCount(msg);
+            return TCL_ERROR;
+        }
+    }
+
+    /*
+     *  If there is an object context, then return the most-specific
+     *  class for the object.  Otherwise, return the class namespace
+     *  name.  Use normal class names when possible.
+     */
+    if (contextIoPtr) {
+        contextNs = contextIoPtr->iclsPtr->nsPtr;
+    } else {
+        assert(contextIclsPtr != NULL);
+        assert(contextIclsPtr->nsPtr != NULL);
+#ifdef NEW_PROTO_RESOLVER
+        contextNs = contextIclsPtr->nsPtr;
+#else
+        if (contextIclsPtr->infoPtr->useOldResolvers) {
+            contextNs = contextIclsPtr->nsPtr;
+        } else {
+            contextNs = contextIclsPtr->nsPtr;
+        }
+#endif
+    }
+
+    if (contextNs == NULL) {
+        name = activeNs->fullName;
+    } else {
+        if (contextNs->parentPtr == activeNs) {
+            name = contextNs->name;
+        } else {
+            name = contextNs->fullName;
+        }
+    }
+    if (!(contextIclsPtr->flags & ITCL_WIDGET)) {
+	Tcl_AppendResult(interp, "object or class is no widget", NULL);
         return TCL_ERROR;
     }
-    if (contextIoPtr != NULL) {
-        contextIclsPtr = contextIoPtr->iclsPtr;
-    }
-    nsPtr = Itcl_GetUplevelNamespace(interp, 1);
-    if (nsPtr->parentPtr == NULL) {
-        /* :: namespace */
-	nsPtr = contextIclsPtr->nsPtr;
-    }
-    infoPtr = contextIclsPtr->infoPtr;
-    hPtr = Tcl_FindHashEntry(&infoPtr->namespaceClasses, (char *)nsPtr);
-    if (hPtr == NULL) {
-        Tcl_AppendResult(interp, "cannot find class name for namespace \"",
-	        nsPtr->fullName, "\"", NULL);
-	return TCL_ERROR;
-    }
-    contextIclsPtr = Tcl_GetHashValue(hPtr);
-
-#endif
-
+    objPtr = Tcl_NewStringObj(name, -1);
+    Tcl_SetResult(interp, Tcl_GetString(objPtr), TCL_VOLATILE);
+    Tcl_DecrRefCount(objPtr);
     return TCL_OK;
 }
 
@@ -2764,92 +2838,6 @@ Itcl_BiInfoDelegatedCmd(
 
 /*
  * ------------------------------------------------------------------------
- *  Itcl_BiInfoItclHullCmd()
- *
- *  Returns information regarding extendedclasses.
- *  Handles the following syntax:
- *
- *    info itcl_hull
- *
- *  The information for a
- *  specific member is returned.  Returns a status TCL_OK/TCL_ERROR
- *  to indicate success/failure.
- * ------------------------------------------------------------------------
- */
-/* ARGSUSED */
-int
-Itcl_BiInfoItclHullCmd(
-    ClientData clientdata, /* ItclObjectInfo Ptr */
-    Tcl_Interp *interp,    /* current interpreter */
-    int objc,              /* number of arguments */
-    Tcl_Obj *const objv[]) /* argument objects */
-{
-    
-#ifdef NOTYET
-    static const char *components[] = {
-	"-name", "-inherit", "-value", (char*)NULL
-    };
-    enum BCompIdx {
-	BCompNameIdx, BCompInheritIdx, BCompValueIdx
-    } *icomplist, icomplistStorage[3];
-
-    static enum BCompIdx DefInfoComponent[3] = {
-        BCompNameIdx,
-        BCompInheritIdx,
-        BCompValueIdx
-    };
-
-    ItclClass *contextIclsPtr;
-    ItclObject *contextIoPtr;
-    ItclObjectInfo *infoPtr;
-
-    Tcl_HashSearch place;
-    Tcl_HashEntry *hPtr;
-    Tcl_Namespace *nsPtr;
-    ItclHierIter hier;
-    ItclClass *iclsPtr;
-    const char *name;
-    int result;
-
-    ItclShowArgs(1, "Itcl_BiInfoHullCmd", objc, objv);
-    /*
-     *  If this command is not invoked within a class namespace,
-     *  signal an error.
-     */
-    contextIclsPtr = NULL;
-    if (Itcl_GetContext(interp, &contextIclsPtr, &contextIoPtr) != TCL_OK) {
-        name = Tcl_GetString(objv[0]);
-        Tcl_ResetResult(interp);
-        Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
-            "\nget info like this instead: ",
-            "\n  namespace eval className { info hull", name, "... }",
-            (char*)NULL);
-        return TCL_ERROR;
-    }
-    if (contextIoPtr != NULL) {
-        contextIclsPtr = contextIoPtr->iclsPtr;
-    }
-    nsPtr = Itcl_GetUplevelNamespace(interp, 1);
-    if (nsPtr->parentPtr == NULL) {
-        /* :: namespace */
-	nsPtr = contextIclsPtr->nsPtr;
-    }
-    infoPtr = contextIclsPtr->infoPtr;
-    hPtr = Tcl_FindHashEntry(&infoPtr->namespaceClasses, (char *)nsPtr);
-    if (hPtr == NULL) {
-        Tcl_AppendResult(interp, "cannot find class name for namespace \"",
-	        nsPtr->fullName, "\"", NULL);
-	return TCL_ERROR;
-    }
-    contextIclsPtr = Tcl_GetHashValue(hPtr);
-
-#endif
-
-    return TCL_OK;
-}
-
-/*
- * ------------------------------------------------------------------------
  *  Itcl_BiInfoTypeCmd()
  *
  *  Returns information regarding the Type for an object.  This command
@@ -2927,7 +2915,7 @@ Itcl_BiInfoTypeCmd(
         contextNs = contextIclsPtr->nsPtr;
 #else
         if (contextIclsPtr->infoPtr->useOldResolvers) {
-            contextNs = Itcl_GetUplevelNamespace(interp, 1);
+            contextNs = contextIclsPtr->nsPtr;
         } else {
             contextNs = contextIclsPtr->nsPtr;
         }
@@ -2943,9 +2931,83 @@ Itcl_BiInfoTypeCmd(
             name = contextNs->fullName;
         }
     }
+    if (!(contextIclsPtr->flags & ITCL_TYPE)) {
+	Tcl_AppendResult(interp, "object or class is no type", NULL);
+        return TCL_ERROR;
+    }
     objPtr = Tcl_NewStringObj(name, -1);
     Tcl_SetResult(interp, Tcl_GetString(objPtr), TCL_VOLATILE);
     Tcl_DecrRefCount(objPtr);
+    return TCL_OK;
+}
+
+/*
+ * ------------------------------------------------------------------------
+ *  Itcl_BiInfoHullTypeCmd()
+ *
+ *  Returns information regarding the hulltype for an object.  This command
+ *  can be invoked with or without an object context:
+ *
+ *    <objName> info hulltype   returns the hulltype name
+ *
+ *  Returns a status TCL_OK/TCL_ERROR to indicate success/failure.
+ * ------------------------------------------------------------------------
+ */
+/* ARGSUSED */
+int
+Itcl_BiInfoHullTypeCmd(
+    ClientData clientData, /* ItclObjectInfo Ptr */
+    Tcl_Interp *interp,    /* current interpreter */
+    int objc,              /* number of arguments */
+    Tcl_Obj *const objv[]) /* argument objects */
+{
+    ItclClass *contextIclsPtr;
+    ItclObject *contextIoPtr;
+
+    ItclShowArgs(1, "Itcl_BiInfoHullTypeCmd", objc, objv);
+    if (objc != 1) {
+        Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+            "wrong # args: should be \"info hulltype\"",
+            (char*)NULL);
+        return TCL_ERROR;
+    }
+
+    /*
+     *  If this command is not invoked within a class namespace,
+     *  signal an error.
+     */
+    contextIclsPtr = NULL;
+    if (Itcl_GetContext(interp, &contextIclsPtr, &contextIoPtr) != TCL_OK) {
+        /* try it the hard way */
+	ClientData clientData;
+	clientData = Itcl_GetCallFrameClientData(interp);
+        ItclObjectInfo *infoPtr;
+        infoPtr = (ItclObjectInfo *)Tcl_GetAssocData(interp,
+                ITCL_INTERP_DATA, NULL);
+        Tcl_Object oPtr;
+	if (clientData != NULL) {
+            oPtr = Tcl_ObjectContextObject(clientData);
+            contextIoPtr = Tcl_ObjectGetMetadata(oPtr,
+	            infoPtr->object_meta_type);
+            contextIclsPtr = contextIoPtr->iclsPtr;
+	}
+	if ((contextIoPtr == NULL) || (contextIclsPtr == NULL)) {
+	    Tcl_Obj *msg = Tcl_NewStringObj("\nget info like this instead: " \
+		    "\n  namespace eval className { info hulltype", -1);
+	    Tcl_AppendStringsToObj(msg, Tcl_GetString(objv[0]), "... }", NULL);
+            Tcl_SetResult(interp, Tcl_GetString(msg), TCL_VOLATILE);
+            Tcl_DecrRefCount(msg);
+            return TCL_ERROR;
+        }
+    }
+
+    if (!(contextIclsPtr->flags & ITCL_WIDGET)) {
+	Tcl_AppendResult(interp, "object or class is no widget.",
+	        " Only ::itcl::widget has a hulltype.", NULL);
+        return TCL_ERROR;
+    }
+    Tcl_SetResult(interp, Tcl_GetString(contextIclsPtr->hullTypePtr),
+            TCL_VOLATILE);
     return TCL_OK;
 }
 
@@ -4339,10 +4401,88 @@ Itcl_BiInfoWidgetadaptorCmd(
     int objc,              /* number of arguments */
     Tcl_Obj *const objv[]) /* argument objects */
 {
+    Tcl_Namespace *activeNs = Tcl_GetCurrentNamespace(interp);
+    Tcl_Namespace *contextNs = NULL;
+    Tcl_Obj *objPtr;
+    ItclClass *contextIclsPtr;
+    ItclObject *contextIoPtr;
+    char *name;
+
     ItclShowArgs(1, "Itcl_BiInfoWidgetadaptorCmd", objc, objv);
-    Tcl_AppendResult(interp, "Itcl_BiInfoWidgetadaptorCmd not yet "
-            "implemented", NULL);
-    return TCL_ERROR;
+    if (objc != 1) {
+        Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+            "wrong # args: should be \"info widgetadaptor\"",
+            (char*)NULL);
+        return TCL_ERROR;
+    }
+
+    /*
+     *  If this command is not invoked within a class namespace,
+     *  signal an error.
+     */
+    contextIclsPtr = NULL;
+    if (Itcl_GetContext(interp, &contextIclsPtr, &contextIoPtr) != TCL_OK) {
+        /* try it the hard way */
+	ClientData clientData;
+	clientData = Itcl_GetCallFrameClientData(interp);
+        ItclObjectInfo *infoPtr;
+        infoPtr = (ItclObjectInfo *)Tcl_GetAssocData(interp,
+                ITCL_INTERP_DATA, NULL);
+        Tcl_Object oPtr;
+	if (clientData != NULL) {
+            oPtr = Tcl_ObjectContextObject(clientData);
+            contextIoPtr = Tcl_ObjectGetMetadata(oPtr,
+	            infoPtr->object_meta_type);
+            contextIclsPtr = contextIoPtr->iclsPtr;
+	}
+	if ((contextIoPtr == NULL) || (contextIclsPtr == NULL)) {
+	    Tcl_Obj *msg = Tcl_NewStringObj("\nget info like this instead: " \
+		    "\n  namespace eval className { info widgetadaptor", -1);
+	    Tcl_AppendStringsToObj(msg, Tcl_GetString(objv[0]), "... }", NULL);
+            Tcl_SetResult(interp, Tcl_GetString(msg), TCL_VOLATILE);
+            Tcl_DecrRefCount(msg);
+            return TCL_ERROR;
+        }
+    }
+
+    /*
+     *  If there is an object context, then return the most-specific
+     *  class for the object.  Otherwise, return the class namespace
+     *  name.  Use normal class names when possible.
+     */
+    if (contextIoPtr) {
+        contextNs = contextIoPtr->iclsPtr->nsPtr;
+    } else {
+        assert(contextIclsPtr != NULL);
+        assert(contextIclsPtr->nsPtr != NULL);
+#ifdef NEW_PROTO_RESOLVER
+        contextNs = contextIclsPtr->nsPtr;
+#else
+        if (contextIclsPtr->infoPtr->useOldResolvers) {
+            contextNs = contextIclsPtr->nsPtr;
+        } else {
+            contextNs = contextIclsPtr->nsPtr;
+        }
+#endif
+    }
+
+    if (contextNs == NULL) {
+        name = activeNs->fullName;
+    } else {
+        if (contextNs->parentPtr == activeNs) {
+            name = contextNs->name;
+        } else {
+            name = contextNs->fullName;
+        }
+    }
+    if (!(contextIclsPtr->flags & ITCL_WIDGETADAPTOR)) {
+	Tcl_AppendResult(interp, "object or class is no widgetadaptor", NULL);
+        return TCL_ERROR;
+    }
+    objPtr = Tcl_NewStringObj(name, -1);
+    Tcl_SetResult(interp, Tcl_GetString(objPtr), TCL_VOLATILE);
+    Tcl_DecrRefCount(objPtr);
+    return TCL_OK;
 }
 
 /*
