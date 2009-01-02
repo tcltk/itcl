@@ -12,7 +12,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: Makefile.in,v 1.29.2.20 2008/12/11 11:16:52 wiede Exp $
+# RCS: @(#) $Id: Makefile.in,v 1.29.2.21 2009/01/02 23:10:10 wiede Exp $
 
 #========================================================================
 # The names of the source files is defined in the configure script.
@@ -208,7 +208,7 @@ install-doc: doc
 	done
 
 test: binaries libraries
-	$(TCLSH) `@CYGPATH@ $(srcdir)/tests/all.tcl` -load "package require itcl" $(TESTFLAGS)
+	$(TCLSH) `@CYGPATH@ $(srcdir)/tests/all.tcl` -load "package require itcl $(PACKAGE_VERSION)" $(TESTFLAGS)
 
 genstubs: $(srcdir)/tools/genStubs.tcl $(srcdir)/generic/itcl.decls
 	@echo $(TCLSH) $(srcdir)/tools/genStubs.tcl $(srcdir)/generic $(srcdir)/generic/itcl.decls
