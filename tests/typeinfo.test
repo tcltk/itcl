@@ -273,6 +273,32 @@ test iinfo-6.3 {info options with local and delegated options} -body {
     dog destroy
 } -result {-bar -foo -quux}
 
+test iinfo-6.3a {info option} -body {
+    type dog {
+        option -foo a
+        option -bar b
+        delegate option -quux to sibling
+    }
+    dog create spot
+
+    lsort [spot info option]
+} -cleanup {
+    dog destroy
+} -result {-bar -foo}
+
+test iinfo-6.3b {info option with options} -body {
+    type dog {
+        option -foo -cgetmethod xx -configuremethodvar yy -default a
+        option -bar b
+        delegate option -quux to sibling
+    }
+    dog create spot
+
+    spot info option -foo
+} -cleanup {
+    dog destroy
+} -result {protected ::dog::-foo foo Foo a xx {} {} yy}
+
 test iinfo-7.1 {info typemethods, simple case} -body {
     type dog { }
 
@@ -1054,6 +1080,36 @@ test tinfo-10.2 {type info components} -body {
     cat destroy
 } -result {{comp1 comp2} {comp1 comp1a}}
 
+test tinfo-10.2a {type info component} -body {
+    type dog {
+        component comp1
+        component comp2
+    }
+
+    type cat {
+        component comp1
+        component comp1a
+    }
+
+    set a [dog info component]
+    set b [cat info component]
+    list $a $b
+} -cleanup {
+    dog destroy
+    cat destroy
+} -result {{::dog::comp1 ::dog::comp2} {::cat::comp1 ::cat::comp1a}}
+
+test tinfo-10.2b {type info component with options} -body {
+    type dog {
+        component comp1
+        component comp2
+    }
+
+    dog info component comp1 -name -inherit
+} -cleanup {
+    dog destroy
+} -result {::dog::comp1 0}
+
 test tinfo-10.4 {type info delegated methods} -body {
     type dog {
     }
@@ -1190,7 +1246,7 @@ test tinfo-10.6 {type info delegated typemethods} -body {
     dog destroy
 } -result {{typetail comp2} {typewag comp1}}
 
-test tinfo-10.7 {type info delegated otpions} -body {
+test tinfo-10.7 {type info delegated options} -body {
     type dog {
         component comp1
         component comp2
@@ -1210,6 +1266,17 @@ test tinfo-10.7 {type info delegated otpions} -body {
 } -cleanup {
     dog destroy
 } -result {{* comp3} {-bar comp2} {-foo comp1}}
+
+test tinfo-11.1 {type info type} -body {
+    type dog {
+        typeconstructor {
+        }
+    }
+
+    dog info type
+} -cleanup {
+    dog destroy
+} -result {::dog}
 
 
 #---------------------------------------------------------------------
