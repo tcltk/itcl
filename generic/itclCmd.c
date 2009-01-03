@@ -23,7 +23,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclCmd.c,v 1.1.2.44 2008/12/31 21:04:26 wiede Exp $
+ *     RCS:  $Id: itclCmd.c,v 1.1.2.45 2009/01/03 17:06:24 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -1798,12 +1798,12 @@ Itcl_AddComponentCmd(
         NULL, 0);
     hPtr = Tcl_FindHashEntry(&contextIclsPtr->variables, (char *)objv[2]);
     if (hPtr == NULL) {
-	Tcl_AppendResult(interp, "Itcl_AddComponentCmd cannont find component",
+	Tcl_AppendResult(interp, "Itcl_AddComponentCmd cannot find component",
 	        " \"", Tcl_GetString(objv[2]), "\"in class variables", NULL);
         return TCL_ERROR;
     }
     ivPtr = Tcl_GetHashValue(hPtr);
-    /* add entries to the virtual tables */
+    /* add entry to the virtual tables */
     vlookup = (ItclVarLookup *)ckalloc(sizeof(ItclVarLookup));
     vlookup->ivPtr = ivPtr;
     vlookup->usage = 0;
