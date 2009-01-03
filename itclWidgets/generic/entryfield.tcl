@@ -5,7 +5,7 @@
 # 
 # Author: Arnulf P. Wiedemann
 # Copyright (c) 2008 for the reimplemented version
-
+#
 # see file license.terms in the top directory
 #
 # ----------------------------------------------------------------------
@@ -16,7 +16,7 @@
 #    Copyright (c) 1995 DSC Technologies Corporation
 # ----------------------------------------------------------------------
 #
-#   @(#) $Id: entryfield.tcl,v 1.1.2.6 2008/12/28 21:37:16 wiede Exp $
+#   @(#) $Id: entryfield.tcl,v 1.1.2.7 2009/01/03 17:30:31 wiede Exp $
 # ======================================================================
 
 package require itcl

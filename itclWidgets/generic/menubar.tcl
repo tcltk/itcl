@@ -31,37 +31,22 @@
 #
 # WISH LIST:
 #   This section lists possible future enhancements.
-#
-# ----------------------------------------------------------------------
-#  AUTHOR: Bill W. Scott
-#
-#  CURRENT MAINTAINER: Chad Smith --> csmith@adc.com or itclguy@yahoo.com
-#
-#  @(#) $Id: menubar.tcl,v 1.1.2.3 2009/01/03 17:00:10 wiede Exp $
-# ----------------------------------------------------------------------
-#            Copyright (c) 1995 DSC Technologies Corporation
-# ======================================================================
-# Permission to use, copy, modify, distribute and license this software 
-# and its documentation for any purpose, and without fee or written 
-# agreement with DSC, is hereby granted, provided that the above copyright 
-# notice appears in all copies and that both the copyright notice and 
-# warranty disclaimer below appear in supporting documentation, and that 
-# the names of DSC Technologies Corporation or DSC Communications 
-# Corporation not be used in advertising or publicity pertaining to the 
-# software without specific, written prior permission.
 # 
-# DSC DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE, INCLUDING 
-# ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, AND NON-
-# INFRINGEMENT. THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, AND THE
-# AUTHORS AND DISTRIBUTORS HAVE NO OBLIGATION TO PROVIDE MAINTENANCE, 
-# SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS. IN NO EVENT SHALL 
-# DSC BE LIABLE FOR ANY SPECIAL, INDIRECT OR CONSEQUENTIAL DAMAGES OR 
-# ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, 
-# WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTUOUS ACTION,
-# ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS 
-# SOFTWARE.
+# Author: Arnulf P. Wiedemann
+# Copyright (c) 2008 for the reimplemented version
+#
+# see file license.terms in the top directory
+#
+# ----------------------------------------------------------------------
+# This code is derived/reimplemented from the iwidgets package Menubar
+# written by:
+#  AUTHOR: Bill W. Scott
+#  CURRENT MAINTAINER: Chad Smith --> csmith@adc.com or itclguy@yahoo.com
+#    Copyright (c) 1995 DSC Technologies Corporation
+# ----------------------------------------------------------------------
+#
+#   @(#) $Id: menubar.tcl,v 1.1.2.4 2009/01/03 17:30:31 wiede Exp $
 # ======================================================================
-
 
 #
 # Use option database to override default resources.
