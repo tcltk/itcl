@@ -37,7 +37,7 @@
 #
 #  CURRENT MAINTAINER: Chad Smith --> csmith@adc.com or itclguy@yahoo.com
 #
-#  @(#) $Id: menubar.tcl,v 1.1.2.2 2009/01/02 22:17:15 wiede Exp $
+#  @(#) $Id: menubar.tcl,v 1.1.2.3 2009/01/03 17:00:10 wiede Exp $
 # ----------------------------------------------------------------------
 #            Copyright (c) 1995 DSC Technologies Corporation
 # ======================================================================
@@ -370,22 +370,19 @@ proc ::itcl::widgets::menubar { args } {
 	# Path Conversions
 	# '''''''''''''''''''''''''''''''''''''''''''''''''''''
 	set path [_parsePath [lindex $args 0]]
-
 	set pathOrIndex $_pathMap($path)
-
-	# Menu Entry
-	# '''''''''''''''''''''''''''''''''''''''''''''''''''''
 	if {[regexp {^[0-9]+$} $pathOrIndex]} {
+	     # Menu Entry
+	     # '''''''''''''''''''''''''''''''''''''''''''''''''''''
 	    uplevel 0 "_deleteEntry $args"
-
+	} else {
 	    # Menu
 	    # '''''''''''''''''''''''''''''''''''''''''''''''''''''
-	} else {
 	    uplevel 0 "_deleteMenu $args"
 	}
     } else {
 	error "wrong # args: should be \
-		\"$itcl_hull delete pathName ?pathName2?\""
+		\"[string trimleft $this {:}] delete pathName ?pathName2?\""
     }
     return ""
 }
@@ -905,7 +902,15 @@ proc ::itcl::widgets::menubar { args } {
 	    -side left \
 	    -before $beforeTkMenu
 
-    return $buttonName
+    # should make a utility function for the next lines !!!
+    set my_prefix ""
+    regsub -all {[.]} $menubar {_} my_prefix
+    if {[string length $my_prefix] > 0} {
+        append my_prefix "_"
+    }
+    set myButtonName ${my_prefix}$buttonName
+
+    return [set $myButtonName]
 }
 
 # -------------------------------------------------------------
@@ -940,8 +945,9 @@ proc ::itcl::widgets::menubar { args } {
     if {[string length $my_prefix] > 0} {
         append my_prefix "_"
     }
-puts stderr "RB!${my_prefix}$buttonName!$buttonName!"
-    ::itcl::addcomponent $this ${my_prefix}$buttonName
+    if {![::info exists ${my_prefix}$buttonName]} {
+        ::itcl::addcomponent $this ${my_prefix}$buttonName
+    }
     setupcomponent ${my_prefix}$buttonName using ::menubutton $menubar.$buttonName {*}$args
     keepcomponentoption ${my_prefix}$buttonName \
                 -activebackground \
@@ -983,7 +989,9 @@ puts stderr "RB!${my_prefix}$buttonName!$buttonName!"
     #,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
     # Create menu component
     # ''''''''''''''''''''''''''''''''
-    ::itcl::addcomponent $this $componentName
+    if {![::info exists $componentName]} {
+        ::itcl::addcomponent $this $componentName
+    }
     setupcomponent $componentName using ::menu $widgetName
     keepcomponentoption $componentName \
 		-activebackground \
@@ -1055,7 +1063,7 @@ puts stderr "RB!${my_prefix}$buttonName!$buttonName!"
 #
 # The basic rule is '.menu' is not needed.
 # -------------------------------------------------------------
-::itcl::body Menubar::_deleteMenu { menuPath {menuPath2 {}} } {
+::itcl::body Menubar::_deleteMenu {menuPath {menuPath2 {}}} {
     if {$menuPath2 eq ""} {
 	# get a corrected path (subst for number, last, end)
 	set path [_parsePath $menuPath]
@@ -1104,7 +1112,6 @@ puts stderr "RB!${my_prefix}$buttonName!$buttonName!"
     # it is on the path already.
     regsub {[.]menu$} $path "" menuButtonPath
     regsub {.*[.]} $menuButtonPath "" buttonName
-puts stderr "PA![set _pathMap(.$buttonName)]!"
     set myButtonName [set _pathMap(.$buttonName)]
     regsub -all {[.]} $myButtonName {_} myButtonName
     # Loop through and destroy any cascades, etc on menu.
@@ -1806,7 +1813,6 @@ puts stderr "PA![set _pathMap(.$buttonName)]!"
     foreach seg $segments {
 	set concatPath [_getSymbolicPath $concatPath $seg]
 	if {[catch {set _pathMap($concatPath)} msg]} {
-puts stderr "_parsePath!$path!$concatPath!$msg!"
 	    error "bad path: \"$path\" does not exist. \"$seg\" not valid"
 	}
     }
@@ -1834,8 +1840,6 @@ puts stderr "_parsePath!$path!$concatPath!$msg!"
     if {[regexp {^[0-9]+$} $segment]} {
 	# if we have no parent, then we are a menubutton
 	if {$parent eq {}} {
-puts stderr "_getMenuList![_getMenuList]!"
-parray _pathMap
 	    set returnPath [lindex [_getMenuList] $segment]
 	} else {
 	    set returnPath [lindex [_getEntryList $parent.menu] $segment]
