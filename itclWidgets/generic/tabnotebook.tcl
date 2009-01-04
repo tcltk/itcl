@@ -39,7 +39,7 @@
 #    Copyright (c) 1995 DSC Technologies Corporation
 # ----------------------------------------------------------------------
 #
-#   @(#) $Id: tabnotebook.tcl,v 1.1.2.1 2009/01/03 22:30:29 wiede Exp $
+#   @(#) $Id: tabnotebook.tcl,v 1.1.2.2 2009/01/04 13:51:10 wiede Exp $
 # ======================================================================
 
 #
@@ -105,7 +105,7 @@ proc ::itcl::widgets::tabnotebook {pathName args} {
     option [list -margin margin Margin] -default 4  -configuremethod configMargin
     option [list -tabborders tabBorders TabBorders] -default true -configuremethod configTabborders
     option [list -bevelamount bevelAmount BevelAmount] -default 0 -configuremethod configBevelamount
-    option [list -raiseselect raiseSelect RaiseSelect] -default false -configuremethod configRaise
+    option [list -raiseselect raiseSelect RaiseSelect] -default false -configuremethod configRaiseselect
     option [list -auto auto Auto] -default true -configuremethod configAuto
     option [list -start start Start] -default 4 -configuremethod configStart
     option [list -padx padX PadX] -default 4 -configuremethod configPadx
@@ -170,6 +170,8 @@ proc ::itcl::widgets::tabnotebook {pathName args} {
     public method pageconfigure {index args} 
     public method select {index} 
     public method view {args} 
+
+    public method NBSelect {index}
 }
 
 
@@ -206,8 +208,8 @@ proc ::itcl::widgets::tabnotebook {pathName args} {
     # 
     # Create the tabset.
     #
-    setupcomponent tabset using ::itcl::widgets::Tabset $itcl_interior.canvas.tabset \
-		-command [itcl::code $this component notebook select]
+    setupcomponent tabset using ::itcl::widgets::Tabset \
+            $itcl_interior.canvas.tabset -command [itcl::code $this NBSelect]
     keepcomponentoption tabset -cursor 
     
     if {[llength $args] > 0} {
@@ -218,7 +220,7 @@ proc ::itcl::widgets::tabnotebook {pathName args} {
     # Ouch, create a dummy tab, go tabconfigure to get its options
     # and munge them into a list for later doling by pageconfigure
     #
-    $abset add
+    $tabset add
     set tsConfigList [$tabset tabconfigure 0]
     foreach config $tsConfigList {
 	lappend _tsOptList [lindex $config 0]
@@ -229,7 +231,7 @@ proc ::itcl::widgets::tabnotebook {pathName args} {
 	    [itcl::code $this _reconfigureTabset]
     
     _pack $_tabPos
-    $itcl_hull configure -width [cget -width] -height [cget -height]
+    $win configure -width [cget -width] -height [cget -height]
 }
 
 
@@ -584,7 +586,7 @@ proc ::itcl::widgets::tabnotebook {pathName args} {
 	set _tabPos $value
 	$tabset configure -tabpos $value
 	pack forget $canvas
-	pack forget $abset
+	pack forget $tabset
 	pack forget $notebook
 	_pack $_tabPos
     }
@@ -613,6 +615,14 @@ proc ::itcl::widgets::tabnotebook {pathName args} {
     return $result
 }
 
+# -------------------------------------------------------------
+# METHOD: NBSelect <index>
+# Callback for selection of a notebook
+#
+# -------------------------------------------------------------
+::itcl::body Tabnotebook::NBSelect {index} {
+        $notebook select $index
+}
 # -------------------------------------------------------------
 # METHOD: add ?<option> <value>...?
 #
@@ -1039,7 +1049,7 @@ proc ::itcl::widgets::tabnotebook {pathName args} {
   # arise again I will reinvestigate the need for _resize.
   #
   #  after idle \
-  #    "$this component hull configure -width $newWidth_ -height $newHeight_"
+  #    "$win configure -width $newWidth_ -height $newHeight_"
 }
 
 } ; # end ::itcl::widgets

@@ -37,7 +37,7 @@
 #    Copyright (c) 1995 DSC Technologies Corporation
 # ----------------------------------------------------------------------
 #
-#   @(#) $Id: notebook.tcl,v 1.1.2.1 2009/01/03 23:21:23 wiede Exp $
+#   @(#) $Id: notebook.tcl,v 1.1.2.2 2009/01/04 13:51:10 wiede Exp $
 # ======================================================================
 
 #
@@ -435,7 +435,7 @@ proc ::itcl::widgets::notebook {pathName args} {
 # no selection.
 # ------------------------------------------------------------------
 ::itcl::body Notebook::select {index} {
-    global page$itcl_hull
+    global page$win
     # ... Error: empty notebook
     if {$_pages == {}} {
 	error "can't select page $index,\
@@ -663,7 +663,7 @@ proc ::itcl::widgets::notebook {pathName args} {
     #
     set pathName $cs.page$_uniqueID
     
-    uplevel 0 ::itcl::widgets::Page $pathName -background $itcl_options(-background) $args
+    uplevel #0 ::itcl::widgets::Page $pathName -background $itcl_options(-background) $args
     incr _uniqueID
     return $pathName
 }
@@ -732,7 +732,7 @@ proc ::itcl::widgets::notebook {pathName args} {
 # This method is up for debate... do we need the -tabcommand option?
 # ------------------------------------------------------------------
 ::itcl::body Notebook::_tabCommand { } {
-    global page$itcl_hull
+    global page$win
     
     if {$itcl_options(-tabcommand) ne {}} {
 	set newTabCmdStr $itcl_options(-tabcommand)
