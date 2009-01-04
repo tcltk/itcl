@@ -25,7 +25,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann Copyright (c) 2007
  *
- *     RCS:  $Id: itclClass.c,v 1.1.2.47 2008/12/27 19:35:24 wiede Exp $
+ *     RCS:  $Id: itclClass.c,v 1.1.2.48 2009/01/04 19:40:45 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -485,6 +485,16 @@ Itcl_CreateClass(
         Tcl_SetHashValue(hPtr, (ClientData)ivPtr);
     }
 
+    if (iclsPtr->flags & (ITCL_ECLASS)) {
+        namePtr = Tcl_NewStringObj("win", -1);
+        (void) Itcl_CreateVariable(interp, iclsPtr, namePtr, (char*)NULL,
+            (char*)NULL, &ivPtr);
+        ivPtr->protection = ITCL_PROTECTED;  /* always "protected" */
+        ivPtr->flags |= ITCL_WIN_VAR;        /* mark as "win" variable */
+        hPtr = Tcl_CreateHashEntry(&iclsPtr->variables, (char *)namePtr,
+	        &newEntry);
+        Tcl_SetHashValue(hPtr, (ClientData)ivPtr);
+    }
     if (iclsPtr->flags & (ITCL_TYPE|ITCL_WIDGET|ITCL_WIDGETADAPTOR)) {
         namePtr = Tcl_NewStringObj("self", -1);
         (void) Itcl_CreateVariable(interp, iclsPtr, namePtr, (char*)NULL,
