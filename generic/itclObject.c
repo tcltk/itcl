@@ -24,7 +24,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann Copyright (c) 2007
  *
- *     RCS:  $Id: itclObject.c,v 1.1.2.67 2009/01/02 22:10:13 wiede Exp $
+ *     RCS:  $Id: itclObject.c,v 1.1.2.68 2009/01/04 19:50:51 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -1533,6 +1533,9 @@ ItclDestructBase(
     Itcl_ListElem *elem;
     ItclClass *iclsPtr;
 
+    if (contextIoPtr->flags & ITCL_OBJECT_CLASS_DESTRUCTED) {
+        return TCL_OK;
+    }
     /*
      *  Look for a destructor in this class, and if found,
      *  invoke it.
@@ -2222,7 +2225,23 @@ ItclTraceThisVar(
      *  Handle write traces on "this"
      */
     if ((flags & TCL_TRACE_WRITES) != 0) {
-        return "variable \"this\" cannot be modified";
+	if (strcmp(name1, "this") == 0) {
+            return "variable \"this\" cannot be modified";
+	}
+	if (strcmp(name1, "win") == 0) {
+	    if (!(contextIoPtr->iclsPtr->flags & ITCL_ECLASS)) {
+                return "variable \"win\" cannot be modified";
+	    }
+	}
+	if (strcmp(name1, "type") == 0) {
+            return "variable \"type\" cannot be modified";
+	}
+	if (strcmp(name1, "self") == 0) {
+            return "variable \"self\" cannot be modified";
+	}
+	if (strcmp(name1, "selfns") == 0) {
+            return "variable \"selfns\" cannot be modified";
+	}
     }
     return NULL;
 }
@@ -2702,18 +2721,6 @@ ItclObjectCmd(
     }
     callbackPtr = Itcl_GetCurrentCallbackPtr(interp);
     newObjv = NULL;
-    if (imPtr->flags & ITCL_DESTRUCTOR) {
-        if (iclsPtr->destructorHasBeenCalled && (iclsPtr->callRefCount < 0)) {
-            /* for now just return TCL_OK */
-#ifdef DEBUG_OBJECT_CONSTRUCTION
-fprintf(stderr, "destructor!%s!called more than once!!!callRefCount!%d!\n", Tcl_GetString(imPtr->fullNamePtr), iclsPtr->callRefCount);
-#endif
-	    result = TCL_OK;
-	    goto nothingTodo;
-	} else {
-	    iclsPtr->destructorHasBeenCalled = 1;
-	}
-    }
     if (methodNamePtr != NULL) {
 	if (iclsPtr->flags & (ITCL_TYPE|ITCL_WIDGETADAPTOR)) {
 	    char *myName;
@@ -2774,7 +2781,6 @@ fprintf(stderr, "destructor!%s!called more than once!!!callRefCount!%d!\n", Tcl_
     }
 
     result = Itcl_NRRunCallbacks(interp, callbackPtr);
-nothingTodo:
     if (methodNamePtr != NULL) {
         ckfree((char *)newObjv);
         Tcl_DecrRefCount(methodNamePtr);
