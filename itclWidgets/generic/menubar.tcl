@@ -45,7 +45,7 @@
 #    Copyright (c) 1995 DSC Technologies Corporation
 # ----------------------------------------------------------------------
 #
-#   @(#) $Id: menubar.tcl,v 1.1.2.4 2009/01/03 17:30:31 wiede Exp $
+#   @(#) $Id: menubar.tcl,v 1.1.2.5 2009/01/05 19:30:47 wiede Exp $
 # ======================================================================
 
 #
@@ -104,20 +104,6 @@ proc ::itcl::widgets::menubar { args } {
 
     constructor {args} {}
 
-    protected method configMenubuttons {option value}
-    protected method configHelpvariable {option value}
-
-    public method add {type path args}
-    public method delete {args}
-    public method index {path}
-    public method insert {beforeComponent type name args}
-    public method invoke {entryPath}
-    public method menucget {args}
-    public method menuconfigure {path args}
-    public method path {args}
-    public method type {path}
-    public method yposition {entryPath}
-
     private method menubutton {menuName args}
     private method options {args}
     private method command {cmdName args}
@@ -151,6 +137,20 @@ proc ::itcl::widgets::menubar { args } {
     private method _parsePath {path}
     private method _getSymbolicPath {parent segment}
     private method _getCallerLevel {}
+
+    protected method configMenubuttons {option value}
+    protected method configHelpvariable {option value}
+
+    public method add {type path args}
+    public method delete {args}
+    public method index {path}
+    public method insert {beforeComponent type name args}
+    public method invoke {entryPath}
+    public method menucget {args}
+    public method menuconfigure {path args}
+    public method path {args}
+    public method type {path}
+    public method yposition {entryPath}
 
 }
 

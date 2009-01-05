@@ -21,7 +21,7 @@
 #    Copyright (c) 1995 DSC Technologies Corporation
 # ----------------------------------------------------------------------
 #
-#   @(#) $Id: scrolledtext.tcl,v 1.1.2.1 2008/12/29 12:46:50 wiede Exp $
+#   @(#) $Id: scrolledtext.tcl,v 1.1.2.2 2009/01/05 19:30:47 wiede Exp $
 # ======================================================================
 
 namespace eval ::itcl::widgets {
@@ -106,11 +106,12 @@ option add *Scrolledtext.labelPos n widgetDefault
     keepcomponentoption clipper -activebackground -activerelief \
         -background -borderwidth -cursor \
 	-elementborderwidth -foreground -highlightcolor -highlightthickness \
-	-jump -labelfont -selectbackground \
-	-selectforeground -textbackground -textfont -troughcolor 
+	-jump -labelfont \
+	-textbackground -textfont -troughcolor 
 
     keepcomponentoption clipper -borderwidth -relief -highlightthickness \
         -highlightcolor
+
     grid $clipper -row 0 -column 0 -sticky nsew
     grid rowconfigure $_interior 0 -weight 1
     grid columnconfigure $_interior 0 -weight 1

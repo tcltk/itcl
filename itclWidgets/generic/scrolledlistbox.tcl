@@ -19,7 +19,7 @@
 #    Copyright (c) 1995 DSC Technologies Corporation
 # ----------------------------------------------------------------------
 #
-#   @(#) $Id: scrolledlistbox.tcl,v 1.1.2.3 2008/12/28 21:36:20 wiede Exp $
+#   @(#) $Id: scrolledlistbox.tcl,v 1.1.2.4 2009/01/05 19:30:47 wiede Exp $
 # ======================================================================
 
 namespace eval ::itcl::widgets {
@@ -73,8 +73,6 @@ option add *Scrolledlistbox.labelPos n widgetDefault
     ]
 
     component listbox
-    component vertsb
-    component horizsb
 
     option [list -dblclickcommand dblClickCommand Command] -default {}
     option [list -selectioncommand selectionCommand Command] -default {}

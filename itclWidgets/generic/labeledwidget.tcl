@@ -22,7 +22,7 @@
 #    Copyright (c) 1995 DSC Technologies Corporation
 # ----------------------------------------------------------------------
 #
-#   @(#) $Id: labeledwidget.tcl,v 1.1.2.1 2008/12/27 19:38:59 wiede Exp $
+#   @(#) $Id: labeledwidget.tcl,v 1.1.2.2 2009/01/05 19:30:47 wiede Exp $
 # ======================================================================
 
 package require itcl
@@ -154,7 +154,9 @@ proc labeledwidget {pathName args} {
 # Specifies the label text.
 # ------------------------------------------------------------------
 ::itcl::body Labeledwidget::configLabeltext {option value} {
-    $label configure -text $value
+    if {[string length $label] > 0} {
+        $label configure -text $value
+    }
     set itcl_options($option) $value
     _positionLabel
 }
@@ -165,7 +167,9 @@ proc labeledwidget {pathName args} {
 # Specifies the label text variable.
 # ------------------------------------------------------------------
 ::itcl::body Labeledwidget::configLabelvariable {option value} {
-    $label configure -textvariable $value
+    if {[string length $label] > 0} {
+        $label configure -textvariable $value
+    }
     set itcl_options($option) $value
     _positionLabel
 }
@@ -176,7 +180,9 @@ proc labeledwidget {pathName args} {
 # Specifies the label bitmap.
 # ------------------------------------------------------------------
 ::itcl::body Labeledwidget::configLabelbitmap {option value} {
-    $label configure -bitmap $$value
+    if {[string length $label] > 0} {
+        $label configure -bitmap $$value
+    }
     set itcl_options($option) $value
     _positionLabel
 }
@@ -187,7 +193,9 @@ proc labeledwidget {pathName args} {
 # Specifies the label image.
 # ------------------------------------------------------------------
 ::itcl::body Labeledwidget::configLabelimage {option value} {
-    $label configure -image $value
+    if {[string length $label] > 0} {
+        $label configure -image $value
+    }
     set itcl_options($option) $value
     _positionLabel
 }
@@ -306,18 +314,23 @@ proc labeledwidget {pathName args} {
 	#
 	# Set the foreground color based on the state.
 	#
+	if {[string length $label] > 0} {
 	if {[info exists itcl_options(-state)]} {
 	    switch -- $itcl_options(-state) {
 	    disabled {
-	        $label configure \
-		    -foreground $itcl_options(-disabledforeground)
+		if {[string length $label] > 0} {
+	            $label configure \
+		        -foreground $itcl_options(-disabledforeground)
+	        }
 	      }
 	    normal {
-	        $label configure -foreground $itcl_options(-foreground)
+		if {[string length $label] > 0} {
+	            $label configure -foreground $itcl_options(-foreground)
+		}
 	      }
 	    }
 	}
-
+        }
 	set parent [winfo parent $lwchildsite]
 
 	#
@@ -331,7 +344,8 @@ proc labeledwidget {pathName args} {
 	    nw -
 	    n -
 	    ne {
-		grid $label -row 0 -column 0 \
+		if {[string length $label] > 0} {
+		    grid $label -row 0 -column 0 \
 			-sticky $itcl_options(-labelpos)
 		grid $lwchildsite -row 2 -column 0 \
 			-sticky $itcl_options(-sticky)
@@ -345,6 +359,7 @@ proc labeledwidget {pathName args} {
 		grid columnconfigure $parent 0 -weight 1 -minsize 0
 		grid columnconfigure $parent 1 -weight 0 -minsize 0
 		grid columnconfigure $parent 2 -weight 0 -minsize 0
+		}
 	    }
 
 	    en -
@@ -352,8 +367,10 @@ proc labeledwidget {pathName args} {
 	    es {
 		grid $lwchildsite -row 0 -column 0 \
 			-sticky $itcl_options(-sticky)
-		grid $label -row 0 -column 2 \
+		if {[string length $label] > 0} {
+		    grid $label -row 0 -column 2 \
 			-sticky $itcl_options(-labelpos)
+	
 		
 		grid rowconfigure $parent 0 -weight 1 -minsize 0
 		grid rowconfigure $parent 1 -weight 0 -minsize 0
@@ -364,6 +381,7 @@ proc labeledwidget {pathName args} {
 			[winfo pixels $label \
 			$itcl_options(-labelmargin)]
 		grid columnconfigure $parent 2 -weight 0 -minsize 0
+		}
 	    }
 	    
 	    se -
@@ -371,7 +389,8 @@ proc labeledwidget {pathName args} {
 	    sw {
 		grid $lwchildsite -row 0 -column 0 \
 			-sticky $itcl_options(-sticky)
-		grid $label -row 2 -column 0 \
+		if {[string length $label] > 0} {
+		    grid $label -row 2 -column 0 \
 			-sticky $itcl_options(-labelpos)
 		
 		grid rowconfigure $parent 0 -weight 1 -minsize 0
@@ -383,6 +402,7 @@ proc labeledwidget {pathName args} {
 		grid columnconfigure $parent 0 -weight 1 -minsize 0
 		grid columnconfigure $parent 1 -weight 0 -minsize 0
 		grid columnconfigure $parent 2 -weight 0 -minsize 0
+		}
 	    }
 	    
 	    wn -
@@ -390,7 +410,8 @@ proc labeledwidget {pathName args} {
 	    ws {
 		grid $lwchildsite -row 0 -column 2 \
 			-sticky $itcl_options(-sticky)
-		grid $label -row 0 -column 0 \
+		if {[string length $label] > 0} {
+		    grid $label -row 0 -column 0 \
 			-sticky $itcl_options(-labelpos)
 		
 		grid rowconfigure $parent 0 -weight 1 -minsize 0
@@ -402,6 +423,7 @@ proc labeledwidget {pathName args} {
 			[winfo pixels $label \
 			$itcl_options(-labelmargin)]
 		grid columnconfigure $parent 2 -weight 1 -minsize 0
+		}
 	    }
 
 	    default {
@@ -416,7 +438,9 @@ proc labeledwidget {pathName args} {
     # forget them so they don't appear and manage only the childsite.
     #
     } else {
-	grid forget $label
+	if {[string length $label] > 0} {
+	    grid forget $label
+        }
 
 	grid $lwchildsite -row 0 -column 0 -sticky $itcl_options(-sticky)
 

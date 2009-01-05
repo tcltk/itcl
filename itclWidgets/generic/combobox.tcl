@@ -27,7 +27,7 @@
 #		Copyright (c) 1995	John S. Sigler
 #		Copyright (c) 1997	Mitch Gorman
 # ----------------------------------------------------------------------
-#   @(#) $Id: combobox.tcl,v 1.1.2.3 2008/12/28 21:36:20 wiede Exp $
+#   @(#) $Id: combobox.tcl,v 1.1.2.4 2009/01/05 19:30:47 wiede Exp $
 # ======================================================================
 
 package require itcl
@@ -60,26 +60,23 @@ proc combobox {pathName args} {
     constructor {args} {}
     destructor {}
 
-    option -arrowrelief arrowRelief Relief -default raised
-    option -completion completion Completion -default true -configuremethod configCompletion
-    option -dropdown dropdown Dropdown -default true -configuremethod configDropdown
-    option -editable editable Editable -default true -configuremethod configEditable
-    option -grab grab Grab -default local -configuremethod configGrab
-#    option -listheight listHeight Height -default 150
-    option -margin margin Margin -default 1 -configuremethod configMargin
-#    option -popupcursor popupCursor Cursor -default arrow
-    option -selectioncommand selectionCommand SelectionCommand -default {}
-    option -state state State -default normal -configuremethod configState
-    option -unique unique Unique -default true -configuremethod configUnique
+    option [list -textfont textFont Font] -default TkDefaultFont
+    option [list -textbackground -textBackground Background] -default #ffffff
+    option [list -arrowrelief arrowRelief Relief] -default raised
+    option [list -background background Background] -default #eeeeee
+    option [list -completion completion Completion] -default true -configuremethod configCompletion
+    option [list -dropdown dropdown Dropdown] -default true -configuremethod configDropdown
+    option [list -editable editable Editable] -default true -configuremethod configEditable
+    option [list -grab grab Grab] -default local -configuremethod configGrab
+    option [list -margin margin Margin] -default 1 -configuremethod configMargin
+    option [list -selectioncommand selectionCommand SelectionCommand] -default {}
+    option [list -state state State] -default normal -configuremethod configState
+    option [list -unique unique Unique] -default true -configuremethod configUnique
 
-    delegate option -background to arrowBtn
+    delegate option -labelfont to label as -font
     delegate option -borderwidth to arrowBtn
-#    delegate option -cursor to arrowBtn
-#    delegate option -state to arrowBtn
     delegate option -highlightcolor to arrowBtn
     delegate option -highlightthickness to arrowBtn
-#    delegate option [list -arrowrelief arrowRelief Relief] to arrowBtn as -relief
-    delegate option [list -background background Background] to arrowBtn as -highlightbackground
     delegate option [list -listheight listHeight Height] to list as -height 
     delegate option [list -popupcursor popupCursor Cursor] to arrowBtn as -cursor 
 
@@ -180,7 +177,6 @@ proc combobox {pathName args} {
 	        lappend my_other_opts $optName [dict get $xx $optName]
 	    }
         }
-#        uplevel 0 configure $args
         uplevel 0 configure $my_opts
     }
     
@@ -306,6 +302,7 @@ proc combobox {pathName args} {
     on {
         switch -- $itcl_options(-state) {
 	normal {
+            set itcl_options($option) $value
 	    $entry configure -state normal
 	  }
         }
@@ -314,13 +311,14 @@ proc combobox {pathName args} {
     false -
     no -
     off {
+        set itcl_options($option) $value
         $entry configure -state readonly
       }
     default {
         error "bad editable option \"$value\": should be boolean"
       }
     }
-    set itcl_options($option) $value
+    return $itcl_options($option)
 }
 
 # --------------------------------------------------------------------
@@ -673,7 +671,7 @@ proc combobox {pathName args} {
 		-highlightcolor -highlightthickness \
 		-hscrollmode -selectbackground \
 		-selectborderwidth -selectforeground -textbackground \
-		-textfont -vscrollmode
+		-textfont -vscrollmode -listheight -labelfont
 
 	# mode specific bindings
 	_dropdownBindings

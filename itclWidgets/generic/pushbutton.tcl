@@ -13,19 +13,15 @@
 # see file license.terms in the top directory
 #
 # ----------------------------------------------------------------------
-# This code is derived/reimplemented from the ::itcl::widgets package Buttonbox
+# This code is derived/reimplemented from the ::itcl::widgets package Pushbutton
 # written by:
 #    Mark L. Ulferts          E-mail: mulferts@austin.dsccc.com
 #    Bret A. Schuhmacher      EMAIL: bas@wn.com
 #    Copyright (c) 1995 DSC Technologies Corporation
 # ----------------------------------------------------------------------
 #
-#   @(#) $Id: pushbutton.tcl,v 1.1.2.1 2009/01/04 15:09:45 wiede Exp $
+#   @(#) $Id: pushbutton.tcl,v 1.1.2.2 2009/01/05 19:30:47 wiede Exp $
 # ======================================================================
-
-    keep -activebackground -activeforeground -background -borderwidth \
-	 -cursor -disabledforeground -font -foreground -highlightbackground \
-	 -highlightcolor -highlightthickness 
 
 #
 # Use option database to override default resources of base classes.
@@ -44,7 +40,7 @@ proc ::itcl::widgets::pushbutton {pathName args} {
 # ------------------------------------------------------------------
 #                            PUSHBUTTON
 # ------------------------------------------------------------------
-::itcl::extendeclass Pushbutton {
+::itcl::extendedclass Pushbutton {
     component itcl_hull
     component itcl_interior
     component pushbutton
@@ -65,6 +61,8 @@ proc ::itcl::widgets::pushbutton {pathName args} {
     option [list -width width Width] -default 0 -configuremethod configWidth
     option [list -takefocus takeFocus TakeFocus] -default 0
 
+    private variable _origWin
+
     constructor {args} {}
     destructor {}
 
@@ -77,7 +75,7 @@ proc ::itcl::widgets::pushbutton {pathName args} {
     protected method configBitmap {option value}
     protected method configImage {option value}
     protected method configHighlightthickness {option value}
-    protected method configBorederwidth {option value}
+    protected method configBorderwidth {option value}
     protected method configDefaultring {option value}
     protected method configDefaultringpad {option value}
     protected method configHeight {option value}
@@ -92,21 +90,20 @@ proc ::itcl::widgets::pushbutton {pathName args} {
 # ------------------------------------------------------------------
 ::itcl::body Pushbutton::constructor {args} {
     set win [createhull frame $this -class [info class] -borderwidth 0]
+    set _origWin $win
     set itcl_interior $win
     #
     # Reconfigure the hull to act as the outer sunken ring of
     # the pushbutton, complete with focus ring.
     #
-#    itcl_options add hull.borderwidth hull.relief
-#    itcl_options add hull.highlightcolor
-#    itcl_options add hull.highlightbackground
 
-    $win configure -padx 0 -pady 0 -borderwidth [$this cget -borderwidth]
+    $itcl_hull configure -padx 0 -pady 0 -borderwidth $itcl_options(-borderwidth)
     pack propagate $win no
     setupcomponent pushbutton using button $win.pushbutton 
     keepcomponentoption pushbutton -activebackground -activeforeground \
          -background -borderwidth -cursor -disabledforeground -font \
-	 -foreground -highlightbackground -highlightcolor -highlightthickness 
+	 -foreground -highlightbackground -highlightcolor \
+	 -highlightthickness 
     keepcomponentoption pushbutton -underline -wraplength -state -command
     pack $pushbutton -expand 1 -fill both
     #
@@ -307,12 +304,12 @@ proc ::itcl::widgets::pushbutton {pathName args} {
 	    set _reposition [after idle [itcl::code $this _relayout now]]
 	}
 	return
-    } elseif {$when != "now"} {
+    } elseif {$when ne "now"} {
 	error "bad option \"$when\": should be now or later"
     }
     set _reposition ""
     if {$itcl_options(-width) == 0} {
-	set w [expr {[winfo reqwidth $itk_component(pushbutton)] \
+	set w [expr {[winfo reqwidth $pushbutton] \
 		+ 2 * $itcl_options(-highlightthickness) \
 		+ 2 * $itcl_options(-borderwidth) \
 		+ 2 * $itcl_options(-defaultringpad)}]
@@ -320,16 +317,16 @@ proc ::itcl::widgets::pushbutton {pathName args} {
 	set w $itcl_options(-width)
     }
     if {$itcl_options(-height) == 0} {
-	set h [expr {[winfo reqheight $itk_component(pushbutton)] \
+	set h [expr {[winfo reqheight $pushbutton] \
 		+ 2 * $itcl_options(-highlightthickness) \
 		+ 2 * $itcl_options(-borderwidth) \
 		+ 2 * $itcl_options(-defaultringpad)}]
     } else {
 	set h $itcl_options(-height)
     }
-    $win configure -width $w -height $h
+    $itcl_hull configure -width $w -height $h
     if {$itcl_options(-defaultring)} {
-	$win configure -relief sunken \
+	$itcl_hull configure -relief sunken \
 		-highlightthickness [$this cget -highlightthickness] \
 		-takefocus 1
 	configure -takefocus 1
@@ -337,7 +334,7 @@ proc ::itcl::widgets::pushbutton {pathName args} {
 		-highlightthickness 0 -takefocus 0
 	
     } else {
-	$win configure -relief flat \
+	$itcl_hull configure -relief flat \
 		-highlightthickness 0 -takefocus 0
 	$pushbutton configure \
 		-highlightthickness [$this cget -highlightthickness] \

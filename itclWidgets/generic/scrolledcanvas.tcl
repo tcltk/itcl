@@ -18,7 +18,7 @@
 #    Copyright (c) 1995 DSC Technologies Corporation
 # ----------------------------------------------------------------------
 #
-#   @(#) $Id: scrolledcanvas.tcl,v 1.1.2.1 2008/12/29 16:33:41 wiede Exp $
+#   @(#) $Id: scrolledcanvas.tcl,v 1.1.2.2 2009/01/05 19:30:47 wiede Exp $
 # ======================================================================
 
 #
@@ -102,12 +102,12 @@ proc ::::itcl::widgets::scrolledcanvas {pathName args} {
     keepcomponentoption clipper -activebackground -activerelief -background \
         -borderwidth -cursor \
 	-elementborderwidth -foreground -highlightcolor -highlightthickness \
-	-insertbackground -insertborderwidth -insertofftime -insertontime \
-	-insertwidth -jump -labelfont -selectbackground -selectborderwidth \
-	-selectforeground -textbackground -troughcolor
+	-jump -labelfont \
+	-textbackground -troughcolor
 
     keepcomponentoption clipper -borderwidth -relief -highlightthickness \
         -highlightcolor
+
     grid $clipper -row 0 -column 0 -sticky nsew
     grid rowconfigure $_interior 0 -weight 1
     grid columnconfigure $_interior 0 -weight 1
@@ -125,14 +125,16 @@ proc ::::itcl::widgets::scrolledcanvas {pathName args} {
     keepcomponentoption canvas -activebackground -activerelief -background \
         -borderwidth -cursor \
 	-elementborderwidth -foreground -highlightcolor -highlightthickness \
-	-insertbackground -insertborderwidth -insertofftime -insertontime \
-	-insertwidth -jump -labelfont -selectbackground -selectborderwidth \
-	-selectforeground -textbackground -troughcolor
+	-insertborderwidth -jump -labelfont \
+	-selectforeground -selectbackground \
+	-insertbackground -insertofftime -insertontime -insertwidth \
+	-selectborderwidth -textbackground -troughcolor
 
 #	ignore -highlightthickness -highlightcolor
 
     keepcomponentoption canvas -closeenough -confine -scrollregion \
-        -xscrollincrement -yscrollincrement
+        -xscrollincrement -yscrollincrement 
+
 
     grid $canvas -row 0 -column 0 -sticky nsew
     grid rowconfigure $clipper 0 -weight 1
