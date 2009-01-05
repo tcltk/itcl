@@ -16,7 +16,7 @@
 #    Copyright (c) 1995 DSC Technologies Corporation
 # ----------------------------------------------------------------------
 #
-#   @(#) $Id: entryfield.tcl,v 1.1.2.7 2009/01/03 17:30:31 wiede Exp $
+#   @(#) $Id: entryfield.tcl,v 1.1.2.8 2009/01/05 20:27:24 wiede Exp $
 # ======================================================================
 
 package require itcl
@@ -47,6 +47,7 @@ proc entryfield {pathName args} {
     option [list -validate validate Command] -default {} -configuremethod configValidate
 
     delegate method * to entry except [list configure cget childsite]
+    delegate option [list -labelfont textFont Font] to label as -font
     delegate option [list -textfont textFont Font] to entry as -font
     delegate option [list -background background Background] to entry as -highlightbackground
     delegate option [list -textbackground textBackground Background] to entry as -background
@@ -81,7 +82,8 @@ proc entryfield {pathName args} {
 	    -highlightthickness -insertbackground -insertborderwidth \
 	    -insertofftime -insertontime -insertwidth -justify \
 	    -relief -selectbackground -selectborderwidth \
-	    -selectforeground -show -state -textvariable -width
+	    -selectforeground -show -state -textvariable -width \
+	    -textfont -textbackground -background
 
     setupcomponent efchildsite using frame $itcl_interior.efchildsite
 
