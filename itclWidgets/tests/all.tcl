@@ -7,7 +7,7 @@
 # Copyright (c) 1998-2000 by Ajuba Solutions
 # All rights reserved.
 # 
-# RCS: @(#) $Id: all.tcl,v 1.1.2.1 2008/12/27 19:41:34 wiede Exp $
+# RCS: @(#) $Id: all.tcl,v 1.1.2.2 2009/01/05 19:41:13 wiede Exp $
 
 package require tcltest
 namespace import -force ::tcltest::*
@@ -68,6 +68,7 @@ foreach file [lsort [::tcltest::getMatchingFiles]] {
     # variable is set correctly when we spawn the child test processes
 
     cd $::tcltest::testsDirectory
+    file delete -force $logfile
     set cmd [concat [list | $shell $file] [split $argv] \
 	    [list -outfile $logfile]]
     if {[catch {

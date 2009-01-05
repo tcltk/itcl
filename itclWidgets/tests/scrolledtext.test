@@ -11,7 +11,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# @(#) $Id: scrolledtext.test,v 1.1.2.1 2008/12/29 12:47:32 wiede Exp $
+# @(#) $Id: scrolledtext.test,v 1.1.2.2 2009/01/05 19:41:13 wiede Exp $
 
 package require tcltest
 namespace import -force ::tcltest::*
@@ -54,6 +54,7 @@ incr c
 # Option tests which are successful.
 #
 test Scrolledtext-2.$o {configuration option} {
+puts stderr [join [lsort [.st configure]] \n]
     llength [.st configure]
 } {48}
 

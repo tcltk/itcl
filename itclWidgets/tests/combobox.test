@@ -141,7 +141,8 @@ foreach test {
     {-vscrollmode dynamic dynamic}
     {-dropdown true true}} {
 	set option [lindex $test 0]
-	test Combobox-2.$o "configuration options, $option" {
+	set optionTxt "$option [lindex $test 2]"
+	test Combobox-2.$o "configuration options, configure $optionTxt" {
 	    .cb configure $option [lindex $test 2]
 	    lindex [.cb configure $option] 4
 	} [lindex $test 2]
@@ -176,7 +177,8 @@ foreach test {
           }
         }
 	set option [lindex $test 0]
-        test Combobox-2.$o "configuration options, $option" {
+	set optionTxt "$option [lindex $test 2]"
+        test Combobox-2.$o "configuration options, configure $optionTxt" {
 	    list [catch {.cb configure $option [lindex $test 1]} msg] $msg
 	} [list 1 [lindex $test 2]]
 	incr o
@@ -185,7 +187,7 @@ foreach test {
 # Method tests which are successful.
 #
 foreach test {
-    {{.cb configure -editable 1} {1}}
+    {{.cb configure -editable 1} {}}
     {{.cb clear all} {}}
     {{.cb insert list 0 Test1 Test2 Test3 Test4} {}}
     {{.cb insert list end {More Test}} {}}
@@ -211,12 +213,12 @@ foreach test {
     {{.cb insert entry end R} {}}
     {{.cb getcurselection} {Really Long String Test}}
     {{.cb get} {Really Long String Test}}
-    {{.cb configure -completion off} {off}}
+    {{.cb configure -completion off} {}}
     {{.cb selection clear 0 end} {}}
     {{.cb insert entry end R} {}}
     {{.cb get} {R}}
     {{.cb getcurselection} {}}
-    {{.cb configure -completion on} {on}}
+    {{.cb configure -completion on} {}}
     {{.cb get [expr [.cb size]-1]} {Really Long String Test}}
     {{.cb insert list 0 {Test3} {Test4} {Really Long String Test}} {}}
     {{.cb size} {6}}
@@ -224,15 +226,15 @@ foreach test {
     {{.cb size} {9}}
     {{.cb insert list 5 {Test7} {Test8} {Really Long String Test}} {}}
     {{.cb size} {12}}
-    {{.cb configure -state disabled} {disabled}}
+    {{.cb configure -state disabled} {}}
     {{.cb insert list end {not gonna make it in}} {}}
     {{.cb size} {12}}
     {{.cb insert entry end {eally!}} {}}
     {{.cb get} {R}}
-    {{.cb configure -state normal} {normal}}
-    {{.cb configure -dropdown 0} {0}}
+    {{.cb configure -state normal} {}}
+    {{.cb configure -dropdown 0} {}}
     {{.cb size} {12}}
-    {{.cb configure -dropdown 1} {1}}
+    {{.cb configure -dropdown 1} {}}
     {{.cb size} {12}}
     {{.cb see 0} {}}
     {{.cb see 11} {}}
@@ -249,7 +251,8 @@ foreach test {
     {{.cb sort increasing} {}}
     {{.cb sort decreasing} {}}} {
 	set method [lindex [lindex $test 0] 1]
-	test Combobox-3.$m "object methods, $method" {
+	set methodTxt [lindex $test 0]
+	test Combobox-3.$m "object methods, $methodTxt" {
 	    list [catch {eval [lindex $test 0]} msg] $msg
 	} [list 0 [lindex $test 1]]
 	update 
@@ -276,7 +279,8 @@ foreach test {
     {{.cb selection bogus bogus} {bad Scrolledlistbox index "bogus": must be active, anchor, end, @x,y, number, or a pattern}}
     {{.cb sort bogus} {bad sort argument "bogus": must be a valid argument to the Tcl lsort command}}} {
     set method [lindex [lindex $test 0] 1]
-    test Combobox-3.$m "object methods, $method" {
+    set methodTxt [lindex $test 0]
+    test Combobox-3.$m "object methods, $methodTxt" {
 	list [catch {eval [lindex $test 0]} msg] $msg
     } [list 1 [lindex $test 1]]
     incr m

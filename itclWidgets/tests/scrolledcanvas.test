@@ -11,7 +11,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# @(#) $Id: scrolledcanvas.test,v 1.1.2.1 2008/12/29 16:34:27 wiede Exp $
+# @(#) $Id: scrolledcanvas.test,v 1.1.2.2 2009/01/05 19:41:13 wiede Exp $
 
 package require tcltest
 namespace import -force ::tcltest::*
@@ -140,7 +140,7 @@ foreach test {
     {{.sc bbox 1} {99 99 401 401}}
     {{.sc coords 2} {300.0 300.0 600.0 600.0}}
     {{.sc delete 3} {}}
-    {{.sc move 1 10 10} {1}}
+    {{.sc move 1 10 10} {}}
     {{.sc scale 1 100 100 0.8 0.8} {}}
     {{.sc xview moveto 0} {}}
     {{.sc yview moveto 0} {}}
@@ -150,7 +150,8 @@ foreach test {
     {{.sc justify top} {}}
     {{.sc justify bottom} {}}} {
 	set method [lindex [lindex $test 0] 1]
-	test Scrolledcanvas-3.$m "object methods, $method" {
+	set methodTxt [lindex $test 0]
+	test Scrolledcanvas-3.$m "object methods, call $methodTxt" {
 	    list [catch {eval [lindex $test 0]} msg] $msg
 	} [list 0 [lindex $test 1]]
 	update 
