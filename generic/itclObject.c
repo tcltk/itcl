@@ -24,7 +24,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann Copyright (c) 2007
  *
- *     RCS:  $Id: itclObject.c,v 1.1.2.68 2009/01/04 19:50:51 wiede Exp $
+ *     RCS:  $Id: itclObject.c,v 1.1.2.69 2009/01/05 19:50:29 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -2262,8 +2262,8 @@ static char*
 ItclTraceOptionVar(
     ClientData cdata,	    /* object instance data */
     Tcl_Interp *interp,	    /* interpreter managing this variable */
-    const char *name1,    /* variable name */
-    const char *name2,    /* unused */
+    const char *name1,      /* variable name */
+    const char *name2,      /* unused */
     int flags)		    /* flags indicating read/write */
 {
     ItclObject *ioPtr;
@@ -2315,6 +2315,7 @@ ItclTraceComponentVar(
     Tcl_Obj *objPtr;
     Tcl_Obj *namePtr;
     Tcl_Obj *componentValuePtr;
+    ItclObjectInfo *infoPtr;
     ItclObject *ioPtr;
     ItclComponent *icPtr;
     ItclDelegatedFunction *idmPtr;
@@ -2323,6 +2324,13 @@ ItclTraceComponentVar(
 /* FIXME should free memory on unset or rename!! */
     if (cdata != NULL) {
         ioPtr = (ItclObject*)cdata;
+        infoPtr = (ItclObjectInfo *)Tcl_GetAssocData(interp,
+                ITCL_INTERP_DATA, NULL);
+        hPtr = Tcl_FindHashEntry(&infoPtr->objects, (char *)ioPtr);
+	if (hPtr == NULL) {
+	    /* object does no longer exist or is being destructed */
+	    return NULL;
+	}
         objPtr = Tcl_NewStringObj(name1, -1);
 	hPtr = Tcl_FindHashEntry(&ioPtr->objectComponents, (char *)objPtr);
         Tcl_DecrRefCount(objPtr);
@@ -2406,6 +2414,7 @@ ItclTraceItclHullVar(
 {
     Tcl_HashEntry *hPtr;
     Tcl_Obj *objPtr;
+    ItclObjectInfo *infoPtr;
     ItclObject *ioPtr;
     ItclVariable *ivPtr;
 
@@ -2413,8 +2422,16 @@ ItclTraceItclHullVar(
 /* FIXME should free memory on unset or rename!! */
     if (cdata != NULL) {
         ioPtr = (ItclObject*)cdata;
+        infoPtr = (ItclObjectInfo *)Tcl_GetAssocData(interp,
+                ITCL_INTERP_DATA, NULL);
+        hPtr = Tcl_FindHashEntry(&infoPtr->objects, (char *)ioPtr);
+	if (hPtr == NULL) {
+	    /* object does no longer exist or is being destructed */
+	    return NULL;
+	}
         objPtr = Tcl_NewStringObj(name1, -1);
 	hPtr = Tcl_FindHashEntry(&ioPtr->iclsPtr->variables, (char *)objPtr);
+        Tcl_DecrRefCount(objPtr);
 /*
 fprintf(stderr, "ITCL_HULLTRACE!%s!%s!%p!\n", name1, ioPtr->iclsPtr->nsPtr->fullName, hPtr);
 */
