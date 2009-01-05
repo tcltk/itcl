@@ -16,17 +16,13 @@
 #   Copyright (c) 1995 DSC Technologies Corporation
 # ----------------------------------------------------------------------
 #
-#   @(#) $Id: timefield.tcl,v 1.1.2.1 2009/01/05 22:22:45 wiede Exp $
+#   @(#) $Id: timefield.tcl,v 1.1.2.2 2009/01/05 23:52:43 wiede Exp $
 # ======================================================================
 
 #
 # Use option database to override default resources of base classes.
 #
 option add *Timefield.justify center widgetDefault
-
-
-    keep -background -borderwidth -cursor -foreground -highlightcolor \
-       -highlightthickness -labelfont -textbackground -textfont
 
 namespace eval ::itcl::widgets {
 
@@ -44,7 +40,7 @@ proc ::itcl::widgets::timefield {pathName args} {
     inherit ::itcl::widgets::Labeledwidget 
     
     component time
-    component dfchildsite
+    protected component dfchildsite
 
     option [list -childsitepos childSitePos Position] -default e -configuremethod configChildsitepos
     option [list -command command Command] -default {} -configuremethod configCommand
@@ -54,6 +50,7 @@ proc ::itcl::widgets::timefield {pathName args} {
     option [list -gmt gmt GMT] -default no -configuremethod configGmt
     option [list -state state State] -default normal -configuremethod configState
 
+    delegate option [list -textbackground textBackground Background] to time as -background
     protected variable _cfield hour
     protected variable _formatString "%r"
     protected variable _fields {}
@@ -87,6 +84,10 @@ proc ::itcl::widgets::timefield {pathName args} {
     public method get {{format "-string"}}
     public method isvalid {}
     public method show {{time "now"}}
+
+public method component {comp args} {
+    uplevel 0 [set $comp] $args
+}
 }
 
 # ------------------------------------------------------------------
@@ -99,18 +100,17 @@ proc ::itcl::widgets::timefield {pathName args} {
     # Create an entry field for entering the time.
     #
     setupcomponent time using entry $itcl_interior.time
-    keepcomponentoption -borderwidth -cursor -exportselection \
+    keepcomponentoption time -borderwidth -cursor -exportselection \
           -foreground -highlightcolor -highlightthickness \
           -insertbackground -justify -relief -textvariable
       
 # FIXME      rename -font -textfont textFont Font
 # FIXME      rename -highlightbackground -background background Background
-# FIXME      rename -background -textbackground textBackground Background
 
     #
     # Create the child site widget.
     #
-    setupcomponent -protected dfchildsite using frame $itcl_interior.dfchildsite
+    setupcomponent dfchildsite using frame $itcl_interior.dfchildsite
     set itcl_interior $dfchildsite
     
     #
@@ -158,8 +158,7 @@ proc ::itcl::widgets::timefield {pathName args} {
 # ------------------------------------------------------------------
 ::itcl::body Timefield::configChildsitepos {option value} {
     set parent [winfo parent $time]
-
-    switch $value
+    switch $value {
     n {
         grid $dfchildsite -row 0 -column 0 -sticky ew
         grid $time -row 1 -column 0 -sticky nsew
@@ -309,7 +308,7 @@ proc ::itcl::widgets::timefield {pathName args} {
 # ------------------------------------------------------------------
 ::itcl::body Timefield::configState {option value} {
     switch -- $value {
-    normal 
+    normal {
         $time configure -state normal
       }
     disabled {
@@ -362,27 +361,27 @@ proc ::itcl::widgets::timefield {pathName args} {
 # integer clock value.  Reference the clock command for more 
 # information on obtaining times and their formats.
 # ------------------------------------------------------------------
-::itcl::body Timefield::show {{time "now"}} {
+::itcl::body Timefield::show {{mytime "now"}} {
     set icursor [$time index insert]
-    if {$time eq {}} {
+    if {$mytime eq {}} {
         set time "now"
     }
 
-    switch -regexp -- $time {
+    switch -regexp -- $mytime {
     {^now$} {
         set seconds [::clock seconds]
       }
     {^[0-9]+$} {
-        if { [catch {::clock format $time -gmt $itcl_options(-gmt)}] } {
-            error "bad time: \"$time\", must be a valid time \
+        if { [catch {::clock format $mytime -gmt $itcl_options(-gmt)}] } {
+            error "bad time: \"$mytime\", must be a valid time \
                  string, clock clicks value or the keyword now"
         }
         set seconds $time
       }
     default {
         if {[catch {
-	        set seconds [::clock scan $time -gmt $itcl_options(-gmt)]}]} {
-            error "bad time: \"$time\", must be a valid time \
+	        set seconds [::clock scan $mytime -gmt $itcl_options(-gmt)]}]} {
+            error "bad time: \"$mytime\", must be a valid time \
                  string, clock clicks value or the keyword now"
         }
       }
@@ -818,7 +817,7 @@ proc ::itcl::widgets::timefield {pathName args} {
     # second  6,7
     # ampm    9,10
     #
-    set icursor [$itk_component(time) index insert]
+    set icursor [$time index insert]
     switch $icursor {
     0 -
     1 {

@@ -18,11 +18,8 @@
 #    Copyright (c) 1995 DSC Technologies Corporation
 # ----------------------------------------------------------------------
 #
-#   @(#) $Id: timeentry.tcl,v 1.1.2.1 2009/01/05 21:32:23 wiede Exp $
+#   @(#) $Id: timeentry.tcl,v 1.1.2.2 2009/01/05 23:52:43 wiede Exp $
 # ======================================================================
-
-    keep -background -borderwidth -cursor -foreground -highlightcolor \
-	-highlightthickness -labelfont -textbackground -textfont
 
 #
 # Use option database to override default resources of base classes.
@@ -101,7 +98,6 @@ proc ::itcl::widgets::timeentry {pathName args} {
     #
     setupcomponent iconbutton using label $itcl_interior.iconbutton -relief raised
     keepcomponentoption iconbutton -borderwidth -cursor -foreground 
-    }
     grid $iconbutton -row 0 -column 0 -sticky ns
 
     #
@@ -163,7 +159,7 @@ proc ::itcl::widgets::timeentry {pathName args} {
 # normal.  A disabled state prevents selection of the time field
 # or time icon button.
 # ------------------------------------------------------------------
-::itcl::body Timeentry::state {option value} {
+::itcl::body Timeentry::configState {option value} {
     switch -- $value {
     normal {
         bind $iconbutton <Button-1> [itcl::code $this _popup]
