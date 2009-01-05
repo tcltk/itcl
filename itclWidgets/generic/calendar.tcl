@@ -16,14 +16,14 @@
 # see file license.terms in the top directory
 #
 # ----------------------------------------------------------------------
-# This code is derived/reimplemented from the ::itcl::widgets package Calendar
+# This code is derived/reimplemented from the iwidgets package Calendar
 # written by:
 #    Mark L. Ulferts          E-mail: mulferts@austin.dsccc.com
 #    ACKNOWLEDGEMENTS: Michael McLennan   E-mail: mmclennan@lucent.com
 #    Copyright (c) 1995 DSC Technologies Corporation
 # ----------------------------------------------------------------------
 #
-#   @(#) $Id: calendar.tcl,v 1.1.2.1 2009/01/03 19:40:20 wiede Exp $
+#   @(#) $Id: calendar.tcl,v 1.1.2.2 2009/01/05 21:11:13 wiede Exp $
 # ======================================================================
 
 #

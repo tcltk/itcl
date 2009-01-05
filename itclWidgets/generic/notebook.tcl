@@ -31,13 +31,13 @@
 # see file license.terms in the top directory
 #
 # ----------------------------------------------------------------------
-# This code is derived/reimplemented from the ::itcl::widgets package Notebook
+# This code is derived/reimplemented from the iwidgets package Notebook
 # written by:
 #    AUTHOR: Bill W. Scott
 #    Copyright (c) 1995 DSC Technologies Corporation
 # ----------------------------------------------------------------------
 #
-#   @(#) $Id: notebook.tcl,v 1.1.2.2 2009/01/04 13:51:10 wiede Exp $
+#   @(#) $Id: notebook.tcl,v 1.1.2.3 2009/01/05 21:11:13 wiede Exp $
 # ======================================================================
 
 #

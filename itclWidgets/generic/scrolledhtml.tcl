@@ -46,14 +46,14 @@
 # see file license.terms in the top directory
 #
 # ----------------------------------------------------------------------
-# This code is derived/reimplemented from the ::itcl::widgets package Scrolledhtml
+# This code is derived/reimplemented from the iwidgets package Scrolledhtml
 # written by:
 #
 #    Kris Raney                    EMAIL: kraney@spd.dsccc.com
 #    Copyright (c) 1995 DSC Technologies Corporation
 # ----------------------------------------------------------------------
 #
-#   @(#) $Id: scrolledhtml.tcl,v 1.1.2.1 2008/12/29 15:54:43 wiede Exp $
+#   @(#) $Id: scrolledhtml.tcl,v 1.1.2.2 2009/01/05 21:11:13 wiede Exp $
 # ======================================================================
 
 # Acknowledgements:

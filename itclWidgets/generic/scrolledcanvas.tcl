@@ -11,14 +11,14 @@
 # see file license.terms in the top directory
 #
 # ----------------------------------------------------------------------
-# This code is derived/reimplemented from the ::itcl::widgets package Scrolledcanvas
+# This code is derived/reimplemented from the iwidgets package Scrolledcanvas
 # written by:
 #
 #    Mark L. Ulferts          E-mail: mulferts@austin.dsccc.com
 #    Copyright (c) 1995 DSC Technologies Corporation
 # ----------------------------------------------------------------------
 #
-#   @(#) $Id: scrolledcanvas.tcl,v 1.1.2.2 2009/01/05 19:30:47 wiede Exp $
+#   @(#) $Id: scrolledcanvas.tcl,v 1.1.2.3 2009/01/05 21:11:13 wiede Exp $
 # ======================================================================
 
 #
