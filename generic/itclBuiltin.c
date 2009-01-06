@@ -24,7 +24,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclBuiltin.c,v 1.1.2.66 2009/01/05 19:30:47 wiede Exp $
+ *     RCS:  $Id: itclBuiltin.c,v 1.1.2.67 2009/01/06 16:11:42 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -109,6 +109,7 @@ Tcl_ObjCmdProc ItclExtendedSetGet;
 Tcl_ObjCmdProc Itcl_BiCreateHullCmd;
 Tcl_ObjCmdProc Itcl_BiSetupComponentCmd;
 Tcl_ObjCmdProc Itcl_BiKeepComponentOptionCmd;
+Tcl_ObjCmdProc Itcl_BiInitOptionsCmd;
 
 /*
  *  FORWARD DECLARATIONS
@@ -242,6 +243,12 @@ static BiMethod BiMethodList[] = {
         "widgetType widgetPath ?-class className? ?optionName value ...?",
         "@itcl-builtin-createhull",
         Itcl_BiCreateHullCmd,
+	ITCL_ECLASS
+    },
+    {"itcl_initoptions",
+        "?optionName value ...?",
+        "@itcl-builtin-initoptions",
+        Itcl_BiInitOptionsCmd,
 	ITCL_ECLASS
     },
 };
@@ -1847,7 +1854,6 @@ Tcl_Obj *makeAsOptionInfo(
     int j;
 
     objPtr = Tcl_NewListObj(0, NULL);
-fprintf(stderr, "AS!%s!%s!\n", Tcl_GetString(optNamePtr), Tcl_GetString(idoPtr->namePtr));
     Tcl_ListObjAppendElement(interp, objPtr, Tcl_NewStringObj(
             Tcl_GetString(optNamePtr), -1));
     Tcl_ListObjAppendElement(interp, objPtr, Tcl_NewStringObj(
@@ -3557,6 +3563,41 @@ Itcl_BiSetupComponentCmd(
     int result;
 
     ItclShowArgs(1, "Itcl_BiSetupComponentCmd", objc, objv);
+    ItclObjectInfo *infoPtr = (ItclObjectInfo*)clientData;
+    if (!infoPtr->itclHullCmdsInitted) {
+        result =  Tcl_Eval(interp, initHullCmdsScript);
+        if (result != TCL_OK) {
+            return result;
+        }
+        infoPtr->itclHullCmdsInitted = 1;
+    }
+    return Tcl_EvalObjv(interp, objc, objv, 0);
+}
+
+/*
+ * ------------------------------------------------------------------------
+ *  Itcl_BiInitOptionsCmd()
+ *
+ *  Invoked by Tcl during evaluating constructor whenever
+ *  the "itcl_initoptions" command is invoked to install and setup an
+ *  ::itcl::extendedclass options
+ *  for an object.  Handles the following syntax:
+ *
+ *      itcl_initoptions 
+ *          ?<optionName> <optionValue> <optionName> <optionValue> ...?
+ *
+ * ------------------------------------------------------------------------
+ */
+int
+Itcl_BiInitOptionsCmd(
+    ClientData clientData,   /* info for all known objects */
+    Tcl_Interp *interp,      /* current interpreter */
+    int objc,                /* number of arguments */
+    Tcl_Obj *const objv[])   /* argument objects */
+{
+    int result;
+
+    ItclShowArgs(1, "Itcl_BiInitOptionsCmd", objc, objv);
     ItclObjectInfo *infoPtr = (ItclObjectInfo*)clientData;
     if (!infoPtr->itclHullCmdsInitted) {
         result =  Tcl_Eval(interp, initHullCmdsScript);

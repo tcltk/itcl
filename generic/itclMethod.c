@@ -25,7 +25,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclMethod.c,v 1.1.2.44 2009/01/02 22:11:05 wiede Exp $
+ *     RCS:  $Id: itclMethod.c,v 1.1.2.45 2009/01/06 16:11:42 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -559,6 +559,11 @@ ItclCreateMemberFunc(
 	    imPtr->maxargcount = -1;
             imPtr->codePtr->flags |= ITCL_BUILTIN;
 	}
+	if (strcmp(name, "itcl_initoptions") == 0) {
+	    imPtr->argcount = 0;
+	    imPtr->maxargcount = -1;
+            imPtr->codePtr->flags |= ITCL_BUILTIN;
+	}
 	if (strcmp(name, "mytypemethod") == 0) {
 	    imPtr->argcount = 0;
 	    imPtr->maxargcount = -1;
@@ -907,6 +912,9 @@ ItclCreateMemberCode(
 	        isDone = 1;
 	    }
 	    if (strcmp(body, "@itcl-builtin-setupcomponent") == 0) {
+	        isDone = 1;
+	    }
+	    if (strcmp(body, "@itcl-builtin-initoptions") == 0) {
 	        isDone = 1;
 	    }
 	    if (strcmp(body, "@itcl-builtin-mytypemethod") == 0) {
@@ -2096,6 +2104,9 @@ Itcl_CmdAliasProc(
 	}
 	if (strcmp(cmdName, "@itcl-builtin-setupcomponent") == 0) {
 	    return Tcl_FindCommand(interp, "::itcl::builtin::setupcomponent", NULL, 0);
+	}
+	if (strcmp(cmdName, "@itcl-builtin-initoptions") == 0) {
+	    return Tcl_FindCommand(interp, "::itcl::builtin::initoptions", NULL, 0);
 	}
 	if (strcmp(cmdName, "@itcl-builtin-mytypemethod") == 0) {
 	    return Tcl_FindCommand(interp, "::itcl::builtin::mytypemethod",

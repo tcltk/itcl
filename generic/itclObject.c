@@ -24,7 +24,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann Copyright (c) 2007
  *
- *     RCS:  $Id: itclObject.c,v 1.1.2.69 2009/01/05 19:50:29 wiede Exp $
+ *     RCS:  $Id: itclObject.c,v 1.1.2.70 2009/01/06 16:11:42 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -2647,6 +2647,7 @@ ItclObjectCmd(
     Tcl_Obj **newObjv;
     Tcl_DString buffer;
     Tcl_Obj *myPtr;
+    ItclObjectInfo *infoPtr;
     ItclMemberFunc *imPtr;
     ItclClass *iclsPtr;
     Itcl_ListElem *elem;
@@ -2668,6 +2669,7 @@ ItclObjectCmd(
     myPtr = NULL;
     imPtr = (ItclMemberFunc *)clientData;
     iclsPtr = imPtr->iclsPtr;
+    infoPtr = imPtr->iclsPtr->infoPtr;
     if ((oPtr == NULL) && (clsPtr == NULL)) {
          isDirectCall = 1;
     }
@@ -2680,8 +2682,17 @@ ItclObjectCmd(
 	            objc, objv);
             return result;
 	}
+	oPtr = NULL;
 	clientData = Itcl_GetCallFrameClientData(interp);
-	if (clientData == NULL) {
+	if (infoPtr->currIoPtr != NULL) {
+	    /* if we want to call methods in the constructor for example
+	     * config* methods, clientData
+	     * is still NULL, but we can use infoPtr->currIoPtr
+	     * for getting the TclOO object ptr
+	     */
+	    oPtr = infoPtr->currIoPtr->oPtr;
+	}
+	if ((clientData == NULL) && (oPtr == NULL)) {
 	    if (((imPtr->codePtr != NULL)
 	            && (imPtr->codePtr->flags & ITCL_BUILTIN))) {
 	        result = Itcl_InvokeProcedureMethod(imPtr->tmPtr, interp,
@@ -2692,7 +2703,9 @@ ItclObjectCmd(
 	            "ItclObjectCmd cannot get context object (NULL)", NULL);
 	    return TCL_ERROR;
 	}
-        oPtr = Tcl_ObjectContextObject((Tcl_ObjectContext)clientData);
+	if (oPtr == NULL) {
+            oPtr = Tcl_ObjectContextObject((Tcl_ObjectContext)clientData);
+        }
     }
     methodNamePtr = NULL;
     if (objv[0] != NULL) {
@@ -3413,6 +3426,9 @@ DelegationInstall(
 	            continue;
 	        }
                 if (strcmp(methodName, "setupcomponent") == 0) {
+	            continue;
+	        }
+                if (strcmp(methodName, "itcl_initoptions") == 0) {
 	            continue;
 	        }
                 if (strcmp(methodName, "mytypemethod") == 0) {

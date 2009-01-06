@@ -39,7 +39,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclParse.c,v 1.1.2.65 2009/01/02 22:11:48 wiede Exp $
+ *     RCS:  $Id: itclParse.c,v 1.1.2.66 2009/01/06 16:11:42 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -817,6 +817,11 @@ ItclClassBaseCmd(
 		if (strcmp(Tcl_GetString(imPtr->codePtr->bodyPtr),
 		        "@itcl-builtin-setupcomponent") == 0) {
 		    Tcl_AppendToObj(bodyPtr, "::itcl::builtin::setupcomponent", -1);
+		    isDone = 1;
+		}
+		if (strcmp(Tcl_GetString(imPtr->codePtr->bodyPtr),
+		        "@itcl-builtin-initoptions") == 0) {
+		    Tcl_AppendToObj(bodyPtr, "::itcl::builtin::initoptions", -1);
 		    isDone = 1;
 		}
 		if (strcmp(Tcl_GetString(imPtr->codePtr->bodyPtr),
