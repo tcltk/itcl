@@ -6,7 +6,7 @@
 # ----------------------------------------------------------------------
 #   AUTHOR:  Arnulf P. Wiedemann
 #
-#      RCS:  $Id: itclHullCmds.tcl,v 1.1.2.5 2008/12/28 21:38:54 wiede Exp $
+#      RCS:  $Id: itclHullCmds.tcl,v 1.1.2.6 2009/01/06 16:07:14 wiede Exp $
 # ----------------------------------------------------------------------
 #            Copyright (c) 2008  Arnulf P. Wiedemann
 # ======================================================================
@@ -43,6 +43,7 @@ namespace eval ::itcl::builtin {
 proc createhull {widget_type path args} {
     variable hullCount
     upvar this this
+    upvar win win
 
 #puts stderr "createhull!$widget_type!$path!$args!$this![::info command $this]!"
 #puts stderr "ns1![uplevel 1 namespace current]!"
@@ -103,6 +104,7 @@ proc createhull {widget_type path args} {
     rename ${tmp}_ ::$tmp
     ::itcl::setcomponent $my_this itcl_hull $widgetName
 #puts stderr "IC![::info command $my_win]!"
+    set win $my_win
     return $my_win
 }
 
@@ -151,6 +153,39 @@ proc setupcomponent {comp using widget_type path args} {
 	}
     }
 #puts stderr END!$path![::info command $path]!
+}
+
+# ======================= setupcomponent ===========================
+
+proc initoptions {args} {
+    upvar win win
+
+    if {[llength $args]} {
+        set argsDict [dict create {*}$args]
+    } else {
+        set argsDict [dict create]
+    }
+    set myOptions [uplevel 1 info options]
+    set my_class [uplevel 1 info class]
+    set myDelegatedOptions [uplevel 1 info delegated options]
+    set opt_lst [list configure]
+    foreach opt $myOptions {
+       set my_win $win
+       if {![catch {
+           set resource [uplevel 1 info option $opt -resource]
+           set class [uplevel 1 info option $opt -class]
+       } msg]} {
+           set val [uplevel #0 ::option get $my_win $resource $class]
+           if {![::dict exists $argsDict $opt]} {
+	       if {[string length $val] > 0} {
+	           uplevel 1 set itcl_options($opt) $val
+	       }
+	   }
+           set val [uplevel 1 set itcl_options($opt)]
+	   lappend opt_lst $opt $val
+       }
+    }
+    uplevel 1 $opt_lst
 }
 
 }
