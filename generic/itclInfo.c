@@ -24,7 +24,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclInfo.c,v 1.1.2.40 2009/01/02 13:01:04 wiede Exp $
+ *     RCS:  $Id: itclInfo.c,v 1.1.2.41 2009/01/06 16:12:11 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -2111,17 +2111,6 @@ Itcl_BiInfoOptionCmd(
     if (contextIoPtr != NULL) {
         contextIclsPtr = contextIoPtr->iclsPtr;
     }
-#ifdef NOTDEF
-    nsPtr = Itcl_GetUplevelNamespace(interp, 1);
-    infoPtr = contextIclsPtr->infoPtr;
-    hPtr = Tcl_FindHashEntry(&infoPtr->namespaceClasses, (char *)nsPtr);
-    if (hPtr == NULL) {
-        Tcl_AppendResult(interp, "cannot find class name for namespace \"",
-	        nsPtr->fullName, "\"", NULL);
-	return TCL_ERROR;
-    }
-    contextIclsPtr = Tcl_GetHashValue(hPtr);
-#endif
 
     /*
      *  Process args:
