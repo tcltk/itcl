@@ -37,7 +37,7 @@
 #    Copyright (c) 1995 DSC Technologies Corporation
 # ----------------------------------------------------------------------
 #
-#   @(#) $Id: notebook.tcl,v 1.1.2.3 2009/01/05 21:11:13 wiede Exp $
+#   @(#) $Id: notebook.tcl,v 1.1.2.4 2009/01/06 22:03:43 wiede Exp $
 # ======================================================================
 
 #
@@ -59,8 +59,6 @@ proc ::itcl::widgets::notebook {pathName args} {
 #                            NOTEBOOK
 # ------------------------------------------------------------------
 ::itcl::extendedclass Notebook {
-    component itcl_hull
-    component itcl_interior
     component cs
     
     option [list -background background Background] -default #d9d9d9 -configuremethod configBackground
@@ -103,7 +101,7 @@ proc ::itcl::widgets::notebook {pathName args} {
 #                      CONSTRUCTOR
 # ------------------------------------------------------------------
 ::itcl::body Notebook::constructor {args}  {
-    set win [createhull frame $this -class [info class] -borderwidth 0]
+    createhull frame $this -class [info class] -borderwidth 0
     set itcl_interior $win
     #
     # Create the outermost frame to maintain geometry.
@@ -112,6 +110,7 @@ proc ::itcl::widgets::notebook {pathName args} {
     keepcomponentoption cs -cursor -background -width -height
     pack $cs -fill both -expand yes
     pack propagate $cs no
+
     if {[llength $args] > 0} {
         uplevel 0 configure $args
     }
@@ -397,6 +396,7 @@ proc ::itcl::widgets::notebook {pathName args} {
     set index [lindex $args 0]
     set args [lrange $args 1 $len]
     set page [_index $_pages $index $_currPage]
+
     # ... Error: page out of range
     if {($page < 0) || ($page >= [llength $_pages])} {
 	error "bad Notebook page index in pageconfigure method:\
@@ -613,7 +613,7 @@ proc ::itcl::widgets::notebook {pathName args} {
 # an integer it looks it up in the $pathList array.
 # If it fails it returns -1
 # ------------------------------------------------------------------
-::itcl::body Notebook::_index { pathList index select} {
+::itcl::body Notebook::_index {pathList index select} {
     switch -- $index {
     select {
         set number $select

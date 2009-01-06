@@ -16,7 +16,7 @@
 #   Copyright (c) 1995 DSC Technologies Corporation
 # ----------------------------------------------------------------------
 #
-#   @(#) $Id: timefield.tcl,v 1.1.2.2 2009/01/05 23:52:43 wiede Exp $
+#   @(#) $Id: timefield.tcl,v 1.1.2.3 2009/01/06 22:03:43 wiede Exp $
 # ======================================================================
 
 #
@@ -51,6 +51,8 @@ proc ::itcl::widgets::timefield {pathName args} {
     option [list -state state State] -default normal -configuremethod configState
 
     delegate option [list -textbackground textBackground Background] to time as -background
+    delegate option [list -textfont textFont Font] to time as -font
+
     protected variable _cfield hour
     protected variable _formatString "%r"
     protected variable _fields {}
@@ -102,9 +104,9 @@ public method component {comp args} {
     setupcomponent time using entry $itcl_interior.time
     keepcomponentoption time -borderwidth -cursor -exportselection \
           -foreground -highlightcolor -highlightthickness \
-          -insertbackground -justify -relief -textvariable
+          -insertbackground -justify -relief -textvariable \
+	  -textbackground -textfont
       
-# FIXME      rename -font -textfont textFont Font
 # FIXME      rename -highlightbackground -background background Background
 
     #
@@ -372,11 +374,11 @@ public method component {comp args} {
         set seconds [::clock seconds]
       }
     {^[0-9]+$} {
-        if { [catch {::clock format $mytime -gmt $itcl_options(-gmt)}] } {
+        if {[catch {::clock format $mytime -gmt $itcl_options(-gmt)}]} {
             error "bad time: \"$mytime\", must be a valid time \
                  string, clock clicks value or the keyword now"
         }
-        set seconds $time
+        set seconds $mytime
       }
     default {
         if {[catch {
@@ -404,8 +406,8 @@ public method component {comp args} {
 # ------------------------------------------------------------------
 ::itcl::body Timefield::isvalid {} {
     set _timeVar [$time get]
-    return [expr {([catch {
-            ::clock scan $_timeVar -gmt $itcl_options(-gmt)}] == 0)}]
+    set result [catch {::clock scan $_timeVar -gmt $itcl_options(-gmt)} msg]
+    return [expr {$result == 0}]
 }
 
 # ------------------------------------------------------------------

@@ -15,7 +15,7 @@
 #   Copyright (c) 1995 DSC Technologies Corporation
 # ----------------------------------------------------------------------
 #
-#   @(#) $Id: watch.tcl,v 1.1.2.2 2009/01/06 16:41:22 wiede Exp $
+#   @(#) $Id: watch.tcl,v 1.1.2.3 2009/01/06 22:03:43 wiede Exp $
 # ======================================================================
 
 #
@@ -40,7 +40,6 @@ proc ::itcl::widgets::watch {pathName args} {
 }
 
 ::itcl::extendedclass ::itcl::widgets::Watch {
-
     component itcl_hull
     component itcl_interior
     component btframe
@@ -70,7 +69,6 @@ proc ::itcl::widgets::watch {pathName args} {
     delegate option [list -labelfont labelFont Font] to am as -font
     delegate option [list -labelfont labelFont Font] to pm as -font
 
-    protected variable _interior
     protected variable _radius
     protected variable _theta
     protected variable _extent
@@ -112,13 +110,11 @@ proc ::itcl::widgets::watch {pathName args} {
 #                        CONSTRUCTOR
 # -----------------------------------------------------------------------------
 ::itcl::body Watch::constructor {args} {
-    createhull frame $this -class [namespace tail [info class]]
-    set itcl_interior $win
+    createhull frame $this -class [info class]
     #
     # Add back to the hull width and height options and make the
     # borderwidth zero since we don't need it.
     #
-    set _interior $itcl_interior
 
 #    itcl_options add hull.width hull.height
     keepcomponentoption itcl_hull -width -height
@@ -154,9 +150,7 @@ proc ::itcl::widgets::watch {pathName args} {
     # Create the canvas in which the clock will be drawn
     #
     setupcomponent canvas using canvas $itcl_interior.canvas
-    bind $canvas <Map> +[list puts stderr Mapevent]
     bind $canvas <Map> +[itcl::code $this _displayClock]
-    bind $canvas <Configure> +[list puts stderr Configurevent]
     bind $canvas <Configure> +[itcl::code $this _displayClock]
 
     #
@@ -361,7 +355,6 @@ proc ::itcl::widgets::watch {pathName args} {
 # then the change is applied later, when the application is idle.
 # -----------------------------------------------------------------------------
 ::itcl::body Watch::_displayClock {{when "later"}} {
-puts stderr "_displayClock!$when!"
     if {$when == "later"} {
 	if {$_reposition == ""} {
 	    set _reposition [after idle [itcl::code $this _displayClock now]]
@@ -372,7 +365,6 @@ puts stderr "_displayClock!$when!"
     # Compute the center coordinates for the clock based on the
     # with and height of the canvas.
     #
-puts stderr "_displayClock2![winfo width $canvas]![winfo height $canvas]!"
     set width [winfo width $canvas]
     set height [winfo height $canvas]
     set _x0 [expr {$width/2}]
@@ -386,7 +378,6 @@ puts stderr "_displayClock2![winfo width $canvas]![winfo height $canvas]!"
     set _radius(minute) [expr {$itcl_options(-minuteradius)*$_radius(outer)}]
     set _radius(second) [expr {$itcl_options(-secondradius)*$_radius(outer)}]
     set outerWidth [watch itemcget clock -width]
-puts stderr "outerWidth!$outerWidth!"
     #
     # Set the coordinates of the clock item
     #
@@ -394,7 +385,6 @@ puts stderr "outerWidth!$outerWidth!"
     set y1Outer $outerWidth
     set x2Outer [expr {$width-$outerWidth}]
     set y2Outer [expr {$height-$outerWidth}]
-puts stderr "watch coords clock $x1Outer $y1Outer $x2Outer $y2Outer"
     watch coords clock $x1Outer $y1Outer $x2Outer $y2Outer
     #
     # Set the coordinates of the tick items
@@ -418,20 +408,17 @@ puts stderr "watch coords clock $x1Outer $y1Outer $x2Outer $y2Outer"
     set y1Center [expr {$_y0-$_radius(pivot)}]
     set x2Center [expr {$_x0+$_radius(pivot)}]
     set y2Center [expr {$_y0+$_radius(pivot)}]
-puts stderr "watch coords pivot $x1Center $y1Center $x2Center $y2Center"
     watch coords pivot $x1Center $y1Center $x2Center $y2Center        
     #
     # Set the coordinates of the hour, minute, and second dial items
     #
     watch itemconfigure hour -extent $_extent(hour)
     _drawHand hour
-puts stderr "after _drawHand hour"
     watch itemconfigure minute -extent $_extent(minute)
     _drawHand minute
     watch itemconfigure second -extent $_extent(second)
     _drawHand second
     set _reposition ""
-puts stderr "_displayClock end"
 }
 
 # -----------------------------------------------------------------------------
@@ -545,7 +532,6 @@ puts stderr "_displayClock end"
 # Configure the color of the hour hand.
 #
 ::itcl::body Watch::configHourcolor {option value} {
-puts stderr "Watch::configHourcolor!$value!"
     watch itemconfigure hour -fill $value
     set itcl_options($option) $value
 }
@@ -586,7 +572,6 @@ puts stderr "Watch::configHourcolor!$value!"
 # Configure the radius of the hour hand.
 #
 ::itcl::body Watch::configHourradius {option value} {
-puts stderr "configHourradius"
     set itcl_options($option) $value
     _displayClock
 }
@@ -597,7 +582,6 @@ puts stderr "configHourradius"
 # Configure the radius of the minute hand.
 #
 ::itcl::body Watch::configMinuteradius {option value} {
-puts stderr "configMinuteradius"
     set itcl_options($option) $value
     _displayClock
 }
@@ -608,7 +592,6 @@ puts stderr "configMinuteradius"
 # Configure the radius of the second hand.
 #
 ::itcl::body Watch::configSecondradius {option value} {
-puts stderr "configSecondradius"
     set itcl_options($option) $value
     _displayClock
 }

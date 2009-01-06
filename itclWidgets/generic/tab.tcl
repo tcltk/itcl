@@ -14,13 +14,13 @@
 # see file license.terms in the top directory
 #
 # ----------------------------------------------------------------------
-# This code is derived/reimplemented from the ::itcl::widgets package Tabset
+# This code is derived/reimplemented from the iwidgets package Tabset
 # written by:
 #    AUTHOR: Bill W. Scott
 #    Copyright (c) 1995 DSC Technologies Corporation
 # ----------------------------------------------------------------------
 #
-#   @(#) $Id: tab.tcl,v 1.1.2.1 2009/01/04 13:39:38 wiede Exp $
+#   @(#) $Id: tab.tcl,v 1.1.2.2 2009/01/06 22:03:43 wiede Exp $
 # ======================================================================
 
 #

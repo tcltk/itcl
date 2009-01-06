@@ -38,7 +38,7 @@
 #   Copyright (c) 1995 DSC Technologies Corporation
 # ----------------------------------------------------------------------
 #
-#   @(#) $Id: toolbar.tcl,v 1.1.2.1 2009/01/06 21:50:16 wiede Exp $
+#   @(#) $Id: toolbar.tcl,v 1.1.2.2 2009/01/06 21:58:41 wiede Exp $
 # ======================================================================
 
 #
@@ -50,13 +50,6 @@ option add *Toolbar*orient horizontal widgetDefault
 option add *Toolbar*highlightThickness 0 widgetDefault
 option add *Toolbar*indicatorOn false widgetDefault
 option add *Toolbar*selectColor [. cget -bg] widgetDefault
-
-    keep -activebackground -activeforeground -background -balloonbackground \
-	 -balloondelay1 -balloondelay2 -balloonfont -balloonforeground \
-	 -borderwidth -cursor -disabledforeground -font -foreground \
-	 -highlightbackground -highlightcolor -highlightthickness \
-	 -insertbackground -insertforeground -selectbackground \
-	 -selectborderwidth -selectcolor -selectforeground -troughcolor
 
 namespace eval ::itcl::widgets {
 
@@ -197,7 +190,7 @@ proc ::itcl::widgets::toolbar {pathName args} {
     uplevel 0 itcl_initoptions $args
 
     # build balloon help window
-    set _hintWindow [toplevel $itcl_hull.balloonHintWindow]
+    set _hintWindow [toplevel $win.balloonHintWindow]
     wm withdraw $_hintWindow
     label $_hintWindow.label \
 	-foreground $itcl_options(-balloonforeground) \
@@ -208,20 +201,20 @@ proc ::itcl::widgets::toolbar {pathName args} {
     pack $_hintWindow.label
     
     # ... Attach help handler to this widget
-    bind toolbar-help-$itcl_hull \
+    bind toolbar-help-$win \
 	    <Enter> "+[itcl::code $this showHelp %W]"
-    bind toolbar-help-$itcl_hull \
+    bind toolbar-help-$win \
 	    <Leave> "+[itcl::code $this hideHelp]"
     
     # ... Set up Microsoft style balloon help display.
     set _balloonTimer $itcl_options(-balloondelay1)
     bind $_interior \
 	    <Leave> "+[itcl::code $this _resetBalloonTimer]"
-    bind toolbar-balloon-$itcl_hull \
+    bind toolbar-balloon-$win \
 	    <Enter> "+[itcl::code $this _startBalloonDelay %W]"
-    bind toolbar-balloon-$itcl_hull \
+    bind toolbar-balloon-$win \
 	    <Leave> "+[itcl::code $this _stopBalloonDelay %W false]"
-    bind toolbar-balloon-$itcl_hull \
+    bind toolbar-balloon-$win \
 	    <Button-1> "+[itcl::code $this _stopBalloonDelay %W true]"
 }
 
@@ -278,7 +271,7 @@ proc ::itcl::widgets::toolbar {pathName args} {
 # Position buttons either horizontally or vertically.
 # ------------------------------------------------------------------
 ::itcl::body Toolbar::configOrient {option value} {
-    switch $ivalue {
+    switch $value {
     "horizontal" -
     "vertical" {
         _packToolbar
@@ -397,7 +390,7 @@ proc ::itcl::widgets::toolbar {pathName args} {
     if {($beforeIndex < 0) || ($beforeIndex > [llength $_toolList])} {
 	error "bad toolbar entry index $beforeIndex"
     }
-    eval "_addWidget $widgetCommand $name $args"
+    uplevel 0 "_addWidget $widgetCommand $name $args"
     # linsert into list
     set _toolList [linsert $_toolList $beforeIndex [set $name]]
     # repack the tool bar
@@ -414,6 +407,7 @@ proc ::itcl::widgets::toolbar {pathName args} {
 # ----------------------------------------------------------------------
 ::itcl::body Toolbar::itemcget { index args} {
     return [lindex [eval itemconfigure $index $args] 4]
+}
 
 # -------------------------------------------------------------
 #
@@ -624,16 +618,16 @@ proc ::itcl::widgets::toolbar {pathName args} {
     foreach optionSet [[set $name] configure] {
 	set option [lindex $optionSet 0]
 	if { [lsearch $_optionList $option] != -1 } {
-	    itcl_options add $name.$option
+# FIXME	    itcl_options add $name.$option
 	}
     }
     set my_comp [set $name]
     bindtags $my_comp \
 	    [linsert [bindtags $my_comp] end \
-	    toolbar-help-$itcl_hull]
+	    toolbar-help-$win]
     bindtags $my_comp \
 	    [linsert [bindtags $my_comp] end \
-	    toolbar-balloon-$itcl_hull]
+	    toolbar-balloon-$win]
     
     return $my_comp
 }

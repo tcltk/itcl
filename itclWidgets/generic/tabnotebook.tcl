@@ -39,7 +39,7 @@
 #    Copyright (c) 1995 DSC Technologies Corporation
 # ----------------------------------------------------------------------
 #
-#   @(#) $Id: tabnotebook.tcl,v 1.1.2.2 2009/01/04 13:51:10 wiede Exp $
+#   @(#) $Id: tabnotebook.tcl,v 1.1.2.3 2009/01/06 22:03:43 wiede Exp $
 # ======================================================================
 
 #
@@ -179,8 +179,7 @@ proc ::itcl::widgets::tabnotebook {pathName args} {
 #                              CONSTRUCTOR
 # ----------------------------------------------------------------------
 ::itcl::body Tabnotebook::constructor {args} {
-    set win [createhull frame $this -class [info class] -borderwidth 0 -padx 0 -pady 0]
-    set itcl_interior $win
+    createhull frame $this -class [info class] -borderwidth 0 -padx 0 -pady 0
     #
     # Create the outermost canvas to maintain geometry.
     #
