@@ -9,7 +9,7 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itclBase.c,v 1.1.2.37 2008/12/31 22:41:55 wiede Exp $
+ * RCS: @(#) $Id: itclBase.c,v 1.1.2.38 2009/01/07 19:38:50 wiede Exp $
  */
 
 #include <stdlib.h>
@@ -228,7 +228,9 @@ FreeItclObjectInfo(
  * ------------------------------------------------------------------------
  */
 
+#ifdef NEW_PROTO_RESOLVER
 int ItclVarsAndCommandResolveInit(Tcl_Interp *interp);
+#endif
 
 static int
 Initialize (
@@ -344,7 +346,9 @@ opt = atoi(res_option);
 
     Itcl_PreserveData((ClientData)infoPtr);
 
+#ifdef NEW_PROTO_RESOLVER
     ItclVarsAndCommandResolveInit(interp);
+#endif
 
     /* first create the Itcl base class as root of itcl classes */
     if (Tcl_Eval(interp, clazzClassScript) != TCL_OK) {

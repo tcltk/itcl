@@ -8,7 +8,7 @@
  * ========================================================================
  *  AUTHOR:  Arnulf Wiedemann
  *
- *     RCS:  $Id: itclResolve2.c,v 1.1.2.2 2008/11/08 23:40:12 wiede Exp $
+ *     RCS:  $Id: itclResolve2.c,v 1.1.2.3 2009/01/07 19:38:50 wiede Exp $
  * ========================================================================
  *           Copyright (c) Arnulf Wiedemann
  * ------------------------------------------------------------------------
@@ -41,9 +41,6 @@ Itcl_CheckClassVariableProtection(
     ItclClassVarInfo *icviPtr;
 
     icviPtr = (ItclClassVarInfo *)clientData;
-/*
-fprintf(stderr, "Itcl_CheckClassVariableProtection!%s!%s!%s!%d!%d\n", nsPtr->fullName, Tcl_GetCurrentNamespace(interp)->fullName, varName, icviPtr->protection, icviPtr->type);
-*/
     if (icviPtr->protection == ITCL_PRIVATE) {
         if (icviPtr->declaringNsPtr != nsPtr) {
 	    Tcl_AppendResult(interp, "can't read \"", varName,
@@ -61,9 +58,6 @@ Itcl_CheckClassCommandProtection(
     const char *commandName,
     ClientData clientData)
 {
-/*
-fprintf(stderr, "Itcl_CheckClassCommandProtection!%s!%s!%p!\n", nsPtr->fullName, commandName, clientData);
-*/
     /* FIXME need code here !!! */
     return TCL_OK;
 }
@@ -100,13 +94,8 @@ Itcl_ClassCmdResolver2(
     ItclResolvingInfo *iriPtr;
     ObjectCmdTableInfo *octiPtr;
     ObjectCmdInfo *ociPtr;
-
-
     Tcl_HashEntry *hPtr;
 
-/*
-fprintf(stderr, "Itcl_ClassCmdResolver2!%s!%s!\n", name, nsPtr->fullName);
-*/
     if ((name[0] == 't') && (strcmp(name, "this") == 0)) {
         return TCL_CONTINUE;
     }

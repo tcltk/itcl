@@ -24,7 +24,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclBuiltin.c,v 1.1.2.67 2009/01/06 16:11:42 wiede Exp $
+ *     RCS:  $Id: itclBuiltin.c,v 1.1.2.68 2009/01/07 19:38:50 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -1429,9 +1429,6 @@ ItclBiClassUnknownCmd(
 	            return TCL_ERROR;
 	        }
 	    }
-/*
-fprintf(stderr, "UK!%s!%p!%s!\n", Tcl_GetString(idmPtr->namePtr), idmPtr->icPtr, val);
-*/
 	    offset = 1;
 	    lObjc = 0;
 	    if ((idmPtr->asPtr != NULL) || (idmPtr->usingPtr != NULL)) {
@@ -1452,9 +1449,6 @@ fprintf(stderr, "UK!%s!%p!%s!\n", Tcl_GetString(idmPtr->namePtr), idmPtr->icPtr,
                     useComponent = 0;
 		}
 	    }
-/*
-fprintf(stderr, "OBJC!%d!%d!%d!%d!%d!\n", objc, lObjc, offset, useComponent, (objc + lObjc - offset));
-*/
 	    if (useComponent) {
 	        if ((val == NULL) || (strlen(val) == 0)) {
 		    Tcl_AppendResult(interp, "component \"", 
@@ -1712,12 +1706,10 @@ ItclBiObjectUnknownCmd(
                     NULL, 0);
 	    Tcl_DStringFree(&buffer);
         }
-/*
-fprintf(stderr, "UKOBJ!%s!%p!%s!\n", Tcl_GetString(idmPtr->namePtr), idmPtr->icPtr, val);
-*/
 
         if (val == NULL) {
-fprintf(stderr, "ItclBiObjectUnknownCmd contents of component == NULL\n");
+            Tcl_AppendResult(interp, "ItclBiObjectUnknownCmd contents of ",
+	            "component == NULL\n", NULL);
             return TCL_ERROR;
         }
     }
@@ -1770,10 +1762,6 @@ fprintf(stderr, "ItclBiObjectUnknownCmd contents of component == NULL\n");
             useComponent = 0;
 	}
     }
-/*
-fprintf(stderr, "OBJC!%d!%d!%d!%d!%d!\n", objc, lObjc, offset, useComponent, (objc + lObjc - offset));
-*/
-
     if (useComponent) {
 	if ((val == NULL) || (strlen(val) == 0)) {
 	    Tcl_AppendResult(interp, "component \"", 

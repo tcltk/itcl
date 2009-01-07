@@ -23,7 +23,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclUtil.c,v 1.1.2.12 2009/01/02 20:23:57 wiede Exp $
+ *     RCS:  $Id: itclUtil.c,v 1.1.2.13 2009/01/07 19:38:50 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -734,17 +734,15 @@ ItclDbgReleaseData(
             ipiePtr->line = line;
             ipiePtr->fileName = file;
             ipiPtr->refCount--;
-if (ipiPtr->refCount < 0) {
-fprintf(stderr, "REFCOUNT < 0 for: %p!\n", cdata);
-noDelete = 1;
-}
-        } else {
-fprintf(stderr, "ReleaseData no entry found for: %p %d %s\n", cdata, line, file);
+            if (ipiPtr->refCount < 0) {
+                fprintf(stderr, "REFCOUNT < 0 for: %p!\n", cdata);
+                noDelete = 1;
+            }
 	}
     }
-if (!noDelete) {
-    Tcl_Release(cdata);
-}
+    if (!noDelete) {
+        Tcl_Release(cdata);
+    }
     return;
 }
 #else

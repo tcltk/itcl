@@ -8,7 +8,7 @@
  * ========================================================================
  *  AUTHOR:  Arnulf Wiedemann
  *
- *     RCS:  $Id: itclVarsAndCmds.c,v 1.1.2.3 2008/12/06 23:05:47 wiede Exp $
+ *     RCS:  $Id: itclVarsAndCmds.c,v 1.1.2.4 2009/01/07 19:38:50 wiede Exp $
  * ========================================================================
  *           Copyright (c) Arnulf Wiedemann
  * ------------------------------------------------------------------------
@@ -74,11 +74,6 @@ Itcl_RegisterClassVariable(
     ItclResolvingInfo *iriPtr;
     int isNew;
 
-/*
-if (strcmp(varName, "this") == 0) {
-fprintf(stderr, "Itcl_RegisterClassVariable!%s!%s!%p!\n", nsPtr->fullName, varName, clientData);
-}
-*/
     iriPtr = Tcl_GetAssocData(interp, ITCL_RESOLVE_DATA, NULL);
     hPtr = Tcl_CreateHashEntry(&iriPtr->resolveVars, nsPtr->fullName, &isNew);
     if (isNew) {
@@ -91,9 +86,6 @@ fprintf(stderr, "Itcl_RegisterClassVariable!%s!%s!%p!\n", nsPtr->fullName, varNa
     }
     hPtr = Tcl_CreateHashEntry(tablePtr, varName, &isNew);
     if (isNew) {
-/*
-fprintf(stderr, "Itcl_RegisterClassVariable!%s!%s!%p!\n", nsPtr->fullName, varName, clientData);
-*/
         Tcl_SetHashValue(hPtr, clientData);
     }
     return Tcl_GetHashValue(hPtr);
@@ -122,9 +114,6 @@ Itcl_RegisterClassCommand(
         tablePtr = Tcl_GetHashValue(hPtr);
     }
     hPtr = Tcl_CreateHashEntry(tablePtr, cmdName, &isNew);
-/*
-fprintf(stderr, "Itcl_RegisterClassCommand!%s!%s!tablePtr!%p!clientData!%p!\n", nsPtr->fullName, cmdName, tablePtr, clientData);
-*/
     if (isNew) {
         Tcl_SetHashValue(hPtr, clientData);
     }
@@ -146,9 +135,6 @@ Itcl_RegisterObjectVariable(
     ObjectVarInfo *oviPtr;
     int isNew;
 
-/*
-fprintf(stderr, "Itcl_RegisterObjectVariable!%s!%s!%p!%p!\n", nsPtr->fullName, varName, ioPtr, clientData);
-*/
     iriPtr = Tcl_GetAssocData(interp, ITCL_RESOLVE_DATA, NULL);
     hPtr = Tcl_CreateHashEntry(&iriPtr->objectVarsTables,
             (char *)ioPtr, &isNew);
@@ -160,9 +146,6 @@ fprintf(stderr, "Itcl_RegisterObjectVariable!%s!%s!%p!%p!\n", nsPtr->fullName, v
     } else {
         ovtiPtr = Tcl_GetHashValue(hPtr);
     }
-/*
-fprintf(stderr, "Itcl_RegisterObjectVariable!%s!%s!ovtiPtr!%p!clientData!%p!\n", nsPtr->fullName, varName, ovtiPtr, clientData);
-*/
     hPtr = Tcl_CreateHashEntry(&ovtiPtr->varInfos, (char *)clientData, &isNew);
     if (isNew) {
 	oviPtr = (ObjectVarInfo *)ckalloc(sizeof(ObjectVarInfo));
@@ -177,9 +160,6 @@ fprintf(stderr, "Itcl_RegisterObjectVariable!%s!%s!ovtiPtr!%p!clientData!%p!\n",
         varPtr = Tcl_NewNamespaceVar(interp, nsPtr, varName);
     }
     oviPtr->varPtr = varPtr;
-/*
-fprintf(stderr, "Itcl_RegisterObjectVariable!%p!\n", varPtr);
-*/
     return varPtr;
 }
 
@@ -198,9 +178,6 @@ Itcl_RegisterObjectCommand(
     ObjectCmdInfo *ociPtr;
     int isNew;
 
-/*
-fprintf(stderr, "Itcl_RegisterObjectCommand!%s!%s!ioPtr!%p!clientData!%p!\n", nsPtr->fullName, cmdName, ioPtr, clientData);
-*/
     iriPtr = Tcl_GetAssocData(interp, ITCL_RESOLVE_DATA, NULL);
     hPtr = Tcl_CreateHashEntry(&iriPtr->objectCmdsTables,
             (char *)ioPtr, &isNew);
@@ -212,9 +189,6 @@ fprintf(stderr, "Itcl_RegisterObjectCommand!%s!%s!ioPtr!%p!clientData!%p!\n", ns
     } else {
         octiPtr = Tcl_GetHashValue(hPtr);
     }
-/*
-fprintf(stderr, "Itcl_RegisterObjectCommand!%s!%s!octiPtr!%p!clientData!%p!\n", nsPtr->fullName, varName, octiPtr, clientData);
-*/
     hPtr = Tcl_CreateHashEntry(&octiPtr->cmdInfos, (char *)clientData, &isNew);
     if (isNew) {
 	ociPtr = (ObjectCmdInfo *)ckalloc(sizeof(ObjectCmdInfo));
@@ -231,9 +205,6 @@ fprintf(stderr, "Itcl_RegisterObjectCommand!%s!%s!octiPtr!%p!clientData!%p!\n", 
 */
     }
     ociPtr->cmdPtr = cmdPtr;
-/*
-fprintf(stderr, "Itcl_RegisterObjectCommand!%p!\n", cmdPtr);
-*/
     return cmdPtr;
 }
 

@@ -23,7 +23,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclCmd.c,v 1.1.2.46 2009/01/07 10:53:40 wiede Exp $
+ *     RCS:  $Id: itclCmd.c,v 1.1.2.47 2009/01/07 19:38:50 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -1410,7 +1410,8 @@ Itcl_NWidgetCmd(
         return result;
     }
     if (iclsPtr == NULL) {
-fprintf(stderr, "Itcl_NWidgetCmd!iclsPtr == NULL\n");
+        Tcl_AppendResult(interp, "Itcl_NWidgetCmd!iclsPtr == NULL\n", NULL);
+        result = TCL_ERROR;
     }
     return result;
 }

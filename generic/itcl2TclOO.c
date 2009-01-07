@@ -8,7 +8,7 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itcl2TclOO.c,v 1.1.2.12 2008/10/26 21:35:30 wiede Exp $
+ * RCS: @(#) $Id: itcl2TclOO.c,v 1.1.2.13 2009/01/07 19:38:50 wiede Exp $
  */
 
 #include <tcl.h>
@@ -400,7 +400,6 @@ Itcl_SelfCmd(
         Tcl_SetObjResult(interp, Itcl_TclOOObjectName(interp, contextPtr->oPtr));
         return TCL_OK;
     }
-fprintf(stderr, "Itcl_SelfCmd!should not happen\n");
     return TCL_ERROR;
 }
 

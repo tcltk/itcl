@@ -20,7 +20,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itclResolve.c,v 1.1.2.27 2008/12/31 17:11:02 wiede Exp $
+ *     RCS:  $Id: itclResolve.c,v 1.1.2.28 2009/01/07 19:38:50 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -75,9 +75,6 @@ Itcl_ClassCmdResolver(
     int inOptionHandling;
     int isCmdDeleted;
 
-/*
-fprintf(stderr, "RCMD1!%s!%s!\n", nsPtr->fullName, name);
-*/
     if ((name[0] == 't') && (strcmp(name, "this") == 0)) {
         return TCL_CONTINUE;
     }
@@ -96,26 +93,12 @@ fprintf(stderr, "RCMD1!%s!%s!\n", nsPtr->fullName, name);
     hPtr = Tcl_FindHashEntry(&iclsPtr->resolveCmds, (char *)objPtr);
     Tcl_DecrRefCount(objPtr);
     if (hPtr == NULL) {
-#ifdef NOTDEF
-	if (!(iclsPtr->flags & ITCL_CLASS)) {
-	    namePtr = Tcl_NewStringObj(name, -1);
-	    Tcl_IncrRefCount(namePtr);
-/* FIXME have to check what to do here or what is possible */
-	    hPtr = Tcl_FindHashEntry(&iclsPtr->components, (char *)namePtr);
-	    Tcl_DecrRefCount(namePtr);
-            if (hPtr != NULL) {
-	    }
-        }
-#endif
 	if ((iclsPtr->flags & ITCL_ECLASS)) {
 	    namePtr = Tcl_NewStringObj(name, -1);
 	    hPtr = Tcl_FindHashEntry(&iclsPtr->delegatedFunctions,
 	            (char *)namePtr);
 	    if (hPtr != NULL) {
 	        idmPtr = Tcl_GetHashValue(hPtr);
-/*
-fprintf(stderr, "RCMD:found delegated function!%s!\n", name);
-*/
                 objPtr = Tcl_NewStringObj("unknown", -1);
                 hPtr = Tcl_FindHashEntry(&iclsPtr->resolveCmds, (char *)objPtr);
                 Tcl_DecrRefCount(objPtr);
@@ -272,17 +255,11 @@ Itcl_ClassVarResolver(
     upNsPtr = Itcl_GetUplevelNamespace(interp, 1);
     assert(Itcl_IsClassNamespace(nsPtr));
 
-#ifdef VAR_DEBUG
-  fprintf(stderr, "CVAR!%s!%s!\n", nsPtr->fullName, name);
-#endif
     /*
      *  If this is a global variable, handle it in the usual
      *  Tcl manner.
      */
     if (flags & TCL_GLOBAL_ONLY) {
-#ifdef VAR_DEBUG
-  fprintf(stderr, "CVAR!%s!ret1\n", name);
-#endif
         return TCL_CONTINUE;
     }
 
@@ -290,9 +267,6 @@ Itcl_ClassVarResolver(
                 ITCL_INTERP_DATA, NULL);
     hPtr = Tcl_FindHashEntry(&infoPtr->namespaceClasses, (char *)nsPtr);
     if (hPtr == NULL) {
-#ifdef VAR_DEBUG
-  fprintf(stderr, "CVAR!%s!ret2\n", name);
-#endif
         return TCL_CONTINUE;
     }
     iclsPtr = Tcl_GetHashValue(hPtr);
@@ -308,9 +282,6 @@ Itcl_ClassVarResolver(
     callContextPtr = Itcl_PeekStack(&infoPtr->contextStack);
     if ((strstr(name,"::") == NULL) &&
             Itcl_IsCallFrameArgument(interp, name)) {
-#ifdef VAR_DEBUG
-  fprintf(stderr, "CVAR!%s!ret3\n", name);
-#endif
         return TCL_CONTINUE;
     }
 
@@ -319,17 +290,11 @@ Itcl_ClassVarResolver(
      */
     hPtr = Tcl_FindHashEntry(&iclsPtr->resolveVars, name);
     if (hPtr == NULL) {
-#ifdef VAR_DEBUG
-  fprintf(stderr, "CVAR!%s!ret4\n", name);
-#endif
         return TCL_CONTINUE;
     }
 
     vlookup = (ItclVarLookup*)Tcl_GetHashValue(hPtr);
     if (!vlookup->accessible) {
-#ifdef VAR_DEBUG
-  fprintf(stderr, "CVAR!%s!ret5\n", name);
-#endif
         return TCL_CONTINUE;
     }
 
@@ -342,9 +307,6 @@ Itcl_ClassVarResolver(
 	        (char *)vlookup->ivPtr);
 	if (hPtr != NULL) {
 	    *rPtr = Tcl_GetHashValue(hPtr);
-#ifdef VAR_DEBUG
-  fprintf(stderr, "CVAR!%s!ret6\n", name);
-#endif
             return TCL_OK;
 	}
     }
@@ -355,15 +317,9 @@ Itcl_ClassVarResolver(
      */
 
     if (callContextPtr == NULL) {
-#ifdef VAR_DEBUG
-  fprintf(stderr, "CVAR!%s!ret7\n", name);
-#endif
         return TCL_CONTINUE;
     }
     if (callContextPtr->ioPtr == NULL) {
-#ifdef VAR_DEBUG
-  fprintf(stderr, "CVAR!%s!ret8\n", name);
-#endif
         return TCL_CONTINUE;
     }
     contextIoPtr = callContextPtr->ioPtr;
@@ -416,9 +372,6 @@ Itcl_ClassVarResolver(
 	varPtr = Itcl_FindNamespaceVar(interp, Tcl_DStringValue(&buffer), NULL, 0);
         if (varPtr != NULL) {
             *rPtr = varPtr;
-#ifdef VAR_DEBUG
-  fprintf(stderr, "CVAR!%s!ret9\n", name);
-#endif
 	    return TCL_OK;
         }
     }
@@ -433,22 +386,13 @@ Itcl_ClassVarResolver(
 	varPtr = Itcl_FindNamespaceVar(interp, Tcl_DStringValue(&buffer), NULL, 0);
         if (varPtr != NULL) {
             *rPtr = varPtr;
-#ifdef VAR_DEBUG
-  fprintf(stderr, "CVAR!%s!ret10\n", name);
-#endif
 	    return TCL_OK;
         }
     }
     if (hPtr != NULL) {
         *rPtr = Tcl_GetHashValue(hPtr);
-#ifdef VAR_DEBUG
-  fprintf(stderr, "CVAR!%s!ret11\n", name);
-#endif
         return TCL_OK;
     }
-#ifdef VAR_DEBUG
-  fprintf(stderr, "CVAR!%s!ret12\n", name);
-#endif
     return TCL_CONTINUE;
 }
 
@@ -488,18 +432,12 @@ Itcl_ClassCompiledVarResolver(
     char *buffer;
     char storage[64];
 
-#ifdef VAR_DEBUG
-  fprintf(stderr, "CCVAR!%s!%s!\n", nsPtr->fullName, name);
-#endif
     assert(Itcl_IsClassNamespace(nsPtr));
 
     infoPtr = (ItclObjectInfo *)Tcl_GetAssocData(interp,
                 ITCL_INTERP_DATA, NULL);
     hPtr = Tcl_FindHashEntry(&infoPtr->namespaceClasses, (char *)nsPtr);
     if (hPtr == NULL) {
-#ifdef VAR_DEBUG
-  fprintf(stderr, "CCVAR!%s!ret1!NS!%s!\n", name, nsPtr->fullName);
-#endif
         return TCL_CONTINUE;
     }
     iclsPtr = Tcl_GetHashValue(hPtr);
@@ -526,17 +464,11 @@ Itcl_ClassCompiledVarResolver(
      *  continue on with the normal Tcl name resolution rules.
      */
     if (hPtr == NULL) {
-#ifdef VAR_DEBUG
-  fprintf(stderr, "CCVAR!%s!ret2\n", name);
-#endif
         return TCL_CONTINUE;
     }
 
     vlookup = (ItclVarLookup*)Tcl_GetHashValue(hPtr);
     if (!vlookup->accessible) {
-#ifdef VAR_DEBUG
-  fprintf(stderr, "CCVAR!%s!ret3\n", name);
-#endif
         return TCL_CONTINUE;
     }
 
@@ -551,9 +483,6 @@ Itcl_ClassCompiledVarResolver(
     (*rPtr)->deleteProc = NULL;
     ((ItclResolvedVarInfo*)(*rPtr))->vlookup = vlookup;
 
-#ifdef VAR_DEBUG
-  fprintf(stderr, "CCVAR!%s!ret4\n", name);
-#endif
     return TCL_OK;
 }
 
@@ -588,9 +517,6 @@ ItclClassRuntimeVarResolver(
 	hPtr = Tcl_FindHashEntry(&vlookup->ivPtr->iclsPtr->classCommons,
 	        (char *)vlookup->ivPtr);
 	if (hPtr != NULL) {
-#ifdef VAR_DEBUG
-  fprintf(stderr, "CRVAR!%s!%s!ret1!%d!\n", Tcl_GetCurrentNamespace(interp)->fullName, Tcl_GetString(vlookup->ivPtr->namePtr), vlookup->ivPtr->protection);
-#endif
 	    return Tcl_GetHashValue(hPtr);
 	}
     }
@@ -607,15 +533,9 @@ ItclClassRuntimeVarResolver(
     ItclCallContext *callContextPtr;
     callContextPtr = Itcl_PeekStack(&iclsPtr->infoPtr->contextStack);
     if (callContextPtr == NULL) {
-#ifdef VAR_DEBUG
-  fprintf(stderr, "CRVAR!%s!ret2\n", Tcl_GetString(vlookup->ivPtr->fullNamePtr));
-#endif
         return NULL;
     }
     if (callContextPtr->ioPtr == NULL) {
-#ifdef VAR_DEBUG
-  fprintf(stderr, "CRVAR!%s!ret3\n", Tcl_GetString(vlookup->ivPtr->namePtr));
-#endif
 	if (iclsPtr->infoPtr->currIoPtr != NULL) {
 	    contextIoPtr = iclsPtr->infoPtr->currIoPtr;
 	} else {
@@ -658,9 +578,6 @@ ItclClassRuntimeVarResolver(
 	    varPtr = Itcl_FindNamespaceVar(interp, Tcl_DStringValue(&buffer),
 	            NULL, 0);
             if (varPtr != NULL) {
-#ifdef VAR_DEBUG
-  fprintf(stderr, "CRVAR!%s!ret4\n", Tcl_GetString(vlookup->ivPtr->namePtr));
-#endif
 	        return varPtr;
             }
         }
@@ -677,23 +594,14 @@ ItclClassRuntimeVarResolver(
 	    varPtr = Itcl_FindNamespaceVar(interp, Tcl_DStringValue(&buffer),
 	            NULL, 0);
             if (varPtr != NULL) {
-#ifdef VAR_DEBUG
-  fprintf(stderr, "CRVAR!%s!ret5\n", Tcl_GetString(vlookup->ivPtr->namePtr));
-#endif
 	        return varPtr;
             }
         }
         if (hPtr != NULL) {
-#ifdef VAR_DEBUG
-  fprintf(stderr, "CRVAR!%s!ret6\n", Tcl_GetString(vlookup->ivPtr->namePtr));
-#endif
             return (Tcl_Var)Tcl_GetHashValue(hPtr);
         }
     } else {
     }
-#ifdef VAR_DEBUG
-  fprintf(stderr, "CRVAR!%s!ret7\n", Tcl_GetString(vlookup->ivPtr->fullNamePtr));
-#endif
     return NULL;
 }
 

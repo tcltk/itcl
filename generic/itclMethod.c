@@ -25,7 +25,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclMethod.c,v 1.1.2.45 2009/01/06 16:11:42 wiede Exp $
+ *     RCS:  $Id: itclMethod.c,v 1.1.2.46 2009/01/07 19:38:50 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -1922,15 +1922,6 @@ Itcl_InvokeMethodIfExists(
     int result = TCL_OK;
 
     ItclShowArgs(1, "Itcl_InvokeMethodIfExists", objc, objv);
-#ifdef NOTDEF
-if (strcmp(name, "destructor") == 0) {
-if (contextClassPtr->flags & ITCL_CLASS_DESTRUCTOR_CALLED) {
-    return TCL_OK;
-}
-fprintf(stderr, "NS!%s!0x%08x!\n", contextClassPtr->nsPtr->fullName, contextClassPtr->flags);
-contextClassPtr->flags |= ITCL_CLASS_DESTRUCTOR_CALLED;
-}
-#endif
     Tcl_Obj *objPtr = Tcl_NewStringObj(name, -1);
     hPtr = Tcl_FindHashEntry(&contextClassPtr->functions, (char *)objPtr);
     Tcl_DecrRefCount(objPtr);
@@ -1945,7 +1936,7 @@ contextClassPtr->flags |= ITCL_CLASS_DESTRUCTOR_CALLED;
         (void) Tcl_ListObjGetElements((Tcl_Interp*)NULL, cmdlinePtr,
             &cmdlinec, &cmdlinev);
 
-ItclShowArgs(1, "EMC", cmdlinec, cmdlinev);
+        ItclShowArgs(1, "EMC", cmdlinec, cmdlinev);
         /*
          *  Execute the code for the method.  Be careful to protect
          *  the method in case it gets deleted during execution.

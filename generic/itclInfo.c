@@ -24,7 +24,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclInfo.c,v 1.1.2.41 2009/01/06 16:12:11 wiede Exp $
+ *     RCS:  $Id: itclInfo.c,v 1.1.2.42 2009/01/07 19:38:50 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -366,10 +366,8 @@ void
 ItclDeleteInfoSubCmd(
     ClientData clientData)
 {
-/*
-fprintf(stderr, "ItclDeleteInfoSubCmd!%p!\n", clientData);
-*/
 }
+
 int
 ItclInfoInit(
     Tcl_Interp *interp)      /* current interpreter */
@@ -462,7 +460,6 @@ ItclGetInfoUsage(
     hPtr = Tcl_FindHashEntry(&infoPtr->namespaceClasses, (char *)
             Tcl_GetCurrentNamespace(interp));
     if (hPtr == NULL) {
-fprintf(stderr, "cannot get class from namespace\n");
         return;
     }
     iclsPtr = Tcl_GetHashValue(hPtr);
@@ -519,7 +516,6 @@ ItclGetInfoDelegatedUsage(
     hPtr = Tcl_FindHashEntry(&infoPtr->namespaceClasses, (char *)
             Tcl_GetCurrentNamespace(interp));
     if (hPtr == NULL) {
-fprintf(stderr, "cannot get class from namespace\n");
         return;
     }
     iclsPtr = Tcl_GetHashValue(hPtr);
@@ -894,11 +890,11 @@ Itcl_BiInfoHeritageCmd(
 
     Itcl_InitHierIter(&hier, contextIclsPtr);
     while ((iclsPtr=Itcl_AdvanceHierIter(&hier)) != NULL) {
-/* FIXME !!! */
-if (iclsPtr->nsPtr == NULL) {
-fprintf(stderr, "ITCL: iclsPtr->nsPtr == NULL %s 0x%08x\n", Tcl_GetString(iclsPtr->fullNamePtr), iclsPtr->flags);
-return TCL_ERROR;
-}
+        if (iclsPtr->nsPtr == NULL) {
+            Tcl_AppendResult(interp, "ITCL: iclsPtr->nsPtr == NULL",
+	            Tcl_GetString(iclsPtr->fullNamePtr), NULL);
+            return TCL_ERROR;
+        }
         if (iclsPtr->nsPtr->parentPtr == activeNs) {
             objPtr = Tcl_NewStringObj(iclsPtr->nsPtr->name, -1);
         } else {
