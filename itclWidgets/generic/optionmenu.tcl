@@ -19,7 +19,7 @@
 #   Copyright (c) 1995 DSC Technologies Corporation
 # ----------------------------------------------------------------------
 #
-#   @(#) $Id: optionmenu.tcl,v 1.1.2.1 2009/01/07 13:19:44 wiede Exp $
+#   @(#) $Id: optionmenu.tcl,v 1.1.2.2 2009/01/07 18:40:29 wiede Exp $
 # ======================================================================
 
 #
@@ -124,7 +124,7 @@ proc ::itcl::widgets::optionmenu {pathName args} {
 	 -disabledforeground -font -foreground -highlightcolor \
 	 -highlightthickness -labelfont -popupcursor
 # FIXME	ignore -tearoff
-    keepcomponentoption popupMenu -activeborderwidth -borderwidth
+    keepcomponentoption popupMenu -activeborderwidth -borderwidth -selectcolor
 
     #
     # Bind to button release for all components.
