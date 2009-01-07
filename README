@@ -1,10 +1,10 @@
 README: [incr Tcl] (itcl)
 
-   This is the 4.0b1 source distribution of [incr Tcl] an object oriented
+   This is the 4.0b2 source distribution of [incr Tcl] an object oriented
    extension for Tcl. [incr Tcl] is available from Sourceforge at:
    http://sourceforge.net/project/showfiles.php?group_id=13244&package_id=295641
 
-RCS: @(#) $Id: README,v 1.1.2.1 2009/01/07 18:15:06 wiede Exp $
+RCS: @(#) $Id: README,v 1.1.2.2 2009/01/07 19:53:23 wiede Exp $
 
 1. Introduction
 
