@@ -1,4 +1,39 @@
-RCS: @(#) $Id: ChangeLog,v 1.1.2.5 2007/09/29 22:26:06 wiede Exp $
+RCS: @(#) $Id: ChangeLog,v 1.1.2.6 2009/01/07 20:57:48 wiede Exp $
+2008-12-11 Arnulf P. Wiedemann <wiede@users.sf.net>
+    * itcl-ng first beta release 4.0b1
+2008-12-06 Arnulf P. Wiedemann <wiede@users.sf.net>
+    * built enhanced functions for chasing memory leaks in adding 
+    * functionality to the functions available in Tcl core 
+    * and fixed a lot of leaks of that class
+2008-11-30 Arnulf P. Wiedemann <wiede@users.sf.net>
+    * built functions for chasing memory leaks and fixed a lot of those
+2008-11-16 Arnulf P. Wiedemann <wiede@users.sf.net>
+    * second alpha release 4.0a1
+2008-11-14 Arnulf P. Wiedemann <wiede@users.sf.net>
+    * 207 tests for snit like functionality running
+2008-10-19 Arnulf P. Wiedemann <wiede@users.sf.net>
+    * the snit like commands are mostly implemented
+    * starting with tests for snit like functionality
+2008-10-18 Arnulf P. Wiedemann <wiede@users.sf.net>
+    * first alpha release 4.0a0
+2007-10-15 Arnulf P. Wiedemann <wiede@users.sf.net>
+    * added the following commands:
+    * ::itcl::extendedclass
+    * ::itcl::adddelegatedoption
+    * ::itcl::adddelegatedmethod
+    * ::itcl::setComponent
+2007-10-12 Arnulf P. Wiedemann <wiede@users.sf.net>
+    * started to add commands in snit like class types:
+    * option
+    * typemethod
+    * delegate option
+    * delegate typemethod
+    * delegate method
+    * component
+    * widgetclass
+2007-09-29 Arnulf P. Wiedemann <wiede@users.sf.net>
+    * started to add snit like commands and classtypes
+    * these are ::itcl::type, ::itcl::widget, ::itcl::widgetadaptor
 2007-09-29 Arnulf P. Wiedemann <wiede@users.sf.net>
     * new commands ::itcl::struct, ::itcl::nwidget ::itcl::addoption and
     * ::itcl::addcomponent
