@@ -10,7 +10,7 @@
 # so you can encode the package version directly into the source files.
 #-----------------------------------------------------------------------
 
-AC_INIT([itcl], [4.0b1])
+AC_INIT([itcl], [4.0b2])
 
 #--------------------------------------------------------------------
 # Call TEA_INIT as the first TEA_ macro to set up initial vars.
@@ -18,7 +18,7 @@ AC_INIT([itcl], [4.0b1])
 # as well as PKG_LIB_FILE and PKG_STUB_LIB_FILE.
 #--------------------------------------------------------------------
 
-TEA_INIT([3.6])
+TEA_INIT([3.7])
 
 AC_PROG_LN_S
 CONFIG_CLEAN_FILES=
@@ -82,11 +82,8 @@ TEA_ADD_SOURCES([
 	        itclStubs.c
                 itclStubInit.c
 	        itclResolve.c
-	        itclResolve2.c
 	        itclTclIntStubsFcn.c
 	        itclUtil.c
-                itclVarsAndCmds.c
-                itclTestRegisterC.c
                 itclMigrate2TclCore.c
                 itclNeededFromTclOO.c
                 ])
