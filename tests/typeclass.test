@@ -3,7 +3,7 @@
 #       typeclass.test
 #
 # AUTHOR:
-#       Arnulf Wiedemann with a lot of code form the snit tests by
+#       Arnulf Wiedemann with a lot of code from the snit tests by
 #       Will Duquette
 #
 # DESCRIPTION:
@@ -13,6 +13,7 @@
 #       There is at least Tcl 8.6a3 needed
 #
 #    The tests assume tcltest 2.2
+#    RCS:  $Id: typeclass.test,v 1.1.2.12 2009/01/07 12:05:23 wiede Exp $
 #-----------------------------------------------------------------------
 
 package require Tcl 8.6
