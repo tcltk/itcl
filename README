@@ -1,0 +1,103 @@
+README: [incr Tcl] (itcl)
+
+   This is the 4.0b1 source distribution of [incr Tcl] an object oriented
+   extension for Tcl. [incr Tcl] is available from Sourceforge at:
+   http://sourceforge.net/project/showfiles.php?group_id=13244&package_id=295641
+
+RCS: @(#) $Id: README,v 1.1.2.1 2009/01/07 18:15:06 wiede Exp $
+
+1. Introduction
+
+This directory contains the source code, documentation, and test scripts
+for the [incr Tcl] extension. This version is a mostly rewritten version
+derived from [incr Tcl] 3.4. The rewriting had several reasons which can
+be found here: http://wiki.tcl.tk/19873
+
+In short: it is now based on TclOO and it was tried to make it less dependent
+on interial features of Tcl core.
+
+This version claims to be script level compatible with Itcl 3.4.
+
+There are a lot of new features in that version: delegation additional
+to inheritance, where the ideas are mostly "stolen" from snit written by Will
+Duquette. The class types are: ::itcl::type, ::itcl::widget and
+::itcl::widgetadaptor.
+
+There is also an experimental class type ::itcl::extended class available,
+which will be used to build itk like megawidgets (a la iwidgets) without
+the need to use itk.
+
+The additional class types need no Tk at load time, Tk is loaded automatically
+for ::itcl::widget and ::itcl::widgetadaptor if needed. To use these features
+you need also the package itclwidget installed, to be also found on the 
+above link.
+
+[incr Tcl] is a freely-available open source package as in the past. 
+You can do virtually anything you like with it, such as modifying it,
+redistributing it, and selling it either in whole or in part.  See the file
+"license.terms" for complete information.
+
+2. Documentation
+
+The 'doc' subdirectory in this release contains a set of reference manual
+entries for [incr Tcl].  Files with an extension '.n' are for Tcl classes and
+commands; files with an extension '.3' are for C library functions.
+
+3. Compiling and Installing.
+
+[incr Tcl] is built in much the same way that Tcl itself is. Once you have
+a Tcl build environment set up, you should be able to simply
+enter the commands:
+
+    cd itcl
+    ./configure
+    make all
+    make test
+    make install
+
+4. Tcl newsgroup.
+
+There is a USENET news group, "comp.lang.tcl", intended for the exchange of
+information about Tcl, Tk, and related applications.  The newsgroup is a
+great place to ask general information questions.  For bug reports, please
+see the "Support and bug fixes" section below.
+
+5. Tcl'ers Wiki
+
+A Wiki-based open community site covering all aspects of Tcl/Tk is at:
+
+	http://wiki.tcl.tk/
+
+It is dedicated to the Tcl programming language and its extensions.  A
+wealth of useful information can be found there.  It contains code
+snippets, references to papers, books, and FAQs, as well as pointers to
+development tools, extensions, and applications.  You can also recommend
+additional URLs by editing the wiki yourself.
+
+6. Mailing lists
+
+SourceForge hosts a mailing list, incrtcl-users to discuss issues with using
+and developing [incr Tcl]. For more information and to subscribe, visit
+
+    http://sourceforge.net/projects/incrtcl
+
+and go to the 'Mailing Lists' page.
+
+7. Support
+
+We are very interested in receiving bug reports, patches, and suggestions
+for improvements.  We prefer that you send this information to us via the
+bug database, rather than emailing us directly.  The bug database is at:
+
+	http://sourceforge.net/tracker/?group_id=13244
+
+We will log and follow-up on each bug, although we cannot promise a
+specific turn-around time.  Enhancements, reported via the Feature
+Requests form at the same web site, may take longer and may not happen
+at all unless there is widespread support for them.
+
+The Tcl community is too large for us to provide much individual support
+for users.  If you need help we suggest that you post questions to
+comp.lang.tcl.  We read the newsgroup and will attempt to answer esoteric
+questions for which no one else is likely to know the answer.
+
