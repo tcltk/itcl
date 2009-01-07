@@ -23,7 +23,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclCmd.c,v 1.1.2.45 2009/01/03 17:06:24 wiede Exp $
+ *     RCS:  $Id: itclCmd.c,v 1.1.2.46 2009/01/07 10:53:40 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -1870,7 +1870,7 @@ Itcl_AddComponentCmd(
 
 
     varName = Tcl_GetString(ivPtr->namePtr);
-    /* now initialize the variables which have an init value */
+    /* now initialize the variable */
     if (Itcl_PushCallFrame(interp, &frame, varNsPtr,
         /*isProcCallFrame*/0) != TCL_OK) {
         return TCL_ERROR;
