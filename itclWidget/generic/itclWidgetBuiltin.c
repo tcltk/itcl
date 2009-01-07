@@ -12,7 +12,7 @@
  * ========================================================================
  *  Author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclWidgetBuiltin.c,v 1.1.2.12 2008/12/26 16:18:52 wiede Exp $
+ *     RCS:  $Id: itclWidgetBuiltin.c,v 1.1.2.13 2009/01/07 10:56:04 wiede Exp $
  * ========================================================================
  *           Copyright (c) 2007 Arnulf Wiedemann
  * ------------------------------------------------------------------------
@@ -326,7 +326,6 @@ Itcl_BiInstallHullCmd(
         tkMainWin = Tk_MainWindow(interp);
         tkWin = Tk_NameToWindow(interp, origWidgetName, tkMainWin);
         if (tkWin != NULL) {
-	    const char *val2;
             FOREACH_HASH_VALUE(ioptPtr, &contextIclsPtr->options) {
                 val = Tk_GetOption(tkWin, Tcl_GetString(
 		        ioptPtr->resourceNamePtr),
@@ -334,9 +333,6 @@ Itcl_BiInstallHullCmd(
 	        if (val != NULL) {
                     val = ItclSetInstanceVar(interp, "itcl_options",
 	                    Tcl_GetString(ioptPtr->namePtr), val,
-                            contextIoPtr, contextIoPtr->iclsPtr);
-                    val2 = ItclGetInstanceVar(interp, "itcl_options",
-	                    Tcl_GetString(ioptPtr->namePtr),
                             contextIoPtr, contextIoPtr->iclsPtr);
 	        } else {
 	            if (ioptPtr->defaultValuePtr != NULL) {
