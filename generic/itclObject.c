@@ -24,7 +24,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann Copyright (c) 2007
  *
- *     RCS:  $Id: itclObject.c,v 1.1.2.70 2009/01/06 16:11:42 wiede Exp $
+ *     RCS:  $Id: itclObject.c,v 1.1.2.71 2009/01/07 10:55:16 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -2684,14 +2684,6 @@ ItclObjectCmd(
 	}
 	oPtr = NULL;
 	clientData = Itcl_GetCallFrameClientData(interp);
-	if (infoPtr->currIoPtr != NULL) {
-	    /* if we want to call methods in the constructor for example
-	     * config* methods, clientData
-	     * is still NULL, but we can use infoPtr->currIoPtr
-	     * for getting the TclOO object ptr
-	     */
-	    oPtr = infoPtr->currIoPtr->oPtr;
-	}
 	if ((clientData == NULL) && (oPtr == NULL)) {
 	    if (((imPtr->codePtr != NULL)
 	            && (imPtr->codePtr->flags & ITCL_BUILTIN))) {
@@ -2699,9 +2691,18 @@ ItclObjectCmd(
 	                objc, objv);
                 return result;
 	    }
-	    Tcl_AppendResult(interp,
-	            "ItclObjectCmd cannot get context object (NULL)", NULL);
-	    return TCL_ERROR;
+	    if (infoPtr->currIoPtr != NULL) {
+	        /* if we want to call methods in the constructor for example
+	         * config* methods, clientData
+	         * is still NULL, but we can use infoPtr->currIoPtr
+	         * for getting the TclOO object ptr
+	         */
+	        oPtr = infoPtr->currIoPtr->oPtr;
+	    } else {
+	        Tcl_AppendResult(interp,
+	                "ItclObjectCmd cannot get context object (NULL)", NULL);
+	        return TCL_ERROR;
+	    }
 	}
 	if (oPtr == NULL) {
             oPtr = Tcl_ObjectContextObject((Tcl_ObjectContext)clientData);
