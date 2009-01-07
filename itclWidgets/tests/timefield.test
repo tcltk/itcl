@@ -11,7 +11,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# @(#) $Id: timefield.test,v 1.1.2.1 2009/01/05 23:40:39 wiede Exp $
+# @(#) $Id: timefield.test,v 1.1.2.2 2009/01/07 10:56:58 wiede Exp $
 
 package require tcltest
 namespace import -force ::tcltest::*
@@ -107,7 +107,8 @@ foreach test {
     {-textbackground GhostWhite GhostWhite} 
     {-textbackground #d9d9d9 #d9d9d9}} {
 	set option [lindex $test 0]
-	test Timefield-2.$o "configuration options, $option" {
+	set optionTxt "configure $option [lindex $test 1]"
+	test Timefield-2.$o "configuration options, $optionTxt" {
 	    .tf configure $option [lindex $test 1]
 	    lindex [.tf configure $option] 4
 	} [lindex $test 2]
@@ -121,7 +122,8 @@ foreach test {
 foreach test {
   {-childsitepos bogus {bad childsite option "bogus": should be n, e, s, or w}}} {
 	set option [lindex $test 0]
-        test Timefield-2.$o "configuration options, $option" {
+	set optionTxt "configure $option [lindex $test 1]"
+        test Timefield-2.$o "configuration options, $optionTxt" {
 	    list [catch {.tf configure $option [lindex $test 1]} msg] $msg
 	} [list 1 [lindex $test 2]]
 	incr o
@@ -130,6 +132,7 @@ foreach test {
 #
 # Method tests which are successful.
 #
+# clock command of tcl8.6 allows 44:44:44 as valid!!
 foreach test {
     {{.tf childsite} {.tf.lwchildsite}}
     {{.tf show "11:45:00 am"} {11:45:00 am}}
@@ -138,10 +141,11 @@ foreach test {
     {{.tf isvalid} {1}}
     {{.tf component time delete 0 end} {}}
     {{.tf component time insert end "44:44:44 pm"} {}}
-    {{.tf isvalid} {0}}
+    {{.tf isvalid} {1}}
     {{.tf show now; list} {}}} {
 	set method [lindex [lindex $test 0] 1]
-	test Timefield-3.$m "object methods, $method" {
+	set methodTxt "call [lindex $test 0]"
+	test Timefield-3.$m "object methods, $methodTxt" {
 	    list [catch {eval [lindex $test 0]} msg] $msg
 	} [list 0 [lindex $test 1]]
 	update 
@@ -153,7 +157,7 @@ test Timefield-3.$m "object methods, clock clicks" {
     .tf show $clicks
     update 
     .tf get 
-} {03:15:00 PM}
+} {03:15:00 pm}
 incr m
 
 #
@@ -163,7 +167,8 @@ foreach test {
     {{.tf get bogus} {bad format option "bogus": should be -string or -clicks}}
     {{.tf show bogus} {bad time: "bogus", must be a valid time  string, clock clicks value or the keyword now}}} {
 	set method [lindex [lindex $test 0] 1]
-	test Timefield-3.$m "object methods, $method" {
+	set methodTxt "call [lindex $test 0]"
+	test Timefield-3.$m "object methods, $methodTxt" {
 	    list [catch {eval [lindex $test 0]} msg] $msg
 	} [list 1 [lindex $test 1]]
 	incr m

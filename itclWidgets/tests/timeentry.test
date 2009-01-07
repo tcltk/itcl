@@ -11,7 +11,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# @(#) $Id: timeentry.test,v 1.1.2.1 2009/01/05 23:40:39 wiede Exp $
+# @(#) $Id: timeentry.test,v 1.1.2.2 2009/01/07 10:56:58 wiede Exp $
 
 package require tcltest
 namespace import -force ::tcltest::*
@@ -145,7 +145,7 @@ foreach test {
     {{.te isvalid} {1}}
     {{.te component time delete 0 end} {}}
     {{.te component time insert end 44:44:44} {}}
-    {{.te isvalid} {0}}
+    {{.te isvalid} {1}}
     {{.te show now; list} {}}} {
 	set method [lindex [lindex $test 0] 1]
 	test Timeentry-3.$m "object methods, $method" {
