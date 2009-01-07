@@ -6,7 +6,7 @@
 # ----------------------------------------------------------------------
 #   AUTHOR:  Arnulf P. Wiedemann
 #
-#      RCS:  $Id: itclHullCmds.tcl,v 1.1.2.6 2009/01/06 16:07:14 wiede Exp $
+#      RCS:  $Id: itclHullCmds.tcl,v 1.1.2.7 2009/01/07 11:00:33 wiede Exp $
 # ----------------------------------------------------------------------
 #            Copyright (c) 2008  Arnulf P. Wiedemann
 # ======================================================================
@@ -45,6 +45,7 @@ proc createhull {widget_type path args} {
     upvar this this
     upvar win win
 
+
 #puts stderr "createhull!$widget_type!$path!$args!$this![::info command $this]!"
 #puts stderr "ns1![uplevel 1 namespace current]!"
 #puts stderr "ns2![uplevel 2 namespace current]!"
@@ -59,6 +60,9 @@ proc createhull {widget_type path args} {
     set options [list]
     foreach {option_name value} $args {
         switch -glob -- $option_name {
+	-class {
+	      lappend options $option_name [namespace tail $value]
+	  }
         -* {
             lappend options $option_name $value
           }
@@ -102,9 +106,22 @@ proc createhull {widget_type path args} {
     rename $tmp $widgetName
 #puts stderr "rename3!rename ${tmp}_ $tmp![::info command ${tmp}_]!"
     rename ${tmp}_ ::$tmp
+    set exists [uplevel 1 ::info exists itcl_hull]
+    if {!$exists} {
+	# that does not yet work, beacause of problems with resolving 
+        ::itcl::addcomponent $my_this itcl_hull
+    }
+    upvar itcl_hull itcl_hull
     ::itcl::setcomponent $my_this itcl_hull $widgetName
 #puts stderr "IC![::info command $my_win]!"
     set win $my_win
+    set exists [uplevel 1 ::info exists itcl_interior]
+    if {!$exists} {
+	# that does not yet work, beacause of problems with resolving 
+        ::itcl::addcomponent $this itcl_interior
+    }
+    upvar itcl_interior itcl_interior
+    set itcl_interior $my_win
     return $my_win
 }
 
