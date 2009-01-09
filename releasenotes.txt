@@ -1,49 +1,138 @@
-RCS: @(#) $Id: releasenotes.txt,v 1.1.2.2 2009/01/09 13:47:36 wiede Exp $
+RCS: @(#) $Id: releasenotes.txt,v 1.1.2.3 2009/01/09 19:37:51 wiede Exp $
 
-This is the second beta release of itcl [incr Tcl]. Ths version is named 
-itcl 4.0b2.
+This is the second beta release of Itcl.
+When final it will be the next major release of Itcl.
+This version is named Itcl 4.0b2.
 
-To use the package add a line
-    package require itcl
-or
-    package require itcl 4.0
-at the top of your script file. Attention this version uses all lower case
-for the package name . There is an additional entry for "package require Itcl"
-in there for compatibility, but that will probably disapear in the future
+There is only one difference to Itcl 3.4, the ::itcl::scope command does no
+longer return strings like "@......." but a different syntax. This string
+layout was always described as internal and not to be used at user level. On
+the script level it does the same as before.
 
-There are a lot of new features in that version: especialy delegation additional
-to inheritance and components, where the ideas are mostly "stolen" from snit
+There is no known incompatibility.
+
+There are a lot of new features in that version: especialy components and
+delegation additional to inheritance. The ideas are mostly "stolen" from snit
 written by Will Duquette.
 
-For details look here: http://wiki.tcl.tk/19873
-
-The new class types are:
+The new class type is:
   - ::itcl::type
-  - ::itcl::widget
-  - ::itcl::widgetadaptor
 
-As documentation you can additionally use most of:
-http://tcllib.sourceforge.net/doc/snit.html, as it was tried to keep the 
-script level API motsly identical to snit.
+::itcl::type has all the features of ::itcl::class and additional functionality
+
+The new functionality for ::itcl::type is
+  - typemethod
+  - typeconstructor
+  - component <componentName> ?-inherit?
+  - delegate option <optionSpec> to <component> ?as <target>?
+  - delegate option * to <component>
+  - delegate option * to <component> except <exceptions>
+  - delegate method <methodName> to <component> ?as <target>?
+  - delegate method <methodName> ?to <component>? using <pattern>
+  - delegate method * ?to <component>? ?using <pattern>? ?except <exceptions>?
+  - delegate typemethod <typeMethodName> to <component> ?as <target>?
+  - delegate typemethod <typeMethodName> ?to <component>? using <pattern>
+  - delegate typemethod * ?to <component>? ?using <pattern>? ?except <exceptions>?
+  - option <optionSpec> <defaultValue>
+  - option <optionSpec> <optionOptions>
+
+optionSpec: something like the X-resource stuff: [list -font font Font]
+
+optionOptions: ?-default <defaultValue>? ?-readonly? ?-cgetmethod <methodName>|-cgetmethodvar <varName>? ?-configuremethod <methodName>|-configuremethodvar <varName>? ?-validatemethod <methodName>|-validatemethodvar <varName>?
+
+-default: the default value to use
+
+-readonly: the value can only be set during initialization using the default
+             value
+
+-cgetmethod: this method can do for example additional formatting when
+             extracting the value of an option
+             The signature of that method is:
+             myCgetMethod {option} { .... }
+
+-configuremethod: this method can do additional stuff when
+             setting the value of an option
+             The signature of that method is:
+             myConfigMethod {option value} { .... }
+
+-validatemethod: this method can be used to validate the value when
+             setting the value of an option
+             The signature of that method is:
+             myValidateMethod {option value} { .... }
+
+-cgetmethodvar: is the name of a variable to be used. The variable
+             contains the name of the cgetmethod to be used. This allows to
+             initialize or change the method during runtime!
+
+-configuremethodvar: is the name of a variable to be used. The variable
+             contains the name of the coniguremethod to be used. This allows to
+             initialize or change the method during runtime!
+
+-validatemethodvar: is the name of a variable to be used. The variable
+             contains the name of the validatemethod to be used. This allows to
+             initialize or change the method during runtime!
+
+You can only use one of ...method or ...methodvar not both for one option!
+             For example you can only use -configuremethod and then it is not
+             possible to use configuremethodvar for the same option.
+
+Components are similar to variables in that they contain the name of an object
+built for example from an ::itcl::type class. Then you are able to delegate 
+methods, typemethods and options to that component. That means, whenever you
+call a method in object A which has a component b initialized for example 
+with string, and you have delegated method length of object A to component B
+then "string length" will be called with the arguments. The same mechanism
+is used for delegated options in that configure with the option name is called
+for the object in component.
+
+Typemethod is like a proc of ::itcl::class
+
+Typconstructor is like the body of a Tcl proc and it is only called once for
+::itcl::type when parsing of ::itcl::type is finished.
+
+There is an special array variable "itcl_options", which contains the value
+for each option with the option name as index. This can be used for fast access
+but be aware, accessing that array does not trigger cgetmethod, configuremethod
+and validatemethod or the methods in the correspondig variables (cgetmethodvar
+...)
+
+These are the new introspection methods for ::itcl::type :
+  - info components ?pattern?
+  - info component ?<componentName>?
+  - info default <methodName> <argName> <resultVar>
+  - info delegated method
+  - info delegated method <methodName> ?-as? ?-except? ?-to? ?-using?
+  - info delegated methods
+  - info delegated option
+   -info delegated option <optionName> ?-as? ?-except? ?-to?
+  - info delegated options
+  - info delegated typemethods
+  - info instances ?pattern?
+  - info method <methodName> ?-protection? ?-type? ?-name? ?-args? ?-body?"
+  - info methods ?pattern?
+  - info option <optionName> ?-defaultvalue? ?-value? ?-readonly? ?-cgetmethod?|?-cgetmethodvar? ?-configuremethod?|?-configuremethodvar? ?-validatemethod?|?-validatemethodvar?
+  - info options ?pattern?
+  - info typemethod <methodName> ?-protection? ?-type? ?-name? ?-args? ?-body?"
+  - info typemethods ?pattern?
+  - info typevariable <varName> ?-protection? ?-type? ?-name? ?-init? ?-value? ?-config?"
+  - info typevars ?pattern?
+  - info variables ?pattern?
+
+For more details look into the documentation in the doc directory and here:
+http://wiki.tcl.tk/19873
+
+
 
 There is also an experimental class type
- - ::itcl::extended class
-available, which will be used to build itk like megawidgets (a la iwidgets)
+ - ::itcl::extendedclass
+
+available, which will be used to build itk like megawidgets (a la Iwidgets)
 in the future without the need to use itk.
+
 WARNING the interfaces are not yet described in detail, as there may be
 changes, so the use of ::itcl::extended class is at the moment
 "on your own risk", as the interfaces may still change.
-At the moment mostly all of the interfaces of ::itcl::type are supported and
-some additional ones where the API has not yet settled, so they are not
-described.
 
-The additional class types need no Tk at load timei of itcl, Tk is loaded
-automaticly for ::itcl::widget and ::itcl::widgetadaptor if needed. To use
-these features you need also the package "itclwidget" installed, to be
-found here: http://wiki.tcl.tk/19873
-
-There is one difference to itcl 3.4, the ::itcl::scope command does no longer
-return strings like "@......." but a different syntax, but this interface was
-always described as internal and not to be used at user level.
-
-
+At the moment mostly all of the interfaces of ::itcl::type are supported
+for ::itcl::extendedclass and some additional ones where the API has not yet
+settled, so they are not described.

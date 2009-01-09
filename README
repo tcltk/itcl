@@ -1,8 +1,8 @@
-README: itcl ([incr Tcl])
+README: Itcl
 
-RCS: @(#) $Id: README,v 1.1.2.4 2009/01/09 13:45:27 wiede Exp $
+RCS: @(#) $Id: README,v 1.1.2.5 2009/01/09 19:37:51 wiede Exp $
 
-This is the 4.0b2 source distribution of itcl, an object oriented
+This is the 4.0b2 source distribution of Itcl, an object oriented
 extension for Tcl. Itcl is available from Sourceforge at:
 http://sourceforge.net/project/showfiles.php?group_id=13244&package_id=295641
 
@@ -10,12 +10,9 @@ http://sourceforge.net/project/showfiles.php?group_id=13244&package_id=295641
 1. Introduction
 
 This directory contains the source code, documentation, and test scripts
-for the itcl extension. This version is a mostly rewritten version
-derived from itcl 3.4. The rewriting had several reasons which can
-be found here: http://wiki.tcl.tk/19873
-
-In short: it is now based on TclOO and it was tried to make it less dependent
-on interial features of Tcl core.
+for the itcl extension. This version is the next major release to follow
+Itcl 3.4. Aditional details to that version can be found here:
+http://wiki.tcl.tk/19873
 
 This version claims to be script level compatible with Itcl 3.4.
 
@@ -26,7 +23,7 @@ redistributing it, and selling it either in whole or in part.  See the file
 
 2. Compiling and Installing.
 
-[incr Tcl] is built in much the same way that Tcl itself is. Once you have
+Itcl is built in much the same way that Tcl itself is. Once you have
 a Tcl build environment set up, you should be able to simply
 enter the commands:
 
@@ -36,18 +33,10 @@ enter the commands:
     make test
     make install
 
-to use the package add a line
-    package require itcl
-or
-    package require itcl 4.0
-at the top of your script file. Attention this version uses all lower case
-for the package name . There is an additional entry for "package require Itcl"
-in there for compatibility, but that will probably disapear in the future
-
 3. Mailing lists
 
 SourceForge hosts a mailing list, incrtcl-users to discuss issues with using
-and developing [incr Tcl]. For more information and to subscribe, visit
+and developing Itcl. For more information and to subscribe, visit
 
     http://sourceforge.net/projects/incrtcl
 
