@@ -38,7 +38,7 @@
 #   Copyright (c) 1995 DSC Technologies Corporation
 # ----------------------------------------------------------------------
 #
-#   @(#) $Id: toolbar.tcl,v 1.1.2.2 2009/01/06 21:58:41 wiede Exp $
+#   @(#) $Id: toolbar.tcl,v 1.1.2.3 2009/01/09 14:18:29 wiede Exp $
 # ======================================================================
 
 #
@@ -590,8 +590,10 @@ proc ::itcl::widgets::toolbar {pathName args} {
         $args
     # ... Add the new widget as a component (catch an error if occurs)
     set createFailed [catch { 
-	::itcl::addcomponent $this $name
-	setupcomponent $name uisng $widgetCommand $_interior.$name {*}$args
+	if {![::info exists $name]} {
+	    ::itcl::addcomponent $this $name
+	}
+	setupcomponent $name using $widgetCommand $_interior.$name {*}$args
     } errMsg]
     # ... Clean up if the create failed, and exit.
     #     The _opts list if it has -helpstr, -balloonstr just entered for
