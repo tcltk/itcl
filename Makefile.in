@@ -12,7 +12,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: Makefile.in,v 1.29.2.23 2009/01/07 20:54:22 wiede Exp $
+# RCS: @(#) $Id: Makefile.in,v 1.29.2.24 2009/01/09 19:36:56 wiede Exp $
 
 datarootdir = @datarootdir@" 
 datadir = @datadir@
@@ -304,7 +304,7 @@ dist: dist-clean doc
 	    fi; \
 	done
 
-	list='CHANGES ChangeLog INCOMPATIBLE README TODO'; \
+	list='CHANGES ChangeLog INCOMPATIBLE README releasenotes.txt TODO'; \
 	for p in $$list; do \
 	    if test -f $(srcdir)/$$p ; then \
 		cp -p $(srcdir)/$$p $(DIST_DIR)/; \
