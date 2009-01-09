@@ -1,6 +1,6 @@
 README: itcl ([incr Tcl])
 
-RCS: @(#) $Id: README,v 1.1.2.3 2009/01/09 13:39:28 wiede Exp $
+RCS: @(#) $Id: README,v 1.1.2.4 2009/01/09 13:45:27 wiede Exp $
 
 This is the 4.0b2 source distribution of itcl, an object oriented
 extension for Tcl. Itcl is available from Sourceforge at:
@@ -35,6 +35,14 @@ enter the commands:
     make all
     make test
     make install
+
+to use the package add a line
+    package require itcl
+or
+    package require itcl 4.0
+at the top of your script file. Attention this version uses all lower case
+for the package name . There is an additional entry for "package require Itcl"
+in there for compatibility, but that will probably disapear in the future
 
 3. Mailing lists
 
