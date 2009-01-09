@@ -1,11 +1,19 @@
-RCS: @(#) $Id: releasenotes.txt,v 1.1.2.1 2009/01/09 13:38:23 wiede Exp $
+RCS: @(#) $Id: releasenotes.txt,v 1.1.2.2 2009/01/09 13:47:36 wiede Exp $
 
 This is the second beta release of itcl [incr Tcl]. Ths version is named 
 itcl 4.0b2.
 
-There are a lot of new features in that version: delegation additional
-to inheritance, where the ideas are mostly "stolen" from snit written by Will
-Duquette.
+To use the package add a line
+    package require itcl
+or
+    package require itcl 4.0
+at the top of your script file. Attention this version uses all lower case
+for the package name . There is an additional entry for "package require Itcl"
+in there for compatibility, but that will probably disapear in the future
+
+There are a lot of new features in that version: especialy delegation additional
+to inheritance and components, where the ideas are mostly "stolen" from snit
+written by Will Duquette.
 
 For details look here: http://wiki.tcl.tk/19873
 
