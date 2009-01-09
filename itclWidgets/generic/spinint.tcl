@@ -26,7 +26,7 @@
 #    Copyright (c) 1995 DSC Technologies Corporation
 # ----------------------------------------------------------------------
 #
-#   @(#) $Id: spinint.tcl,v 1.1.2.1 2009/01/09 16:58:17 wiede Exp $
+#   @(#) $Id: spinint.tcl,v 1.1.2.2 2009/01/09 21:40:52 wiede Exp $
 # ======================================================================
 
 namespace eval ::itcl::widgets {
@@ -56,6 +56,12 @@ proc ::itcl::widgets::spinint {pathName args} {
 
     public method up {}
     public method down {}
+public method component {what} {
+    if {[::info exists $what]} {
+        return [set $what]
+    }
+    error "no such component \"$what\""
+}
 }
 
 # ------------------------------------------------------------------

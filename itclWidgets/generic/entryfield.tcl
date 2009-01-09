@@ -16,7 +16,7 @@
 #    Copyright (c) 1995 DSC Technologies Corporation
 # ----------------------------------------------------------------------
 #
-#   @(#) $Id: entryfield.tcl,v 1.1.2.8 2009/01/05 20:27:24 wiede Exp $
+#   @(#) $Id: entryfield.tcl,v 1.1.2.9 2009/01/09 21:40:52 wiede Exp $
 # ======================================================================
 
 package require itcl
@@ -47,7 +47,7 @@ proc entryfield {pathName args} {
     option [list -validate validate Command] -default {} -configuremethod configValidate
 
     delegate method * to entry except [list configure cget childsite]
-    delegate option [list -labelfont textFont Font] to label as -font
+#    delegate option [list -labelfont textFont Font] to label as -font
     delegate option [list -textfont textFont Font] to entry as -font
     delegate option [list -background background Background] to entry as -highlightbackground
     delegate option [list -textbackground textBackground Background] to entry as -background
@@ -64,15 +64,22 @@ proc entryfield {pathName args} {
     protected method configValidate {option value}
     protected method configFixed {option value}
 
-    public method childsite {}
-    public method clear {}
-
     protected proc numeric {char}
     protected proc integer {string}
     protected proc alphabetic {char}
     protected proc alphanumeric {char}
     protected proc hexadecimal {string}
     protected proc real {string}
+
+    public method childsite {}
+    public method clear {}
+
+public method component {what} {
+    if {[::info exists $what]} {
+        return [set $what]
+    }
+    error "no such component \"$what\""
+}
 } ; # end Entryfield
 
 ::itcl::body Entryfield::constructor {args} {

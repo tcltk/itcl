@@ -22,7 +22,7 @@
 #    Copyright (c) 1995 DSC Technologies Corporation
 # ----------------------------------------------------------------------
 #
-#   @(#) $Id: labeledwidget.tcl,v 1.1.2.2 2009/01/05 19:30:47 wiede Exp $
+#   @(#) $Id: labeledwidget.tcl,v 1.1.2.3 2009/01/09 21:40:52 wiede Exp $
 # ======================================================================
 
 package require itcl
@@ -78,6 +78,13 @@ proc labeledwidget {pathName args} {
     public method childsite
     
     proc alignlabels {args} {}
+
+public method component {what} {
+    if {[::info exists $what]} {
+        return [set $what]
+    }
+    error "no such component \"$what\""
+}
 }
     
 # ------------------------------------------------------------------
@@ -181,7 +188,7 @@ proc labeledwidget {pathName args} {
 # ------------------------------------------------------------------
 ::itcl::body Labeledwidget::configLabelbitmap {option value} {
     if {[string length $label] > 0} {
-        $label configure -bitmap $$value
+        $label configure -bitmap $value
     }
     set itcl_options($option) $value
     _positionLabel
