@@ -1,0 +1,41 @@
+RCS: @(#) $Id: releasenotes.txt,v 1.1.2.1 2009/01/09 13:38:23 wiede Exp $
+
+This is the second beta release of itcl [incr Tcl]. Ths version is named 
+itcl 4.0b2.
+
+There are a lot of new features in that version: delegation additional
+to inheritance, where the ideas are mostly "stolen" from snit written by Will
+Duquette.
+
+For details look here: http://wiki.tcl.tk/19873
+
+The new class types are:
+  - ::itcl::type
+  - ::itcl::widget
+  - ::itcl::widgetadaptor
+
+As documentation you can additionally use most of:
+http://tcllib.sourceforge.net/doc/snit.html, as it was tried to keep the 
+script level API motsly identical to snit.
+
+There is also an experimental class type
+ - ::itcl::extended class
+available, which will be used to build itk like megawidgets (a la iwidgets)
+in the future without the need to use itk.
+WARNING the interfaces are not yet described in detail, as there may be
+changes, so the use of ::itcl::extended class is at the moment
+"on your own risk", as the interfaces may still change.
+At the moment mostly all of the interfaces of ::itcl::type are supported and
+some additional ones where the API has not yet settled, so they are not
+described.
+
+The additional class types need no Tk at load timei of itcl, Tk is loaded
+automaticly for ::itcl::widget and ::itcl::widgetadaptor if needed. To use
+these features you need also the package "itclwidget" installed, to be
+found here: http://wiki.tcl.tk/19873
+
+There is one difference to itcl 3.4, the ::itcl::scope command does no longer
+return strings like "@......." but a different syntax, but this interface was
+always described as internal and not to be used at user level.
+
+
