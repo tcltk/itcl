@@ -17,7 +17,7 @@
 #    Copyright (c) 1995 DSC Technologies Corporation
 # ----------------------------------------------------------------------
 #
-#   @(#) $Id: dialog.tcl,v 1.1.2.1 2009/01/09 21:39:21 wiede Exp $
+#   @(#) $Id: dialog.tcl,v 1.1.2.2 2009/01/10 17:11:54 wiede Exp $
 # ======================================================================
 
 #
@@ -61,7 +61,7 @@ proc ::::itcl::widgets::dialog {pathName args} {
     # cancel button.  This can be overridden by the user via the
     # execution of a similar command outside the class.
     #
-    wm protocol $itk_component(hull) WM_DELETE_WINDOW \
+    wm protocol $win WM_DELETE_WINDOW \
 	[itcl::code $this invoke Cancel]
     #
     # Initialize the widget based on the command line options.

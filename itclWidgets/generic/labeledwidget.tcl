@@ -22,7 +22,7 @@
 #    Copyright (c) 1995 DSC Technologies Corporation
 # ----------------------------------------------------------------------
 #
-#   @(#) $Id: labeledwidget.tcl,v 1.1.2.3 2009/01/09 21:40:52 wiede Exp $
+#   @(#) $Id: labeledwidget.tcl,v 1.1.2.4 2009/01/10 17:11:54 wiede Exp $
 # ======================================================================
 
 package require itcl
@@ -91,23 +91,20 @@ public method component {what} {
 #                        CONSTRUCTOR
 # ------------------------------------------------------------------
 ::itcl::body Labeledwidget::constructor {args} {
-    set win [createhull frame $this -class [info class]]
+    createhull frame $this -class [info class]
     #
     # Create a frame for the childsite widget.
     #
     setupcomponent lwchildsite using frame $win.lwchildsite
-    
     #
     # Create label.
     #
     setupcomponent label using label $win.label
     keepcomponentoption label -background -cursor -foreground -labelfont
-    
     #
     # Set the interior to be the childsite for derived classes.
     #
     set itcl_interior $lwchildsite
-
     #
     # Initialize the widget based on the command line options.
     #

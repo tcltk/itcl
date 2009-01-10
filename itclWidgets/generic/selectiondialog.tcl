@@ -18,7 +18,7 @@
 #    Copyright (c) 1995 DSC Technologies Corporation
 # ----------------------------------------------------------------------
 #
-#   @(#) $Id: selectiondialog.tcl,v 1.1.2.1 2009/01/09 20:55:26 wiede Exp $
+#   @(#) $Id: selectiondialog.tcl,v 1.1.2.2 2009/01/10 17:11:54 wiede Exp $
 # ======================================================================
 
 
@@ -65,10 +65,11 @@ proc ::itcl::widgets::selectiondialog {pathName args} {
 #                        CONSTRUCTOR
 # ------------------------------------------------------------------
 ::itcl::body Selectiondialog::constructor {args} {
+puts stderr Selectiondialog::constructor
     #
     # Set the borderwidth to zero.
     #
-    $win configure -borderwidth 0
+# FIXME    $win configure -borderwidth 0
     # 
     # Instantiate a selection box widget.
     #
@@ -89,7 +90,8 @@ proc ::itcl::widgets::selectiondialog {pathName args} {
     pack $selectionbox -fill both -expand yes
     set itk_interior [$selectionbox childsite]
     hide Help
-    uplevle 0 itcl_initoptions $args
+    uplevel 0 itcl_initoptions $args
+puts stderr Selectiondialog::constructor!END
 }   
 
 # ------------------------------------------------------------------
@@ -203,7 +205,7 @@ proc ::itcl::widgets::selectiondialog {pathName args} {
 #
 # Set the default button to ok and select the item.
 # ------------------------------------------------------------------
-::itcl::body :Selectiondialog::selectitem {} {
+::itcl::body Selectiondialog::selectitem {} {
     default OK
     $selectionbox selectitem
 }

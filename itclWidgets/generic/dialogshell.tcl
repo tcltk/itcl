@@ -17,10 +17,8 @@
 #    Copyright (c) 1995 DSC Technologies Corporation
 # ----------------------------------------------------------------------
 #
-#   @(#) $Id: dialogshell.tcl,v 1.1.2.1 2009/01/09 21:39:21 wiede Exp $
+#   @(#) $Id: dialogshell.tcl,v 1.1.2.2 2009/01/10 17:11:54 wiede Exp $
 # ======================================================================
-
-    keep -background -cursor -foreground -modality 
 
 #
 # Use option database to override default resources of base classes.
@@ -80,6 +78,7 @@ proc ::itcl::widgets::dialogshell {pathName args} {
 #                        CONSTRUCTOR
 # ------------------------------------------------------------------
 ::itcl::body Dialogshell::constructor {args} {
+puts stderr Dialogshell::constructor
 # FIXME    itcl_options remove ::itcl::widgets::Shell::padx ::itcl::widgets::Shell::pady
     #
     # Create the user child site, separator, and button box,
