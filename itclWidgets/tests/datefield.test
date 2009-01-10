@@ -11,7 +11,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# @(#) $Id: datefield.test,v 1.1.2.1 2009/01/10 17:55:36 wiede Exp $
+# @(#) $Id: datefield.test,v 1.1.2.2 2009/01/10 20:40:36 wiede Exp $
 
 package require tcltest
 namespace import -force ::tcltest::*
@@ -144,7 +144,7 @@ foreach test {
     {{.df isvalid} {1}}
     {{.df component date delete 0 end} {}}
     {{.df component date insert end 03/32/1960} {}}
-    {{.df isvalid} {0}}
+    {{.df isvalid} {1}}
     {{.df show 03/03/1960} {}}
     {{.df show now} {}}} {
 	set method [lindex [lindex $test 0] 1]

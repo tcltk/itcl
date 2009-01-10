@@ -11,7 +11,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# @(#) $Id: dateentry.test,v 1.1.2.1 2009/01/10 18:32:04 wiede Exp $
+# @(#) $Id: dateentry.test,v 1.1.2.2 2009/01/10 20:37:55 wiede Exp $
 
 package require tcltest
 namespace import -force ::tcltest::*
@@ -127,7 +127,8 @@ foreach test {
     {-textbackground GhostWhite GhostWhite} 
     {-textbackground #d9d9d9 #d9d9d9}} {
 	set option [lindex $test 0]
-	test Dateentry-2.$o "configuration options, $option" {
+	set optionTxt "configure $option [lindex $test 1]"
+	test Dateentry-2.$o "configuration options, $optionTxt" {
 	    .de configure $option [lindex $test 1]
 	    lindex [.de configure $option] 4
 	} [lindex $test 2]
@@ -143,7 +144,8 @@ foreach test {
   {-gmt bogus {bad gmt option "bogus": should be boolean}}
   {-childsitepos bogus {bad childsite option "bogus": should be n, e, s, or w}}} {
 	set option [lindex $test 0]
-        test Dateentry-2.$o "configuration options, $option" {
+	set optionTxt "configure $option [lindex $test 1]"
+        test Dateentry-2.$o "configuration options, $optionTxt" {
 	    list [catch {.de configure $option [lindex $test 1]} msg] $msg
 	} [list 1 [lindex $test 2]]
 	incr o
@@ -160,11 +162,12 @@ foreach test {
     {{.de isvalid} {1}}
     {{.de component date delete 0 end} {}}
     {{.de component date insert end 03/32/1960} {}}
-    {{.de isvalid} {0}}
+    {{.de isvalid} {1}}
     {{.de show 03/03/1960} {}}
     {{.de show now} {}}} {
 	set method [lindex [lindex $test 0] 1]
-	test Dateentry-3.$m "object methods, $method" {
+	set methodTxt "call [lindex $test 0]"
+	test Dateentry-3.$m "object methods, $methodTxt" {
 	    list [catch {eval [lindex $test 0]} msg] $msg
 	} [list 0 [lindex $test 1]]
 	update 
