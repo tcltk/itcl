@@ -28,7 +28,7 @@
 #                Copyright (c) 1995  Tako Schotanus
 # ----------------------------------------------------------------------
 #
-#   @(#) $Id: canvasprintbox.tcl,v 1.1.2.1 2009/01/10 14:47:58 wiede Exp $
+#   @(#) $Id: canvasprintbox.tcl,v 1.1.2.2 2009/01/10 17:05:53 wiede Exp $
 # ======================================================================
 
 #
@@ -88,6 +88,7 @@ proc ::itcl::widgets::canvasprintbox {args} {
     #
     # Holds the current state for all check- and radiobuttons.
     #
+    option [list -disabledforeground disabledForeground Background] -default grey
     option [list -filename filename FileName] -default "canvas.ps" -configuremethod configFilename
     option [list -hpagecnt hPageCnt PageCnt] -default 1 -configuremethod configHpagecnt
     option [list -orient orient Orient] -default "landscape" -configuremethod configOrient
@@ -880,7 +881,7 @@ proc ::itcl::widgets::canvasprintbox {args} {
 #
 ::itcl::body Canvasprintbox::_mapEventHandler {} {
     set cwin $itcl_interior
-    set canvw $icanvas
+    set canvw $canvas
     if {$canvas ne ""} {
 	setcanvas $canvas
     }
