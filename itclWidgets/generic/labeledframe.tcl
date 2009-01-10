@@ -52,7 +52,7 @@
 #    Copyright (c) 1995 DSC Technologies Corporation
 # ----------------------------------------------------------------------
 #
-#   @(#) $Id: labeledframe.tcl,v 1.1.2.1 2009/01/10 17:09:09 wiede Exp $
+#   @(#) $Id: labeledframe.tcl,v 1.1.2.2 2009/01/10 20:01:21 wiede Exp $
 # ======================================================================
 
 #
@@ -138,7 +138,8 @@ proc ::itcl::widgets::labeledframe {pathName args} {
     # of the hull frame.
     #
     setupcomponent label using label $itcl_interior.label -highlightthickness 0 -bd 0
-    keepcomponentoption label -background -cursor -labelfont -foreground
+    keepcomponentoption label -background -cursor -labelfont -foreground \
+        -labelbitmap -labelimage -labeltext -labelvariable
 # FIXME    ignore -highlightthickness -highlightcolor
     grid $childsite -row 1 -column 1 -sticky nsew
     grid columnconfigure $itcl_interior 1 -weight 1
