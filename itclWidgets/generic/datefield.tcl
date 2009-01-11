@@ -16,7 +16,7 @@
 #    Copyright (c) 1995 DSC Technologies Corporation
 # ----------------------------------------------------------------------
 #
-#   @(#) $Id: datefield.tcl,v 1.1.2.1 2009/01/10 17:54:47 wiede Exp $
+#   @(#) $Id: datefield.tcl,v 1.1.2.2 2009/01/11 12:08:19 wiede Exp $
 # ======================================================================
 
 #
@@ -39,7 +39,6 @@ proc ::itcl::widgets::datefield {pathName args} {
 ::itcl::extendedclass ::itcl::widgets::Datefield {
     inherit ::itcl::widgets::Labeledwidget 
     
-    component entry
     protected component dfchildsite
     component date
 
@@ -49,9 +48,9 @@ proc ::itcl::widgets::datefield {pathName args} {
     option [list -gmt gmt GMT] -default no -configuremethod configGmt
     option [list -int int DateFormat] -default no -configuremethod configInt
 
-    delegate option [list -textfont textFont Font] to entry as -font
-    delegate option [list -background background Background] to entry as -highlightbackground
-   delegate option [list -textbackground textBackground Background] to entry as -background
+    delegate option [list -textfont textFont Font] to date as -font
+    delegate option [list -background background Background] to date as -highlightbackground
+   delegate option [list -textbackground textBackground Background] to date as -background
 
     protected variable _cfield "month"
     protected variable _fields {month day year}
@@ -75,6 +74,12 @@ proc ::itcl::widgets::datefield {pathName args} {
     public method get {{format "-string"}}
     public method isvalid {}
     public method show {{date now}}
+public method component {what args} {
+    if {[::info exists $what]} {
+        return [uplevel 0 [set $what] $args]
+    }
+    error "no such component \"$what\""
+}
 }
 
 
@@ -87,9 +92,10 @@ proc ::itcl::widgets::datefield {pathName args} {
     # Create an entry field for entering the date.
     #   
     setupcomponent date using entry $itcl_interior.date -width 10
-    keepcomponentoption entry -borderwidth -cursor -exportselection \
+    keepcomponentoption date -borderwidth -cursor -exportselection \
         -foreground -highlightcolor -highlightthickness \
-        -insertbackground -justify -relief -state
+        -insertbackground -justify -relief -state -background \
+	-textbackground -textfont
     #
     # Create the child site widget.
     #
@@ -265,7 +271,7 @@ proc ::itcl::widgets::datefield {pathName args} {
     on {
       }
     default {
-      error "bad gmt option \"$itcl_options(-gmt)\": should be boolean"
+        error "bad gmt option \"$value\": should be boolean"
       }
     }
     set itcl_options($option) $value
@@ -324,7 +330,7 @@ proc ::itcl::widgets::datefield {pathName args} {
             set seconds $fdate
         } elseif {[catch {set seconds [::clock scan $fdate -gmt \
                 $itcl_options(-gmt)]}] != 0} {
-            error "bad date: \"$date\", must be a valid date\
+            error "bad date: \"$fdate\", must be a valid date\
             string, clock clicks value or the keyword now"
         }
         $date insert end \

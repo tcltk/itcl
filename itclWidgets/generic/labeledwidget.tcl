@@ -22,7 +22,7 @@
 #    Copyright (c) 1995 DSC Technologies Corporation
 # ----------------------------------------------------------------------
 #
-#   @(#) $Id: labeledwidget.tcl,v 1.1.2.4 2009/01/10 17:11:54 wiede Exp $
+#   @(#) $Id: labeledwidget.tcl,v 1.1.2.5 2009/01/11 12:08:19 wiede Exp $
 # ======================================================================
 
 package require itcl
@@ -79,9 +79,9 @@ proc labeledwidget {pathName args} {
     
     proc alignlabels {args} {}
 
-public method component {what} {
+public method component {what args} {
     if {[::info exists $what]} {
-        return [set $what]
+        return [uplevel 0 [set $what] $args]
     }
     error "no such component \"$what\""
 }
