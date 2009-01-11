@@ -23,7 +23,7 @@
 #    Copyright (c) 1996  Lucent Technologies
 # ----------------------------------------------------------------------
 #
-#   @(#) $Id: hierarchy.tcl,v 1.1.2.2 2009/01/11 11:38:04 wiede Exp $
+#   @(#) $Id: hierarchy.tcl,v 1.1.2.3 2009/01/11 11:40:11 wiede Exp $
 # ======================================================================
 
 #
@@ -922,9 +922,8 @@ proc ::itcl::widgets::hierarchy {pathName args} {
     add {
         foreach node $args {
             set _selected($node) 1
-            if {[catch {
+            catch {
                 $list tag add hilite "$node.first" "$node.last"
-            } msg]} {
 	    }
         }
       }
