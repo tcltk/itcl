@@ -11,7 +11,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# @(#) $Id: hierarchy.test,v 1.1.2.1 2009/01/10 13:26:50 wiede Exp $
+# @(#) $Id: hierarchy.test,v 1.1.2.2 2009/01/11 11:40:29 wiede Exp $
 
 package require tcltest
 namespace import -force ::tcltest::*
@@ -89,9 +89,10 @@ incr c
 #
 # Option tests which are successful.
 #
+# have 58 as we cannot delete options at the moment, so -state is there
 test Hierarchy-2.$o {configuration option} {
     llength [.h configure]
-} {57}
+} {58}
 
 incr o
 
