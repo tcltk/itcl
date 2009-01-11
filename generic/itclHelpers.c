@@ -9,7 +9,7 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itclHelpers.c,v 1.1.2.9 2008/12/06 23:05:47 wiede Exp $
+ * RCS: @(#) $Id: itclHelpers.c,v 1.1.2.10 2009/01/11 11:42:51 wiede Exp $
  */
 
 #include "itclInt.h"
@@ -399,6 +399,10 @@ ItclTraceUnsetVar(
         /* unsetting of an array element nothing to do */
 	return NULL;
     }
+    /* also when unsetting variables, they stay alive until the class
+     * or object is teared down!!
+     */
+#ifdef NOTDEF
     tracePtr = (IctlVarTraceInfo *)clientData;
     if (tracePtr->flags & ITCL_TRACE_CLASS) {
         hPtr = Tcl_FindHashEntry(&tracePtr->iclsPtr->classCommons,
@@ -415,6 +419,7 @@ ItclTraceUnsetVar(
 	}
     }
     ckfree((char *)tracePtr);
+#endif
     return NULL;
 }
 
