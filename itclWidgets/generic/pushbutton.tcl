@@ -20,7 +20,7 @@
 #    Copyright (c) 1995 DSC Technologies Corporation
 # ----------------------------------------------------------------------
 #
-#   @(#) $Id: pushbutton.tcl,v 1.1.2.3 2009/01/05 21:11:13 wiede Exp $
+#   @(#) $Id: pushbutton.tcl,v 1.1.2.4 2009/01/11 12:42:46 wiede Exp $
 # ======================================================================
 
 #
@@ -103,7 +103,7 @@ proc ::itcl::widgets::pushbutton {pathName args} {
     keepcomponentoption pushbutton -activebackground -activeforeground \
          -background -borderwidth -cursor -disabledforeground -font \
 	 -foreground -highlightbackground -highlightcolor \
-	 -highlightthickness 
+	 -highlightthickness -relief
     keepcomponentoption pushbutton -underline -wraplength -state -command
     pack $pushbutton -expand 1 -fill both
     #
@@ -138,7 +138,7 @@ proc ::itcl::widgets::pushbutton {pathName args} {
 # Specifies the extra space surrounding the label in the x direction.
 # ------------------------------------------------------------------
 ::itcl::body Pushbutton::configPadx {option value} {
-    $pushbutton configure -padx $$value
+    $pushbutton configure -padx $value
     _relayout
     set itcl_options($option) $value
 }
