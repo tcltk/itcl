@@ -23,7 +23,7 @@
 #    Copyright (c) 1996  Lucent Technologies
 # ----------------------------------------------------------------------
 #
-#   @(#) $Id: hierarchy.tcl,v 1.1.2.1 2009/01/10 13:26:27 wiede Exp $
+#   @(#) $Id: hierarchy.tcl,v 1.1.2.2 2009/01/11 11:38:04 wiede Exp $
 # ======================================================================
 
 #
@@ -53,30 +53,46 @@ proc ::itcl::widgets::hierarchy {pathName args} {
     component itemMenu
     component bgMenu
 
-    option [list -alwaysquery alwaysQuery AlwaysQuery] -default 0
-    option [list -closedicon closedIcon Icon] -default {}
-    option [list -dblclickcommand dblClickCommand Command] -default {}
-    option [list -expanded expanded Expanded] -default 0 
-    option [list -filter filter Filter] -default 0 
+    option [list -alwaysquery alwaysQuery AlwaysQuery] -default 0 -configuremethod configAlwaysquery
+    option [list -closedicon closedIcon Icon] -default {} -configuremethod configClosedicon
+    option [list -dblclickcommand dblClickCommand Command] -default {} -configuremethod configDblclickcommand
+    option [list -expanded expanded Expanded] -default 0  -configuremethod configExpanded
+    option [list -filter filter Filter] -default 0  -configuremethod configFilter
     option [list -font font Font] -default \
-	-*-Courier-Medium-R-Normal--*-120-*-*-*-*-*-* 
-    option [list -height height Height] -default 0
-    option [list -iconcommand iconCommand Command] -default {}
-    option [list -icondblcommand iconDblCommand Command] -default {}
-    option [list -imagecommand imageCommand Command] -default {}
-    option [list -imagedblcommand imageDblCommand Command] -default {}
-    option [list -imagemenuloadcommand imageMenuLoadCommand Command] -default {}
-    option [list -markbackground markBackground Foreground] -default #a0a0a0 
-    option [list -markforeground markForeground Background] -default Black 
-    option [list -nodeicon nodeIcon Icon] -default {}
-    option [list -openicon openIcon Icon] -default {}
-    option [list -querycommand queryCommand Command] -default {}
-    option [list -selectcommand selectCommand Command] -default {}
-    option [list -selectbackground selectBackground Foreground] -default #c3c3c3
-    option [list -selectforeground selectForeground Background] -default Black 
-    option [list -textmenuloadcommand textMenuLoadCommand Command] -default {}
-    option [list -visibleitems visibleItems VisibleItems] -default 80x24
-    option [list -width width Width] -default 0
+	-*-Courier-Medium-R-Normal--*-120-*-*-*-*-*-* -configuremethod configFont
+    option [list -height height Height] -default 0 -configuremethod configHeight
+    option [list -iconcommand iconCommand Command] -default {} -configuremethod configIconcommand
+
+    option [list -icondblcommand iconDblCommand Command] -default {} -configuremethod configIcondblcommand
+
+    option [list -imagecommand imageCommand Command] -default {} -configuremethod configImagecommand
+
+    option [list -imagedblcommand imageDblCommand Command] -default {} -configuremethod configImagedblcommand
+
+    option [list -imagemenuloadcommand imageMenuLoadCommand Command] -default {} -configuremethod configImageloadcommand
+
+    option [list -markbackground markBackground Foreground] -default #a0a0a0  -configuremethod configMarkbackground
+
+    option [list -markforeground markForeground Background] -default Black  -configuremethod configMarkforeground
+
+    option [list -nodeicon nodeIcon Icon] -default {} -configuremethod configNodeicon
+
+    option [list -openicon openIcon Icon] -default {} -configuremethod configOpenicon
+
+    option [list -querycommand queryCommand Command] -default {} -configuremethod configQuerycommand
+
+    option [list -selectcommand selectCommand Command] -default {} -configuremethod configSelectcommand
+
+    option [list -selectbackground selectBackground Foreground] -default #c3c3c3 -configuremethod configSelectbackground
+
+    option [list -selectforeground selectForeground Background] -default Black  -configuremethod configSelectforeground
+
+    option [list -textmenuloadcommand textMenuLoadCommand Command] -default {} -configuremethod configTextmenuloadcommand
+
+    option [list -visibleitems visibleItems VisibleItems] -default 80x24 -configuremethod configVisibleitems
+
+    option [list -width width Width] -default 0 -configuremethod configWidth
+
 
     delegate option [list -background background Background] to clipper as -highlightbackground
     delegate option [list -textfont textFont Font] to list as -font
@@ -192,9 +208,8 @@ proc ::itcl::widgets::hierarchy {pathName args} {
     # relief display.
     #
     setupcomponent clipper using frame $itcl_interior.clipper
-    keepcomponentoption clipper -cursor -textfont -font \
-        -background -foreground -textbackground  \
-        -selectbackground -selectforeground 
+    keepcomponentoption clipper -cursor -textfont  \
+        -background -foreground -textbackground
     keepcomponentoption clipper -borderwidth -relief -highlightthickness -highlightcolor
     grid $clipper -row 0 -column 0 -sticky nsew
     grid rowconfigure $_interior 0 -weight 1
@@ -211,7 +226,7 @@ proc ::itcl::widgets::hierarchy {pathName args} {
 	        -borderwidth 0 -highlightthickness 0
     keepcomponentoption list -cursor -textfont -font \
         -background -foreground -textbackground  \
-        -selectbackground -selectforeground 
+        -selectbackground -selectforeground -activebackground
     keepcomponentoption list -spacing1 -spacing2 -spacing3 -tabs
 # FIXME	ignore -highlightthickness -highlightcolor
 # FIXME	ignore -insertbackground -insertborderwidth
@@ -243,14 +258,14 @@ proc ::itcl::widgets::hierarchy {pathName args} {
     #
     setupcomponent itemMenu using menu $list.itemmenu -tearoff 0
     keepcomponentoption itemMenu -cursor -textfont -font \
-        -background -foreground -textbackground  \
-        -selectbackground -selectforeground 
+        -background -foreground -textbackground  -activeforeground \
+        -selectbackground -selectforeground -selectcolor -menucursor
 # FIXME ignore -tearoff
     setupcomponent bgMenu using menu $list.bgmenu -tearoff 0
 # FIXME	ignore -tearoff
     keepcomponentoption bgMenu -cursor -textfont -font \
         -background -foreground -textbackground  \
-        -selectbackground -selectforeground 
+        -selectbackground -selectforeground -menucursor
     #
     # Adjust the bind tags to remove the class bindings.  Also, add
     # bindings for mouse button 1 to do selection and button 3 to 
@@ -305,7 +320,7 @@ proc ::itcl::widgets::hierarchy {pathName args} {
 # Foreground color scheme for selected nodes.
 # ------------------------------------------------------------------
 ::itcl::body Hierarchy::configSelectforeground {option value} {
-    $list tag configure hilite -foreground $vlue
+    $list tag configure hilite -foreground $value
     set itcl_options($option) $value
 }
 
@@ -559,8 +574,7 @@ proc ::itcl::widgets::hierarchy {pathName args} {
 # possible, bitmap otherwise.
 # ------------------------------------------------------------------
 ::itcl::body Hierarchy::configOpenicon {option value} {
-    set itcl_options($option) $value
-    if {value eq {}} {
+    if {$itcl_options($option) eq {}} {
 	if {[lsearch [image names] openFolder] == -1} {
 	    if {[lsearch [image types] pixmap] != -1} {
 		image create pixmap openFolder -data {
@@ -603,11 +617,13 @@ proc ::itcl::widgets::hierarchy {pathName args} {
 	    }
 	}
 	set itcl_options(-openicon) openFolder
+        set itcl_options($option) $value
     } else {
-	if {[lsearch [image names] $value == -1} {
+	if {[lsearch [image names] $value] == -1} {
 	    error "bad openicon option \"$value\":\
                    should be an existing image"
 	}
+        set itcl_options($option) $value
     }
 }
 
@@ -619,8 +635,7 @@ proc ::itcl::widgets::hierarchy {pathName args} {
 # possible, bitmap otherwise.
 # ------------------------------------------------------------------
 ::itcl::body Hierarchy::configClosedicon {option value} {
-    set itcl_options($option) $value
-    if {$value eq {}} {
+    if {$itcl_options($option) eq {}} {
 	if {[lsearch [image names] closedFolder] == -1} {
 	    if {[lsearch [image types] pixmap] != -1} {
 		image create pixmap closedFolder -data {
@@ -660,11 +675,13 @@ proc ::itcl::widgets::hierarchy {pathName args} {
 	    }
 	}
 	set itcl_options(-closedicon) closedFolder
+        set itcl_options($option) $value
     } else {
 	if {[lsearch [image names] $value] == -1} {
 	    error "bad closedicon option \"$value\":\
                    should be an existing image"
 	}
+        set itcl_options($option) $value
     }
 }
 
@@ -676,8 +693,7 @@ proc ::itcl::widgets::hierarchy {pathName args} {
 # possible, bitmap otherwise.
 # ------------------------------------------------------------------
 ::itcl::body Hierarchy::configNodeicon {option value} {
-    set itcl_options($option) $value
-    if {$value eq {}} {
+    if {$itcl_options($option) eq {}} {
 	if {[lsearch [image names] nodeFolder] == -1} {
 	    if {[lsearch [image types] pixmap] != -1} {
 		image create pixmap nodeFolder -data {
@@ -717,11 +733,13 @@ proc ::itcl::widgets::hierarchy {pathName args} {
 	    }
 	}
 	set itcl_options(-nodeicon) nodeFolder
+        set itcl_options($option) $value
     } else {
-	if {[lsearch [image names] $vaöue] == -1} {
-	    error "bad nodeicon option \"$itcl_options(-nodeicon)\":\
+	if {[lsearch [image names] $value] == -1} {
+	    error "bad nodeicon option \"$value\":\
                    should be an existing image"
 	}
+        set itcl_options($option) $value
     }
 }
 
@@ -904,9 +922,10 @@ proc ::itcl::widgets::hierarchy {pathName args} {
     add {
         foreach node $args {
             set _selected($node) 1
-            catch {
+            if {[catch {
                 $list tag add hilite "$node.first" "$node.last"
-            }
+            } msg]} {
+	    }
         }
       }
     remove {
@@ -1216,7 +1235,7 @@ proc ::itcl::widgets::hierarchy {pathName args} {
 # index1 to index2.
 # ------------------------------------------------------------------
 ::itcl::body Hierarchy::dump {args} {
-    return [uplevle 0 $list dump $args]
+    return [uplevel 0 $list dump $args]
 }
 
 # ------------------------------------------------------------------
@@ -1292,7 +1311,7 @@ proc ::itcl::widgets::hierarchy {pathName args} {
 # Manipulate tags dependent on options.
 # ------------------------------------------------------------------
 ::itcl::body Hierarchy::tag {op args} {
-    return [uplevle 0 $list tag $op $args]
+    return [uplevel 0 $list tag $op $args]
 }
 
 # ------------------------------------------------------------------
