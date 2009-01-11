@@ -6,7 +6,7 @@
 # ----------------------------------------------------------------------
 #   AUTHOR:  Arnulf P. Wiedemann
 #
-#      RCS:  $Id: itclHullCmds.tcl,v 1.1.2.7 2009/01/07 11:00:33 wiede Exp $
+#      RCS:  $Id: itclHullCmds.tcl,v 1.1.2.8 2009/01/11 12:07:20 wiede Exp $
 # ----------------------------------------------------------------------
 #            Copyright (c) 2008  Arnulf P. Wiedemann
 # ======================================================================
@@ -199,10 +199,13 @@ proc initoptions {args} {
 	       }
 	   }
            set val [uplevel 1 set itcl_options($opt)]
-	   lappend opt_lst $opt $val
+	   # FIXME temporary catch as we get all options instead of the
+	   # ones for the class only
+           catch {uplevel 1 configure $opt $val}
+#	   lappend opt_lst $opt $val
        }
     }
-    uplevel 1 $opt_lst
+#    uplevel 1 $opt_lst
 }
 
 }
