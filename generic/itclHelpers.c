@@ -9,7 +9,7 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itclHelpers.c,v 1.1.2.10 2009/01/11 11:42:51 wiede Exp $
+ * RCS: @(#) $Id: itclHelpers.c,v 1.1.2.11 2009/01/11 12:05:08 wiede Exp $
  */
 
 #include "itclInt.h"
@@ -392,8 +392,10 @@ ItclTraceUnsetVar(
     const char *name2,
     int flags)
 {
+#ifdef NOTDEF
     IctlVarTraceInfo *tracePtr;
     Tcl_HashEntry *hPtr;
+#endif
 
     if (name2 != NULL) {
         /* unsetting of an array element nothing to do */
