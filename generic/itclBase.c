@@ -9,7 +9,7 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itclBase.c,v 1.1.2.38 2009/01/07 19:38:50 wiede Exp $
+ * RCS: @(#) $Id: itclBase.c,v 1.1.2.39 2009/01/14 22:43:24 davygrvy Exp $
  */
 
 #include <stdlib.h>
@@ -183,7 +183,7 @@ AddClassUnknowMethod(
     ItclObjectInfo *infoPtr,
     Tcl_Class clsPtr)
 {
-    ClientData pmPtr;
+    ClientData tmPtr, pmPtr;
 
     infoPtr->unknownNamePtr = Tcl_NewStringObj("unknown", -1);
     Tcl_IncrRefCount(infoPtr->unknownNamePtr);
@@ -191,7 +191,7 @@ AddClassUnknowMethod(
     Tcl_IncrRefCount(infoPtr->unknownArgumentPtr);
     infoPtr->unknownBodyPtr = Tcl_NewStringObj(clazzUnknownBody, -1);
     Tcl_IncrRefCount(infoPtr->unknownBodyPtr);
-    ClientData tmPtr = (ClientData)Itcl_NewProcClassMethod(interp,
+    tmPtr = (ClientData)Itcl_NewProcClassMethod(interp,
         clsPtr, NULL, NULL, NULL, NULL, infoPtr->unknownNamePtr,
 	infoPtr->unknownArgumentPtr, infoPtr->unknownBodyPtr, &pmPtr);
     if (tmPtr == NULL) {
@@ -241,6 +241,8 @@ Initialize (
     Tcl_Obj *objPtr;
     ItclObjectInfo *infoPtr;
     const char * ret;
+    char *res_option;
+    int opt;
 
     if (Tcl_InitStubs(interp, TCL_VERSION, 0) == NULL) {
         return TCL_ERROR;
@@ -329,13 +331,13 @@ Initialize (
     infoPtr->buildingWidget = 0;
     infoPtr->typeDestructorArgumentPtr = Tcl_NewStringObj("", -1);
     Tcl_IncrRefCount(infoPtr->typeDestructorArgumentPtr);
-char *res_option = getenv("ITCL_USE_OLD_RESOLVERS");
-int opt;
-if (res_option == NULL) {
-opt = 1;
-} else {
-opt = atoi(res_option);
-}
+
+    res_option = getenv("ITCL_USE_OLD_RESOLVERS");
+    if (res_option == NULL) {
+	opt = 1;
+    } else {
+	opt = atoi(res_option);
+    }
     infoPtr->useOldResolvers = opt;
     Itcl_InitStack(&infoPtr->clsStack);
     Itcl_InitStack(&infoPtr->contextStack);
@@ -530,10 +532,10 @@ ItclCallCCommand(
     }
     if (objProc != NULL) {
 	Tcl_Namespace *callerNsPtr;
+        ItclObjectInfo *infoPtr;
         callerNsPtr = Itcl_GetUplevelNamespace(interp, 1);
         ItclShowArgs(2, "CARGS", Itcl_GetCallFrameObjc(interp),
 	        Itcl_GetCallFrameObjv(interp));
-        ItclObjectInfo *infoPtr;
         infoPtr = (ItclObjectInfo *)Tcl_GetAssocData(interp,
                 ITCL_INTERP_DATA, NULL);
 

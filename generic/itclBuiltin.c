@@ -24,7 +24,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclBuiltin.c,v 1.1.2.68 2009/01/07 19:38:50 wiede Exp $
+ *     RCS:  $Id: itclBuiltin.c,v 1.1.2.69 2009/01/14 22:43:24 davygrvy Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -1039,11 +1039,12 @@ NRBiChainCmd(
     Tcl_DString buffer;
     Tcl_Obj *cmdlinePtr;
     Tcl_Obj **newobjv;
-
-    ItclShowArgs(1, "Itcl_BiChainCmd", objc, objv);
     Tcl_Obj * const *cObjv;
     int freeCmd;
     int idx;
+    Tcl_Obj *objPtr;
+
+    ItclShowArgs(1, "Itcl_BiChainCmd", objc, objv);
 
     /*
      *  If this command is not invoked within a class namespace,
@@ -1111,7 +1112,6 @@ NRBiChainCmd(
      *  Now search up the class hierarchy for the next implementation.
      *  If found, execute it.  Otherwise, do nothing.
      */
-    Tcl_Obj *objPtr;
     objPtr = Tcl_NewStringObj(cmd, -1);
     if (freeCmd) {
         ckfree(cmd1);
@@ -1120,6 +1120,7 @@ NRBiChainCmd(
     while ((iclsPtr = Itcl_AdvanceHierIter(&hier)) != NULL) {
         hPtr = Tcl_FindHashEntry(&iclsPtr->functions, (char *)objPtr);
         if (hPtr) {
+	    int my_objc;
             imPtr = (ItclMemberFunc*)Tcl_GetHashValue(hPtr);
 
             /*
@@ -1131,7 +1132,6 @@ NRBiChainCmd(
             cmdlinePtr = Itcl_CreateArgs(interp,
 	            Tcl_GetString(imPtr->fullNamePtr), objc-1, objv+1);
 
-	    int my_objc;
             (void) Tcl_ListObjGetElements((Tcl_Interp*)NULL, cmdlinePtr,
                 &my_objc, &newobjv);
 
@@ -1380,10 +1380,10 @@ ItclBiClassUnknownCmd(
             /* check if the function is in the exceptions */
 	    hPtr2 = Tcl_FindHashEntry(&starIdmPtr->exceptions, (char *)objv[1]);
 	    if (hPtr2 != NULL) {
+		const char *sep = "";
 		objPtr = Tcl_NewStringObj("unknown subcommand \"", -1);
 		Tcl_AppendToObj(objPtr, funcName, -1);
 		Tcl_AppendToObj(objPtr, "\": must be ", -1);
-		const char *sep = "";
 		FOREACH_HASH_VALUE(idmPtr,
 			&iclsPtr->delegatedFunctions) {
 		    funcName = Tcl_GetString(idmPtr->namePtr);
@@ -1663,10 +1663,10 @@ ItclBiObjectUnknownCmd(
        /* check if the function is in the exceptions */
         hPtr2 = Tcl_FindHashEntry(&idmPtr->exceptions, (char *)objv[2]);
         if (hPtr2 != NULL) {
+	    const char *sep = "";
 	    objPtr = Tcl_NewStringObj("unknown subcommand \"", -1);
 	    Tcl_AppendToObj(objPtr, funcName, -1);
 	    Tcl_AppendToObj(objPtr, "\": must be ", -1);
-	    const char *sep = "";
 	    FOREACH_HASH_VALUE(idmPtr,
 		    &iclsPtr->delegatedFunctions) {
 	        funcName = Tcl_GetString(idmPtr->namePtr);
@@ -1719,10 +1719,10 @@ ItclBiObjectUnknownCmd(
         hPtr = Tcl_FindHashEntry(&idmPtr->exceptions, (char *)objv[2]);
 	/* we have no method name in that case in the caller */
 	if (hPtr != NULL) {
+	    const char *sep = "";
 	    objPtr = Tcl_NewStringObj("unknown subcommand \"", -1);
 	    Tcl_AppendToObj(objPtr, funcName, -1);
 	    Tcl_AppendToObj(objPtr, "\": must be ", -1);
-	    const char *sep = "";
 	    FOREACH_HASH_VALUE(idmPtr, &iclsPtr->delegatedFunctions) {
 		funcName = Tcl_GetString(idmPtr->namePtr);
 	        if (strcmp(funcName, "*") != 0) {
@@ -2933,6 +2933,7 @@ Itcl_BiInstallComponentCmd(
     }
     icPtr = Tcl_GetHashValue(hPtr);
     if (contextIclsPtr->flags & ITCL_TYPE) {
+        Tcl_Obj *objPtr;
         usageStr = "usage: installcomponent <componentName> using <widgetType> <widgetPath> ?-option value ...?";
         if (objc < 4) {
             Tcl_AppendResult(interp, usageStr, NULL);
@@ -2952,7 +2953,6 @@ Itcl_BiInstallComponentCmd(
             return result;
         }
         componentValue = Tcl_GetStringResult(interp);
-        Tcl_Obj *objPtr;
         objPtr = Tcl_NewStringObj(ITCL_VARIABLES_NAMESPACE, -1);
         Tcl_AppendToObj(objPtr, Tcl_GetString(contextIclsPtr->fullNamePtr), -1);
         Tcl_AppendToObj(objPtr, "::", -1);
@@ -3514,9 +3514,9 @@ Itcl_BiCreateHullCmd(
     Tcl_Obj *const objv[])   /* argument objects */
 {
     int result;
-
-    ItclShowArgs(1, "Itcl_BiCreateHullCmd", objc, objv);
     ItclObjectInfo *infoPtr = (ItclObjectInfo*)clientData;
+ 
+    ItclShowArgs(1, "Itcl_BiCreateHullCmd", objc, objv);
     if (!infoPtr->itclHullCmdsInitted) {
         result =  Tcl_Eval(interp, initHullCmdsScript);
         if (result != TCL_OK) {
@@ -3549,9 +3549,9 @@ Itcl_BiSetupComponentCmd(
     Tcl_Obj *const objv[])   /* argument objects */
 {
     int result;
+    ItclObjectInfo *infoPtr = (ItclObjectInfo*)clientData;
 
     ItclShowArgs(1, "Itcl_BiSetupComponentCmd", objc, objv);
-    ItclObjectInfo *infoPtr = (ItclObjectInfo*)clientData;
     if (!infoPtr->itclHullCmdsInitted) {
         result =  Tcl_Eval(interp, initHullCmdsScript);
         if (result != TCL_OK) {
@@ -3584,9 +3584,9 @@ Itcl_BiInitOptionsCmd(
     Tcl_Obj *const objv[])   /* argument objects */
 {
     int result;
+    ItclObjectInfo *infoPtr = (ItclObjectInfo*)clientData;
 
     ItclShowArgs(1, "Itcl_BiInitOptionsCmd", objc, objv);
-    ItclObjectInfo *infoPtr = (ItclObjectInfo*)clientData;
     if (!infoPtr->itclHullCmdsInitted) {
         result =  Tcl_Eval(interp, initHullCmdsScript);
         if (result != TCL_OK) {
@@ -3628,9 +3628,9 @@ Itcl_BiKeepComponentOptionCmd(
     int idx;
     int isNew;
     int result;
+    ItclObjectInfo *infoPtr = (ItclObjectInfo*)clientData;
 
     ItclShowArgs(1, "Itcl_BiKeepComponentOptionCmd", objc, objv);
-    ItclObjectInfo *infoPtr = (ItclObjectInfo*)clientData;
     if (!infoPtr->itclHullCmdsInitted) {
         result =  Tcl_Eval(interp, initHullCmdsScript);
         if (result != TCL_OK) {

@@ -24,7 +24,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclInfo.c,v 1.1.2.42 2009/01/07 19:38:50 wiede Exp $
+ *     RCS:  $Id: itclInfo.c,v 1.1.2.43 2009/01/14 22:43:24 davygrvy Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -637,11 +637,11 @@ Itcl_BiInfoClassCmd(
     if (Itcl_GetContext(interp, &contextIclsPtr, &contextIoPtr) != TCL_OK) {
         /* try it the hard way */
 	ClientData clientData;
-	clientData = Itcl_GetCallFrameClientData(interp);
         ItclObjectInfo *infoPtr;
+        Tcl_Object oPtr;
+	clientData = Itcl_GetCallFrameClientData(interp);
         infoPtr = (ItclObjectInfo *)Tcl_GetAssocData(interp,
                 ITCL_INTERP_DATA, NULL);
-        Tcl_Object oPtr;
 	if (clientData != NULL) {
             oPtr = Tcl_ObjectContextObject(clientData);
             contextIoPtr = Tcl_ObjectGetMetadata(oPtr,
@@ -722,6 +722,7 @@ Itcl_BiInfoInheritCmd(
     ItclMemberFunc *imPtr;
     Tcl_Obj *listPtr;
     Tcl_Obj *objPtr;
+    Tcl_Namespace *upNsPtr;
 
     ItclShowArgs(2, "Itcl_BiInfoInheritCmd", objc, objv);
     if (objc != 1) {
@@ -758,7 +759,6 @@ Itcl_BiInfoInheritCmd(
     callContextPtr = Itcl_PeekStack(&infoPtr->contextStack);
     imPtr = callContextPtr->imPtr;
     contextIclsPtr = imPtr->iclsPtr;
-    Tcl_Namespace *upNsPtr;
     upNsPtr = Itcl_GetUplevelNamespace(interp, 1);
     if (imPtr->iclsPtr->infoPtr->useOldResolvers) {
         if (contextIoPtr != NULL) {
@@ -831,6 +831,7 @@ Itcl_BiInfoHeritageCmd(
     Tcl_Obj *listPtr;
     Tcl_Obj *objPtr;
     ItclClass *iclsPtr;
+    Tcl_Namespace *upNsPtr;
 
     ItclShowArgs(2, "Itcl_BiInfoHeritageCmd", objc, objv);
     if (objc != 1) {
@@ -864,7 +865,6 @@ Itcl_BiInfoHeritageCmd(
     callContextPtr = Itcl_PeekStack(&infoPtr->contextStack);
     imPtr = callContextPtr->imPtr;
     contextIclsPtr = imPtr->iclsPtr;
-    Tcl_Namespace *upNsPtr;
     upNsPtr = Itcl_GetUplevelNamespace(interp, 1);
     if (contextIclsPtr->infoPtr->useOldResolvers) {
         if (contextIoPtr != NULL) {
@@ -1002,6 +1002,7 @@ Itcl_BiInfoFunctionCmd(
      *  Return info for a specific command.
      */
     if (cmdName) {
+	ItclCmdLookup *clookup;
 	objPtr = Tcl_NewStringObj(cmdName, -1);
         entry = Tcl_FindHashEntry(&contextIclsPtr->resolveCmds, (char *)objPtr);
 	Tcl_DecrRefCount(objPtr);
@@ -1014,7 +1015,6 @@ Itcl_BiInfoFunctionCmd(
             return TCL_ERROR;
         }
 
-	ItclCmdLookup *clookup;
 	clookup = (ItclCmdLookup *)Tcl_GetHashValue(entry);
 	imPtr = clookup->imPtr;
         mcode = imPtr->codePtr;
@@ -2587,11 +2587,11 @@ Itcl_BiInfoWidgetCmd(
     if (Itcl_GetContext(interp, &contextIclsPtr, &contextIoPtr) != TCL_OK) {
         /* try it the hard way */
 	ClientData clientData;
-	clientData = Itcl_GetCallFrameClientData(interp);
         ItclObjectInfo *infoPtr;
+        Tcl_Object oPtr;
+	clientData = Itcl_GetCallFrameClientData(interp);
         infoPtr = (ItclObjectInfo *)Tcl_GetAssocData(interp,
                 ITCL_INTERP_DATA, NULL);
-        Tcl_Object oPtr;
 	if (clientData != NULL) {
             oPtr = Tcl_ObjectContextObject(clientData);
             contextIoPtr = Tcl_ObjectGetMetadata(oPtr,
@@ -2865,11 +2865,11 @@ Itcl_BiInfoTypeCmd(
     if (Itcl_GetContext(interp, &contextIclsPtr, &contextIoPtr) != TCL_OK) {
         /* try it the hard way */
 	ClientData clientData;
-	clientData = Itcl_GetCallFrameClientData(interp);
         ItclObjectInfo *infoPtr;
+        Tcl_Object oPtr;
+	clientData = Itcl_GetCallFrameClientData(interp);
         infoPtr = (ItclObjectInfo *)Tcl_GetAssocData(interp,
                 ITCL_INTERP_DATA, NULL);
-        Tcl_Object oPtr;
 	if (clientData != NULL) {
             oPtr = Tcl_ObjectContextObject(clientData);
             contextIoPtr = Tcl_ObjectGetMetadata(oPtr,
@@ -2965,11 +2965,11 @@ Itcl_BiInfoHullTypeCmd(
     if (Itcl_GetContext(interp, &contextIclsPtr, &contextIoPtr) != TCL_OK) {
         /* try it the hard way */
 	ClientData clientData;
-	clientData = Itcl_GetCallFrameClientData(interp);
         ItclObjectInfo *infoPtr;
+        Tcl_Object oPtr;
+	clientData = Itcl_GetCallFrameClientData(interp);
         infoPtr = (ItclObjectInfo *)Tcl_GetAssocData(interp,
                 ITCL_INTERP_DATA, NULL);
-        Tcl_Object oPtr;
 	if (clientData != NULL) {
             oPtr = Tcl_ObjectContextObject(clientData);
             contextIoPtr = Tcl_ObjectGetMetadata(oPtr,
@@ -3205,6 +3205,7 @@ Itcl_BiInfoMethodCmd(
      *  Return info for a specific command.
      */
     if (cmdName) {
+	ItclCmdLookup *clookup;
 	objPtr = Tcl_NewStringObj(cmdName, -1);
         hPtr = Tcl_FindHashEntry(&contextIclsPtr->resolveCmds, (char *)objPtr);
 	Tcl_DecrRefCount(objPtr);
@@ -3217,7 +3218,6 @@ Itcl_BiInfoMethodCmd(
             return TCL_ERROR;
         }
 
-	ItclCmdLookup *clookup;
 	clookup = (ItclCmdLookup *)Tcl_GetHashValue(hPtr);
 	imPtr = clookup->imPtr;
         mcode = imPtr->codePtr;
@@ -3779,6 +3779,7 @@ Itcl_BiInfoTypeMethodCmd(
      *  Return info for a specific command.
      */
     if (cmdName) {
+	ItclCmdLookup *clookup;
 	objPtr = Tcl_NewStringObj(cmdName, -1);
         hPtr = Tcl_FindHashEntry(&contextIclsPtr->resolveCmds, (char *)objPtr);
 	Tcl_DecrRefCount(objPtr);
@@ -3791,7 +3792,6 @@ Itcl_BiInfoTypeMethodCmd(
             return TCL_ERROR;
         }
 
-	ItclCmdLookup *clookup;
 	clookup = (ItclCmdLookup *)Tcl_GetHashValue(hPtr);
 	imPtr = clookup->imPtr;
         mcode = imPtr->codePtr;
@@ -4409,11 +4409,11 @@ Itcl_BiInfoWidgetadaptorCmd(
     if (Itcl_GetContext(interp, &contextIclsPtr, &contextIoPtr) != TCL_OK) {
         /* try it the hard way */
 	ClientData clientData;
-	clientData = Itcl_GetCallFrameClientData(interp);
         ItclObjectInfo *infoPtr;
+        Tcl_Object oPtr;
+	clientData = Itcl_GetCallFrameClientData(interp);
         infoPtr = (ItclObjectInfo *)Tcl_GetAssocData(interp,
                 ITCL_INTERP_DATA, NULL);
-        Tcl_Object oPtr;
 	if (clientData != NULL) {
             oPtr = Tcl_ObjectContextObject(clientData);
             contextIoPtr = Tcl_ObjectGetMetadata(oPtr,
@@ -4782,10 +4782,10 @@ Itcl_ErrorDelegatedInfoCmd(
     int objc,              /* number of arguments */
     Tcl_Obj *const objv[]) /* argument objects */
 {
-    ItclShowArgs(1, "Itcl_ErrorDelegatedInfoCmd", objc, objv);
     /* produce usage message */
     Tcl_Obj *objPtr = Tcl_NewStringObj(
            "wrong # args: should be one of...\n", -1);
+    ItclShowArgs(1, "Itcl_ErrorDelegatedInfoCmd", objc, objv);
     ItclGetInfoDelegatedUsage(interp, objPtr, (ItclObjectInfo *)clientData);
     Tcl_SetResult(interp, Tcl_GetString(objPtr), TCL_VOLATILE);
     Tcl_DecrRefCount(objPtr);

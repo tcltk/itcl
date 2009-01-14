@@ -25,7 +25,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann Copyright (c) 2007
  *
- *     RCS:  $Id: itclClass.c,v 1.1.2.48 2009/01/04 19:40:45 wiede Exp $
+ *     RCS:  $Id: itclClass.c,v 1.1.2.49 2009/01/14 22:43:24 davygrvy Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -146,9 +146,10 @@ void
 ItclDeleteClassMetadata(
     ClientData clientData)
 {
+    ItclClass *iclsPtr;
+
     /* do we need that at all ? */
 return;
-    ItclClass *iclsPtr;
 
     iclsPtr = clientData;
 }
@@ -207,6 +208,7 @@ Itcl_CreateClass(
     void *callbackPtr;
     int result;
     int newEntry;
+    ItclResolveInfo *resolveInfoPtr;
 
     /*
      * check for an empty class name to avoid a crash
@@ -300,8 +302,7 @@ Itcl_CreateClass(
     Itcl_InitList(&iclsPtr->bases);
     Itcl_InitList(&iclsPtr->derived);
 
-    ItclResolveInfo *resolveInfoPtr = (ItclResolveInfo *)
-            ckalloc(sizeof(ItclResolveInfo));
+    resolveInfoPtr = (ItclResolveInfo *) ckalloc(sizeof(ItclResolveInfo));
     memset (resolveInfoPtr, 0, sizeof(ItclResolveInfo));
     resolveInfoPtr->flags = ITCL_RESOLVE_CLASS;
     resolveInfoPtr->iclsPtr = iclsPtr;
@@ -605,9 +606,11 @@ ItclDeleteClassVariablesNamespace(
     Tcl_Interp *interp,
     ItclClass *iclsPtr)
 {
-return;
     Tcl_DString buffer;
     Tcl_Namespace *varNsPtr;
+
+    /* TODO: why is this being skipped? */
+return;
 
     if (iclsPtr->nsPtr == NULL) {
         return;
@@ -1705,6 +1708,7 @@ Itcl_BuildVirtualTables(
     while (iclsPtr2 != NULL) {
         hPtr = Tcl_FirstHashEntry(&iclsPtr2->variables, &place);
         while (hPtr) {
+            int type = VAR_TYPE_VARIABLE;
             ivPtr = (ItclVariable*)Tcl_GetHashValue(hPtr);
 
             vlookup = (ItclVarLookup *)ckalloc(sizeof(ItclVarLookup));
@@ -1719,7 +1723,6 @@ Itcl_BuildVirtualTables(
             vlookup->accessible = (ivPtr->protection != ITCL_PRIVATE ||
 	            ivPtr->iclsPtr == iclsPtr);
 
-            int type = VAR_TYPE_VARIABLE;
 	    if (ivPtr->flags & ITCL_COMMON) {
 	        type = VAR_TYPE_COMMON;
 	    }

@@ -9,7 +9,7 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itclStubs.c,v 1.1.2.6 2009/01/01 19:41:42 wiede Exp $
+ * RCS: @(#) $Id: itclStubs.c,v 1.1.2.7 2009/01/14 22:43:24 davygrvy Exp $
  */
 
 #include <string.h>
@@ -74,6 +74,7 @@ Itcl_StubCreateCmd(
 {
     Tcl_Command cmdPtr;
     char *cmdName;
+    Tcl_CmdInfo cmdInfo;
 
     if (objc != 2) {
         Tcl_WrongNumArgs(interp, 1, objv, "name");
@@ -91,7 +92,6 @@ Itcl_StubCreateCmd(
         ItclHandleStubCmd, (ClientData)NULL,
         (Tcl_CmdDeleteProc*)ItclDeleteStub);
 
-    Tcl_CmdInfo cmdInfo;
     Tcl_GetCommandInfoFromToken(cmdPtr, &cmdInfo);
     cmdInfo.objClientData = cmdPtr;
     Tcl_SetCommandInfoFromToken(cmdPtr, &cmdInfo);

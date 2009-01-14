@@ -23,7 +23,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclCmd.c,v 1.1.2.47 2009/01/07 19:38:50 wiede Exp $
+ *     RCS:  $Id: itclCmd.c,v 1.1.2.48 2009/01/14 22:43:24 davygrvy Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -749,6 +749,7 @@ Itcl_ScopeCmd(
         contextIclsPtr = (ItclClass *)Tcl_GetHashValue(hPtr);
     }
     if (Itcl_IsClassNamespace(contextNsPtr)) {
+	ClientData clientData;
 
         entry = Tcl_FindHashEntry(&contextIclsPtr->resolveVars, token);
         if (!entry) {
@@ -782,7 +783,6 @@ Itcl_ScopeCmd(
          *  an object context.  Return the name as a fully qualified name.
          */
         infoPtr = contextIclsPtr->infoPtr;
-	ClientData clientData;
         clientData = Itcl_GetCallFrameClientData(interp);
         if (clientData != NULL) {
             oPtr = Tcl_ObjectContextObject((Tcl_ObjectContext)clientData);
@@ -1753,6 +1753,7 @@ Itcl_AddComponentCmd(
     const char *name;
     int isNew;
     int result;
+    int type = VAR_TYPE_VARIABLE;
 
     result = TCL_OK;
     contextIoPtr = NULL;
@@ -1817,7 +1818,6 @@ Itcl_AddComponentCmd(
     vlookup->accessible = (ivPtr->protection != ITCL_PRIVATE ||
         ivPtr->iclsPtr == contextIclsPtr);
 
-    int type = VAR_TYPE_VARIABLE;
     if (ivPtr->flags & ITCL_COMMON) {
         type = VAR_TYPE_COMMON;
     }

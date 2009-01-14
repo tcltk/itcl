@@ -9,7 +9,7 @@
  * ========================================================================
  *  AUTHOR:  Arnulf Wiedemann
  *
- *     RCS:  $Id: itclMigrate2TclCore.c,v 1.1.2.9 2008/01/12 18:29:04 wiede Exp $
+ *     RCS:  $Id: itclMigrate2TclCore.c,v 1.1.2.10 2009/01/14 22:43:24 davygrvy Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -131,10 +131,11 @@ Itcl_GetUplevelNamespace(
     Tcl_Interp *interp,
     int level)
 {
+    CallFrame *framePtr;
     if (level < 0) {
         return NULL;
     }
-    CallFrame *framePtr = ((Interp *)interp)->framePtr;
+    framePtr = ((Interp *)interp)->framePtr;
     while ((framePtr != NULL) && (level-- > 0)) {
         framePtr = framePtr->callerVarPtr;
     }
@@ -196,13 +197,15 @@ Itcl_IsCallFrameArgument(
     const char *name)
 {
     CallFrame *varFramePtr = ((Interp *)interp)->framePtr;
+    Proc *procPtr;
+
     if (varFramePtr == NULL) {
         return 0;
     }
     if (!varFramePtr->isProcCallFrame) {
         return 0;
     }
-    Proc *procPtr = varFramePtr->procPtr;
+    procPtr = varFramePtr->procPtr;
     /*
      *  Search through compiled locals first...
      */

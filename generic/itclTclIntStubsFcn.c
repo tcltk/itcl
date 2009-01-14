@@ -9,14 +9,14 @@
  * ========================================================================
  *  AUTHOR:  Arnulf Wiedemann
  *
- *     RCS:  $Id: itclTclIntStubsFcn.c,v 1.1.2.1 2008/01/06 19:24:35 wiede Exp $
+ *     RCS:  $Id: itclTclIntStubsFcn.c,v 1.1.2.2 2009/01/14 22:43:24 davygrvy Exp $
  * ------------------------------------------------------------------------
  * See the file "license.terms" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  */
 #include <tcl.h>
 #include <tclInt.h>
-#include "itclTclIntStubsFcn.h"
+#include "itclInt.h"
 
 Tcl_Command
 _Tcl_GetOriginalCommand(

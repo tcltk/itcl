@@ -5,7 +5,7 @@
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 # 
 # Copyright (c) 1993-1998 Lucent Technologies, Inc.
-# RCS: $Id: makefile.vc,v 1.34.2.1 2009/01/14 20:22:20 davygrvy Exp $
+# RCS: $Id: makefile.vc,v 1.34.2.2 2009/01/14 22:43:24 davygrvy Exp $
 #------------------------------------------------------------------------------
 #  Do not modify this file!
 #------------------------------------------------------------------------------
@@ -104,7 +104,6 @@ ITCLSTUBOBJS = \
 
 GENERICDIR	= $(ROOT)\generic
 DOCDIR		= $(ROOT)\doc
-RCDIR		= $(ROOT)\win\rc
 WINDIR		= $(ROOT)\win
 TOOLSDIR	= ..\..\tools
 
@@ -191,7 +190,7 @@ TCL_INCLUDES	= -I"$(TCLDIR)\generic" -I"$(TCLDIR)\win"
 !endif
 
 ITCL_INCLUDES	= -I$(WINDIR) -I$(GENERICDIR)
-ITCL_DEFINES	= -DBUILD_itcl -DTCL_THREADS=1
+ITCL_DEFINES	= -DBUILD_itcl -DTCL_THREADS=1 -DUSE_TCLOO_STUBS
 ITCL_DLL_CFLAGS	= $(cflags) $(cdebug) $(crt) $(ITCL_INCLUDES) $(ITCL_DEFINES) $(TCL_INCLUDES) $(OPTDEFINES)
 ITCL_STUB_CFLAGS= $(cflags) $(cdebug:-GL=) $(ITCL_INCLUDES) $(TCL_INCLUDES) $(OPTDEFINES)
 
@@ -324,7 +323,7 @@ $<
 $<
 <<
 
-{$(RCDIR)}.rc{$(TMP_DIR)}.res:
+{$(WINDIR)}.rc{$(TMP_DIR)}.res:
 	$(rc32) -fo $@ -d DEBUG=$(DEBUG) -d UNCHECKED=$(UNCHECKED) \
 		$(ITCL_INCLUDES) $(TCL_INCLUDES) $(ITCL_DEFINES) $<
 

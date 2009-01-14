@@ -24,7 +24,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann Copyright (c) 2007
  *
- *     RCS:  $Id: itclObject.c,v 1.1.2.72 2009/01/07 19:38:50 wiede Exp $
+ *     RCS:  $Id: itclObject.c,v 1.1.2.73 2009/01/14 22:43:24 davygrvy Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -172,6 +172,8 @@ ItclCreateObject(
     char unique[256];    /* buffer used for unique part of object names */
     int newObjc;
     int newEntry;
+    ItclResolveInfo *resolveInfoPtr;
+    char str[100];
 
     infoPtr = NULL;
     ItclShowArgs(1, "ItclCreateObject", objc, objv);
@@ -356,8 +358,7 @@ ItclCreateObject(
     ioPtr->resolvePtr = (Tcl_Resolve *)ckalloc(sizeof(Tcl_Resolve));
     ioPtr->resolvePtr->cmdProcPtr = Itcl_CmdAliasProc;
     ioPtr->resolvePtr->varProcPtr = Itcl_VarAliasProc;
-    ItclResolveInfo *resolveInfoPtr = (ItclResolveInfo *)
-    ckalloc(sizeof(ItclResolveInfo));
+    resolveInfoPtr = (ItclResolveInfo *)ckalloc(sizeof(ItclResolveInfo));
     memset (resolveInfoPtr, 0, sizeof(ItclResolveInfo));
     resolveInfoPtr->flags = ITCL_RESOLVE_OBJECT;
     resolveInfoPtr->ioPtr = ioPtr;
@@ -379,7 +380,6 @@ ItclCreateObject(
 
     /* make the object instance known, for use as unique key if the object */
     /* is renamed. Used by mytypemethod etc. */
-    char str[100];
     sprintf(str, "ItclInst%d", iclsPtr->infoPtr->numInstances);
     /* FIXME need to free that when deleting object and to remove the entries!! */
     objPtr = Tcl_NewStringObj(str, -1);
@@ -511,7 +511,12 @@ ItclCreateObject(
      *  its accessCmd member is NULL.
      */
     if (result == TCL_OK && (ioPtr->accessCmd != NULL))  {
-        if (!(ioPtr->iclsPtr->flags & ITCL_CLASS)) {
+	ClientData pmPtr;
+	Tcl_Obj *namePtr;
+	Tcl_Obj *argumentPtr;
+	Tcl_Obj *bodyPtr;
+
+	if (!(ioPtr->iclsPtr->flags & ITCL_CLASS)) {
 	    result = DelegationInstall(interp, ioPtr, iclsPtr);
 	    if (result != TCL_OK) {
 		goto errorReturn;
@@ -528,10 +533,6 @@ ItclCreateObject(
         Tcl_SetHashValue(hPtr, (ClientData)ioPtr);
 
         /* add the objects unknow command to handle all unknown sub commands */
-	ClientData pmPtr;
-	Tcl_Obj *namePtr;
-	Tcl_Obj *argumentPtr;
-	Tcl_Obj *bodyPtr;
 	namePtr = Tcl_NewStringObj("unknown", -1);
 	Tcl_IncrRefCount(namePtr);
 	argumentPtr = Tcl_NewStringObj("args", -1);
@@ -867,6 +868,7 @@ ItclInitObjectVariables(
             }
 	    vlookup = Tcl_GetHashValue(hPtr2);
 	    if ((ivPtr->flags & ITCL_COMMON) == 0) {
+                IctlVarTraceInfo *traceInfoPtr;
 #ifndef NEW_PROTO_RESOLVER
                 varPtr = Tcl_NewNamespaceVar(interp, varNsPtr,
                         Tcl_GetString(ivPtr->namePtr));
@@ -881,7 +883,6 @@ ItclInitObjectVariables(
 		    Tcl_SetHashValue(hPtr2, varPtr);
 		} else {
 		}
-                IctlVarTraceInfo *traceInfoPtr;
                 traceInfoPtr = (IctlVarTraceInfo *)ckalloc(
 		        sizeof(IctlVarTraceInfo));
                 memset (traceInfoPtr, 0, sizeof(IctlVarTraceInfo));
@@ -1050,7 +1051,7 @@ ItclInitObjectOptions(
 {
     Tcl_DString buffer;
     Tcl_HashEntry *hPtr;
-    Tcl_HashEntry *hPtr2;;
+    Tcl_HashEntry *hPtr2;
     Tcl_HashSearch place;
     Tcl_CallFrame frame;
     Tcl_Namespace *varNsPtr;
@@ -1234,7 +1235,7 @@ ItclInitObjectMethodVariables(
     ItclHierIter hier;
     ItclMethodVariable *imvPtr;
     Tcl_HashEntry *hPtr;
-    Tcl_HashEntry *hPtr2;;
+    Tcl_HashEntry *hPtr2;
     Tcl_HashSearch place;
     int isNew;
 
@@ -1276,8 +1277,9 @@ Itcl_DeleteObject(
     ItclObject *contextIoPtr)  /* object to be deleted */
 {
     Tcl_CmdInfo cmdInfo;
-    Tcl_GetCommandInfoFromToken(contextIoPtr->accessCmd, &cmdInfo);
     Tcl_HashEntry *hPtr;
+
+    Tcl_GetCommandInfoFromToken(contextIoPtr->accessCmd, &cmdInfo);
 
     contextIoPtr->flags |= ITCL_OBJECT_IS_DELETED;
     Itcl_PreserveData((ClientData)contextIoPtr);
@@ -1438,6 +1440,7 @@ Itcl_DestructObject(
 
     result = TCL_OK;
     if (contextIoPtr->oPtr != NULL) {
+        void *callbackPtr;
         /*
          *  Create a "destructed" table to keep track of which destructors
          *  have been invoked.  This is used in ItclDestructBase to make
@@ -1451,7 +1454,6 @@ Itcl_DestructObject(
          *  Destruct the object starting from the most-specific class.
          *  If all goes well, return the null string as the result.
          */
-        void *callbackPtr;
         callbackPtr = Itcl_GetCurrentCallbackPtr(interp);
         Itcl_NRAddCallback(interp, FinalizeDeleteObject, contextIoPtr,
 	        NULL, NULL, NULL);
@@ -2934,9 +2936,9 @@ ItclMapMethodNameProc(
     if (hPtr != NULL) {
 	ItclMemberFunc *imPtr;
 	Tcl_Namespace *nsPtr;
+	ItclCmdLookup *clookup;
 
 	nsPtr = Tcl_GetCurrentNamespace(interp);
-	ItclCmdLookup *clookup;
 	clookup = (ItclCmdLookup *)Tcl_GetHashValue(hPtr);
 	imPtr = clookup->imPtr;
         if (!Itcl_CanAccessFunc(imPtr, nsPtr)) {
@@ -3184,6 +3186,7 @@ DelegateFunction(
     Tcl_Obj *listPtr;
     const char *val;
     int result;
+    Tcl_Method mPtr;
 
     listPtr = Tcl_NewListObj(0, NULL);
     if (componentValuePtr != NULL) {
@@ -3198,7 +3201,6 @@ DelegateFunction(
         return result;
     }
     val = Tcl_GetString(listPtr);
-    Tcl_Method mPtr;
     if (componentValuePtr != NULL) {
         mPtr = Itcl_NewForwardClassMethod(interp, iclsPtr->clsPtr, 1,
                 idmPtr->namePtr, listPtr);
