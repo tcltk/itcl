@@ -1,4 +1,9 @@
-RCS: @(#) $Id: ChangeLog,v 1.1.2.6 2009/01/07 20:57:48 wiede Exp $
+RCS: @(#) $Id: ChangeLog,v 1.1.2.7 2009/01/14 21:55:09 das Exp $
+2009-01-14 Daniel A. Steffen <das@users.sourceforge.net>
+    * Makefile.in: fix itclConfig.sh install location to match TEA convention
+    * aclocal.m4: match minimum autoconf requirement with TEA
+    * configure: autoconf-2.59
+    * generic/itclUtil.c: fix Mac OS X build failure (dkf) [Bug 2505545]
 2008-12-11 Arnulf P. Wiedemann <wiede@users.sf.net>
     * itcl-ng first beta release 4.0b1
 2008-12-06 Arnulf P. Wiedemann <wiede@users.sf.net>

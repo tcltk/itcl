@@ -23,7 +23,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclUtil.c,v 1.1.2.13 2009/01/07 19:38:50 wiede Exp $
+ *     RCS:  $Id: itclUtil.c,v 1.1.2.14 2009/01/14 21:55:09 das Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -31,7 +31,6 @@
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  */
 #include "itclInt.h"
-#include <malloc.h>
 
 /*
  *  POOL OF LIST ELEMENTS FOR LINKED LIST
@@ -640,12 +639,12 @@ ItclDbgPreserveData(
         }
 	hPtr = Tcl_CreateHashEntry(&itclPreserveInfos, cdata, &isNew);
 	if (isNew) {
-	    ipiPtr = (ItclPreserveInfo *)malloc(sizeof(ItclPreserveInfo));
+	    ipiPtr = (ItclPreserveInfo *)ckalloc(sizeof(ItclPreserveInfo));
 	    ipiPtr->refCount = 0;
 	    ipiPtr->size = ITCL_PRESERVE_BUCKET_SIZE;
 	    ipiPtr->numEntries = 0;
 	    ipiPtr->clientData = cdata;
-	    ipiPtr->entries = (ItclPreserveInfoEntry *)malloc(
+	    ipiPtr->entries = (ItclPreserveInfoEntry *)ckalloc(
 	            sizeof(ItclPreserveInfoEntry) * ipiPtr->size);
 	    Tcl_SetHashValue(hPtr, ipiPtr);
 	}
@@ -653,7 +652,7 @@ ItclDbgPreserveData(
         if (ipiPtr->numEntries >= ipiPtr->size) {
             ipiPtr->size += ITCL_PRESERVE_BUCKET_SIZE;
             ipiPtr->entries = (ItclPreserveInfoEntry *)
-                    realloc((char *)ipiPtr->entries,
+                    ckrealloc((char *)ipiPtr->entries,
                     sizeof(ItclPreserveInfoEntry) *
                     ipiPtr->size);
         }
@@ -725,7 +724,7 @@ ItclDbgReleaseData(
             if (ipiPtr->numEntries >= ipiPtr->size) {
                 ipiPtr->size += ITCL_PRESERVE_BUCKET_SIZE;
                 ipiPtr->entries = (ItclPreserveInfoEntry *)
-                        realloc((char *)ipiPtr->entries,
+                        ckrealloc((char *)ipiPtr->entries,
                         sizeof(ItclPreserveInfoEntry) *
                         ipiPtr->size);
             }
