@@ -1,4 +1,27 @@
-RCS: @(#) $Id: ChangeLog,v 1.1.2.7 2009/01/14 21:55:09 das Exp $
+RCS: @(#) $Id: ChangeLog,v 1.1.2.8 2009/01/14 22:48:38 davygrvy Exp $
+
+2009-01-08 David Gravereaux <davygrvy@pobox.com>
+
+	* generic/itclBase.c:
+	* generic/itclBuiltin.c:
+	* generic/itclClass.c:
+	* generic/itclCmd.c:
+	* generic/itclEnsemble.c:
+	* generic/itclHelpers.c:
+	* generic/itclInfo.c:
+	* generic/itclMethod.c:
+	* generic/itclMigrate2TclCore.c:
+	* generic/itclObject.c:
+	* generic/itclParse.c:
+	* generic/itclResolve.c
+	* generic/itclStubs.c
+	* generic/itclTclIntStubsFcn.c:
+	* win/makefile.vc:
+		Changes to allow compiling on windows with
+		MSVC++.  Double declaration of internal 
+		functions not yet repaired.  DOESN'T
+		BUILD YET with makefile.vc.
+
 2009-01-14 Daniel A. Steffen <das@users.sourceforge.net>
     * Makefile.in: fix itclConfig.sh install location to match TEA convention
     * aclocal.m4: match minimum autoconf requirement with TEA
