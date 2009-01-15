@@ -82,15 +82,15 @@ typedef void (*Tcl_ProcErrorProc)(Tcl_Interp *interp, Tcl_Obj *procNameObj);
 #define Tcl_InvokeNamespaceProc _Tcl_InvokeNamespaceProc
 
 
-EXTERN Tcl_HashTable *_Tcl_GetNamespaceChildTable(Tcl_Namespace *nsPtr);
+extern Tcl_HashTable *_Tcl_GetNamespaceChildTable(Tcl_Namespace *nsPtr);
 
-EXTERN Tcl_HashTable *_Tcl_GetNamespaceCommandTable(Tcl_Namespace *nsPtr);
-EXTERN int _Tcl_InitRewriteEnsemble(Tcl_Interp *interp, int numRemoved,
+extern Tcl_HashTable *_Tcl_GetNamespaceCommandTable(Tcl_Namespace *nsPtr);
+extern int _Tcl_InitRewriteEnsemble(Tcl_Interp *interp, int numRemoved,
 	int numInserted, int objc, Tcl_Obj *const *objv);
-EXTERN void _Tcl_ResetRewriteEnsemble(Tcl_Interp *interp,
+extern void _Tcl_ResetRewriteEnsemble(Tcl_Interp *interp,
         int isRootEnsemble);
-EXTERN int _Tcl_InvokeNamespaceProc(Tcl_Interp *interp, Tcl_Proc proc,
+extern int _Tcl_InvokeNamespaceProc(Tcl_Interp *interp, Tcl_Proc proc,
         Tcl_Namespace *nsPtr, Tcl_Obj *namePtr, int objc, Tcl_Obj *const *objv);
-EXTERN Tcl_Var Tcl_NewNamespaceVar(Tcl_Interp *interp, Tcl_Namespace *nsPtr,
+extern Tcl_Var Tcl_NewNamespaceVar(Tcl_Interp *interp, Tcl_Namespace *nsPtr,
 	const char *varName);
-EXTERN int Itcl_IsCallFrameArgument(Tcl_Interp *interp, const char *name);
+extern int Itcl_IsCallFrameArgument(Tcl_Interp *interp, const char *name);
