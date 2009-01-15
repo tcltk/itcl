@@ -5,7 +5,7 @@
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 # 
 # Copyright (c) 1993-1998 Lucent Technologies, Inc.
-# RCS: $Id: makefile.vc,v 1.34.2.4 2009/01/15 18:58:04 davygrvy Exp $
+# RCS: $Id: makefile.vc,v 1.34.2.5 2009/01/15 21:23:49 davygrvy Exp $
 #------------------------------------------------------------------------------
 #  There is no requirement to modify this file to generate a build.
 #------------------------------------------------------------------------------
@@ -155,6 +155,9 @@ TCL_INCLUDES	= -I"$(TCLDIR)\generic" -I"$(TCLDIR)\win"
 
 ITCL_INCLUDES	= -I$(WINDIR) -I$(GENERICDIR)
 ITCL_DEFINES	= -DBUILD_itcl -DTCL_THREADS=1
+!if $(DEBUG)
+ITCL_DEFINES	= $(ITCL_DEFINES) -DITCL_DEBUG
+!endif
 ITCL_DLL_CFLAGS	= $(cflags) $(cdebug) $(crt) $(ITCL_INCLUDES) $(ITCL_DEFINES) $(TCL_INCLUDES) $(OPTDEFINES)
 ITCL_STUB_CFLAGS= $(cflags) $(cdebug:-GL=) $(ITCL_INCLUDES) $(TCL_INCLUDES) $(OPTDEFINES)
 
