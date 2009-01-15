@@ -1,7 +1,11 @@
-RCS: @(#) $Id: ChangeLog,v 1.1.2.8 2009/01/14 22:48:38 davygrvy Exp $
+RCS: @(#) $Id: ChangeLog,v 1.1.2.9 2009/01/15 05:57:13 davygrvy Exp $
 
 2009-01-08 David Gravereaux <davygrvy@pobox.com>
-
+	* generic/itclMigrate2TclCore.h:    All build errors squashed
+	* generic/itclStubLib.c:
+	* generic/itclTclIntStubFcn.h:
+	* win/makefile.vc:  
+2009-01-08 David Gravereaux <davygrvy@pobox.com>
 	* generic/itclBase.c:
 	* generic/itclBuiltin.c:
 	* generic/itclClass.c:
@@ -21,7 +25,6 @@ RCS: @(#) $Id: ChangeLog,v 1.1.2.8 2009/01/14 22:48:38 davygrvy Exp $
 		MSVC++.  Double declaration of internal 
 		functions not yet repaired.  DOESN'T
 		BUILD YET with makefile.vc.
-
 2009-01-14 Daniel A. Steffen <das@users.sourceforge.net>
     * Makefile.in: fix itclConfig.sh install location to match TEA convention
     * aclocal.m4: match minimum autoconf requirement with TEA
