@@ -5,9 +5,9 @@
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 # 
 # Copyright (c) 1993-1998 Lucent Technologies, Inc.
-# RCS: $Id: makefile.vc,v 1.34.2.3 2009/01/15 05:55:47 davygrvy Exp $
+# RCS: $Id: makefile.vc,v 1.34.2.4 2009/01/15 18:58:04 davygrvy Exp $
 #------------------------------------------------------------------------------
-#  Do not modify this file!
+#  There is no requirement to modify this file to generate a build.
 #------------------------------------------------------------------------------
 
 # Check to see we are configured to build with MSVC (MSDEVDIR or MSVCDIR)
@@ -154,7 +154,7 @@ TCL_INCLUDES	= -I"$(TCLDIR)\generic" -I"$(TCLDIR)\win"
 !endif
 
 ITCL_INCLUDES	= -I$(WINDIR) -I$(GENERICDIR)
-ITCL_DEFINES	= -DBUILD_itcl -DTCL_THREADS=1 -DUSE_TCLOO_STUBS
+ITCL_DEFINES	= -DBUILD_itcl -DTCL_THREADS=1
 ITCL_DLL_CFLAGS	= $(cflags) $(cdebug) $(crt) $(ITCL_INCLUDES) $(ITCL_DEFINES) $(TCL_INCLUDES) $(OPTDEFINES)
 ITCL_STUB_CFLAGS= $(cflags) $(cdebug:-GL=) $(ITCL_INCLUDES) $(TCL_INCLUDES) $(OPTDEFINES)
 
@@ -162,10 +162,8 @@ ITCL_STUB_CFLAGS= $(cflags) $(cdebug:-GL=) $(ITCL_INCLUDES) $(TCL_INCLUDES) $(OP
 ### not a technical limitation.
 !if $(STATIC_BUILD)
 ITCL_CFLAGS	= $(ITCL_DLL_CFLAGS) -DSTATIC_BUILD
-!elseif $(TCL_DOES_STUBS)
-ITCL_CFLAGS	= $(ITCL_DLL_CFLAGS) -DUSE_TCL_STUBS
 !else
-ITCL_CFLAGS	= $(ITCL_DLL_CFLAGS)
+ITCL_CFLAGS	= $(ITCL_DLL_CFLAGS) -DUSE_TCL_STUBS -DUSE_TCLOO_STUBS
 !endif
 
 #---------------------------------------------------------------------
@@ -346,7 +344,7 @@ $<
 # Generate the windows help files.
 #---------------------------------------------------------------------
 
-HLPBASE		= $(PROJECT)$(ITCL_VERSION)
+HLPBASE		= $(PROJECT)$(VERSION)
 HELPFILE	= $(OUT_DIR)\$(HLPBASE).hlp
 HELPCNT		= $(OUT_DIR)\$(HLPBASE).cnt
 DOCTMP_DIR	= $(OUT_DIR)\$(PROJECT)_docs
@@ -401,7 +399,7 @@ $(MAN2TCL): $(TCLTOOLSDIR)\$$(@B).c
 	$(cc32) -nologo -G4 -ML -O2 -Fo$(@D)\ $(TCLTOOLSDIR)\$(@B).c -link -out:$@
 
 $(HELPRTF): $(MAN2TCL) $(MAN2HELP) $(MAN2HELP2) $(INDEX)
-	$(TCLSH) $(MAN2HELP) -bitmap $(BMP_NOPATH) $(PROJECT) $(ITCL_VERSION) $(DOCDIR:\=/)
+	$(TCLSH) $(MAN2HELP) -bitmap $(BMP_NOPATH) $(PROJECT) $(VERSION) $(DOCDIR:\=/)
 
 install-docs:
 !if exist($(HELPFILE))
@@ -417,7 +415,7 @@ while {![eof $$f]} {
 	    exit
 	} else {
 	    # do something here logical to remove (or replace) it.
-	    puts "$$ver != $(ITCL_VERSION), unfinished code path, die, die!"
+	    puts "$$ver != $(VERSION), unfinished code path, die, die!"
 	    exit 1
 	}
     }

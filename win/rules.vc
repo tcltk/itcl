@@ -11,7 +11,7 @@
 # Copyright (c) 2003-2007 Patrick Thoyts
 #
 #------------------------------------------------------------------------------
-# RCS: @(#) $Id: rules.vc,v 1.1.2.1 2009/01/14 20:22:20 davygrvy Exp $
+# RCS: @(#) $Id: rules.vc,v 1.1.2.2 2009/01/15 18:58:04 davygrvy Exp $
 #------------------------------------------------------------------------------
 
 !ifndef _RULES_VC
@@ -122,6 +122,13 @@ OPTIMIZATIONS  = $(OPTIMIZATIONS) -GS
 OPTIMIZATIONS  = $(OPTIMIZATIONS) -GL
 !endif
 
+# In v13 -GL and -YX are incompatible.
+!if [nmakehlp -c -YX]
+!if ![nmakehlp -c -GL]
+OPTIMIZATIONS  = $(OPTIMIZATIONS) -YX
+!endif
+!endif
+
 DEBUGFLAGS     =
 
 !if [nmakehlp -c -RTC1]
@@ -130,14 +137,7 @@ DEBUGFLAGS     = $(DEBUGFLAGS) -RTC1
 DEBUGFLAGS     = $(DEBUGFLAGS) -GZ
 !endif
 
-COMPILERFLAGS  =-W3
-
-# In v13 -GL and -YX are incompatible.
-!if [nmakehlp -c -YX]
-!if ![nmakehlp -c -GL]
-OPTIMIZATIONS  = $(OPTIMIZATIONS) -YX
-!endif
-!endif
+COMPILERFLAGS  =
 
 !if "$(MACHINE)" == "IX86"
 ### test for pentium errata

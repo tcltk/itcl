@@ -25,7 +25,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann Copyright (c) 2007
  *
- *     RCS:  $Id: itclClass.c,v 1.1.2.49 2009/01/14 22:43:24 davygrvy Exp $
+ *     RCS:  $Id: itclClass.c,v 1.1.2.50 2009/01/15 18:58:04 davygrvy Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -34,7 +34,7 @@
  */
 #include "itclInt.h"
 
-EXTERN Tcl_ObjCmdProc Itcl_ThisCmd;
+extern Tcl_ObjCmdProc Itcl_ThisCmd;
 static Tcl_NamespaceDeleteProc* _TclOONamespaceDeleteProc = NULL;
 static void ItclDeleteOption(char *cdata);
 
