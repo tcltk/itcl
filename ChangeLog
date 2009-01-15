@@ -1,11 +1,19 @@
-RCS: @(#) $Id: ChangeLog,v 1.1.2.9 2009/01/15 05:57:13 davygrvy Exp $
+RCS: @(#) $Id: ChangeLog,v 1.1.2.10 2009/01/15 21:22:55 davygrvy Exp $
 
-2009-01-08 David Gravereaux <davygrvy@pobox.com>
+2009-01-15 David Gravereaux <davygrvy@pobox.com>
+	* generic/itcl2TclOO.h:  More cleanups changing the last of the 
+	* generic/itclClass.c:   'EXTERN' macros to just be 'extern' as we 
+	* win/.cvsignore:        aren't importing the declaration, just  
+	* win/itcl.rc:           sharing it internally.  This caused warnings 
+	* win/makefile.vc:       on windows during the link stage as it was 
+	* win/nmakehlp.c:        getting confused about 'why are you 
+	* win/rules.vc:          importing an internal function?'
+2009-01-15 David Gravereaux <davygrvy@pobox.com>
 	* generic/itclMigrate2TclCore.h:    All build errors squashed
 	* generic/itclStubLib.c:
 	* generic/itclTclIntStubFcn.h:
 	* win/makefile.vc:  
-2009-01-08 David Gravereaux <davygrvy@pobox.com>
+2009-01-14 David Gravereaux <davygrvy@pobox.com>
 	* generic/itclBase.c:
 	* generic/itclBuiltin.c:
 	* generic/itclClass.c:
