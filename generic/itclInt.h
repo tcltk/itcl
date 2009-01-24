@@ -9,7 +9,7 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itclInt.h,v 1.17.2.61 2008/12/31 15:48:59 wiede Exp $
+ * RCS: @(#) $Id: itclInt.h,v 1.17.2.62 2009/01/24 19:26:33 wiede Exp $
  */
 
 #include <string.h>
@@ -49,7 +49,7 @@
 #endif  /* DEBUG */
 
 #define ITCL_INTERP_DATA "itcl_data"
-#define ITCL_TK_VERSION "8.5"
+#define ITCL_TK_VERSION "8.6"
 
 /*
  * Convenience macros for iterating through hash tables. FOREACH_HASH_DECLS
@@ -123,24 +123,6 @@ struct EnsembleInfo;
 struct ItclDelegatedOption;
 struct ItclDelegatedFunction;
 
-typedef int (*HullAndOptionsInst)(Tcl_Interp *interp,
-        struct ItclObject *ioPtr, struct ItclClass *iclsPtr, int objc,
-	Tcl_Obj *const *objv, int *newObjc, Tcl_Obj **newObjv);
-typedef int (*InitObjectOptions)(Tcl_Interp *interp,
-        struct ItclObject *ioPtr, struct ItclClass *iclsPtr, const char *name);
-typedef int (*DelegationInst)(Tcl_Interp *interp,
-        struct ItclObject *ioPtr, struct ItclClass *iclsPtr);
-typedef int (*ComponentInst)(Tcl_Interp *interp,
-        struct ItclObject *ioPtr, struct ItclClass *iclsPtr,
-	int objc, Tcl_Obj *const *objv);
-
-typedef struct ItclWidgetInfo {
-    InitObjectOptions initObjectOpts;
-    HullAndOptionsInst hullAndOptsInst;
-    DelegationInst delegationInst;
-    ComponentInst componentInst;
-} ItclWidgetInfo;
-
 typedef struct ItclObjectInfo {
     Tcl_Interp *interp;             /* interpreter that manages this info */
     Tcl_HashTable objects;          /* list of all known objects key is 
@@ -156,6 +138,8 @@ typedef struct ItclObjectInfo {
     Tcl_HashTable objectInstances;  /* maps from ioPtr to instanceNumber */
     Tcl_HashTable myEnsembles;      /* maps from ensemble name (::itcl::find)
                                      * etc. to ensemble pathName */
+    Tcl_HashTable classTypes;       /* maps from class type i.e. "widget"
+                                     * to define value i.e. ITCL_WIDGET */
     int protection;                 /* protection level currently in effect */
     int useOldResolvers;            /* whether to use the "old" style
                                      * resolvers or the CallFrame resolvers */
@@ -175,8 +159,6 @@ typedef struct ItclObjectInfo {
     Tcl_Object clazzObjectPtr;      /* the root object of Itcl */
     Tcl_Class clazzClassPtr;        /* the root class of Itcl */
     struct EnsembleInfo *ensembleInfo;
-    ItclWidgetInfo *windgetInfoPtr; /* contains function pointers to be called
-                                     * when constructing an ItclWidget object */
     struct ItclClass *currContextIclsPtr;
                                     /* context class for delegated option
                                      * handling */
@@ -458,6 +440,7 @@ typedef struct ItclMemberCode {
 #define ITCL_OPTIONS_VAR       0x40   /* non-zero => built-in "itcl_options"
                                        * variable */
 #define ITCL_TYPE_VAR          0x80   /* non-zero => built-in "type" variable */
+                                      /* no longer used ??? */
 #define ITCL_SELF_VAR          0x100  /* non-zero => built-in "self" variable */
 #define ITCL_SELFNS_VAR        0x200  /* non-zero => built-in "selfns"
                                        * variable */
@@ -751,7 +734,8 @@ MODULE_SCOPE const char* ItclGetInstanceVar(Tcl_Interp *interp,
 MODULE_SCOPE const char* ItclGetCommonInstanceVar(Tcl_Interp *interp,
         const char *name, const char *name2, ItclObject *contextIoPtr,
 	ItclClass *contextIclsPtr);
-MODULE_SCOPE const char* ItclSetInstanceVar(Tcl_Interp *interp,
+//MODULE_SCOPE const char* ItclSetInstanceVar(Tcl_Interp *interp,
+extern const char* ItclSetInstanceVar(Tcl_Interp *interp,
         const char *name, const char *name2, const char *value,
 	ItclObject *contextIoPtr, ItclClass *contextIclsPtr);
 MODULE_SCOPE Tcl_Obj * ItclCapitalize(const char *str);
@@ -798,8 +782,8 @@ MODULE_SCOPE int ExpandDelegateAs(Tcl_Interp *interp, ItclObject *ioPtr,
 MODULE_SCOPE int ItclCheckForInitializedComponents(Tcl_Interp *interp,
         ItclClass *iclsPtr, ItclObject *ioPtr);
 MODULE_SCOPE int ItclCreateDelegatedFunction(Tcl_Interp *interp,
-        Tcl_Obj *methodNamePtr, ItclComponent *icPtr, Tcl_Obj *targetPtr,
-	Tcl_Obj *usingPtr, Tcl_Obj *exceptionsPtr,
+        ItclClass *iclsPtr, Tcl_Obj *methodNamePtr, ItclComponent *icPtr,
+	Tcl_Obj *targetPtr, Tcl_Obj *usingPtr, Tcl_Obj *exceptionsPtr,
 	ItclDelegatedFunction **idmPtrPtr);
 MODULE_SCOPE void ItclDeleteDelegatedOption(char *cdata);
 MODULE_SCOPE void Itcl_FinishList();
@@ -807,6 +791,24 @@ MODULE_SCOPE void ItclDeleteDelegatedFunction(ItclDelegatedFunction *idmPtr);
 MODULE_SCOPE void ItclFinishEnsemble(ItclObjectInfo *infoPtr);
 MODULE_SCOPE int Itcl_EnsembleDeleteCmd(ClientData clientData,
         Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]);
+MODULE_SCOPE int ItclAddClassesDictInfo(Tcl_Interp *interp, ItclClass *iclsPtr);
+MODULE_SCOPE int ItclDeleteClassesDictInfo(Tcl_Interp *interp,
+        ItclClass *iclsPtr);
+MODULE_SCOPE int ItclAddObjectsDictInfo(Tcl_Interp *interp, ItclObject *ioPtr);
+MODULE_SCOPE int ItclDeleteObjectsDictInfo(Tcl_Interp *interp,
+        ItclObject *ioPtr);
+MODULE_SCOPE int ItclAddOptionDictInfo(Tcl_Interp *interp, ItclClass *iclsPtr,
+	ItclOption *ioptPtr);
+MODULE_SCOPE int ItclAddDelegatedOptionDictInfo(Tcl_Interp *interp,
+        ItclClass *iclsPtr, ItclDelegatedOption *idoPtr);
+MODULE_SCOPE int ItclAddClassComponentDictInfo(Tcl_Interp *interp,
+        ItclClass *iclsPtr, ItclComponent *icPtr);
+MODULE_SCOPE int ItclAddClassVariableDictInfo(Tcl_Interp *interp,
+        ItclClass *iclsPtr, ItclVariable *ivPtr);
+MODULE_SCOPE int ItclAddClassFunctionDictInfo(Tcl_Interp *interp,
+        ItclClass *iclsPtr, ItclMemberFunc *imPtr);
+MODULE_SCOPE int ItclAddClassDelegatedFunctionDictInfo(Tcl_Interp *interp,
+        ItclClass *iclsPtr, ItclDelegatedFunction *idmPtr);
 
 
 
