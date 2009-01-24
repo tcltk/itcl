@@ -24,7 +24,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclInfo.c,v 1.1.2.43 2009/01/14 22:43:24 davygrvy Exp $
+ *     RCS:  $Id: itclInfo.c,v 1.1.2.44 2009/01/24 19:37:45 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -60,6 +60,10 @@ Tcl_ObjCmdProc Itcl_BiInfoDelegatedMethodCmd;
 Tcl_ObjCmdProc Itcl_BiInfoDelegatedTypeMethodCmd;
 Tcl_ObjCmdProc Itcl_ErrorDelegatedInfoCmd;
 Tcl_ObjCmdProc Itcl_BiInfoDelegatedUnknownCmd;
+Tcl_ObjCmdProc Itcl_BiInfoHullTypesCmd;
+Tcl_ObjCmdProc Itcl_BiInfoWidgetclassesCmd;
+Tcl_ObjCmdProc Itcl_BiInfoWidgetsCmd;
+Tcl_ObjCmdProc Itcl_BiInfoWidgetadaptorsCmd;
 
 typedef struct InfoMethod {
     char* name;              /* method name */
@@ -126,7 +130,7 @@ static InfoMethod InfoMethodList[] = {
     },
     { "hulltypes",
         "?pattern?",
-        NULL /* this is in package itclWidget */,
+        Itcl_BiInfoHullTypesCmd,
 	ITCL_WIDGETADAPTOR|ITCL_WIDGET
     },
     { "inherit",
@@ -214,12 +218,12 @@ static InfoMethod InfoMethodList[] = {
     },
     { "widgets",
         "?pattern?",
-	NULL /* ItclBiInfoWidgetsCmd */,
+	Itcl_BiInfoWidgetsCmd,
 	ITCL_WIDGET
     },
     { "widgetclasses",
         "?pattern?",
-	NULL /* ItclBiInfoWidgetclassesCmd */,
+	Itcl_BiInfoWidgetclassesCmd,
 	ITCL_WIDGET
     },
     { "widgetadaptor",
@@ -229,7 +233,7 @@ static InfoMethod InfoMethodList[] = {
     },
     { "widgetadaptors",
         "?pattern?",
-	NULL /* ItclBiInfoWidgetAdaptorsCmd */,
+	Itcl_BiInfoWidgetadaptorsCmd,
 	ITCL_WIDGETADAPTOR
     },
     /*
@@ -274,6 +278,7 @@ static const struct NameProcMap infoCmds2[] = {
     { "::itcl::builtin::Info::function", Itcl_BiInfoFunctionCmd },
     { "::itcl::builtin::Info::heritage", Itcl_BiInfoHeritageCmd },
     { "::itcl::builtin::Info::hulltype", Itcl_BiInfoHullTypeCmd },
+    { "::itcl::builtin::Info::hulltypes", Itcl_BiInfoHullTypesCmd },
     { "::itcl::builtin::Info::inherit", Itcl_BiInfoInheritCmd },
     { "::itcl::builtin::Info::instances", Itcl_BiInfoInstancesCmd },
     { "::itcl::builtin::Info::method", Itcl_BiInfoMethodCmd },
@@ -292,6 +297,9 @@ static const struct NameProcMap infoCmds2[] = {
     { "::itcl::builtin::Info::unknown", Itcl_BiInfoUnknownCmd },
     { "::itcl::builtin::Info::widget", Itcl_BiInfoWidgetCmd },
     { "::itcl::builtin::Info::widgetadaptor", Itcl_BiInfoWidgetadaptorCmd },
+    { "::itcl::builtin::Info::widgets", Itcl_BiInfoWidgetsCmd },
+    { "::itcl::builtin::Info::widgetclasses", Itcl_BiInfoWidgetclassesCmd },
+    { "::itcl::builtin::Info::widgetadaptors", Itcl_BiInfoWidgetadaptorsCmd },
     /*
      *  Add an error handler to support all of the usual inquiries
      *  for the "info" command in the global namespace.
@@ -1221,7 +1229,7 @@ Itcl_BiInfoVariableCmd(
     };
 
 
-    ItclShowArgs(2, "Itcl_BiInfoVariableCmd", objc, objv);
+    ItclShowArgs(1, "Itcl_BiInfoVariableCmd", objc, objv);
     resultPtr = NULL;
     objPtr = NULL;
     varName = NULL;
@@ -3648,6 +3656,8 @@ Itcl_BiInfoComponentsCmd(
     ItclObject *ioPtr;
     ItclClass *iclsPtr;
     ItclComponent *icPtr;
+    ItclHierIter hier;
+    ItclClass *iclsPtr2;
     const char *name;
     const char *pattern;
 
@@ -3676,14 +3686,20 @@ Itcl_BiInfoComponentsCmd(
         pattern = Tcl_GetString(objv[1]);
     }
     listPtr = Tcl_NewListObj(0, NULL);
-    FOREACH_HASH_VALUE(icPtr, &iclsPtr->components) {
-        name = Tcl_GetString(icPtr->namePtr);
-        if ((pattern == NULL) ||
-                 Tcl_StringMatch(name, pattern)) {
-            Tcl_ListObjAppendElement(interp, listPtr,
-	            Tcl_NewStringObj(Tcl_GetString(icPtr->namePtr), -1));
+    Itcl_InitHierIter(&hier, iclsPtr);
+    iclsPtr2 = Itcl_AdvanceHierIter(&hier);
+    while (iclsPtr2 != NULL) {
+        FOREACH_HASH_VALUE(icPtr, &iclsPtr2->components) {
+            name = Tcl_GetString(icPtr->namePtr);
+            if ((pattern == NULL) ||
+                     Tcl_StringMatch(name, pattern)) {
+                Tcl_ListObjAppendElement(interp, listPtr,
+	                Tcl_NewStringObj(Tcl_GetString(icPtr->namePtr), -1));
+            }
         }
+        iclsPtr2 = Itcl_AdvanceHierIter(&hier);
     }
+    Itcl_DeleteHierIter(&hier);
     Tcl_SetResult(interp, Tcl_GetString(listPtr), TCL_VOLATILE);
     Tcl_DecrRefCount(listPtr);
     return TCL_OK;
@@ -5563,4 +5579,43 @@ Itcl_BiInfoDelegatedTypeMethodCmd(
         Tcl_DecrRefCount(resultPtr);
     }
     return TCL_OK;
+}
+/* the next 4 commands are dummies until itclWidget.tcl is loaded
+ * they just report the normal unknown message
+ */
+int
+Itcl_BiInfoHullTypesCmd(
+    ClientData clientData, /* ItclObjectInfo Ptr */
+    Tcl_Interp *interp,    /* current interpreter */
+    int objc,              /* number of arguments */
+    Tcl_Obj *const objv[]) /* argument objects */
+{
+    return Itcl_BiInfoUnknownCmd(clientData, interp, objc, objv);
+}
+int
+Itcl_BiInfoWidgetclassesCmd(
+    ClientData clientData, /* ItclObjectInfo Ptr */
+    Tcl_Interp *interp,    /* current interpreter */
+    int objc,              /* number of arguments */
+    Tcl_Obj *const objv[]) /* argument objects */
+{
+    return Itcl_BiInfoUnknownCmd(clientData, interp, objc, objv);
+}
+int
+Itcl_BiInfoWidgetsCmd(
+    ClientData clientData, /* ItclObjectInfo Ptr */
+    Tcl_Interp *interp,    /* current interpreter */
+    int objc,              /* number of arguments */
+    Tcl_Obj *const objv[]) /* argument objects */
+{
+    return Itcl_BiInfoUnknownCmd(clientData, interp, objc, objv);
+}
+int
+Itcl_BiInfoWidgetadaptorsCmd(
+    ClientData clientData, /* ItclObjectInfo Ptr */
+    Tcl_Interp *interp,    /* current interpreter */
+    int objc,              /* number of arguments */
+    Tcl_Obj *const objv[]) /* argument objects */
+{
+    return Itcl_BiInfoUnknownCmd(clientData, interp, objc, objv);
 }
