@@ -9,7 +9,7 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itclHelpers.c,v 1.1.2.13 2009/01/24 19:35:16 wiede Exp $
+ * RCS: @(#) $Id: itclHelpers.c,v 1.1.2.14 2009/01/24 20:46:34 wiede Exp $
  */
 
 #include "itclInt.h"
@@ -486,6 +486,9 @@ AddDictEntry(
 {
     Tcl_Obj *keyPtr;
 
+    if (valuePtr == NULL) {
+        return TCL_OK;
+    }
     keyPtr = Tcl_NewStringObj(keyStr, -1);
     if (Tcl_DictObjPut(interp, dictPtr, keyPtr, valuePtr) != TCL_OK) {
         return TCL_ERROR;
