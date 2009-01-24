@@ -9,7 +9,7 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itclInt.h,v 1.17.2.62 2009/01/24 19:26:33 wiede Exp $
+ * RCS: @(#) $Id: itclInt.h,v 1.17.2.63 2009/01/24 19:48:02 wiede Exp $
  */
 
 #include <string.h>
@@ -98,6 +98,7 @@ typedef struct ItclPreserveInfo {
 } ItclPreserveInfo;
 
 #endif
+
 
 typedef struct ItclFoundation {
     Itcl_Stack methodCallStack;
@@ -734,8 +735,7 @@ MODULE_SCOPE const char* ItclGetInstanceVar(Tcl_Interp *interp,
 MODULE_SCOPE const char* ItclGetCommonInstanceVar(Tcl_Interp *interp,
         const char *name, const char *name2, ItclObject *contextIoPtr,
 	ItclClass *contextIclsPtr);
-//MODULE_SCOPE const char* ItclSetInstanceVar(Tcl_Interp *interp,
-extern const char* ItclSetInstanceVar(Tcl_Interp *interp,
+MODULE_SCOPE const char* ItclSetInstanceVar(Tcl_Interp *interp,
         const char *name, const char *name2, const char *value,
 	ItclObject *contextIoPtr, ItclClass *contextIclsPtr);
 MODULE_SCOPE Tcl_Obj * ItclCapitalize(const char *str);
