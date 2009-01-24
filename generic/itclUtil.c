@@ -23,7 +23,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclUtil.c,v 1.1.2.14 2009/01/14 21:55:09 das Exp $
+ *     RCS:  $Id: itclUtil.c,v 1.1.2.15 2009/01/24 19:56:15 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -31,6 +31,10 @@
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  */
 #include "itclInt.h"
+
+#ifdef ITCL_PRESERVE_DEBUG
+#include <malloc.h>
+#endif
 
 /*
  *  POOL OF LIST ELEMENTS FOR LINKED LIST
@@ -644,7 +648,7 @@ ItclDbgPreserveData(
 	    ipiPtr->size = ITCL_PRESERVE_BUCKET_SIZE;
 	    ipiPtr->numEntries = 0;
 	    ipiPtr->clientData = cdata;
-	    ipiPtr->entries = (ItclPreserveInfoEntry *)ckalloc(
+	    ipiPtr->entries = (ItclPreserveInfoEntry *)malloc(
 	            sizeof(ItclPreserveInfoEntry) * ipiPtr->size);
 	    Tcl_SetHashValue(hPtr, ipiPtr);
 	}
@@ -652,7 +656,7 @@ ItclDbgPreserveData(
         if (ipiPtr->numEntries >= ipiPtr->size) {
             ipiPtr->size += ITCL_PRESERVE_BUCKET_SIZE;
             ipiPtr->entries = (ItclPreserveInfoEntry *)
-                    ckrealloc((char *)ipiPtr->entries,
+                    realloc((char *)ipiPtr->entries,
                     sizeof(ItclPreserveInfoEntry) *
                     ipiPtr->size);
         }
@@ -724,7 +728,7 @@ ItclDbgReleaseData(
             if (ipiPtr->numEntries >= ipiPtr->size) {
                 ipiPtr->size += ITCL_PRESERVE_BUCKET_SIZE;
                 ipiPtr->entries = (ItclPreserveInfoEntry *)
-                        ckrealloc((char *)ipiPtr->entries,
+                        realloc((char *)ipiPtr->entries,
                         sizeof(ItclPreserveInfoEntry) *
                         ipiPtr->size);
             }
