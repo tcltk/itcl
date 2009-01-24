@@ -24,7 +24,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclBuiltin.c,v 1.1.2.69 2009/01/14 22:43:24 davygrvy Exp $
+ *     RCS:  $Id: itclBuiltin.c,v 1.1.2.70 2009/01/24 19:31:47 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -1477,7 +1477,7 @@ ItclBiClassUnknownCmd(
             if (isStar && (result == TCL_OK)) {
 		if (Tcl_FindHashEntry(&iclsPtr->delegatedFunctions,
 		        (char *)newObjv[1]) == NULL) {
-                    result = ItclCreateDelegatedFunction(interp,
+                    result = ItclCreateDelegatedFunction(interp, iclsPtr,
 		            newObjv[1], idmPtr->icPtr, NULL, NULL,
 			    NULL, &idmPtr2);
 		    if (result == TCL_OK) {
@@ -1790,7 +1790,7 @@ ItclBiObjectUnknownCmd(
     if (isStar && (result == TCL_OK)) {
 	if (Tcl_FindHashEntry(&iclsPtr->delegatedFunctions,
 	        (char *)newObjv[1]) == NULL) {
-            result = ItclCreateDelegatedFunction(interp,
+            result = ItclCreateDelegatedFunction(interp, iclsPtr,
 	            newObjv[1], idmPtr->icPtr, NULL, NULL,
 		    NULL, &idmPtr2);
 	    if (result == TCL_OK) {
@@ -2257,7 +2257,8 @@ ItclExtendedConfigure(
 	    }
             return result;
         } else {
-	    Tcl_AppendResult(interp, "INTERNAL ERROR component not found",
+	    Tcl_AppendResult(interp, "INTERNAL ERROR component \"",
+	            Tcl_GetString(icPtr->namePtr), "\" not found",
 	            " or not set in ItclExtendedConfigure delegated option",
 		    NULL);
 	    return TCL_ERROR;
@@ -2695,7 +2696,7 @@ ItclExtendedCget(
 	Tcl_IncrRefCount(newObjv[0]);
         newObjv[1] = objv[1];
 	Tcl_IncrRefCount(newObjv[1]);
-	ItclShowArgs(0, "eval cget method", objc, newObjv);
+	ItclShowArgs(1, "eval cget method", objc, newObjv);
         result = Tcl_EvalObjv(interp, objc, newObjv, TCL_EVAL_DIRECT);
 	Tcl_DecrRefCount(newObjv[1]);
 	Tcl_DecrRefCount(newObjv[0]);
@@ -2961,16 +2962,14 @@ Itcl_BiInstallComponentCmd(
         Tcl_SetVar2(interp, Tcl_GetString(objPtr), NULL, componentValue, 0);
 
     } else {
-        if (contextIclsPtr->infoPtr->windgetInfoPtr != NULL) {
-            if (contextIclsPtr->infoPtr->windgetInfoPtr->componentInst !=
-	            NULL) {
-                if (contextIclsPtr->infoPtr->windgetInfoPtr->componentInst(
-	                interp, contextIoPtr, contextIclsPtr,
-		        objc, objv) != TCL_OK) {
-	            return TCL_ERROR;
-	        }
-	    }
-        }
+	newObjv = (Tcl_Obj **)ckalloc(sizeof(Tcl_Obj *) * (objc + 1));
+	newObjv[0] = Tcl_NewStringObj("::itcl::builtin::installcomponent", -1);
+	Tcl_IncrRefCount(newObjv[0]);
+        memcpy(newObjv, objv + 1, sizeof(Tcl_Obj *) * ((objc - 1)));
+        result = Tcl_EvalObjv(interp, objc, newObjv, 0);
+	Tcl_DecrRefCount(newObjv[0]);
+	ckfree((char *)newObjv);
+	return result;
     }
     return TCL_OK;
 }
