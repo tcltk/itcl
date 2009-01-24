@@ -25,7 +25,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann Copyright (c) 2007
  *
- *     RCS:  $Id: itclClass.c,v 1.1.2.50 2009/01/15 18:58:04 davygrvy Exp $
+ *     RCS:  $Id: itclClass.c,v 1.1.2.51 2009/01/24 19:32:55 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -1029,6 +1029,7 @@ ItclFreeClass(
     if (iclsPtr->flags & ITCL_CLASS_IS_FREED) {
         return;
     }
+    ItclDeleteClassesDictInfo(iclsPtr->interp, iclsPtr);
     iclsPtr->flags |= ITCL_CLASS_IS_FREED;
 
     /*
@@ -2349,6 +2350,8 @@ Itcl_DeleteVariable(
     ItclVariable *ivPtr;
 
     ivPtr = (ItclVariable *)cdata;
+if (ivPtr->arrayInitPtr != NULL) {
+}
     hPtr = Tcl_FindHashEntry(&ivPtr->infoPtr->classes, (char *)ivPtr->iclsPtr);
     if (hPtr != NULL) {
 	/* unlink owerself from list of class variables */
