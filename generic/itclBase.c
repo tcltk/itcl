@@ -9,7 +9,7 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itclBase.c,v 1.1.2.39 2009/01/14 22:43:24 davygrvy Exp $
+ * RCS: @(#) $Id: itclBase.c,v 1.1.2.40 2009/01/24 19:29:36 wiede Exp $
  */
 
 #include <stdlib.h>
@@ -17,6 +17,8 @@
 #include <tclOODecls.h>
 
 Tcl_ObjCmdProc ItclFinishCmd;
+Tcl_ObjCmdProc ItclSetHullWindowName;
+Tcl_ObjCmdProc ItclCheckSetItclHull;
 
 #ifdef OBJ_REF_COUNT_DEBUG
 Tcl_ObjCmdProc ItclDumpRefCountInfo;
@@ -130,11 +132,11 @@ static char *clazzUnknownBody = "\n\
     }\n\
     set myObj [lindex [::info level 0] 0]\n\
     set cmd [list uplevel 1 ::itcl::parser::handleClass $myObj $mySelf $m {*}[list $args]]\n\
-    set ::errorInfo {}\n\
+    set myErrorInfo {}\n\
     set obj {}\n\
     if {[catch {\n\
         eval $cmd\n\
-    } obj errInfo]} {\n\
+    } obj myErrorInfo]} {\n\
 	return -code error -errorinfo $::errorInfo $obj\n\
     }\n\
     return $obj\n\
@@ -167,6 +169,7 @@ static ItclCmdsInfo itclCmds [] = {
     { "::itcl::addcomponent", 0},
     { "::itcl::setcomponent", 0},
     { "::itcl::extendedclass", 0},
+    { "::itcl::genericclass", 0},
     { "::itcl::parser::delegate", ITCL_IS_ENSEMBLE},
     { NULL, 0},
 };
@@ -238,11 +241,13 @@ Initialize (
 {
     Tcl_Namespace *nsPtr;
     Tcl_Namespace *itclNs;
+    Tcl_HashEntry *hPtr;
     Tcl_Obj *objPtr;
     ItclObjectInfo *infoPtr;
     const char * ret;
     char *res_option;
     int opt;
+    int isNew;
 
     if (Tcl_InitStubs(interp, TCL_VERSION, 0) == NULL) {
         return TCL_ERROR;
@@ -257,6 +262,7 @@ Initialize (
     if (nsPtr == NULL) {
         Tcl_Panic("Itcl: cannot create namespace: \"%s\" \n", ITCL_NAMESPACE);
     }
+
     nsPtr = Tcl_CreateNamespace(interp, ITCL_NAMESPACE"::methodset",
             NULL, NULL);
     if (nsPtr == NULL) {
@@ -264,9 +270,16 @@ Initialize (
 	        ITCL_NAMESPACE);
     }
 
-    Tcl_CreateObjCommand(interp,
-            ITCL_NAMESPACE"::finish",
-            ItclFinishCmd, NULL, NULL);
+    nsPtr = Tcl_CreateNamespace(interp, ITCL_NAMESPACE"::internal::dicts",
+            NULL, NULL);
+    if (nsPtr == NULL) {
+        Tcl_Panic("Itcl: cannot create namespace: \"%s::internal::dicts\" \n",
+	        ITCL_NAMESPACE);
+    }
+
+    Tcl_CreateObjCommand(interp, ITCL_NAMESPACE"::finish", ItclFinishCmd,
+            NULL, NULL);
+
     /* for debugging only !!! */
 #ifdef OBJ_REF_COUNT_DEBUG
     Tcl_CreateObjCommand(interp,
@@ -318,19 +331,47 @@ Initialize (
     Tcl_InitObjHashTable(&infoPtr->instances);
     Tcl_InitHashTable(&infoPtr->objectInstances, TCL_ONE_WORD_KEYS);
     Tcl_InitObjHashTable(&infoPtr->myEnsembles);
+    Tcl_InitObjHashTable(&infoPtr->classTypes);
     infoPtr->ensembleInfo = (EnsembleInfo *)ckalloc(sizeof(EnsembleInfo));
     memset(infoPtr->ensembleInfo, 0, sizeof(EnsembleInfo));
     Tcl_InitHashTable(&infoPtr->ensembleInfo->ensembles, TCL_ONE_WORD_KEYS);
     Tcl_InitHashTable(&infoPtr->ensembleInfo->subEnsembles, TCL_ONE_WORD_KEYS);
     infoPtr->ensembleInfo->numEnsembles = 0;
     infoPtr->protection = ITCL_DEFAULT_PROTECT;
-    infoPtr->currIoPtr = NULL;
-    infoPtr->windgetInfoPtr = NULL;
-    infoPtr->currContextIclsPtr = NULL;
     infoPtr->currClassFlags = 0;
     infoPtr->buildingWidget = 0;
     infoPtr->typeDestructorArgumentPtr = Tcl_NewStringObj("", -1);
     Tcl_IncrRefCount(infoPtr->typeDestructorArgumentPtr);
+
+    Tcl_SetVar(interp, ITCL_NAMESPACE"::internal::dicts::classes", "", 0);
+    Tcl_SetVar(interp, ITCL_NAMESPACE"::internal::dicts::objects", "", 0);
+    Tcl_SetVar(interp, ITCL_NAMESPACE"::internal::dicts::classOptions", "", 0);
+    Tcl_SetVar(interp,
+            ITCL_NAMESPACE"::internal::dicts::classDelegatedOptions", "", 0);
+    Tcl_SetVar(interp,
+            ITCL_NAMESPACE"::internal::dicts::classComponents", "", 0);
+    Tcl_SetVar(interp,
+            ITCL_NAMESPACE"::internal::dicts::classVariables", "", 0);
+    Tcl_SetVar(interp,
+            ITCL_NAMESPACE"::internal::dicts::classFunctions", "", 0);
+    Tcl_SetVar(interp,
+            ITCL_NAMESPACE"::internal::dicts::classDelegatedFunctions", "", 0);
+
+    hPtr = Tcl_CreateHashEntry(&infoPtr->classTypes,
+            (char *)Tcl_NewStringObj("class", -1), &isNew);
+    Tcl_SetHashValue(hPtr, ITCL_CLASS);
+    hPtr = Tcl_CreateHashEntry(&infoPtr->classTypes,
+            (char *)Tcl_NewStringObj("type", -1), &isNew);
+    Tcl_SetHashValue(hPtr, ITCL_TYPE);
+    hPtr = Tcl_CreateHashEntry(&infoPtr->classTypes,
+            (char *)Tcl_NewStringObj("widget", -1), &isNew);
+    Tcl_SetHashValue(hPtr, ITCL_WIDGET);
+    hPtr = Tcl_CreateHashEntry(&infoPtr->classTypes,
+            (char *)Tcl_NewStringObj("widgetadaptor", -1), &isNew);
+    Tcl_SetHashValue(hPtr, ITCL_WIDGETADAPTOR);
+    hPtr = Tcl_CreateHashEntry(&infoPtr->classTypes,
+            (char *)Tcl_NewStringObj("extendedclass", -1), &isNew);
+    Tcl_SetHashValue(hPtr, ITCL_ECLASS);
 
     res_option = getenv("ITCL_USE_OLD_RESOLVERS");
     if (res_option == NULL) {
@@ -416,6 +457,13 @@ Initialize (
             (Tcl_Export(interp, itclNs, "scope", 0) != TCL_OK)) {
         return TCL_ERROR;
     }
+
+    Tcl_CreateObjCommand(interp,
+            ITCL_NAMESPACE"::internal::commands::sethullwindowname",
+            ItclSetHullWindowName, infoPtr, NULL);
+    Tcl_CreateObjCommand(interp,
+            ITCL_NAMESPACE"::internal::commands::checksetitclhull",
+            ItclCheckSetItclHull, infoPtr, NULL);
 
     /*
      *  Set up the variables containing version info.
@@ -550,6 +598,97 @@ ItclCallCCommand(
 
 /*
  * ------------------------------------------------------------------------
+ *  ItclSetHullWindowName()
+ *
+ *
+ * ------------------------------------------------------------------------
+ */
+int
+ItclSetHullWindowName(
+    ClientData clientData,   /* infoPtr */
+    Tcl_Interp *interp,      /* current interpreter */
+    int objc,                /* number of arguments */
+    Tcl_Obj *const objv[])   /* argument objects */
+{
+    ItclObjectInfo *infoPtr;
+
+    infoPtr = (ItclObjectInfo *)clientData;
+    if (infoPtr->currIoPtr != NULL) {
+        infoPtr->currIoPtr->hullWindowNamePtr = objv[1];
+	Tcl_IncrRefCount(infoPtr->currIoPtr->hullWindowNamePtr);
+    }
+    return TCL_OK;
+}
+
+/*
+ * ------------------------------------------------------------------------
+ *  ItclCheckSetItclHull()
+ *
+ *
+ * ------------------------------------------------------------------------
+ */
+int
+ItclCheckSetItclHull(
+    ClientData clientData,   /* infoPtr */
+    Tcl_Interp *interp,      /* current interpreter */
+    int objc,                /* number of arguments */
+    Tcl_Obj *const objv[])   /* argument objects */
+{
+    Tcl_HashEntry *hPtr;
+    Tcl_Obj *objPtr;
+    ItclObject *ioPtr;
+    ItclVariable *ivPtr;
+    ItclObjectInfo *infoPtr;
+    const char *valueStr;
+
+    if (objc < 3) {
+        Tcl_AppendResult(interp, "ItclCheckSetItclHull wrong # args should be ",
+	        "<objectName> <value>", NULL);
+	return TCL_ERROR;
+    }
+    infoPtr = (ItclObjectInfo *)clientData;
+    if (strlen(Tcl_GetString(objv[1])) > 0) {
+        hPtr = Tcl_FindHashEntry(&infoPtr->objectNames, (char *)objv[1]);
+        if (hPtr == NULL) {
+            Tcl_AppendResult(interp, "ItclCheckSetItclHull cannot find object\"",
+	            Tcl_GetString(objv[1]), "\"", NULL);
+	    return TCL_ERROR;
+        }
+        ioPtr = Tcl_GetHashValue(hPtr);
+    } else {
+        ioPtr = infoPtr->currIoPtr;
+	if (ioPtr == NULL) {
+            Tcl_AppendResult(interp, "ItclCheckSetItclHull cannot find object",
+	            NULL);
+	    return TCL_ERROR;
+        }
+    }
+    objPtr = Tcl_NewStringObj("itcl_hull", -1);
+    hPtr = Tcl_FindHashEntry(&ioPtr->iclsPtr->variables, (char *)objPtr);
+    Tcl_DecrRefCount(objPtr);
+    if (hPtr == NULL) {
+        Tcl_AppendResult(interp, "ItclCheckSetItclHull cannot find itcl_hull",
+	        " variable for object \"", Tcl_GetString(objv[1]), "\"", NULL);
+	return TCL_ERROR;
+    }
+    ivPtr = Tcl_GetHashValue(hPtr);
+    valueStr = Tcl_GetString(objv[2]);
+    if (strcmp(valueStr, "2") == 0) {
+        ivPtr->initted = 2;
+    } else {
+        if (strcmp(valueStr, "0") == 0) {
+            ivPtr->initted = 0;
+	} else {
+            Tcl_AppendResult(interp, "ItclCheckSetItclHull bad value \"",
+	            valueStr, "\"", NULL);
+	    return TCL_ERROR;
+	}
+    }
+    return TCL_OK;
+}
+
+/*
+ * ------------------------------------------------------------------------
  *  ItclFinishCmd()
  *
  *  called when an interp is deleted to free up memory or called explicitly
@@ -623,7 +762,6 @@ ItclFinishCmd(
     }
     Tcl_DecrRefCount(ensObjPtr);
 
-
     while (1) {
         hPtr = Tcl_FirstHashEntry(&infoPtr->instances, &place);
 	if (hPtr == NULL) {
@@ -632,6 +770,15 @@ ItclFinishCmd(
 	Tcl_DeleteHashEntry(hPtr);
     }
     Tcl_DeleteHashTable(&infoPtr->instances);
+
+    while (1) {
+        hPtr = Tcl_FirstHashEntry(&infoPtr->classTypes, &place);
+	if (hPtr == NULL) {
+	    break;
+	}
+	Tcl_DeleteHashEntry(hPtr);
+    }
+    Tcl_DeleteHashTable(&infoPtr->classTypes);
 
     nsPtr = Tcl_FindNamespace(interp, "::itcl::parser", NULL, 0);
     if (nsPtr != NULL) {
