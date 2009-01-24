@@ -6,7 +6,7 @@
 # ----------------------------------------------------------------------
 #   AUTHOR:  Arnulf P. Wiedemann
 #
-#      RCS:  $Id: itclHullCmds.tcl,v 1.1.2.8 2009/01/11 12:07:20 wiede Exp $
+#      RCS:  $Id: itclHullCmds.tcl,v 1.1.2.9 2009/01/24 20:03:00 wiede Exp $
 # ----------------------------------------------------------------------
 #            Copyright (c) 2008  Arnulf P. Wiedemann
 # ======================================================================
@@ -182,7 +182,8 @@ proc initoptions {args} {
     } else {
         set argsDict [dict create]
     }
-    set myOptions [uplevel 1 info options]
+    set myOptions [uplevel 1 info option]
+#    set myOptions [uplevel 1 info options]
     set my_class [uplevel 1 info class]
     set myDelegatedOptions [uplevel 1 info delegated options]
     set opt_lst [list configure]
