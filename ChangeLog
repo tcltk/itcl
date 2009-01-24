@@ -1,5 +1,31 @@
-RCS: @(#) $Id: ChangeLog,v 1.1.2.10 2009/01/15 21:22:55 davygrvy Exp $
+RCS: @(#) $Id: ChangeLog,v 1.1.2.11 2009/01/24 21:02:31 wiede Exp $
 
+2008-01-24 Arnulf P. Wiedemann <wiede@users.sf.net>
+	* generic/itclBase.c:	added *Dict*Info functions to allow fully
+	* generic/itclBuiltin.c:integration of itclWidget package.
+	* generic/itclClass.c:  itclWidget package is no longer needed.
+	* generic/itclCmd.c:	The *Dict*Info* function also allow in the
+	* generic/itclObject.c: future to replace itclInfo.c by a scripted
+	* generic/itclParse.c:  version written in tcl.
+	* generic/itclInfo.c:   For replacing itclWidget package itclWidget.tcl
+	* generic/itclMethod.c: has been filled with new procs, which are
+	* library/itclWidget.tcl:called from the C parts, when needed.
+
+	* generic/itclHelpers.c:here one can find all the *Dict*Info functions
+
+	* library/ictlHullCmds.tcl:
+				here are similar funtions to itclWidget.tcl for
+				use by ::itcl::extendedclass
+
+	* generic/itclUtil.c:	malloc.h include now bracketed with 
+				#ifdef ITCL_PRESERVE_DEBUG as it is only used
+				for debugging. I have to look for a solution
+				using memory.h as a portable version, but
+				for that I have to understand that first.
+				With #ifdef ITCL_PRESERVE_DEBUG, the malloc
+				and free calls can be used again, these are
+				necessary, as im am checking stuff done by
+				ckalloc and ckfree, so these cannot be used.
 2009-01-15 David Gravereaux <davygrvy@pobox.com>
 	* generic/itcl2TclOO.h:  More cleanups changing the last of the 
 	* generic/itclClass.c:   'EXTERN' macros to just be 'extern' as we 
