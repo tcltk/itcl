@@ -25,7 +25,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclMethod.c,v 1.1.2.47 2009/01/14 22:43:24 davygrvy Exp $
+ *     RCS:  $Id: itclMethod.c,v 1.1.2.48 2009/01/24 19:53:07 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -377,6 +377,7 @@ ItclCreateMethod(
     if (imPtrPtr != NULL) {
         *imPtrPtr = imPtr;
     }
+    ItclAddClassFunctionDictInfo(interp, iclsPtr, imPtr);
     return TCL_OK;
 }
 
@@ -757,7 +758,7 @@ Itcl_ChangeMemberFunc(
             Tcl_SetHashValue(hPtr, imPtr);
         }
     }
-
+    ItclAddClassFunctionDictInfo(interp, imPtr->iclsPtr, imPtr);
     return TCL_OK;
 }
 
@@ -822,6 +823,7 @@ ItclCreateMemberCode(
         mcode->maxargcount = maxArgc;
         mcode->argListPtr = argListPtr;
         mcode->usagePtr = usagePtr;
+	Tcl_IncrRefCount(mcode->usagePtr);
 	mcode->argumentPtr = Tcl_NewStringObj((const char *)arglist, -1);
 	if (iclsPtr->flags & (ITCL_TYPE|ITCL_WIDGETADAPTOR)) {
 	    haveError = 0;
