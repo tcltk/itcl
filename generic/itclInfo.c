@@ -24,7 +24,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclInfo.c,v 1.1.2.44 2009/01/24 19:37:45 wiede Exp $
+ *     RCS:  $Id: itclInfo.c,v 1.1.2.45 2009/01/24 19:49:15 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -2085,10 +2085,8 @@ Itcl_BiInfoOptionCmd(
 
     Tcl_HashSearch place;
     Tcl_HashEntry *hPtr;
-//    Tcl_Namespace *nsPtr;
     ItclClass *contextIclsPtr;
     ItclObject *contextIoPtr;
-//    ItclObjectInfo *infoPtr;
     ItclOption *ioptPtr;
     ItclHierIter hier;
     ItclClass *iclsPtr;
