@@ -23,7 +23,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclCmd.c,v 1.1.2.48 2009/01/14 22:43:24 davygrvy Exp $
+ *     RCS:  $Id: itclCmd.c,v 1.1.2.49 2009/01/24 19:33:31 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -606,6 +606,7 @@ NRDelObjectCmd(
      */
     for (i=1; i < objc; i++) {
         name = Tcl_GetStringFromObj(objv[i], (int*)NULL);
+	contextIoPtr = NULL;
         if (Itcl_FindObject(interp, name, &contextIoPtr) != TCL_OK) {
             return TCL_ERROR;
         }
