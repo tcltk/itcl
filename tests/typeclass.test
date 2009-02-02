@@ -13,7 +13,7 @@
 #       There is at least Tcl 8.6a3 needed
 #
 #    The tests assume tcltest 2.2
-#    RCS:  $Id: typeclass.test,v 1.1.2.12 2009/01/07 12:05:23 wiede Exp $
+#    RCS:  $Id: typeclass.test,v 1.1.2.13 2009/02/02 08:47:45 wiede Exp $
 #-----------------------------------------------------------------------
 
 package require Tcl 8.6
@@ -554,10 +554,31 @@ test destroy-1.3 {user-defined destructors are called} -body {
     dog destroy
 } -result {{created ::spot} {destroyed ::spot}}
 
+test install-1.7 {install works for itcl::types
+} -body {
+    type tail {
+        option -tailcolor black
+    }
+
+    type dog {
+        delegate option -tailcolor to tail
+
+        constructor {args} {
+            installcomponent tail using tail $self.tail
+        }
+    }
+
+    dog fido
+    fido cget -tailcolor
+} -cleanup {
+    dog destroy
+    tail destroy
+} -result {black}
+
 #-----------------------------------------------------------------------
 # Setting the widget class explicitly
 
-test widgetclass-1.1 {can't set widgetclass for snit::types} -body {
+test widgetclass-1.1 {can't set widgetclass for itcl::types} -body {
     type dog {
         widgetclass Dog
     }
