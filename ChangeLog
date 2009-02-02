@@ -1,5 +1,12 @@
-RCS: @(#) $Id: ChangeLog,v 1.1.2.11 2009/01/24 21:02:31 wiede Exp $
+RCS: @(#) $Id: ChangeLog,v 1.1.2.12 2009/02/02 15:36:15 wiede Exp $
 
+2008-02-02 Arnulf P. Wiedemann <wiede@users.sf.net>
+        * generic/itcl.h configure.in:
+	             bumped version to 4.0b3
+2008-02-01 Arnulf P. Wiedemann <wiede@users.sf.net>
+        * tests/widgetadaptor.test and tests/widgetclass.test:
+	             removed package require Tk to avoid running the tests
+		     always
 2008-01-24 Arnulf P. Wiedemann <wiede@users.sf.net>
 	* generic/itclBase.c:	added *Dict*Info functions to allow fully
 	* generic/itclBuiltin.c:integration of itclWidget package.

@@ -1,8 +1,15 @@
-RCS: @(#) $Id: releasenotes.txt,v 1.1.2.3 2009/01/09 19:37:51 wiede Exp $
+RCS: @(#) $Id: releasenotes.txt,v 1.1.2.4 2009/02/02 15:36:15 wiede Exp $
 
-This is the second beta release of Itcl.
+This is the third beta release of Itcl.
 When final it will be the next major release of Itcl.
-This version is named Itcl 4.0b2.
+This version is named Itcl 4.0b3.
+
+The difference to 4.0b2 which was never released as a source release is, that
+it has a lot of fixes to run on OSX and Windows platform.
+
+Other change is fully final integration of itclWidget package, so there is no
+separate itclWidget package any more. Instead there is a Tcl script, which
+will be loaded on demand.
 
 There is only one difference to Itcl 3.4, the ::itcl::scope command does no
 longer return strings like "@......." but a different syntax. This string
