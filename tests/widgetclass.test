@@ -93,8 +93,6 @@ testsNeedTcltest 2.2
 interp alias {} type {} ::itcl::type
 interp alias {} widget {} ::itcl::widget
 
-package require Tk 8.6
-
 # Marks tests which are only for Tk.
 tcltest::testConstraint tk [info exists tk_version]
 
@@ -107,7 +105,8 @@ tcltest::testConstraint tk [info exists tk_version]
 # component (a Tk frame).  So the widgetadaptor tests apply; all we
 # need to test here is the frame creation.
 
-test widget-1.1 {creating a widget} -constraints {
+test widget-1.1 {creating a widget
+} -constraints {
     tk
 } -body {
     widget myframe {
@@ -127,7 +126,8 @@ test widget-1.1 {creating a widget} -constraints {
     myframe destroy
 } -result {green ::itcl::internal::widgets::hull1.frm}
 
-test widget-2.1 {can't redefine hull} -constraints {
+test widget-2.1 {can't redefine hull
+} -constraints {
     tk
 } -body {
     # there is no need to define or set itcl_hull as that is done automatically
@@ -153,7 +153,8 @@ test widget-2.1 {can't redefine hull} -constraints {
 # The install command is used to install widget components, while getting
 # options for the option database.
 
-test install-1.1 {installed components are created properly} -constraints {
+test install-1.1 {installed components are created properly
+} -constraints {
     tk
 } -body {
     widget myframe {
@@ -179,7 +180,8 @@ test install-1.1 {installed components are created properly} -constraints {
     myframe destroy
 } -result {green}
 
-test install-1.2 {installed components are saved properly} -constraints {
+test install-1.2 {installed components are saved properly
+} -constraints {
     tk
 } -body {
     widget myframe {
@@ -205,7 +207,8 @@ test install-1.2 {installed components are saved properly} -constraints {
     myframe destroy
 } -result {green}
 
-test install-1.4 {install queries option database} -constraints {
+test install-1.4 {install queries option database
+} -constraints {
     tk
 } -body {
     widget myframe {
@@ -229,7 +232,8 @@ test install-1.4 {install queries option database} -constraints {
     myframe destroy
 } -result {Courier}
 
-test install-1.5 {explicit options override option database} -constraints {
+test install-1.5 {explicit options override option database
+} -constraints {
     tk
 } -body {
     widget myframe {
@@ -253,7 +257,8 @@ test install-1.5 {explicit options override option database} -constraints {
     myframe destroy
 } -result {Times}
 
-test install-1.6 {option db works with targetted options} -constraints {
+test install-1.6 {option db works with targetted options
+} -constraints {
     tk
 } -body {
     widget myframe {
@@ -277,27 +282,8 @@ test install-1.6 {option db works with targetted options} -constraints {
     myframe destroy
 } -result {Courier}
 
-test install-1.7 {install works for snit::types} -body {
-    type tail {
-        option -tailcolor black
-    }
-
-    type dog {
-        delegate option -tailcolor to tail
-
-        constructor {args} {
-            installcomponent tail using tail $self.tail
-        }
-    }
-
-    dog fido
-    fido cget -tailcolor
-} -cleanup {
-    dog destroy
-    tail destroy
-} -result {black}
-
-test install-1.8 {install can install non-widget components} -constraints {
+test install-1.8 {install can install non-widget components
+} -constraints {
     tk
 } -body {
     type dog {
@@ -327,7 +313,8 @@ test install-1.8 {install can install non-widget components} -constraints {
     myframe destroy
 } -result {green}
 
-test install-1.9 {ok if no options are delegated to component} -constraints {
+test install-1.9 {ok if no options are delegated to component
+} -constraints {
     tk
 } -body {
     type dog {
@@ -556,7 +543,8 @@ test installhull-1.2 {
 
 
 
-test option-5.1 {local widget options read from option database} -constraints {
+test option-5.1 {local widget options read from option database
+} -constraints {
     tk
 } -body {
     widget dog {
@@ -580,7 +568,8 @@ test option-5.1 {local widget options read from option database} -constraints {
     dog destroy
 } -result {a bb}
 
-test option-5.2 {local option database values available in constructor} -constraints {
+test option-5.2 {local option database values available in constructor
+} -constraints {
     tk
 } -body {
     widget dog {
@@ -613,7 +602,8 @@ test option-5.2 {local option database values available in constructor} -constra
 #-----------------------------------------------------------------------
 # Setting the widget class explicitly
 
-test widgetclass-1.3 {widgetclass must begin with uppercase letter} -constraints {
+test widgetclass-1.3 {widgetclass must begin with uppercase letter
+} -constraints {
     tk
 } -body {
     widget dog {
@@ -623,7 +613,8 @@ test widgetclass-1.3 {widgetclass must begin with uppercase letter} -constraints
     error
 } -result {widgetclass "dog" does not begin with an uppercase letter}
 
-test widgetclass-1.4 {widgetclass can only be defined once} -constraints {
+test widgetclass-1.4 {widgetclass can only be defined once
+} -constraints {
     tk
 } -body {
     widget dog {
@@ -634,7 +625,8 @@ test widgetclass-1.4 {widgetclass can only be defined once} -constraints {
     error
 } -result {too many widgetclass statements}
 
-test widgetclass-1.5 {widgetclass set successfully} -constraints {
+test widgetclass-1.5 {widgetclass set successfully
+} -constraints {
     tk
 } -body {
     widget dog {
@@ -647,7 +639,8 @@ test widgetclass-1.5 {widgetclass set successfully} -constraints {
     dog destroy
 } -result {ok}
 
-test widgetclass-1.6 {implicit widgetclass applied to hull} -constraints {
+test widgetclass-1.6 {implicit widgetclass applied to hull
+} -constraints {
     tk
 } -body {
     widget dog {
@@ -671,7 +664,8 @@ test widgetclass-1.6 {implicit widgetclass applied to hull} -constraints {
     dog destroy
 } -result {green}
 
-test widgetclass-1.7 {explicit widgetclass applied to hull} -constraints {
+test widgetclass-1.7 {explicit widgetclass applied to hull
+} -constraints {
     tk
 } -body {
     widget dog {
@@ -700,7 +694,8 @@ test widgetclass-1.7 {explicit widgetclass applied to hull} -constraints {
 #-----------------------------------------------------------------------
 # hulltype statement
 
-test hulltype-1.3 {hulltype can be frame} -constraints {
+test hulltype-1.3 {hulltype can be frame
+} -constraints {
     tk
 } -body {
     widget dog {
@@ -718,7 +713,8 @@ test hulltype-1.3 {hulltype can be frame} -constraints {
     dog destroy
 } -result {unknown option "-use"}
 
-test hulltype-1.4 {hulltype can be toplevel} -constraints {
+test hulltype-1.4 {hulltype can be toplevel
+} -constraints {
     tk
 } -body {
     widget dog {
@@ -736,7 +732,8 @@ test hulltype-1.4 {hulltype can be toplevel} -constraints {
     dog destroy
 } -result {-use use Use {} {}}
 
-test hulltype-1.5 {hulltype can only be defined once} -constraints {
+test hulltype-1.5 {hulltype can only be defined once
+} -constraints {
     tk
 } -body {
     widget dog {
@@ -747,7 +744,8 @@ test hulltype-1.5 {hulltype can only be defined once} -constraints {
     error
 } -result {too many hulltype statements}
 
-test hulltype-2.1 {list of valid hulltypes} -constraints {
+test hulltype-2.1 {list of valid hulltypes
+} -constraints {
     tk
 } -body {
     type dog {
@@ -758,7 +756,10 @@ test hulltype-2.1 {list of valid hulltypes} -constraints {
     dog destroy
 } -result {frame labelframe toplevel ttk:frame ttk:labelframe ttk:toplevel}
 
-test winfo-10.1 {widget info widgets} -body {
+test winfo-10.1 {widget info widgets
+} -constraints {
+    tk
+} -body {
     widget dog {
     }
 
@@ -771,7 +772,10 @@ test winfo-10.1 {widget info widgets} -body {
     cat destroy
 } -result {cat dog}
 
-test winfo-10.2 {widget info components} -body {
+test winfo-10.2 {widget info components
+} -constraints {
+    tk
+} -body {
     widget dog {
         component comp1
         component comp2
@@ -790,7 +794,10 @@ test winfo-10.2 {widget info components} -body {
     cat destroy
 } -result {{comp1 comp2 itcl_hull} {comp1 comp1a itcl_hull}}
 
-test winfo-10.3 {widget info widgetclasses} -body {
+test winfo-10.3 {widget info widgetclasses
+} -constraints {
+    tk
+} -body {
     widget dog {
         widgetclass DogWidget
     }

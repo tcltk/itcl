@@ -91,18 +91,16 @@ testsNeedTcltest 2.2
 interp alias {} type {} ::itcl::type
 interp alias {} widgetadaptor {} ::itcl::widgetadaptor
 
-package require Tk 8.6
-
 # Marks tests which are only for Tk.
 tcltest::testConstraint tk [info exists tk_version]
 
 ::tcltest::loadTestedCommands
 
-if {1} {
 #-----------------------------------------------------------------------
 # Widgetadaptors
 
-test widgetadaptor-1.1 {creating a widget: hull hijacking} -constraints {
+test widgetadaptor-1.1 {creating a widget: hull hijacking
+} -constraints {
     tk
 } -body {
     widgetadaptor mylabel {
@@ -127,7 +125,8 @@ test widgetadaptor-1.1 {creating a widget: hull hijacking} -constraints {
     mylabel destroy
 } -result {{My Label} {My Label}}
 
-test widgetadaptor-1.2 {destroying a widget with destroy} -constraints {
+test widgetadaptor-1.2 {destroying a widget with destroy
+} -constraints {
     tk
 } -body {
     widgetadaptor mylabel {
@@ -146,7 +145,8 @@ test widgetadaptor-1.2 {destroying a widget with destroy} -constraints {
     mylabel destroy
 } -result {{::itcl::internal::variables::.label ::itcl::internal::variables::mylabel} ::itcl::internal::variables::mylabel}
 
-test widgetadaptor-1.3 {destroying two widgets of the same type with destroy} -constraints {
+test widgetadaptor-1.3 {destroying two widgets of the same type with destroy
+} -constraints {
     tk
 } -body {
     widgetadaptor mylabel {
@@ -167,7 +167,10 @@ test widgetadaptor-1.3 {destroying two widgets of the same type with destroy} -c
     mylabel destroy
 } -result {{::itcl::internal::variables::.lab1 ::itcl::internal::variables::mylabel ::itcl::internal::variables::.lab2} ::itcl::internal::variables::mylabel}
 
-test widgetadaptor-1.4 {destroying a widget with rename, then destroy type} -body {
+test widgetadaptor-1.4 {destroying a widget with rename, then destroy type
+} -constraints {
+    tk
+} -body {
     widgetadaptor mylabel {
         constructor {} {
             installhull [label $self]
@@ -184,7 +187,10 @@ test widgetadaptor-1.4 {destroying a widget with rename, then destroy type} -bod
     list $a $b
 } -result {{::itcl::internal::variables::.label ::itcl::internal::variables::mylabel} ::itcl::internal::variables::mylabel}
 
-test widgetadaptor-1.5 {destroying two widgets of the same type with rename} -body {
+test widgetadaptor-1.5 {destroying two widgets of the same type with rename
+} -constraints {
+    tk
+} -body {
     widgetadaptor mylabel {
         constructor {} {
             installhull [label $self]
@@ -202,7 +208,8 @@ test widgetadaptor-1.5 {destroying two widgets of the same type with rename} -bo
     list $a $b
 } -result {{::itcl::internal::variables::.lab1 ::itcl::internal::variables::mylabel ::itcl::internal::variables::.lab2} ::itcl::internal::variables::mylabel}
 
-test widgetadaptor-1.6 {create/destroy twice, with destroy} -constraints {
+test widgetadaptor-1.6 {create/destroy twice, with destroy
+} -constraints {
     tk
 } -body {
     widgetadaptor mylabel {
@@ -225,7 +232,10 @@ test widgetadaptor-1.6 {create/destroy twice, with destroy} -constraints {
     list $a $b $c
 } -result {{::itcl::internal::variables::.lab1 ::itcl::internal::variables::mylabel} {::itcl::internal::variables::.lab1 ::itcl::internal::variables::mylabel} ::itcl::internal::variables::mylabel}
 
-test widgetadaptor-1.7 {create/destroy twice, with rename} -body {
+test widgetadaptor-1.7 {create/destroy twice, with rename
+} -constraints {
+    tk
+} -body {
     widgetadaptor mylabel {
         constructor {} {
             installhull [label $self]
@@ -246,7 +256,8 @@ test widgetadaptor-1.7 {create/destroy twice, with rename} -body {
     list $a $b $c
 } -result {{::itcl::internal::variables::.lab1 ::itcl::internal::variables::mylabel} {::itcl::internal::variables::.lab1 ::itcl::internal::variables::mylabel} ::itcl::internal::variables::mylabel}
 
-test widgetadaptor-1.8 {"create" is optional} -constraints {
+test widgetadaptor-1.8 {"create" is optional
+} -constraints {
     tk
 } -body {
     widgetadaptor mylabel {
@@ -266,7 +277,8 @@ test widgetadaptor-1.8 {"create" is optional} -constraints {
     mylabel destroy
 } -result {Howdy!}
 
-test widgetadaptor-1.10 {"create" is optional, but must be a valid name} -constraints {
+test widgetadaptor-1.10 {"create" is optional, but must be a valid name
+} -constraints {
     tk
 } -body {
     widgetadaptor mylabel {
@@ -283,7 +295,8 @@ test widgetadaptor-1.10 {"create" is optional, but must be a valid name} -constr
     mylabel destroy
 } -result {bad window path name "foo"}
 
-test widgetadaptor-1.11 {user-defined destructors are called} -constraints {
+test widgetadaptor-1.11 {user-defined destructors are called
+} -constraints {
     tk
 } -body {
     widgetadaptor mylabel {
@@ -312,7 +325,8 @@ test widgetadaptor-1.11 {user-defined destructors are called} -constraints {
     mylabel destroy
 } -result {{created ::itcl::internal::widgets::hull1.label} {destroyed ::itcl::internal::widgets::hull1.label}}
 
-test widgetadaptor-1.14 {hull can be repeatedly renamed} -constraints {
+test widgetadaptor-1.14 {hull can be repeatedly renamed
+} -constraints {
     tk
 } -body {
     widgetadaptor basetype {
@@ -345,7 +359,8 @@ test widgetadaptor-1.14 {hull can be repeatedly renamed} -constraints {
     basetype destroy
 } -result {.foo}
 
-test widgetadaptor-1.15 {widget names can be generated} -constraints {
+test widgetadaptor-1.15 {widget names can be generated
+} -constraints {
     tk
 } -body {
     widgetadaptor unique {
@@ -362,7 +377,8 @@ test widgetadaptor-1.15 {widget names can be generated} -constraints {
     unique destroy
 } -result {.unique0}
 
-test widgetadaptor-1.16 {snit::widgetadaptor as hull} -constraints {
+test widgetadaptor-1.16 {snit::widgetadaptor as hull
+} -constraints {
     tk
 } -body {
     widgetadaptor mylabel {
@@ -407,7 +423,10 @@ test widgetadaptor-1.16 {snit::widgetadaptor as hull} -constraints {
     list $a $b $c $d $e
 } -result {{method2: method1} {Some Text} {More Text} {::itcl::internal::variables::mylabel2 ::itcl::internal::variables::.label ::itcl::internal::variables::mylabel} {::itcl::internal::variables::mylabel2 ::itcl::internal::variables::mylabel}}
 
-test widgetadaptor-1.17 {snit::widgetadaptor as hull; use rename} -body {
+test widgetadaptor-1.17 {snit::widgetadaptor as hull; use rename
+} -constraints {
+    tk
+} -body {
     widgetadaptor mylabel {
         constructor {args} {
             installhull [label $self]
@@ -448,7 +467,8 @@ test widgetadaptor-1.17 {snit::widgetadaptor as hull; use rename} -body {
     list $a $b $c $d $e
 } -result {{method2: method1} {Some Text} {More Text} {::itcl::internal::variables::mylabel2 ::itcl::internal::variables::.label ::itcl::internal::variables::mylabel} {::itcl::internal::variables::mylabel2 ::itcl::internal::variables::mylabel}}
 
-test widgetadaptor-1.19 {error in widgetadaptor constructor} -constraints {
+test widgetadaptor-1.19 {error in widgetadaptor constructor
+} -constraints {
     tk
 } -body {
     widgetadaptor mylabel {
@@ -465,7 +485,8 @@ test widgetadaptor-1.19 {error in widgetadaptor constructor} -constraints {
 } -result {Simulated Error}
 
 
-test install-1.3 {can't install until hull exists} -constraints {
+test install-1.3 {can't install until hull exists
+} -constraints {
     tk 
 } -body {
     widgetadaptor myframe {
@@ -582,7 +603,8 @@ test installhull-1.5 {
     myframe destroy
 } -result {green 321}
 
-test option-2.5 {configure returns info, unknown options} -constraints {
+test option-2.5 {configure returns info, unknown options
+} -constraints {
     tk
 } -body {
     widgetadaptor myframe {
@@ -609,7 +631,8 @@ test option-2.5 {configure returns info, unknown options} -constraints {
     myframe destroy
 } -result {{-foo foo Foo a a} {-width width Width 0 0} {-height height Height 0 0}}
 
-test option-2.6 {configure -opt unknown to implicit component} -constraints {
+test option-2.6 {configure -opt unknown to implicit component
+} -constraints {
     tk
 } -body {
     widgetadaptor myframe {
@@ -627,10 +650,8 @@ test option-2.6 {configure -opt unknown to implicit component} -constraints {
     myframe destroy
 } -result {unknown option "-quux"}
 
-# end
-}
-
-test iinfo-6.5 {info options with unknown delegated options} -constraints {
+test iinfo-6.5 {info options with unknown delegated options
+} -constraints {
     tk
 } -body {
     widgetadaptor myframe {
@@ -650,7 +671,8 @@ test iinfo-6.5 {info options with unknown delegated options} -constraints {
     myframe destroy
 } -result {-background -bd -bg -borderwidth -class -colormap -container -cursor -foo -height -highlightbackground -highlightcolor -highlightthickness -padx -pady -relief -takefocus -visual -width}
 
-test iinfo-6.7 {info options with exceptions} -constraints {
+test iinfo-6.7 {info options with exceptions
+} -constraints {
     tk
 } -body {
     widgetadaptor myframe {
@@ -670,7 +692,8 @@ test iinfo-6.7 {info options with exceptions} -constraints {
     myframe destroy
 } -result {-bd -bg -borderwidth -class -colormap -container -cursor -foo -height -highlightbackground -highlightcolor -highlightthickness -padx -pady -relief -takefocus -visual -width}
 
-test iinfo-6.8 {info options with pattern} -constraints {
+test iinfo-6.8 {info options with pattern
+} -constraints {
     tk
 } -body {
     widgetadaptor myframe {
@@ -690,7 +713,8 @@ test iinfo-6.8 {info options with pattern} -constraints {
     myframe destroy
 } -result {-class -colormap -container -cursor}
 
-test tinfo-3.2 {widget info instances} -constraints {
+test tinfo-3.2 {widget info instances
+} -constraints {
     tk
 } -body {
     widgetadaptor mylabel {
@@ -713,7 +737,8 @@ test tinfo-3.2 {widget info instances} -constraints {
     mylabel destroy
 } -result {.lab1 .lab2}
 
-test widgetclass-1.2 {can't set widgetclass for snit::widgetadaptors} -constraints {
+test widgetclass-1.2 {can't set widgetclass for itcl::widgetadaptors
+} -constraints {
     tk
 } -body {
     widgetadaptor dog {
@@ -723,7 +748,8 @@ test widgetclass-1.2 {can't set widgetclass for snit::widgetadaptors} -constrain
     error
 } -result {can't set widgetclass for ::itcl::widgetadaptor}
 
-test hulltype-1.2 {can't set hulltype for snit::widgetadaptors} -constraints {
+test hulltype-1.2 {can't set hulltype for itcl::widgetadaptors
+} -constraints {
     tk
 } -body {
     widgetadaptor dog {
@@ -733,7 +759,10 @@ test hulltype-1.2 {can't set hulltype for snit::widgetadaptors} -constraints {
     error
 } -result {can't set hulltype for ::itcl::widgetadaptor}
 
-test wainfo-10.1 {widgetadaptor info widgetadaptors} -body {
+test wainfo-10.1 {widgetadaptor info widgetadaptors
+} -constraints {
+    tk
+} -body {
     widgetadaptor dog {
     }
 
@@ -746,7 +775,10 @@ test wainfo-10.1 {widgetadaptor info widgetadaptors} -body {
     cat destroy
 } -result {cat dog}
 
-test wainfo-10.2 {widgetadaptor info components} -body {
+test wainfo-10.2 {widgetadaptor info components
+} -constraints {
+    tk
+} -body {
     widgetadaptor dog {
         component comp1
         component comp2
