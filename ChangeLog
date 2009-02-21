@@ -1,5 +1,9 @@
-RCS: @(#) $Id: ChangeLog,v 1.1.2.12 2009/02/02 15:36:15 wiede Exp $
+RCS: @(#) $Id: ChangeLog,v 1.1.2.13 2009/02/21 13:59:35 wiede Exp $
 
+2008-02-21 Arnulf P. Wiedemann <wiede@users.sf.net>
+        * fix for SF bug 2595708 itclParse.c and itclBuiltin.c
+	* fix for problem with scope command path reported by 
+	* Harald Krummeck on c.l.t ItclCmd.c
 2008-02-02 Arnulf P. Wiedemann <wiede@users.sf.net>
         * generic/itcl.h configure.in:
 	             bumped version to 4.0b3
