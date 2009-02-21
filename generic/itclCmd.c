@@ -23,7 +23,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclCmd.c,v 1.1.2.49 2009/01/24 19:33:31 wiede Exp $
+ *     RCS:  $Id: itclCmd.c,v 1.1.2.50 2009/02/21 13:55:46 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -678,31 +678,33 @@ Itcl_ScopeCmd(
     int objc,                /* number of arguments */
     Tcl_Obj *CONST objv[])   /* argument objects */
 {
-    int result = TCL_OK;
-    Tcl_Namespace *contextNsPtr = Tcl_GetCurrentNamespace(interp);
-    char *openParen = NULL;
-
-    register char *p;
-    char *token;
+    Tcl_Namespace *contextNsPtr;
     Tcl_HashEntry *hPtr;
     Tcl_Object oPtr;
     Tcl_InterpDeleteProc *procPtr;
     Tcl_Obj *objPtr;
     Tcl_Obj *objPtr2;
     Tcl_Var var;
+    Tcl_HashEntry *entry;
     ItclClass *contextIclsPtr;
     ItclObject *contextIoPtr;
-    Tcl_HashEntry *entry;
     ItclObjectInfo *infoPtr;
     ItclVarLookup *vlookup;
+    char *openParen;
+    register char *p;
+    char *token;
     int doAppend;
+    int result;
 
-    ItclShowArgs(2, "Itcl_ScopeCmd", objc, objv);
+    ItclShowArgs(1, "Itcl_ScopeCmd", objc, objv);
     if (objc != 2) {
         Tcl_WrongNumArgs(interp, 1, objv, "varname");
         return TCL_ERROR;
     }
 
+    contextNsPtr = Tcl_GetCurrentNamespace(interp);
+    openParen = NULL;
+    result = TCL_OK;
     /*
      *  If this looks like a fully qualified name already,
      *  then return it as is.
@@ -816,11 +818,13 @@ Itcl_ScopeCmd(
         objPtr = Tcl_NewStringObj((char*)NULL, 0);
         Tcl_IncrRefCount(objPtr);
 	if (doAppend) {
-            Tcl_GetCommandFullName(interp, contextIoPtr->accessCmd, objPtr);
+	    Tcl_AppendToObj(objPtr, "::", -1);
+	    Tcl_AppendToObj(objPtr,
+	            Tcl_GetString(contextIoPtr->namePtr), -1);
 	} else {
 	    Tcl_AppendToObj(objPtr, "::", -1);
 	    Tcl_AppendToObj(objPtr,
-	            Tcl_GetCommandName(interp, contextIoPtr->accessCmd), -1);
+	            Tcl_GetString(contextIoPtr->namePtr), -1);
 	}
 
         objPtr2 = Tcl_NewStringObj((char*)NULL, 0);
