@@ -39,7 +39,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclParse.c,v 1.1.2.68 2009/01/24 19:44:05 wiede Exp $
+ *     RCS:  $Id: itclParse.c,v 1.1.2.69 2009/02/21 13:57:19 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -1109,6 +1109,7 @@ ItclCheckForInitializedComponents(
             /*isProcCallFrame*/0) != TCL_OK) {
         return TCL_ERROR;
     }
+    idmPtr = NULL;
     FOREACH_HASH_VALUE(idmPtr, &iclsPtr->delegatedFunctions) {
         const char *val;
         /* check here for delegated typemethods only
