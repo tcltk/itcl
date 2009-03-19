@@ -9,7 +9,7 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itclBase.c,v 1.1.2.40 2009/01/24 19:29:36 wiede Exp $
+ * RCS: @(#) $Id: itclBase.c,v 1.1.2.41 2009/03/19 23:39:35 hobbs Exp $
  */
 
 #include <stdlib.h>
@@ -35,58 +35,48 @@ static int Initialize _ANSI_ARGS_((Tcl_Interp *interp));
 static char initScript[] = "\n\
 namespace eval ::itcl {\n\
     proc _find_init {} {\n\
-        global env tcl_library\n\
-        variable library\n\
-        variable patchLevel\n\
-        rename _find_init {}\n\
-        if {[info exists library]} {\n\
-            lappend dirs $library\n\
-        } else {\n\
-            if {[catch {uplevel #0 source -rsrc itcl}] == 0} {\n\
-                return\n\
-            }\n\
-            set dirs {}\n\
-            if {[info exists env(ITCL_LIBRARY)]} {\n\
-                lappend dirs $env(ITCL_LIBRARY)\n\
-            }\n\
-            lappend dirs [file join [file dirname $tcl_library] itcl$patchLevel]\n\
-            set bindir [file dirname [info nameofexecutable]]\n\
+	global env tcl_library\n\
+	variable library\n\
+	variable patchLevel\n\
+	rename _find_init {}\n\
+	if {[info exists library]} {\n\
+	    lappend dirs $library\n\
+	} else {\n\
+	    set dirs {}\n\
+	    if {[info exists env(ITCL_LIBRARY)]} {\n\
+		lappend dirs $env(ITCL_LIBRARY)\n\
+	    }\n\
+	    lappend dirs [file join [file dirname $tcl_library] itcl$patchLevel]\n\
+	    set bindir [file dirname [info nameofexecutable]]\n\
 	    lappend dirs [file join . library]\n\
-            lappend dirs [file join $bindir .. lib itcl$patchLevel]\n\
-            lappend dirs [file join $bindir .. library]\n\
-            lappend dirs [file join $bindir .. .. library]\n\
-            lappend dirs [file join $bindir .. .. itcl library]\n\
-            lappend dirs [file join $bindir .. .. .. itcl library]\n\
-            lappend dirs [file join $bindir .. .. itcl-ng itcl library]\n\
-            # On MacOSX, check the directories in the tcl_pkgPath\n\
-            if {[string equal $::tcl_platform(platform) \"unix\"] && \
-                    [string equal $::tcl_platform(os) \"Darwin\"]} {\n\
-                foreach d $::tcl_pkgPath {\n\
-                    lappend dirs [file join $d itcl$patchLevel]\n\
-                }\n\
-            }\n\
-            # On *nix, check the directories in the tcl_pkgPath\n\
-            if {[string equal $::tcl_platform(platform) \"unix\"]} {\n\
-                foreach d $::tcl_pkgPath {\n\
-                    lappend dirs $d\n\
-                    lappend dirs [file join $d itcl$patchLevel]\n\
-                }\n\
-            }\n\
-        }\n\
-        foreach i $dirs {\n\
-            set library $i\n\
-            set itclfile [file join $i itcl.tcl]\n\
-            if {![catch {uplevel #0 [list source $itclfile]} msg]} {\n\
-                return\n\
-            }\n\
-        }\n\
-        set msg \"Can't find a usable itcl.tcl in the following directories:\n\"\n\
-        append msg \"    $dirs\n\"\n\
-        append msg \"This probably means that Itcl/Tcl weren't installed properly.\n\"\n\
-        append msg \"If you know where the Itcl library directory was installed,\n\"\n\
-        append msg \"you can set the environment variable ITCL_LIBRARY to point\n\"\n\
-        append msg \"to the library directory.\n\"\n\
-        error $msg\n\
+	    lappend dirs [file join $bindir .. lib itcl$patchLevel]\n\
+	    lappend dirs [file join $bindir .. library]\n\
+	    lappend dirs [file join $bindir .. .. library]\n\
+	    lappend dirs [file join $bindir .. .. itcl library]\n\
+	    lappend dirs [file join $bindir .. .. .. itcl library]\n\
+	    lappend dirs [file join $bindir .. .. itcl-ng itcl library]\n\
+	    # On *nix, check the directories in the tcl_pkgPath\n\
+	    # XXX JH - this looks unnecessary, maybe Darwin only?\n\
+	    if {[string equal $::tcl_platform(platform) \"unix\"]} {\n	\
+		foreach d $::tcl_pkgPath {\n\
+		    lappend dirs $d\n\
+		    lappend dirs [file join $d itcl$patchLevel]\n\
+		}\n\
+	    }\n\
+	}\n\
+	foreach i $dirs {\n\
+	    if {![catch {uplevel #0 [list source [file join $i itcl.tcl]]}]} {\n\
+		set library $i\n\
+		return\n\
+	    }\n\
+	}\n\
+	set msg \"Can't find a usable itcl.tcl in the following directories:\n\"\n\
+	append msg \"	 $dirs\n\"\n\
+	append msg \"This probably means that Itcl/Tcl weren't installed properly.\n\"\n\
+	append msg \"If you know where the Itcl library directory was installed,\n\"\n\
+	append msg \"you can set the environment variable ITCL_LIBRARY to point\n\"\n\
+	append msg \"to the library directory.\n\"\n\
+	error $msg\n\
     }\n\
     _find_init\n\
 }";

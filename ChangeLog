@@ -1,4 +1,8 @@
-RCS: @(#) $Id: ChangeLog,v 1.1.2.13 2009/02/21 13:59:35 wiede Exp $
+RCS: @(#) $Id: ChangeLog,v 1.1.2.14 2009/03/19 23:39:35 hobbs Exp $
+
+2009-03-19  Jeff Hobbs  <jeffh@ActiveState.com>
+
+	* generic/itclBase.c: reduce size of initScript to satisfy MSVC6.
 
 2008-02-21 Arnulf P. Wiedemann <wiede@users.sf.net>
         * fix for SF bug 2595708 itclParse.c and itclBuiltin.c
