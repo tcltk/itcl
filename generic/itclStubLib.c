@@ -1,8 +1,9 @@
 /*
- * $Id: itclStubLib.c,v 1.9.2.7 2009/01/15 05:55:47 davygrvy Exp $
+ * $Id: itclStubLib.c,v 1.9.2.8 2009/05/09 08:46:10 davygrvy Exp $
  * SOURCE: tk/generic/tkStubLib.c, version 1.9 2004/03/17
  */
 
+#define USE_TCL_STUBS 1
 #include "tcl.h"
 
 #define USE_ITCL_STUBS 1

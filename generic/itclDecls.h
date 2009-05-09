@@ -1,5 +1,5 @@
 /*
- * $Id: itclDecls.h,v 1.9.2.11 2008/12/31 22:41:55 wiede Exp $
+ * $Id: itclDecls.h,v 1.9.2.12 2009/05/09 08:46:10 davygrvy Exp $
  *
  * This file is (mostly) automatically generated from itcl.decls.
  */
@@ -7,7 +7,7 @@
 
 #if defined(USE_ITCL_STUBS)
 
-extern const char *Itcl_InitStubs(
+EXTERN const char *Itcl_InitStubs(
 	Tcl_Interp *, const char *version, int exact);
 #define Itcl_InitStubs(interp, version, exact) Itcl_InitStubs( \
 	interp, ITCL_PATCH_LEVEL, 1)

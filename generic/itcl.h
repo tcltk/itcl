@@ -13,7 +13,7 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itcl.h,v 1.31.2.9 2009/02/02 15:36:35 wiede Exp $
+ * RCS: @(#) $Id: itcl.h,v 1.31.2.10 2009/05/09 08:46:10 davygrvy Exp $
  */
 
 /*
@@ -61,6 +61,14 @@
 #include <ctype.h>
 #include "tcl.h"
 
+/*
+ * For C++ compilers, use extern "C"
+ */
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #if defined(BUILD_itcl)
 #       define ITCLAPI DLLEXPORT
 #       undef USE_ITCL_STUBS
@@ -85,6 +93,18 @@
 
 #define ITCL_VERSION            "4.0"
 #define ITCL_PATCH_LEVEL        "4.0b3"
+
+
+/*
+ * A special definition used to allow this header file to be included from
+ * windows resource files so that they can obtain version information.
+ * RC_INVOKED is defined by default by the windows RC tool.
+ *
+ * Resource compilers don't like all the C stuff, like typedefs and function
+ * declarations, that occur below, so block them out.
+ */
+
+#ifndef RC_INVOKED
 
 #define ITCL_NAMESPACE          "::itcl"
 
@@ -171,5 +191,15 @@ void ItclDbgReleaseData(ClientData cdata, int line, const char *file);
 
 #undef TCL_STORAGE_CLASS
 #define TCL_STORAGE_CLASS DLLIMPORT
+
+#endif /* RC_INVOKED */
+
+/*
+ * end block for C++
+ */
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* ITCL_H_INCLUDED */
