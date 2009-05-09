@@ -1,4 +1,10 @@
-RCS: @(#) $Id: ChangeLog,v 1.1.2.14 2009/03/19 23:39:35 hobbs Exp $
+RCS: @(#) $Id: ChangeLog,v 1.1.2.15 2009/05/09 08:46:54 davygrvy Exp $
+
+2009-05-09  David Gravereaux <davygrvy@pobox.com>
+
+	* generic/itcl.h:
+	* generic/itclDecls.h:   Better C++ support.
+	* generic/itclStubLib.c: #define USE_TCL_STUBS is required
 
 2009-03-19  Jeff Hobbs  <jeffh@ActiveState.com>
 
