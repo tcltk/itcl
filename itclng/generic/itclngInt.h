@@ -9,7 +9,7 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itclngInt.h,v 1.1.2.16 2008/10/04 20:58:02 wiede Exp $
+ * RCS: @(#) $Id: itclngInt.h,v 1.1.2.17 2009/07/18 05:09:49 das Exp $
  */
 
 #include <string.h>
@@ -454,6 +454,9 @@ typedef struct ItclngCallContext {
 
 #if !defined(INT2PTR) && !defined(PTR2INT)
 #   if defined(HAVE_INTPTR_T) || defined(intptr_t)
+#       ifdef HAVE_SYS_TYPES_H
+#           include <sys/types.h>
+#       endif
 #       define INT2PTR(p) ((void*)(intptr_t)(p))
 #       define PTR2INT(p) ((int)(intptr_t)(p))
 #   else
