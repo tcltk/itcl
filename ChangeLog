@@ -1,4 +1,16 @@
-RCS: @(#) $Id: ChangeLog,v 1.1.2.15 2009/05/09 08:46:54 davygrvy Exp $
+RCS: @(#) $Id: ChangeLog,v 1.1.2.16 2009/07/18 05:10:45 das Exp $
+
+2009-07-18  Daniel A. Steffen <das@users.sourceforge.net>
+
+	* generic/itclClass.c:	fix warnings.
+	* generic/itclParse.c:
+	* generic/itclResolve.c:
+
+	* configure.in:		check for intptr_t type and include sys/types.h
+	* generic/itclInt.h:	to make INT2PTR & PTR2INT macros actually work.
+	* itclng/generic/itclngInt.h:
+
+	* configure:		autoconf-2.59
 
 2009-05-09  David Gravereaux <davygrvy@pobox.com>
 

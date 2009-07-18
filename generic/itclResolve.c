@@ -20,7 +20,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itclResolve.c,v 1.1.2.29 2009/01/14 22:43:24 davygrvy Exp $
+ *     RCS:  $Id: itclResolve.c,v 1.1.2.30 2009/07/18 05:10:45 das Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -447,7 +447,7 @@ Itcl_ClassCompiledVarResolver(
      *  Copy the name to local storage so we can NULL terminate it.
      *  If the name is long, allocate extra space for it.
      */
-    if (length < sizeof(storage)) {
+    if ((unsigned int)length < sizeof(storage)) {
         buffer = storage;
     } else {
         buffer = (char*)ckalloc((unsigned)(length+1));

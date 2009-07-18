@@ -25,7 +25,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann Copyright (c) 2007
  *
- *     RCS:  $Id: itclClass.c,v 1.1.2.51 2009/01/24 19:32:55 wiede Exp $
+ *     RCS:  $Id: itclClass.c,v 1.1.2.52 2009/07/18 05:10:45 das Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -1315,6 +1315,7 @@ ItclClass*
 Itcl_FindClass(interp, path, autoload)
     Tcl_Interp* interp;      /* interpreter containing class */
     CONST char* path;              /* path name for class */
+    int autoload;
 {
     Tcl_Namespace* classNs;
 

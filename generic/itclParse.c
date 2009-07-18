@@ -39,7 +39,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclParse.c,v 1.1.2.69 2009/02/21 13:57:19 wiede Exp $
+ *     RCS:  $Id: itclParse.c,v 1.1.2.70 2009/07/18 05:10:45 das Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -645,12 +645,12 @@ ItclGenericClassCmd(
                 "\"", NULL);
         return TCL_ERROR;
     }
-    result = ItclClassBaseCmd(clientData, interp, (int)Tcl_GetHashValue(hPtr),
+    result = ItclClassBaseCmd(clientData, interp, PTR2INT(Tcl_GetHashValue(hPtr)),
             objc - 1, objv + 1, &iclsPtr);
     if (result != TCL_OK) {
         return result;
     }
-    if ((int)Tcl_GetHashValue(hPtr) == ITCL_WIDGETADAPTOR) {
+    if (PTR2INT(Tcl_GetHashValue(hPtr)) == ITCL_WIDGETADAPTOR) {
         /* create the itcl_hull variable */
         namePtr = Tcl_NewStringObj("itcl_hull", -1);
         if (ItclCreateComponent(interp, iclsPtr, namePtr, ITCL_COMMON,
