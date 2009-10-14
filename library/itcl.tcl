@@ -9,7 +9,7 @@
 #            mmclennan@lucent.com
 #            http://www.tcltk.com/itcl
 #
-#      RCS:  $Id: itcl.tcl,v 1.11 2008/11/03 23:30:38 hobbs Exp $
+#      RCS:  $Id: itcl.tcl,v 1.12 2009/10/14 20:53:34 hobbs Exp $
 # ----------------------------------------------------------------------
 #            Copyright (c) 1993-1998  Lucent Technologies, Inc.
 # ======================================================================
@@ -249,7 +249,7 @@ namespace eval ::itcl {
 	    if {$ret == 0} {
 		return $result
 	    } else {
-		return -code $ret -errorcode $errorCode $result
+		return -code $ret -errorcode $::errorCode $result
 	    }
 	}
 	#######################################################################
