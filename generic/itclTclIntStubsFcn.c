@@ -9,7 +9,7 @@
  * ========================================================================
  *  AUTHOR:  Arnulf Wiedemann
  *
- *     RCS:  $Id: itclTclIntStubsFcn.c,v 1.1.2.2 2009/01/14 22:43:24 davygrvy Exp $
+ *     RCS:  $Id: itclTclIntStubsFcn.c,v 1.1.2.3 2009/10/18 16:46:23 wiede Exp $
  * ------------------------------------------------------------------------
  * See the file "license.terms" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
@@ -29,7 +29,7 @@ int
 _Tcl_CreateProc(
     Tcl_Interp *interp,         /* Interpreter containing proc. */
     Tcl_Namespace *nsPtr,       /* Namespace containing this proc. */
-    CONST char *procName,       /* Unqualified name of this proc. */
+    const char *procName,       /* Unqualified name of this proc. */
     Tcl_Obj *argsPtr,           /* Description of arguments. */
     Tcl_Obj *bodyPtr,           /* Command body. */
     Tcl_Proc *procPtrPtr)       /* Returns: pointer to proc data. */
@@ -90,7 +90,7 @@ Itcl_GetVariableFullName(
 Tcl_Var
 Itcl_FindNamespaceVar(
     Tcl_Interp * interp,
-    CONST char * name,
+    const char * name,
     Tcl_Namespace * contextNsPtr,
     int flags)
 {

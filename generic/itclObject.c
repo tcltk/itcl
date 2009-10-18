@@ -24,7 +24,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann Copyright (c) 2007
  *
- *     RCS:  $Id: itclObject.c,v 1.1.2.74 2009/01/24 19:39:43 wiede Exp $
+ *     RCS:  $Id: itclObject.c,v 1.1.2.75 2009/10/18 16:49:10 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -152,7 +152,7 @@ ItclCreateObject(
     const char* name,        /* name of new object */
     ItclClass *iclsPtr,        /* class for new object */
     int objc,                /* number of arguments */
-    Tcl_Obj *CONST objv[])   /* argument objects */
+    Tcl_Obj *const objv[])   /* argument objects */
 {
     int result = TCL_OK;
 
@@ -1523,7 +1523,7 @@ ItclDestructBase(
     if (Tcl_FindHashEntry(contextIoPtr->destructed,
             (char *)contextIclsPtr->namePtr) == NULL) {
         result = Itcl_InvokeMethodIfExists(interp, "destructor",
-            contextIclsPtr, contextIoPtr, 0, (Tcl_Obj* CONST*)NULL);
+            contextIclsPtr, contextIoPtr, 0, (Tcl_Obj* const*)NULL);
         if (result != TCL_OK) {
             return TCL_ERROR;
         }
@@ -1568,7 +1568,7 @@ ItclDestructBase(
 int
 Itcl_FindObject(
     Tcl_Interp *interp,      /* interpreter containing this object */
-    CONST char *name,        /* name of the object */
+    const char *name,        /* name of the object */
     ItclObject **roPtr)      /* returns: object data or NULL */
 {
     Tcl_Command cmd;
@@ -1681,7 +1681,7 @@ Itcl_ObjectIsa(
  *  anything goes wrong, this returns NULL.
  * ------------------------------------------------------------------------
  */
-CONST char*
+const char*
 ItclGetInstanceVar(
     Tcl_Interp *interp,        /* current interpreter */
     const char *name1,         /* name of desired instance variable */
@@ -1783,7 +1783,7 @@ ItclGetInstanceVar(
  *  anything goes wrong, this returns NULL.
  * ------------------------------------------------------------------------
  */
-CONST char*
+const char*
 ItclGetCommonInstanceVar(
     Tcl_Interp *interp,        /* current interpreter */
     const char *name1,         /* name of desired instance variable */
@@ -1795,7 +1795,7 @@ ItclGetCommonInstanceVar(
     Tcl_CallFrame *framePtr;
     Tcl_Namespace *nsPtr;
     Tcl_DString buffer;
-    CONST char *val;
+    const char *val;
     int doAppend;
 
     /*
@@ -1854,7 +1854,7 @@ ItclGetCommonInstanceVar(
  *  anything goes wrong, this returns NULL.
  * ------------------------------------------------------------------------
  */
-CONST char*
+const char*
 Itcl_GetInstanceVar(
     Tcl_Interp *interp,        /* current interpreter */
     const char *name,          /* name of desired instance variable */
@@ -1878,7 +1878,7 @@ Itcl_GetInstanceVar(
  *  anything goes wrong, this returns NULL.
  * ------------------------------------------------------------------------
  */
-CONST char*
+const char*
 ItclSetInstanceVar(
     Tcl_Interp *interp,        /* current interpreter */
     const char *name1,         /* name of desired instance variable */

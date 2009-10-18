@@ -8,7 +8,7 @@
  * ========================================================================
  *  AUTHOR:  Arnulf Wiedemann
  *
- *     RCS:  $Id: itclResolve2.c,v 1.1.2.3 2009/01/07 19:38:50 wiede Exp $
+ *     RCS:  $Id: itclResolve2.c,v 1.1.2.4 2009/10/18 16:46:23 wiede Exp $
  * ========================================================================
  *           Copyright (c) Arnulf Wiedemann
  * ------------------------------------------------------------------------
@@ -80,7 +80,7 @@ Itcl_CheckClassCommandProtection(
 int
 Itcl_ClassCmdResolver2(
     Tcl_Interp *interp,		/* current interpreter */
-    CONST char* name,		/* name of the command being accessed */
+    const char* name,		/* name of the command being accessed */
     Tcl_Namespace *nsPtr,	/* namespace performing the resolution */
     int flags,			/* TCL_LEAVE_ERR_MSG => leave error messages
 				 *   in interp if anything goes wrong */
@@ -166,7 +166,7 @@ Itcl_ClassCmdResolver2(
 int
 Itcl_ClassVarResolver2(
     Tcl_Interp *interp,       /* current interpreter */
-    CONST char* name,	      /* name of the variable being accessed */
+    const char* name,	      /* name of the variable being accessed */
     Tcl_Namespace *nsPtr,   /* namespace performing the resolution */
     int flags,                /* TCL_LEAVE_ERR_MSG => leave error messages
                                *   in interp if anything goes wrong */
@@ -307,7 +307,7 @@ Itcl_ClassVarResolver2(
 int
 Itcl_ClassCompiledVarResolver2(
     Tcl_Interp *interp,         /* current interpreter */
-    CONST char* name,           /* name of the variable being accessed */
+    const char* name,           /* name of the variable being accessed */
     int length,                 /* number of characters in name */
     Tcl_Namespace *nsPtr,       /* namespace performing the resolution */
     Tcl_ResolvedVarInfo **rPtr) /* returns: info that makes it possible to
@@ -509,7 +509,7 @@ ItclClassRuntimeVarResolver2(
 int
 Itcl_ParseVarResolver2(
     Tcl_Interp *interp,        /* current interpreter */
-    CONST char* name,                /* name of the variable being accessed */
+    const char* name,                /* name of the variable being accessed */
     Tcl_Namespace *contextNs,  /* namespace context */
     int flags,                 /* TCL_GLOBAL_ONLY => global variable
                                 * TCL_NAMESPACE_ONLY => namespace variable */
