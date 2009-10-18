@@ -24,7 +24,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclInfo.c,v 1.1.2.45 2009/01/24 19:49:15 wiede Exp $
+ *     RCS:  $Id: itclInfo.c,v 1.1.2.46 2009/10/18 16:14:23 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -39,6 +39,7 @@ Tcl_ObjCmdProc Itcl_BiInfoDelegatedCmd;
 Tcl_ObjCmdProc Itcl_BiInfoExistsCmd;
 Tcl_ObjCmdProc Itcl_BiInfoExtendedClassCmd;
 Tcl_ObjCmdProc Itcl_BiInfoInstancesCmd;
+Tcl_ObjCmdProc Itcl_BiInfoLevelCmd;
 Tcl_ObjCmdProc Itcl_BiInfoHullTypeCmd;
 Tcl_ObjCmdProc Itcl_BiInfoMethodCmd;
 Tcl_ObjCmdProc Itcl_BiInfoMethodsCmd;
@@ -1656,12 +1657,9 @@ Itcl_BiInfoUnknownCmd(
         return TCL_ERROR;
     }
     listObj = Tcl_NewListObj(-1, NULL);
-    objPtr = Tcl_NewStringObj("namespace", -1);
+    objPtr = Tcl_NewStringObj("uplevel", -1);
     Tcl_ListObjAppendElement(interp, listObj, objPtr);
-    objPtr = Tcl_NewStringObj("inscope", -1);
-    Tcl_ListObjAppendElement(interp, listObj, objPtr);
-    objPtr = Tcl_NewStringObj(Itcl_GetUplevelNamespace(interp, 1)->fullName,
-            -1);
+    objPtr = Tcl_NewStringObj("1", -1);
     Tcl_ListObjAppendElement(interp, listObj, objPtr);
     objPtr = Tcl_NewStringObj("::info", -1);
     Tcl_ListObjAppendElement(interp, listObj, objPtr);
@@ -1669,7 +1667,7 @@ Itcl_BiInfoUnknownCmd(
     Tcl_ListObjAppendElement(interp, listObj, objPtr);
     Tcl_SetResult(interp, Tcl_GetString(listObj), TCL_VOLATILE);
     Tcl_DecrRefCount(listObj);
-    return result;
+    return TCL_OK;
 }
 
 
@@ -5578,6 +5576,7 @@ Itcl_BiInfoDelegatedTypeMethodCmd(
     }
     return TCL_OK;
 }
+
 /* the next 4 commands are dummies until itclWidget.tcl is loaded
  * they just report the normal unknown message
  */
@@ -5590,6 +5589,7 @@ Itcl_BiInfoHullTypesCmd(
 {
     return Itcl_BiInfoUnknownCmd(clientData, interp, objc, objv);
 }
+
 int
 Itcl_BiInfoWidgetclassesCmd(
     ClientData clientData, /* ItclObjectInfo Ptr */
@@ -5599,6 +5599,7 @@ Itcl_BiInfoWidgetclassesCmd(
 {
     return Itcl_BiInfoUnknownCmd(clientData, interp, objc, objv);
 }
+
 int
 Itcl_BiInfoWidgetsCmd(
     ClientData clientData, /* ItclObjectInfo Ptr */
@@ -5608,6 +5609,7 @@ Itcl_BiInfoWidgetsCmd(
 {
     return Itcl_BiInfoUnknownCmd(clientData, interp, objc, objv);
 }
+
 int
 Itcl_BiInfoWidgetadaptorsCmd(
     ClientData clientData, /* ItclObjectInfo Ptr */
