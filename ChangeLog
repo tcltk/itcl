@@ -1,4 +1,4 @@
-RCS: @(#) $Id: ChangeLog,v 1.1.2.18 2009/10/18 16:31:47 wiede Exp $
+RCS: @(#) $Id: ChangeLog,v 1.1.2.19 2009/10/18 16:52:35 wiede Exp $
 
 2009-10-18  Arnulf P. Wiedemann <wiede@users.sourceforge.net>
 
@@ -6,6 +6,20 @@ RCS: @(#) $Id: ChangeLog,v 1.1.2.18 2009/10/18 16:31:47 wiede Exp $
 	* pkgIndex.tcl.in:	fix for bug  #2856166.
 	* itclInt.h:    for linux we need inclusion of unistd.h otherwise
 	                intprt_t type is not defined
+
+	* itclResolve2.c:       changed CONST in declarations to const
+	* itclTclIntStubsFcn.c:
+	* itclObject.c:
+	* itclParse.c:
+	* itclLinkage.c:
+	* itclMethod.c:
+	* itclClass.c:
+	* ItclEnsemble.c:
+	* itclHelpers.c:
+	* itclBuiltin.c:
+	* itclBase.c:
+	* itclCmd.c:
+	* itclUtil.c:
 
 2009-07-18  Daniel A. Steffen <das@users.sourceforge.net>
 
