@@ -23,7 +23,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclUtil.c,v 1.1.2.15 2009/01/24 19:56:15 wiede Exp $
+ *     RCS:  $Id: itclUtil.c,v 1.1.2.16 2009/10/18 16:36:17 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -78,8 +78,8 @@ static int itclPreserveInfoInitted = 0;
 
 void
 Itcl_Assert(testExpr, fileName, lineNumber)
-    CONST char *testExpr;   /* string representing test expression */
-    CONST char *fileName;   /* file name containing this call */
+    const char *testExpr;   /* string representing test expression */
+    const char *fileName;   /* file name containing this call */
     int lineNumber;	    /* line number containing this call */
 {
     Tcl_Panic("Itcl Assertion failed: \"%s\" (line %d of %s)",
@@ -897,7 +897,7 @@ Itcl_Protection(interp, newLevel)
  */
 void
 Itcl_ParseNamespPath(
-    CONST char *name,    /* path name to class member */
+    const char *name,    /* path name to class member */
     Tcl_DString *buffer, /* dynamic string buffer (uninitialized) */
     char **head,         /* returns "namesp::namesp::namesp" part */
     char **tail)         /* returns "element" part */
@@ -1115,7 +1115,7 @@ Itcl_CanAccessFunc(
 int
 Itcl_DecodeScopedCommand(
     Tcl_Interp *interp,		/* current interpreter */
-    CONST char *name,		/* string to be decoded */
+    const char *name,		/* string to be decoded */
     Tcl_Namespace **rNsPtr,	/* returns: namespace for scoped value */
     char **rCmdPtr)		/* returns: simple command word */
 {

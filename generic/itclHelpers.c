@@ -9,7 +9,7 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itclHelpers.c,v 1.1.2.14 2009/01/24 20:46:34 wiede Exp $
+ * RCS: @(#) $Id: itclHelpers.c,v 1.1.2.15 2009/10/18 16:42:33 wiede Exp $
  */
 
 #include "itclInt.h"
@@ -243,7 +243,7 @@ int
 Itcl_EvalArgs(
     Tcl_Interp *interp,      /* current interpreter */
     int objc,                /* number of arguments */
-    Tcl_Obj *CONST objv[])   /* argument objects */
+    Tcl_Obj *const objv[])   /* argument objects */
 {
     int result;
     Tcl_Command cmd;

@@ -25,7 +25,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann Copyright (c) 2007
  *
- *     RCS:  $Id: itclClass.c,v 1.1.2.52 2009/07/18 05:10:45 das Exp $
+ *     RCS:  $Id: itclClass.c,v 1.1.2.53 2009/10/18 16:42:33 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -189,7 +189,7 @@ CallNewObjectInstance(
 int
 Itcl_CreateClass(
     Tcl_Interp* interp,		/* interpreter that will contain new class */
-    CONST char* path,		/* name of new class */
+    const char* path,		/* name of new class */
     ItclObjectInfo *infoPtr,	/* info for all known objects */
     ItclClass **rPtr)		/* returns: pointer to class definition */
 {
@@ -1314,7 +1314,7 @@ Itcl_IsClass(
 ItclClass*
 Itcl_FindClass(interp, path, autoload)
     Tcl_Interp* interp;      /* interpreter containing class */
-    CONST char* path;              /* path name for class */
+    const char* path;              /* path name for class */
     int autoload;
 {
     Tcl_Namespace* classNs;
@@ -1397,7 +1397,7 @@ Itcl_FindClass(interp, path, autoload)
 Tcl_Namespace*
 Itcl_FindClassNamespace(interp, path)
     Tcl_Interp* interp;        /* interpreter containing class */
-    CONST char* path;                /* path name for class */
+    const char* path;                /* path name for class */
 {
     Tcl_Namespace* contextNs = Tcl_GetCurrentNamespace(interp);
     Tcl_Namespace* classNs;
@@ -2219,13 +2219,13 @@ Itcl_CreateMethodVariable(
  *  anything goes wrong, this returns NULL.
  * ------------------------------------------------------------------------
  */
-CONST char*
+const char*
 Itcl_GetCommonVar(
     Tcl_Interp *interp,        /* current interpreter */
-    CONST char *name,          /* name of desired instance variable */
+    const char *name,          /* name of desired instance variable */
     ItclClass *contextIclsPtr) /* name is interpreted in this scope */
 {
-    CONST char *val = NULL;
+    const char *val = NULL;
     Tcl_HashEntry *hPtr;
     Tcl_DString buffer;
     Tcl_Obj *namePtr;
