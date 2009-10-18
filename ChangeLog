@@ -1,9 +1,11 @@
-RCS: @(#) $Id: ChangeLog,v 1.1.2.17 2009/10/18 16:19:29 wiede Exp $
+RCS: @(#) $Id: ChangeLog,v 1.1.2.18 2009/10/18 16:31:47 wiede Exp $
 
 2009-10-18  Arnulf P. Wiedemann <wiede@users.sourceforge.net>
 
 	* generic/itclInfo.c:	fix for bug  #2830946.
 	* pkgIndex.tcl.in:	fix for bug  #2856166.
+	* itclInt.h:    for linux we need inclusion of unistd.h otherwise
+	                intprt_t type is not defined
 
 2009-07-18  Daniel A. Steffen <das@users.sourceforge.net>
 
