@@ -39,7 +39,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclParse.c,v 1.1.2.71 2009/10/18 16:49:10 wiede Exp $
+ *     RCS:  $Id: itclParse.c,v 1.1.2.72 2009/10/20 07:42:27 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -1238,6 +1238,11 @@ Itcl_ClassInheritCmd(
         return TCL_ERROR;
     }
 
+    if (iclsPtr == NULL) {
+        Tcl_AppendResult(interp, "Error: ::itcl::parser::inherit called from",
+	        " not within a class", NULL);
+        return TCL_ERROR;
+    }
     /*
      *  An "inherit" statement can only be included once in a
      *  class definition.
@@ -1579,6 +1584,11 @@ Itcl_ClassConstructorCmd(
         return TCL_ERROR;
     }
 
+    if (iclsPtr == NULL) {
+        Tcl_AppendResult(interp, "Error: ::itcl::parser::constructor called from",
+	        " not within a class", NULL);
+        return TCL_ERROR;
+    }
     namePtr = objv[0];
     if (Tcl_FindHashEntry(&iclsPtr->functions, (char *)objv[0])) {
         Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
@@ -1647,6 +1657,11 @@ Itcl_ClassDestructorCmd(
         return TCL_ERROR;
     }
 
+    if (iclsPtr == NULL) {
+        Tcl_AppendResult(interp, "Error: ::itcl::parser::destructor called from",
+	        " not within a class", NULL);
+        return TCL_ERROR;
+    }
     namePtr = objv[0];
     body = Tcl_GetString(objv[1]);
 
@@ -1698,6 +1713,11 @@ Itcl_ClassMethodCmd(
         return TCL_ERROR;
     }
 
+    if (iclsPtr == NULL) {
+        Tcl_AppendResult(interp, "Error: ::itcl::parser::method called from",
+	        " not within a class", NULL);
+        return TCL_ERROR;
+    }
     namePtr = objv[1];
 
     hPtr = Tcl_FindHashEntry(&iclsPtr->delegatedFunctions, (char *)objv[1]);
@@ -1770,6 +1790,11 @@ Itcl_ClassProcCmd(
         body = Tcl_GetString(objv[3]);
     }
 
+    if (iclsPtr == NULL) {
+        Tcl_AppendResult(interp, "Error: ::itcl::parser::proc called from",
+	        " not within a class", NULL);
+        return TCL_ERROR;
+    }
     if (iclsPtr->flags & (ITCL_TYPE|ITCL_WIDGETADAPTOR)) {
 	const char *name = Tcl_GetString(namePtr);
         /* check if the typemethod is already delegated */
@@ -1826,6 +1851,11 @@ Itcl_ClassTypeMethodCmd(
 
     infoPtr = (ItclObjectInfo*)clientData;
     iclsPtr = (ItclClass*)Itcl_PeekStack(&infoPtr->clsStack);
+    if (iclsPtr == NULL) {
+        Tcl_AppendResult(interp, "Error: ::itcl::parser::typemethod called from",
+	        " not within a class", NULL);
+        return TCL_ERROR;
+    }
     namePtr = objv[1];
 
     arglist = NULL;
@@ -1898,6 +1928,11 @@ Itcl_ClassVariableCmd(
     usageStr = NULL;
     arrayInitStr = NULL;
     ItclShowArgs(1, "Itcl_ClassVariableCmd", objc, objv);
+    if (iclsPtr == NULL) {
+        Tcl_AppendResult(interp, "Error: ::itcl::parser::variable called from",
+	        " not within a class", NULL);
+        return TCL_ERROR;
+    }
     pLevel = Itcl_Protection(interp, 0);
     if (iclsPtr->flags & (ITCL_TYPE|ITCL_WIDGET|ITCL_WIDGETADAPTOR)) {
         if (objc > 2) {
@@ -2133,6 +2168,11 @@ ItclClassCommonCmd(
     arrayInitStr = NULL;
     *ivPtrPtr = NULL;
     ItclShowArgs(2, "Itcl_ClassCommonCmd", objc, objv);
+    if (iclsPtr == NULL) {
+        Tcl_AppendResult(interp, "Error: ::itcl::parser::common called from",
+	        " not within a class", NULL);
+        return TCL_ERROR;
+    }
     if (iclsPtr->flags & (ITCL_TYPE|ITCL_WIDGETADAPTOR)) {
         if (objc > 2) {
 	    if (strcmp(Tcl_GetString(objv[2]), "-array") == 0) {
@@ -2337,6 +2377,11 @@ Itcl_ClassFilterCmd(
     ItclShowArgs(1, "Itcl_ClassFilterCmd", objc, objv);
     infoPtr = (ItclObjectInfo*)clientData;
     iclsPtr = (ItclClass*)Itcl_PeekStack(&infoPtr->clsStack);
+    if (iclsPtr == NULL) {
+        Tcl_AppendResult(interp, "Error: ::itcl::parser::filter called from",
+	        " not within a class", NULL);
+        return TCL_ERROR;
+    }
     if (iclsPtr->flags & ITCL_CLASS) {
         Tcl_AppendResult(interp, "\"", Tcl_GetString(iclsPtr->namePtr),
 	        " is no ::itcl::widget/::itcl::widgetadaptor/::itcl::type", 
@@ -2806,6 +2851,11 @@ Itcl_ClassOptionCmd(
 
     ItclShowArgs(1, "Itcl_ClassOptionCmd", objc, objv);
 
+    if (iclsPtr == NULL) {
+        Tcl_AppendResult(interp, "Error: ::itcl::parser::option called from",
+	        " not within a class", NULL);
+        return TCL_ERROR;
+    }
     if (iclsPtr->flags & ITCL_CLASS) {
         Tcl_AppendResult(interp, "a \"class\" cannot have options", NULL);
 	return TCL_ERROR;
@@ -2939,6 +2989,11 @@ ItclHandleClassComponent(
     }
     infoPtr = (ItclObjectInfo*)clientData;
     iclsPtr = (ItclClass*)Itcl_PeekStack(&infoPtr->clsStack);
+    if (iclsPtr == NULL) {
+        Tcl_AppendResult(interp, "Error: ::itcl::parser::component called from",
+	        " not within a class", NULL);
+        return TCL_ERROR;
+    }
     usage = "component ?-public <typemethod>? ?-inherit ?<flag>??";
     if (iclsPtr->flags & ITCL_CLASS) {
         Tcl_AppendResult(interp, "\"", Tcl_GetString(iclsPtr->namePtr),
@@ -3416,6 +3471,11 @@ delegate method <methodName> ?to <componentName>? using <pattern>\n\
 delegate method * ?to <componentName>? ?using <pattern>? ?except <methods>?";
     infoPtr = (ItclObjectInfo*)clientData;
     iclsPtr = (ItclClass*)Itcl_PeekStack(&infoPtr->clsStack);
+    if (iclsPtr == NULL) {
+        Tcl_AppendResult(interp, "Error: ::itcl::parser::delegatemethod called from",
+	        " not within a class", NULL);
+        return TCL_ERROR;
+    }
     if (iclsPtr->flags & ITCL_CLASS) {
         Tcl_AppendResult(interp, "\"", Tcl_GetString(iclsPtr->namePtr),
 	        " is no ::itcl::widget/::itcl::widgetadaptor/::itcl::type",
@@ -3780,6 +3840,11 @@ Itcl_ClassDelegateOptionCmd(
     }
     infoPtr = (ItclObjectInfo *)clientData;
     iclsPtr = (ItclClass *)Itcl_PeekStack(&infoPtr->clsStack);
+    if (iclsPtr == NULL) {
+        Tcl_AppendResult(interp, "Error: ::itcl::parser::delegateoption called from",
+	        " not within a class", NULL);
+        return TCL_ERROR;
+    }
     if (iclsPtr->flags & ITCL_CLASS) {
         Tcl_AppendResult(interp, "\"", Tcl_GetString(iclsPtr->namePtr),
 	        " is no ::itcl::widget/::itcl::widgetadaptor/::itcl::type",
@@ -3845,6 +3910,11 @@ delegate typemethod * ?to <componentName>? ?using <pattern>? ?except <typemethod
     icPtr = NULL;
     infoPtr = (ItclObjectInfo*)clientData;
     iclsPtr = (ItclClass*)Itcl_PeekStack(&infoPtr->clsStack);
+    if (iclsPtr == NULL) {
+        Tcl_AppendResult(interp, "Error: ::itcl::parser::delegatetypemethod called from",
+	        " not within a class", NULL);
+        return TCL_ERROR;
+    }
     if (iclsPtr->flags & ITCL_CLASS) {
         Tcl_AppendResult(interp, "\"", Tcl_GetString(iclsPtr->namePtr),
 	        " is no ::itcl::widget/::itcl::widgetadaptor/::itcl::type.", 
@@ -4004,6 +4074,11 @@ Itcl_ClassForwardCmd(
     ItclShowArgs(1, "Itcl_ClassForwardCmd", objc, objv);
     infoPtr = (ItclObjectInfo*)clientData;
     iclsPtr = (ItclClass*)Itcl_PeekStack(&infoPtr->clsStack);
+    if (iclsPtr == NULL) {
+        Tcl_AppendResult(interp, "Error: ::itcl::parser::forward called from",
+	        " not within a class", NULL);
+        return TCL_ERROR;
+    }
     if (iclsPtr->flags & ITCL_CLASS) {
         Tcl_AppendResult(interp, "\"", Tcl_GetString(iclsPtr->namePtr),
 	        " is no ::itcl::widget/::itcl::widgetadaptor/",
@@ -4060,6 +4135,11 @@ Itcl_ClassMethodVariableCmd(
     ItclShowArgs(1, "Itcl_ClassMethodVariableCmd", objc, objv);
     infoPtr = (ItclObjectInfo*)clientData;
     iclsPtr = (ItclClass*)Itcl_PeekStack(&infoPtr->clsStack);
+    if (iclsPtr == NULL) {
+        Tcl_AppendResult(interp, "Error: ::itcl::parser::methodvariable called from",
+	        " not within a class", NULL);
+        return TCL_ERROR;
+    }
     if (iclsPtr->flags & ITCL_CLASS) {
         Tcl_AppendResult(interp, "\"", Tcl_GetString(iclsPtr->namePtr),
 	        " is no ::itcl::widget/::itcl::widgetadaptor/",
@@ -4165,6 +4245,11 @@ Itcl_ClassTypeConstructorCmd(
 
     ItclShowArgs(1, "Itcl_ClassTypeConstructorCmd", objc, objv);
 
+    if (iclsPtr == NULL) {
+        Tcl_AppendResult(interp, "Error: ::itcl::parser::typeconstructor called from",
+	        " not within a class", NULL);
+        return TCL_ERROR;
+    }
     if (iclsPtr->flags & ITCL_CLASS) {
         Tcl_AppendResult(interp, "a \"class\" cannot have a typeconstructor",
 	        NULL);
