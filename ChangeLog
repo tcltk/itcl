@@ -1,4 +1,10 @@
-RCS: @(#) $Id: ChangeLog,v 1.1.2.19 2009/10/18 16:52:35 wiede Exp $
+RCS: @(#) $Id: ChangeLog,v 1.1.2.20 2009/10/20 07:59:06 wiede Exp $
+
+2009-10-20  Arnulf P. Wiedemann <wiede@users.sourceforge.net>
+	* generic/itclParse.c:	fix for bug  #2871541.
+	       added a lot of checks if within a class
+	       environment (iclsPtr != NULL), as there
+	       were a lot of similar cases
 
 2009-10-18  Arnulf P. Wiedemann <wiede@users.sourceforge.net>
 
