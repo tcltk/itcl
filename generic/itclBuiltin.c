@@ -24,7 +24,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclBuiltin.c,v 1.1.2.71 2009/02/21 13:57:19 wiede Exp $
+ *     RCS:  $Id: itclBuiltin.c,v 1.1.2.72 2009/10/22 09:00:34 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -435,7 +435,7 @@ Itcl_BiIsaCmd(
     ClientData clientData,   /* class definition */
     Tcl_Interp *interp,      /* current interpreter */
     int objc,                /* number of arguments */
-    Tcl_Obj *CONST objv[])   /* argument objects */
+    Tcl_Obj *const objv[])   /* argument objects */
 {
     ItclClass *iclsPtr;
     char *token;
@@ -514,7 +514,7 @@ Itcl_BiConfigureCmd(
     ClientData clientData,   /* class definition */
     Tcl_Interp *interp,      /* current interpreter */
     int objc,                /* number of arguments */
-    Tcl_Obj *CONST objv[])   /* argument objects */
+    Tcl_Obj *const objv[])   /* argument objects */
 {
     ItclClass *contextIclsPtr;
     ItclObject *contextIoPtr;
@@ -533,7 +533,7 @@ Itcl_BiConfigureCmd(
     ItclMemberCode *mcode;
     ItclHierIter hier;
     ItclObjectInfo *infoPtr;
-    CONST char *lastval;
+    const char *lastval;
     char *token;
     char *varName;
     int i;
@@ -789,15 +789,15 @@ Itcl_BiCgetCmd(
     ClientData clientData,   /* class definition */
     Tcl_Interp *interp,      /* current interpreter */
     int objc,                /* number of arguments */
-    Tcl_Obj *CONST objv[])   /* argument objects */
+    Tcl_Obj *const objv[])   /* argument objects */
 {
     ItclClass *contextIclsPtr;
     ItclObject *contextIoPtr;
 
     Tcl_HashEntry *hPtr;
     ItclVarLookup *vlookup;
-    CONST char *name;
-    CONST char *val;
+    const char *name;
+    const char *val;
     int result;
 
     ItclShowArgs(1,"Itcl_BiCgetCmd", objc, objv);
@@ -876,7 +876,7 @@ ItclReportPublicOpt(
     ItclVariable *ivPtr,     /* public variable to be reported */
     ItclObject *contextIoPtr) /* object containing this variable */
 {
-    CONST char *val;
+    const char *val;
     ItclClass *iclsPtr;
     Tcl_HashEntry *hPtr;
     ItclVarLookup *vlookup;
@@ -1022,7 +1022,7 @@ NRBiChainCmd(
     ClientData dummy,        /* not used */
     Tcl_Interp *interp,      /* current interpreter */
     int objc,                /* number of arguments */
-    Tcl_Obj *CONST objv[])   /* argument objects */
+    Tcl_Obj *const objv[])   /* argument objects */
 {
     int result = TCL_OK;
 
@@ -1539,7 +1539,7 @@ ItclBiObjectUnknownCmd(
     ClientData clientData,   /* ItclObjectInfo Ptr */
     Tcl_Interp *interp,      /* current interpreter */
     int objc,                /* number of arguments */
-    Tcl_Obj *CONST objv[])   /* argument objects */
+    Tcl_Obj *const objv[])   /* argument objects */
 {
     FOREACH_HASH_DECLS;
     Tcl_HashEntry *hPtr2;
@@ -1884,7 +1884,7 @@ ItclExtendedConfigure(
     ClientData clientData,   /* class definition */
     Tcl_Interp *interp,      /* current interpreter */
     int objc,                /* number of arguments */
-    Tcl_Obj *CONST objv[])   /* argument objects */
+    Tcl_Obj *const objv[])   /* argument objects */
 {
     FOREACH_HASH_DECLS;
     Tcl_HashTable unique;
@@ -2503,7 +2503,7 @@ ItclExtendedCget(
     ClientData clientData,   /* class definition */
     Tcl_Interp *interp,      /* current interpreter */
     int objc,                /* number of arguments */
-    Tcl_Obj *CONST objv[])   /* argument objects */
+    Tcl_Obj *const objv[])   /* argument objects */
 {
     Tcl_HashEntry *hPtr;
     Tcl_HashEntry *hPtr2;
@@ -2741,7 +2741,7 @@ ItclExtendedSetGet(
     ClientData clientData,   /* class definition */
     Tcl_Interp *interp,      /* current interpreter */
     int objc,                /* number of arguments */
-    Tcl_Obj *CONST objv[])   /* argument objects */
+    Tcl_Obj *const objv[])   /* argument objects */
 {
     ItclClass *contextIclsPtr;
     ItclObject *contextIoPtr;
@@ -2861,7 +2861,7 @@ Itcl_BiInstallComponentCmd(
     ClientData clientData,   /* class definition */
     Tcl_Interp *interp,      /* current interpreter */
     int objc,                /* number of arguments */
-    Tcl_Obj *CONST objv[])   /* argument objects */
+    Tcl_Obj *const objv[])   /* argument objects */
 {
     FOREACH_HASH_DECLS;
     Tcl_Obj ** newObjv;
@@ -2992,7 +2992,7 @@ Itcl_BiDestroyCmd(
     ClientData clientData,   /* class definition */
     Tcl_Interp *interp,      /* current interpreter */
     int objc,                /* number of arguments */
-    Tcl_Obj *CONST objv[])   /* argument objects */
+    Tcl_Obj *const objv[])   /* argument objects */
 {
     Tcl_Obj **newObjv;
     ItclClass *contextIclsPtr;
@@ -3071,7 +3071,7 @@ Itcl_BiCallInstanceCmd(
     ClientData clientData,   /* class definition */
     Tcl_Interp *interp,      /* current interpreter */
     int objc,                /* number of arguments */
-    Tcl_Obj *CONST objv[])   /* argument objects */
+    Tcl_Obj *const objv[])   /* argument objects */
 {
     Tcl_HashEntry *hPtr;
     Tcl_Obj *objPtr;
@@ -3138,7 +3138,7 @@ Itcl_BiGetInstanceVarCmd(
     ClientData clientData,   /* class definition */
     Tcl_Interp *interp,      /* current interpreter */
     int objc,                /* number of arguments */
-    Tcl_Obj *CONST objv[])   /* argument objects */
+    Tcl_Obj *const objv[])   /* argument objects */
 {
     Tcl_HashEntry *hPtr;
     Tcl_Obj *objPtr;
@@ -3204,7 +3204,7 @@ Itcl_BiMyTypeMethodCmd(
     ClientData clientData,   /* class definition */
     Tcl_Interp *interp,      /* current interpreter */
     int objc,                /* number of arguments */
-    Tcl_Obj *CONST objv[])   /* argument objects */
+    Tcl_Obj *const objv[])   /* argument objects */
 {
     Tcl_Obj *objPtr;
     Tcl_Obj *resultPtr;
@@ -3254,7 +3254,7 @@ Itcl_BiMyMethodCmd(
     ClientData clientData,   /* class definition */
     Tcl_Interp *interp,      /* current interpreter */
     int objc,                /* number of arguments */
-    Tcl_Obj *CONST objv[])   /* argument objects */
+    Tcl_Obj *const objv[])   /* argument objects */
 {
     Tcl_HashEntry *hPtr;
     Tcl_Obj *objPtr;
@@ -3312,7 +3312,7 @@ Itcl_BiMyProcCmd(
     ClientData clientData,   /* class definition */
     Tcl_Interp *interp,      /* current interpreter */
     int objc,                /* number of arguments */
-    Tcl_Obj *CONST objv[])   /* argument objects */
+    Tcl_Obj *const objv[])   /* argument objects */
 {
     Tcl_Obj *objPtr;
     Tcl_Obj *resultPtr;
@@ -3363,7 +3363,7 @@ Itcl_BiMyTypeVarCmd(
     ClientData clientData,   /* class definition */
     Tcl_Interp *interp,      /* current interpreter */
     int objc,                /* number of arguments */
-    Tcl_Obj *CONST objv[])   /* argument objects */
+    Tcl_Obj *const objv[])   /* argument objects */
 {
     Tcl_Obj *objPtr;
     Tcl_Obj *resultPtr;
@@ -3415,7 +3415,7 @@ Itcl_BiMyVarCmd(
     ClientData clientData,   /* class definition */
     Tcl_Interp *interp,      /* current interpreter */
     int objc,                /* number of arguments */
-    Tcl_Obj *CONST objv[])   /* argument objects */
+    Tcl_Obj *const objv[])   /* argument objects */
 {
     Tcl_HashEntry *hPtr;
     Tcl_Obj *objPtr;
@@ -3469,7 +3469,7 @@ Itcl_BiItclHullCmd(
     ClientData clientData,   /* class definition */
     Tcl_Interp *interp,      /* current interpreter */
     int objc,                /* number of arguments */
-    Tcl_Obj *CONST objv[])   /* argument objects */
+    Tcl_Obj *const objv[])   /* argument objects */
 {
     ItclClass *contextIclsPtr;
     ItclObject *contextIoPtr;

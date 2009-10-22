@@ -25,7 +25,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclMethod.c,v 1.1.2.48 2009/01/24 19:53:07 wiede Exp $
+ *     RCS:  $Id: itclMethod.c,v 1.1.2.49 2009/10/22 09:00:34 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -39,10 +39,10 @@ Tcl_ObjCmdProc Itcl_BiMyProcCmd;
 static int EquivArgLists(Tcl_Interp *interp, ItclArgList *origArgs,
         ItclArgList *realArgs);
 static int ItclCreateMemberCode(Tcl_Interp* interp, ItclClass *iclsPtr,
-        CONST char* arglist, CONST char* body, ItclMemberCode** mcodePtr,
+        const char* arglist, const char* body, ItclMemberCode** mcodePtr,
         Tcl_Obj *namePtr, int flags);
 static int ItclCreateMemberFunc(Tcl_Interp* interp, ItclClass *iclsPtr,
-	Tcl_Obj *namePtr, CONST char* arglist, CONST char* body,
+	Tcl_Obj *namePtr, const char* arglist, const char* body,
         ItclMemberFunc** imPtrPtr, int flags);
 
 
@@ -196,7 +196,7 @@ NRConfigBodyCmd(
     ClientData dummy,        /* unused */
     Tcl_Interp *interp,      /* current interpreter */
     int objc,                /* number of arguments */
-    Tcl_Obj *CONST objv[])   /* argument objects */
+    Tcl_Obj *const objv[])   /* argument objects */
 {
     int status = TCL_OK;
 
@@ -323,8 +323,8 @@ Itcl_CreateMethod(
     Tcl_Interp* interp,  /* interpreter managing this action */
     ItclClass *iclsPtr,  /* class definition */
     Tcl_Obj *namePtr,    /* name of new method */
-    CONST char* arglist, /* space-separated list of arg names */
-    CONST char* body)    /* body of commands for the method */
+    const char* arglist, /* space-separated list of arg names */
+    const char* body)    /* body of commands for the method */
 {
     ItclMemberFunc *imPtr;
 
@@ -348,8 +348,8 @@ ItclCreateMethod(
     Tcl_Interp* interp,  /* interpreter managing this action */
     ItclClass *iclsPtr,  /* class definition */
     Tcl_Obj *namePtr,    /* name of new method */
-    CONST char* arglist, /* space-separated list of arg names */
-    CONST char* body,    /* body of commands for the method */
+    const char* arglist, /* space-separated list of arg names */
+    const char* body,    /* body of commands for the method */
     ItclMemberFunc **imPtrPtr)
 {
     ItclMemberFunc *imPtr;
@@ -670,8 +670,8 @@ Itcl_CreateMemberFunc(
     Tcl_Interp* interp,            /* interpreter managing this action */
     ItclClass *iclsPtr,            /* class definition */
     Tcl_Obj *namePtr,              /* name of new member */
-    CONST char* arglist,           /* space-separated list of arg names */
-    CONST char* body,              /* body of commands for the method */
+    const char* arglist,           /* space-separated list of arg names */
+    const char* body,              /* body of commands for the method */
     ItclMemberFunc** imPtrPtr)     /* returns: pointer to new method defn */
 {
     return ItclCreateMemberFunc(interp, iclsPtr, namePtr, arglist,
@@ -698,8 +698,8 @@ int
 Itcl_ChangeMemberFunc(
     Tcl_Interp* interp,            /* interpreter managing this action */
     ItclMemberFunc* imPtr,         /* command member being changed */
-    CONST char* arglist,           /* space-separated list of arg names */
-    CONST char* body)              /* body of commands for the method */
+    const char* arglist,           /* space-separated list of arg names */
+    const char* body)              /* body of commands for the method */
 {
     Tcl_HashEntry *hPtr;
     ItclMemberCode *mcode = NULL;
@@ -1019,8 +1019,8 @@ int
 Itcl_CreateMemberCode(
     Tcl_Interp* interp,            /* interpreter managing this action */
     ItclClass *iclsPtr,              /* class containing this member */
-    CONST char* arglist,           /* space-separated list of arg names */
-    CONST char* body,              /* body of commands for the method */
+    const char* arglist,           /* space-separated list of arg names */
+    const char* body,              /* body of commands for the method */
     ItclMemberCode** mcodePtr)     /* returns: pointer to new implementation */
 {
     return ItclCreateMemberCode(interp, iclsPtr, arglist, body, mcodePtr,
@@ -1185,7 +1185,7 @@ Itcl_EvalMemberCode(
     ItclMemberFunc *imPtr,    /* member func, or NULL (for error messages) */
     ItclObject *contextIoPtr,   /* object context, or NULL */
     int objc,                 /* number of arguments */
-    Tcl_Obj *CONST objv[])    /* argument objects */
+    Tcl_Obj *const objv[])    /* argument objects */
 {
     Tcl_Object oPtr;
     ItclMemberCode *mcode;
@@ -1664,7 +1664,7 @@ NRExecProc(
     ClientData clientData,   /* proc definition */
     Tcl_Interp *interp,      /* current interpreter */
     int objc,                /* number of arguments */
-    Tcl_Obj *CONST objv[])   /* argument objects */
+    Tcl_Obj *const objv[])   /* argument objects */
 {
     ItclMemberFunc *imPtr = (ItclMemberFunc*)clientData;
     int result = TCL_OK;
@@ -1744,7 +1744,7 @@ CallInvokeMethodIfExists(
     Tcl_Obj* const* objv = data[3];
 
     result = Itcl_InvokeMethodIfExists(interp, "constructor",
-            iclsPtr, contextObj, objc, (Tcl_Obj* CONST*)objv);
+            iclsPtr, contextObj, objc, (Tcl_Obj* const*)objv);
 
     if (result != TCL_OK) {
         return TCL_ERROR;
@@ -1908,11 +1908,11 @@ Itcl_ConstructBase(
 int
 Itcl_InvokeMethodIfExists(
     Tcl_Interp *interp,           /* interpreter */
-    CONST char *name,             /* name of desired method */
+    const char *name,             /* name of desired method */
     ItclClass *contextClassPtr,   /* current class being constructed */
     ItclObject *contextObjectPtr, /* object being constructed */
     int objc,                     /* number of arguments */
-    Tcl_Obj *CONST objv[])        /* argument objects */
+    Tcl_Obj *const objv[])        /* argument objects */
 {
     Tcl_HashEntry *hPtr;
     Tcl_Obj *cmdlinePtr;
@@ -2039,7 +2039,7 @@ Tcl_Command
 Itcl_CmdAliasProc(
     Tcl_Interp *interp,
     Tcl_Namespace *nsPtr,
-    CONST char *cmdName,
+    const char *cmdName,
     ClientData clientData)
 {
     Tcl_HashEntry *hPtr;
@@ -2161,7 +2161,7 @@ Tcl_Var
 Itcl_VarAliasProc(
     Tcl_Interp *interp,
     Tcl_Namespace *nsPtr,
-    CONST char *varName,
+    const char *varName,
     ClientData clientData)
 {
 

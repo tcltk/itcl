@@ -9,7 +9,7 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itclBase.c,v 1.1.2.41 2009/03/19 23:39:35 hobbs Exp $
+ * RCS: @(#) $Id: itclBase.c,v 1.1.2.42 2009/10/22 09:00:34 wiede Exp $
  */
 
 #include <stdlib.h>
@@ -891,7 +891,7 @@ ItclDumpRefCountInfo(
     ClientData clientData,   /* unused */
     Tcl_Interp *interp,      /* current interpreter */
     int objc,                /* number of arguments */
-    Tcl_Obj *CONST objv[])   /* argument objects */
+    Tcl_Obj *const objv[])   /* argument objects */
 {
     int noDeleted;
 
@@ -925,7 +925,7 @@ ItclDumpPreserveInfo(
     ClientData clientData,   /* unused */
     Tcl_Interp *interp,      /* current interpreter */
     int objc,                /* number of arguments */
-    Tcl_Obj *CONST objv[])   /* argument objects */
+    Tcl_Obj *const objv[])   /* argument objects */
 {
     ItclShowArgs(0, "ItclDumpPreserveInfo", objc, objv);
     Itcl_DbDumpPreserveInfo(NULL);

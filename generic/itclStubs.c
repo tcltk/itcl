@@ -9,7 +9,7 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itclStubs.c,v 1.1.2.7 2009/01/14 22:43:24 davygrvy Exp $
+ * RCS: @(#) $Id: itclStubs.c,v 1.1.2.8 2009/10/22 09:00:34 wiede Exp $
  */
 
 #include <string.h>
@@ -19,7 +19,7 @@
 
 static void ItclDeleteStub(ClientData cdata);
 static int ItclHandleStubCmd(ClientData clientData, Tcl_Interp *interp,
-        int objc, Tcl_Obj *CONST objv[]);
+        int objc, Tcl_Obj *const objv[]);
 
 
 /*
@@ -76,6 +76,7 @@ Itcl_StubCreateCmd(
     char *cmdName;
     Tcl_CmdInfo cmdInfo;
 
+    ItclShowArgs(1, "Itcl_StubCreateCmd", objc, objv);
     if (objc != 2) {
         Tcl_WrongNumArgs(interp, 1, objv, "name");
         return TCL_ERROR;
@@ -193,7 +194,7 @@ ItclHandleStubCmd(
     int loaded;
     int cmdlinec;
 
-    ItclShowArgs(2, "ItclHandleStubCmd", objc, objv);
+    ItclShowArgs(0, "ItclHandleStubCmd", objc, objv);
     cmdPtr = (Tcl_Command) clientData;
     cmdNamePtr = Tcl_NewStringObj((char*)NULL, 0);
     Tcl_IncrRefCount(cmdNamePtr);
