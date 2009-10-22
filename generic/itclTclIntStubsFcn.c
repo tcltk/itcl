@@ -9,7 +9,7 @@
  * ========================================================================
  *  AUTHOR:  Arnulf Wiedemann
  *
- *     RCS:  $Id: itclTclIntStubsFcn.c,v 1.1.2.3 2009/10/18 16:46:23 wiede Exp $
+ *     RCS:  $Id: itclTclIntStubsFcn.c,v 1.1.2.4 2009/10/22 15:09:51 wiede Exp $
  * ------------------------------------------------------------------------
  * See the file "license.terms" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
@@ -105,6 +105,39 @@ Itcl_SetNamespaceResolvers (
     Tcl_ResolveCompiledVarProc * compiledVarProc)
 {
     Tcl_SetNamespaceResolvers(namespacePtr, cmdProc, varProc, compiledVarProc);
+}
+
+Tcl_HashTable *
+Itcl_GetNamespaceCommandTable(
+    Tcl_Namespace *nsPtr)
+{
+    return TclGetNamespaceCommandTable(nsPtr);
+}
+
+Tcl_HashTable *
+Itcl_GetNamespaceChildTable(
+    Tcl_Namespace *nsPtr)
+{
+    return TclGetNamespaceChildTable(nsPtr);
+}
+
+int
+Itcl_InitRewriteEnsemble(
+    Tcl_Interp *interp,
+    int numRemoved,
+    int numInserted,
+    int objc,
+    Tcl_Obj *const *objv)
+{
+    return TclInitRewriteEnsemble(interp, numRemoved, numInserted, objv);
+}
+
+void
+Itcl_ResetRewriteEnsemble(
+    Tcl_Interp *interp,
+    int isRootEnsemble)
+{
+    return TclResetRewriteEnsemble(interp, isRootEnsemble);
 }
 
 

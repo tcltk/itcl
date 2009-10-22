@@ -23,7 +23,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclCmd.c,v 1.1.2.51 2009/10/18 16:38:07 wiede Exp $
+ *     RCS:  $Id: itclCmd.c,v 1.1.2.52 2009/10/22 15:09:50 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -224,7 +224,7 @@ Itcl_FindClassesCmd(
             continue;
         }
 
-        hPtr = Tcl_FirstHashEntry(Tcl_GetNamespaceCommandTable(nsPtr),
+        hPtr = Tcl_FirstHashEntry(Itcl_GetNamespaceCommandTable(nsPtr),
 	        &place);
         while (hPtr) {
             cmd = (Tcl_Command)Tcl_GetHashValue(hPtr);
@@ -275,7 +275,7 @@ Itcl_FindClassesCmd(
          *  Push any child namespaces onto the stack and continue
          *  the search in those namespaces.
          */
-        hPtr = Tcl_FirstHashEntry(Tcl_GetNamespaceChildTable(nsPtr), &place);
+        hPtr = Tcl_FirstHashEntry(Itcl_GetNamespaceChildTable(nsPtr), &place);
         while (hPtr != NULL) {
             Itcl_PushStack(Tcl_GetHashValue(hPtr), &search);
             hPtr = Tcl_NextHashEntry(&place);
@@ -406,7 +406,7 @@ Itcl_FindObjectsCmd(
             continue;
         }
 
-        entry = Tcl_FirstHashEntry(Tcl_GetNamespaceCommandTable(nsPtr), &place);
+        entry = Tcl_FirstHashEntry(Itcl_GetNamespaceCommandTable(nsPtr), &place);
         while (entry) {
             cmd = (Tcl_Command)Tcl_GetHashValue(entry);
             if (Itcl_IsObject(cmd)) {
@@ -474,7 +474,7 @@ Itcl_FindObjectsCmd(
          *  Push any child namespaces onto the stack and continue
          *  the search in those namespaces.
          */
-        entry = Tcl_FirstHashEntry(Tcl_GetNamespaceChildTable(nsPtr), &place);
+        entry = Tcl_FirstHashEntry(Itcl_GetNamespaceChildTable(nsPtr), &place);
         while (entry != NULL) {
             Itcl_PushStack(Tcl_GetHashValue(entry), &search);
             entry = Tcl_NextHashEntry(&place);

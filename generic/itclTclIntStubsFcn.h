@@ -31,5 +31,11 @@ extern int _Tcl_SetNamespaceResolver(Tcl_Namespace *nsPtr,
         struct Tcl_Resolve *resolvePtr);
 extern int Tcl_RenameCommand(Tcl_Interp *interp, const char *oldName,
 	const char *newName);
+extern Tcl_HashTable *Itcl_GetNamespaceChildTable(Tcl_Namespace *nsPtr);
+extern Tcl_HashTable *Itcl_GetNamespaceCommandTable(Tcl_Namespace *nsPtr);
+extern int Itcl_InitRewriteEnsemble(Tcl_Interp *interp, int numRemoved,
+	int numInserted, int objc, Tcl_Obj *const *objv);
+extern void Itcl_ResetRewriteEnsemble(Tcl_Interp *interp,
+        int isRootEnsemble);
 
 

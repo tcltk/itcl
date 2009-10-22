@@ -9,7 +9,7 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itclHelpers.c,v 1.1.2.15 2009/10/18 16:42:33 wiede Exp $
+ * RCS: @(#) $Id: itclHelpers.c,v 1.1.2.16 2009/10/22 15:09:50 wiede Exp $
  */
 
 #include "itclInt.h"
@@ -363,7 +363,7 @@ ItclEnsembleSubCmd(
     ItclShowArgs(2, functionName, objc, objv);
 
     newObjv = (Tcl_Obj **)ckalloc(sizeof(Tcl_Obj *)*(objc+1));
-    isRootEnsemble = Tcl_InitRewriteEnsemble(interp, 1, 2, objc, objv);
+    isRootEnsemble = Itcl_InitRewriteEnsemble(interp, 1, 2, objc, objv);
     newObjv[0] = Tcl_NewStringObj("::info", -1);
     Tcl_IncrRefCount(newObjv[0]);
     newObjv[1] = Tcl_NewStringObj("itclinfo", -1);
@@ -375,7 +375,7 @@ ItclEnsembleSubCmd(
     Tcl_DecrRefCount(newObjv[0]);
     Tcl_DecrRefCount(newObjv[1]);
     ckfree((char *)newObjv);
-    Tcl_ResetRewriteEnsemble(interp, isRootEnsemble);
+    Itcl_ResetRewriteEnsemble(interp, isRootEnsemble);
     return result;
 }
 

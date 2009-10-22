@@ -9,7 +9,7 @@
  * ========================================================================
  *  AUTHOR:  Arnulf Wiedemann
  *
- *     RCS:  $Id: itclMigrate2TclCore.c,v 1.1.2.10 2009/01/14 22:43:24 davygrvy Exp $
+ *     RCS:  $Id: itclMigrate2TclCore.c,v 1.1.2.11 2009/10/22 15:09:50 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -34,62 +34,6 @@ Itcl_SetCallFrameResolver(
         return TCL_OK;
     }
     return TCL_ERROR;
-}
-
-Tcl_HashTable *
-_Tcl_GetNamespaceCommandTable(
-    Tcl_Namespace *nsPtr)
-{
-    return &((Namespace *)nsPtr)->cmdTable;
-}
-
-Tcl_HashTable *
-_Tcl_GetNamespaceChildTable(
-    Tcl_Namespace *nsPtr)
-{
-    return &((Namespace *)nsPtr)->childTable;
-}
-
-int
-_Tcl_InitRewriteEnsemble(
-    Tcl_Interp *interp,
-    int numRemoved,
-    int numInserted,
-    int objc,
-    Tcl_Obj *const *objv)
-{
-    Interp *iPtr = (Interp *) interp;
-
-    int isRootEnsemble = (iPtr->ensembleRewrite.sourceObjs == NULL);
-
-    if (isRootEnsemble) {
-        iPtr->ensembleRewrite.sourceObjs = objv;
-        iPtr->ensembleRewrite.numRemovedObjs = numRemoved;
-        iPtr->ensembleRewrite.numInsertedObjs = numInserted;
-    } else {
-        int numIns = iPtr->ensembleRewrite.numInsertedObjs;
-        if (numIns < numRemoved) {
-            iPtr->ensembleRewrite.numRemovedObjs += numRemoved - numIns;
-            iPtr->ensembleRewrite.numInsertedObjs += numInserted - 1;
-        } else {
-            iPtr->ensembleRewrite.numInsertedObjs += numInserted - numRemoved;
-        }
-    }
-    return isRootEnsemble;
-}
-
-void
-_Tcl_ResetRewriteEnsemble(
-    Tcl_Interp *interp,
-    int isRootEnsemble)
-{
-    Interp *iPtr = (Interp *) interp;
-
-    if (isRootEnsemble) {
-        iPtr->ensembleRewrite.sourceObjs = NULL;
-        iPtr->ensembleRewrite.numRemovedObjs = 0;
-        iPtr->ensembleRewrite.numInsertedObjs = 0;
-    }
 }
 
 int
