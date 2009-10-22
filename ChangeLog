@@ -1,4 +1,4 @@
-RCS: @(#) $Id: ChangeLog,v 1.1.2.21 2009/10/22 09:15:38 wiede Exp $
+RCS: @(#) $Id: ChangeLog,v 1.1.2.22 2009/10/22 11:42:06 wiede Exp $
 
 2009-10-22  Arnulf P. Wiedemann <wiede@users.sourceforge.net>
 	* itclLinkage.c:    changed CONST in declarations to const
@@ -12,6 +12,7 @@ RCS: @(#) $Id: ChangeLog,v 1.1.2.21 2009/10/22 09:15:38 wiede Exp $
 	* itclInfo.c:       no extra method for info exists, use the
 	                    ItclBiInfoUnknownCmd instead
 			    fix for bug # 2738459
+	* itclObject:c      fix for bug # 2789473
 
 2009-10-20  Arnulf P. Wiedemann <wiede@users.sourceforge.net>
 	* generic/itclParse.c:	fix for bug  #2871541.
