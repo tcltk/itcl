@@ -1,4 +1,17 @@
-RCS: @(#) $Id: ChangeLog,v 1.1.2.20 2009/10/20 07:59:06 wiede Exp $
+RCS: @(#) $Id: ChangeLog,v 1.1.2.21 2009/10/22 09:15:38 wiede Exp $
+
+2009-10-22  Arnulf P. Wiedemann <wiede@users.sourceforge.net>
+	* itclLinkage.c:    changed CONST in declarations to const
+	* itclMethod.c:
+	* itclBase.c:
+	* itclBuiltin.c:
+	* itclStubs.c:
+
+	* itclObject.c:     added an empty line (beautifying)
+
+	* itclInfo.c:       no extra method for info exists, use the
+	                    ItclBiInfoUnknownCmd instead
+			    fix for bug # 2738459
 
 2009-10-20  Arnulf P. Wiedemann <wiede@users.sourceforge.net>
 	* generic/itclParse.c:	fix for bug  #2871541.
@@ -17,13 +30,9 @@ RCS: @(#) $Id: ChangeLog,v 1.1.2.20 2009/10/20 07:59:06 wiede Exp $
 	* itclTclIntStubsFcn.c:
 	* itclObject.c:
 	* itclParse.c:
-	* itclLinkage.c:
-	* itclMethod.c:
 	* itclClass.c:
 	* ItclEnsemble.c:
 	* itclHelpers.c:
-	* itclBuiltin.c:
-	* itclBase.c:
 	* itclCmd.c:
 	* itclUtil.c:
 
