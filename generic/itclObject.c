@@ -24,7 +24,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann Copyright (c) 2007
  *
- *     RCS:  $Id: itclObject.c,v 1.1.2.76 2009/10/22 09:04:18 wiede Exp $
+ *     RCS:  $Id: itclObject.c,v 1.1.2.77 2009/10/22 11:40:48 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -2949,7 +2949,11 @@ ItclMapMethodNameProc(
         Tcl_IncrRefCount(methodName);
         className = Tcl_NewStringObj(head, -1);
         Tcl_IncrRefCount(className);
-	iclsPtr2 = GetClassFromClassName(head, iclsPtr);
+	if (strlen(head) > 0) {
+	    iclsPtr2 = GetClassFromClassName(head, iclsPtr);
+	} else {
+	    iclsPtr2 = NULL;
+	}
 	if (iclsPtr2 != NULL) {
 	    *startClsPtr = iclsPtr2->clsPtr;
 	    Tcl_SetStringObj(methodObj, Tcl_GetString(methodName), -1);
