@@ -24,7 +24,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann Copyright (c) 2007
  *
- *     RCS:  $Id: itclObject.c,v 1.1.2.75 2009/10/18 16:49:10 wiede Exp $
+ *     RCS:  $Id: itclObject.c,v 1.1.2.76 2009/10/22 09:04:18 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -3003,6 +3003,7 @@ ItclMapMethodNameProc(
     Tcl_DStringFree(&buffer);
     return TCL_OK;
 }
+
 int
 ExpandDelegateAs(
     Tcl_Interp *interp,
