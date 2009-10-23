@@ -24,7 +24,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann Copyright (c) 2007
  *
- *     RCS:  $Id: itclObject.c,v 1.1.2.78 2009/10/23 20:58:44 wiede Exp $
+ *     RCS:  $Id: itclObject.c,v 1.1.2.79 2009/10/23 21:08:41 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -2941,7 +2941,7 @@ ItclMapMethodNameProc(
 	}
         iclsPtr = ioPtr->iclsPtr;
     }
-    *startClsPtr = NULL;
+//    *startClsPtr = NULL;
     sp = Tcl_GetString(methodObj);
     Itcl_ParseNamespPath(sp, &buffer, &head, &tail);
     if (head != NULL) {
