@@ -1,5 +1,5 @@
 # -*- tcl -*-
-# $Id: itcl.decls,v 1.3.2.14 2008/12/06 23:05:46 wiede Exp $
+# $Id: itcl.decls,v 1.3.2.15 2009/10/23 16:26:22 wiede Exp $
 
 # public API
 library itcl
@@ -587,4 +587,12 @@ declare 174 current {
 }
 declare 175 current {
     void Itcl_PopCallFrame (Tcl_Interp * interp);
+}
+declare 176 current {
+    Tcl_CallFrame * Itcl_GetUplevelCallFrame (Tcl_Interp * interp, \
+                                    int level);
+}
+declare 177 current {
+    Tcl_CallFrame * Itcl_ActivateCallFrame(Tcl_Interp *interp, \
+            Tcl_CallFrame *framePtr);
 }

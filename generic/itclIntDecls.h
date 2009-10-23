@@ -1,5 +1,5 @@
 /*
- * $Id: itclIntDecls.h,v 1.13.2.17 2008/12/31 22:41:55 wiede Exp $
+ * $Id: itclIntDecls.h,v 1.13.2.18 2009/10/23 16:26:22 wiede Exp $
  *
  * This file is (mostly) automatically generated from itcl.decls.
  */
@@ -23,7 +23,7 @@ extern const char *Itcl_InitStubs(
 /* !BEGIN!: Do not edit below this line. */
 
 #define ITCLINT_STUBS_EPOCH 0
-#define ITCLINT_STUBS_REVISION 144
+#define ITCLINT_STUBS_REVISION 146
 
 #if !defined(USE_ITCL_STUBS)
 
@@ -508,6 +508,12 @@ ITCLAPI int		Itcl_PushCallFrame (Tcl_Interp * interp,
 				Tcl_Namespace * nsPtr, int isProcCallFrame);
 /* 175 */
 ITCLAPI void		Itcl_PopCallFrame (Tcl_Interp * interp);
+/* 176 */
+ITCLAPI Tcl_CallFrame *	 Itcl_GetUplevelCallFrame (Tcl_Interp * interp, 
+				int level);
+/* 177 */
+ITCLAPI Tcl_CallFrame *	 Itcl_ActivateCallFrame (Tcl_Interp * interp, 
+				Tcl_CallFrame * framePtr);
 
 #endif /* !defined(USE_ITCL_STUBS) */
 
@@ -693,6 +699,8 @@ typedef struct ItclIntStubs {
     int (*itcl_RenameCommand) (Tcl_Interp * interp, const char * oldName, const char * newName); /* 173 */
     int (*itcl_PushCallFrame) (Tcl_Interp * interp, Tcl_CallFrame * framePtr, Tcl_Namespace * nsPtr, int isProcCallFrame); /* 174 */
     void (*itcl_PopCallFrame) (Tcl_Interp * interp); /* 175 */
+    Tcl_CallFrame * (*itcl_GetUplevelCallFrame) (Tcl_Interp * interp, int level); /* 176 */
+    Tcl_CallFrame * (*itcl_ActivateCallFrame) (Tcl_Interp * interp, Tcl_CallFrame * framePtr); /* 177 */
 } ItclIntStubs;
 
 #ifdef __cplusplus
@@ -1238,6 +1246,14 @@ extern const ItclIntStubs *itclIntStubsPtr;
 #ifndef Itcl_PopCallFrame
 #define Itcl_PopCallFrame \
 	(itclIntStubsPtr->itcl_PopCallFrame) /* 175 */
+#endif
+#ifndef Itcl_GetUplevelCallFrame
+#define Itcl_GetUplevelCallFrame \
+	(itclIntStubsPtr->itcl_GetUplevelCallFrame) /* 176 */
+#endif
+#ifndef Itcl_ActivateCallFrame
+#define Itcl_ActivateCallFrame \
+	(itclIntStubsPtr->itcl_ActivateCallFrame) /* 177 */
 #endif
 
 #endif /* defined(USE_ITCL_STUBS) */

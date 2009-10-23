@@ -9,7 +9,7 @@
  * ========================================================================
  *  AUTHOR:  Arnulf Wiedemann
  *
- *     RCS:  $Id: itclMigrate2TclCore.c,v 1.1.2.11 2009/10/22 15:09:50 wiede Exp $
+ *     RCS:  $Id: itclMigrate2TclCore.c,v 1.1.2.12 2009/10/23 16:26:22 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -68,6 +68,40 @@ Tcl_NewNamespaceVar(
     TclSetVarNamespaceVar(varPtr);
     VarHashRefCount(varPtr)++;
     return (Tcl_Var)varPtr;
+}
+
+Tcl_CallFrame *
+Itcl_GetUplevelCallFrame(
+    Tcl_Interp *interp,
+    int level)
+{
+    CallFrame *framePtr;
+    if (level < 0) {
+        return NULL;
+    }
+    framePtr = ((Interp *)interp)->framePtr;
+    while ((framePtr != NULL) && (level-- > 0)) {
+        framePtr = framePtr->callerVarPtr;
+    }
+    if (framePtr == NULL) {
+        return NULL;
+    }
+    return (Tcl_CallFrame *)framePtr;
+}
+
+
+Tcl_CallFrame *
+Itcl_ActivateCallFrame(
+    Tcl_Interp *interp,
+    Tcl_CallFrame *framePtr)
+{
+    Interp *iPtr = (Interp*)interp;
+    CallFrame *oldFramePtr;
+
+    oldFramePtr = iPtr->varFramePtr;
+    iPtr->varFramePtr = (CallFrame *) framePtr;
+
+    return (Tcl_CallFrame *) oldFramePtr;
 }
 
 Tcl_Namespace *
