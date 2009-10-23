@@ -13,7 +13,7 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itcl.h,v 1.31.2.10 2009/05/09 08:46:10 davygrvy Exp $
+ * RCS: @(#) $Id: itcl.h,v 1.31.2.11 2009/10/23 16:40:33 wiede Exp $
  */
 
 /*
@@ -89,10 +89,10 @@ extern "C" {
 #define ITCL_MAJOR_VERSION	4
 #define ITCL_MINOR_VERSION	0
 #define ITCL_RELEASE_LEVEL      TCL_BETA_RELEASE
-#define ITCL_RELEASE_SERIAL     3
+#define ITCL_RELEASE_SERIAL     4
 
 #define ITCL_VERSION            "4.0"
-#define ITCL_PATCH_LEVEL        "4.0b3"
+#define ITCL_PATCH_LEVEL        "4.0b4"
 
 
 /*
