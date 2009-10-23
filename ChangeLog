@@ -1,9 +1,14 @@
-RCS: @(#) $Id: ChangeLog,v 1.1.2.25 2009/10/23 16:52:04 wiede Exp $
+RCS: @(#) $Id: ChangeLog,v 1.1.2.26 2009/10/23 21:20:35 wiede Exp $
 
 2009-10-23 Arnulf P. Wiedemann <wiede@users.sf.net>
         * generic/itcl.h:        bumped version to 4.0b4
 	* configure.in:
 	* configure:
+
+	* itclClass.c:           fixed bug which prevented correct error
+	                         reporting when there was a problem when
+				 creating an object, also fixed to use correct
+				 NRE calling
 
 2009-10-23  Arnulf P. Wiedemann <wiede@users.sourceforge.net>
 	* itclMigrate2TclCore.c: added Itcl_GetUplevelCallFrame and 
