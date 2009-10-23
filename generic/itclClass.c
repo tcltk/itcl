@@ -25,7 +25,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann Copyright (c) 2007
  *
- *     RCS:  $Id: itclClass.c,v 1.1.2.53 2009/10/18 16:42:33 wiede Exp $
+ *     RCS:  $Id: itclClass.c,v 1.1.2.54 2009/10/23 21:01:55 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -1136,7 +1136,9 @@ ItclFreeClass(
         }
         icPtr = Tcl_GetHashValue(hPtr);
 	Tcl_DeleteHashEntry(hPtr);
-        ItclDeleteComponent(icPtr);
+	if (icPtr != NULL) {
+            ItclDeleteComponent(icPtr);
+	}
     }
     Tcl_DeleteHashTable(&iclsPtr->components);
 
@@ -1150,7 +1152,9 @@ ItclFreeClass(
         }
         ivPtr = Tcl_GetHashValue(hPtr);
 	Tcl_DeleteHashEntry(hPtr);
-        Itcl_ReleaseData(ivPtr);
+	if (ivPtr != NULL) {
+            Itcl_ReleaseData(ivPtr);
+	}
     }
     Tcl_DeleteHashTable(&iclsPtr->variables);
 
@@ -1450,8 +1454,8 @@ FinalizeCreateObject(
     if (result == TCL_ERROR) {
 	Tcl_Obj *objPtr;
 	
+	(void) Tcl_GetReturnOptions(interp, result);
 	objPtr = Tcl_NewStringObj("-level 2", -1);
-	/* result = Tcl_SetReturnOptions(interp, objPtr); */
 	if (!(iclsPtr->flags & (ITCL_TYPE|ITCL_WIDGETADAPTOR))) {
 	    result = Tcl_SetReturnOptions(interp, objPtr);
 	} else {
@@ -1459,6 +1463,24 @@ FinalizeCreateObject(
 	}
     }
     Tcl_DecrRefCount(objNamePtr);
+    return result;
+}
+
+static int
+CallCreateObject(
+    ClientData data[],
+    Tcl_Interp *interp,
+    int result)
+{
+    Tcl_Obj *objNamePtr = data[0];
+    ItclClass *iclsPtr = data[1];
+    int objc = PTR2INT(data[2]);
+    Tcl_Obj **objv = data[3];
+
+    if (result == TCL_OK) {
+        result = ItclCreateObject(interp, Tcl_GetString(objNamePtr), iclsPtr,
+                objc, objv);
+    }
     return result;
 }
 /*
@@ -1493,8 +1515,10 @@ Itcl_HandleClass(
     Tcl_DString buffer;  /* buffer used to build object names */
     Tcl_Obj *objNamePtr;
     Tcl_HashEntry *hPtr;
+    Tcl_Obj **newObjv;
     ItclClass *iclsPtr;
     ItclObjectInfo *infoPtr;
+    void *callbackPtr;
     char unique[256];    /* buffer used for unique part of object names */
     char *token;
     char *objName;
@@ -1619,10 +1643,13 @@ Itcl_HandleClass(
     objNamePtr = Tcl_NewStringObj(objName, -1);
     Tcl_IncrRefCount(objNamePtr);
     Tcl_DStringFree(&buffer);
+    callbackPtr = Itcl_GetCurrentCallbackPtr(interp);
+    newObjv = (Tcl_Obj **)(objv+4);
     Itcl_NRAddCallback(interp, FinalizeCreateObject, objNamePtr, iclsPtr,
             NULL, NULL);
-    result = ItclCreateObject(interp, Tcl_GetString(objNamePtr), iclsPtr,
-            objc-4, objv+4);
+    Itcl_NRAddCallback(interp, CallCreateObject, objNamePtr, iclsPtr,
+            INT2PTR(objc-4), newObjv);
+    result = Itcl_NRRunCallbacks(interp, callbackPtr);
     return result;
 }
 
