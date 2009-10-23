@@ -1,4 +1,26 @@
-RCS: @(#) $Id: ChangeLog,v 1.1.2.24 2009/10/22 15:12:11 wiede Exp $
+RCS: @(#) $Id: ChangeLog,v 1.1.2.25 2009/10/23 16:52:04 wiede Exp $
+
+2009-10-23 Arnulf P. Wiedemann <wiede@users.sf.net>
+        * generic/itcl.h:        bumped version to 4.0b4
+	* configure.in:
+	* configure:
+
+2009-10-23  Arnulf P. Wiedemann <wiede@users.sourceforge.net>
+	* itclMigrate2TclCore.c: added Itcl_GetUplevelCallFrame and 
+	                         Itcl_ActivateCallFrame functions
+	                         same as in Itcl3.4. They are needed to call
+				 the itk_component command with the suitable
+				 call frame as this is needed for access to the
+	                         proc local vars. This was the fix for SF 
+				 bug #2840994
+	* itclStubInit.c:
+	* itcl.decls:
+	* itclDecls.h:
+	* itclIntDecls.h:
+
+	* itclResolve.c:         added special_resolve_vars. Also needed
+	                         for SF bug #2840994
+
 
 2009-10-22  Arnulf P. Wiedemann <wiede@users.sourceforge.net>
 	* itclLinkage.c:    changed CONST in declarations to const
