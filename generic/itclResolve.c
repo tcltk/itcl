@@ -20,7 +20,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itclResolve.c,v 1.1.2.31 2009/10/22 14:33:59 wiede Exp $
+ *     RCS:  $Id: itclResolve.c,v 1.1.2.32 2009/10/23 16:32:31 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -37,6 +37,15 @@ typedef struct ItclResolvedVarInfo {
     Tcl_ResolvedVarInfo vinfo;        /* This must be the first element. */
     ItclVarLookup *vlookup;           /* Pointer to lookup info. */
 } ItclResolvedVarInfo;
+
+static char * special_resolve_vars[] = {
+   "this",
+   "self",
+   "itk_option",
+   "itk_interior",
+   "itk_component",
+   NULL
+};
 
 static Tcl_Var ItclClassRuntimeVarResolver _ANSI_ARGS_((
     Tcl_Interp *interp, Tcl_ResolvedVarInfo *vinfoPtr));
@@ -253,6 +262,8 @@ Itcl_ClassVarResolver(
     ItclCallContext *callContextPtr;
     int idx;
     int start_idx;
+    int found;
+    char **cp;
 
     Tcl_Namespace *upNsPtr;
     upNsPtr = Itcl_GetUplevelNamespace(interp, 1);
@@ -317,14 +328,23 @@ Itcl_ClassVarResolver(
 
     idx = Itcl_GetStackSize(&infoPtr->contextStack) - 1;
     start_idx = idx;
-
     while (idx >= 0) {
-	/* self can only be looked up in the current object!! */
-	if (strcmp(name, "self") == 0) {
-	    if (idx != start_idx) {
-	        break;
+	/* self and other special_resolve_vars can only be looked up in
+	 * the current object!! */
+	cp = &special_resolve_vars[0];
+	found = 0;
+	while (*cp != NULL) {
+	    if (strcmp(name, *cp) == 0) {
+		found = 1;
+		break;
 	    }
+	    cp++;
 	}
+	if (found) {
+            if (idx != start_idx) {
+                break;
+	    }
+        }
         callContextPtr = Itcl_GetStackValue(&infoPtr->contextStack, idx);
 	idx--;
         /* we first look in the current object, then we look if there is
