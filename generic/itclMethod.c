@@ -25,7 +25,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclMethod.c,v 1.1.2.49 2009/10/22 09:00:34 wiede Exp $
+ *     RCS:  $Id: itclMethod.c,v 1.1.2.50 2009/10/24 15:48:03 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -1139,16 +1139,25 @@ CallItclObjectCmd(
     Tcl_Interp *interp,
     int result)
 {
+    Tcl_Object oPtr;
     ItclMemberFunc *imPtr = data[0];
-    Tcl_Object oPtr = data[1];
-    Tcl_Obj **objv = data[3];
+    ItclObject *ioPtr = data[1];
     int objc = PTR2INT(data[2]);
+    Tcl_Obj **objv = data[3];
     
+    if (imPtr->flags & (ITCL_CONSTRUCTOR|ITCL_DESTRUCTOR)) {
+        oPtr = ioPtr->oPtr;
+    } else {
+        oPtr = NULL;
+    }
     if (oPtr != NULL) {
         result =  ItclObjectCmd(imPtr, interp, oPtr, imPtr->iclsPtr->clsPtr,
                 objc, objv);
     } else {
         result = ItclObjectCmd(imPtr, interp, NULL, NULL, objc, objv);
+    }
+    if (result != TCL_OK) {
+        ioPtr->hadConstructorError = 1;
     }
     return result;
 }
@@ -1179,6 +1188,7 @@ CallConstructBase(
     return Itcl_ConstructBase(interp, contextIoPtr, imPtr->iclsPtr,
 	        objc, objv);
 }
+
 int
 Itcl_EvalMemberCode(
     Tcl_Interp *interp,       /* current interpreter */
@@ -1187,7 +1197,6 @@ Itcl_EvalMemberCode(
     int objc,                 /* number of arguments */
     Tcl_Obj *const objv[])    /* argument objects */
 {
-    Tcl_Object oPtr;
     ItclMemberCode *mcode;
     void *callbackPtr;
     int result = TCL_OK;
@@ -1266,12 +1275,7 @@ Itcl_EvalMemberCode(
     } else {
         if ((mcode->flags & ITCL_IMPLEMENT_TCL) != 0) {
             callbackPtr = Itcl_GetCurrentCallbackPtr(interp);
-	    if (imPtr->flags & (ITCL_CONSTRUCTOR|ITCL_DESTRUCTOR)) {
-	        oPtr = contextIoPtr->oPtr;
-	    } else {
-		oPtr = NULL;
-            }
-            Itcl_NRAddCallback(interp, CallItclObjectCmd, imPtr, oPtr,
+            Itcl_NRAddCallback(interp, CallItclObjectCmd, imPtr, contextIoPtr,
 	            INT2PTR(objc), (void *)objv);
             result = Itcl_NRRunCallbacks(interp, callbackPtr);
          }
@@ -1957,7 +1961,7 @@ Itcl_InvokeMethodIfExists(
         Tcl_DecrRefCount(cmdlinePtr);
     } else {
         if (contextClassPtr->flags &
-	        (ITCL_TYPE|ITCL_WIDGET|ITCL_WIDGETADAPTOR)) {
+	        (ITCL_ECLASS|ITCL_TYPE|ITCL_WIDGET|ITCL_WIDGETADAPTOR)) {
 	    if (strcmp(name, "constructor") == 0) {
                 if (objc > 0) {
                     if (contextClassPtr->numOptions == 0) {

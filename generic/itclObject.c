@@ -24,7 +24,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann Copyright (c) 2007
  *
- *     RCS:  $Id: itclObject.c,v 1.1.2.80 2009/10/24 14:31:20 wiede Exp $
+ *     RCS:  $Id: itclObject.c,v 1.1.2.81 2009/10/24 15:48:03 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -424,8 +424,13 @@ ItclCreateObject(
      *  invoked implicitly without arguments.
      */
     ItclShowArgs(1, "OBJECTCONSTRUCTOR", objc, objv);
+    ioPtr->hadConstructorError = 0;
     result = Itcl_InvokeMethodIfExists(interp, "constructor",
         iclsPtr, ioPtr, objc, objv);
+    if (ioPtr->hadConstructorError) {
+        result = TCL_ERROR;
+        ioPtr->hadConstructorError = 0;
+    }
     if (result != TCL_OK) {
         int constructorStackSize;
 	/* clean up the constructor stack */

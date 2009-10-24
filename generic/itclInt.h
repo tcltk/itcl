@@ -9,7 +9,7 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itclInt.h,v 1.17.2.65 2009/10/18 16:28:33 wiede Exp $
+ * RCS: @(#) $Id: itclInt.h,v 1.17.2.66 2009/10/24 15:48:03 wiede Exp $
  */
 
 #include <unistd.h>
@@ -372,6 +372,7 @@ typedef struct ItclObject {
                                    * to avoid callin destructor twice */
     int noComponentTrace;         /* don't call component traces if
                                    * setting components in DelegationInstall */
+    int hadConstructorError;      /* needed for multiple calls of CallItclObjectCmd */
 } ItclObject;
 
 #define ITCL_IGNORE_ERRS  0x002  /* useful for construction/destruction */
