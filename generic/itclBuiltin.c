@@ -24,7 +24,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclBuiltin.c,v 1.1.2.72 2009/10/22 09:00:34 wiede Exp $
+ *     RCS:  $Id: itclBuiltin.c,v 1.1.2.73 2009/10/24 20:58:18 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -1239,6 +1239,14 @@ PrepareCreateObject(
     Itcl_NRAddCallback(interp, CallCreateObject, iclsPtr,
             INT2PTR(objc+3-offset), (ClientData)newObjv, NULL);
     result = Itcl_NRRunCallbacks(interp, callbackPtr);
+    if (result != TCL_OK) {
+        if (iclsPtr->infoPtr->currIoPtr != NULL) {
+            /* we are in a constructor call */
+            if (iclsPtr->infoPtr->currIoPtr->hadConstructorError == 0) {
+	        iclsPtr->infoPtr->currIoPtr->hadConstructorError = 1;
+	    }
+        }
+    }
     ckfree((char *)newObjv);
     return result;
 }
@@ -1341,12 +1349,16 @@ ItclBiClassUnknownCmd(
     }
     /* from a class object only typemethods can be called directly
      * if delegated, so check for that, otherwise create an object
+     * for ITCL_ECLASS we allow calling too
      */
     hPtr = NULL;
     isTypeMethod = 0;
     FOREACH_HASH_VALUE(idmPtr, &iclsPtr->delegatedFunctions) {
         if (strcmp(Tcl_GetString(idmPtr->namePtr), funcName) == 0) {
             if (idmPtr->flags & ITCL_TYPE_METHOD) {
+	       isTypeMethod = 1;
+	    }
+	    if (iclsPtr->flags & ITCL_ECLASS) {
 	       isTypeMethod = 1;
 	    }
 	    break;

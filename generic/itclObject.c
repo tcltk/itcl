@@ -24,7 +24,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann Copyright (c) 2007
  *
- *     RCS:  $Id: itclObject.c,v 1.1.2.82 2009/10/24 16:35:07 wiede Exp $
+ *     RCS:  $Id: itclObject.c,v 1.1.2.83 2009/10/24 20:58:18 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -67,7 +67,9 @@ static int ItclInitObjectCommands(Tcl_Interp *interp, ItclObject *ioPtr,
         ItclClass *iclsPtr, const char *name);
 static int ItclInitExtendedClassOptions(Tcl_Interp *interp, ItclObject *ioPtr);
 static int ItclInitObjectOptions(Tcl_Interp *interp, ItclObject *ioPtr,
-         ItclClass *iclsPtr, const char *name);
+        ItclClass *iclsPtr, const char *name);
+static const char * GetConstructorVar(Tcl_Interp *interp, ItclClass *iclsPtr,
+        const char *varName);
 
 
 /*
@@ -429,8 +431,8 @@ ItclCreateObject(
         iclsPtr, ioPtr, objc, objv);
     if (ioPtr->hadConstructorError) {
         result = TCL_ERROR;
-        ioPtr->hadConstructorError = 0;
     }
+    ioPtr->hadConstructorError = -1;
     if (result != TCL_OK) {
         int constructorStackSize;
 	/* clean up the constructor stack */
@@ -3160,10 +3162,17 @@ ExpandDelegateAs(
 				const char *cp2;
 
                                 my_obj = Tcl_NewStringObj(cp, ep-cp);
-                                cp2 =ItclGetInstanceVar(interp,
-                                    Tcl_GetString(my_obj), NULL, ioPtr,
-				    iclsPtr);
-                                Tcl_AppendToObj(strPtr, cp2, -1);
+				if (iclsPtr->infoPtr->currIoPtr != NULL) {
+				  cp2 = GetConstructorVar(interp, iclsPtr,
+				      Tcl_GetString(my_obj));
+				} else {
+                                  cp2 = ItclGetInstanceVar(interp,
+                                      Tcl_GetString(my_obj), NULL, ioPtr,
+				      iclsPtr);
+				}
+				if (cp2 != NULL) {
+                                    Tcl_AppendToObj(strPtr, cp2, -1);
+				}
 			        ep -= 2; /* to fit for code after default !! */
 			    }
 		            break;
@@ -3328,6 +3337,61 @@ DelegatedOptionsInstall(
 
 /*
  * ------------------------------------------------------------------------
+ *  GetConstructorVar()
+ *  get an object variable when in executing the constructor
+ * ------------------------------------------------------------------------
+ */
+
+static const char *
+GetConstructorVar(
+    Tcl_Interp *interp,
+    ItclClass *iclsPtr,
+    const char *varName)
+
+{
+    Tcl_HashEntry *hPtr;
+    Tcl_Obj *objPtr;
+    Tcl_DString buffer;
+    ItclVarLookup *vlookup;
+    ItclVariable *ivPtr;
+    const char *val;
+
+    hPtr = Tcl_FindHashEntry(&iclsPtr->resolveVars, (char *)varName);
+    if (hPtr == NULL) {
+	/* no such variable */
+        return NULL;
+    }
+    vlookup = (ItclVarLookup *)Tcl_GetHashValue(hPtr);
+    if (vlookup == NULL) {
+        return NULL;
+    }
+    ivPtr = vlookup->ivPtr;
+    if (ivPtr == NULL) {
+        return NULL;
+    }
+    if (ivPtr->flags & ITCL_COMMON) {
+        /* look for a common variable */
+        objPtr = Tcl_NewStringObj(ITCL_VARIABLES_NAMESPACE, -1);
+        Tcl_AppendToObj(objPtr, iclsPtr->nsPtr->fullName, -1);
+        Tcl_AppendToObj(objPtr, "::", -1);
+        Tcl_AppendToObj(objPtr, varName, -1);
+        val = Tcl_GetVar2(interp, Tcl_GetString(objPtr), NULL, 0);
+        Tcl_DecrRefCount(objPtr);
+    } else {
+        /* look for a normal variable */
+        Tcl_DStringInit(&buffer);
+        Tcl_DStringAppend(&buffer,
+                Tcl_GetString(iclsPtr->infoPtr->currIoPtr->varNsNamePtr), -1);
+        Tcl_DStringAppend(&buffer, ivPtr->iclsPtr->nsPtr->fullName, -1);
+        Tcl_DStringAppend(&buffer, "::", -1);
+        Tcl_DStringAppend(&buffer, varName, -1);
+        val = Tcl_GetVar2(interp, Tcl_DStringValue(&buffer), NULL, 0);
+    }
+    return val;
+}
+
+/*
+ * ------------------------------------------------------------------------
  *  DelegationInstall()
  * ------------------------------------------------------------------------
  */
@@ -3344,6 +3408,7 @@ DelegationInstall(
     Tcl_DString buffer;
     ItclDelegatedFunction *idmPtr;
     ItclMemberFunc *imPtr;
+    ItclVariable *ivPtr;
     FOREACH_HASH_DECLS;
     char *methodName;
     const char *val;
@@ -3366,10 +3431,10 @@ DelegationInstall(
 	    /* we cannot use Itcl_GetInstanceVar here as the object is not
 	     * yet completely built. So use the varNsNamePtr
 	     */
-            if (idmPtr->icPtr->ivPtr->flags & ITCL_COMMON) {
+	    ivPtr = idmPtr->icPtr->ivPtr;
+            if (ivPtr->flags & ITCL_COMMON) {
 	        objPtr = Tcl_NewStringObj(ITCL_VARIABLES_NAMESPACE, -1);
-	        Tcl_AppendToObj(objPtr,
-		        idmPtr->icPtr->ivPtr->iclsPtr->nsPtr->fullName, -1);
+	        Tcl_AppendToObj(objPtr, ivPtr->iclsPtr->nsPtr->fullName, -1);
 	        Tcl_AppendToObj(objPtr, "::", -1);
 	        Tcl_AppendToObj(objPtr,
 		        Tcl_GetString(idmPtr->icPtr->namePtr), -1);
@@ -3380,7 +3445,7 @@ DelegationInstall(
                 Tcl_DStringAppend(&buffer,
                         Tcl_GetString(ioPtr->varNsNamePtr), -1);
                 Tcl_DStringAppend(&buffer,
-                        Tcl_GetString(idmPtr->icPtr->ivPtr->fullNamePtr), -1);
+                        Tcl_GetString(ivPtr->fullNamePtr), -1);
                 val = Tcl_GetVar2(interp,
                             Tcl_DStringValue(&buffer), NULL, 0);
 	    }

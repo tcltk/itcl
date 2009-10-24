@@ -25,7 +25,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclMethod.c,v 1.1.2.50 2009/10/24 15:48:03 wiede Exp $
+ *     RCS:  $Id: itclMethod.c,v 1.1.2.51 2009/10/24 20:58:18 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -1145,6 +1145,7 @@ CallItclObjectCmd(
     int objc = PTR2INT(data[2]);
     Tcl_Obj **objv = data[3];
     
+    ItclShowArgs(1, "CallObjectCmd", objc, objv);
     if (imPtr->flags & (ITCL_CONSTRUCTOR|ITCL_DESTRUCTOR)) {
         oPtr = ioPtr->oPtr;
     } else {
@@ -1157,7 +1158,11 @@ CallItclObjectCmd(
         result = ItclObjectCmd(imPtr, interp, NULL, NULL, objc, objv);
     }
     if (result != TCL_OK) {
-        ioPtr->hadConstructorError = 1;
+	if (ioPtr->hadConstructorError == 0) {
+	    /* we are in a constructor call and did not yet have an error */
+	    /* -1 means we are not in a constructor */
+            ioPtr->hadConstructorError = 1;
+	}
     }
     return result;
 }
@@ -1185,8 +1190,9 @@ CallConstructBase(
     int objc = PTR2INT(data[2]);
     Tcl_Obj *const* objv = data[3];
 
-    return Itcl_ConstructBase(interp, contextIoPtr, imPtr->iclsPtr,
+    result = Itcl_ConstructBase(interp, contextIoPtr, imPtr->iclsPtr,
 	        objc, objv);
+    return result;
 }
 
 int
