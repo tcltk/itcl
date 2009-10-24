@@ -1,4 +1,15 @@
-RCS: @(#) $Id: ChangeLog,v 1.1.2.26 2009/10/23 21:20:35 wiede Exp $
+RCS: @(#) $Id: ChangeLog,v 1.1.2.27 2009/10/24 15:48:58 wiede Exp $
+
+2009-10-24 Arnulf P. Wiedemann <wiede@users.sf.net>
+	* itclMethod.c:          if during call of constructor, when building
+	                         an object there were multiple recursive calls
+				 on CallItclObjectCmd and errors have not been
+				 propagated. Now hadConstructorError
+				 field in ItclObject struct is used for that
+				 purpose.
+	* itclInt.h:
+	* itclObject.c:
+
 
 2009-10-23 Arnulf P. Wiedemann <wiede@users.sf.net>
         * generic/itcl.h:        bumped version to 4.0b4
