@@ -24,7 +24,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann Copyright (c) 2007
  *
- *     RCS:  $Id: itclObject.c,v 1.1.2.81 2009/10/24 15:48:03 wiede Exp $
+ *     RCS:  $Id: itclObject.c,v 1.1.2.82 2009/10/24 16:35:07 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -3143,6 +3143,33 @@ ExpandDelegateAs(
 			    }
 		        }
 		        break;
+		    case ':':
+		        /* substitute with contents of variable after ':' */
+			if (iclsPtr->flags & ITCL_ECLASS) {
+			    if (ep-cp-1 > 0) {
+		                Tcl_ListObjAppendElement(interp, listPtr,
+			                Tcl_NewStringObj(cp, ep-cp-1));
+			    }
+			    ep++;
+			    cp = ep + 1;
+			    while (*ep && (*ep != ' ')) {
+			        ep++;
+			    }
+			    if (ep-cp > 0) {
+				Tcl_Obj *my_obj;
+				const char *cp2;
+
+                                my_obj = Tcl_NewStringObj(cp, ep-cp);
+                                cp2 =ItclGetInstanceVar(interp,
+                                    Tcl_GetString(my_obj), NULL, ioPtr,
+				    iclsPtr);
+                                Tcl_AppendToObj(strPtr, cp2, -1);
+			        ep -= 2; /* to fit for code after default !! */
+			    }
+		            break;
+		        } else {
+			    /* fall through */
+			}
 		    default:
 		      {
 			char buf[2];
