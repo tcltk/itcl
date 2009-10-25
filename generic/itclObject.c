@@ -24,7 +24,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann Copyright (c) 2007
  *
- *     RCS:  $Id: itclObject.c,v 1.1.2.83 2009/10/24 20:58:18 wiede Exp $
+ *     RCS:  $Id: itclObject.c,v 1.1.2.84 2009/10/25 21:02:38 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -469,6 +469,15 @@ ItclCreateObject(
     }
     Tcl_DecrRefCount(objPtr);
 
+    if (iclsPtr->flags & ITCL_ECLASS) {
+        ItclInitExtendedClassOptions(interp, ioPtr);
+        if (ItclInitObjectOptions(interp, ioPtr, iclsPtr, name) != TCL_OK) {
+                Tcl_AppendResult(interp, "error in ItclInitObjectOptions",
+	        NULL);
+            result = TCL_ERROR;
+            goto errorReturn;
+        }
+    }
     /*
      *  If construction failed, then delete the object access
      *  command.  This will destruct the object and delete the
