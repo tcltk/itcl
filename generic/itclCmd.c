@@ -23,7 +23,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclCmd.c,v 1.1.2.52 2009/10/22 15:09:50 wiede Exp $
+ *     RCS:  $Id: itclCmd.c,v 1.1.2.53 2009/10/25 12:55:02 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -1427,7 +1427,7 @@ Itcl_NWidgetCmd(
  *
  *  Used to build an option to an [incr Tcl] nwidget/eclass
  *
- *  Syntax: ::itcl::addoption <nwidget class> <optionName> <defaultValue>
+ *  Syntax: ::itcl::addoption <nwidget class> <protection> <optionName> <defaultValue>
  *
  *  Returns TCL_OK/TCL_ERROR to indicate success/failure.
  * ------------------------------------------------------------------------
@@ -1479,7 +1479,7 @@ Itcl_AddOptionCmd(
         return TCL_ERROR;
     }
     Itcl_PushStack((ClientData)iclsPtr, &infoPtr->clsStack);
-    result = Itcl_ClassOptionCmd(clientData, interp, objc-1, objv+1);
+    result = Itcl_ClassOptionCmd(clientData, interp, objc-2, objv+2);
     Itcl_PopStack(&infoPtr->clsStack);
     if (result != TCL_OK) {
         return result;
