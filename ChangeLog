@@ -1,4 +1,17 @@
-RCS: @(#) $Id: ChangeLog,v 1.1.2.29 2009/10/24 21:00:06 wiede Exp $
+RCS: @(#) $Id: ChangeLog,v 1.1.2.30 2010/03/06 12:56:21 wiede Exp $
+
+2010-03-06  Arnulf P. Wiedemann <wiede@users.sourceforge.net>
+	* itcl.decls:    	changed CONST in declarations to const
+	* itclDecls.h:
+	* itclIntDecls.h
+	* itcl2TclOO.c:		adaption to typedef change in TclOO for TclOO_PreCallProc and
+				TclOO_PostCallProc
+	* itclNeededFromTclOO.h:
+	* itclBuiltin.c:	allow installcomponent for ::itcl::type too typeclass.test install-1.7
+	* itclClass.c:		use "new" style params in Itcl_FindClass
+
+2009-10-25 Arnulf P. Wiedemann <wiede@users.sf.net>
+	* itclCmd.c:            fix for Itcl_AddOptionCmd
 
 2009-10-24 Arnulf P. Wiedemann <wiede@users.sf.net>
 	* itclMethod.c:          if during call of constructor, when building
