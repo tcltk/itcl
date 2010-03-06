@@ -1,5 +1,5 @@
 /*
- * $Id: itclDecls.h,v 1.9.2.13 2009/10/23 16:26:22 wiede Exp $
+ * $Id: itclDecls.h,v 1.9.2.14 2010/03/06 12:41:47 wiede Exp $
  *
  * This file is (mostly) automatically generated from itcl.decls.
  */
@@ -35,16 +35,16 @@ ITCLAPI int		Itcl_Init (Tcl_Interp * interp);
 ITCLAPI int		Itcl_SafeInit (Tcl_Interp * interp);
 /* 2 */
 ITCLAPI int		Itcl_RegisterC (Tcl_Interp * interp, 
-				CONST char * name, Tcl_CmdProc * proc, 
+				const char * name, Tcl_CmdProc * proc, 
 				ClientData clientData, 
 				Tcl_CmdDeleteProc * deleteProc);
 /* 3 */
 ITCLAPI int		Itcl_RegisterObjC (Tcl_Interp * interp, 
-				CONST char * name, Tcl_ObjCmdProc * proc, 
+				const char * name, Tcl_ObjCmdProc * proc, 
 				ClientData clientData, 
 				Tcl_CmdDeleteProc * deleteProc);
 /* 4 */
-ITCLAPI int		Itcl_FindC (Tcl_Interp * interp, CONST char * name, 
+ITCLAPI int		Itcl_FindC (Tcl_Interp * interp, const char * name, 
 				Tcl_CmdProc ** argProcPtr, 
 				Tcl_ObjCmdProc ** objProcPtr, 
 				ClientData * cDataPtr);
@@ -111,9 +111,9 @@ typedef struct ItclStubs {
 
     int (*itcl_Init) (Tcl_Interp * interp); /* 0 */
     int (*itcl_SafeInit) (Tcl_Interp * interp); /* 1 */
-    int (*itcl_RegisterC) (Tcl_Interp * interp, CONST char * name, Tcl_CmdProc * proc, ClientData clientData, Tcl_CmdDeleteProc * deleteProc); /* 2 */
-    int (*itcl_RegisterObjC) (Tcl_Interp * interp, CONST char * name, Tcl_ObjCmdProc * proc, ClientData clientData, Tcl_CmdDeleteProc * deleteProc); /* 3 */
-    int (*itcl_FindC) (Tcl_Interp * interp, CONST char * name, Tcl_CmdProc ** argProcPtr, Tcl_ObjCmdProc ** objProcPtr, ClientData * cDataPtr); /* 4 */
+    int (*itcl_RegisterC) (Tcl_Interp * interp, const char * name, Tcl_CmdProc * proc, ClientData clientData, Tcl_CmdDeleteProc * deleteProc); /* 2 */
+    int (*itcl_RegisterObjC) (Tcl_Interp * interp, const char * name, Tcl_ObjCmdProc * proc, ClientData clientData, Tcl_CmdDeleteProc * deleteProc); /* 3 */
+    int (*itcl_FindC) (Tcl_Interp * interp, const char * name, Tcl_CmdProc ** argProcPtr, Tcl_ObjCmdProc ** objProcPtr, ClientData * cDataPtr); /* 4 */
     void (*itcl_InitStack) (Itcl_Stack * stack); /* 5 */
     void (*itcl_DeleteStack) (Itcl_Stack * stack); /* 6 */
     void (*itcl_PushStack) (ClientData cdata, Itcl_Stack * stack); /* 7 */
