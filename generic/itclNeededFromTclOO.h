@@ -1,7 +1,7 @@
 #ifndef _TCLOOINT_H
-typedef int (*TclOO_PreCallProc)(ClientData clientData, Tcl_Interp *interp,
+typedef int (TclOO_PreCallProc)(ClientData clientData, Tcl_Interp *interp,
         Tcl_ObjectContext contextPtr, Tcl_CallFrame *framePtr, int *isFinished);
-typedef int (*TclOO_PostCallProc)(ClientData clientData, Tcl_Interp *interp,
+typedef int (TclOO_PostCallProc)(ClientData clientData, Tcl_Interp *interp,
         Tcl_ObjectContext contextPtr, Tcl_Namespace *nsPtr, int result);
 #endif
 
