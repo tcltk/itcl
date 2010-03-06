@@ -24,7 +24,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclBuiltin.c,v 1.1.2.73 2009/10/24 20:58:18 wiede Exp $
+ *     RCS:  $Id: itclBuiltin.c,v 1.1.2.74 2010/03/06 12:50:40 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -2924,7 +2924,7 @@ Itcl_BiInstallComponentCmd(
 		NULL);
         return TCL_ERROR;
     }
-    if (!contextIclsPtr->flags & (ITCL_WIDGET|ITCL_WIDGETADAPTOR)) {
+    if (!(contextIclsPtr->flags & (ITCL_TYPE|ITCL_WIDGET|ITCL_WIDGETADAPTOR))) {
         Tcl_AppendResult(interp, "no such method \"installcomponent\"", NULL);
 	return TCL_ERROR;
     }
