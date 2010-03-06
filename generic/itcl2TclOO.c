@@ -8,7 +8,7 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itcl2TclOO.c,v 1.1.2.13 2009/01/07 19:38:50 wiede Exp $
+ * RCS: @(#) $Id: itcl2TclOO.c,v 1.1.2.14 2010/03/06 12:46:12 wiede Exp $
  */
 
 #include <tcl.h>
@@ -62,7 +62,7 @@ CallFinalizePMCall(
     int result)
 {
     Tcl_Namespace *nsPtr = data[0];
-    TclOO_PostCallProc postCallProc = data[1];
+    TclOO_PostCallProc *postCallProc = data[1];
     ClientData clientData = data[2];
 
     /*
@@ -70,7 +70,7 @@ CallFinalizePMCall(
      * this point the call frame itself is invalid; it's already been popped.
      */
 
-    if (postCallProc) {
+    if (postCallProc != NULL) {
         result = postCallProc(clientData, interp, NULL, nsPtr, result);
     }
     return result;
