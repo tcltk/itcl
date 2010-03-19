@@ -25,7 +25,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclMethod.c,v 1.1.2.51 2009/10/24 20:58:18 wiede Exp $
+ *     RCS:  $Id: itclMethod.c,v 1.1.2.52 2010/03/19 08:24:57 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -1158,7 +1158,7 @@ CallItclObjectCmd(
         result = ItclObjectCmd(imPtr, interp, NULL, NULL, objc, objv);
     }
     if (result != TCL_OK) {
-	if (ioPtr->hadConstructorError == 0) {
+	if (ioPtr != NULL && ioPtr->hadConstructorError == 0) {
 	    /* we are in a constructor call and did not yet have an error */
 	    /* -1 means we are not in a constructor */
             ioPtr->hadConstructorError = 1;

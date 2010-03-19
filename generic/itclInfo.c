@@ -24,7 +24,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclInfo.c,v 1.1.2.47 2009/10/22 09:12:04 wiede Exp $
+ *     RCS:  $Id: itclInfo.c,v 1.1.2.48 2010/03/19 08:24:57 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -1616,10 +1616,6 @@ Itcl_BiInfoUnknownCmd(
         return TCL_ERROR;
     }
     listObj = Tcl_NewListObj(-1, NULL);
-    objPtr = Tcl_NewStringObj("uplevel", -1);
-    Tcl_ListObjAppendElement(interp, listObj, objPtr);
-    objPtr = Tcl_NewStringObj("1", -1);
-    Tcl_ListObjAppendElement(interp, listObj, objPtr);
     objPtr = Tcl_NewStringObj("::info", -1);
     Tcl_ListObjAppendElement(interp, listObj, objPtr);
     objPtr = Tcl_NewStringObj(Tcl_GetString(objv[2]), -1);
