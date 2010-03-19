@@ -1,5 +1,12 @@
-RCS: @(#) $Id: ChangeLog,v 1.1.2.30 2010/03/06 12:56:21 wiede Exp $
+RCS: @(#) $Id: ChangeLog,v 1.1.2.31 2010/03/19 08:27:06 wiede Exp $
 
+2010-03-19  Arnulf P. Wiedemann <wiede@users.sourceforge.net>
+	* configure.in:    	add missing include files for install,thanks to Reinhard Max for
+	                        the patch
+	* itclInfo.c:		removed "uplevel 1" in Itcl_BiInfoUnknownCmd.c, which made problems
+	                        with "info complete", reported by Reinhard Max
+	* itclMethod.c:		fixed bug, which caused core dump in CallItclObjectCmd, thanks to
+	                        Reinhard Max for the patch
 2010-03-06  Arnulf P. Wiedemann <wiede@users.sourceforge.net>
 	* itcl.decls:    	changed CONST in declarations to const
 	* itclDecls.h:
