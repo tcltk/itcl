@@ -4,14 +4,14 @@
 '\" See the file "license.terms" for information on usage and redistribution
 '\" of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 '\"
-'\" RCS: $Id: scope.n,v 1.7 2004/09/25 22:50:43 davygrvy Exp $
+'\" RCS: $Id: scope.n,v 1.7.2.1 2010/03/19 11:51:41 wiede Exp $
 '\"
 .so man.macros
 .TH scope n "" itcl "[incr\ Tcl]"
 .BS
 '\" Note:  do not modify the .SH NAME line immediately below!
 .SH NAME
-scope \- capture the namespace context for a variable
+itcl::scope \- capture the namespace context for a variable
 .SH SYNOPSIS
 \fBitcl::scope \fIname\fR
 .BE

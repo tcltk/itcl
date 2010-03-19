@@ -4,35 +4,30 @@
 '\" See the file "license.terms" for information on usage and redistribution
 '\" of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 '\" 
-'\" RCS: $Id: ensemble.n,v 1.4 2004/09/25 22:50:43 davygrvy Exp $
+'\" RCS: $Id: ensemble.n,v 1.4.2.1 2010/03/19 11:51:41 wiede Exp $
 '\" 
 .so man.macros
 .TH ensemble n 3.0 itcl "[incr\ Tcl]"
 .BS
 '\" Note:  do not modify the .SH NAME line immediately below!
 .SH NAME
-ensemble \- create or modify a composite command
+itcl::ensemble \- create or modify a composite command
 .SH SYNOPSIS
+.nf
 \fBitcl::ensemble \fIensName\fR ?\fIcommand arg arg...\fR?
-.br
+.fi
 or
-.br
+.nf
 \fBensemble \fIensName\fR {
-.br
     \fBpart \fIpartName args body\fR
-.br
     \fI...\fR
-.br
     \fBensemble \fIpartName\fR {
-.br
         \fBpart \fIsubPartName args body\fR
-.br
         \fBpart \fIsubPartName args body\fR
-.br
     \fI...\fR
     }
-.br
 }
+.fi
 .BE
 
 .SH DESCRIPTION
@@ -75,6 +70,7 @@ The \fBensemble\fR command can be nested inside another \fBensemble\fR
 command to define a sub-ensemble.
 
 .SH "WHAT IS AN ENSEMBLE?"
+.PP
 The usual "info" command is a composite command--the command name
 \fBinfo\fR must be followed by a sub-command like \fBbody\fR or \fBglobals\fR.
 We will refer to a command like \fBinfo\fR as an \fIensemble\fR, and to
@@ -102,6 +98,7 @@ you get an automatically generated error message that summarizes
 the usage information.  For example, when the \fBinfo\fR command
 is invoked without any arguments, it produces the following error
 message:
+.PP
 .CS
 wrong # args: should be one of...
   info args procname
@@ -123,8 +120,9 @@ wrong # args: should be one of...
   info script
   info tclversion
   info vars ?pattern?
-  info which ?-command? ?-variable? ?-namespace? name\fR
+  info which ?-command? ?-variable? ?-namespace? name
 .CE
+.PP
 You can also customize the way an ensemble responds to errors.
 When an ensemble encounters an unspecified or ambiguous part
 name, it looks for a part called \fB@error\fR.  If it exists,
@@ -134,28 +132,36 @@ part name.  It can find another way of resolving the command,
 or generate its own error message.
 
 .SH EXAMPLE
+.PP
 We could use an ensemble to clean up the syntax of the various
 "wait" commands in Tcl/Tk.  Instead of using a series of
 strange commands like this:
+.PP
 .CS
 vwait x
 tkwait visibility .top
 tkwait window .
 .CE
+.PP
 we could use commands with a uniform syntax, like this:
+.PP
 .CS
 wait variable x
 wait visibility .top
 wait window .
 .CE
+.PP
 The Tcl package could define the following ensemble:
+.PP
 .CS
 itcl::ensemble wait part variable {name} {
     uplevel vwait $name
 }
 .CE
+.PP
 The Tk package could add some options to this ensemble, with a
 command like this:
+.PP
 .CS
 itcl::ensemble wait {
     part visibility {name} {
@@ -166,6 +172,7 @@ itcl::ensemble wait {
     }
 }
 .CE
+.PP
 Other extensions could add their own parts to the \fBwait\fR command
 too.
 

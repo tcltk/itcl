@@ -4,7 +4,7 @@
 '\" See the file "license.terms" for information on usage and redistribution
 '\" of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 '\"
-'\" RCS: $Id: Object.3,v 1.1 2007/09/06 21:45:52 davygrvy Exp $
+'\" RCS: $Id: Object.3,v 1.1.2.1 2010/03/19 11:51:41 wiede Exp $
 '\"
 .so man.macros
 .TH Itcl_CreateObject 3 3.0 itcl "[incr\ Tcl] Library Procedures"
@@ -15,15 +15,16 @@ Itcl_CreateObject, Itcl_DeleteObject, Itcl_FindObject, Itcl_IsObject, Itcl_IsObj
 .SH SYNOPSIS
 .nf
 \fB#include <itclInt.h>\fR
-.sp
+
 void
 \fBItcl_PreserveData\fR(\fIcdata\fR)
-.sp
+
 void
 \fBItcl_ReleaseData\fR(\fIcdata\fR)
-.sp
+
 void
 \fBItcl_EventuallyFree\fR(\fIcdata, fproc\fR)
+.fi
 .SH ARGUMENTS
 .AP Tcl_FreeProc *fproc in
 Address of function to call when the block is to be freed.

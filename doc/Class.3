@@ -4,7 +4,7 @@
 '\" See the file "license.terms" for information on usage and redistribution
 '\" of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 '\"
-'\" RCS: $Id: Class.3,v 1.1 2007/09/06 21:48:31 davygrvy Exp $
+'\" RCS: $Id: Class.3,v 1.1.2.1 2010/03/19 11:51:41 wiede Exp $
 '\"
 .so man.macros
 .TH Itcl_CreateClass 3 3.0 itcl "[incr\ Tcl] Library Procedures"
@@ -15,21 +15,22 @@ Itcl_CreateClass, Itcl_DeleteClass, Itcl_FindClass, Itcl_IsClass, Itcl_IsClassNa
 .SH SYNOPSIS
 .nf
 \fB#include <itclInt.h>\fR
-.sp
+
 int
 \fBItcl_CreateClass\fR(\fIinterp, path, info, rPtr\fR)
-.sp
+
 int
 \fBItcl_DeleteClass\fR(\fIinterp, cdefnPtr\fR)
-.sp
+
 ItclClass *
 \fBItcl_FindClass\fR(\fIinterp, path, autoload\fR)
-.sp
+
 int
 \fBItcl_IsClass\fR(\fIcmd\fR)
-.sp
+
 int
 \fBItcl_IsClassNamespace\fR(\fInamesp\fR)
+.fi
 .SH ARGUMENTS
 .AP Tcl_Interp *interp in
 Interpreter to modify.
@@ -54,4 +55,3 @@ Namespace to check.
 
 .SH KEYWORDS
 class, find
-

@@ -4,50 +4,45 @@
 '\" See the file "license.terms" for information on usage and redistribution
 '\" of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 '\"
-'\" RCS: $Id: itclcomponent.n,v 1.1.2.1 2008/10/24 16:08:07 wiede Exp $
+'\" RCS: $Id: itclcomponent.n,v 1.1.2.2 2010/03/19 11:51:41 wiede Exp $
 '\"
 .so man.macros
 .TH component n 4.0 itcl "[incr\ Tcl]"
 .BS
 '\" Note:  do not modify the .SH NAME line immediately below!
 .SH NAME
-component \- define components for extendedclass, widget or widgetadaptor
-.sp
+itcl::component \- define components for extendedclass, widget or widgetadaptor
+.PP
 Parts of this description are "borrowed" from Tcl extension [snit], as the functionality is mostly identical.
-.sp
-\fBWARNING!\fR
-.br
+.SH WARNING!
 This is new functionality in [incr Tcl] where the API can still change!!
 .SH SYNOPSIS
+.nf
 \fBpublic component \fIcomp\fR ?\fB-inherit\fR?
-.br
 \fBprotected component \fIcomp\fR ?\fB-inherit\fR?
-.br
 \fBprivate component \fIcomp\fR ?\fB-inherit\fR?
-.br
-.sp
+.fi
 .BE
 
 .SH DESCRIPTION
 .PP
 The \fBcomponent\fR command is used inside an \fB[incr\ Tcl]\fR
 extendedclass/widget/widgetadaptor definition to define components.
-.sp
+.PP
 Explicitly declares a component called comp, and automatically defines
 the component's instance variable.
-.sp
+.PP
 If the \fI-inherit\fR option is specified then all unknown methods
 and options will be delegated to this component. The name -inherit
 implies that instances of this new type inherit, in a sense,
 the methods and options of the component. That is,
 -inherit yes is equivalent to:
-.sp
+.PP
 .CS
 component mycomp
 delegate option * to mycomp
 delegate method * to mycomp
 .CE
-.sp
 
 .SH KEYWORDS
 component, widget, widgetadaptor, extendedclass

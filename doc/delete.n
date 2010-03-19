@@ -4,14 +4,14 @@
 '\" See the file "license.terms" for information on usage and redistribution
 '\" of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 '\"
-'\" RCS: $Id: delete.n,v 1.4 2004/09/25 22:50:43 davygrvy Exp $
+'\" RCS: $Id: delete.n,v 1.4.2.1 2010/03/19 11:51:41 wiede Exp $
 '\"
 .so man.macros
 .TH delete n 3.0 itcl "[incr\ Tcl]"
 .BS
 '\" Note:  do not modify the .SH NAME line immediately below!
 .SH NAME
-delete \- delete things in the interpreter
+itcl::delete \- delete things in the interpreter
 .SH SYNOPSIS
 \fBitcl::delete \fIoption\fR ?\fIarg arg ...\fR?
 .BE
@@ -28,33 +28,42 @@ by the command.  The legal \fIoptions\fR (which may be abbreviated)
 are:
 .TP
 \fBdelete class \fIname\fR ?\fIname...\fR?
+.
 Deletes one or more \fB[incr\ Tcl]\fR classes called \fIname\fR.
 This deletes all objects in the class, and all derived classes
 as well.
-.sp
+.RS
+.PP
 If an error is encountered while destructing an object, it will
 prevent the destruction of the class and any remaining objects.
 To destroy the entire class without regard for errors, use the
 "\fBdelete namespace\fR" command.
+.RE
 .TP
 \fBdelete object \fIname\fR ?\fIname...\fR?
+.
 Deletes one or more \fB[incr\ Tcl]\fR objects called \fIname\fR.
 An object is deleted by invoking all destructors in its class
 hierarchy, in order from most- to least-specific.  If all destructors
 are successful, data associated with the object is deleted and
 the \fIname\fR is removed as a command from the interpreter.
-.sp
+.RS
+.PP
 If the access command for an object resides in another namespace,
 then its qualified name can be used:
+.PP
 .CS
 itcl::delete object foo::bar::x
 .CE
+.PP
 If an error is encountered while destructing an object, the
 \fBdelete\fR command is aborted and the object remains alive.
 To destroy an object without regard for errors, use the
 "\fBrename\fR" command to destroy the object access command.
+.RE
 .TP
 \fBdelete namespace \fIname\fR ?\fIname...\fR?
+.
 Deletes one or more namespaces called \fIname\fR.  This deletes
 all commands and variables in the namespace, and deletes all
 child namespaces as well.  When a namespace is deleted, it is

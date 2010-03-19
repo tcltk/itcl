@@ -4,7 +4,7 @@
 '\" See the file "license.terms" for information on usage and redistribution
 '\" of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 '\"
-'\" RCS: $Id: RegisterC.3,v 1.5 2004/09/27 05:17:11 davygrvy Exp $
+'\" RCS: $Id: RegisterC.3,v 1.5.2.1 2010/03/19 11:51:41 wiede Exp $
 '\"
 .so man.macros
 .TH Itcl_RegisterC 3 3.0 itcl "[incr\ Tcl] Library Procedures"
@@ -15,15 +15,16 @@ Itcl_RegisterC, Itcl_RegisterObjC, Itcl_FindC \- Associate a symbolic name with 
 .SH SYNOPSIS
 .nf
 \fB#include <itcl.h>\fR
-.sp
+
 int
 \fBItcl_RegisterC\fR(\fIinterp, cmdName, argProc, clientData, deleteProc\fR)
-.sp
+
 int
 \fBItcl_RegisterObjC\fR(\fIinterp, cmdName, objProc, clientData, deleteProc\fR)
-.sp
+
 int
 \fBItcl_FindC\fR(\fIinterp, cmdName, argProcPtr, objProcPtr, cDataPtr\fR)
+.fi
 .SH ARGUMENTS
 .AP Tcl_Interp *interp in
 Interpreter in which to create new command.
