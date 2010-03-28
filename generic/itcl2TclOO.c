@@ -8,7 +8,7 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itcl2TclOO.c,v 1.1.2.14 2010/03/06 12:46:12 wiede Exp $
+ * RCS: @(#) $Id: itcl2TclOO.c,v 1.1.2.15 2010/03/28 11:01:46 wiede Exp $
  */
 
 #include <tcl.h>
@@ -70,10 +70,7 @@ CallFinalizePMCall(
      * this point the call frame itself is invalid; it's already been popped.
      */
 
-    if (postCallProc != NULL) {
-        result = postCallProc(clientData, interp, NULL, nsPtr, result);
-    }
-    return result;
+    return postCallProc(clientData, interp, NULL, nsPtr, result);
 }
 
 extern int ItclAfterCallMethod(ClientData clientData, Tcl_Interp *interp,
@@ -148,7 +145,10 @@ Tcl_InvokeClassProcedureMethod(
      * name is passed as an argument.
      */
 
-    Tcl_NRAddCallback(interp, CallFinalizePMCall, nsPtr, pmPtr->postCallProc, pmPtr->clientData, NULL);
+    if (pmPtr->postCallProc) {
+	Tcl_NRAddCallback(interp, CallFinalizePMCall, nsPtr,
+		pmPtr->postCallProc, pmPtr->clientData, NULL);
+    }
     return TclNRInterpProcCore(interp, namePtr, 1, pmPtr->errProc);
 
 done:

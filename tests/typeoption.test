@@ -179,10 +179,10 @@ test option-2.1 {configure returns info, local options only} -body {
     dog create spot
     spot configure -color red
     spot configure -akc 0
-    spot configure
+    lsort [spot configure]
 } -cleanup {
     dog destroy
-} -result {{-color color Color black red} {-akc akc Akc 1 0}}
+} -result {{-akc akc Akc 1 0} {-color color Color black red}}
 
 test option-2.2 {configure -opt returns info, local options only} -body {
     type dog {

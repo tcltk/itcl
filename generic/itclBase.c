@@ -9,7 +9,7 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itclBase.c,v 1.1.2.42 2009/10/22 09:00:34 wiede Exp $
+ * RCS: @(#) $Id: itclBase.c,v 1.1.2.43 2010/03/28 11:01:46 wiede Exp $
  */
 
 #include <stdlib.h>
@@ -32,105 +32,106 @@ extern struct ItclStubAPI itclStubAPI;
 
 static int Initialize _ANSI_ARGS_((Tcl_Interp *interp));
 
-static char initScript[] = "\n\
-namespace eval ::itcl {\n\
-    proc _find_init {} {\n\
-	global env tcl_library\n\
-	variable library\n\
-	variable patchLevel\n\
-	rename _find_init {}\n\
-	if {[info exists library]} {\n\
-	    lappend dirs $library\n\
-	} else {\n\
-	    set dirs {}\n\
-	    if {[info exists env(ITCL_LIBRARY)]} {\n\
-		lappend dirs $env(ITCL_LIBRARY)\n\
-	    }\n\
-	    lappend dirs [file join [file dirname $tcl_library] itcl$patchLevel]\n\
-	    set bindir [file dirname [info nameofexecutable]]\n\
-	    lappend dirs [file join . library]\n\
-	    lappend dirs [file join $bindir .. lib itcl$patchLevel]\n\
-	    lappend dirs [file join $bindir .. library]\n\
-	    lappend dirs [file join $bindir .. .. library]\n\
-	    lappend dirs [file join $bindir .. .. itcl library]\n\
-	    lappend dirs [file join $bindir .. .. .. itcl library]\n\
-	    lappend dirs [file join $bindir .. .. itcl-ng itcl library]\n\
-	    # On *nix, check the directories in the tcl_pkgPath\n\
-	    # XXX JH - this looks unnecessary, maybe Darwin only?\n\
-	    if {[string equal $::tcl_platform(platform) \"unix\"]} {\n	\
-		foreach d $::tcl_pkgPath {\n\
-		    lappend dirs $d\n\
-		    lappend dirs [file join $d itcl$patchLevel]\n\
-		}\n\
-	    }\n\
-	}\n\
-	foreach i $dirs {\n\
-	    if {![catch {uplevel #0 [list source [file join $i itcl.tcl]]}]} {\n\
-		set library $i\n\
-		return\n\
-	    }\n\
-	}\n\
-	set msg \"Can't find a usable itcl.tcl in the following directories:\n\"\n\
-	append msg \"	 $dirs\n\"\n\
-	append msg \"This probably means that Itcl/Tcl weren't installed properly.\n\"\n\
-	append msg \"If you know where the Itcl library directory was installed,\n\"\n\
-	append msg \"you can set the environment variable ITCL_LIBRARY to point\n\"\n\
-	append msg \"to the library directory.\n\"\n\
-	error $msg\n\
-    }\n\
-    _find_init\n\
-}";
+static char initScript[] =
+"namespace eval ::itcl {\n"
+"    proc _find_init {} {\n"
+"        global env tcl_library\n"
+"        variable library\n"
+"        variable patchLevel\n"
+"        rename _find_init {}\n"
+"        if {[info exists library]} {\n"
+"            lappend dirs $library\n"
+"        } else {\n"
+"            set dirs {}\n"
+"            if {[info exists env(ITCL_LIBRARY)]} {\n"
+"                lappend dirs $env(ITCL_LIBRARY)\n"
+"            }\n"
+"            lappend dirs [file join [file dirname $tcl_library] itcl$patchLevel]\n"
+"            set bindir [file dirname [info nameofexecutable]]\n"
+"            lappend dirs [file join . library]\n"
+"            lappend dirs [file join $bindir .. lib itcl$patchLevel]\n"
+"            lappend dirs [file join $bindir .. library]\n"
+"            lappend dirs [file join $bindir .. .. library]\n"
+"            lappend dirs [file join $bindir .. .. itcl library]\n"
+"            lappend dirs [file join $bindir .. .. .. itcl library]\n"
+"            lappend dirs [file join $bindir .. .. itcl-ng itcl library]\n"
+"            # On *nix, check the directories in the tcl_pkgPath\n"
+"            # XXX JH - this looks unnecessary, maybe Darwin only?\n"
+"            if {[string equal $::tcl_platform(platform) \"unix\"]} {\n"
+"                foreach d $::tcl_pkgPath {\n"
+"                    lappend dirs $d\n"
+"                    lappend dirs [file join $d itcl$patchLevel]\n"
+"                }\n"
+"            }\n"
+"        }\n"
+"        foreach i $dirs {\n"
+"            set library $i\n"
+"            if {![catch {uplevel #0 [list source [file join $i itcl.tcl]]}]} {\n"
+"                set library $i\n"
+"                return\n"
+"            }\n"
+"        }\n"
+"        set msg \"Can't find a usable itcl.tcl in the following directories:\n\"\n"
+"        append msg \"    $dirs\n\"\n"
+"        append msg \"This probably means that Itcl/Tcl weren't installed properly.\n\"\n"
+"        append msg \"If you know where the Itcl library directory was installed,\n\"\n"
+"        append msg \"you can set the environment variable ITCL_LIBRARY to point\n\"\n"
+"        append msg \"to the library directory.\n\"\n"
+"        error $msg\n"
+"    }\n"
+"    _find_init\n"
+"}";
 
 /*
  * The following script is used to initialize Itcl in a safe interpreter.
  */
 
 static char safeInitScript[] =
-"proc ::itcl::local {class name args} {\n\
-    set ptr [uplevel [list $class $name] $args]\n\
-    uplevel [list set itcl-local-$ptr $ptr]\n\
-    set cmd [uplevel namespace which -command $ptr]\n\
-    uplevel [list trace variable itcl-local-$ptr u \"::itcl::delete object $cmd; list\"]\n\
-    return $ptr\n\
-}";
+"proc ::itcl::local {class name args} {\n"
+"    set ptr [uplevel [list $class $name] $args]\n"
+"    uplevel [list set itcl-local-$ptr $ptr]\n"
+"    set cmd [uplevel namespace which -command $ptr]\n"
+"    uplevel [list trace variable itcl-local-$ptr u \"::itcl::delete object $cmd; list\"]\n"
+"    return $ptr\n"
+"}";
 
-static char *clazzClassScript = "set itclClass [::oo::class create ::itcl::clazz]; \
-    ::oo::define $itclClass superclass ::oo::class";
+static char *clazzClassScript =
+"set itclClass [::oo::class create ::itcl::clazz]\n"
+"::oo::define $itclClass superclass ::oo::class";
 
 
-static char *clazzUnknownBody = "\n\
-    set mySelf [::oo::Helpers::self]\n\
-    if {[::itcl::is class $mySelf]} {\n\
-        set namespace [uplevel 1 namespace current]\n\
-        set my_namespace $namespace\n\
-        if {$my_namespace ne \"::\"} {\n\
-            set my_namespace ${my_namespace}::\n\
-        }\n\
-        set my_class [::itcl::find classes ${my_namespace}$m]\n\
-        if {[string length $my_class] > 0} {\n\
-            # class already exists, it is a redefinition, so delete old class first\n\
-	    ::itcl::delete class $my_class\n\
-        }\n\
-        set cmd [uplevel 1 ::info command ${my_namespace}$m]\n\
-        if {[string length $cmd] > 0} {\n\
-            error \"command \\\"$m\\\" already exists in namespace \\\"$namespace\\\"\"\n\
-        }\n\
-    } \n\
-    set myns [uplevel namespace current]\n\
-    if {$myns ne \"::\"} {\n\
-       set myns ${myns}::\n\
-    }\n\
-    set myObj [lindex [::info level 0] 0]\n\
-    set cmd [list uplevel 1 ::itcl::parser::handleClass $myObj $mySelf $m {*}[list $args]]\n\
-    set myErrorInfo {}\n\
-    set obj {}\n\
-    if {[catch {\n\
-        eval $cmd\n\
-    } obj myErrorInfo]} {\n\
-	return -code error -errorinfo $::errorInfo $obj\n\
-    }\n\
-    return $obj\n\
-";
+static char *clazzUnknownBody =
+"    set mySelf [::oo::Helpers::self]\n"
+"    if {[::itcl::is class $mySelf]} {\n"
+"        set namespace [uplevel 1 namespace current]\n"
+"        set my_namespace $namespace\n"
+"        if {$my_namespace ne \"::\"} {\n"
+"            set my_namespace ${my_namespace}::\n"
+"        }\n"
+"        set my_class [::itcl::find classes ${my_namespace}$m]\n"
+"        if {[string length $my_class] > 0} {\n"
+"            # class already exists, it is a redefinition, so delete old class first\n"
+"	    ::itcl::delete class $my_class\n"
+"        }\n"
+"        set cmd [uplevel 1 ::info command ${my_namespace}$m]\n"
+"        if {[string length $cmd] > 0} {\n"
+"            error \"command \\\"$m\\\" already exists in namespace \\\"$namespace\\\"\"\n"
+"        }\n"
+"    } \n"
+"    set myns [uplevel namespace current]\n"
+"    if {$myns ne \"::\"} {\n"
+"       set myns ${myns}::\n"
+"    }\n"
+"    set myObj [lindex [::info level 0] 0]\n"
+"    set cmd [list uplevel 1 ::itcl::parser::handleClass $myObj $mySelf $m {*}[list $args]]\n"
+"    set myErrorInfo {}\n"
+"    set obj {}\n"
+"    if {[catch {\n"
+"        eval $cmd\n"
+"    } obj myErrorInfo]} {\n"
+"	return -code error -errorinfo $::errorInfo $obj\n"
+"    }\n"
+"    return $obj\n";
 
 #define ITCL_IS_ENSEMBLE 0x1
 

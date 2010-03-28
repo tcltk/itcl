@@ -24,7 +24,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclBuiltin.c,v 1.1.2.74 2010/03/06 12:50:40 wiede Exp $
+ *     RCS:  $Id: itclBuiltin.c,v 1.1.2.75 2010/03/28 11:01:46 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -33,65 +33,65 @@
  */
 #include "itclInt.h"
 
-static char initHullCmdsScript[] = "\n\
-namespace eval ::itcl {\n\
-    proc _find_hull_init {} {\n\
-        global env tcl_library\n\
-        variable library\n\
-        variable patchLevel\n\
-        rename _find_hull_init {}\n\
-        if {[info exists library]} {\n\
-            lappend dirs $library\n\
-        } else {\n\
-            if {[catch {uplevel #0 source -rsrc itcl}] == 0} {\n\
-                return\n\
-            }\n\
-            set dirs {}\n\
-            if {[info exists env(ITCL_LIBRARY)]} {\n\
-                lappend dirs $env(ITCL_LIBRARY)\n\
-            }\n\
-            lappend dirs [file join [file dirname $tcl_library] itcl$patchLevel]\n\
-            set bindir [file dirname [info nameofexecutable]]\n\
-	    lappend dirs [file join . library]\n\
-            lappend dirs [file join $bindir .. lib itcl$patchLevel]\n\
-            lappend dirs [file join $bindir .. library]\n\
-            lappend dirs [file join $bindir .. .. library]\n\
-            lappend dirs [file join $bindir .. .. itcl library]\n\
-            lappend dirs [file join $bindir .. .. .. itcl library]\n\
-            lappend dirs [file join $bindir .. .. itcl-ng itcl library]\n\
-            # On MacOSX, check the directories in the tcl_pkgPath\n\
-            if {[string equal $::tcl_platform(platform) \"unix\"] && \
-                    [string equal $::tcl_platform(os) \"Darwin\"]} {\n\
-                foreach d $::tcl_pkgPath {\n\
-                    lappend dirs [file join $d itcl$patchLevel]\n\
-                }\n\
-            }\n\
-            # On *nix, check the directories in the tcl_pkgPath\n\
-            if {[string equal $::tcl_platform(platform) \"unix\"]} {\n\
-                foreach d $::tcl_pkgPath {\n\
-                    lappend dirs $d\n\
-                    lappend dirs [file join $d itcl$patchLevel]\n\
-                }\n\
-            }\n\
-        }\n\
-        foreach i $dirs {\n\
-            set library $i\n\
-            set itclfile [file join $i itclHullCmds.tcl]\n\
-            if {![catch {uplevel #0 [list source $itclfile]} msg]} {\n\
-                return\n\
-            }\n\
-puts stderr \"MSG!$msg!\"\n\
-        }\n\
-        set msg \"Can't find a usable itclHullCmds.tcl in the following directories:\n\"\n\
-        append msg \"    $dirs\n\"\n\
-        append msg \"This probably means that Itcl/Tcl weren't installed properly.\n\"\n\
-        append msg \"If you know where the Itcl library directory was installed,\n\"\n\
-        append msg \"you can set the environment variable ITCL_LIBRARY to point\n\"\n\
-        append msg \"to the library directory.\n\"\n\
-        error $msg\n\
-    }\n\
-    _find_hull_init\n\
-}";
+static char initHullCmdsScript[] =
+"namespace eval ::itcl {\n"
+"    proc _find_hull_init {} {\n"
+"        global env tcl_library\n"
+"        variable library\n"
+"        variable patchLevel\n"
+"        rename _find_hull_init {}\n"
+"        if {[info exists library]} {\n"
+"            lappend dirs $library\n"
+"        } else {\n"
+"            if {[catch {uplevel #0 source -rsrc itcl}] == 0} {\n"
+"                return\n"
+"            }\n"
+"            set dirs {}\n"
+"            if {[info exists env(ITCL_LIBRARY)]} {\n"
+"                lappend dirs $env(ITCL_LIBRARY)\n"
+"            }\n"
+"            lappend dirs [file join [file dirname $tcl_library] itcl$patchLevel]\n"
+"            set bindir [file dirname [info nameofexecutable]]\n"
+"	    lappend dirs [file join . library]\n"
+"            lappend dirs [file join $bindir .. lib itcl$patchLevel]\n"
+"            lappend dirs [file join $bindir .. library]\n"
+"            lappend dirs [file join $bindir .. .. library]\n"
+"            lappend dirs [file join $bindir .. .. itcl library]\n"
+"            lappend dirs [file join $bindir .. .. .. itcl library]\n"
+"            lappend dirs [file join $bindir .. .. itcl-ng itcl library]\n"
+"            # On MacOSX, check the directories in the tcl_pkgPath\n"
+"            if {[string equal $::tcl_platform(platform) \"unix\"] && "
+"                    [string equal $::tcl_platform(os) \"Darwin\"]} {\n"
+"                foreach d $::tcl_pkgPath {\n"
+"                    lappend dirs [file join $d itcl$patchLevel]\n"
+"                }\n"
+"            }\n"
+"            # On *nix, check the directories in the tcl_pkgPath\n"
+"            if {[string equal $::tcl_platform(platform) \"unix\"]} {\n"
+"                foreach d $::tcl_pkgPath {\n"
+"                    lappend dirs $d\n"
+"                    lappend dirs [file join $d itcl$patchLevel]\n"
+"                }\n"
+"            }\n"
+"        }\n"
+"        foreach i $dirs {\n"
+"            set library $i\n"
+"            set itclfile [file join $i itclHullCmds.tcl]\n"
+"            if {![catch {uplevel #0 [list source $itclfile]} msg]} {\n"
+"                return\n"
+"            }\n"
+"puts stderr \"MSG!$msg!\"\n"
+"        }\n"
+"        set msg \"Can't find a usable itclHullCmds.tcl in the following directories:\n\"\n"
+"        append msg \"    $dirs\n\"\n"
+"        append msg \"This probably means that Itcl/Tcl weren't installed properly.\n\"\n"
+"        append msg \"If you know where the Itcl library directory was installed,\n\"\n"
+"        append msg \"you can set the environment variable ITCL_LIBRARY to point\n\"\n"
+"        append msg \"to the library directory.\n\"\n"
+"        error $msg\n"
+"    }\n"
+"    _find_hull_init\n"
+"}";
 
 Tcl_ObjCmdProc Itcl_BiInstallComponentCmd;
 Tcl_ObjCmdProc Itcl_BiDestroyCmd;

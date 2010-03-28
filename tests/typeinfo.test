@@ -1016,8 +1016,8 @@ test tinfo-10.2a {type info component} -body {
         component comp1a
     }
 
-    set a [dog info component]
-    set b [cat info component]
+    set a [lsort [dog info component]]
+    set b [lsort [cat info component]]
     list $a $b
 } -cleanup {
     dog destroy
