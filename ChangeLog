@@ -1,5 +1,10 @@
-RCS: @(#) $Id: ChangeLog,v 1.1.2.33 2010/03/28 20:55:09 dgp Exp $
+RCS: @(#) $Id: ChangeLog,v 1.1.2.34 2010/04/05 18:26:36 dgp Exp $
 
+2010-04-05  Don Porter  <dgp@Users.sourceforge.net>
+	* itclTclIntStubsFcn.c:	Remove attempt to return value from
+				Itcl_ResetRewriteEnsemle() which is declared
+				as returning (void).  Thanks to Andreas
+				Kupried for reporting the compiler errors.
 2010-03-28  Arnulf P. Wiedemann <wiede@users.sourceforge.net>
 	* typeinfo.test:        integrated fix for [Tcl Bug 2821935] and
 	* typeoption.test:	other fixes from Donal Fellows.  This helps

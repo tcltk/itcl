@@ -9,7 +9,7 @@
  * ========================================================================
  *  AUTHOR:  Arnulf Wiedemann
  *
- *     RCS:  $Id: itclTclIntStubsFcn.c,v 1.1.2.4 2009/10/22 15:09:51 wiede Exp $
+ *     RCS:  $Id: itclTclIntStubsFcn.c,v 1.1.2.5 2010/04/05 18:26:36 dgp Exp $
  * ------------------------------------------------------------------------
  * See the file "license.terms" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
@@ -137,7 +137,7 @@ Itcl_ResetRewriteEnsemble(
     Tcl_Interp *interp,
     int isRootEnsemble)
 {
-    return TclResetRewriteEnsemble(interp, isRootEnsemble);
+    TclResetRewriteEnsemble(interp, isRootEnsemble);
 }
 
 
