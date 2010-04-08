@@ -9,10 +9,12 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itclInt.h,v 1.17.2.66 2009/10/24 15:48:03 wiede Exp $
+ * RCS: @(#) $Id: itclInt.h,v 1.17.2.67 2010/04/08 17:46:45 dgp Exp $
  */
 
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>
+#endif
 #include <string.h>
 #include <ctype.h>
 #include <tcl.h>

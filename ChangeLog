@@ -1,5 +1,8 @@
-RCS: @(#) $Id: ChangeLog,v 1.1.2.34 2010/04/05 18:26:36 dgp Exp $
+RCS: @(#) $Id: ChangeLog,v 1.1.2.35 2010/04/08 17:46:45 dgp Exp $
 
+2010-04-08  Don Porter  <dgp@Users.sourceforge.net>
+	* itclInt.h:		Add #ifdef guards to attempt inclusion of
+				a unistd.h header file only where one exists.
 2010-04-05  Don Porter  <dgp@Users.sourceforge.net>
 	* itclTclIntStubsFcn.c:	Remove attempt to return value from
 				Itcl_ResetRewriteEnsemle() which is declared
