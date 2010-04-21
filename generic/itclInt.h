@@ -9,7 +9,7 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itclInt.h,v 1.17.2.67 2010/04/08 17:46:45 dgp Exp $
+ * RCS: @(#) $Id: itclInt.h,v 1.17.2.68 2010/04/21 09:22:43 wiede Exp $
  */
 
 #ifdef HAVE_UNISTD_H
@@ -652,9 +652,6 @@ typedef struct ItclCallContext {
 
 #if !defined(INT2PTR) && !defined(PTR2INT)
 #   if defined(HAVE_INTPTR_T) || defined(intptr_t)
-#       ifdef HAVE_SYS_TYPES_H
-#           include <sys/types.h>
-#       endif
 #       define INT2PTR(p) ((void*)(intptr_t)(p))
 #       define PTR2INT(p) ((int)(intptr_t)(p))
 #   else

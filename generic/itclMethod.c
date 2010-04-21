@@ -25,7 +25,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclMethod.c,v 1.1.2.52 2010/03/19 08:24:57 wiede Exp $
+ *     RCS:  $Id: itclMethod.c,v 1.1.2.53 2010/04/21 09:22:43 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -2284,14 +2284,15 @@ ItclCheckCallMethod(
     Tcl_Object oPtr;
     ItclObject *ioPtr;
     Tcl_HashEntry *hPtr;
+    Tcl_Obj *const * cObjv;
+    Tcl_Namespace *currNsPtr;
     ItclCallContext *callContextPtr;
     ItclCallContext *callContextPtr2;
     ItclMemberFunc *imPtr;
     int result;
     int isNew;
     int cObjc;
-    Tcl_Obj *const * cObjv;
-    Tcl_Namespace *currNsPtr;
+    int min_allowed_args;
 
     oPtr = NULL;
     hPtr = NULL;
@@ -2339,7 +2340,11 @@ ItclCheckCallMethod(
     }
     cObjc = Itcl_GetCallFrameObjc(interp);
     cObjv = Itcl_GetCallFrameObjv(interp);
-    if (cObjc-2 < imPtr->argcount) {
+    min_allowed_args = cObjc-2;
+    if (strcmp(Tcl_GetString(cObjv[0]), "next") == 0) {
+        min_allowed_args++;
+    }
+    if (min_allowed_args < imPtr->argcount) {
 	if (strcmp(Tcl_GetString(imPtr->namePtr), "info") == 0) {
             Tcl_Obj *objPtr = Tcl_NewStringObj(
 	            "wrong # args: should be one of...\n", -1);

@@ -20,7 +20,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itclResolve.c,v 1.1.2.32 2009/10/23 16:32:31 wiede Exp $
+ *     RCS:  $Id: itclResolve.c,v 1.1.2.33 2010/04/21 09:22:43 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -437,6 +437,7 @@ Itcl_ClassVarResolver(
 	Tcl_DStringAppend(&buffer, Tcl_GetString(contextIoPtr->namePtr), -1);
 	Tcl_DStringAppend(&buffer, "::itcl_options", -1);
 	varPtr = Itcl_FindNamespaceVar(interp, Tcl_DStringValue(&buffer), NULL, 0);
+	Tcl_DStringFree(&buffer);
         if (varPtr != NULL) {
             *rPtr = varPtr;
 	    return TCL_OK;
@@ -648,6 +649,7 @@ ItclClassRuntimeVarResolver(
 	    Tcl_DStringAppend(&buffer, "::itcl_options", -1);
 	    varPtr = Itcl_FindNamespaceVar(interp, Tcl_DStringValue(&buffer),
 	            NULL, 0);
+	    Tcl_DStringFree(&buffer);
             if (varPtr != NULL) {
 	        return varPtr;
             }

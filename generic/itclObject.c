@@ -24,7 +24,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann Copyright (c) 2007
  *
- *     RCS:  $Id: itclObject.c,v 1.1.2.84 2009/10/25 21:02:38 wiede Exp $
+ *     RCS:  $Id: itclObject.c,v 1.1.2.85 2010/04/21 09:22:43 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -3395,6 +3395,7 @@ GetConstructorVar(
         Tcl_DStringAppend(&buffer, "::", -1);
         Tcl_DStringAppend(&buffer, varName, -1);
         val = Tcl_GetVar2(interp, Tcl_DStringValue(&buffer), NULL, 0);
+        Tcl_DStringFree(&buffer);
     }
     return val;
 }
@@ -3457,6 +3458,7 @@ DelegationInstall(
                         Tcl_GetString(ivPtr->fullNamePtr), -1);
                 val = Tcl_GetVar2(interp,
                             Tcl_DStringValue(&buffer), NULL, 0);
+                Tcl_DStringFree(&buffer);
 	    }
 	    componentValuePtr = Tcl_NewStringObj(val, -1);
             Tcl_IncrRefCount(componentValuePtr);

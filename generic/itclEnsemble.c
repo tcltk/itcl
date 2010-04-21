@@ -25,7 +25,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclEnsemble.c,v 1.1.2.21 2009/10/18 16:42:33 wiede Exp $
+ *     RCS:  $Id: itclEnsemble.c,v 1.1.2.22 2010/04/21 09:22:43 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -183,6 +183,7 @@ Itcl_EnsembleInit(
     Tcl_DStringAppend(&buffer, "::ensembles", -1);
     infoPtr->ensembleInfo->ensembleNsPtr = Tcl_CreateNamespace(interp,
             Tcl_DStringValue(&buffer), NULL, NULL);
+    Tcl_DStringFree(&buffer);
     if (infoPtr->ensembleInfo->ensembleNsPtr == NULL) {
         Tcl_AppendResult(interp, "error in creating namespace: ",
 	        Tcl_DStringValue(&buffer), NULL);

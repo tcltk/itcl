@@ -23,7 +23,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclCmd.c,v 1.1.2.53 2009/10/25 12:55:02 wiede Exp $
+ *     RCS:  $Id: itclCmd.c,v 1.1.2.54 2010/04/21 09:22:43 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -1029,7 +1029,6 @@ Itcl_IsObjectCmd(
     Tcl_Command     cmd;
     Tcl_Namespace   *contextNs = NULL;
     ItclClass       *iclsPtr = NULL;
-    ItclObject      *contextObj;
 
     /*
      *    Handle the arguments.
@@ -1091,14 +1090,14 @@ Itcl_IsObjectCmd(
      *    Handle the case when the -class flag is given
      */
     if (classFlag) {
-	Tcl_CmdInfo cmdInfo;
-        if (Tcl_GetCommandInfoFromToken(cmd, &cmdInfo) == 1) {
-            contextObj = (ItclObject*)cmdInfo.objClientData;
-            if (! Itcl_ObjectIsa(contextObj, iclsPtr)) {
-                Tcl_SetObjResult(interp, Tcl_NewBooleanObj(0));
-	        ckfree((char *)cmdName);
-                return TCL_OK;
-            }
+	ItclObject *contextIoPtr;
+        if (Itcl_FindObject(interp, Tcl_GetCommandName(interp, cmd), &contextIoPtr) != TCL_OK) {
+            return TCL_ERROR;
+        }
+        if (! Itcl_ObjectIsa(contextIoPtr, iclsPtr)) {
+            Tcl_SetObjResult(interp, Tcl_NewBooleanObj(0));
+	    ckfree((char *)cmdName);
+            return TCL_OK;
         }
 
     }
@@ -1872,6 +1871,8 @@ Itcl_AddComponentCmd(
 
         nsPtr = nsPtr->parentPtr;
     }
+    Tcl_DStringFree(&buffer2);
+    Tcl_DStringFree(&buffer);
 
 
 
