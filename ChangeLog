@@ -1,5 +1,10 @@
-RCS: @(#) $Id: ChangeLog,v 1.1.2.36 2010/04/21 09:34:40 wiede Exp $
+RCS: @(#) $Id: ChangeLog,v 1.1.2.37 2010/05/02 09:05:36 wiede Exp $
 
+2010-05-02  Arnulf P.Wiedemann  <wiede@users.sourceforge.net>
+        * itclClass.c:		fix for SF bug #2993540
+	* itcl2Tcloo.c:         fix for SF bug #2993648
+	* itcl2Tcloo.h:
+	* itclBuiltin.c:        added an empty line for beautifying
 2010-04-21  Arnulf P.Wiedemann  <wiede@users.sourceforge.net>
 	* itclCmd.c:		Add missing Tcl_DStringFree for [itcl Bug 2983809]
 	* itclEnsemble.c:
