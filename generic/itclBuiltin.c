@@ -24,7 +24,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclBuiltin.c,v 1.1.2.75 2010/03/28 11:01:46 wiede Exp $
+ *     RCS:  $Id: itclBuiltin.c,v 1.1.2.76 2010/05/02 09:04:07 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -1166,6 +1166,7 @@ Itcl_BiChainCmd(
 {
     return Itcl_NRCallObjProc(clientData, interp, NRBiChainCmd, objc, objv);
 }
+
 static int
 CallCreateObject(
     ClientData data[],
