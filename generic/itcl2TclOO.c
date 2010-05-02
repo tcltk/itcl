@@ -8,7 +8,7 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itcl2TclOO.c,v 1.1.2.15 2010/03/28 11:01:46 wiede Exp $
+ * RCS: @(#) $Id: itcl2TclOO.c,v 1.1.2.16 2010/05/02 08:57:07 wiede Exp $
  */
 
 #include <tcl.h>
@@ -31,7 +31,7 @@ void
 Itcl_NRAddCallback_(
     Tcl_Interp *interp,
     char *procName,
-    void *procPtr,
+    Tcl_NRPostProc *procPtr,
     ClientData data0,
     ClientData data1,
     ClientData data2,
@@ -62,7 +62,7 @@ CallFinalizePMCall(
     int result)
 {
     Tcl_Namespace *nsPtr = data[0];
-    TclOO_PostCallProc *postCallProc = data[1];
+    TclOO_PostCallProc *postCallProc = (TclOO_PostCallProc *)data[1];
     ClientData clientData = data[2];
 
     /*
@@ -147,7 +147,7 @@ Tcl_InvokeClassProcedureMethod(
 
     if (pmPtr->postCallProc) {
 	Tcl_NRAddCallback(interp, CallFinalizePMCall, nsPtr,
-		pmPtr->postCallProc, pmPtr->clientData, NULL);
+		(Tcl_NRPostProc *)pmPtr->postCallProc, pmPtr->clientData, NULL);
     }
     return TclNRInterpProcCore(interp, namePtr, 1, pmPtr->errProc);
 

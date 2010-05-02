@@ -1,7 +1,7 @@
 #define Itcl_NRAddCallback(interp,procPtr,data0,data1,data2,data3) \
   Itcl_NRAddCallback_(interp, #procPtr, procPtr, data0, data1, data2, data3)
 extern void Itcl_NRAddCallback_(Tcl_Interp *interp, char *procName,
-        void *procPtr, ClientData data0, ClientData data1,
+        Tcl_NRPostProc *procPtr, ClientData data0, ClientData data1,
         ClientData data2, ClientData data3);
 extern void Itcl_DumpNRCallbacks(Tcl_Interp *interp, char *str);
 extern int Itcl_NRCallObjProc(ClientData clientData, Tcl_Interp *interp,
