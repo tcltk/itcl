@@ -24,7 +24,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann Copyright (c) 2007
  *
- *     RCS:  $Id: itclObject.c,v 1.1.2.85 2010/04/21 09:22:43 wiede Exp $
+ *     RCS:  $Id: itclObject.c,v 1.1.2.86 2010/05/02 15:43:55 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -1680,6 +1680,10 @@ Itcl_ObjectIsa(
     ItclClass *iclsPtr)       /* class to test for "is-a" relationship */
 {
     Tcl_HashEntry *entry;
+
+    if (contextIoPtr == NULL) {
+        return 0;
+    }
     entry = Tcl_FindHashEntry(&contextIoPtr->iclsPtr->heritage, (char*)iclsPtr);
     return (entry != NULL);
 }
