@@ -23,7 +23,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclCmd.c,v 1.1.2.54 2010/04/21 09:22:43 wiede Exp $
+ *     RCS:  $Id: itclCmd.c,v 1.1.2.55 2010/05/02 15:43:05 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -1094,6 +1094,10 @@ Itcl_IsObjectCmd(
         if (Itcl_FindObject(interp, Tcl_GetCommandName(interp, cmd), &contextIoPtr) != TCL_OK) {
             return TCL_ERROR;
         }
+	if (contextIoPtr == NULL) {
+	   /* seems that we are in constructor, so look for currIoPtr in info structure */
+	   contextIoPtr = iclsPtr->infoPtr->currIoPtr;
+	}
         if (! Itcl_ObjectIsa(contextIoPtr, iclsPtr)) {
             Tcl_SetObjResult(interp, Tcl_NewBooleanObj(0));
 	    ckfree((char *)cmdName);
