@@ -25,7 +25,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann Copyright (c) 2007
  *
- *     RCS:  $Id: itclClass.c,v 1.1.2.56 2010/05/02 09:01:19 wiede Exp $
+ *     RCS:  $Id: itclClass.c,v 1.1.2.57 2010/05/16 19:37:24 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -195,6 +195,7 @@ Itcl_CreateClass(
     Tcl_Command cmd;
     Tcl_CmdInfo cmdInfo;
     Tcl_Namespace *classNs;
+    Tcl_Namespace *varNsPtr;
     Tcl_Object oPtr;
     Tcl_Obj *nameObjPtr;
     Tcl_Obj *namePtr;
@@ -444,12 +445,16 @@ Itcl_CreateClass(
     Tcl_DStringInit(&buffer);
     Tcl_DStringAppend(&buffer, ITCL_VARIABLES_NAMESPACE, -1);
     Tcl_DStringAppend(&buffer, Tcl_GetString(iclsPtr->fullNamePtr), -1);
-    if (Tcl_CreateNamespace(interp, Tcl_DStringValue(&buffer),
-            NULL, 0) == NULL) {
-	Tcl_AppendResult(interp, "ITCL: cannot create variables namespace \"",
-	Tcl_DStringValue(&buffer), "\"", NULL);
-	result = TCL_ERROR;
-        goto errorOut;
+    varNsPtr = Tcl_FindNamespace(interp,
+		        Tcl_DStringValue(&buffer), NULL, 0);
+    if (varNsPtr == NULL) {
+        if (Tcl_CreateNamespace(interp, Tcl_DStringValue(&buffer),
+                NULL, 0) == NULL) {
+	    Tcl_AppendResult(interp, "ITCL: cannot create variables namespace \"",
+	    Tcl_DStringValue(&buffer), "\"", NULL);
+	    result = TCL_ERROR;
+            goto errorOut;
+        }
     }
 
     /*
