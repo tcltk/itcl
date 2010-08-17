@@ -12,10 +12,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: Makefile.in,v 1.29.2.26 2009/01/14 21:54:27 das Exp $
-
-datarootdir = @datarootdir@
-datadir = @datadir@
+# RCS: @(#) $Id: Makefile.in,v 1.29.2.27 2010/08/17 21:29:29 hobbs Exp $
 
 #========================================================================
 # The names of the source files is defined in the configure script.
@@ -72,6 +69,7 @@ exec_prefix	= @exec_prefix@
 
 bindir		= @bindir@
 libdir		= @libdir@
+datarootdir	= @datarootdir@
 datadir		= @datadir@
 mandir		= @mandir@
 includedir	= @includedir@
@@ -107,14 +105,11 @@ RANLIB		= @RANLIB@
 RANLIB_STUB	= @RANLIB_STUB@
 SHLIB_CFLAGS	= @SHLIB_CFLAGS@
 SHLIB_LD	= @SHLIB_LD@
-SHLIB_LD_FLAGS	= @SHLIB_LD_FLAGS@
 SHLIB_LD_LIBS	= @SHLIB_LD_LIBS@
 STLIB_LD	= @STLIB_LD@
 TCL_DEFS	= @TCL_DEFS@
 TCL_BIN_DIR	= @TCL_BIN_DIR@
 TCL_SRC_DIR	= @TCL_SRC_DIR@
-# This is necessary for packages that use private Tcl headers
-TCL_TOP_DIR_NATIVE = @TCL_TOP_DIR_NATIVE@
 
 # Not used, but retained for reference of what libs Tcl required
 TCL_LIBS	= @TCL_LIBS@

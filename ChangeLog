@@ -1,4 +1,14 @@
-RCS: @(#) $Id: ChangeLog,v 1.1.2.38 2010/05/02 15:45:23 wiede Exp $
+RCS: @(#) $Id: ChangeLog,v 1.1.2.39 2010/08/17 21:29:29 hobbs Exp $
+
+2010-08-17  Jeff Hobbs  <jeffh@ActiveState.com>
+
+	* itclConfig.sh.in, releasenotes.txt, generic/itcl.h:
+	* itclWidget/tclconfig/tcl.m4, itclWidget/Makefile.in:
+	* itclWidget/configure, itclWidget/configure.in:
+	* itclWidget/itclWidgetConfig.sh.in (removed):
+	* configure, configure.in, Makefile.in: Bump version to 4.0b5
+	Update to TEA 3.9
+	Remove unnecessary itcl_INCLUDE_DIR (dup of itcl_INCLUDE_SPEC)
 
 2010-05-02  Arnulf P.Wiedemann  <wiede@users.sourceforge.net>
         * itclClass.c:		fix for SF bug #2993540

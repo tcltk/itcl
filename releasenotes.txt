@@ -1,8 +1,11 @@
-RCS: @(#) $Id: releasenotes.txt,v 1.1.2.5 2009/10/23 16:50:49 wiede Exp $
+RCS: @(#) $Id: releasenotes.txt,v 1.1.2.6 2010/08/17 21:29:30 hobbs Exp $
 
-This is the fourth beta release of Itcl.
+This is the fifth beta release of Itcl.
 When final it will be the next major release of Itcl.
-This version is named Itcl 4.0b4.
+This version is named Itcl 4.0b5.
+
+The difference to 4.0b4: in this release there are only bug fixes from SF
+tracker and updates to TEA 3.9.
 
 The difference to 4.0b3: in this release there are only bug fixes from SF
 tracker and some fixes to run on OSX and Windows platform.

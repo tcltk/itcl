@@ -10,7 +10,7 @@
 # so you can encode the package version directly into the source files.
 #-----------------------------------------------------------------------
 
-AC_INIT([itclwidget], [4.0b1])
+AC_INIT([itclwidget], [4.0b5])
 
 #--------------------------------------------------------------------
 # Call TEA_INIT as the first TEA_ macro to set up initial vars.
@@ -18,7 +18,7 @@ AC_INIT([itclwidget], [4.0b1])
 # as well as PKG_LIB_FILE and PKG_STUB_LIB_FILE.
 #--------------------------------------------------------------------
 
-TEA_INIT([3.6])
+TEA_INIT([3.9])
 
 AC_PROG_LN_S
 CONFIG_CLEAN_FILES=
@@ -83,7 +83,7 @@ TEA_ADD_HEADERS([
 		])
 TEA_ADD_INCLUDES([-I. -I\"`${CYGPATH} ${srcdir}/generic`\"])
 TEA_ADD_LIBS([])
-TEA_ADD_CFLAGS([-DUSE_TCLOO_STUBS -DUSE_ITCL_SUBS -I${itcl_INCLUDE_DIR}])
+TEA_ADD_CFLAGS([-DUSE_TCLOO_STUBS -DUSE_ITCL_SUBS -I${itcl_INCLUDE_SPEC}])
 TEA_ADD_STUB_SOURCES(itclWidgetStubLib.c)
 TEA_ADD_TCL_SOURCES([])
 
@@ -91,29 +91,14 @@ TEA_ADD_TCL_SOURCES([])
 # __CHANGE__
 # A few miscellaneous platform-specific items:
 #
-# Define a special symbol for Windows (BUILD_itclWidget in this case) so
-# that we create the export library with the dll.  See sha1.h on how
-# to use this.
-#
-# Windows creates a few extra files that need to be cleaned up.
-# You can add more files to clean if your extension creates any extra
-# files.
-#
 # Define any extra compiler flags in the PACKAGE_CFLAGS variable.
 # These will be appended to the current set of compiler flags for
 # your system.
 #--------------------------------------------------------------------
 
 if test "${TEA_PLATFORM}" = "windows" ; then
-    AC_DEFINE(BUILD_itclWidget)
-    CLEANFILES="*.lib *.dll *.exp *.ilk *.pdb vc*.pch"
     TEA_ADD_SOURCES([dllEntryPoint.c])
-else
-    CLEANFILES=
-    #TEA_ADD_SOURCES([])
 fi
-
-AC_SUBST(CLEANFILES)
 
 #--------------------------------------------------------------------
 # __CHANGE__
@@ -188,18 +173,6 @@ fi
 TEA_MAKE_LIB
 
 #--------------------------------------------------------------------
-# __CHANGE__
-# Change the name from exampeA_LIB_FILE to match your package name.
-# Use the stub_LIB_FILE substitution if your package creates a stub
-# library.
-#--------------------------------------------------------------------
-
-itclWidget_STUB_LIB_FILE=${PKG_STUB_LIB_FILE}
-itclWidget_LIB_FILE=${PKG_LIB_FILE}
-AC_SUBST(itclWidget_STUB_LIB_FILE)
-AC_SUBST(itclWidget_LIB_FILE)
-
-#--------------------------------------------------------------------
 # Find tclsh so that we can run pkg_mkIndex to generate the pkgIndex.tcl
 # file during the install process.  Don't run the TCLSH_PROG through
 # ${CYGPATH} because it's being used directly by make.
@@ -210,40 +183,7 @@ AC_SUBST(itclWidget_LIB_FILE)
 TEA_PROG_TCLSH
 
 #--------------------------------------------------------------------
-# These are for itclWidgetWidgetConfig.sh
-#--------------------------------------------------------------------
-
-# pkglibdir must be a fully qualified path and (not ${exec_prefix}/lib)
-eval pkglibdir="${libdir}/${PACKAGE_NAME}${PACKAGE_VERSION}"
-if test "${TCL_LIB_VERSIONS_OK}" = "ok"; then
-    eval itclWidget_LIB_FLAG="-litcl${PACKAGE_VERSION}${DBGX}"
-    eval itclWidget_STUB_LIB_FLAG="-litclstub${PACKAGE_VERSION}${DBGX}"
-else
-    eval itclWidget_LIB_FLAG="-litcl`echo ${PACKAGE_VERSION} | tr -d .`${DBGX}"
-    eval itclWidget_STUB_LIB_FLAG="-litclstub`echo ${PACKAGE_VERSION} | tr -d .`${DBGX}"
-fi
-itclWidget_BUILD_LIB_SPEC="-L`pwd` ${itclWidget_LIB_FLAG}"
-itclWidget_LIB_SPEC="-L${pkglibdir} ${itclWidget_LIB_FLAG}"
-
-itclWidget_BUILD_STUB_LIB_SPEC="-L`pwd` ${itclWidget_STUB_LIB_FLAG}"
-itclWidget_STUB_LIB_SPEC="-L${pkglibdir} ${itclWidget_STUB_LIB_FLAG}"
-itclWidget_BUILD_STUB_LIB_PATH="`pwd`/${itclWidget_STUB_LIB_FILE}"
-itclWidget_STUB_LIB_PATH="${pkglibdir}/${itclWidget_STUB_LIB_FILE}"
-
-AC_SUBST(itclWidget_BUILD_LIB_SPEC)
-AC_SUBST(itclWidget_LIB_SPEC)
-AC_SUBST(itclWidget_BUILD_STUB_LIB_SPEC)
-AC_SUBST(itclWidget_STUB_LIB_SPEC)
-AC_SUBST(itclWidget_BUILD_STUB_LIB_PATH)
-AC_SUBST(itclWidget_STUB_LIB_PATH)
-
-# itclWidget_SRC_DIR must be a fully qualified path
-eval itclWidget_SRC_DIR="$srcdir"
-itclWidget_SRC_DIR=`cd "${itclWidget_SRC_DIR}"; pwd`
-AC_SUBST(itclWidget_SRC_DIR)
-
-#--------------------------------------------------------------------
 # Finally, substitute all of the various values into the Makefile.
 #--------------------------------------------------------------------
 
-AC_OUTPUT([Makefile pkgIndex.tcl itclWidgetConfig.sh])
+AC_OUTPUT([Makefile pkgIndex.tcl])

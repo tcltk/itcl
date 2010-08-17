@@ -12,7 +12,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: Makefile.in,v 1.1.2.4 2008/12/11 11:17:43 wiede Exp $
+# RCS: @(#) $Id: Makefile.in,v 1.1.2.5 2010/08/17 21:29:30 hobbs Exp $
 
 #========================================================================
 # The names of the source files is defined in the configure script.
@@ -92,7 +92,6 @@ PACKAGE_VERSION	= @PACKAGE_VERSION@
 CC		= @CC@
 CFLAGS_DEFAULT	= @CFLAGS_DEFAULT@
 CFLAGS_WARNING	= @CFLAGS_WARNING@
-CLEANFILES	= @CLEANFILES@
 EXEEXT		= @EXEEXT@
 LDFLAGS_DEFAULT	= @LDFLAGS_DEFAULT@
 MAKE_LIB	= @MAKE_LIB@
@@ -104,14 +103,11 @@ RANLIB		= @RANLIB@
 RANLIB_STUB	= @RANLIB_STUB@
 SHLIB_CFLAGS	= @SHLIB_CFLAGS@
 SHLIB_LD	= @SHLIB_LD@
-SHLIB_LD_FLAGS	= @SHLIB_LD_FLAGS@
 SHLIB_LD_LIBS	= @SHLIB_LD_LIBS@
 STLIB_LD	= @STLIB_LD@
 TCL_DEFS	= @TCL_DEFS@
 TCL_BIN_DIR	= @TCL_BIN_DIR@
 TCL_SRC_DIR	= @TCL_SRC_DIR@
-# This is necessary for packages that use private Tcl headers
-TCL_TOP_DIR_NATIVE = @TCL_TOP_DIR_NATIVE@
 
 # Not used, but retained for reference of what libs Tcl required
 TCL_LIBS	= @TCL_LIBS@
@@ -131,7 +127,6 @@ PKG_ENV		= ITCL_LIBRARY=`@CYGPATH@ $(srcdir)/library` \
 		  TCLLIBPATH="$(top_builddir)"
 TCLSH_PROG	= $(TCLSH_ENV) @TCLSH_PROG@
 TCLSH		= $(PKG_ENV) $(TCLSH_PROG)
-SHARED_BUILD	= @SHARED_BUILD@
 
 INCLUDES	= @PKG_INCLUDES@ @TCL_INCLUDES@ @ITCL_INCLUDES@
 
@@ -140,7 +135,8 @@ PKG_CFLAGS	= @PKG_CFLAGS@
 DEFS		= @DEFS@ $(PKG_CFLAGS) \
 		  -DITCL_LIBRARY=\"$(pkglibdir)\"
 
-CONFIG_CLEAN_FILES = @CONFIG_CLEAN_FILES@ Makefile itclWidgetConfig.sh pkgIndex.tcl
+CONFIG_CLEAN_FILES = @CONFIG_CLEAN_FILES@ Makefile pkgIndex.tcl
+CLEANFILES	= @CLEANFILES@
 
 CPPFLAGS	= @CPPFLAGS@
 LIBS		= @PKG_LIBS@ @LIBS@
@@ -374,7 +370,6 @@ install-lib-binaries:
 	  fi; \
 	done
 	$(INSTALL_DATA) pkgIndex.tcl $(DESTDIR)$(pkglibdir)
-	$(INSTALL_DATA) itclWidgetConfig.sh $(DESTDIR)$(libdir)
 
 #========================================================================
 # Install binary executables (e.g. .exe files)
