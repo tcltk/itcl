@@ -1,4 +1,4 @@
-RCS: @(#) $Id: ChangeLog,v 1.1.2.39 2010/08/17 21:29:29 hobbs Exp $
+RCS: @(#) $Id: ChangeLog,v 1.1.2.40 2010/08/18 11:40:56 wiede Exp $
 
 2010-08-17  Jeff Hobbs  <jeffh@ActiveState.com>
 
@@ -10,6 +10,10 @@ RCS: @(#) $Id: ChangeLog,v 1.1.2.39 2010/08/17 21:29:29 hobbs Exp $
 	Update to TEA 3.9
 	Remove unnecessary itcl_INCLUDE_DIR (dup of itcl_INCLUDE_SPEC)
 
+2010-05-17  Arnulf P.Wiedemann  <wiede@users.sourceforge.net>
+        * itclClass.c:          undo change from 2010-05-16
+2010-05-16  Arnulf P.Wiedemann  <wiede@users.sourceforge.net>
+        * itclClass.c:          allow variable namespace to exist
 2010-05-02  Arnulf P.Wiedemann  <wiede@users.sourceforge.net>
         * itclClass.c:		fix for SF bug #2993540
 	* itcl2Tcloo.c:         fix for SF bug #2993648
