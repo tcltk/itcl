@@ -1,8 +1,8 @@
-RCS: @(#) $Id: ChangeLog,v 1.1.2.41 2010/08/22 18:42:45 wiede Exp $
+RCS: @(#) $Id: ChangeLog,v 1.1.2.42 2010/08/22 18:49:09 wiede Exp $
 
 2010-08-22  Arnulf P.Wiedemann  <wiede@users.sourceforge.net>
-        * itclInt.h, itclObject.c, itclInfo.c: fix for BiInfoHeritage
-	function, if we have no object context
+        * itclInt.h, itclObject.c, itclInfo.c: fix for BiInfoHeritageCmd
+	and BiInfoInheritCmd function, if we have no object context
 
 2010-08-17  Jeff Hobbs  <jeffh@ActiveState.com>
 
