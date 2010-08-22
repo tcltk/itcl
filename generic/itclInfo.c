@@ -24,7 +24,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclInfo.c,v 1.1.2.50 2010/08/22 18:47:20 wiede Exp $
+ *     RCS:  $Id: itclInfo.c,v 1.1.2.51 2010/08/22 18:53:07 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -744,6 +744,7 @@ Itcl_BiInfoInheritCmd(
      *  signal an error.
      */
     contextIclsPtr = NULL;
+    imPtr = NULL;
     if (Itcl_GetContext(interp, &contextIclsPtr, &contextIoPtr) != TCL_OK) {
         char *name = Tcl_GetString(objv[0]);
         Tcl_ResetResult(interp);
@@ -857,6 +858,7 @@ Itcl_BiInfoHeritageCmd(
      *  signal an error.
      */
     contextIclsPtr = NULL;
+    imPtr = NULL;
     if (Itcl_GetContext(interp, &contextIclsPtr, &contextIoPtr) != TCL_OK) {
         name = Tcl_GetString(objv[0]);
         Tcl_ResetResult(interp);
