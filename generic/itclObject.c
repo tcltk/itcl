@@ -24,7 +24,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann Copyright (c) 2007
  *
- *     RCS:  $Id: itclObject.c,v 1.1.2.86 2010/05/02 15:43:55 wiede Exp $
+ *     RCS:  $Id: itclObject.c,v 1.1.2.87 2010/08/22 18:42:02 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -2851,13 +2851,15 @@ ItclObjectUnknownCommand(
  * ------------------------------------------------------------------------
  */
 
-static ItclClass *
+ItclClass *
 GetClassFromClassName(
+    Tcl_Interp *interp,
     const char *className,
     ItclClass *iclsPtr)
 {
     Tcl_Obj *objPtr;
     Tcl_HashEntry *hPtr;
+    ItclObjectInfo *infoPtr;
     ItclClass *basePtr;
     Itcl_ListElem *elem;
     const char *chkPtr;
@@ -2866,38 +2868,44 @@ GetClassFromClassName(
 
     /* look for the class in the hierarchy */
     /* first check the class itself */
-    if (strcmp(className,
-            (const char *)Tcl_GetString(iclsPtr->namePtr)) == 0) {
-	return iclsPtr;
-    }
-    elem = Itcl_FirstListElem(&iclsPtr->bases);
-    while (elem != NULL) {
-        basePtr = (ItclClass*)Itcl_GetListValue(elem);
-	basePtr = GetClassFromClassName(className, basePtr);
-	if (basePtr != NULL) {
-	    return basePtr;
+    if (iclsPtr != NULL) {
+        if (strcmp(className,
+                (const char *)Tcl_GetString(iclsPtr->namePtr)) == 0) {
+	    return iclsPtr;
 	}
-        elem = Itcl_NextListElem(elem);
-    }
-    /* now try to match the classes full name last part with the className */
-    lgth = strlen(className);
-    elem = Itcl_FirstListElem(&iclsPtr->bases);
-    while (elem != NULL) {
-        basePtr = (ItclClass*)Itcl_GetListValue(elem);
-	chkPtr = basePtr->nsPtr->fullName;
-	chkLgth = strlen(chkPtr);
-	if (chkLgth >= lgth) {
-	    chkPtr = chkPtr + chkLgth - lgth;
-	    if (strcmp(chkPtr, className) == 0) {
+        elem = Itcl_FirstListElem(&iclsPtr->bases);
+        while (elem != NULL) {
+            basePtr = (ItclClass*)Itcl_GetListValue(elem);
+	    basePtr = GetClassFromClassName(interp, className, basePtr);
+	    if (basePtr != NULL) {
 	        return basePtr;
 	    }
-	}
-        elem = Itcl_NextListElem(elem);
+            elem = Itcl_NextListElem(elem);
+        }
+        /* now try to match the classes full name last part with the className */
+        lgth = strlen(className);
+        elem = Itcl_FirstListElem(&iclsPtr->bases);
+        while (elem != NULL) {
+            basePtr = (ItclClass*)Itcl_GetListValue(elem);
+	    chkPtr = basePtr->nsPtr->fullName;
+	    chkLgth = strlen(chkPtr);
+	    if (chkLgth >= lgth) {
+	        chkPtr = chkPtr + chkLgth - lgth;
+	        if (strcmp(chkPtr, className) == 0) {
+	            return basePtr;
+	        }
+	    }
+            elem = Itcl_NextListElem(elem);
+        }
+        infoPtr = iclsPtr->infoPtr;
+    } else {
+        infoPtr = (ItclObjectInfo *)Tcl_GetAssocData(interp,
+                ITCL_INTERP_DATA, NULL);
     }
     /* as a last chance try with className in hash table */
     objPtr = Tcl_NewStringObj(className, -1);
     Tcl_IncrRefCount(objPtr);
-    hPtr = Tcl_FindHashEntry(&iclsPtr->infoPtr->nameClasses, (char *)objPtr);
+    hPtr = Tcl_FindHashEntry(&infoPtr->nameClasses, (char *)objPtr);
     if (hPtr != NULL) {
         iclsPtr = Tcl_GetHashValue(hPtr);
     } else {
@@ -2970,7 +2978,7 @@ ItclMapMethodNameProc(
         className = Tcl_NewStringObj(head, -1);
         Tcl_IncrRefCount(className);
 	if (strlen(head) > 0) {
-	    iclsPtr2 = GetClassFromClassName(head, iclsPtr);
+	    iclsPtr2 = GetClassFromClassName(interp, head, iclsPtr);
 	} else {
 	    iclsPtr2 = NULL;
 	}

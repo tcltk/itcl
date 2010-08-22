@@ -9,7 +9,7 @@
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: itclInt.h,v 1.17.2.68 2010/04/21 09:22:43 wiede Exp $
+ * RCS: @(#) $Id: itclInt.h,v 1.17.2.69 2010/08/22 18:42:02 wiede Exp $
  */
 
 #ifdef HAVE_UNISTD_H
@@ -813,6 +813,8 @@ MODULE_SCOPE int ItclAddClassFunctionDictInfo(Tcl_Interp *interp,
         ItclClass *iclsPtr, ItclMemberFunc *imPtr);
 MODULE_SCOPE int ItclAddClassDelegatedFunctionDictInfo(Tcl_Interp *interp,
         ItclClass *iclsPtr, ItclDelegatedFunction *idmPtr);
+MODULE_SCOPE ItclClass * GetClassFromClassName(Tcl_Interp *interp,
+        const char *className, ItclClass *iclsPtr);
 
 
 

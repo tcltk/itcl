@@ -24,7 +24,7 @@
  *
  *  overhauled version author: Arnulf Wiedemann
  *
- *     RCS:  $Id: itclInfo.c,v 1.1.2.48 2010/03/19 08:24:57 wiede Exp $
+ *     RCS:  $Id: itclInfo.c,v 1.1.2.49 2010/08/22 18:42:02 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -870,9 +870,13 @@ Itcl_BiInfoHeritageCmd(
     listPtr = Tcl_NewListObj(0, (Tcl_Obj**)NULL);
     infoPtr = Tcl_GetAssocData(interp, ITCL_INTERP_DATA, NULL);
     callContextPtr = Itcl_PeekStack(&infoPtr->contextStack);
-    imPtr = callContextPtr->imPtr;
-    contextIclsPtr = imPtr->iclsPtr;
     upNsPtr = Itcl_GetUplevelNamespace(interp, 1);
+    if (callContextPtr != NULL) {
+        imPtr = callContextPtr->imPtr;
+        contextIclsPtr = imPtr->iclsPtr;
+    } else {
+	contextIclsPtr = GetClassFromClassName(interp, upNsPtr->fullName, NULL);
+    }
     if (contextIclsPtr->infoPtr->useOldResolvers) {
         if (contextIoPtr != NULL) {
             if (upNsPtr != contextIclsPtr->nsPtr) {
