@@ -23,7 +23,7 @@
  *           mmclennan@lucent.com
  *           http://www.tcltk.com/itcl
  *
- *     RCS:  $Id: itcl_ensemble.c,v 1.13 2008/12/15 20:02:58 andreas_kupries Exp $
+ *     RCS:  $Id: itcl_ensemble.c,v 1.14 2010/09/23 21:33:15 hobbs Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
@@ -1516,7 +1516,6 @@ HandleEnsemble(clientData, interp, objc, objv)
     chainObj->bytes = NULL;
     chainObj->typePtr = &itclEnsInvocType;
     chainObj->internalRep.twoPtrValue.ptr1 = (VOID *) ensPart;
-    Tcl_IncrRefCount(objv[1]);
     chainObj->internalRep.twoPtrValue.ptr2 = (VOID *) objv[0];
     Tcl_IncrRefCount(objv[0]);
 
