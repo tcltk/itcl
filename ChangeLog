@@ -1,4 +1,10 @@
-RCS: @(#) $Id: ChangeLog,v 1.1.2.42 2010/08/22 18:49:09 wiede Exp $
+RCS: @(#) $Id: ChangeLog,v 1.1.2.43 2010/09/27 19:56:18 msofer Exp $
+
+2010-09-26  Miguel Sofer  <msofer@users.sf.net>
+
+	* itcl/generic/itcl2TclOO.c (Itcl_NRRunCallbacks):
+	Tcl's [Patch 3072080] (a saner NRE): TclNRRunCallbacks lost one
+	argument. 
 
 2010-08-22  Arnulf P.Wiedemann  <wiede@users.sourceforge.net>
         * itclInt.h, itclObject.c, itclInfo.c: fix for BiInfoHeritageCmd
