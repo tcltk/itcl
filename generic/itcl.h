@@ -12,8 +12,6 @@
  *
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
- *
- * RCS: @(#) $Id: itcl.h,v 1.31.2.12 2010/08/17 21:29:30 hobbs Exp $
  */
 
 /*

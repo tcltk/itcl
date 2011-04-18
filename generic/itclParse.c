@@ -38,8 +38,6 @@
  *           http://www.tcltk.com/itcl
  *
  *  overhauled version author: Arnulf Wiedemann
- *
- *     RCS:  $Id: itclParse.c,v 1.1.2.74 2010/04/21 09:22:43 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------

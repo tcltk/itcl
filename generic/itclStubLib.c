@@ -1,5 +1,4 @@
 /*
- * $Id: itclStubLib.c,v 1.9.2.8 2009/05/09 08:46:10 davygrvy Exp $
  * SOURCE: tk/generic/tkStubLib.c, version 1.9 2004/03/17
  */
 

@@ -8,8 +8,6 @@
  *
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
- *
- * RCS: @(#) $Id: itclStubs.c,v 1.1.2.9 2009/10/22 09:10:33 wiede Exp $
  */
 
 #include <string.h>

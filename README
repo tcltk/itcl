@@ -1,7 +1,5 @@
 README: Itcl
 
-RCS: @(#) $Id: README,v 1.1.2.5 2009/01/09 19:37:51 wiede Exp $
-
 This is the 4.0b2 source distribution of Itcl, an object oriented
 extension for Tcl. Itcl is available from Sourceforge at:
 http://sourceforge.net/project/showfiles.php?group_id=13244&package_id=295641

@@ -1,5 +1,4 @@
 # -*- tcl -*-
-# $Id: itcl.decls,v 1.3.2.16 2010/03/06 12:41:46 wiede Exp $
 
 # public API
 library itcl

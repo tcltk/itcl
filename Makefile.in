@@ -11,8 +11,6 @@
 #
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
-#
-# RCS: @(#) $Id: Makefile.in,v 1.29.2.27 2010/08/17 21:29:29 hobbs Exp $
 
 #========================================================================
 # The names of the source files is defined in the configure script.
