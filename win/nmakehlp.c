@@ -7,9 +7,6 @@
  *
  * See the file "license.terms" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
- *
- * ----------------------------------------------------------------------------
- * RCS: @(#) $Id: nmakehlp.c,v 1.4 2004/04/29 17:40:44 davygrvy Exp $
  * ----------------------------------------------------------------------------
  */
 #include <windows.h>
