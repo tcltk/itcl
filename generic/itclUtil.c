@@ -22,8 +22,6 @@
  *           http://www.tcltk.com/itcl
  *
  *  overhauled version author: Arnulf Wiedemann
- *
- *     RCS:  $Id: itclUtil.c,v 1.1.2.16 2009/10/18 16:36:17 wiede Exp $
  * ========================================================================
  *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------

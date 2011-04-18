@@ -6,8 +6,6 @@
 #
 # Copyright (c) 1998-2000 by Ajuba Solutions
 # All rights reserved.
-# 
-# RCS: @(#) $Id: all.tcl,v 1.1.2.1 2008/11/14 12:10:41 wiede Exp $
 
 package require tcltest 2.1
 

@@ -1,6 +1,4 @@
 /*
- * $Id: itclDecls.h,v 1.9.2.14 2010/03/06 12:41:47 wiede Exp $
- *
  * This file is (mostly) automatically generated from itcl.decls.
  */
 

@@ -1,6 +1,4 @@
 /*
- * $Id: itclStubInit.c,v 1.4.2.10 2009/10/23 16:26:22 wiede Exp $
- *
  * This file is (mostly) automatically generated from itcl.decls.
  * It is compiled and linked in with the itcl package proper.
  */

@@ -7,8 +7,6 @@
  *
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
- *
- * RCS: @(#) $Id: itclNeededFromTclOO.c,v 1.1.2.15 2009/01/07 19:38:50 wiede Exp $
  */
 
 #include <tclOOInt.h>

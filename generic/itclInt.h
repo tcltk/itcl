@@ -8,8 +8,6 @@
  *
  * See the file "license.terms" for information on usage and redistribution of
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
- *
- * RCS: @(#) $Id: itclInt.h,v 1.17.2.69 2010/08/22 18:42:02 wiede Exp $
  */
 
 #ifdef HAVE_UNISTD_H

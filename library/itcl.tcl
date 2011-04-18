@@ -8,8 +8,6 @@
 #            Bell Labs Innovations for Lucent Technologies
 #            mmclennan@lucent.com
 #            http://www.tcltk.com/itcl
-#
-#      RCS:  $Id: itcl.tcl,v 1.7.2.1 2008/12/28 21:46:55 wiede Exp $
 # ----------------------------------------------------------------------
 #            Copyright (c) 1993-1998  Lucent Technologies, Inc.
 # ======================================================================
