@@ -1,7 +1,10 @@
 
 This is the fifth beta release of Itcl.
 When final it will be the next major release of Itcl.
-This version is named Itcl 4.0b5.
+This version is named Itcl 4.0b6.
+
+The difference to 4.0b5: in this release there are only bug fixes from SF
+tracker and updates for using Tcl 8.6 version from fossil repo trunk
 
 The difference to 4.0b4: in this release there are only bug fixes from SF
 tracker and updates to TEA 3.9.
