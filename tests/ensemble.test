@@ -94,9 +94,9 @@ test ensemble-1.10 {part errors are handled gracefully} {
     invoked from within
 "itcl::ensemble test_numbers {part foo}"}}
 
-test ensemble-1.11 {part argument errors are handled gracefully} {
+test ensemble-1.11 {part argument errors are handled gracefully} -body {
     list [catch "itcl::ensemble test_numbers {part foo {{}} {}}" msg] $msg $errorInfo
-} {1 {procedure "foo" has argument with no name} {procedure "foo" has argument with no name
+} -match glob -result {1 {*argument with no name} {*argument with no name
     while executing
 "part foo {{}} {}"
     ("ensemble" body line 1)
