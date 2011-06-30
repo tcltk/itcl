@@ -39,6 +39,12 @@ AC_CONFIG_AUX_DIR(tclconfig)
 TEA_PATH_TCLCONFIG
 TEA_LOAD_TCLCONFIG
 
+if test "${TCL_VERSION}" != "8.6"; then
+    AC_MSG_ERROR([${TCL_BIN_DIR}/tclConfig.sh is for Tcl ${TCL_VERSION}.
+Itcl ${PACKAGE_VERSION} needs Tcl 8.6.
+Use --with-tcl= option to indicate location of tclConfig.sh file for Tcl 8.6.])
+fi
+
 #-----------------------------------------------------------------------
 # Handle the --prefix=... option by defaulting to what Tcl gave.
 # Must be called after TEA_LOAD_TCLCONFIG and before TEA_SETUP_COMPILER.
