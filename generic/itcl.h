@@ -59,6 +59,10 @@
 #include <ctype.h>
 #include "tcl.h"
 
+#if (TCL_MAJOR_VERSION != 8) || (TCL_MINOR_VERSION < 6)
+#    error Itcl 4 build requires tcl.h from Tcl 8.6 or later
+#endif
+
 /*
  * For C++ compilers, use extern "C"
  */
