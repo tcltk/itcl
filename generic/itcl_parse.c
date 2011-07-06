@@ -265,7 +265,7 @@ Itcl_ClassCmd(clientData, interp, objc, objv)
     if (result != TCL_OK) {
         char msg[256];
         sprintf(msg, "\n    (class \"%.200s\" body line %d)",
-            className, ERRORLINE(interp));
+            className, Tcl_GetErrorLine(interp));
         Tcl_AddErrorInfo(interp, msg);
 
         Tcl_DeleteNamespace(cdefnPtr->namesp);
@@ -591,7 +591,8 @@ Itcl_ClassProtectionCmd(clientData, interp, objc, objv)
     else if (result != TCL_OK) {
         char mesg[256], *token;
         token = Tcl_GetStringFromObj(objv[0], (int*)NULL);
-        sprintf(mesg, "\n    (%.100s body line %d)", token, ERRORLINE(interp));
+        sprintf(mesg, "\n    (%.100s body line %d)", token,
+		Tcl_GetErrorLine(interp));
         Tcl_AddErrorInfo(interp, mesg);
     }
 

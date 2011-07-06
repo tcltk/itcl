@@ -2499,7 +2499,7 @@ Itcl_ReportFuncErrors(interp, mfunc, contextObj, result)
 
             if ((mfunc->member->code->flags & ITCL_IMPLEMENT_TCL) != 0) {
                 Tcl_AppendToObj(objPtr, "body line ", -1);
-                sprintf(num, "%d", ERRORLINE(iPtr));
+                sprintf(num, "%d", Tcl_GetErrorLine(iPtr));
                 Tcl_AppendToObj(objPtr, num, -1);
                 Tcl_AppendToObj(objPtr, ")", -1);
             } else {
