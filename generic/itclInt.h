@@ -63,6 +63,7 @@
 #endif
 
 #define ITCL_TCL_PRE_8_5 (TCL_MAJOR_VERSION == 8 && TCL_MINOR_VERSION < 5)
+#define ITCL_TCL_PRE_8_6 (TCL_MAJOR_VERSION == 8 && TCL_MINOR_VERSION < 6)
 
 #if !ITCL_TCL_PRE_8_5
 #if defined(USE_TCL_STUBS)
@@ -112,12 +113,55 @@
 	(tclIntStubsPtr->tcl_GetCommandFullName)
 #endif /* use stubs */
 
+#if !ITCL_TCL_PRE_8_6
 /*
- * Use 8.5+ CallFrame
+ * Use 8.6+ CallFrame
  */
-
 #define ItclCallFrame CallFrame
 #define Itcl_CallFrame Tcl_CallFrame
+
+#else
+
+/*
+ * Redefine CallFrame to account for extra field in Tcl 8.6.
+ * Make sure that standard CallFrame comes first.
+ */
+
+typedef struct ItclCallFrame {
+    Namespace *nsPtr;
+    int isProcCallFrame;
+    int objc;
+    Tcl_Obj *CONST *objv;
+    struct CallFrame *callerPtr;
+    struct CallFrame *callerVarPtr;
+    int level;
+    Proc *procPtr;
+    Tcl_HashTable *varTablePtr;
+    int numCompiledLocals;
+    Var* compiledLocals;
+    ClientData clientData;
+    struct localCache *localCachePtr;
+    struct NRE_callback *tailcallPtr;
+} ItclCallFrame;
+
+typedef struct Itcl_CallFrame {
+    Tcl_Namespace *nsPtr;
+    int dummy1;
+    int dummy2;
+    char *dummy3;
+    char *dummy4;
+    char *dummy5;
+    int dummy6;
+    char *dummy7;
+    char *dummy8;
+    int dummy9;
+    char *dummy10;
+    char *dummy11;
+    char *dummy12;
+    char *dummy13;
+} Itcl_CallFrame;
+
+#endif
 
 #define ItclInitVarFlags(varPtr) \
     (varPtr)->flags = 0
@@ -142,7 +186,7 @@
 #else /* Compiling on Tcl8.x, x<5 */ 
 
 /*
- * Redefine CallFrame to account for extra ClientData in 8.5.
+ * Redefine CallFrame to account for extra fields in Tcl 8.5 and 8.6.
  * Make sure that standard CallFrame comes first.
  */
 
@@ -160,6 +204,7 @@ typedef struct ItclCallFrame {
     Var* compiledLocals;
     ClientData clientData;
     struct localCache *localCachePtr;
+    struct NRE_callback *tailcallPtr;
 } ItclCallFrame;
 
 typedef struct Itcl_CallFrame {
@@ -176,6 +221,7 @@ typedef struct Itcl_CallFrame {
     char *dummy10;
     char *dummy11;
     char *dummy12;
+    char *dummy13;
 } Itcl_CallFrame;
 
 /*
