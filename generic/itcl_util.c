@@ -693,7 +693,7 @@ Itcl_ReleaseData(cdata)
     }
     if (!entry) {
 	Tcl_MutexUnlock(&ItclPreservedListLock);
-        Tcl_Panic("Itcl_ReleaseData can't find reference for 0x%x", cdata);
+        Tcl_Panic("Itcl_ReleaseData can't find reference for 0x%p", cdata);
     }
 
     /*
