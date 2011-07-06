@@ -59,9 +59,7 @@
  * Handle hiding of errorLine in 8.6
  */
 #if (TCL_MAJOR_VERSION == 8) && (TCL_MINOR_VERSION < 6)
-#define ERRORLINE(interp) ((interp)->errorLine)
-#else
-#define ERRORLINE(interp) (Tcl_GetErrorLine(interp))
+#define Tcl_GetErrorLine(interp) ((interp)->errorLine)
 #endif
 
 #define ITCL_TCL_PRE_8_5 (TCL_MAJOR_VERSION == 8 && TCL_MINOR_VERSION < 5)
