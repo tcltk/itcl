@@ -647,7 +647,7 @@ Itcl_ClassConstructorCmd(clientData, interp, objc, objv)
     if (objc == 3) {
         body = Tcl_GetString(objv[2]);
     } else {
-        cdefnPtr->initCode = objv[2];
+        cdefnPtr->initCode = Tcl_DuplicateObj(objv[2]);
         Tcl_IncrRefCount(cdefnPtr->initCode);
         body = Tcl_GetString(objv[3]);
     }
