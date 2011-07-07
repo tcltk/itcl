@@ -306,7 +306,7 @@ test basic-5.6a {variable accesses variables within namespace} {
     list [catch {test_globals::getval g1} msg] $msg
 } {0 global1}
 
-test basic-5.6a {variable accesses variables within namespace} {
+test basic-5.6b {variable accesses variables within namespace} {
     list [catch {test_globals::getval g2} msg] $msg
 } {0 global2}
 
