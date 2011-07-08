@@ -666,7 +666,7 @@ Itcl_HandleInstance(clientData, interp, objc, objv)
         return TCL_ERROR;
     }
 
-    framePtr = &context.frame;
+    framePtr = (ItclCallFrame *) &context.frame;
     Itcl_PushStack((ClientData)framePtr, &info->transparentFrames);
 
     /* Bug 227824
