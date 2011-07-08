@@ -1590,7 +1590,7 @@ Itcl_PushContext(interp, member, contextClass, contextObj, contextPtr)
     ItclObject *contextObj;   /* object context, or NULL */
     ItclContext *contextPtr;  /* storage space for class/object context */
 {
-    ItclCallFrame *framePtr = &contextPtr->frame;
+    ItclCallFrame *framePtr = (ItclCallFrame *) &contextPtr->frame;
 
     int result, localCt, newEntry;
     ItclMemberCode *mcode;

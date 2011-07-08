@@ -63,7 +63,9 @@
 #endif
 
 #define ITCL_TCL_PRE_8_5 (TCL_MAJOR_VERSION == 8 && TCL_MINOR_VERSION < 5)
-#define ITCL_TCL_PRE_8_6 (TCL_MAJOR_VERSION == 8 && TCL_MINOR_VERSION < 6)
+
+#define ItclCallFrame CallFrame
+#define Itcl_CallFrame Tcl_CallFrame
 
 #if !ITCL_TCL_PRE_8_5
 #if defined(USE_TCL_STUBS)
@@ -113,56 +115,6 @@
 	(tclIntStubsPtr->tcl_GetCommandFullName)
 #endif /* use stubs */
 
-#if !ITCL_TCL_PRE_8_6
-/*
- * Use 8.6+ CallFrame
- */
-#define ItclCallFrame CallFrame
-#define Itcl_CallFrame Tcl_CallFrame
-
-#else
-
-/*
- * Redefine CallFrame to account for extra field in Tcl 8.6.
- * Make sure that standard CallFrame comes first.
- */
-
-typedef struct ItclCallFrame {
-    Namespace *nsPtr;
-    int isProcCallFrame;
-    int objc;
-    Tcl_Obj *CONST *objv;
-    struct CallFrame *callerPtr;
-    struct CallFrame *callerVarPtr;
-    int level;
-    Proc *procPtr;
-    Tcl_HashTable *varTablePtr;
-    int numCompiledLocals;
-    Var* compiledLocals;
-    ClientData clientData;
-    struct localCache *localCachePtr;
-    struct NRE_callback *tailcallPtr;
-} ItclCallFrame;
-
-typedef struct Itcl_CallFrame {
-    Tcl_Namespace *nsPtr;
-    int dummy1;
-    int dummy2;
-    char *dummy3;
-    char *dummy4;
-    char *dummy5;
-    int dummy6;
-    char *dummy7;
-    char *dummy8;
-    int dummy9;
-    char *dummy10;
-    char *dummy11;
-    char *dummy12;
-    char *dummy13;
-} Itcl_CallFrame;
-
-#endif
-
 #define ItclInitVarFlags(varPtr) \
     (varPtr)->flags = 0
 
@@ -184,45 +136,6 @@ typedef struct Itcl_CallFrame {
 #define itclVarLocalSize  sizeof(Var)
 
 #else /* Compiling on Tcl8.x, x<5 */ 
-
-/*
- * Redefine CallFrame to account for extra fields in Tcl 8.5 and 8.6.
- * Make sure that standard CallFrame comes first.
- */
-
-typedef struct ItclCallFrame {
-    Namespace *nsPtr;
-    int isProcCallFrame;
-    int objc;
-    Tcl_Obj *CONST *objv;
-    struct CallFrame *callerPtr;
-    struct CallFrame *callerVarPtr;
-    int level;
-    Proc *procPtr;
-    Tcl_HashTable *varTablePtr;
-    int numCompiledLocals;
-    Var* compiledLocals;
-    ClientData clientData;
-    struct localCache *localCachePtr;
-    struct NRE_callback *tailcallPtr;
-} ItclCallFrame;
-
-typedef struct Itcl_CallFrame {
-    Tcl_Namespace *nsPtr;
-    int dummy1;
-    int dummy2;
-    char *dummy3;
-    char *dummy4;
-    char *dummy5;
-    int dummy6;
-    char *dummy7;
-    char *dummy8;
-    int dummy9;
-    char *dummy10;
-    char *dummy11;
-    char *dummy12;
-    char *dummy13;
-} Itcl_CallFrame;
 
 /*
  * Definition of runtime behaviour to be able to run irrespective of the Tcl
@@ -518,7 +431,7 @@ typedef struct ItclVarLookup {
  */
 typedef struct ItclContext {
     ItclClass *classDefn;     /* class definition */
-    ItclCallFrame frame;      /* call frame for object context */
+    Itcl_CallFrame frame;      /* call frame for object context */
     Var *compiledLocals;      /* points to storage for compiled locals */
     Var localStorage[20];     /* default storage for compiled locals */
 } ItclContext;
