@@ -499,9 +499,9 @@ Itcl_SetListValue(elemPtr,val)
     Itcl_ListElem *elemPtr; /* list element being modified */
     ClientData val;         /* new value associated with element */
 {
-    Itcl_List *listPtr = elemPtr->owner;
-    assert(listPtr->validate == ITCL_VALID_LIST);
     assert(elemPtr != NULL);
+    assert(elemPtr->owner != NULL);
+    assert(elemPtr->owner->validate == ITCL_VALID_LIST);
 
     elemPtr->value = val;
 }
