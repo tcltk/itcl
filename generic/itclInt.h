@@ -65,9 +65,11 @@
 #define ITCL_TCL_PRE_8_5 (TCL_MAJOR_VERSION == 8 && TCL_MINOR_VERSION < 5)
 
 #define ItclCallFrame CallFrame
-#define Itcl_CallFrame Tcl_CallFrame
 
 #if !ITCL_TCL_PRE_8_5
+
+#define Itcl_CallFrame Tcl_CallFrame
+
 #if defined(USE_TCL_STUBS)
 
 /*
@@ -136,6 +138,23 @@
 #define itclVarLocalSize  sizeof(Var)
 
 #else /* Compiling on Tcl8.x, x<5 */ 
+
+typedef struct Itcl_CallFrame {
+    Tcl_Namespace *nsPtr;
+    int dummy1;
+    int dummy2;
+    void *dummy3;
+    void *dummy4;
+    void *dummy5;
+    int dummy6;
+    void *dummy7;
+    void *dummy8;
+    int dummy9;
+    void *dummy10;
+    void *dummy11;
+    void *dummy12;
+    void *dummy13;
+} Itcl_CallFrame;
 
 /*
  * Definition of runtime behaviour to be able to run irrespective of the Tcl
