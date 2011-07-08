@@ -90,6 +90,7 @@ INSTALL_LIBRARY	= ${INSTALL_DATA}
 
 PACKAGE_NAME	= @PACKAGE_NAME@
 PACKAGE_VERSION	= @PACKAGE_VERSION@
+PACKAGE_PATCH_LEVEL = 
 CC		= @CC@
 CFLAGS_DEFAULT	= @CFLAGS_DEFAULT@
 CFLAGS_WARNING	= @CFLAGS_WARNING@
@@ -270,10 +271,11 @@ VPATH = $(srcdir)/unix:$(srcdir)/generic:$(srcdir)/win
 #========================================================================
 
 TAR		= tar
-#COMPRESS       = tar cvf $(PKG_DIR).tar $(PKG_DIR); compress $(PKG_DIR).tar
-COMPRESS        = $(TAR) zcvf $(PKG_DIR).tar.gz $(PKG_DIR)
+RELEASE_DIR	= $(PKG_DIR)$(PACKAGE_PATCH_LEVEL)
+#COMPRESS       = tar cvf $(RELEASE_DIR).tar $(RELEASE_DIR); compress $(RELEASE_DIR).tar
+COMPRESS        = $(TAR) zcvf $(RELEASE_DIR).tar.gz $(RELEASE_DIR)
 DIST_ROOT       = /tmp/dist
-DIST_DIR        = $(DIST_ROOT)/$(PKG_DIR)
+DIST_DIR        = $(DIST_ROOT)/$(RELEASE_DIR)
 
 dist-clean:
 	rm -rf $(DIST_DIR) $(DIST_ROOT)/$(PKG_DIR).tar.*
