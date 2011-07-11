@@ -164,19 +164,12 @@ Initialize(interp)
      *  to adapt dynamically regarding use of some internal structures and
      *  functions that have changed (or have been added) since 8.1.0
      */
-#if TCL_DOES_STUBS
     if (itclCompatFlags == -1) {
 	int maj, min, ptch, type;
 
 	itclCompatFlags = 0;
 	Tcl_GetVersion(&maj, &min, &ptch, &type);
 
-	/* ver >= 8.4a1 */
-	if ((maj == 8) && (min >= 4)) {
-	    /* TODO: make a TIP for exporting a Tcl_CommandIsDeleted
-	     * function in the core. */
-	    itclCompatFlags |= ITCL_COMPAT_USECMDFLAGS;
-	}
 #if USE_TCL_STUBS
 	if ((maj == 8) && (min > 4) &&
 		((type > TCL_ALPHA_RELEASE) || (ptch > 2))) {
@@ -214,7 +207,6 @@ Initialize(interp)
     if (Itcl_EnsembleInit(interp) != TCL_OK) {
         return TCL_ERROR;
     }
-#endif
     
     /*
      *  Create the top-level data structure for tracking objects.
@@ -405,7 +397,6 @@ Initialize(interp)
     /*
      *  Package is now loaded.
      */
-#if TCL_DOES_STUBS
     {
 	extern ItclStubs itclStubs;
 	if (Tcl_PkgProvideEx(interp, "Itcl", ITCL_VERSION,
@@ -413,11 +404,6 @@ Initialize(interp)
 	    return TCL_ERROR;
 	}
     }
-#else
-    if (Tcl_PkgProvide(interp, "Itcl", ITCL_VERSION) != TCL_OK) {
-	return TCL_ERROR;
-    }
-#endif
 
     return TCL_OK;
 }

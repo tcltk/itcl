@@ -45,23 +45,13 @@ STUBPREFIX	= $(PROJECT)stub
 
 PKGINDEX	= "$(TMP_DIR)\pkgIndex.tcl"
 
-!if $(TCL_DOES_STUBS)
 ITCLLIBNAME	= $(PROJECT)$(ITCL_VERSION)$(SUFX).$(EXT)
-!else
-ITCLLIBNAME	= $(PROJECT)$(ITCL_VERSION)80$(SUFX).$(EXT)
-!endif
 
 ITCLLIB		= "$(OUT_DIR)\$(ITCLLIBNAME)"
 ITCLIMPLIB	= "$(OUT_DIR)\$(PROJECT)$(ITCL_VERSION)$(SUFX).lib"
 
-!if $(TCL_DOES_STUBS)
 ITCLSTUBLIBNAME	= $(STUBPREFIX)$(ITCL_VERSION).lib
 ITCLSTUBLIB	= "$(OUT_DIR)\$(ITCLSTUBLIBNAME)"
-!else
-ITCLSTUBLIBNAME	=
-ITCLSTUBLIB	= 
-TCLSTUBLIB	= $(TCLIMPLIB)
-!endif
 
 BIN_INSTALL_DIR		= $(_INSTALLDIR)\bin
 DOC_INSTALL_DIR		= $(_INSTALLDIR)\doc
@@ -80,18 +70,13 @@ ITCLOBJS = \
 	$(TMP_DIR)\itcl_objects.obj \
 	$(TMP_DIR)\itcl_parse.obj \
 	$(TMP_DIR)\itcl_util.obj \
-!if $(TCL_DOES_STUBS)
 	$(TMP_DIR)\itclStubInit.obj \
-!endif
 !if !$(STATIC_BUILD)
 	$(TMP_DIR)\dllEntryPoint.obj \
 	$(TMP_DIR)\itcl.res
 !endif
 
-ITCLSTUBOBJS = \
-!if $(TCL_DOES_STUBS)
-	$(TMP_DIR)\itclStubLib.obj
-!endif
+ITCLSTUBOBJS = $(TMP_DIR)\itclStubLib.obj
 
 GENERICDIR	= $(ROOT)\generic
 DOCDIR		= $(ROOT)\doc
@@ -183,10 +168,8 @@ ITCL_DLL_CFLAGS	= $(cflags) $(cdebug) $(crt) $(ITCL_INCLUDES) $(ITCL_DEFINES) $(
 ### not a technical limitation.
 !if $(STATIC_BUILD)
 ITCL_CFLAGS	= $(ITCL_DLL_CFLAGS) -DSTATIC_BUILD
-!elseif $(TCL_DOES_STUBS)
-ITCL_CFLAGS	= $(ITCL_DLL_CFLAGS) -DUSE_TCL_STUBS
 !else
-ITCL_CFLAGS	= $(ITCL_DLL_CFLAGS)
+ITCL_CFLAGS	= $(ITCL_DLL_CFLAGS) -DUSE_TCL_STUBS
 !endif
 
 #---------------------------------------------------------------------
@@ -221,10 +204,8 @@ $(ITCLOBJS)
 	-@del $*.exp
 !endif
 
-!if $(TCL_DOES_STUBS)
 $(ITCLSTUBLIB) : $(ITCLSTUBOBJS)
 	$(lib32) -nologo -out:$@ $(ITCLSTUBOBJS)
-!endif
 
 install-binaries :
 	if not exist "$(_INSTALLDIR)" mkdir "$(_INSTALLDIR)"

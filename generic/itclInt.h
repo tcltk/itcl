@@ -256,23 +256,6 @@ MODULE_SCOPE Var * ItclVarHashCreateVar (TclVarHashTable * tablePtr,
 
 
 /*
- * Some backward compatability adjustments.
- */
-
-#if TCL_MAJOR_VERSION == 8 && TCL_MINOR_VERSION == 0
-#   define Tcl_GetString(obj)	Tcl_GetStringFromObj((obj), NULL)
-#   define TCL_DECLARE_MUTEX(mutexVar)
-#   define Tcl_MutexLock(mutexVar)
-#   define Tcl_MutexUnlock(mutexVar)
-#   define Tcl_Panic panic
-#endif
-
-#define TCL_DOES_STUBS \
-    (TCL_MAJOR_VERSION > 8 || TCL_MAJOR_VERSION == 8 && (TCL_MINOR_VERSION > 1 || \
-    (TCL_MINOR_VERSION == 1 && TCL_RELEASE_LEVEL == TCL_FINAL_RELEASE)))
-
-
-/*
  *  Common info for managing all known objects.
  *  Each interpreter has one of these data structures stored as
  *  clientData in the "itcl" namespace.  It is also accessible
@@ -462,9 +445,6 @@ typedef struct ItclContext {
 
 extern int itclCompatFlags;
 
-#define ITCL_COMPAT_USECMDFLAGS 0x0001	/* Tcl8.4a1 introduced a different Command
-					 * structure, and we need to adapt
-					 * dynamically */
 #define ITCL_COMPAT_USE_ISTATE_API 0x2  /* Tcl 8.5a2 added interp state APIs */
 
 #include "itclIntDecls.h"
