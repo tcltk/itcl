@@ -66,7 +66,7 @@ Itcl_InitStubs (interp, version, exact)
 {
     CONST char *actualVersion;
     
-    actualVersion = Tcl_PkgRequireEx(interp, "Itcl", (CONST84 char *)version, exact,
+    actualVersion = Tcl_PkgRequireEx(interp, "Itcl", version, exact,
         (ClientData *) &itclStubsPtr);
 
     if (actualVersion == NULL) {

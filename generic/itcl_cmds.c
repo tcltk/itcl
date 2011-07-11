@@ -620,7 +620,7 @@ Itcl_FindClassesCmd(clientData, interp, objc, objv)
                     cmdName = Tcl_GetString(objPtr);
                 } else {
                     cmdName = Tcl_GetCommandName(interp, cmd);
-                    objPtr = Tcl_NewStringObj((CONST84 char *)cmdName, -1);
+                    objPtr = Tcl_NewStringObj(cmdName, -1);
                 }
 
                 if (originalCmd) {
@@ -629,7 +629,7 @@ Itcl_FindClassesCmd(clientData, interp, objc, objv)
                 Tcl_CreateHashEntry(&unique, (char*)cmd, &newEntry);
 
                 if (newEntry &&
-			(!pattern || Tcl_StringMatch((CONST84 char *)cmdName,
+			(!pattern || Tcl_StringMatch(cmdName,
 			pattern))) {
                     Tcl_ListObjAppendElement((Tcl_Interp*)NULL,
 			    Tcl_GetObjResult(interp), objPtr);
@@ -801,14 +801,14 @@ Itcl_FindObjectsCmd(clientData, interp, objc, objv)
 		    cmdName = Tcl_GetString(objPtr);
                 } else {
                     cmdName = Tcl_GetCommandName(interp, cmd);
-                    objPtr = Tcl_NewStringObj((CONST84 char *)cmdName, -1);
+                    objPtr = Tcl_NewStringObj(cmdName, -1);
                 }
 
                 Tcl_CreateHashEntry(&unique, (char*)cmd, &newEntry);
 
                 match = 0;
 		if (newEntry &&
-			(!pattern || Tcl_StringMatch((CONST84 char *)cmdName,
+			(!pattern || Tcl_StringMatch(cmdName,
 			pattern))) {
                     if (!classDefn || (contextObj->classDefn == classDefn)) {
                         if (!isaDefn) {
