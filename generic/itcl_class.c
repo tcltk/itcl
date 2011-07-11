@@ -936,7 +936,6 @@ Itcl_ClassCmdResolver(interp, name, context, flags, rPtr)
     Tcl_HashEntry *entry;
     ItclMemberFunc *mfunc;
     Command *cmdPtr;
-    int isCmdDeleted;
 
     /*
      *  If the command is a member function, and if it is
@@ -984,29 +983,7 @@ Itcl_ClassCmdResolver(interp, name, context, flags, rPtr)
      */
     cmdPtr = (Command*)mfunc->accessCmd;
     
-    /*
-     * The following #if is needed so itcl can be compiled with
-     * all versions of Tcl.  The integer "deleted" was renamed to
-     * "flags" in tcl8.4a2.  This #if is also found in itcl_ensemble.c .
-     * We're using a runtime check with itclCompatFlags to adjust for
-     * the behavior of this change, too.
-     *
-     */
-#if (TCL_MAJOR_VERSION == 8) && (TCL_MINOR_VERSION < 4)
-#   define CMD_IS_DELETED 0x1  /* If someone ever changes this from tcl.h,
-				* we must change our logic here, too */
-	isCmdDeleted = (!cmdPtr ||
-		(itclCompatFlags & ITCL_COMPAT_USECMDFLAGS ?
-		(cmdPtr->deleted & CMD_IS_DELETED) :
-		cmdPtr->deleted));
-#else
-	isCmdDeleted = (!cmdPtr ||
-		(itclCompatFlags & ITCL_COMPAT_USECMDFLAGS ?
-		(cmdPtr->flags & CMD_IS_DELETED) :
-		cmdPtr->flags));
-#endif
-
-    if (isCmdDeleted) {
+    if (!cmdPtr || cmdPtr->flags & CMD_IS_DELETED) {
 	mfunc->accessCmd = NULL;
 
 	if ((flags & TCL_LEAVE_ERR_MSG) != 0) {
