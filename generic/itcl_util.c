@@ -1271,7 +1271,7 @@ Itcl_DecodeScopedCommand(interp, name, rNsPtr, rCmdPtr)
     int len = strlen(name);
     CONST char *pos;
     int listc, result;
-    char **listv;
+    CONST char **listv;
 
     cmdName = ckalloc((unsigned)strlen(name)+1);
     strcpy(cmdName, name);
@@ -1283,7 +1283,7 @@ Itcl_DecodeScopedCommand(interp, name, rNsPtr, rCmdPtr)
 	if ((*pos == 'i') && ((pos + 7) <= (name + len))
 	        && (strncmp(pos, "inscope", 7) == 0)) {
 
-            result = Tcl_SplitList(interp, (CONST84 char *)name, &listc,
+            result = Tcl_SplitList(interp, name, &listc,
 		    &listv);
             if (result == TCL_OK) {
                 if (listc != 4) {
@@ -1424,7 +1424,7 @@ Itcl_CreateArgs(interp, string, objc, objv)
 
     listPtr = Tcl_NewListObj(0, (Tcl_Obj**)NULL);
     Tcl_ListObjAppendElement((Tcl_Interp*)NULL, listPtr,
-        Tcl_NewStringObj((CONST84 char *)string, -1));
+        Tcl_NewStringObj(string, -1));
 
     for (i=0; i < objc; i++) {
         Tcl_ListObjAppendElement((Tcl_Interp*)NULL, listPtr, objv[i]);

@@ -87,7 +87,7 @@ Itcl_CreateClass(interp, path, info, rPtr)
      *  We'll just replace the namespace data below with the
      *  proper class data.
      */
-    classNs = Tcl_FindNamespace(interp, (CONST84 char *)path,
+    classNs = Tcl_FindNamespace(interp, path,
 	    (Tcl_Namespace*)NULL, /* flags */ 0);
 
     if (classNs != NULL && Itcl_IsClassNamespace(classNs)) {
@@ -103,7 +103,7 @@ Itcl_CreateClass(interp, path, info, rPtr)
      *  usual Tcl commands from being clobbered when a programmer
      *  makes a bogus call like "class info".
      */
-    cmd = Tcl_FindCommand(interp, (CONST84 char *)path,
+    cmd = Tcl_FindCommand(interp, path,
 	    (Tcl_Namespace*)NULL, /* flags */ TCL_NAMESPACE_ONLY);
 
     if (cmd != NULL && !Itcl_IsStub(cmd)) {
@@ -179,7 +179,7 @@ Itcl_CreateClass(interp, path, info, rPtr)
     Itcl_PreserveData((ClientData)cdPtr);
 
     if (classNs == NULL) {
-        classNs = Tcl_CreateNamespace(interp, (CONST84 char *)path,
+        classNs = Tcl_CreateNamespace(interp, path,
             (ClientData)cdPtr, ItclDestroyClassNamesp);
     }
     else {
@@ -733,7 +733,7 @@ Itcl_FindClassNamespace(interp, path)
      *  see if it's the current namespace, and try the global
      *  namespace as well.
      */
-    classNs = Tcl_FindNamespace(interp, (CONST84 char *)path,
+    classNs = Tcl_FindNamespace(interp, path,
 	    (Tcl_Namespace*)NULL, /* flags */ 0);
 
     if ( !classNs && contextNs->parentPtr != NULL &&
@@ -1681,7 +1681,7 @@ Itcl_GetCommonVar(interp, name, contextClass)
                  contextClass->namesp, /*isProcCallFrame*/ 0);
 
     if (result == TCL_OK) {
-        val = Tcl_GetVar2(interp, (CONST84 char *)name, (char*)NULL, 0);
+        val = Tcl_GetVar2(interp, name, (char*)NULL, 0);
         Tcl_PopCallFrame(interp);
     }
     return val;
