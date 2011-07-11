@@ -11,6 +11,8 @@
 #-----------------------------------------------------------------------
 
 AC_INIT([itcl], [3.4])
+itcl_PATCH_LEVEL=""
+AC_SUBST(itcl_PATCH_LEVEL)
 
 #--------------------------------------------------------------------
 # Call TEA_INIT as the first TEA_ macro to set up initial vars.
