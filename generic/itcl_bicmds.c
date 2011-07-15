@@ -654,7 +654,7 @@ ItclReportPublicOpt(interp, vdefn, contextObj)
         contextObj->classDefn);
 
     if (val) {
-        objPtr = Tcl_NewStringObj((CONST84 char *)val, -1);
+        objPtr = Tcl_NewStringObj(val, -1);
     } else {
         objPtr = Tcl_NewStringObj("<undefined>", -1);
     }
@@ -1019,7 +1019,7 @@ Itcl_BiInfoFunctionCmd(dummy, interp, objc, objv)
     Tcl_Obj *resultPtr = NULL;
     Tcl_Obj *objPtr = NULL;
 
-    static char *options[] = {
+    static CONST char *options[] = {
         "-args", "-body", "-name", "-protection", "-type",
         (char*)NULL
     };
@@ -1214,7 +1214,7 @@ Itcl_BiInfoVariableCmd(dummy, interp, objc, objv)
     Tcl_Obj *resultPtr = NULL;
     Tcl_Obj *objPtr = NULL;
 
-    static char *options[] = {
+    static CONST char *options[] = {
         "-config", "-init", "-name", "-protection", "-type",
         "-value", (char*)NULL
     };
@@ -1367,13 +1367,13 @@ Itcl_BiInfoVariableCmd(dummy, interp, objc, objv)
 
                 case BIvProtectIdx:
                     val = Itcl_ProtectionStr(member->protection);
-                    objPtr = Tcl_NewStringObj((CONST84 char *)val, -1);
+                    objPtr = Tcl_NewStringObj(val, -1);
                     break;
 
                 case BIvTypeIdx:
                     val = ((member->flags & ITCL_COMMON) != 0)
                         ? "common" : "variable";
-                    objPtr = Tcl_NewStringObj((CONST84 char *)val, -1);
+                    objPtr = Tcl_NewStringObj(val, -1);
                     break;
 
                 case BIvValueIdx:
@@ -1397,7 +1397,7 @@ Itcl_BiInfoVariableCmd(dummy, interp, objc, objv)
                     if (val == NULL) {
                         val = "<undefined>";
                     }
-                    objPtr = Tcl_NewStringObj((CONST84 char *)val, -1);
+                    objPtr = Tcl_NewStringObj(val, -1);
                     break;
             }
 

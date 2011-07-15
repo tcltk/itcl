@@ -124,20 +124,6 @@
 #   endif
 #endif
 
-
-/*
- * Starting from the 8.4 core, Tcl API is CONST'ified.  Our API is always
- * CONST, but we need to build with Tcl when it isn't CONST and fake it
- * when needed with <= 8.3
- *
- * http://wiki.tcl.tk/3669
- */
-
-#ifndef CONST84
-#   define CONST84
-#endif
-
-
 /*
  * Protection levels:
  *
