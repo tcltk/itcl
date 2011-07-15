@@ -7,6 +7,7 @@
 # Copyright (c) 1998-2000 by Ajuba Solutions
 # All rights reserved.
 
+package require Tcl 8.4
 package require tcltest 2.1
 
 tcltest::testsDirectory [file dir [info script]]
