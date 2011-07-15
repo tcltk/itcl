@@ -320,7 +320,7 @@ Itcl_CreateMethod(interp, cdefn, name, arglist, body)
     name = Tcl_DStringValue(&buffer);
 
     Itcl_PreserveData((ClientData)mfunc);
-    mfunc->accessCmd = Tcl_CreateObjCommand(interp, (CONST84 char *)name,
+    mfunc->accessCmd = Tcl_CreateObjCommand(interp, name,
 	Itcl_ExecMethod, (ClientData)mfunc, Itcl_ReleaseData);
 
     Tcl_DStringFree(&buffer);
@@ -385,7 +385,7 @@ Itcl_CreateProc(interp, cdefn, name, arglist, body)
     name = Tcl_DStringValue(&buffer);
 
     Itcl_PreserveData((ClientData)mfunc);
-    mfunc->accessCmd = Tcl_CreateObjCommand(interp, (CONST84 char *)name,
+    mfunc->accessCmd = Tcl_CreateObjCommand(interp, name,
 	Itcl_ExecProc, (ClientData)mfunc, Itcl_ReleaseData);
 
     Tcl_DStringFree(&buffer);
@@ -653,9 +653,9 @@ Itcl_CreateMemberCode(interp, cdefn, arglist, body, mcodePtr)
     procPtr->cmdPtr->nsPtr = (Namespace*)cdefn->namesp;
 
     if (body) {
-        procPtr->bodyPtr = Tcl_NewStringObj((CONST84 char *)body, -1);
+        procPtr->bodyPtr = Tcl_NewStringObj(body, -1);
     } else {
-        procPtr->bodyPtr = Tcl_NewStringObj((CONST84 char *)"", -1);
+        procPtr->bodyPtr = Tcl_NewStringObj("", -1);
         mcode->flags |= ITCL_IMPLEMENT_NONE;
     }
     Tcl_IncrRefCount(procPtr->bodyPtr);
@@ -978,8 +978,8 @@ Itcl_EvalMemberCode(interp, mfunc, member, contextObj, objc, objv)
             interp, objc, objv);
     }
     else if ((mcode->flags & ITCL_IMPLEMENT_ARGCMD) != 0) {
-        char **argv;
-        argv = (char**)ckalloc( (unsigned)(objc*sizeof(char*)) );
+        CONST char **argv;
+        argv = (CONST char**)ckalloc( (unsigned)(objc*sizeof(char*)) );
         for (i=0; i < objc; i++) {
             argv[i] = Tcl_GetStringFromObj(objv[i], (int*)NULL);
         }
@@ -1047,14 +1047,14 @@ Itcl_CreateArgList(interp, decl, argcPtr, argPtr)
     int status = TCL_OK;  /* assume that this will succeed */
 
     int i, argc, fargc;
-    char **argv, **fargv;
+    CONST char **argv, **fargv;
     CompiledLocal *localPtr, *last;
 
     *argPtr = last = NULL;
     *argcPtr = 0;
 
     if (decl) {
-        if (Tcl_SplitList(interp, (CONST84 char *)decl, &argc, &argv)
+        if (Tcl_SplitList(interp, decl, &argc, &argv)
 		!= TCL_OK) {
             return TCL_ERROR;
         }
@@ -1155,7 +1155,7 @@ Itcl_CreateArg(name, init)
     localPtr->resolveInfo = NULL;
 
     if (init != NULL) {
-        localPtr->defValuePtr = Tcl_NewStringObj((CONST84 char *)init, -1);
+        localPtr->defValuePtr = Tcl_NewStringObj(init, -1);
         Tcl_IncrRefCount(localPtr->defValuePtr);
     } else {
         localPtr->defValuePtr = NULL;
@@ -1822,7 +1822,7 @@ Itcl_AssignArgs(interp, objc, objv, mfunc)
     int result = TCL_OK;
 
     int defargc;
-    char **defargv = NULL;
+    CONST char **defargv = NULL;
     Tcl_Obj **defobjv = NULL;
     int configc = 0;
     ItclVarDefn **configVars = NULL;
