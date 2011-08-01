@@ -1,3 +1,7 @@
+2011-08-01  Don Porter  <dgp@Users.sourceforge.net>
+	* win/makefile.vc: MSVC support updates.  Thanks to Twylite.
+	* win/rules.vc:
+
 2011-04-29  Arnulf P.Wiedemann  <wiede@users.sourceforge.net>
 	* generic/itcl.h:
 	* configure, configure.in, Makefile.in: Bump version to 4.0b6

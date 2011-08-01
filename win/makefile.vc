@@ -56,7 +56,7 @@ PROJECT	= itcl
 BINROOT		= .
 ROOT		= ..
 STUBPREFIX	= $(PROJECT)stub
-DOTVERSION      = $(ITCL_MAJOR_VERSION).$(ITCL_MINOR_VERSION)
+DOTVERSION      = $(ITCL_PATCH_LEVEL)
 VERSION         = $(ITCL_MAJOR_VERSION)$(ITCL_MINOR_VERSION)
 
 PKGINDEX	= "$(TMP_DIR)\pkgIndex.tcl"
@@ -66,11 +66,11 @@ ITCLIMPLIB	= "$(OUT_DIR)\$(PROJECT)$(VERSION)$(SUFX).lib"
 ITCLSTUBLIBNAME	= $(STUBPREFIX)$(VERSION).lib
 ITCLSTUBLIB	= "$(OUT_DIR)\$(ITCLSTUBLIBNAME)"
 
-BIN_INSTALL_DIR		= $(_INSTALLDIR)\bin
-DOC_INSTALL_DIR		= $(_INSTALLDIR)\doc
-LIB_INSTALL_DIR		= $(_INSTALLDIR)\lib
-SCRIPT_INSTALL_DIR	= $(_INSTALLDIR)\lib\$(PROJECT)$(DOTVERSION)
-INCLUDE_INSTALL_DIR	= $(_INSTALLDIR)\include
+BIN_INSTALL_DIR		= $(_INSTALLDIR)\..\bin
+DOC_INSTALL_DIR		= $(_INSTALLDIR)\..\doc
+LIB_INSTALL_DIR		= $(_INSTALLDIR)
+SCRIPT_INSTALL_DIR	= $(_INSTALLDIR)\$(PROJECT)$(DOTVERSION)
+INCLUDE_INSTALL_DIR	= $(_INSTALLDIR)\..\include
 
 ITCLOBJS = \
         $(TMP_DIR)\itcl2TclOO.obj \
@@ -270,14 +270,14 @@ install-binaries :
 		> "$(SCRIPT_INSTALL_DIR)\pkgIndex.tcl"
 	echo ^ ^ ^ ^ set add 80>> "$(SCRIPT_INSTALL_DIR)\pkgIndex.tcl"
 	echo } else {>> "$(SCRIPT_INSTALL_DIR)\pkgIndex.tcl"
-	echo ^ ^ ^ ^ set add {}>> "$(SCRIPT_INSTALL_DIR)\pkgIndex.tcl"
+	echo ^ ^ ^ ^ set add {$(SUFX:g=)}>> "$(SCRIPT_INSTALL_DIR)\pkgIndex.tcl"
 	echo }>> "$(SCRIPT_INSTALL_DIR)\pkgIndex.tcl"
 	echo if {[info exists ::tcl_platform(debug)] ^&^&\
 		$$::tcl_platform(debug)	^&^& \>> "$(SCRIPT_INSTALL_DIR)\pkgIndex.tcl"
 	echo ^ ^ ^ ^ ^ ^ ^ ^ [file exists [file join $$dir\
 		$(PROJECT)$(VERSION)$${add}g.dll]]}\
 		{>> "$(SCRIPT_INSTALL_DIR)\pkgIndex.tcl"
-	echo ^ ^ ^ ^ package ifneeded Itcl $(VERSION) [list load\
+	echo ^ ^ ^ ^ package ifneeded Itcl $(DOTVERSION) [list load\
 		[file join $$dir $(PROJECT)$(VERSION)$${add}g.dll]\
 		Itcl]>> "$(SCRIPT_INSTALL_DIR)\pkgIndex.tcl"
 	echo } else {>> "$(SCRIPT_INSTALL_DIR)\pkgIndex.tcl"
@@ -441,6 +441,11 @@ tidy :
 	-del $(TMP_DIR)\*.res
 
 clean : tidy
+	@if exist $(TMP_DIR)\nul $(RMDIR) $(TMP_DIR)
+	@if exist $(WINDIR)\version.vc del $(WINDIR)\version.vc
+	@if exist $(WINDIR)\vercl.i del $(WINDIR)\vercl.i
+	@if exist $(WINDIR)\vercl.x del $(WINDIR)\vercl.x
+	@if exist $(WINDIR)\_junk.pch del $(WINDIR)\_junk.pch
 	-del $(OUT_DIR)\*.exp
 	-del $(OUT_DIR)\*.lib
 	-del $(OUT_DIR)\*.dll

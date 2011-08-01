@@ -186,7 +186,9 @@ VCVER=0
 !if ![echo VCVERSION=_MSC_VER > vercl.x] \
     && ![cl -nologo -TC -P vercl.x $(ERRNULL)]
 !include vercl.i
-!if $(VCVERSION) >= 1500
+!if $(VCVERSION) >= 1600
+VCVER=10
+!elseif $(VCVERSION) >= 1500
 VCVER=9
 !elseif $(VCVERSION) >= 1400
 VCVER=8
