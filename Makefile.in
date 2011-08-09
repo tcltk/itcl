@@ -288,7 +288,7 @@ dist: dist-clean doc
 	chmod 664 $(DIST_DIR)/tclconfig/tcl.m4
 	chmod +x $(DIST_DIR)/tclconfig/install-sh
 
-	list='doc generic library tests tools win win/rc'; \
+	list='doc generic library tests tools win'; \
 	for p in $$list; do \
 	    if test -d $(srcdir)/$$p ; then \
 		mkdir $(DIST_DIR)/$$p; \
