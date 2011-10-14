@@ -6,9 +6,14 @@
 #include "itcl.h"
 #include "itclInt.h"
 
+MODULE_SCOPE const ItclStubs itclStubs;
+
+#define Itcl_Init_ Itcl_Init
+#define Itcl_SafeInit_ Itcl_SafeInit
+
 /* !BEGIN!: Do not edit below this line. */
 
-ItclIntStubs itclIntStubs = {
+static const ItclIntStubs itclIntStubs = {
     TCL_STUB_MAGIC,
     ITCLINT_STUBS_EPOCH,
     ITCLINT_STUBS_REVISION,
@@ -193,17 +198,17 @@ ItclIntStubs itclIntStubs = {
     Itcl_ActivateCallFrame, /* 177 */
 };
 
-static ItclStubHooks itclStubHooks = {
+static const ItclStubHooks itclStubHooks = {
     &itclIntStubs
 };
 
-ItclStubs itclStubs = {
+const ItclStubs itclStubs = {
     TCL_STUB_MAGIC,
     ITCL_STUBS_EPOCH,
     ITCL_STUBS_REVISION,
     &itclStubHooks,
-    Itcl_Init, /* 0 */
-    Itcl_SafeInit, /* 1 */
+    Itcl_Init_, /* 0 */
+    Itcl_SafeInit_, /* 1 */
     Itcl_RegisterC, /* 2 */
     Itcl_RegisterObjC, /* 3 */
     Itcl_FindC, /* 4 */
@@ -232,7 +237,7 @@ ItclStubs itclStubs = {
 
 /* !END!: Do not edit above this line. */
 
-struct ItclStubAPI itclStubAPI = {
+const struct ItclStubAPI itclStubAPI = {
     &itclStubs,
     &itclIntStubs
 };

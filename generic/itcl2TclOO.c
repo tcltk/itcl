@@ -71,9 +71,6 @@ CallFinalizePMCall(
     return postCallProc(clientData, interp, NULL, nsPtr, result);
 }
 
-extern int ItclAfterCallMethod(ClientData clientData, Tcl_Interp *interp,
-    Tcl_ObjectContext contextPtr, Tcl_Namespace *nsPtr, int call_result);
-
 int
 Tcl_InvokeClassProcedureMethod(
     Tcl_Interp *interp,

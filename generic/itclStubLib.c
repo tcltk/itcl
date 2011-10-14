@@ -13,8 +13,8 @@
 #undef Itcl_InitStubs
 #endif
 
-const ItclStubs *itclStubsPtr;
-const ItclIntStubs *itclIntStubsPtr;
+const ItclStubs *itclStubsPtr = NULL;
+const ItclIntStubs *itclIntStubsPtr = NULL;
 
 /*
  *----------------------------------------------------------------------
@@ -41,10 +41,10 @@ Itcl_InitStubs(
     const char *packageName = "itcl";
     const char *errMsg = NULL;
     ClientData clientData = NULL;
-    ItclStubs *stubsPtr;
-    ItclIntStubs *intStubsPtr;
+    const ItclStubs *stubsPtr;
+    const ItclIntStubs *intStubsPtr;
     const char *actualVersion;
-    struct ItclStubAPI *stubsAPIPtr;
+    const struct ItclStubAPI *stubsAPIPtr;
     
     actualVersion =
 	    Tcl_PkgRequireEx(interp, packageName, version, exact, &clientData);

@@ -71,13 +71,6 @@
 extern "C" {
 #endif
 
-#if defined(BUILD_itcl)
-#       define ITCLAPI DLLEXPORT
-#       undef USE_ITCL_STUBS
-#else
-#       define ITCLAPI DLLIMPORT
-#endif
-
 #ifndef TCL_ALPHA_RELEASE
 #   define TCL_ALPHA_RELEASE    0
 #endif
@@ -110,16 +103,25 @@ extern "C" {
 
 #define ITCL_NAMESPACE          "::itcl"
 
+#ifndef ITCLAPI
+#   if defined(BUILD_itcl)
+#	define ITCLAPI MODULE_SCOPE
+#   else
+#	define ITCLAPI extern
+#	undef USE_ITCL_STUBS
+#	define USE_ITCL_STUBS 1
+#   endif
+#endif
+
 #undef TCL_STORAGE_CLASS
 #ifdef BUILD_itcl
 #   define TCL_STORAGE_CLASS DLLEXPORT
 #else
-#   ifdef USE_ITCL_STUBS
-#       define TCL_STORAGE_CLASS
-#   else
-#       define TCL_STORAGE_CLASS DLLIMPORT
-#   endif
+#   define TCL_STORAGE_CLASS
 #endif
+
+EXTERN int		Itcl_Init(Tcl_Interp *interp);
+EXTERN int		Itcl_SafeInit(Tcl_Interp *interp);
 
 /*
  * Protection levels:

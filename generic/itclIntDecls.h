@@ -519,7 +519,7 @@ typedef struct ItclIntStubs {
     int magic;
     int epoch;
     int revision;
-    struct ItclIntStubHooks *hooks;
+    const struct ItclIntStubHooks *hooks;
 
     int (*itcl_IsClassNamespace) (Tcl_Namespace * namesp); /* 0 */
     int (*itcl_IsClass) (Tcl_Command cmd); /* 1 */
@@ -704,7 +704,7 @@ typedef struct ItclIntStubs {
 #ifdef __cplusplus
 extern "C" {
 #endif
-extern const ItclIntStubs *itclIntStubsPtr;
+ITCLAPI const ItclIntStubs *itclIntStubsPtr;
 #ifdef __cplusplus
 }
 #endif
@@ -1259,6 +1259,6 @@ extern const ItclIntStubs *itclIntStubsPtr;
 /* !END!: Do not edit above this line. */
 
 struct ItclStubAPI {
-    ItclStubs *stubsPtr;
-    ItclIntStubs *intStubsPtr;
+    const ItclStubs *stubsPtr;
+    const ItclIntStubs *intStubsPtr;
 };

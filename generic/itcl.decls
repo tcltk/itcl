@@ -11,11 +11,12 @@ scspec ITCLAPI
 # the an index should never be reused for a different function in order
 # to preserve backwards compatibility.
 
+# Just dummy definitions, meant to keep ITCL_STUBS_REVISION the same
 declare 0 current {
-    int Itcl_Init(Tcl_Interp *interp);
+    int Itcl_Init_(Tcl_Interp *interp);
 }
 declare 1 current {
-    int Itcl_SafeInit(Tcl_Interp *interp)
+    int Itcl_SafeInit_(Tcl_Interp *interp)
 }
 declare 2 current {
     int Itcl_RegisterC(Tcl_Interp *interp, const char *name, \
