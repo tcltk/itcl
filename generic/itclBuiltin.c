@@ -436,7 +436,7 @@ Itcl_BiIsaCmd(
     Tcl_Obj *const objv[])   /* argument objects */
 {
     ItclClass *iclsPtr;
-    char *token;
+    const char *token;
 
     ItclClass *contextIclsPtr;
     ItclObject *contextIoPtr;
@@ -532,7 +532,7 @@ Itcl_BiConfigureCmd(
     ItclHierIter hier;
     ItclObjectInfo *infoPtr;
     const char *lastval;
-    char *token;
+    const char *token;
     char *varName;
     int i;
     int unparsedObjc;
@@ -1027,9 +1027,9 @@ NRBiChainCmd(
     ItclClass *contextIclsPtr;
     ItclObject *contextIoPtr;
 
-    char *cmd;
+    const char *cmd;
     char *cmd1;
-    char *head;
+    const char *head;
     ItclClass *iclsPtr;
     ItclHierIter hier;
     Tcl_HashEntry *hPtr;
@@ -1928,7 +1928,7 @@ ItclExtendedConfigure(
     ItclOption *ioptPtr;
     ItclObjectInfo *infoPtr;
     const char *val;
-    char *token;
+    const char *token;
     int lObjc;
     int lObjc2;
     int i;
@@ -2763,7 +2763,7 @@ ItclExtendedSetGet(
     ItclObjectInfo *infoPtr;
     const char *usageStr;
     const char *val;
-    char *token;
+    const char *token;
     int result;
     int setValue;
 
@@ -2883,7 +2883,7 @@ Itcl_BiInstallComponentCmd(
     const char *usageStr;
     const char *componentName;
     const char *componentValue;
-    char *token;
+    const char *token;
     int numOpts;
     int result;
 
@@ -3090,7 +3090,7 @@ Itcl_BiCallInstanceCmd(
     ItclClass *contextIclsPtr;
     ItclObject *contextIoPtr;
     ItclObject *ioPtr;
-    char *token;
+    const char *token;
     int result;
 
     /*
@@ -3157,7 +3157,7 @@ Itcl_BiGetInstanceVarCmd(
     ItclClass *contextIclsPtr;
     ItclObject *contextIoPtr;
     ItclObject *ioPtr;
-    char *token;
+    const char *token;
     int result;
 
     /*

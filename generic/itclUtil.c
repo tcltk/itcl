@@ -897,8 +897,8 @@ void
 Itcl_ParseNamespPath(
     const char *name,    /* path name to class member */
     Tcl_DString *buffer, /* dynamic string buffer (uninitialized) */
-    char **head,         /* returns "namesp::namesp::namesp" part */
-    char **tail)         /* returns "element" part */
+    const char **head,   /* returns "namesp::namesp::namesp" part */
+    const char **tail)   /* returns "element" part */
 {
     register char *sep, *newname;
 

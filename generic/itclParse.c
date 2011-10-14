@@ -1218,7 +1218,7 @@ Itcl_ClassInheritCmd(
     int i;
     int newEntry;
     int haveClasses;
-    char *token;
+    const char *token;
     Itcl_ListElem *elem;
     Itcl_ListElem *elem2;
     ItclClass *cdPtr;
@@ -2530,7 +2530,7 @@ ItclParseOption(
     char *configureMethodVar;
     char *validateMethod;
     char *validateMethodVar;
-    char *token;
+    const char *token;
     char *usage;
     const char *optionName;
     const char **argv;
