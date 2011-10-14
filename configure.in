@@ -98,7 +98,6 @@ TEA_ADD_HEADERS([generic/itcl.h
                 generic/itclMigrate2TclCore.h
                 generic/itclTclIntStubsFcn.h
                 generic/itcl2TclOO.h
-                generic/itclVarsAndCmds.h
                 generic/itclIntDecls.h
 		])
 TEA_ADD_INCLUDES([-I. -I\"`${CYGPATH} ${srcdir}/generic`\"])

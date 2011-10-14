@@ -75,10 +75,7 @@ typedef struct Tcl_Proc_ *Tcl_Proc;
 typedef void (*Tcl_ProcErrorProc)(Tcl_Interp *interp, Tcl_Obj *procNameObj);
 
 #define Tcl_SetProcCmd _Tcl_SetProcCmd
-#define Tcl_InvokeNamespaceProc _Tcl_InvokeNamespaceProc
 
-extern int _Tcl_InvokeNamespaceProc(Tcl_Interp *interp, Tcl_Proc proc,
-        Tcl_Namespace *nsPtr, Tcl_Obj *namePtr, int objc, Tcl_Obj *const *objv);
-extern Tcl_Var Tcl_NewNamespaceVar(Tcl_Interp *interp, Tcl_Namespace *nsPtr,
+MODULE_SCOPE Tcl_Var Tcl_NewNamespaceVar(Tcl_Interp *interp, Tcl_Namespace *nsPtr,
 	const char *varName);
-extern int Itcl_IsCallFrameArgument(Tcl_Interp *interp, const char *name);
+MODULE_SCOPE int Itcl_IsCallFrameArgument(Tcl_Interp *interp, const char *name);

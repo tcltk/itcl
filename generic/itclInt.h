@@ -819,7 +819,9 @@ MODULE_SCOPE ItclClass * GetClassFromClassName(Tcl_Interp *interp,
 
 
 #include "itcl2TclOO.h"
+#ifdef NEW_PROTO_RESOLVER
 #include "itclVarsAndCmds.h"
+#endif
 
 /*
  * Include all the private API, generated from itcl.decls.
