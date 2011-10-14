@@ -1,3 +1,17 @@
+2011-10-14  Jan Nijtmans  <nijtmans@users.sourceforge.net>
+
+	* generic/itcl2TclOO.h: [Bug 3369931]: unneeded exported functions
+	* generic/itclBase.c
+	* generic/itclBuiltin.c
+	* generic/itclClass.c
+	* generic/itclCmd.c
+	* generic/itclInt.h
+	* generic/itclNeededFromTclOO.h (removed)
+	* generic/itclNeededFromTclOO.c (removed)
+	* configure
+	* configure.in
+	* win/makefile.vc
+
 2011-08-03  Don Porter  <dgp@Users.sourceforge.net>
 	* generic/itclInt.h: fix for SF bug #3385041
 

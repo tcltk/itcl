@@ -91,14 +91,12 @@ TEA_ADD_SOURCES([
 	        itclTclIntStubsFcn.c
 	        itclUtil.c
                 itclMigrate2TclCore.c
-                itclNeededFromTclOO.c
                 ])
 TEA_ADD_HEADERS([generic/itcl.h
                 generic/itclDecls.h
 		generic/itclInt.h
                 generic/itclMigrate2TclCore.h
                 generic/itclTclIntStubsFcn.h
-                generic/itclNeededFromTclOO.h
                 generic/itcl2TclOO.h
                 generic/itclVarsAndCmds.h
                 generic/itclIntDecls.h

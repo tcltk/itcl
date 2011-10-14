@@ -6157,7 +6157,6 @@ done
 	        itclTclIntStubsFcn.c
 	        itclUtil.c
                 itclMigrate2TclCore.c
-                itclNeededFromTclOO.c
                 "
     for i in $vars; do
 	case $i in
@@ -6200,7 +6199,6 @@ echo "$as_me: error: could not find source file '$i'" >&2;}
 		generic/itclInt.h
                 generic/itclMigrate2TclCore.h
                 generic/itclTclIntStubsFcn.h
-                generic/itclNeededFromTclOO.h
                 generic/itcl2TclOO.h
                 generic/itclVarsAndCmds.h
                 generic/itclIntDecls.h

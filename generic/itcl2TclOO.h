@@ -1,3 +1,11 @@
+
+#ifndef TCL_OO_INTERNAL_H
+typedef int (TclOO_PreCallProc)(ClientData clientData, Tcl_Interp *interp,
+	Tcl_ObjectContext context, Tcl_CallFrame *framePtr, int *isFinished);
+typedef int (TclOO_PostCallProc)(ClientData clientData, Tcl_Interp *interp,
+	Tcl_ObjectContext context, Tcl_Namespace *namespacePtr, int result);
+#endif
+
 #define Itcl_NRAddCallback(interp,procPtr,data0,data1,data2,data3) \
   Itcl_NRAddCallback_(interp, #procPtr, procPtr, data0, data1, data2, data3)
 extern void Itcl_NRAddCallback_(Tcl_Interp *interp, char *procName,

@@ -604,7 +604,7 @@ ItclDeleteClassVariablesNamespace(
     return;
 }
 
-int
+static int
 CallDeleteOneObject(
     ClientData data[],
     Tcl_Interp *interp,
@@ -678,7 +678,7 @@ deleteClassFail:
     return TCL_ERROR;
 }
 
-int
+static int
 CallDeleteOneClass(
     ClientData data[],
     Tcl_Interp *interp,
