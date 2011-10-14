@@ -200,7 +200,7 @@ AddClassUnknowMethod(
  *
  * ------------------------------------------------------------------------
  */
-void
+static void
 FreeItclObjectInfo(
     ClientData clientData)
 {

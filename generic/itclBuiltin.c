@@ -1842,7 +1842,7 @@ ItclBiObjectUnknownCmd(
     return result;
 }
 
-Tcl_Obj *makeAsOptionInfo(
+static Tcl_Obj *makeAsOptionInfo(
     Tcl_Interp *interp,
     Tcl_Obj *optNamePtr,
     ItclDelegatedOption *idoPtr,

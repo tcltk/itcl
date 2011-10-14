@@ -22,7 +22,6 @@
 #include <tclOO.h>
 #include "itclMigrate2TclCore.h"
 #include "itclTclIntStubsFcn.h"
-#include "itclNeededFromTclOO.h"
 #include "itcl.h"
 
 /*

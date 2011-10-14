@@ -42,7 +42,7 @@
  * ------------------------------------------------------------------------
  */
 /* ARGSUSED */
-int
+static int
 NRThisCmd(
     ClientData clientData,   /* class info */
     Tcl_Interp *interp,      /* current interpreter */
