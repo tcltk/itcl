@@ -6,6 +6,8 @@
 	* generic/itclClass.c
 	* generic/itclCmd.c
 	* generic/itclInt.h
+	* generic/itclMigrate2TclCore.h
+	* generic/itclTclIntStubsFcn.h
 	* generic/itclNeededFromTclOO.h (removed)
 	* generic/itclNeededFromTclOO.c (removed)
 	* configure
