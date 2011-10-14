@@ -1501,7 +1501,7 @@ Itcl_HandleClass(
     char tmp;
     char *start;
     char *pos;
-    char *match;
+    const char *match;
     int result;
 
     infoPtr = (ItclObjectInfo *)clientData;

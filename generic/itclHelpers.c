@@ -1298,7 +1298,7 @@ ItclAddClassFunctionDictInfo(
     Tcl_Obj *valuePtr1;
     Tcl_Obj *valuePtr2;
     Tcl_Obj *listPtr;
-    char *cp;
+    const char *cp;
     int haveFlags;
     int newValue1;
 

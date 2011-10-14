@@ -645,7 +645,7 @@ GetEnsembleUsage(
     Ensemble *ensData,     /* ensemble data */
     Tcl_Obj *objPtr)       /* returns: summary of usage info */
 {
-    char *spaces = "  ";
+    const char *spaces = "  ";
     int isOpenEnded = 0;
 
     int i;

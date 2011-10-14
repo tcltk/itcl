@@ -121,14 +121,14 @@ static Tcl_ObjCmdProc ItclBiClassUnknownCmd;
  *  Standard list of built-in methods for all objects.
  */
 typedef struct BiMethod {
-    char* name;              /* method name */
-    char* usage;             /* string describing usage */
-    char* registration;      /* registration name for C proc */
+    const char* name;        /* method name */
+    const char* usage;       /* string describing usage */
+    const char* registration;/* registration name for C proc */
     Tcl_ObjCmdProc *proc;    /* implementation C proc */
     int flags;               /* flag for which type of class to be used */
 } BiMethod;
 
-static BiMethod BiMethodList[] = {
+static const BiMethod BiMethodList[] = {
     { "callinstance",
         "<instancename>",
         "@itcl-builtin-callinstance",

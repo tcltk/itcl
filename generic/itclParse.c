@@ -1166,9 +1166,9 @@ ItclCheckForInitializedComponents(
     }
     Itcl_PopCallFrame(interp);
     if (result == TCL_ERROR) {
-        char *startStr;
-        char *sepStr;
-	char *objectStr;
+        const char *startStr;
+        const char *sepStr;
+	const char *objectStr;
         startStr = "";
 	sepStr = "";
 	objectStr = "";
@@ -1920,7 +1920,7 @@ Itcl_ClassVariableCmd(
     char *init;
     char *config;
     char *arrayInitStr;
-    char *usageStr;
+    const char *usageStr;
     int pLevel;
     int haveError;
     int haveArrayInit;
@@ -2159,7 +2159,7 @@ ItclClassCommonCmd(
     ItclVariable *ivPtr;
     Tcl_Obj *namePtr;
     char *arrayInitStr;
-    char *usageStr;
+    const char *usageStr;
     char *initStr;
     int haveError;
     int haveArrayInit;
@@ -2531,7 +2531,7 @@ ItclParseOption(
     char *validateMethod;
     char *validateMethodVar;
     char *token;
-    char *usage;
+    const char *usage;
     const char *optionName;
     const char **argv;
     const char *name;
@@ -3291,7 +3291,7 @@ Itcl_HandleDelegateMethodCmd(
     const char *component;
     const char *token;
     const char *whatName;
-    char *what;
+    const char *what;
     int result;
     int i;
     int foundOpt;
@@ -3541,7 +3541,7 @@ Itcl_HandleDelegateOptionCmd(
     const char *component;
     const char *token;
     const char **argv;
-    char *what;
+    const char *what;
     const char *whatName;
     int foundOpt;
     int argc;

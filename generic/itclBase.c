@@ -84,7 +84,7 @@ static char initScript[] =
  * The following script is used to initialize Itcl in a safe interpreter.
  */
 
-static char safeInitScript[] =
+static const char safeInitScript[] =
 "proc ::itcl::local {class name args} {\n"
 "    set ptr [uplevel [list $class $name] $args]\n"
 "    uplevel [list set itcl-local-$ptr $ptr]\n"
@@ -93,12 +93,12 @@ static char safeInitScript[] =
 "    return $ptr\n"
 "}";
 
-static char *clazzClassScript =
+static const char *clazzClassScript =
 "set itclClass [::oo::class create ::itcl::clazz]\n"
 "::oo::define $itclClass superclass ::oo::class";
 
 
-static char *clazzUnknownBody =
+static const char *clazzUnknownBody =
 "    set mySelf [::oo::Helpers::self]\n"
 "    if {[::itcl::is class $mySelf]} {\n"
 "        set namespace [uplevel 1 namespace current]\n"
