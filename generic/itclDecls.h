@@ -5,7 +5,7 @@
 
 #if defined(USE_ITCL_STUBS)
 
-EXTERN const char *Itcl_InitStubs(
+ITCLAPI const char *Itcl_InitStubs(
 	Tcl_Interp *, const char *version, int exact);
 #define Itcl_InitStubs(interp, version, exact) Itcl_InitStubs( \
 	interp, ITCL_PATCH_LEVEL, 1)
@@ -28,9 +28,9 @@ EXTERN const char *Itcl_InitStubs(
  */
 
 /* 0 */
-ITCLAPI int		Itcl_Init (Tcl_Interp * interp);
+ITCLAPI int		Itcl_Init_ (Tcl_Interp * interp);
 /* 1 */
-ITCLAPI int		Itcl_SafeInit (Tcl_Interp * interp);
+ITCLAPI int		Itcl_SafeInit_ (Tcl_Interp * interp);
 /* 2 */
 ITCLAPI int		Itcl_RegisterC (Tcl_Interp * interp, 
 				const char * name, Tcl_CmdProc * proc, 
@@ -98,17 +98,17 @@ ITCLAPI void		Itcl_DiscardInterpState (Itcl_InterpState state);
 #endif /* !defined(USE_ITCL_STUBS) */
 
 typedef struct ItclStubHooks {
-    struct ItclIntStubs *itclIntStubs;
+    const struct ItclIntStubs *itclIntStubs;
 } ItclStubHooks;
 
 typedef struct ItclStubs {
     int magic;
     int epoch;
     int revision;
-    struct ItclStubHooks *hooks;
+    const struct ItclStubHooks *hooks;
 
-    int (*itcl_Init) (Tcl_Interp * interp); /* 0 */
-    int (*itcl_SafeInit) (Tcl_Interp * interp); /* 1 */
+    int (*itcl_Init_) (Tcl_Interp * interp); /* 0 */
+    int (*itcl_SafeInit_) (Tcl_Interp * interp); /* 1 */
     int (*itcl_RegisterC) (Tcl_Interp * interp, const char * name, Tcl_CmdProc * proc, ClientData clientData, Tcl_CmdDeleteProc * deleteProc); /* 2 */
     int (*itcl_RegisterObjC) (Tcl_Interp * interp, const char * name, Tcl_ObjCmdProc * proc, ClientData clientData, Tcl_CmdDeleteProc * deleteProc); /* 3 */
     int (*itcl_FindC) (Tcl_Interp * interp, const char * name, Tcl_CmdProc ** argProcPtr, Tcl_ObjCmdProc ** objProcPtr, ClientData * cDataPtr); /* 4 */
@@ -138,7 +138,7 @@ typedef struct ItclStubs {
 #ifdef __cplusplus
 extern "C" {
 #endif
-extern const ItclStubs *itclStubsPtr;
+ITCLAPI const ItclStubs *itclStubsPtr;
 #ifdef __cplusplus
 }
 #endif
@@ -149,13 +149,13 @@ extern const ItclStubs *itclStubsPtr;
  * Inline function declarations:
  */
 
-#ifndef Itcl_Init
-#define Itcl_Init \
-	(itclStubsPtr->itcl_Init) /* 0 */
+#ifndef Itcl_Init_
+#define Itcl_Init_ \
+	(itclStubsPtr->itcl_Init_) /* 0 */
 #endif
-#ifndef Itcl_SafeInit
-#define Itcl_SafeInit \
-	(itclStubsPtr->itcl_SafeInit) /* 1 */
+#ifndef Itcl_SafeInit_
+#define Itcl_SafeInit_ \
+	(itclStubsPtr->itcl_SafeInit_) /* 1 */
 #endif
 #ifndef Itcl_RegisterC
 #define Itcl_RegisterC \
