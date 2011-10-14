@@ -2634,9 +2634,9 @@ ItclObjectCmd(
     Itcl_ListElem *elem;
     ItclClass *basePtr;
     void *callbackPtr;
-    char *className;
-    char *tail;
-    char *cp;
+    const char *className;
+    const char *tail;
+    const char *cp;
     int isDirectCall;
     int incr;
     int result;
@@ -2934,9 +2934,9 @@ ItclMapMethodNameProc(
     ItclClass *iclsPtr;
     ItclClass *iclsPtr2;
     ItclObjectInfo *infoPtr;
-    char *head;
-    char *tail;
-    char *sp;
+    const char *head;
+    const char *tail;
+    const char *sp;
 
     iclsPtr = NULL;
     iclsPtr2 = NULL;

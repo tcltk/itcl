@@ -47,7 +47,7 @@ ITCLAPI int		Itcl_ObjectIsa (ItclObject * contextObj,
 /* 6 */
 ITCLAPI int		Itcl_Protection (Tcl_Interp * interp, int newLevel);
 /* 7 */
-ITCLAPI char*		Itcl_ProtectionStr (int pLevel);
+ITCLAPI const char*	Itcl_ProtectionStr (int pLevel);
 /* 8 */
 ITCLAPI int		Itcl_CanAccess (ItclMemberFunc* memberPtr, 
 				Tcl_Namespace* fromNsPtr);
@@ -57,8 +57,8 @@ ITCLAPI int		Itcl_CanAccessFunc (ItclMemberFunc* mfunc,
 /* Slot 10 is reserved */
 /* 11 */
 ITCLAPI void		Itcl_ParseNamespPath (const char * name, 
-				Tcl_DString * buffer, char ** head, 
-				char ** tail);
+				Tcl_DString * buffer, const char ** head, 
+				const char ** tail);
 /* 12 */
 ITCLAPI int		Itcl_DecodeScopedCommand (Tcl_Interp * interp, 
 				const char * name, Tcl_Namespace ** rNsPtr, 
@@ -528,11 +528,11 @@ typedef struct ItclIntStubs {
     int (*itcl_IsObject) (Tcl_Command cmd); /* 4 */
     int (*itcl_ObjectIsa) (ItclObject * contextObj, ItclClass * cdefn); /* 5 */
     int (*itcl_Protection) (Tcl_Interp * interp, int newLevel); /* 6 */
-    char* (*itcl_ProtectionStr) (int pLevel); /* 7 */
+    const char* (*itcl_ProtectionStr) (int pLevel); /* 7 */
     int (*itcl_CanAccess) (ItclMemberFunc* memberPtr, Tcl_Namespace* fromNsPtr); /* 8 */
     int (*itcl_CanAccessFunc) (ItclMemberFunc* mfunc, Tcl_Namespace* fromNsPtr); /* 9 */
     void (*reserved10)(void);
-    void (*itcl_ParseNamespPath) (const char * name, Tcl_DString * buffer, char ** head, char ** tail); /* 11 */
+    void (*itcl_ParseNamespPath) (const char * name, Tcl_DString * buffer, const char ** head, const char ** tail); /* 11 */
     int (*itcl_DecodeScopedCommand) (Tcl_Interp * interp, const char * name, Tcl_Namespace ** rNsPtr, char ** rCmdPtr); /* 12 */
     int (*itcl_EvalArgs) (Tcl_Interp * interp, int objc, Tcl_Obj *const objv[]); /* 13 */
     Tcl_Obj* (*itcl_CreateArgs) (Tcl_Interp * interp, const char * string, int objc, Tcl_Obj *const objv[]); /* 14 */

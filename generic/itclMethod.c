@@ -76,9 +76,9 @@ NRBodyCmd(
     Tcl_Obj *objPtr;
     ItclClass *iclsPtr;
     ItclMemberFunc *imPtr;
-    char *head;
-    char *tail;
-    char *token;
+    const char *head;
+    const char *tail;
+    const char *token;
     char *arglist;
     char *body;
     int status = TCL_OK;
@@ -198,9 +198,9 @@ NRConfigBodyCmd(
 {
     int status = TCL_OK;
 
-    char *head;
-    char *tail;
-    char *token;
+    const char *head;
+    const char *tail;
+    const char *token;
     Tcl_DString buffer;
     ItclClass *iclsPtr;
     ItclVarLookup *vlookup;
@@ -1580,7 +1580,7 @@ NRExecMethod(
     ItclMemberFunc *imPtr = (ItclMemberFunc*)clientData;
     int result = TCL_OK;
 
-    char *token;
+    const char *token;
     Tcl_HashEntry *entry;
     ItclClass *iclsPtr;
     ItclObject *ioPtr;
