@@ -13,6 +13,11 @@
 	* configure
 	* configure.in
 	* win/makefile.vc
+	* generic/itclEnsemble.c:  Fix various gcc warnings, discovered
+	* generic/itclHelpers.c    with -Wwrite-strings
+	* generic/itclInfo.c
+	* generic/itclParse.c
+	* generic/itclResolve.c
 
 2011-08-03  Don Porter  <dgp@Users.sourceforge.net>
 	* generic/itclInt.h: fix for SF bug #3385041

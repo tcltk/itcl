@@ -64,13 +64,13 @@ Tcl_ObjCmdProc Itcl_BiInfoWidgetsCmd;
 Tcl_ObjCmdProc Itcl_BiInfoWidgetadaptorsCmd;
 
 typedef struct InfoMethod {
-    char* name;              /* method name */
-    char* usage;             /* string describing usage */
+    const char* name;        /* method name */
+    const char* usage;       /* string describing usage */
     Tcl_ObjCmdProc *proc;    /* implementation C proc */
     int flags;               /* which class commands have it */
 } InfoMethod;
 
-static InfoMethod InfoMethodList[] = {
+static const InfoMethod InfoMethodList[] = {
     { "args",
         "procname",
 	Itcl_BiInfoArgsCmd,
@@ -253,8 +253,8 @@ static InfoMethod InfoMethodList[] = {
 struct NameProcMap { const char *name; Tcl_ObjCmdProc *proc; };
 
 struct NameProcMap2 {
-    char* name;              /* method name */
-    char* usage;             /* string describing usage */
+    const char* name;        /* method name */
+    const char* usage;       /* string describing usage */
     Tcl_ObjCmdProc *proc;    /* implementation C proc */
     int flags;               /* which class commands have it */
 };
@@ -457,7 +457,7 @@ ItclGetInfoUsage(
 {
     Tcl_HashEntry *hPtr;
     ItclClass *iclsPtr;
-    char *spaces = "  ";
+    const char *spaces = "  ";
     int isOpenEnded = 0;
 
     int i;
@@ -513,7 +513,7 @@ ItclGetInfoDelegatedUsage(
     ItclClass *iclsPtr;
     const char *name;
     const char *lastName;
-    char *spaces = "  ";
+    const char *spaces = "  ";
     int isOpenEnded = 0;
 
     int i;
