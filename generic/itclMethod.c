@@ -32,8 +32,6 @@
  */
 #include "itclInt.h"
 
-Tcl_ObjCmdProc Itcl_BiMyProcCmd;
-
 static int EquivArgLists(Tcl_Interp *interp, ItclArgList *origArgs,
         ItclArgList *realArgs);
 static int ItclCreateMemberCode(Tcl_Interp* interp, ItclClass *iclsPtr,

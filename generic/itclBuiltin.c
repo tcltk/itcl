@@ -91,23 +91,14 @@ static char initHullCmdsScript[] =
 "    _find_hull_init\n"
 "}";
 
-Tcl_ObjCmdProc Itcl_BiInstallComponentCmd;
-Tcl_ObjCmdProc Itcl_BiDestroyCmd;
-Tcl_ObjCmdProc Itcl_BiCallInstanceCmd;
-Tcl_ObjCmdProc Itcl_BiGetInstanceVarCmd;
-Tcl_ObjCmdProc Itcl_BiMyTypeMethodCmd;
-Tcl_ObjCmdProc Itcl_BiMyMethodCmd;
-Tcl_ObjCmdProc Itcl_BiMyProcCmd;
-Tcl_ObjCmdProc Itcl_BiMyTypeVarCmd;
-Tcl_ObjCmdProc Itcl_BiMyVarCmd;
-Tcl_ObjCmdProc Itcl_BiItclHullCmd;
-Tcl_ObjCmdProc ItclExtendedConfigure;
-Tcl_ObjCmdProc ItclExtendedCget;
-Tcl_ObjCmdProc ItclExtendedSetGet;
-Tcl_ObjCmdProc Itcl_BiCreateHullCmd;
-Tcl_ObjCmdProc Itcl_BiSetupComponentCmd;
-Tcl_ObjCmdProc Itcl_BiKeepComponentOptionCmd;
-Tcl_ObjCmdProc Itcl_BiInitOptionsCmd;
+static Tcl_ObjCmdProc Itcl_BiDestroyCmd;
+static Tcl_ObjCmdProc ItclExtendedConfigure;
+static Tcl_ObjCmdProc ItclExtendedCget;
+static Tcl_ObjCmdProc ItclExtendedSetGet;
+static Tcl_ObjCmdProc Itcl_BiCreateHullCmd;
+static Tcl_ObjCmdProc Itcl_BiSetupComponentCmd;
+static Tcl_ObjCmdProc Itcl_BiKeepComponentOptionCmd;
+static Tcl_ObjCmdProc Itcl_BiInitOptionsCmd;
 
 /*
  *  FORWARD DECLARATIONS
@@ -1890,7 +1881,7 @@ static Tcl_Obj *makeAsOptionInfo(
  * ------------------------------------------------------------------------
  */
 /* ARGSUSED */
-int
+static int
 ItclExtendedConfigure(
     ClientData clientData,   /* class definition */
     Tcl_Interp *interp,      /* current interpreter */
@@ -2509,7 +2500,7 @@ ItclExtendedConfigure(
  * ------------------------------------------------------------------------
  */
 /* ARGSUSED */
-int
+static int
 ItclExtendedCget(
     ClientData clientData,   /* class definition */
     Tcl_Interp *interp,      /* current interpreter */
@@ -2747,7 +2738,7 @@ ItclExtendedCget(
  * ------------------------------------------------------------------------
  */
 /* ARGSUSED */
-int
+static int
 ItclExtendedSetGet(
     ClientData clientData,   /* class definition */
     Tcl_Interp *interp,      /* current interpreter */
@@ -2998,7 +2989,7 @@ Itcl_BiInstallComponentCmd(
  * ------------------------------------------------------------------------
  */
 /* ARGSUSED */
-int
+static int
 Itcl_BiDestroyCmd(
     ClientData clientData,   /* class definition */
     Tcl_Interp *interp,      /* current interpreter */
@@ -3517,7 +3508,7 @@ Itcl_BiItclHullCmd(
  *
  * ------------------------------------------------------------------------
  */
-int
+static int
 Itcl_BiCreateHullCmd(
     ClientData clientData,   /* info for all known objects */
     Tcl_Interp *interp,      /* current interpreter */
@@ -3552,7 +3543,7 @@ Itcl_BiCreateHullCmd(
  *
  * ------------------------------------------------------------------------
  */
-int
+static int
 Itcl_BiSetupComponentCmd(
     ClientData clientData,   /* info for all known objects */
     Tcl_Interp *interp,      /* current interpreter */
@@ -3587,7 +3578,7 @@ Itcl_BiSetupComponentCmd(
  *
  * ------------------------------------------------------------------------
  */
-int
+static int
 Itcl_BiInitOptionsCmd(
     ClientData clientData,   /* info for all known objects */
     Tcl_Interp *interp,      /* current interpreter */
@@ -3621,7 +3612,7 @@ Itcl_BiInitOptionsCmd(
  *
  * ------------------------------------------------------------------------
  */
-int
+static int
 Itcl_BiKeepComponentOptionCmd(
     ClientData clientData,   /* info for all known objects */
     Tcl_Interp *interp,      /* current interpreter */

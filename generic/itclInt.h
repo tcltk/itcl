@@ -743,10 +743,6 @@ MODULE_SCOPE const char* ItclSetInstanceVar(Tcl_Interp *interp,
         const char *name, const char *name2, const char *value,
 	ItclObject *contextIoPtr, ItclClass *contextIclsPtr);
 MODULE_SCOPE Tcl_Obj * ItclCapitalize(const char *str);
-MODULE_SCOPE int ItclExtendedConfigure(ClientData clientData,
-        Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]);
-MODULE_SCOPE int ItclExtendedCget(ClientData clientData, Tcl_Interp *interp,
-        int objc, Tcl_Obj *const objv[]);
 MODULE_SCOPE int ItclCreateMethod(Tcl_Interp* interp, ItclClass *iclsPtr,
 	Tcl_Obj *namePtr, const char* arglist, const char* body,
         ItclMemberFunc **imPtrPtr);
@@ -815,8 +811,24 @@ MODULE_SCOPE int ItclAddClassDelegatedFunctionDictInfo(Tcl_Interp *interp,
         ItclClass *iclsPtr, ItclDelegatedFunction *idmPtr);
 MODULE_SCOPE ItclClass * GetClassFromClassName(Tcl_Interp *interp,
         const char *className, ItclClass *iclsPtr);
-
-
+MODULE_SCOPE Tcl_ObjCmdProc Itcl_BiMyProcCmd;
+MODULE_SCOPE Tcl_ObjCmdProc Itcl_BiInstallComponentCmd;
+MODULE_SCOPE Tcl_ObjCmdProc Itcl_BiCallInstanceCmd;
+MODULE_SCOPE Tcl_ObjCmdProc Itcl_BiGetInstanceVarCmd;
+MODULE_SCOPE Tcl_ObjCmdProc Itcl_BiMyTypeMethodCmd;
+MODULE_SCOPE Tcl_ObjCmdProc Itcl_BiMyMethodCmd;
+MODULE_SCOPE Tcl_ObjCmdProc Itcl_BiMyTypeVarCmd;
+MODULE_SCOPE Tcl_ObjCmdProc Itcl_BiMyVarCmd;
+MODULE_SCOPE Tcl_ObjCmdProc Itcl_BiItclHullCmd;
+MODULE_SCOPE Tcl_ObjCmdProc Itcl_ThisCmd;
+MODULE_SCOPE Tcl_ObjCmdProc Itcl_ExtendedClassCmd;
+MODULE_SCOPE Tcl_ObjCmdProc Itcl_TypeClassCmd;
+MODULE_SCOPE Tcl_ObjCmdProc Itcl_AddObjectOptionCmd;
+MODULE_SCOPE Tcl_ObjCmdProc Itcl_AddDelegatedOptionCmd;
+MODULE_SCOPE Tcl_ObjCmdProc Itcl_AddDelegatedFunctionCmd;
+MODULE_SCOPE Tcl_ObjCmdProc Itcl_SetComponentCmd;
+MODULE_SCOPE Tcl_ObjCmdProc Itcl_ClassHullTypeCmd;
+MODULE_SCOPE Tcl_ObjCmdProc Itcl_ClassWidgetClassCmd;
 
 #include "itcl2TclOO.h"
 #ifdef NEW_PROTO_RESOLVER
