@@ -2587,9 +2587,6 @@ ItclFreeObject(
  * ------------------------------------------------------------------------
  */
 
-int Itcl_InvokeProcedureMethod(ClientData clientData, Tcl_Interp *interp,
-	int objc, Tcl_Obj *const *objv);
-
 static int
 CallPublicObjectCmd(
     ClientData data[],

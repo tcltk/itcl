@@ -226,7 +226,8 @@ Itcl_PublicObjectCmd(
     return result;
 }
 
-int
+#if 0
+static int
 Itcl_PrivateObjectCmd(
     ClientData clientData,
     Tcl_Interp *interp,
@@ -241,6 +242,7 @@ Itcl_PrivateObjectCmd(
             objc, objv);
     return result;
 }
+#endif
 
 /*
  * ----------------------------------------------------------------------
