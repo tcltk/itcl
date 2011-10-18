@@ -35,3 +35,6 @@ MODULE_SCOPE int Itcl_SelfCmd(ClientData clientData, Tcl_Interp *interp,
 MODULE_SCOPE Tcl_Obj * Itcl_TclOOObjectName(Tcl_Interp *interp, Tcl_Object oPtr);
 MODULE_SCOPE int Itcl_InvokeEnsembleMethod(Tcl_Interp *interp, Tcl_Namespace *nsPtr,
     Tcl_Obj *namePtr, Tcl_Proc procPtr, int objc, Tcl_Obj *const *objv);
+MODULE_SCOPE int Itcl_InvokeProcedureMethod(ClientData clientData, Tcl_Interp *interp,
+	int objc, Tcl_Obj *const *objv);
+

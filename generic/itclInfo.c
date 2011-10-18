@@ -362,7 +362,7 @@ static const struct NameProcMap2 infoCmdsDelegated2[] = {
  *  Returns TCL_OK/TCL_ERROR to indicate success/failure.
  * ------------------------------------------------------------------------
  */
-void
+static void
 ItclDeleteInfoSubCmd(
     ClientData clientData)
 {
