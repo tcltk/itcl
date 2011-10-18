@@ -163,7 +163,7 @@ Itcl_BodyCmd(
     int objc,
     Tcl_Obj *const *objv)
 {
-    return Itcl_NRCallObjProc(clientData, interp, NRBodyCmd, objc, objv);
+    return Tcl_NRCallObjProc(interp, NRBodyCmd, clientData, objc, objv);
 }
 
 
@@ -297,7 +297,7 @@ Itcl_ConfigBodyCmd(
     int objc,
     Tcl_Obj *const *objv)
 {
-    return Itcl_NRCallObjProc(clientData, interp, NRConfigBodyCmd, objc, objv);
+    return Tcl_NRCallObjProc(interp, NRConfigBodyCmd, clientData, objc, objv);
 }
 
 
@@ -1231,7 +1231,7 @@ Itcl_EvalMemberCode(
         contextIoPtr->constructed) {
 
         callbackPtr = Itcl_GetCurrentCallbackPtr(interp);
-        Itcl_NRAddCallback(interp, CallConstructBase, imPtr, contextIoPtr,
+        Tcl_NRAddCallback(interp, CallConstructBase, imPtr, contextIoPtr,
 	        INT2PTR(objc), (ClientData)objv);
         result = Itcl_NRRunCallbacks(interp, callbackPtr);
         if (result != TCL_OK) {
@@ -1271,7 +1271,7 @@ Itcl_EvalMemberCode(
     } else {
         if ((mcode->flags & ITCL_IMPLEMENT_TCL) != 0) {
             callbackPtr = Itcl_GetCurrentCallbackPtr(interp);
-            Itcl_NRAddCallback(interp, CallItclObjectCmd, imPtr, contextIoPtr,
+            Tcl_NRAddCallback(interp, CallItclObjectCmd, imPtr, contextIoPtr,
 	            INT2PTR(objc), (void *)objv);
             result = Itcl_NRRunCallbacks(interp, callbackPtr);
          }
@@ -1641,7 +1641,7 @@ Itcl_ExecMethod(
     int objc,
     Tcl_Obj *const *objv)
 {
-    return Itcl_NRCallObjProc(clientData, interp, NRExecMethod, objc, objv);
+    return Tcl_NRCallObjProc(interp, NRExecMethod, clientData, objc, objv);
 }
 
 
@@ -1729,7 +1729,7 @@ Itcl_ExecProc(
     int objc,
     Tcl_Obj *const *objv)
 {
-    return Itcl_NRCallObjProc(clientData, interp, NRExecProc, objc, objv);
+    return Tcl_NRCallObjProc(interp, NRExecProc, clientData, objc, objv);
 }
 
 static int
@@ -1830,7 +1830,7 @@ Itcl_ConstructBase(
         (void) Tcl_ListObjGetElements((Tcl_Interp*)NULL, cmdlinePtr,
             &cmdlinec, &cmdlinev);
         callbackPtr = Itcl_GetCurrentCallbackPtr(interp);
-        Itcl_NRAddCallback(interp, CallPublicObjectCmd, contextClass,
+        Tcl_NRAddCallback(interp, CallPublicObjectCmd, contextClass,
 	        INT2PTR(cmdlinec), cmdlinev, NULL);
         result = Itcl_NRRunCallbacks(interp, callbackPtr);
 	Tcl_DecrRefCount(cmdlinev[0]);
@@ -1857,7 +1857,7 @@ Itcl_ConstructBase(
 	    Tcl_Obj *objPtr;
 
             callbackPtr = Itcl_GetCurrentCallbackPtr(interp);
-            Itcl_NRAddCallback(interp, CallInvokeMethodIfExists, iclsPtr,
+            Tcl_NRAddCallback(interp, CallInvokeMethodIfExists, iclsPtr,
 	            contextObj, INT2PTR(0), NULL);
             result = Itcl_NRRunCallbacks(interp, callbackPtr);
             if (result != TCL_OK) {

@@ -1484,9 +1484,9 @@ Itcl_DestructObject(
          *  If all goes well, return the null string as the result.
          */
         callbackPtr = Itcl_GetCurrentCallbackPtr(interp);
-        Itcl_NRAddCallback(interp, FinalizeDeleteObject, contextIoPtr,
+        Tcl_NRAddCallback(interp, FinalizeDeleteObject, contextIoPtr,
 	        NULL, NULL, NULL);
-        Itcl_NRAddCallback(interp, CallDestructBase, contextIoPtr,
+        Tcl_NRAddCallback(interp, CallDestructBase, contextIoPtr,
 	        INT2PTR(flags), NULL, NULL);
         result = Itcl_NRRunCallbacks(interp, callbackPtr);
     }
@@ -2772,12 +2772,12 @@ ItclObjectCmd(
         newObjv[1] = methodNamePtr;
         memcpy(newObjv+incr+1, objv+1, (sizeof(Tcl_Obj*)*(objc-1)));
 	ItclShowArgs(1, "run CallPublicObjectCmd1", objc+incr, newObjv);
-        Itcl_NRAddCallback(interp, CallPublicObjectCmd, oPtr, clsPtr,
+	Tcl_NRAddCallback(interp, CallPublicObjectCmd, oPtr, clsPtr,
 	        INT2PTR(objc+incr), newObjv);
 
     } else {
 	ItclShowArgs(1, "run CallPublicObjectCmd2", objc, objv);
-        Itcl_NRAddCallback(interp, CallPublicObjectCmd, oPtr, clsPtr,
+	Tcl_NRAddCallback(interp, CallPublicObjectCmd, oPtr, clsPtr,
 	        INT2PTR(objc), (ClientData)objv);
     }
 

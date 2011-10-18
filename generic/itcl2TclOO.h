@@ -6,14 +6,6 @@ typedef int (TclOO_PostCallProc)(ClientData clientData, Tcl_Interp *interp,
 	Tcl_ObjectContext context, Tcl_Namespace *namespacePtr, int result);
 #endif
 
-#define Itcl_NRAddCallback(interp,procPtr,data0,data1,data2,data3) \
-  Itcl_NRAddCallback_(interp, #procPtr, procPtr, data0, data1, data2, data3)
-MODULE_SCOPE void Itcl_NRAddCallback_(Tcl_Interp *interp, char *procName,
-        Tcl_NRPostProc *procPtr, ClientData data0, ClientData data1,
-        ClientData data2, ClientData data3);
-MODULE_SCOPE void Itcl_DumpNRCallbacks(Tcl_Interp *interp, char *str);
-MODULE_SCOPE int Itcl_NRCallObjProc(ClientData clientData, Tcl_Interp *interp,
-        Tcl_ObjCmdProc *objProc, int objc, Tcl_Obj *const *objv);
 MODULE_SCOPE int Itcl_NRRunCallbacks(Tcl_Interp *interp, void *rootPtr);
 MODULE_SCOPE void * Itcl_GetCurrentCallbackPtr(Tcl_Interp *interp);
 MODULE_SCOPE Tcl_Method Itcl_NewProcClassMethod(Tcl_Interp *interp, Tcl_Class clsPtr,
