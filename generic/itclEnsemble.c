@@ -2122,9 +2122,6 @@ Itcl_EnsembleErrorCmd(
  *----------------------------------------------------------------------
  */
 
-int Itcl_InvokeEnsembleMethod(Tcl_Interp *interp, Tcl_Namespace *nsPtr,
-    Tcl_Obj *namePtr, Tcl_Proc procPtr, int objc, Tcl_Obj *const *objv);
-
 static int
 CallInvokeEnsembleMethod(
     ClientData data[],

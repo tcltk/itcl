@@ -1170,7 +1170,8 @@ ItclInitObjectOptions(
  *  when an object is created.
  * ------------------------------------------------------------------------
  */
-int
+#if 0
+static int
 ItclInitObjectComponents(
    Tcl_Interp *interp,
    ItclObject *ioPtr,
@@ -1240,6 +1241,7 @@ ItclInitObjectComponents(
     Itcl_DeleteHierIter(&hier);
     return TCL_OK;
 }
+#endif
 
 /*
  * ------------------------------------------------------------------------

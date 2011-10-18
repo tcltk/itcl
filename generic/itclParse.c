@@ -2943,7 +2943,7 @@ ItclCreateComponent(
  *
  * ------------------------------------------------------------------------
  */
-int
+static int
 ItclHandleClassComponent(
     ClientData clientData,   /* info for all known objects */
     Tcl_Interp *interp,      /* current interpreter */

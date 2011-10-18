@@ -440,12 +440,6 @@ Itcl_CreateProc(
  *  member function.
  * ------------------------------------------------------------------------
  */
-void Itcl_DeleteMemberFunc2 (
-    char *cdata)
-{
-    Itcl_DeleteMemberFunc(cdata);
-}
-
 static int
 ItclCreateMemberFunc(
     Tcl_Interp* interp,            /* interpreter managing this action */
@@ -640,7 +634,7 @@ ItclCreateMemberFunc(
 
     Tcl_SetHashValue(hPtr, (ClientData)imPtr);
     Itcl_PreserveData((ClientData)imPtr);
-    Itcl_EventuallyFree((ClientData)imPtr, Itcl_DeleteMemberFunc2);
+    Itcl_EventuallyFree((ClientData)imPtr, Itcl_DeleteMemberFunc);
 
     *imPtrPtr = imPtr;
     return TCL_OK;
