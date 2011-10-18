@@ -2173,9 +2173,9 @@ EnsembleSubCmd(
 	if (ensPart->clientData == NULL) {
 	    return TCL_ERROR;
 	}
-        Itcl_NRAddCallback(interp, CallInvokeEnsembleMethod, nsPtr, ensPart, INT2PTR(objc), (ClientData)objv);
+	Tcl_NRAddCallback(interp, CallInvokeEnsembleMethod, nsPtr, ensPart, INT2PTR(objc), (ClientData)objv);
     } else {
-        Itcl_NRAddCallback(interp, CallInvokeEnsembleMethod2, ensPart, INT2PTR(objc), (ClientData)objv, NULL);
+	Tcl_NRAddCallback(interp, CallInvokeEnsembleMethod2, ensPart, INT2PTR(objc), (ClientData)objv, NULL);
     }
     result = Itcl_NRRunCallbacks(interp, callbackPtr);
     return result;

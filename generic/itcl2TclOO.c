@@ -14,30 +14,6 @@
 #include <tclOO.h>
 #include <tclOOInt.h>
 
-int
-Itcl_NRCallObjProc(
-    ClientData clientData,
-    Tcl_Interp *interp,
-    Tcl_ObjCmdProc *objProc,
-    int objc,
-    Tcl_Obj *const *objv)
-{
-    return Tcl_NRCallObjProc(interp, objProc, clientData, objc, objv);
-}
-
-void
-Itcl_NRAddCallback_(
-    Tcl_Interp *interp,
-    char *procName,
-    Tcl_NRPostProc *procPtr,
-    ClientData data0,
-    ClientData data1,
-    ClientData data2,
-    ClientData data3)
-{
-    Tcl_NRAddCallback(interp, procPtr, data0, data1, data2, data3);
-}
-
 void *
 Itcl_GetCurrentCallbackPtr(
     Tcl_Interp *interp)

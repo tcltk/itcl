@@ -1153,7 +1153,7 @@ Itcl_BiChainCmd(
     int objc,
     Tcl_Obj *const *objv)
 {
-    return Itcl_NRCallObjProc(clientData, interp, NRBiChainCmd, objc, objv);
+    return Tcl_NRCallObjProc(interp, NRBiChainCmd, clientData, objc, objv);
 }
 
 static int
@@ -1226,7 +1226,7 @@ PrepareCreateObject(
     memcpy(newObjv+3, objv+offset, (objc-offset) * sizeof(Tcl_Obj *));
     callbackPtr = Itcl_GetCurrentCallbackPtr(interp);
     ItclShowArgs(1, "CREATE", objc+3-offset, newObjv);
-    Itcl_NRAddCallback(interp, CallCreateObject, iclsPtr,
+    Tcl_NRAddCallback(interp, CallCreateObject, iclsPtr,
             INT2PTR(objc+3-offset), (ClientData)newObjv, NULL);
     result = Itcl_NRRunCallbacks(interp, callbackPtr);
     if (result != TCL_OK) {
