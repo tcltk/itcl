@@ -344,6 +344,7 @@ Itcl_NewForwardClassMethod(
  * ----------------------------------------------------------------------
  */
 
+#if 0
 Tcl_Method
 Itcl_NewForwardMethod(
     Tcl_Interp *interp,
@@ -355,8 +356,9 @@ Itcl_NewForwardMethod(
     return (Tcl_Method)TclOONewForwardInstanceMethod(interp, (Object *)oPtr,
             flags, nameObj, prefixObj);
 }
+#endif
 
-Tcl_Obj *
+static Tcl_Obj *
 Itcl_TclOOObjectName(
     Tcl_Interp *interp,
     Object *oPtr)
