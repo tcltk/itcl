@@ -31,16 +31,6 @@
  */
 #include "itclInt.h"
 
-Tcl_ObjCmdProc Itcl_BiMyTypeMethodCmd;
-Tcl_ObjCmdProc Itcl_BiMyMethodCmd;
-Tcl_ObjCmdProc Itcl_BiMyProcCmd;
-Tcl_ObjCmdProc Itcl_BiMyTypeVarCmd;
-Tcl_ObjCmdProc Itcl_BiMyVarCmd;
-Tcl_ObjCmdProc Itcl_BiItclHullCmd;
-Tcl_ObjCmdProc Itcl_BiCallInstanceCmd;
-Tcl_ObjCmdProc Itcl_BiGetInstanceVarCmd;
-Tcl_ObjCmdProc Itcl_BiInstallComponentCmd;
-
 /*
  *  FORWARD DECLARATIONS
  */

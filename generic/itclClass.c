@@ -32,7 +32,6 @@
  */
 #include "itclInt.h"
 
-extern Tcl_ObjCmdProc Itcl_ThisCmd;
 static Tcl_NamespaceDeleteProc* _TclOONamespaceDeleteProc = NULL;
 static void ItclDeleteOption(char *cdata);
 

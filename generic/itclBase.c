@@ -14,16 +14,16 @@
 #include "itclInt.h"
 #include <tclOODecls.h>
 
-Tcl_ObjCmdProc ItclFinishCmd;
-Tcl_ObjCmdProc ItclSetHullWindowName;
-Tcl_ObjCmdProc ItclCheckSetItclHull;
+static Tcl_ObjCmdProc ItclFinishCmd;
+static Tcl_ObjCmdProc ItclSetHullWindowName;
+static Tcl_ObjCmdProc ItclCheckSetItclHull;
 
 #ifdef OBJ_REF_COUNT_DEBUG
-Tcl_ObjCmdProc ItclDumpRefCountInfo;
+static Tcl_ObjCmdProc ItclDumpRefCountInfo;
 #endif
 
 #ifdef ITCL_PRESERVE_DEBUG
-Tcl_ObjCmdProc ItclDumpPreserveInfo;
+static Tcl_ObjCmdProc ItclDumpPreserveInfo;
 #endif
 
 extern struct ItclStubAPI itclStubAPI;
@@ -592,7 +592,7 @@ ItclCallCCommand(
  *
  * ------------------------------------------------------------------------
  */
-int
+static int
 ItclSetHullWindowName(
     ClientData clientData,   /* infoPtr */
     Tcl_Interp *interp,      /* current interpreter */
@@ -616,7 +616,7 @@ ItclSetHullWindowName(
  *
  * ------------------------------------------------------------------------
  */
-int
+static int
 ItclCheckSetItclHull(
     ClientData clientData,   /* infoPtr */
     Tcl_Interp *interp,      /* current interpreter */
@@ -685,7 +685,7 @@ ItclCheckSetItclHull(
  *
  * ------------------------------------------------------------------------
  */
-int
+static int
 ItclFinishCmd(
     ClientData clientData,   /* unused */
     Tcl_Interp *interp,      /* current interpreter */
@@ -885,7 +885,7 @@ void Tcl_DbDumpRefCountInfo(const char *fileName, int noDeleted);
  *
  * ------------------------------------------------------------------------
  */
-int
+static int
 ItclDumpRefCountInfo(
     ClientData clientData,   /* unused */
     Tcl_Interp *interp,      /* current interpreter */
@@ -919,7 +919,7 @@ void Itcl_DbDumpPreserveInfo(const char *fileName);
  *
  * ------------------------------------------------------------------------
  */
-int
+static int
 ItclDumpPreserveInfo(
     ClientData clientData,   /* unused */
     Tcl_Interp *interp,      /* current interpreter */
