@@ -49,15 +49,16 @@ Itcl_InitStubs(
     actualVersion =
 	    Tcl_PkgRequireEx(interp, packageName, version, exact, &clientData);
     stubsAPIPtr = clientData;
-    if (clientData == NULL) {
+    if ((actualVersion == NULL) || (clientData == NULL)) {
         return NULL;
+    }
+    stubsPtr = (ItclStubs *) clientData;
+    if (stubsPtr->magic == TCL_STUB_MAGIC) {
+    	errMsg = "incompatible stub table pointer";
+    	goto error;
     }
     stubsPtr = stubsAPIPtr->stubsPtr;
     intStubsPtr = stubsAPIPtr->intStubsPtr;
-
-    if (actualVersion == NULL) {
-	return NULL;
-    }
 
     if (!stubsPtr || !intStubsPtr) {
 	errMsg = "missing stub table pointer";
