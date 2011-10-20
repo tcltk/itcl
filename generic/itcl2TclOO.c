@@ -13,6 +13,8 @@
 #include <tclInt.h>
 #include <tclOO.h>
 #include <tclOOInt.h>
+#include "itclMigrate2TclCore.h"
+#include "itcl2TclOO.h"
 
 void *
 Itcl_GetCurrentCallbackPtr(
@@ -153,7 +155,7 @@ Itcl_InvokeEnsembleMethod(
     Tcl_Interp *interp,
     Tcl_Namespace *nsPtr,       /* namespace to call the method in */
     Tcl_Obj *namePtr,           /* name of the method */
-    Proc *procPtr,
+    Tcl_Proc *procPtr,
     int objc,			/* Number of arguments. */
     Tcl_Obj *const *objv)	/* Arguments as actually seen. */
 {

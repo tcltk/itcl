@@ -19,7 +19,6 @@ struct Tcl_Resolve;
 #define Tcl_CreateProc _Tcl_CreateProc
 #define Tcl_ProcDeleteProc _Tcl_ProcDeleteProc
 #define Tcl_GetObjInterpProc _Tcl_GetObjInterpProc
-#define Tcl_SetNamespaceResolver _Tcl_SetNamespaceResolver
 
 MODULE_SCOPE Tcl_Command _Tcl_GetOriginalCommand(Tcl_Command command);
 MODULE_SCOPE int _Tcl_CreateProc(Tcl_Interp *interp, Tcl_Namespace *nsPtr,
@@ -27,8 +26,6 @@ MODULE_SCOPE int _Tcl_CreateProc(Tcl_Interp *interp, Tcl_Namespace *nsPtr,
         Tcl_Proc *procPtrPtr);
 MODULE_SCOPE void _Tcl_ProcDeleteProc(ClientData clientData);
 MODULE_SCOPE void *_Tcl_GetObjInterpProc(void);
-MODULE_SCOPE int _Tcl_SetNamespaceResolver(Tcl_Namespace *nsPtr,
-        struct Tcl_Resolve *resolvePtr);
 MODULE_SCOPE int Tcl_RenameCommand(Tcl_Interp *interp, const char *oldName,
 	const char *newName);
 MODULE_SCOPE Tcl_HashTable *Itcl_GetNamespaceChildTable(Tcl_Namespace *nsPtr);
