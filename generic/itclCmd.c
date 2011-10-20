@@ -919,7 +919,7 @@ Itcl_CodeCmd(
 
     Tcl_Obj *listPtr;
     Tcl_Obj *objPtr;
-    char *token;
+    const char *token;
     int pos;
 
     ItclShowArgs(1, "Itcl_CodeCmd", objc, objv);

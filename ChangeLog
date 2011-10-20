@@ -5,6 +5,21 @@
 	* generic/itcl2TclOO.h
 	* generic/itcl2TclOO.c
 
+	* generic/itcl.decls: [Frq 3423707]: TIP #27 related signature changes
+	* generic/itclIntDecls.h: (regenerated)
+	* generic/itcl2TclOO.h
+	* generic/itclBase.c
+	* generic/itclBuiltin.c
+	* generic/itclClass.c
+	* generic/itclCmd.c
+	* generic/itclEnsemble.c
+	* generic/itclHelpers.c
+	* generic/itclInfo.c
+	* generic/itclMethod.c
+	* generic/itclObject.c
+	* generic/itclParse.c
+	* generic/itclUtil.c
+
 2011-10-14  Jan Nijtmans  <nijtmans@users.sourceforge.net>
 
 	* generic/itcl2TclOO.h: [Bug 3369931]: unneeded exported functions
