@@ -2134,7 +2134,7 @@ CallInvokeEnsembleMethod(
     Tcl_Obj *const*objv = data[3];
 
     result = Itcl_InvokeEnsembleMethod(interp, nsPtr, ensPart->namePtr,
-	        (Tcl_Proc)ensPart->clientData, objc, objv);
+	        (Tcl_Proc *)ensPart->clientData, objc, objv);
     return result;
 }
 

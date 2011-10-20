@@ -30,7 +30,7 @@ extern struct ItclStubAPI itclStubAPI;
 
 static int Initialize _ANSI_ARGS_((Tcl_Interp *interp));
 
-static char initScript[] =
+static const char initScript[] =
 "namespace eval ::itcl {\n"
 "    proc _find_init {} {\n"
 "        global env tcl_library\n"

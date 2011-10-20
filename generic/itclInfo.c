@@ -970,7 +970,7 @@ Itcl_BiInfoFunctionCmd(
     int i;
     int result;
     char *name;
-    char *val;
+    const char *val;
     Tcl_HashSearch place;
     Tcl_HashEntry *entry;
     ItclMemberFunc *imPtr;
@@ -1527,8 +1527,8 @@ Itcl_BiInfoVarsCmd(
     }
     if (result == TCL_OK) {
 	Tcl_DString buffer;
-	char *head;
-	char *tail;
+	const char *head;
+	const char *tail;
         /* check if the pattern contains a class namespace
 	 * and if yes add the common private and protected vars
 	 * and remove the ___DO_NOT_DELETE_THIS_VARIABLE var
@@ -3108,7 +3108,7 @@ Itcl_BiInfoMethodCmd(
     ItclMemberCode *mcode;
     ItclHierIter hier;
     char *name;
-    char *val;
+    const char *val;
     char *cmdName;
     int i;
     int result;
@@ -3689,7 +3689,7 @@ Itcl_BiInfoTypeMethodCmd(
     ItclMemberCode *mcode;
     ItclHierIter hier;
     char *name;
-    char *val;
+    const char *val;
     char *cmdName;
     int i;
     int result;

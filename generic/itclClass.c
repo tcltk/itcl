@@ -186,8 +186,8 @@ Itcl_CreateClass(
     ItclObjectInfo *infoPtr,	/* info for all known objects */
     ItclClass **rPtr)		/* returns: pointer to class definition */
 {
-    char *head;
-    char *tail;
+    const char *head;
+    const char *tail;
     Tcl_DString buffer;
     Tcl_Command cmd;
     Tcl_CmdInfo cmdInfo;

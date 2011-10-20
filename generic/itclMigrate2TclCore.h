@@ -72,8 +72,6 @@ typedef struct Tcl_Proc_ *Tcl_Proc;
 #define _TCL_PROC_DEFINED 1
 #endif
 
-typedef void (*Tcl_ProcErrorProc)(Tcl_Interp *interp, Tcl_Obj *procNameObj);
-
 #define Tcl_SetProcCmd _Tcl_SetProcCmd
 
 MODULE_SCOPE Tcl_Var Tcl_NewNamespaceVar(Tcl_Interp *interp, Tcl_Namespace *nsPtr,
