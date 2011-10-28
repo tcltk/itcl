@@ -1,6 +1,8 @@
-This is the seventh beta release of Itcl.
+This is the eighth beta release of Itcl.
 When final it will be the next major release of Itcl.
-This version is named Itcl 4.0b7.
+This version is named Itcl 4.0b8.
+
+The difference to 4.0b7: Tighter control on the set of exported functions.
 
 The difference to 4.0b6: Updated TEA system and related build system changes.
 
