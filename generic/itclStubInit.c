@@ -8,11 +8,6 @@
 MODULE_SCOPE const ItclStubs itclStubs;
 MODULE_SCOPE const struct ItclStubAPI itclStubAPI;
 
-MODULE_SCOPE const ItclStubs itclStubs;
-
-#define Itcl_Init_ Itcl_Init
-#define Itcl_SafeInit_ Itcl_SafeInit
-
 /* !BEGIN!: Do not edit below this line. */
 
 static const ItclIntStubs itclIntStubs = {
