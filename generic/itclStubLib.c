@@ -3,15 +3,10 @@
  */
 
 #define USE_TCL_STUBS 1
-#include "tcl.h"
-
 #define USE_ITCL_STUBS 1
-#include "itcl.h"
 #include "itclInt.h"
 
-#ifdef Itcl_InitStubs
 #undef Itcl_InitStubs
-#endif
 
 const ItclStubs *itclStubsPtr = NULL;
 const ItclIntStubs *itclIntStubsPtr = NULL;
@@ -52,7 +47,7 @@ Itcl_InitStubs(
     if ((actualVersion == NULL) || (clientData == NULL)) {
         return NULL;
     }
-    stubsPtr = (ItclStubs *) clientData;
+    stubsPtr = (const ItclStubs *) clientData;
     if (stubsPtr->magic == TCL_STUB_MAGIC) {
     	errMsg = "incompatible stub table pointer";
     	goto error;

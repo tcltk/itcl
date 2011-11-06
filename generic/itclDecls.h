@@ -19,7 +19,7 @@ ITCLAPI const char *Itcl_InitStubs(
 /* !BEGIN!: Do not edit below this line. */
 
 #define ITCL_STUBS_EPOCH 0
-#define ITCL_STUBS_REVISION 146
+#define ITCL_STUBS_REVISION 144
 
 #if !defined(USE_ITCL_STUBS)
 
@@ -27,10 +27,8 @@ ITCLAPI const char *Itcl_InitStubs(
  * Exported function declarations:
  */
 
-/* 0 */
-ITCLAPI int		Itcl_Init_ (Tcl_Interp * interp);
-/* 1 */
-ITCLAPI int		Itcl_SafeInit_ (Tcl_Interp * interp);
+/* Slot 0 is reserved */
+/* Slot 1 is reserved */
 /* 2 */
 ITCLAPI int		Itcl_RegisterC (Tcl_Interp * interp, 
 				const char * name, Tcl_CmdProc * proc, 
@@ -107,8 +105,8 @@ typedef struct ItclStubs {
     int revision;
     const struct ItclStubHooks *hooks;
 
-    int (*itcl_Init_) (Tcl_Interp * interp); /* 0 */
-    int (*itcl_SafeInit_) (Tcl_Interp * interp); /* 1 */
+    void (*reserved0)(void);
+    void (*reserved1)(void);
     int (*itcl_RegisterC) (Tcl_Interp * interp, const char * name, Tcl_CmdProc * proc, ClientData clientData, Tcl_CmdDeleteProc * deleteProc); /* 2 */
     int (*itcl_RegisterObjC) (Tcl_Interp * interp, const char * name, Tcl_ObjCmdProc * proc, ClientData clientData, Tcl_CmdDeleteProc * deleteProc); /* 3 */
     int (*itcl_FindC) (Tcl_Interp * interp, const char * name, Tcl_CmdProc ** argProcPtr, Tcl_ObjCmdProc ** objProcPtr, ClientData * cDataPtr); /* 4 */
@@ -149,14 +147,8 @@ ITCLAPI const ItclStubs *itclStubsPtr;
  * Inline function declarations:
  */
 
-#ifndef Itcl_Init_
-#define Itcl_Init_ \
-	(itclStubsPtr->itcl_Init_) /* 0 */
-#endif
-#ifndef Itcl_SafeInit_
-#define Itcl_SafeInit_ \
-	(itclStubsPtr->itcl_SafeInit_) /* 1 */
-#endif
+/* Slot 0 is reserved */
+/* Slot 1 is reserved */
 #ifndef Itcl_RegisterC
 #define Itcl_RegisterC \
 	(itclStubsPtr->itcl_RegisterC) /* 2 */

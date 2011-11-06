@@ -3,8 +3,10 @@
  * It is compiled and linked in with the itcl package proper.
  */
 
-#include "itcl.h"
 #include "itclInt.h"
+
+MODULE_SCOPE const ItclStubs itclStubs;
+MODULE_SCOPE const struct ItclStubAPI itclStubAPI;
 
 MODULE_SCOPE const ItclStubs itclStubs;
 
@@ -207,8 +209,8 @@ const ItclStubs itclStubs = {
     ITCL_STUBS_EPOCH,
     ITCL_STUBS_REVISION,
     &itclStubHooks,
-    Itcl_Init_, /* 0 */
-    Itcl_SafeInit_, /* 1 */
+    0, /* 0 */
+    0, /* 1 */
     Itcl_RegisterC, /* 2 */
     Itcl_RegisterObjC, /* 3 */
     Itcl_FindC, /* 4 */

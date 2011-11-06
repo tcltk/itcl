@@ -14,7 +14,7 @@
  * See the file "license.terms" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  */
-#include "tclInt.h"
+#include <tclInt.h>
 #include "itclInt.h"
 #include "itclVCInt.h"
 
@@ -235,7 +235,7 @@ Itcl_ClassVarResolver2(
              *  If this is an instance variable, then we have to
              *  find the object context,
              */
-    
+
             if ((callContextPtr != NULL) && (callContextPtr->ioPtr != NULL)) {
                 contextIoPtr = callContextPtr->ioPtr;
                 hPtr = Tcl_FindHashEntry(&iriPtr->objectVarsTables,
