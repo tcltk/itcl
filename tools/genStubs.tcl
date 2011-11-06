@@ -182,12 +182,21 @@ proc genStubs::hooks {names} {
 #	decl		The C function declaration, or {} for an undefined
 #			entry.
 #
-proc genStubs::declare {index status decl} {
+proc genStubs::declare {args} {
     variable stubs
     variable curName
     variable revision
 
     incr revision
+    if {[llength $args] == 2} {
+	lassign $args index decl
+	set status current
+    } elseif {[llength $args] == 3} {
+	lassign $args index status decl
+    } else {
+	puts stderr "wrong # args: declare $args"
+	return
+    }
 
     # Check for duplicate declarations, then add the declaration and
     # bump the lastNum counter if necessary.
@@ -228,6 +237,7 @@ proc genStubs::rewriteFile {file text} {
     }
     set in [open ${file} r]
     set out [open ${file}.new w]
+    fconfigure $out -translation lf
 
     while {![eof $in]} {
 	set line [gets $in]
@@ -524,7 +534,7 @@ proc genStubs::makeSlot {name decl index} {
 	    append text ")"
 	}
     }
-    
+
     append text "; /* $index */\n"
     return $text
 }
@@ -567,8 +577,8 @@ proc genStubs::makeInit {name decl index} {
 # Results:
 #	None.
 
-proc genStubs::forAllStubs {name slotProc guardProc textVar 
-    	{skipString {"/* Slot $i is reserved */\n"}}} {
+proc genStubs::forAllStubs {name slotProc guardProc textVar
+	{skipString {"/* Slot $i is reserved */\n"}}} {
     variable stubs
     upvar $textVar text
 
@@ -653,7 +663,7 @@ proc genStubs::emitMacros {name textVar} {
     set upName [string toupper $libraryName]
     append text "\n#if defined(USE_${upName}_STUBS)\n"
     append text "\n/*\n * Inline function declarations:\n */\n\n"
-    
+
     forAllStubs $name makeMacro addGuard text
 
     append text "\n#endif /* defined(USE_${upName}_STUBS) */\n"
@@ -692,7 +702,7 @@ proc genStubs::emitHeader {name} {
 	foreach hook $hooks($name) {
 	    set capHook [string toupper [string index $hook 0]]
 	    append capHook [string range $hook 1 end]
-	    append text "    struct ${capHook}Stubs *${hook}Stubs;\n"
+	    append text "    const struct ${capHook}Stubs *${hook}Stubs;\n"
 	}
 	append text "} ${capName}StubHooks;\n"
     }
@@ -700,7 +710,7 @@ proc genStubs::emitHeader {name} {
     append text "    int magic;\n"
     append text "    int epoch;\n"
     append text "    int revision;\n"
-    append text "    struct ${capName}StubHooks *hooks;\n\n"
+    append text "    const struct ${capName}StubHooks *hooks;\n\n"
 
     emitSlots $name text
 
@@ -729,17 +739,17 @@ proc genStubs::emitHeader {name} {
 
 proc genStubs::emitInit {name textVar} {
     variable hooks
+    variable interfaces
     variable epoch
-    variable revision
-
     upvar $textVar text
+    set root 1
 
     set capName [string toupper [string index $name 0]]
     append capName [string range $name 1 end]
     set CAPName [string toupper $name]
 
     if {[info exists hooks($name)]} {
- 	append text "\nstatic ${capName}StubHooks ${name}StubHooks = \{\n"
+	append text "\nstatic const ${capName}StubHooks ${name}StubHooks = \{\n"
 	set sep "    "
 	foreach sub $hooks($name) {
 	    append text $sep "&${sub}Stubs"
@@ -747,7 +757,20 @@ proc genStubs::emitInit {name textVar} {
 	}
 	append text "\n\};\n"
     }
-    append text "\n${capName}Stubs ${name}Stubs = \{\n"
+    foreach intf [array names interfaces] {
+	if {[info exists hooks($intf)]} {
+	    if {[lsearch -exact $hooks($intf) $name] >= 0} {
+		set root 0
+		break
+	    }
+	}
+    }
+
+    append text "\n"
+    if {!$root} {
+	append text "static "
+    }
+    append text "const ${capName}Stubs ${name}Stubs = \{\n"
     append text "    TCL_STUB_MAGIC,\n"
     append text "    ${CAPName}_STUBS_EPOCH,\n"
     append text "    ${CAPName}_STUBS_REVISION,\n"
@@ -756,7 +779,7 @@ proc genStubs::emitInit {name textVar} {
     } else {
 	append text "    0,\n"
     }
-    
+
     forAllStubs $name makeInit noGuard text {"    0, /* $i */\n"}
 
     append text "\};\n"
@@ -847,13 +870,14 @@ proc genStubs::init {} {
 # Results:
 #	Returns any values that were not assigned to variables.
 
-proc lassign {valueList args} {
-  if {[llength $args] == 0} {
-      error "wrong # args: lassign list varname ?varname..?"
-  }
-
-  uplevel [list foreach $args $valueList {break}]
-  return [lrange $valueList [llength $args] end]
+if {[string length [namespace which lassign]] == 0} {
+    proc lassign {valueList args} {
+	if {[llength $args] == 0} {
+	    error "wrong # args: should be \"lassign list varName ?varName ...?\""
+	}
+	uplevel [list foreach $args $valueList {break}]
+	return [lrange $valueList [llength $args] end]
+    }
 }
 
 genStubs::init

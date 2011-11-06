@@ -1,3 +1,23 @@
+2011-11-07  Jan Nijtmans  <nijtmans@users.sourceforge.net>
+
+	* tools/genStubs.tcl:  Make stub table symbols and pointers const
+	* generic/itcl.decls:  Remove Itcl_(Safe)Init from Stub table
+	* generic/itcl.h:
+	* generic/itcl2TclOO.c: Remove unnecessary includes, and consistent
+	* generic/itclBase.c:   use of include <file> resp include "file"
+	* generic/itclInt.h:
+	* generic/itclMigrate2TclCore.c:
+	* generic/itclParse.c:
+	* generic/itclResolve2.c:
+	* generic/itclStubLib.c:
+	* generic/itclStubs.c:
+	* generic/itclTclIntStubsFcn.c:
+	* generic/itclTestRegisterC.c:
+	* generic/itclVarsAndCmds.c:
+	* generic/itclDecls.h:    (regenerated)
+	* generic/itclIntDecls.h:
+	* generic/itclStubInit.c:
+
 2011-10-20  Jan Nijtmans  <nijtmans@users.sourceforge.net>
 
 	* generic/itclMigrate2TclCore.h: [Bug 3424948]: trunk does not link
