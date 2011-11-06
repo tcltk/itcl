@@ -146,7 +146,8 @@ Itcl_StubExistsCmd(
  *  Invoked by Tcl whenever itcl has to handle "stub unknown" command to
  * ------------------------------------------------------------------------
  */
-int
+#if 0
+static int
 ItclStubUnknownCmd(
     ClientData clientData,   /* not used */
     Tcl_Interp *interp,      /* current interpreter */
@@ -160,6 +161,7 @@ ItclStubUnknownCmd(
 	NULL);
     return TCL_ERROR;
 }
+#endif
 
 /*
  * ------------------------------------------------------------------------

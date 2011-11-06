@@ -121,43 +121,21 @@ static void ItclDelObjectInfo(char* cdata);
 static int ItclInitClassCommon(Tcl_Interp *interp, ItclClass *iclsPtr,
         ItclVariable *ivPtr, const char *initStr);
 
-Tcl_ObjCmdProc Itcl_ClassCommonCmd;
-Tcl_ObjCmdProc Itcl_ClassTypeVariableCmd;
-Tcl_ObjCmdProc Itcl_ClassConstructorCmd;
-Tcl_ObjCmdProc Itcl_ClassDestructorCmd;
-Tcl_ObjCmdProc Itcl_HandleClass;
-Tcl_ObjCmdProc Itcl_ClassInheritCmd;
-Tcl_ObjCmdProc Itcl_ClassMethodCmd;
-Tcl_ObjCmdProc Itcl_ClassProcCmd;
-Tcl_ObjCmdProc Itcl_ClassTypeMethodCmd;
-Tcl_ObjCmdProc Itcl_ClassVariableCmd;
-Tcl_ObjCmdProc Itcl_ClassProtectionCmd;
-Tcl_ObjCmdProc Itcl_ClassFilterCmd;
-Tcl_ObjCmdProc Itcl_ClassMixinCmd;
-Tcl_ObjCmdProc Itcl_WidgetCmd;
-Tcl_ObjCmdProc Itcl_WidgetAdaptorCmd;
-Tcl_ObjCmdProc Itcl_ClassOptionCmd;
-Tcl_ObjCmdProc Itcl_NWidgetCmd;
-Tcl_ObjCmdProc Itcl_ExtendedClassCmd;
-Tcl_ObjCmdProc Itcl_TypeClassCmd;
-Tcl_ObjCmdProc Itcl_AddOptionCmd;
-Tcl_ObjCmdProc Itcl_AddObjectOptionCmd;
-Tcl_ObjCmdProc Itcl_AddDelegatedOptionCmd;
-Tcl_ObjCmdProc Itcl_AddDelegatedFunctionCmd;
-Tcl_ObjCmdProc Itcl_AddComponentCmd;
-Tcl_ObjCmdProc Itcl_SetComponentCmd;
-Tcl_ObjCmdProc Itcl_ClassComponentCmd;
-Tcl_ObjCmdProc Itcl_ClassTypeComponentCmd;
-Tcl_ObjCmdProc Itcl_ClassDelegateMethodCmd;
-Tcl_ObjCmdProc Itcl_ClassDelegateOptionCmd;
-Tcl_ObjCmdProc Itcl_ClassDelegateTypeMethodCmd;
-Tcl_ObjCmdProc Itcl_ClassForwardCmd;
-Tcl_ObjCmdProc Itcl_ClassMethodVariableCmd;
-Tcl_ObjCmdProc Itcl_ClassTypeConstructorCmd;
-Tcl_ObjCmdProc Itcl_ClassHullTypeCmd;
-Tcl_ObjCmdProc Itcl_ClassWidgetClassCmd;
-Tcl_ObjCmdProc Itcl_EnsembleDeleteCmd;
-Tcl_ObjCmdProc ItclGenericClassCmd;
+static Tcl_ObjCmdProc Itcl_ClassTypeVariableCmd;
+static Tcl_ObjCmdProc Itcl_ClassTypeMethodCmd;
+static Tcl_ObjCmdProc Itcl_ClassFilterCmd;
+static Tcl_ObjCmdProc Itcl_ClassMixinCmd;
+static Tcl_ObjCmdProc Itcl_WidgetCmd;
+static Tcl_ObjCmdProc Itcl_WidgetAdaptorCmd;
+static Tcl_ObjCmdProc Itcl_ClassComponentCmd;
+static Tcl_ObjCmdProc Itcl_ClassTypeComponentCmd;
+static Tcl_ObjCmdProc Itcl_ClassDelegateMethodCmd;
+static Tcl_ObjCmdProc Itcl_ClassDelegateOptionCmd;
+static Tcl_ObjCmdProc Itcl_ClassDelegateTypeMethodCmd;
+static Tcl_ObjCmdProc Itcl_ClassForwardCmd;
+static Tcl_ObjCmdProc Itcl_ClassMethodVariableCmd;
+static Tcl_ObjCmdProc Itcl_ClassTypeConstructorCmd;
+static Tcl_ObjCmdProc ItclGenericClassCmd;
 
 static const struct {
     const char *name;
@@ -613,7 +591,7 @@ Itcl_ParseInit(
  *
  * ------------------------------------------------------------------------
  */
-int
+static int
 ItclGenericClassCmd(
     ClientData clientData,   /* info for all known objects */
     Tcl_Interp *interp,      /* current interpreter */
@@ -1166,9 +1144,9 @@ ItclCheckForInitializedComponents(
     }
     Itcl_PopCallFrame(interp);
     if (result == TCL_ERROR) {
-        char *startStr;
-        char *sepStr;
-	char *objectStr;
+        const char *startStr;
+        const char *sepStr;
+	const char *objectStr;
         startStr = "";
 	sepStr = "";
 	objectStr = "";
@@ -1218,7 +1196,7 @@ Itcl_ClassInheritCmd(
     int i;
     int newEntry;
     int haveClasses;
-    char *token;
+    const char *token;
     Itcl_ListElem *elem;
     Itcl_ListElem *elem2;
     ItclClass *cdPtr;
@@ -1830,7 +1808,7 @@ Itcl_ClassProcCmd(
  *
  * ------------------------------------------------------------------------
  */
-int
+static int
 Itcl_ClassTypeMethodCmd(
     ClientData clientData,   /* info for all known objects */
     Tcl_Interp *interp,      /* current interpreter */
@@ -1920,7 +1898,7 @@ Itcl_ClassVariableCmd(
     char *init;
     char *config;
     char *arrayInitStr;
-    char *usageStr;
+    const char *usageStr;
     int pLevel;
     int haveError;
     int haveArrayInit;
@@ -2159,7 +2137,7 @@ ItclClassCommonCmd(
     ItclVariable *ivPtr;
     Tcl_Obj *namePtr;
     char *arrayInitStr;
-    char *usageStr;
+    const char *usageStr;
     char *initStr;
     int haveError;
     int haveArrayInit;
@@ -2250,7 +2228,7 @@ ItclClassCommonCmd(
  *
  * ------------------------------------------------------------------------
  */
-int
+static int
 Itcl_ClassTypeVariableCmd(
     ClientData clientData,   /* info for all known objects */
     Tcl_Interp *interp,      /* current interpreter */
@@ -2366,7 +2344,7 @@ ItclDelObjectInfo(
  *
  * ------------------------------------------------------------------------
  */
-int
+static int
 Itcl_ClassFilterCmd(
     ClientData clientData,   /* info for all known objects */
     Tcl_Interp *interp,      /* current interpreter */
@@ -2420,7 +2398,7 @@ ItclShowArgs(1, "Itcl_ClassFilterCmd2", objc+2, newObjv);
  *
  * ------------------------------------------------------------------------
  */
-int
+static int
 Itcl_ClassMixinCmd(
     ClientData clientData,   /* info for all known objects */
     Tcl_Interp *interp,      /* current interpreter */
@@ -2441,7 +2419,7 @@ Itcl_ClassMixinCmd(
  *
  * ------------------------------------------------------------------------
  */
-int
+static int
 Itcl_WidgetCmd(
     ClientData clientData,   /* info for all known objects */
     Tcl_Interp *interp,      /* current interpreter */
@@ -2473,7 +2451,7 @@ Itcl_WidgetCmd(
  *
  * ------------------------------------------------------------------------
  */
-int
+static int
 Itcl_WidgetAdaptorCmd(
     ClientData clientData,   /* info for all known objects */
     Tcl_Interp *interp,      /* current interpreter */
@@ -2530,8 +2508,8 @@ ItclParseOption(
     char *configureMethodVar;
     char *validateMethod;
     char *validateMethodVar;
-    char *token;
-    char *usage;
+    const char *token;
+    const char *usage;
     const char *optionName;
     const char **argv;
     const char *name;
@@ -2965,7 +2943,7 @@ ItclCreateComponent(
  *
  * ------------------------------------------------------------------------
  */
-int
+static int
 ItclHandleClassComponent(
     ClientData clientData,   /* info for all known objects */
     Tcl_Interp *interp,      /* current interpreter */
@@ -3142,7 +3120,7 @@ ItclHandleClassComponent(
  *
  * ------------------------------------------------------------------------
  */
-int
+static int
 Itcl_ClassComponentCmd(
     ClientData clientData,   /* info for all known objects */
     Tcl_Interp *interp,      /* current interpreter */
@@ -3166,7 +3144,7 @@ Itcl_ClassComponentCmd(
  *
  * ------------------------------------------------------------------------
  */
-int
+static int
 Itcl_ClassTypeComponentCmd(
     ClientData clientData,   /* info for all known objects */
     Tcl_Interp *interp,      /* current interpreter */
@@ -3291,7 +3269,7 @@ Itcl_HandleDelegateMethodCmd(
     const char *component;
     const char *token;
     const char *whatName;
-    char *what;
+    const char *what;
     int result;
     int i;
     int foundOpt;
@@ -3454,7 +3432,7 @@ errorOut:
  *
  * ------------------------------------------------------------------------
  */
-int
+static int
 Itcl_ClassDelegateMethodCmd(
     ClientData clientData,   /* info for all known objects */
     Tcl_Interp *interp,      /* current interpreter */
@@ -3541,7 +3519,7 @@ Itcl_HandleDelegateOptionCmd(
     const char *component;
     const char *token;
     const char **argv;
-    char *what;
+    const char *what;
     const char *whatName;
     int foundOpt;
     int argc;
@@ -3821,7 +3799,7 @@ errorOut1:
  *
  * ------------------------------------------------------------------------
  */
-int
+static int
 Itcl_ClassDelegateOptionCmd(
     ClientData clientData,   /* info for all known objects */
     Tcl_Interp *interp,      /* current interpreter */
@@ -3879,7 +3857,7 @@ Itcl_ClassDelegateOptionCmd(
  *
  * ------------------------------------------------------------------------
  */
-int
+static int
 Itcl_ClassDelegateTypeMethodCmd(
     ClientData clientData,   /* info for all known objects */
     Tcl_Interp *interp,      /* current interpreter */
@@ -4063,7 +4041,7 @@ delegate typemethod * ?to <componentName>? ?using <pattern>? ?except <typemethod
  * ------------------------------------------------------------------------
  */
 /* ARGSUSED */
-int
+static int
 Itcl_ClassForwardCmd(
     ClientData clientData,   /* unused */
     Tcl_Interp *interp,      /* current interpreter */
@@ -4113,7 +4091,7 @@ Itcl_ClassForwardCmd(
  * ------------------------------------------------------------------------
  */
 /* ARGSUSED */
-int
+static int
 Itcl_ClassMethodVariableCmd(
     ClientData clientData,   /* unused */
     Tcl_Interp *interp,      /* current interpreter */
@@ -4236,7 +4214,7 @@ Itcl_ClassMethodVariableCmd(
  *
  * ------------------------------------------------------------------------
  */
-int
+static int
 Itcl_ClassTypeConstructorCmd(
     ClientData clientData,   /* info for all known objects */
     Tcl_Interp *interp,      /* current interpreter */

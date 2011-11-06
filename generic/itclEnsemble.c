@@ -645,7 +645,7 @@ GetEnsembleUsage(
     Ensemble *ensData,     /* ensemble data */
     Tcl_Obj *objPtr)       /* returns: summary of usage info */
 {
-    char *spaces = "  ";
+    const char *spaces = "  ";
     int isOpenEnded = 0;
 
     int i;
@@ -2122,9 +2122,6 @@ Itcl_EnsembleErrorCmd(
  *----------------------------------------------------------------------
  */
 
-int Itcl_InvokeEnsembleMethod(Tcl_Interp *interp, Tcl_Namespace *nsPtr,
-    Tcl_Obj *namePtr, Tcl_Proc procPtr, int objc, Tcl_Obj *const *objv);
-
 static int
 CallInvokeEnsembleMethod(
     ClientData data[],
@@ -2137,7 +2134,7 @@ CallInvokeEnsembleMethod(
     Tcl_Obj *const*objv = data[3];
 
     result = Itcl_InvokeEnsembleMethod(interp, nsPtr, ensPart->namePtr,
-	        (Tcl_Proc)ensPart->clientData, objc, objv);
+	        (Tcl_Proc *)ensPart->clientData, objc, objv);
     return result;
 }
 
@@ -2176,9 +2173,9 @@ EnsembleSubCmd(
 	if (ensPart->clientData == NULL) {
 	    return TCL_ERROR;
 	}
-        Itcl_NRAddCallback(interp, CallInvokeEnsembleMethod, nsPtr, ensPart, INT2PTR(objc), (ClientData)objv);
+	Tcl_NRAddCallback(interp, CallInvokeEnsembleMethod, nsPtr, ensPart, INT2PTR(objc), (ClientData)objv);
     } else {
-        Itcl_NRAddCallback(interp, CallInvokeEnsembleMethod2, ensPart, INT2PTR(objc), (ClientData)objv, NULL);
+	Tcl_NRAddCallback(interp, CallInvokeEnsembleMethod2, ensPart, INT2PTR(objc), (ClientData)objv, NULL);
     }
     result = Itcl_NRRunCallbacks(interp, callbackPtr);
     return result;

@@ -36,7 +36,7 @@ typedef struct ItclResolvedVarInfo {
     ItclVarLookup *vlookup;           /* Pointer to lookup info. */
 } ItclResolvedVarInfo;
 
-static char * special_resolve_vars[] = {
+static const char * special_resolve_vars[] = {
    "this",
    "self",
    "itk_option",
@@ -261,7 +261,7 @@ Itcl_ClassVarResolver(
     int idx;
     int start_idx;
     int found;
-    char **cp;
+    const char **cp;
 
     Tcl_Namespace *upNsPtr;
     upNsPtr = Itcl_GetUplevelNamespace(interp, 1);

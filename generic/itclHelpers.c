@@ -52,7 +52,7 @@ ItclShowArgs(
  *  a pointer to this string.
  * ------------------------------------------------------------------------
  */
-char*
+const char*
 Itcl_ProtectionStr(
     int pLevel)     /* protection level */
 {
@@ -1146,7 +1146,7 @@ ItclAddClassVariableDictInfo(
     Tcl_Obj *valuePtr1;
     Tcl_Obj *valuePtr2;
     Tcl_Obj *listPtr;
-    char *cp;
+    const char *cp;
     int haveFlags;
     int newValue1;
 
@@ -1298,7 +1298,7 @@ ItclAddClassFunctionDictInfo(
     Tcl_Obj *valuePtr1;
     Tcl_Obj *valuePtr2;
     Tcl_Obj *listPtr;
-    char *cp;
+    const char *cp;
     int haveFlags;
     int newValue1;
 

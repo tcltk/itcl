@@ -84,7 +84,6 @@ ITCLOBJS = \
         $(TMP_DIR)\itclLinkage.obj \
         $(TMP_DIR)\itclMethod.obj \
         $(TMP_DIR)\itclMigrate2TclCore.obj \
-        $(TMP_DIR)\itclNeededFromTclOO.obj \
         $(TMP_DIR)\itclObject.obj \
         $(TMP_DIR)\itclParse.obj \
         $(TMP_DIR)\itclResolve.obj \

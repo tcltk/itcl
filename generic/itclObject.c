@@ -31,16 +31,6 @@
  */
 #include "itclInt.h"
 
-Tcl_ObjCmdProc Itcl_BiMyTypeMethodCmd;
-Tcl_ObjCmdProc Itcl_BiMyMethodCmd;
-Tcl_ObjCmdProc Itcl_BiMyProcCmd;
-Tcl_ObjCmdProc Itcl_BiMyTypeVarCmd;
-Tcl_ObjCmdProc Itcl_BiMyVarCmd;
-Tcl_ObjCmdProc Itcl_BiItclHullCmd;
-Tcl_ObjCmdProc Itcl_BiCallInstanceCmd;
-Tcl_ObjCmdProc Itcl_BiGetInstanceVarCmd;
-Tcl_ObjCmdProc Itcl_BiInstallComponentCmd;
-
 /*
  *  FORWARD DECLARATIONS
  */
@@ -1180,7 +1170,8 @@ ItclInitObjectOptions(
  *  when an object is created.
  * ------------------------------------------------------------------------
  */
-int
+#if 0
+static int
 ItclInitObjectComponents(
    Tcl_Interp *interp,
    ItclObject *ioPtr,
@@ -1250,6 +1241,7 @@ ItclInitObjectComponents(
     Itcl_DeleteHierIter(&hier);
     return TCL_OK;
 }
+#endif
 
 /*
  * ------------------------------------------------------------------------
@@ -1492,9 +1484,9 @@ Itcl_DestructObject(
          *  If all goes well, return the null string as the result.
          */
         callbackPtr = Itcl_GetCurrentCallbackPtr(interp);
-        Itcl_NRAddCallback(interp, FinalizeDeleteObject, contextIoPtr,
+        Tcl_NRAddCallback(interp, FinalizeDeleteObject, contextIoPtr,
 	        NULL, NULL, NULL);
-        Itcl_NRAddCallback(interp, CallDestructBase, contextIoPtr,
+        Tcl_NRAddCallback(interp, CallDestructBase, contextIoPtr,
 	        INT2PTR(flags), NULL, NULL);
         result = Itcl_NRRunCallbacks(interp, callbackPtr);
     }
@@ -2595,9 +2587,6 @@ ItclFreeObject(
  * ------------------------------------------------------------------------
  */
 
-int Itcl_InvokeProcedureMethod(ClientData clientData, Tcl_Interp *interp,
-	int objc, Tcl_Obj *const *objv);
-
 static int
 CallPublicObjectCmd(
     ClientData data[],
@@ -2634,9 +2623,9 @@ ItclObjectCmd(
     Itcl_ListElem *elem;
     ItclClass *basePtr;
     void *callbackPtr;
-    char *className;
-    char *tail;
-    char *cp;
+    const char *className;
+    const char *tail;
+    const char *cp;
     int isDirectCall;
     int incr;
     int result;
@@ -2783,12 +2772,12 @@ ItclObjectCmd(
         newObjv[1] = methodNamePtr;
         memcpy(newObjv+incr+1, objv+1, (sizeof(Tcl_Obj*)*(objc-1)));
 	ItclShowArgs(1, "run CallPublicObjectCmd1", objc+incr, newObjv);
-        Itcl_NRAddCallback(interp, CallPublicObjectCmd, oPtr, clsPtr,
+	Tcl_NRAddCallback(interp, CallPublicObjectCmd, oPtr, clsPtr,
 	        INT2PTR(objc+incr), newObjv);
 
     } else {
 	ItclShowArgs(1, "run CallPublicObjectCmd2", objc, objv);
-        Itcl_NRAddCallback(interp, CallPublicObjectCmd, oPtr, clsPtr,
+	Tcl_NRAddCallback(interp, CallPublicObjectCmd, oPtr, clsPtr,
 	        INT2PTR(objc), (ClientData)objv);
     }
 
@@ -2934,9 +2923,9 @@ ItclMapMethodNameProc(
     ItclClass *iclsPtr;
     ItclClass *iclsPtr2;
     ItclObjectInfo *infoPtr;
-    char *head;
-    char *tail;
-    char *sp;
+    const char *head;
+    const char *tail;
+    const char *sp;
 
     iclsPtr = NULL;
     iclsPtr2 = NULL;
