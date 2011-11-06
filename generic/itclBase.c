@@ -12,7 +12,6 @@
 
 #include <stdlib.h>
 #include "itclInt.h"
-#include <tclOODecls.h>
 
 static Tcl_ObjCmdProc ItclFinishCmd;
 static Tcl_ObjCmdProc ItclSetHullWindowName;
@@ -26,7 +25,7 @@ static Tcl_ObjCmdProc ItclDumpRefCountInfo;
 static Tcl_ObjCmdProc ItclDumpPreserveInfo;
 #endif
 
-extern struct ItclStubAPI itclStubAPI;
+MODULE_SCOPE const struct ItclStubAPI itclStubAPI;
 
 static int Initialize _ANSI_ARGS_((Tcl_Interp *interp));
 

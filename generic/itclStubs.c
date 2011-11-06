@@ -10,9 +10,6 @@
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  */
 
-#include <string.h>
-#include <ctype.h>
-#include "tcl.h"
 #include "itclInt.h"
 
 static void ItclDeleteStub(ClientData cdata);
