@@ -9,12 +9,9 @@
  * this file, and for a DISCLAIMER OF ALL WARRANTIES.
  */
 
-#include <tcl.h>
 #include <tclInt.h>
-#include <tclOO.h>
 #include <tclOOInt.h>
-#include "itclMigrate2TclCore.h"
-#include "itcl2TclOO.h"
+#include "itclInt.h"
 
 void *
 Itcl_GetCurrentCallbackPtr(
@@ -371,7 +368,7 @@ Itcl_SelfCmd(
         return TCL_ERROR;
     }
 
-    contextPtr = framePtr->clientData; 
+    contextPtr = framePtr->clientData;
 
     if (objc == 1) {
         Tcl_SetObjResult(interp, Itcl_TclOOObjectName(interp, contextPtr->oPtr));

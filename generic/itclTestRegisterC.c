@@ -4,7 +4,6 @@
 #ifdef ITCL_DEBUG_C_INTERFACE
 
 #include <stdio.h>
-#include "tcl.h"
 #include "itclInt.h"
 
 Tcl_CmdProc cArgFunc;

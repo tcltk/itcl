@@ -13,13 +13,12 @@
  * See the file "license.terms" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  */
-#include <tcl.h>
 #include <tclInt.h>
 #include "itclInt.h"
 
 Tcl_Command
 _Tcl_GetOriginalCommand(
-    Tcl_Command command) 
+    Tcl_Command command)
 {
     return TclGetOriginalCommand(command);
 }
