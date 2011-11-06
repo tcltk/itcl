@@ -126,7 +126,7 @@ declare 6 current {
     int Itcl_Protection (Tcl_Interp *interp, int newLevel)
 }
 declare 7 current {
-    char* Itcl_ProtectionStr (int pLevel)
+    const char* Itcl_ProtectionStr (int pLevel)
 }
 declare 8 current {
     int Itcl_CanAccess (ItclMemberFunc* memberPtr, Tcl_Namespace* fromNsPtr)
@@ -136,7 +136,7 @@ declare 9 current {
 }
 declare 11 current {
     void Itcl_ParseNamespPath (const char *name, Tcl_DString *buffer,
-        char **head, char **tail)
+        const char **head, const char **tail)
 }
 declare 12 current {
     int Itcl_DecodeScopedCommand (Tcl_Interp *interp, const char *name, \

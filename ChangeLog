@@ -1,3 +1,46 @@
+2011-10-20  Jan Nijtmans  <nijtmans@users.sourceforge.net>
+
+	* generic/itclMigrate2TclCore.h: [Bug 3424948]: trunk does not link
+	* generic/itclTclIntStubsFcn.h
+	* generic/itcl2TclOO.h
+	* generic/itcl2TclOO.c
+
+	* generic/itcl.decls: [Frq 3423707]: TIP #27 related signature changes
+	* generic/itclIntDecls.h: (regenerated)
+	* generic/itcl2TclOO.h
+	* generic/itclBase.c
+	* generic/itclBuiltin.c
+	* generic/itclClass.c
+	* generic/itclCmd.c
+	* generic/itclEnsemble.c
+	* generic/itclHelpers.c
+	* generic/itclInfo.c
+	* generic/itclMethod.c
+	* generic/itclObject.c
+	* generic/itclParse.c
+	* generic/itclUtil.c
+
+2011-10-14  Jan Nijtmans  <nijtmans@users.sourceforge.net>
+
+	* generic/itcl2TclOO.h: [Bug 3369931]: unneeded exported functions
+	* generic/itclBase.c
+	* generic/itclBuiltin.c
+	* generic/itclClass.c
+	* generic/itclCmd.c
+	* generic/itclInt.h
+	* generic/itclMigrate2TclCore.h
+	* generic/itclTclIntStubsFcn.h
+	* generic/itclNeededFromTclOO.h (removed)
+	* generic/itclNeededFromTclOO.c (removed)
+	* configure
+	* configure.in
+	* win/makefile.vc
+	* generic/itclEnsemble.c:  Fix various gcc warnings, discovered
+	* generic/itclHelpers.c    with -Wwrite-strings
+	* generic/itclInfo.c
+	* generic/itclParse.c
+	* generic/itclResolve.c
+
 2011-08-03  Don Porter  <dgp@Users.sourceforge.net>
 	* generic/itclInt.h: fix for SF bug #3385041
 

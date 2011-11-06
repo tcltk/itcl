@@ -91,23 +91,14 @@ static char initHullCmdsScript[] =
 "    _find_hull_init\n"
 "}";
 
-Tcl_ObjCmdProc Itcl_BiInstallComponentCmd;
-Tcl_ObjCmdProc Itcl_BiDestroyCmd;
-Tcl_ObjCmdProc Itcl_BiCallInstanceCmd;
-Tcl_ObjCmdProc Itcl_BiGetInstanceVarCmd;
-Tcl_ObjCmdProc Itcl_BiMyTypeMethodCmd;
-Tcl_ObjCmdProc Itcl_BiMyMethodCmd;
-Tcl_ObjCmdProc Itcl_BiMyProcCmd;
-Tcl_ObjCmdProc Itcl_BiMyTypeVarCmd;
-Tcl_ObjCmdProc Itcl_BiMyVarCmd;
-Tcl_ObjCmdProc Itcl_BiItclHullCmd;
-Tcl_ObjCmdProc ItclExtendedConfigure;
-Tcl_ObjCmdProc ItclExtendedCget;
-Tcl_ObjCmdProc ItclExtendedSetGet;
-Tcl_ObjCmdProc Itcl_BiCreateHullCmd;
-Tcl_ObjCmdProc Itcl_BiSetupComponentCmd;
-Tcl_ObjCmdProc Itcl_BiKeepComponentOptionCmd;
-Tcl_ObjCmdProc Itcl_BiInitOptionsCmd;
+static Tcl_ObjCmdProc Itcl_BiDestroyCmd;
+static Tcl_ObjCmdProc ItclExtendedConfigure;
+static Tcl_ObjCmdProc ItclExtendedCget;
+static Tcl_ObjCmdProc ItclExtendedSetGet;
+static Tcl_ObjCmdProc Itcl_BiCreateHullCmd;
+static Tcl_ObjCmdProc Itcl_BiSetupComponentCmd;
+static Tcl_ObjCmdProc Itcl_BiKeepComponentOptionCmd;
+static Tcl_ObjCmdProc Itcl_BiInitOptionsCmd;
 
 /*
  *  FORWARD DECLARATIONS
@@ -121,14 +112,14 @@ static Tcl_ObjCmdProc ItclBiClassUnknownCmd;
  *  Standard list of built-in methods for all objects.
  */
 typedef struct BiMethod {
-    char* name;              /* method name */
-    char* usage;             /* string describing usage */
-    char* registration;      /* registration name for C proc */
+    const char* name;        /* method name */
+    const char* usage;       /* string describing usage */
+    const char* registration;/* registration name for C proc */
     Tcl_ObjCmdProc *proc;    /* implementation C proc */
     int flags;               /* flag for which type of class to be used */
 } BiMethod;
 
-static BiMethod BiMethodList[] = {
+static const BiMethod BiMethodList[] = {
     { "callinstance",
         "<instancename>",
         "@itcl-builtin-callinstance",
@@ -436,7 +427,7 @@ Itcl_BiIsaCmd(
     Tcl_Obj *const objv[])   /* argument objects */
 {
     ItclClass *iclsPtr;
-    char *token;
+    const char *token;
 
     ItclClass *contextIclsPtr;
     ItclObject *contextIoPtr;
@@ -532,7 +523,7 @@ Itcl_BiConfigureCmd(
     ItclHierIter hier;
     ItclObjectInfo *infoPtr;
     const char *lastval;
-    char *token;
+    const char *token;
     char *varName;
     int i;
     int unparsedObjc;
@@ -1027,9 +1018,9 @@ NRBiChainCmd(
     ItclClass *contextIclsPtr;
     ItclObject *contextIoPtr;
 
-    char *cmd;
+    const char *cmd;
     char *cmd1;
-    char *head;
+    const char *head;
     ItclClass *iclsPtr;
     ItclHierIter hier;
     Tcl_HashEntry *hPtr;
@@ -1162,7 +1153,7 @@ Itcl_BiChainCmd(
     int objc,
     Tcl_Obj *const *objv)
 {
-    return Itcl_NRCallObjProc(clientData, interp, NRBiChainCmd, objc, objv);
+    return Tcl_NRCallObjProc(interp, NRBiChainCmd, clientData, objc, objv);
 }
 
 static int
@@ -1235,7 +1226,7 @@ PrepareCreateObject(
     memcpy(newObjv+3, objv+offset, (objc-offset) * sizeof(Tcl_Obj *));
     callbackPtr = Itcl_GetCurrentCallbackPtr(interp);
     ItclShowArgs(1, "CREATE", objc+3-offset, newObjv);
-    Itcl_NRAddCallback(interp, CallCreateObject, iclsPtr,
+    Tcl_NRAddCallback(interp, CallCreateObject, iclsPtr,
             INT2PTR(objc+3-offset), (ClientData)newObjv, NULL);
     result = Itcl_NRRunCallbacks(interp, callbackPtr);
     if (result != TCL_OK) {
@@ -1842,7 +1833,7 @@ ItclBiObjectUnknownCmd(
     return result;
 }
 
-Tcl_Obj *makeAsOptionInfo(
+static Tcl_Obj *makeAsOptionInfo(
     Tcl_Interp *interp,
     Tcl_Obj *optNamePtr,
     ItclDelegatedOption *idoPtr,
@@ -1890,7 +1881,7 @@ Tcl_Obj *makeAsOptionInfo(
  * ------------------------------------------------------------------------
  */
 /* ARGSUSED */
-int
+static int
 ItclExtendedConfigure(
     ClientData clientData,   /* class definition */
     Tcl_Interp *interp,      /* current interpreter */
@@ -1928,7 +1919,7 @@ ItclExtendedConfigure(
     ItclOption *ioptPtr;
     ItclObjectInfo *infoPtr;
     const char *val;
-    char *token;
+    const char *token;
     int lObjc;
     int lObjc2;
     int i;
@@ -2509,7 +2500,7 @@ ItclExtendedConfigure(
  * ------------------------------------------------------------------------
  */
 /* ARGSUSED */
-int
+static int
 ItclExtendedCget(
     ClientData clientData,   /* class definition */
     Tcl_Interp *interp,      /* current interpreter */
@@ -2747,7 +2738,7 @@ ItclExtendedCget(
  * ------------------------------------------------------------------------
  */
 /* ARGSUSED */
-int
+static int
 ItclExtendedSetGet(
     ClientData clientData,   /* class definition */
     Tcl_Interp *interp,      /* current interpreter */
@@ -2763,7 +2754,7 @@ ItclExtendedSetGet(
     ItclObjectInfo *infoPtr;
     const char *usageStr;
     const char *val;
-    char *token;
+    const char *token;
     int result;
     int setValue;
 
@@ -2883,7 +2874,7 @@ Itcl_BiInstallComponentCmd(
     const char *usageStr;
     const char *componentName;
     const char *componentValue;
-    char *token;
+    const char *token;
     int numOpts;
     int result;
 
@@ -2998,7 +2989,7 @@ Itcl_BiInstallComponentCmd(
  * ------------------------------------------------------------------------
  */
 /* ARGSUSED */
-int
+static int
 Itcl_BiDestroyCmd(
     ClientData clientData,   /* class definition */
     Tcl_Interp *interp,      /* current interpreter */
@@ -3090,7 +3081,7 @@ Itcl_BiCallInstanceCmd(
     ItclClass *contextIclsPtr;
     ItclObject *contextIoPtr;
     ItclObject *ioPtr;
-    char *token;
+    const char *token;
     int result;
 
     /*
@@ -3157,7 +3148,7 @@ Itcl_BiGetInstanceVarCmd(
     ItclClass *contextIclsPtr;
     ItclObject *contextIoPtr;
     ItclObject *ioPtr;
-    char *token;
+    const char *token;
     int result;
 
     /*
@@ -3517,7 +3508,7 @@ Itcl_BiItclHullCmd(
  *
  * ------------------------------------------------------------------------
  */
-int
+static int
 Itcl_BiCreateHullCmd(
     ClientData clientData,   /* info for all known objects */
     Tcl_Interp *interp,      /* current interpreter */
@@ -3552,7 +3543,7 @@ Itcl_BiCreateHullCmd(
  *
  * ------------------------------------------------------------------------
  */
-int
+static int
 Itcl_BiSetupComponentCmd(
     ClientData clientData,   /* info for all known objects */
     Tcl_Interp *interp,      /* current interpreter */
@@ -3587,7 +3578,7 @@ Itcl_BiSetupComponentCmd(
  *
  * ------------------------------------------------------------------------
  */
-int
+static int
 Itcl_BiInitOptionsCmd(
     ClientData clientData,   /* info for all known objects */
     Tcl_Interp *interp,      /* current interpreter */
@@ -3621,7 +3612,7 @@ Itcl_BiInitOptionsCmd(
  *
  * ------------------------------------------------------------------------
  */
-int
+static int
 Itcl_BiKeepComponentOptionCmd(
     ClientData clientData,   /* info for all known objects */
     Tcl_Interp *interp,      /* current interpreter */

@@ -32,7 +32,6 @@
  */
 #include "itclInt.h"
 
-extern Tcl_ObjCmdProc Itcl_ThisCmd;
 static Tcl_NamespaceDeleteProc* _TclOONamespaceDeleteProc = NULL;
 static void ItclDeleteOption(char *cdata);
 
@@ -187,8 +186,8 @@ Itcl_CreateClass(
     ItclObjectInfo *infoPtr,	/* info for all known objects */
     ItclClass **rPtr)		/* returns: pointer to class definition */
 {
-    char *head;
-    char *tail;
+    const char *head;
+    const char *tail;
     Tcl_DString buffer;
     Tcl_Command cmd;
     Tcl_CmdInfo cmdInfo;
@@ -346,7 +345,7 @@ Itcl_CreateClass(
      *    <className>
      *    <className> <objName> ?<constructor-args>?
      */
-    Itcl_NRAddCallback(interp, CallNewObjectInstance, infoPtr,
+    Tcl_NRAddCallback(interp, CallNewObjectInstance, infoPtr,
             (ClientData)path, &oPtr, nameObjPtr);
     result = Itcl_NRRunCallbacks(interp, callbackPtr);
     if (result == TCL_ERROR) {
@@ -604,7 +603,7 @@ ItclDeleteClassVariablesNamespace(
     return;
 }
 
-int
+static int
 CallDeleteOneObject(
     ClientData data[],
     Tcl_Interp *interp,
@@ -655,7 +654,7 @@ CallDeleteOneObject(
                 goto deleteClassFail;
             }
 
-            Itcl_NRAddCallback(interp, CallDeleteOneObject, iclsPtr,
+            Tcl_NRAddCallback(interp, CallDeleteOneObject, iclsPtr,
 	            infoPtr, NULL, NULL);
             return Itcl_NRRunCallbacks(interp, callbackPtr);
         }
@@ -678,7 +677,7 @@ deleteClassFail:
     return TCL_ERROR;
 }
 
-int
+static int
 CallDeleteOneClass(
     ClientData data[],
     Tcl_Interp *interp,
@@ -765,7 +764,7 @@ Itcl_DeleteClass(
         elem = Itcl_NextListElem(elem);  /* advance here--elem will go away */
 
         callbackPtr = Itcl_GetCurrentCallbackPtr(interp);
-        Itcl_NRAddCallback(interp, CallDeleteOneClass, iclsPtr2,
+        Tcl_NRAddCallback(interp, CallDeleteOneClass, iclsPtr2,
 	        iclsPtr2->infoPtr, NULL, NULL);
         result = Itcl_NRRunCallbacks(interp, callbackPtr);
         if (result != TCL_OK) {
@@ -788,7 +787,7 @@ Itcl_DeleteClass(
      * otherwise we return at the end of the enrolled loop.
      */
     callbackPtr = Itcl_GetCurrentCallbackPtr(interp);
-    Itcl_NRAddCallback(interp, CallDeleteOneObject, iclsPtr,
+    Tcl_NRAddCallback(interp, CallDeleteOneObject, iclsPtr,
             iclsPtr->infoPtr, NULL, NULL);
     result = Itcl_NRRunCallbacks(interp, callbackPtr);
     if (result != TCL_OK) {
@@ -1501,7 +1500,7 @@ Itcl_HandleClass(
     char tmp;
     char *start;
     char *pos;
-    char *match;
+    const char *match;
     int result;
 
     infoPtr = (ItclObjectInfo *)clientData;
@@ -1621,9 +1620,9 @@ Itcl_HandleClass(
     Tcl_DStringFree(&buffer);
     callbackPtr = Itcl_GetCurrentCallbackPtr(interp);
     newObjv = (Tcl_Obj **)(objv+4);
-    Itcl_NRAddCallback(interp, FinalizeCreateObject, objNamePtr, iclsPtr,
+    Tcl_NRAddCallback(interp, FinalizeCreateObject, objNamePtr, iclsPtr,
             NULL, NULL);
-    Itcl_NRAddCallback(interp, CallCreateObject, objNamePtr, iclsPtr,
+    Tcl_NRAddCallback(interp, CallCreateObject, objNamePtr, iclsPtr,
             INT2PTR(objc-4), newObjv);
     result = Itcl_NRRunCallbacks(interp, callbackPtr);
     return result;

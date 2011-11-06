@@ -14,23 +14,23 @@
 #include "itclInt.h"
 #include <tclOODecls.h>
 
-Tcl_ObjCmdProc ItclFinishCmd;
-Tcl_ObjCmdProc ItclSetHullWindowName;
-Tcl_ObjCmdProc ItclCheckSetItclHull;
+static Tcl_ObjCmdProc ItclFinishCmd;
+static Tcl_ObjCmdProc ItclSetHullWindowName;
+static Tcl_ObjCmdProc ItclCheckSetItclHull;
 
 #ifdef OBJ_REF_COUNT_DEBUG
-Tcl_ObjCmdProc ItclDumpRefCountInfo;
+static Tcl_ObjCmdProc ItclDumpRefCountInfo;
 #endif
 
 #ifdef ITCL_PRESERVE_DEBUG
-Tcl_ObjCmdProc ItclDumpPreserveInfo;
+static Tcl_ObjCmdProc ItclDumpPreserveInfo;
 #endif
 
 extern struct ItclStubAPI itclStubAPI;
 
 static int Initialize _ANSI_ARGS_((Tcl_Interp *interp));
 
-static char initScript[] =
+static const char initScript[] =
 "namespace eval ::itcl {\n"
 "    proc _find_init {} {\n"
 "        global env tcl_library\n"
@@ -84,7 +84,7 @@ static char initScript[] =
  * The following script is used to initialize Itcl in a safe interpreter.
  */
 
-static char safeInitScript[] =
+static const char safeInitScript[] =
 "proc ::itcl::local {class name args} {\n"
 "    set ptr [uplevel [list $class $name] $args]\n"
 "    uplevel [list set itcl-local-$ptr $ptr]\n"
@@ -93,12 +93,12 @@ static char safeInitScript[] =
 "    return $ptr\n"
 "}";
 
-static char *clazzClassScript =
+static const char *clazzClassScript =
 "set itclClass [::oo::class create ::itcl::clazz]\n"
 "::oo::define $itclClass superclass ::oo::class";
 
 
-static char *clazzUnknownBody =
+static const char *clazzUnknownBody =
 "    set mySelf [::oo::Helpers::self]\n"
 "    if {[::itcl::is class $mySelf]} {\n"
 "        set namespace [uplevel 1 namespace current]\n"
@@ -200,7 +200,7 @@ AddClassUnknowMethod(
  *
  * ------------------------------------------------------------------------
  */
-void
+static void
 FreeItclObjectInfo(
     ClientData clientData)
 {
@@ -592,7 +592,7 @@ ItclCallCCommand(
  *
  * ------------------------------------------------------------------------
  */
-int
+static int
 ItclSetHullWindowName(
     ClientData clientData,   /* infoPtr */
     Tcl_Interp *interp,      /* current interpreter */
@@ -616,7 +616,7 @@ ItclSetHullWindowName(
  *
  * ------------------------------------------------------------------------
  */
-int
+static int
 ItclCheckSetItclHull(
     ClientData clientData,   /* infoPtr */
     Tcl_Interp *interp,      /* current interpreter */
@@ -685,7 +685,7 @@ ItclCheckSetItclHull(
  *
  * ------------------------------------------------------------------------
  */
-int
+static int
 ItclFinishCmd(
     ClientData clientData,   /* unused */
     Tcl_Interp *interp,      /* current interpreter */
@@ -885,7 +885,7 @@ void Tcl_DbDumpRefCountInfo(const char *fileName, int noDeleted);
  *
  * ------------------------------------------------------------------------
  */
-int
+static int
 ItclDumpRefCountInfo(
     ClientData clientData,   /* unused */
     Tcl_Interp *interp,      /* current interpreter */
@@ -919,7 +919,7 @@ void Itcl_DbDumpPreserveInfo(const char *fileName);
  *
  * ------------------------------------------------------------------------
  */
-int
+static int
 ItclDumpPreserveInfo(
     ClientData clientData,   /* unused */
     Tcl_Interp *interp,      /* current interpreter */
