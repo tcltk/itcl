@@ -15,9 +15,8 @@
  * See the file "license.terms" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  */
-#include <tcl.h>
 #include <tclInt.h>
-#include "itclMigrate2TclCore.h"
+#include "itclInt.h"
 
 int
 Itcl_SetCallFrameResolver(
@@ -199,7 +198,7 @@ Itcl_IsCallFrameArgument(
                     return 1;
                 }
             }
-        }            
+        }
     }
     return 0;
 }
