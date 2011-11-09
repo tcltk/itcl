@@ -18,11 +18,10 @@
 #endif
 #include <string.h>
 #include <ctype.h>
-#include <tcl.h>
 #include <tclOO.h>
+#include "itcl.h"
 #include "itclMigrate2TclCore.h"
 #include "itclTclIntStubsFcn.h"
-#include "itcl.h"
 
 /*
  * Used to tag functions that are only to be visible within the module being
@@ -129,7 +128,7 @@ struct ItclDelegatedFunction;
 
 typedef struct ItclObjectInfo {
     Tcl_Interp *interp;             /* interpreter that manages this info */
-    Tcl_HashTable objects;          /* list of all known objects key is 
+    Tcl_HashTable objects;          /* list of all known objects key is
                                      * ioPtr */
     Tcl_HashTable objectCmds;       /* list of known objects using accessCmd */
     Tcl_HashTable objectNames;      /* list of known objects using namePtr */
@@ -168,7 +167,7 @@ typedef struct ItclObjectInfo {
                                      * handling */
     int currClassFlags;             /* flags for the class just in creation */
     int buildingWidget;             /* set if in construction of a widget */
-    int unparsedObjc;               /* number options not parsed by 
+    int unparsedObjc;               /* number options not parsed by
                                        ItclExtendedConfigure/-Cget function */
     Tcl_Obj **unparsedObjv;         /* options not parsed by
                                        ItclExtendedConfigure/-Cget function */
@@ -520,7 +519,7 @@ typedef struct ItclVariable {
     Tcl_Obj *arrayInitPtr;      /* initial value if variable should be array */
     int protection;             /* protection level */
     int flags;                  /* flags describing member (see below) */
-    int initted;                /* is set when first time initted, to check 
+    int initted;                /* is set when first time initted, to check
                                  * for example itcl_hull var, which can be only
 				 * initialized once */
 } ItclVariable;
@@ -665,7 +664,7 @@ MODULE_SCOPE int _itcl_debug_level;
 MODULE_SCOPE void ItclShowArgs(int level, const char *str, int objc,
 	Tcl_Obj * const* objv);
 #else
-#define ItclShowArgs(a,b,c,d) 
+#define ItclShowArgs(a,b,c,d)
 #endif
 
 MODULE_SCOPE Tcl_ObjCmdProc ItclCallCCommand;
