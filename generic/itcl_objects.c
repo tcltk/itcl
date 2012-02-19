@@ -1196,7 +1196,8 @@ Itcl_ScopedVarResolver(interp, name, contextNs, flags, rPtr)
      *  Look for the command representing the object and extract
      *  the object context.
      */
-    if (!Tcl_GetCommandInfo(interp, namev[1], &cmdInfo)) {
+    if (!Tcl_GetCommandInfo(interp, namev[1], &cmdInfo)
+	    || cmdInfo.objProc != Itcl_HandleInstance) {
         if (errs) {
             Tcl_AppendResult(errs,
                 "can't resolve scoped variable \"", name, "\": ",
