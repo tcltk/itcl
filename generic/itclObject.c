@@ -1249,7 +1249,7 @@ ItclInitObjectComponents(
  *
  *  Collect all instance methdovariables for the given object instance to allow
  *  faster runtime access to the methdovariables.
- *  This is usually invoked *  automatically by Itcl_CreateObject(),
+ *  This is usually invoked automatically by Itcl_CreateObject(),
  *  when an object is created.
  * ------------------------------------------------------------------------
  */
@@ -2977,7 +2977,16 @@ ItclMapMethodNameProc(
         Tcl_DecrRefCount(methodName);
     }
     hPtr = Tcl_FindHashEntry(&iclsPtr->resolveCmds, (char *)methodObj);
-    if (hPtr != NULL) {
+    if (hPtr == NULL) {
+        /* special case: we found the class for the class command,
+	 * for a relative or absolute class path name
+	 * but we have no method in that class that fits.
+	 * Problem of Rene Zaumseil when having the object
+	 * for a class in a child namespace of the class
+	 * fossil ticket id: 36577626c340ad59615f0a0238d67872c009a8c9
+	 */
+        *startClsPtr = NULL;
+    } else {
 	ItclMemberFunc *imPtr;
 	Tcl_Namespace *nsPtr;
 	ItclCmdLookup *clookup;
