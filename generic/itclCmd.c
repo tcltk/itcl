@@ -2058,7 +2058,7 @@ Itcl_TypeClassCmd(
     if (result != TCL_OK) {
         return result;
     }
-    /* we handle create by owerselfs !! */
+    /* we handle create by ourself !! */
     objPtr = Tcl_NewStringObj("oo::objdefine ", -1);
     Tcl_AppendToObj(objPtr, iclsPtr->nsPtr->fullName, -1);
     Tcl_AppendToObj(objPtr, " unexport create", -1);
