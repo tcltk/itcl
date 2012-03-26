@@ -1,3 +1,6 @@
+2012-03-25  Arnulf P.Wiedemann  <wiede@users.sourceforge.net>
+	* generic/itclInfo.c: fixed problem with info exists command.
+	                        fossil ticket id: d4ee728817f951d0b2aa8e8f9b030ea854e92c9f
 2012-02-25  Arnulf P.Wiedemann  <wiede@users.sourceforge.net>
 	* generic/itclObject.c: special case: we found the class for the class command,
 				for a relative or absolute class path name
