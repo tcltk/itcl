@@ -1619,6 +1619,10 @@ Itcl_BiInfoUnknownCmd(
         return TCL_ERROR;
     }
     listObj = Tcl_NewListObj(-1, NULL);
+    /* use tailcall because of otherwise no access to local variables for info exists */
+    /* Ticket Id d4ee728817f951d0b2aa8e8f9b030ea854e92c9f */
+    objPtr = Tcl_NewStringObj("tailcall", -1);
+    Tcl_ListObjAppendElement(interp, listObj, objPtr);
     objPtr = Tcl_NewStringObj("::info", -1);
     Tcl_ListObjAppendElement(interp, listObj, objPtr);
     objPtr = Tcl_NewStringObj(Tcl_GetString(objv[2]), -1);
@@ -1936,7 +1940,7 @@ Itcl_DefaultInfoCmd(
     Tcl_Command cmd;
     Tcl_Obj *resultPtr;
 
-    ItclShowArgs(1, "Itcl_DefaultInfoCmd", objc, objv);
+    ItclShowArgs(0, "Itcl_DefaultInfoCmd", objc, objv);
     /*
      *  Look for the usual "::info" command, and use it to
      *  evaluate the unknown option.
