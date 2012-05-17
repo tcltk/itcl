@@ -1,3 +1,8 @@
+2012-05-17  Arnulf P.Wiedemann  <wiede@users.sourceforge.net>
+	* generic/itclResolve.c: fixed problem with access to protected class
+	                        variables when not from top level context
+	                        reported from Rene Zaumseil for his itk
+				emulation
 2012-03-25  Arnulf P.Wiedemann  <wiede@users.sourceforge.net>
 	* generic/itclInfo.c: fixed problem with info exists command.
 	                        fossil ticket id: d4ee728817f951d0b2aa8e8f9b030ea854e92c9f
