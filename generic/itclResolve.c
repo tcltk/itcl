@@ -387,9 +387,9 @@ Itcl_ClassVarResolver(
         hPtr = Tcl_FindHashEntry(&contextIoPtr->objectVariables,
                 (char *)vlookup->ivPtr);
 	/* check if it is a public variable (must be one) if not top_level */
-	if ((idx != start_idx) && !(vlookup->ivPtr->protection & ITCL_PUBLIC)) {
-	    continue;
-	}
+//	if ((idx != start_idx) && !(vlookup->ivPtr->protection & ITCL_PUBLIC)) {
+//	    continue;
+//	}
 	if (hPtr != NULL) {
 	    break;
 	}
