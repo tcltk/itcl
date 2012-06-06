@@ -644,6 +644,13 @@ typedef struct ItclCallContext {
 } ItclCallContext;
 
 /*
+ * The macro below is used to modify a "char" value (e.g. by casting
+ * it to an unsigned character) so that it can be used safely with
+ * macros such as isspace.
+ */
+
+#define UCHAR(c) ((unsigned char) (c))
+/*
  * Macros used to cast between pointers and integers (e.g. when storing an int
  * in ClientData), on 64-bit architectures they avoid gcc warning about "cast
  * to/from pointer from/to integer of different size".
