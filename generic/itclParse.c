@@ -2721,7 +2721,7 @@ ItclParseOption(
     }
     cp = name;
     while (*cp) {
-        if (isupper(*cp)) {
+        if (isupper(UCHAR(*cp))) {
 	    Tcl_AppendResult(interp, "bad option name \"", name, "\" ",
 	            ", options must not contain uppercase characters", NULL);
             result = TCL_ERROR;
@@ -3590,7 +3590,7 @@ Itcl_HandleDelegateOptionCmd(
     }
     cp = option;
     while (*cp) {
-        if (isupper(*cp)) {
+        if (isupper(UCHAR(*cp))) {
 	    Tcl_AppendResult(interp, "bad option name \"", option, "\" ",
 	            ", options must not contain uppercase characters", NULL);
 	    ckfree((char *)argv);
