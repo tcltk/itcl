@@ -2199,7 +2199,7 @@ Itcl_ClassWidgetClassCmd(
     }
     if (iclsPtr->flags & ITCL_WIDGET) {
         widgetClassName = Tcl_GetString(objv[1]);
-	if (! isupper(*widgetClassName)) {
+	if (!isupper(UCHAR(*widgetClassName))) {
 	    Tcl_AppendResult(interp, "widgetclass \"", widgetClassName,
 	            "\" does not begin with an uppercase letter", NULL);
             return TCL_ERROR;
