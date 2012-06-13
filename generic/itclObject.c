@@ -331,7 +331,7 @@ ItclCreateObject(
 	    Tcl_CmdInfo dummy;
 
             sprintf(unique,"%.200s_%d", name, iclsPtr->unique++);
-            unique[0] = tolower(unique[0]);
+            unique[0] = tolower(UCHAR(unique[0]));
 
             Tcl_DStringTrunc(&buffer, 0);
             Tcl_DStringAppend(&buffer, unique, -1);
