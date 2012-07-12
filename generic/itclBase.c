@@ -110,7 +110,7 @@ static const char *clazzUnknownBody =
 "            # class already exists, it is a redefinition, so delete old class first\n"
 "	    ::itcl::delete class $my_class\n"
 "        }\n"
-"        set cmd [uplevel 1 ::info command ${my_namespace}$m]\n"
+"        set cmd [uplevel 1 [list ::info command ${my_namespace}$m]]\n"
 "        if {[string length $cmd] > 0} {\n"
 "            error \"command \\\"$m\\\" already exists in namespace \\\"$namespace\\\"\"\n"
 "        }\n"
