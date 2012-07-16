@@ -16,12 +16,6 @@
 #ifdef HAVE_STDINT_H
 #include <stdint.h>
 #endif
-#include <string.h>
-#include <ctype.h>
-#include <tclOO.h>
-#include "itcl.h"
-#include "itclMigrate2TclCore.h"
-#include "itclTclIntStubsFcn.h"
 
 /*
  * Used to tag functions that are only to be visible within the module being
@@ -35,6 +29,13 @@
 #       define MODULE_SCOPE extern
 #   endif
 #endif
+
+#include <string.h>
+#include <ctype.h>
+#include <tclOO.h>
+#include "itcl.h"
+#include "itclMigrate2TclCore.h"
+#include "itclTclIntStubsFcn.h"
 
 /*
  * Since the Tcl/Tk distribution doesn't perform any asserts,

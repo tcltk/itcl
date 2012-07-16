@@ -1,3 +1,8 @@
+2012-07-12  Arnulf P.Wiedemann  <wiede@users.sourceforge.net>
+	* generic/itclBase.c:   make the info command call in clazzUnknownBody a
+	                        list to avoid problems with class names 
+	                        containing spaces. i
+				Fix for [incr Tcl] bug  ID: 3536018
 2012-05-17  Arnulf P.Wiedemann  <wiede@users.sourceforge.net>
 	* generic/itclResolve.c: fixed problem with access to protected class
 	                        variables when not from top level context
