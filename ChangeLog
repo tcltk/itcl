@@ -1,3 +1,7 @@
+2012-07-17  Jan Nijtmans  <nijtmans@users.sf.net>
+
+	* win/makefile.vc: [Bug 3544932]: Visual studio compiler check fails
+
 2012-07-12  Arnulf P.Wiedemann  <wiede@users.sourceforge.net>
 	* generic/itclBase.c:   make the info command call in clazzUnknownBody a
 	                        list to avoid problems with class names 
