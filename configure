@@ -8082,7 +8082,6 @@ rm -f conftest.err conftest.$ac_objext conftest.$ac_ext
 fi
 echo "$as_me:$LINENO: result: $ac_cv_cross" >&5
 echo "${ECHO_T}$ac_cv_cross" >&6
-
 		      if test "$ac_cv_cross" = "yes"; then
 			case "$do64bit" in
 			    amd64|x64|yes)
@@ -9094,7 +9093,7 @@ echo "${ECHO_T}$tcl_cv_ld_single_module" >&6
 
 fi
 
-	    # TEA specific: link shlib with current and compatiblity version flags
+	    # TEA specific: link shlib with current and compatibility version flags
 	    vers=`echo ${PACKAGE_VERSION} | sed -e 's/^\([0-9]\{1,5\}\)\(\(\.[0-9]\{1,3\}\)\{0,2\}\).*$/\1\2/p' -e d`
 	    SHLIB_LD="${SHLIB_LD} -current_version ${vers:-0} -compatibility_version ${vers:-0}"
 	    SHLIB_SUFFIX=".dylib"
@@ -9664,17 +9663,18 @@ fi
 
     if test "$SHARED_LIB_SUFFIX" = ""; then
 
-	# TEA specific: use PACKAGE_VERSION instead of VERSION
-	SHARED_LIB_SUFFIX='${PACKAGE_VERSION}${SHLIB_SUFFIX}'
+    # TEA specific: use PACKAGE_VERSION instead of VERSION
+    SHARED_LIB_SUFFIX='${PACKAGE_VERSION}${SHLIB_SUFFIX}'
 fi
 
     if test "$UNSHARED_LIB_SUFFIX" = ""; then
 
-	# TEA specific: use PACKAGE_VERSION instead of VERSION
-	UNSHARED_LIB_SUFFIX='${PACKAGE_VERSION}.a'
+    # TEA specific: use PACKAGE_VERSION instead of VERSION
+    UNSHARED_LIB_SUFFIX='${PACKAGE_VERSION}.a'
 fi
 
 
+    if test "${GCC}" = "yes" ; then
 	echo "$as_me:$LINENO: checking for SEH support in compiler" >&5
 echo $ECHO_N "checking for SEH support in compiler... $ECHO_C" >&6
 if test "${tcl_cv_seh+set}" = set; then
@@ -9957,6 +9957,7 @@ cat >>confdefs.h <<\_ACEOF
 _ACEOF
 
 	fi
+    fi
 
 
 
