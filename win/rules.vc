@@ -4,11 +4,14 @@
 #	Microsoft Visual C++ makefile include for decoding the commandline
 #	macros.  This file does not need editing to build Tcl.
 #
+#	This version is modified from the Tcl source version to support
+#	building extensions using nmake.
+#
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
 # Copyright (c) 2001-2003 David Gravereaux.
-# Copyright (c) 2003-2007 Patrick Thoyts
+# Copyright (c) 2003-2008 Patrick Thoyts
 #------------------------------------------------------------------------------
 
 !ifndef _RULES_VC
@@ -208,36 +211,6 @@ LINKERFLAGS     =-ltcg
 !endif
 
 #----------------------------------------------------------
-# MSVC8 (ships with Visual Studio 2005) generates a manifest
-# file that we should link into the binaries. This is how.
-#----------------------------------------------------------
-
-_VC_MANIFEST_EMBED_EXE=
-_VC_MANIFEST_EMBED_DLL=
-VCVER=0
-!if ![echo VCVERSION=_MSC_VER > vercl.x] \
-    && ![cl -nologo -TC -P vercl.x $(ERRNULL)]
-!include vercl.i
-!if $(VCVERSION) >= 1600
-VCVER=10
-!elseif $(VCVERSION) >= 1500
-VCVER=9
-!elseif $(VCVERSION) >= 1400
-VCVER=8
-!elseif $(VCVERSION) >= 1300
-VCVER=7
-!elseif $(VCVERSION) >= 1200
-VCVER=6
-!endif
-!endif
-
-# Since MSVC8 we must deal with manifest resources.
-!if $(VCVERSION) >= 1400
-_VC_MANIFEST_EMBED_EXE=if exist $@.manifest mt -nologo -manifest $@.manifest -outputresource:$@;1
-_VC_MANIFEST_EMBED_DLL=if exist $@.manifest mt -nologo -manifest $@.manifest -outputresource:$@;2
-!endif
-
-#----------------------------------------------------------
 # Decode the options requested.
 #----------------------------------------------------------
 
@@ -250,8 +223,6 @@ PROFILE		= 0
 PGO		= 0
 MSVCRT		= 0
 LOIMPACT	= 0
-TCL_USE_STATIC_PACKAGES	= 0
-USE_THREAD_ALLOC = 1
 UNCHECKED	= 0
 !else
 !if [nmakehlp -f $(OPTS) "static"]
@@ -266,18 +237,11 @@ MSVCRT		= 1
 !else
 MSVCRT		= 0
 !endif
-!if [nmakehlp -f $(OPTS) "staticpkg"]
-!message *** Doing staticpkg
-TCL_USE_STATIC_PACKAGES	= 1
-!else
-TCL_USE_STATIC_PACKAGES	= 0
-!endif
 !if [nmakehlp -f $(OPTS) "nothreads"]
+!message *** Compile explicitly for non-threaded tcl
 TCL_THREADS	= 0
 !else
-!message *** Doing threads
 TCL_THREADS	= 1
-USE_THREAD_ALLOC= 1
 !endif
 !if [nmakehlp -f $(OPTS) "symbols"]
 !message *** Doing symbols
@@ -311,14 +275,6 @@ PGO		= 0
 LOIMPACT	= 1
 !else
 LOIMPACT	= 0
-!endif
-!if [nmakehlp -f $(OPTS) "thrdalloc"]
-!message *** Doing thrdalloc
-USE_THREAD_ALLOC = 1
-!endif
-!if [nmakehlp -f $(OPTS) "tclalloc"]
-!message *** Doing thrdalloc
-USE_THREAD_ALLOC = 0
 !endif
 !if [nmakehlp -f $(OPTS) "unchecked"]
 !message *** Doing unchecked
@@ -492,9 +448,6 @@ OPTDEFINES	= $(OPTDEFINES) -DTCL_COMPILE_DEBUG -DTCL_COMPILE_STATS
 !endif
 !if $(TCL_THREADS)
 OPTDEFINES	= $(OPTDEFINES) -DTCL_THREADS=1
-!if $(USE_THREAD_ALLOC)
-OPTDEFINES	= $(OPTDEFINES) -DUSE_THREAD_ALLOC=1
-!endif
 !endif
 !if $(STATIC_BUILD)
 OPTDEFINES	= $(OPTDEFINES) -DSTATIC_BUILD
@@ -516,15 +469,12 @@ OPTDEFINES	= $(OPTDEFINES) -DTCL_CFG_PROFILED
 OPTDEFINES	= $(OPTDEFINES) -DTCL_CFG_DO64BIT
 !endif
 
+
 #----------------------------------------------------------
-# Locate the Tcl headers to build against
+# Get common info used when building extensions.
 #----------------------------------------------------------
 
-!if "$(PROJECT)" == "tcl"
-
-_TCL_H          = ..\generic\tcl.h
-
-!else
+!if "$(PROJECT)" != "tcl"
 
 # If INSTALLDIR set to tcl root dir then reset to the lib dir.
 !if exist("$(_INSTALLDIR)\include\tcl.h")
@@ -624,8 +574,6 @@ TCLSH           = "$(_TCLDIR)\bin\tclsh$(TCL_VERSION)t$(SUFX).exe"
 TCLSTUBLIB	= "$(_TCLDIR)\lib\tclstub$(TCL_VERSION).lib"
 TCLIMPLIB	= "$(_TCLDIR)\lib\tcl$(TCL_VERSION)$(SUFX).lib"
 TCL_LIBRARY	= $(_TCLDIR)\lib
-TCLREGLIB	= "$(_TCLDIR)\lib\tclreg13$(SUFX:t=).lib"
-TCLDDELIB	= "$(_TCLDIR)\lib\tcldde14$(SUFX:t=).lib"
 COFFBASE	= \must\have\tcl\sources\to\build\this\target
 TCLTOOLSDIR	= \must\have\tcl\sources\to\build\this\target
 TCL_INCLUDES    = -I"$(_TCLDIR)\include"
@@ -637,8 +585,6 @@ TCLSH		= "$(_TCLDIR)\win\$(BUILDDIRTOP)\tclsh$(TCL_VERSION)t$(SUFX).exe"
 TCLSTUBLIB	= "$(_TCLDIR)\win\$(BUILDDIRTOP)\tclstub$(TCL_VERSION).lib"
 TCLIMPLIB	= "$(_TCLDIR)\win\$(BUILDDIRTOP)\tcl$(TCL_VERSION)$(SUFX).lib"
 TCL_LIBRARY	= $(_TCLDIR)\library
-TCLREGLIB	= "$(_TCLDIR)\win\$(BUILDDIRTOP)\tclreg13$(SUFX:t=).lib"
-TCLDDELIB	= "$(_TCLDIR)\win\$(BUILDDIRTOP)\tcldde14$(SUFX:t=).lib"
 COFFBASE	= "$(_TCLDIR)\win\coffbase.txt"
 TCLTOOLSDIR	= $(_TCLDIR)\tools
 TCL_INCLUDES	= -I"$(_TCLDIR)\generic" -I"$(_TCLDIR)\win"
