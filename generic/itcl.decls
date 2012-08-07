@@ -11,82 +11,82 @@ scspec ITCLAPI
 # the an index should never be reused for a different function in order
 # to preserve backwards compatibility.
 
-declare 2 current {
-    int Itcl_RegisterC(Tcl_Interp *interp, const char *name, \
-        Tcl_CmdProc *proc, ClientData clientData, \
+declare 2 {
+    int Itcl_RegisterC(Tcl_Interp *interp, const char *name,
+        Tcl_CmdProc *proc, ClientData clientData,
         Tcl_CmdDeleteProc *deleteProc)
 }
-declare 3 current {
-    int Itcl_RegisterObjC (Tcl_Interp *interp, const char *name, \
-        Tcl_ObjCmdProc *proc, ClientData clientData, \
+declare 3 {
+    int Itcl_RegisterObjC(Tcl_Interp *interp, const char *name,
+        Tcl_ObjCmdProc *proc, ClientData clientData,
         Tcl_CmdDeleteProc *deleteProc)
 }
-declare 4 current {
-    int Itcl_FindC(Tcl_Interp *interp, const char *name, \
-	Tcl_CmdProc **argProcPtr, Tcl_ObjCmdProc **objProcPtr, \
+declare 4 {
+    int Itcl_FindC(Tcl_Interp *interp, const char *name,
+	Tcl_CmdProc **argProcPtr, Tcl_ObjCmdProc **objProcPtr,
 	ClientData *cDataPtr)
 }
-declare 5 current {
+declare 5 {
     void Itcl_InitStack(Itcl_Stack *stack)
 }
-declare 6 current {
+declare 6 {
     void Itcl_DeleteStack(Itcl_Stack *stack)
 }
-declare 7 current {
+declare 7 {
     void Itcl_PushStack(ClientData cdata, Itcl_Stack *stack)
 }
-declare 8 current {
+declare 8 {
     ClientData Itcl_PopStack(Itcl_Stack *stack)
 }
-declare 9 current {
+declare 9 {
     ClientData Itcl_PeekStack(Itcl_Stack *stack)
 }
-declare 10 current {
+declare 10 {
     ClientData Itcl_GetStackValue(Itcl_Stack *stack, int pos)
 }
-declare 11 current {
+declare 11 {
     void Itcl_InitList(Itcl_List *listPtr)
 }
-declare 12 current {
+declare 12 {
     void Itcl_DeleteList(Itcl_List *listPtr)
 }
-declare 13 current {
-    Itcl_ListElem* Itcl_CreateListElem(Itcl_List *listPtr)
+declare 13 {
+    Itcl_ListElem *Itcl_CreateListElem(Itcl_List *listPtr)
 }
-declare 14 current {
-    Itcl_ListElem* Itcl_DeleteListElem(Itcl_ListElem *elemPtr)
+declare 14 {
+    Itcl_ListElem *Itcl_DeleteListElem(Itcl_ListElem *elemPtr)
 }
-declare 15 current {
-    Itcl_ListElem* Itcl_InsertList(Itcl_List *listPtr, ClientData val)
+declare 15 {
+    Itcl_ListElem *Itcl_InsertList(Itcl_List *listPtr, ClientData val)
 }
-declare 16 current {
-    Itcl_ListElem* Itcl_InsertListElem (Itcl_ListElem *pos, ClientData val)
+declare 16 {
+    Itcl_ListElem *Itcl_InsertListElem(Itcl_ListElem *pos, ClientData val)
 }
-declare 17 current {
-    Itcl_ListElem* Itcl_AppendList(Itcl_List *listPtr, ClientData val)
+declare 17 {
+    Itcl_ListElem *Itcl_AppendList(Itcl_List *listPtr, ClientData val)
 }
-declare 18 current {
-    Itcl_ListElem* Itcl_AppendListElem(Itcl_ListElem *pos, ClientData val)
+declare 18 {
+    Itcl_ListElem *Itcl_AppendListElem(Itcl_ListElem *pos, ClientData val)
 }
-declare 19 current {
+declare 19 {
     void Itcl_SetListValue(Itcl_ListElem *elemPtr, ClientData val)
 }
-declare 20 current {
+declare 20 {
     void Itcl_EventuallyFree(ClientData cdata, Tcl_FreeProc *fproc)
 }
-declare 21 current {
+declare 21 {
     void Itcl_PreserveData(ClientData cdata)
 }
-declare 22 current {
+declare 22 {
     void Itcl_ReleaseData(ClientData cdata)
 }
-declare 23 current {
-    Itcl_InterpState Itcl_SaveInterpState(Tcl_Interp* interp, int status)
+declare 23 {
+    Itcl_InterpState Itcl_SaveInterpState(Tcl_Interp *interp, int status)
 }
-declare 24 current {
-    int Itcl_RestoreInterpState(Tcl_Interp* interp, Itcl_InterpState state)
+declare 24 {
+    int Itcl_RestoreInterpState(Tcl_Interp *interp, Itcl_InterpState state)
 }
-declare 25 current {
+declare 25 {
     void Itcl_DiscardInterpState(Itcl_InterpState state)
 }
 
@@ -97,98 +97,98 @@ interface itclInt
 # Functions used within the package, but not considered "public"
 #
 
-declare 0 current {
+declare 0 {
     int Itcl_IsClassNamespace(Tcl_Namespace *namesp)
 }
-declare 1 current {
-    int Itcl_IsClass (Tcl_Command cmd)
+declare 1 {
+    int Itcl_IsClass(Tcl_Command cmd)
 }
-declare 2 current {
-    ItclClass* Itcl_FindClass (Tcl_Interp* interp, const char* path, int autoload)
+declare 2 {
+    ItclClass *Itcl_FindClass(Tcl_Interp *interp, const char *path, int autoload)
 }
-declare 3 current {
-    int Itcl_FindObject (Tcl_Interp *interp, const char *name, ItclObject **roPtr)
+declare 3 {
+    int Itcl_FindObject(Tcl_Interp *interp, const char *name, ItclObject **roPtr)
 }
-declare 4 current {
-    int Itcl_IsObject (Tcl_Command cmd)
+declare 4 {
+    int Itcl_IsObject(Tcl_Command cmd)
 }
-declare 5 current {
-    int Itcl_ObjectIsa (ItclObject *contextObj, ItclClass *cdefn)
+declare 5 {
+    int Itcl_ObjectIsa(ItclObject *contextObj, ItclClass *cdefn)
 }
-declare 6 current {
-    int Itcl_Protection (Tcl_Interp *interp, int newLevel)
+declare 6 {
+    int Itcl_Protection(Tcl_Interp *interp, int newLevel)
 }
-declare 7 current {
-    const char* Itcl_ProtectionStr (int pLevel)
+declare 7 {
+    const char *Itcl_ProtectionStr(int pLevel)
 }
-declare 8 current {
-    int Itcl_CanAccess (ItclMemberFunc* memberPtr, Tcl_Namespace* fromNsPtr)
+declare 8 {
+    int Itcl_CanAccess(ItclMemberFunc *memberPtr, Tcl_Namespace *fromNsPtr)
 }
-declare 9 current {
-    int Itcl_CanAccessFunc (ItclMemberFunc* mfunc, Tcl_Namespace* fromNsPtr)
+declare 9 {
+    int Itcl_CanAccessFunc(ItclMemberFunc *mfunc, Tcl_Namespace *fromNsPtr)
 }
-declare 11 current {
-    void Itcl_ParseNamespPath (const char *name, Tcl_DString *buffer,
+declare 11 {
+    void Itcl_ParseNamespPath(const char *name, Tcl_DString *buffer,
         const char **head, const char **tail)
 }
-declare 12 current {
-    int Itcl_DecodeScopedCommand (Tcl_Interp *interp, const char *name, \
+declare 12 {
+    int Itcl_DecodeScopedCommand(Tcl_Interp *interp, const char *name,
         Tcl_Namespace **rNsPtr, char **rCmdPtr)
 }
-declare 13 current {
-    int Itcl_EvalArgs (Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
+declare 13 {
+    int Itcl_EvalArgs(Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 }
-declare 14 current {
-    Tcl_Obj* Itcl_CreateArgs (Tcl_Interp *interp, const char *string,
+declare 14 {
+    Tcl_Obj *Itcl_CreateArgs(Tcl_Interp *interp, const char *string,
         int objc, Tcl_Obj *const objv[])
 }
-declare 17 current {
-    int Itcl_GetContext (Tcl_Interp *interp, ItclClass **iclsPtrPtr, \
+declare 17 {
+    int Itcl_GetContext(Tcl_Interp *interp, ItclClass **iclsPtrPtr,
         ItclObject **ioPtrPtr)
 }
-declare 18 current {
-    void Itcl_InitHierIter (ItclHierIter *iter, ItclClass *iclsPtr)
+declare 18 {
+    void Itcl_InitHierIter(ItclHierIter *iter, ItclClass *iclsPtr)
 }
-declare 19 current {
-    void Itcl_DeleteHierIter (ItclHierIter *iter)
+declare 19 {
+    void Itcl_DeleteHierIter(ItclHierIter *iter)
 }
-declare 20 current {
-    ItclClass* Itcl_AdvanceHierIter (ItclHierIter *iter)
+declare 20 {
+    ItclClass *Itcl_AdvanceHierIter(ItclHierIter *iter)
 }
-declare 21 current {
-    int Itcl_FindClassesCmd (ClientData clientData, Tcl_Interp *interp, \
+declare 21 {
+    int Itcl_FindClassesCmd(ClientData clientData, Tcl_Interp *interp,
         int objc, Tcl_Obj *const objv[])
 }
-declare 22 current {
-    int Itcl_FindObjectsCmd (ClientData clientData, Tcl_Interp *interp, \
+declare 22 {
+    int Itcl_FindObjectsCmd(ClientData clientData, Tcl_Interp *interp,
         int objc, Tcl_Obj *const objv[])
 }
-declare 24 current {
-    int Itcl_DelClassCmd (ClientData clientData, Tcl_Interp *interp, \
+declare 24 {
+    int Itcl_DelClassCmd(ClientData clientData, Tcl_Interp *interp,
         int objc, Tcl_Obj *const objv[])
 }
-declare 25 current {
-    int Itcl_DelObjectCmd (ClientData clientData, Tcl_Interp *interp, \
+declare 25 {
+    int Itcl_DelObjectCmd(ClientData clientData, Tcl_Interp *interp,
         int objc, Tcl_Obj *const objv[])
 }
-declare 26 current {
-    int Itcl_ScopeCmd (ClientData clientData, Tcl_Interp *interp, \
+declare 26 {
+    int Itcl_ScopeCmd(ClientData clientData, Tcl_Interp *interp,
         int objc, Tcl_Obj *const objv[])
 }
-declare 27 current {
-    int Itcl_CodeCmd (ClientData clientData, Tcl_Interp *interp, \
+declare 27 {
+    int Itcl_CodeCmd(ClientData clientData, Tcl_Interp *interp,
         int objc, Tcl_Obj *const objv[])
 }
-declare 28 current {
-    int Itcl_StubCreateCmd (ClientData clientData, Tcl_Interp *interp, \
+declare 28 {
+    int Itcl_StubCreateCmd(ClientData clientData, Tcl_Interp *interp,
         int objc, Tcl_Obj *const objv[])
 }
-declare 29 current {
-    int Itcl_StubExistsCmd (ClientData clientData, Tcl_Interp *interp, \
+declare 29 {
+    int Itcl_StubExistsCmd(ClientData clientData, Tcl_Interp *interp,
         int objc, Tcl_Obj *const objv[])
 }
-declare 30 current {
-    int Itcl_IsStub (Tcl_Command cmd)
+declare 30 {
+    int Itcl_IsStub(Tcl_Command cmd)
 }
 
 
@@ -196,32 +196,32 @@ declare 30 current {
 #  Functions for manipulating classes
 #
 
-declare 31 current {
-    int Itcl_CreateClass (Tcl_Interp* interp, const char* path, \
+declare 31 {
+    int Itcl_CreateClass(Tcl_Interp *interp, const char *path,
         ItclObjectInfo *info, ItclClass **rPtr)
 }
-declare 32 current {
-    int Itcl_DeleteClass (Tcl_Interp *interp, ItclClass *iclsPtr)
+declare 32 {
+    int Itcl_DeleteClass(Tcl_Interp *interp, ItclClass *iclsPtr)
 }
-declare 33 current {
-    Tcl_Namespace* Itcl_FindClassNamespace (Tcl_Interp* interp, const char* path)
+declare 33 {
+    Tcl_Namespace *Itcl_FindClassNamespace(Tcl_Interp *interp, const char *path)
 }
-declare 34 current {
-    int Itcl_HandleClass (ClientData clientData, Tcl_Interp *interp, \
+declare 34 {
+    int Itcl_HandleClass(ClientData clientData, Tcl_Interp *interp,
         int objc, Tcl_Obj *const objv[])
 }
-declare 38 current {
-    void Itcl_BuildVirtualTables (ItclClass *iclsPtr)
+declare 38 {
+    void Itcl_BuildVirtualTables(ItclClass *iclsPtr)
 }
-declare 39 current {
-    int Itcl_CreateVariable (Tcl_Interp *interp, ItclClass *iclsPtr, \
+declare 39 {
+    int Itcl_CreateVariable(Tcl_Interp *interp, ItclClass *iclsPtr,
         Tcl_Obj *name, char *init, char *config, ItclVariable **ivPtr)
 }
-declare 40 current {
-    void Itcl_DeleteVariable (char *cdata)
+declare 40 {
+    void Itcl_DeleteVariable(char *cdata)
 }
-declare 41 current {
-    const char* Itcl_GetCommonVar (Tcl_Interp *interp, const char *name, \
+declare 41 {
+    const char *Itcl_GetCommonVar(Tcl_Interp *interp, const char *name,
         ItclClass *contextClass)
 }
 
@@ -230,15 +230,15 @@ declare 41 current {
 #  Functions for manipulating objects
 #
 
-declare 45 current {
-    int Itcl_DeleteObject (Tcl_Interp *interp, ItclObject *contextObj)
+declare 45 {
+    int Itcl_DeleteObject(Tcl_Interp *interp, ItclObject *contextObj)
 }
-declare 46 current {
-    int Itcl_DestructObject (Tcl_Interp *interp, ItclObject *contextObj, \
+declare 46 {
+    int Itcl_DestructObject(Tcl_Interp *interp, ItclObject *contextObj,
         int flags)
 }
-declare 48 current {
-    const char* Itcl_GetInstanceVar (Tcl_Interp *interp, const char *name, \
+declare 48 {
+    const char *Itcl_GetInstanceVar(Tcl_Interp *interp, const char *name,
         ItclObject *contextIoPtr, ItclClass *contextIclsPtr)
 }
 
@@ -246,71 +246,71 @@ declare 48 current {
 #  Functions for manipulating methods and procs
 #
 
-declare 50 current {
-    int Itcl_BodyCmd (ClientData dummy, Tcl_Interp *interp, int objc, \
+declare 50 {
+    int Itcl_BodyCmd(ClientData dummy, Tcl_Interp *interp, int objc,
         Tcl_Obj *const objv[])
 }
-declare 51 current {
-    int Itcl_ConfigBodyCmd (ClientData dummy, Tcl_Interp *interp, int objc, \
+declare 51 {
+    int Itcl_ConfigBodyCmd(ClientData dummy, Tcl_Interp *interp, int objc,
         Tcl_Obj *const objv[])
 }
-declare 52 current {
-    int Itcl_CreateMethod (Tcl_Interp* interp, ItclClass *iclsPtr,
-	Tcl_Obj *namePtr, const char* arglist, const char* body)
+declare 52 {
+    int Itcl_CreateMethod(Tcl_Interp *interp, ItclClass *iclsPtr,
+	Tcl_Obj *namePtr, const char *arglist, const char *body)
 }
-declare 53 current {
-    int Itcl_CreateProc (Tcl_Interp* interp, ItclClass *iclsPtr,
-	Tcl_Obj *namePtr, const char* arglist, const char* body)
+declare 53 {
+    int Itcl_CreateProc(Tcl_Interp *interp, ItclClass *iclsPtr,
+	Tcl_Obj *namePtr, const char *arglist, const char *body)
 }
-declare 54 current {
-    int Itcl_CreateMemberFunc (Tcl_Interp* interp, ItclClass *iclsPtr, \
-        Tcl_Obj *name, const char* arglist, const char* body, \
-	ItclMemberFunc** mfuncPtr)
+declare 54 {
+    int Itcl_CreateMemberFunc(Tcl_Interp *interp, ItclClass *iclsPtr,
+        Tcl_Obj *name, const char *arglist, const char *body,
+	ItclMemberFunc **mfuncPtr)
 }
-declare 55 current {
-    int Itcl_ChangeMemberFunc (Tcl_Interp* interp, ItclMemberFunc* mfunc, \
-        const char* arglist, const char* body)
+declare 55 {
+    int Itcl_ChangeMemberFunc(Tcl_Interp *interp, ItclMemberFunc *mfunc,
+        const char *arglist, const char *body)
 }
-declare 56 current {
-    void Itcl_DeleteMemberFunc (char *cdata)
+declare 56 {
+    void Itcl_DeleteMemberFunc(char *cdata)
 }
-declare 57 current {
-    int Itcl_CreateMemberCode (Tcl_Interp* interp, ItclClass *iclsPtr, \
-        const char* arglist, const char* body, ItclMemberCode** mcodePtr)
+declare 57 {
+    int Itcl_CreateMemberCode(Tcl_Interp *interp, ItclClass *iclsPtr, \
+        const char *arglist, const char *body, ItclMemberCode **mcodePtr)
 }
-declare 58 current {
-    void Itcl_DeleteMemberCode (char *cdata)
+declare 58 {
+    void Itcl_DeleteMemberCode(char *cdata)
 }
-declare 59 current {
-    int Itcl_GetMemberCode (Tcl_Interp* interp, ItclMemberFunc* mfunc)
+declare 59 {
+    int Itcl_GetMemberCode(Tcl_Interp *interp, ItclMemberFunc *mfunc)
 }
-declare 61 current {
-    int Itcl_EvalMemberCode (Tcl_Interp *interp, ItclMemberFunc *mfunc, \
+declare 61 {
+    int Itcl_EvalMemberCode(Tcl_Interp *interp, ItclMemberFunc *mfunc,
         ItclObject *contextObj, int objc, Tcl_Obj *const objv[])
 }
-declare 67 current {
-    void Itcl_GetMemberFuncUsage (ItclMemberFunc *mfunc, \
+declare 67 {
+    void Itcl_GetMemberFuncUsage(ItclMemberFunc *mfunc,
         ItclObject *contextObj, Tcl_Obj *objPtr)
 }
-declare 68 current {
-    int Itcl_ExecMethod (ClientData clientData, Tcl_Interp *interp, int objc, \
+declare 68 {
+    int Itcl_ExecMethod(ClientData clientData, Tcl_Interp *interp, int objc,
         Tcl_Obj *const objv[])
 }
-declare 69 current {
-    int Itcl_ExecProc (ClientData clientData, Tcl_Interp *interp, \
+declare 69 {
+    int Itcl_ExecProc(ClientData clientData, Tcl_Interp *interp,
         int objc, Tcl_Obj *const objv[])
 }
-declare 71 current {
-    int Itcl_ConstructBase (Tcl_Interp *interp, ItclObject *contextObj, \
+declare 71 {
+    int Itcl_ConstructBase(Tcl_Interp *interp, ItclObject *contextObj,
         ItclClass *contextClass, int objc, Tcl_Obj *const *objv)
 }
-declare 72 current {
-    int Itcl_InvokeMethodIfExists (Tcl_Interp *interp, const char *name, \
-        ItclClass *contextClass, ItclObject *contextObj, int objc, \
+declare 72 {
+    int Itcl_InvokeMethodIfExists(Tcl_Interp *interp, const char *name,
+        ItclClass *contextClass, ItclObject *contextObj, int objc,
         Tcl_Obj *const objv[])
 }
-declare 74 current {
-    int Itcl_ReportFuncErrors (Tcl_Interp* interp, ItclMemberFunc *mfunc, \
+declare 74 {
+    int Itcl_ReportFuncErrors(Tcl_Interp *interp, ItclMemberFunc *mfunc,
         ItclObject *contextObj, int result)
 }
 
@@ -319,106 +319,106 @@ declare 74 current {
 #  Commands for parsing class definitions
 #
 
-declare 75 current {
-    int Itcl_ParseInit (Tcl_Interp *interp, ItclObjectInfo *info)
+declare 75 {
+    int Itcl_ParseInit(Tcl_Interp *interp, ItclObjectInfo *info)
 }
-declare 76 current {
-    int Itcl_ClassCmd (ClientData clientData, Tcl_Interp *interp, int objc, \
+declare 76 {
+    int Itcl_ClassCmd(ClientData clientData, Tcl_Interp *interp, int objc,
         Tcl_Obj *const objv[])
 }
-declare 77 current {
-    int Itcl_ClassInheritCmd (ClientData clientData, Tcl_Interp *interp, \
+declare 77 {
+    int Itcl_ClassInheritCmd(ClientData clientData, Tcl_Interp *interp,
         int objc, Tcl_Obj *const objv[])
 }
-declare 78 current {
-    int Itcl_ClassProtectionCmd (ClientData clientData, Tcl_Interp *interp, \
+declare 78 {
+    int Itcl_ClassProtectionCmd(ClientData clientData, Tcl_Interp *interp,
         int objc, Tcl_Obj *const objv[])
 }
-declare 79 current {
-    int Itcl_ClassConstructorCmd (ClientData clientData, Tcl_Interp *interp, \
+declare 79 {
+    int Itcl_ClassConstructorCmd(ClientData clientData, Tcl_Interp *interp,
         int objc, Tcl_Obj *const objv[])
 }
-declare 80 current {
-    int Itcl_ClassDestructorCmd (ClientData clientData, Tcl_Interp *interp, \
+declare 80 {
+    int Itcl_ClassDestructorCmd(ClientData clientData, Tcl_Interp *interp,
         int objc, Tcl_Obj *const objv[])
 }
-declare 81 current {
-    int Itcl_ClassMethodCmd (ClientData clientData, Tcl_Interp *interp, \
+declare 81 {
+    int Itcl_ClassMethodCmd(ClientData clientData, Tcl_Interp *interp,
         int objc, Tcl_Obj *const objv[])
 }
-declare 82 current {
-    int Itcl_ClassProcCmd (ClientData clientData, Tcl_Interp *interp, \
+declare 82 {
+    int Itcl_ClassProcCmd(ClientData clientData, Tcl_Interp *interp,
         int objc, Tcl_Obj *const objv[])
 }
-declare 83 current {
-    int Itcl_ClassVariableCmd (ClientData clientData, Tcl_Interp *interp, \
+declare 83 {
+    int Itcl_ClassVariableCmd(ClientData clientData, Tcl_Interp *interp,
         int objc, Tcl_Obj *const objv[])
 }
-declare 84 current {
-    int Itcl_ClassCommonCmd (ClientData clientData, Tcl_Interp *interp, \
+declare 84 {
+    int Itcl_ClassCommonCmd(ClientData clientData, Tcl_Interp *interp,
         int objc, Tcl_Obj *const objv[])
 }
-declare 85 current {
-    int Itcl_ParseVarResolver (Tcl_Interp *interp, const char* name, \
-        Tcl_Namespace *contextNs, int flags, Tcl_Var* rPtr)
+declare 85 {
+    int Itcl_ParseVarResolver(Tcl_Interp *interp, const char *name,
+        Tcl_Namespace *contextNs, int flags, Tcl_Var *rPtr)
 }
 
 #
 #  Commands in the "builtin" namespace
 #
 
-declare 86 current {
-    int Itcl_BiInit (Tcl_Interp *interp, ItclObjectInfo *infoPtr)
+declare 86 {
+    int Itcl_BiInit(Tcl_Interp *interp, ItclObjectInfo *infoPtr)
 }
-declare 87 current {
-    int Itcl_InstallBiMethods (Tcl_Interp *interp, ItclClass *cdefn)
+declare 87 {
+    int Itcl_InstallBiMethods(Tcl_Interp *interp, ItclClass *cdefn)
 }
-declare 88 current {
-    int Itcl_BiIsaCmd (ClientData clientData, Tcl_Interp *interp, \
+declare 88 {
+    int Itcl_BiIsaCmd(ClientData clientData, Tcl_Interp *interp,
         int objc, Tcl_Obj *const objv[])
 }
-declare 89 current {
-    int Itcl_BiConfigureCmd (ClientData clientData, Tcl_Interp *interp, \
+declare 89 {
+    int Itcl_BiConfigureCmd(ClientData clientData, Tcl_Interp *interp,
         int objc, Tcl_Obj *const objv[])
 }
-declare 90 current {
-    int Itcl_BiCgetCmd (ClientData clientData, Tcl_Interp *interp, int objc, \
+declare 90 {
+    int Itcl_BiCgetCmd(ClientData clientData, Tcl_Interp *interp, int objc,
         Tcl_Obj *const objv[])
 }
-declare 91 current {
-    int Itcl_BiChainCmd (ClientData dummy, Tcl_Interp *interp, int objc, \
+declare 91 {
+    int Itcl_BiChainCmd(ClientData dummy, Tcl_Interp *interp, int objc,
         Tcl_Obj *const objv[])
 }
-declare 92 current {
-    int Itcl_BiInfoClassCmd (ClientData dummy, Tcl_Interp *interp, int objc, \
+declare 92 {
+    int Itcl_BiInfoClassCmd(ClientData dummy, Tcl_Interp *interp, int objc,
         Tcl_Obj *const objv[])
 }
-declare 93 current {
-    int Itcl_BiInfoInheritCmd (ClientData dummy, Tcl_Interp *interp, int objc, \
+declare 93 {
+    int Itcl_BiInfoInheritCmd(ClientData dummy, Tcl_Interp *interp, int objc,
         Tcl_Obj *const objv[])
 }
-declare 94 current {
-    int Itcl_BiInfoHeritageCmd (ClientData dummy, Tcl_Interp *interp, \
+declare 94 {
+    int Itcl_BiInfoHeritageCmd(ClientData dummy, Tcl_Interp *interp,
         int objc, Tcl_Obj *const objv[])
 }
-declare 95 current {
-    int Itcl_BiInfoFunctionCmd (ClientData dummy, Tcl_Interp *interp, \
+declare 95 {
+    int Itcl_BiInfoFunctionCmd(ClientData dummy, Tcl_Interp *interp,
         int objc, Tcl_Obj *const objv[])
 }
-declare 96 current {
-    int Itcl_BiInfoVariableCmd (ClientData dummy, Tcl_Interp *interp, \
+declare 96 {
+    int Itcl_BiInfoVariableCmd(ClientData dummy, Tcl_Interp *interp,
         int objc, Tcl_Obj *const objv[])
 }
-declare 97 current {
-    int Itcl_BiInfoBodyCmd (ClientData dummy, Tcl_Interp *interp, int objc, \
+declare 97 {
+    int Itcl_BiInfoBodyCmd(ClientData dummy, Tcl_Interp *interp, int objc,
         Tcl_Obj *const objv[])
 }
-declare 98 current {
-    int Itcl_BiInfoArgsCmd (ClientData dummy, Tcl_Interp *interp, int objc, \
+declare 98 {
+    int Itcl_BiInfoArgsCmd(ClientData dummy, Tcl_Interp *interp, int objc,
         Tcl_Obj *const objv[])
 }
-declare 99 current {
-    int Itcl_DefaultInfoCmd (ClientData dummy, Tcl_Interp *interp, int objc, \
+declare 99 {
+    int Itcl_DefaultInfoCmd(ClientData dummy, Tcl_Interp *interp, int objc,
         Tcl_Obj *const objv[])
 }
 
@@ -427,53 +427,53 @@ declare 99 current {
 #  Ensembles
 #
 
-declare 100 current {
-    int Itcl_EnsembleInit (Tcl_Interp *interp)
+declare 100 {
+    int Itcl_EnsembleInit(Tcl_Interp *interp)
 }
-declare 101 current {
-    int Itcl_CreateEnsemble (Tcl_Interp *interp, const char* ensName)
+declare 101 {
+    int Itcl_CreateEnsemble(Tcl_Interp *interp, const char *ensName)
 }
-declare 102 current {
-    int Itcl_AddEnsemblePart (Tcl_Interp *interp, const char* ensName, \
-        const char* partName, const char* usageInfo, Tcl_ObjCmdProc *objProc, \
+declare 102 {
+    int Itcl_AddEnsemblePart(Tcl_Interp *interp, const char *ensName,
+        const char *partName, const char *usageInfo, Tcl_ObjCmdProc *objProc,
         ClientData clientData, Tcl_CmdDeleteProc *deleteProc)
 }
-declare 103 current {
-    int Itcl_GetEnsemblePart (Tcl_Interp *interp, const char *ensName, \
+declare 103 {
+    int Itcl_GetEnsemblePart(Tcl_Interp *interp, const char *ensName,
         const char *partName, Tcl_CmdInfo *infoPtr)
 }
-declare 104 current {
-    int Itcl_IsEnsemble (Tcl_CmdInfo* infoPtr)
+declare 104 {
+    int Itcl_IsEnsemble(Tcl_CmdInfo *infoPtr)
 }
-declare 105 current {
-    int Itcl_GetEnsembleUsage (Tcl_Interp *interp, const char *ensName, \
+declare 105 {
+    int Itcl_GetEnsembleUsage(Tcl_Interp *interp, const char *ensName,
         Tcl_Obj *objPtr)
 }
-declare 106 current {
-    int Itcl_GetEnsembleUsageForObj (Tcl_Interp *interp, Tcl_Obj *ensObjPtr, \
+declare 106 {
+    int Itcl_GetEnsembleUsageForObj(Tcl_Interp *interp, Tcl_Obj *ensObjPtr,
         Tcl_Obj *objPtr)
 }
-declare 107 current {
-    int Itcl_EnsembleCmd (ClientData clientData, Tcl_Interp *interp, int objc, \
+declare 107 {
+    int Itcl_EnsembleCmd(ClientData clientData, Tcl_Interp *interp, int objc,
         Tcl_Obj *const objv[])
 }
-declare 108 current {
-    int Itcl_EnsPartCmd (ClientData clientData, Tcl_Interp *interp, int objc, \
+declare 108 {
+    int Itcl_EnsPartCmd(ClientData clientData, Tcl_Interp *interp, int objc,
         Tcl_Obj *const objv[])
 }
-declare 109 current {
-    int Itcl_EnsembleErrorCmd (ClientData clientData, Tcl_Interp *interp, \
+declare 109 {
+    int Itcl_EnsembleErrorCmd(ClientData clientData, Tcl_Interp *interp,
         int objc, Tcl_Obj *const objv[])
 }
-declare 115 current {
-    void Itcl_Assert (const char *testExpr, const char *fileName, int lineNum)
+declare 115 {
+    void Itcl_Assert(const char *testExpr, const char *fileName, int lineNum)
 }
-declare 116 current {
-    int Itcl_IsObjectCmd (ClientData clientData, Tcl_Interp *interp, \
+declare 116 {
+    int Itcl_IsObjectCmd(ClientData clientData, Tcl_Interp *interp,
     int objc, Tcl_Obj *const objv[])
 }
-declare 117 current {
-    int Itcl_IsClassCmd (ClientData clientData, Tcl_Interp *interp, \
+declare 117 {
+    int Itcl_IsClassCmd(ClientData clientData, Tcl_Interp *interp,
     int objc, Tcl_Obj *const objv[])
 }
 
@@ -481,28 +481,28 @@ declare 117 current {
 #  new commands to use TclOO functionality
 #
 
-declare 140 current {
-    int Itcl_FilterAddCmd (ClientData clientData, Tcl_Interp *interp, \
+declare 140 {
+    int Itcl_FilterAddCmd(ClientData clientData, Tcl_Interp *interp,
         int objc, Tcl_Obj *const objv[])
 }
-declare 141 current {
-    int Itcl_FilterDeleteCmd (ClientData clientData, Tcl_Interp *interp, \
+declare 141 {
+    int Itcl_FilterDeleteCmd(ClientData clientData, Tcl_Interp *interp,
         int objc, Tcl_Obj *const objv[])
 }
-declare 142 current {
-    int Itcl_ForwardAddCmd (ClientData clientData, Tcl_Interp *interp, \
+declare 142 {
+    int Itcl_ForwardAddCmd(ClientData clientData, Tcl_Interp *interp,
         int objc, Tcl_Obj *const objv[])
 }
-declare 143 current {
-    int Itcl_ForwardDeleteCmd (ClientData clientData, Tcl_Interp *interp, \
+declare 143 {
+    int Itcl_ForwardDeleteCmd(ClientData clientData, Tcl_Interp *interp,
         int objc, Tcl_Obj *const objv[])
 }
-declare 144 current {
-    int Itcl_MixinAddCmd (ClientData clientData, Tcl_Interp *interp, \
+declare 144 {
+    int Itcl_MixinAddCmd(ClientData clientData, Tcl_Interp *interp,
         int objc, Tcl_Obj *const objv[])
 }
-declare 145 current {
-    int Itcl_MixinDeleteCmd (ClientData clientData, Tcl_Interp *interp, \
+declare 145 {
+    int Itcl_MixinDeleteCmd(ClientData clientData, Tcl_Interp *interp,
         int objc, Tcl_Obj *const objv[])
 }
 
@@ -510,82 +510,82 @@ declare 145 current {
 #  Helper commands
 #
 
-declare 150 current {
-    int Itcl_BiInfoCmd (ClientData clientData, Tcl_Interp *interp, int objc, \
+declare 150 {
+    int Itcl_BiInfoCmd(ClientData clientData, Tcl_Interp *interp, int objc,
         Tcl_Obj *const objv[])
 }
-declare 151 current {
-    int Itcl_BiInfoUnknownCmd (ClientData dummy, Tcl_Interp *interp, \
+declare 151 {
+    int Itcl_BiInfoUnknownCmd(ClientData dummy, Tcl_Interp *interp,
         int objc, Tcl_Obj *const objv[])
 }
-declare 152 current {
-    int Itcl_BiInfoVarsCmd (ClientData dummy, Tcl_Interp *interp, \
+declare 152 {
+    int Itcl_BiInfoVarsCmd(ClientData dummy, Tcl_Interp *interp,
         int objc, Tcl_Obj *const objv[])
 }
-declare 153 current {
-    int Itcl_CanAccess2 (ItclClass* iclsPtr, int protection, \
-        Tcl_Namespace* fromNsPtr)
+declare 153 {
+    int Itcl_CanAccess2(ItclClass *iclsPtr, int protection,
+        Tcl_Namespace *fromNsPtr)
 }
-declare 160 current {
-    int Itcl_SetCallFrameResolver(Tcl_Interp *interp, \
+declare 160 {
+    int Itcl_SetCallFrameResolver(Tcl_Interp *interp,
                     Tcl_Resolve *resolvePtr)
 }
-declare 161 current {
-    int ItclEnsembleSubCmd(ClientData clientData, Tcl_Interp *interp, \
-            const char *ensembleName, int objc, Tcl_Obj *const *objv, \
+declare 161 {
+    int ItclEnsembleSubCmd(ClientData clientData, Tcl_Interp *interp,
+            const char *ensembleName, int objc, Tcl_Obj *const *objv,
             const char *functionName)
 }
-declare 162 current {
-    Tcl_Namespace * Itcl_GetUplevelNamespace(Tcl_Interp *interp, int level)
+declare 162 {
+    Tcl_Namespace *Itcl_GetUplevelNamespace(Tcl_Interp *interp, int level)
 }
-declare 163 current {
+declare 163 {
     ClientData Itcl_GetCallFrameClientData(Tcl_Interp *interp)
 }
-declare 165 current {
+declare 165 {
     int Itcl_SetCallFrameNamespace(Tcl_Interp *interp, Tcl_Namespace *nsPtr)
 }
-declare 166 current {
+declare 166 {
     int Itcl_GetCallFrameObjc(Tcl_Interp *interp)
 }
-declare 167 current {
-    Tcl_Obj * const * Itcl_GetCallFrameObjv(Tcl_Interp *interp)
+declare 167 {
+    Tcl_Obj *const *Itcl_GetCallFrameObjv(Tcl_Interp *interp)
 }
-declare 168 current {
-    int Itcl_NWidgetCmd (ClientData infoPtr, Tcl_Interp *interp, \
+declare 168 {
+    int Itcl_NWidgetCmd(ClientData infoPtr, Tcl_Interp *interp,
         int objc, Tcl_Obj *const objv[])
 }
-declare 169 current {
-    int Itcl_AddOptionCmd (ClientData infoPtr, Tcl_Interp *interp, \
+declare 169 {
+    int Itcl_AddOptionCmd(ClientData infoPtr, Tcl_Interp *interp,
         int objc, Tcl_Obj *const objv[])
 }
-declare 170 current {
-    int Itcl_AddComponentCmd (ClientData infoPtr, Tcl_Interp *interp, \
+declare 170 {
+    int Itcl_AddComponentCmd(ClientData infoPtr, Tcl_Interp *interp,
         int objc, Tcl_Obj *const objv[])
 }
-declare 171 current {
-    int Itcl_BiInfoOptionCmd (ClientData dummy, Tcl_Interp *interp, int objc, \
+declare 171 {
+    int Itcl_BiInfoOptionCmd(ClientData dummy, Tcl_Interp *interp, int objc,
         Tcl_Obj *const objv[])
 }
-declare 172 current {
-    int Itcl_BiInfoComponentCmd (ClientData dummy, Tcl_Interp *interp, \
+declare 172 {
+    int Itcl_BiInfoComponentCmd(ClientData dummy, Tcl_Interp *interp,
         int objc, Tcl_Obj *const objv[])
 }
-declare 173 current {
-    int Itcl_RenameCommand (Tcl_Interp *interp, const char *oldName, \
+declare 173 {
+    int Itcl_RenameCommand(Tcl_Interp *interp, const char *oldName,
 	const char *newName)
 }
-declare 174 current {
-    int Itcl_PushCallFrame(Tcl_Interp * interp, Tcl_CallFrame * framePtr, \
-	Tcl_Namespace * nsPtr, int isProcCallFrame);
+declare 174 {
+    int Itcl_PushCallFrame(Tcl_Interp *interp, Tcl_CallFrame *framePtr,
+	Tcl_Namespace *nsPtr, int isProcCallFrame);
 }
-declare 175 current {
-    void Itcl_PopCallFrame (Tcl_Interp * interp);
+declare 175 {
+    void Itcl_PopCallFrame(Tcl_Interp *interp)
 }
-declare 176 current {
-    Tcl_CallFrame * Itcl_GetUplevelCallFrame (Tcl_Interp * interp, \
-                                    int level);
+declare 176 {
+    Tcl_CallFrame *Itcl_GetUplevelCallFrame(Tcl_Interp *interp,
+                                    int level)
 }
-declare 177 current {
-    Tcl_CallFrame * Itcl_ActivateCallFrame(Tcl_Interp *interp, \
-            Tcl_CallFrame *framePtr);
+declare 177 {
+    Tcl_CallFrame *Itcl_ActivateCallFrame(Tcl_Interp *interp,
+            Tcl_CallFrame *framePtr)
 }
