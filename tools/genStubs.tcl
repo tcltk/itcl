@@ -417,7 +417,7 @@ proc genStubs::makeDecl {name decl index} {
 	append line " "
 	set pad 0
     }
-    append line "$fname "
+    append line $fname
 
     set arg1 [lindex $args 0]
     switch -exact $arg1 {
@@ -433,11 +433,14 @@ proc genStubs::makeDecl {name decl index} {
 	    foreach arg $args {
 		append line $sep
 		set next {}
-		append next [lindex $arg 0] " " [lindex $arg 1] \
-			[lindex $arg 2]
+		append next [lindex $arg 0]
+		if {[string index $next end] ne "*"} {
+		    append next " "
+		}
+		append next [lindex $arg 1] [lindex $arg 2]
 		if {[string length $line] + [string length $next] \
 			+ $pad > 76} {
-		    append text $line \n
+		    append text [string trimright $line] \n
 		    set line "\t\t\t\t"
 		    set pad 28
 		}
@@ -471,7 +474,7 @@ proc genStubs::makeMacro {name decl index} {
     set lfname [string tolower [string index $fname 0]]
     append lfname [string range $fname 1 end]
 
-    set text "#ifndef $fname\n#define $fname"
+    set text "#define $fname \\\n\t("
     set arg1 [lindex $args 0]
     set argList ""
     switch -exact $arg1 {
@@ -489,8 +492,8 @@ proc genStubs::makeMacro {name decl index} {
 	    append argList ")"
 	}
     }
-    append text " \\\n\t(${name}StubsPtr->$lfname)"
-    append text " /* $index */\n#endif\n"
+    append text "${name}StubsPtr->$lfname)"
+    append text " /* $index */\n"
     return $text
 }
 
@@ -527,8 +530,11 @@ proc genStubs::makeSlot {name decl index} {
 	default {
 	    set sep "("
 	    foreach arg $args {
-		append text $sep [lindex $arg 0] " " [lindex $arg 1] \
-			[lindex $arg 2]
+		append text $sep [lindex $arg 0]
+		if {[string index $text end] ne "*"} {
+		    append text " "
+		}
+		append text [lindex $arg 1] [lindex $arg 2]
 		set sep ", "
 	    }
 	    append text ")"
@@ -633,15 +639,10 @@ proc genStubs::ifdeffed {macro text} {
 #	None.
 
 proc genStubs::emitDeclarations {name textVar} {
-    variable libraryName
     upvar $textVar text
 
-    set upName [string toupper $libraryName]
-    append text "\n#if !defined(USE_${upName}_STUBS)\n"
     append text "\n/*\n * Exported function declarations:\n */\n\n"
     forAllStubs $name makeDecl noGuard text
-    append text "\n#endif /* !defined(USE_${upName}_STUBS) */\n"
-
     return
 }
 
@@ -714,9 +715,9 @@ proc genStubs::emitHeader {name} {
 
     emitSlots $name text
 
-    append text "} ${capName}Stubs;\n"
+    append text "} ${capName}Stubs;\n\n"
 
-    append text "\n#ifdef __cplusplus\nextern \"C\" {\n#endif\n"
+    append text "#ifdef __cplusplus\nextern \"C\" {\n#endif\n"
     append text "extern const ${capName}Stubs *${name}StubsPtr;\n"
     append text "#ifdef __cplusplus\n}\n#endif\n"
 
