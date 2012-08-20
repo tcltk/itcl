@@ -10749,7 +10749,7 @@ else
 fi;
     DBGX=""
     if test "$tcl_ok" = "no"; then
-	CFLAGS_DEFAULT="${CFLAGS_OPTIMIZE}"
+	CFLAGS_DEFAULT="${CFLAGS_OPTIMIZE} -DNDEBUG"
 	LDFLAGS_DEFAULT="${LDFLAGS_OPTIMIZE}"
 	echo "$as_me:$LINENO: result: no" >&5
 echo "${ECHO_T}no" >&6
