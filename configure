@@ -1347,13 +1347,6 @@ echo "${ECHO_T}warning: requested TEA version \"3.9\", have \"${TEA_VERSION}\"" 
 	echo "$as_me:$LINENO: result: ok (TEA ${TEA_VERSION})" >&5
 echo "${ECHO_T}ok (TEA ${TEA_VERSION})" >&6
     fi
-
-    # If the user did not set CFLAGS, set it now to keep macros
-    # like AC_PROG_CC and AC_TRY_COMPILE from adding "-g -O2".
-    if test "${CFLAGS+set}" != "set" ; then
-	CFLAGS=""
-    fi
-
     case "`uname -s`" in
 	*win32*|*WIN32*|*MINGW32_*)
 	    # Extract the first word of "cygpath", so it can be a program name with args.
@@ -2777,6 +2770,12 @@ echo "$as_me: --exec-prefix defaulting to ${prefix}" >&6;}
 
     # Don't put any macros that use the compiler (e.g. AC_TRY_COMPILE)
     # in this macro, they need to go into TEA_SETUP_COMPILER instead.
+
+    # If the user did not set CFLAGS, set it now to keep
+    # the AC_PROG_CC macro from adding "-g -O2".
+    if test "${CFLAGS+set}" != "set" ; then
+	CFLAGS=""
+    fi
 
     ac_ext=c
 ac_cpp='$CPP $CPPFLAGS'
@@ -8083,6 +8082,7 @@ rm -f conftest.err conftest.$ac_objext conftest.$ac_ext
 fi
 echo "$as_me:$LINENO: result: $ac_cv_cross" >&5
 echo "${ECHO_T}$ac_cv_cross" >&6
+
 		      if test "$ac_cv_cross" = "yes"; then
 			case "$do64bit" in
 			    amd64|x64|yes)
@@ -9094,7 +9094,7 @@ echo "${ECHO_T}$tcl_cv_ld_single_module" >&6
 
 fi
 
-	    # TEA specific: link shlib with current and compatibility version flags
+	    # TEA specific: link shlib with current and compatiblity version flags
 	    vers=`echo ${PACKAGE_VERSION} | sed -e 's/^\([0-9]\{1,5\}\)\(\(\.[0-9]\{1,3\}\)\{0,2\}\).*$/\1\2/p' -e d`
 	    SHLIB_LD="${SHLIB_LD} -current_version ${vers:-0} -compatibility_version ${vers:-0}"
 	    SHLIB_SUFFIX=".dylib"
@@ -9664,18 +9664,17 @@ fi
 
     if test "$SHARED_LIB_SUFFIX" = ""; then
 
-    # TEA specific: use PACKAGE_VERSION instead of VERSION
-    SHARED_LIB_SUFFIX='${PACKAGE_VERSION}${SHLIB_SUFFIX}'
+	# TEA specific: use PACKAGE_VERSION instead of VERSION
+	SHARED_LIB_SUFFIX='${PACKAGE_VERSION}${SHLIB_SUFFIX}'
 fi
 
     if test "$UNSHARED_LIB_SUFFIX" = ""; then
 
-    # TEA specific: use PACKAGE_VERSION instead of VERSION
-    UNSHARED_LIB_SUFFIX='${PACKAGE_VERSION}.a'
+	# TEA specific: use PACKAGE_VERSION instead of VERSION
+	UNSHARED_LIB_SUFFIX='${PACKAGE_VERSION}.a'
 fi
 
 
-    if test "${GCC}" = "yes" ; then
 	echo "$as_me:$LINENO: checking for SEH support in compiler" >&5
 echo $ECHO_N "checking for SEH support in compiler... $ECHO_C" >&6
 if test "${tcl_cv_seh+set}" = set; then
@@ -9958,7 +9957,6 @@ cat >>confdefs.h <<\_ACEOF
 _ACEOF
 
 	fi
-    fi
 
 
 
@@ -10749,13 +10747,13 @@ else
 fi;
     DBGX=""
     if test "$tcl_ok" = "no"; then
-	CFLAGS_DEFAULT="${CFLAGS_OPTIMIZE} -DNDEBUG"
-	LDFLAGS_DEFAULT="${LDFLAGS_OPTIMIZE}"
+	CFLAGS_DEFAULT='${CFLAGS_OPTIMIZE}'
+	LDFLAGS_DEFAULT='${LDFLAGS_OPTIMIZE}'
 	echo "$as_me:$LINENO: result: no" >&5
 echo "${ECHO_T}no" >&6
     else
-	CFLAGS_DEFAULT="${CFLAGS_DEBUG}"
-	LDFLAGS_DEFAULT="${LDFLAGS_DEBUG}"
+	CFLAGS_DEFAULT='${CFLAGS_DEBUG}'
+	LDFLAGS_DEFAULT='${LDFLAGS_DEBUG}'
 	if test "$tcl_ok" = "yes"; then
 	    echo "$as_me:$LINENO: result: yes (standard debugging)" >&5
 echo "${ECHO_T}yes (standard debugging)" >&6

@@ -103,8 +103,8 @@ static Tcl_ObjCmdProc Itcl_BiInitOptionsCmd;
 /*
  *  FORWARD DECLARATIONS
  */
-static Tcl_Obj* ItclReportPublicOpt _ANSI_ARGS_((Tcl_Interp *interp,
-    ItclVariable *ivPtr, ItclObject *contextIoPtr));
+static Tcl_Obj* ItclReportPublicOpt(Tcl_Interp *interp,
+    ItclVariable *ivPtr, ItclObject *contextIoPtr);
 
 static Tcl_ObjCmdProc ItclBiObjectUnknownCmd;
 static Tcl_ObjCmdProc ItclBiClassUnknownCmd;
@@ -1453,7 +1453,7 @@ ItclBiClassUnknownCmd(
 	    }
 	    if (useComponent) {
 	        if ((val == NULL) || (strlen(val) == 0)) {
-		    Tcl_AppendResult(interp, "component \"", 
+		    Tcl_AppendResult(interp, "component \"",
 		            Tcl_GetString(idmPtr->icPtr->namePtr),
 			    "\" is not initialized", NULL);
 		    return TCL_ERROR;
@@ -1766,7 +1766,7 @@ ItclBiObjectUnknownCmd(
     }
     if (useComponent) {
 	if ((val == NULL) || (strlen(val) == 0)) {
-	    Tcl_AppendResult(interp, "component \"", 
+	    Tcl_AppendResult(interp, "component \"",
 		    Tcl_GetString(idmPtr->icPtr->namePtr),
 		    "\" is not initialized", NULL);
 	    return TCL_ERROR;
@@ -2034,7 +2034,7 @@ ItclExtendedConfigure(
 	        Tcl_ListObjAppendElement(interp, objPtr,
 		        Tcl_NewStringObj("", -1));
 	    }
-	    val = ItclGetInstanceVar(interp, "itcl_options", 
+	    val = ItclGetInstanceVar(interp, "itcl_options",
 	            Tcl_GetString(ioptPtr->namePtr), contextIoPtr,
 		    contextIclsPtr);
 	    if (val == NULL) {
@@ -2361,7 +2361,7 @@ ItclExtendedConfigure(
         if (hPtr == NULL) {
 	    infoPtr->unparsedObjc += 2;
 	    if (infoPtr->unparsedObjv == NULL) {
-	        infoPtr->unparsedObjc++; /* keep the first slot for 
+	        infoPtr->unparsedObjc++; /* keep the first slot for
 		                            correct working !! */
 	        infoPtr->unparsedObjv = (Tcl_Obj **)ckalloc(sizeof(Tcl_Obj *)
 	                *(infoPtr->unparsedObjc));
@@ -2805,7 +2805,7 @@ ItclExtendedSetGet(
     }
     imvPtr = (ItclMethodVariable *)Tcl_GetHashValue(hPtr);
     if (objc == 2) {
-        val = ItclGetInstanceVar(interp, Tcl_GetString(objv[1]), NULL, 
+        val = ItclGetInstanceVar(interp, Tcl_GetString(objv[1]), NULL,
 	        contextIoPtr, imvPtr->iclsPtr);
         if (val == NULL) {
             result = TCL_ERROR;
@@ -2835,7 +2835,7 @@ ItclExtendedSetGet(
         Tcl_GetIntFromObj(interp, Tcl_GetObjResult(interp), &setValue);
 	/* if setValue != 0 set the new value of the variable here */
 	if (setValue) {
-            if (ItclSetInstanceVar(interp, Tcl_GetString(objv[1]), NULL, 
+            if (ItclSetInstanceVar(interp, Tcl_GetString(objv[1]), NULL,
 	            Tcl_GetString(objv[2]), contextIoPtr,
 		    imvPtr->iclsPtr) == NULL) {
                 result = TCL_ERROR;
@@ -3498,7 +3498,7 @@ Itcl_BiItclHullCmd(
  * ------------------------------------------------------------------------
  *  Itcl_BiCreateHullCmd()
  *
- *  Invoked by Tcl normally during evaluating constructor 
+ *  Invoked by Tcl normally during evaluating constructor
  *  the "createhull" command is invoked to install and setup an
  *  ::itcl::extendedclass itcl_hull
  *  for an object.  Handles the following syntax:
@@ -3517,7 +3517,7 @@ Itcl_BiCreateHullCmd(
 {
     int result;
     ItclObjectInfo *infoPtr = (ItclObjectInfo*)clientData;
- 
+
     ItclShowArgs(1, "Itcl_BiCreateHullCmd", objc, objv);
     if (!infoPtr->itclHullCmdsInitted) {
         result =  Tcl_Eval(interp, initHullCmdsScript);
@@ -3573,7 +3573,7 @@ Itcl_BiSetupComponentCmd(
  *  ::itcl::extendedclass options
  *  for an object.  Handles the following syntax:
  *
- *      itcl_initoptions 
+ *      itcl_initoptions
  *          ?<optionName> <optionValue> <optionName> <optionValue> ...?
  *
  * ------------------------------------------------------------------------
