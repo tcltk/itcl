@@ -27,7 +27,7 @@ static Tcl_ObjCmdProc ItclDumpPreserveInfo;
 
 MODULE_SCOPE const struct ItclStubAPI itclStubAPI;
 
-static int Initialize _ANSI_ARGS_((Tcl_Interp *interp));
+static int Initialize(Tcl_Interp *interp);
 
 static const char initScript[] =
 "namespace eval ::itcl {\n"
