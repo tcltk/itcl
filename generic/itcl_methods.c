@@ -40,6 +40,7 @@ static int ItclParseConfig _ANSI_ARGS_((Tcl_Interp *interp,
 static int ItclHandleConfig _ANSI_ARGS_((Tcl_Interp *interp,
     int argc, ItclVarDefn **vars, char **vals, ItclObject *contextObj));
 
+static void ItclReleaseMethod (ClientData cdata);
 
 /*
  * ------------------------------------------------------------------------
@@ -321,7 +322,7 @@ Itcl_CreateMethod(interp, cdefn, name, arglist, body)
 
     Itcl_PreserveData((ClientData)mfunc);
     mfunc->accessCmd = Tcl_CreateObjCommand(interp, name,
-	Itcl_ExecMethod, (ClientData)mfunc, Itcl_ReleaseData);
+	Itcl_ExecMethod, (ClientData)mfunc, ItclReleaseMethod);
 
     Tcl_DStringFree(&buffer);
     return TCL_OK;
@@ -386,7 +387,7 @@ Itcl_CreateProc(interp, cdefn, name, arglist, body)
 
     Itcl_PreserveData((ClientData)mfunc);
     mfunc->accessCmd = Tcl_CreateObjCommand(interp, name,
-	Itcl_ExecProc, (ClientData)mfunc, Itcl_ReleaseData);
+	Itcl_ExecProc, (ClientData)mfunc, ItclReleaseMethod);
 
     Tcl_DStringFree(&buffer);
     return TCL_OK;
@@ -2072,6 +2073,22 @@ argErrors:
     return result;
 }
 
+/*
+ * ------------------------------------------------------------------------
+ *  ItclReleaseMethod()
+ *
+ *  Nulls the reference to the Tcl access command when it went away,
+ *  preventing us from leaving behind a dangling pointer for the resolver
+ *  to promote into bytecode, leading to double-free and heap corruption.
+ * ------------------------------------------------------------------------
+ */
+
+static void ItclReleaseMethod (ClientData cdata)
+{
+  ItclMemberFunc *mfunc = (ItclMemberFunc*) cdata;
+  mfunc->accessCmd = NULL;
+  Itcl_ReleaseData (cdata);
+}
 
 /*
  * ------------------------------------------------------------------------
