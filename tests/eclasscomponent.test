@@ -10,14 +10,13 @@
 #       Test cases for ::itcl::extendedclass component command.
 #       Uses the ::tcltest:: harness.
 #
-#       There is at least Tcl 8.6a3 needed
-#
 #    The tests assume tcltest 2.2
 #-----------------------------------------------------------------------
 
-package require Tcl 8.6
 package require tcltest 2.2
 namespace import ::tcltest::*
+::tcltest::loadTestedCommands
+package require itcl
 
 #---------------------------------------------------------------------
 
