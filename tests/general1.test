@@ -12,6 +12,7 @@
 package require tcltest 2.1
 namespace import ::tcltest::test
 ::tcltest::loadTestedCommands
+package require itcl
 
 # ----------------------------------------------------------------------
 #  Test protection with inheritance
