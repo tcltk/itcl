@@ -52,6 +52,11 @@
 	* generic/itclIntDecls.h:
 	* generic/itclStubInit.c:
 
+2011-10-28  Don Porter  <dgp@Users.sourceforge.net>
+
+	* generic/itcl.h:
+	* configure, configure.in, Makefile.in: Bump version to 4.0b8
+
 2011-10-20  Jan Nijtmans  <nijtmans@users.sourceforge.net>
 
 	* generic/itclMigrate2TclCore.h: [Bug 3424948]: trunk does not link
