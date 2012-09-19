@@ -41,8 +41,8 @@ typedef struct ItclCfunc {
     Tcl_CmdDeleteProc *deleteProc;  /* proc called to free clientData */
 } ItclCfunc;
 
-static Tcl_HashTable* ItclGetRegisteredProcs _ANSI_ARGS_((Tcl_Interp *interp));
-static void ItclFreeC _ANSI_ARGS_((ClientData clientData, Tcl_Interp *interp));
+static Tcl_HashTable* ItclGetRegisteredProcs(Tcl_Interp *interp);
+static void ItclFreeC(ClientData clientData, Tcl_Interp *interp);
 
 
 /*

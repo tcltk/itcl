@@ -45,8 +45,8 @@ static const char * special_resolve_vars[] = {
    NULL
 };
 
-static Tcl_Var ItclClassRuntimeVarResolver _ANSI_ARGS_((
-    Tcl_Interp *interp, Tcl_ResolvedVarInfo *vinfoPtr));
+static Tcl_Var ItclClassRuntimeVarResolver(
+    Tcl_Interp *interp, Tcl_ResolvedVarInfo *vinfoPtr);
 
 
 /*
@@ -195,7 +195,7 @@ Itcl_ClassCmdResolver(
      *    command, it may not be.  This is just the time to catch
      *    it--as it is being resolved again by the compiler.
      */
-    
+
     /*
      * The following #if is needed so itcl can be compiled with
      * all versions of Tcl.  The integer "deleted" was renamed to
@@ -346,7 +346,7 @@ Itcl_ClassVarResolver(
         callContextPtr = Itcl_GetStackValue(&infoPtr->contextStack, idx);
 	idx--;
         /* we first look in the current object, then we look if there is
-	 * perhaps a public variable on the 
+	 * perhaps a public variable on the
 	 * stack from another class object
 	 */
         if (callContextPtr == NULL) {

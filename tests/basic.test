@@ -14,6 +14,7 @@
 package require tcltest 2.2
 namespace import ::tcltest::test
 ::tcltest::loadTestedCommands
+package require itcl
 
 test basic-1.0 {empty string as class name should fail but not crash
 } -body {
