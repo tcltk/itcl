@@ -21,7 +21,7 @@ extern const char *Itcl_InitStubs(
 /* !BEGIN!: Do not edit below this line. */
 
 #define ITCLINT_STUBS_EPOCH 0
-#define ITCLINT_STUBS_REVISION 146
+#define ITCLINT_STUBS_REVISION 144
 
 /*
  * Exported function declarations:
@@ -1011,8 +1011,3 @@ extern const ItclIntStubs *itclIntStubsPtr;
 #endif /* defined(USE_ITCL_STUBS) */
 
 /* !END!: Do not edit above this line. */
-
-struct ItclStubAPI {
-    const ItclStubs *stubsPtr;
-    const ItclIntStubs *intStubsPtr;
-};

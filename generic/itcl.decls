@@ -576,7 +576,7 @@ declare 173 {
 }
 declare 174 {
     int Itcl_PushCallFrame(Tcl_Interp *interp, Tcl_CallFrame *framePtr,
-	Tcl_Namespace *nsPtr, int isProcCallFrame);
+	Tcl_Namespace *nsPtr, int isProcCallFrame)
 }
 declare 175 {
     void Itcl_PopCallFrame(Tcl_Interp *interp)

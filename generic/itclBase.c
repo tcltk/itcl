@@ -25,7 +25,7 @@ static Tcl_ObjCmdProc ItclDumpRefCountInfo;
 static Tcl_ObjCmdProc ItclDumpPreserveInfo;
 #endif
 
-MODULE_SCOPE const struct ItclStubAPI itclStubAPI;
+MODULE_SCOPE const ItclStubs itclStubs;
 
 static int Initialize(Tcl_Interp *interp);
 
@@ -466,8 +466,8 @@ Initialize (
      *  Package is now loaded.
      */
 
-    Tcl_PkgProvideEx(interp, "Itcl", ITCL_PATCH_LEVEL, &itclStubAPI);
-    return Tcl_PkgProvideEx(interp, "itcl", ITCL_PATCH_LEVEL, &itclStubAPI);
+    Tcl_PkgProvideEx(interp, "Itcl", ITCL_PATCH_LEVEL, &itclStubs);
+    return Tcl_PkgProvideEx(interp, "itcl", ITCL_PATCH_LEVEL, &itclStubs);
 }
 
 /*
