@@ -8,8 +8,8 @@
 
 #undef Itcl_InitStubs
 
-const ItclStubs *itclStubsPtr;
-const ItclIntStubs *itclIntStubsPtr;
+const ItclStubs *itclStubsPtr = NULL;
+const ItclIntStubs *itclIntStubsPtr = NULL;
 
 /*
  *----------------------------------------------------------------------
@@ -39,21 +39,15 @@ Itcl_InitStubs(
     const ItclStubs *stubsPtr;
     const ItclIntStubs *intStubsPtr;
     const char *actualVersion;
-    const struct ItclStubAPI *stubsAPIPtr;
-
+    
     actualVersion =
 	    Tcl_PkgRequireEx(interp, packageName, version, exact, &clientData);
-    stubsAPIPtr = clientData;
+    stubsPtr = clientData;
     if ((actualVersion == NULL) || (clientData == NULL)) {
         return NULL;
     }
-    stubsPtr = (const ItclStubs *) clientData;
-    if (stubsPtr->magic == TCL_STUB_MAGIC) {
-    	errMsg = "incompatible stub table pointer";
-    	goto error;
-    }
-    stubsPtr = stubsAPIPtr->stubsPtr;
-    intStubsPtr = stubsAPIPtr->intStubsPtr;
+    intStubsPtr = stubsPtr->hooks ?
+	    stubsPtr->hooks->itclIntStubs : NULL;
 
     if (!stubsPtr || !intStubsPtr) {
 	errMsg = "missing stub table pointer";

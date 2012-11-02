@@ -17,8 +17,6 @@
 #include "itclWidgetInt.h"
 #include <tk.h>
 
-extern struct ItclStubAPI itclStubAPI;
-
 static int Initialize(Tcl_Interp *interp);
 
 /*
@@ -91,7 +89,7 @@ Initialize (
      *  Package is now loaded.
      */
 
-    return Tcl_PkgProvideEx(interp, "itclwidget", ITCL_PATCH_LEVEL, &itclStubAPI);
+    return Tcl_PkgProvide(interp, "itclwidget", ITCL_PATCH_LEVEL);
 }
 
 /*

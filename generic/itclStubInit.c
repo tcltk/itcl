@@ -6,8 +6,6 @@
 #include "itclInt.h"
 
 MODULE_SCOPE const ItclStubs itclStubs;
-MODULE_SCOPE const struct ItclStubAPI itclStubAPI;
-
 /* !BEGIN!: Do not edit below this line. */
 
 static const ItclIntStubs itclIntStubs = {
@@ -233,8 +231,3 @@ const ItclStubs itclStubs = {
 };
 
 /* !END!: Do not edit above this line. */
-
-const struct ItclStubAPI itclStubAPI = {
-    &itclStubs,
-    &itclIntStubs
-};

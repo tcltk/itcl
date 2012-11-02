@@ -498,9 +498,10 @@ GetVersionFromFile(
 	    p = strstr(szBuffer, match);
 	    if (p != NULL) {
 		/*
-		 * Skip to first digit.
+		 * Skip to first digit after the match.
 		 */
 
+		p += strlen(match);
 		while (*p && !isdigit(*p)) {
 		    ++p;
 		}

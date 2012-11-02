@@ -5,7 +5,7 @@
 
 #if defined(USE_ITCL_STUBS)
 
-EXTERN const char *Itcl_InitStubs(
+ITCLAPI const char *Itcl_InitStubs(
 	Tcl_Interp *, const char *version, int exact);
 #define Itcl_InitStubs(interp, version, exact) Itcl_InitStubs( \
 	interp, ITCL_PATCH_LEVEL, 1)
@@ -19,7 +19,7 @@ EXTERN const char *Itcl_InitStubs(
 /* !BEGIN!: Do not edit below this line. */
 
 #define ITCL_STUBS_EPOCH 0
-#define ITCL_STUBS_REVISION 146
+#define ITCL_STUBS_REVISION 144
 
 /*
  * Exported function declarations:
