@@ -7,8 +7,6 @@
 
 ITCLAPI const char *Itcl_InitStubs(
 	Tcl_Interp *, const char *version, int exact);
-#define Itcl_InitStubs(interp, version, exact) Itcl_InitStubs( \
-	interp, ITCL_PATCH_LEVEL, 1)
 #else
 
 #define Itcl_InitStubs(interp, version, exact) Tcl_PkgRequire(interp,"itcl",version,exact)
