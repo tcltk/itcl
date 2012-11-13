@@ -3,21 +3,6 @@
  */
 
 
-#ifdef NOTDEF
-#if defined(USE_ITCL_STUBS)
-
-extern const char *Itcl_InitStubs(
-	Tcl_Interp *, const char *version, int exact);
-#define Itcl_InitStubs(interp,version,exact) Itcl_InitStubs( \
-	interp, ITCL_PATCH_LEVEL, 1)
-#else
-
-#define Itcl_InitStubs(interp,version,exact) Tcl_PkgRequire(interp,"itcl",version, exact)
-
-#endif
-#endif
-
-
 /* !BEGIN!: Do not edit below this line. */
 
 #define ITCLINT_STUBS_EPOCH 0
