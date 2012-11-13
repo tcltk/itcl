@@ -292,7 +292,7 @@ test :
 test : setup $(ITCLLIB) $(ITCLSTUBLIB)
 	$(TCLSH) ..\tests\all.tcl $(TESTFLAGS) -loadfile <<
 	set env(ITCL_LIBRARY) [file normalize [file join $(MAKEDIR:\=/) .. library]]
-	load [file normalize [file join $(MAKEDIR:\=/) $(ITCLLIB:\=/)]]
+	package ifneeded $(PROJECT) $(ITCL_PATCH_LEVEL) [list load [file normalize [file join $(MAKEDIR:\=/) $(ITCLLIB:\=/)]]]
 <<
 !endif
 
