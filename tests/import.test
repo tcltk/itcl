@@ -44,7 +44,7 @@ test import-1.3 {"stub exists" requires one argument} {
 
 set interp [interp create]
 $interp eval "
-    load $::itcllib itcl
+    [list ::load $::itcllib itcl]
     [::tcltest::configure -load]
     proc auto_load {cmd {namespace {}}} {
         global debug
@@ -93,7 +93,7 @@ catch {interp delete $interp}
 # ----------------------------------------------------------------------
 set interp [interp create]
 $interp eval "
-    load $::itcllib itcl
+    [list ::load $::itcllib itcl]
     [::tcltest::configure -load]
     proc auto_load {cmd {namespace {}}} {
         proc \$cmd {args} \[format {return \"%s: \$args\"} \$cmd\]
