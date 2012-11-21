@@ -779,7 +779,7 @@ ItclClassBaseCmd(
 
     Itcl_SetCallFrameResolver(interp, iclsPtr->resolvePtr);
     if (result == TCL_OK) {
-        result = Tcl_EvalObj(interp, objv[2]);
+        result = Tcl_EvalObjEx(interp, objv[2], 0);
         Itcl_PopCallFrame(interp);
     }
     Itcl_PopStack(&infoPtr->clsStack);
@@ -1421,7 +1421,7 @@ Itcl_ClassInheritCmd(
     }
     Itcl_PopCallFrame(interp);
     if (haveClasses) {
-        result = Tcl_Eval(interp, Tcl_DStringValue(&buffer));
+        result = Tcl_EvalEx(interp, Tcl_DStringValue(&buffer), -1, 0);
     }
     Tcl_DStringFree(&buffer);
 
@@ -1486,7 +1486,7 @@ Itcl_ClassProtectionCmd(
 
     if (objc == 2) {
 	/* something like: public { variable a; variable b } */
-        result = Tcl_EvalObj(interp, objv[1]);
+        result = Tcl_EvalObjEx(interp, objv[1], 0);
     } else {
 	/* something like: public variable a 123 456 */
         result = Itcl_EvalArgs(interp, objc-1, objv+1);
@@ -2432,7 +2432,7 @@ Itcl_WidgetCmd(
     ItclShowArgs(1, "Itcl_WidgetCmd", objc-1, objv);
     infoPtr = (ItclObjectInfo *)clientData;
     if (!infoPtr->itclWidgetInitted) {
-        result =  Tcl_Eval(interp, initWidgetScript);
+        result =  Tcl_EvalEx(interp, initWidgetScript, -1, 0);
         if (result != TCL_OK) {
             return result;
         }
@@ -2464,7 +2464,7 @@ Itcl_WidgetAdaptorCmd(
     ItclShowArgs(1, "Itcl_WidgetAdaptorCmd", objc-1, objv);
     infoPtr = (ItclObjectInfo *)clientData;
     if (!infoPtr->itclWidgetInitted) {
-        result =  Tcl_Eval(interp, initWidgetScript);
+        result =  Tcl_EvalEx(interp, initWidgetScript, -1, 0);
         if (result != TCL_OK) {
             return result;
         }
