@@ -1576,7 +1576,7 @@ Itcl_HandleClass(
                         iclsPtr->unique++);
                     unique[0] = tolower(UCHAR(unique[0]));
 
-                    Tcl_DStringTrunc(&buffer, 0);
+                    Tcl_DStringSetLength(&buffer, 0);
                     Tcl_DStringAppend(&buffer, token, -1);
                     Tcl_DStringAppend(&buffer, unique, -1);
                     Tcl_DStringAppend(&buffer, start+5, -1);

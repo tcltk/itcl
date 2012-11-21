@@ -3520,7 +3520,7 @@ Itcl_BiCreateHullCmd(
 
     ItclShowArgs(1, "Itcl_BiCreateHullCmd", objc, objv);
     if (!infoPtr->itclHullCmdsInitted) {
-        result =  Tcl_Eval(interp, initHullCmdsScript);
+        result =  Tcl_EvalEx(interp, initHullCmdsScript, -1, 0);
         if (result != TCL_OK) {
             return result;
         }
@@ -3555,7 +3555,7 @@ Itcl_BiSetupComponentCmd(
 
     ItclShowArgs(1, "Itcl_BiSetupComponentCmd", objc, objv);
     if (!infoPtr->itclHullCmdsInitted) {
-        result =  Tcl_Eval(interp, initHullCmdsScript);
+        result =  Tcl_EvalEx(interp, initHullCmdsScript, -1, 0);
         if (result != TCL_OK) {
             return result;
         }
@@ -3590,7 +3590,7 @@ Itcl_BiInitOptionsCmd(
 
     ItclShowArgs(1, "Itcl_BiInitOptionsCmd", objc, objv);
     if (!infoPtr->itclHullCmdsInitted) {
-        result =  Tcl_Eval(interp, initHullCmdsScript);
+        result =  Tcl_EvalEx(interp, initHullCmdsScript, -1, 0);
         if (result != TCL_OK) {
             return result;
         }
@@ -3634,7 +3634,7 @@ Itcl_BiKeepComponentOptionCmd(
 
     ItclShowArgs(1, "Itcl_BiKeepComponentOptionCmd", objc, objv);
     if (!infoPtr->itclHullCmdsInitted) {
-        result =  Tcl_Eval(interp, initHullCmdsScript);
+        result =  Tcl_EvalEx(interp, initHullCmdsScript, -1, 0);
         if (result != TCL_OK) {
             return result;
         }

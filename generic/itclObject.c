@@ -333,7 +333,7 @@ ItclCreateObject(
             sprintf(unique,"%.200s_%d", name, iclsPtr->unique++);
             unique[0] = tolower(UCHAR(unique[0]));
 
-            Tcl_DStringTrunc(&buffer, 0);
+            Tcl_DStringSetLength(&buffer, 0);
             Tcl_DStringAppend(&buffer, unique, -1);
             objName = Tcl_DStringValue(&buffer);
 
