@@ -51,6 +51,6 @@ test mkindex-1.3 {examine tclIndex} {
     }
 } "{::Simple2::bump $element} {::Simple2::by $element} {::buried::deep::within $element} {::buried::ens $element} {::buried::inside $element} {::buried::inside::bump $element} {::buried::inside::by $element} {::buried::inside::find $element} {::buried::under::neath $element} {::top::find $element} {::top::notice $element} {Simple1 $element} {Simple2 $element} {ens $element} {top $element}"
 
-::tcltest::removeFile tclIndex
+file delete tclIndex
 ::tcltest::cleanupTests
 return

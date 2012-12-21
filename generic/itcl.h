@@ -81,11 +81,11 @@ extern "C" {
 
 #define ITCL_MAJOR_VERSION	4
 #define ITCL_MINOR_VERSION	0
-#define ITCL_RELEASE_LEVEL      TCL_BETA_RELEASE
-#define ITCL_RELEASE_SERIAL     8
+#define ITCL_RELEASE_LEVEL      TCL_FINAL_RELEASE
+#define ITCL_RELEASE_SERIAL     0
 
 #define ITCL_VERSION            "4.0"
-#define ITCL_PATCH_LEVEL        "4.0b8"
+#define ITCL_PATCH_LEVEL        "4.0.0"
 
 
 /*

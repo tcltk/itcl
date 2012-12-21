@@ -1,6 +1,5 @@
-This is the eighth beta release of Itcl.
-When final it will be the next major release of Itcl.
-This version is named Itcl 4.0b8.
+This is the first stable release of Itcl 4.0.
+It is a new major release of Itcl.
 
 The difference to 4.0b7: Tighter control on the set of exported functions.
 
