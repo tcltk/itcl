@@ -171,7 +171,7 @@ proc setupcomponent {comp using widget_type path args} {
 #puts stderr END!$path![::info command $path]!
 }
 
-# ======================= setupcomponent ===========================
+# ======================= initoptions ===========================
 
 proc initoptions {args} {
     upvar win win
@@ -198,7 +198,11 @@ proc initoptions {args} {
 	           uplevel 1 set itcl_options($opt) $val
 	       }
 	   }
-           set val [uplevel 1 set itcl_options($opt)]
+	   if {[info exists itcl_options($opt)]} {
+               set val [uplevel 1 set itcl_options($opt)]
+           } else {
+               set val ""
+           }
 	   # FIXME temporary catch as we get all options instead of the
 	   # ones for the class only
            catch {uplevel 1 configure $opt $val}

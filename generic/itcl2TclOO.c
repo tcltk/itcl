@@ -377,3 +377,14 @@ Itcl_SelfCmd(
     return TCL_ERROR;
 }
 
+int
+Itcl_IsMethodCallFrame(
+    Tcl_Interp *interp)
+{
+    Interp *iPtr = (Interp *) interp;
+    CallFrame *framePtr = iPtr->varFramePtr;
+    if (framePtr == NULL || !(framePtr->isProcCallFrame & FRAME_IS_METHOD)) {
+        return 0;
+    }
+    return 1;
+}
