@@ -2919,6 +2919,7 @@ ItclMapMethodNameProc(
     Tcl_Obj *className;
     Tcl_DString buffer;
     Tcl_HashEntry *hPtr;
+    Tcl_Namespace * myNsPtr;
     ItclObject *ioPtr;
     ItclClass *iclsPtr;
     ItclClass *iclsPtr2;
@@ -2958,6 +2959,16 @@ ItclMapMethodNameProc(
     }
     sp = Tcl_GetString(methodObj);
     Itcl_ParseNamespPath(sp, &buffer, &head, &tail);
+    if (head == NULL) {
+        /* itcl bug #3600923 call private method in class
+	 * without namespace
+	 */
+        myNsPtr = Tcl_GetCurrentNamespace(iclsPtr->interp);
+        iclsPtr2 = GetClassFromClassName(interp, myNsPtr->name, iclsPtr);
+        if (iclsPtr2 != NULL && myNsPtr == iclsPtr2->nsPtr && Itcl_IsMethodCallFrame(iclsPtr->interp) > 0) {
+            iclsPtr = iclsPtr2;
+	}
+    }
     if (head != NULL) {
         className = NULL;
         methodName = Tcl_NewStringObj(tail, -1);

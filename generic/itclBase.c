@@ -567,6 +567,7 @@ ItclCallCCommand(
         ckfree((char*)argv);
     }
     if (objProc != NULL) {
+#ifdef FIXED_ITCL_CALL_CONTEXT
 	Tcl_Namespace *callerNsPtr;
         ItclObjectInfo *infoPtr;
         callerNsPtr = Itcl_GetUplevelNamespace(interp, 1);
@@ -577,9 +578,12 @@ ItclCallCCommand(
 
 /* FIXME have to use ItclCallContext here !!! */
 /*	Itcl_PushStack(callerNsPtr, &infoPtr->namespaceStack); */
+#endif
         result = (*objProc)(cData, interp, Itcl_GetCallFrameObjc(interp)-1,
 	        Itcl_GetCallFrameObjv(interp)+1);
+#ifdef FIXED_ITCL_CALL_CONTEXT
 /*	Itcl_PopStack(&infoPtr->namespaceStack); */
+#endif
     }
     return result;
 }
@@ -706,6 +710,7 @@ ItclFinishCmd(
     int result;
 
     ItclShowArgs(1, "ItclFinishCmd", objc, objv);
+    result = TCL_OK;
     infoPtr = Tcl_GetAssocData(interp, ITCL_INTERP_DATA, NULL);
     if (infoPtr == NULL) {
         infoPtr = (ItclObjectInfo *)clientData;
@@ -869,7 +874,7 @@ ItclFinishCmd(
     Itcl_FinishList();
 
     Itcl_ReleaseData((ClientData)infoPtr);
-    return TCL_OK;
+    return result;
 }
 
 #ifdef OBJ_REF_COUNT_DEBUG
