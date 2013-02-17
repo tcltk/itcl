@@ -1,3 +1,5 @@
+2013-02-17  Arnulf P. Wiedemann  <wiede@users.sourceforge.net>
+	* generic/itclBuiltin.c: fix for SF Bug #237
 2013-02-03  Arnulf P. Wiedemann  <wiede@users.sourceforge.net>
 	* generic/itclBase.c: fix for SF Bug #3591018 new #232
 	* generic/itclObject.c: fix for SF Bug #3600923 new #???

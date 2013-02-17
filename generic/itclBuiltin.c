@@ -1029,6 +1029,7 @@ NRBiChainCmd(
     Tcl_Obj *cmdlinePtr;
     Tcl_Obj **newobjv;
     Tcl_Obj * const *cObjv;
+    int cObjc;
     int freeCmd;
     int idx;
     Tcl_Obj *objPtr;
@@ -1057,10 +1058,15 @@ NRBiChainCmd(
     if (cObjv == NULL) {
         return TCL_OK;
     }
+    cObjc = Itcl_GetCallFrameObjc(interp);
 
     if ((Itcl_GetCallFrameClientData(interp) == NULL) || (objc == 1)) {
         /* that has been a direct call, so no object in front !! */
-	idx = 0;
+        if (objc == 1 && cObjc == 2) {
+            idx = 1;
+        } else {
+            idx = 0;
+        }
     } else {
 	idx = 1;
     }
