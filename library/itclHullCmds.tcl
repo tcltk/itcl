@@ -45,13 +45,15 @@ proc createhull {widget_type path args} {
     upvar win win
 
 
+#puts stderr "il-1![::info level -1]!$this!"
 #puts stderr "createhull!$widget_type!$path!$args!$this![::info command $this]!"
 #puts stderr "ns1![uplevel 1 namespace current]!"
 #puts stderr "ns2![uplevel 2 namespace current]!"
 #puts stderr "ns3![uplevel 3 namespace current]!"
 #puts stderr "level-1![::info level -1]!"
 #puts stderr "level-2![::info level -2]!"
-    set my_this [namespace tail $this]
+#    set my_this [namespace tail $this]
+    set my_this $this
     set tmp $my_this
 #puts stderr "II![::info command $this]![::info command $tmp]!"
 #puts stderr "rename1!rename $my_this ${tmp}_!"
@@ -71,12 +73,13 @@ proc createhull {widget_type path args} {
         }
     }
     set my_win [namespace tail $path]
-#puts stderr "my_win!$my_win!"
     set cmd [list $widget_type $my_win]
+#puts stderr "my_win!$my_win!cmd!$cmd!$path!"
     if {[llength $options] > 0} {
         lappend cmd {*}$options
     }
     set widget [uplevel 1 $cmd]
+#puts stderr "widget!$widget!"
     trace add command $widget delete ::itcl::internal::commands::widgetDeleted
     set opts [uplevel 1 info delegated options]
     foreach entry $opts {
@@ -95,15 +98,16 @@ proc createhull {widget_type path args} {
     set idx 1
     while {1} {
         set widgetName ::itcl::internal::widgets::hull${idx}$my_win
+#puts stderr "widgetName!$widgetName!"
 	if {[string length [::info command $widgetName]] == 0} {
 	    break
 	}
         incr idx
     }
-#puts stderr "rename2!rename $tmp $widgetName!"
+#puts stderr "rename2!rename $widget $widgetName!"
     set dorename 0
-    rename $tmp $widgetName
-#puts stderr "rename3!rename ${tmp}_ $tmp![::info command ${tmp}_]!"
+    rename $widget $widgetName
+#puts stderr "rename3!rename ${tmp}_ $tmp![::info command ${tmp}_]!my_this!$my_this!"
     rename ${tmp}_ ::$tmp
     set exists [uplevel 1 ::info exists itcl_hull]
     if {!$exists} {
@@ -113,7 +117,6 @@ proc createhull {widget_type path args} {
     upvar itcl_hull itcl_hull
     ::itcl::setcomponent $my_this itcl_hull $widgetName
 #puts stderr "IC![::info command $my_win]!"
-    set win $my_win
     set exists [uplevel 1 ::info exists itcl_interior]
     if {!$exists} {
 	# that does not yet work, beacause of problems with resolving 
@@ -121,6 +124,7 @@ proc createhull {widget_type path args} {
     }
     upvar itcl_interior itcl_interior
     set itcl_interior $my_win
+#puts stderr "hull end!win!$win!itcl_hull!$itcl_hull!itcl_interior!$itcl_interior!"
     return $my_win
 }
 

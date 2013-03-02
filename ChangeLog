@@ -1,3 +1,12 @@
+2013-03-02  Arnulf P. Wiedemann  <wiede@users.sourceforge.net>
+	* generic/itclMethod.c: fixes for constructor problems with
+				itclwidgets
+	* generic/itclObject.c:
+	* library/itclHullCmds.tcl:
+2013-03-02  Arnulf P. Wiedemann  <wiede@users.sourceforge.net>
+	* configure: bumped version number already to 4.0.1 no real version yet!
+	* configure.in:
+	* generic/itcl.h:
 2013-02-17  Arnulf P. Wiedemann  <wiede@users.sourceforge.net>
 	* generic/itclBuiltin.c: fix for SF Bug #237
 2013-02-03  Arnulf P. Wiedemann  <wiede@users.sourceforge.net>
