@@ -10,7 +10,7 @@
 # so you can encode the package version directly into the source files.
 #-----------------------------------------------------------------------
 
-AC_INIT([itclwidget], [4.0b5])
+AC_INIT([itclwidget], [4.0.0])
 
 #--------------------------------------------------------------------
 # Call TEA_INIT as the first TEA_ macro to set up initial vars.
@@ -33,11 +33,13 @@ AC_SUBST(CONFIG_CLEAN_FILES)
 AC_CONFIG_AUX_DIR(tclconfig)
 
 #--------------------------------------------------------------------
-# Load the tclConfig.sh file
+# Load the tclConfig.sh, tkConfig.sh and itclConfig.sh file
 #--------------------------------------------------------------------
 
 TEA_PATH_TCLCONFIG
 TEA_LOAD_TCLCONFIG
+TEA_PATH_TKCONFIG
+TEA_LOAD_TKCONFIG
 
 TEA_PATH_CONFIG(itcl)
 TEA_LOAD_CONFIG(itcl)
@@ -113,6 +115,7 @@ fi
 
 #TEA_PUBLIC_TCL_HEADERS
 TEA_PRIVATE_TCL_HEADERS
+TEA_PUBLIC_TK_HEADERS
 TEA_PRIVATE_ITCL_HEADERS
 
 #--------------------------------------------------------------------

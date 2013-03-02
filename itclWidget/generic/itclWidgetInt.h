@@ -18,6 +18,24 @@
 
 #define ITCL_WIDGETS_NAMESPACE "::itcl::internal::widgets"
 
+typedef int (*HullAndOptionsInst)(Tcl_Interp *interp,
+        struct ItclObject *ioPtr, struct ItclClass *iclsPtr, int objc,
+        Tcl_Obj *const *objv, int *newObjc, Tcl_Obj **newObjv);
+typedef int (*InitObjectOptions)(Tcl_Interp *interp,
+        struct ItclObject *ioPtr, struct ItclClass *iclsPtr, const char *name);
+typedef int (*DelegationInst)(Tcl_Interp *interp,
+        struct ItclObject *ioPtr, struct ItclClass *iclsPtr);
+
+
+typedef struct ItclWidgetInfo {
+    InitObjectOptions initObjectOpts;
+    HullAndOptionsInst hullAndOptsInst;
+    DelegationInst delegationInst;
+    Tcl_ObjCmdProc *widgetConfigure;
+    Tcl_ObjCmdProc *widgetCget;
+} ItclWidgetInfo;
+
+
 MODULE_SCOPE int HullAndOptionsInstall(Tcl_Interp *interp, ItclObject *ioPtr,
         ItclClass *iclsPtr, int objc, Tcl_Obj * const objv[],
 	int *newObjc, Tcl_Obj **newObjv);
