@@ -3663,6 +3663,174 @@ AC_DEFUN([TEA_PUBLIC_TK_HEADERS], [
 ])
 
 #------------------------------------------------------------------------
+# TEA_PUBLIC_ITCL_HEADERS --
+#
+#	Locate the installed public itcl header files
+#
+# Arguments:
+#	None.
+#
+# Requires:
+#	CYGPATH must be set
+#
+# Results:
+#
+#	Adds a --with-itclinclude switch to configure.
+#	Result is cached.
+#
+#	Substs the following vars:
+#		ITCL_INCLUDES
+#------------------------------------------------------------------------
+
+AC_DEFUN([TEA_PUBLIC_ITCL_HEADERS], [
+    AC_MSG_CHECKING([for itcl public headers])
+
+    AC_ARG_WITH(itclinclude, [  --with-itclinclude       directory containing the public itcl header files], with_itclinclude=${withval})
+
+    AC_CACHE_VAL(ac_cv_c_itclh, [
+	# Use the value from --with-itclinclude, if it was given
+
+	if test x"${with_itclinclude}" != x ; then
+	    if test -f "${with_itclinclude}/itcl.h" ; then
+		ac_cv_c_itclh=${with_itclinclude}
+	    else
+		AC_MSG_ERROR([${with_itclinclude} directory does not contain itcl.h])
+	    fi
+	else
+	    list=""
+	    if test "`uname -s`" = "Darwin"; then
+		# If itcl was built as a framework, attempt to use
+		# the framework's Headers directory
+		case ${ITCL_DEFS} in
+		    *TCL_FRAMEWORK*)
+			list="`ls -d ${ITCL_BIN_DIR}/Headers 2>/dev/null`"
+			;;
+		esac
+	    fi
+
+	    # Look in the source dir only if Tcl is not installed,
+	    # and in that situation, look there before installed locations.
+	    if test -f "${ITCL_BIN_DIR}/Makefile" ; then
+		list="$list `ls -d ${ITCL_SRC_DIR}/generic 2>/dev/null`"
+	    fi
+
+	    # Check order: pkg --prefix location, itcl's --prefix location,
+	    # relative to directory of tclConfig.sh.
+
+	    eval "temp_includedir=${includedir}"
+	    list="$list \
+		`ls -d ${temp_includedir}        2>/dev/null` \
+		`ls -d ${ITCL_PREFIX}/include     2>/dev/null` \
+		`ls -d ${ITCL_BIN_DIR}/../include 2>/dev/null`"
+	    if test "${TEA_PLATFORM}" != "windows" -o "$GCC" = "yes"; then
+		list="$list /usr/local/include /usr/include"
+		if test x"${ITCL_INCLUDE_SPEC}" != x ; then
+		    d=`echo "${ITCL_INCLUDE_SPEC}" | sed -e 's/^-I//'`
+		    list="$list `ls -d ${d} 2>/dev/null`"
+		fi
+	    fi
+	    for i in $list ; do
+		if test -f "$i/itcl.h" ; then
+		    ac_cv_c_itclh=$i
+		    break
+		fi
+	    done
+	fi
+    ])
+
+    # Print a message based on how we determined the include path
+
+    if test x"${ac_cv_c_itclh}" = x ; then
+	AC_MSG_ERROR([itcl.h not found.  Please specify its location with --with-itclinclude])
+    else
+	AC_MSG_RESULT([${ac_cv_c_itclh}])
+    fi
+
+    # Convert to a native path and substitute into the output files.
+
+    INCLUDE_DIR_NATIVE=`${CYGPATH} ${ac_cv_c_itclh}`
+
+    ITCL_INCLUDES=-I\"${INCLUDE_DIR_NATIVE}\"
+
+    AC_SUBST(ITCL_INCLUDES)
+])
+
+#------------------------------------------------------------------------
+# TEA_PRIVATE_ITCL_HEADERS --
+#
+#	Locate the private itcl include files
+#
+# Arguments:
+#
+#	Requires:
+#		ITCL_SRC_DIR	Assumes that TEA_LOAD_TCLCONFIG has
+#				already been called.
+#
+# Results:
+#
+#	Substs the following vars:
+#		ITCL_TOP_DIR_NATIVE
+#		ITCL_INCLUDES
+#------------------------------------------------------------------------
+
+AC_DEFUN([TEA_PRIVATE_ITCL_HEADERS], [
+    # Allow for --with-itclinclude to take effect and define ${ac_cv_c_itclh}
+    AC_REQUIRE([TEA_PUBLIC_ITCL_HEADERS])
+    AC_MSG_CHECKING([for itcl private include files])
+
+    ITCL_SRC_DIR_NATIVE=`${CYGPATH} ${ITCL_SRC_DIR}`
+    ITCL_TOP_DIR_NATIVE=\"${ITCL_SRC_DIR_NATIVE}\"
+
+    # Check to see if itcl<Plat>Port.h isn't already with the public headers
+    # Don't look for tclInt.h because that resides with tcl.h in the core
+    # sources, but the <plat>Port headers are in a different directory
+    if test "${TEA_PLATFORM}" = "windows" -a \
+	-f "${ac_cv_c_itclh}/itclWinPort.h"; then
+	result="private headers found with public headers"
+    elif test "${TEA_PLATFORM}" = "unix" -a \
+	-f "${ac_cv_c_itclh}/itclUnixPort.h"; then
+	result="private headers found with public headers"
+    else
+	TCL_GENERIC_DIR_NATIVE=\"${ITCL_SRC_DIR_NATIVE}/generic\"
+	if test "${TEA_PLATFORM}" = "windows"; then
+	    ITCL_PLATFORM_DIR_NATIVE=\"${ITCL_SRC_DIR_NATIVE}/win\"
+	else
+	    ITCL_PLATFORM_DIR_NATIVE=\"${ITCL_SRC_DIR_NATIVE}/unix\"
+	fi
+	# Overwrite the previous ITCL_INCLUDES as this should capture both
+	# public and private headers in the same set.
+	# We want to ensure these are substituted so as not to require
+	# any *_NATIVE vars be defined in the Makefile
+	ITCL_INCLUDES="-I${ITCL_GENERIC_DIR_NATIVE} -I${ITCL_PLATFORM_DIR_NATIVE}"
+	if test "`uname -s`" = "Darwin"; then
+            # If icl was built as a framework, attempt to use
+            # the framework's Headers and PrivateHeaders directories
+            case ${ITCL_DEFS} in
+	    	*ITCL_FRAMEWORK*)
+		    if test -d "${ITCL_BIN_DIR}/Headers" -a \
+			    -d "${ITCL_BIN_DIR}/PrivateHeaders"; then
+			ITCL_INCLUDES="-I\"${ITCL_BIN_DIR}/Headers\" -I\"${ITCL_BIN_DIR}/PrivateHeaders\" ${ITCL_INCLUDES}"
+		    else
+			ITCL_INCLUDES="${ITCL_INCLUDES} ${ITCL_INCLUDE_SPEC} `echo "${ITCL_INCLUDE_SPEC}" | sed -e 's/Headers/PrivateHeaders/'`"
+		    fi
+	            ;;
+	    esac
+	    result="Using ${ITCL_INCLUDES}"
+	else
+	    if test ! -f "${ITCL_SRC_DIR}/generic/itclInt.h" ; then
+		AC_MSG_ERROR([Cannot find private header itclInt.h in ${TCL_SRC_DIR}])
+	    fi
+	    result="Using srcdir found in itclConfig.sh: ${ITCL_SRC_DIR}"
+	fi
+    fi
+
+    AC_SUBST(ITCL_TOP_DIR_NATIVE)
+
+    AC_SUBST(ITCL_INCLUDES)
+    AC_MSG_RESULT([${result}])
+])
+
+#------------------------------------------------------------------------
 # TEA_PATH_CONFIG --
 #
 #	Locate the ${1}Config.sh file and perform a sanity check on
