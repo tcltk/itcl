@@ -243,11 +243,13 @@ ItclCreateObject(
      */
 
     if (ItclInitObjectVariables(interp, ioPtr, iclsPtr, name) != TCL_OK) {
+	ioPtr->hadConstructorError = 11;    
 	result = TCL_ERROR;
         goto errorReturn;
     }
     if (ItclInitObjectCommands(interp, ioPtr, iclsPtr, name) != TCL_OK) {
 	Tcl_AppendResult(interp, "error in ItclInitObjectCommands", NULL);
+	ioPtr->hadConstructorError = 12;    
 	result = TCL_ERROR;
         goto errorReturn;
     }
@@ -259,6 +261,7 @@ ItclCreateObject(
             if (ItclInitObjectOptions(interp, ioPtr, iclsPtr, name) != TCL_OK) {
 	        Tcl_AppendResult(interp, "error in ItclInitObjectOptions",
 		        NULL);
+	        ioPtr->hadConstructorError = 13;    
 	        result = TCL_ERROR;
                 goto errorReturn;
             }
@@ -267,6 +270,7 @@ ItclCreateObject(
 	        != TCL_OK) {
 	    Tcl_AppendResult(interp,
 	            "error in ItclInitObjectMethodVariables", NULL);
+	    ioPtr->hadConstructorError = 14;    
 	    result = TCL_ERROR;
             goto errorReturn;
         }
@@ -304,6 +308,7 @@ ItclCreateObject(
         Tcl_DecrRefCount(newObjv[4]);
         ckfree((char *)newObjv);
         if (result != TCL_OK) {
+	    ioPtr->hadConstructorError = 15;    
             goto errorReturn;
         }
     }
@@ -314,6 +319,7 @@ ItclCreateObject(
 	            "error in ItclInitObjectMethodVariables", NULL);
 	    infoPtr->currIoPtr = saveCurrIoPtr;
 	    result = TCL_ERROR;
+	    ioPtr->hadConstructorError = 16;    
             goto errorReturn;
         }
     }
@@ -356,6 +362,7 @@ ItclCreateObject(
         ItclDeleteObjectVariablesNamespace(interp, ioPtr);
         Itcl_ReleaseData((ClientData)ioPtr);
         Itcl_ReleaseData((ClientData)ioPtr);
+	ioPtr->hadConstructorError = 16;    
         return TCL_ERROR;
     }
     Tcl_ObjectSetMethodNameMapper(ioPtr->oPtr, ItclMapMethodNameProc);
@@ -2126,8 +2133,11 @@ ItclTraceThisVar(
     int flags)		    /* flags indicating read/write */
 {
     ItclObject *contextIoPtr = (ItclObject*)cdata;
-    const char *objName;
+    Tcl_DString buffer;
     Tcl_Obj *objPtr;
+    const char *objName;
+    const char *head;
+    const char *tail;
     int isDone;
 
     /*
@@ -2178,8 +2188,12 @@ ItclTraceThisVar(
 	        isDone = 1;
             }
 	    if (!isDone && (strcmp(name1, "win") == 0)) {
-		Tcl_SetStringObj(objPtr,
-                        Tcl_GetString(contextIoPtr->origNamePtr)+2, -1);
+                /* a window path name must not contain namespace parts !! */
+                Itcl_ParseNamespPath(Tcl_GetString(contextIoPtr->origNamePtr), &buffer, &head, &tail);
+		if (tail == NULL) {
+	            return " INTERNAL ERROR tail == NULL in ItclTraceThisVar for win";
+		}
+		Tcl_SetStringObj(objPtr, tail, -1);
 	        isDone = 1;
 	    }
 	    if (!isDone && (contextIoPtr->iclsPtr->flags & ITCL_WIDGET)) {

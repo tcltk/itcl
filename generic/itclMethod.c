@@ -1136,6 +1136,9 @@ CallItclObjectCmd(
     Tcl_Obj **objv = data[3];
     
     ItclShowArgs(1, "CallObjectCmd", objc, objv);
+    if (ioPtr != NULL) {
+        ioPtr->hadConstructorError = 0;
+    }
     if (imPtr->flags & (ITCL_CONSTRUCTOR|ITCL_DESTRUCTOR)) {
         oPtr = ioPtr->oPtr;
     } else {
