@@ -1,3 +1,5 @@
+2013-03-11  Don Porter  <dgp@Users.sourceforge.net>
+	* Makefile.n: SF Bug #239 - support -singleproc 1 testing.
 2013-03-02  Arnulf P. Wiedemann  <wiede@users.sourceforge.net>
 	* generic/itclMethod.c: fixes for constructor problems with
 				itclwidgets
