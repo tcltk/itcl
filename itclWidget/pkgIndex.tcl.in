@@ -1,3 +1,7 @@
 # Tcl package index file, version 1.0
 
-package ifneeded itclwidget @PACKAGE_VERSION@ [list load [file join $dir "@PKG_LIB_FILE@"] itclwidget]
+if {![package vsatisfies [package provide Tcl] 8.6]} {return}
+
+package ifneeded itclwidget @PACKAGE_VERSION@ [list package require itcl 4.0.0]\
+	[list package require Tk 8.6.0]\
+	[list load [file join $dir "@PKG_LIB_FILE@"] itclwidget]

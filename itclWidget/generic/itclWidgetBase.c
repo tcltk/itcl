@@ -42,7 +42,7 @@ Initialize (
     if (Tk_InitStubs(interp, "8.6", 0) == NULL) {
         return TCL_ERROR;
     }
-    if (Itcl_InitStubs(interp, ITCL_PATCH_LEVEL, 1) == NULL) {
+    if (Itcl_InitStubs(interp, "4.0.0", 0) == NULL) {
         return TCL_ERROR;
     }
 
