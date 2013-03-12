@@ -237,7 +237,7 @@ Initialize (
     int opt;
     int isNew;
 
-    if (Tcl_InitStubs(interp, TCL_VERSION, 0) == NULL) {
+    if (Tcl_InitStubs(interp, "8.6", 0) == NULL) {
         return TCL_ERROR;
     }
 
