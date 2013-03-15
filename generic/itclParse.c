@@ -975,12 +975,6 @@ ItclClassBaseCmd(
 	            (char *)imPtr->tmPtr, &isNewEntry);
 	    if (isNewEntry) {
 	        Tcl_SetHashValue(hPtr2, imPtr);
-	    } else {
-if (imPtr != Tcl_GetHashKey(&iclsPtr->infoPtr->procMethods, hPtr2)) {
-fprintf(stdout, "OOPS 1!\n"); fflush(stdout);
-} else {
-fprintf(stdout, "SAFE 1!\n"); fflush(stdout);
-}
 	    }
 	    if (iclsPtr->flags & (ITCL_TYPE|ITCL_WIDGET|ITCL_WIDGETADAPTOR)) {
 		if (argumentPtr == NULL) {

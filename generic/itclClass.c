@@ -2445,9 +2445,7 @@ ItclDeleteFunction(
 	    (char *) imPtr->tmPtr);
     if (hPtr != NULL) {
 	Tcl_DeleteHashEntry(hPtr);
-    } else {
-fprintf(stdout, "IDF: not in procMethods: '%s'\n", Tcl_GetString(imPtr->fullNamePtr)); fflush(stdout);
-}
+    }
     hPtr = Tcl_FindHashEntry(&imPtr->infoPtr->classes, (char *)imPtr->iclsPtr);
     if (hPtr != NULL) {
 	/* unlink owerself from list of class functions */

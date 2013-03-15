@@ -746,13 +746,7 @@ Itcl_ChangeMemberFunc(
                 (char *)imPtr->tmPtr, &isNewEntry);
         if (isNewEntry) {
             Tcl_SetHashValue(hPtr, imPtr);
-        } else {
-if (imPtr != Tcl_GetHashKey(&imPtr->iclsPtr->infoPtr->procMethods, hPtr)) {
-fprintf(stdout, "OOPS 2!\n"); fflush(stdout);
-} else {
-fprintf(stdout, "SAFE 2!\n"); fflush(stdout);
-}
-}
+        }
     }
     ItclAddClassFunctionDictInfo(interp, imPtr->iclsPtr, imPtr);
     return TCL_OK;
