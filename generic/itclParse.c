@@ -982,6 +982,13 @@ ItclClassBaseCmd(
 		    imPtr->codePtr->argumentPtr = argumentPtr;
 		    Tcl_IncrRefCount(argumentPtr);
 		}
+		/*
+		 * We're overwriting the tmPtr field, so yank out the
+		 * entry in the procMethods map based on the old one.
+		 */
+		if (isNewEntry) {
+		    Tcl_DeleteHashEntry(hPtr2);
+		}
 	        imPtr->tmPtr = (ClientData)Itcl_NewProcMethod(interp,
 	            iclsPtr->oPtr, ItclCheckCallMethod, ItclAfterCallMethod,
                     ItclProcErrorProc, imPtr, imPtr->namePtr, argumentPtr,
