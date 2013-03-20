@@ -975,6 +975,7 @@ ItclClassBaseCmd(
 	            (char *)imPtr->tmPtr, &isNewEntry);
 	    if (isNewEntry) {
 	        Tcl_SetHashValue(hPtr2, imPtr);
+		Itcl_PreserveData(iclsPtr);
 	    }
 	    if (iclsPtr->flags & (ITCL_TYPE|ITCL_WIDGET|ITCL_WIDGETADAPTOR)) {
 		if (argumentPtr == NULL) {
@@ -987,6 +988,7 @@ ItclClassBaseCmd(
 		 * entry in the procMethods map based on the old one.
 		 */
 		if (isNewEntry) {
+		    Itcl_ReleaseData(iclsPtr);
 		    Tcl_DeleteHashEntry(hPtr2);
 		}
 	        imPtr->tmPtr = (ClientData)Itcl_NewProcMethod(interp,
