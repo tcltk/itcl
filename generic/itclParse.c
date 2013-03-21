@@ -988,7 +988,7 @@ ItclClassBaseCmd(
 		 * entry in the procMethods map based on the old one.
 		 */
 		if (isNewEntry) {
-		    Itcl_ReleaseData(iclsPtr);
+/*		    Itcl_ReleaseData(iclsPtr);*/
 		    Tcl_DeleteHashEntry(hPtr2);
 		}
 	        imPtr->tmPtr = (ClientData)Itcl_NewProcMethod(interp,
