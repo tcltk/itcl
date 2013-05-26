@@ -456,6 +456,7 @@ typedef struct ItclMemberCode {
 #define ITCL_OPTION_READONLY   0x2000 /* non-zero => readonly */
 #define ITCL_VARIABLE          0x4000 /* non-zero => normal variable */
 #define ITCL_TYPE_VARIABLE     0x8000 /* non-zero => typevariable */
+#define ITCL_OPTION_INITTED    0x10000 /* non-zero => option has been initialized */
 
 /*
  *  Instance components.
