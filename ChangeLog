@@ -1,3 +1,12 @@
+2013-05-26  Arnulf P. Wiedemann  <wiede@users.sourceforge.net>
+	* generic/itclBuiltin.c: Removed unused code, added some code for
+	BiInitOptionsCmd also that code seems to be no
+	longer used instead a Tcl implementation of that code is used at least
+	on some places
+	* generic/itclCmd.c: Removed unused code
+	* generic/itclInfo.c: Added new command "info classoptions"
+	  (Itcl_BiInfoClassOptionsCmd), removed some unused code.
+	* generic/itclInt.h: Added define ITCL_OPTION_INITTED
 2013-03-11  Don Porter  <dgp@Users.sourceforge.net>
 	* Makefile.n: SF Bug #239 - support -singleproc 1 testing.
 2013-03-02  Arnulf P. Wiedemann  <wiede@users.sourceforge.net>
