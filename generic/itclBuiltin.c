@@ -319,6 +319,9 @@ Itcl_BiInit(
 	    Tcl_IncrRefCount(infoPtr->infoVars4Ptr);
             result = Tcl_DictObjGet(interp, mapDict, infoPtr->infoVars4Ptr,
 	            &infoPtr->infoVarsPtr);
+	    if(result != TCL_OK) {
+              /* FIXME need code here!! */
+	    }
 	    objPtr = Tcl_NewStringObj("itclinfo", -1);
 	    infoPtr->infoVars2Ptr =
 	            Tcl_NewStringObj("::itcl::builtin::Info", -1);
@@ -1290,7 +1293,6 @@ ItclBiClassUnknownCmd(
     int isItclHull;
     int isTypeMethod;
     int isStar;
-    int found;
     int isNew;
     int idx;
 
@@ -1369,7 +1371,6 @@ ItclBiClassUnknownCmd(
     }
     idmPtr = NULL;
     if (isTypeMethod) {
-	found = 0;
 	hPtr = Tcl_FindHashEntry(&iclsPtr->delegatedFunctions, (char *)objv[1]);
 	if (hPtr == NULL) {
 	    objPtr = Tcl_NewStringObj("*", -1);
@@ -1381,8 +1382,6 @@ ItclBiClassUnknownCmd(
 	        idmPtr = Tcl_GetHashValue(hPtr);
 	        isStar = 1;
 	    }
-	} else {
-	    found = 1;
 	}
 	if (isStar) {
             /* check if the function is in the exceptions */
@@ -1916,7 +1915,6 @@ ItclExtendedConfigure(
     ItclClass *iclsPtr2;
     ItclComponent *componentIcPtr;
     ItclObject *contextIoPtr;
-    ItclVarLookup *vlookup;
     ItclDelegatedFunction *idmPtr;
     ItclDelegatedOption *idoPtr;
     ItclDelegatedOption *saveIdoPtr;
@@ -1925,7 +1923,6 @@ ItclExtendedConfigure(
     ItclOption *ioptPtr;
     ItclObjectInfo *infoPtr;
     const char *val;
-    const char *token;
     int lObjc;
     int lObjc2;
     int i;
@@ -1933,8 +1930,6 @@ ItclExtendedConfigure(
     int result;
 
     ItclShowArgs(1, "ItclExtendedConfigure", objc, objv);
-    vlookup = NULL;
-    token = NULL;
     ioptPtr = NULL;
     optNamePtr = NULL;
     /*
@@ -2760,12 +2755,10 @@ ItclExtendedSetGet(
     ItclObjectInfo *infoPtr;
     const char *usageStr;
     const char *val;
-    const char *token;
     int result;
     int setValue;
 
     ItclShowArgs(1, "ItclExtendedSetGet", objc, objv);
-    token = NULL;
     imvPtr = NULL;
     result = TCL_OK;
     /*
@@ -2876,7 +2869,6 @@ Itcl_BiInstallComponentCmd(
     ItclClass *contextIclsPtr;
     ItclObject *contextIoPtr;
     ItclDelegatedOption *idoPtr;
-    ItclComponent *icPtr;
     const char *usageStr;
     const char *componentName;
     const char *componentValue;
@@ -2928,6 +2920,9 @@ Itcl_BiInstallComponentCmd(
     if (hPtr == NULL) {
 	numOpts = 0;
 	FOREACH_HASH_VALUE(idoPtr, &contextIoPtr->objectDelegatedOptions) {
+            if (idoPtr == NULL) {
+                /* FIXME need code here !! */
+	    }
 	    numOpts++;
 	}
 	if (numOpts == 0) {
@@ -2941,7 +2936,6 @@ Itcl_BiInstallComponentCmd(
 		Tcl_GetString(objv[1]), "\"", NULL);
         return TCL_ERROR;
     }
-    icPtr = Tcl_GetHashValue(hPtr);
     if (contextIclsPtr->flags & ITCL_TYPE) {
         Tcl_Obj *objPtr;
         usageStr = "usage: installcomponent <componentName> using <widgetType> <widgetPath> ?-option value ...?";
@@ -3426,7 +3420,6 @@ Itcl_BiMyVarCmd(
     Tcl_Obj *const objv[])   /* argument objects */
 {
     Tcl_HashEntry *hPtr;
-    Tcl_Obj *objPtr;
     Tcl_Obj *resultPtr;
     ItclClass *contextIclsPtr;
     ItclObject *contextIoPtr;
@@ -3448,7 +3441,6 @@ Itcl_BiMyVarCmd(
 	            " in objectInstances", NULL);
             return TCL_ERROR;
 	}
-	objPtr = Tcl_GetHashValue(hPtr);
         resultPtr = Tcl_NewStringObj(Tcl_GetString(contextIoPtr->varNsNamePtr),
 	        -1);
 	Tcl_AppendToObj(resultPtr, "::", -1);
@@ -3559,7 +3551,7 @@ Itcl_BiSetupComponentCmd(
     int result;
     ItclObjectInfo *infoPtr = (ItclObjectInfo*)clientData;
 
-    ItclShowArgs(1, "Itcl_BiSetupComponentCmd", objc, objv);
+    ItclShowArgs(0, "Itcl_BiSetupComponentCmd", objc, objv);
     if (!infoPtr->itclHullCmdsInitted) {
         result =  Tcl_Eval(interp, initHullCmdsScript);
         if (result != TCL_OK) {
@@ -3593,7 +3585,14 @@ Itcl_BiInitOptionsCmd(
 {
     int result;
     ItclObjectInfo *infoPtr = (ItclObjectInfo*)clientData;
+    ItclClass *iclsPtr;
+    ItclObject *ioPtr;
+    ItclDelegatedOption *idoptPtr;
+    ItclOption *ioptPtr;
+    FOREACH_HASH_DECLS;
 
+    /* FIXME !!!! seems no longer been used !!! */
+    /* instead ::itcl::builtin::initoptions in ../library/itclHullCmds.tcl is used !! */
     ItclShowArgs(1, "Itcl_BiInitOptionsCmd", objc, objv);
     if (!infoPtr->itclHullCmdsInitted) {
         result =  Tcl_Eval(interp, initHullCmdsScript);
@@ -3602,7 +3601,19 @@ Itcl_BiInitOptionsCmd(
         }
         infoPtr->itclHullCmdsInitted = 1;
     }
-    return Tcl_EvalObjv(interp, objc, objv, 0);
+    result = Tcl_EvalObjv(interp, objc, objv, 0);
+    iclsPtr = NULL;
+    if (Itcl_GetContext(interp, &iclsPtr, &ioPtr) != TCL_OK) {
+        return TCL_ERROR;
+    }
+    /* first handle delegated options */
+    FOREACH_HASH_VALUE(idoptPtr, &ioPtr->objectDelegatedOptions) {
+fprintf(stderr, "delopt!%s!\n", Tcl_GetString(idoptPtr->namePtr));
+    }
+    FOREACH_HASH_VALUE(ioptPtr, &ioPtr->objectOptions) {
+fprintf(stderr, "opt!%s!\n", Tcl_GetString(ioptPtr->namePtr));
+    }
+    return result;
 }
 
 /*
