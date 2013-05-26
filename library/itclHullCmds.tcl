@@ -175,6 +175,10 @@ proc setupcomponent {comp using widget_type path args} {
 #puts stderr END!$path![::info command $path]!
 }
 
+proc itcl_initoptions {args} {
+puts stderr "ITCL_INITOPT!$args!"
+}
+
 # ======================= initoptions ===========================
 
 proc initoptions {args} {
@@ -185,31 +189,33 @@ proc initoptions {args} {
     } else {
         set argsDict [dict create]
     }
-    set myOptions [uplevel 1 info option]
-#    set myOptions [uplevel 1 info options]
     set my_class [uplevel 1 info class]
+    set myOptions [namespace eval $my_class {info classoptions}]
+#    set myOptions [uplevel 1 info option]
+#    set myOptions [uplevel 1 info options]
     set myDelegatedOptions [uplevel 1 info delegated options]
     set opt_lst [list configure]
-    foreach opt $myOptions {
-       set my_win $win
+    set my_win $win
+    foreach opt [lsort $myOptions] {
        if {![catch {
            set resource [uplevel 1 info option $opt -resource]
            set class [uplevel 1 info option $opt -class]
+           set default_val [uplevel 1 info option $opt -default]
        } msg]} {
            set val [uplevel #0 ::option get $my_win $resource $class]
-           if {![::dict exists $argsDict $opt]} {
-	       if {[string length $val] > 0} {
-	           uplevel 1 set itcl_options($opt) $val
-	       }
-	   }
-	   if {[info exists itcl_options($opt)]} {
-               set val [uplevel 1 set itcl_options($opt)]
+           if {[::dict exists $argsDict $opt]} {
+               # we have an explicitly set option
+               set val [::dict get $argsDict $opt]
            } else {
-               set val ""
+	       if {[string length $val] == 0} {
+                   set val $default_val
+	       }
            }
-	   # FIXME temporary catch as we get all options instead of the
+	   # FIXME temporary do a catch as we have all options in myOptions instead of the
 	   # ones for the class only
-           catch {uplevel 1 configure $opt $val}
+           if {[catch {uplevel 1 $my_win configure $opt [list $val]} msg]} {
+puts stderr "ERR!$msg!$my_win configure $opt $val!"
+	   }
 #	   lappend opt_lst $opt $val
        }
     }
