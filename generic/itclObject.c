@@ -3545,6 +3545,12 @@ DelegationInstall(
                 if (strcmp(methodName, "keepcomponentoption") == 0) {
 	            continue;
 	        }
+                if (strcmp(methodName, "addcomponentoption") == 0) {
+	            continue;
+	        }
+                if (strcmp(methodName, "removecomponentoption") == 0) {
+	            continue;
+	        }
                 if (strcmp(methodName, "setupcomponent") == 0) {
 	            continue;
 	        }
