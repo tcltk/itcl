@@ -1015,6 +1015,9 @@ ItclAddDelegatedOptionDictInfo(
     listPtr = Tcl_NewListObj(0, NULL);
     haveExceptions = 0;
     FOREACH_HASH(keyPtr, value, &idoPtr->exceptions) {
+        if (value == NULL) {
+            /* FIXME need code here */
+        }
         haveExceptions = 1;
 	Tcl_ListObjAppendElement(interp, listPtr, keyPtr);
     }
@@ -1107,6 +1110,9 @@ ItclAddClassComponentDictInfo(
     if (icPtr->haveKeptOptions) {
         listPtr = Tcl_NewListObj(0, NULL);
         FOREACH_HASH(keyPtr, value, &icPtr->keptOptions) {
+            if (value == NULL) {
+                /* FIXME need code here */
+            }
 	    Tcl_ListObjAppendElement(interp, listPtr, keyPtr);
         }
         if (AddDictEntry(interp, valuePtr2, "-keptoptions", listPtr)
@@ -1516,6 +1522,9 @@ ItclAddClassDelegatedFunctionDictInfo(
     haveExceptions = 0;
     listPtr = Tcl_NewListObj(0, NULL);
     FOREACH_HASH(keyPtr, value, &idmPtr->exceptions) {
+        if (value == NULL) {
+            /* FIXME need code here */
+        }
         haveExceptions = 1;
         if (Tcl_ListObjAppendElement(interp, listPtr, keyPtr) != TCL_OK) {
             return TCL_ERROR;
