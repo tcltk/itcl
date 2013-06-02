@@ -7,7 +7,15 @@
 	* generic/itclInfo.c: Fix for info classoptions to only use current
 	class options
 	* generic/itclBuiltin.c: Fixed typo which used hPtr instead of hPtr2
+	Fixes for compiler warnings. Added 3 internal builtin commands
+	addoptioncomponent, removeoptioncomponent, renameoptioncomponent for
+	extendedclass.
 	* generic/itclInt.h: Added define ITCL_OPTION_COMP_VAR
+	* generic/itclHelpers.c: Fixes for compiler warnings
+	* generic/itclMethod.c:
+	* generic/itclParse.c: Fixes for compiler warnings. Added 3 internal
+	builtin commands addoptioncomponent,
+	removeoptioncomponent, renameoptioncomponent for extendedclass.
 2013-05-26  Arnulf P. Wiedemann  <wiede@users.sourceforge.net>
 	* generic/itclBuiltin.c: Removed unused code, added some code for
 	BiInitOptionsCmd also that code seems to be no
