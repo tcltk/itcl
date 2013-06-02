@@ -744,9 +744,6 @@ Itcl_BiInfoClassOptionsCmd(
         Tcl_AppendResult(interp, "cannot get context ", (char*)NULL);
         return TCL_ERROR;
     }
-    if (ioPtr != NULL) {
-        iclsPtr = ioPtr->iclsPtr;
-    }
     if (objc > 2) {
 	Tcl_AppendResult(interp, "wrong # args should be: info options ",
 	        "?pattern?", NULL);
