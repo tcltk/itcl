@@ -16,6 +16,8 @@
 	* generic/itclParse.c: Fixes for compiler warnings. Added 3 internal
 	builtin commands addoptioncomponent,
 	removeoptioncomponent, renameoptioncomponent for extendedclass.
+	* library/itclHullCmds.c: New code for seeting component options
+	depending on itcl_option_components arra
 2013-05-26  Arnulf P. Wiedemann  <wiede@users.sourceforge.net>
 	* generic/itclBuiltin.c: Removed unused code, added some code for
 	BiInitOptionsCmd also that code seems to be no
