@@ -38,6 +38,20 @@ proc widgetDeleted {oldName newName op} {
 namespace eval ::itcl::builtin {
 
 # ======================= createhull ===========================
+# the hull widget is a tk widget which is the (mega) widget handled behind the itcl
+# extendedclass/itcl widget.
+# It is created be renaming the itcl class object to a temporary name <itcl objecct name>_
+# creating the widget with the
+# appropriate options and the installing that as the "hull" widget (the container)
+# All the options in args and the options delegated to component itcl_hull are used
+# Then a unique name (hull_widget_name) in the itcl namespace is created for widget:
+# ::itcl::internal::widgets::hull<unique number><namespace tail path>
+# and widget is renamed to that name
+# Finally the <itcl objecct name>_ is renamed to the original <itcl object name> again
+# Component itcl_hull is created if not existent
+# itcl_hull is set to the hull_widget_name and the <itcl object name>
+# is returned to the caller
+# ==============================================================
 
 proc createhull {widget_type path args} {
     variable hullCount
@@ -183,16 +197,17 @@ puts stderr "ITCL_INITOPT!$args!"
 
 proc initoptions {args} {
     upvar win win
+    upvar itcl_hull itcl_hull
+    upvar itcl_option_components itcl_option_components
 
     if {[llength $args]} {
         set argsDict [dict create {*}$args]
     } else {
         set argsDict [dict create]
     }
-    set my_class [uplevel 1 info class]
+    set my_class [uplevel 1 namespace current]
     set myOptions [namespace eval $my_class {info classoptions}]
-#    set myOptions [uplevel 1 info option]
-#    set myOptions [uplevel 1 info options]
+#puts stderr "OPTS!$win!$my_class![join [lsort $myOptions]] \n]!"
     set myDelegatedOptions [uplevel 1 info delegated options]
     set opt_lst [list configure]
     set my_win $win
@@ -211,15 +226,51 @@ proc initoptions {args} {
                    set val $default_val
 	       }
            }
+	   uplevel 1 [list set itcl_options($opt) [list $val]]
+           if {![uplevel 1 info exists itcl_option_components($opt)]} {
+                set itcl_option_components($opt) [list]
+           }
 	   # FIXME temporary do a catch as we have all options in myOptions instead of the
 	   # ones for the class only
+
+#puts stderr "OPT!$opt!$val!$my_win!"
            if {[catch {uplevel 1 $my_win configure $opt [list $val]} msg]} {
-puts stderr "ERR!$msg!$my_win configure $opt $val!"
+puts stderr "initoptions ERR!$msg!$my_class!$my_win!configure!$opt!$val!"
 	   }
 #	   lappend opt_lst $opt $val
        }
     }
+    set class_info_dict [dict get $::itcl::internal::dicts::classComponents $my_class]
+    foreach comp [dict keys $class_info_dict] {
+        if {[dict exists $class_info_dict $comp -keptoptions]} {
+            foreach opt [dict get $class_info_dict $comp -keptoptions] {
+		if {![uplevel 1 info exists itcl_option_components($opt)]} {
+                    set itcl_option_components($opt) [list]
+		}
+		if {[lsearch [set itcl_option_components($opt)] $comp] < 0} {
+		    if {![catch {
+		        set optval [uplevel 1 [list set itcl_options($opt)]]
+                    } msg3]} {
+                            uplevel 1 \[set $comp\] configure $opt $optval
+                    }
+                    lappend itcl_option_components($opt) $comp
+		}
+	    }
+	}
+    }
 #    uplevel 1 $opt_lst
+}
+
+proc addoptioncomponent {args} {
+puts stderr "ADD_OPTION_COMPONENT!$args!"
+}
+
+proc removeoptioncomponent {args} {
+puts stderr "REMOVE_OPTION_COMPONENT!$args!"
+}
+
+proc renameoptioncomponent {args} {
+puts stderr "RENAME_OPTION_COMPONENT!$args!"
 }
 
 }
