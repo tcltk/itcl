@@ -59,6 +59,9 @@ void Itcl_DeleteMemberFunc (
     ItclMemberFunc *imPtr;
 
     imPtr = (ItclMemberFunc *)cdata;
+    if (imPtr == NULL) {
+        /* FIXME need code here */
+    }
     ItclDeleteFunction((ItclMemberFunc *)cdata);
 }
 
@@ -547,6 +550,25 @@ Itcl_CreateClass(
         Tcl_SetHashValue(hPtr, (ClientData)ivPtr);
 
     }
+    if (infoPtr->currClassFlags &
+            ITCL_ECLASS) {
+        /*
+         *  Add the built-in "itcl_option_components" variable to the list of
+	 *  data members.
+         */
+        namePtr = Tcl_NewStringObj("itcl_option_components", -1);
+        (void) Itcl_CreateVariable(interp, iclsPtr, namePtr, (char*)NULL,
+                (char*)NULL, &ivPtr);
+
+        ivPtr->protection = ITCL_PROTECTED;  /* always "protected" */
+        ivPtr->flags |= ITCL_OPTION_COMP_VAR; /* mark as "itcl_option_components"
+	                                      * variable */
+    
+        hPtr = Tcl_CreateHashEntry(&iclsPtr->variables, (char *)namePtr,
+	        &newEntry);
+        Tcl_SetHashValue(hPtr, (ClientData)ivPtr);
+
+    }
     if (infoPtr->currClassFlags & (ITCL_WIDGET|ITCL_WIDGETADAPTOR)) {
         /*
          *  Add the built-in "thiswin" variable to the list of data members.
@@ -856,7 +878,6 @@ ItclDestroyClassNamesp(
     ClientData cdata)  /* class definition to be destroyed */
 {
     Tcl_HashEntry *hPtr;
-    Tcl_HashEntry *hPtr2;
     Tcl_HashSearch place;
     Tcl_Command cmdPtr;
     ItclClass *iclsPtr;
@@ -874,7 +895,7 @@ ItclDestroyClassNamesp(
     }
     iclsPtr->flags |= ITCL_CLASS_NS_IS_DESTROYED;
     infoPtr = iclsPtr->infoPtr;
-    hPtr2 = Tcl_FindHashEntry(&infoPtr->nameClasses,
+    Tcl_FindHashEntry(&infoPtr->nameClasses,
             (char *)iclsPtr->fullNamePtr);
     /*
      *  Destroy all derived classes, since these lose their meaning
@@ -997,9 +1018,7 @@ ItclFreeClass(
     Itcl_ListElem *elem;
     ItclVarLookup *vlookup;
     ItclCmdLookup *clookupPtr;
-    int found;
 
-    found = 0;
     iclsPtr = (ItclClass*)cdata;
     if (iclsPtr->flags & ITCL_CLASS_IS_FREED) {
         return;
@@ -1697,8 +1716,9 @@ Itcl_BuildVirtualTables(
      *  "this" variable.  Only allocate one of these, even though
      *  there is a definition for "this" in each class scope.
      *  Set aside the second object-specific slot for the built-in
-     *  "itcl_options" variable.
+     *  "itcl_options" and "itcl_option_components" variable.
      */
+    iclsPtr->numInstanceVars++;
     iclsPtr->numInstanceVars++;
     iclsPtr->numInstanceVars++;
 
@@ -1712,7 +1732,9 @@ Itcl_BuildVirtualTables(
     while (iclsPtr2 != NULL) {
         hPtr = Tcl_FirstHashEntry(&iclsPtr2->variables, &place);
         while (hPtr) {
+#ifdef NEW_PROTO_RESOLVER
             int type = VAR_TYPE_VARIABLE;
+#endif
             ivPtr = (ItclVariable*)Tcl_GetHashValue(hPtr);
 
             vlookup = (ItclVarLookup *)ckalloc(sizeof(ItclVarLookup));
@@ -1728,7 +1750,9 @@ Itcl_BuildVirtualTables(
 	            ivPtr->iclsPtr == iclsPtr);
 
 	    if (ivPtr->flags & ITCL_COMMON) {
+#ifdef NEW_PROTO_RESOLVER
 	        type = VAR_TYPE_COMMON;
+#endif
 	    }
             /*
              *  If this is a reference to the built-in "this"
