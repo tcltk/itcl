@@ -159,7 +159,6 @@ ItclCreateObject(
     const char *nsName;
     const char *objName;
     char unique[256];    /* buffer used for unique part of object names */
-    int newObjc;
     int newEntry;
     ItclResolveInfo *resolveInfoPtr;
     char str[100];
@@ -178,7 +177,6 @@ ItclCreateObject(
         }
     }
     /* just init for the case of none ItclWidget objects */
-    newObjc = objc;
     newObjv = (Tcl_Obj **)objv;
     infoPtr = iclsPtr->infoPtr;
     /*
@@ -279,7 +277,6 @@ ItclCreateObject(
     saveCurrIoPtr = infoPtr->currIoPtr;
     infoPtr->currIoPtr = ioPtr;
     if (iclsPtr->flags & ITCL_WIDGET) {
-        newObjc = objc;
         newObjv = (Tcl_Obj **)ckalloc(sizeof(Tcl_Obj *) * (objc + 5));
         newObjv[0] = Tcl_NewStringObj(
                 "::itcl::internal::commands::hullandoptionsinstall", -1);
@@ -782,12 +779,13 @@ ItclInitObjectVariables(
     ItclHierIter hier;
     ItclVariable *ivPtr;
     ItclComponent *icPtr;
+#ifdef NEW_PROTO_RESOLVER
     ItclVarLookup *vlookup;
+#endif
     const char *varName;
     const char *inheritComponentName;
     int itclOptionsIsSet;
     int isNew;
-    int numInheritComponents;
 
     ivPtr = NULL;
     /*
@@ -795,7 +793,6 @@ ItclInitObjectVariables(
      * ::itcl::variables::<object>::<class> namespace as an
      * undefined variable using the Tcl "variable xx" command
      */
-    numInheritComponents = 0;
     itclOptionsIsSet = 0;
     inheritComponentName = NULL;
     Itcl_InitHierIter(&hier, iclsPtr);
@@ -847,6 +844,11 @@ ItclInitObjectVariables(
 		    goto errorCleanup2;
                 }
                 if (Tcl_SetVar2(interp, "itcl_options", "",
+	                "", TCL_NAMESPACE_ONLY) == NULL) {
+		    goto errorCleanup;
+                }
+		/* needed for option components for option propagation */
+                if (Tcl_SetVar2(interp, "itcl_option_components", "",
 	                "", TCL_NAMESPACE_ONLY) == NULL) {
 		    goto errorCleanup;
                 }
@@ -906,7 +908,9 @@ ItclInitObjectVariables(
             if (hPtr2 == NULL) {
                 Tcl_Panic("before Itcl_RegisterObjectVariable hPtr2 == NULL!\n");
             }
+#ifdef NEW_PROTO_RESOLVER
 	    vlookup = Tcl_GetHashValue(hPtr2);
+#endif
 	    if ((ivPtr->flags & ITCL_COMMON) == 0) {
                 IctlVarTraceInfo *traceInfoPtr;
 #ifndef NEW_PROTO_RESOLVER
@@ -966,14 +970,13 @@ ItclInitObjectVariables(
 	                int argc;
 	                const char **argv;
 	                const char *val;
-			int result;
 
 			Tcl_DStringInit(&buffer3);
                         Tcl_DStringAppend(&buffer3, varNsPtr->fullName, -1);
                         Tcl_DStringAppend(&buffer3, "::", -1);
                         Tcl_DStringAppend(&buffer3,
 			        Tcl_GetString(ivPtr->namePtr), -1);
-	                result = Tcl_SplitList(interp,
+	                Tcl_SplitList(interp,
 			        Tcl_GetString(ivPtr->arrayInitPtr),
 	                        &argc, &argv);
 	                for (i = 0; i < argc; i++) {
@@ -1099,7 +1102,6 @@ ItclInitObjectOptions(
     ItclHierIter hier;
     ItclOption *ioptPtr;
     ItclDelegatedOption *idoPtr;
-    const char *itclOptionsName;
     int isNew;
 
     ioptPtr = NULL;
@@ -1114,7 +1116,6 @@ ItclInitObjectOptions(
 	            (char *)ioptPtr->namePtr, &isNew);
 	    if (isNew) {
 		Tcl_SetHashValue(hPtr2, ioptPtr);
-                itclOptionsName = Tcl_GetString(ioptPtr->namePtr);
                 Tcl_DStringInit(&buffer);
 	        Tcl_DStringAppend(&buffer, ITCL_VARIABLES_NAMESPACE, -1);
 	        if ((name[0] != ':') && (name[1] != ':')) {
@@ -1751,6 +1752,9 @@ ItclGetInstanceVar(
     if (strcmp(name1, "itcl_options") == 0) {
         isItclOptions = 1;
     }
+    if (strcmp(name1, "itcl_option_components") == 0) {
+        isItclOptions = 1;
+    }
     Tcl_DStringInit(&buffer);
     Tcl_DStringAppend(&buffer, Tcl_GetString(contextIoPtr->varNsNamePtr), -1);
     doAppend = 1;
@@ -1837,6 +1841,9 @@ ItclGetCommonInstanceVar(
     if ((contextIclsPtr == NULL) || (contextIclsPtr->flags &
             (ITCL_ECLASS|ITCL_TYPE|ITCL_WIDGETADAPTOR))) {
         if (strcmp(name1, "itcl_options") == 0) {
+	    doAppend = 0;
+        }
+        if (strcmp(name1, "itcl_option_components") == 0) {
 	    doAppend = 0;
         }
     }
@@ -1947,6 +1954,9 @@ ItclSetInstanceVar(
      */
     isItclOptions = 0;
     if (strcmp(name1, "itcl_options") == 0) {
+        isItclOptions = 1;
+    }
+    if (strcmp(name1, "itcl_option_components") == 0) {
         isItclOptions = 1;
     }
     Tcl_DStringInit(&buffer);
@@ -2263,8 +2273,12 @@ ItclTraceOptionVar(
 /* FIXME should free memory on unset or rename!! */
     if (cdata != NULL) {
         ioPtr = (ItclObject*)cdata;
+	if (ioPtr == NULL) {
+	}
     } else {
         ioptPtr = (ItclOption*)cdata;
+	if (ioptPtr == NULL) {
+	}
         /*
          *  Handle read traces "itcl_options"
          */
@@ -3263,6 +3277,9 @@ ExpandDelegateAs(
 		    }
 		}
 	    }
+	    if (hadDoublePercent) {
+		    /* FIXME need code here */
+	    }
 	    if (cp != ep) {
 		if (*ep == '\0') {
                     Tcl_ListObjAppendElement(interp, listPtr,
@@ -3314,6 +3331,9 @@ DelegateFunction(
         return result;
     }
     val = Tcl_GetString(listPtr);
+    if (val == NULL) {
+        /* FIXME need code here */
+    }
     if (componentValuePtr != NULL) {
         mPtr = Itcl_NewForwardClassMethod(interp, iclsPtr->clsPtr, 1,
                 idmPtr->namePtr, listPtr);
