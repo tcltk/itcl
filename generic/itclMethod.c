@@ -918,6 +918,12 @@ ItclCreateMemberCode(
 	    if (strcmp(body, "@itcl-builtin-keepcomponentoption") == 0) {
 	        isDone = 1;
 	    }
+	    if (strcmp(body, "@itcl-builtin-addcomponentoption") == 0) {
+	        isDone = 1;
+	    }
+	    if (strcmp(body, "@itcl-builtin-removecomponentoption") == 0) {
+	        isDone = 1;
+	    }
 	    if (strcmp(body, "@itcl-builtin-addoptioncomponent") == 0) {
 	        isDone = 1;
 	    }
@@ -2116,6 +2122,12 @@ Itcl_CmdAliasProc(
 	}
 	if (strcmp(cmdName, "@itcl-builtin-keepcomponentoption") == 0) {
 	    return Tcl_FindCommand(interp, "::itcl::builtin::keepcomponentoption", NULL, 0);
+	}
+	if (strcmp(cmdName, "@itcl-builtin-addcomponentoption") == 0) {
+	    return Tcl_FindCommand(interp, "::itcl::builtin::addcomponentoption", NULL, 0);
+	}
+	if (strcmp(cmdName, "@itcl-builtin-removecomponentoption") == 0) {
+	    return Tcl_FindCommand(interp, "::itcl::builtin::removecomponentoption", NULL, 0);
 	}
 	if (strcmp(cmdName, "@itcl-builtin-setupcomponent") == 0) {
 	    return Tcl_FindCommand(interp, "::itcl::builtin::setupcomponent", NULL, 0);
