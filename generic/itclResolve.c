@@ -78,7 +78,6 @@ Itcl_ClassCmdResolver(
     ItclClass *iclsPtr;
     ItclObjectInfo *infoPtr;
     ItclMemberFunc *imPtr;
-    ItclDelegatedFunction *idmPtr;
     int inOptionHandling;
     int isCmdDeleted;
 
@@ -106,7 +105,6 @@ Itcl_ClassCmdResolver(
 	    hPtr = Tcl_FindHashEntry(&iclsPtr->delegatedFunctions,
 	            (char *)namePtr);
 	    if (hPtr != NULL) {
-	        idmPtr = Tcl_GetHashValue(hPtr);
                 objPtr = Tcl_NewStringObj("unknown", -1);
                 hPtr = Tcl_FindHashEntry(&iclsPtr->resolveCmds, (char *)objPtr);
                 Tcl_DecrRefCount(objPtr);
@@ -263,8 +261,6 @@ Itcl_ClassVarResolver(
     int found;
     const char **cp;
 
-    Tcl_Namespace *upNsPtr;
-    upNsPtr = Itcl_GetUplevelNamespace(interp, 1);
     assert(Itcl_IsClassNamespace(nsPtr));
 
     contextIoPtr = NULL;
@@ -434,6 +430,22 @@ Itcl_ClassVarResolver(
 	Tcl_DStringAppend(&buffer, "::", 2);
 	Tcl_DStringAppend(&buffer, Tcl_GetString(contextIoPtr->namePtr), -1);
 	Tcl_DStringAppend(&buffer, "::itcl_options", -1);
+	varPtr = Itcl_FindNamespaceVar(interp, Tcl_DStringValue(&buffer), NULL, 0);
+	Tcl_DStringFree(&buffer);
+        if (varPtr != NULL) {
+            *rPtr = varPtr;
+	    return TCL_OK;
+        }
+    }
+    if (strcmp(name, "itcl_option_components") == 0) {
+        Tcl_Var varPtr;
+        Tcl_DString buffer;
+
+	Tcl_DStringInit(&buffer);
+	Tcl_DStringAppend(&buffer, ITCL_VARIABLES_NAMESPACE, -1);
+	Tcl_DStringAppend(&buffer, "::", 2);
+	Tcl_DStringAppend(&buffer, Tcl_GetString(contextIoPtr->namePtr), -1);
+	Tcl_DStringAppend(&buffer, "::itcl_option_components", -1);
 	varPtr = Itcl_FindNamespaceVar(interp, Tcl_DStringValue(&buffer), NULL, 0);
 	Tcl_DStringFree(&buffer);
         if (varPtr != NULL) {
@@ -645,6 +657,24 @@ ItclClassRuntimeVarResolver(
 	    Tcl_DStringAppend(&buffer,
 	            Tcl_GetString(contextIoPtr->namePtr), -1);
 	    Tcl_DStringAppend(&buffer, "::itcl_options", -1);
+	    varPtr = Itcl_FindNamespaceVar(interp, Tcl_DStringValue(&buffer),
+	            NULL, 0);
+	    Tcl_DStringFree(&buffer);
+            if (varPtr != NULL) {
+	        return varPtr;
+            }
+        }
+        if (strcmp(Tcl_GetString(vlookup->ivPtr->namePtr),
+	        "itcl_option_components") == 0) {
+            Tcl_Var varPtr;
+            Tcl_DString buffer;
+
+	    Tcl_DStringInit(&buffer);
+	    Tcl_DStringAppend(&buffer, ITCL_VARIABLES_NAMESPACE, -1);
+	    Tcl_DStringAppend(&buffer, "::", 2);
+	    Tcl_DStringAppend(&buffer,
+	            Tcl_GetString(contextIoPtr->namePtr), -1);
+	    Tcl_DStringAppend(&buffer, "::itcl_option_components", -1);
 	    varPtr = Itcl_FindNamespaceVar(interp, Tcl_DStringValue(&buffer),
 	            NULL, 0);
 	    Tcl_DStringFree(&buffer);
