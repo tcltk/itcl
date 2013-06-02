@@ -873,6 +873,21 @@ ItclClassBaseCmd(
 		    isDone = 1;
 		}
 		if (strcmp(Tcl_GetString(imPtr->codePtr->bodyPtr),
+		        "@itcl-builtin-addoptioncomponent") == 0) {
+		    Tcl_AppendToObj(bodyPtr, "::itcl::builtin::addoptioncomponent", -1);
+		    isDone = 1;
+		}
+		if (strcmp(Tcl_GetString(imPtr->codePtr->bodyPtr),
+		        "@itcl-builtin-removeoptioncomponent") == 0) {
+		    Tcl_AppendToObj(bodyPtr, "::itcl::builtin::removeoptioncomponent", -1);
+		    isDone = 1;
+		}
+		if (strcmp(Tcl_GetString(imPtr->codePtr->bodyPtr),
+		        "@itcl-builtin-renameoptioncomponent") == 0) {
+		    Tcl_AppendToObj(bodyPtr, "::itcl::builtin::renameoptioncomponent", -1);
+		    isDone = 1;
+		}
+		if (strcmp(Tcl_GetString(imPtr->codePtr->bodyPtr),
 		        "@itcl-builtin-setupcomponent") == 0) {
 		    Tcl_AppendToObj(bodyPtr, "::itcl::builtin::setupcomponent", -1);
 		    isDone = 1;
@@ -2013,6 +2028,7 @@ ItclInitClassCommon(
     int isNew;
     IctlVarTraceInfo *traceInfoPtr;
 
+    result = TCL_OK;
     ivPtr->flags |= ITCL_COMMON;
     iclsPtr->numCommons++;
 
@@ -2108,7 +2124,7 @@ ItclInitClassCommon(
         ckfree((char *)argv);
     }
     Tcl_DStringFree(&buffer);
-    return TCL_OK;
+    return result;
 }
 
 /*
@@ -3182,7 +3198,9 @@ ItclCreateDelegatedFunction(
     Tcl_Obj *exceptionsPtr,
     ItclDelegatedFunction **idmPtrPtr)
 {
+#ifdef NOTDEF
     Tcl_HashEntry *hPtr;
+#endif
     ItclDelegatedFunction *idmPtr;
     const char **argv;
     int argc;
@@ -3211,7 +3229,7 @@ ItclCreateDelegatedFunction(
         for(i = 0; i < argc; i++) {
 	    Tcl_Obj *objPtr;
 	    objPtr = Tcl_NewStringObj(argv[i], -1);
-	    hPtr = Tcl_CreateHashEntry(&idmPtr->exceptions, (char *)objPtr,
+	    Tcl_CreateHashEntry(&idmPtr->exceptions, (char *)objPtr,
 	            &isNew);
 #ifdef NOTDEF
 	    hPtr2 = Tcl_FindHashEntry(&iclsPtr->functions, (char *)objPtr);
@@ -3268,8 +3286,6 @@ Itcl_HandleDelegateMethodCmd(
     const char *methodName;
     const char *component;
     const char *token;
-    const char *whatName;
-    const char *what;
     int result;
     int i;
     int foundOpt;
@@ -3289,13 +3305,6 @@ delegate method * ?to <componentName>? ?using <pattern>? ?except <methods>?";
     targetPtr = NULL;
     usingPtr = NULL;
     exceptionsPtr = NULL;
-    if (ioPtr != NULL) {
-        what = "object";
-	whatName = Tcl_GetCommandName(interp, ioPtr->accessCmd);
-    } else {
-	whatName = iclsPtr->nsPtr->fullName;
-        what = "class";
-    }
     for(i=2;i<objc;i++) {
         token = Tcl_GetString(objv[i]);
 	if (i+1 == objc) {
@@ -3443,14 +3452,10 @@ Itcl_ClassDelegateMethodCmd(
     ItclObjectInfo *infoPtr;
     ItclClass *iclsPtr;
     ItclDelegatedFunction *idmPtr;
-    const char *usageStr;
     int isNew;
     int result;
 
     ItclShowArgs(1, "Itcl_ClassDelegateMethodCmd", objc, objv);
-    usageStr = "delegate method <methodName> to <componentName> ?as <targetName>?\n\
-delegate method <methodName> ?to <componentName>? using <pattern>\n\
-delegate method * ?to <componentName>? ?using <pattern>? ?except <methods>?";
     infoPtr = (ItclObjectInfo*)clientData;
     iclsPtr = (ItclClass*)Itcl_PeekStack(&infoPtr->clsStack);
     if (iclsPtr == NULL) {
@@ -3519,8 +3524,6 @@ Itcl_HandleDelegateOptionCmd(
     const char *component;
     const char *token;
     const char **argv;
-    const char *what;
-    const char *whatName;
     int foundOpt;
     int argc;
     int isStarOption;
@@ -3537,13 +3540,6 @@ Itcl_HandleDelegateOptionCmd(
     componentPtr = NULL;
     icPtr = NULL;
     isStarOption = 0;
-    if (ioPtr != NULL) {
-        what = "object";
-	whatName = Tcl_GetCommandName(interp, ioPtr->accessCmd);
-    } else {
-	whatName = iclsPtr->nsPtr->fullName;
-        what = "class";
-    }
     token = Tcl_GetString(objv[1]);
     if (Tcl_SplitList(interp, (const char *)token, &argc, &argv) != TCL_OK) {
         return TCL_ERROR;
@@ -4110,7 +4106,6 @@ Itcl_ClassMethodVariableCmd(
     const char *usageStr;
     int i;
     int foundOpt;
-    int pLevel;
     int result;
     Tcl_Obj *objPtr;
 
@@ -4134,8 +4129,6 @@ Itcl_ClassMethodVariableCmd(
         Tcl_WrongNumArgs(interp, 1, objv, usageStr);
         return TCL_ERROR;
     }
-
-    pLevel = Itcl_Protection(interp, 0);
 
     /*
      *  Make sure that the variable name does not contain anything
