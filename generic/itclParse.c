@@ -873,6 +873,16 @@ ItclClassBaseCmd(
 		    isDone = 1;
 		}
 		if (strcmp(Tcl_GetString(imPtr->codePtr->bodyPtr),
+		        "@itcl-builtin-addcomponentoption") == 0) {
+		    Tcl_AppendToObj(bodyPtr, "::itcl::builtin::addcomponentoption", -1);
+		    isDone = 1;
+		}
+		if (strcmp(Tcl_GetString(imPtr->codePtr->bodyPtr),
+		        "@itcl-builtin-removecomponentoption") == 0) {
+		    Tcl_AppendToObj(bodyPtr, "::itcl::builtin::removecomponentoption", -1);
+		    isDone = 1;
+		}
+		if (strcmp(Tcl_GetString(imPtr->codePtr->bodyPtr),
 		        "@itcl-builtin-addoptioncomponent") == 0) {
 		    Tcl_AppendToObj(bodyPtr, "::itcl::builtin::addoptioncomponent", -1);
 		    isDone = 1;
