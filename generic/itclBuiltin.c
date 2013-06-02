@@ -222,6 +222,25 @@ static const BiMethod BiMethodList[] = {
         Itcl_BiKeepComponentOptionCmd,
 	ITCL_ECLASS
     },
+    /* the next 3 are defined in library/itclHullCmds.tcl */
+    {"addoptioncomponent",
+        "componentName optionName ?optionName ...?",
+        "@itcl-builtin-addoptioncomponent",
+        NULL,
+	ITCL_ECLASS
+    },
+    {"removeoptioncomponent",
+        "componentName optionName ?optionName ...?",
+        "@itcl-builtin-removeoptioncomponent",
+        NULL,
+	ITCL_ECLASS
+    },
+    {"renameoptioncomponent",
+        "componentName optionName ?optionName ...?",
+        "@itcl-builtin-renameoptioncomponent",
+        NULL,
+	ITCL_ECLASS
+    },
     {"setupcomponent",
         "componentName using widgetType widgetPath ?optionName value ...?",
         "@itcl-builtin-setupcomponent",
@@ -3551,7 +3570,7 @@ Itcl_BiSetupComponentCmd(
     int result;
     ItclObjectInfo *infoPtr = (ItclObjectInfo*)clientData;
 
-    ItclShowArgs(0, "Itcl_BiSetupComponentCmd", objc, objv);
+    ItclShowArgs(1, "Itcl_BiSetupComponentCmd", objc, objv);
     if (!infoPtr->itclHullCmdsInitted) {
         result =  Tcl_Eval(interp, initHullCmdsScript);
         if (result != TCL_OK) {
@@ -3573,6 +3592,7 @@ Itcl_BiSetupComponentCmd(
  *
  *      itcl_initoptions
  *          ?<optionName> <optionValue> <optionName> <optionValue> ...?
+ * FIXME !!!! seems no longer been used !!! 
  *
  * ------------------------------------------------------------------------
  */
@@ -3591,7 +3611,6 @@ Itcl_BiInitOptionsCmd(
     ItclOption *ioptPtr;
     FOREACH_HASH_DECLS;
 
-    /* FIXME !!!! seems no longer been used !!! */
     /* instead ::itcl::builtin::initoptions in ../library/itclHullCmds.tcl is used !! */
     ItclShowArgs(1, "Itcl_BiInitOptionsCmd", objc, objv);
     if (!infoPtr->itclHullCmdsInitted) {
@@ -3719,6 +3738,7 @@ Itcl_BiKeepComponentOptionCmd(
                 }
             }
         }
+        ItclAddClassComponentDictInfo(interp, iclsPtr, icPtr);
     }
     return TCL_OK;
 }
