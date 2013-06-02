@@ -545,6 +545,21 @@ ItclCreateMemberFunc(
 	    imPtr->maxargcount = -1;
             imPtr->codePtr->flags |= ITCL_BUILTIN;
 	}
+	if (strcmp(name, "addoptioncomponent") == 0) {
+	    imPtr->argcount = 0;
+	    imPtr->maxargcount = -1;
+            imPtr->codePtr->flags |= ITCL_BUILTIN;
+	}
+	if (strcmp(name, "removeoptioncomponent") == 0) {
+	    imPtr->argcount = 0;
+	    imPtr->maxargcount = -1;
+            imPtr->codePtr->flags |= ITCL_BUILTIN;
+	}
+	if (strcmp(name, "renameoptioncomponent") == 0) {
+	    imPtr->argcount = 0;
+	    imPtr->maxargcount = -1;
+            imPtr->codePtr->flags |= ITCL_BUILTIN;
+	}
 	if (strcmp(name, "setupcomponent") == 0) {
 	    imPtr->argcount = 0;
 	    imPtr->maxargcount = -1;
@@ -903,6 +918,15 @@ ItclCreateMemberCode(
 	    if (strcmp(body, "@itcl-builtin-keepcomponentoption") == 0) {
 	        isDone = 1;
 	    }
+	    if (strcmp(body, "@itcl-builtin-addoptioncomponent") == 0) {
+	        isDone = 1;
+	    }
+	    if (strcmp(body, "@itcl-builtin-removeoptioncomponent") == 0) {
+	        isDone = 1;
+	    }
+	    if (strcmp(body, "@itcl-builtin-renameoptioncomponent") == 0) {
+	        isDone = 1;
+	    }
 	    if (strcmp(body, "@itcl-builtin-setupcomponent") == 0) {
 	        isDone = 1;
 	    }
@@ -1250,8 +1274,6 @@ Itcl_EvalMemberCode(
      */
     if (((mcode->flags & ITCL_IMPLEMENT_OBJCMD) != 0) ||
             ((mcode->flags & ITCL_IMPLEMENT_ARGCMD) != 0)) {
-	Tcl_Namespace *callerNsPtr;
-	callerNsPtr = Tcl_GetCurrentNamespace(interp);
 	Itcl_SetCallFrameNamespace(interp, imPtr->iclsPtr->nsPtr);
 
         if ((mcode->flags & ITCL_IMPLEMENT_OBJCMD) != 0) {
@@ -1472,7 +1494,6 @@ Itcl_GetMemberFuncUsage(
     ItclClass *iclsPtr;
     char *name;
     char *arglist;
-    int argcount;
 
     /*
      *  If the command is a method and an object context was
@@ -1529,14 +1550,11 @@ Itcl_GetMemberFuncUsage(
 	} else {
 	    arglist = NULL;
 	}
-        argcount = imPtr->argcount;
     } else {
         if (imPtr->argListPtr != NULL) {
             arglist = Tcl_GetString(imPtr->usagePtr);
-            argcount = imPtr->argcount;
         } else {
             arglist = NULL;
-            argcount = 0;
         }
     }
     if (arglist) {
@@ -2435,7 +2453,6 @@ ItclAfterCallMethod(
     Tcl_Namespace *nsPtr,
     int call_result)
 {
-    Tcl_Object oPtr;
     Tcl_HashEntry *hPtr;
     ItclObject *ioPtr;
     ItclMemberFunc *imPtr;
@@ -2443,7 +2460,6 @@ ItclAfterCallMethod(
     int newEntry;
     int result;
 
-    oPtr = NULL;
     imPtr = (ItclMemberFunc *)clientData;
 
     callContextPtr = NULL;
