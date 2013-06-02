@@ -1,3 +1,13 @@
+2013-06-02  Arnulf P. Wiedemann  <wiede@users.sourceforge.net>
+	* generic/itclResolve.c:
+	* generic/itclClass.c:
+	* generic/itclObject.c: Changed code to avoid some compiler warnings.
+	Added code for extendedclass variable itcl_optio
+	n_components.
+	* generic/itclInfo.c: Fix for info classoptions to only use current
+	class options
+	* generic/itclBuiltin.c: Fixed typo which used hPtr instead of hPtr2
+	* generic/itclInt.h: Added define ITCL_OPTION_COMP_VAR
 2013-05-26  Arnulf P. Wiedemann  <wiede@users.sourceforge.net>
 	* generic/itclBuiltin.c: Removed unused code, added some code for
 	BiInitOptionsCmd also that code seems to be no
@@ -7,6 +17,8 @@
 	* generic/itclInfo.c: Added new command "info classoptions"
 	  (Itcl_BiInfoClassOptionsCmd), removed some unused code.
 	* generic/itclInt.h: Added define ITCL_OPTION_INITTED
+	* library/itclHullCmds.tcl: Added proc itcl_initoptions. A lot of
+	changes and fixes in initoptions.
 2013-03-11  Don Porter  <dgp@Users.sourceforge.net>
 	* Makefile.n: SF Bug #239 - support -singleproc 1 testing.
 2013-03-02  Arnulf P. Wiedemann  <wiede@users.sourceforge.net>
