@@ -873,23 +873,23 @@ ItclClassBaseCmd(
 		    isDone = 1;
 		}
 		if (strcmp(Tcl_GetString(imPtr->codePtr->bodyPtr),
-		        "@itcl-builtin-addcomponentoption") == 0) {
-		    Tcl_AppendToObj(bodyPtr, "::itcl::builtin::addcomponentoption", -1);
+		        "@itcl-builtin-ignorecomponentoption") == 0) {
+		    Tcl_AppendToObj(bodyPtr, "::itcl::builtin::ignorercomponentoption", -1);
 		    isDone = 1;
 		}
 		if (strcmp(Tcl_GetString(imPtr->codePtr->bodyPtr),
-		        "@itcl-builtin-removecomponentoption") == 0) {
-		    Tcl_AppendToObj(bodyPtr, "::itcl::builtin::removecomponentoption", -1);
+		        "@itcl-builtin-renamecomponentoption") == 0) {
+		    Tcl_AppendToObj(bodyPtr, "::itcl::builtin::renamecomponentoption", -1);
 		    isDone = 1;
 		}
 		if (strcmp(Tcl_GetString(imPtr->codePtr->bodyPtr),
-		        "@itcl-builtin-addoptioncomponent") == 0) {
-		    Tcl_AppendToObj(bodyPtr, "::itcl::builtin::addoptioncomponent", -1);
+		        "@itcl-builtin-keepoptioncomponent") == 0) {
+		    Tcl_AppendToObj(bodyPtr, "::itcl::builtin::keepoptioncomponent", -1);
 		    isDone = 1;
 		}
 		if (strcmp(Tcl_GetString(imPtr->codePtr->bodyPtr),
-		        "@itcl-builtin-removeoptioncomponent") == 0) {
-		    Tcl_AppendToObj(bodyPtr, "::itcl::builtin::removeoptioncomponent", -1);
+		        "@itcl-builtin-ignoreoptioncomponent") == 0) {
+		    Tcl_AppendToObj(bodyPtr, "::itcl::builtin::ignoreoptioncomponent", -1);
 		    isDone = 1;
 		}
 		if (strcmp(Tcl_GetString(imPtr->codePtr->bodyPtr),

@@ -3545,10 +3545,10 @@ DelegationInstall(
                 if (strcmp(methodName, "keepcomponentoption") == 0) {
 	            continue;
 	        }
-                if (strcmp(methodName, "addcomponentoption") == 0) {
+                if (strcmp(methodName, "ignorecomponentoption") == 0) {
 	            continue;
 	        }
-                if (strcmp(methodName, "removecomponentoption") == 0) {
+                if (strcmp(methodName, "renamecomponentoption") == 0) {
 	            continue;
 	        }
                 if (strcmp(methodName, "setupcomponent") == 0) {
@@ -3627,10 +3627,13 @@ ItclInitExtendedClassOptions(
 		if (ItclGetInstanceVar(interp, "itcl_options",
 		        Tcl_GetString(ioptPtr->namePtr), ioPtr, iclsPtr)
 			== NULL) {
+#ifdef NOTDEF
+fprintf(stderr, "SET OPTION3!%s!\n", Tcl_GetString(ioptPtr->namePtr));
                     ItclSetInstanceVar(interp, "itcl_options",
                             Tcl_GetString(ioptPtr->namePtr),
                             Tcl_GetString(ioptPtr->defaultValuePtr),
 			    ioPtr, iclsPtr);
+#endif
 	        }
             }
 	}
