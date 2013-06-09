@@ -1,3 +1,14 @@
+2013-06-09  Arnulf P. Wiedemann  <wiede@users.sourceforge.net>
+	* generic/itclParse.c:
+	* generic/itclObject.c:
+	* generic/itclMethod.c:
+	* generic/itclBuiltin.c: renaming of removecomponentoption to
+	ignorekomponentoption, removing of addcomponentoption
+	move code for keepcomponentoption from itclBuiltin.c as Tcl code to
+	itclHullCmds.tcl
+	* library/itclHullCmds.tcl: moved keepcomponentoption from
+	itclBuiltin.c to here as Tcl code. renaming of removecomponentoption
+	to ignorekomponentoption
 2013-06-02  Arnulf P. Wiedemann  <wiede@users.sourceforge.net>
 	* generic/itclResolve.c:
 	* generic/itclClass.c:
