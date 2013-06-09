@@ -206,17 +206,24 @@ proc initoptions {args} {
         set argsDict [dict create]
     }
     set my_class [uplevel 1 namespace current]
-    set myOptions [namespace eval $my_class {info classoptions}]
+#    set myOptions [namespace eval $my_class {info classoptions}]
+    set myOptions [lsort -unique [namespace eval $my_class {info options}]]
 #puts stderr "OPTS!$win!$my_class![join [lsort $myOptions]] \n]!"
     set myDelegatedOptions [uplevel 1 info delegated options]
     set opt_lst [list configure]
     set my_win $win
+    set class_info_dict [dict get $::itcl::internal::dicts::classComponents $my_class]
     foreach opt [lsort $myOptions] {
-       if {![catch {
-           set resource [uplevel 1 info option $opt -resource]
-           set class [uplevel 1 info option $opt -class]
-           set default_val [uplevel 1 info option $opt -default]
-       } msg]} {
+	set found 0
+        if {[catch {
+            set resource [uplevel 1 info option $opt -resource]
+            set class [uplevel 1 info option $opt -class]
+            set default_val [uplevel 1 info option $opt -default]
+	    set found 1
+        } msg]} {
+#            puts stderr "MSG!$opt!$msg!"
+        }
+	if {$found} {
            set val [uplevel #0 ::option get $my_win $resource $class]
            if {[::dict exists $argsDict $opt]} {
                # we have an explicitly set option
@@ -226,47 +233,123 @@ proc initoptions {args} {
                    set val $default_val
 	       }
            }
-	   uplevel 1 [list set itcl_options($opt) [list $val]]
-           if {![uplevel 1 info exists itcl_option_components($opt)]} {
-                set itcl_option_components($opt) [list]
-           }
-	   # FIXME temporary do a catch as we have all options in myOptions instead of the
-	   # ones for the class only
-
-#puts stderr "OPT!$opt!$val!$my_win!"
+           set ::itcl::internal::variables::${win}::itcl_options($opt) $val
+#	   uplevel 1 [list set itcl_options($opt) [list $val]]
            if {[catch {uplevel 1 $my_win configure $opt [list $val]} msg]} {
 puts stderr "initoptions ERR!$msg!$my_class!$my_win!configure!$opt!$val!"
 	   }
-#	   lappend opt_lst $opt $val
-       }
-    }
-    set class_info_dict [dict get $::itcl::internal::dicts::classComponents $my_class]
-    foreach comp [dict keys $class_info_dict] {
-        if {[dict exists $class_info_dict $comp -keptoptions]} {
-            foreach opt [dict get $class_info_dict $comp -keptoptions] {
-		if {![uplevel 1 info exists itcl_option_components($opt)]} {
-                    set itcl_option_components($opt) [list]
-		}
-		if {[lsearch [set itcl_option_components($opt)] $comp] < 0} {
-		    if {![catch {
-		        set optval [uplevel 1 [list set itcl_options($opt)]]
-                    } msg3]} {
-                            uplevel 1 \[set $comp\] configure $opt $optval
+        }
+        foreach comp [dict keys $class_info_dict] {
+#puts stderr "OPT1!$opt!$comp![dict get $class_info_dict $comp]!"
+            if {[dict exists $class_info_dict $comp -keptoptions]} {
+                if {[lsearch [dict get $class_info_dict $comp -keptoptions] $opt] >= 0} {
+                    if {$found == 0} {
+                        # we use the option value of the first component for setting
+                        # the option, as the components are traversed in the dict
+                        # depending on the ordering of the component creation!!
+                        set my_info [uplevel 1 \[set $comp\] configure $opt]
+                        set resource [lindex $my_info 1]
+                        set class [lindex $my_info 2]
+                        set default_val [lindex $my_info 3]
+                        set found 2
+                        set val [uplevel #0 ::option get $my_win $resource $class]
+                        if {[::dict exists $argsDict $opt]} {
+                            # we have an explicitly set option
+                            set val [::dict get $argsDict $opt]
+                        } else {
+	                    if {[string length $val] == 0} {
+                                set val $default_val
+	                    }
+                        }
+		        set ::itcl::internal::variables::${win}::itcl_options($opt) $val
+#	                uplevel 1 [list set itcl_options($opt) [list $val]]
                     }
-                    lappend itcl_option_components($opt) $comp
-		}
-	    }
-	}
+                    if {[catch {uplevel 1 \[set $comp\] configure $opt [list $val]} msg]} {
+puts stderr "initoptions ERR2!$msg!$my_class!$comp!configure!$opt!$val!"
+	            }
+		    if {![uplevel 1 info exists itcl_option_components($opt)]} {
+                        set itcl_option_components($opt) [list]
+		    }
+		    if {[lsearch [set itcl_option_components($opt)] $comp] < 0} {
+		        if {![catch {
+		            set optval [uplevel 1 [list set itcl_options($opt)]]
+                        } msg3]} {
+                                uplevel 1 \[set $comp\] configure $opt $optval
+                        }
+                        lappend itcl_option_components($opt) $comp
+		    }
+                }
+            }
+        }
     }
 #    uplevel 1 $opt_lst
+}
+
+# ========================= keepcomponentoption ======================
+#  Invoked by Tcl during evaluating constructor whenever
+#  the "keepcomponentoption" command is invoked to list the options
+#  to be kept when an ::itcl::extendedclass component has been setup
+#  for an object.
+#
+#  It checks, for all arguments, if the opt is an option of that class
+#  and of that component. If that is the case it adds the component name
+#  to the list of components for that option.
+#  The variable is the object variable: itcl_option_components($opt)
+#
+#  Handles the following syntax:
+#
+#    keepcomponentoption <componentName> <optionName> ?<optionName> ...?
+#
+# ======================================================================
+
+
+proc keepcomponentoption {args} {
+    set usage "wrong # args, should be: keepcomponentoption componentName optionName ?optionName ...?"
+
+    if {[llength $args] < 2} {
+        puts stderr $usage
+	return -code error
+    }
+    set my_hull [uplevel 1 set itcl_hull]
+    set my_class [uplevel 1 namespace current]
+    set comp [lindex $args 0]
+    set args [lrange $args 1 end]
+    set class_info_dict [dict get $::itcl::internal::dicts::classComponents $my_class]
+    if {![dict exists $class_info_dict $comp]} {
+        puts stderr "keepcomponentoption cannot find component \"$comp\""
+	return -code error
+    }
+    set class_comp_dict [dict get $class_info_dict $comp]
+    if {![dict exists $class_comp_dict -keptoptions]} {
+        dict set class_comp_dict -keptoptions [list]
+    }
+    foreach opt $args {
+	if {[string range $opt 0 0] ne "-"} {
+            puts stderr "keepcomponentoption: option must begin with a \"-\"!"
+	    return -code error
+	}
+        if {[lsearch [dict get $class_comp_dict -keptoptions] $opt] < 0} {
+            dict lappend class_comp_dict -keptoptions $opt
+	}
+    }
+    dict set class_info_dict $comp $class_comp_dict
+    dict set ::itcl::internal::dicts::classComponents $my_class $class_info_dict
+}
+
+proc ignorecomponentoption {args} {
+puts stderr "IGNORE_COMPONENT_OPTION!$args!"
+}
+
+proc renamecomponentoption {args} {
+puts stderr "rename_COMPONENT_OPTION!$args!"
 }
 
 proc addoptioncomponent {args} {
 puts stderr "ADD_OPTION_COMPONENT!$args!"
 }
 
-proc removeoptioncomponent {args} {
-puts stderr "REMOVE_OPTION_COMPONENT!$args!"
+proc ignoreoptioncomponent {args} {
+puts stderr "IGNORE_OPTION_COMPONENT!$args!"
 }
 
 proc renameoptioncomponent {args} {
