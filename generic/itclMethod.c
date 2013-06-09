@@ -545,12 +545,22 @@ ItclCreateMemberFunc(
 	    imPtr->maxargcount = -1;
             imPtr->codePtr->flags |= ITCL_BUILTIN;
 	}
+	if (strcmp(name, "ignorecomponentoption") == 0) {
+	    imPtr->argcount = 0;
+	    imPtr->maxargcount = -1;
+            imPtr->codePtr->flags |= ITCL_BUILTIN;
+	}
+	if (strcmp(name, "renamecomponentoption") == 0) {
+	    imPtr->argcount = 0;
+	    imPtr->maxargcount = -1;
+            imPtr->codePtr->flags |= ITCL_BUILTIN;
+	}
 	if (strcmp(name, "addoptioncomponent") == 0) {
 	    imPtr->argcount = 0;
 	    imPtr->maxargcount = -1;
             imPtr->codePtr->flags |= ITCL_BUILTIN;
 	}
-	if (strcmp(name, "removeoptioncomponent") == 0) {
+	if (strcmp(name, "ignoreoptioncomponent") == 0) {
 	    imPtr->argcount = 0;
 	    imPtr->maxargcount = -1;
             imPtr->codePtr->flags |= ITCL_BUILTIN;
@@ -918,16 +928,16 @@ ItclCreateMemberCode(
 	    if (strcmp(body, "@itcl-builtin-keepcomponentoption") == 0) {
 	        isDone = 1;
 	    }
-	    if (strcmp(body, "@itcl-builtin-addcomponentoption") == 0) {
+	    if (strcmp(body, "@itcl-builtin-ignorecomponentoption") == 0) {
 	        isDone = 1;
 	    }
-	    if (strcmp(body, "@itcl-builtin-removecomponentoption") == 0) {
+	    if (strcmp(body, "@itcl-builtin-renamecomponentoption") == 0) {
 	        isDone = 1;
 	    }
 	    if (strcmp(body, "@itcl-builtin-addoptioncomponent") == 0) {
 	        isDone = 1;
 	    }
-	    if (strcmp(body, "@itcl-builtin-removeoptioncomponent") == 0) {
+	    if (strcmp(body, "@itcl-builtin-ignoreoptioncomponent") == 0) {
 	        isDone = 1;
 	    }
 	    if (strcmp(body, "@itcl-builtin-renameoptioncomponent") == 0) {
@@ -2123,11 +2133,11 @@ Itcl_CmdAliasProc(
 	if (strcmp(cmdName, "@itcl-builtin-keepcomponentoption") == 0) {
 	    return Tcl_FindCommand(interp, "::itcl::builtin::keepcomponentoption", NULL, 0);
 	}
-	if (strcmp(cmdName, "@itcl-builtin-addcomponentoption") == 0) {
-	    return Tcl_FindCommand(interp, "::itcl::builtin::addcomponentoption", NULL, 0);
-	}
-	if (strcmp(cmdName, "@itcl-builtin-removecomponentoption") == 0) {
+	if (strcmp(cmdName, "@itcl-builtin-ignorecomponentoption") == 0) {
 	    return Tcl_FindCommand(interp, "::itcl::builtin::removecomponentoption", NULL, 0);
+	}
+	if (strcmp(cmdName, "@itcl-builtin-irgnorecomponentoption") == 0) {
+	    return Tcl_FindCommand(interp, "::itcl::builtin::ignorecomponentoption", NULL, 0);
 	}
 	if (strcmp(cmdName, "@itcl-builtin-setupcomponent") == 0) {
 	    return Tcl_FindCommand(interp, "::itcl::builtin::setupcomponent", NULL, 0);
