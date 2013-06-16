@@ -1932,9 +1932,10 @@ ItclExtendedConfigure(
     Tcl_Obj *methodNamePtr;
     Tcl_Obj *configureMethodPtr;
     Tcl_Obj **lObjv;
+    Tcl_Obj **newObjv;
     Tcl_Obj *lObjvOne[1];
     Tcl_Obj **lObjv2;
-    Tcl_Obj **newObjv;
+    Tcl_Obj **lObjv3;
     Tcl_Namespace *saveNsPtr;
     Tcl_Namespace *evalNsPtr;
     ItclClass *contextIclsPtr;
@@ -1951,9 +1952,12 @@ ItclExtendedConfigure(
     const char *val;
     int lObjc;
     int lObjc2;
+    int lObjc3;
     int i;
+    int j;
     int isNew;
     int result;
+	    int isOneOption;
 
     ItclShowArgs(1, "ItclExtendedConfigure", objc, objv);
     ioptPtr = NULL;
@@ -2040,6 +2044,10 @@ ItclExtendedConfigure(
 	Tcl_InitObjHashTable(&unique);
 	/* plain configure */
         listPtr = Tcl_NewListObj(0, NULL);
+	if (contextIclsPtr->flags & ITCL_ECLASS) {
+            result = Tcl_Eval(interp, "::itcl::builtin::getEclassOptions");
+            return result;
+	}
 	FOREACH_HASH_VALUE(ioptPtr, &contextIoPtr->objectOptions) {
 	    hPtr2 = Tcl_CreateHashEntry(&unique,
 	            (char *)ioptPtr->namePtr, &isNew);
@@ -2073,7 +2081,6 @@ ItclExtendedConfigure(
 	}
 	/* now check for delegated options */
 	FOREACH_HASH_VALUE(idoPtr, &contextIoPtr->objectDelegatedOptions) {
-	    int isOneOption;
 
             if (idoPtr->icPtr != NULL) {
                 icPtr = idoPtr->icPtr;
@@ -2082,9 +2089,11 @@ ItclExtendedConfigure(
 	        if ((val != NULL) && (strlen(val) != 0)) {
 
 		    objPtr = Tcl_NewStringObj(val, -1);
+		    Tcl_IncrRefCount(objPtr);
 		    Tcl_AppendToObj(objPtr, " configure ", -1);
 		    isOneOption = 0;
 		    if (strcmp(Tcl_GetString(idoPtr->namePtr), "*") != 0) {
+		        Tcl_AppendToObj(objPtr, " ", -1);
 			if (idoPtr->asPtr != NULL) {
 		            Tcl_AppendToObj(objPtr, Tcl_GetString(
 			            idoPtr->asPtr), -1);
@@ -2095,6 +2104,7 @@ ItclExtendedConfigure(
 		        isOneOption = 1;
 		    }
                     result = Tcl_EvalObjEx(interp, objPtr, 0);
+		    Tcl_DecrRefCount(objPtr);
                     if (result != TCL_OK) {
 		        return TCL_ERROR;
 		    }
@@ -2111,6 +2121,7 @@ ItclExtendedConfigure(
 			objPtr = lObjv[i];
 		        Tcl_ListObjGetElements(interp, objPtr,
 		            &lObjc2, &lObjv2);
+			optNamePtr = idoPtr->namePtr;
 			if (lObjc2 == 0) {
 			    hPtr = NULL;
 			} else {
@@ -2160,14 +2171,21 @@ ItclExtendedConfigure(
 				            objPtr);
 			        }
 			    } else {
+		                Tcl_ListObjGetElements(interp, lObjv2[i],
+		                        &lObjc3, &lObjv3);
+	                        hPtr2 = Tcl_CreateHashEntry(&unique,
+	                                (char *)lObjv3[0], &isNew);
+	                        if (!isNew) {
+	                            continue;
+	                        }
 			        /* add the option */
 				if (idoPtr->asPtr != NULL) {
 				    objPtr = makeAsOptionInfo(interp,
 				            optNamePtr, idoPtr, lObjc2,
-					    lObjv2);
+				            lObjv2);
 				}
 	                        Tcl_ListObjAppendElement(interp, listPtr,
-				        objPtr);
+				    objPtr);
 			    }
 		        }
 		    }
@@ -2309,6 +2327,23 @@ ItclExtendedConfigure(
 	    }
 	}
         if (hPtr2 == NULL) {
+            if (contextIclsPtr->flags & ITCL_ECLASS) {
+		newObjv = (Tcl_Obj **)ckalloc(sizeof(Tcl_Obj *) * (objc));
+                newObjv[0] = Tcl_NewStringObj("::itcl::builtin::eclassConfigure", -1);
+		Tcl_IncrRefCount(newObjv[0]);
+		for (j = 1; j < objc; j++) {
+                    newObjv[j] = objv[j];
+		    Tcl_IncrRefCount(newObjv[j]);
+		}
+                result = Tcl_EvalObjv(interp, objc, newObjv, TCL_EVAL_DIRECT);
+		for (j = 0; j < objc; j++) {
+		    Tcl_DecrRefCount(newObjv[j]);
+		}
+                ckfree((char *)newObjv);
+		if (result == TCL_OK) {
+                  return TCL_OK;
+                }
+	    }
 	    /* no option at all, let the normal configure do the job */
 	    infoPtr->currIdoPtr = saveIdoPtr;
 	    return TCL_CONTINUE;
@@ -2331,6 +2366,23 @@ ItclExtendedConfigure(
         hPtr = Tcl_FindHashEntry(&contextIoPtr->objectOptions,
 	        (char *) objv[i]);
         if (hPtr == NULL) {
+            if (contextIclsPtr->flags & ITCL_ECLASS) {
+		newObjv = (Tcl_Obj **)ckalloc(sizeof(Tcl_Obj *) * (objc));
+                newObjv[0] = Tcl_NewStringObj("::itcl::builtin::eclassConfigure", -1);
+		Tcl_IncrRefCount(newObjv[0]);
+		for (j = 1; j < objc; j++) {
+                    newObjv[j] = objv[j];
+		    Tcl_IncrRefCount(newObjv[j]);
+		}
+                result = Tcl_EvalObjv(interp, objc, newObjv, TCL_EVAL_DIRECT);
+		for (j = 0; j < objc; j++) {
+		    Tcl_DecrRefCount(newObjv[j]);
+		}
+                ckfree((char *)newObjv);
+		if (result == TCL_OK) {
+                  continue;
+                }
+	    }
             hPtr = Tcl_FindHashEntry(&contextIoPtr->objectDelegatedOptions,
 	            (char *) objv[i]);
             if (hPtr != NULL) {
