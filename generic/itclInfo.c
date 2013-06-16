@@ -58,6 +58,7 @@ static Tcl_ObjCmdProc Itcl_BiInfoDelegatedMethodCmd;
 static Tcl_ObjCmdProc Itcl_BiInfoDelegatedTypeMethodCmd;
 static Tcl_ObjCmdProc Itcl_ErrorDelegatedInfoCmd;
 static Tcl_ObjCmdProc Itcl_BiInfoDelegatedUnknownCmd;
+static Tcl_ObjCmdProc Itcl_BiInfoContextCmd;
 
 typedef struct InfoMethod {
     const char* name;        /* method name */
@@ -91,6 +92,11 @@ static const InfoMethod InfoMethodList[] = {
         "?name? ?-inherit? ?-value?",
         Itcl_BiInfoComponentCmd,
 	ITCL_TYPE|ITCL_WIDGETADAPTOR|ITCL_WIDGET|ITCL_ECLASS
+    },
+    { "context",
+        "",
+        Itcl_BiInfoContextCmd,
+	ITCL_ECLASS
     },
     { "components",
         "?pattern?",
@@ -269,6 +275,7 @@ static const struct NameProcMap infoCmds2[] = {
     { "::itcl::builtin::Info::body", Itcl_BiInfoBodyCmd },
     { "::itcl::builtin::Info::class", Itcl_BiInfoClassCmd },
     { "::itcl::builtin::Info::classoptions", Itcl_BiInfoClassOptionsCmd },
+    { "::itcl::builtin::Info::context", Itcl_BiInfoContextCmd },
     { "::itcl::builtin::Info::component", Itcl_BiInfoComponentCmd },
     { "::itcl::builtin::Info::components", Itcl_BiInfoComponentsCmd },
     { "::itcl::builtin::Info::default", Itcl_BiInfoDefaultCmd },
@@ -702,7 +709,7 @@ Itcl_BiInfoClassCmd(
 
 /*
  * ------------------------------------------------------------------------
- *  Itcl_BiInfoVClassOptionsCmd()
+ *  Itcl_BiInfoClassOptionsCmd()
  *
  *  Returns information regarding the options for a class.  This command
  *  can be invoked with or without an object context:
@@ -805,6 +812,46 @@ Itcl_BiInfoClassOptionsCmd(
 	    }
 	}
     }
+    Tcl_SetResult(interp, Tcl_GetString(listPtr), TCL_VOLATILE);
+    Tcl_DecrRefCount(listPtr);
+    return TCL_OK;
+}
+
+/*
+ * ------------------------------------------------------------------------
+ *  Itcl_BiInfoContextCmd()
+ *
+ *  Returns information regarding the context object and class.  This command
+ *  can only be invoked with an object context:
+ *
+ *
+ *  Returns a status TCL_OK/TCL_ERROR to indicate success/failure.
+ * ------------------------------------------------------------------------
+ */
+/* ARGSUSED */
+static int
+Itcl_BiInfoContextCmd(
+    ClientData clientData, /* ItclObjectInfo Ptr */
+    Tcl_Interp *interp,    /* current interpreter */
+    int objc,              /* number of arguments */
+    Tcl_Obj *const objv[]) /* argument objects */
+{
+    Tcl_Obj *listPtr;
+    Tcl_Obj *objPtr;
+    ItclObject *ioPtr;
+    ItclClass *iclsPtr;
+
+    ItclShowArgs(1, "Itcl_BiInfoContextCmd", objc, objv);
+    iclsPtr = NULL;
+    if (Itcl_GetContext(interp, &iclsPtr, &ioPtr) != TCL_OK) {
+        Tcl_AppendResult(interp, "cannot get context ", (char*)NULL);
+        return TCL_ERROR;
+    }
+    listPtr = Tcl_NewListObj(0, NULL);
+    objPtr = Tcl_NewStringObj(Tcl_GetString(iclsPtr->namePtr), -1);
+    Tcl_ListObjAppendElement(interp, listPtr, objPtr);
+    objPtr = Tcl_NewStringObj(Tcl_GetString(ioPtr->namePtr), -1);
+    Tcl_ListObjAppendElement(interp, listPtr, objPtr);
     Tcl_SetResult(interp, Tcl_GetString(listPtr), TCL_VOLATILE);
     Tcl_DecrRefCount(listPtr);
     return TCL_OK;
