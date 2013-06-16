@@ -1,3 +1,10 @@
+2013-06-16  Arnulf P. Wiedemann  <wiede@users.sourceforge.net>
+	* generic/itclInfo.c: Added new command: info context
+	* generic/itclBuiltin.c:
+	* library/itclHullCmds.tcl: new code for extendedclass component
+	handling
+	* generic/itclObject.c: removed not necessary code
+	* generic/itclCmd.c: code for extendedclass
 2013-06-09  Arnulf P. Wiedemann  <wiede@users.sourceforge.net>
 	* generic/itclParse.c:
 	* generic/itclObject.c:
