@@ -843,15 +843,6 @@ ItclInitObjectVariables(
                         /*isProcCallFrame*/0) != TCL_OK) {
 		    goto errorCleanup2;
                 }
-                if (Tcl_SetVar2(interp, "itcl_options", "",
-	                "", TCL_NAMESPACE_ONLY) == NULL) {
-		    goto errorCleanup;
-                }
-		/* needed for option components for option propagation */
-                if (Tcl_SetVar2(interp, "itcl_option_components", "",
-	                "", TCL_NAMESPACE_ONLY) == NULL) {
-		    goto errorCleanup;
-                }
                 Tcl_TraceVar2(interp, "itcl_options",
                         NULL,
                         TCL_TRACE_READS|TCL_TRACE_WRITES,
