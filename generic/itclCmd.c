@@ -1753,7 +1753,6 @@ Itcl_AddComponentCmd(
     const char *name;
     int isNew;
     int result;
-    int type = VAR_TYPE_VARIABLE;
 
     result = TCL_OK;
     contextIoPtr = NULL;
@@ -1785,6 +1784,7 @@ Itcl_AddComponentCmd(
             &icPtr) != TCL_OK) {
         return TCL_ERROR;
     }
+    ItclAddClassComponentDictInfo(interp, contextIclsPtr, icPtr);
 //fprintf(stderr, "*** ADDCOMP!%s!%s!%s!%s!\n", contextIclsPtr->nsPtr->fullName, Tcl_GetString(objv[2]), Tcl_GetString(icPtr->namePtr), Tcl_GetString(icPtr->ivPtr->fullNamePtr));
     contextIclsPtr->numVariables++;
     Tcl_SetHashValue(hPtr, icPtr);
@@ -1818,9 +1818,6 @@ Itcl_AddComponentCmd(
     vlookup->accessible = (ivPtr->protection != ITCL_PRIVATE ||
         ivPtr->iclsPtr == contextIclsPtr);
 
-    if (ivPtr->flags & ITCL_COMMON) {
-        type = VAR_TYPE_COMMON;
-    }
     vlookup->varNum = contextIclsPtr->numInstanceVars++;
     /*
      *  Create all possible names for this variable and enter
