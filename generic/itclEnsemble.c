@@ -1284,7 +1284,6 @@ static void
 DeleteEnsemblePart(
     ClientData clientData)     /* part being destroyed */
 {
-    Tcl_Command cmdPtr;
     Tcl_Obj *mapDict;
     Tcl_HashEntry *hPtr;
     ItclObjectInfo *infoPtr;
@@ -1299,7 +1298,6 @@ DeleteEnsemblePart(
     if (ensPart == NULL) {
         return;
     }
-    cmdPtr = ensPart->cmdPtr;
     ensData = ensPart->ensemble;
 
     /*
@@ -1332,10 +1330,10 @@ DeleteEnsemblePart(
 	        Tcl_SetEnsembleMappingDict(NULL, ensData2->cmdPtr, mapDict);
 	    }
 	}
-        Tcl_DecrRefCount(ensPart->subEnsemblePtr);
-if (ensPart->newMapDict != NULL) {
-    Tcl_DecrRefCount(ensPart->newMapDict);
-}
+	Tcl_DecrRefCount(ensPart->subEnsemblePtr);
+	if (ensPart->newMapDict != NULL) {
+	    Tcl_DecrRefCount(ensPart->newMapDict);
+	}
     }
     /*
      *  Find this part within its ensemble, and remove it from
@@ -1862,7 +1860,6 @@ static EnsembleParser*
 GetEnsembleParser(
     Tcl_Interp *interp)     /* interpreter handling the ensemble */
 {
-    Tcl_Namespace *nsPtr;
     EnsembleParser *ensInfo;
 
     /*
@@ -1885,13 +1882,13 @@ GetEnsembleParser(
     ensInfo->parser = interp;
     ensInfo->ensData = NULL;
 
+#ifdef NOTDEF
     /*
      *  Remove all namespaces and all normal commands from the
      *  parser interpreter.
      */
     nsPtr = Tcl_GetGlobalNamespace(ensInfo->parser);
 
-#ifdef NOTDEF
     for (hPtr = Tcl_FirstHashEntry(&nsPtr->childTable, &search);
          hPtr != NULL;
          hPtr = Tcl_FirstHashEntry(&nsPtr->childTable, &search)) {
@@ -2000,7 +1997,6 @@ Itcl_EnsPartCmd(
 {
     Tcl_Obj *usagePtr;
     Tcl_Proc procPtr;
-    Tcl_Command cmdPtr;
     EnsembleParser *ensInfo = (EnsembleParser*)clientData;
     Ensemble *ensData = (Ensemble*)ensInfo->ensData;
     EnsemblePart *ensPart;
@@ -2029,7 +2025,6 @@ Itcl_EnsPartCmd(
      *  accessed through the ensemble, not through a Tcl command.
      */
     partName = Tcl_GetStringFromObj(objv[1], (int*)NULL);
-    cmdPtr = ensData->cmdPtr;
 
     if (ItclCreateArgList(interp, Tcl_GetString(objv[2]), &argc, &maxArgc,
             &usagePtr, &arglistPtr, NULL, partName) != TCL_OK) {
