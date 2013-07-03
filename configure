@@ -1804,6 +1804,60 @@ fi
   eval $as_lineno_stack; ${as_lineno_stack:+:} unset as_lineno
 
 } # ac_fn_c_check_header_mongrel
+
+# ac_fn_c_check_type LINENO TYPE VAR INCLUDES
+# -------------------------------------------
+# Tests whether TYPE exists after having included INCLUDES, setting cache
+# variable VAR accordingly.
+ac_fn_c_check_type ()
+{
+  as_lineno=${as_lineno-"$1"} as_lineno_stack=as_lineno_stack=$as_lineno_stack
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for $2" >&5
+$as_echo_n "checking for $2... " >&6; }
+if eval \${$3+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  eval "$3=no"
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+$4
+int
+main ()
+{
+if (sizeof ($2))
+	 return 0;
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"; then :
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+$4
+int
+main ()
+{
+if (sizeof (($2)))
+	    return 0;
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"; then :
+
+else
+  eval "$3=yes"
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+fi
+eval ac_res=\$$3
+	       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
+$as_echo "$ac_res" >&6; }
+  eval $as_lineno_stack; ${as_lineno_stack:+:} unset as_lineno
+
+} # ac_fn_c_check_type
 cat >config.log <<_ACEOF
 This file contains any messages produced by compilers while
 running configure, to aid debugging if configure makes a mistake.
@@ -8240,6 +8294,61 @@ $as_echo "enabled symbols mem debugging" >&6; }
 $as_echo "enabled $tcl_ok debugging" >&6; }
 	fi
     fi
+
+
+#--------------------------------------------------------------------
+# Check for intptr_t (for INT2PTR & PTR2INT macros).
+#--------------------------------------------------------------------
+
+ac_fn_c_check_type "$LINENO" "intptr_t" "ac_cv_type_intptr_t" "$ac_includes_default"
+if test "x$ac_cv_type_intptr_t" = xyes; then :
+
+
+$as_echo "#define HAVE_INTPTR_T 1" >>confdefs.h
+
+else
+
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for pointer-size signed integer type" >&5
+$as_echo_n "checking for pointer-size signed integer type... " >&6; }
+if ${tcl_cv_intptr_t+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+
+    for tcl_cv_intptr_t in "int" "long" "long long" none; do
+	if test "$tcl_cv_intptr_t" != none; then
+	    cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+$ac_includes_default
+int
+main ()
+{
+static int test_array [1 - 2 * !(sizeof (void *) <= sizeof ($tcl_cv_intptr_t))];
+test_array [0] = 0
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"; then :
+  tcl_ok=yes
+else
+  tcl_ok=no
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+	    test "$tcl_ok" = yes && break; fi
+    done
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $tcl_cv_intptr_t" >&5
+$as_echo "$tcl_cv_intptr_t" >&6; }
+    if test "$tcl_cv_intptr_t" != none; then
+
+cat >>confdefs.h <<_ACEOF
+#define intptr_t $tcl_cv_intptr_t
+_ACEOF
+
+    fi
+
+fi
 
 
 #--------------------------------------------------------------------
