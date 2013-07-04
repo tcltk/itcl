@@ -733,8 +733,6 @@ MODULE_SCOPE int Itcl_ClassCompiledVarResolver2(Tcl_Interp *interp,
         struct Tcl_ResolvedVarInfo **rPtr);
 MODULE_SCOPE int ItclSetParserResolver(Tcl_Namespace *nsPtr);
 MODULE_SCOPE void ItclProcErrorProc(Tcl_Interp *interp, Tcl_Obj *procNameObj);
-MODULE_SCOPE int ItclClassBaseCmd(ClientData clientData, Tcl_Interp *interp,
-	int flags, int objc, Tcl_Obj *CONST objv[], ItclClass **iclsPtrPtr);
 MODULE_SCOPE int Itcl_CreateOption (Tcl_Interp *interp, ItclClass *iclsPtr,
 	ItclOption *ioptPtr);
 MODULE_SCOPE int Itcl_CreateMethodVariable (Tcl_Interp *interp,
@@ -748,15 +746,9 @@ MODULE_SCOPE const char* ItclGetInstanceVar(Tcl_Interp *interp,
 MODULE_SCOPE const char* ItclGetCommonInstanceVar(Tcl_Interp *interp,
         const char *name, const char *name2, ItclObject *contextIoPtr,
 	ItclClass *contextIclsPtr);
-MODULE_SCOPE const char* ItclSetInstanceVar(Tcl_Interp *interp,
-        const char *name, const char *name2, const char *value,
-	ItclObject *contextIoPtr, ItclClass *contextIclsPtr);
-MODULE_SCOPE Tcl_Obj * ItclCapitalize(const char *str);
 MODULE_SCOPE int ItclCreateMethod(Tcl_Interp* interp, ItclClass *iclsPtr,
 	Tcl_Obj *namePtr, const char* arglist, const char* body,
         ItclMemberFunc **imPtrPtr);
-MODULE_SCOPE int ItclCreateComponent(Tcl_Interp *interp, ItclClass *iclsPtr,
-        Tcl_Obj *componentPtr, int type, ItclComponent **icPtrPtr);
 MODULE_SCOPE int Itcl_WidgetParseInit(Tcl_Interp *interp,
         ItclObjectInfo *infoPtr);
 MODULE_SCOPE void ItclDeleteObjectMetadata(ClientData clientData);
