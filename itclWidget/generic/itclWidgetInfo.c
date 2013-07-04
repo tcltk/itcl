@@ -81,15 +81,11 @@ ItclBiInfoHullTypesCmd(
 {
     Tcl_Obj *listPtr;
     Tcl_Obj *objPtr;
-    ItclObjectInfo *infoPtr;
-    ItclClass *iclsPtr;
     const char **cPtrPtr;
     const char *name;
     const char *pattern;
 
     ItclShowArgs(0, "ItclBiInfoHullTypesCmd", objc, objv);
-    infoPtr = (ItclObjectInfo *)clientData;
-    iclsPtr = NULL;
     pattern = NULL;
     if (objc > 2) {
 	Tcl_AppendResult(interp, "wrong # args should be: info hulltypes ",
@@ -122,7 +118,6 @@ ItclBiInfoWidgetClassesCmd(
     Tcl_Obj *const objv[])   /* argument objects */
 {
     FOREACH_HASH_DECLS;
-    Tcl_HashEntry *hPtr2;
     Tcl_Obj *listPtr;
     Tcl_HashTable  wClasses;
     ItclObjectInfo *infoPtr;
@@ -149,7 +144,7 @@ ItclBiInfoWidgetClassesCmd(
     FOREACH_HASH_VALUE(iclsPtr, &infoPtr->classes) {
 	if (iclsPtr->flags & ITCL_WIDGET) {
 	    if (iclsPtr->widgetClassPtr != NULL) {
-	        hPtr2 = Tcl_CreateHashEntry(&wClasses,
+	        Tcl_CreateHashEntry(&wClasses,
 	                (char *)iclsPtr->widgetClassPtr, &isNew);
 	        if (isNew) {
 	            name = Tcl_GetString(iclsPtr->widgetClassPtr);

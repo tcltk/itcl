@@ -63,7 +63,6 @@ void ItclHullContentsDeleted(
     Tcl_HashEntry *hPtr;
     ItclObjectInfo *infoPtr;
     ItclObject *ioPtr;
-    int result;
 
     ioPtr = (ItclObject *)clientData;
     infoPtr = Tcl_GetAssocData(interp, ITCL_INTERP_DATA, NULL);
@@ -74,7 +73,7 @@ void ItclHullContentsDeleted(
     }
     if (newName == NULL) {
         /* delete the object which has this as an itcl_hull contents */
-        result = Itcl_RenameCommand(ioPtr->interp,
+        Itcl_RenameCommand(ioPtr->interp,
 	        Tcl_GetString(ioPtr->origNamePtr), NULL);
 /*
 fprintf(stderr, "RES!%d!%s!\n", result, Tcl_GetStringResult(ioPtr->iclsPtr->interp));
@@ -206,7 +205,6 @@ Itcl_BiInstallHullCmd(
     FOREACH_HASH_DECLS;
     Tcl_Obj *namePtr;
     Tcl_Obj *classNamePtr;
-    Tcl_Var varPtr;
     Tcl_DString buffer;
     Tcl_Obj **newObjv;
     Tk_Window tkMainWin;
@@ -385,7 +383,6 @@ fprintf(stderr, "REN!%s!%s!\n", widgetName, Tcl_DStringValue(&buffer));
     if (ivPtr->initted <= 1) {
         ivPtr->initted = 0;
         hPtr = Tcl_FindHashEntry(&contextIoPtr->objectVariables, (char *)ivPtr);
-        varPtr = Tcl_GetHashValue(hPtr);
         val = ItclSetInstanceVar(interp, "itcl_hull", NULL,
                 Tcl_DStringValue(&buffer), contextIoPtr, contextIoPtr->iclsPtr);
         ivPtr->initted = 2;
