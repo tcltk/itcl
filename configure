@@ -645,6 +645,7 @@ EGREP
 GREP
 RANLIB
 SET_MAKE
+INSTALL
 CPP
 TCL_SHLIB_LD_LIBS
 TCL_LD_FLAGS
@@ -4175,6 +4176,9 @@ ac_cpp='$CPP $CPPFLAGS'
 ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
 ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
+
+
+    INSTALL="\$(SHELL) \$(srcdir)/tclconfig/install-sh -c"
 
 
     #--------------------------------------------------------------------
@@ -7709,7 +7713,7 @@ fi
     UNSHARED_LIB_SUFFIX='${PACKAGE_VERSION}.a'
 fi
 
-    if test "${GCC}" = "yes" ; then
+    if test "${GCC}" = "yes" -a ${SHLIB_SUFFIX} = ".dll"; then
 	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for SEH support in compiler" >&5
 $as_echo_n "checking for SEH support in compiler... " >&6; }
 if ${tcl_cv_seh+:} false; then :
@@ -7721,9 +7725,9 @@ else
   cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
-	    #define WIN32_LEAN_AND_MEAN
-	    #include <windows.h>
-	    #undef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
+#undef WIN32_LEAN_AND_MEAN
 
 	    int main(int argc, char** argv) {
 		int a, b = 0;
@@ -7812,10 +7816,10 @@ else
   cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
-		#define VOID void
-		#define WIN32_LEAN_AND_MEAN
-		#include <windows.h>
-		#undef WIN32_LEAN_AND_MEAN
+#define VOID void
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
+#undef WIN32_LEAN_AND_MEAN
 
 int
 main ()
@@ -7844,6 +7848,7 @@ $as_echo "$tcl_cv_winnt_ignore_void" >&6; }
 $as_echo "#define HAVE_WINNT_IGNORE_VOID 1" >>confdefs.h
 
 	fi
+    fi
 
 	# See if the compiler supports casting to a union type.
 	# This is used to stop gcc from printing a compiler
@@ -7883,7 +7888,6 @@ $as_echo "$tcl_cv_cast_to_union" >&6; }
 $as_echo "#define HAVE_CAST_TO_UNION 1" >>confdefs.h
 
 	fi
-    fi
 
 
 
