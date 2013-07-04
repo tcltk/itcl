@@ -191,6 +191,10 @@ static const ItclIntStubs itclIntStubs = {
     Itcl_PopCallFrame, /* 175 */
     Itcl_GetUplevelCallFrame, /* 176 */
     Itcl_ActivateCallFrame, /* 177 */
+    ItclSetInstanceVar, /* 178 */
+    ItclCapitalize, /* 179 */
+    ItclClassBaseCmd, /* 180 */
+    ItclCreateComponent, /* 181 */
 };
 
 static const ItclStubHooks itclStubHooks = {
