@@ -58,11 +58,13 @@ Initialize (
 	        "::itcl::widget::internal");
     }
 
+#if 0 /* This doesn't compile ???? */
     infoPtr->windgetInfoPtr = (ItclWidgetInfo *)ckalloc(sizeof(ItclWidgetInfo));
     infoPtr->windgetInfoPtr->initObjectOpts = ItclWidgetInitObjectOptions;
     infoPtr->windgetInfoPtr->hullAndOptsInst = HullAndOptionsInstall;
     infoPtr->windgetInfoPtr->delegationInst = DelegationInstall;
     infoPtr->windgetInfoPtr->componentInst = InstallComponent;
+#endif
 
     /*
      *  Create "itcl::builtin" namespace for commands that
