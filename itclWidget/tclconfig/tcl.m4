@@ -1017,15 +1017,15 @@ AC_DEFUN([TEA_CONFIG_SYSTEM], [
 #                       extensions.  An empty string means we don't know how
 #                       to use shared libraries on this platform.
 #       LIB_SUFFIX -    Specifies everything that comes after the "libfoo"
-#                       in a static or shared library name, using the $VERSION variable
+#                       in a static or shared library name, using the $PACKAGE_VERSION variable
 #                       to put the version in the right place.  This is used
 #                       by platforms that need non-standard library names.
-#                       Examples:  ${VERSION}.so.1.1 on NetBSD, since it needs
-#                       to have a version after the .so, and ${VERSION}.a
+#                       Examples:  ${PACKAGE_VERSION}.so.1.1 on NetBSD, since it needs
+#                       to have a version after the .so, and ${PACKAGE_VERSION}.a
 #                       on AIX, since a shared library needs to have
 #                       a .a extension whereas shared objects for loadable
 #                       extensions have a .so extension.  Defaults to
-#                       ${VERSION}${SHLIB_SUFFIX}.
+#                       ${PACKAGE_VERSION}${SHLIB_SUFFIX}.
 #	CFLAGS_DEBUG -
 #			Flags used when running the compiler in debug mode
 #	CFLAGS_OPTIMIZE -
@@ -1656,7 +1656,7 @@ AC_DEFUN([TEA_CONFIG_CFLAGS], [
 		CFLAGS="$CFLAGS $PTHREAD_CFLAGS"
 		LDFLAGS="$LDFLAGS $PTHREAD_LIBS"])
 	    # Version numbers are dot-stripped by system policy.
-	    TCL_TRIM_DOTS=`echo ${VERSION} | tr -d .`
+	    TCL_TRIM_DOTS=`echo ${PACKAGE_VERSION} | tr -d .`
 	    UNSHARED_LIB_SUFFIX='${TCL_TRIM_DOTS}.a'
 	    SHARED_LIB_SUFFIX='${TCL_TRIM_DOTS}\$\{DBGX\}.so.1'
 	    TCL_LIB_VERSIONS_OK=nodots
