@@ -216,7 +216,7 @@ InstallComponent(
     componentName = Tcl_GetString(objv[1]);
     widgetType = Tcl_GetString(objv[3]);
     widgetPath = Tcl_GetString(objv[4]);
-    val = ItclGetInstanceVar(interp, "itcl_hull", NULL, ioPtr, iclsPtr);
+    val = Itcl_GetInstanceVar(interp, "itcl_hull", ioPtr, iclsPtr);
     if ((val != NULL) && (strlen(val) == 0)) {
 	Tcl_AppendResult(interp, "cannot install \"", componentName,
 	        " before \"itcl_hull\" exists", NULL);
