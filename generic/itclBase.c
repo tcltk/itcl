@@ -241,7 +241,7 @@ Initialize (
         return TCL_ERROR;
     }
 
-    ret = Tcl_OOInitStubs(interp);
+    ret = TclOOInitializeStubs(interp, "1.0");
     if (ret == NULL) {
         return TCL_ERROR;
     }
