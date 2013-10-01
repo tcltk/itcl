@@ -3336,10 +3336,10 @@ print("manifest needed")
 	if test "${SHARED_BUILD}" = "1" ; then
 	    # We force the unresolved linking of symbols that are really in
 	    # the private libraries of Tcl and Tk.
-	    SHLIB_LD_LIBS="${SHLIB_LD_LIBS} \"`${CYGPATH} ${TCL_BIN_DIR}/${TCL_STUB_LIB_FILE}`\""
 	    if test x"${TK_BIN_DIR}" != x ; then
 		SHLIB_LD_LIBS="${SHLIB_LD_LIBS} \"`${CYGPATH} ${TK_BIN_DIR}/${TK_STUB_LIB_FILE}`\""
 	    fi
+	    SHLIB_LD_LIBS="${SHLIB_LD_LIBS} \"`${CYGPATH} ${TCL_BIN_DIR}/${TCL_STUB_LIB_FILE}`\" -static-libgcc"
 	    eval eval "PKG_LIB_FILE=${PACKAGE_NAME}${SHARED_LIB_SUFFIX}"
 	else
 	    eval eval "PKG_LIB_FILE=${PACKAGE_NAME}${UNSHARED_LIB_SUFFIX}"
