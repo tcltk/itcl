@@ -96,9 +96,7 @@ ITCLOBJS = \
 !endif
 
 ITCLSTUBOBJS = \
-!if $(TCL_DOES_STUBS)
 	$(TMP_DIR)\itclStubLib.obj
-!endif
 
 GENERICDIR	= $(ROOT)\generic
 DOCDIR		= $(ROOT)\doc
@@ -246,10 +244,8 @@ $**
 	-@del $*.exp
 !endif
 
-!if $(TCL_DOES_STUBS)
 $(ITCLSTUBLIB) : $(ITCLSTUBOBJS)
-	$(lib32) -nologo -out:$@ $(ITCLSTUBOBJS)
-!endif
+	$(lib32) -nologo -nodefaultlib -out:$@ $(ITCLSTUBOBJS)
 
 install-binaries :
 	if not exist "$(_INSTALLDIR)" mkdir "$(_INSTALLDIR)"
