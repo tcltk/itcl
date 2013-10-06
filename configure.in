@@ -205,9 +205,8 @@ AC_CHECK_TYPE([intptr_t], [
 # link against the non-stubbed Tcl library.
 #--------------------------------------------------------------------
 
-if test "${SHARED_BUILD}" = "1" ; then
-    AC_DEFINE(USE_TCL_STUBS, 1, [Use Tcl stubs])
-fi
+AC_DEFINE(USE_TCL_STUBS, 1, [Use Tcl stubs])
+AC_DEFINE(USE_TCLOO_STUBS, 1, [Use TclOO stubs])
 
 #--------------------------------------------------------------------
 # This macro generates a line to use when building a library.  It

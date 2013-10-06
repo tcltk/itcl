@@ -8332,11 +8332,12 @@ fi
 # link against the non-stubbed Tcl library.
 #--------------------------------------------------------------------
 
-if test "${SHARED_BUILD}" = "1" ; then
 
 $as_echo "#define USE_TCL_STUBS 1" >>confdefs.h
 
-fi
+
+$as_echo "#define USE_TCLOO_STUBS 1" >>confdefs.h
+
 
 #--------------------------------------------------------------------
 # This macro generates a line to use when building a library.  It
