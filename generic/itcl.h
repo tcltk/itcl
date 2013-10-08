@@ -111,15 +111,14 @@ extern "C" {
 #   endif
 #endif
 
-#undef TCL_STORAGE_CLASS
 #ifdef BUILD_itcl
-#   define TCL_STORAGE_CLASS DLLEXPORT
+#   define ITCL_EXTERN extern DLLEXPORT
 #else
-#   define TCL_STORAGE_CLASS
+#   define ITCL_EXTERN extern
 #endif
 
-EXTERN int		Itcl_Init(Tcl_Interp *interp);
-EXTERN int		Itcl_SafeInit(Tcl_Interp *interp);
+ITCL_EXTERN int Itcl_Init(Tcl_Interp *interp);
+ITCL_EXTERN int Itcl_SafeInit(Tcl_Interp *interp);
 
 /*
  * Protection levels:
@@ -190,9 +189,6 @@ void ItclDbgReleaseData(ClientData cdata, int line, const char *file);
 #define Itcl_PreserveData(addr) ItclDbgPreserveData(addr, __LINE__, __FILE__)
 #define Itcl_ReleaseData(addr) ItclDbgReleaseData(addr, __LINE__, __FILE__)
 #endif
-
-#undef TCL_STORAGE_CLASS
-#define TCL_STORAGE_CLASS DLLIMPORT
 
 #endif /* RC_INVOKED */
 
