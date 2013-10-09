@@ -5,10 +5,10 @@
 #define FRAME_HAS_RESOLVER 0x100
 struct Tcl_Var;
 typedef Tcl_Command (Tcl_CmdAliasProc)(Tcl_Interp *interp,
-        Tcl_Namespace *nsPtr, CONST char *cmdName,
+        Tcl_Namespace *nsPtr, const char *cmdName,
         ClientData clientData);
 typedef Tcl_Var (Tcl_VarAliasProc)(Tcl_Interp *interp,
-        Tcl_Namespace *nsPtr, CONST char *varName,
+        Tcl_Namespace *nsPtr, const char *varName,
         ClientData clientData);
 
 #ifndef _TCL_RESOLVE_DEFINED

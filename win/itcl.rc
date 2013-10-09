@@ -3,7 +3,7 @@
 //
 
 #include <winver.h>
-#include <itcl.h>
+#include <itclInt.h>
 
 //
 // build-up the name suffix that defines the type of build this is.

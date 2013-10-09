@@ -38,6 +38,16 @@
 #include "itclTclIntStubsFcn.h"
 
 /*
+ * Utility macros: STRINGIFY takes an argument and wraps it in "" (double
+ * quotation marks).
+ */
+
+#ifndef STRINGIFY
+#  define STRINGIFY(x) STRINGIFY1(x)
+#  define STRINGIFY1(x) #x
+#endif
+
+/*
  * Since the Tcl/Tk distribution doesn't perform any asserts,
  * dynamic loading can fail to find the __assert function.
  * As a workaround, we'll include our own.
@@ -685,9 +695,9 @@ MODULE_SCOPE int ItclCheckCallProc(ClientData clientData, Tcl_Interp *interp,
 MODULE_SCOPE ItclFoundation *ItclGetFoundation(Tcl_Interp *interp);
 MODULE_SCOPE Tcl_ObjCmdProc ItclClassCommandDispatcher;
 MODULE_SCOPE Tcl_Command Itcl_CmdAliasProc(Tcl_Interp *interp,
-        Tcl_Namespace *nsPtr, CONST char *cmdName, ClientData clientData);
+        Tcl_Namespace *nsPtr, const char *cmdName, ClientData clientData);
 MODULE_SCOPE Tcl_Var Itcl_VarAliasProc(Tcl_Interp *interp,
-        Tcl_Namespace *nsPtr, CONST char *VarName, ClientData clientData);
+        Tcl_Namespace *nsPtr, const char *VarName, ClientData clientData);
 MODULE_SCOPE int ItclIsClass(Tcl_Interp *interp, Tcl_Command cmd);
 MODULE_SCOPE int ItclCheckCallMethod(ClientData clientData, Tcl_Interp *interp,
         Tcl_ObjectContext contextPtr, Tcl_CallFrame *framePtr, int *isFinished);
@@ -706,8 +716,8 @@ MODULE_SCOPE int ItclCreateArgList(Tcl_Interp *interp, const char *str,
 	const char *commandName);
 MODULE_SCOPE int ItclObjectCmd(ClientData clientData, Tcl_Interp *interp,
         Tcl_Object oPtr, Tcl_Class clsPtr, int objc, Tcl_Obj *const *objv);
-MODULE_SCOPE int ItclCreateObject (Tcl_Interp *interp, CONST char* name,
-        ItclClass *iclsPtr, int objc, Tcl_Obj *CONST objv[]);
+MODULE_SCOPE int ItclCreateObject (Tcl_Interp *interp, const char* name,
+        ItclClass *iclsPtr, int objc, Tcl_Obj *const objv[]);
 MODULE_SCOPE void ItclDeleteObjectVariablesNamespace(Tcl_Interp *interp,
         ItclObject *ioPtr);
 MODULE_SCOPE void ItclDeleteClassVariablesNamespace(Tcl_Interp *interp,
@@ -717,19 +727,19 @@ MODULE_SCOPE char * ItclTraceUnsetVar(ClientData clientData, Tcl_Interp *interp,
 	const char *name1, const char *name2, int flags);
 
 struct Tcl_ResolvedVarInfo;
-MODULE_SCOPE int Itcl_ClassCmdResolver(Tcl_Interp *interp, CONST char* name,
+MODULE_SCOPE int Itcl_ClassCmdResolver(Tcl_Interp *interp, const char* name,
 	Tcl_Namespace *nsPtr, int flags, Tcl_Command *rPtr);
-MODULE_SCOPE int Itcl_ClassVarResolver(Tcl_Interp *interp, CONST char* name,
+MODULE_SCOPE int Itcl_ClassVarResolver(Tcl_Interp *interp, const char* name,
         Tcl_Namespace *nsPtr, int flags, Tcl_Var *rPtr);
 MODULE_SCOPE int Itcl_ClassCompiledVarResolver(Tcl_Interp *interp,
-        CONST char* name, int length, Tcl_Namespace *nsPtr,
+        const char* name, int length, Tcl_Namespace *nsPtr,
         struct Tcl_ResolvedVarInfo **rPtr);
-MODULE_SCOPE int Itcl_ClassCmdResolver2(Tcl_Interp *interp, CONST char* name,
+MODULE_SCOPE int Itcl_ClassCmdResolver2(Tcl_Interp *interp, const char* name,
 	Tcl_Namespace *nsPtr, int flags, Tcl_Command *rPtr);
-MODULE_SCOPE int Itcl_ClassVarResolver2(Tcl_Interp *interp, CONST char* name,
+MODULE_SCOPE int Itcl_ClassVarResolver2(Tcl_Interp *interp, const char* name,
         Tcl_Namespace *nsPtr, int flags, Tcl_Var *rPtr);
 MODULE_SCOPE int Itcl_ClassCompiledVarResolver2(Tcl_Interp *interp,
-        CONST char* name, int length, Tcl_Namespace *nsPtr,
+        const char* name, int length, Tcl_Namespace *nsPtr,
         struct Tcl_ResolvedVarInfo **rPtr);
 MODULE_SCOPE int ItclSetParserResolver(Tcl_Namespace *nsPtr);
 MODULE_SCOPE void ItclProcErrorProc(Tcl_Interp *interp, Tcl_Obj *procNameObj);
@@ -755,15 +765,15 @@ MODULE_SCOPE void ItclDeleteObjectMetadata(ClientData clientData);
 MODULE_SCOPE void ItclDeleteClassMetadata(ClientData clientData);
 MODULE_SCOPE void ItclDeleteArgList(ItclArgList *arglistPtr);
 MODULE_SCOPE int Itcl_ClassOptionCmd(ClientData clientData, Tcl_Interp *interp,
-        int objc, Tcl_Obj *CONST objv[]);
+        int objc, Tcl_Obj *const objv[]);
 MODULE_SCOPE int DelegatedOptionsInstall(Tcl_Interp *interp,
         ItclClass *iclsPtr);
 MODULE_SCOPE int Itcl_HandleDelegateOptionCmd(Tcl_Interp *interp,
         ItclObject *ioPtr, ItclClass *iclsPtr, ItclDelegatedOption **idoPtrPtr,
-        int objc, Tcl_Obj *CONST objv[]);
+        int objc, Tcl_Obj *const objv[]);
 MODULE_SCOPE int Itcl_HandleDelegateMethodCmd(Tcl_Interp *interp,
         ItclObject *ioPtr, ItclClass *iclsPtr,
-	ItclDelegatedFunction **idmPtrPtr, int objc, Tcl_Obj *CONST objv[]);
+	ItclDelegatedFunction **idmPtrPtr, int objc, Tcl_Obj *const objv[]);
 MODULE_SCOPE int DelegateFunction(Tcl_Interp *interp, ItclObject *ioPtr,
         ItclClass *iclsPtr, Tcl_Obj *componentNamePtr,
         ItclDelegatedFunction *idmPtr);
@@ -774,7 +784,7 @@ MODULE_SCOPE ItclOption* ItclNewOption(Tcl_Interp *interp, ItclObject *ioPtr,
         ItclClass *iclsPtr, Tcl_Obj *namePtr, const char *resourceName,
         const char *className, char *init, ItclMemberCode *mCodePtr);
 MODULE_SCOPE int ItclParseOption(ItclObjectInfo *infoPtr, Tcl_Interp *interp,
-        int objc, Tcl_Obj *CONST objv[], ItclClass *iclsPtr,
+        int objc, Tcl_Obj *const objv[], ItclClass *iclsPtr,
 	ItclObject *ioPtr, ItclOption **ioptPtrPtr);
 MODULE_SCOPE void ItclDestroyClassNamesp(ClientData cdata);
 MODULE_SCOPE int ExpandDelegateAs(Tcl_Interp *interp, ItclObject *ioPtr,

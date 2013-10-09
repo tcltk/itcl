@@ -66,7 +66,7 @@ static Tcl_Var ItclClassRuntimeVarResolver(
 int
 Itcl_ClassCmdResolver(
     Tcl_Interp *interp,		/* current interpreter */
-    CONST char* name,		/* name of the command being accessed */
+    const char* name,		/* name of the command being accessed */
     Tcl_Namespace *nsPtr,	/* namespace performing the resolution */
     int flags,			/* TCL_LEAVE_ERR_MSG => leave error messages
 				 *   in interp if anything goes wrong */
@@ -244,7 +244,7 @@ isCmdDeleted = 0;
 int
 Itcl_ClassVarResolver(
     Tcl_Interp *interp,       /* current interpreter */
-    CONST char* name,	      /* name of the variable being accessed */
+    const char* name,	      /* name of the variable being accessed */
     Tcl_Namespace *nsPtr,     /* namespace performing the resolution */
     int flags,                /* TCL_LEAVE_ERR_MSG => leave error messages
                                *   in interp if anything goes wrong */
@@ -483,7 +483,7 @@ Itcl_ClassVarResolver(
 int
 Itcl_ClassCompiledVarResolver(
     Tcl_Interp *interp,         /* current interpreter */
-    CONST char* name,           /* name of the variable being accessed */
+    const char* name,           /* name of the variable being accessed */
     int length,                 /* number of characters in name */
     Tcl_Namespace *nsPtr,       /* namespace performing the resolution */
     Tcl_ResolvedVarInfo **rPtr) /* returns: info that makes it possible to

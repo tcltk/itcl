@@ -57,7 +57,7 @@
 
 #include <tcl.h>
 
-#if (TCL_MAJOR_VERSION != 8) || (TCL_MINOR_VERSION < 6)
+#if (TCL_MAJOR_VERSION == 8) && (TCL_MINOR_VERSION < 6)
 #    error Itcl 4 build requires tcl.h from Tcl 8.6 or later
 #endif
 
@@ -111,7 +111,7 @@ extern "C" {
 #   endif
 #endif
 
-#ifdef BUILD_itcl
+#if defined(BUILD_itcl) && !defined(STATIC_BUILD)
 #   define ITCL_EXTERN extern DLLEXPORT
 #else
 #   define ITCL_EXTERN extern

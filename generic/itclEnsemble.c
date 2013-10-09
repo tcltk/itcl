@@ -1223,7 +1223,7 @@ CreateEnsemblePart(
     if (ensData->numParts >= ensData->maxParts) {
         size = ensData->maxParts*sizeof(EnsemblePart*);
         partList = (EnsemblePart**)ckalloc((unsigned)2*size);
-        memcpy((VOID*)partList, (VOID*)ensData->parts, (size_t)size);
+        memcpy(partList, ensData->parts, (size_t)size);
         ckfree((char*)ensData->parts);
 
         ensData->parts = partList;
