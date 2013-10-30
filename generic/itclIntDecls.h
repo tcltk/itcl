@@ -8,6 +8,10 @@
 #define ITCLINT_STUBS_EPOCH 0
 #define ITCLINT_STUBS_REVISION 144
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /*
  * Exported function declarations:
  */
@@ -514,7 +518,7 @@ typedef struct ItclIntStubs {
     int magic;
     int epoch;
     int revision;
-    const struct ItclIntStubHooks *hooks;
+    void *hooks;
 
     int (*itcl_IsClassNamespace) (Tcl_Namespace *namesp); /* 0 */
     int (*itcl_IsClass) (Tcl_Command cmd); /* 1 */
@@ -700,10 +704,8 @@ typedef struct ItclIntStubs {
     int (*itclCreateComponent) (Tcl_Interp *interp, ItclClass *iclsPtr, Tcl_Obj *componentPtr, int type, ItclComponent **icPtrPtr); /* 181 */
 } ItclIntStubs;
 
-#ifdef __cplusplus
-extern "C" {
-#endif
 extern const ItclIntStubs *itclIntStubsPtr;
+
 #ifdef __cplusplus
 }
 #endif
