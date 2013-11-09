@@ -48,8 +48,8 @@ proc ::itcl::local {class name args} {
 # USAGE:  itcl::class name body
 # Adds an entry for the given class declaration.
 #
-foreach cmd {itcl::class class itcl::type type ictl::widget widget itcl::widgetadaptor widgetadaptor itcl::extendedclass extendedclass} {
-    auto_mkindex_parser::command $cmd {name body} {
+foreach __cmd {itcl::class class itcl::type type ictl::widget widget itcl::widgetadaptor widgetadaptor itcl::extendedclass extendedclass} {
+    auto_mkindex_parser::command $__cmd {name body} {
 	variable index
 	variable scriptFile
 	append index "set [list auto_index([fullname $name])]"
@@ -67,8 +67,8 @@ foreach cmd {itcl::class class itcl::type type ictl::widget widget itcl::widgeta
 # USAGE:  itcl::body name arglist body
 # Adds an entry for the given method/proc body.
 #
-foreach cmd {itcl::body body} {
-    auto_mkindex_parser::command $cmd {name arglist body} {
+foreach __cmd {itcl::body body} {
+    auto_mkindex_parser::command $__cmd {name arglist body} {
 	variable index
 	variable scriptFile
 	append index "set [list auto_index([fullname $name])]"
@@ -80,8 +80,8 @@ foreach cmd {itcl::body body} {
 # USAGE:  itcl::configbody name arglist body
 # Adds an entry for the given method/proc body.
 #
-foreach cmd {itcl::configbody configbody} {
-    auto_mkindex_parser::command $cmd {name body} {
+foreach __cmd {itcl::configbody configbody} {
+    auto_mkindex_parser::command $__cmd {name body} {
 	variable index
 	variable scriptFile
 	append index "set [list auto_index([fullname $name])]"
@@ -93,8 +93,8 @@ foreach cmd {itcl::configbody configbody} {
 # USAGE:  ensemble name ?body?
 # Adds an entry to the auto index list for the given ensemble name.
 #
-foreach cmd {itcl::ensemble ensemble} {
-    auto_mkindex_parser::command $cmd {name {body ""}} {
+foreach __cmd {itcl::ensemble ensemble} {
+    auto_mkindex_parser::command $__cmd {name {body ""}} {
 	variable index
 	variable scriptFile
 	append index "set [list auto_index([fullname $name])]"
@@ -110,12 +110,15 @@ foreach cmd {itcl::ensemble ensemble} {
 # Evaluates the arguments as commands, so we can recognize proc
 # declarations within classes.
 #
-foreach cmd {public protected private} {
-    auto_mkindex_parser::command $cmd {args} {
+foreach __cmd {public protected private} {
+    auto_mkindex_parser::command $__cmd {args} {
         variable parser
         $parser eval $args
     }
 }
+
+# SF bug #246 unset variable __cmd to avoid problems in user programs!!
+unset __cmd
 
 # ----------------------------------------------------------------------
 # auto_import
