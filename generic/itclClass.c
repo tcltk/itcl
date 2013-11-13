@@ -1335,13 +1335,20 @@ Itcl_FindClass(
      *  definition.
      */
     if (autoload) {
-        if (Tcl_VarEval(interp, "::auto_load ", path, (char*)NULL) != TCL_OK) {
+        Tcl_DString buf;
+
+        Tcl_DStringInit(&buf);
+        Tcl_DStringAppend(&buf, "::auto_load ", -1);
+        Tcl_DStringAppend(&buf, path, -1);
+        if (Tcl_EvalEx(interp, Tcl_DStringValue(&buf), -1, 0) != TCL_OK) {
             char msg[256];
             sprintf(msg, "\n    (while attempting to autoload class \"%.200s\")", path);
             Tcl_AddErrorInfo(interp, msg);
+            Tcl_DStringFree(&buf);
             return NULL;
         }
         Tcl_ResetResult(interp);
+        Tcl_DStringFree(&buf);
 
         classNs = Itcl_FindClassNamespace(interp, path);
         if (classNs && Itcl_IsClassNamespace(classNs)) {

@@ -1126,9 +1126,13 @@ Itcl_GetMemberCode(
      */
 
     if (!Itcl_IsMemberCodeImplemented(mcode)) {
-        result = Tcl_VarEval(interp, "::auto_load ",
-	        Tcl_GetString(imPtr->fullNamePtr), (char*)NULL);
+        Tcl_DString buf;
 
+        Tcl_DStringInit(&buf);
+        Tcl_DStringAppend(&buf, "::auto_load ", -1);
+        Tcl_DStringAppend(&buf, Tcl_GetString(imPtr->fullNamePtr), -1);
+        result = Tcl_EvalEx(interp, Tcl_DStringValue(&buf), -1, 0);
+        Tcl_DStringFree(&buf);
         if (result != TCL_OK) {
             char msg[256];
             sprintf(msg, "\n    (while autoloading code for \"%.100s\")",
