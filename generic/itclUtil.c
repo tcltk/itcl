@@ -1162,9 +1162,9 @@ Itcl_DecodeScopedCommand(
             ckfree((char*)listv);
 
             if (result != TCL_OK) {
-                char msg[512];
-                sprintf(msg, "\n    (while decoding scoped command \"%.400s\")", name);
-                Tcl_AddObjErrorInfo(interp, msg, -1);
+                Tcl_AppendObjToErrorInfo(interp, Tcl_ObjPrintf(
+                        "\n    (while decoding scoped command \"%s\")",
+                        name));
 		ckfree(cmdName);
                 return TCL_ERROR;
             }
