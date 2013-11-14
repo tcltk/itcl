@@ -633,7 +633,6 @@ CallDeleteOneObject(
 {
     Tcl_HashEntry *hPtr;
     Tcl_HashSearch place;
-    Tcl_DString buffer;
     ItclClass *iclsPtr2 = NULL;
     ItclObject *contextIoPtr;
     ItclClass *iclsPtr = data[0];
@@ -689,12 +688,9 @@ deleteClassFail:
     /* check if class is not yet deleted */
     hPtr = Tcl_FindHashEntry(&infoPtr->classes, (char *)iclsPtr2);
     if (hPtr != NULL) {
-        Tcl_DStringInit(&buffer);
-        Tcl_DStringAppend(&buffer, "\n    (while deleting class \"", -1);
-        Tcl_DStringAppend(&buffer, iclsPtr2->nsPtr->fullName, -1);
-        Tcl_DStringAppend(&buffer, "\")", -1);
-        Tcl_AppendObjToErrorInfo(interp, Tcl_NewStringObj(Tcl_DStringValue(&buffer), -1));
-        Tcl_DStringFree(&buffer);
+        Tcl_AppendObjToErrorInfo(interp, Tcl_ObjPrintf(
+                "\n    (while deleting class \"%s\")",
+                iclsPtr2->nsPtr->fullName));
     }
     return TCL_ERROR;
 }
@@ -706,7 +702,6 @@ CallDeleteOneClass(
     int result)
 {
     Tcl_HashEntry *hPtr;
-    Tcl_DString buffer;
     ItclClass *iclsPtr = data[0];
     ItclObjectInfo *infoPtr = data[1];
     int isDerivedReleased;
@@ -729,12 +724,9 @@ CallDeleteOneClass(
         return TCL_OK;
     }
 
-    Tcl_DStringInit(&buffer);
-    Tcl_DStringAppend(&buffer, "\n    (while deleting class \"", -1);
-    Tcl_DStringAppend(&buffer, iclsPtr->nsPtr->fullName, -1);
-    Tcl_DStringAppend(&buffer, "\")", -1);
-    Tcl_AppendObjToErrorInfo(interp, Tcl_NewStringObj(Tcl_DStringValue(&buffer), -1));
-    Tcl_DStringFree(&buffer);
+    Tcl_AppendObjToErrorInfo(interp, Tcl_ObjPrintf(
+            "\n    (while deleting class \"%s\")",
+            iclsPtr->nsPtr->fullName));
     return TCL_ERROR;
 }
 /*
@@ -1341,9 +1333,9 @@ Itcl_FindClass(
         Tcl_DStringAppend(&buf, "::auto_load ", -1);
         Tcl_DStringAppend(&buf, path, -1);
         if (Tcl_EvalEx(interp, Tcl_DStringValue(&buf), -1, 0) != TCL_OK) {
-            char msg[256];
-            sprintf(msg, "\n    (while attempting to autoload class \"%.200s\")", path);
-            Tcl_AppendObjToErrorInfo(interp, Tcl_NewStringObj(msg, -1));
+            Tcl_AppendObjToErrorInfo(interp, Tcl_ObjPrintf(
+                    "\n    (while attempting to autoload class \"%s\")",
+                    path));
             Tcl_DStringFree(&buf);
             return NULL;
         }
@@ -1359,11 +1351,9 @@ Itcl_FindClass(
 	    hPtr = Tcl_FindHashEntry(&infoPtr->namespaceClasses, (char *)
 	            classNs);
 	    if (hPtr == NULL) {
-	        char msg[256];
-		sprintf(msg,
-		        "\n    (while attempting to autoload class \"%.200s\")"
-		        , path);
-                Tcl_AppendObjToErrorInfo(interp, Tcl_NewStringObj(msg, -1));
+                Tcl_AppendObjToErrorInfo(interp, Tcl_ObjPrintf(
+                        "\n    (while attempting to autoload class \"%.200s\")",
+                        path));
                 return NULL;
 	    }
 	    return (ItclClass *)Tcl_GetHashValue(hPtr);
