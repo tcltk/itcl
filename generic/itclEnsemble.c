@@ -236,7 +236,6 @@ Itcl_CreateEnsemble(
     const char **nameArgv = NULL;
     int nameArgc;
     Ensemble *parentEnsData;
-    Tcl_DString buffer;
 
     /*
      *  Split the ensemble name into its path components.
@@ -289,12 +288,9 @@ ensCreateFail:
     if (nameArgv) {
         ckfree((char*)nameArgv);
     }
-    Tcl_DStringInit(&buffer);
-    Tcl_DStringAppend(&buffer, "\n    (while creating ensemble \"", -1);
-    Tcl_DStringAppend(&buffer, ensName, -1);
-    Tcl_DStringAppend(&buffer, "\")", -1);
-    Tcl_AddObjErrorInfo(interp, Tcl_DStringValue(&buffer), -1);
-    Tcl_DStringFree(&buffer);
+    Tcl_AppendObjToErrorInfo(interp, Tcl_ObjPrintf(
+            "\n    (while creating ensemble \"%s\")",
+            ensName));
 
     return TCL_ERROR;
 }
@@ -342,7 +338,6 @@ Itcl_AddEnsemblePart(
     int nameArgc;
     Ensemble *ensData;
     EnsemblePart *ensPart;
-    Tcl_DString buffer;
 
     /*
      *  Parse the ensemble name and look for a containing ensemble.
@@ -380,12 +375,9 @@ ensPartFail:
     if (nameArgv) {
         ckfree((char*)nameArgv);
     }
-    Tcl_DStringInit(&buffer);
-    Tcl_DStringAppend(&buffer, "\n    (while adding to ensemble \"", -1);
-    Tcl_DStringAppend(&buffer, ensName, -1);
-    Tcl_DStringAppend(&buffer, "\")", -1);
-    Tcl_AddObjErrorInfo(interp, Tcl_DStringValue(&buffer), -1);
-    Tcl_DStringFree(&buffer);
+    Tcl_AppendObjToErrorInfo(interp, Tcl_ObjPrintf(
+            "\n    (while adding to ensemble \"%s\")",
+            ensName));
 
     return TCL_ERROR;
 }
@@ -824,7 +816,8 @@ CreateEnsemble(
     if (ensData->nsPtr == NULL) {
         Tcl_AppendResult(interp, "error in creating namespace: ",
 	        Tcl_DStringValue(&buffer), NULL);
-        return TCL_ERROR;
+        result = TCL_ERROR;
+        goto finish;
     }
 
     /*
@@ -872,7 +865,7 @@ CreateEnsemble(
         result = TCL_ERROR;
         goto finish;
     }
-    Tcl_DStringInit(&buffer);
+    Tcl_DStringSetLength(&buffer, 0);
     Tcl_DStringAppend(&buffer, infoPtr->ensembleInfo->ensembleNsPtr->fullName, -1);
     Tcl_DStringAppend(&buffer, "::subensembles::", -1);
     sprintf(buf, "%d", parentEnsData->ensembleId);
@@ -1816,17 +1809,15 @@ Itcl_EnsembleCmd(
 #endif
 
         if (objc == 3) {
-            char msg[128];
 	    Tcl_Obj *options = Tcl_GetReturnOptions(interp, status);
 	    Tcl_Obj *key = Tcl_NewStringObj("-errorline", -1);
 	    Tcl_Obj *stackTrace;
 	    Tcl_IncrRefCount(key);
 	    Tcl_DictObjGet(NULL, options, key, &stackTrace);
 	    Tcl_DecrRefCount(key);
-            sprintf(msg, "\n    (\"ensemble\" body line %s)",
-                Tcl_GetString(stackTrace));
-/*                ensInfo->parser->errorLine); */
-            Tcl_AddObjErrorInfo(interp, msg, -1);
+	    Tcl_AppendObjToErrorInfo(interp, Tcl_ObjPrintf(
+	            "\n    (\"ensemble\" body line %s)",
+	            Tcl_GetString(stackTrace)));
         }
     }
     Tcl_SetObjResult(interp, Tcl_GetObjResult(ensInfo->parser));
