@@ -734,7 +734,7 @@ ItclClassBaseCmd(
         char msg[256];
         sprintf(msg, "\n    (while parsing class definition for \"%.100s\")",
             className);
-        Tcl_AddErrorInfo(interp, msg);
+        Tcl_AppendObjToErrorInfo(interp, Tcl_NewStringObj(msg, -1));
         return TCL_ERROR;
     }
 
@@ -763,7 +763,7 @@ ItclClassBaseCmd(
     if (result != TCL_OK) {
         char msg[256];
         sprintf(msg, "\n    (while installing built-in commands for class \"%.100s\")", className);
-        Tcl_AddErrorInfo(interp, msg);
+        Tcl_AppendObjToErrorInfo(interp, Tcl_NewStringObj(msg, -1));
         goto errorReturn;
     }
 
@@ -803,7 +803,7 @@ ItclClassBaseCmd(
                 className, Tcl_GetString(stackTrace));
 	    iclsPtr->flags |= ITCL_CLASS_CONSTRUCT_ERROR;
 	}
-        Tcl_AddErrorInfo(interp, msg);
+        Tcl_AppendObjToErrorInfo(interp, Tcl_NewStringObj(msg, -1));
         result = TCL_ERROR;
         goto errorReturn;
     }
@@ -1549,7 +1549,7 @@ Itcl_ClassProtectionCmd(
                     sprintf(msg, "\n    (%.100s body line %s)", token,
                             Tcl_GetString(stackTrace));
 		}
-                Tcl_AddErrorInfo(interp, msg);
+                Tcl_AppendObjToErrorInfo(interp, Tcl_NewStringObj(msg, -1));
             }
         }
     }
