@@ -729,12 +729,9 @@ Itcl_BiConfigureCmd(
         token = Tcl_GetString(unparsedObjv[i+1]);
         if (Tcl_SetVar2(interp, varName, (char*)NULL, token,
                 TCL_LEAVE_ERR_MSG) == NULL) {
-
-            char msg[256];
-            sprintf(msg,
-	        "\n    (error in configuration of public variable \"%.100s\")",
-	            Tcl_GetString(ivPtr->fullNamePtr));
-            Tcl_AppendObjToErrorInfo(interp, Tcl_NewStringObj(msg, -1));
+    	    Tcl_AppendObjToErrorInfo(interp, Tcl_ObjPrintf(
+    		    "\n    (error in configuration of public variable \"%s\")",
+    		    Tcl_GetString(ivPtr->fullNamePtr)));
             result = TCL_ERROR;
             goto configureDone;
         }
@@ -759,12 +756,9 @@ Itcl_BiConfigureCmd(
             if (result == TCL_OK) {
                 Tcl_ResetResult(interp);
             } else {
-                char msg[256];
-                sprintf(msg,
-		"\n    (error in configuration of public variable \"%.100s\")",
-		        Tcl_GetString(ivPtr->fullNamePtr));
-                Tcl_AppendObjToErrorInfo(interp, Tcl_NewStringObj(msg, -1));
-
+        	    Tcl_AppendObjToErrorInfo(interp, Tcl_ObjPrintf(
+        		    "\n    (error in configuration of public variable \"%s\")",
+        		    Tcl_GetString(ivPtr->fullNamePtr)));
                 Tcl_SetVar2(interp, varName,(char*)NULL,
                     Tcl_DStringValue(&buffer), 0);
 

@@ -1134,10 +1134,9 @@ Itcl_GetMemberCode(
         result = Tcl_EvalEx(interp, Tcl_DStringValue(&buf), -1, 0);
         Tcl_DStringFree(&buf);
         if (result != TCL_OK) {
-            char msg[256];
-            sprintf(msg, "\n    (while autoloading code for \"%.100s\")",
-                Tcl_GetString(imPtr->fullNamePtr));
-            Tcl_AddErrorInfo(interp, msg);
+            Tcl_AppendObjToErrorInfo(interp, Tcl_ObjPrintf(
+                    "\n    (while autoloading code for \"%s\")",
+                    Tcl_GetString(imPtr->fullNamePtr)));
             return result;
         }
         Tcl_ResetResult(interp);  /* get rid of 1/0 status */
@@ -2703,8 +2702,7 @@ ItclProcErrorProc(
             Tcl_AppendToObj(objPtr, ")", -1);
         }
 
-        Tcl_AddErrorInfo(interp, Tcl_GetString(objPtr));
-        Tcl_DecrRefCount(objPtr);
+        Tcl_AppendObjToErrorInfo(interp, objPtr);
 	objPtr = NULL;
         loopCnt--;
     }
