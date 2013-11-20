@@ -1781,12 +1781,12 @@ Itcl_EnsembleCmd(
     ensInfo->ensData = ensData;
 
     if (objc == 3) {
-        status = Tcl_EvalObj(ensInfo->parser, objv[2]);
+        status = Tcl_EvalObjEx(ensInfo->parser, objv[2], 0);
     } else {
         if (objc > 3) {
             objPtr = Tcl_NewListObj(objc-2, objv+2);
             Tcl_IncrRefCount(objPtr);  /* stop Eval trashing it */
-            status = Tcl_EvalObj(ensInfo->parser, objPtr);
+            status = Tcl_EvalObjEx(ensInfo->parser, objPtr, 0);
             Tcl_DecrRefCount(objPtr);  /* we're done with the object */
         }
     }
