@@ -2217,8 +2217,8 @@ ItclExtendedConfigure(
      */
     hPtr2 = Tcl_FindHashEntry(&contextIoPtr->objectOptions,
             (char *)objv[1]);
-    if (hPtr2 != NULL) {
-        idoPtr = (ItclDelegatedOption *)Tcl_GetHashValue(hPtr2);
+    if (hPtr != NULL) {
+        idoPtr = (ItclDelegatedOption *)Tcl_GetHashValue(hPtr);
         icPtr = idoPtr->icPtr;
         if (icPtr != NULL) {
 	    if (icPtr->haveKeptOptions) {
