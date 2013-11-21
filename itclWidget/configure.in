@@ -119,20 +119,11 @@ TEA_PUBLIC_TK_HEADERS
 TEA_PRIVATE_ITCL_HEADERS
 
 #--------------------------------------------------------------------
-# We need to enable the threading macros found in tcl.h and tclInt.h.
-# The use of the threading features is determined by the core the
-# extension is loaded into, but we need to compile with these macros
-# turned on.
-#--------------------------------------------------------------------
-
-AC_DEFINE(TCL_THREADS, 1, [Use Threads])
-
-#--------------------------------------------------------------------
 # Check whether --enable-threads or --disable-threads was given.
 # This auto-enables if Tcl was compiled threaded.
 #--------------------------------------------------------------------
 
-#TEA_ENABLE_THREADS
+TEA_ENABLE_THREADS
 
 #--------------------------------------------------------------------
 # The statement below defines a collection of symbols related to
