@@ -3454,7 +3454,7 @@ _ACEOF
 
 
 
-if test "${TCL_VERSION}" != "8.6"; then
+if test "${TCL_VERSION}" != "8.6" -a "${TCL_VERSION}" != "9.0"; then
     as_fn_error $? "${TCL_BIN_DIR}/tclConfig.sh is for Tcl ${TCL_VERSION}.
 Itcl ${PACKAGE_VERSION} needs Tcl 8.6.
 Use --with-tcl= option to indicate location of tclConfig.sh file for Tcl 8.6." "$LINENO" 5
