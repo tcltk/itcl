@@ -1597,6 +1597,12 @@ ItclBiObjectUnknownCmd(
     int idx;
 
     ItclShowArgs(1, "ItclBiObjectUnknownCmd", objc, objv);
+
+    if (objc < 3) {
+        Tcl_WrongNumArgs(interp, 1, objv, "object method ?arg...?");
+        return TCL_ERROR;
+    }
+
     infoPtr = (ItclObjectInfo *)clientData;
     ioPtr = NULL;
     listPtr = NULL;
