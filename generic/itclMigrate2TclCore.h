@@ -3,7 +3,7 @@
  * infoPtr->useOldResolvers == 0 which is not the default
  */
 #define FRAME_HAS_RESOLVER 0x100
-struct Tcl_Var;
+typedef struct Tcl_Var_ *Tcl_Var;
 typedef Tcl_Command (Tcl_CmdAliasProc)(Tcl_Interp *interp,
         Tcl_Namespace *nsPtr, const char *cmdName,
         ClientData clientData);
