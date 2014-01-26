@@ -1,4 +1,9 @@
 2014-01-24  Arnulf P. Wiedemann  <wiede@users.sourceforge.net>
+	* generic/itclMethod.c: added some code for special handling of
+	relative method name with namespace parts (SF bug #243)
+	When calling Itcl_EvalMemberCode strip off the namespace parts
+	if no constructor.
+2014-01-24  Arnulf P. Wiedemann  <wiede@users.sourceforge.net>
 	* generic/itclMethod.c:
 	* generic/itclObject.c:
 	* generic/itclMigrate2TclCore.c:
