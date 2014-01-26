@@ -1,3 +1,14 @@
+2014-01-24  Arnulf P. Wiedemann  <wiede@users.sourceforge.net>
+	* generic/itclMethod.c:
+	* generic/itclObject.c:
+	* generic/itclMigrate2TclCore.c:
+	* generic/itclMigrate2TclCore.h: added some code for special handling
+	of an uplevel call to get the appropriate oPtr (SF bug #244).
+	The uplevel environment is checked by looking if the framePtr
+	and the varFramePtr are different (maybe not enough ?).
+2014-01-24  Arnulf P. Wiedemann  <wiede@users.sourceforge.net>
+	* generic/itclMigrate2TclCore.h: use same type for Tcl_Var as in tcl.h
+	SF bug #248.
 2013-11-09  Arnulf P. Wiedemann  <wiede@users.sourceforge.net>
 	* library/itcl.tcl: rename variable cmd to __cmd to avoid conflicts
 	with user variable of the same name SF bug #246
@@ -23,8 +34,7 @@
 	* generic/itclResolve.c:
 	* generic/itclClass.c:
 	* generic/itclObject.c: Changed code to avoid some compiler warnings.
-	Added code for extendedclass variable itcl_optio
-	n_components.
+	Added code for extendedclass variable itcl_option_components.
 	* generic/itclInfo.c: Fix for info classoptions to only use current
 	class options
 	* generic/itclBuiltin.c: Fixed typo which used hPtr instead of hPtr2
