@@ -1177,8 +1177,9 @@ CallItclObjectCmd(
     ItclObject *ioPtr = data[1];
     int objc = PTR2INT(data[2]);
     Tcl_Obj **objv = data[3];
+    void * ptr;
     
-    ItclShowArgs(1, "CallObjectCmd", objc, objv);
+    ItclShowArgs(1, "CallItclObjectCmd", objc, objv);
     if (ioPtr != NULL) {
         ioPtr->hadConstructorError = 0;
     }
@@ -1191,7 +1192,14 @@ CallItclObjectCmd(
         result =  ItclObjectCmd(imPtr, interp, oPtr, imPtr->iclsPtr->clsPtr,
                 objc, objv);
     } else {
-        result = ItclObjectCmd(imPtr, interp, NULL, NULL, objc, objv);
+        ptr = Itcl_GetCallFrameVarFramePtr(interp);
+        if (Itcl_GetUplevelCallFrame(interp, 0) != ptr) {
+            /* we are executing an uplevel command (SF bug #244) */
+            if (ioPtr != NULL) {
+                oPtr = ioPtr->oPtr;
+            }
+        }
+        result = ItclObjectCmd(imPtr, interp, oPtr, NULL, objc, objv);
     }
     if (result != TCL_OK) {
 	if (ioPtr != NULL && ioPtr->hadConstructorError == 0) {
