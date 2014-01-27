@@ -646,6 +646,9 @@ EGREP
 GREP
 RANLIB
 SET_MAKE
+INSTALL_SCRIPT
+INSTALL_PROGRAM
+INSTALL_DATA
 INSTALL
 CPP
 TCL_SHLIB_LD_LIBS
@@ -2502,6 +2505,8 @@ $as_echo "$as_me: WARNING: --with-tcl argument should refer to directory contain
 			`ls -d /usr/contrib/lib 2>/dev/null` \
 			`ls -d /usr/lib 2>/dev/null` \
 			`ls -d /usr/lib64 2>/dev/null` \
+			`ls -d /usr/lib/tcl8.6 2>/dev/null` \
+			`ls -d /usr/lib/tcl8.5 2>/dev/null` \
 			; do
 		    if test -f "$i/tclConfig.sh" ; then
 			ac_cv_c_tclconfig="`(cd $i; pwd)`"
@@ -4182,6 +4187,12 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 
     INSTALL="\$(SHELL) \$(srcdir)/tclconfig/install-sh -c"
+
+    INSTALL_DATA="\${INSTALL} -m 644"
+
+    INSTALL_PROGRAM="\${INSTALL}"
+
+    INSTALL_SCRIPT="\${INSTALL}"
 
 
     #--------------------------------------------------------------------
