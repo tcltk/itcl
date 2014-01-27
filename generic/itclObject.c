@@ -2663,7 +2663,7 @@ ItclObjectCmd(
          isDirectCall = 1;
     }
     if (oPtr == NULL) {
-	ClientData clientData;
+	ClientData clientData2;
 	if ((imPtr->flags & ITCL_COMMON)
 	        && (imPtr->codePtr != NULL)
 	        && !(imPtr->codePtr->flags & ITCL_BUILTIN)) {
@@ -2672,8 +2672,8 @@ ItclObjectCmd(
             return result;
 	}
 	oPtr = NULL;
-	clientData = Itcl_GetCallFrameClientData(interp);
-	if ((clientData == NULL) && (oPtr == NULL)) {
+	clientData2 = Itcl_GetCallFrameClientData(interp);
+	if ((clientData2 == NULL) && (oPtr == NULL)) {
 	    if (((imPtr->codePtr != NULL)
 	            && (imPtr->codePtr->flags & ITCL_BUILTIN))) {
 	        result = Itcl_InvokeProcedureMethod(imPtr->tmPtr, interp,
@@ -2694,7 +2694,7 @@ ItclObjectCmd(
 	    }
 	}
 	if (oPtr == NULL) {
-            oPtr = Tcl_ObjectContextObject((Tcl_ObjectContext)clientData);
+            oPtr = Tcl_ObjectContextObject((Tcl_ObjectContext)clientData2);
         }
     }
     methodNamePtr = NULL;
@@ -2729,6 +2729,8 @@ ItclObjectCmd(
 	    }
         }
         Tcl_DStringFree(&buffer);
+    } else {
+        methodNamePtr = Tcl_NewStringObj(tail, -1);
     }
     if (isDirectCall) {
 	if (!found) {
@@ -2785,7 +2787,7 @@ ItclObjectCmd(
 	}
         incr = 1;
         newObjv = (Tcl_Obj **)ckalloc(sizeof(Tcl_Obj *)*(objc+incr));
-	myPtr = Tcl_NewStringObj("my", 2);
+        myPtr = Tcl_NewStringObj("my", 2);
         Tcl_IncrRefCount(myPtr);
         newObjv[0] = myPtr;
         newObjv[1] = methodNamePtr;
@@ -2796,8 +2798,21 @@ ItclObjectCmd(
 
     } else {
 	ItclShowArgs(1, "run CallPublicObjectCmd2", objc, objv);
-	Tcl_NRAddCallback(interp, CallPublicObjectCmd, oPtr, clsPtr,
-	        INT2PTR(objc), (ClientData)objv);
+        if (objc == 1) {
+            /* add a "my" at the beginning of the arguments */
+            incr = 1;
+            newObjv = (Tcl_Obj **)ckalloc(sizeof(Tcl_Obj *)*(objc+incr));
+            myPtr = Tcl_NewStringObj("my", 2);
+            Tcl_IncrRefCount(myPtr);
+            newObjv[0] = myPtr;
+            memcpy(newObjv+incr, objv, (sizeof(Tcl_Obj*)*(objc)));
+	    ItclShowArgs(1, "run CallPublicObjectCmd3", objc+incr, newObjv);
+            Tcl_NRAddCallback(interp, CallPublicObjectCmd, oPtr, clsPtr,
+                    INT2PTR(objc+incr), newObjv);
+        } else {
+	    Tcl_NRAddCallback(interp, CallPublicObjectCmd, oPtr, clsPtr,
+	            INT2PTR(objc), (ClientData)objv);
+        }
     }
 
     result = Itcl_NRRunCallbacks(interp, callbackPtr);
