@@ -138,6 +138,8 @@ AC_DEFUN([TEA_PATH_TCLCONFIG], [
 			`ls -d /usr/contrib/lib 2>/dev/null` \
 			`ls -d /usr/lib 2>/dev/null` \
 			`ls -d /usr/lib64 2>/dev/null` \
+			`ls -d /usr/lib/tcl8.6 2>/dev/null` \
+			`ls -d /usr/lib/tcl8.5 2>/dev/null` \
 			; do
 		    if test -f "$i/tclConfig.sh" ; then
 			ac_cv_c_tclconfig="`(cd $i; pwd)`"
@@ -3205,6 +3207,12 @@ AC_DEFUN([TEA_SETUP_COMPILER_CC], [
 
     INSTALL="\$(SHELL) \$(srcdir)/tclconfig/install-sh -c"
     AC_SUBST(INSTALL)
+    INSTALL_DATA="\${INSTALL} -m 644"
+    AC_SUBST(INSTALL_DATA)
+    INSTALL_PROGRAM="\${INSTALL}"
+    AC_SUBST(INSTALL_PROGRAM)
+    INSTALL_SCRIPT="\${INSTALL}"
+    AC_SUBST(INSTALL_SCRIPT)
 
     #--------------------------------------------------------------------
     # Checks to see if the make program sets the $MAKE variable.

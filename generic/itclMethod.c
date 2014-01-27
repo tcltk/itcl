@@ -1177,8 +1177,9 @@ CallItclObjectCmd(
     ItclObject *ioPtr = data[1];
     int objc = PTR2INT(data[2]);
     Tcl_Obj **objv = data[3];
+    void * ptr;
     
-    ItclShowArgs(1, "CallObjectCmd", objc, objv);
+    ItclShowArgs(1, "CallItclObjectCmd", objc, objv);
     if (ioPtr != NULL) {
         ioPtr->hadConstructorError = 0;
     }
@@ -1191,7 +1192,14 @@ CallItclObjectCmd(
         result =  ItclObjectCmd(imPtr, interp, oPtr, imPtr->iclsPtr->clsPtr,
                 objc, objv);
     } else {
-        result = ItclObjectCmd(imPtr, interp, NULL, NULL, objc, objv);
+        ptr = Itcl_GetCallFrameVarFramePtr(interp);
+        if (Itcl_GetUplevelCallFrame(interp, 0) != ptr) {
+            /* we are executing an uplevel command (SF bug #244) */
+            if (ioPtr != NULL) {
+                oPtr = ioPtr->oPtr;
+            }
+        }
+        result = ItclObjectCmd(imPtr, interp, oPtr, NULL, objc, objv);
     }
     if (result != TCL_OK) {
 	if (ioPtr != NULL && ioPtr->hadConstructorError == 0) {
@@ -1616,6 +1624,8 @@ NRExecMethod(
     Tcl_HashEntry *entry;
     ItclClass *iclsPtr;
     ItclObject *ioPtr;
+    Tcl_Obj **newObjv;
+    int relNs = 0;
 
     ItclShowArgs(1, "NRExecMethod", objc, objv);
 
@@ -1650,7 +1660,7 @@ NRExecMethod(
      *  table for this class.
      */
     token = Tcl_GetString(objv[0]);
-    if (strstr(token, "::") == NULL) {
+    if ((strstr(token, "::") == NULL)) {
 	if (ioPtr != NULL) {
             entry = Tcl_FindHashEntry(&ioPtr->iclsPtr->resolveCmds,
                 (char *)imPtr->namePtr);
@@ -1661,6 +1671,23 @@ NRExecMethod(
 		imPtr = clookup->imPtr;
             }
         }
+    } else {
+        /* fix for SF bug #243 */
+        if (!(token[0] == ':' && token[1] == ':')
+            && ((imPtr->flags & ITCL_CONSTRUCTOR) == 0)
+            ) {
+            if (ioPtr != NULL) {
+                entry = Tcl_FindHashEntry(&ioPtr->iclsPtr->resolveCmds,
+                    (char *)imPtr->namePtr);
+
+                if (entry) {
+                    ItclCmdLookup *clookup;
+                    clookup = (ItclCmdLookup *)Tcl_GetHashValue(entry);
+                    imPtr = clookup->imPtr;
+                }
+                relNs = 1;
+            }
+        }
     }
 
     /*
@@ -1668,7 +1695,20 @@ NRExecMethod(
      *  the method in case it gets deleted during execution.
      */
     Itcl_PreserveData((ClientData)imPtr);
-    result = Itcl_EvalMemberCode(interp, imPtr, ioPtr, objc, objv);
+    if (relNs) {
+        /* fix for SF bug #243 */
+        newObjv = (Tcl_Obj **)ckalloc(sizeof(Tcl_Obj *)*(objc));
+        newObjv[0] = imPtr->namePtr;
+        Tcl_IncrRefCount(newObjv[0]);
+        memcpy(newObjv + 1, objv + 1, ((objc - 1) * sizeof(Tcl_Obj *)));
+        result = Itcl_EvalMemberCode(interp, imPtr, ioPtr, objc, newObjv);
+    } else {
+        result = Itcl_EvalMemberCode(interp, imPtr, ioPtr, objc, objv);
+    }
+    if (relNs) {
+        Tcl_DecrRefCount(newObjv[0]);
+        ckfree((char *)newObjv);
+    }
     Itcl_ReleaseData((ClientData)imPtr);
     return result;
 }
