@@ -1295,7 +1295,7 @@ AC_DEFUN([TEA_CONFIG_CFLAGS], [
 		AC_CACHE_CHECK(for cross-compile version of gcc,
 			ac_cv_cross,
 			AC_TRY_COMPILE([
-			    #ifdef __WIN32__
+			    #ifdef _WIN32
 				#error cross-compiler
 			    #endif
 			], [],
