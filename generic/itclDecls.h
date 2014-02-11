@@ -2,6 +2,8 @@
  * This file is (mostly) automatically generated from itcl.decls.
  */
 
+#ifndef _ITCLDECLS
+#define _ITCLDECLS
 
 #if defined(USE_ITCL_STUBS)
 
@@ -195,3 +197,5 @@ extern const ItclStubs *itclStubsPtr;
 #endif /* defined(USE_ITCL_STUBS) */
 
 /* !END!: Do not edit above this line. */
+
+#endif /* _ITCLDECLS */

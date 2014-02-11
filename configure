@@ -6770,7 +6770,7 @@ else
   cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
-			    #ifdef __WIN32__
+			    #ifdef _WIN32
 				#error cross-compiler
 			    #endif
 
