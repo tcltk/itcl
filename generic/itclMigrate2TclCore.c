@@ -132,7 +132,7 @@ ClientData
 Itcl_GetCallFrameClientData(
     Tcl_Interp *interp)
 {
-    CallFrame *framePtr = ((Interp *)interp)->framePtr;
+    CallFrame *framePtr = ((Interp *)interp)->varFramePtr;
     if (framePtr == NULL) {
         return NULL;
     }
