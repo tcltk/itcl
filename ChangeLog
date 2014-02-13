@@ -1,3 +1,5 @@
+2014-02-13  Arnulf P. Wiedemann  <wiede@users.sourceforge.net>
+	* generic/itclMigrate2TclCore.c: fix for uplevel 2nd problem (SF bug #250).
 2014-01-24  Arnulf P. Wiedemann  <wiede@users.sourceforge.net>
 	* generic/itclMethod.c: added some code for special handling of
 	relative method name with namespace parts (SF bug #243)
