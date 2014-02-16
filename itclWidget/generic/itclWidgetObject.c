@@ -370,8 +370,5 @@ InstallComponent(
     Tcl_AppendToObj(objPtr, componentName, -1);
     Tcl_SetVar2(interp, Tcl_GetString(objPtr), NULL, componentValue, 0);
 
-//fprintf(stderr, "SET!%s!%s!\n", componentName, componentValue);
-//    ItclSetInstanceVar(interp, componentName, NULL, componentValue,
-//            ioPtr, iclsPtr);
     return TCL_OK;
 }

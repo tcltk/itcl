@@ -1785,7 +1785,6 @@ Itcl_AddComponentCmd(
         return TCL_ERROR;
     }
     ItclAddClassComponentDictInfo(interp, contextIclsPtr, icPtr);
-//fprintf(stderr, "*** ADDCOMP!%s!%s!%s!%s!\n", contextIclsPtr->nsPtr->fullName, Tcl_GetString(objv[2]), Tcl_GetString(icPtr->namePtr), Tcl_GetString(icPtr->ivPtr->fullNamePtr));
     contextIclsPtr->numVariables++;
     Tcl_SetHashValue(hPtr, icPtr);
     Tcl_DStringInit(&buffer);
