@@ -1,3 +1,7 @@
+2014-02-16  Arnulf P. Wiedemann  <wiede@users.sourceforge.net>
+	* generic/itclMethod.c:
+	* generic/itclMigrate2TclCore.h:
+	* generic/itclMigrate2TclCore.c: 2nd fix for uplevel problem (SF bug #250).
 2014-02-13  Arnulf P. Wiedemann  <wiede@users.sourceforge.net>
 	* generic/itclMigrate2TclCore.c: fix for uplevel 2nd problem (SF bug #250).
 2014-01-24  Arnulf P. Wiedemann  <wiede@users.sourceforge.net>
