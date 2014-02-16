@@ -103,8 +103,7 @@ Itcl_ActivateCallFrame(
 
 void *
 Itcl_GetCallFrameVarFramePtr(
-    Tcl_Interp *interp,
-    int level)
+    Tcl_Interp *interp)
 {
 
     return ((Interp *)interp)->varFramePtr;

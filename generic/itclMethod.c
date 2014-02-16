@@ -1197,7 +1197,7 @@ CallItclObjectCmd(
         result =  ItclObjectCmd(imPtr, interp, oPtr, imPtr->iclsPtr->clsPtr,
                 objc, objv);
     } else {
-        ptr = Itcl_GetCallFrameVarFramePtr(interp, -1);
+        ptr = Itcl_GetCallFrameVarFramePtr(interp);
         if (Itcl_GetUplevelCallFrame(interp, 0) != ptr) {
             /* we are executing an uplevel command (SF bug #244) */
             if (ioPtr != NULL) {
@@ -1481,7 +1481,6 @@ Itcl_GetContext(
     infoPtr = (ItclObjectInfo *)Tcl_GetAssocData(interp,
             ITCL_INTERP_DATA, NULL);
     callContextPtr = Itcl_PeekStack(&infoPtr->contextStack);
-//fprintf(stderr, "callContextPtr: %p, %p, %s\n", callContextPtr, callContextPtr->imPtr, activeNs->fullName);
     if ((callContextPtr != NULL) && (callContextPtr->imPtr != NULL)) {
         *iclsPtrPtr = callContextPtr->imPtr->iclsPtr;
     } else {
