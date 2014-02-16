@@ -76,7 +76,9 @@ typedef struct Tcl_Proc_ *Tcl_Proc;
 MODULE_SCOPE Tcl_Var Tcl_NewNamespaceVar(Tcl_Interp *interp, Tcl_Namespace *nsPtr,
 	const char *varName);
 MODULE_SCOPE int Itcl_IsCallFrameArgument(Tcl_Interp *interp, const char *name);
-MODULE_SCOPE void *Itcl_GetCallFrameVarFramePtr(Tcl_Interp *interp);
+MODULE_SCOPE int Itcl_GetCallVarFrameObjc(Tcl_Interp *interp);
+MODULE_SCOPE Tcl_Obj * const * Itcl_GetCallVarFrameObjv(Tcl_Interp *interp);
+MODULE_SCOPE void *Itcl_GetCallFrameVarFramePtr(Tcl_Interp *interp, int level);
 #define Tcl_SetNamespaceResolver _Tcl_SetNamespaceResolver
 MODULE_SCOPE int _Tcl_SetNamespaceResolver(Tcl_Namespace *nsPtr,
         struct Tcl_Resolve *resolvePtr);

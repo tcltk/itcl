@@ -103,7 +103,8 @@ Itcl_ActivateCallFrame(
 
 void *
 Itcl_GetCallFrameVarFramePtr(
-    Tcl_Interp *interp)
+    Tcl_Interp *interp,
+    int level)
 {
 
     return ((Interp *)interp)->varFramePtr;
@@ -132,7 +133,12 @@ ClientData
 Itcl_GetCallFrameClientData(
     Tcl_Interp *interp)
 {
-    CallFrame *framePtr = ((Interp *)interp)->varFramePtr;
+    /* suggested fix for SF bug #250 use varFramePtr instead of framePtr
+     * seems to have no side effect concerning test suite, but does NOT fix the bug
+     * there is a different fix using Itcl_GetUplevelContext, which works.
+     * We are using framePtr again
+     */
+    CallFrame *framePtr = ((Interp *)interp)->framePtr;
     if (framePtr == NULL) {
         return NULL;
     }
@@ -150,6 +156,28 @@ Itcl_SetCallFrameNamespace(
     }
     ((Interp *)interp)->framePtr->nsPtr = (Namespace *)nsPtr;
     return TCL_OK;
+}
+
+int
+Itcl_GetCallVarFrameObjc(
+    Tcl_Interp *interp)
+{
+    CallFrame *framePtr = ((Interp *)interp)->varFramePtr;
+    if (framePtr == NULL) {
+        return 0;
+    }
+    return framePtr->objc;
+}
+
+Tcl_Obj * const *
+Itcl_GetCallVarFrameObjv(
+    Tcl_Interp *interp)
+{
+    CallFrame *framePtr = ((Interp *)interp)->varFramePtr;
+    if (framePtr == NULL) {
+        return NULL;
+    }
+    return framePtr->objv;
 }
 
 int
