@@ -38,6 +38,9 @@ typedef struct ItclResolvedVarInfo {
 
 static const char * special_resolve_vars[] = {
    "this",
+   "win",
+   "type",
+   "selfns",
    "self",
    "itk_option",
    "itk_interior",
