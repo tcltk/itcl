@@ -469,14 +469,14 @@ Itcl_CreateClass(
     Tcl_DStringFree(&buffer);
 
     /*
-     *  Add the built-in "this" variable to the list of data members.
+     *  Add the built-in "type" variable to the list of data members.
      */
     if (iclsPtr->flags & ITCL_TYPE) {
         namePtr = Tcl_NewStringObj("type", -1);
         (void) Itcl_CreateVariable(interp, iclsPtr, namePtr, (char*)NULL,
             (char*)NULL, &ivPtr);
         ivPtr->protection = ITCL_PROTECTED;  /* always "protected" */
-        ivPtr->flags |= ITCL_THIS_VAR;       /* mark as "type" variable */
+        ivPtr->flags |= ITCL_TYPE_VAR;       /* mark as "type" variable */
         hPtr = Tcl_CreateHashEntry(&iclsPtr->variables, (char *)namePtr,
 	        &newEntry);
         Tcl_SetHashValue(hPtr, (ClientData)ivPtr);
