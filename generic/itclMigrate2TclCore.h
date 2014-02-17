@@ -77,6 +77,8 @@ MODULE_SCOPE Tcl_Var Tcl_NewNamespaceVar(Tcl_Interp *interp, Tcl_Namespace *nsPt
 	const char *varName);
 MODULE_SCOPE int Itcl_IsCallFrameArgument(Tcl_Interp *interp, const char *name);
 MODULE_SCOPE int Itcl_GetCallVarFrameObjc(Tcl_Interp *interp);
+MODULE_SCOPE int Itcl_IsVarLink(Tcl_Var var);
+MODULE_SCOPE int Itcl_IsCallFrameLinkVar(Tcl_Interp *interp, const char *name);
 MODULE_SCOPE Tcl_Obj * const * Itcl_GetCallVarFrameObjv(Tcl_Interp *interp);
 MODULE_SCOPE void *Itcl_GetCallFrameVarFramePtr(Tcl_Interp *interp);
 #define Tcl_SetNamespaceResolver _Tcl_SetNamespaceResolver
