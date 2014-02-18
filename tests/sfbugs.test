@@ -181,8 +181,6 @@ test sfbug-243 {faulty namespace behaviour SF bug #243
 
 ::itcl::delete class ns::A
 
-if {0} {
-# no longer working OK!!
 test sfbug-244 { SF bug 244
 } -body {
     set ::test_status ""
@@ -197,14 +195,13 @@ test sfbug-244 { SF bug 244
     }
 
     set y [A #auto]
-   lappend ::test_status [$y  do {
+    $y  do {
         lappend ::test_status "I'm $this"
         do2
-    }]
-} -result {{I'm ::a0} {done}}
+    }
+} -result {{I'm ::a0} done}
 
 ::itcl::delete class A
-}
 
 test sfbug-250 { SF bug #250
 } -body {
