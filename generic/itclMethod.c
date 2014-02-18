@@ -1205,6 +1205,7 @@ CallItclObjectCmd(
                         ITCL_INTERP_DATA, NULL);
                 if (Itcl_GetStackSize(&infoPtr->contextStack) <= 1) {
                     oPtr = ioPtr->oPtr;
+                    result = ItclObjectCmd(imPtr, interp, oPtr, NULL, objc, objv);
                 } else {
                     /* we are executing an uplevel command (SF bug #250) */
                     if (Itcl_GetUplevelContext(interp, &contextIclsPtr, &contextIoPtr, -1) != TCL_OK) {
