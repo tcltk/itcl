@@ -202,6 +202,7 @@ test sfbug-244 { SF bug 244
 } -result {{I'm ::a0} done}
 
 ::itcl::delete class A
+rename foo {}
 
 test sfbug-250 { SF bug #250
 } -body {
@@ -235,6 +236,23 @@ test sfbug-250 { SF bug #250
 } -result {m2}
 
 ::itcl::delete class B
+
+test sfbug-Schelte {bug with onfo reported from Schelte SF bug xxx
+} -body {
+    set ::test_status ""
+
+    itcl::class foo {
+        method kerplunk {args} {
+            lappend ::test_status [info level 0]
+            lappend ::test_status [::info level 0]
+            lappend ::test_status [[namespace which info] level 0]
+       }
+    }
+
+    [foo #auto] kerplunk hello world
+} -result {{foo0 kerplunk hello world} {foo0 kerplunk hello world} {foo0 kerplunk hello world}}
+
+::itcl::delete class foo
 
 
 
