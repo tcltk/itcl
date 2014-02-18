@@ -1,3 +1,8 @@
+2014-02-18  Arnulf P. Wiedemann  <wiede@users.sourceforge.net>
+	* generic/itclResolve.c:
+	* generic/itclObject.c: fix for upvar problem (SF bug #187) in 
+	splitting up the trace handlers for this, win, type, self and selfns.
+	Also doing traces for linked variables to one of these.
 2014-02-16  Arnulf P. Wiedemann  <wiede@users.sourceforge.net>
 	* generic/itclMethod.c:
 	* generic/itclMigrate2TclCore.h:
