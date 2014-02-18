@@ -40,14 +40,14 @@ namespace eval ::itcl::builtin {
 # ======================= createhull ===========================
 # the hull widget is a tk widget which is the (mega) widget handled behind the itcl
 # extendedclass/itcl widget.
-# It is created be renaming the itcl class object to a temporary name <itcl objecct name>_
+# It is created be renaming the itcl class object to a temporary name <itcl object name>_
 # creating the widget with the
 # appropriate options and the installing that as the "hull" widget (the container)
 # All the options in args and the options delegated to component itcl_hull are used
 # Then a unique name (hull_widget_name) in the itcl namespace is created for widget:
 # ::itcl::internal::widgets::hull<unique number><namespace tail path>
 # and widget is renamed to that name
-# Finally the <itcl objecct name>_ is renamed to the original <itcl object name> again
+# Finally the <itcl object name>_ is renamed to the original <itcl object name> again
 # Component itcl_hull is created if not existent
 # itcl_hull is set to the hull_widget_name and the <itcl object name>
 # is returned to the caller
@@ -191,7 +191,7 @@ proc addToItclOptions {my_class my_win myOptions argsDict} {
 #puts stderr "OPT1!$opt!$val!"
 #	   uplevel 1 [list set itcl_options($opt) [list $val]]
            if {[catch {uplevel 1 $win configure $opt [list $val]} msg]} {
-puts stderr "addToItclOptions ERR!$msg!$my_class!$win!configure!$opt!$val!"
+#puts stderr "addToItclOptions ERR!$msg!$my_class!$win!configure!$opt!$val!"
 	   }
         }
     }
@@ -290,17 +290,21 @@ proc initoptions {args} {
     }
     set my_class [uplevel 1 namespace current]
     set myOptions [namespace eval $my_class {info classoptions}]
-    set class_info_dict [dict get $::itcl::internal::dicts::classComponents $my_class]
+    if {[dict exists $::itcl::internal::dicts::classComponents $my_class]} {
+        set class_info_dict [dict get $::itcl::internal::dicts::classComponents $my_class]
 #    set myOptions [lsort -unique [namespace eval $my_class {info options}]]
-    foreach comp [uplevel 1 info components] {
-       if {[dict exists $class_info_dict $comp -keptoptions]} {
-           foreach my_opt [dict get $class_info_dict $comp -keptoptions] {
-               if {[lsearch $myOptions $my_opt] < 0} {
+        foreach comp [uplevel 1 info components] {
+           if {[dict exists $class_info_dict $comp -keptoptions]} {
+               foreach my_opt [dict get $class_info_dict $comp -keptoptions] {
+                   if {[lsearch $myOptions $my_opt] < 0} {
 #puts stderr "KEOPT!$my_opt!"
-                   lappend myOptions $my_opt
+                       lappend myOptions $my_opt
+                   }
                }
            }
-       }
+        }
+    } else {
+        set class_info_dict [list]
     }
 #puts stderr "OPTS!$win!$my_class![join [lsort $myOptions]] \n]!"
     set opt_lst [list configure]
@@ -315,8 +319,13 @@ proc initoptions {args} {
         } msg]} {
 #            puts stderr "MSG!$opt!$msg!"
         }
+#puts stderr "OPT!$opt!$found!"
 	if {$found} {
-           set val [uplevel #0 ::option get $my_win $resource $class]
+           if {[catch {
+               set val [uplevel #0 ::option get $my_win $resource $class]
+           } msg]} {
+               set val ""
+           }
            if {[::dict exists $argsDict $opt]} {
                # we have an explicitly set option
                set val [::dict get $argsDict $opt]
@@ -330,7 +339,7 @@ proc initoptions {args} {
 #puts stderr "OPT1!$opt!$val!"
 #	   uplevel 1 [list set itcl_options($opt) [list $val]]
            if {[catch {uplevel 1 $my_win configure $opt [list $val]} msg]} {
-#puts stderr "initoptions ERR!$msg!$my_class!$my_win!configure!$opt!$val!"
+puts stderr "initoptions ERR!$msg!$my_class!$my_win!configure!$opt!$val!"
 	   }
         }
         foreach comp [dict keys $class_info_dict] {
@@ -376,6 +385,55 @@ puts stderr "initoptions ERR2!$msg!$my_class!$comp!configure!$opt!$val!"
 		    }
                 }
             }
+        }
+    }
+#    uplevel 1 $opt_lst
+}
+
+# ======================= setoptions ===========================
+
+proc setoptions {args} {
+
+#puts stderr "setOPT!!$args!"
+    if {[llength $args]} {
+        set argsDict [dict create {*}$args]
+    } else {
+        set argsDict [dict create]
+    }
+    set my_class [uplevel 1 namespace current]
+    set myOptions [namespace eval $my_class {info options}]
+#puts stderr "OPTS!$win!$my_class![join [lsort $myOptions]] \n]!"
+    set opt_lst [list configure]
+    foreach opt [lsort $myOptions] {
+	set found 0
+        if {[catch {
+            set resource [uplevel 1 info option $opt -resource]
+            set class [uplevel 1 info option $opt -class]
+            set default_val [uplevel 1 info option $opt -default]
+	    set found 1
+        } msg]} {
+#            puts stderr "MSG!$opt!$msg!"
+        }
+#puts stderr "OPT!$opt!$found!"
+	if {$found} {
+           set val ""
+           if {[::dict exists $argsDict $opt]} {
+               # we have an explicitly set option
+               set val [::dict get $argsDict $opt]
+           } else {
+	       if {[string length $val] == 0} {
+                   set val $default_val
+	       }
+           }
+	   set myObj [uplevel 1 set this]
+#puts stderr "myObj!$myObj!"
+           set ::itcl::internal::variables::${myObj}::itcl_options($opt) $val
+           set ::itcl::internal::variables::${myObj}::__itcl_option_infos($opt) [list $resource $class $default_val]
+#puts stderr "OPT1!$opt!$val!"
+	   uplevel 1 [list set itcl_options($opt) [list $val]]
+#           if {[catch {uplevel 1 $myObj configure $opt [list $val]} msg]} {
+#puts stderr "initoptions ERR!$msg!$my_class!$my_win!configure!$opt!$val!"
+#	   }
         }
     }
 #    uplevel 1 $opt_lst
