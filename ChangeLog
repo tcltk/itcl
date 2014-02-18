@@ -1,4 +1,10 @@
 2014-02-18  Arnulf P. Wiedemann  <wiede@users.sourceforge.net>
+	* generic/itclMethod.c: again a fix for SF bug #244 to make it work
+	correctly.
+2014-02-18  Arnulf P. Wiedemann  <wiede@users.sourceforge.net>
+	* tests/sfbugs.test: added a test file for bugs reported on SF incrtcl
+	tracker.
+2014-02-18  Arnulf P. Wiedemann  <wiede@users.sourceforge.net>
 	* generic/itclResolve.c:
 	* generic/itclObject.c: fix for upvar problem (SF bug #187) in 
 	splitting up the trace handlers for this, win, type, self and selfns.
