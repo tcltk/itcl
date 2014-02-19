@@ -1,3 +1,6 @@
+2014-02-19  Arnulf P. Wiedemann  <wiede@users.sourceforge.net>
+	* generic/itclCmd.c: fix for SF bug #238 in Itcl_ScopeCmd. Use
+	Tcl_AppendResult instead of TclAppendElement.
 2014-02-18  Arnulf P. Wiedemann  <wiede@users.sourceforge.net>
 	* generic/itclMethod.c: again a fix for SF bug #244 to make it work
 	correctly.
