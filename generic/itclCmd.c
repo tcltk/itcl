@@ -844,7 +844,8 @@ Itcl_ScopeCmd(
             Tcl_AppendToObj(objPtr2, openParen, -1);
             openParen = NULL;
         }
-        Tcl_AppendElement(interp, Tcl_GetString(objPtr2));
+        /* fix for SF bug #238 use Tcl_AppendResult instead of Tcl_AppendElement */
+        Tcl_AppendResult(interp, Tcl_GetString(objPtr2), NULL);
         Tcl_DecrRefCount(objPtr);
         Tcl_DecrRefCount(objPtr2);
     } else {
