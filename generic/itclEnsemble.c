@@ -236,7 +236,6 @@ Itcl_CreateEnsemble(
     const char **nameArgv = NULL;
     int nameArgc;
     Ensemble *parentEnsData;
-    Tcl_DString buffer;
 
     /*
      *  Split the ensemble name into its path components.
@@ -289,12 +288,9 @@ ensCreateFail:
     if (nameArgv) {
         ckfree((char*)nameArgv);
     }
-    Tcl_DStringInit(&buffer);
-    Tcl_DStringAppend(&buffer, "\n    (while creating ensemble \"", -1);
-    Tcl_DStringAppend(&buffer, ensName, -1);
-    Tcl_DStringAppend(&buffer, "\")", -1);
-    Tcl_AddObjErrorInfo(interp, Tcl_DStringValue(&buffer), -1);
-    Tcl_DStringFree(&buffer);
+    Tcl_AppendObjToErrorInfo(interp, Tcl_ObjPrintf(
+            "\n    (while creating ensemble \"%s\")",
+            ensName));
 
     return TCL_ERROR;
 }
@@ -342,7 +338,6 @@ Itcl_AddEnsemblePart(
     int nameArgc;
     Ensemble *ensData;
     EnsemblePart *ensPart;
-    Tcl_DString buffer;
 
     /*
      *  Parse the ensemble name and look for a containing ensemble.
@@ -380,12 +375,9 @@ ensPartFail:
     if (nameArgv) {
         ckfree((char*)nameArgv);
     }
-    Tcl_DStringInit(&buffer);
-    Tcl_DStringAppend(&buffer, "\n    (while adding to ensemble \"", -1);
-    Tcl_DStringAppend(&buffer, ensName, -1);
-    Tcl_DStringAppend(&buffer, "\")", -1);
-    Tcl_AddObjErrorInfo(interp, Tcl_DStringValue(&buffer), -1);
-    Tcl_DStringFree(&buffer);
+    Tcl_AppendObjToErrorInfo(interp, Tcl_ObjPrintf(
+            "\n    (while adding to ensemble \"%s\")",
+            ensName));
 
     return TCL_ERROR;
 }
@@ -824,7 +816,8 @@ CreateEnsemble(
     if (ensData->nsPtr == NULL) {
         Tcl_AppendResult(interp, "error in creating namespace: ",
 	        Tcl_DStringValue(&buffer), NULL);
-        return TCL_ERROR;
+        result = TCL_ERROR;
+        goto finish;
     }
 
     /*
@@ -872,7 +865,7 @@ CreateEnsemble(
         result = TCL_ERROR;
         goto finish;
     }
-    Tcl_DStringInit(&buffer);
+    Tcl_DStringSetLength(&buffer, 0);
     Tcl_DStringAppend(&buffer, infoPtr->ensembleInfo->ensembleNsPtr->fullName, -1);
     Tcl_DStringAppend(&buffer, "::subensembles::", -1);
     sprintf(buf, "%d", parentEnsData->ensembleId);
@@ -1223,7 +1216,7 @@ CreateEnsemblePart(
     if (ensData->numParts >= ensData->maxParts) {
         size = ensData->maxParts*sizeof(EnsemblePart*);
         partList = (EnsemblePart**)ckalloc((unsigned)2*size);
-        memcpy((VOID*)partList, (VOID*)ensData->parts, (size_t)size);
+        memcpy(partList, ensData->parts, (size_t)size);
         ckfree((char*)ensData->parts);
 
         ensData->parts = partList;
@@ -1284,7 +1277,6 @@ static void
 DeleteEnsemblePart(
     ClientData clientData)     /* part being destroyed */
 {
-    Tcl_Command cmdPtr;
     Tcl_Obj *mapDict;
     Tcl_HashEntry *hPtr;
     ItclObjectInfo *infoPtr;
@@ -1299,7 +1291,6 @@ DeleteEnsemblePart(
     if (ensPart == NULL) {
         return;
     }
-    cmdPtr = ensPart->cmdPtr;
     ensData = ensPart->ensemble;
 
     /*
@@ -1332,10 +1323,10 @@ DeleteEnsemblePart(
 	        Tcl_SetEnsembleMappingDict(NULL, ensData2->cmdPtr, mapDict);
 	    }
 	}
-        Tcl_DecrRefCount(ensPart->subEnsemblePtr);
-if (ensPart->newMapDict != NULL) {
-    Tcl_DecrRefCount(ensPart->newMapDict);
-}
+	Tcl_DecrRefCount(ensPart->subEnsemblePtr);
+	if (ensPart->newMapDict != NULL) {
+	    Tcl_DecrRefCount(ensPart->newMapDict);
+	}
     }
     /*
      *  Find this part within its ensemble, and remove it from
@@ -1790,12 +1781,12 @@ Itcl_EnsembleCmd(
     ensInfo->ensData = ensData;
 
     if (objc == 3) {
-        status = Tcl_EvalObj(ensInfo->parser, objv[2]);
+        status = Tcl_EvalObjEx(ensInfo->parser, objv[2], 0);
     } else {
         if (objc > 3) {
             objPtr = Tcl_NewListObj(objc-2, objv+2);
             Tcl_IncrRefCount(objPtr);  /* stop Eval trashing it */
-            status = Tcl_EvalObj(ensInfo->parser, objPtr);
+            status = Tcl_EvalObjEx(ensInfo->parser, objPtr, 0);
             Tcl_DecrRefCount(objPtr);  /* we're done with the object */
         }
     }
@@ -1818,17 +1809,15 @@ Itcl_EnsembleCmd(
 #endif
 
         if (objc == 3) {
-            char msg[128];
 	    Tcl_Obj *options = Tcl_GetReturnOptions(interp, status);
 	    Tcl_Obj *key = Tcl_NewStringObj("-errorline", -1);
 	    Tcl_Obj *stackTrace;
 	    Tcl_IncrRefCount(key);
 	    Tcl_DictObjGet(NULL, options, key, &stackTrace);
 	    Tcl_DecrRefCount(key);
-            sprintf(msg, "\n    (\"ensemble\" body line %s)",
-                Tcl_GetString(stackTrace));
-/*                ensInfo->parser->errorLine); */
-            Tcl_AddObjErrorInfo(interp, msg, -1);
+	    Tcl_AppendObjToErrorInfo(interp, Tcl_ObjPrintf(
+	            "\n    (\"ensemble\" body line %s)",
+	            Tcl_GetString(stackTrace)));
         }
     }
     Tcl_SetObjResult(interp, Tcl_GetObjResult(ensInfo->parser));
@@ -1862,7 +1851,6 @@ static EnsembleParser*
 GetEnsembleParser(
     Tcl_Interp *interp)     /* interpreter handling the ensemble */
 {
-    Tcl_Namespace *nsPtr;
     EnsembleParser *ensInfo;
 
     /*
@@ -1885,13 +1873,13 @@ GetEnsembleParser(
     ensInfo->parser = interp;
     ensInfo->ensData = NULL;
 
+#ifdef NOTDEF
     /*
      *  Remove all namespaces and all normal commands from the
      *  parser interpreter.
      */
     nsPtr = Tcl_GetGlobalNamespace(ensInfo->parser);
 
-#ifdef NOTDEF
     for (hPtr = Tcl_FirstHashEntry(&nsPtr->childTable, &search);
          hPtr != NULL;
          hPtr = Tcl_FirstHashEntry(&nsPtr->childTable, &search)) {
@@ -2000,7 +1988,6 @@ Itcl_EnsPartCmd(
 {
     Tcl_Obj *usagePtr;
     Tcl_Proc procPtr;
-    Tcl_Command cmdPtr;
     EnsembleParser *ensInfo = (EnsembleParser*)clientData;
     Ensemble *ensData = (Ensemble*)ensInfo->ensData;
     EnsemblePart *ensPart;
@@ -2029,7 +2016,6 @@ Itcl_EnsPartCmd(
      *  accessed through the ensemble, not through a Tcl command.
      */
     partName = Tcl_GetStringFromObj(objv[1], (int*)NULL);
-    cmdPtr = ensData->cmdPtr;
 
     if (ItclCreateArgList(interp, Tcl_GetString(objv[2]), &argc, &maxArgc,
             &usagePtr, &arglistPtr, NULL, partName) != TCL_OK) {

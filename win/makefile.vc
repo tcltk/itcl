@@ -96,9 +96,7 @@ ITCLOBJS = \
 !endif
 
 ITCLSTUBOBJS = \
-!if $(TCL_DOES_STUBS)
 	$(TMP_DIR)\itclStubLib.obj
-!endif
 
 GENERICDIR	= $(ROOT)\generic
 DOCDIR		= $(ROOT)\doc
@@ -151,19 +149,17 @@ TCL_INCLUDES	= -I"$(TCLDIR)\generic" -I"$(TCLDIR)\win"
 !endif
 
 ITCL_INCLUDES	= -I$(WINDIR) -I$(GENERICDIR)
-ITCL_DEFINES	= -DBUILD_itcl -DTCL_THREADS=1
+ITCL_DEFINES	= -DBUILD_itcl -DTCL_THREADS=1 -DUSE_TCL_STUBS -DUSE_TCLOO_STUBS
 !if $(DEBUG)
 ITCL_DEFINES	= $(ITCL_DEFINES) -DITCL_DEBUG
 !endif
 ITCL_DLL_CFLAGS	= $(cflags) $(cdebug) $(crt) $(ITCL_INCLUDES) $(ITCL_DEFINES) $(TCL_INCLUDES) $(OPTDEFINES)
 ITCL_STUB_CFLAGS= $(cflags) $(cdebug:-GL=) $(ITCL_INCLUDES) $(TCL_INCLUDES) $(OPTDEFINES)
 
-### By convention, static builds do not use Stubs.  This is just a practice,
-### not a technical limitation.
 !if $(STATIC_BUILD)
 ITCL_CFLAGS	= $(ITCL_DLL_CFLAGS) -DSTATIC_BUILD
 !else
-ITCL_CFLAGS	= $(ITCL_DLL_CFLAGS) -DUSE_TCL_STUBS -DUSE_TCLOO_STUBS
+ITCL_CFLAGS	= $(ITCL_DLL_CFLAGS)
 !endif
 
 #---------------------------------------------------------------------
@@ -246,10 +242,8 @@ $**
 	-@del $*.exp
 !endif
 
-!if $(TCL_DOES_STUBS)
 $(ITCLSTUBLIB) : $(ITCLSTUBOBJS)
-	$(lib32) -nologo -out:$@ $(ITCLSTUBOBJS)
-!endif
+	$(lib32) -nologo -nodefaultlib -out:$@ $(ITCLSTUBOBJS)
 
 install-binaries :
 	if not exist "$(_INSTALLDIR)" mkdir "$(_INSTALLDIR)"

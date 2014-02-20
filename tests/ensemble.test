@@ -43,11 +43,7 @@ test ensemble-1.4 {invoking ensemble parts} {
 
 test ensemble-1.5 {invoking parts with improper arguments} {
     set res [catch "test_numbers three x" msg]
-    if {[package vsatisfies [package provide Tcl] 8.4]} {
-	lappend res [string match "wrong # args*" $msg]
-    } else {
-	lappend res [string match "no value given*" $msg]
-    }
+    lappend res [string match "wrong # args*" $msg]
 } {1 1}
 
 test ensemble-1.6 {errors trigger a usage summary} {

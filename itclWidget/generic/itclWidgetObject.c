@@ -104,13 +104,11 @@ HullAndOptionsInstall(
     char *token;
     const char *hullType;
     int hullObjc;
-    int foundWclass;
     int result;
     int i;
 
     ItclShowArgs(1, "HullAndOptionsInstall", objc, objv);
     widgetClassPtr = iclsPtr->widgetClassPtr;
-    foundWclass = 0;
     iclsPtr->infoPtr->buildingWidget = 1;
     iclsPtr->infoPtr->currIoPtr = ioPtr;
     for (i = 0; i < objc; i++) {
@@ -119,7 +117,6 @@ HullAndOptionsInstall(
 	    /* check if it is in the -option position */
 	    if (((i % 2) == 0) && (i + 1 <= objc)) {
 		widgetClassPtr = objv[i+1];
-		foundWclass = 1;
 	    }
 	}
     }
@@ -128,7 +125,7 @@ HullAndOptionsInstall(
 	char *cp;
 	cp = Tcl_GetString(iclsPtr->namePtr);
         widgetClassPtr = Tcl_NewStringObj("", -1);
-	buf[0] = toupper(*cp);
+	buf[0] = toupper(UCHAR(*cp));
 	buf[1] = '\0';
 	Tcl_AppendToObj(widgetClassPtr, buf, -1);
 	Tcl_AppendToObj(widgetClassPtr, cp+1, -1);
@@ -219,7 +216,7 @@ InstallComponent(
     componentName = Tcl_GetString(objv[1]);
     widgetType = Tcl_GetString(objv[3]);
     widgetPath = Tcl_GetString(objv[4]);
-    val = ItclGetInstanceVar(interp, "itcl_hull", NULL, ioPtr, iclsPtr);
+    val = Itcl_GetInstanceVar(interp, "itcl_hull", ioPtr, iclsPtr);
     if ((val != NULL) && (strlen(val) == 0)) {
 	Tcl_AppendResult(interp, "cannot install \"", componentName,
 	        " before \"itcl_hull\" exists", NULL);
@@ -373,8 +370,5 @@ InstallComponent(
     Tcl_AppendToObj(objPtr, componentName, -1);
     Tcl_SetVar2(interp, Tcl_GetString(objPtr), NULL, componentValue, 0);
 
-//fprintf(stderr, "SET!%s!%s!\n", componentName, componentValue);
-//    ItclSetInstanceVar(interp, componentName, NULL, componentValue,
-//            ioPtr, iclsPtr);
     return TCL_OK;
 }

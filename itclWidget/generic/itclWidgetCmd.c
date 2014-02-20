@@ -39,10 +39,8 @@ _Itcl_WidgetCmd(
 {
     Tcl_Obj *objPtr;
     ItclClass *iclsPtr;
-    ItclObjectInfo *infoPtr;
     int result;
 
-    infoPtr = (ItclObjectInfo *)clientData;
     ItclShowArgs(1, "Itcl_WidgetCmd", objc-1, objv);
     result = ItclClassBaseCmd(clientData, interp, ITCL_WIDGET, objc, objv,
             &iclsPtr);
@@ -84,11 +82,9 @@ _Itcl_WidgetAdaptorCmd(
     Tcl_Obj *namePtr;
     Tcl_Obj *objPtr;
     ItclClass *iclsPtr;
-    ItclObjectInfo *infoPtr;
     ItclComponent *icPtr;
     int result;
 
-    infoPtr = (ItclObjectInfo *)clientData;
     ItclShowArgs(1, "Itcl_WidgetAdaptorCmd", objc-1, objv);
     result = ItclClassBaseCmd(clientData, interp, ITCL_WIDGETADAPTOR,
             objc, objv, &iclsPtr);

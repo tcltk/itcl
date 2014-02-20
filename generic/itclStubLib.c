@@ -8,6 +8,9 @@
 
 #undef Itcl_InitStubs
 
+MODULE_SCOPE const ItclStubs *itclStubsPtr;
+MODULE_SCOPE const ItclIntStubs *itclIntStubsPtr;
+
 const ItclStubs *itclStubsPtr = NULL;
 const ItclIntStubs *itclIntStubsPtr = NULL;
 
