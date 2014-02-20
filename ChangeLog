@@ -1,3 +1,90 @@
+2014-02-19  Arnulf P. Wiedemann  <wiede@users.sourceforge.net>
+	* generic/itclCmd.c: fix for SF bug #238 in Itcl_ScopeCmd. Use
+	Tcl_AppendResult instead of TclAppendElement.
+2014-02-18  Arnulf P. Wiedemann  <wiede@users.sourceforge.net>
+	* generic/itclMethod.c: again a fix for SF bug #244 to make it work
+	correctly.
+2014-02-18  Arnulf P. Wiedemann  <wiede@users.sourceforge.net>
+	* tests/sfbugs.test: added a test file for bugs reported on SF incrtcl
+	tracker.
+2014-02-18  Arnulf P. Wiedemann  <wiede@users.sourceforge.net>
+	* generic/itclResolve.c:
+	* generic/itclObject.c: fix for upvar problem (SF bug #187) in 
+	splitting up the trace handlers for this, win, type, self and selfns.
+	Also doing traces for linked variables to one of these.
+2014-02-16  Arnulf P. Wiedemann  <wiede@users.sourceforge.net>
+	* generic/itclMethod.c:
+	* generic/itclMigrate2TclCore.h:
+	* generic/itclMigrate2TclCore.c: 2nd fix for uplevel problem (SF bug #250).
+2014-02-13  Arnulf P. Wiedemann  <wiede@users.sourceforge.net>
+	* generic/itclMigrate2TclCore.c: fix for uplevel 2nd problem (SF bug #250).
+2014-01-24  Arnulf P. Wiedemann  <wiede@users.sourceforge.net>
+	* generic/itclMethod.c: added some code for special handling of
+	relative method name with namespace parts (SF bug #243)
+	When calling Itcl_EvalMemberCode strip off the namespace parts
+	if no constructor.
+2014-01-24  Arnulf P. Wiedemann  <wiede@users.sourceforge.net>
+	* generic/itclMethod.c:
+	* generic/itclObject.c:
+	* generic/itclMigrate2TclCore.c:
+	* generic/itclMigrate2TclCore.h: added some code for special handling
+	of an uplevel call to get the appropriate oPtr (SF bug #244).
+	The uplevel environment is checked by looking if the framePtr
+	and the varFramePtr are different (maybe not enough ?).
+2014-01-24  Arnulf P. Wiedemann  <wiede@users.sourceforge.net>
+	* generic/itclMigrate2TclCore.h: use same type for Tcl_Var as in tcl.h
+	SF bug #248.
+2013-11-09  Arnulf P. Wiedemann  <wiede@users.sourceforge.net>
+	* library/itcl.tcl: rename variable cmd to __cmd to avoid conflicts
+	with user variable of the same name SF bug #246
+2013-06-16  Arnulf P. Wiedemann  <wiede@users.sourceforge.net>
+	* generic/itclInfo.c: Added new command: info context
+	* generic/itclBuiltin.c:
+	* library/itclHullCmds.tcl: new code for extendedclass component
+	handling
+	* generic/itclObject.c: removed not necessary code
+	* generic/itclCmd.c: code for extendedclass
+2013-06-09  Arnulf P. Wiedemann  <wiede@users.sourceforge.net>
+	* generic/itclParse.c:
+	* generic/itclObject.c:
+	* generic/itclMethod.c:
+	* generic/itclBuiltin.c: renaming of removecomponentoption to
+	ignorekomponentoption, removing of addcomponentoption
+	move code for keepcomponentoption from itclBuiltin.c as Tcl code to
+	itclHullCmds.tcl
+	* library/itclHullCmds.tcl: moved keepcomponentoption from
+	itclBuiltin.c to here as Tcl code. renaming of removecomponentoption
+	to ignorekomponentoption
+2013-06-02  Arnulf P. Wiedemann  <wiede@users.sourceforge.net>
+	* generic/itclResolve.c:
+	* generic/itclClass.c:
+	* generic/itclObject.c: Changed code to avoid some compiler warnings.
+	Added code for extendedclass variable itcl_option_components.
+	* generic/itclInfo.c: Fix for info classoptions to only use current
+	class options
+	* generic/itclBuiltin.c: Fixed typo which used hPtr instead of hPtr2
+	Fixes for compiler warnings. Added 3 internal builtin commands
+	addoptioncomponent, removeoptioncomponent, renameoptioncomponent for
+	extendedclass.
+	* generic/itclInt.h: Added define ITCL_OPTION_COMP_VAR
+	* generic/itclHelpers.c: Fixes for compiler warnings
+	* generic/itclMethod.c:
+	* generic/itclParse.c: Fixes for compiler warnings. Added 3 internal
+	builtin commands addoptioncomponent,
+	removeoptioncomponent, renameoptioncomponent for extendedclass.
+	* library/itclHullCmds.c: New code for seeting component options
+	depending on itcl_option_components arra
+2013-05-26  Arnulf P. Wiedemann  <wiede@users.sourceforge.net>
+	* generic/itclBuiltin.c: Removed unused code, added some code for
+	BiInitOptionsCmd also that code seems to be no
+	longer used instead a Tcl implementation of that code is used at least
+	on some places
+	* generic/itclCmd.c: Removed unused code
+	* generic/itclInfo.c: Added new command "info classoptions"
+	  (Itcl_BiInfoClassOptionsCmd), removed some unused code.
+	* generic/itclInt.h: Added define ITCL_OPTION_INITTED
+	* library/itclHullCmds.tcl: Added proc itcl_initoptions. A lot of
+	changes and fixes in initoptions.
 2013-03-11  Don Porter  <dgp@Users.sourceforge.net>
 	* Makefile.n: SF Bug #239 - support -singleproc 1 testing.
 2013-03-02  Arnulf P. Wiedemann  <wiede@users.sourceforge.net>

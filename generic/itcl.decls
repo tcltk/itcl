@@ -589,3 +589,19 @@ declare 177 {
     Tcl_CallFrame *Itcl_ActivateCallFrame(Tcl_Interp *interp,
             Tcl_CallFrame *framePtr)
 }
+declare 178 {
+    const char* ItclSetInstanceVar(Tcl_Interp *interp,
+            const char *name, const char *name2, const char *value,
+            ItclObject *contextIoPtr, ItclClass *contextIclsPtr)
+}
+declare 179 {
+    Tcl_Obj * ItclCapitalize(const char *str)
+}
+declare 180 {
+    int ItclClassBaseCmd(ClientData clientData, Tcl_Interp *interp,
+            int flags, int objc, Tcl_Obj *const objv[], ItclClass **iclsPtrPtr)
+}
+declare 181 {
+    int ItclCreateComponent(Tcl_Interp *interp, ItclClass *iclsPtr,
+            Tcl_Obj *componentPtr, int type, ItclComponent **icPtrPtr)
+}

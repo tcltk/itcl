@@ -560,12 +560,6 @@ Failed to find tcl.h.  The TCLDIR macro does not appear correct.
 
 TCL_VERSION	= $(TCL_MAJOR_VERSION)$(TCL_MINOR_VERSION)
 
-!if $(TCL_VERSION) < 81
-TCL_DOES_STUBS	= 0
-!else
-TCL_DOES_STUBS	= 1
-!endif
-
 !if $(TCLINSTALL)
 TCLSH		= "$(_TCLDIR)\bin\tclsh$(TCL_VERSION)$(SUFX).exe"
 !if !exist($(TCLSH)) && $(TCL_THREADS)

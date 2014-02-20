@@ -1,0 +1,268 @@
+#
+# Tests for SF bugs
+# ----------------------------------------------------------------------
+#   AUTHOR:  Arnulf Wiedemann
+#            arnulf@wiedemann-pri.de
+# ----------------------------------------------------------------------
+#            Copyright (c) Arnulf Wiedemann
+# ======================================================================
+# See the file "license.terms" for information on usage and
+# redistribution of this file, and for a DISCLAIMER OF ALL WARRANTIES.
+
+package require tcltest 2.1
+namespace import ::tcltest::test
+::tcltest::loadTestedCommands
+package require itcl
+
+global ::test_status
+
+# ----------------------------------------------------------------------
+#  Test bugs of the SourceForge bug tracker for incrtcl
+# ----------------------------------------------------------------------
+test sfbug-187 {upvar with this variable SF bug #187
+} -body {
+    ::itcl::class foo {
+      method test {} {
+          PopID
+      }
+
+      proc PopID {} {
+        upvar 1 this me
+        set me
+      }
+    }
+    foo bar
+    bar test
+} -result {::bar}
+
+::itcl::delete class foo
+
+test sfbug-234 {chain with no argument SF bug #234
+} -body {
+    set ::test_status ""
+    itcl::class One {
+	public method t1 {x} {
+            lappend ::test_status "$this One.t1($x)"
+	}
+	public method t2 {} {
+            lappend ::test_status "$this One.t2"
+	}
+    }
+
+    itcl::class Two {
+        inherit One
+
+        public method t1 {x} {
+            lappend ::test_status "$this Two.t1($x)"
+            chain $x
+        }
+
+        public method t2 {} {
+            lappend ::test_status "$this Two.t2"
+            chain
+        }
+    }
+    set y [Two #auto]
+    $y t1 a
+    $y t2
+} -result {{::two0 Two.t1(a)} {::two0 One.t1(a)} {::two0 Two.t2} {::two0 One.t2}}
+
+::itcl::delete class Two
+
+test sfbug-236 {problem with inheritance of methods SF bug #236
+} -body {
+    set ::test_status ""
+
+    ::itcl::class c_mem {
+        private method get_ports {}
+        public method get_mem {}
+    }
+
+    ::itcl::class c_rom {
+        inherit c_mem
+        private method get_ports {}
+    }
+
+    ::itcl::body c_rom::get_ports {} {
+        return "toto"
+    }
+
+    ::itcl::body c_mem::get_ports {} {
+        return "tata"
+    }
+
+    ::itcl::body c_mem::get_mem {} {
+        return [concat "titi" [get_ports]]
+    }
+
+    set ptr [c_rom #auto]
+    lappend ::test_status [$ptr get_mem]
+
+# expected output:
+# titi toto
+} -result {{titi toto}}
+
+::itcl::delete class c_rom
+
+test sfbug-237 { problem with chain command SF bug #237
+} -body {
+    set ::test_status ""
+
+    itcl::class main {
+        constructor {} {
+            lappend ::test_status "OK ITCL constructor"
+	}
+
+        public method init_OK1 { parm } {
+            lappend ::test_status "OK1 MAIN $parm"
+        }
+        public method init_OK2 {} {
+            lappend ::test_status "OK2 MAIN"
+        }
+        public method init_ERR1 {} {
+            lappend ::test_status "ERR1 MAIN"
+        }
+    }
+
+    itcl::class child {
+        inherit main
+
+        constructor {} {}
+
+        public method init_OK1 {} {
+            lappend ::test_status "OK1 CHILD"
+            chain TEST
+        }
+
+        public method init_OK2 {} {
+            lappend ::test_status "OK2 CHILD"
+            next
+        }
+
+        public method init_ERR1 {} {
+            lappend ::test_status "ERR1 CHILD"
+            chain
+        }
+    }
+
+    set obj [child #auto]
+    $obj init_OK1
+    $obj init_OK2
+    $obj init_ERR1
+} -result {{OK ITCL constructor} {OK1 CHILD} {OK1 MAIN TEST} {OK2 CHILD} {OK2 MAIN} {ERR1 CHILD} {ERR1 MAIN}}
+
+::itcl::delete class child
+
+test sfbug-243 {faulty namespace behaviour SF bug #243
+} -body {
+    set ::test_status ""
+
+    namespace eval ns {}
+
+    itcl::class ns::A {
+        method do {} {nsdo}
+
+        method nsdo {} {
+            lappend ::test_status "body do: [info function do -body]"
+        }
+    }
+
+    [ns::A #auto] do
+
+    itcl::body ns::A::do {} {A::nsdo}
+    [ns::A #auto] do
+
+    itcl::body ns::A::do {} {::ns::A::nsdo}
+    [ns::A #auto] do
+
+    itcl::body ns::A::do {} {ns::A::nsdo}
+    [ns::A #auto] do
+} -result {{body do: nsdo} {body do: A::nsdo} {body do: ::ns::A::nsdo} {body do: ns::A::nsdo}}
+
+::itcl::delete class ns::A
+
+test sfbug-244 { SF bug 244
+} -body {
+    set ::test_status ""
+
+    proc foo {body} {
+        uplevel $body
+    }
+
+    itcl::class A {
+      method do {body} {foo $body}
+      method do2 {} {lappend ::test_status done}
+    }
+
+    set y [A #auto]
+    $y  do {
+        lappend ::test_status "I'm $this"
+        do2
+    }
+} -result {{I'm ::a0} done}
+
+::itcl::delete class A
+rename foo {}
+
+test sfbug-250 { SF bug #250
+} -body {
+    set ::test_status ""
+
+    ::itcl::class A {
+        variable b
+
+        constructor {} {
+            set b [B #auto]
+        }
+
+        public method m1 {} {
+            $b m3
+        }
+
+        public method m2 {} {
+            lappend ::test_status m2
+        }
+    }
+
+    ::itcl::class B {
+        public method m3 {} {
+          uplevel m2
+         }
+    }
+
+    set a [A #auto]
+    $a m1
+
+} -result {m2}
+
+::itcl::delete class B
+
+test sfbug-Schelte {bug with onfo reported from Schelte SF bug xxx
+} -body {
+    set ::test_status ""
+
+    itcl::class foo {
+        method kerplunk {args} {
+            lappend ::test_status [info level 0]
+            lappend ::test_status [::info level 0]
+            lappend ::test_status [[namespace which info] level 0]
+       }
+    }
+
+    [foo #auto] kerplunk hello world
+} -result {{foo0 kerplunk hello world} {foo0 kerplunk hello world} {foo0 kerplunk hello world}}
+
+::itcl::delete class foo
+
+
+
+#test sfbug-xxx { SF bug xxx
+#} -body {
+#    set ::test_status ""
+#
+#} -result {::bar}
+#
+#::itcl::delete class yyy
+
+::tcltest::cleanupTests
+return

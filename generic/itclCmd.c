@@ -28,6 +28,7 @@
  * See the file "license.terms" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  */
+#include "tclInt.h"
 #include "itclInt.h"
 /*
  * ------------------------------------------------------------------------
@@ -843,7 +844,8 @@ Itcl_ScopeCmd(
             Tcl_AppendToObj(objPtr2, openParen, -1);
             openParen = NULL;
         }
-        Tcl_AppendElement(interp, Tcl_GetString(objPtr2));
+        /* fix for SF bug #238 use Tcl_AppendResult instead of Tcl_AppendElement */
+        Tcl_AppendResult(interp, Tcl_GetString(objPtr2), NULL);
         Tcl_DecrRefCount(objPtr);
         Tcl_DecrRefCount(objPtr2);
     } else {
@@ -1336,8 +1338,6 @@ Itcl_MixinAddCmd(
     Tcl_Obj *const objv[])   /* argument objects */
 {
     Tcl_Obj **newObjv;
-    ItclObjectInfo *infoPtr;
-    ItclClass *iclsPtr;
     int result;
 
     ItclShowArgs(1, "Itcl_MixinAddCmd", objc, objv);
@@ -1345,8 +1345,6 @@ Itcl_MixinAddCmd(
         Tcl_WrongNumArgs(interp, 1, objv, "<className> <mixinName> ?<mixinName> ...?");
         return TCL_ERROR;
     }
-    infoPtr = Tcl_GetAssocData(interp, ITCL_INTERP_DATA, NULL);
-    iclsPtr = (ItclClass*)Itcl_PeekStack(&infoPtr->clsStack);
     newObjv = (Tcl_Obj **)ckalloc(sizeof(Tcl_Obj *)*(objc+1));
     newObjv[0] = Tcl_NewStringObj("::oo::define", -1);
     Tcl_IncrRefCount(newObjv[0]);
@@ -1404,10 +1402,8 @@ Itcl_NWidgetCmd(
     Tcl_Obj *const objv[])   /* argument objects */
 {
     ItclClass *iclsPtr;
-    ItclObjectInfo *infoPtr;
     int result;
 
-    infoPtr = (ItclObjectInfo *)clientData;
     iclsPtr = NULL;
     ItclShowArgs(0, "Itcl_NWidgetCmd", objc-1, objv);
     result = ItclClassBaseCmd(clientData, interp, ITCL_ECLASS|ITCL_NWIDGET, objc, objv,
@@ -1750,7 +1746,6 @@ Itcl_AddComponentCmd(
     Tcl_CallFrame frame;
     Tcl_Var varPtr;
     ItclVarLookup *vlookup;
-    ItclObjectInfo *infoPtr;
     ItclObject *contextIoPtr;
     ItclClass *contextIclsPtr;
     ItclComponent *icPtr;
@@ -1759,11 +1754,9 @@ Itcl_AddComponentCmd(
     const char *name;
     int isNew;
     int result;
-    int type = VAR_TYPE_VARIABLE;
 
     result = TCL_OK;
     contextIoPtr = NULL;
-    infoPtr = (ItclObjectInfo *)clientData;
     ItclShowArgs(1, "Itcl_AddComponentCmd", objc, objv);
     if (objc < 3) {
         Tcl_WrongNumArgs(interp, 1, objv, 
@@ -1788,10 +1781,11 @@ Itcl_AddComponentCmd(
 		Tcl_GetString(objv[1]), "\"", NULL);
         return TCL_ERROR;
     }
-    if (ItclCreateComponent(interp, contextIclsPtr, objv[2], 0,
+    if (ItclCreateComponent(interp, contextIclsPtr, objv[2], /* not common */0,
             &icPtr) != TCL_OK) {
         return TCL_ERROR;
     }
+    ItclAddClassComponentDictInfo(interp, contextIclsPtr, icPtr);
     contextIclsPtr->numVariables++;
     Tcl_SetHashValue(hPtr, icPtr);
     Tcl_DStringInit(&buffer);
@@ -1824,9 +1818,6 @@ Itcl_AddComponentCmd(
     vlookup->accessible = (ivPtr->protection != ITCL_PRIVATE ||
         ivPtr->iclsPtr == contextIclsPtr);
 
-    if (ivPtr->flags & ITCL_COMMON) {
-        type = VAR_TYPE_COMMON;
-    }
     vlookup->varNum = contextIclsPtr->numInstanceVars++;
     /*
      *  Create all possible names for this variable and enter
@@ -1920,7 +1911,6 @@ Itcl_SetComponentCmd(
     Tcl_Obj *const objv[])   /* argument objects */
 {
     FOREACH_HASH_DECLS;
-    ItclObjectInfo *infoPtr;
     ItclClass *iclsPtr;
     ItclObject *contextIoPtr;
     ItclClass *contextIclsPtr;
@@ -1933,7 +1923,6 @@ Itcl_SetComponentCmd(
 
     result = TCL_OK;
     contextIoPtr = NULL;
-    infoPtr = (ItclObjectInfo *)clientData;
     ItclShowArgs(1, "Itcl_SetComponentCmd", objc, objv);
     if (objc < 4) {
         Tcl_WrongNumArgs(interp, 1, objv, 
@@ -2008,10 +1997,8 @@ Itcl_ExtendedClassCmd(
     Tcl_Obj *const objv[])   /* argument objects */
 {
     ItclClass *iclsPtr;
-    ItclObjectInfo *infoPtr;
     int result;
 
-    infoPtr = (ItclObjectInfo *)clientData;
     ItclShowArgs(1, "Itcl_ExtendedClassCmd", objc-1, objv);
     result = ItclClassBaseCmd(clientData, interp, ITCL_ECLASS, objc, objv,
             &iclsPtr);
@@ -2044,10 +2031,8 @@ Itcl_TypeClassCmd(
 {
     Tcl_Obj *objPtr;
     ItclClass *iclsPtr;
-    ItclObjectInfo *infoPtr;
     int result;
 
-    infoPtr = (ItclObjectInfo *)clientData;
     ItclShowArgs(1, "Itcl_TypeClassCmd", objc-1, objv);
     result = ItclClassBaseCmd(clientData, interp, ITCL_TYPE, objc, objv,
             &iclsPtr);
@@ -2092,9 +2077,7 @@ Itcl_ClassHullTypeCmd(
     ItclObjectInfo *infoPtr;
     const char *hullTypeName;
     int correctArg;
-    int result;
 
-    result = TCL_OK;
     infoPtr = (ItclObjectInfo *)clientData;
     iclsPtr = (ItclClass*)Itcl_PeekStack(&infoPtr->clsStack);
     ItclShowArgs(1, "Itcl_ClassHullTypeCmd", objc-1, objv);

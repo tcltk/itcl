@@ -7,10 +7,23 @@
 #	replaced in the actual Makefile.
 #
 # Copyright (c) 1999 Scriptics Corporation.
-# Copyright (c) 2002-2004 ActiveState Corporation.
+# Copyright (c) 2002-2005 ActiveState Corporation.
 #
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
+
+#========================================================================
+# Add additional lines to handle any additional AC_SUBST cases that
+# have been added in a customized configure script.
+#========================================================================
+
+#SAMPLE_NEW_VAR	= @SAMPLE_NEW_VAR@
+
+#========================================================================
+# Nothing of the variables below this line should need to be changed.
+# Please check the TARGETS section below to make sure the make targets
+# are correct.
+#========================================================================
 
 #========================================================================
 # The names of the source files is defined in the configure script.
@@ -42,15 +55,8 @@ PKG_TCL_SOURCES = @PKG_TCL_SOURCES@
 PKG_HEADERS	= @PKG_HEADERS@
 
 #========================================================================
-# Nothing of the variables below this line need to be changed.  Please
-# check the TARGETS section below to make sure the make targets are
-# correct.
-#========================================================================
-
-#========================================================================
-# Change the name of the variable "exampleA_LIB_FILE" to match the one
-# used in the configure script.  This is the parameterized name of the
-# library that we are building.
+# "PKG_LIB_FILE" refers to the library (dynamic or static as per
+# configuration options) composed of the named objects.
 #========================================================================
 
 PKG_LIB_FILE	= @PKG_LIB_FILE@
@@ -67,10 +73,10 @@ exec_prefix	= @exec_prefix@
 
 bindir		= @bindir@
 libdir		= @libdir@
+includedir	= @includedir@
 datarootdir	= @datarootdir@
 datadir		= @datadir@
 mandir		= @mandir@
-includedir	= @includedir@
 
 DESTDIR		=
 
@@ -85,7 +91,7 @@ INSTALL_OPTIONS	=
 INSTALL		= $(SHELL) $(srcdir)/tclconfig/install-sh -c ${INSTALL_OPTIONS}
 INSTALL_DATA_DIR = ${INSTALL} -d -m 755
 INSTALL_PROGRAM	= ${INSTALL} -m 755
-INSTALL_DATA	= ${INSTALL} -m 444
+INSTALL_DATA	= ${INSTALL} -m 644
 INSTALL_SCRIPT	= ${INSTALL_PROGRAM}
 INSTALL_LIBRARY	= ${INSTALL_DATA}
 
@@ -94,7 +100,6 @@ PACKAGE_VERSION	= @PACKAGE_VERSION@
 CC		= @CC@
 CFLAGS_DEFAULT	= @CFLAGS_DEFAULT@
 CFLAGS_WARNING	= @CFLAGS_WARNING@
-CLEANFILES	= @CLEANFILES@
 EXEEXT		= @EXEEXT@
 LDFLAGS_DEFAULT	= @LDFLAGS_DEFAULT@
 MAKE_LIB	= @MAKE_LIB@
@@ -111,6 +116,8 @@ STLIB_LD	= @STLIB_LD@
 TCL_DEFS	= @TCL_DEFS@
 TCL_BIN_DIR	= @TCL_BIN_DIR@
 TCL_SRC_DIR	= @TCL_SRC_DIR@
+#TK_BIN_DIR	= @TK_BIN_DIR@
+#TK_SRC_DIR	= @TK_SRC_DIR@
 
 # Not used, but retained for reference of what libs Tcl required
 TCL_LIBS	= @TCL_LIBS@
@@ -123,6 +130,7 @@ TCL_LIBS	= @TCL_LIBS@
 #========================================================================
 
 EXTRA_PATH	= $(top_builddir):$(TCL_BIN_DIR)
+#EXTRA_PATH	= $(top_builddir):$(TCL_BIN_DIR):$(TK_BIN_DIR)
 TCLSH_ENV	= TCL_LIBRARY=`@CYGPATH@ $(TCL_SRC_DIR)/library`
 PKG_ENV		= ITCL_LIBRARY=`@CYGPATH@ $(srcdir)/library` \
 		  @LD_LIBRARY_PATH_VAR@="$(EXTRA_PATH):$(@LD_LIBRARY_PATH_VAR@)" \
@@ -130,16 +138,22 @@ PKG_ENV		= ITCL_LIBRARY=`@CYGPATH@ $(srcdir)/library` \
 		  TCLLIBPATH="$(top_builddir)"
 TCLSH_PROG	= @TCLSH_PROG@
 TCLSH		= $(PKG_ENV) $(TCLSH_ENV) $(TCLSH_PROG)
+
+#WISH_ENV	= TK_LIBRARY=`@CYGPATH@ $(TK_SRC_DIR)/library`
+#WISH_PROG	= @WISH_PROG@
+#WISH		= $(PKG_ENV) $(TCLSH_ENV) $(WISH_ENV) $(WISH_PROG)
+
 SHARED_BUILD	= @SHARED_BUILD@
 
 INCLUDES	= @PKG_INCLUDES@ @TCL_INCLUDES@ @TK_INCLUDES@ @ITCL_INCLUDES@
 
 PKG_CFLAGS	= @PKG_CFLAGS@
 
-DEFS		= @DEFS@ $(PKG_CFLAGS) \
+DEFS		= @DEFS@ $(PKG_CFLAGS) -DUSE_TCL_STUBS -DUSE_TK_STUBS \
 		  -DITCL_LIBRARY=\"$(pkglibdir)\"
 
 CONFIG_CLEAN_FILES = @CONFIG_CLEAN_FILES@ Makefile pkgIndex.tcl
+CLEANFILES	= @CLEANFILES@
 
 CPPFLAGS	= @CPPFLAGS@
 LIBS		= @PKG_LIBS@ @LIBS@
@@ -147,13 +161,15 @@ AR		= @AR@
 CFLAGS		= @CFLAGS@
 COMPILE		= $(CC) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 
+.SUFFIXES: .c .$(OBJEXT)
+
 #========================================================================
 # Start of user-definable TARGETS section
 #========================================================================
 
 #========================================================================
 # TEA TARGETS.  Please note that the "libraries:" target refers to platform
-# independent files, and the "binaries:" target inclues executable programs and
+# independent files, and the "binaries:" target includes executable programs and
 # platform-dependent libraries.  Modify these targets so that they install
 # the various pieces of your package.  The make and install rules
 # for the BINARIES that you specified above have already been done.
@@ -172,6 +188,12 @@ binaries: $(BINARIES)
 
 libraries:
 
+#========================================================================
+# Your doc target should differentiate from doc builds (by the developer)
+# and doc installs (see install-doc), which just install the docs on the
+# end user machine when building from source.
+#========================================================================
+
 doc:
 
 install: all install-binaries install-libraries install-doc
@@ -180,6 +202,7 @@ install-binaries: binaries install-lib-binaries install-bin-binaries
 
 #========================================================================
 # This rule installs platform-independent files, such as header files.
+# The list=...; for p in $$list handles the empty list case x-platform.
 #========================================================================
 
 install-libraries: libraries
@@ -197,27 +220,30 @@ install-libraries: libraries
 
 install-doc: doc
 	@$(INSTALL_DATA_DIR) $(DESTDIR)$(mandir)/mann
-	@echo "Installing man pages in $(DESTDIR)$(mandir)"
-	@cd $(srcdir)/doc; for i in *.n; do \
+	@echo "Installing documentation in $(DESTDIR)$(mandir)"
+	@list='$(srcdir)/doc/*.n'; for i in $$list; do \
 	    echo "Installing $$i"; \
-	    rm -f $(DESTDIR)$(mandir)/mann/`basename $$i`; \
-	    sed -e '/man\.macros/r man.macros' -e '/man\.macros/d' \
-		$$i > $(DESTDIR)$(mandir)/mann/$$i; \
-	    chmod 444 $(DESTDIR)$(mandir)/mann/$$i; \
+	    $(INSTALL_DATA) $$i $(DESTDIR)$(mandir)/mann ; \
 	done
 
 test: binaries libraries
-	$(TCLSH) `@CYGPATH@ $(srcdir)/tests/all.tcl` -load "package require itcl" $(TESTFLAGS)
-
-genstubs: $(srcdir)/tools/genStubs.tcl $(srcdir)/generic/itcl.decls
-	@echo $(TCLSH) $(srcdir)/tools/genStubs.tcl $(srcdir)/generic $(srcdir)/generic/itcl.decls
-	@$(TCLSH) $(srcdir)/tools/genStubs.tcl $(srcdir)/generic $(srcdir)/generic/itcl.decls
+	$(TCLSH) `@CYGPATH@ $(srcdir)/tests/all.tcl` $(TESTFLAGS) -load "package require itcl"
 
 shell: binaries libraries
 	@$(TCLSH) $(SCRIPT)
 
 gdb:
 	$(TCLSH_ENV) gdb $(TCLSH_PROG) $(SCRIPT)
+
+VALGRINDARGS =	--tool=memcheck --num-callers=8 --leak-resolution=high \
+		--leak-check=yes --show-reachable=yes -v
+
+valgrind: binaries libraries
+	$(TCLSH_ENV) valgrind $(VALGRINDARGS) $(TCLSH_PROG) \
+		`@CYGPATH@ $(srcdir)/tests/all.tcl` $(TESTFLAGS)
+
+valgrindshell: binaries libraries
+	$(TCLSH_ENV) valgrind $(VALGRINDARGS) $(TCLSH_PROG) $(SCRIPT)
 
 depend:
 
@@ -256,9 +282,9 @@ $(PKG_STUB_LIB_FILE): $(PKG_STUB_OBJECTS)
 # As necessary, add $(srcdir):$(srcdir)/compat:....
 #========================================================================
 
-VPATH = $(srcdir)/unix:$(srcdir)/generic:$(srcdir)/win
+VPATH = $(srcdir):$(srcdir)/generic:$(srcdir)/unix:$(srcdir)/win:$(srcdir)/macosx
 
-.c.$(OBJEXT):
+.c.@OBJEXT@:
 	$(COMPILE) -c `@CYGPATH@ $<` -o $@
 
 #========================================================================
@@ -276,13 +302,13 @@ dist-clean:
 	rm -rf $(DIST_DIR) $(DIST_ROOT)/$(PKG_DIR).tar.*
 
 dist: dist-clean doc
-	mkdir -p $(DIST_DIR)
+	$(INSTALL_DATA_DIR) $(DIST_DIR)
 	cp -p $(srcdir)/license* $(srcdir)/aclocal.m4 $(srcdir)/configure \
 		$(srcdir)/*.in  $(DIST_DIR)/
 	chmod 664 $(DIST_DIR)/Makefile.in $(DIST_DIR)/aclocal.m4
 	chmod 775 $(DIST_DIR)/configure $(DIST_DIR)/configure.in
 
-	mkdir $(DIST_DIR)/tclconfig
+	$(INSTALL_DATA_DIR) $(DIST_DIR)/tclconfig
 	cp $(srcdir)/tclconfig/install-sh $(srcdir)/tclconfig/tcl.m4 \
 		$(DIST_DIR)/tclconfig/
 	chmod 664 $(DIST_DIR)/tclconfig/tcl.m4
@@ -291,7 +317,7 @@ dist: dist-clean doc
 	list='doc generic library tests win win/rc'; \
 	for p in $$list; do \
 	    if test -d $(srcdir)/$$p ; then \
-		mkdir $(DIST_DIR)/$$p; \
+		$(INSTALL_DATA_DIR) $(DIST_DIR)/$$p; \
 		for q in $(srcdir)/$$p/*; do \
 		    if test -f $$q ; then \
 			cp -p $$q $(DIST_DIR)/$$p/; \
@@ -318,7 +344,7 @@ dist: dist-clean doc
 # variable in configure.in
 #========================================================================
 
-clean:  
+clean:
 	-test -z "$(BINARIES)" || rm -f $(BINARIES)
 	-rm -f *.$(OBJEXT) core *.core
 	-test -z "$(CLEANFILES)" || rm -f $(CLEANFILES)
@@ -335,17 +361,17 @@ distclean: clean
 # Additionally, the .dll files go into the bin directory, but the .lib
 # files go into the lib directory.  On Unix platforms, all library files
 # go into the lib directory.  In addition, this will generate the pkgIndex.tcl
-# file in the install location (assuming it can find a usable tclsh8.2 shell)
+# file in the install location (assuming it can find a usable tclsh)
 #
 # You should not have to modify this target.
 #========================================================================
 
-install-lib-binaries:
+install-lib-binaries: binaries
 	@$(INSTALL_DATA_DIR) $(DESTDIR)$(pkglibdir)
 	@list='$(lib_BINARIES)'; for p in $$list; do \
 	  if test -f $$p; then \
-	    echo " $(INSTALL_PROGRAM) $$p $(DESTDIR)$(pkglibdir)/$$p"; \
-	    $(INSTALL_PROGRAM) $$p $(DESTDIR)$(pkglibdir)/$$p; \
+	    echo " $(INSTALL_LIBRARY) $$p $(DESTDIR)$(pkglibdir)/$$p"; \
+	    $(INSTALL_LIBRARY) $$p $(DESTDIR)$(pkglibdir)/$$p; \
 	    stub=`echo $$p|sed -e "s/.*\(stub\).*/\1/"`; \
 	    if test "x$$stub" = "xstub"; then \
 		echo " $(RANLIB_STUB) $(DESTDIR)$(pkglibdir)/$$p"; \
@@ -371,15 +397,21 @@ install-lib-binaries:
 	    $(INSTALL_DATA) $(srcdir)/$$p $(DESTDIR)$(pkglibdir)/$$destp; \
 	  fi; \
 	done
-	$(INSTALL_DATA) pkgIndex.tcl $(DESTDIR)$(pkglibdir)
+	@if test "x$(SHARED_BUILD)" = "x1"; then \
+	    echo " Install pkgIndex.tcl $(DESTDIR)$(pkglibdir)"; \
+	    $(INSTALL_DATA) pkgIndex.tcl $(DESTDIR)$(pkglibdir); \
+	fi
 
 #========================================================================
-# Install binary executables (e.g. .exe files)
+# Install binary executables (e.g. .exe files and dependent .dll files)
+# This is for files that must go in the bin directory (located next to
+# wish and tclsh), like dependent .dll files on Windows.
 #
-# You should not have to modify this target.
+# You should not have to modify this target, except to define bin_BINARIES
+# above if necessary.
 #========================================================================
 
-install-bin-binaries:
+install-bin-binaries: binaries
 	@$(INSTALL_DATA_DIR) $(DESTDIR)$(bindir)
 	@list='$(bin_BINARIES)'; for p in $$list; do \
 	  if test -f $$p; then \
@@ -387,8 +419,6 @@ install-bin-binaries:
 	    $(INSTALL_PROGRAM) $$p $(DESTDIR)$(bindir)/$$p; \
 	  fi; \
 	done
-
-.SUFFIXES: .c .$(OBJEXT)
 
 Makefile: $(srcdir)/Makefile.in  $(top_builddir)/config.status
 	cd $(top_builddir) \

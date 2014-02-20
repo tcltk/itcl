@@ -731,10 +731,9 @@ ItclClassBaseCmd(
         (Tcl_Namespace*)NULL, TCL_LEAVE_ERR_MSG);
 
     if (parserNs == NULL) {
-        char msg[256];
-        sprintf(msg, "\n    (while parsing class definition for \"%.100s\")",
-            className);
-        Tcl_AddErrorInfo(interp, msg);
+        Tcl_AppendObjToErrorInfo(interp, Tcl_ObjPrintf(
+                "\n    (while parsing class definition for \"%s\")",
+                className));
         return TCL_ERROR;
     }
 
@@ -761,9 +760,9 @@ ItclClassBaseCmd(
         /* allowOverwrite */ 1);
 
     if (result != TCL_OK) {
-        char msg[256];
-        sprintf(msg, "\n    (while installing built-in commands for class \"%.100s\")", className);
-        Tcl_AddErrorInfo(interp, msg);
+        Tcl_AppendObjToErrorInfo(interp, Tcl_ObjPrintf(
+                "\n    (while installing built-in commands for class \"%s\")",
+                className));
         goto errorReturn;
     }
 
@@ -779,14 +778,13 @@ ItclClassBaseCmd(
 
     Itcl_SetCallFrameResolver(interp, iclsPtr->resolvePtr);
     if (result == TCL_OK) {
-        result = Tcl_EvalObj(interp, objv[2]);
+        result = Tcl_EvalObjEx(interp, objv[2], 0);
         Itcl_PopCallFrame(interp);
     }
     Itcl_PopStack(&infoPtr->clsStack);
 
     noCleanup = 0;
     if (result != TCL_OK) {
-        char msg[256];
 	Tcl_Obj *options = Tcl_GetReturnOptions(interp, result);
 	Tcl_Obj *key = Tcl_NewStringObj("-errorline", -1);
 	Tcl_Obj *stackTrace = NULL;
@@ -795,15 +793,16 @@ ItclClassBaseCmd(
 	Tcl_DictObjGet(NULL, options, key, &stackTrace);
 	Tcl_DecrRefCount(key);
 	if (stackTrace == NULL) {
-            sprintf(msg, "\n    error while parsing class \"%.200s\" body %s",
-                className, Tcl_GetString(objv[2]));
+	    Tcl_AppendObjToErrorInfo(interp, Tcl_ObjPrintf(
+		    "\n    error while parsing class \"%s\" body %s",
+		    className, Tcl_GetString(objv[2])));
 	    noCleanup = 1;
 	} else {
-            sprintf(msg, "\n    (class \"%.200s\" body line %s)",
-                className, Tcl_GetString(stackTrace));
+	    Tcl_AppendObjToErrorInfo(interp, Tcl_ObjPrintf(
+		    "\n    (class \"%s\" body line %s)",
+		    className, Tcl_GetString(stackTrace)));
 	    iclsPtr->flags |= ITCL_CLASS_CONSTRUCT_ERROR;
 	}
-        Tcl_AddErrorInfo(interp, msg);
         result = TCL_ERROR;
         goto errorReturn;
     }
@@ -870,6 +869,31 @@ ItclClassBaseCmd(
 		if (strcmp(Tcl_GetString(imPtr->codePtr->bodyPtr),
 		        "@itcl-builtin-keepcomponentoption") == 0) {
 		    Tcl_AppendToObj(bodyPtr, "::itcl::builtin::keepcomponentoption", -1);
+		    isDone = 1;
+		}
+		if (strcmp(Tcl_GetString(imPtr->codePtr->bodyPtr),
+		        "@itcl-builtin-ignorecomponentoption") == 0) {
+		    Tcl_AppendToObj(bodyPtr, "::itcl::builtin::ignorercomponentoption", -1);
+		    isDone = 1;
+		}
+		if (strcmp(Tcl_GetString(imPtr->codePtr->bodyPtr),
+		        "@itcl-builtin-renamecomponentoption") == 0) {
+		    Tcl_AppendToObj(bodyPtr, "::itcl::builtin::renamecomponentoption", -1);
+		    isDone = 1;
+		}
+		if (strcmp(Tcl_GetString(imPtr->codePtr->bodyPtr),
+		        "@itcl-builtin-keepoptioncomponent") == 0) {
+		    Tcl_AppendToObj(bodyPtr, "::itcl::builtin::keepoptioncomponent", -1);
+		    isDone = 1;
+		}
+		if (strcmp(Tcl_GetString(imPtr->codePtr->bodyPtr),
+		        "@itcl-builtin-ignoreoptioncomponent") == 0) {
+		    Tcl_AppendToObj(bodyPtr, "::itcl::builtin::ignoreoptioncomponent", -1);
+		    isDone = 1;
+		}
+		if (strcmp(Tcl_GetString(imPtr->codePtr->bodyPtr),
+		        "@itcl-builtin-renameoptioncomponent") == 0) {
+		    Tcl_AppendToObj(bodyPtr, "::itcl::builtin::renameoptioncomponent", -1);
 		    isDone = 1;
 		}
 		if (strcmp(Tcl_GetString(imPtr->codePtr->bodyPtr),
@@ -1430,7 +1454,7 @@ Itcl_ClassInheritCmd(
     }
     Itcl_PopCallFrame(interp);
     if (haveClasses) {
-        result = Tcl_Eval(interp, Tcl_DStringValue(&buffer));
+        result = Tcl_EvalEx(interp, Tcl_DStringValue(&buffer), -1, 0);
     }
     Tcl_DStringFree(&buffer);
 
@@ -1495,7 +1519,7 @@ Itcl_ClassProtectionCmd(
 
     if (objc == 2) {
 	/* something like: public { variable a; variable b } */
-        result = Tcl_EvalObj(interp, objv[1]);
+        result = Tcl_EvalObjEx(interp, objv[1], 0);
     } else {
 	/* something like: public variable a 123 456 */
         result = Itcl_EvalArgs(interp, objc-1, objv+1);
@@ -1517,7 +1541,6 @@ Itcl_ClassProtectionCmd(
             result = TCL_ERROR;
         } else {
 	    if (result != TCL_OK) {
-                char msg[256], *token;
 	        Tcl_Obj *options = Tcl_GetReturnOptions(interp, result);
 	        Tcl_Obj *key = Tcl_NewStringObj("-errorline", -1);
 	        Tcl_Obj *stackTrace = NULL;
@@ -1526,14 +1549,15 @@ Itcl_ClassProtectionCmd(
 	        Tcl_DictObjGet(NULL, options, key, &stackTrace);
 	        Tcl_DecrRefCount(key);
 	        if (stackTrace == NULL) {
-                    sprintf(msg, "\n    error while parsing class \"%.200s\"",
-                        Tcl_GetString(objv[0]));
+                Tcl_AppendObjToErrorInfo(interp, Tcl_ObjPrintf(
+                    "\n    error while parsing class \"%s\"",
+                    Tcl_GetString(objv[0])));
 		} else {
-                    token = Tcl_GetString(objv[0]);
-                    sprintf(msg, "\n    (%.100s body line %s)", token,
-                            Tcl_GetString(stackTrace));
+                    char *token = Tcl_GetString(objv[0]);
+                    Tcl_AppendObjToErrorInfo(interp, Tcl_ObjPrintf(
+                        "\n    (%.100s body line %s)",
+                        token, Tcl_GetString(stackTrace)));
 		}
-                Tcl_AddErrorInfo(interp, msg);
             }
         }
     }
@@ -2022,6 +2046,7 @@ ItclInitClassCommon(
     int isNew;
     IctlVarTraceInfo *traceInfoPtr;
 
+    result = TCL_OK;
     ivPtr->flags |= ITCL_COMMON;
     iclsPtr->numCommons++;
 
@@ -2117,7 +2142,7 @@ ItclInitClassCommon(
         ckfree((char *)argv);
     }
     Tcl_DStringFree(&buffer);
-    return TCL_OK;
+    return result;
 }
 
 /*
@@ -2441,7 +2466,7 @@ Itcl_WidgetCmd(
     ItclShowArgs(1, "Itcl_WidgetCmd", objc-1, objv);
     infoPtr = (ItclObjectInfo *)clientData;
     if (!infoPtr->itclWidgetInitted) {
-        result =  Tcl_Eval(interp, initWidgetScript);
+        result =  Tcl_EvalEx(interp, initWidgetScript, -1, 0);
         if (result != TCL_OK) {
             return result;
         }
@@ -2473,7 +2498,7 @@ Itcl_WidgetAdaptorCmd(
     ItclShowArgs(1, "Itcl_WidgetAdaptorCmd", objc-1, objv);
     infoPtr = (ItclObjectInfo *)clientData;
     if (!infoPtr->itclWidgetInitted) {
-        result =  Tcl_Eval(interp, initWidgetScript);
+        result =  Tcl_EvalEx(interp, initWidgetScript, -1, 0);
         if (result != TCL_OK) {
             return result;
         }
@@ -3191,7 +3216,9 @@ ItclCreateDelegatedFunction(
     Tcl_Obj *exceptionsPtr,
     ItclDelegatedFunction **idmPtrPtr)
 {
+#ifdef NOTDEF
     Tcl_HashEntry *hPtr;
+#endif
     ItclDelegatedFunction *idmPtr;
     const char **argv;
     int argc;
@@ -3220,7 +3247,7 @@ ItclCreateDelegatedFunction(
         for(i = 0; i < argc; i++) {
 	    Tcl_Obj *objPtr;
 	    objPtr = Tcl_NewStringObj(argv[i], -1);
-	    hPtr = Tcl_CreateHashEntry(&idmPtr->exceptions, (char *)objPtr,
+	    Tcl_CreateHashEntry(&idmPtr->exceptions, (char *)objPtr,
 	            &isNew);
 #ifdef NOTDEF
 	    hPtr2 = Tcl_FindHashEntry(&iclsPtr->functions, (char *)objPtr);
@@ -3277,8 +3304,6 @@ Itcl_HandleDelegateMethodCmd(
     const char *methodName;
     const char *component;
     const char *token;
-    const char *whatName;
-    const char *what;
     int result;
     int i;
     int foundOpt;
@@ -3298,13 +3323,6 @@ delegate method * ?to <componentName>? ?using <pattern>? ?except <methods>?";
     targetPtr = NULL;
     usingPtr = NULL;
     exceptionsPtr = NULL;
-    if (ioPtr != NULL) {
-        what = "object";
-	whatName = Tcl_GetCommandName(interp, ioPtr->accessCmd);
-    } else {
-	whatName = iclsPtr->nsPtr->fullName;
-        what = "class";
-    }
     for(i=2;i<objc;i++) {
         token = Tcl_GetString(objv[i]);
 	if (i+1 == objc) {
@@ -3452,14 +3470,10 @@ Itcl_ClassDelegateMethodCmd(
     ItclObjectInfo *infoPtr;
     ItclClass *iclsPtr;
     ItclDelegatedFunction *idmPtr;
-    const char *usageStr;
     int isNew;
     int result;
 
     ItclShowArgs(1, "Itcl_ClassDelegateMethodCmd", objc, objv);
-    usageStr = "delegate method <methodName> to <componentName> ?as <targetName>?\n\
-delegate method <methodName> ?to <componentName>? using <pattern>\n\
-delegate method * ?to <componentName>? ?using <pattern>? ?except <methods>?";
     infoPtr = (ItclObjectInfo*)clientData;
     iclsPtr = (ItclClass*)Itcl_PeekStack(&infoPtr->clsStack);
     if (iclsPtr == NULL) {
@@ -3528,8 +3542,6 @@ Itcl_HandleDelegateOptionCmd(
     const char *component;
     const char *token;
     const char **argv;
-    const char *what;
-    const char *whatName;
     int foundOpt;
     int argc;
     int isStarOption;
@@ -3546,13 +3558,6 @@ Itcl_HandleDelegateOptionCmd(
     componentPtr = NULL;
     icPtr = NULL;
     isStarOption = 0;
-    if (ioPtr != NULL) {
-        what = "object";
-	whatName = Tcl_GetCommandName(interp, ioPtr->accessCmd);
-    } else {
-	whatName = iclsPtr->nsPtr->fullName;
-        what = "class";
-    }
     token = Tcl_GetString(objv[1]);
     if (Tcl_SplitList(interp, (const char *)token, &argc, &argv) != TCL_OK) {
         return TCL_ERROR;
@@ -4119,7 +4124,6 @@ Itcl_ClassMethodVariableCmd(
     const char *usageStr;
     int i;
     int foundOpt;
-    int pLevel;
     int result;
     Tcl_Obj *objPtr;
 
@@ -4143,8 +4147,6 @@ Itcl_ClassMethodVariableCmd(
         Tcl_WrongNumArgs(interp, 1, objv, usageStr);
         return TCL_ERROR;
     }
-
-    pLevel = Itcl_Protection(interp, 0);
 
     /*
      *  Make sure that the variable name does not contain anything

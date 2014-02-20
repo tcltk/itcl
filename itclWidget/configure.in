@@ -54,8 +54,8 @@ TEA_PREFIX
 #-----------------------------------------------------------------------
 # Standard compiler checks.
 # This sets up CC by using the CC env var, or looks for gcc otherwise.
-# This also calls AC_PROG_CC, AC_PROG_INSTALL and a few others to create
-# the basic setup necessary to compile executables.
+# This also calls AC_PROG_CC and a few others to create the basic setup
+# necessary to compile executables.
 #-----------------------------------------------------------------------
 
 TEA_SETUP_COMPILER
@@ -119,20 +119,11 @@ TEA_PUBLIC_TK_HEADERS
 TEA_PRIVATE_ITCL_HEADERS
 
 #--------------------------------------------------------------------
-# We need to enable the threading macros found in tcl.h and tclInt.h.
-# The use of the threading features is determined by the core the
-# extension is loaded into, but we need to compile with these macros
-# turned on.
-#--------------------------------------------------------------------
-
-AC_DEFINE(TCL_THREADS)
-
-#--------------------------------------------------------------------
 # Check whether --enable-threads or --disable-threads was given.
 # This auto-enables if Tcl was compiled threaded.
 #--------------------------------------------------------------------
 
-#TEA_ENABLE_THREADS
+TEA_ENABLE_THREADS
 
 #--------------------------------------------------------------------
 # The statement below defines a collection of symbols related to
@@ -150,8 +141,7 @@ TEA_ENABLE_SHARED
 TEA_CONFIG_CFLAGS
 
 #--------------------------------------------------------------------
-# Set the default compiler switches based on the --enable-symbols
-# option.
+# Set the default compiler switches based on the --enable-symbols option.
 #--------------------------------------------------------------------
 
 TEA_ENABLE_SYMBOLS
@@ -163,9 +153,8 @@ TEA_ENABLE_SYMBOLS
 # link against the non-stubbed Tcl library.
 #--------------------------------------------------------------------
 
-if test "${SHARED_BUILD}" = "1" ; then
-    AC_DEFINE(USE_TCL_STUBS)
-fi
+AC_DEFINE(USE_TCL_STUBS, 1, [Use Tcl stubs])
+AC_DEFINE(USE_TCLOO_STUBS, 1, [Use TclOO stubs])
 
 #--------------------------------------------------------------------
 # This macro generates a line to use when building a library.  It
