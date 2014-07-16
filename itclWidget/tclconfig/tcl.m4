@@ -1655,9 +1655,9 @@ AC_DEFUN([TEA_CONFIG_CFLAGS], [
 	    case $system in
 	    FreeBSD-3.*)
 		# Version numbers are dot-stripped by system policy.
-		TCL_TRIM_DOTS=`echo ${VERSION} | tr -d .`
+		TCL_TRIM_DOTS=`echo ${PACKAGE_VERSION} | tr -d .`
 		UNSHARED_LIB_SUFFIX='${TCL_TRIM_DOTS}.a'
-		SHARED_LIB_SUFFIX='${TCL_TRIM_DOTS}.so'
+		SHARED_LIB_SUFFIX='${TCL_TRIM_DOTS}\$\{DBGX\}.so.1'
 		TCL_LIB_VERSIONS_OK=nodots
 		;;
 	    esac
