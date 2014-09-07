@@ -547,7 +547,7 @@ ItclCallCCommand(
     int result;
 
     ItclShowArgs(2, "ItclCallCCommand", objc, objv);
-    if (!Itcl_FindC(interp, Tcl_GetString(objv[0])+1, &argProc,
+    if (!Itcl_FindC(interp, Tcl_GetString(objv[1])+1, &argProc,
             &objProc, &cData)) {
 	Tcl_AppendResult(interp, "no such registered C command 1: \"",
 	        Tcl_GetString(objv[1]), "\"", NULL);
