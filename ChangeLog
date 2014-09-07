@@ -1,3 +1,11 @@
+2014-09-07  Arnulf P. Wiedemann  <wiede@users.sourceforge.net>
+	* generic/itcl2TclOO.h:
+	* generic/itcl2TclOO.c:
+	* generic/itclBase.c: Work around for SF bug #254 using call
+	Itcl_IncrObjectRefCount until fix in TclOO is done.
+2014-09-07  Arnulf P. Wiedemann  <wiede@users.sourceforge.net>
+	* generic/itclMethod.c: fix for SF bug #255 in CallItclObjectCmd.
+	Check for built in commands and do not set oPtr in that case.
 2014-02-19  Arnulf P. Wiedemann  <wiede@users.sourceforge.net>
 	* generic/itclCmd.c: fix for SF bug #238 in Itcl_ScopeCmd. Use
 	Tcl_AppendResult instead of TclAppendElement.
