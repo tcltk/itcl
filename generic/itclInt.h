@@ -206,6 +206,7 @@ typedef struct ItclObjectInfo {
     Tcl_Obj *infoVars3Ptr;
     Tcl_Obj *infoVars4Ptr;
     Tcl_Obj *typeDestructorArgumentPtr;
+    struct ItclObject *lastIoPtr;   /* last object constructed */
 } ItclObjectInfo;
 
 typedef struct EnsembleInfo {
