@@ -387,6 +387,10 @@ Initialize (
     }
     objPtr = Tcl_NewStringObj("::itcl::clazz", -1);
     infoPtr->clazzObjectPtr = Tcl_GetObjectFromObj(interp, objPtr);
+    //
+    // FIXME work arouund for SF bug #254 needed because of problem in Tcl 8.6.2 TclOO!!
+    Itcl_IncrObjectRefCount(infoPtr->clazzObjectPtr);
+
     Tcl_DecrRefCount(objPtr);
     if (infoPtr->clazzObjectPtr == NULL) {
         Tcl_AppendResult(interp,
