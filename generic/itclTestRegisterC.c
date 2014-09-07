@@ -33,9 +33,15 @@ cObjFunc(
     Tcl_Obj *const *objv)
 {
     Tcl_Namespace *nsPtr;
+    int i;
 
-    ItclShowArgs(2, "cObjFunc called", objc, objv);
+    ItclShowArgs(0, "cObjFunc called", objc, objv);
+fprintf(stderr, "XX:%d %p\n", objc, objv);
+for(i = 0; i<objc;i++) {
+    fprintf(stderr, "arg:%d:%s:\n", i, Tcl_GetString(objv[i]));
+}
     nsPtr = Tcl_GetCurrentNamespace(interp);
+fprintf(stderr, "IP:%p:\n",interp);
     return TCL_OK;
 }
 
