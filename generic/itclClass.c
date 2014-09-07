@@ -1532,7 +1532,7 @@ Itcl_CreateObject(
 
     infoPtr = (ItclObjectInfo *)clientData;
     Tcl_ResetResult(interp);
-    ItclShowArgs(1, "Itcl_HandleClassCmd", objc, objv);
+    ItclShowArgs(1, "Itcl_CreateObject", objc, objv);
     /*
      *  If the command is invoked without an object name, then do nothing.
      *  This used to support autoloading--that the class name could be

@@ -1,4 +1,17 @@
 2014-09-07  Arnulf P. Wiedemann  <wiede@users.sourceforge.net>
+	* generic/itclMethod.c: small fixes to save code.
+2014-09-07  Arnulf P. Wiedemann  <wiede@users.sourceforge.net>
+	* generic/itclParse.c: fix for making Itcl_CallCCommand working again.
+2014-09-07  Arnulf P. Wiedemann  <wiede@users.sourceforge.net>
+	* generic/itcl.decls:
+	* generic/itclClass.c:
+	* generic/itclDecls.h:
+	* generic/itclInt.h:
+	* generic/itclIntDecls.h:
+	* generic/itclObject.c:
+	* generic/itclStubInit.c: Start of implementation of Itcl_CreateObject
+	stubs interface.
+2014-09-07  Arnulf P. Wiedemann  <wiede@users.sourceforge.net>
 	* generic/itcl2TclOO.h:
 	* generic/itcl2TclOO.c:
 	* generic/itclBase.c: Work around for SF bug #254 using call

@@ -526,123 +526,100 @@ ItclCreateMemberFunc(
     if ((body != NULL) && (body[0] == '@')) {
         /* check for builtin cget isa and configure and mark them for
 	 * use of a different arglist "args" for TclOO !! */
+        imPtr->codePtr->flags |= ITCL_BUILTIN;
 	if (strcmp(name, "cget") == 0) {
-            imPtr->codePtr->flags |= ITCL_BUILTIN;
 	}
 	if (strcmp(name, "configure") == 0) {
 	    imPtr->argcount = 0;
 	    imPtr->maxargcount = -1;
-            imPtr->codePtr->flags |= ITCL_BUILTIN;
 	}
 	if (strcmp(name, "isa") == 0) {
-            imPtr->codePtr->flags |= ITCL_BUILTIN;
 	}
 	if (strcmp(name, "createhull") == 0) {
 	    imPtr->argcount = 0;
 	    imPtr->maxargcount = -1;
-            imPtr->codePtr->flags |= ITCL_BUILTIN;
 	}
 	if (strcmp(name, "keepcomponentoption") == 0) {
 	    imPtr->argcount = 0;
 	    imPtr->maxargcount = -1;
-            imPtr->codePtr->flags |= ITCL_BUILTIN;
 	}
 	if (strcmp(name, "ignorecomponentoption") == 0) {
 	    imPtr->argcount = 0;
 	    imPtr->maxargcount = -1;
-            imPtr->codePtr->flags |= ITCL_BUILTIN;
 	}
 	if (strcmp(name, "renamecomponentoption") == 0) {
 	    imPtr->argcount = 0;
 	    imPtr->maxargcount = -1;
-            imPtr->codePtr->flags |= ITCL_BUILTIN;
 	}
 	if (strcmp(name, "addoptioncomponent") == 0) {
 	    imPtr->argcount = 0;
 	    imPtr->maxargcount = -1;
-            imPtr->codePtr->flags |= ITCL_BUILTIN;
 	}
 	if (strcmp(name, "ignoreoptioncomponent") == 0) {
 	    imPtr->argcount = 0;
 	    imPtr->maxargcount = -1;
-            imPtr->codePtr->flags |= ITCL_BUILTIN;
 	}
 	if (strcmp(name, "renameoptioncomponent") == 0) {
 	    imPtr->argcount = 0;
 	    imPtr->maxargcount = -1;
-            imPtr->codePtr->flags |= ITCL_BUILTIN;
 	}
 	if (strcmp(name, "setupcomponent") == 0) {
 	    imPtr->argcount = 0;
 	    imPtr->maxargcount = -1;
-            imPtr->codePtr->flags |= ITCL_BUILTIN;
 	}
 	if (strcmp(name, "itcl_initoptions") == 0) {
 	    imPtr->argcount = 0;
 	    imPtr->maxargcount = -1;
-            imPtr->codePtr->flags |= ITCL_BUILTIN;
 	}
 	if (strcmp(name, "mytypemethod") == 0) {
 	    imPtr->argcount = 0;
 	    imPtr->maxargcount = -1;
-            imPtr->codePtr->flags |= ITCL_BUILTIN;
             imPtr->flags |= ITCL_COMMON;
 	}
 	if (strcmp(name, "mymethod") == 0) {
 	    imPtr->argcount = 0;
 	    imPtr->maxargcount = -1;
-            imPtr->codePtr->flags |= ITCL_BUILTIN;
 	}
 	if (strcmp(name, "mytypevar") == 0) {
 	    imPtr->argcount = 0;
 	    imPtr->maxargcount = -1;
-            imPtr->codePtr->flags |= ITCL_BUILTIN;
             imPtr->flags |= ITCL_COMMON;
 	}
 	if (strcmp(name, "myvar") == 0) {
 	    imPtr->argcount = 0;
 	    imPtr->maxargcount = -1;
-            imPtr->codePtr->flags |= ITCL_BUILTIN;
 	}
 	if (strcmp(name, "itcl_hull") == 0) {
 	    imPtr->argcount = 0;
 	    imPtr->maxargcount = -1;
-            imPtr->codePtr->flags |= ITCL_BUILTIN;
             imPtr->flags |= ITCL_COMPONENT;
 	}
 	if (strcmp(name, "callinstance") == 0) {
 	    imPtr->argcount = 0;
 	    imPtr->maxargcount = -1;
-            imPtr->codePtr->flags |= ITCL_BUILTIN;
 	}
 	if (strcmp(name, "getinstancevar") == 0) {
 	    imPtr->argcount = 0;
 	    imPtr->maxargcount = -1;
-            imPtr->codePtr->flags |= ITCL_BUILTIN;
 	}
 	if (strcmp(name, "myproc") == 0) {
 	    imPtr->argcount = 0;
 	    imPtr->maxargcount = -1;
-            imPtr->codePtr->flags |= ITCL_BUILTIN;
             imPtr->flags |= ITCL_COMMON;
 	}
 	if (strcmp(name, "installhull") == 0) {
 	    imPtr->argcount = 0;
 	    imPtr->maxargcount = -1;
-            imPtr->codePtr->flags |= ITCL_BUILTIN;
 	}
 	if (strcmp(name, "destroy") == 0) {
 	    imPtr->argcount = 0;
 	    imPtr->maxargcount = -1;
-            imPtr->codePtr->flags |= ITCL_BUILTIN;
 	}
 	if (strcmp(name, "installcomponent") == 0) {
 	    imPtr->argcount = 0;
 	    imPtr->maxargcount = -1;
-            imPtr->codePtr->flags |= ITCL_BUILTIN;
 	}
 	if (strcmp(name, "info") == 0) {
-            imPtr->codePtr->flags |= ITCL_BUILTIN;
             imPtr->flags |= ITCL_COMMON;
 	}
     }
