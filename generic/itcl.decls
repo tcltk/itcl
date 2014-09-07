@@ -230,6 +230,10 @@ declare 41 {
 #  Functions for manipulating objects
 #
 
+declare 44 {
+    int Itcl_CreateObject(ClientData clientData, Tcl_Interp *interp,
+        int objc, Tcl_Obj *const objv[], ItclObject **rioPtr)
+}
 declare 45 {
     int Itcl_DeleteObject(Tcl_Interp *interp, ItclObject *contextObj)
 }

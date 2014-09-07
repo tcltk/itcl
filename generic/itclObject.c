@@ -187,6 +187,9 @@ ItclCreateObject(
     /* just init for the case of none ItclWidget objects */
     newObjv = (Tcl_Obj **)objv;
     infoPtr = iclsPtr->infoPtr;
+    if (infoPtr != NULL) {
+      infoPtr->lastIoPtr = NULL;
+    }
     /*
      *  Create a new object and initialize it.
      */
@@ -637,6 +640,7 @@ ItclCreateObject(
     if (infoPtr != NULL) {
         infoPtr->currIoPtr = saveCurrIoPtr;
     }
+    infoPtr->lastIoPtr = ioPtr;
     Tcl_DeleteHashTable(ioPtr->constructed);
     ckfree((char*)ioPtr->constructed);
     ioPtr->constructed = NULL;
@@ -651,6 +655,7 @@ errorReturn:
      *  it is no longer needed.
      */
     if (infoPtr != NULL) {
+        infoPtr->lastIoPtr = ioPtr;
         infoPtr->currIoPtr = saveCurrIoPtr;
     }
     if (ioPtr->constructed != NULL) {

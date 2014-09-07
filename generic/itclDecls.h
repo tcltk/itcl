@@ -19,7 +19,7 @@ ITCLAPI const char *Itcl_InitStubs(
 /* !BEGIN!: Do not edit below this line. */
 
 #define ITCL_STUBS_EPOCH 0
-#define ITCL_STUBS_REVISION 144
+#define ITCL_STUBS_REVISION 149
 
 #ifdef __cplusplus
 extern "C" {

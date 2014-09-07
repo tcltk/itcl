@@ -1503,6 +1503,17 @@ Itcl_HandleClass(
     int objc,                /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
 {
+    return Itcl_CreateObject(clientData, interp, objc, objv, NULL);
+}
+
+int
+Itcl_CreateObject(
+    ClientData clientData,   /* class definition */
+    Tcl_Interp *interp,      /* current interpreter */
+    int objc,                /* number of arguments */
+    Tcl_Obj *const objv[],   /* argument objects */
+    ItclObject ** rioPtr)    /* result for returning newly created object */
+{
     Tcl_DString buffer;  /* buffer used to build object names */
     Tcl_Obj *objNamePtr;
     Tcl_HashEntry *hPtr;
@@ -1641,6 +1652,13 @@ Itcl_HandleClass(
     Tcl_NRAddCallback(interp, CallCreateObject, objNamePtr, iclsPtr,
             INT2PTR(objc-4), newObjv);
     result = Itcl_NRRunCallbacks(interp, callbackPtr);
+    if (rioPtr != NULL) {
+      if (infoPtr != NULL) {
+         *rioPtr = infoPtr->lastIoPtr;
+      } else {
+         *rioPtr = NULL;
+      }
+    }
     return result;
 }
 
