@@ -1204,7 +1204,10 @@ CallItclObjectCmd(
                 infoPtr = (ItclObjectInfo *)Tcl_GetAssocData(interp,
                         ITCL_INTERP_DATA, NULL);
                 if (Itcl_GetStackSize(&infoPtr->contextStack) <= 1) {
-                    oPtr = ioPtr->oPtr;
+                    if (imPtr->builtinArgumentPtr == NULL) {
+                      /* it is not a builtin command (SF bug #255) */
+                      oPtr = ioPtr->oPtr;
+                    }
                     result = ItclObjectCmd(imPtr, interp, oPtr, NULL, objc, objv);
                 } else {
                     /* we are executing an uplevel command (SF bug #250) */
