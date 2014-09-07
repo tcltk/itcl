@@ -161,6 +161,9 @@ static ItclCmdsInfo itclCmds [] = {
     { "::itcl::parser::delegate", ITCL_IS_ENSEMBLE},
     { NULL, 0},
 };
+#ifdef ITCL_DEBUG_C_INTERFACE
+extern void RegisterDebugCFunctions( Tcl_Interp * interp);
+#endif
 
 /*
  * ------------------------------------------------------------------------
@@ -466,6 +469,9 @@ Initialize (
             TCL_NAMESPACE_ONLY);
 
 
+#ifdef ITCL_DEBUG_C_INTERFACE
+    RegisterDebugCFunctions(interp);
+#endif    
     /*
      *  Package is now loaded.
      */
@@ -563,11 +569,11 @@ ItclCallCCommand(
 	const char **argv;
 	int i;
 
-	argv = (const char**)ckalloc((unsigned)(objc*sizeof(char*)));
-	for (i=1;i<objc;i++) {
-	    argv[i-1] = Tcl_GetString(objv[i]);
+	argv = (const char**)ckalloc((unsigned)((objc-1)*sizeof(char*)));
+	for (i=2;i<objc;i++) {
+	    argv[i-2] = Tcl_GetString(objv[i]);
 	}
-        result = (*argProc)(cData, interp, objc-1, argv);
+        result = (*argProc)(cData, interp, objc-2, argv);
         ckfree((char*)argv);
     }
     if (objProc != NULL) {
