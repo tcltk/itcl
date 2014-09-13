@@ -303,6 +303,14 @@ test fossilbug-8 { fossil bug 2cd667f270b68ef66d668338e09d144e20405e23
 
 ::tcltest::cleanupTests
 
+test sfbug-254 { SF bug #254
+} -body {
+    set ::test_status ""
+    oo::class destroy
+
+} -result {}
+
+
 
 #test sfbug-xxx { SF bug xxx
 #} -body {
