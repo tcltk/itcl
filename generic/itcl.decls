@@ -231,7 +231,7 @@ declare 41 {
 #
 
 declare 44 {
-    int Itcl_CreateObject(ClientData clientData, Tcl_Interp *interp,
+    int Itcl_CreateObject(Tcl_Interp *interp, const char* name, ItclClass *iclsPtr,
         int objc, Tcl_Obj *const objv[], ItclObject **rioPtr)
 }
 declare 45 {

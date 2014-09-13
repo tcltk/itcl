@@ -1503,16 +1503,15 @@ Itcl_HandleClass(
     int objc,                /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
 {
-    return Itcl_CreateObject(clientData, interp, objc, objv, NULL);
+    return ItclClassCreateObject(clientData, interp, objc, objv);
 }
 
 int
-Itcl_CreateObject(
-    ClientData clientData,   /* class definition */
+ItclClassCreateObject(
+    ClientData clientData,   /* IclObjectInfo */
     Tcl_Interp *interp,      /* current interpreter */
     int objc,                /* number of arguments */
-    Tcl_Obj *const objv[],   /* argument objects */
-    ItclObject ** rioPtr)    /* result for returning newly created object */
+    Tcl_Obj *const objv[])   /* argument objects */
 {
     Tcl_DString buffer;  /* buffer used to build object names */
     Tcl_Obj *objNamePtr;
@@ -1528,11 +1527,10 @@ Itcl_CreateObject(
     char *start;
     char *pos;
     const char *match;
-    int result;
 
     infoPtr = (ItclObjectInfo *)clientData;
     Tcl_ResetResult(interp);
-    ItclShowArgs(1, "Itcl_CreateObject", objc, objv);
+    ItclShowArgs(1, "ItclClassCreateObject", objc, objv);
     /*
      *  If the command is invoked without an object name, then do nothing.
      *  This used to support autoloading--that the class name could be
@@ -1651,15 +1649,7 @@ Itcl_CreateObject(
             NULL, NULL);
     Tcl_NRAddCallback(interp, CallCreateObject, objNamePtr, iclsPtr,
             INT2PTR(objc-4), newObjv);
-    result = Itcl_NRRunCallbacks(interp, callbackPtr);
-    if (rioPtr != NULL) {
-      if (infoPtr != NULL) {
-         *rioPtr = infoPtr->lastIoPtr;
-      } else {
-         *rioPtr = NULL;
-      }
-    }
-    return result;
+    return Itcl_NRRunCallbacks(interp, callbackPtr);
 }
 
 

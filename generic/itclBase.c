@@ -333,6 +333,7 @@ Initialize (
     infoPtr->buildingWidget = 0;
     infoPtr->typeDestructorArgumentPtr = Tcl_NewStringObj("", -1);
     Tcl_IncrRefCount(infoPtr->typeDestructorArgumentPtr);
+    infoPtr->lastIoPtr = NULL;
 
     Tcl_SetVar(interp, ITCL_NAMESPACE"::internal::dicts::classes", "", 0);
     Tcl_SetVar(interp, ITCL_NAMESPACE"::internal::dicts::objects", "", 0);
