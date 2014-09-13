@@ -1,5 +1,7 @@
 2014-09-13  Arnulf P. Wiedemann  <wiede@users.sourceforge.net>
+	* generic/itclMethod.c: Fixes for SF bug #256
 	* tests/sfbugs.test: added test for fossil bug #8 and for SF bug #254
+	and #256
 	* generic/itclObject.c: fix for fossil bug
 	2cd667f270b68ef66d668338e09d144e20405e23 (fossil bug # 8).
 	* generic/itcl.decls:
