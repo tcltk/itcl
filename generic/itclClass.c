@@ -1720,7 +1720,7 @@ Itcl_BuildVirtualTables(
      *  Set aside the first object-specific slot for the built-in
      *  "this" variable.  Only allocate one of these, even though
      *  there is a definition for "this" in each class scope.
-     *  Set aside the second object-specific slot for the built-in
+     *  Set aside the second and third object-specific slot for the built-in
      *  "itcl_options" and "itcl_option_components" variable.
      */
     iclsPtr->numInstanceVars++;
