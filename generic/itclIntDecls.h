@@ -139,9 +139,10 @@ ITCLAPI const char *	Itcl_GetCommonVar(Tcl_Interp *interp,
 /* Slot 42 is reserved */
 /* Slot 43 is reserved */
 /* 44 */
-ITCLAPI int		Itcl_CreateObject(ClientData clientData,
-				Tcl_Interp *interp, int objc,
-				Tcl_Obj *const objv[], ItclObject **rioPtr);
+ITCLAPI int		Itcl_CreateObject(Tcl_Interp *interp,
+				const char*name, ItclClass *iclsPtr,
+				int objc, Tcl_Obj *const objv[],
+				ItclObject **rioPtr);
 /* 45 */
 ITCLAPI int		Itcl_DeleteObject(Tcl_Interp *interp,
 				ItclObject *contextObj);
@@ -569,7 +570,7 @@ typedef struct ItclIntStubs {
     const char * (*itcl_GetCommonVar) (Tcl_Interp *interp, const char *name, ItclClass *contextClass); /* 41 */
     void (*reserved42)(void);
     void (*reserved43)(void);
-    int (*itcl_CreateObject) (ClientData clientData, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[], ItclObject **rioPtr); /* 44 */
+    int (*itcl_CreateObject) (Tcl_Interp *interp, const char*name, ItclClass *iclsPtr, int objc, Tcl_Obj *const objv[], ItclObject **rioPtr); /* 44 */
     int (*itcl_DeleteObject) (Tcl_Interp *interp, ItclObject *contextObj); /* 45 */
     int (*itcl_DestructObject) (Tcl_Interp *interp, ItclObject *contextObj, int flags); /* 46 */
     void (*reserved47)(void);

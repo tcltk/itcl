@@ -39,11 +39,16 @@ cArgFunc(
     int argc,
     const char **argv)
 {
+#ifdef NOTDEF
     int i;
+#endif
     int result;
-    ClientData clientData2 = NULL;
+    ItclObjectInfo * infoPtr = NULL;
+    ItclClass *iclsPtr = NULL;
     ItclObject * rioPtr = (ItclObject *)1;
     Tcl_Obj * objv[4];
+    FOREACH_HASH_DECLS;
+    ItclClass * classPtr;
 
 //fprintf(stderr, "argc: %d\n", argc);
     if (argc != 4) {
@@ -51,14 +56,25 @@ cArgFunc(
       return TCL_ERROR;
     }
     objv[0] = Tcl_NewStringObj(argv[0], -1);
-    objv[1] = Tcl_NewStringObj(argv[1], -1);
-    objv[2] = Tcl_NewStringObj(argv[2], -1);
-    objv[3] = Tcl_NewStringObj(argv[3], -1);
+    objv[1] = Tcl_NewStringObj(argv[1], -1); /* class name */
+    objv[2] = Tcl_NewStringObj(argv[2], -1); /* full class name */
+    objv[3] = Tcl_NewStringObj(argv[3], -1); /* object name */
     Tcl_IncrRefCount(objv[0]);
     Tcl_IncrRefCount(objv[1]);
     Tcl_IncrRefCount(objv[2]);
     Tcl_IncrRefCount(objv[3]);
-    clientData2 = (ClientData)Tcl_GetAssocData(interp, ITCL_INTERP_DATA, NULL);
+    infoPtr = (ClientData)Tcl_GetAssocData(interp, ITCL_INTERP_DATA, NULL);
+    FOREACH_HASH_VALUE(classPtr,&infoPtr->nameClasses) {
+        if (strcmp(Tcl_GetString(objv[1]), Tcl_GetString(classPtr->fullNamePtr)) == 0 ||
+                strcmp(Tcl_GetString(objv[2]), Tcl_GetString(classPtr->fullNamePtr)) == 0) {
+           iclsPtr = classPtr;
+	   break;
+        }
+    }
+    if (iclsPtr == NULL) {
+      Tcl_AppendResult(interp, "no such class: ", Tcl_GetString(objv[2]), NULL);
+      return TCL_ERROR;
+    }
 
 #ifdef NOTDEF
 fprintf(stderr, "cArgFunc called:\n");
@@ -69,7 +85,7 @@ for(i = 0; i<argc;i++) {
     /* try to create an object for a class as a test for calling a C function from
      * an Itcl class. See file CreateItclObjectWithC_example.tcl in library directory
      */
-    result = Itcl_CreateObject(clientData2, interp, 4, objv, &rioPtr);
+    result = Itcl_CreateObject(interp, Tcl_GetString(objv[3]), iclsPtr, 4, objv, &rioPtr);
     return result;
 }
 
@@ -84,7 +100,7 @@ cObjFunc(
     int i;
 
     ItclShowArgs(0, "cObjFunc called", objc, objv);
-fprintf(stderr, "XX:%d %p\n", objc, objv);
+fprintf(stderr, "objv: %d %p\n", objc, objv);
 for(i = 0; i<objc;i++) {
     fprintf(stderr, "arg:%d:%s:\n", i, Tcl_GetString(objv[i]));
 }

@@ -127,6 +127,42 @@ ObjectRenamedTrace(
 
 /*
  * ------------------------------------------------------------------------
+ *  Itcl_CreateObject()
+ *
+ */
+int
+Itcl_CreateObject(
+    Tcl_Interp *interp,      /* interpreter mananging new object */
+    const char* name,        /* name of new object */
+    ItclClass *iclsPtr,      /* class for new object */
+    int objc,                /* number of arguments */
+    Tcl_Obj *const objv[],   /* argument objects */
+    ItclObject **rioPtr)     /* the created object */
+{
+    int result;
+    ItclObjectInfo * infoPtr;
+
+    result = ItclCreateObject(interp, name, iclsPtr, objc, objv);
+    if (result == TCL_OK) {
+        if (!(iclsPtr->flags & (ITCL_TYPE|ITCL_WIDGET|ITCL_WIDGETADAPTOR))) {
+            Tcl_ResetResult(interp);
+            Tcl_AppendResult(interp, name, NULL);
+        }
+    }
+    if (rioPtr != NULL) {
+        if (result == TCL_OK) {
+            infoPtr = (ItclObjectInfo *)Tcl_GetAssocData(interp,
+			                    ITCL_INTERP_DATA, NULL);
+            *rioPtr = infoPtr->lastIoPtr;
+	} else {
+            *rioPtr = NULL;
+	}
+    }
+    return result;
+}
+
+/*
+ * ------------------------------------------------------------------------
  *  ItclCreateObject()
  *
  *  Creates a new object instance belonging to the given class.
@@ -170,6 +206,9 @@ ItclCreateObject(
     int newEntry;
     ItclResolveInfo *resolveInfoPtr;
     char str[100];
+    /* objv[1]: class name */
+    /* objv[2]: class full name */
+    /* objv[3]: object name */
 
     infoPtr = NULL;
     ItclShowArgs(1, "ItclCreateObject", objc, objv);
@@ -187,6 +226,7 @@ ItclCreateObject(
     /* just init for the case of none ItclWidget objects */
     newObjv = (Tcl_Obj **)objv;
     infoPtr = iclsPtr->infoPtr;
+
     if (infoPtr != NULL) {
       infoPtr->lastIoPtr = NULL;
     }
