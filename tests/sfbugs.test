@@ -254,17 +254,18 @@ test sfbug-Schelte {bug with onfo reported from Schelte SF bug xxx
 
 ::itcl::delete class foo
 
-proc ::sfbug_255_do_uplevel { body } {
-    uplevel 1 $body
-}
-
-proc ::sfbug_255_testclass { pathName args } {
-    uplevel TestClass $pathName $args
-}
-
 test sfbug-255 { SF bug #255
 } -body {
     set ::test_status ""
+
+    proc ::sfbug_255_do_uplevel { body } {
+        uplevel 1 $body
+    }
+
+    proc ::sfbug_255_testclass { pathName args } {
+        uplevel TestClass $pathName $args
+    }
+
     ::itcl::class TestClass {
         public variable property "value"
         constructor {} {
@@ -301,14 +302,41 @@ test fossilbug-8 { fossil bug 2cd667f270b68ef66d668338e09d144e20405e23
 
 ::itcl::delete class ::Naughty
 
-::tcltest::cleanupTests
-
-test sfbug-254 { SF bug #254
+test sfbug-256 { SF bug #256
 } -body {
     set ::test_status ""
-    oo::class destroy
 
-} -result {}
+    proc ::sfbug_256_do_uplevel { body } {
+        uplevel 1 $body
+    }
+
+    proc ::sfbug_256_testclass { pathName args } {
+        uplevel TestClass256 $pathName $args
+    }
+
+    ::itcl::class TestClass256 {
+        public variable property "value"
+        constructor {} {
+        }
+
+        private method internal-helper {} {
+            lappend ::test_status "TestClass::internal-helper"
+            sfbug_256_do_uplevel { lappend ::test_status [cget -property] }
+        }
+
+        public method api-call {} {
+            lappend ::test_status "TestClass::api-call"
+            lappend ::test_status [internal-helper]
+            lappend ::test_status [sfbug_256_do_uplevel { internal-helper }]
+            lappend ::test_status [cget -property]
+            sfbug_256_do_uplevel { lappend ::test_status [cget -property] }
+        }
+    }
+
+    [::sfbug_256_testclass tc] api-call
+} -result {TestClass::api-call TestClass::internal-helper value {TestClass::api-call TestClass::internal-helper value} TestClass::internal-helper value {TestClass::api-call TestClass::internal-helper value {TestClass::api-call TestClass::internal-helper value} TestClass::internal-helper value} value value}
+
+::itcl::delete class TestClass256
 
 
 
@@ -319,6 +347,14 @@ test sfbug-254 { SF bug #254
 #} -result {::bar}
 #
 #::itcl::delete class yyy
+
+# this has to be the last test, as it destroys oo::class!!!!
+test sfbug-254 { SF bug #254
+} -body {
+    set ::test_status ""
+    oo::class destroy
+
+} -result {}
 
 ::tcltest::cleanupTests
 return
