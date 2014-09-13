@@ -1178,22 +1178,24 @@ CallItclObjectCmd(
         if (Itcl_GetUplevelCallFrame(interp, 0) != ptr) {
             /* we are executing an uplevel command (SF bug #244) */
             if (ioPtr != NULL) {
-                infoPtr = (ItclObjectInfo *)Tcl_GetAssocData(interp,
-                        ITCL_INTERP_DATA, NULL);
-                if (Itcl_GetStackSize(&infoPtr->contextStack) <= 1) {
-                    if (imPtr->builtinArgumentPtr == NULL) {
-                      /* it is not a builtin command (SF bug #255) */
-                      oPtr = ioPtr->oPtr;
-                    }
+                if (imPtr->codePtr->flags & ITCL_BUILTIN) {
+                    /* it is a builtin command (SF bug #255 and # 256) */
                     result = ItclObjectCmd(imPtr, interp, oPtr, NULL, objc, objv);
                 } else {
-                    /* we are executing an uplevel command (SF bug #250) */
-                    if (Itcl_GetUplevelContext(interp, &contextIclsPtr, &contextIoPtr, -1) != TCL_OK) {
-                        return TCL_ERROR;
+                    infoPtr = (ItclObjectInfo *)Tcl_GetAssocData(interp,
+                            ITCL_INTERP_DATA, NULL);
+                    if (Itcl_GetStackSize(&infoPtr->contextStack) <= 1) {
+                        oPtr = ioPtr->oPtr;
+                        result = ItclObjectCmd(imPtr, interp, oPtr, NULL, objc, objv);
+                    } else {
+                        /* we are executing an uplevel command (SF bug #250) */
+                        if (Itcl_GetUplevelContext(interp, &contextIclsPtr, &contextIoPtr, -1) != TCL_OK) {
+                            return TCL_ERROR;
+                        }
+                        oPtr = contextIoPtr->oPtr;
+                        result =  ItclObjectCmd(imPtr, interp, oPtr, imPtr->iclsPtr->clsPtr,
+                                objc, objv);
                     }
-                    oPtr = contextIoPtr->oPtr;
-                    result =  ItclObjectCmd(imPtr, interp, oPtr, imPtr->iclsPtr->clsPtr,
-                            objc, objv);
                 }
             } else {
                 result = ItclObjectCmd(imPtr, interp, oPtr, NULL, objc, objv);
