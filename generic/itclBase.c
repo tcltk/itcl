@@ -161,6 +161,9 @@ static ItclCmdsInfo itclCmds [] = {
     { "::itcl::parser::delegate", ITCL_IS_ENSEMBLE},
     { NULL, 0},
 };
+#ifdef ITCL_DEBUG_C_INTERFACE
+extern void RegisterDebugCFunctions( Tcl_Interp * interp);
+#endif
 
 /*
  * ------------------------------------------------------------------------
@@ -330,6 +333,7 @@ Initialize (
     infoPtr->buildingWidget = 0;
     infoPtr->typeDestructorArgumentPtr = Tcl_NewStringObj("", -1);
     Tcl_IncrRefCount(infoPtr->typeDestructorArgumentPtr);
+    infoPtr->lastIoPtr = NULL;
 
     Tcl_SetVar(interp, ITCL_NAMESPACE"::internal::dicts::classes", "", 0);
     Tcl_SetVar(interp, ITCL_NAMESPACE"::internal::dicts::objects", "", 0);
@@ -387,6 +391,10 @@ Initialize (
     }
     objPtr = Tcl_NewStringObj("::itcl::clazz", -1);
     infoPtr->clazzObjectPtr = Tcl_GetObjectFromObj(interp, objPtr);
+
+    // FIXME work around for SF bug #254 needed because of problem in Tcl 8.6.2 TclOO!!
+    Itcl_IncrObjectRefCount(infoPtr->clazzObjectPtr);
+
     Tcl_DecrRefCount(objPtr);
     if (infoPtr->clazzObjectPtr == NULL) {
         Tcl_AppendResult(interp,
@@ -462,6 +470,9 @@ Initialize (
             TCL_NAMESPACE_ONLY);
 
 
+#ifdef ITCL_DEBUG_C_INTERFACE
+    RegisterDebugCFunctions(interp);
+#endif    
     /*
      *  Package is now loaded.
      */
@@ -543,7 +554,7 @@ ItclCallCCommand(
     int result;
 
     ItclShowArgs(2, "ItclCallCCommand", objc, objv);
-    if (!Itcl_FindC(interp, Tcl_GetString(objv[0])+1, &argProc,
+    if (!Itcl_FindC(interp, Tcl_GetString(objv[1])+1, &argProc,
             &objProc, &cData)) {
 	Tcl_AppendResult(interp, "no such registered C command 1: \"",
 	        Tcl_GetString(objv[1]), "\"", NULL);
@@ -559,11 +570,11 @@ ItclCallCCommand(
 	const char **argv;
 	int i;
 
-	argv = (const char**)ckalloc((unsigned)(objc*sizeof(char*)));
-	for (i=1;i<objc;i++) {
-	    argv[i-1] = Tcl_GetString(objv[i]);
+	argv = (const char**)ckalloc((unsigned)((objc-1)*sizeof(char*)));
+	for (i=2;i<objc;i++) {
+	    argv[i-2] = Tcl_GetString(objv[i]);
 	}
-        result = (*argProc)(cData, interp, objc-1, argv);
+        result = (*argProc)(cData, interp, objc-2, argv);
         ckfree((char*)argv);
     }
     if (objProc != NULL) {

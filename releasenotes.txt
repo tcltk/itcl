@@ -1,3 +1,6 @@
+This is the release 4.0.1 of Itcl.
+The difference to 4.0.0: in this release there are only bug fixes from SF and the fossil bug tracker for itcl.
+
 This is the first stable release of Itcl 4.0.
 It is a new major release of Itcl.
 
