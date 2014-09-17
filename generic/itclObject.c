@@ -127,6 +127,42 @@ ObjectRenamedTrace(
 
 /*
  * ------------------------------------------------------------------------
+ *  Itcl_CreateObject()
+ *
+ */
+int
+Itcl_CreateObject(
+    Tcl_Interp *interp,      /* interpreter mananging new object */
+    const char* name,        /* name of new object */
+    ItclClass *iclsPtr,      /* class for new object */
+    int objc,                /* number of arguments */
+    Tcl_Obj *const objv[],   /* argument objects */
+    ItclObject **rioPtr)     /* the created object */
+{
+    int result;
+    ItclObjectInfo * infoPtr;
+
+    result = ItclCreateObject(interp, name, iclsPtr, objc, objv);
+    if (result == TCL_OK) {
+        if (!(iclsPtr->flags & (ITCL_TYPE|ITCL_WIDGET|ITCL_WIDGETADAPTOR))) {
+            Tcl_ResetResult(interp);
+            Tcl_AppendResult(interp, name, NULL);
+        }
+    }
+    if (rioPtr != NULL) {
+        if (result == TCL_OK) {
+            infoPtr = (ItclObjectInfo *)Tcl_GetAssocData(interp,
+			                    ITCL_INTERP_DATA, NULL);
+            *rioPtr = infoPtr->lastIoPtr;
+	} else {
+            *rioPtr = NULL;
+	}
+    }
+    return result;
+}
+
+/*
+ * ------------------------------------------------------------------------
  *  ItclCreateObject()
  *
  *  Creates a new object instance belonging to the given class.
@@ -170,6 +206,9 @@ ItclCreateObject(
     int newEntry;
     ItclResolveInfo *resolveInfoPtr;
     char str[100];
+    /* objv[1]: class name */
+    /* objv[2]: class full name */
+    /* objv[3]: object name */
 
     infoPtr = NULL;
     ItclShowArgs(1, "ItclCreateObject", objc, objv);
@@ -187,6 +226,10 @@ ItclCreateObject(
     /* just init for the case of none ItclWidget objects */
     newObjv = (Tcl_Obj **)objv;
     infoPtr = iclsPtr->infoPtr;
+
+    if (infoPtr != NULL) {
+      infoPtr->lastIoPtr = NULL;
+    }
     /*
      *  Create a new object and initialize it.
      */
@@ -637,6 +680,7 @@ ItclCreateObject(
     if (infoPtr != NULL) {
         infoPtr->currIoPtr = saveCurrIoPtr;
     }
+    infoPtr->lastIoPtr = ioPtr;
     Tcl_DeleteHashTable(ioPtr->constructed);
     ckfree((char*)ioPtr->constructed);
     ioPtr->constructed = NULL;
@@ -651,6 +695,7 @@ errorReturn:
      *  it is no longer needed.
      */
     if (infoPtr != NULL) {
+        infoPtr->lastIoPtr = ioPtr;
         infoPtr->currIoPtr = saveCurrIoPtr;
     }
     if (ioPtr->constructed != NULL) {
@@ -2043,17 +2088,43 @@ ItclReportObjectUsage(
     Tcl_HashEntry *entry;
     Tcl_HashSearch place;
     Tcl_Obj *resultPtr;
-    ItclClass *iclsPtr;
+    ItclClass *iclsPtr = NULL;
     Itcl_List cmdList;
     Itcl_ListElem *elem;
     ItclMemberFunc *imPtr;
     ItclMemberFunc *cmpFunc;
     ItclCmdLookup *clookup;
+    ItclObjectInfo * infoPtr = NULL;
+    ItclClass * classPtr = NULL;
     char *name;
     int ignore;
     int cmp;
+    FOREACH_HASH_DECLS;
 
-    iclsPtr = (ItclClass*)contextIoPtr->iclsPtr;
+    if (contextIoPtr == NULL) {
+        resultPtr = Tcl_GetObjResult(interp);
+        infoPtr = (ClientData)Tcl_GetAssocData(interp, ITCL_INTERP_DATA, NULL);
+        if (infoPtr == NULL) {
+            Tcl_AppendResult(interp, " PANIC cannot get Itcl AssocData in ItclReportObjectUsage", NULL);
+	    return;
+        }
+	if (contextNsPtr == NULL) {
+            Tcl_AppendResult(interp, " PANIC cannot get contextNsPtr in ItclReportObjectUsage", NULL);
+	    return;
+	}
+        FOREACH_HASH_VALUE(classPtr,&infoPtr->nameClasses) {
+            if (strcmp(contextNsPtr->fullName, Tcl_GetString(classPtr->fullNamePtr)) == 0) {
+               iclsPtr = classPtr;
+               break;
+            }
+        }
+        if (iclsPtr == NULL) {
+          Tcl_AppendResult(interp, " PANIC cannot get class from contextNsPtr ItclReportObjectUsage", NULL);
+          return;
+        }
+    } else {
+        iclsPtr = (ItclClass*)contextIoPtr->iclsPtr;
+    }
     ignore = ITCL_CONSTRUCTOR | ITCL_DESTRUCTOR | ITCL_COMMON;
     /*
      *  Scan through all methods in the virtual table and sort
@@ -3061,6 +3132,8 @@ ItclObjectUnknownCommand(
     ItclShowArgs(1, "ItclObjectUnknownCommand", objc, objv);
     cmd = Tcl_GetCommandFromObj(interp, objv[1]);
     if (Tcl_GetCommandInfoFromToken(cmd, &cmdInfo) != 1) {
+        Tcl_AppendResult(interp, "PANIC: cannot get Tcl_GetCommandFromObj for: ", Tcl_GetString(objv[1]), " in ItclObjectUnknownCommand", NULL);
+        return TCL_ERROR;
     }
     oPtr = cmdInfo.objClientData;
     infoPtr = (ItclObjectInfo *)Tcl_GetAssocData(interp,
@@ -3273,11 +3346,36 @@ ItclMapMethodNameProc(
 		    }
                 }
 		/* END needed for test protect-2.5 */
-                Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
-                       "bad option \"", token, "\": should be one of...",
+                if (ioPtr == NULL) {
+                    /* itcl in fossil ticket: 2cd667f270b68ef66d668338e09d144e20405e23 */
+                    Tcl_HashEntry *hPtr;
+                    Tcl_Obj * objPtr;
+	            ItclMemberFunc *imPtr2 = NULL;
+                    ItclCmdLookup *clookupPtr;
+
+                    objPtr = Tcl_NewStringObj(token, -1);
+                    hPtr = Tcl_FindHashEntry(&iclsPtr->resolveCmds, (char *)objPtr);
+	            if (hPtr != NULL) {
+	                clookupPtr = Tcl_GetHashValue(hPtr);
+                        imPtr2 = clookupPtr->imPtr;
+                    }
+		    if ((imPtr->protection & ITCL_PRIVATE) &&
+		            (imPtr2 != NULL) &&
+		            (imPtr->iclsPtr->nsPtr == imPtr2->iclsPtr->nsPtr)) {
+                        Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+		                "invalid command name \"",
+			        token,
+			        "\"", NULL);
+		        return TCL_ERROR;
+		    }
+                } else {
+                    Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+                           "bad option \"", token, "\": should be one of...",
                         (char*)NULL);
-	        ItclReportObjectUsage(interp, ioPtr, nsPtr, nsPtr);
-                return TCL_ERROR;
+	            ItclReportObjectUsage(interp, ioPtr, nsPtr, nsPtr);
+                    return TCL_ERROR;
+
+                }
             }
         }
     }

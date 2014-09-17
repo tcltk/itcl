@@ -1503,6 +1503,16 @@ Itcl_HandleClass(
     int objc,                /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
 {
+    return ItclClassCreateObject(clientData, interp, objc, objv);
+}
+
+int
+ItclClassCreateObject(
+    ClientData clientData,   /* IclObjectInfo */
+    Tcl_Interp *interp,      /* current interpreter */
+    int objc,                /* number of arguments */
+    Tcl_Obj *const objv[])   /* argument objects */
+{
     Tcl_DString buffer;  /* buffer used to build object names */
     Tcl_Obj *objNamePtr;
     Tcl_HashEntry *hPtr;
@@ -1517,11 +1527,10 @@ Itcl_HandleClass(
     char *start;
     char *pos;
     const char *match;
-    int result;
 
     infoPtr = (ItclObjectInfo *)clientData;
     Tcl_ResetResult(interp);
-    ItclShowArgs(1, "Itcl_HandleClassCmd", objc, objv);
+    ItclShowArgs(1, "ItclClassCreateObject", objc, objv);
     /*
      *  If the command is invoked without an object name, then do nothing.
      *  This used to support autoloading--that the class name could be
@@ -1640,8 +1649,7 @@ Itcl_HandleClass(
             NULL, NULL);
     Tcl_NRAddCallback(interp, CallCreateObject, objNamePtr, iclsPtr,
             INT2PTR(objc-4), newObjv);
-    result = Itcl_NRRunCallbacks(interp, callbackPtr);
-    return result;
+    return Itcl_NRRunCallbacks(interp, callbackPtr);
 }
 
 
@@ -1712,7 +1720,7 @@ Itcl_BuildVirtualTables(
      *  Set aside the first object-specific slot for the built-in
      *  "this" variable.  Only allocate one of these, even though
      *  there is a definition for "this" in each class scope.
-     *  Set aside the second object-specific slot for the built-in
+     *  Set aside the second and third object-specific slot for the built-in
      *  "itcl_options" and "itcl_option_components" variable.
      */
     iclsPtr->numInstanceVars++;
