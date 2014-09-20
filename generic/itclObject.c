@@ -3235,6 +3235,7 @@ ItclMapMethodNameProc(
     Tcl_DString buffer;
     Tcl_HashEntry *hPtr;
     Tcl_Namespace * myNsPtr;
+    Tcl_CmdInfo cmdInfo;
     ItclObject *ioPtr;
     ItclClass *iclsPtr;
     ItclClass *iclsPtr2;
@@ -3242,6 +3243,7 @@ ItclMapMethodNameProc(
     const char *head;
     const char *tail;
     const char *sp;
+    int result;
 
     iclsPtr = NULL;
     iclsPtr2 = NULL;
@@ -3250,6 +3252,12 @@ ItclMapMethodNameProc(
             ITCL_INTERP_DATA, NULL);
     ioPtr = (ItclObject *)Tcl_ObjectGetMetadata(oPtr,
             infoPtr->object_meta_type);
+    /* fix for SF bug #257 check if TclOO is still available! */
+    result = Tcl_GetCommandInfo(interp, "::oo::class", &cmdInfo);
+    if (result == 0) {
+      Tcl_AppendResult(interp, " missing ::oo::class command!", NULL);
+      return TCL_ERROR;
+    }
     hPtr = Tcl_FindHashEntry(&infoPtr->objects, (char *)ioPtr);
     if ((hPtr == NULL) || (ioPtr == NULL)) {
         /* try to get the class (if a class is creating an object) */
