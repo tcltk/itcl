@@ -1,3 +1,8 @@
+2014-09-20  Arnulf P. Wiedemann  <wiede@users.sourceforge.net>
+	* generic/itclParse.c:
+	* generic/itclObject.c: Fixes for SF bug #257
+	* tests/sfbugs.test: added test for SF bug #257 and fixed test 254 to
+	use an own interpreter for avoiding problems with following tests.
 2014-09-13  Arnulf P. Wiedemann  <wiede@users.sourceforge.net>
 	* generic/itclMethod.c: Fixes for SF bug #256
 	* tests/sfbugs.test: added test for fossil bug #8 and for SF bug #254
