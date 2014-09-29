@@ -1,3 +1,63 @@
+2014-09-20  Arnulf P. Wiedemann  <wiede@users.sourceforge.net>
+	* generic/itclParse.c:
+	* generic/itclObject.c: Fixes for SF bug #257
+	* tests/sfbugs.test: added test for SF bug #257 and fixed test 254 to
+	use an own interpreter for avoiding problems with following tests.
+2014-09-13  Arnulf P. Wiedemann  <wiede@users.sourceforge.net>
+	* generic/itclMethod.c: Fixes for SF bug #256
+	* tests/sfbugs.test: added test for fossil bug #8 and for SF bug #254
+	and #256
+	* generic/itclObject.c: fix for fossil bug
+	2cd667f270b68ef66d668338e09d144e20405e23 (fossil bug # 8).
+	* generic/itcl.decls:
+	* generic/itclBase.c:
+	* generic/itclClass.c:
+	* generic/itclInt.h:
+	* generic/itclIntDecls.h:
+	* generic/itclObject.c:
+	* generic/itclTestRegisterC.c: Implementation of Itcl_CreateObject
+	stubs Interface (now complete) SF bug #252.
+2014-09-07  Arnulf P. Wiedemann  <wiede@users.sourceforge.net>
+	* generic/itclMethod.c: small fixes to save code.
+2014-09-07  Arnulf P. Wiedemann  <wiede@users.sourceforge.net>
+	* generic/itclParse.c: fix for making Itcl_CallCCommand working again.
+2014-09-07  Arnulf P. Wiedemann  <wiede@users.sourceforge.net>
+	* generic/itcl.decls:
+	* generic/itclClass.c:
+	* generic/itclDecls.h:
+	* generic/itclInt.h:
+	* generic/itclIntDecls.h:
+	* generic/itclObject.c:
+	* generic/itclStubInit.c: Start of implementation of Itcl_CreateObject
+	stubs interface.
+2014-09-07  Arnulf P. Wiedemann  <wiede@users.sourceforge.net>
+	* generic/itcl2TclOO.h:
+	* generic/itcl2TclOO.c:
+	* generic/itclBase.c: Work around for SF bug #254 using call
+	Itcl_IncrObjectRefCount until fix in TclOO is done.
+2014-09-07  Arnulf P. Wiedemann  <wiede@users.sourceforge.net>
+	* generic/itclMethod.c: fix for SF bug #255 in CallItclObjectCmd.
+	Check for built in commands and do not set oPtr in that case.
+2014-02-19  Arnulf P. Wiedemann  <wiede@users.sourceforge.net>
+	* generic/itclCmd.c: fix for SF bug #238 in Itcl_ScopeCmd. Use
+	Tcl_AppendResult instead of TclAppendElement.
+2014-02-18  Arnulf P. Wiedemann  <wiede@users.sourceforge.net>
+	* generic/itclMethod.c: again a fix for SF bug #244 to make it work
+	correctly.
+2014-02-18  Arnulf P. Wiedemann  <wiede@users.sourceforge.net>
+	* tests/sfbugs.test: added a test file for bugs reported on SF incrtcl
+	tracker.
+2014-02-18  Arnulf P. Wiedemann  <wiede@users.sourceforge.net>
+	* generic/itclResolve.c:
+	* generic/itclObject.c: fix for upvar problem (SF bug #187) in 
+	splitting up the trace handlers for this, win, type, self and selfns.
+	Also doing traces for linked variables to one of these.
+2014-02-16  Arnulf P. Wiedemann  <wiede@users.sourceforge.net>
+	* generic/itclMethod.c:
+	* generic/itclMigrate2TclCore.h:
+	* generic/itclMigrate2TclCore.c: 2nd fix for uplevel problem (SF bug #250).
+2014-02-13  Arnulf P. Wiedemann  <wiede@users.sourceforge.net>
+	* generic/itclMigrate2TclCore.c: fix for uplevel 2nd problem (SF bug #250).
 2014-01-24  Arnulf P. Wiedemann  <wiede@users.sourceforge.net>
 	* generic/itclMethod.c: added some code for special handling of
 	relative method name with namespace parts (SF bug #243)

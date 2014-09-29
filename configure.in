@@ -91,6 +91,7 @@ TEA_ADD_SOURCES([
 	        itclTclIntStubsFcn.c
 	        itclUtil.c
                 itclMigrate2TclCore.c
+		itclTestRegisterC.c
                 ])
 TEA_ADD_HEADERS([generic/itcl.h
                 generic/itclDecls.h
