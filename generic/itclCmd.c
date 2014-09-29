@@ -844,7 +844,8 @@ Itcl_ScopeCmd(
             Tcl_AppendToObj(objPtr2, openParen, -1);
             openParen = NULL;
         }
-        Tcl_AppendElement(interp, Tcl_GetString(objPtr2));
+        /* fix for SF bug #238 use Tcl_AppendResult instead of Tcl_AppendElement */
+        Tcl_AppendResult(interp, Tcl_GetString(objPtr2), NULL);
         Tcl_DecrRefCount(objPtr);
         Tcl_DecrRefCount(objPtr2);
     } else {
@@ -1785,7 +1786,6 @@ Itcl_AddComponentCmd(
         return TCL_ERROR;
     }
     ItclAddClassComponentDictInfo(interp, contextIclsPtr, icPtr);
-//fprintf(stderr, "*** ADDCOMP!%s!%s!%s!%s!\n", contextIclsPtr->nsPtr->fullName, Tcl_GetString(objv[2]), Tcl_GetString(icPtr->namePtr), Tcl_GetString(icPtr->ivPtr->fullNamePtr));
     contextIclsPtr->numVariables++;
     Tcl_SetHashValue(hPtr, icPtr);
     Tcl_DStringInit(&buffer);

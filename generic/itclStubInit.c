@@ -57,7 +57,7 @@ static const ItclIntStubs itclIntStubs = {
     Itcl_GetCommonVar, /* 41 */
     0, /* 42 */
     0, /* 43 */
-    0, /* 44 */
+    Itcl_CreateObject, /* 44 */
     Itcl_DeleteObject, /* 45 */
     Itcl_DestructObject, /* 46 */
     0, /* 47 */

@@ -163,7 +163,7 @@ test delegatemethod-1.6a {delegating unknown method to existing component with e
     ::itcl::delete class dog
 } -returnCodes {
     error
-} -result {unknown or ambiguous subcommand "foo": must be bytelength, compare, equal, first, index, is, last, length, map, match, range, repeat, replace, reverse, tolower, totitle, toupper, trim, trimleft, trimright, wordend, or wordstart}
+} -result {unknown or ambiguous subcommand "foo": must be bytelength, cat, compare, equal, first, index, is, last, length, map, match, range, repeat, replace, reverse, tolower, totitle, toupper, trim, trimleft, trimright, wordend, or wordstart}
 
 test delegatemethod-1.7 {can't delegate local method: order 1} -body {
     ::itcl::extendedclass dog {

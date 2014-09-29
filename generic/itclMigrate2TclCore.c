@@ -132,6 +132,11 @@ ClientData
 Itcl_GetCallFrameClientData(
     Tcl_Interp *interp)
 {
+    /* suggested fix for SF bug #250 use varFramePtr instead of framePtr
+     * seems to have no side effect concerning test suite, but does NOT fix the bug
+     * there is a different fix using Itcl_GetUplevelContext, which works.
+     * We are using framePtr again
+     */
     CallFrame *framePtr = ((Interp *)interp)->framePtr;
     if (framePtr == NULL) {
         return NULL;
@@ -150,6 +155,28 @@ Itcl_SetCallFrameNamespace(
     }
     ((Interp *)interp)->framePtr->nsPtr = (Namespace *)nsPtr;
     return TCL_OK;
+}
+
+int
+Itcl_GetCallVarFrameObjc(
+    Tcl_Interp *interp)
+{
+    CallFrame *framePtr = ((Interp *)interp)->varFramePtr;
+    if (framePtr == NULL) {
+        return 0;
+    }
+    return framePtr->objc;
+}
+
+Tcl_Obj * const *
+Itcl_GetCallVarFrameObjv(
+    Tcl_Interp *interp)
+{
+    CallFrame *framePtr = ((Interp *)interp)->varFramePtr;
+    if (framePtr == NULL) {
+        return NULL;
+    }
+    return framePtr->objv;
 }
 
 int
@@ -208,4 +235,45 @@ Itcl_IsCallFrameArgument(
         }
     }
     return 0;
+}
+
+int
+Itcl_IsCallFrameLinkVar(
+    Tcl_Interp *interp,
+    const char *name)
+{
+    CallFrame *varFramePtr = ((Interp *)interp)->framePtr;
+    Proc *procPtr;
+
+    if (varFramePtr == NULL) {
+        return 0;
+    }
+    if (!varFramePtr->isProcCallFrame) {
+        return 0;
+    }
+    procPtr = varFramePtr->procPtr;
+    /*
+     *  Search through compiled locals first...
+     */
+    if (procPtr) {
+        CompiledLocal *localPtr = procPtr->firstLocalPtr;
+        int nameLen = strlen(name);
+
+        for (;localPtr != NULL; localPtr = localPtr->nextPtr) {
+            if (TclIsVarLink(localPtr)) {
+                register char *localName = localPtr->name;
+                if ((name[0] == localName[0])
+                        && (nameLen == localPtr->nameLength)
+                        && (strcmp(name, localName) == 0)) {
+                    return 1;
+                }
+            }
+        }
+    }
+    return 0;
+}
+
+int 
+Itcl_IsVarLink(Tcl_Var varPtr) {
+    return TclIsVarLink((Var *)varPtr);
 }

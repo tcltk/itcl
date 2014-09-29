@@ -1667,7 +1667,7 @@ Itcl_BiInfoVarsCmd(
     } else {
 	listPtr = Tcl_NewListObj(0, NULL);
 	FOREACH_HASH_VALUE(ivPtr, &iclsPtr->variables) {
-	    if ((ivPtr->flags & (ITCL_TYPE_VAR|ITCL_VARIABLE)) != 0) {
+	    if ((ivPtr->flags & ITCL_VARIABLE) != 0) {
 		name = Tcl_GetString(ivPtr->namePtr);
                 if ((pattern == NULL) ||
 		        Tcl_StringMatch((const char *)name, pattern)) {
@@ -1715,17 +1715,17 @@ Itcl_BiInfoVarsCmd(
 		numElems = 0;
 /* FIXME !! should perhaps skip ___DO_NOT_DELETE_THIS_VARIABLE here !! */
 		FOREACH_HASH_VALUE(ivPtr, &iclsPtr->variables) {
-		    if ((ivPtr->flags & (ITCL_TYPE_VAR|ITCL_VARIABLE)) != 0) {
-			    if (head != NULL) {
-			        namePtr = Tcl_NewStringObj(
-				        Tcl_GetString(ivPtr->fullNamePtr), -1);
-			    } else {
-			        namePtr = Tcl_NewStringObj(
-				        Tcl_GetString(ivPtr->namePtr), -1);
-			    }
-		            Tcl_ListObjAppendElement(interp, resultListPtr,
-			            namePtr);
-			    numElems++;
+		    if ((ivPtr->flags & ITCL_VARIABLE) != 0) {
+		        if (head != NULL) {
+		            namePtr = Tcl_NewStringObj(
+			            Tcl_GetString(ivPtr->fullNamePtr), -1);
+		        } else {
+		            namePtr = Tcl_NewStringObj(
+			            Tcl_GetString(ivPtr->namePtr), -1);
+		        }
+		        Tcl_ListObjAppendElement(interp, resultListPtr,
+		                namePtr);
+		        numElems++;
 		    }
 		    if ((ivPtr->flags & ITCL_COMMON) != 0) {
 		        if (ivPtr->protection != ITCL_PUBLIC) {
