@@ -1,3 +1,7 @@
+2014-10-31  Don Porter  <dgp@Users.sourceforge.net>
+	* generic/itclMethod.c:	Completely different fix for SF bug #243
+	* geneirc/itclObject.c: that has the benefit of not completely
+	breaking Itk and Iwidgets. :)
 2014-09-20  Arnulf P. Wiedemann  <wiede@users.sourceforge.net>
 	* generic/itclParse.c:
 	* generic/itclObject.c: Fixes for SF bug #257
