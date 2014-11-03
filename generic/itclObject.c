@@ -2918,8 +2918,12 @@ ItclObjectCmd(
     ItclObjectInfo *infoPtr;
     ItclMemberFunc *imPtr;
     ItclClass *iclsPtr;
+    Itcl_ListElem *elem;
+    ItclClass *basePtr;
     void *callbackPtr;
+    const char *className;
     const char *tail;
+    const char *cp;
     int isDirectCall;
     int incr;
     int result;
@@ -2974,33 +2978,49 @@ ItclObjectCmd(
     }
     methodNamePtr = NULL;
     if (objv[0] != NULL) {
-	const char *nsName = NULL;
-
         Itcl_ParseNamespPath(Tcl_GetString(objv[0]), &buffer,
-	        &nsName, &tail);
-
-	if (nsName) {
-	    /*
-	     * We resolved to this ItclObjectCmd by way of a
-	     * qualified command name.  That seems to imply that
-	     * whatever the namespace qualifiers are as a string
-	     * prefix, they identify the namespace in which this
-	     * command is defined, which is the iclsPtr->nsPtr
-	     * namespace, I assert.  If there is an exception,
-	     * for goodness sakes lets get it in the test suite.
-	     *
-	     * The tail part of the command name that resolved us
-	     * here must be the method name.
-	     */
-
-	    methodNamePtr = Tcl_NewStringObj(tail, -1);
-	    found = 1;
-	    clsPtr = iclsPtr->clsPtr;
-	}
+	        &className, &tail);
+        if (className != NULL) {
+            methodNamePtr = Tcl_NewStringObj(tail, -1);
+	    /* look for the class in the hierarchy */
+	    cp = className;
+	    if ((*cp == ':') && (*(cp+1) == ':')) {
+	        cp += 2;
+	    }
+            elem = Itcl_FirstListElem(&iclsPtr->bases);
+	    if (elem == NULL) {
+	        /* check the class itself */
+		if (strcmp((const char *)cp,
+		        (const char *)Tcl_GetString(iclsPtr->namePtr)) == 0) {
+		    found = 1;
+		    clsPtr = iclsPtr->clsPtr;
+		}
+	    }
+            while (elem != NULL) {
+                basePtr = (ItclClass*)Itcl_GetListValue(elem);
+		if (strcmp((const char *)cp,
+		        (const char *)Tcl_GetString(basePtr->namePtr)) == 0) {
+		    clsPtr = basePtr->clsPtr;
+		    found = 1;
+		    break;
+		}
+                elem = Itcl_NextListElem(elem);
+	    }
+	    if (!found) {
+		found = 1;
+		clsPtr = iclsPtr->clsPtr;
+	    }
+        }
         Tcl_DStringFree(&buffer);
     } else {
 	/* Can this happen? */
 	Tcl_Panic("objv[0] is NULL?!");
+	/* Panic above replaces obviously broken line below.  Creating
+	 * a string value from uninitialized memory cannot possibly be
+	 * a correct thing to do.
+
+        methodNamePtr = Tcl_NewStringObj(tail, -1);
+	 */
     }
     if (isDirectCall) {
 	if (!found) {
