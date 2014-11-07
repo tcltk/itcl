@@ -137,7 +137,7 @@ Itcl_GetCallFrameClientData(
      * there is a different fix using Itcl_GetUplevelContext, which works.
      * We are using framePtr again
      */
-    CallFrame *framePtr = ((Interp *)interp)->framePtr;
+    CallFrame *framePtr = ((Interp *)interp)->varFramePtr;
     if (framePtr == NULL) {
         return NULL;
     }
