@@ -3006,10 +3006,21 @@ ItclObjectCmd(
 		}
                 elem = Itcl_NextListElem(elem);
 	    }
+	    if (!found) {
+		found = 1;
+		clsPtr = iclsPtr->clsPtr;
+	    }
         }
         Tcl_DStringFree(&buffer);
     } else {
+	/* Can this happen? */
+	Tcl_Panic("objv[0] is NULL?!");
+	/* Panic above replaces obviously broken line below.  Creating
+	 * a string value from uninitialized memory cannot possibly be
+	 * a correct thing to do.
+
         methodNamePtr = Tcl_NewStringObj(tail, -1);
+	 */
     }
     if (isDirectCall) {
 	if (!found) {
