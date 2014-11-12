@@ -321,7 +321,7 @@ Initialize (
     Tcl_InitHashTable(&infoPtr->procMethods, TCL_ONE_WORD_KEYS);
     Tcl_InitObjHashTable(&infoPtr->instances);
     Tcl_InitHashTable(&infoPtr->objectInstances, TCL_ONE_WORD_KEYS);
-    Tcl_InitObjHashTable(&infoPtr->myEnsembles);
+//    Tcl_InitObjHashTable(&infoPtr->myEnsembles);
     Tcl_InitObjHashTable(&infoPtr->classTypes);
     infoPtr->ensembleInfo = (EnsembleInfo *)ckalloc(sizeof(EnsembleInfo));
     memset(infoPtr->ensembleInfo, 0, sizeof(EnsembleInfo));
@@ -392,8 +392,10 @@ Initialize (
     objPtr = Tcl_NewStringObj("::itcl::clazz", -1);
     infoPtr->clazzObjectPtr = Tcl_GetObjectFromObj(interp, objPtr);
 
-    // FIXME work around for SF bug #254 needed because of problem in Tcl 8.6.2 TclOO!!
-    Itcl_IncrObjectRefCount(infoPtr->clazzObjectPtr);
+    // work around for SF bug #254 needed because of problem in TclOO 1.0.2 !!
+    if (Tcl_PkgPresent(interp, "TclOO", "1.0.2", 1) != NULL) {
+	Itcl_IncrObjectRefCount(infoPtr->clazzObjectPtr);
+    }
 
     Tcl_DecrRefCount(objPtr);
     if (infoPtr->clazzObjectPtr == NULL) {
