@@ -266,14 +266,6 @@ Itcl_ParseInit(
     if (Itcl_CreateEnsemble(interp, "::itcl::find") != TCL_OK) {
         return TCL_ERROR;
     }
-/*
-    namePtr = Tcl_NewStringObj("::itcl::find", -1);
-    objPtr = Tcl_GetObjResult(interp);
-    Tcl_IncrRefCount(objPtr);
-    hPtr = Tcl_CreateHashEntry(&infoPtr->myEnsembles, (char *)namePtr, &isNew);
-    Tcl_SetHashValue(hPtr, objPtr);
-    Tcl_DecrRefCount(namePtr);
-*/
 
     if (Itcl_AddEnsemblePart(interp, "::itcl::find",
             "classes", "?pattern?",
@@ -299,14 +291,6 @@ Itcl_ParseInit(
     if (Itcl_CreateEnsemble(interp, "::itcl::delete") != TCL_OK) {
         return TCL_ERROR;
     }
-/*
-    namePtr = Tcl_NewStringObj("::itcl::delete", -1);
-    objPtr = Tcl_GetObjResult(interp);
-    Tcl_IncrRefCount(objPtr);
-    hPtr = Tcl_CreateHashEntry(&infoPtr->myEnsembles, (char *)namePtr, &isNew);
-    Tcl_SetHashValue(hPtr, objPtr);
-    Tcl_DecrRefCount(namePtr);
-*/
 
     if (Itcl_AddEnsemblePart(interp, "::itcl::delete",
             "class", "name ?name...?",
@@ -339,14 +323,6 @@ Itcl_ParseInit(
     if (Itcl_CreateEnsemble(interp, "::itcl::is") != TCL_OK) {
         return TCL_ERROR;
     }
-/*
-    namePtr = Tcl_NewStringObj("::itcl::is", -1);
-    objPtr = Tcl_GetObjResult(interp);
-    Tcl_IncrRefCount(objPtr);
-    hPtr = Tcl_CreateHashEntry(&infoPtr->myEnsembles, (char *)namePtr, &isNew);
-    Tcl_SetHashValue(hPtr, objPtr);
-    Tcl_DecrRefCount(namePtr);
-*/
 
     if (Itcl_AddEnsemblePart(interp, "::itcl::is",
             "class", "name", Itcl_IsClassCmd,
@@ -390,14 +366,6 @@ Itcl_ParseInit(
             (ClientData)infoPtr, Itcl_ReleaseData) != TCL_OK) {
         return TCL_ERROR;
     }
-/*
-    namePtr = Tcl_NewStringObj("::itcl::filter", -1);
-    objPtr = Tcl_GetObjResult(interp);
-    Tcl_IncrRefCount(objPtr);
-    hPtr = Tcl_CreateHashEntry(&infoPtr->myEnsembles, (char *)namePtr, &isNew);
-    Tcl_SetHashValue(hPtr, objPtr);
-    Tcl_DecrRefCount(namePtr);
-*/
 
     Itcl_PreserveData((ClientData)infoPtr);
 
@@ -407,14 +375,6 @@ Itcl_ParseInit(
     if (Itcl_CreateEnsemble(interp, "::itcl::forward") != TCL_OK) {
         return TCL_ERROR;
     }
-/*
-    namePtr = Tcl_NewStringObj("::itcl::forward", -1);
-    objPtr = Tcl_GetObjResult(interp);
-    Tcl_IncrRefCount(objPtr);
-    hPtr = Tcl_CreateHashEntry(&infoPtr->myEnsembles, (char *)namePtr, &isNew);
-    Tcl_SetHashValue(hPtr, objPtr);
-    Tcl_DecrRefCount(namePtr);
-*/
 
     if (Itcl_AddEnsemblePart(interp, "::itcl::forward",
             "add", "objectOrClass srcCommand targetCommand ? options ... ?",
@@ -438,14 +398,6 @@ Itcl_ParseInit(
     if (Itcl_CreateEnsemble(interp, "::itcl::mixin") != TCL_OK) {
         return TCL_ERROR;
     }
-/*
-    namePtr = Tcl_NewStringObj("::itcl::mixin", -1);
-    objPtr = Tcl_GetObjResult(interp);
-    Tcl_IncrRefCount(objPtr);
-    hPtr = Tcl_CreateHashEntry(&infoPtr->myEnsembles, (char *)namePtr, &isNew);
-    Tcl_SetHashValue(hPtr, objPtr);
-    Tcl_DecrRefCount(namePtr);
-*/
 
     if (Itcl_AddEnsemblePart(interp, "::itcl::mixin",
             "add", "objectOrClass class ? class ... ?",
@@ -469,13 +421,6 @@ Itcl_ParseInit(
     if (Itcl_CreateEnsemble(interp, "::itcl::import::stub") != TCL_OK) {
         return TCL_ERROR;
     }
-/*
-    namePtr = Tcl_NewStringObj("::itcl::stubs", -1);
-    objPtr = Tcl_GetObjResult(interp);
-    hPtr = Tcl_CreateHashEntry(&infoPtr->myEnsembles, (char *)namePtr, &isNew);
-    Tcl_SetHashValue(hPtr, objPtr);
-    Tcl_DecrRefCount(namePtr);
-*/
 
     if (Itcl_AddEnsemblePart(interp, "::itcl::import::stub",
             "create", "name", Itcl_StubCreateCmd,
@@ -545,14 +490,6 @@ Itcl_ParseInit(
     if (Itcl_CreateEnsemble(interp, "::itcl::parser::delegate") != TCL_OK) {
         return TCL_ERROR;
     }
-/*
-    namePtr = Tcl_NewStringObj("::itcl::delegate", -1);
-    objPtr = Tcl_GetObjResult(interp);
-    Tcl_IncrRefCount(objPtr);
-    hPtr = Tcl_CreateHashEntry(&infoPtr->myEnsembles, (char *)namePtr, &isNew);
-    Tcl_SetHashValue(hPtr, objPtr);
-    Tcl_DecrRefCount(namePtr);
-*/
 
     if (Itcl_AddEnsemblePart(interp, "::itcl::parser::delegate",
             "method", "name to targetName as scipt using script",
