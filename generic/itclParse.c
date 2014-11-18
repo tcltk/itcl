@@ -189,13 +189,13 @@ Itcl_ParseInit(
     Tcl_Interp *interp,     /* interpreter to be updated */
     ItclObjectInfo *infoPtr) /* info regarding all known objects and classes */
 {
-//    Tcl_HashEntry *hPtr;
+    /*    Tcl_HashEntry *hPtr;*/
     Tcl_Namespace *parserNs;
-//    Tcl_Obj *objPtr;
-//    Tcl_Obj *namePtr;
+    /*    Tcl_Obj *objPtr;*/
+    /*    Tcl_Obj *namePtr;*/
     ProtectionCmdInfo *pInfoPtr;
     Tcl_DString buffer;
-//    int isNew;
+    /*    int isNew; */
     int i;
 
     /*

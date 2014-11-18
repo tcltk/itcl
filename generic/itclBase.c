@@ -391,7 +391,7 @@ Initialize (
     objPtr = Tcl_NewStringObj("::itcl::clazz", -1);
     infoPtr->clazzObjectPtr = Tcl_GetObjectFromObj(interp, objPtr);
 
-    // work around for SF bug #254 needed because of problem in TclOO 1.0.2 !!
+    /* work around for SF bug #254 needed because of problem in TclOO 1.0.2 !! */
     if (Tcl_PkgPresent(interp, "TclOO", "1.0.2", 1) != NULL) {
 	Itcl_IncrObjectRefCount(infoPtr->clazzObjectPtr);
     }
