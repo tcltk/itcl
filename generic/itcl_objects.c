@@ -1025,8 +1025,12 @@ ItclFreeObject(cdata)
      *  must be deleted explicitly here.
      */
     for (i=0; i < dataSize; i++) {
-        if (contextObj->data[i]) {
-            ckfree((char*)contextObj->data[i]);
+	Var *varPtr = contextObj->data[i];
+        if (varPtr) {
+	    if (!TclIsVarUndefined(varPtr)) {
+		Tcl_Panic("Var being freed is still defined!");
+	    }
+            ckfree((char*)varPtr);
         }
     }
 
@@ -1213,7 +1217,7 @@ Itcl_ScopedVarResolver(interp, name, contextNs, flags, rPtr)
     }
     contextObj = (ItclObject*)cmdInfo.objClientData;
     if (contextObj->dataSize < 0) {
-	/* Don't resolve names into dying objects? */
+	/* Don't resolve names into dying objects */
         return TCL_ERROR;
     }
 
