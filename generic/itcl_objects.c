@@ -962,6 +962,10 @@ ItclFreeObject(cdata)
     ItclContext context;
     Itcl_InterpState istate;
 
+    int dataSize = contextObj->dataSize;
+
+    contextObj->dataSize = -1;
+
     /*
      *  Install the class namespace and object context so that
      *  the object's data members can be destroyed via simple
@@ -1020,9 +1024,13 @@ ItclFreeObject(cdata)
      *  variables are protected by an extra reference count, and they
      *  must be deleted explicitly here.
      */
-    for (i=0; i < contextObj->dataSize; i++) {
-        if (contextObj->data[i]) {
-            ckfree((char*)contextObj->data[i]);
+    for (i=0; i < dataSize; i++) {
+	Var *varPtr = contextObj->data[i];
+        if (varPtr) {
+	    if (!TclIsVarUndefined(varPtr)) {
+		Tcl_Panic("Var being freed is still defined!");
+	    }
+            ckfree((char*)varPtr);
         }
     }
 
@@ -1208,6 +1216,10 @@ Itcl_ScopedVarResolver(interp, name, contextNs, flags, rPtr)
         return TCL_ERROR;
     }
     contextObj = (ItclObject*)cmdInfo.objClientData;
+    if (contextObj->dataSize < 0) {
+	/* Don't resolve names into dying objects */
+        return TCL_ERROR;
+    }
 
     /*
      *  Resolve the variable with respect to the most-specific
