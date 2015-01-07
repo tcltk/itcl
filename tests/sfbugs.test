@@ -227,7 +227,7 @@ test sfbug-250 { SF bug #250
     $a m1
 
 } -result {m2} \
-  -cleanup {::itcl::delete class B}
+  -cleanup {::itcl::delete class A B}
 
 test sfbug-Schelte {bug with onfo reported from Schelte SF bug xxx
 } -body {
@@ -399,6 +399,19 @@ set tc [::testclass .]
 $tc api-call
     }
 }
+
+test sfbug-261 { SF bug #261 } -setup {
+    itcl::class A {
+	public method a1 {} {a2}
+	public method a2 {} {uplevel a3 hello}
+	public method a3 {s} {return $s}
+    }
+    A x
+} -body {
+    x a1
+} -cleanup {
+    itcl::delete class A
+} -result hello
 
 #test sfbug-xxx { SF bug xxx
 #} -body {
