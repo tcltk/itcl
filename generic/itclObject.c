@@ -3088,21 +3088,8 @@ ItclObjectCmd(
 
     } else {
 	ItclShowArgs(1, "run CallPublicObjectCmd2", objc, objv);
-        if (objc == 1) {
-            /* add a "my" at the beginning of the arguments */
-            incr = 1;
-            newObjv = (Tcl_Obj **)ckalloc(sizeof(Tcl_Obj *)*(objc+incr));
-            myPtr = Tcl_NewStringObj("my", 2);
-            Tcl_IncrRefCount(myPtr);
-            newObjv[0] = myPtr;
-            memcpy(newObjv+incr, objv, (sizeof(Tcl_Obj*)*(objc)));
-	    ItclShowArgs(1, "run CallPublicObjectCmd3", objc+incr, newObjv);
-            Tcl_NRAddCallback(interp, CallPublicObjectCmd, oPtr, clsPtr,
-                    INT2PTR(objc+incr), newObjv);
-        } else {
-	    Tcl_NRAddCallback(interp, CallPublicObjectCmd, oPtr, clsPtr,
-	            INT2PTR(objc), (ClientData)objv);
-        }
+	Tcl_NRAddCallback(interp, CallPublicObjectCmd, oPtr, clsPtr,
+		INT2PTR(objc), (ClientData)objv);
     }
 
     result = Itcl_NRRunCallbacks(interp, callbackPtr);

@@ -101,14 +101,6 @@ Itcl_ActivateCallFrame(
     return (Tcl_CallFrame *) oldFramePtr;
 }
 
-void *
-Itcl_GetCallFrameVarFramePtr(
-    Tcl_Interp *interp)
-{
-
-    return ((Interp *)interp)->varFramePtr;
-}
-
 Tcl_Namespace *
 Itcl_GetUplevelNamespace(
     Tcl_Interp *interp,
