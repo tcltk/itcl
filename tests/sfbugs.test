@@ -33,9 +33,8 @@ test sfbug-187 {upvar with this variable SF bug #187
     }
     foo bar
     bar test
-} -result {::bar}
-
-::itcl::delete class foo
+} -result {::bar} \
+  -cleanup {::itcl::delete class foo}
 
 test sfbug-234 {chain with no argument SF bug #234
 } -body {
@@ -65,9 +64,8 @@ test sfbug-234 {chain with no argument SF bug #234
     set y [Two #auto]
     $y t1 a
     $y t2
-} -result {{::two0 Two.t1(a)} {::two0 One.t1(a)} {::two0 Two.t2} {::two0 One.t2}}
-
-::itcl::delete class Two
+} -result {{::two0 Two.t1(a)} {::two0 One.t1(a)} {::two0 Two.t2} {::two0 One.t2}} \
+  -cleanup {::itcl::delete class Two}
 
 test sfbug-236 {problem with inheritance of methods SF bug #236
 } -body {
@@ -100,9 +98,8 @@ test sfbug-236 {problem with inheritance of methods SF bug #236
 
 # expected output:
 # titi toto
-} -result {{titi toto}}
-
-::itcl::delete class c_rom
+} -result {{titi toto}} \
+  -cleanup {::itcl::delete class c_rom}
 
 test sfbug-237 { problem with chain command SF bug #237
 } -body {
@@ -149,9 +146,8 @@ test sfbug-237 { problem with chain command SF bug #237
     $obj init_OK1
     $obj init_OK2
     $obj init_ERR1
-} -result {{OK ITCL constructor} {OK1 CHILD} {OK1 MAIN TEST} {OK2 CHILD} {OK2 MAIN} {ERR1 CHILD} {ERR1 MAIN}}
-
-::itcl::delete class child
+} -result {{OK ITCL constructor} {OK1 CHILD} {OK1 MAIN TEST} {OK2 CHILD} {OK2 MAIN} {ERR1 CHILD} {ERR1 MAIN}} \
+  -cleanup {::itcl::delete class child}
 
 test sfbug-243 {faulty namespace behaviour SF bug #243
 } -body {
@@ -177,9 +173,8 @@ test sfbug-243 {faulty namespace behaviour SF bug #243
 
     itcl::body ns::A::do {} {ns::A::nsdo}
     [ns::A #auto] do
-} -result {{body do: nsdo} {body do: A::nsdo} {body do: ::ns::A::nsdo} {body do: ns::A::nsdo}}
-
-::itcl::delete class ns::A
+} -result {{body do: nsdo} {body do: A::nsdo} {body do: ::ns::A::nsdo} {body do: ns::A::nsdo}} \
+  -cleanup {::itcl::delete class ns::A}
 
 test sfbug-244 { SF bug 244
 } -body {
@@ -199,10 +194,8 @@ test sfbug-244 { SF bug 244
         lappend ::test_status "I'm $this"
         do2
     }
-} -result {{I'm ::a0} done}
-
-::itcl::delete class A
-rename foo {}
+} -result {{I'm ::a0} done} \
+  -cleanup {::itcl::delete class A; rename foo {}}
 
 test sfbug-250 { SF bug #250
 } -body {
@@ -233,9 +226,8 @@ test sfbug-250 { SF bug #250
     set a [A #auto]
     $a m1
 
-} -result {m2}
-
-::itcl::delete class B
+} -result {m2} \
+  -cleanup {::itcl::delete class A B}
 
 test sfbug-Schelte {bug with onfo reported from Schelte SF bug xxx
 } -body {
@@ -250,9 +242,21 @@ test sfbug-Schelte {bug with onfo reported from Schelte SF bug xxx
     }
 
     [foo #auto] kerplunk hello world
-} -result {{foo0 kerplunk hello world} {foo0 kerplunk hello world} {foo0 kerplunk hello world}}
+} -result {{foo0 kerplunk hello world} {foo0 kerplunk hello world} {foo0 kerplunk hello world}} \
+  -cleanup {::itcl::delete class foo}
 
-::itcl::delete class foo
+test sfbug-254 { SF bug #254
+} -body {
+    set interp [interp create]
+    $interp eval {
+      package require itcl
+
+      set ::test_status ""
+      oo::class destroy
+      lappend ::test_status "::oo::class destroy worked"
+    }
+} -result {{::oo::class destroy worked}} \
+  -cleanup { }
 
 test sfbug-255 { SF bug #255
 } -body {
@@ -285,9 +289,8 @@ test sfbug-255 { SF bug #255
     }
 
     [::sfbug_255_testclass tc] api-call
-} -result {TestClass::api-call TestClass::internal-helper TestClass::internal-helper value value}
-
-::itcl::delete class TestClass
+} -result {TestClass::api-call TestClass::internal-helper TestClass::internal-helper value value} \
+  -cleanup {::itcl::delete class TestClass}
 
 test fossilbug-8 { fossil bug 2cd667f270b68ef66d668338e09d144e20405e23
 } -body {
@@ -298,9 +301,8 @@ test fossilbug-8 { fossil bug 2cd667f270b68ef66d668338e09d144e20405e23
     }
     catch {::Naughty die} msg
     lappend ::test_status $msg 
-} -result {{invalid command name "die"}}
-
-::itcl::delete class ::Naughty
+} -result {{invalid command name "die"}} \
+  -cleanup {::itcl::delete class ::Naughty}
 
 test sfbug-256 { SF bug #256
 } -body {
@@ -334,27 +336,89 @@ test sfbug-256 { SF bug #256
     }
 
     [::sfbug_256_testclass tc] api-call
-} -result {TestClass::api-call TestClass::internal-helper value {TestClass::api-call TestClass::internal-helper value} TestClass::internal-helper value {TestClass::api-call TestClass::internal-helper value {TestClass::api-call TestClass::internal-helper value} TestClass::internal-helper value} value value}
+} -result {TestClass::api-call TestClass::internal-helper value {TestClass::api-call TestClass::internal-helper value} TestClass::internal-helper value {TestClass::api-call TestClass::internal-helper value {TestClass::api-call TestClass::internal-helper value} TestClass::internal-helper value} value value} \
+  -cleanup {::itcl::delete class TestClass256}
 
-::itcl::delete class TestClass256
+test sfbug-257 { SF bug #257
+} -body {
+    set interp [interp create]
+    $interp eval {
+      package require itcl
+      set ::test_status ""
+      ::itcl::class ::cl1 {
+        method m1 {} {
+          ::oo::class destroy
+          lappend ::test_status "method Hello World"
+        }
+        proc p1 {} {
+          lappend ::test_status "proc Hello World"
+        }
+      }
+      set obj1 [::cl1 #auto]
+      ::cl1::p1
+      $obj1 p1
+      $obj1 m1
+  
+      catch {
+      $obj1 m1
+      ::cl1::p1
+      } msg
+      lappend ::test_status $msg
+    }
+} -result {{proc Hello World} {proc Hello World} {method Hello World} {invalid command name "cl10"}} \
+  -cleanup {catch {::itcl::delete class ::cl1}}
 
+test sfbug-259 { SF bug #257 } -setup {
+    interp create slave
+    load {} Itcl slave
+} -cleanup {
+    interp delete slave
+} -body {
+    slave eval {
+proc do_uplevel { body } {
+    uplevel 1 $body
+}
+proc ::testclass { pathName args } {
+    uplevel TestClass $pathName $args
+}
+itcl::class TestClass {
+    constructor {} {}
+    public variable property "value"
+    public method api-call {}
+    protected method internal-helper {}
+}
+itcl::body TestClass::internal-helper {} {
+}
+itcl::configbody TestClass::property {
+    internal-helper
+}
+itcl::body TestClass::api-call {} {
+    do_uplevel {configure -property blah}
+}
+set tc [::testclass .]
+$tc api-call
+    }
+}
 
+test sfbug-261 { SF bug #261 } -setup {
+    itcl::class A {
+	public method a1 {} {a2}
+	public method a2 {} {uplevel a3 hello}
+	public method a3 {s} {return $s}
+    }
+    A x
+} -body {
+    x a1
+} -cleanup {
+    itcl::delete class A
+} -result hello
 
 #test sfbug-xxx { SF bug xxx
 #} -body {
 #    set ::test_status ""
 #
-#} -result {::bar}
-#
-#::itcl::delete class yyy
-
-# this has to be the last test, as it destroys oo::class!!!!
-test sfbug-254 { SF bug #254
-} -body {
-    set ::test_status ""
-    oo::class destroy
-
-} -result {}
+#} -result {::bar} \
+#  -cleanup {::itcl::delete class yyy}
 
 ::tcltest::cleanupTests
 return

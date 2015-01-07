@@ -3006,10 +3006,21 @@ ItclObjectCmd(
 		}
                 elem = Itcl_NextListElem(elem);
 	    }
+	    if (!found) {
+		found = 1;
+		clsPtr = iclsPtr->clsPtr;
+	    }
         }
         Tcl_DStringFree(&buffer);
     } else {
+	/* Can this happen? */
+	Tcl_Panic("objv[0] is NULL?!");
+	/* Panic above replaces obviously broken line below.  Creating
+	 * a string value from uninitialized memory cannot possibly be
+	 * a correct thing to do.
+
         methodNamePtr = Tcl_NewStringObj(tail, -1);
+	 */
     }
     if (isDirectCall) {
 	if (!found) {
@@ -3077,21 +3088,8 @@ ItclObjectCmd(
 
     } else {
 	ItclShowArgs(1, "run CallPublicObjectCmd2", objc, objv);
-        if (objc == 1) {
-            /* add a "my" at the beginning of the arguments */
-            incr = 1;
-            newObjv = (Tcl_Obj **)ckalloc(sizeof(Tcl_Obj *)*(objc+incr));
-            myPtr = Tcl_NewStringObj("my", 2);
-            Tcl_IncrRefCount(myPtr);
-            newObjv[0] = myPtr;
-            memcpy(newObjv+incr, objv, (sizeof(Tcl_Obj*)*(objc)));
-	    ItclShowArgs(1, "run CallPublicObjectCmd3", objc+incr, newObjv);
-            Tcl_NRAddCallback(interp, CallPublicObjectCmd, oPtr, clsPtr,
-                    INT2PTR(objc+incr), newObjv);
-        } else {
-	    Tcl_NRAddCallback(interp, CallPublicObjectCmd, oPtr, clsPtr,
-	            INT2PTR(objc), (ClientData)objv);
-        }
+	Tcl_NRAddCallback(interp, CallPublicObjectCmd, oPtr, clsPtr,
+		INT2PTR(objc), (ClientData)objv);
     }
 
     result = Itcl_NRRunCallbacks(interp, callbackPtr);
@@ -3235,6 +3233,7 @@ ItclMapMethodNameProc(
     Tcl_DString buffer;
     Tcl_HashEntry *hPtr;
     Tcl_Namespace * myNsPtr;
+    Tcl_CmdInfo cmdInfo;
     ItclObject *ioPtr;
     ItclClass *iclsPtr;
     ItclClass *iclsPtr2;
@@ -3242,6 +3241,7 @@ ItclMapMethodNameProc(
     const char *head;
     const char *tail;
     const char *sp;
+    int result;
 
     iclsPtr = NULL;
     iclsPtr2 = NULL;
@@ -3250,6 +3250,12 @@ ItclMapMethodNameProc(
             ITCL_INTERP_DATA, NULL);
     ioPtr = (ItclObject *)Tcl_ObjectGetMetadata(oPtr,
             infoPtr->object_meta_type);
+    /* fix for SF bug #257 check if TclOO is still available! */
+    result = Tcl_GetCommandInfo(interp, "::oo::class", &cmdInfo);
+    if (result == 0) {
+      Tcl_AppendResult(interp, " missing ::oo::class command!", NULL);
+      return TCL_ERROR;
+    }
     hPtr = Tcl_FindHashEntry(&infoPtr->objects, (char *)ioPtr);
     if ((hPtr == NULL) || (ioPtr == NULL)) {
         /* try to get the class (if a class is creating an object) */

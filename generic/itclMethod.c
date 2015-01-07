@@ -40,8 +40,6 @@ static int ItclCreateMemberCode(Tcl_Interp* interp, ItclClass *iclsPtr,
 static int ItclCreateMemberFunc(Tcl_Interp* interp, ItclClass *iclsPtr,
 	Tcl_Obj *namePtr, const char* arglist, const char* body,
         ItclMemberFunc** imPtrPtr, int flags);
-static int Itcl_GetUplevelContext(Tcl_Interp *interp, ItclClass **iclsPtrPtr,
-       	ItclObject **ioPtrPtr, int level);
 
 
 /*
@@ -1157,10 +1155,6 @@ CallItclObjectCmd(
     ItclObject *ioPtr = data[1];
     int objc = PTR2INT(data[2]);
     Tcl_Obj **objv = data[3];
-    void * ptr;
-    ItclClass *contextIclsPtr = NULL;
-    ItclObject *contextIoPtr = NULL;
-    ItclObjectInfo *infoPtr;
     
     ItclShowArgs(1, "CallItclObjectCmd", objc, objv);
     if (ioPtr != NULL) {
@@ -1175,35 +1169,7 @@ CallItclObjectCmd(
         result =  ItclObjectCmd(imPtr, interp, oPtr, imPtr->iclsPtr->clsPtr,
                 objc, objv);
     } else {
-        ptr = Itcl_GetCallFrameVarFramePtr(interp);
-        if (Itcl_GetUplevelCallFrame(interp, 0) != ptr) {
-            /* we are executing an uplevel command (SF bug #244) */
-            if (ioPtr != NULL) {
-                if (imPtr->codePtr->flags & ITCL_BUILTIN) {
-                    /* it is a builtin command (SF bug #255 and # 256) */
-                    result = ItclObjectCmd(imPtr, interp, oPtr, NULL, objc, objv);
-                } else {
-                    infoPtr = (ItclObjectInfo *)Tcl_GetAssocData(interp,
-                            ITCL_INTERP_DATA, NULL);
-                    if (Itcl_GetStackSize(&infoPtr->contextStack) <= 1) {
-                        oPtr = ioPtr->oPtr;
-                        result = ItclObjectCmd(imPtr, interp, oPtr, NULL, objc, objv);
-                    } else {
-                        /* we are executing an uplevel command (SF bug #250) */
-                        if (Itcl_GetUplevelContext(interp, &contextIclsPtr, &contextIoPtr, -1) != TCL_OK) {
-                            return TCL_ERROR;
-                        }
-                        oPtr = contextIoPtr->oPtr;
-                        result =  ItclObjectCmd(imPtr, interp, oPtr, imPtr->iclsPtr->clsPtr,
-                                objc, objv);
-                    }
-                }
-            } else {
-                result = ItclObjectCmd(imPtr, interp, oPtr, NULL, objc, objv);
-	    }
-        } else {
-            result = ItclObjectCmd(imPtr, interp, oPtr, NULL, objc, objv);
-	}
+	result = ItclObjectCmd(imPtr, interp, NULL, NULL, objc, objv);
     }
     if (result != TCL_OK) {
 	if (ioPtr != NULL && ioPtr->hadConstructorError == 0) {
@@ -1494,79 +1460,6 @@ Itcl_GetContext(
     }
     return TCL_OK;
 }
-
-int
-Itcl_GetUplevelContext(
-    Tcl_Interp *interp,           /* current interpreter */
-    ItclClass **iclsPtrPtr,       /* returns:  class definition or NULL */
-    ItclObject **ioPtrPtr,
-    int level)        /* returns:  object data or NULL */
-{
-    Tcl_Namespace *activeNs = Tcl_GetCurrentNamespace(interp);
-    Tcl_HashEntry *hPtr;
-    ItclCallContext *callContextPtr;
-    ItclObjectInfo *infoPtr;
-
-    /*
-     *  Return NULL for anything that cannot be found.
-     */
-    *ioPtrPtr = NULL;
-
-    if (!Itcl_IsClassNamespace(activeNs)) {
-        /*
-         *  If there is no class/object context, return an error message.
-         */
-        Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
-            "namespace \"", activeNs->fullName, "\" is not a class namespace",
-            (char*)NULL);
-
-        return TCL_ERROR;
-    }
-    /*
-     *  If the active namespace is a class namespace, then return
-     *  all known info.  See if the current call frame is a known
-     *  object context, and if so, return that context.
-     */
-    infoPtr = (ItclObjectInfo *)Tcl_GetAssocData(interp,
-            ITCL_INTERP_DATA, NULL);
-    if (Itcl_GetStackSize(&infoPtr->contextStack)-1+level < 0 ||
-            level > Itcl_GetStackSize(&infoPtr->contextStack)) {
-        Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
-            "INTERNAL ERROR in Itcl_GetUplevelContext",
-            (char*)NULL);
-        return TCL_ERROR;
-    }
-    callContextPtr = Itcl_GetStackValue(&infoPtr->contextStack,
-            Itcl_GetStackSize(&infoPtr->contextStack)-1+level);
-    if ((callContextPtr != NULL) && (callContextPtr->imPtr != NULL)) {
-        *iclsPtrPtr = callContextPtr->imPtr->iclsPtr;
-    } else {
-        hPtr = Tcl_FindHashEntry(&infoPtr->namespaceClasses,
-                (char *)activeNs);
-        if (hPtr != NULL) {
-            *iclsPtrPtr = (ItclClass *)Tcl_GetHashValue(hPtr);
-        }
-    }
-    if (*iclsPtrPtr == NULL) {
-        Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
-            "namespace \"", activeNs->fullName, "\" is not a class namespace",
-            (char*)NULL);
-
-        return TCL_ERROR;
-    }
-
-    if (callContextPtr == NULL) {
-	/* must be a class namespace without an object */
-	*ioPtrPtr = NULL;
-	return TCL_OK;
-    }
-    *ioPtrPtr = callContextPtr->ioPtr;
-    if ((*ioPtrPtr == NULL) && ((*iclsPtrPtr)->nsPtr != NULL)) {
-        /* maybe we are in a constructor try currIoPtr */
-        *ioPtrPtr = (*iclsPtrPtr)->infoPtr->currIoPtr;
-    }
-    return TCL_OK;
-}
 
 /*
  * ------------------------------------------------------------------------
@@ -1701,8 +1594,6 @@ NRExecMethod(
     Tcl_HashEntry *entry;
     ItclClass *iclsPtr;
     ItclObject *ioPtr;
-    Tcl_Obj **newObjv;
-    int relNs = 0;
 
     ItclShowArgs(1, "NRExecMethod", objc, objv);
 
@@ -1737,7 +1628,7 @@ NRExecMethod(
      *  table for this class.
      */
     token = Tcl_GetString(objv[0]);
-    if ((strstr(token, "::") == NULL)) {
+    if (strstr(token, "::") == NULL) {
 	if (ioPtr != NULL) {
             entry = Tcl_FindHashEntry(&ioPtr->iclsPtr->resolveCmds,
                 (char *)imPtr->namePtr);
@@ -1748,23 +1639,6 @@ NRExecMethod(
 		imPtr = clookup->imPtr;
             }
         }
-    } else {
-        /* fix for SF bug #243 */
-        if (!(token[0] == ':' && token[1] == ':')
-            && ((imPtr->flags & ITCL_CONSTRUCTOR) == 0)
-            ) {
-            if (ioPtr != NULL) {
-                entry = Tcl_FindHashEntry(&ioPtr->iclsPtr->resolveCmds,
-                    (char *)imPtr->namePtr);
-
-                if (entry) {
-                    ItclCmdLookup *clookup;
-                    clookup = (ItclCmdLookup *)Tcl_GetHashValue(entry);
-                    imPtr = clookup->imPtr;
-                }
-                relNs = 1;
-            }
-        }
     }
 
     /*
@@ -1772,20 +1646,7 @@ NRExecMethod(
      *  the method in case it gets deleted during execution.
      */
     Itcl_PreserveData((ClientData)imPtr);
-    if (relNs) {
-        /* fix for SF bug #243 */
-        newObjv = (Tcl_Obj **)ckalloc(sizeof(Tcl_Obj *)*(objc));
-        newObjv[0] = imPtr->namePtr;
-        Tcl_IncrRefCount(newObjv[0]);
-        memcpy(newObjv + 1, objv + 1, ((objc - 1) * sizeof(Tcl_Obj *)));
-        result = Itcl_EvalMemberCode(interp, imPtr, ioPtr, objc, newObjv);
-    } else {
-        result = Itcl_EvalMemberCode(interp, imPtr, ioPtr, objc, objv);
-    }
-    if (relNs) {
-        Tcl_DecrRefCount(newObjv[0]);
-        ckfree((char *)newObjv);
-    }
+    result = Itcl_EvalMemberCode(interp, imPtr, ioPtr, objc, objv);
     Itcl_ReleaseData((ClientData)imPtr);
     return result;
 }
