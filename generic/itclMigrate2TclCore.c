@@ -126,8 +126,6 @@ Itcl_GetCallFrameClientData(
 {
     /* suggested fix for SF bug #250 use varFramePtr instead of framePtr
      * seems to have no side effect concerning test suite, but does NOT fix the bug
-     * there is a different fix using Itcl_GetUplevelContext, which works.
-     * We are using framePtr again
      */
     CallFrame *framePtr = ((Interp *)interp)->varFramePtr;
     if (framePtr == NULL) {
