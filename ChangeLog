@@ -1,3 +1,15 @@
+2014-11-06  Don Porter  <dgp@Users.sourceforge.net>
+	* generic/itclMigrate2TclCore.c: Fix for SF Bug 259.
+	* tests/sfbugs.test: Test for Bug 250 fix.
+2014-11-02  Don Porter  <dgp@Users.sourceforge.net>
+	* generic/itclMethod.c:	Completely different fix for SF bug #243
+	* geneirc/itclObject.c: that has the benefit of not completely
+	breaking Itk and Iwidgets. :)
+2014-09-20  Arnulf P. Wiedemann  <wiede@users.sourceforge.net>
+	* generic/itclParse.c:
+	* generic/itclObject.c: Fixes for SF bug #257
+	* tests/sfbugs.test: added test for SF bug #257 and fixed test 254 to
+	use an own interpreter for avoiding problems with following tests.
 2014-09-13  Arnulf P. Wiedemann  <wiede@users.sourceforge.net>
 	* generic/itclMethod.c: Fixes for SF bug #256
 	* tests/sfbugs.test: added test for fossil bug #8 and for SF bug #254
