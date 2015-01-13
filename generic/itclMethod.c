@@ -748,6 +748,7 @@ Itcl_ChangeMemberFunc(
                 (char *)imPtr->tmPtr, &isNewEntry);
         if (isNewEntry) {
             Tcl_SetHashValue(hPtr, imPtr);
+	    Itcl_PreserveData(imPtr->iclsPtr);
         }
     }
     ItclAddClassFunctionDictInfo(interp, imPtr->iclsPtr, imPtr);
