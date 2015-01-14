@@ -1027,9 +1027,7 @@ ItclFreeObject(cdata)
     for (i=0; i < dataSize; i++) {
 	Var *varPtr = contextObj->data[i];
         if (varPtr) {
-	    if (!TclIsVarUndefined(varPtr)) {
-		Tcl_Panic("Var being freed is still defined!");
-	    }
+	    assert(TclIsVarUndefined(varPtr));
             ckfree((char*)varPtr);
         }
     }
