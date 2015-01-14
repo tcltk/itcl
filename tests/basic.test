@@ -399,5 +399,20 @@ test basic-6.8 {common variables can be redefined} {
     test_arrays0 do set undefined "scalar"
 } {scalar}
 
+test basic-7.0 {SF Bug 230} -setup {
+    itcl::class Dog {
+	method bark {}
+    }
+    itcl::body Dog::bark {} {
+	variable bite
+	set bite ouch
+    }
+} -body {
+    Dog fido
+    fido bark
+} -cleanup {
+    itcl::delete class Dog
+} -result ouch
+
 ::tcltest::cleanupTests
 return

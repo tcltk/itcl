@@ -1048,10 +1048,9 @@ Itcl_ClassVarResolver(interp, name, context, flags, rPtr)
 
     /*
      *  See if this is a formal parameter in the current proc scope.
-     *  If so, that variable has precedence.  Look it up and return
-     *  it here.  This duplicates some of the functionality of
-     *  TclLookupVar, but we return it here (instead of returning
-     *  TCL_CONTINUE) to avoid looking it up again later.
+     *  If so, that variable has precedence, and we do not want to 
+     *  override Tcl's normal resolution of the local var.  We return
+     *  TCL_CONTINUE to let Tcl take control back.
      */
     if (varFramePtr && varFramePtr->isProcCallFrame
         && strstr(name,"::") == NULL) {
@@ -1074,8 +1073,7 @@ Itcl_ClassVarResolver(interp, name, context, flags, rPtr)
                     if ((name[0] == localName[0])
                             && (nameLen == localPtr->nameLength)
                             && (strcmp(name, localName) == 0)) {
-                        *rPtr = (Tcl_Var)localVarPtr;
-                        return TCL_OK;
+			return TCL_CONTINUE;
                     }
                 }
                 ItclNextLocal(localVarPtr);
@@ -1091,7 +1089,7 @@ Itcl_ClassVarResolver(interp, name, context, flags, rPtr)
         if (varFramePtr->varTablePtr != NULL) {
 	    *rPtr = (Tcl_Var) ItclVarHashFindVar(varFramePtr->varTablePtr, name);
 	    if (*rPtr) {
-                return TCL_OK;
+		return TCL_CONTINUE;
             }
         }
     }
