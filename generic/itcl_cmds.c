@@ -1614,6 +1614,7 @@ Itcl_IsObjectCmd(clientData, interp, objc, objv)
      *    Need the NULL test, or the test will fail if cmd is NULL
      */
     if (cmd == NULL || ! Itcl_IsObject(cmd)) {
+	ckfree(cmdName);
         Tcl_SetObjResult(interp, Tcl_NewBooleanObj(0));
         return TCL_OK;
     }
@@ -1627,6 +1628,7 @@ Itcl_IsObjectCmd(clientData, interp, objc, objv)
 
         if (! Itcl_ObjectIsa(contextObj, classDefn)) {
 
+	    ckfree(cmdName);
             Tcl_SetObjResult(interp, Tcl_NewBooleanObj(0));
             return TCL_OK;
         }

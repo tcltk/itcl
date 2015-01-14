@@ -1267,7 +1267,7 @@ Itcl_DecodeScopedCommand(interp, name, rNsPtr, rCmdPtr)
     char **rCmdPtr;		/* returns: simple command word */
 {
     Tcl_Namespace *nsPtr = NULL;
-    char *cmdName;
+    char *cmdName = NULL;
     int len = strlen(name);
     CONST char *pos;
     int listc, result;
@@ -1309,6 +1309,10 @@ Itcl_DecodeScopedCommand(interp, name, rNsPtr, rCmdPtr)
 
             if (result != TCL_OK) {
                 char msg[512];
+
+		if (cmdName) {
+		    ckfree(cmdName);
+		}
                 sprintf(msg, "\n    (while decoding scoped command \"%.400s\")", name);
                 Tcl_AddObjErrorInfo(interp, msg, -1);
                 return TCL_ERROR;
