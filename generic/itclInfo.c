@@ -930,6 +930,7 @@ Itcl_BiInfoInheritCmd(
     }
     if (imPtr->iclsPtr->infoPtr->useOldResolvers) {
         if (contextIoPtr != NULL) {
+#if 0
             if (upNsPtr != contextIclsPtr->nsPtr) {
 		Tcl_HashEntry *hPtr;
 		hPtr = Tcl_FindHashEntry(
@@ -941,6 +942,9 @@ Itcl_BiInfoInheritCmd(
                     contextIclsPtr = contextIoPtr->iclsPtr;
 	        }
             }
+#else
+contextIclsPtr = contextIoPtr->iclsPtr;
+#endif
         }
     } else {
         if (strcmp(Tcl_GetString(imPtr->namePtr), "info") == 0) {
@@ -1041,6 +1045,7 @@ Itcl_BiInfoHeritageCmd(
     }
     if (contextIclsPtr->infoPtr->useOldResolvers) {
         if (contextIoPtr != NULL) {
+#if 0
             if (upNsPtr != contextIclsPtr->nsPtr) {
 	        Tcl_HashEntry *hPtr;
 	        hPtr = Tcl_FindHashEntry(
@@ -1052,6 +1057,9 @@ Itcl_BiInfoHeritageCmd(
                     contextIclsPtr = contextIoPtr->iclsPtr;
 	        }
             }
+#else
+contextIclsPtr = contextIoPtr->iclsPtr;
+#endif
         }
     } else {
         if (strcmp(Tcl_GetString(imPtr->namePtr), "info") == 0) {
