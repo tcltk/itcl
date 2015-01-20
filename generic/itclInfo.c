@@ -930,21 +930,19 @@ Itcl_BiInfoInheritCmd(
     }
     if (imPtr->iclsPtr->infoPtr->useOldResolvers) {
         if (contextIoPtr != NULL) {
-#if 0
-            if (upNsPtr != contextIclsPtr->nsPtr) {
-		Tcl_HashEntry *hPtr;
-		hPtr = Tcl_FindHashEntry(
+	    /* Checking "my" instead of real direct call test (auto-"my") */
+	    Tcl_Obj * const * objv = Itcl_GetCallFrameObjv(interp);
+	    int isDirectCall = (strcmp(Tcl_GetString(objv[0]), "my") == 0);
+
+            contextIclsPtr = contextIoPtr->iclsPtr;
+	    if (isDirectCall && upNsPtr != contextIclsPtr->nsPtr) {
+		Tcl_HashEntry *hPtr = Tcl_FindHashEntry(
 		        &imPtr->iclsPtr->infoPtr->namespaceClasses,
 			(char *)upNsPtr);
-		if (hPtr != NULL) {
+		if (hPtr) {
 		    contextIclsPtr = Tcl_GetHashValue(hPtr);
-		} else {
-                    contextIclsPtr = contextIoPtr->iclsPtr;
-	        }
-            }
-#else
-contextIclsPtr = contextIoPtr->iclsPtr;
-#endif
+		}
+	    }
         }
     } else {
         if (strcmp(Tcl_GetString(imPtr->namePtr), "info") == 0) {
@@ -1045,21 +1043,19 @@ Itcl_BiInfoHeritageCmd(
     }
     if (contextIclsPtr->infoPtr->useOldResolvers) {
         if (contextIoPtr != NULL) {
-#if 0
-            if (upNsPtr != contextIclsPtr->nsPtr) {
-	        Tcl_HashEntry *hPtr;
-	        hPtr = Tcl_FindHashEntry(
+	    /* Checking "my" instead of real direct call test (auto-"my") */
+	    Tcl_Obj * const * objv = Itcl_GetCallFrameObjv(interp);
+	    int isDirectCall = (strcmp(Tcl_GetString(objv[0]), "my") == 0);
+
+            contextIclsPtr = contextIoPtr->iclsPtr;
+	    if (isDirectCall && upNsPtr != contextIclsPtr->nsPtr) {
+		Tcl_HashEntry *hPtr = Tcl_FindHashEntry(
 		        &imPtr->iclsPtr->infoPtr->namespaceClasses,
 			(char *)upNsPtr);
-	        if (hPtr != NULL) {
-	            contextIclsPtr = Tcl_GetHashValue(hPtr);
-	        } else {
-                    contextIclsPtr = contextIoPtr->iclsPtr;
-	        }
-            }
-#else
-contextIclsPtr = contextIoPtr->iclsPtr;
-#endif
+		if (hPtr) {
+		    contextIclsPtr = Tcl_GetHashValue(hPtr);
+		}
+	    }
         }
     } else {
         if (strcmp(Tcl_GetString(imPtr->namePtr), "info") == 0) {
