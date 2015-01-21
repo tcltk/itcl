@@ -928,18 +928,46 @@ Itcl_BiInfoInheritCmd(
     } else {
 	contextIclsPtr = GetClassFromClassName(interp, upNsPtr->fullName, NULL);
     }
+
+    /*
+     * Note the assumption here that imPtr != NULL.
+     * This implies an assumption above that callContextPtr != NULL, and
+     * that the call to GetClassFromClassName() is never taken.
+     */
+
     if (imPtr->iclsPtr->infoPtr->useOldResolvers) {
         if (contextIoPtr != NULL) {
-	    /* Checking "my" instead of real direct call test (auto-"my") */
+
+	    /*
+	     * For consistency with Itcl 3, we must exhibit different
+	     * context selection depending on whether the invocation
+	     * was [$obj info inherit] or [info inherit] in a class context.
+	     * Itcl 4 implements the routing of the direct [info inherit]
+	     * by prepending a [my].  To distinguish the cases we look for
+	     * that leading [my].  It is conceivable this would be confused
+	     * with the literal command [my info inherit], but as it happens,
+	     * such a command cannot be resolved in an Itcl method body, so
+	     * it's at least very unlikely if not impossible for that confusion
+	     * to arise.  See also Itcl_BiInfoHeritageCmd().
+	     */
+
 	    Tcl_Obj * const * objv = Itcl_GetCallFrameObjv(interp);
 	    int isDirectCall = (strcmp(Tcl_GetString(objv[0]), "my") == 0);
 
+	    /*
+	     * The default behavior is to query the heritage of the
+	     * invoking object....
+	     */
             contextIclsPtr = contextIoPtr->iclsPtr;
 	    if (isDirectCall && upNsPtr != contextIclsPtr->nsPtr) {
 		Tcl_HashEntry *hPtr = Tcl_FindHashEntry(
 		        &imPtr->iclsPtr->infoPtr->namespaceClasses,
 			(char *)upNsPtr);
 		if (hPtr) {
+		    /*
+		     * ...but when invoked as [info inherit] and in
+		     * a class namespace, we query that class instead.
+		     */
 		    contextIclsPtr = Tcl_GetHashValue(hPtr);
 		}
 	    }
@@ -1043,7 +1071,7 @@ Itcl_BiInfoHeritageCmd(
     }
     if (contextIclsPtr->infoPtr->useOldResolvers) {
         if (contextIoPtr != NULL) {
-	    /* Checking "my" instead of real direct call test (auto-"my") */
+	    /* See Itcl_InfoInheritCmd() comments. */
 	    Tcl_Obj * const * objv = Itcl_GetCallFrameObjv(interp);
 	    int isDirectCall = (strcmp(Tcl_GetString(objv[0]), "my") == 0);
 
