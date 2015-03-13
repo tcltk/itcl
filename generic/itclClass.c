@@ -639,7 +639,7 @@ CallDeleteOneObject(
     ItclObjectInfo *infoPtr = data[1];
     void *callbackPtr;
     int classIsDeleted;
-    
+
     if (result != TCL_OK) {
         return result;
     }
@@ -2470,6 +2470,12 @@ ItclDeleteFunction(
 {
     Tcl_HashEntry *hPtr;
 
+    hPtr = Tcl_FindHashEntry(&imPtr->iclsPtr->infoPtr->procMethods,
+	    (char *) imPtr->tmPtr);
+    if (hPtr != NULL) {
+	Itcl_ReleaseData(imPtr->iclsPtr);
+	Tcl_DeleteHashEntry(hPtr);
+    }
     hPtr = Tcl_FindHashEntry(&imPtr->infoPtr->classes, (char *)imPtr->iclsPtr);
     if (hPtr != NULL) {
 	/* unlink owerself from list of class functions */

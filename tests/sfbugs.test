@@ -227,7 +227,7 @@ test sfbug-250 { SF bug #250
     $a m1
 
 } -result {m2} \
-  -cleanup {::itcl::delete class B}
+  -cleanup {::itcl::delete class A B}
 
 test sfbug-Schelte {bug with onfo reported from Schelte SF bug xxx
 } -body {
@@ -368,7 +368,50 @@ test sfbug-257 { SF bug #257
 } -result {{proc Hello World} {proc Hello World} {method Hello World} {invalid command name "cl10"}} \
   -cleanup {catch {::itcl::delete class ::cl1}}
 
+test sfbug-259 { SF bug #257 } -setup {
+    interp create slave
+    load {} Itcl slave
+} -cleanup {
+    interp delete slave
+} -body {
+    slave eval {
+proc do_uplevel { body } {
+    uplevel 1 $body
+}
+proc ::testclass { pathName args } {
+    uplevel TestClass $pathName $args
+}
+itcl::class TestClass {
+    constructor {} {}
+    public variable property "value"
+    public method api-call {}
+    protected method internal-helper {}
+}
+itcl::body TestClass::internal-helper {} {
+}
+itcl::configbody TestClass::property {
+    internal-helper
+}
+itcl::body TestClass::api-call {} {
+    do_uplevel {configure -property blah}
+}
+set tc [::testclass .]
+$tc api-call
+    }
+}
 
+test sfbug-261 { SF bug #261 } -setup {
+    itcl::class A {
+	public method a1 {} {a2}
+	public method a2 {} {uplevel a3 hello}
+	public method a3 {s} {return $s}
+    }
+    A x
+} -body {
+    x a1
+} -cleanup {
+    itcl::delete class A
+} -result hello
 
 #test sfbug-xxx { SF bug xxx
 #} -body {
