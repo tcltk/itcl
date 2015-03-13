@@ -344,6 +344,10 @@ test info-4.2b {query inheritance info} {
     list [ti info inherit] [ti do info inherit]
 } {::test_info_base {}}
 
+test info-4.2c {query inheritance info} {
+    ti do ti info inherit
+} {::test_info_base}
+
 test info-4.3a {query heritage info (wrong # args)} {
     list [catch {ti info heritage x} result] $result
 } {1 {wrong # args: should be "info heritage"}}
@@ -351,6 +355,10 @@ test info-4.3a {query heritage info (wrong # args)} {
 test info-4.3b {query heritage info} {
     list [ti info heritage] [ti do info heritage]
 } {{::test_info ::test_info_base} ::test_info_base}
+
+test info-4.3c {query heritage info} {
+    ti do ti info heritage
+} {::test_info ::test_info_base}
 
 test info-4.4a {query argument list (wrong # args)} {
     list [catch {ti info args} result] $result \
