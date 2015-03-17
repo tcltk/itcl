@@ -17,7 +17,7 @@ Please `cd` to its location first.
 !endif
 
 PROJECT	= itcl
-!include "..\..\rules.vc"
+!include "rules.vc"
 
 !if $(TCLINSTALL)
 !message *** Warning: [Incr Tcl] requires the source distribution of Tcl to build from,
