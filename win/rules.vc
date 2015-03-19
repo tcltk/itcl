@@ -29,6 +29,42 @@ _INSTALLDIR	= C:\Program Files\Tcl
 _INSTALLDIR	= $(INSTALLDIR:/=\)
 !endif
 
+#------------------------------------------------------------------------------
+# Determine the host and target architectures and compiler version.
+#------------------------------------------------------------------------------
+
+_HASH=^#
+_VC_MANIFEST_EMBED_EXE=
+_VC_MANIFEST_EMBED_DLL=
+VCVER=0
+!if ![echo VCVERSION=_MSC_VER > vercl.x] \
+    && ![echo $(_HASH)if defined(_M_IX86) >> vercl.x] \
+    && ![echo ARCH=IX86 >> vercl.x] \
+    && ![echo $(_HASH)elif defined(_M_AMD64) >> vercl.x] \
+    && ![echo ARCH=AMD64 >> vercl.x] \
+    && ![echo $(_HASH)endif >> vercl.x] \
+    && ![cl -nologo -TC -P vercl.x $(ERRNULL)]
+!include vercl.i
+!if ![echo VCVER= ^\> vercl.vc] \
+    && ![set /a $(VCVERSION) / 100 - 6 >> vercl.vc]
+!include vercl.vc
+!endif
+!endif
+!if ![del $(ERRNUL) /q/f vercl.x vercl.i vercl.vc]
+!endif
+
+!if ![reg query HKLM\Hardware\Description\System\CentralProcessor\0 /v Identifier | findstr /i x86]
+NATIVE_ARCH=IX86
+!else
+NATIVE_ARCH=AMD64
+!endif
+
+# Since MSVC8 we must deal with manifest resources.
+!if $(VCVERSION) >= 1400
+_VC_MANIFEST_EMBED_EXE=if exist $@.manifest mt -nologo -manifest $@.manifest -outputresource:$@;1
+_VC_MANIFEST_EMBED_DLL=if exist $@.manifest mt -nologo -manifest $@.manifest -outputresource:$@;2
+!endif
+
 !ifndef MACHINE
 MACHINE		= IX86
 !endif
@@ -218,6 +254,13 @@ SUFX	    = tsgx
 BUILDDIRTOP = Debug
 !else
 BUILDDIRTOP = Release
+!endif
+
+!if "$(MACHINE)" != "IX86"
+BUILDDIRTOP =$(BUILDDIRTOP)_$(MACHINE)
+!endif
+!if $(VCVER) > 6
+BUILDDIRTOP =$(BUILDDIRTOP)_VC$(VCVER)
 !endif
 
 !if !$(DEBUG) || $(DEBUG) && $(UNCHECKED)
