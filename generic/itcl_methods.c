@@ -841,9 +841,19 @@ Itcl_GetMemberCode(interp, member)
      */
     if ((mcode->flags & ITCL_IMPLEMENT_TCL) != 0) {
 
+	/*
+	 * UGLY UGLY UGLY hackery to accommodate changing Tcl
+	 * internals in Tcl 8.6.
+	 */
+	int saveNumArgs = mcode->procPtr->numArgs;
+
+	mcode->procPtr->numArgs = mcode->procPtr->numCompiledLocals;
+
         result = TclProcCompileProc(interp, mcode->procPtr,
             mcode->procPtr->bodyPtr, (Namespace*)member->classDefn->namesp,
             "body for", member->fullname);
+
+	mcode->procPtr->numArgs = saveNumArgs;
 
         if (result != TCL_OK) {
             return result;

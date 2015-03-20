@@ -129,6 +129,16 @@ test basic-1.19 {classes can be unicode} {
 test basic-1.20 {classes can be unicode} {
     \u6210bcd0 foo
 } bar
+test basic-1.21 {Bug 2e0e27de5f} -setup {
+    itcl::class Object {
+	public variable n {}
+	constructor {} {set n test} {}
+    }
+} -body {
+    Object foo
+} -cleanup {
+    itcl::delete class Object
+} -result foo
 
 # ----------------------------------------------------------------------
 #  #auto names
