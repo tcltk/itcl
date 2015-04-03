@@ -987,13 +987,13 @@ ItclClassBaseCmd(
 	    if ((imPtr->flags & ITCL_COMMON) == 0) {
 	        imPtr->accessCmd = Tcl_CreateObjCommand(interp,
 		        Tcl_GetString(imPtr->fullNamePtr),
-		        Itcl_ExecMethod, imPtr, Itcl_ReleaseData);
-		Itcl_PreserveData(imPtr);
+		        Itcl_ExecMethod, imPtr, ItclReleaseIMF);
+		ItclPreserveIMF(imPtr);
 	    } else {
 	        imPtr->accessCmd = Tcl_CreateObjCommand(interp,
 		        Tcl_GetString(imPtr->fullNamePtr),
-			Itcl_ExecProc, imPtr, Itcl_ReleaseData);
-		Itcl_PreserveData(imPtr);
+			Itcl_ExecProc, imPtr, ItclReleaseIMF);
+		ItclPreserveIMF(imPtr);
 	    }
             Tcl_DStringInit(&buffer);
         }
