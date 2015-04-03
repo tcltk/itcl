@@ -41,6 +41,23 @@ static int ItclCreateMemberFunc(Tcl_Interp* interp, ItclClass *iclsPtr,
 	Tcl_Obj *namePtr, const char* arglist, const char* body,
         ItclMemberFunc** imPtrPtr, int flags);
 
+void
+ItclPreserveIMF(
+    ItclMemberFunc *imPtr)
+{
+    imPtr->refCount++;
+}
+
+void
+ItclReleaseIMF(
+    ClientData clientData)
+{
+    ItclMemberFunc *imPtr = (ItclMemberFunc *)clientData;
+
+    if (--imPtr->refCount == 0) {
+	Itcl_DeleteMemberFunc(clientData);
+    }
+}
 
 /*
  * ------------------------------------------------------------------------
@@ -635,8 +652,7 @@ ItclCreateMemberFunc(
     }
 
     Tcl_SetHashValue(hPtr, (ClientData)imPtr);
-    Itcl_PreserveData((ClientData)imPtr);
-    Itcl_EventuallyFree((ClientData)imPtr, Itcl_DeleteMemberFunc);
+    imPtr->refCount = 1;
 
     *imPtrPtr = imPtr;
     return TCL_OK;
@@ -1645,9 +1661,9 @@ NRExecMethod(
      *  Execute the code for the method.  Be careful to protect
      *  the method in case it gets deleted during execution.
      */
-    Itcl_PreserveData((ClientData)imPtr);
+    ItclPreserveIMF(imPtr);
     result = Itcl_EvalMemberCode(interp, imPtr, ioPtr, objc, objv);
-    Itcl_ReleaseData((ClientData)imPtr);
+    ItclReleaseIMF(imPtr);
     return result;
 }
 
@@ -1731,11 +1747,11 @@ NRExecProc(
      *  Execute the code for the proc.  Be careful to protect
      *  the proc in case it gets deleted during execution.
      */
-    Itcl_PreserveData((ClientData)imPtr);
+    ItclPreserveIMF(imPtr);
 
     result = Itcl_EvalMemberCode(interp, imPtr, (ItclObject*)NULL,
         objc, objv);
-    Itcl_ReleaseData((ClientData)imPtr);
+    ItclReleaseIMF(imPtr);
     return result;
 }
 
@@ -1961,7 +1977,7 @@ Itcl_InvokeMethodIfExists(
          *  Execute the code for the method.  Be careful to protect
          *  the method in case it gets deleted during execution.
          */
-        Itcl_PreserveData((ClientData)imPtr);
+	ItclPreserveIMF(imPtr);
 
 	if (contextObjectPtr->oPtr == NULL) {
             Tcl_DecrRefCount(cmdlinePtr);
@@ -1971,7 +1987,7 @@ Itcl_InvokeMethodIfExists(
 	        cmdlinec, cmdlinev);
 	Tcl_DecrRefCount(cmdlinev[0]);
 	Tcl_DecrRefCount(cmdlinev[1]);
-        Itcl_ReleaseData((ClientData)imPtr);
+	ItclReleaseIMF(imPtr);
         Tcl_DecrRefCount(cmdlinePtr);
     } else {
         if (contextClassPtr->flags &
@@ -2311,7 +2327,7 @@ ItclCheckCallMethod(
     oPtr = NULL;
     hPtr = NULL;
     imPtr = (ItclMemberFunc *)clientData;
-    Itcl_PreserveData(imPtr);
+    ItclPreserveIMF(imPtr);
     if (imPtr->codePtr != NULL) {
         Itcl_PreserveData(imPtr->codePtr);
     }
@@ -2434,10 +2450,10 @@ ItclCheckCallMethod(
     }
     return result;
 finishReturn:
-    Itcl_ReleaseData(imPtr);
     if (imPtr->codePtr != NULL) {
         Itcl_ReleaseData(imPtr->codePtr);
     }
+    ItclReleaseIMF(imPtr);
     return result;
 }
 
@@ -2527,7 +2543,7 @@ finishReturn:
     if (imPtr->codePtr != NULL) {
         Itcl_ReleaseData(imPtr->codePtr);
     }
-    Itcl_ReleaseData(imPtr);
+    ItclReleaseIMF(imPtr);
     return result;
 }
 

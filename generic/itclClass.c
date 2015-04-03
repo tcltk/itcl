@@ -1087,7 +1087,7 @@ ItclFreeClass(
 	 * the Tcl_Commands have not yet been built, so release here
 	 */
 	if (imPtr->iclsPtr->flags & ITCL_CLASS_CONSTRUCT_ERROR) {
-            Itcl_ReleaseData(imPtr);
+            ItclReleaseIMF(imPtr);
 	}
     }
     Tcl_DeleteHashTable(&iclsPtr->functions);
