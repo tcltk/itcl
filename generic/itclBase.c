@@ -557,10 +557,10 @@ ItclCallCCommand(
 	int i;
 
 	argv = (const char**)ckalloc((unsigned)((objc-1)*sizeof(char*)));
-	for (i=2;i<objc;i++) {
-	    argv[i-2] = Tcl_GetString(objv[i]);
+	for (i=1;i<objc;i++) {
+	    argv[i-1] = Tcl_GetString(objv[i]);
 	}
-        result = (*argProc)(cData, interp, objc-2, argv);
+        result = (*argProc)(cData, interp, objc-1, argv);
         ckfree((char*)argv);
     }
     if (objProc != NULL) {

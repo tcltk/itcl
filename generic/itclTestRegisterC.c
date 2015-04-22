@@ -118,7 +118,7 @@ fprintf(stderr, "IP:%p %p %p !%s!\n",interp, clientData, nsPtr, nsPtr->fullName)
 	   break;
         }
     }
-fprintf(stderr, "IP2:%p %p\n",interp, clientData, iclsPtr);
+fprintf(stderr, "IP2:%p %p %p\n",interp, clientData, iclsPtr);
     return TCL_OK;
 }
 
