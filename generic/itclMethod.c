@@ -2405,10 +2405,12 @@ ItclCheckCallMethod(
                 callContextPtr->nsPtr = Tcl_GetCurrentNamespace(interp);
                 callContextPtr->ioPtr = ioPtr;
                 callContextPtr->imPtr = imPtr;
+		callContextPtr->codePtr = imPtr->codePtr;
                 callContextPtr->refCount = 1;
 	    } else {
 	      if ((callContextPtr2->objectFlags == ioPtr->flags) 
-		    && (callContextPtr2->nsPtr == currNsPtr)) {
+		    && (callContextPtr2->nsPtr == currNsPtr)
+		    && (callContextPtr2->codePtr == imPtr->codePtr)) {
 	        callContextPtr = callContextPtr2;
                 callContextPtr->refCount++;
               }
@@ -2427,6 +2429,7 @@ ItclCheckCallMethod(
 	}
         callContextPtr->nsPtr = Tcl_GetCurrentNamespace(interp);
         callContextPtr->imPtr = imPtr;
+        callContextPtr->codePtr = imPtr->codePtr;
         callContextPtr->refCount = 1;
     }
     if (isNew) {
@@ -2478,6 +2481,7 @@ ItclAfterCallMethod(
     ItclCallContext *callContextPtr;
     int newEntry;
     int result;
+    ItclMemberCode *codePtr;
 
     imPtr = (ItclMemberFunc *)clientData;
 
@@ -2486,6 +2490,7 @@ ItclAfterCallMethod(
         callContextPtr = Itcl_PopStack(&imPtr->infoPtr->contextStack);
     }
     if (callContextPtr == NULL) {
+	codePtr = imPtr->codePtr;
         if ((imPtr->flags & ITCL_COMMON) ||
                 (imPtr->codePtr->flags & ITCL_BUILTIN)) {
 	    result = call_result;
@@ -2504,6 +2509,7 @@ ItclAfterCallMethod(
      *  invoke constructors/destructors as needed.
      */
     ioPtr = callContextPtr->ioPtr;
+    codePtr = callContextPtr->codePtr;
     if (ioPtr != NULL) {
         imPtr->iclsPtr->callRefCount--;
         if (imPtr->flags & (ITCL_CONSTRUCTOR | ITCL_DESTRUCTOR)) {
@@ -2540,8 +2546,8 @@ ItclAfterCallMethod(
     }
     result = call_result;
 finishReturn:
-    if (imPtr->codePtr != NULL) {
-        Itcl_ReleaseData(imPtr->codePtr);
+    if (codePtr != NULL) {
+        Itcl_ReleaseData(codePtr);
     }
     ItclReleaseIMF(imPtr);
     return result;
