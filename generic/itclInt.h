@@ -654,6 +654,7 @@ typedef struct ItclCallContext {
     Tcl_Namespace *nsPtr;
     ItclObject *ioPtr;
     ItclMemberFunc *imPtr;
+    ItclMemberCode *codePtr;
     int refCount;
 } ItclCallContext;
 
