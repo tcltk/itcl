@@ -776,7 +776,7 @@ ItclClassBaseCmd(
     /* make the methods and procs known to TclOO */
     Tcl_DStringInit(&buffer);
     FOREACH_HASH_VALUE(imPtr, &iclsPtr->functions) {
-        if (!(imPtr->flags & ITCL_IMPLEMENT_NONE)) {
+        if (Itcl_IsMemberCodeImplemented(imPtr->codePtr)) {
     	    ClientData pmPtr;
 	    argumentPtr = imPtr->codePtr->argumentPtr;
 	    bodyPtr = imPtr->codePtr->bodyPtr;
