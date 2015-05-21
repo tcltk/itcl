@@ -776,7 +776,6 @@ ItclClassBaseCmd(
     /* make the methods and procs known to TclOO */
     Tcl_DStringInit(&buffer);
     FOREACH_HASH_VALUE(imPtr, &iclsPtr->functions) {
-        if (Itcl_IsMemberCodeImplemented(imPtr->codePtr)) {
     	    ClientData pmPtr;
 	    argumentPtr = imPtr->codePtr->argumentPtr;
 	    bodyPtr = imPtr->codePtr->bodyPtr;
@@ -996,7 +995,6 @@ ItclClassBaseCmd(
 		ItclPreserveIMF(imPtr);
 	    }
             Tcl_DStringInit(&buffer);
-        }
     }
     if (iclsPtr->flags & (ITCL_TYPE|ITCL_WIDGETADAPTOR)) {
 	/* initialize the typecomponents and typevariables */
