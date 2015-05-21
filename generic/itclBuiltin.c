@@ -1681,14 +1681,6 @@ ItclBiObjectUnknownCmd(
 	if (hPtr != NULL) {
 	    idmPtr = Tcl_GetHashValue(hPtr);
             isStar = 1;
-	} else {
-#if 0
-	    hPtr = Tcl_FindHashEntry(&iclsPtr->functions,
-	            (char *)objv[2]);
-	    if (hPtr != NULL) {
-	        idmPtr = Tcl_GetHashValue(hPtr);
-	    }
-#endif
 	}
     } else {
         found = 1;
