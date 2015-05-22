@@ -100,20 +100,20 @@ static const char *clazzClassScript =
 static const char *clazzUnknownBody =
 "    set mySelf [::oo::Helpers::self]\n"
 "    set ns [uplevel 1 ::namespace current]\n"
-"    if {[::itcl::is class $mySelf]} {\n"
-"        if {[namespace which ${ns}::$m] ne {}} {\n"
-"            error \"command \\\"$m\\\" already exists in namespace \\\"$ns\\\"\"\n"
-"        }\n"
-"    } \n"
+"#    if {[::itcl::is class $mySelf]} {\n"
+"#        if {[namespace which ${ns}::$m] ne {}} {\n"
+"#            error \"command \\\"$m\\\" already exists in namespace \\\"$ns\\\"\"\n"
+"#        }\n"
+"#    } \n"
 "    set myObj [lindex [::info level 0] 0]\n"
 "    set myErrorInfo {}\n"
 "    set obj {}\n"
-"    if {[catch {\n"
+"#    if {[catch {\n"
 "        uplevel 1 [list ::itcl::parser::handleClass $myObj $mySelf $m] $args\n"
-"    } obj myErrorInfo]} {\n"
-"	return -code error -errorinfo $::errorInfo $obj\n"
-"    }\n"
-"    return $obj\n";
+"#    } obj]} {\n"
+"#	return -code error -errorinfo $::errorInfo $obj\n"
+"#    }\n"
+"#    return $obj\n";
 
 #define ITCL_IS_ENSEMBLE 0x1
 
