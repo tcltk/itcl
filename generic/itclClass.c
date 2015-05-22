@@ -1441,7 +1441,7 @@ FinalizeCreateObject(
             Tcl_AppendResult(interp, Tcl_GetString(objNamePtr), NULL);
 	}
     }
-
+#if 0
     if (result == TCL_ERROR) {
 	Tcl_Obj *objPtr;
 	
@@ -1453,6 +1453,7 @@ FinalizeCreateObject(
 	    Tcl_SetReturnOptions(interp, objPtr);
 	}
     }
+#endif
     Tcl_DecrRefCount(objNamePtr);
     return result;
 }
