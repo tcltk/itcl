@@ -327,7 +327,7 @@ Itcl_CreateClass(
 
     nameObjPtr = Tcl_NewStringObj("", 0);
     Tcl_IncrRefCount(nameObjPtr);
-    if ((path[0] != ':') && (path[1] != ':')) {
+    if ((path[0] != ':') || (path[1] != ':')) {
         Tcl_Namespace *currNsPtr = Tcl_GetCurrentNamespace(interp);
         Tcl_AppendToObj(nameObjPtr, currNsPtr->fullName, -1);
         if (currNsPtr->parentPtr != NULL) {
