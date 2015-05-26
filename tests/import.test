@@ -155,13 +155,15 @@ test import-2.4 {itcl::class handles stubs correctly
 test import-2.5 {itcl::class will overwrite stubs in an existing namespace} {
     $interp eval {
         proc auto_load {cmd {namespace {}}} {
+puts AL:$cmd
             itcl::class $cmd { }
+puts IS-$cmd-[itcl::is class $cmd]
             return 1
         }
         namespace eval test::buried { }
         itcl::import::stub create ::test::buried
         itcl::import::stub create ::test::buried::stub
-        list [catch {::test::buried xx} result] $result [xx info class]
+        list [puts A:[catch {::test::buried xx} result]] [puts B:$result] [xx info class]
     }
 } {0 xx ::test::buried}
 
