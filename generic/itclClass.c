@@ -1007,7 +1007,6 @@ ItclFreeClass(
     FOREACH_HASH_DECLS;
     Tcl_HashSearch place;
     ItclClass *iclsPtr;
-    ItclClass *iclsPtr2;
     ItclMemberFunc *imPtr;
     ItclVariable *ivPtr;
     ItclOption *ioptPtr;
