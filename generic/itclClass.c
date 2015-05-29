@@ -1223,11 +1223,6 @@ ItclFreeClass(
     Tcl_DecrRefCount(iclsPtr->namePtr);
     Tcl_DecrRefCount(iclsPtr->fullNamePtr);
 
-    FOREACH_HASH_VALUE(iclsPtr2, &iclsPtr->infoPtr->namespaceClasses) {
-        if (iclsPtr2 == iclsPtr) {
-	    Tcl_DeleteHashEntry(hPtr);
-	}
-    }
     if (iclsPtr->resolvePtr != NULL) {
         ckfree((char *)iclsPtr->resolvePtr->clientData);
         ckfree((char *)iclsPtr->resolvePtr);
