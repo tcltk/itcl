@@ -1314,24 +1314,26 @@ Itcl_FindClass(
     const char* path,        /* path name for class */
     int autoload)
 {
-    Tcl_Namespace* classNs;
-
     /*
      *  Search for a namespace with the specified name, and if
      *  one is found, see if it is a class namespace.
      */
-    classNs = Itcl_FindClassNamespace(interp, path);
 
-    if (classNs && Itcl_IsClassNamespace(classNs)) {
-	ItclObjectInfo *infoPtr;
-	infoPtr = Tcl_GetAssocData(interp, ITCL_INTERP_DATA, NULL);
-        return (ItclClass*)Tcl_ObjectGetMetadata(classNs->clientData,
-	        infoPtr->class_meta_type);
+    Tcl_Namespace* classNs = Itcl_FindClassNamespace(interp, path);
+
+    if (classNs) {
+	ItclObjectInfo *infoPtr
+		= Tcl_GetAssocData(interp, ITCL_INTERP_DATA, NULL);
+	Tcl_HashEntry *hPtr = Tcl_FindHashEntry(&infoPtr->namespaceClasses,
+		(char *) classNs);
+	if (hPtr) {
+	    return (ItclClass *) Tcl_GetHashValue(hPtr);
+	}
     }
 
     /*
      *  If the autoload flag is set, try to autoload the class
-     *  definition.
+     *  definition, then search again.
      */
     if (autoload) {
         Tcl_DString buf;
@@ -1349,22 +1351,7 @@ Itcl_FindClass(
         Tcl_ResetResult(interp);
         Tcl_DStringFree(&buf);
 
-        classNs = Itcl_FindClassNamespace(interp, path);
-        if (classNs && Itcl_IsClassNamespace(classNs)) {
-	    ItclObjectInfo *infoPtr;
-	    Tcl_HashEntry *hPtr;
-
-	    infoPtr = Tcl_GetAssocData(interp, ITCL_INTERP_DATA, NULL);
-	    hPtr = Tcl_FindHashEntry(&infoPtr->namespaceClasses, (char *)
-	            classNs);
-	    if (hPtr == NULL) {
-                Tcl_AppendObjToErrorInfo(interp, Tcl_ObjPrintf(
-                        "\n    (while attempting to autoload class \"%.200s\")",
-                        path));
-                return NULL;
-	    }
-	    return (ItclClass *)Tcl_GetHashValue(hPtr);
-        }
+	return Itcl_FindClass(interp, path, 0);
     }
 
     Tcl_AppendResult(interp, "class \"", path, "\" not found in context \"",
@@ -1402,14 +1389,7 @@ Itcl_FindClassNamespace(interp, path)
     const char* path;                /* path name for class */
 {
     Tcl_Namespace* contextNs = Tcl_GetCurrentNamespace(interp);
-    Tcl_Namespace* classNs;
-
-    /*
-     *  Look up the namespace.  If the name is not absolute, then
-     *  see if it's the current namespace, and try the global
-     *  namespace as well.
-     */
-    classNs = Tcl_FindNamespace(interp, path, NULL, /* flags */ 0);
+    Tcl_Namespace *classNs = Tcl_FindNamespace(interp, path, NULL, 0);
 
     if ( !classNs /* We didn't find it... */
 	    && contextNs->parentPtr != NULL	/* context is not global */
@@ -1418,8 +1398,7 @@ Itcl_FindClassNamespace(interp, path)
 
         if (strcmp(contextNs->name, path) == 0) {
             classNs = contextNs;
-        }
-        else {
+        } else {
             classNs = Tcl_FindNamespace(interp, path, NULL, TCL_GLOBAL_ONLY);
         }
     }
