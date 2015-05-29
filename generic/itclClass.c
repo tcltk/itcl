@@ -1403,31 +1403,24 @@ Itcl_FindClassNamespace(interp, path)
 {
     Tcl_Namespace* contextNs = Tcl_GetCurrentNamespace(interp);
     Tcl_Namespace* classNs;
-    Tcl_DString buffer;
 
     /*
      *  Look up the namespace.  If the name is not absolute, then
      *  see if it's the current namespace, and try the global
      *  namespace as well.
      */
-    classNs = Tcl_FindNamespace(interp, (const char *)path,
-	    (Tcl_Namespace*)NULL, /* flags */ 0);
+    classNs = Tcl_FindNamespace(interp, path, NULL, /* flags */ 0);
 
-    if ( !classNs && contextNs->parentPtr != NULL &&
-         (*path != ':' || *(path+1) != ':') ) {
+    if ( !classNs /* We didn't find it... */
+	    && contextNs->parentPtr != NULL	/* context is not global */
+	    && (*path != ':' || *(path+1) != ':') /* path not FQ */
+	) {
 
         if (strcmp(contextNs->name, path) == 0) {
             classNs = contextNs;
         }
         else {
-            Tcl_DStringInit(&buffer);
-            Tcl_DStringAppend(&buffer, "::", -1);
-            Tcl_DStringAppend(&buffer, path, -1);
-
-            classNs = Tcl_FindNamespace(interp, Tcl_DStringValue(&buffer),
-                (Tcl_Namespace*)NULL, /* flags */ 0);
-
-            Tcl_DStringFree(&buffer);
+            classNs = Tcl_FindNamespace(interp, path, NULL, TCL_GLOBAL_ONLY);
         }
     }
     return classNs;
