@@ -98,22 +98,25 @@ static const char *clazzClassScript =
 
 
 static const char *clazzUnknownBody =
-"    set mySelf [::oo::Helpers::self]\n"
-"    set ns [uplevel 1 ::namespace current]\n"
-"    if {[::itcl::is class $mySelf]} {\n"
-"        if {[namespace which ${ns}::$m] ne {}} {\n"
-"            error \"command \\\"$m\\\" already exists in namespace \\\"$ns\\\"\"\n"
-"        }\n"
-"    } \n"
-"    set myObj [lindex [::info level 0] 0]\n"
-"    set myErrorInfo {}\n"
-"    set obj {}\n"
-"    if {[catch {\n"
-"        uplevel 1 [list ::itcl::parser::handleClass $myObj $mySelf $m] $args\n"
-"    } obj myErrorInfo]} {\n"
-"	return -code error -errorinfo $::errorInfo $obj\n"
+"    set called [lindex [::info level 0] 0]\n"
+"    set myObj [uplevel 1 [list namespace which $called]]\n"
+"    if {[::itcl::is class $myObj]} {\n"
+"	 if {![string match ::* $m]} {\n"
+"	    set ns [uplevel 1 {namespace current}]\n"
+"	    set fq ${ns}::$m\n"
+"	 } else {\n"
+"	    set fq $m\n"
+"	    set ns [namespace qualifiers $fq]\n"
+"	 }\n"
+"	 if {[namespace which $fq] ne {}} {\n"
+"	    set qual [namespace qualifiers $fq]\n"
+"	    set tail [namespace tail $fq]\n"
+"	    if {$qual eq {}} {set qual ::}\n"
+"	    return -code error \"command \\\"$tail\\\" already exists in namespace \\\"$qual\\\"\"\n"
+"	 }\n"
+"        tailcall ::itcl::parser::handleClass $called [::oo::Helpers::self] $m {*}$args\n"
 "    }\n"
-"    return $obj\n";
+"    next $m {*}$args\n";
 
 #define ITCL_IS_ENSEMBLE 0x1
 
