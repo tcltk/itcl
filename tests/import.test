@@ -165,6 +165,17 @@ test import-2.5 {itcl::class will overwrite stubs in an existing namespace} {
     }
 } {0 xx ::test::buried}
 
+test import-2.6 {itcl::class will overwrite stubs} {
+    $interp eval {
+        proc auto_load {cmd {namespace {}}} {
+            itcl::class $cmd { }
+            return 1
+        }
+        itcl::import::stub create ::test::zonk
+        list [catch {::test::zonk yy} result] $result [yy info class]
+    }
+} {0 yy ::test::zonk}
+
 catch {interp delete $interp}
 
 ::tcltest::cleanupTests

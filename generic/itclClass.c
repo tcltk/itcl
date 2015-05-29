@@ -335,10 +335,17 @@ Itcl_CreateClass(
         }
     }
     Tcl_AppendToObj(nameObjPtr, path, -1);
-    if (classNs != NULL) {
-        Tcl_Command oldCmd = Tcl_FindCommand(interp,
-                Tcl_GetString(nameObjPtr), NULL, 0);
-        if (oldCmd != NULL) {
+    {
+	/*
+	 * TclOO machinery will refuse to overwrite an existing command
+	 * with creation of a new object.  However, Itcl has a legacy
+	 * "stubs" auto-importing mechanism that explicitly needs such
+	 * overwriting.  So, check whether we have a stub, and if so,
+	 * delete it before TclOO has a chance to object.
+	 */
+	Tcl_Command oldCmd = Tcl_FindCommand(interp, path, NULL, 0);
+
+	if (Itcl_IsStub(oldCmd)) {
             Tcl_DeleteCommandFromToken(interp, oldCmd);
         }
     }
