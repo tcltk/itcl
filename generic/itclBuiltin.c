@@ -3121,9 +3121,7 @@ Itcl_BiDestroyCmd(
 	Tcl_DecrRefCount(objPtr);
         result = TCL_OK;
     } else {
-	Itcl_PreserveData(contextIclsPtr);
         result = Itcl_DeleteClass(interp, contextIclsPtr);
-        Itcl_ReleaseData(contextIclsPtr);
     }
     return result;
 }

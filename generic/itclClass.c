@@ -44,6 +44,23 @@ static void ItclDeleteFunction(ItclMemberFunc *imPtr);
 static void ItclDeleteComponent(ItclComponent *icPtr);
 static void ItclDeleteOption(char *cdata);
 
+void
+ItclPreserveClass(
+    ItclClass *iclsPtr)
+{
+    iclsPtr->refCount++;
+}
+
+void
+ItclReleaseClass(
+    ClientData clientData)
+{
+    ItclClass *iclsPtr = (ItclClass *)clientData;
+
+    if (--iclsPtr->refCount == 0) {
+	ItclFreeClass((char *) clientData);
+    }
+}
 
 /*
  * ------------------------------------------------------------------------
@@ -117,7 +134,7 @@ ClassRenamedTrace(
         return;
     }
     iclsPtr->flags |= ITCL_CLASS_IS_RENAMED;
-    Itcl_PreserveData(iclsPtr);
+    ItclPreserveClass(iclsPtr);
     /* delete the namespace for the common variables */
     Tcl_DStringInit(&buffer);
     Tcl_DStringAppend(&buffer, ITCL_VARIABLES_NAMESPACE, -1);
@@ -130,7 +147,7 @@ ClassRenamedTrace(
     if (!(iclsPtr->flags & ITCL_CLASS_NS_IS_DESTROYED)) {
         ItclDestroyClassNamesp(iclsPtr);
     }
-    Itcl_ReleaseData(iclsPtr);
+    ItclReleaseClass(iclsPtr);
     return;
 }
 
@@ -323,7 +340,7 @@ Itcl_CreateClass(
      *  data with the class data.
      */
 
-    Itcl_PreserveData((ClientData)iclsPtr);
+    ItclPreserveClass(iclsPtr);
 
     nameObjPtr = Tcl_NewStringObj("", 0);
     Tcl_IncrRefCount(nameObjPtr);
@@ -376,8 +393,6 @@ Itcl_CreateClass(
     if (_TclOONamespaceDeleteProc == NULL) {
         _TclOONamespaceDeleteProc = classNs->deleteProc;
     }
-
-    Itcl_EventuallyFree((ClientData)iclsPtr, ItclFreeClass);
 
     if (classNs == NULL) {
 	Tcl_AppendResult(interp,
@@ -603,7 +618,7 @@ Itcl_CreateClass(
         }
     }
 
-    Itcl_PreserveData((ClientData)iclsPtr);
+    ItclPreserveClass(iclsPtr);
     iclsPtr->accessCmd = Tcl_GetObjectCommand(oPtr);
     Tcl_TraceCommand(interp, Tcl_GetCommandName(interp, iclsPtr->accessCmd),
                 TCL_TRACE_RENAME|TCL_TRACE_DELETE, ClassRenamedTrace, iclsPtr);
@@ -723,7 +738,7 @@ CallDeleteOneClass(
 	    hPtr = Tcl_FindHashEntry(&infoPtr->classes, (char *)iclsPtr);
 	    if (hPtr != NULL) {
 	        /* release from derived reference */
-                Itcl_ReleaseData((char *)iclsPtr);
+		ItclReleaseClass(iclsPtr);
 	    }
         }
     }
@@ -856,7 +871,7 @@ ItclDestroyClass(
         iclsPtr->accessCmd = NULL;
         Tcl_DeleteNamespace(iclsPtr->nsPtr);
     }
-    Itcl_ReleaseData((ClientData)iclsPtr);
+    ItclReleaseClass(iclsPtr);
 }
 
 
@@ -960,7 +975,7 @@ ItclDestroyClassNamesp(
             derivedPtr = (ItclClass*)Itcl_GetListValue(elem);
             if (derivedPtr == iclsPtr) {
 		derivedPtr->flags |= ITCL_CLASS_DERIVED_RELEASED;
-                Itcl_ReleaseData(derivedPtr);
+		ItclReleaseClass(derivedPtr);
                 elem = Itcl_DeleteListElem(elem);
             } else {
                 elem = Itcl_NextListElem(elem);
@@ -987,7 +1002,7 @@ ItclDestroyClassNamesp(
     /*
      *  Release the namespace's claim on the class definition.
      */
-    Itcl_ReleaseData((ClientData)iclsPtr);
+    ItclReleaseClass(iclsPtr);
 }
 
 
@@ -1031,7 +1046,7 @@ ItclFreeClass(
      */
     elem = Itcl_FirstListElem(&iclsPtr->derived);
     while (elem) {
-        Itcl_ReleaseData( Itcl_GetListValue(elem) );
+	ItclReleaseClass( Itcl_GetListValue(elem) );
         elem = Itcl_NextListElem(elem);
     }
     Itcl_DeleteList(&iclsPtr->derived);
@@ -1155,7 +1170,7 @@ ItclFreeClass(
      */
     elem = Itcl_FirstListElem(&iclsPtr->bases);
     while (elem) {
-        Itcl_ReleaseData( Itcl_GetListValue(elem) );
+	ItclReleaseClass( Itcl_GetListValue(elem) );
         elem = Itcl_NextListElem(elem);
     }
     Itcl_DeleteList(&iclsPtr->bases);
@@ -2447,7 +2462,6 @@ ItclDeleteFunction(
     hPtr = Tcl_FindHashEntry(&imPtr->iclsPtr->infoPtr->procMethods,
 	    (char *) imPtr->tmPtr);
     if (hPtr != NULL) {
-	Itcl_ReleaseData(imPtr->iclsPtr);
 	Tcl_DeleteHashEntry(hPtr);
     }
     hPtr = Tcl_FindHashEntry(&imPtr->infoPtr->classes, (char *)imPtr->iclsPtr);

@@ -962,7 +962,6 @@ ItclClassBaseCmd(
 	            (char *)imPtr->tmPtr, &isNewEntry);
 	    if (isNewEntry) {
 	        Tcl_SetHashValue(hPtr2, imPtr);
-		Itcl_PreserveData(iclsPtr);
 	    }
 	    if (iclsPtr->flags & (ITCL_TYPE|ITCL_WIDGET|ITCL_WIDGETADAPTOR)) {
 		if (argumentPtr == NULL) {
@@ -975,7 +974,6 @@ ItclClassBaseCmd(
 		 * entry in the procMethods map based on the old one.
 		 */
 		if (isNewEntry) {
-		    Itcl_ReleaseData(iclsPtr);
 		    Tcl_DeleteHashEntry(hPtr2);
 		}
 	        imPtr->tmPtr = (ClientData)Itcl_NewProcMethod(interp,
@@ -1292,7 +1290,7 @@ Itcl_ClassInheritCmd(
         }
 
         Itcl_AppendList(&iclsPtr->bases, (ClientData)baseClsPtr);
-        Itcl_PreserveData((ClientData)baseClsPtr);
+	ItclPreserveClass(baseClsPtr);
     }
 
     /*
@@ -1412,7 +1410,7 @@ Itcl_ClassInheritCmd(
         Tcl_DStringAppend(&buffer, Tcl_GetString(baseClsPtr->fullNamePtr), -1);
 
         Itcl_AppendList(&baseClsPtr->derived, (ClientData)iclsPtr);
-        Itcl_PreserveData((ClientData)iclsPtr);
+	ItclPreserveClass(iclsPtr);
 
         elem = Itcl_NextListElem(elem);
     }
@@ -1434,7 +1432,7 @@ inheritError:
 
     elem = Itcl_FirstListElem(&iclsPtr->bases);
     while (elem) {
-        Itcl_ReleaseData( Itcl_GetListValue(elem) );
+	ItclReleaseClass( (ItclClass *)Itcl_GetListValue(elem) );
         elem = Itcl_DeleteListElem(elem);
     }
     return TCL_ERROR;
