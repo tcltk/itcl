@@ -314,6 +314,7 @@ typedef struct ItclClass {
     int callRefCount;             /* prevent deleting of class if refcount>1 */
     Tcl_Obj *typeConstructorPtr;  /* initialization for types */
     int destructorHasBeenCalled;  /* prevent multiple invocations of destrcutor */
+    int refCount;
 } ItclClass;
 
 typedef struct ItclHierIter {
@@ -695,6 +696,9 @@ MODULE_SCOPE int ItclCheckCallProc(ClientData clientData, Tcl_Interp *interp,
 
 MODULE_SCOPE void ItclPreserveIMF(ItclMemberFunc *imPtr);
 MODULE_SCOPE void ItclReleaseIMF(ClientData imPtr);
+
+MODULE_SCOPE void ItclPreserveClass(ItclClass *iclsPtr);
+MODULE_SCOPE void ItclReleaseClass(ClientData iclsPtr);
 
 MODULE_SCOPE ItclFoundation *ItclGetFoundation(Tcl_Interp *interp);
 MODULE_SCOPE Tcl_ObjCmdProc ItclClassCommandDispatcher;

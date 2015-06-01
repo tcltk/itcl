@@ -764,7 +764,6 @@ Itcl_ChangeMemberFunc(
                 (char *)imPtr->tmPtr, &isNewEntry);
         if (isNewEntry) {
             Tcl_SetHashValue(hPtr, imPtr);
-	    Itcl_PreserveData(imPtr->iclsPtr);
         }
     }
     ItclAddClassFunctionDictInfo(interp, imPtr->iclsPtr, imPtr);
@@ -2437,7 +2436,6 @@ ItclCheckCallMethod(
     if (ioPtr != NULL) {
         ioPtr->callRefCount++;
 	Itcl_PreserveData(ioPtr);
-	Itcl_PreserveData(ioPtr->iclsPtr);
     }
     imPtr->iclsPtr->callRefCount++;
     if (!imPtr->iclsPtr->infoPtr->useOldResolvers) {
@@ -2532,7 +2530,6 @@ ItclAfterCallMethod(
             if (hPtr == NULL) {
                 ckfree((char *)callContextPtr);
 	    }
-            Itcl_ReleaseData(ioPtr->iclsPtr);
             Itcl_ReleaseData(ioPtr);
         } else {
             ckfree((char *)callContextPtr);

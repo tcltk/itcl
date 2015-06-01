@@ -238,7 +238,7 @@ ItclCreateObject(
     ioPtr->iclsPtr = iclsPtr;
     ioPtr->interp = interp;
     ioPtr->infoPtr = infoPtr;
-    Itcl_PreserveData((ClientData)iclsPtr);
+    ItclPreserveClass(iclsPtr);
 
     ioPtr->constructed = (Tcl_HashTable*)ckalloc(sizeof(Tcl_HashTable));
     Tcl_InitObjHashTable(ioPtr->constructed);
@@ -2828,7 +2828,7 @@ ItclFreeObject(
      *    from below.
      */
 
-    Itcl_ReleaseData((ClientData)ioPtr->iclsPtr);
+    ItclReleaseClass(ioPtr->iclsPtr);
     if (ioPtr->constructed) {
         Tcl_DeleteHashTable(ioPtr->constructed);
         ckfree((char*)ioPtr->constructed);
