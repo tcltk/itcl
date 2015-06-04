@@ -5307,9 +5307,7 @@ Itcl_BiInfoDelegatedMethodCmd(
     hPtr = Tcl_FindHashEntry(&infoPtr->namespaceClasses, (char *)nsPtr);
     if (hPtr == NULL) {
 	nsPtr = Tcl_GetCurrentNamespace(interp);
-	objPtr = Tcl_NewStringObj(nsPtr->fullName, -1);
-        hPtr = Tcl_FindHashEntry(&infoPtr->nameClasses, (char *)objPtr);
-	Tcl_DecrRefCount(objPtr);
+	hPtr = Tcl_FindHashEntry(&infoPtr->namespaceClasses, (char *)nsPtr);
         if (hPtr == NULL) {
             Tcl_AppendResult(interp, "cannot find class name for namespace \"",
 	            nsPtr->fullName, "\"", NULL);
@@ -5561,9 +5559,7 @@ Itcl_BiInfoDelegatedTypeMethodCmd(
     hPtr = Tcl_FindHashEntry(&infoPtr->namespaceClasses, (char *)nsPtr);
     if (hPtr == NULL) {
 	nsPtr = Tcl_GetCurrentNamespace(interp);
-	objPtr = Tcl_NewStringObj(nsPtr->fullName, -1);
-        hPtr = Tcl_FindHashEntry(&infoPtr->nameClasses, (char *)objPtr);
-	Tcl_DecrRefCount(objPtr);
+	hPtr = Tcl_FindHashEntry(&infoPtr->namespaceClasses, (char *)nsPtr);
         if (hPtr == NULL) {
             Tcl_AppendResult(interp, "cannot find class name for namespace \"",
 	            nsPtr->fullName, "\"", NULL);
