@@ -2094,11 +2094,9 @@ ItclReportObjectUsage(
     ItclMemberFunc *cmpFunc;
     ItclCmdLookup *clookup;
     ItclObjectInfo * infoPtr = NULL;
-    ItclClass * classPtr = NULL;
     char *name;
     int ignore;
     int cmp;
-    FOREACH_HASH_DECLS;
 
     if (contextIoPtr == NULL) {
         resultPtr = Tcl_GetObjResult(interp);
@@ -2111,12 +2109,13 @@ ItclReportObjectUsage(
             Tcl_AppendResult(interp, " PANIC cannot get contextNsPtr in ItclReportObjectUsage", NULL);
 	    return;
 	}
-        FOREACH_HASH_VALUE(classPtr,&infoPtr->nameClasses) {
-            if (strcmp(contextNsPtr->fullName, Tcl_GetString(classPtr->fullNamePtr)) == 0) {
-               iclsPtr = classPtr;
-               break;
-            }
-        }
+
+	entry = Tcl_FindHashEntry(&infoPtr->namespaceClasses,
+		(char *)contextNsPtr);
+	if (entry) {
+	    iclsPtr = Tcl_GetHashValue(entry);
+	}
+
         if (iclsPtr == NULL) {
           Tcl_AppendResult(interp, " PANIC cannot get class from contextNsPtr ItclReportObjectUsage", NULL);
           return;
