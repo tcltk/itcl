@@ -403,8 +403,7 @@ ItclCreateObject(
 	ioPtr->createNamePtr = Tcl_NewStringObj(objName, -1);
     }
     ioPtr->oPtr = Tcl_NewObjectInstance(interp, iclsPtr->clsPtr, objName,
-            iclsPtr->nsPtr->fullName, /* objc */-1, /* objv */NULL,
-	    /* skip */0);
+            /* nsName */ NULL, /* objc */ -1, /* objv */ NULL, /* skip */ 0);
     if (ioPtr->oPtr == NULL) {
 	infoPtr->currIoPtr = saveCurrIoPtr;
         ItclDeleteObjectVariablesNamespace(interp, ioPtr);
