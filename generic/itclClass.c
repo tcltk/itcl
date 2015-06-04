@@ -901,16 +901,12 @@ ItclDestroyClassNamesp(
     ItclClass *iclsPtr2;
     ItclClass *basePtr;
     ItclClass *derivedPtr;
-    ItclObjectInfo *infoPtr;
 
     iclsPtr = (ItclClass*)cdata;
     if (iclsPtr->flags & ITCL_CLASS_NS_IS_DESTROYED) {
         return;
     }
     iclsPtr->flags |= ITCL_CLASS_NS_IS_DESTROYED;
-    infoPtr = iclsPtr->infoPtr;
-    Tcl_FindHashEntry(&infoPtr->nameClasses,
-            (char *)iclsPtr->fullNamePtr);
     /*
      *  Destroy all derived classes, since these lose their meaning
      *  when the base class goes away.
