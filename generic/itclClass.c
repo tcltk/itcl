@@ -212,7 +212,7 @@ Itcl_CreateClass(
     Tcl_DString buffer;
     Tcl_Command cmd;
     Tcl_CmdInfo cmdInfo;
-    Tcl_Namespace *classNs;
+    Tcl_Namespace *classNs, *ooNs;
     Tcl_Object oPtr;
     Tcl_Obj *nameObjPtr;
     Tcl_Obj *namePtr;
@@ -389,6 +389,7 @@ Itcl_CreateClass(
     cmdInfo.deleteProc = ItclDestroyClass;
     cmdInfo.deleteData = iclsPtr;
     Tcl_SetCommandInfoFromToken(cmd, &cmdInfo);
+    ooNs = Tcl_GetObjectNamespace(oPtr);
     classNs = Tcl_FindNamespace(interp, Tcl_GetString(nameObjPtr),
             (Tcl_Namespace*)NULL, /* flags */ 0);
     if (_TclOONamespaceDeleteProc == NULL) {
@@ -404,18 +405,18 @@ Itcl_CreateClass(
 
     if (iclsPtr->infoPtr->useOldResolvers) {
 #ifdef NEW_PROTO_RESOLVER
-        Itcl_SetNamespaceResolvers(classNs,
+        Itcl_SetNamespaceResolvers(ooNs,
                 (Tcl_ResolveCmdProc*)Itcl_ClassCmdResolver2,
                 (Tcl_ResolveVarProc*)Itcl_ClassVarResolver2,
                 (Tcl_ResolveCompiledVarProc*)Itcl_ClassCompiledVarResolver2);
 #else
-        Itcl_SetNamespaceResolvers(classNs,
+        Itcl_SetNamespaceResolvers(ooNs,
                 (Tcl_ResolveCmdProc*)Itcl_ClassCmdResolver,
                 (Tcl_ResolveVarProc*)Itcl_ClassVarResolver,
                 (Tcl_ResolveCompiledVarProc*)Itcl_ClassCompiledVarResolver);
 #endif
     } else {
-        Tcl_SetNamespaceResolver(classNs, iclsPtr->resolvePtr);
+        Tcl_SetNamespaceResolver(ooNs, iclsPtr->resolvePtr);
     }
     iclsPtr->nsPtr = classNs;
 
