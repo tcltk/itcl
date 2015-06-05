@@ -97,6 +97,7 @@ ItclDestroyClass2(
 
     iclsPtr = clientData;
     ItclDestroyClassNamesp(iclsPtr);
+    ItclReleaseClass(iclsPtr);
 }
 
 /*
@@ -486,6 +487,7 @@ Itcl_CreateClass(
     /* the ___this command is just to notify when a namespace is deleted */
     Tcl_DStringAppend(&buffer, Tcl_GetString(iclsPtr->fullNamePtr), -1);
     Tcl_DStringAppend(&buffer, "::___this", -1);
+    ItclPreserveClass(iclsPtr);
     iclsPtr->thisCmd = Tcl_CreateObjCommand(interp, Tcl_DStringValue(&buffer),
             Itcl_ThisCmd, iclsPtr, ItclDestroyClass2);
     Tcl_DStringFree(&buffer);
