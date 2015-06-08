@@ -145,9 +145,7 @@ ClassCmdDeleteTrace(
     if (nsPtr != NULL) {
         Tcl_DeleteNamespace(nsPtr);
     }
-fprintf(stdout, "TEST 1 %p\n", iclsPtr); fflush(stdout);
     if (!(iclsPtr->flags & ITCL_CLASS_NS_IS_DESTROYED)) {
-fprintf(stdout, "GO 1 %p\n", iclsPtr); fflush(stdout);
         ItclDestroyClassNamesp(iclsPtr);
     }
     ItclReleaseClass(iclsPtr);
@@ -166,8 +164,27 @@ void
 ItclDeleteClassMetadata(
     ClientData clientData)
 {
-    /* do we need that at all ? */
-    return;
+    /*
+     * This is how we get alerted from TclOO that the object corresponding
+     * to an Itcl class (or its namespace...) is being torn down.
+     */
+
+    ItclClass *iclsPtr = clientData;
+    Tcl_Object oPtr = iclsPtr->oPtr;
+    Tcl_Namespace *ooNsPtr = Tcl_GetObjectNamespace(oPtr);
+
+    if (ooNsPtr != iclsPtr->nsPtr) {
+	/* 
+	 * Itcl's idea of the class namespace is different from that of TclOO.
+	 * Make sure both get torn down and pulled from tables.
+	 */
+	Tcl_HashEntry *hPtr = Tcl_FindHashEntry(&iclsPtr->infoPtr->namespaceClasses,
+		(char *)ooNsPtr);
+	if (hPtr != NULL) {
+	    Tcl_DeleteHashEntry(hPtr);
+	}
+	Tcl_DeleteNamespace(iclsPtr->nsPtr);
+    }
 }
 
 static int
@@ -886,9 +903,7 @@ ItclDestroyClass(
         return;
     }
     iclsPtr->flags |= ITCL_CLASS_IS_DESTROYED;
-fprintf(stdout, "TEST 2 %p\n", iclsPtr); fflush(stdout);
     if (!(iclsPtr->flags & ITCL_CLASS_NS_IS_DESTROYED)) {
-fprintf(stdout, "GO 2 %p\n", iclsPtr); fflush(stdout);
         iclsPtr->accessCmd = NULL;
         Tcl_DeleteNamespace(iclsPtr->nsPtr);
     }
@@ -924,12 +939,9 @@ ItclDestroyClassNamesp(
     ItclClass *derivedPtr;
 
     iclsPtr = (ItclClass*)cdata;
-fprintf(stdout, "TEST 3 %p\n", iclsPtr); fflush(stdout);
     if (iclsPtr->flags & ITCL_CLASS_NS_IS_DESTROYED) {
-fprintf(stdout, "GO 3 %p\n", iclsPtr); fflush(stdout);
         return;
     }
-fprintf(stdout, "SET %p\n", iclsPtr); fflush(stdout);
     iclsPtr->flags |= ITCL_CLASS_NS_IS_DESTROYED;
     /*
      *  Destroy all derived classes, since these lose their meaning
@@ -1018,7 +1030,6 @@ fprintf(stdout, "SET %p\n", iclsPtr); fflush(stdout);
 	    }
 else {
 Tcl_Panic("WTF?!");
-fprintf(stdout, "HUH?\n"); fflush(stdout);
 }
         }
     }
