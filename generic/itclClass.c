@@ -102,39 +102,39 @@ ItclDestroyClass2(
 
 /*
  * ------------------------------------------------------------------------
- *  ClassRenamedTrace()
+ *  ClassCmdDeleteTrace()
  *
  * ------------------------------------------------------------------------
  */
 
 static void
-ClassRenamedTrace(
+ClassCmdDeleteTrace(
     ClientData clientData,      /* The class being deleted. */
     Tcl_Interp *interp,         /* The interpreter containing the object. */
     const char *oldName,        /* What the object was (last) called. */
-    const char *newName,        /* Always NULL ??. not for itk!! */
+    const char *newName,        /* Always NULL. */
     int flags)                  /* Why was the object deleted? */
 {
     Tcl_HashEntry *hPtr;
     Tcl_DString buffer;
     Tcl_Namespace *nsPtr;
     ItclObjectInfo *infoPtr;
-    ItclClass *iclsPtr;
-    
-    if (newName != NULL) {
-        return;
-    }
-    iclsPtr = clientData;
+    ItclClass *iclsPtr = clientData;
+
+    /*
+     * How is it decided what cleanup is done here tracing the access command deletion,
+     * versus what cleanup is done by the Tcl_CmdDeleteProc tied to the access command?
+     */
 
     infoPtr = Tcl_GetAssocData(interp, ITCL_INTERP_DATA, NULL);
     hPtr = Tcl_FindHashEntry(&infoPtr->classes, (char *)iclsPtr);
     if (hPtr == NULL) {
         return;
     }
-    if (iclsPtr->flags & ITCL_CLASS_IS_RENAMED) {
-        return;
+    if (iclsPtr->flags & ITCL_CLASS_IS_RENAMED) {	/* DUMB! name for this flag */
+        return;				/* Flag very likely serves no purpose as well. */
     }
-    iclsPtr->flags |= ITCL_CLASS_IS_RENAMED;
+    iclsPtr->flags |= ITCL_CLASS_IS_RENAMED;		/* DUMB! name for this flag */
     ItclPreserveClass(iclsPtr);
     /* delete the namespace for the common variables */
     Tcl_DStringInit(&buffer);
@@ -623,7 +623,7 @@ Itcl_CreateClass(
     ItclPreserveClass(iclsPtr);
     iclsPtr->accessCmd = Tcl_GetObjectCommand(oPtr);
     Tcl_TraceCommand(interp, Tcl_GetCommandName(interp, iclsPtr->accessCmd),
-                TCL_TRACE_RENAME|TCL_TRACE_DELETE, ClassRenamedTrace, iclsPtr);
+                TCL_TRACE_DELETE, ClassCmdDeleteTrace, iclsPtr);
     /* FIXME should set the class objects unknown command to Itcl_HandleClass */
 
     *rPtr = iclsPtr;
