@@ -1021,17 +1021,9 @@ ItclDestroyClassNamesp(
      */
     iclsPtr->flags |= ITCL_CLASS_NS_TEARDOWN;
     if (iclsPtr->accessCmd) {
-        Tcl_CmdInfo cmdInfo;
-	if (Tcl_GetCommandInfoFromToken(iclsPtr->accessCmd, &cmdInfo) == 1) {
-	    cmdPtr = iclsPtr->accessCmd;
-	    iclsPtr->accessCmd = NULL;
-	    if (cmdInfo.deleteProc != NULL) {
-                Tcl_DeleteCommandFromToken(iclsPtr->interp, cmdPtr);
-	    }
-else {
-Tcl_Panic("WTF?!");
-}
-        }
+	cmdPtr = iclsPtr->accessCmd;
+	iclsPtr->accessCmd = NULL;
+        Tcl_DeleteCommandFromToken(iclsPtr->interp, cmdPtr);
     }
 
     /*
