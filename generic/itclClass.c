@@ -102,39 +102,39 @@ ItclDestroyClass2(
 
 /*
  * ------------------------------------------------------------------------
- *  ClassRenamedTrace()
+ *  ClassCmdDeleteTrace()
  *
  * ------------------------------------------------------------------------
  */
 
 static void
-ClassRenamedTrace(
+ClassCmdDeleteTrace(
     ClientData clientData,      /* The class being deleted. */
     Tcl_Interp *interp,         /* The interpreter containing the object. */
     const char *oldName,        /* What the object was (last) called. */
-    const char *newName,        /* Always NULL ??. not for itk!! */
+    const char *newName,        /* Always NULL. */
     int flags)                  /* Why was the object deleted? */
 {
     Tcl_HashEntry *hPtr;
     Tcl_DString buffer;
     Tcl_Namespace *nsPtr;
     ItclObjectInfo *infoPtr;
-    ItclClass *iclsPtr;
-    
-    if (newName != NULL) {
-        return;
-    }
-    iclsPtr = clientData;
+    ItclClass *iclsPtr = clientData;
+
+    /*
+     * How is it decided what cleanup is done here tracing the access command deletion,
+     * versus what cleanup is done by the Tcl_CmdDeleteProc tied to the access command?
+     */
 
     infoPtr = Tcl_GetAssocData(interp, ITCL_INTERP_DATA, NULL);
     hPtr = Tcl_FindHashEntry(&infoPtr->classes, (char *)iclsPtr);
     if (hPtr == NULL) {
         return;
     }
-    if (iclsPtr->flags & ITCL_CLASS_IS_RENAMED) {
-        return;
+    if (iclsPtr->flags & ITCL_CLASS_IS_RENAMED) {	/* DUMB! name for this flag */
+        return;				/* Flag very likely serves no purpose as well. */
     }
-    iclsPtr->flags |= ITCL_CLASS_IS_RENAMED;
+    iclsPtr->flags |= ITCL_CLASS_IS_RENAMED;		/* DUMB! name for this flag */
     ItclPreserveClass(iclsPtr);
     /* delete the namespace for the common variables */
     Tcl_DStringInit(&buffer);
@@ -145,7 +145,9 @@ ClassRenamedTrace(
     if (nsPtr != NULL) {
         Tcl_DeleteNamespace(nsPtr);
     }
+fprintf(stdout, "TEST 1 %p\n", iclsPtr); fflush(stdout);
     if (!(iclsPtr->flags & ITCL_CLASS_NS_IS_DESTROYED)) {
+fprintf(stdout, "GO 1 %p\n", iclsPtr); fflush(stdout);
         ItclDestroyClassNamesp(iclsPtr);
     }
     ItclReleaseClass(iclsPtr);
@@ -393,7 +395,7 @@ Itcl_CreateClass(
     classNs = Tcl_FindNamespace(interp, Tcl_GetString(nameObjPtr),
             (Tcl_Namespace*)NULL, /* flags */ 0);
     if (_TclOONamespaceDeleteProc == NULL) {
-        _TclOONamespaceDeleteProc = classNs->deleteProc;
+        _TclOONamespaceDeleteProc = ooNs->deleteProc;
     }
 
     if (classNs == NULL) {
@@ -438,6 +440,7 @@ Itcl_CreateClass(
     }
     Tcl_SetHashValue(hPtr, (ClientData)iclsPtr);
 
+
     hPtr = Tcl_CreateHashEntry(&infoPtr->namespaceClasses, (char *)classNs,
             &newEntry);
     if (hPtr == NULL) {
@@ -449,6 +452,19 @@ Itcl_CreateClass(
         goto errorOut;
     }
     Tcl_SetHashValue(hPtr, (ClientData)iclsPtr);
+  if (classNs != ooNs) {
+    hPtr = Tcl_CreateHashEntry(&infoPtr->namespaceClasses, (char *)ooNs,
+            &newEntry);
+    if (hPtr == NULL) {
+	Tcl_AppendResult(interp,
+	        "ITCL: cannot create hash entry in infoPtr->namespaceClasses",
+		" for class \"", 
+		Tcl_GetString(iclsPtr->fullNamePtr), "\"", NULL);
+	result = TCL_ERROR;
+        goto errorOut;
+    }
+    Tcl_SetHashValue(hPtr, (ClientData)iclsPtr);
+}
 
     hPtr = Tcl_CreateHashEntry(&infoPtr->classes, (char *)iclsPtr, &newEntry);
     if (hPtr == NULL) {
@@ -624,7 +640,7 @@ Itcl_CreateClass(
     ItclPreserveClass(iclsPtr);
     iclsPtr->accessCmd = Tcl_GetObjectCommand(oPtr);
     Tcl_TraceCommand(interp, Tcl_GetCommandName(interp, iclsPtr->accessCmd),
-                TCL_TRACE_RENAME|TCL_TRACE_DELETE, ClassRenamedTrace, iclsPtr);
+                TCL_TRACE_DELETE, ClassCmdDeleteTrace, iclsPtr);
     /* FIXME should set the class objects unknown command to Itcl_HandleClass */
 
     *rPtr = iclsPtr;
@@ -870,7 +886,9 @@ ItclDestroyClass(
         return;
     }
     iclsPtr->flags |= ITCL_CLASS_IS_DESTROYED;
+fprintf(stdout, "TEST 2 %p\n", iclsPtr); fflush(stdout);
     if (!(iclsPtr->flags & ITCL_CLASS_NS_IS_DESTROYED)) {
+fprintf(stdout, "GO 2 %p\n", iclsPtr); fflush(stdout);
         iclsPtr->accessCmd = NULL;
         Tcl_DeleteNamespace(iclsPtr->nsPtr);
     }
@@ -906,9 +924,12 @@ ItclDestroyClassNamesp(
     ItclClass *derivedPtr;
 
     iclsPtr = (ItclClass*)cdata;
+fprintf(stdout, "TEST 3 %p\n", iclsPtr); fflush(stdout);
     if (iclsPtr->flags & ITCL_CLASS_NS_IS_DESTROYED) {
+fprintf(stdout, "GO 3 %p\n", iclsPtr); fflush(stdout);
         return;
     }
+fprintf(stdout, "SET %p\n", iclsPtr); fflush(stdout);
     iclsPtr->flags |= ITCL_CLASS_NS_IS_DESTROYED;
     /*
      *  Destroy all derived classes, since these lose their meaning
@@ -995,6 +1016,10 @@ ItclDestroyClassNamesp(
 	    if (cmdInfo.deleteProc != NULL) {
                 Tcl_DeleteCommandFromToken(iclsPtr->interp, cmdPtr);
 	    }
+else {
+Tcl_Panic("WTF?!");
+fprintf(stdout, "HUH?\n"); fflush(stdout);
+}
         }
     }
 
