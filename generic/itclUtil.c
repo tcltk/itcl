@@ -986,11 +986,13 @@ Itcl_CanAccess2(
     assert (protection == ITCL_PROTECTED);
 
     if (Itcl_IsClassNamespace(fromNsPtr)) {
-        fromIclsPtr =  (ItclClass*)Tcl_ObjectGetMetadata(fromNsPtr->clientData,
-	        iclsPtr->infoPtr->class_meta_type);
-	if (fromIclsPtr == NULL) {
-	   return 0;
+	entry = Tcl_FindHashEntry(&iclsPtr->infoPtr->namespaceClasses,
+		fromNsPtr);
+	if (entry == NULL) {
+	    return 0;
 	}
+	fromIclsPtr = Tcl_GetHashValue(entry);
+
         entry = Tcl_FindHashEntry(&fromIclsPtr->heritage,
 	        (char*)iclsPtr);
 
