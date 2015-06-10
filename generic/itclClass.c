@@ -481,6 +481,12 @@ Itcl_CreateClass(
         goto errorOut;
     }
     Tcl_SetHashValue(hPtr, (ClientData)iclsPtr);
+
+    if (classNs->clientData && classNs->deleteProc) {
+	(*classNs->deleteProc)(classNs->clientData);
+    }
+    classNs->clientData = (ClientData)iclsPtr;
+    classNs->deleteProc = ItclDestroyClass2;
 }
 
     hPtr = Tcl_CreateHashEntry(&infoPtr->classes, (char *)iclsPtr, &newEntry);
@@ -517,14 +523,6 @@ Itcl_CreateClass(
     Tcl_DStringAppend(&buffer, "::this", -1);
     iclsPtr->thisCmd = Tcl_CreateObjCommand(interp, Tcl_DStringValue(&buffer),
             Itcl_ThisCmd, iclsPtr, NULL);
-    Tcl_DStringInit(&buffer);
-    /* the ___this command is just to notify when a namespace is deleted */
-    Tcl_DStringAppend(&buffer, Tcl_GetString(iclsPtr->fullNamePtr), -1);
-    Tcl_DStringAppend(&buffer, "::___this", -1);
-    ItclPreserveClass(iclsPtr);
-    iclsPtr->thisCmd = Tcl_CreateObjCommand(interp, Tcl_DStringValue(&buffer),
-            Itcl_ThisCmd, iclsPtr, ItclDestroyClass2);
-    Tcl_DStringFree(&buffer);
 
     /*
      *  Add the built-in "type" variable to the list of data members.
