@@ -1282,13 +1282,16 @@ int
 Itcl_IsClassNamespace(
     Tcl_Namespace *nsPtr)  /* namespace being tested */
 {
-    if (nsPtr != NULL) {
-        if (nsPtr->deleteProc == NULL) {
-	   return 0;
-	}
-        return (nsPtr->deleteProc == _TclOONamespaceDeleteProc);
+    if (nsPtr == NULL) {
+	return 0;
     }
-    return 0;
+    if (nsPtr->deleteProc == NULL) {
+	return 0;
+    }
+    if (nsPtr->deleteProc == ItclDestroyClass2) {
+	return 1;
+    }
+    return (nsPtr->deleteProc == _TclOONamespaceDeleteProc);
 }
 
 
