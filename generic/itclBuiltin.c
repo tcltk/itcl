@@ -289,7 +289,6 @@ Itcl_BiInit(
 {
     Tcl_Namespace *itclBiNs;
     Tcl_DString buffer;
-    Tcl_Obj *objPtr;
     Tcl_Obj *mapDict;
     Tcl_Command infoCmd;
     int result;
@@ -348,12 +347,6 @@ Itcl_BiInit(
 	    if(result != TCL_OK) {
               /* FIXME need code here!! */
 	    }
-	    objPtr = Tcl_NewStringObj("itclinfo", -1);
-	    infoPtr->infoVars2Ptr =
-	            Tcl_NewStringObj("::itcl::builtin::Info", -1);
-	    /* FIXME see comment in itclBase.c ItclFinishCmd */
-	    Tcl_IncrRefCount(infoPtr->infoVars2Ptr);
-            Tcl_DictObjPut(NULL, mapDict, objPtr, infoPtr->infoVars2Ptr);
 
 	    infoPtr->infoVars3Ptr =
 	            Tcl_NewStringObj("::itcl::builtin::Info::vars", -1);
