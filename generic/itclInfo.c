@@ -601,8 +601,7 @@ Itcl_BiInfoCmd(
         Tcl_DecrRefCount(objPtr);
 	return TCL_ERROR;
     }
-    return ItclEnsembleSubCmd(clientData, interp, "::info itclinfo",
-            objc, objv, "Itcl_BiInfoCmd");
+    return ItclEnsembleSubCmd(clientData, interp, NULL, objc, objv, "Itcl_BiInfoCmd");
 }
 
 /*
