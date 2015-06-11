@@ -360,18 +360,15 @@ ItclEnsembleSubCmd(
     int isRootEnsemble;
     ItclShowArgs(2, functionName, objc, objv);
 
-    newObjv = (Tcl_Obj **)ckalloc(sizeof(Tcl_Obj *)*(objc+1));
-    isRootEnsemble = Itcl_InitRewriteEnsemble(interp, 1, 2, objc, objv);
-    newObjv[0] = Tcl_NewStringObj("::info", -1);
+    newObjv = (Tcl_Obj **)ckalloc(sizeof(Tcl_Obj *)*(objc));
+    isRootEnsemble = Itcl_InitRewriteEnsemble(interp, 1, 1, objc, objv);
+    newObjv[0] = Tcl_NewStringObj("::itcl::builtin::Info", -1);
     Tcl_IncrRefCount(newObjv[0]);
-    newObjv[1] = Tcl_NewStringObj("itclinfo", -1);
-    Tcl_IncrRefCount(newObjv[1]);
     if (objc > 1) {
-        memcpy(newObjv+2, objv+1, sizeof(Tcl_Obj *) * (objc-1));
+        memcpy(newObjv+1, objv+1, sizeof(Tcl_Obj *) * (objc-1));
     }
-    result = Tcl_EvalObjv(interp, objc+1, newObjv, TCL_EVAL_INVOKE);
+    result = Tcl_EvalObjv(interp, objc, newObjv, TCL_EVAL_INVOKE);
     Tcl_DecrRefCount(newObjv[0]);
-    Tcl_DecrRefCount(newObjv[1]);
     ckfree((char *)newObjv);
     Itcl_ResetRewriteEnsemble(interp, isRootEnsemble);
     return result;

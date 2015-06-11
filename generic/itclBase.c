@@ -787,7 +787,7 @@ ItclFinishCmd(
     }
     Tcl_DecrRefCount(ensObjPtr);
 
-    /* remove the itclinfo and vars entry from the info dict */
+    /* remove the vars entry from the info dict */
     /* and replace it by the original one */
     cmdPtr = Tcl_FindCommand(interp, "info", NULL, TCL_GLOBAL_ONLY);
     if (cmdPtr != NULL && Tcl_IsEnsemble(cmdPtr)) {
@@ -798,10 +798,6 @@ ItclFinishCmd(
 	    Tcl_DictObjRemove(interp, mapDict, objPtr);
 	    Tcl_DictObjPut(interp, mapDict, objPtr, infoPtr->infoVars4Ptr);
 	    Tcl_DecrRefCount(objPtr);
-
-            objPtr = Tcl_NewStringObj("itclinfo", -1);
-	    Tcl_DictObjRemove(interp, mapDict, objPtr);
-	    Tcl_DecrRefCount(objPtr);
 	    Tcl_SetEnsembleMappingDict(interp, cmdPtr, mapDict);
         }
     }
@@ -809,11 +805,9 @@ ItclFinishCmd(
      * ::itcl::builtin::Info
      * and ::itcl::builtin::Info::vars and vars is 2 here !! */
     /* seems to be as the tclOO commands are not yet deleted ?? */
-    Tcl_DecrRefCount(infoPtr->infoVars2Ptr);
     Tcl_DecrRefCount(infoPtr->infoVars3Ptr);
     Tcl_DecrRefCount(infoPtr->infoVars4Ptr);
     if (checkMemoryLeaks) {
-        Tcl_DecrRefCount(infoPtr->infoVars2Ptr);
         Tcl_DecrRefCount(infoPtr->infoVars3Ptr);
         Tcl_DecrRefCount(infoPtr->infoVars4Ptr);
     /* see comment above */
