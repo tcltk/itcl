@@ -358,6 +358,14 @@ test info-4.4c {query argument list (undefined)} {
     ti info args uninitm
 } {<undefined>}
 
+test info-4.4d {query argument list of real proc} {
+    ti info args ::unknown
+} {args}
+
+test info-4.4e {query argument list of real proc} {
+    itcl::builtin::info args ::unknown
+} {args}
+
 test info-4.5a {query body (wrong # args)} {
     list [catch {ti info body} result] $result \
          [catch {ti info body x y} result] $result
