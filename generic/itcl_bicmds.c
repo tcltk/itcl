@@ -1574,6 +1574,7 @@ Itcl_BiInfoArgsCmd(dummy, interp, objc, objv)
         Proc *procPtr;
         CompiledLocal *localPtr;
 
+    regular:
         procPtr = TclFindProc((Interp*)interp, name);
         if (procPtr == NULL) {
             Tcl_AppendResult(interp,
@@ -1593,14 +1594,15 @@ Itcl_BiInfoArgsCmd(dummy, interp, objc, objv)
         }
 
         Tcl_SetObjResult(interp, objPtr);
+	return TCL_OK;
     }
 
     /*
      *  Otherwise, treat the name as a class method/proc.
      */
     if (Itcl_GetContext(interp, &contextClass, &contextObj) != TCL_OK) {
+	/* This might be a "can't happen" situation now. */
         name = Tcl_GetStringFromObj(objv[0], (int*)NULL);
-        Tcl_ResetResult(interp);
         Tcl_AppendResult(interp,
             "\nget info like this instead: ",
             "\n  namespace eval className { info ", name, "... }",
@@ -1610,10 +1612,7 @@ Itcl_BiInfoArgsCmd(dummy, interp, objc, objv)
 
     entry = Tcl_FindHashEntry(&contextClass->resolveCmds, name);
     if (entry == NULL) {
-        Tcl_AppendResult(interp,
-            "\"", name, "\" isn't a procedure",
-            (char*)NULL);
-        return TCL_ERROR;
+	goto regular;
     }
 
     mfunc = (ItclMemberFunc*)Tcl_GetHashValue(entry);
