@@ -1991,31 +1991,21 @@ Itcl_BiInfoArgsCmd(
      */
     contextIclsPtr = NULL;
     if (!Itcl_IsClassNamespace(Tcl_GetCurrentNamespace(interp))) {
-/* FIXME !!! */
-#ifdef NOTDEF
-        Proc *procPtr;
-/*        CompiledLocal *localPtr; */
+	int code;
+	Tcl_Obj *script;
 
-        procPtr = TclFindProc((Interp*)interp, name);
-        if (procPtr == NULL) {
-            Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
-                "\"", name, "\" isn't a procedure",
-                (char*)NULL);
-            return TCL_ERROR;
-        }
+	if (objc != 2) {
+	    what = "procedure";
+	    goto wrongnumargs;
+	}
 
-        objPtr = Tcl_NewListObj(0, (Tcl_Obj**)NULL);
-        for (localPtr = procPtr->firstLocalPtr;
-             localPtr != NULL;
-             localPtr = localPtr->nextPtr) {
-            if (TclIsVarArgument(localPtr)) {
-                Tcl_ListObjAppendElement(interp, objPtr,
-                    Tcl_NewStringObj(localPtr->name, -1));
-            }
-        }
-
-        Tcl_SetObjResult(interp, objPtr);
-#endif
+    regular:
+	script = Tcl_NewStringObj("::info args", -1);
+	Tcl_ListObjAppendElement(NULL, script, objv[1]);
+	Tcl_IncrRefCount(script);
+	code = Tcl_EvalObjEx(interp, script, 0);
+	Tcl_DecrRefCount(script);
+	return code;
     }
 
     /*
@@ -2023,8 +2013,8 @@ Itcl_BiInfoArgsCmd(
      */
     contextIclsPtr = NULL;
     if (Itcl_GetContext(interp, &contextIclsPtr, &contextIoPtr) != TCL_OK) {
+	/* This likely cannot happen */
         name = Tcl_GetString(objv[0]);
-        Tcl_ResetResult(interp);
         Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
             "\nget info like this instead: ",
             "\n  namespace eval className { info args", name, "... }",
@@ -2040,6 +2030,7 @@ Itcl_BiInfoArgsCmd(
         what = "method";
     }
     if (objc != 2) {
+    wrongnumargs:
         Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
             "wrong # args: should be \"info args ", what, "\"",
             (char*)NULL);
@@ -2060,6 +2051,7 @@ Itcl_BiInfoArgsCmd(
 	            (char *)objv[1]);
 	}
         if (hPtr2 == NULL) {
+	    goto regular;
             Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
                 "\"", name, "\" isn't a ", what, (char*)NULL);
             return TCL_ERROR;
