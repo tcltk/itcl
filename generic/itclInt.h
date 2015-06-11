@@ -201,7 +201,6 @@ typedef struct ItclObjectInfo {
     Tcl_Obj *unknownArgumentPtr;
     Tcl_Obj *unknownBodyPtr;
     Tcl_Obj *infoVarsPtr;
-    Tcl_Obj *infoVars2Ptr;
     Tcl_Obj *infoVars3Ptr;
     Tcl_Obj *infoVars4Ptr;
     Tcl_Obj *typeDestructorArgumentPtr;
