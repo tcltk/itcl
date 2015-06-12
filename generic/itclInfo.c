@@ -387,6 +387,8 @@ ItclInfoInit(
     Tcl_Interp *interp)      /* current interpreter */
 {
     Tcl_Namespace *nsPtr;
+    Tcl_Command token;
+    Tcl_CmdInfo info;
     Tcl_Obj *unkObjPtr;
     Tcl_Obj *ensObjPtr;
     int result;
@@ -403,8 +405,19 @@ ItclInfoInit(
     if (nsPtr == NULL) {
         Tcl_Panic("ITCL: error in creating namespace: ::itcl::builtin::Info \n");
     }
-    Tcl_CreateEnsemble(interp, nsPtr->fullName, nsPtr,
+    token = Tcl_CreateEnsemble(interp, nsPtr->fullName, nsPtr,
         TCL_ENSEMBLE_PREFIX);
+    Tcl_GetCommandInfoFromToken(token, &info);
+
+    /*
+     * Make the C implementation of the "info" ensemble available as
+     * a method body.  This makes all [$object info] become the 
+     * equivalent of [::itcl::builtin::Info] without any need for
+     * tailcall to restore the right frame [87a1bc6e82].
+     */
+    Itcl_RegisterObjC(interp, "itcl-builtin-info", info.objProc,
+	info.objClientData, NULL);
+
     Tcl_Export(interp, nsPtr, "[a-z]*", 1);
     for (i=0 ; infoCmds2[i].name!=NULL ; i++) {
         Tcl_CreateObjCommand(interp, infoCmds2[i].name,
@@ -1808,10 +1821,6 @@ Itcl_BiInfoUnknownCmd(
         return TCL_ERROR;
     }
     listObj = Tcl_NewListObj(-1, NULL);
-    /* use tailcall because of otherwise no access to local variables for info exists */
-    /* Ticket Id d4ee728817f951d0b2aa8e8f9b030ea854e92c9f */
-    objPtr = Tcl_NewStringObj("tailcall", -1);
-    Tcl_ListObjAppendElement(interp, listObj, objPtr);
     objPtr = Tcl_NewStringObj("::info", -1);
     Tcl_ListObjAppendElement(interp, listObj, objPtr);
     objPtr = Tcl_NewStringObj(Tcl_GetString(objv[2]), -1);

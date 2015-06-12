@@ -909,9 +909,6 @@ ItclCreateMemberCode(
 	    if (strcmp(body, "@itcl-builtin-configure") == 0) {
 	        isDone = 1;
 	    }
-	    if (strcmp(body, "@itcl-builtin-info") == 0) {
-	        isDone = 1;
-	    }
 	    if (strcmp(body, "@itcl-builtin-isa") == 0) {
 	        isDone = 1;
 	    }
@@ -2102,12 +2099,6 @@ Itcl_CmdAliasProc(
     hPtr = Tcl_FindHashEntry(&iclsPtr->resolveCmds, (char *)objPtr);
     Tcl_DecrRefCount(objPtr);
     if (hPtr == NULL) {
-	if (strcmp(cmdName, "info") == 0) {
-	    return Tcl_FindCommand(interp, "::itcl::builtin::Info", NULL, 0);
-	}
-	if (strcmp(cmdName, "@itcl-builtin-info") == 0) {
-	    return Tcl_FindCommand(interp, "::itcl::builtin::Info", NULL, 0);
-	}
 	if (strcmp(cmdName, "@itcl-builtin-cget") == 0) {
 	    return Tcl_FindCommand(interp, "::itcl::builtin::cget", NULL, 0);
 	}
@@ -2184,9 +2175,6 @@ Itcl_CmdAliasProc(
     }
     clookup = (ItclCmdLookup *)Tcl_GetHashValue(hPtr);
     imPtr = clookup->imPtr;
-    if (strcmp(cmdName, "info") == 0) {
-        return Tcl_FindCommand(interp, "::itcl::builtin::Info", NULL, 0);
-    }
     return imPtr->accessCmd;
 }
 
