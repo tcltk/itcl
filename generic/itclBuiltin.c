@@ -328,7 +328,7 @@ Itcl_BiInit(
         (Tcl_Namespace*)NULL, TCL_LEAVE_ERR_MSG);
 
     if ((itclBiNs == NULL) ||
-        Tcl_Export(interp, itclBiNs, "*", /* resetListFirst */ 1) != TCL_OK) {
+        Tcl_Export(interp, itclBiNs, "[a-z]*", /* resetListFirst */ 1) != TCL_OK) {
         return TCL_ERROR;
     }
     /*

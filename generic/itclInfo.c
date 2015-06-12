@@ -692,29 +692,18 @@ Itcl_BiInfoClassCmd(
     } else {
         assert(contextIclsPtr != NULL);
         assert(contextIclsPtr->nsPtr != NULL);
-#ifdef NEW_PROTO_RESOLVER
         contextNs = contextIclsPtr->nsPtr;
-#else
-        if (contextIclsPtr->infoPtr->useOldResolvers) {
-            contextNs = Itcl_GetUplevelNamespace(interp, 1);
-        } else {
-            contextNs = contextIclsPtr->nsPtr;
-        }
-#endif
     }
 
-    if (contextNs == NULL) {
-        name = activeNs->fullName;
+    assert(contextNs);
+
+    if (contextNs->parentPtr == activeNs) {
+        name = contextNs->name;
     } else {
-        if (contextNs->parentPtr == activeNs) {
-            name = contextNs->name;
-        } else {
-            name = contextNs->fullName;
-        }
+        name = contextNs->fullName;
     }
-    objPtr = Tcl_NewStringObj(name, -1);
-    Tcl_SetResult(interp, Tcl_GetString(objPtr), TCL_VOLATILE);
-    Tcl_DecrRefCount(objPtr);
+
+    Tcl_SetObjResult(interp, Tcl_NewStringObj(name, -1));
     return TCL_OK;
 }
 
