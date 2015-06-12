@@ -640,7 +640,6 @@ Itcl_BiInfoClassCmd(
 {
     Tcl_Namespace *activeNs = Tcl_GetCurrentNamespace(interp);
     Tcl_Namespace *contextNs = NULL;
-    Tcl_Obj *objPtr;
     ItclClass *contextIclsPtr;
     ItclObject *contextIoPtr;
 
