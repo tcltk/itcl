@@ -2154,9 +2154,6 @@ ItclReportObjectUsage(
 	        if (imPtr->codePtr != NULL) {
 	            body = Tcl_GetString(imPtr->codePtr->bodyPtr);
 	            if (*body == '@') {
-                        if (strcmp(body, "@itcl-builtin-info") == 0) {
-	                    imPtr = NULL;
-		        }
                         if (strcmp(body, "@itcl-builtin-setget") == 0) {
 			    if (!(imPtr->iclsPtr->flags & ITCL_ECLASS)) {
 	                        imPtr = NULL;
