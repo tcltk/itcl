@@ -163,7 +163,7 @@ static const ItclIntStubs itclIntStubs = {
     0, /* 147 */
     0, /* 148 */
     0, /* 149 */
-    Itcl_BiInfoCmd, /* 150 */
+    0, /* 150 */
     Itcl_BiInfoUnknownCmd, /* 151 */
     Itcl_BiInfoVarsCmd, /* 152 */
     Itcl_CanAccess2, /* 153 */
@@ -174,7 +174,7 @@ static const ItclIntStubs itclIntStubs = {
     0, /* 158 */
     0, /* 159 */
     Itcl_SetCallFrameResolver, /* 160 */
-    ItclEnsembleSubCmd, /* 161 */
+    0, /* 161 */
     Itcl_GetUplevelNamespace, /* 162 */
     Itcl_GetCallFrameClientData, /* 163 */
     0, /* 164 */
