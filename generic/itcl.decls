@@ -514,10 +514,10 @@ declare 145 {
 #  Helper commands
 #
 
-declare 150 {
-    int Itcl_BiInfoCmd(ClientData clientData, Tcl_Interp *interp, int objc,
-        Tcl_Obj *const objv[])
-}
+#declare 150 {
+#    int Itcl_BiInfoCmd(ClientData clientData, Tcl_Interp *interp, int objc,
+#        Tcl_Obj *const objv[])
+#}
 declare 151 {
     int Itcl_BiInfoUnknownCmd(ClientData dummy, Tcl_Interp *interp,
         int objc, Tcl_Obj *const objv[])
@@ -534,11 +534,11 @@ declare 160 {
     int Itcl_SetCallFrameResolver(Tcl_Interp *interp,
                     Tcl_Resolve *resolvePtr)
 }
-declare 161 {
-    int ItclEnsembleSubCmd(ClientData clientData, Tcl_Interp *interp,
-            const char *ensembleName, int objc, Tcl_Obj *const *objv,
-            const char *functionName)
-}
+#declare 161 {
+#    int ItclEnsembleSubCmd(ClientData clientData, Tcl_Interp *interp,
+#            const char *ensembleName, int objc, Tcl_Obj *const *objv,
+#            const char *functionName)
+#}
 declare 162 {
     Tcl_Namespace *Itcl_GetUplevelNamespace(Tcl_Interp *interp, int level)
 }

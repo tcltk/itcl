@@ -583,7 +583,7 @@ ItclGetInfoDelegatedUsage(
     }
 }
 
-
+#if 0
 
 /*
  * ------------------------------------------------------------------------
@@ -616,6 +616,7 @@ Itcl_BiInfoCmd(
     }
     return ItclEnsembleSubCmd(clientData, interp, NULL, objc, objv, "Itcl_BiInfoCmd");
 }
+#endif
 
 /*
  * ------------------------------------------------------------------------
@@ -910,15 +911,16 @@ Itcl_BiInfoInheritCmd(
             (char*)NULL);
         return TCL_ERROR;
     }
-    if (contextIoPtr != NULL) {
-        contextIclsPtr = contextIoPtr->iclsPtr;
-    }
+//    if (contextIoPtr != NULL) {
+//        contextIclsPtr = contextIoPtr->iclsPtr;
+//    }
 
     /*
      *  Return the list of base classes.
      */
     listPtr = Tcl_NewListObj(0, (Tcl_Obj**)NULL);
 
+#if 0
     infoPtr = Tcl_GetAssocData(interp, ITCL_INTERP_DATA, NULL);
     callContextPtr = Itcl_PeekStack(&infoPtr->contextStack);
     upNsPtr = Itcl_GetUplevelNamespace(interp, 1);
@@ -935,7 +937,7 @@ Itcl_BiInfoInheritCmd(
      * that the call to GetClassFromClassName() is never taken.
      */
 
-    if (imPtr->iclsPtr->infoPtr->useOldResolvers) {
+    if (infoPtr->useOldResolvers) {
         if (contextIoPtr != NULL) {
 
 	    /*
@@ -979,6 +981,7 @@ Itcl_BiInfoInheritCmd(
             }
         }
     }
+#endif
 
     elem = Itcl_FirstListElem(&contextIclsPtr->bases);
     while (elem) {
@@ -1060,6 +1063,7 @@ Itcl_BiInfoHeritageCmd(
      *  base class names.
      */
     listPtr = Tcl_NewListObj(0, (Tcl_Obj**)NULL);
+#if 0
     infoPtr = Tcl_GetAssocData(interp, ITCL_INTERP_DATA, NULL);
     callContextPtr = Itcl_PeekStack(&infoPtr->contextStack);
     upNsPtr = Itcl_GetUplevelNamespace(interp, 1);
@@ -1092,6 +1096,7 @@ Itcl_BiInfoHeritageCmd(
             }
         }
     }
+#endif
 
     Itcl_InitHierIter(&hier, contextIclsPtr);
     while ((iclsPtr=Itcl_AdvanceHierIter(&hier)) != NULL) {

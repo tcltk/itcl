@@ -169,12 +169,14 @@ static const BiMethod BiMethodList[] = {
         Itcl_BiItclHullCmd,
 	ITCL_WIDGET|ITCL_WIDGETADAPTOR
     },
+#if 0
     { "info",
         "???",
         "@itcl-builtin-info",
 	Itcl_BiInfoCmd,
 	ITCL_CLASS|ITCL_ECLASS|ITCL_TYPE|ITCL_WIDGET|ITCL_WIDGETADAPTOR
     },
+#endif
     { "isa",
         "className",
         "@itcl-builtin-isa",
@@ -307,6 +309,7 @@ Itcl_BiInit(
         Tcl_CreateObjCommand(interp, Tcl_DStringValue(&buffer),
 	        BiMethodList[i].proc, (ClientData)infoPtr,
 		(Tcl_CmdDeleteProc*)NULL);
+//fprintf(stdout, "CREATED: '%s'\n", BiMethodList[i].name); fflush(stdout);
     }
     Tcl_DStringFree(&buffer);
 
@@ -382,7 +385,6 @@ Itcl_InstallBiMethods(
     ItclClass *iclsPtr)      /* class definition to be updated */
 {
     int result = TCL_OK;
-    Tcl_HashEntry *hPtr = NULL;
 
     int i;
     ItclHierIter hier;
@@ -399,6 +401,10 @@ Itcl_InstallBiMethods(
      */
     Tcl_Obj *objPtr = Tcl_NewStringObj("", 0);
     for (i=0; i < BiMethodListLen; i++) {
+	Tcl_HashEntry *hPtr = NULL;
+
+	if (BiMethodList[i].name[0] != 'i'
+		|| strcmp(BiMethodList[i].name, "info")) {
         Itcl_InitHierIter(&hier, iclsPtr);
 	Tcl_SetStringObj(objPtr, BiMethodList[i].name, -1);
         superPtr = Itcl_AdvanceHierIter(&hier);
@@ -410,9 +416,12 @@ Itcl_InstallBiMethods(
             superPtr = Itcl_AdvanceHierIter(&hier);
         }
         Itcl_DeleteHierIter(&hier);
+	}
 
         if (!hPtr) {
 	    if (iclsPtr->flags & BiMethodList[i].flags) {
+//fprintf(stdout, "Create Method '%s' in '%s'\n", BiMethodList[i].name,
+//	Tcl_GetString(iclsPtr->fullNamePtr)); fflush(stdout);
                 result = Itcl_CreateMethod(interp, iclsPtr,
 	            Tcl_NewStringObj(BiMethodList[i].name, -1),
                     BiMethodList[i].usage, BiMethodList[i].registration);
@@ -423,6 +432,12 @@ Itcl_InstallBiMethods(
 	    }
         }
     }
+
+    if (result == TCL_OK) {
+	result = Itcl_CreateMethod(interp, iclsPtr,
+		Tcl_NewStringObj("info", -1), "???", "@itcl-builtin-info");
+    }
+
     Tcl_DecrRefCount(objPtr);
     return result;
 }
