@@ -1422,19 +1422,6 @@ FinalizeCreateObject(
             Tcl_AppendResult(interp, Tcl_GetString(objNamePtr), NULL);
 	}
     }
-#if 0
-    if (result == TCL_ERROR) {
-	Tcl_Obj *objPtr;
-	
-	(void) Tcl_GetReturnOptions(interp, result);
-	objPtr = Tcl_NewStringObj("-level 2", -1);
-	if (!(iclsPtr->flags & (ITCL_TYPE|ITCL_WIDGETADAPTOR))) {
-	    result = Tcl_SetReturnOptions(interp, objPtr);
-	} else {
-	    Tcl_SetReturnOptions(interp, objPtr);
-	}
-    }
-#endif
     Tcl_DecrRefCount(objNamePtr);
     return result;
 }
