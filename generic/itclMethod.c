@@ -1283,6 +1283,7 @@ Itcl_EvalMemberCode(
      */
     if (((mcode->flags & ITCL_IMPLEMENT_OBJCMD) != 0) ||
             ((mcode->flags & ITCL_IMPLEMENT_ARGCMD) != 0)) {
+	Tcl_Namespace *saveNsPtr = Tcl_GetCurrentNamespace(interp);
 	Itcl_SetCallFrameNamespace(interp, imPtr->iclsPtr->nsPtr);
 
         if ((mcode->flags & ITCL_IMPLEMENT_OBJCMD) != 0) {
@@ -1302,6 +1303,7 @@ Itcl_EvalMemberCode(
                 ckfree((char*)argv);
 	    }
         }
+	Itcl_SetCallFrameNamespace(interp, saveNsPtr);
     } else {
         if ((mcode->flags & ITCL_IMPLEMENT_TCL) != 0) {
             callbackPtr = Itcl_GetCurrentCallbackPtr(interp);
