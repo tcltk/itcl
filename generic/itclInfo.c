@@ -376,11 +376,6 @@ static const struct NameProcMap2 infoCmdsDelegated2[] = {
  *  Returns TCL_OK/TCL_ERROR to indicate success/failure.
  * ------------------------------------------------------------------------
  */
-static void
-ItclDeleteInfoSubCmd(
-    ClientData clientData)
-{
-}
 
 int
 ItclInfoInit(
@@ -420,8 +415,9 @@ ItclInfoInit(
 
     Tcl_Export(interp, nsPtr, "[a-z]*", 1);
     for (i=0 ; infoCmds2[i].name!=NULL ; i++) {
+
         Tcl_CreateObjCommand(interp, infoCmds2[i].name,
-                infoCmds2[i].proc, infoPtr, ItclDeleteInfoSubCmd);
+                infoCmds2[i].proc, infoPtr, NULL);
     }
     ensObjPtr = Tcl_NewStringObj("::itcl::builtin::Info", -1);
     unkObjPtr = Tcl_NewStringObj("::itcl::builtin::Info::unknown", -1);
@@ -582,41 +578,6 @@ ItclGetInfoDelegatedUsage(
             "\n...and others described on the man page", -1);
     }
 }
-
-#if 0
-
-/*
- * ------------------------------------------------------------------------
- *  Itcl_BiInfoCmd()
- *
- *  Invoked whenever the user issues the "info" method for an object.
- *  Handles the following syntax:
- *
- *    <objName> info 
- *
- * ------------------------------------------------------------------------
- */
-/* ARGSUSED */
-int
-Itcl_BiInfoCmd(
-    ClientData clientData,   /* ItclObjectInfo */
-    Tcl_Interp *interp,      /* current interpreter */
-    int objc,                /* number of arguments */
-    Tcl_Obj *const objv[])   /* argument objects */
-{
-    ItclShowArgs(2, "Itcl_BiInfoCmd", objc, objv);
-    if (objc == 1) {
-        /* produce usage message */
-        Tcl_Obj *objPtr = Tcl_NewStringObj(
-	        "wrong # args: should be one of...\n", -1);
-        ItclGetInfoUsage(interp, objPtr, (ItclObjectInfo *)clientData);
-        Tcl_SetResult(interp, Tcl_GetString(objPtr), TCL_VOLATILE);
-        Tcl_DecrRefCount(objPtr);
-	return TCL_ERROR;
-    }
-    return ItclEnsembleSubCmd(clientData, interp, NULL, objc, objv, "Itcl_BiInfoCmd");
-}
-#endif
 
 /*
  * ------------------------------------------------------------------------
@@ -648,9 +609,12 @@ Itcl_BiInfoClassCmd(
 
     ItclShowArgs(1, "Itcl_BiInfoClassCmd", objc, objv);
     if (objc != 1) {
+	Tcl_WrongNumArgs(interp, 1, objv, NULL);
+/*
         Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
             "wrong # args: should be \"info class\"",
             (char*)NULL);
+*/
         return TCL_ERROR;
     }
 
@@ -674,10 +638,9 @@ Itcl_BiInfoClassCmd(
             contextIclsPtr = contextIoPtr->iclsPtr;
 	}
 	if ((contextIoPtr == NULL) || (contextIclsPtr == NULL)) {
-	    Tcl_Obj *msg = Tcl_NewStringObj("\nget info like this instead: " \
-		    "\n  namespace eval className { info class", -1);
-	    Tcl_AppendStringsToObj(msg, Tcl_GetString(objv[0]), "... }", NULL);
-            Tcl_SetObjResult(interp, msg);
+            Tcl_SetObjResult(interp, Tcl_NewStringObj(
+		    "\nget info like this instead: " \
+		    "\n  namespace eval className { info class }", -1));
             return TCL_ERROR;
         }
     }
@@ -875,21 +838,14 @@ Itcl_BiInfoInheritCmd(
     Tcl_Obj *const objv[]) /* argument objects */
 {
     Tcl_Namespace *activeNs = Tcl_GetCurrentNamespace(interp);
-
-    ItclClass *contextIclsPtr;
-    ItclObject *contextIoPtr;
-
-    ItclObjectInfo *infoPtr;
-    ItclClass *iclsPtr;
-    ItclCallContext *callContextPtr;
+    ItclClass *contextIclsPtr = NULL;
+    ItclObject *contextIoPtr = NULL;
     Itcl_ListElem *elem;
-    ItclMemberFunc *imPtr;
     Tcl_Obj *listPtr;
-    Tcl_Obj *objPtr;
-    Tcl_Namespace *upNsPtr;
 
     ItclShowArgs(2, "Itcl_BiInfoInheritCmd", objc, objv);
     if (objc != 1) {
+	/* TODO: WrongNumArgs */
         Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
             "wrong # args: should be \"info inherit\"",
             (char*)NULL);
@@ -900,92 +856,23 @@ Itcl_BiInfoInheritCmd(
      *  If this command is not invoked within a class namespace,
      *  signal an error.
      */
-    contextIclsPtr = NULL;
-    imPtr = NULL;
+
     if (Itcl_GetContext(interp, &contextIclsPtr, &contextIoPtr) != TCL_OK) {
-        char *name = Tcl_GetString(objv[0]);
-        Tcl_ResetResult(interp);
-        Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
-            "\nget info like this instead: ",
-            "\n  namespace eval className { info inherit", name, "... }",
-            (char*)NULL);
+	Tcl_SetObjResult(interp, Tcl_NewStringObj(
+            "\nget info like this instead: "
+            "\n  namespace eval className { info inherit }", -1));
         return TCL_ERROR;
     }
-//    if (contextIoPtr != NULL) {
-//        contextIclsPtr = contextIoPtr->iclsPtr;
-//    }
 
     /*
      *  Return the list of base classes.
      */
+
     listPtr = Tcl_NewListObj(0, (Tcl_Obj**)NULL);
-
-#if 0
-    infoPtr = Tcl_GetAssocData(interp, ITCL_INTERP_DATA, NULL);
-    callContextPtr = Itcl_PeekStack(&infoPtr->contextStack);
-    upNsPtr = Itcl_GetUplevelNamespace(interp, 1);
-    if (callContextPtr != NULL) {
-        imPtr = callContextPtr->imPtr;
-        contextIclsPtr = imPtr->iclsPtr;
-    } else {
-	contextIclsPtr = GetClassFromClassName(interp, upNsPtr->fullName, NULL);
-    }
-
-    /*
-     * Note the assumption here that imPtr != NULL.
-     * This implies an assumption above that callContextPtr != NULL, and
-     * that the call to GetClassFromClassName() is never taken.
-     */
-
-    if (infoPtr->useOldResolvers) {
-        if (contextIoPtr != NULL) {
-
-	    /*
-	     * For consistency with Itcl 3, we must exhibit different
-	     * context selection depending on whether the invocation
-	     * was [$obj info inherit] or [info inherit] in a class context.
-	     * Itcl 4 implements the routing of the direct [info inherit]
-	     * by prepending a [my].  To distinguish the cases we look for
-	     * that leading [my].  It is conceivable this would be confused
-	     * with the literal command [my info inherit], but as it happens,
-	     * such a command cannot be resolved in an Itcl method body, so
-	     * it's at least very unlikely if not impossible for that confusion
-	     * to arise.  See also Itcl_BiInfoHeritageCmd().
-	     */
-
-	    Tcl_Obj * const * objv = Itcl_GetCallFrameObjv(interp);
-	    int isDirectCall = (strcmp(Tcl_GetString(objv[0]), "my") == 0);
-
-	    /*
-	     * The default behavior is to query the heritage of the
-	     * invoking object....
-	     */
-            contextIclsPtr = contextIoPtr->iclsPtr;
-	    if (isDirectCall && upNsPtr != contextIclsPtr->nsPtr) {
-		Tcl_HashEntry *hPtr = Tcl_FindHashEntry(
-		        &imPtr->iclsPtr->infoPtr->namespaceClasses,
-			(char *)upNsPtr);
-		if (hPtr) {
-		    /*
-		     * ...but when invoked as [info inherit] and in
-		     * a class namespace, we query that class instead.
-		     */
-		    contextIclsPtr = Tcl_GetHashValue(hPtr);
-		}
-	    }
-        }
-    } else {
-        if (strcmp(Tcl_GetString(imPtr->namePtr), "info") == 0) {
-            if (contextIoPtr != NULL) {
-	        contextIclsPtr = contextIoPtr->iclsPtr;
-            }
-        }
-    }
-#endif
-
     elem = Itcl_FirstListElem(&contextIclsPtr->bases);
     while (elem) {
-        iclsPtr = (ItclClass*)Itcl_GetListValue(elem);
+	Tcl_Obj *objPtr;
+	ItclClass *iclsPtr = (ItclClass*)Itcl_GetListValue(elem);
         if (iclsPtr->nsPtr->parentPtr == activeNs) {
             objPtr = Tcl_NewStringObj(iclsPtr->nsPtr->name, -1);
         } else {
@@ -995,8 +882,7 @@ Itcl_BiInfoInheritCmd(
         elem = Itcl_NextListElem(elem);
     }
 
-    Tcl_SetResult(interp, Tcl_GetString(listPtr), TCL_VOLATILE);
-    Tcl_DecrRefCount(listPtr);
+    Tcl_SetObjResult(interp, listPtr);
     return TCL_OK;
 }
 
@@ -1025,14 +911,11 @@ Itcl_BiInfoHeritageCmd(
     ItclObject *contextIoPtr;
 
     char *name;
-    ItclObjectInfo *infoPtr;
     ItclHierIter hier;
-    ItclCallContext *callContextPtr;
     ItclMemberFunc *imPtr;
     Tcl_Obj *listPtr;
     Tcl_Obj *objPtr;
     ItclClass *iclsPtr;
-    Tcl_Namespace *upNsPtr;
 
     ItclShowArgs(2, "Itcl_BiInfoHeritageCmd", objc, objv);
     if (objc != 1) {

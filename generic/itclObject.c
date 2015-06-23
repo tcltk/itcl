@@ -66,6 +66,8 @@ static int ItclInitObjectOptions(Tcl_Interp *interp, ItclObject *ioPtr,
         ItclClass *iclsPtr, const char *name);
 static const char * GetConstructorVar(Tcl_Interp *interp, ItclClass *iclsPtr,
         const char *varName);
+static ItclClass * GetClassFromClassName(Tcl_Interp *interp,
+	const char *className, ItclClass *iclsPtr);
 
 
 /*
