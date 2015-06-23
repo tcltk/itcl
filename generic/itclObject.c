@@ -66,6 +66,8 @@ static int ItclInitObjectOptions(Tcl_Interp *interp, ItclObject *ioPtr,
         ItclClass *iclsPtr, const char *name);
 static const char * GetConstructorVar(Tcl_Interp *interp, ItclClass *iclsPtr,
         const char *varName);
+static ItclClass * GetClassFromClassName(Tcl_Interp *interp,
+	const char *className, ItclClass *iclsPtr);
 
 
 /*
@@ -2154,9 +2156,6 @@ ItclReportObjectUsage(
 	        if (imPtr->codePtr != NULL) {
 	            body = Tcl_GetString(imPtr->codePtr->bodyPtr);
 	            if (*body == '@') {
-                        if (strcmp(body, "@itcl-builtin-info") == 0) {
-	                    imPtr = NULL;
-		        }
                         if (strcmp(body, "@itcl-builtin-setget") == 0) {
 			    if (!(imPtr->iclsPtr->flags & ITCL_ECLASS)) {
 	                        imPtr = NULL;

@@ -8,7 +8,7 @@
 /* !BEGIN!: Do not edit below this line. */
 
 #define ITCLINT_STUBS_EPOCH 0
-#define ITCLINT_STUBS_REVISION 149
+#define ITCLINT_STUBS_REVISION 147
 
 #ifdef __cplusplus
 extern "C" {
@@ -426,10 +426,7 @@ ITCLAPI int		Itcl_MixinDeleteCmd(ClientData clientData,
 /* Slot 147 is reserved */
 /* Slot 148 is reserved */
 /* Slot 149 is reserved */
-/* 150 */
-ITCLAPI int		Itcl_BiInfoCmd(ClientData clientData,
-				Tcl_Interp *interp, int objc,
-				Tcl_Obj *const objv[]);
+/* Slot 150 is reserved */
 /* 151 */
 ITCLAPI int		Itcl_BiInfoUnknownCmd(ClientData dummy,
 				Tcl_Interp *interp, int objc,
@@ -450,11 +447,7 @@ ITCLAPI int		Itcl_CanAccess2(ItclClass *iclsPtr, int protection,
 /* 160 */
 ITCLAPI int		Itcl_SetCallFrameResolver(Tcl_Interp *interp,
 				Tcl_Resolve *resolvePtr);
-/* 161 */
-ITCLAPI int		ItclEnsembleSubCmd(ClientData clientData,
-				Tcl_Interp *interp, const char *ensembleName,
-				int objc, Tcl_Obj *const *objv,
-				const char *functionName);
+/* Slot 161 is reserved */
 /* 162 */
 ITCLAPI Tcl_Namespace *	 Itcl_GetUplevelNamespace(Tcl_Interp *interp,
 				int level);
@@ -676,7 +669,7 @@ typedef struct ItclIntStubs {
     void (*reserved147)(void);
     void (*reserved148)(void);
     void (*reserved149)(void);
-    int (*itcl_BiInfoCmd) (ClientData clientData, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]); /* 150 */
+    void (*reserved150)(void);
     int (*itcl_BiInfoUnknownCmd) (ClientData dummy, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]); /* 151 */
     int (*itcl_BiInfoVarsCmd) (ClientData dummy, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]); /* 152 */
     int (*itcl_CanAccess2) (ItclClass *iclsPtr, int protection, Tcl_Namespace *fromNsPtr); /* 153 */
@@ -687,7 +680,7 @@ typedef struct ItclIntStubs {
     void (*reserved158)(void);
     void (*reserved159)(void);
     int (*itcl_SetCallFrameResolver) (Tcl_Interp *interp, Tcl_Resolve *resolvePtr); /* 160 */
-    int (*itclEnsembleSubCmd) (ClientData clientData, Tcl_Interp *interp, const char *ensembleName, int objc, Tcl_Obj *const *objv, const char *functionName); /* 161 */
+    void (*reserved161)(void);
     Tcl_Namespace * (*itcl_GetUplevelNamespace) (Tcl_Interp *interp, int level); /* 162 */
     ClientData (*itcl_GetCallFrameClientData) (Tcl_Interp *interp); /* 163 */
     void (*reserved164)(void);
@@ -972,8 +965,7 @@ extern const ItclIntStubs *itclIntStubsPtr;
 /* Slot 147 is reserved */
 /* Slot 148 is reserved */
 /* Slot 149 is reserved */
-#define Itcl_BiInfoCmd \
-	(itclIntStubsPtr->itcl_BiInfoCmd) /* 150 */
+/* Slot 150 is reserved */
 #define Itcl_BiInfoUnknownCmd \
 	(itclIntStubsPtr->itcl_BiInfoUnknownCmd) /* 151 */
 #define Itcl_BiInfoVarsCmd \
@@ -988,8 +980,7 @@ extern const ItclIntStubs *itclIntStubsPtr;
 /* Slot 159 is reserved */
 #define Itcl_SetCallFrameResolver \
 	(itclIntStubsPtr->itcl_SetCallFrameResolver) /* 160 */
-#define ItclEnsembleSubCmd \
-	(itclIntStubsPtr->itclEnsembleSubCmd) /* 161 */
+/* Slot 161 is reserved */
 #define Itcl_GetUplevelNamespace \
 	(itclIntStubsPtr->itcl_GetUplevelNamespace) /* 162 */
 #define Itcl_GetCallFrameClientData \
