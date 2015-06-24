@@ -87,6 +87,9 @@ Itcl_ClassCmdResolver(
     if ((name[0] == 't') && (strcmp(name, "this") == 0)) {
         return TCL_CONTINUE;
     }
+//    if ((name[0] == 'i') && (strcmp(name, "info") == 0)) {
+//        return TCL_CONTINUE;
+//    }
     infoPtr = (ItclObjectInfo *)Tcl_GetAssocData(interp,
                 ITCL_INTERP_DATA, NULL);
     hPtr = Tcl_FindHashEntry(&infoPtr->namespaceClasses, (char *)nsPtr);

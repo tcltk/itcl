@@ -201,7 +201,6 @@ typedef struct ItclObjectInfo {
     Tcl_Obj *unknownArgumentPtr;
     Tcl_Obj *unknownBodyPtr;
     Tcl_Obj *infoVarsPtr;
-    Tcl_Obj *infoVars2Ptr;
     Tcl_Obj *infoVars3Ptr;
     Tcl_Obj *infoVars4Ptr;
     Tcl_Obj *typeDestructorArgumentPtr;
@@ -828,8 +827,6 @@ MODULE_SCOPE int ItclAddClassFunctionDictInfo(Tcl_Interp *interp,
         ItclClass *iclsPtr, ItclMemberFunc *imPtr);
 MODULE_SCOPE int ItclAddClassDelegatedFunctionDictInfo(Tcl_Interp *interp,
         ItclClass *iclsPtr, ItclDelegatedFunction *idmPtr);
-MODULE_SCOPE ItclClass * GetClassFromClassName(Tcl_Interp *interp,
-        const char *className, ItclClass *iclsPtr);
 MODULE_SCOPE int ItclClassCreateObject(ClientData clientData, Tcl_Interp *interp,
         int objc, Tcl_Obj *const objv[]);
 MODULE_SCOPE Tcl_ObjCmdProc Itcl_BiMyProcCmd;

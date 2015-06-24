@@ -802,11 +802,6 @@ ItclClassBaseCmd(
 		    isDone = 1;
 		}
 		if (strcmp(Tcl_GetString(imPtr->codePtr->bodyPtr),
-		        "@itcl-builtin-info") == 0) {
-		    Tcl_AppendToObj(bodyPtr, "::itcl::builtin::Info", -1);
-		    isDone = 1;
-		}
-		if (strcmp(Tcl_GetString(imPtr->codePtr->bodyPtr),
 		        "@itcl-builtin-isa") == 0) {
 		    Tcl_AppendToObj(bodyPtr, "::itcl::builtin::isa", -1);
 		    isDone = 1;
