@@ -112,7 +112,7 @@ static const ItclIntStubs itclIntStubs = {
     Itcl_BiInfoVariableCmd, /* 96 */
     Itcl_BiInfoBodyCmd, /* 97 */
     Itcl_BiInfoArgsCmd, /* 98 */
-    Itcl_DefaultInfoCmd, /* 99 */
+    0, /* 99 */
     Itcl_EnsembleInit, /* 100 */
     Itcl_CreateEnsemble, /* 101 */
     Itcl_AddEnsemblePart, /* 102 */

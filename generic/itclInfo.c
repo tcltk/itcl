@@ -56,7 +56,6 @@ static Tcl_ObjCmdProc Itcl_BiInfoDelegatedTypeMethodsCmd;
 static Tcl_ObjCmdProc Itcl_BiInfoDelegatedOptionCmd;
 static Tcl_ObjCmdProc Itcl_BiInfoDelegatedMethodCmd;
 static Tcl_ObjCmdProc Itcl_BiInfoDelegatedTypeMethodCmd;
-static Tcl_ObjCmdProc Itcl_ErrorDelegatedInfoCmd;
 static Tcl_ObjCmdProc Itcl_BiInfoDelegatedUnknownCmd;
 static Tcl_ObjCmdProc Itcl_BiInfoContextCmd;
 
@@ -241,15 +240,6 @@ static const InfoMethod InfoMethodList[] = {
         Itcl_BiInfoUnknownCmd,
 	ITCL_WIDGETADAPTOR
     },
-    /*
-     *  Add an error handler to support all of the usual inquiries
-     *  for the "info" command in the global namespace.
-     */
-    { "@error",
-        "",
-	Itcl_DefaultInfoCmd,
-	0
-    },
     { NULL,
         NULL,
 	NULL,
@@ -306,11 +296,6 @@ static const struct NameProcMap infoCmds2[] = {
     { "::itcl::builtin::Info::widgets", Itcl_BiInfoUnknownCmd },
     { "::itcl::builtin::Info::widgetclasses", Itcl_BiInfoUnknownCmd },
     { "::itcl::builtin::Info::widgetadaptors", Itcl_BiInfoUnknownCmd },
-    /*
-     *  Add an error handler to support all of the usual inquiries
-     *  for the "info" command in the global namespace.
-     */
-    { "::itcl::builtin::Info::@error", Itcl_DefaultInfoCmd },
     { NULL, NULL }
 };
 
@@ -349,16 +334,6 @@ static const struct NameProcMap2 infoCmdsDelegated2[] = {
 	"",
         Itcl_BiInfoDelegatedUnknownCmd,
         ITCL_TYPE|ITCL_WIDGETADAPTOR|ITCL_WIDGET|ITCL_ECLASS
-    },
-    /*
-     *  Add an error handler to support all of the usual inquiries
-     *  for the "info" command in the global namespace.
-     */
-    {
-        "::itcl::builtin::Info::delegated::@error",
-	"",
-	Itcl_ErrorDelegatedInfoCmd,
-	0
     },
     { NULL, NULL, NULL, 0 }
 };
@@ -475,7 +450,6 @@ ItclGetInfoUsage(
     Tcl_HashEntry *hPtr;
     ItclClass *iclsPtr;
     const char *spaces = "  ";
-    int isOpenEnded = 0;
 
     int i;
 
@@ -492,10 +466,6 @@ ItclGetInfoUsage(
 	     * to the ::info vars command */
 	    continue;
 	}
-        if (*InfoMethodList[i].name == '@'
-	        && strcmp(InfoMethodList[i].name,"@error") == 0) {
-            isOpenEnded = 1;
-        } else {
 	    if (iclsPtr->flags & InfoMethodList[i].flags) {
                 Tcl_AppendToObj(objPtr, spaces, -1);
                 Tcl_AppendToObj(objPtr, "info ", -1);
@@ -506,12 +476,9 @@ ItclGetInfoUsage(
 	        }
                 spaces = "\n  ";
 	    }
-        }
     }
-    if (isOpenEnded) {
         Tcl_AppendToObj(objPtr,
             "\n...and others described on the man page", -1);
-    }
 }
 
 /*
@@ -531,7 +498,6 @@ ItclGetInfoDelegatedUsage(
     const char *name;
     const char *lastName;
     const char *spaces = "  ";
-    int isOpenEnded = 0;
 
     int i;
 
@@ -557,10 +523,6 @@ ItclGetInfoDelegatedUsage(
 	    /* we don't report that, as it is a special case */
 	    continue;
 	}
-        if (*name == '@'
-	        && strcmp(name,"@error") == 0) {
-            isOpenEnded = 1;
-        } else {
 	    if (iclsPtr->flags & infoCmdsDelegated2[i].flags) {
                 Tcl_AppendToObj(objPtr, spaces, -1);
                 Tcl_AppendToObj(objPtr, "info ", -1);
@@ -571,12 +533,9 @@ ItclGetInfoDelegatedUsage(
 	        }
                 spaces = "\n  ";
 	    }
-        }
     }
-    if (isOpenEnded) {
         Tcl_AppendToObj(objPtr,
             "\n...and others described on the man page", -1);
-    }
 }
 
 /*
@@ -1898,69 +1857,6 @@ Itcl_BiInfoArgsCmd(
     return TCL_OK;
 }
 
-
-/*
- * ------------------------------------------------------------------------
- *  Itcl_DefaultInfoCmd()
- *
- *  Handles any unknown options for the "itcl::builtin::info" command
- *  by passing requests on to the usual "::info" command.  If the
- *  option is recognized, then it is handled.  Otherwise, if it is
- *  still unknown, then an error message is returned with the list
- *  of possible options.
- *
- *  Returns TCL_OK/TCL_ERROR to indicate success/failure.
- * ------------------------------------------------------------------------
- */
-/* ARGSUSED */
-int
-Itcl_DefaultInfoCmd(
-    ClientData clientData, /* ItclObjectInfo Ptr */
-    Tcl_Interp *interp,    /* current interpreter */
-    int objc,              /* number of arguments */
-    Tcl_Obj *const objv[]) /* argument objects */
-{
-    int result;
-    char *name;
-    Tcl_CmdInfo cmdInfo;
-    Tcl_Command cmd;
-    Tcl_Obj *resultPtr;
-
-    ItclShowArgs(1, "Itcl_DefaultInfoCmd", objc, objv);
-    /*
-     *  Look for the usual "::info" command, and use it to
-     *  evaluate the unknown option.
-     */
-    cmd = Tcl_FindCommand(interp, "::info", (Tcl_Namespace*)NULL, 0);
-    if (cmd == NULL) {
-        name = Tcl_GetString(objv[0]);
-        Tcl_ResetResult(interp);
-
-        resultPtr = Tcl_GetObjResult(interp);
-        Tcl_AppendStringsToObj(resultPtr,
-            "bad option \"", name, "\" should be one of...\n",
-            (char*)NULL);
-        Itcl_GetEnsembleUsageForObj(interp, objv[0], resultPtr);
-
-        return TCL_ERROR;
-    }
-
-    result = Tcl_GetCommandInfoFromToken(cmd, &cmdInfo);
-    result = (*cmdInfo.objProc)(cmdInfo.objClientData, interp, objc, objv);
-
-    /*
-     *  If the option was not recognized by the usual "info" command,
-     *  then we got a "bad option" error message.  Add the options
-     *  for the current ensemble to the error message.
-     */
-    if (result != TCL_OK &&
-            strncmp(Tcl_GetStringResult(interp),"bad option",10) == 0) {
-        resultPtr = Tcl_GetObjResult(interp);
-        Tcl_AppendToObj(resultPtr, "\nor", -1);
-        Itcl_GetEnsembleUsageForObj(interp, objv[0], resultPtr);
-    }
-    return result;
-}
 
 /*
  * ------------------------------------------------------------------------
@@ -4662,34 +4558,6 @@ Itcl_BiInfoDelegatedTypeMethodsCmd(
     }
     Tcl_SetObjResult(interp, listPtr);
     return TCL_OK;
-}
-
-/*
- * ------------------------------------------------------------------------
- *  Itcl_BiInfoInstancesCmd()
- *
- *  Returns information regarding instances.  This command
- *  can be invoked with or without an object context:
- *
- *
- *  Returns a status TCL_OK/TCL_ERROR to indicate success/failure.
- * ------------------------------------------------------------------------
- */
-/* ARGSUSED */
-static int
-Itcl_ErrorDelegatedInfoCmd(
-    ClientData clientData, /* ItclObjectInfo Ptr */
-    Tcl_Interp *interp,    /* current interpreter */
-    int objc,              /* number of arguments */
-    Tcl_Obj *const objv[]) /* argument objects */
-{
-    /* produce usage message */
-    Tcl_Obj *objPtr = Tcl_NewStringObj(
-           "wrong # args: should be one of...\n", -1);
-    ItclShowArgs(1, "Itcl_ErrorDelegatedInfoCmd", objc, objv);
-    ItclGetInfoDelegatedUsage(interp, objPtr, (ItclObjectInfo *)clientData);
-    Tcl_SetObjResult(interp, objPtr);
-    return TCL_ERROR;
 }
 
 /*

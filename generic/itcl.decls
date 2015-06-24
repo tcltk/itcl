@@ -421,10 +421,10 @@ declare 98 {
     int Itcl_BiInfoArgsCmd(ClientData dummy, Tcl_Interp *interp, int objc,
         Tcl_Obj *const objv[])
 }
-declare 99 {
-    int Itcl_DefaultInfoCmd(ClientData dummy, Tcl_Interp *interp, int objc,
-        Tcl_Obj *const objv[])
-}
+#declare 99 {
+#    int Itcl_DefaultInfoCmd(ClientData dummy, Tcl_Interp *interp, int objc,
+#        Tcl_Obj *const objv[])
+#}
 
 
 #
