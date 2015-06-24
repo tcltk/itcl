@@ -67,7 +67,7 @@ test info-1.1 {define a simple class} {
 
 test info-1.2 {info: errors trigger usage info} {
     list [catch {namespace eval test_info {info}} msg] $msg
-} {1 {wrong # args: should be "::itcl::builtin::Info subcommand ?arg ...?"}}
+} {1 {wrong # args: should be "info subcommand ?arg ...?"}}
 
 test info-1.2a {info: errors trigger usage info
 } -body {
@@ -378,7 +378,7 @@ test info-4.4d {query argument list of real proc} {
 } {args}
 
 test info-4.4e {query argument list of real proc} {
-    itcl::builtin::info args ::unknown
+    itcl::builtin::Info args ::unknown
 } {args}
 
 test info-4.5a {query body (wrong # args)} {

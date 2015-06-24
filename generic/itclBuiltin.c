@@ -169,12 +169,6 @@ static const BiMethod BiMethodList[] = {
         Itcl_BiItclHullCmd,
 	ITCL_WIDGET|ITCL_WIDGETADAPTOR
     },
-    { "info",
-        "???",
-        "@itcl-builtin-info",
-	Itcl_BiInfoCmd,
-	ITCL_CLASS|ITCL_ECLASS|ITCL_TYPE|ITCL_WIDGET|ITCL_WIDGETADAPTOR
-    },
     { "isa",
         "className",
         "@itcl-builtin-isa",
@@ -289,7 +283,6 @@ Itcl_BiInit(
 {
     Tcl_Namespace *itclBiNs;
     Tcl_DString buffer;
-    Tcl_Obj *objPtr;
     Tcl_Obj *mapDict;
     Tcl_Command infoCmd;
     int result;
@@ -329,7 +322,7 @@ Itcl_BiInit(
         (Tcl_Namespace*)NULL, TCL_LEAVE_ERR_MSG);
 
     if ((itclBiNs == NULL) ||
-        Tcl_Export(interp, itclBiNs, "*", /* resetListFirst */ 1) != TCL_OK) {
+        Tcl_Export(interp, itclBiNs, "[a-z]*", /* resetListFirst */ 1) != TCL_OK) {
         return TCL_ERROR;
     }
     /*
@@ -348,12 +341,6 @@ Itcl_BiInit(
 	    if(result != TCL_OK) {
               /* FIXME need code here!! */
 	    }
-	    objPtr = Tcl_NewStringObj("itclinfo", -1);
-	    infoPtr->infoVars2Ptr =
-	            Tcl_NewStringObj("::itcl::builtin::Info", -1);
-	    /* FIXME see comment in itclBase.c ItclFinishCmd */
-	    Tcl_IncrRefCount(infoPtr->infoVars2Ptr);
-            Tcl_DictObjPut(NULL, mapDict, objPtr, infoPtr->infoVars2Ptr);
 
 	    infoPtr->infoVars3Ptr =
 	            Tcl_NewStringObj("::itcl::builtin::Info::vars", -1);
@@ -389,7 +376,6 @@ Itcl_InstallBiMethods(
     ItclClass *iclsPtr)      /* class definition to be updated */
 {
     int result = TCL_OK;
-    Tcl_HashEntry *hPtr = NULL;
 
     int i;
     ItclHierIter hier;
@@ -406,6 +392,8 @@ Itcl_InstallBiMethods(
      */
     Tcl_Obj *objPtr = Tcl_NewStringObj("", 0);
     for (i=0; i < BiMethodListLen; i++) {
+	Tcl_HashEntry *hPtr = NULL;
+
         Itcl_InitHierIter(&hier, iclsPtr);
 	Tcl_SetStringObj(objPtr, BiMethodList[i].name, -1);
         superPtr = Itcl_AdvanceHierIter(&hier);
@@ -430,6 +418,18 @@ Itcl_InstallBiMethods(
 	    }
         }
     }
+
+    /*
+     * Every Itcl class gets an info method installed so that each has
+     * a proper context for the subcommands to do their context senstive
+     * work.
+     */
+
+    if (result == TCL_OK) {
+	result = Itcl_CreateMethod(interp, iclsPtr,
+		Tcl_NewStringObj("info", -1), "???", "@itcl-builtin-info");
+    }
+
     Tcl_DecrRefCount(objPtr);
     return result;
 }
