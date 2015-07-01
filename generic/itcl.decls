@@ -514,10 +514,10 @@ declare 145 {
 #  Helper commands
 #
 
-declare 150 {
-    int Itcl_BiInfoCmd(ClientData clientData, Tcl_Interp *interp, int objc,
-        Tcl_Obj *const objv[])
-}
+#declare 150 {
+#    int Itcl_BiInfoCmd(ClientData clientData, Tcl_Interp *interp, int objc,
+#        Tcl_Obj *const objv[])
+#}
 declare 151 {
     int Itcl_BiInfoUnknownCmd(ClientData dummy, Tcl_Interp *interp,
         int objc, Tcl_Obj *const objv[])
