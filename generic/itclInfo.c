@@ -1574,23 +1574,68 @@ Itcl_BiInfoUnknownCmd(
     int objc,                /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
 {
-    Tcl_Obj *listObj;
-    Tcl_Obj *objPtr;
+    Tcl_Obj *objPtr, *listObj;
+    int usage = 1;
+    int code = TCL_ERROR;
 
     ItclShowArgs(1, "Itcl_BiInfoUnknownCmd", objc, objv);
-    if (objc < 3) {
+
+    if (objc < 2) {
+	/* Namespace ensemble unknown callbacks never do this. */
+	Tcl_SetObjResult(interp, Tcl_NewStringObj(
+		"unknown callback should not be called directly", -1));
+	return TCL_ERROR;
+    }
+
+    /* Redirect to the [::info] command. */
+    objPtr = Tcl_NewStringObj("::info", -1);
+    listObj = Tcl_NewListObj(1, &objPtr);
+    Tcl_IncrRefCount(listObj);
+    if (Tcl_GetCommandFromObj(interp, objPtr)) {
+	usage = 0;
+	Tcl_ListObjReplace(NULL, listObj, 1, 0, objc-2, objv+2);
+	code = Tcl_EvalObj(interp, listObj);
+	if (code == TCL_ERROR) {
+	    /* Redirection to [::info] failed, but why? */
+	    Tcl_Obj *optDict = Tcl_GetReturnOptions(interp, code);
+	    Tcl_Obj *key = Tcl_NewStringObj("-errorcode", -1);
+	    Tcl_Obj *val, *elem;
+
+	    Tcl_DictObjGet(NULL, optDict, key, &val);
+	    Tcl_DecrRefCount(key);
+	    Tcl_ListObjIndex(NULL, val, 0, &elem);
+	    if (elem && !strcmp(Tcl_GetString(elem), "TCL")) {
+		Tcl_ListObjIndex(NULL, val, 1, &elem);
+		if (elem && !strcmp(Tcl_GetString(elem), "LOOKUP")) {
+		    Tcl_ListObjIndex(NULL, val, 2, &elem);
+		    if (elem && !strcmp(Tcl_GetString(elem), "SUBCOMMAND")) {
+
+			/* [::info didn't have that subcommand] */
+			usage = 1;
+			Tcl_ResetResult(interp);
+		    }
+		}
+	    }
+	}
+    }
+    Tcl_DecrRefCount(listObj);
+
+    if (usage) {
         /* produce usage message */
         Tcl_Obj *objPtr = Tcl_NewStringObj(
 	        "wrong # args: should be one of...\n", -1);
         ItclGetInfoUsage(interp, objPtr, (ItclObjectInfo *)clientData);
 	Tcl_SetObjResult(interp, objPtr);
-        return TCL_ERROR;
     }
-    listObj = Tcl_NewListObj(-1, NULL);
-    objPtr = Tcl_NewStringObj("::info", -1);
-    Tcl_ListObjAppendElement(interp, listObj, objPtr);
-    objPtr = Tcl_NewStringObj(Tcl_GetString(objv[2]), -1);
-    Tcl_ListObjAppendElement(interp, listObj, objPtr);
+    if (code == TCL_ERROR) {
+	return TCL_ERROR;
+    }
+
+    /* Return a command to replicate the non-error redirect outcome */
+    listObj = Tcl_NewStringObj(
+	    "::apply {{o m args} {::tailcall ::return -options $o $m}}", -1);
+    Tcl_ListObjAppendElement(NULL, listObj, Tcl_GetReturnOptions(interp,code));
+    Tcl_ListObjAppendElement(NULL, listObj, Tcl_GetObjResult(interp));
     Tcl_SetObjResult(interp, listObj);
     return TCL_OK;
 }
