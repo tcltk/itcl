@@ -8,7 +8,7 @@
 /* !BEGIN!: Do not edit below this line. */
 
 #define ITCLINT_STUBS_EPOCH 0
-#define ITCLINT_STUBS_REVISION 149
+#define ITCLINT_STUBS_REVISION 148
 
 #ifdef __cplusplus
 extern "C" {
@@ -426,10 +426,7 @@ ITCLAPI int		Itcl_MixinDeleteCmd(ClientData clientData,
 /* Slot 147 is reserved */
 /* Slot 148 is reserved */
 /* Slot 149 is reserved */
-/* 150 */
-ITCLAPI int		Itcl_BiInfoCmd(ClientData clientData,
-				Tcl_Interp *interp, int objc,
-				Tcl_Obj *const objv[]);
+/* Slot 150 is reserved */
 /* 151 */
 ITCLAPI int		Itcl_BiInfoUnknownCmd(ClientData dummy,
 				Tcl_Interp *interp, int objc,
@@ -676,7 +673,7 @@ typedef struct ItclIntStubs {
     void (*reserved147)(void);
     void (*reserved148)(void);
     void (*reserved149)(void);
-    int (*itcl_BiInfoCmd) (ClientData clientData, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]); /* 150 */
+    void (*reserved150)(void);
     int (*itcl_BiInfoUnknownCmd) (ClientData dummy, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]); /* 151 */
     int (*itcl_BiInfoVarsCmd) (ClientData dummy, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]); /* 152 */
     int (*itcl_CanAccess2) (ItclClass *iclsPtr, int protection, Tcl_Namespace *fromNsPtr); /* 153 */
@@ -972,8 +969,7 @@ extern const ItclIntStubs *itclIntStubsPtr;
 /* Slot 147 is reserved */
 /* Slot 148 is reserved */
 /* Slot 149 is reserved */
-#define Itcl_BiInfoCmd \
-	(itclIntStubsPtr->itcl_BiInfoCmd) /* 150 */
+/* Slot 150 is reserved */
 #define Itcl_BiInfoUnknownCmd \
 	(itclIntStubsPtr->itcl_BiInfoUnknownCmd) /* 151 */
 #define Itcl_BiInfoVarsCmd \
