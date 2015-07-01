@@ -1796,40 +1796,28 @@ Itcl_BiInfoArgsCmd(
     ItclMemberCode *mcode;
     ItclCmdLookup *clookup;
     char *name;
-    const char *what;
+    const char *what = NULL;
 
-    /*
-     *  If this command is not invoked within a class namespace,
-     *  then treat the procedure name as a normal Tcl procedure.
-     */
     contextIclsPtr = NULL;
-    if (!Itcl_IsClassNamespace(Tcl_GetCurrentNamespace(interp))) {
+    if (Itcl_GetContext(interp, &contextIclsPtr, &contextIoPtr) != TCL_OK) {
 	int code;
 	Tcl_Obj *script;
 
-	if (objc != 2) {
-	    what = "procedure";
-	    goto wrongnumargs;
-	}
+	/*
+	 * We lack the context for any specialized Itcl meaning for
+	 * [info args], so fallback to Tcl's.
+	 */
 
-    regular:
+    fallback:
 	script = Tcl_NewStringObj("::info args", -1);
 	Tcl_ListObjAppendElement(NULL, script, objv[1]);
 	Tcl_IncrRefCount(script);
 	code = Tcl_EvalObjEx(interp, script, 0);
 	Tcl_DecrRefCount(script);
-	return code;
-    }
+	if (code == TCL_ERROR && what) {
 
-    /*
-     *  Otherwise, treat the name as a class method/proc.
-     */
-    contextIclsPtr = NULL;
-    if (Itcl_GetContext(interp, &contextIclsPtr, &contextIoPtr) != TCL_OK) {
-	Tcl_SetObjResult(interp, Tcl_NewStringObj(
-            "\nget info like this instead: "
-            "\n  namespace eval className { info args ... }", -1));
-        return TCL_ERROR;
+	}
+	return code;
     }
     if (contextIoPtr != NULL) {
         contextIclsPtr = contextIoPtr->iclsPtr;
@@ -1840,7 +1828,6 @@ Itcl_BiInfoArgsCmd(
         what = "method";
     }
     if (objc != 2) {
-    wrongnumargs:
         Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
             "wrong # args: should be \"info args ", what, "\"",
             (char*)NULL);
@@ -1848,11 +1835,29 @@ Itcl_BiInfoArgsCmd(
     }
     name = Tcl_GetString(objv[1]);
 
-
-
     objPtr = Tcl_NewStringObj(name, -1);
     hPtr = Tcl_FindHashEntry(&contextIclsPtr->resolveCmds, (char *)objPtr);
     Tcl_DecrRefCount(objPtr);
+    if (hPtr) {
+        clookup = (ItclCmdLookup *)Tcl_GetHashValue(hPtr);
+        imPtr = clookup->imPtr;
+        mcode = imPtr->codePtr;
+
+        /*
+         *  Return a string describing the argument list.
+         */
+        if ((mcode && mcode->argListPtr != NULL)
+		|| ((imPtr->flags & ITCL_ARG_SPEC) != 0)) {
+            objPtr = imPtr->usagePtr;
+        } else {
+             objPtr = Tcl_NewStringObj("<undefined>", -1);
+        }
+
+	Tcl_SetObjResult(interp, objPtr);
+	return TCL_OK;
+    }
+
+
     hPtr2 = NULL;
     if (hPtr == NULL) {
 	if (contextIclsPtr->flags &
@@ -1861,10 +1866,7 @@ Itcl_BiInfoArgsCmd(
 	            (char *)objv[1]);
 	}
         if (hPtr2 == NULL) {
-	    goto regular;
-            Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
-                "\"", name, "\" isn't a ", what, (char*)NULL);
-            return TCL_ERROR;
+	    goto fallback;
         }
     }
 
