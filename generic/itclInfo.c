@@ -1590,6 +1590,7 @@ Itcl_BiInfoUnknownCmd(
     /* Redirect to the [::info] command. */
     objPtr = Tcl_NewStringObj("::info", -1);
     listObj = Tcl_NewListObj(1, &objPtr);
+    Tcl_IncrRefCount(listObj);
     if (Tcl_GetCommandFromObj(interp, objPtr)) {
 	usage = 0;
 	Tcl_ListObjReplace(NULL, listObj, 1, 0, objc-2, objv+2);
@@ -1633,11 +1634,8 @@ Itcl_BiInfoUnknownCmd(
     /* Return a command to replicate the non-error redirect outcome */
     listObj = Tcl_NewStringObj(
 	    "::apply {{o m args} {::tailcall ::return -options $o $m}}", -1);
-fprintf(stdout, "A: '%s'\n", Tcl_GetString(listObj)); fflush(stdout);
-    Tcl_ListObjAppendElement(NULL, listObj, Tcl_GetReturnOptions(interp, code));
-fprintf(stdout, "B: '%s'\n", Tcl_GetString(listObj)); fflush(stdout);
+    Tcl_ListObjAppendElement(NULL, listObj, Tcl_GetReturnOptions(interp,code));
     Tcl_ListObjAppendElement(NULL, listObj, Tcl_GetObjResult(interp));
-fprintf(stdout, "C: '%s'\n", Tcl_GetString(listObj)); fflush(stdout);
     Tcl_SetObjResult(interp, listObj);
     return TCL_OK;
 }
