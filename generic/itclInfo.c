@@ -1786,19 +1786,16 @@ Itcl_BiInfoArgsCmd(
     int objc,              /* number of arguments */
     Tcl_Obj *const objv[]) /* argument objects */
 {
-    Tcl_HashEntry *hPtr;
-    Tcl_HashEntry *hPtr2;
+    Tcl_HashEntry *hPtr = NULL;
     Tcl_Obj *objPtr;
-    ItclClass *contextIclsPtr;
+    ItclClass *contextIclsPtr = NULL;
     ItclObject *contextIoPtr;
     ItclMemberFunc *imPtr;
     ItclDelegatedFunction *idmPtr;
     ItclMemberCode *mcode;
     ItclCmdLookup *clookup;
-    char *name;
     const char *what = NULL;
 
-    contextIclsPtr = NULL;
     if (Itcl_GetContext(interp, &contextIclsPtr, &contextIoPtr) != TCL_OK) {
 	int code;
 	Tcl_Obj *script;
@@ -1828,16 +1825,12 @@ Itcl_BiInfoArgsCmd(
         what = "method";
     }
     if (objc != 2) {
-        Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
-            "wrong # args: should be \"info args ", what, "\"",
-            (char*)NULL);
+        Tcl_SetObjResult(interp, Tcl_ObjPrintf(
+            "wrong # args: should be \"info args %s\"", what));
         return TCL_ERROR;
     }
-    name = Tcl_GetString(objv[1]);
 
-    objPtr = Tcl_NewStringObj(name, -1);
-    hPtr = Tcl_FindHashEntry(&contextIclsPtr->resolveCmds, (char *)objPtr);
-    Tcl_DecrRefCount(objPtr);
+    hPtr = Tcl_FindHashEntry(&contextIclsPtr->resolveCmds, (char *)objv[1]);
     if (hPtr) {
         clookup = (ItclCmdLookup *)Tcl_GetHashValue(hPtr);
         imPtr = clookup->imPtr;
@@ -1848,60 +1841,33 @@ Itcl_BiInfoArgsCmd(
          */
         if ((mcode && mcode->argListPtr != NULL)
 		|| ((imPtr->flags & ITCL_ARG_SPEC) != 0)) {
-            objPtr = imPtr->usagePtr;
+	    Tcl_SetObjResult(interp, imPtr->usagePtr);
         } else {
-             objPtr = Tcl_NewStringObj("<undefined>", -1);
+	    Tcl_SetObjResult(interp, Tcl_NewStringObj("<undefined>", -1));
         }
-
-	Tcl_SetObjResult(interp, objPtr);
 	return TCL_OK;
     }
 
-
-    hPtr2 = NULL;
-    if (hPtr == NULL) {
-	if (contextIclsPtr->flags &
-	        (ITCL_TYPE|ITCL_WIDGETADAPTOR|ITCL_WIDGET|ITCL_ECLASS)) {
-	    hPtr2 = Tcl_FindHashEntry(&contextIclsPtr->delegatedFunctions,
-	            (char *)objv[1]);
-	}
-        if (hPtr2 == NULL) {
-	    goto fallback;
-        }
+    if (contextIclsPtr->flags
+	    & (ITCL_TYPE|ITCL_WIDGETADAPTOR|ITCL_WIDGET|ITCL_ECLASS)) {
+	hPtr = Tcl_FindHashEntry(&contextIclsPtr->delegatedFunctions,
+		(char *)objv[1]);
     }
 
-    if (hPtr2 == NULL) {
-        clookup = (ItclCmdLookup *)Tcl_GetHashValue(hPtr);
-        imPtr = clookup->imPtr;
-        mcode = imPtr->codePtr;
-
-        /*
-         *  Return a string describing the argument list.
-         */
-        if (mcode && mcode->argListPtr != NULL) {
-            objPtr = Tcl_NewStringObj(Tcl_GetString(imPtr->usagePtr), -1);
-        } else {
-            if ((imPtr->flags & ITCL_ARG_SPEC) != 0) {
-                objPtr = Tcl_NewStringObj(Tcl_GetString(imPtr->usagePtr), -1);
-            } else {
-                objPtr = Tcl_NewStringObj("<undefined>", -1);
-            }
-        }
-    } else {
-	idmPtr = Tcl_GetHashValue(hPtr2);
+    if (hPtr) {
+	idmPtr = Tcl_GetHashValue(hPtr);
 	if (idmPtr->flags & ITCL_TYPE_METHOD) {
 	    what = "typemethod";
 	}
         objPtr = Tcl_NewStringObj("delegated ", -1);
 	Tcl_AppendToObj(objPtr, what, -1);
 	Tcl_AppendToObj(objPtr, " \"", -1);
-	Tcl_AppendToObj(objPtr, name, -1);
+	Tcl_AppendObjToObj(objPtr, objv[1]);
 	Tcl_AppendToObj(objPtr, "\"", -1);
         Tcl_SetObjResult(interp, objPtr);
         return TCL_ERROR;
     }
-    Tcl_SetObjResult(interp, objPtr);
-    return TCL_OK;
+    goto fallback;
 }
 
 
