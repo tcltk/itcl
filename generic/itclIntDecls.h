@@ -8,7 +8,7 @@
 /* !BEGIN!: Do not edit below this line. */
 
 #define ITCLINT_STUBS_EPOCH 0
-#define ITCLINT_STUBS_REVISION 148
+#define ITCLINT_STUBS_REVISION 147
 
 #ifdef __cplusplus
 extern "C" {
@@ -320,10 +320,7 @@ ITCLAPI int		Itcl_BiInfoBodyCmd(ClientData dummy,
 ITCLAPI int		Itcl_BiInfoArgsCmd(ClientData dummy,
 				Tcl_Interp *interp, int objc,
 				Tcl_Obj *const objv[]);
-/* 99 */
-ITCLAPI int		Itcl_DefaultInfoCmd(ClientData dummy,
-				Tcl_Interp *interp, int objc,
-				Tcl_Obj *const objv[]);
+/* Slot 99 is reserved */
 /* 100 */
 ITCLAPI int		Itcl_EnsembleInit(Tcl_Interp *interp);
 /* 101 */
@@ -622,7 +619,7 @@ typedef struct ItclIntStubs {
     int (*itcl_BiInfoVariableCmd) (ClientData dummy, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]); /* 96 */
     int (*itcl_BiInfoBodyCmd) (ClientData dummy, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]); /* 97 */
     int (*itcl_BiInfoArgsCmd) (ClientData dummy, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]); /* 98 */
-    int (*itcl_DefaultInfoCmd) (ClientData dummy, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]); /* 99 */
+    void (*reserved99)(void);
     int (*itcl_EnsembleInit) (Tcl_Interp *interp); /* 100 */
     int (*itcl_CreateEnsemble) (Tcl_Interp *interp, const char *ensName); /* 101 */
     int (*itcl_AddEnsemblePart) (Tcl_Interp *interp, const char *ensName, const char *partName, const char *usageInfo, Tcl_ObjCmdProc *objProc, ClientData clientData, Tcl_CmdDeleteProc *deleteProc); /* 102 */
@@ -898,8 +895,7 @@ extern const ItclIntStubs *itclIntStubsPtr;
 	(itclIntStubsPtr->itcl_BiInfoBodyCmd) /* 97 */
 #define Itcl_BiInfoArgsCmd \
 	(itclIntStubsPtr->itcl_BiInfoArgsCmd) /* 98 */
-#define Itcl_DefaultInfoCmd \
-	(itclIntStubsPtr->itcl_DefaultInfoCmd) /* 99 */
+/* Slot 99 is reserved */
 #define Itcl_EnsembleInit \
 	(itclIntStubsPtr->itcl_EnsembleInit) /* 100 */
 #define Itcl_CreateEnsemble \
