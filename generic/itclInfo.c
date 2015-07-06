@@ -1812,7 +1812,8 @@ Itcl_BiInfoArgsCmd(
 	code = Tcl_EvalObjEx(interp, script, 0);
 	Tcl_DecrRefCount(script);
 	if (code == TCL_ERROR && what) {
-
+	    Tcl_SetObjResult(interp, Tcl_ObjPrintf(
+		"\"%s\" isn't a %s", Tcl_GetString(objv[1]), what));
 	}
 	return code;
     }
