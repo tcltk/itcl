@@ -247,56 +247,11 @@ static const InfoMethod InfoMethodList[] = {
     }
 };
 
-struct NameProcMap { const char *name; Tcl_ObjCmdProc *proc; };
-
 struct NameProcMap2 {
     const char* name;        /* method name */
     const char* usage;       /* string describing usage */
     Tcl_ObjCmdProc *proc;    /* implementation C proc */
     int flags;               /* which class commands have it */
-};
-
-/*
- * List of commands that are used to implement the [info object] subcommands.
- */
-
-static const struct NameProcMap infoCmds2[] = {
-    { "::itcl::builtin::Info::args", Itcl_BiInfoArgsCmd },
-    { "::itcl::builtin::Info::body", Itcl_BiInfoBodyCmd },
-    { "::itcl::builtin::Info::class", Itcl_BiInfoClassCmd },
-    { "::itcl::builtin::Info::classoptions", Itcl_BiInfoClassOptionsCmd },
-    { "::itcl::builtin::Info::context", Itcl_BiInfoContextCmd },
-    { "::itcl::builtin::Info::component", Itcl_BiInfoComponentCmd },
-    { "::itcl::builtin::Info::components", Itcl_BiInfoComponentsCmd },
-    { "::itcl::builtin::Info::default", Itcl_BiInfoDefaultCmd },
-    { "::itcl::builtin::Info::delegated", Itcl_BiInfoDelegatedCmd },
-    { "::itcl::builtin::Info::extendedclass", Itcl_BiInfoExtendedClassCmd },
-    { "::itcl::builtin::Info::function", Itcl_BiInfoFunctionCmd },
-    { "::itcl::builtin::Info::heritage", Itcl_BiInfoHeritageCmd },
-    { "::itcl::builtin::Info::hulltype", Itcl_BiInfoHullTypeCmd },
-    { "::itcl::builtin::Info::hulltypes", Itcl_BiInfoUnknownCmd },
-    { "::itcl::builtin::Info::inherit", Itcl_BiInfoInheritCmd },
-    { "::itcl::builtin::Info::instances", Itcl_BiInfoInstancesCmd },
-    { "::itcl::builtin::Info::method", Itcl_BiInfoMethodCmd },
-    { "::itcl::builtin::Info::methods", Itcl_BiInfoMethodsCmd },
-    { "::itcl::builtin::Info::option", Itcl_BiInfoOptionCmd },
-    { "::itcl::builtin::Info::options", Itcl_BiInfoOptionsCmd },
-    { "::itcl::builtin::Info::type", Itcl_BiInfoTypeCmd },
-    { "::itcl::builtin::Info::typemethod", Itcl_BiInfoTypeMethodCmd },
-    { "::itcl::builtin::Info::typemethods", Itcl_BiInfoTypeMethodsCmd },
-    { "::itcl::builtin::Info::types", Itcl_BiInfoTypesCmd },
-    { "::itcl::builtin::Info::typevars", Itcl_BiInfoTypeVarsCmd },
-    { "::itcl::builtin::Info::typevariable", Itcl_BiInfoTypeVariableCmd },
-    { "::itcl::builtin::Info::variable", Itcl_BiInfoVariableCmd },
-    { "::itcl::builtin::Info::variables", Itcl_BiInfoVariablesCmd },
-    { "::itcl::builtin::Info::vars", Itcl_BiInfoVarsCmd },
-    { "::itcl::builtin::Info::unknown", Itcl_BiInfoUnknownCmd },
-    { "::itcl::builtin::Info::widget", Itcl_BiInfoWidgetCmd },
-    { "::itcl::builtin::Info::widgetadaptor", Itcl_BiInfoWidgetadaptorCmd },
-    { "::itcl::builtin::Info::widgets", Itcl_BiInfoUnknownCmd },
-    { "::itcl::builtin::Info::widgetclasses", Itcl_BiInfoUnknownCmd },
-    { "::itcl::builtin::Info::widgetadaptors", Itcl_BiInfoUnknownCmd },
-    { NULL, NULL }
 };
 
 static const struct NameProcMap2 infoCmdsDelegated2[] = {
@@ -389,13 +344,20 @@ ItclInfoInit(
 	info.objClientData, NULL);
 
     Tcl_Export(interp, nsPtr, "[a-z]*", 1);
-    for (i=0 ; infoCmds2[i].name!=NULL ; i++) {
-
-        Tcl_CreateObjCommand(interp, infoCmds2[i].name,
-                infoCmds2[i].proc, infoPtr, NULL);
-    }
     ensObjPtr = Tcl_NewStringObj("::itcl::builtin::Info", -1);
+
+    for (i=0 ; InfoMethodList[i].name!=NULL ; i++) {
+	Tcl_Obj *cmdObjPtr = Tcl_DuplicateObj(ensObjPtr);
+
+	Tcl_AppendToObj(cmdObjPtr, "::", 2);
+	Tcl_AppendToObj(cmdObjPtr, InfoMethodList[i].name, -1);
+        Tcl_CreateObjCommand(interp, Tcl_GetString(cmdObjPtr),
+                InfoMethodList[i].proc, infoPtr, NULL);
+	Tcl_DecrRefCount(cmdObjPtr);
+    }
     unkObjPtr = Tcl_NewStringObj("::itcl::builtin::Info::unknown", -1);
+    Tcl_CreateObjCommand(interp, Tcl_GetString(unkObjPtr),
+	    Itcl_BiInfoUnknownCmd, infoPtr, NULL);
     if (Tcl_SetEnsembleUnknownHandler(NULL,
             Tcl_FindEnsemble(interp, ensObjPtr, TCL_LEAVE_ERR_MSG),
 	    unkObjPtr) != TCL_OK) {
