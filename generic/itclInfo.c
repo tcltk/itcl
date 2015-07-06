@@ -1622,47 +1622,30 @@ Itcl_BiInfoBodyCmd(
     Tcl_Obj *const objv[]) /* argument objects */
 {
     Tcl_HashEntry *hPtr;
-    Tcl_HashEntry *hPtr2;
-    Tcl_Obj *objPtr;
-    ItclClass *contextIclsPtr;
+    ItclClass *contextIclsPtr = NULL;
     ItclObject *contextIoPtr;
-    ItclMemberFunc *imPtr;
-    ItclDelegatedFunction *idmPtr;
-    ItclMemberCode *mcode;
-    char *name;
     const char *what;
 
-    /*
-     *  If this command is not invoked within a class namespace,
-     *  then treat the procedure name as a normal Tcl procedure.
-     */
-    contextIclsPtr = NULL;
-    if (!Itcl_IsClassNamespace(Tcl_GetCurrentNamespace(interp))) {
-/* FIXME !!! */
-#ifdef NOTDEF
-        Proc *procPtr;
-
-        name = Tcl_GetStringFromObj(objv[1], (int*)NULL);
-        procPtr = TclFindProc((Interp*)interp, name);
-        if (procPtr == NULL) {
-            Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
-                "\"", name, "\" isn't a procedure",
-                (char*)NULL);
-            return TCL_ERROR;
-        }
-        Tcl_SetObjResult(interp, procPtr->bodyPtr);
-#endif
-    }
-
-    /*
-     *  Otherwise, treat the name as a class method/proc.
-     */
-    contextIclsPtr = NULL;
     if (Itcl_GetContext(interp, &contextIclsPtr, &contextIoPtr) != TCL_OK) {
-	Tcl_SetObjResult(interp, Tcl_NewStringObj(
-            "\nget info like this instead: "
-            "\n  namespace eval className { info body ... }", -1));
-        return TCL_ERROR;
+	int code;
+	Tcl_Obj *script;
+
+	/*
+	 * We lack the context for any specialized Itcl meaning for
+	 * [info body], so fallback to Tcl's.
+	 */
+
+    fallback:
+	script = Tcl_NewStringObj("::info body", -1);
+	Tcl_ListObjAppendElement(NULL, script, objv[1]);
+	Tcl_IncrRefCount(script);
+	code = Tcl_EvalObjEx(interp, script, 0);
+	Tcl_DecrRefCount(script);
+	if (code == TCL_ERROR && what) {
+	    Tcl_SetObjResult(interp, Tcl_ObjPrintf(
+		"\"%s\" isn't a %s", Tcl_GetString(objv[1]), what));
+	}
+	return code;
     }
     if (contextIoPtr != NULL) {
         contextIclsPtr = contextIoPtr->iclsPtr;
@@ -1680,53 +1663,44 @@ Itcl_BiInfoBodyCmd(
         return TCL_ERROR;
     }
 
-    name = Tcl_GetString(objv[1]);
-    objPtr = Tcl_NewStringObj(name, -1);
-    hPtr = Tcl_FindHashEntry(&contextIclsPtr->resolveCmds, (char *)objPtr);
-    Tcl_DecrRefCount(objPtr);
-    hPtr2 = NULL;
-    if (hPtr == NULL) {
-	if (contextIclsPtr->flags &
-	        (ITCL_TYPE|ITCL_WIDGETADAPTOR|ITCL_WIDGET|ITCL_ECLASS)) {
-	    hPtr2 = Tcl_FindHashEntry(&contextIclsPtr->delegatedFunctions,
-	            (char *)objv[1]);
-	}
-        if (hPtr2 == NULL) {
-            Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
-                "\"", name, "\" isn't a ", what, (char*)NULL);
-            return TCL_ERROR;
-        }
-    }
-
-    if (hPtr2 == NULL) {
-        ItclCmdLookup *clookup;
-        clookup = (ItclCmdLookup *)Tcl_GetHashValue(hPtr);
-        imPtr = clookup->imPtr;
-        mcode = imPtr->codePtr;
+    hPtr = Tcl_FindHashEntry(&contextIclsPtr->resolveCmds, (char *)objv[1]);
+    if (hPtr) {
+        ItclCmdLookup *clookup = (ItclCmdLookup *)Tcl_GetHashValue(hPtr);
+	ItclMemberFunc *imPtr = clookup->imPtr;
+	ItclMemberCode *mcode = imPtr->codePtr;
 
         /*
          *  Return a string describing the implementation.
          */
         if (mcode && Itcl_IsMemberCodeImplemented(mcode)) {
-            objPtr = Tcl_NewStringObj(Tcl_GetString(mcode->bodyPtr), -1);
+            Tcl_SetObjResult(interp, mcode->bodyPtr);
         } else {
-            objPtr = Tcl_NewStringObj("<undefined>", -1);
+            Tcl_SetObjResult(interp, Tcl_NewStringObj("<undefined>", -1));
         }
-    } else {
-	idmPtr = Tcl_GetHashValue(hPtr2);
+	return TCL_OK;
+    } 
+
+	if (contextIclsPtr->flags &
+	        (ITCL_TYPE|ITCL_WIDGETADAPTOR|ITCL_WIDGET|ITCL_ECLASS)) {
+	    hPtr = Tcl_FindHashEntry(&contextIclsPtr->delegatedFunctions,
+	            (char *)objv[1]);
+	}
+
+    if (hPtr) {
+	ItclDelegatedFunction *idmPtr = Tcl_GetHashValue(hPtr);
+        Tcl_Obj *objPtr = Tcl_NewStringObj("delegated ", -1);
+
 	if (idmPtr->flags & ITCL_TYPE_METHOD) {
 	    what = "typemethod";
 	}
-        objPtr = Tcl_NewStringObj("delegated ", -1);
 	Tcl_AppendToObj(objPtr, what, -1);
 	Tcl_AppendToObj(objPtr, " \"", -1);
-	Tcl_AppendToObj(objPtr, name, -1);
+	Tcl_AppendObjToObj(objPtr, objv[1]);
 	Tcl_AppendToObj(objPtr, "\"", -1);
         Tcl_SetObjResult(interp, objPtr);
         return TCL_ERROR;
     }
-    Tcl_SetObjResult(interp, objPtr);
-    return TCL_OK;
+    goto fallback;
 }
 
 
