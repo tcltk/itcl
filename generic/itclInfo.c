@@ -1723,13 +1723,8 @@ Itcl_BiInfoArgsCmd(
     Tcl_Obj *const objv[]) /* argument objects */
 {
     Tcl_HashEntry *hPtr = NULL;
-    Tcl_Obj *objPtr;
     ItclClass *contextIclsPtr = NULL;
     ItclObject *contextIoPtr;
-    ItclMemberFunc *imPtr;
-    ItclDelegatedFunction *idmPtr;
-    ItclMemberCode *mcode;
-    ItclCmdLookup *clookup;
     const char *what = NULL;
 
     if (Itcl_GetContext(interp, &contextIclsPtr, &contextIoPtr) != TCL_OK) {
@@ -1769,9 +1764,9 @@ Itcl_BiInfoArgsCmd(
 
     hPtr = Tcl_FindHashEntry(&contextIclsPtr->resolveCmds, (char *)objv[1]);
     if (hPtr) {
-        clookup = (ItclCmdLookup *)Tcl_GetHashValue(hPtr);
-        imPtr = clookup->imPtr;
-        mcode = imPtr->codePtr;
+	ItclCmdLookup *clookup = (ItclCmdLookup *)Tcl_GetHashValue(hPtr);
+	ItclMemberFunc *imPtr = clookup->imPtr;
+	ItclMemberCode *mcode = imPtr->codePtr;
 
         /*
          *  Return a string describing the argument list.
@@ -1792,11 +1787,12 @@ Itcl_BiInfoArgsCmd(
     }
 
     if (hPtr) {
-	idmPtr = Tcl_GetHashValue(hPtr);
+	ItclDelegatedFunction *idmPtr = Tcl_GetHashValue(hPtr);
+        Tcl_Obj *objPtr = Tcl_NewStringObj("delegated ", -1);
+
 	if (idmPtr->flags & ITCL_TYPE_METHOD) {
 	    what = "typemethod";
 	}
-        objPtr = Tcl_NewStringObj("delegated ", -1);
 	Tcl_AppendToObj(objPtr, what, -1);
 	Tcl_AppendToObj(objPtr, " \"", -1);
 	Tcl_AppendObjToObj(objPtr, objv[1]);
