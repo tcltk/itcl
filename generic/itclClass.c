@@ -164,8 +164,27 @@ void
 ItclDeleteClassMetadata(
     ClientData clientData)
 {
-    /* do we need that at all ? */
-    return;
+    /*
+     * This is how we get alerted from TclOO that the object corresponding
+     * to an Itcl class (or its namespace...) is being torn down.
+     */
+
+    ItclClass *iclsPtr = clientData;
+    Tcl_Object oPtr = iclsPtr->oPtr;
+    Tcl_Namespace *ooNsPtr = Tcl_GetObjectNamespace(oPtr);
+
+    if (ooNsPtr != iclsPtr->nsPtr) {
+	/* 
+	 * Itcl's idea of the class namespace is different from that of TclOO.
+	 * Make sure both get torn down and pulled from tables.
+	 */
+	Tcl_HashEntry *hPtr = Tcl_FindHashEntry(&iclsPtr->infoPtr->namespaceClasses,
+		(char *)ooNsPtr);
+	if (hPtr != NULL) {
+	    Tcl_DeleteHashEntry(hPtr);
+	}
+	Tcl_DeleteNamespace(iclsPtr->nsPtr);
+    }
 }
 
 static int
@@ -212,7 +231,7 @@ Itcl_CreateClass(
     Tcl_DString buffer;
     Tcl_Command cmd;
     Tcl_CmdInfo cmdInfo;
-    Tcl_Namespace *classNs;
+    Tcl_Namespace *classNs, *ooNs;
     Tcl_Object oPtr;
     Tcl_Obj *nameObjPtr;
     Tcl_Obj *namePtr;
@@ -389,10 +408,11 @@ Itcl_CreateClass(
     cmdInfo.deleteProc = ItclDestroyClass;
     cmdInfo.deleteData = iclsPtr;
     Tcl_SetCommandInfoFromToken(cmd, &cmdInfo);
+    ooNs = Tcl_GetObjectNamespace(oPtr);
     classNs = Tcl_FindNamespace(interp, Tcl_GetString(nameObjPtr),
             (Tcl_Namespace*)NULL, /* flags */ 0);
     if (_TclOONamespaceDeleteProc == NULL) {
-        _TclOONamespaceDeleteProc = classNs->deleteProc;
+        _TclOONamespaceDeleteProc = ooNs->deleteProc;
     }
 
     if (classNs == NULL) {
@@ -404,17 +424,26 @@ Itcl_CreateClass(
 
     if (iclsPtr->infoPtr->useOldResolvers) {
 #ifdef NEW_PROTO_RESOLVER
+        Itcl_SetNamespaceResolvers(ooNs,
+                (Tcl_ResolveCmdProc*)Itcl_ClassCmdResolver2,
+                (Tcl_ResolveVarProc*)Itcl_ClassVarResolver2,
+                (Tcl_ResolveCompiledVarProc*)Itcl_ClassCompiledVarResolver2);
         Itcl_SetNamespaceResolvers(classNs,
                 (Tcl_ResolveCmdProc*)Itcl_ClassCmdResolver2,
                 (Tcl_ResolveVarProc*)Itcl_ClassVarResolver2,
                 (Tcl_ResolveCompiledVarProc*)Itcl_ClassCompiledVarResolver2);
 #else
+        Itcl_SetNamespaceResolvers(ooNs,
+                (Tcl_ResolveCmdProc*)Itcl_ClassCmdResolver,
+                (Tcl_ResolveVarProc*)Itcl_ClassVarResolver,
+                (Tcl_ResolveCompiledVarProc*)Itcl_ClassCompiledVarResolver);
         Itcl_SetNamespaceResolvers(classNs,
                 (Tcl_ResolveCmdProc*)Itcl_ClassCmdResolver,
                 (Tcl_ResolveVarProc*)Itcl_ClassVarResolver,
                 (Tcl_ResolveCompiledVarProc*)Itcl_ClassCompiledVarResolver);
 #endif
     } else {
+        Tcl_SetNamespaceResolver(ooNs, iclsPtr->resolvePtr);
         Tcl_SetNamespaceResolver(classNs, iclsPtr->resolvePtr);
     }
     iclsPtr->nsPtr = classNs;
@@ -437,6 +466,7 @@ Itcl_CreateClass(
     }
     Tcl_SetHashValue(hPtr, (ClientData)iclsPtr);
 
+
     hPtr = Tcl_CreateHashEntry(&infoPtr->namespaceClasses, (char *)classNs,
             &newEntry);
     if (hPtr == NULL) {
@@ -448,6 +478,25 @@ Itcl_CreateClass(
         goto errorOut;
     }
     Tcl_SetHashValue(hPtr, (ClientData)iclsPtr);
+  if (classNs != ooNs) {
+    hPtr = Tcl_CreateHashEntry(&infoPtr->namespaceClasses, (char *)ooNs,
+            &newEntry);
+    if (hPtr == NULL) {
+	Tcl_AppendResult(interp,
+	        "ITCL: cannot create hash entry in infoPtr->namespaceClasses",
+		" for class \"", 
+		Tcl_GetString(iclsPtr->fullNamePtr), "\"", NULL);
+	result = TCL_ERROR;
+        goto errorOut;
+    }
+    Tcl_SetHashValue(hPtr, (ClientData)iclsPtr);
+
+    if (classNs->clientData && classNs->deleteProc) {
+	(*classNs->deleteProc)(classNs->clientData);
+    }
+    classNs->clientData = (ClientData)iclsPtr;
+    classNs->deleteProc = ItclDestroyClass2;
+}
 
     hPtr = Tcl_CreateHashEntry(&infoPtr->classes, (char *)iclsPtr, &newEntry);
     if (hPtr == NULL) {
@@ -483,14 +532,6 @@ Itcl_CreateClass(
     Tcl_DStringAppend(&buffer, "::this", -1);
     iclsPtr->thisCmd = Tcl_CreateObjCommand(interp, Tcl_DStringValue(&buffer),
             Itcl_ThisCmd, iclsPtr, NULL);
-    Tcl_DStringInit(&buffer);
-    /* the ___this command is just to notify when a namespace is deleted */
-    Tcl_DStringAppend(&buffer, Tcl_GetString(iclsPtr->fullNamePtr), -1);
-    Tcl_DStringAppend(&buffer, "::___this", -1);
-    ItclPreserveClass(iclsPtr);
-    iclsPtr->thisCmd = Tcl_CreateObjCommand(interp, Tcl_DStringValue(&buffer),
-            Itcl_ThisCmd, iclsPtr, ItclDestroyClass2);
-    Tcl_DStringFree(&buffer);
 
     /*
      *  Add the built-in "type" variable to the list of data members.
@@ -1250,13 +1291,16 @@ int
 Itcl_IsClassNamespace(
     Tcl_Namespace *nsPtr)  /* namespace being tested */
 {
-    if (nsPtr != NULL) {
-        if (nsPtr->deleteProc == NULL) {
-	   return 0;
-	}
-        return (nsPtr->deleteProc == _TclOONamespaceDeleteProc);
+    if (nsPtr == NULL) {
+	return 0;
     }
-    return 0;
+    if (nsPtr->deleteProc == NULL) {
+	return 0;
+    }
+    if (nsPtr->deleteProc == ItclDestroyClass2) {
+	return 1;
+    }
+    return (nsPtr->deleteProc == _TclOONamespaceDeleteProc);
 }
 
 
