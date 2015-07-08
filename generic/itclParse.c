@@ -650,7 +650,7 @@ ItclClassBaseCmd(
     Tcl_CmdInfo cmdInfo;
     FOREACH_HASH_DECLS;
     Tcl_HashEntry *hPtr2;
-    Tcl_Namespace *parserNs;
+    Tcl_Namespace *parserNs, *ooNs;
     Tcl_CallFrame frame;
     ItclClass *iclsPtr;
     ItclVariable *ivPtr;
@@ -709,6 +709,10 @@ ItclClassBaseCmd(
      */
     result = Tcl_Import(interp, iclsPtr->nsPtr, "::itcl::builtin::*",
         /* allowOverwrite */ 1);
+    ooNs = Tcl_GetObjectNamespace(iclsPtr->oPtr);
+    if ( result == TCL_OK && ooNs != iclsPtr->nsPtr) {
+	result = Tcl_Import(interp, ooNs, "::itcl::builtin::*", 1);
+    }
 
     if (result != TCL_OK) {
         Tcl_AppendObjToErrorInfo(interp, Tcl_ObjPrintf(

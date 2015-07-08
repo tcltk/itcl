@@ -3282,9 +3282,12 @@ ItclMapMethodNameProc(
 	 * without namespace
 	 */
         myNsPtr = Tcl_GetCurrentNamespace(iclsPtr->interp);
-        iclsPtr2 = GetClassFromClassName(interp, myNsPtr->name, iclsPtr);
-        if (iclsPtr2 != NULL && myNsPtr == iclsPtr2->nsPtr && Itcl_IsMethodCallFrame(iclsPtr->interp) > 0) {
-            iclsPtr = iclsPtr2;
+	hPtr = Tcl_FindHashEntry(&infoPtr->namespaceClasses, (char *) myNsPtr);
+	if (hPtr) {
+	    iclsPtr2 = (ItclClass *) Tcl_GetHashValue(hPtr);
+	    if (Itcl_IsMethodCallFrame(iclsPtr->interp) > 0) {
+		iclsPtr = iclsPtr2;
+	    }
 	}
     }
     if (head != NULL) {
