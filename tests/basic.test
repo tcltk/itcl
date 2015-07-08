@@ -16,14 +16,6 @@ namespace import ::tcltest::test
 ::tcltest::loadTestedCommands
 package require itcl
 
-rename ::itcl::class ::itcl::dgp
-
-proc ::itcl::class {c args} {
-    uplevel 1 [list ::namespace eval $c {}]
-    uplevel 1 [list ::catch [linsert $args 0 ::itcl::dgp $c] ::itcl::m ::itcl::o]
-    return -options $::itcl::o $::itcl::m
-}
-
 test basic-1.0 {empty string as class name should fail but not crash
 } -body {
     list [catch {itcl::class "" {}} err] $err
