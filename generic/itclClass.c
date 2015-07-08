@@ -428,14 +428,23 @@ Itcl_CreateClass(
                 (Tcl_ResolveCmdProc*)Itcl_ClassCmdResolver2,
                 (Tcl_ResolveVarProc*)Itcl_ClassVarResolver2,
                 (Tcl_ResolveCompiledVarProc*)Itcl_ClassCompiledVarResolver2);
+        Itcl_SetNamespaceResolvers(classNs,
+                (Tcl_ResolveCmdProc*)Itcl_ClassCmdResolver2,
+                (Tcl_ResolveVarProc*)Itcl_ClassVarResolver2,
+                (Tcl_ResolveCompiledVarProc*)Itcl_ClassCompiledVarResolver2);
 #else
         Itcl_SetNamespaceResolvers(ooNs,
+                (Tcl_ResolveCmdProc*)Itcl_ClassCmdResolver,
+                (Tcl_ResolveVarProc*)Itcl_ClassVarResolver,
+                (Tcl_ResolveCompiledVarProc*)Itcl_ClassCompiledVarResolver);
+        Itcl_SetNamespaceResolvers(classNs,
                 (Tcl_ResolveCmdProc*)Itcl_ClassCmdResolver,
                 (Tcl_ResolveVarProc*)Itcl_ClassVarResolver,
                 (Tcl_ResolveCompiledVarProc*)Itcl_ClassCompiledVarResolver);
 #endif
     } else {
         Tcl_SetNamespaceResolver(ooNs, iclsPtr->resolvePtr);
+        Tcl_SetNamespaceResolver(classNs, iclsPtr->resolvePtr);
     }
     iclsPtr->nsPtr = classNs;
 
