@@ -974,7 +974,12 @@ Itcl_CanAccess2(
         return 1;
     } else {
         if (protection == ITCL_PRIVATE) {
-            return (iclsPtr->nsPtr == fromNsPtr);
+	    entry = Tcl_FindHashEntry(&iclsPtr->infoPtr->namespaceClasses,
+		fromNsPtr);
+	    if (entry == NULL) {
+		return 0;
+	    }
+	    return (iclsPtr == Tcl_GetHashValue(entry));
         }
     }
 
