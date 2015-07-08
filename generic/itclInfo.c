@@ -1624,7 +1624,7 @@ Itcl_BiInfoBodyCmd(
     Tcl_HashEntry *hPtr;
     ItclClass *contextIclsPtr = NULL;
     ItclObject *contextIoPtr;
-    const char *what;
+    const char *what = "procedure";
 
     if (Itcl_GetContext(interp, &contextIclsPtr, &contextIoPtr) != TCL_OK) {
 	int code;
