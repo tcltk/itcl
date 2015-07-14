@@ -644,7 +644,6 @@ ItclClassBaseCmd(
     Tcl_Obj *const objv[],   /* argument objects */
     ItclClass **iclsPtrPtr)  /* for returning iclsPtr */
 {
-    Tcl_DString buffer;
     Tcl_Obj *argumentPtr;
     Tcl_Obj *bodyPtr;
     Tcl_CmdInfo cmdInfo;
@@ -778,7 +777,6 @@ ItclClassBaseCmd(
     Itcl_BuildVirtualTables(iclsPtr);
 
     /* make the methods and procs known to TclOO */
-    Tcl_DStringInit(&buffer);
     FOREACH_HASH_VALUE(imPtr, &iclsPtr->functions) {
     	    ClientData pmPtr;
 	    argumentPtr = imPtr->codePtr->argumentPtr;
@@ -991,7 +989,6 @@ ItclClassBaseCmd(
 			Itcl_ExecProc, imPtr, ItclReleaseIMF);
 		ItclPreserveIMF(imPtr);
 	    }
-            Tcl_DStringInit(&buffer);
     }
     if (iclsPtr->flags & (ITCL_TYPE|ITCL_WIDGETADAPTOR)) {
 	/* initialize the typecomponents and typevariables */
@@ -1006,7 +1003,6 @@ ItclClassBaseCmd(
 	                Tcl_GetString(ivPtr->init),
 			TCL_NAMESPACE_ONLY) == NULL) {
                     Itcl_PopCallFrame(interp);
-                    Tcl_DStringFree(&buffer);
 		    result = TCL_ERROR;
 	            goto errorReturn;
                 }
@@ -1014,7 +1010,6 @@ ItclClassBaseCmd(
         }
         Itcl_PopCallFrame(interp);
     }
-    Tcl_DStringFree(&buffer);
     if (iclsPtr->typeConstructorPtr != NULL) {
         /* call the typeconstructor body */
         if (Itcl_PushCallFrame(interp, &frame, iclsPtr->nsPtr,
