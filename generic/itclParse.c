@@ -634,6 +634,72 @@ Itcl_ClassCmd(
  *
  * ------------------------------------------------------------------------
  */
+
+static Tcl_MethodCallProc ObjCallProc;
+static Tcl_MethodCallProc ArgCallProc;
+static Tcl_CloneProc CloneProc;
+
+static const Tcl_MethodType itclObjMethodType = {
+    TCL_OO_METHOD_VERSION_CURRENT,
+    "itcl objv method",
+    ObjCallProc,
+    ItclReleaseIMF,
+    CloneProc
+};
+
+static const Tcl_MethodType itclArgMethodType = {
+    TCL_OO_METHOD_VERSION_CURRENT,
+    "itcl argv method",
+    ArgCallProc,
+    ItclReleaseIMF,
+    CloneProc
+};
+
+static int
+CloneProc(
+    Tcl_Interp *interp,
+    ClientData original,
+    ClientData *copyPtr)
+{
+    ItclPreserveIMF((ItclMemberFunc *)original);
+    *copyPtr = original;
+    return TCL_OK;
+}
+
+static int
+ObjCallProc(
+    ClientData clientData,
+    Tcl_Interp *interp,
+    Tcl_ObjectContext context,
+    int objc,
+    Tcl_Obj *const *objv)
+{
+    ItclMemberFunc *imPtr = (ItclMemberFunc *)clientData;
+    ItclMemberCode *mcode = imPtr->codePtr;
+
+    assert(mcode && (mcode->flags & ITCL_IMPLEMENT_OBJCMD));
+
+
+    
+    
+
+    return Tcl_NRCallObjProc(interp, mcode->cfunc.objCmd,
+	    mcode->clientData, objc, objv);
+}
+
+static int
+ArgCallProc(
+    ClientData clientData,
+    Tcl_Interp *interp,
+    Tcl_ObjectContext context,
+    int objc,
+    Tcl_Obj *const *objv)
+{
+    ItclMemberFunc *imPtr = (ItclMemberFunc *)clientData;
+
+    return TCL_ERROR;
+}
+
 int
 ItclClassBaseCmd(
     ClientData clientData,   /* info for all known objects */
@@ -781,6 +847,39 @@ ItclClassBaseCmd(
     	    ClientData pmPtr;
 	    argumentPtr = imPtr->codePtr->argumentPtr;
 	    bodyPtr = imPtr->codePtr->bodyPtr;
+
+	    /*
+	     * fix for SF bug #257 check if TclOO is still available!
+	     * TODO: Is there some better way to do this from C?
+	     * SF bug 257 appears to demonstrate trouble when
+	     * iclsPtr->clsPtr == NULL.  What causes that?
+	     */
+
+	    result2 = Tcl_GetCommandInfo(interp, "::oo::class", &cmdInfo);
+	    if (result2 == 0) {
+              Tcl_AppendResult(interp, " missing ::oo::class command!", NULL);
+	      return TCL_ERROR;
+	    }
+
+if (imPtr->codePtr->flags & ITCL_IMPLEMENT_OBJCMD) {
+    /* Implementation of this member is coded in C expecting Tcl_Obj */
+
+    imPtr->tmPtr = Tcl_NewMethod(interp, iclsPtr->clsPtr, imPtr->namePtr,
+	    1, &itclObjMethodType, (ClientData) imPtr);
+
+		ItclPreserveIMF(imPtr);
+
+} else if (imPtr->codePtr->flags & ITCL_IMPLEMENT_ARGCMD) {
+    /* Implementation of this member is coded in C expecting (char *) */
+
+    imPtr->tmPtr = Tcl_NewMethod(interp, iclsPtr->clsPtr, imPtr->namePtr,
+	    1, &itclArgMethodType, (ClientData) imPtr);
+
+		ItclPreserveIMF(imPtr);
+
+
+
+} else {
 	    if (imPtr->codePtr->flags & ITCL_BUILTIN) {
 		int isDone;
 		isDone = 0;
@@ -945,12 +1044,6 @@ ItclClassBaseCmd(
                 }
 	        Tcl_AppendToObj(bodyPtr, " {*}$args]", -1);
 	    }
-	    /* fix for SF bug #257 check if TclOO is still available! */
-	    result2 = Tcl_GetCommandInfo(interp, "::oo::class", &cmdInfo);
-	    if (result2 == 0) {
-              Tcl_AppendResult(interp, " missing ::oo::class command!", NULL);
-	      return TCL_ERROR;
-	    }
 	    imPtr->tmPtr = (ClientData)Itcl_NewProcClassMethod(interp,
 	        iclsPtr->clsPtr, ItclCheckCallMethod, ItclAfterCallMethod,
                 ItclProcErrorProc, imPtr, imPtr->namePtr, argumentPtr,
@@ -978,6 +1071,7 @@ ItclClassBaseCmd(
                     ItclProcErrorProc, imPtr, imPtr->namePtr, argumentPtr,
 		    bodyPtr, &pmPtr);
 	    }
+}
 	    if ((imPtr->flags & ITCL_COMMON) == 0) {
 	        imPtr->accessCmd = Tcl_CreateObjCommand(interp,
 		        Tcl_GetString(imPtr->fullNamePtr),
