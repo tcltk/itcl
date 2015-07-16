@@ -667,6 +667,18 @@ CloneProc(
 }
 
 static int
+CallAfterCallMethod(
+    ClientData data[],
+    Tcl_Interp *interp,
+    int result)
+{
+    ClientData clientData = data[0];
+    Tcl_ObjectContext context = data[1];
+
+    return ItclAfterCallMethod(clientData, interp, context, NULL, result);
+}
+
+static int
 ObjCallProc(
     ClientData clientData,
     Tcl_Interp *interp,
@@ -675,6 +687,16 @@ ObjCallProc(
     Tcl_Obj *const *objv)
 {
     ItclMemberFunc *imPtr = (ItclMemberFunc *)clientData;
+    int code, done = 0;
+
+
+    if (TCL_ERROR == ItclCheckCallMethod(clientData, interp, context,
+	    NULL, NULL)) {
+	return TCL_ERROR;
+    }
+
+    Tcl_NRAddCallback(interp, CallAfterCallMethod, clientData, context,
+	    NULL, NULL);
 
     if ((imPtr->flags & ITCL_COMMON) == 0) {
 	return Itcl_ExecMethod(clientData, interp, objc-1, objv+1);
