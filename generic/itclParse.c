@@ -675,16 +675,12 @@ ObjCallProc(
     Tcl_Obj *const *objv)
 {
     ItclMemberFunc *imPtr = (ItclMemberFunc *)clientData;
-    ItclMemberCode *mcode = imPtr->codePtr;
 
-    assert(mcode && (mcode->flags & ITCL_IMPLEMENT_OBJCMD));
-
-
-    
-    
-
-    return Tcl_NRCallObjProc(interp, mcode->cfunc.objCmd,
-	    mcode->clientData, objc, objv);
+    if ((imPtr->flags & ITCL_COMMON) == 0) {
+	return Itcl_ExecMethod(clientData, interp, objc-1, objv+1);
+    } else {
+	return Itcl_ExecProc(clientData, interp, objc-1, objv+1);
+    }
 }
 
 static int
