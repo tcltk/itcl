@@ -139,11 +139,11 @@ Itcl_SetCallFrameNamespace(
     Tcl_Interp *interp,
     Tcl_Namespace *nsPtr)
 {
-    CallFrame *framePtr = ((Interp *)interp)->framePtr;
+    CallFrame *framePtr = ((Interp *)interp)->varFramePtr;
     if (framePtr == NULL) {
         return TCL_ERROR;
     }
-    ((Interp *)interp)->framePtr->nsPtr = (Namespace *)nsPtr;
+    ((Interp *)interp)->varFramePtr->nsPtr = (Namespace *)nsPtr;
     return TCL_OK;
 }
 
