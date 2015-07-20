@@ -2357,6 +2357,7 @@ ItclCheckCallMethod(
 	result = TCL_ERROR;
 	goto finishReturn;
     }
+  if (framePtr) {
     cObjc = Itcl_GetCallFrameObjc(interp);
     cObjv = Itcl_GetCallFrameObjv(interp);
     min_allowed_args = cObjc-2;
@@ -2381,6 +2382,7 @@ ItclCheckCallMethod(
 	result = TCL_ERROR;
 	goto finishReturn;
     }
+  }
     isNew = 0;
     callContextPtr = NULL;
     currNsPtr = Tcl_GetCurrentNamespace(interp);
