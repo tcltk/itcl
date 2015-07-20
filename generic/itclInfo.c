@@ -307,6 +307,57 @@ static const struct NameProcMap2 infoCmdsDelegated2[] = {
  * ------------------------------------------------------------------------
  */
 
+static int
+NRInfoWrap(
+    ClientData clientData,
+    Tcl_Interp *interp,
+    int objc,
+    Tcl_Obj *const objv[])
+{
+    Tcl_CmdInfo info;
+    Tcl_Command token = (Tcl_Command) clientData;
+
+    if (objc == 1) {
+	/*
+	 * No subcommand passed.  Give good usage message.  NOT the
+	 * default message of a Tcl ensemble.
+	 */
+
+	ItclObjectInfo *infoPtr = (ItclObjectInfo *)Tcl_GetAssocData(interp,
+		ITCL_INTERP_DATA, NULL);
+	Tcl_Obj *objPtr = Tcl_NewStringObj(
+		"wrong # args: should be one of...\n", -1);
+	ItclGetInfoUsage(interp, objPtr, infoPtr);
+	Tcl_SetObjResult(interp, objPtr);
+	return TCL_ERROR;
+    }
+
+    /* Have a subcommand.  Pass on to the ensemble */
+
+    /*
+     * WARNING! WARNING! WARNING!
+     * We are doing NOTHING to guarantee that the command corresponding to
+     * token has not been deleted.  If it is deleted, this will fail very
+     * badly.  Another pass to plug up dependencies like this is in order.
+     * I'm not bothering now because the code is already overflowing with
+     * worse uncontrolled dependencies.  I'll clean the windows sometime
+     * later when the cracks in the foundation are filled in.
+     */
+    Tcl_GetCommandInfoFromToken(token, &info);
+    return Tcl_NRCallObjProc(interp, info.objProc, info.objClientData,
+	    objc, objv);
+}
+
+static int
+InfoWrap(
+    ClientData clientData,
+    Tcl_Interp *interp,
+    int objc,
+    Tcl_Obj *const objv[])
+{
+    return Tcl_NRCallObjProc(interp, NRInfoWrap, clientData, objc, objv);
+}
+
 int
 ItclInfoInit(
     Tcl_Interp *interp)      /* current interpreter */
@@ -332,6 +383,8 @@ ItclInfoInit(
     }
     token = Tcl_CreateEnsemble(interp, nsPtr->fullName, nsPtr,
         TCL_ENSEMBLE_PREFIX);
+    token = Tcl_NRCreateCommand(interp, "::itcl::builtin::Wrap", InfoWrap,
+	    NRInfoWrap, token, NULL);
     Tcl_GetCommandInfoFromToken(token, &info);
 
     /*

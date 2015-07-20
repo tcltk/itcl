@@ -687,8 +687,6 @@ ObjCallProc(
     Tcl_Obj *const *objv)
 {
     ItclMemberFunc *imPtr = (ItclMemberFunc *)clientData;
-    int code, done = 0;
-
 
     if (TCL_ERROR == ItclCheckCallMethod(clientData, interp, context,
 	    NULL, NULL)) {
@@ -713,8 +711,6 @@ ArgCallProc(
     int objc,
     Tcl_Obj *const *objv)
 {
-    ItclMemberFunc *imPtr = (ItclMemberFunc *)clientData;
-
     return TCL_ERROR;
 }
 
