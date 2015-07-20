@@ -427,7 +427,7 @@ Itcl_InstallBiMethods(
 
     if (result == TCL_OK) {
 	result = Itcl_CreateMethod(interp, iclsPtr,
-		Tcl_NewStringObj("info", -1), "???", "@itcl-builtin-info");
+		Tcl_NewStringObj("info", -1), NULL, "@itcl-builtin-info");
     }
 
     Tcl_DecrRefCount(objPtr);

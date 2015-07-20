@@ -988,6 +988,18 @@ ItclCreateMemberCode(
                     return TCL_ERROR;
                 }
 
+	/*
+	 * WARNING! WARNING! WARNING!
+	 * This is a pretty dangerous approach.  What's done here is
+	 * to copy over the proc + clientData implementation that
+	 * happens to be in place at the moment the method is
+	 * (re-)defined.  This denies any freedom for the clientData
+	 * to be changed dynamically or for the implementation to
+	 * shift from OBJCMD to ARGCMD or vice versa, which the
+	 * Itcl_Register(Obj)C routines explicitly permit.  The whole
+	 * system also lacks any scheme to unregister.
+	 */
+
                 if (objCmdProc != NULL) {
                     mcode->flags |= ITCL_IMPLEMENT_OBJCMD;
                     mcode->cfunc.objCmd = objCmdProc;
@@ -2358,6 +2370,12 @@ ItclCheckCallMethod(
 	goto finishReturn;
     }
   if (framePtr) {
+    /*
+     * This stanza is in place to seize control over usage error messages
+     * before TclOO examines the arguments and produces its own.  This
+     * gives Itcl stability in its error messages at the cost of inconsistency
+     * with Tcl's evolving conventions.
+     */
     cObjc = Itcl_GetCallFrameObjc(interp);
     cObjv = Itcl_GetCallFrameObjv(interp);
     min_allowed_args = cObjc-2;
@@ -2365,17 +2383,9 @@ ItclCheckCallMethod(
         min_allowed_args++;
     }
     if (min_allowed_args < imPtr->argcount) {
-	if (strcmp(Tcl_GetString(imPtr->namePtr), "info") == 0) {
-            Tcl_Obj *objPtr = Tcl_NewStringObj(
-	            "wrong # args: should be one of...\n", -1);
-            ItclGetInfoUsage(interp, objPtr, imPtr->iclsPtr->infoPtr);
-	    Tcl_SetObjResult(interp, objPtr);
-	} else {
-            Tcl_AppendResult(interp, "wrong # args: should be \"",
-	            Tcl_GetString(cObjv[0]), " ",
-	            Tcl_GetString(imPtr->namePtr), " ",
-		    Tcl_GetString(imPtr->usagePtr), "\"", NULL);
-	}
+	Tcl_AppendResult(interp, "wrong # args: should be \"",
+		Tcl_GetString(cObjv[0]), " ", Tcl_GetString(imPtr->namePtr),
+		" ", Tcl_GetString(imPtr->usagePtr), "\"", NULL);
         if (isFinished != NULL) {
             *isFinished = 1;
         }
