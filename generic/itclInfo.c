@@ -2801,7 +2801,6 @@ Itcl_BiInfoDefaultCmd(
     iclsPtr = NULL;
     found = 0;
     if (Itcl_GetContext(interp, &iclsPtr, &ioPtr) != TCL_OK) {
-        Tcl_AppendResult(interp, "cannot get context ", (char*)NULL);
         return TCL_ERROR;
     }
     if (ioPtr != NULL) {
@@ -2853,7 +2852,7 @@ Itcl_BiInfoDefaultCmd(
 		    return TCL_OK;
 	        } else {
 	            Tcl_AppendResult(interp, "method \"", methodName,
-		            "\" has no defult value for argument \"",
+		            "\" has no default value for argument \"",
 			    argName, "\"", NULL);
 		    return TCL_ERROR;
 	        }
