@@ -1429,6 +1429,47 @@ Itcl_GetContext(
     ItclClass **iclsPtrPtr,       /* returns:  class definition or NULL */
     ItclObject **ioPtrPtr)        /* returns:  object data or NULL */
 {
+#if 0
+    Tcl_Namespace *nsPtr;
+
+    /* Fetch the current call frame.  That determines context. */
+    Tcl_CallFrame *framePtr = Itcl_GetUplevelCallFrame(interp, 0);
+
+    /* Try to map it to a context stack. */
+    ItclObjectInfo *infoPtr = (ItclObjectInfo *)Tcl_GetAssocData(interp,
+            ITCL_INTERP_DATA, NULL);
+    Tcl_HashEntry *hPtr = Tcl_FindHashEntry(&infoPtr->frameContext,
+	    (char *)framePtr)
+    if (hPtr) {
+	/* Frame maps to a context stack. */
+	Itcl_Stack *stackPtr = (Itcl_Stack *)Tcl_GetHashValue(hPtr);
+	ItclCallContext *contextPtr = Itcl_PeekStack(*stackPtr);
+
+	assert(contextPtr);
+
+	*iclPtrPtr = contextPtr->imPtr->iclsPtr;
+	*ioPtrPtr = contextPtr->ioPtr ? contextPtr->ioPtr : infoPtr->currIoPtr;
+	return TCL_OK;
+    }
+
+    /* Frame has no Itcl context data.  No way to get object context. */
+    *ioPtrPtr = NULL;
+
+    /* Fall back to namespace for possible class context info. */
+    nsPtr = Tcl_GetCurrentNamespace(interp);
+    hPtr = Tcl_FindHashEntry(&infoPtr->namespaceClasses, (char *)nsPtr);
+    if (hPtr) {
+	*iclsPtrPtr = (ItclClass *)Tcl_GetHashValue(hPtr);
+	return TCL_OK;
+    }
+
+    /* Cannot get any context.  Record an error message. */
+    if (interp) {
+        Tcl_SetObjResult(interp, Tcl_ObjPrintf(
+            "namespace \"%s\" is not a class namespace", nsPtr->fullName));
+    }
+    return TCL_ERROR;
+#else
     Tcl_Namespace *activeNs = Tcl_GetCurrentNamespace(interp);
     Tcl_HashEntry *hPtr;
     ItclCallContext *callContextPtr;
@@ -1485,6 +1526,7 @@ Itcl_GetContext(
         *ioPtrPtr = (*iclsPtrPtr)->infoPtr->currIoPtr;
     }
     return TCL_OK;
+#endif
 }
 
 /*
