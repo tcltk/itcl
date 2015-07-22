@@ -1447,7 +1447,7 @@ Itcl_GetContext(
 
 	assert(contextPtr);
 
-	*iclPtrPtr = contextPtr->imPtr->iclsPtr;
+	*iclsPtrPtr = contextPtr->imPtr->iclsPtr;
 	*ioPtrPtr = contextPtr->ioPtr ? contextPtr->ioPtr : infoPtr->currIoPtr;
 	return TCL_OK;
     }
