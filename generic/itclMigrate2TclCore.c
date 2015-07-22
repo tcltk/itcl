@@ -77,7 +77,7 @@ Itcl_GetUplevelCallFrame(
     if (level < 0) {
         return NULL;
     }
-    framePtr = ((Interp *)interp)->framePtr;
+    framePtr = ((Interp *)interp)->varFramePtr;
     while ((framePtr != NULL) && (level-- > 0)) {
         framePtr = framePtr->callerVarPtr;
     }
