@@ -1429,7 +1429,6 @@ Itcl_GetContext(
     ItclClass **iclsPtrPtr,       /* returns:  class definition or NULL */
     ItclObject **ioPtrPtr)        /* returns:  object data or NULL */
 {
-#if 1
     Tcl_Namespace *nsPtr;
 
     /* Fetch the current call frame.  That determines context. */
@@ -1469,64 +1468,6 @@ Itcl_GetContext(
             "namespace \"%s\" is not a class namespace", nsPtr->fullName));
     }
     return TCL_ERROR;
-#else
-    Tcl_Namespace *activeNs = Tcl_GetCurrentNamespace(interp);
-    Tcl_HashEntry *hPtr;
-    ItclCallContext *callContextPtr;
-    ItclObjectInfo *infoPtr;
-
-    /*
-     *  Return NULL for anything that cannot be found.
-     */
-    *ioPtrPtr = NULL;
-
-    if (!Itcl_IsClassNamespace(activeNs)) {
-        /*
-         *  If there is no class/object context, return an error message.
-         */
-        Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
-            "namespace \"", activeNs->fullName, "\" is not a class namespace",
-            (char*)NULL);
-
-        return TCL_ERROR;
-    }
-    /*
-     *  If the active namespace is a class namespace, then return
-     *  all known info.  See if the current call frame is a known
-     *  object context, and if so, return that context.
-     */
-    infoPtr = (ItclObjectInfo *)Tcl_GetAssocData(interp,
-            ITCL_INTERP_DATA, NULL);
-    callContextPtr = Itcl_PeekStack(&infoPtr->contextStack);
-    if ((callContextPtr != NULL) && (callContextPtr->imPtr != NULL)) {
-        *iclsPtrPtr = callContextPtr->imPtr->iclsPtr;
-    } else {
-        hPtr = Tcl_FindHashEntry(&infoPtr->namespaceClasses,
-                (char *)activeNs);
-        if (hPtr != NULL) {
-            *iclsPtrPtr = (ItclClass *)Tcl_GetHashValue(hPtr);
-        }
-    }
-    if (*iclsPtrPtr == NULL) {
-        Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
-            "namespace \"", activeNs->fullName, "\" is not a class namespace",
-            (char*)NULL);
-
-        return TCL_ERROR;
-    }
-
-    if (callContextPtr == NULL) {
-	/* must be a class namespace without an object */
-	*ioPtrPtr = NULL;
-	return TCL_OK;
-    }
-    *ioPtrPtr = callContextPtr->ioPtr;
-    if ((*ioPtrPtr == NULL) && ((*iclsPtrPtr)->nsPtr != NULL)) {
-        /* maybe we are in a constructor try currIoPtr */
-        *ioPtrPtr = (*iclsPtrPtr)->infoPtr->currIoPtr;
-    }
-    return TCL_OK;
-#endif
 }
 
 /*
@@ -2479,7 +2420,6 @@ ItclCheckCallMethod(
         Tcl_SetHashValue(hPtr, callContextPtr);
     }
 
-#if 1
     if (framePtr == NULL) {
 	framePtr = Itcl_GetUplevelCallFrame(interp, 0);
     }
@@ -2511,9 +2451,6 @@ ItclCheckCallMethod(
     }
 
     Itcl_PushStack(framePtr, stackPtr);
-#else
-    Itcl_PushStack(callContextPtr, &imPtr->iclsPtr->infoPtr->contextStack);
-#endif
 
     if (ioPtr != NULL) {
         ioPtr->callRefCount++;
@@ -2562,7 +2499,6 @@ ItclAfterCallMethod(
     imPtr = (ItclMemberFunc *)clientData;
     callContextPtr = NULL;
     if (contextPtr != NULL) {
-#if 1
     ItclObjectInfo *infoPtr = imPtr->infoPtr;
     Tcl_CallFrame *framePtr;
     Itcl_Stack *stackPtr;
@@ -2586,9 +2522,6 @@ ItclAfterCallMethod(
 	ckfree((char *) stackPtr);
 	Tcl_DeleteHashEntry(hPtr);
     }
-#else
-        callContextPtr = Itcl_PopStack(&imPtr->infoPtr->contextStack);
-#endif
     }
     if (callContextPtr == NULL) {
         if ((imPtr->flags & ITCL_COMMON) ||
@@ -2669,8 +2602,6 @@ ItclProcErrorProc(
     int constructorStackSize;
     int isFirstLoop;
     int loopCnt;
-
-#if 1
     Itcl_Stack *stackPtr;
 
     /* Fetch the current call frame.  That determines context. */
@@ -2688,11 +2619,6 @@ ItclProcErrorProc(
     /* Frame maps to a context stack. */
     stackPtr = (Itcl_Stack *)Tcl_GetHashValue(hPtr);
     callContextPtr = Itcl_PeekStack(stackPtr);
-#else
-    infoPtr = (ItclObjectInfo *)Tcl_GetAssocData(interp,
-            ITCL_INTERP_DATA, NULL);
-    callContextPtr = Itcl_PeekStack(&infoPtr->contextStack);
-#endif
 
     if (callContextPtr == NULL) {
 	return;
