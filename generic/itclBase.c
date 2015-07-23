@@ -309,6 +309,7 @@ Initialize (
     Tcl_InitHashTable(&infoPtr->procMethods, TCL_ONE_WORD_KEYS);
     Tcl_InitObjHashTable(&infoPtr->instances);
     Tcl_InitHashTable(&infoPtr->objectInstances, TCL_ONE_WORD_KEYS);
+    Tcl_InitHashTable(&infoPtr->frameContext, TCL_ONE_WORD_KEYS);
     Tcl_InitObjHashTable(&infoPtr->classTypes);
     infoPtr->ensembleInfo = (EnsembleInfo *)ckalloc(sizeof(EnsembleInfo));
     memset(infoPtr->ensembleInfo, 0, sizeof(EnsembleInfo));
@@ -360,7 +361,6 @@ Initialize (
     }
     infoPtr->useOldResolvers = opt;
     Itcl_InitStack(&infoPtr->clsStack);
-    Itcl_InitStack(&infoPtr->contextStack);
     Itcl_InitStack(&infoPtr->constructorStack);
 
     Tcl_SetAssocData(interp, ITCL_INTERP_DATA,
@@ -862,7 +862,6 @@ ItclFinishCmd(
     ckfree((char *)infoPtr->class_meta_type);
 
     Itcl_DeleteStack(&infoPtr->clsStack);
-    Itcl_DeleteStack(&infoPtr->contextStack);
     Itcl_DeleteStack(&infoPtr->constructorStack);
     /* clean up list pool */
     Itcl_FinishList();
