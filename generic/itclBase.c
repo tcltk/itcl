@@ -361,7 +361,6 @@ Initialize (
     }
     infoPtr->useOldResolvers = opt;
     Itcl_InitStack(&infoPtr->clsStack);
-    Itcl_InitStack(&infoPtr->contextStack);
     Itcl_InitStack(&infoPtr->constructorStack);
 
     Tcl_SetAssocData(interp, ITCL_INTERP_DATA,
@@ -863,7 +862,6 @@ ItclFinishCmd(
     ckfree((char *)infoPtr->class_meta_type);
 
     Itcl_DeleteStack(&infoPtr->clsStack);
-    Itcl_DeleteStack(&infoPtr->contextStack);
     Itcl_DeleteStack(&infoPtr->constructorStack);
     /* clean up list pool */
     Itcl_FinishList();

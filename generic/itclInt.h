@@ -158,7 +158,7 @@ typedef struct ItclObjectInfo {
                                      * resolvers or the CallFrame resolvers */
     Itcl_Stack clsStack;            /* stack of class definitions currently
                                      * being parsed */
-    Itcl_Stack contextStack;        /* stack of call contexts */
+    Itcl_Stack unused;              /* Removed */
     Itcl_Stack constructorStack;    /* stack of constructor calls */
     struct ItclObject *currIoPtr;   /* object currently being constructed
                                      * set only during calling of constructors
