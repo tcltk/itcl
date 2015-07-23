@@ -2943,10 +2943,8 @@ ItclObjectCmd(
 	if ((imPtr->flags & ITCL_COMMON)
 	        && (imPtr->codePtr != NULL)
 	        && !(imPtr->codePtr->flags & ITCL_BUILTIN)) {
-fprintf(stdout, "IPM IN\n"); fflush(stdout);
 	    result = Itcl_InvokeProcedureMethod(imPtr->tmPtr, interp,
 	            objc, objv);
-fprintf(stdout, "IPM OUT\n"); fflush(stdout);
             return result;
 	}
 	oPtr = NULL;

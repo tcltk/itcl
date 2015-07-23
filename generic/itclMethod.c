@@ -1193,7 +1193,6 @@ CallItclObjectCmd(
         result =  ItclObjectCmd(imPtr, interp, oPtr, imPtr->iclsPtr->clsPtr,
                 objc, objv);
     } else {
-fprintf(stdout, "NULLED\n"); fflush(stdout);
 	result = ItclObjectCmd(imPtr, interp, NULL, NULL, objc, objv);
     }
     if (result != TCL_OK) {
@@ -1296,7 +1295,6 @@ Itcl_EvalMemberCode(
      */
     if (((mcode->flags & ITCL_IMPLEMENT_OBJCMD) != 0) ||
             ((mcode->flags & ITCL_IMPLEMENT_ARGCMD) != 0)) {
-fprintf(stdout, "XXX\n"); fflush(stdout);
 	Tcl_Namespace *saveNsPtr = Tcl_GetCurrentNamespace(interp);
 	Itcl_SetCallFrameNamespace(interp, imPtr->iclsPtr->nsPtr);
 
@@ -1318,16 +1316,13 @@ fprintf(stdout, "XXX\n"); fflush(stdout);
 	    }
         }
 	Itcl_SetCallFrameNamespace(interp, saveNsPtr);
-fprintf(stdout, "YYY\n"); fflush(stdout);
     } else {
-fprintf(stdout, "XX2\n"); fflush(stdout);
         if ((mcode->flags & ITCL_IMPLEMENT_TCL) != 0) {
             callbackPtr = Itcl_GetCurrentCallbackPtr(interp);
             Tcl_NRAddCallback(interp, CallItclObjectCmd, imPtr, contextIoPtr,
 	            INT2PTR(objc), (void *)objv);
             result = Itcl_NRRunCallbacks(interp, callbackPtr);
          }
-fprintf(stdout, "YY2\n"); fflush(stdout);
     }
 
 evalMemberCodeDone:
@@ -1434,7 +1429,7 @@ Itcl_GetContext(
     ItclClass **iclsPtrPtr,       /* returns:  class definition or NULL */
     ItclObject **ioPtrPtr)        /* returns:  object data or NULL */
 {
-#if 0
+#if 1
     Tcl_Namespace *nsPtr;
 
     /* Fetch the current call frame.  That determines context. */
@@ -1444,7 +1439,7 @@ Itcl_GetContext(
     ItclObjectInfo *infoPtr = (ItclObjectInfo *)Tcl_GetAssocData(interp,
             ITCL_INTERP_DATA, NULL);
     Tcl_HashEntry *hPtr = Tcl_FindHashEntry(&infoPtr->frameContext,
-	    (char *)framePtr)
+	    (char *)framePtr);
     if (hPtr) {
 	/* Frame maps to a context stack. */
 	Itcl_Stack *stackPtr = (Itcl_Stack *)Tcl_GetHashValue(hPtr);
@@ -2386,7 +2381,6 @@ ItclCheckCallMethod(
         ioPtr = imPtr->iclsPtr->infoPtr->currIoPtr;
     } else {
 	if (contextPtr == NULL) {
-fprintf(stdout, "HOOPEN\t\t"); fflush(stdout);
 	    if ((imPtr->flags & ITCL_COMMON) ||
                     (imPtr->codePtr->flags & ITCL_BUILTIN)) {
                 if (!imPtr->iclsPtr->infoPtr->useOldResolvers) {
@@ -2485,7 +2479,7 @@ fprintf(stdout, "HOOPEN\t\t"); fflush(stdout);
         Tcl_SetHashValue(hPtr, callContextPtr);
     }
 
-#if 0
+#if 1
     if (framePtr == NULL) {
 	framePtr = Itcl_GetUplevelCallFrame(interp, 0);
     }
@@ -2497,12 +2491,26 @@ fprintf(stdout, "HOOPEN\t\t"); fflush(stdout);
     if (isNew) {
 	stackPtr = (Itcl_Stack *)ckalloc(sizeof(Itcl_Stack));
 	Itcl_InitStack(stackPtr);
-        Tcl_SetHashValue(hPtr, callContextPtr);
+        Tcl_SetHashValue(hPtr, stackPtr);
     } else {
 	stackPtr = (Itcl_Stack *)Tcl_GetHashValue(hPtr);
     }
 
+    assert (callContextPtr) ;
     Itcl_PushStack(callContextPtr, stackPtr);
+
+    /* Ugly abuse alert.  Two maps in one table */
+    hPtr = Tcl_CreateHashEntry(&infoPtr->frameContext,
+	    (char *)contextPtr, &isNew);
+    if (isNew) {
+	stackPtr = (Itcl_Stack *)ckalloc(sizeof(Itcl_Stack));
+	Itcl_InitStack(stackPtr);
+        Tcl_SetHashValue(hPtr, stackPtr);
+    } else {
+	stackPtr = (Itcl_Stack *)Tcl_GetHashValue(hPtr);
+    }
+
+    Itcl_PushStack(framePtr, stackPtr);
 #else
     Itcl_PushStack(callContextPtr, &imPtr->iclsPtr->infoPtr->contextStack);
 #endif
@@ -2551,42 +2559,40 @@ ItclAfterCallMethod(
     int newEntry;
     int result;
 
-#if 0
-    ItclObjectInfo *infoPtr = imPtr->infoPtr;
-    Tcl_CallFrame *framePtr = Itcl_GetUplevelCallFrame(interp, 0);
-
-	
-    if (framePtr == NULL) {
-	framePtr = Itcl_GetUplevelCallFrame(interp, 0);
-    }
-
-    isNew = 0;
-    infoPtr = imPtr->iclsPtr->infoPtr;
-    hPtr = Tcl_CreateHashEntry(&infoPtr->frameContext,
-	    (char *)framePtr, &isNew);
-    if (isNew) {
-	stackPtr = (Itcl_Stack *)ckalloc(sizeof(Itcl_Stack));
-	Itcl_InitStack(stackPtr);
-        Tcl_SetHashValue(hPtr, callContextPtr);
-    } else {
-	stackPtr = (Itcl_Stack *)Tcl_GetHashValue(hPtr);
-    }
-
-    Itcl_PushStack(callContextPtr, stackPtr);
-
-#else
-
-#endif
-
     imPtr = (ItclMemberFunc *)clientData;
     callContextPtr = NULL;
     if (contextPtr != NULL) {
+#if 1
+    ItclObjectInfo *infoPtr = imPtr->infoPtr;
+    Tcl_CallFrame *framePtr;
+    Itcl_Stack *stackPtr;
+	
+    hPtr = Tcl_FindHashEntry(&infoPtr->frameContext, (char *)contextPtr);
+    assert(hPtr);
+    stackPtr = (Itcl_Stack *)Tcl_GetHashValue(hPtr);
+    framePtr = Itcl_PopStack(stackPtr);
+    if (Itcl_GetStackSize(stackPtr) == 0) {
+	Itcl_DeleteStack(stackPtr);
+	ckfree((char *) stackPtr);
+	Tcl_DeleteHashEntry(hPtr);
+    }
+
+    hPtr = Tcl_FindHashEntry(&infoPtr->frameContext, (char *)framePtr);
+    assert(hPtr);
+    stackPtr = (Itcl_Stack *)Tcl_GetHashValue(hPtr);
+    callContextPtr = Itcl_PopStack(stackPtr);
+    if (Itcl_GetStackSize(stackPtr) == 0) {
+	Itcl_DeleteStack(stackPtr);
+	ckfree((char *) stackPtr);
+	Tcl_DeleteHashEntry(hPtr);
+    }
+#else
         callContextPtr = Itcl_PopStack(&imPtr->infoPtr->contextStack);
+#endif
     }
     if (callContextPtr == NULL) {
         if ((imPtr->flags & ITCL_COMMON) ||
                 (imPtr->codePtr->flags & ITCL_BUILTIN)) {
-fprintf(stdout, "HAPPENS: %p\n", contextPtr); fflush(stdout);
 	    result = call_result;
 	    goto finishReturn;
         }
@@ -2664,7 +2670,7 @@ ItclProcErrorProc(
     int isFirstLoop;
     int loopCnt;
 
-#if 0
+#if 1
     Itcl_Stack *stackPtr;
 
     /* Fetch the current call frame.  That determines context. */
