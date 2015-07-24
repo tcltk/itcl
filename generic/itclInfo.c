@@ -462,18 +462,24 @@ ItclGetInfoUsage(
     Tcl_Obj *objPtr,       /* returns: summary of usage info */
     ItclObjectInfo *infoPtr)
 {
-    Tcl_HashEntry *hPtr;
     ItclClass *iclsPtr;
     const char *spaces = "  ";
-
     int i;
 
+#if 0
+    Tcl_HashEntry *hPtr;
     hPtr = Tcl_FindHashEntry(&infoPtr->namespaceClasses, (char *)
             Tcl_GetCurrentNamespace(interp));
     if (hPtr == NULL) {
         return;
     }
     iclsPtr = Tcl_GetHashValue(hPtr);
+#else
+    ItclObject *ioPtr;
+    if (TCL_ERROR == Itcl_GetContext(interp, &iclsPtr, &ioPtr)) {
+	return;
+    }
+#endif
     for (i=0; InfoMethodList[i].name != NULL; i++) {
 	if (strcmp(InfoMethodList[i].name, "vars") == 0) {
 	    /* we don't report that, as it is a special case
@@ -629,7 +635,7 @@ Itcl_BiInfoClassCmd(
 
     assert(contextNs);
 
-    if (contextNs->parentPtr == activeNs) {
+    if (0 && contextNs->parentPtr == activeNs) {
         name = contextNs->name;
     } else {
         name = contextNs->fullName;
@@ -837,7 +843,7 @@ Itcl_BiInfoInheritCmd(
     while (elem) {
 	Tcl_Obj *objPtr;
 	ItclClass *iclsPtr = (ItclClass*)Itcl_GetListValue(elem);
-        if (iclsPtr->nsPtr->parentPtr == activeNs) {
+        if (0 && iclsPtr->nsPtr->parentPtr == activeNs) {
             objPtr = Tcl_NewStringObj(iclsPtr->nsPtr->name, -1);
         } else {
             objPtr = Tcl_NewStringObj(iclsPtr->nsPtr->fullName, -1);
@@ -907,7 +913,7 @@ Itcl_BiInfoHeritageCmd(
 	            Tcl_GetString(iclsPtr->fullNamePtr), NULL);
             return TCL_ERROR;
         }
-        if (iclsPtr->nsPtr->parentPtr == activeNs) {
+        if (0 && iclsPtr->nsPtr->parentPtr == activeNs) {
             objPtr = Tcl_NewStringObj(iclsPtr->nsPtr->name, -1);
         } else {
             objPtr = Tcl_NewStringObj(iclsPtr->nsPtr->fullName, -1);
@@ -2734,7 +2740,7 @@ Itcl_BiInfoTypeCmd(
     if (contextNs == NULL) {
         name = activeNs->fullName;
     } else {
-        if (contextNs->parentPtr == activeNs) {
+        if (0 && contextNs->parentPtr == activeNs) {
             name = contextNs->name;
         } else {
             name = contextNs->fullName;
