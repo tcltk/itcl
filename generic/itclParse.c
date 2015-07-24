@@ -880,8 +880,13 @@ if (imPtr->codePtr->flags & ITCL_IMPLEMENT_OBJCMD) {
 
     imPtr->tmPtr = Tcl_NewMethod(interp, iclsPtr->clsPtr, imPtr->namePtr,
 	    1, &itclObjMethodType, (ClientData) imPtr);
+    ItclPreserveIMF(imPtr);
 
-		ItclPreserveIMF(imPtr);
+    if (iclsPtr->flags & (ITCL_TYPE|ITCL_WIDGET|ITCL_WIDGETADAPTOR)) {
+	imPtr->tmPtr = Tcl_NewInstanceMethod(interp, iclsPtr->oPtr,
+		imPtr->namePtr, 1, &itclObjMethodType, (ClientData) imPtr);
+	ItclPreserveIMF(imPtr);
+    }
 
 } else if (imPtr->codePtr->flags & ITCL_IMPLEMENT_ARGCMD) {
     /* Implementation of this member is coded in C expecting (char *) */
