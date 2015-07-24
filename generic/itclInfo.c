@@ -2884,6 +2884,7 @@ Itcl_BiInfoDefaultCmd(
 	while (argListPtr != NULL) {
 	    if (strcmp(argName, Tcl_GetString(argListPtr->namePtr)) == 0) {
 	        if (argListPtr->defaultValuePtr != NULL) {
+#if 0
 		    objPtr = NULL;
 		    nsPtr = Itcl_GetUplevelNamespace(interp, 1);
 		    if (nsPtr == NULL) {
@@ -2907,6 +2908,13 @@ Itcl_BiInfoDefaultCmd(
 		    if (objPtr != NULL) {
 		        Tcl_DecrRefCount(objPtr);
 		    }
+#else
+		    if (NULL == Tcl_ObjSetVar2(interp, objv[3], NULL,
+			    argListPtr->defaultValuePtr, TCL_LEAVE_ERR_MSG)) {
+			return TCL_ERROR;
+		    }
+#endif
+
 		    Tcl_SetResult(interp, "1", NULL);
 		    return TCL_OK;
 	        } else {
