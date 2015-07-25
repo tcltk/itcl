@@ -4915,6 +4915,7 @@ Itcl_BiInfoDelegatedMethodCmd(
     }
     if (contextIoPtr != NULL) {
         contextIclsPtr = contextIoPtr->iclsPtr;
+#if 0
     } else {
     nsPtr = Itcl_GetUplevelNamespace(interp, 1);
     infoPtr = contextIclsPtr->infoPtr;
@@ -4929,6 +4930,7 @@ Itcl_BiInfoDelegatedMethodCmd(
         }
     }
     contextIclsPtr = Tcl_GetHashValue(hPtr);
+#endif
     }
 
     /*
@@ -5161,6 +5163,7 @@ Itcl_BiInfoDelegatedTypeMethodCmd(
     }
     if (contextIoPtr != NULL) {
         contextIclsPtr = contextIoPtr->iclsPtr;
+#if 0
     } else {
     nsPtr = Itcl_GetUplevelNamespace(interp, 1);
     infoPtr = contextIclsPtr->infoPtr;
@@ -5175,6 +5178,7 @@ Itcl_BiInfoDelegatedTypeMethodCmd(
         }
     }
     contextIclsPtr = Tcl_GetHashValue(hPtr);
+#endif
     }
 
     /*
