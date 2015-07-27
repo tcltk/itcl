@@ -242,15 +242,6 @@ Initialize (
         Tcl_Panic("Itcl: cannot create namespace: \"%s\" \n", ITCL_NAMESPACE);
     }
 
-#if 0
-    nsPtr = Tcl_CreateNamespace(interp, ITCL_NAMESPACE"::methodset",
-            NULL, NULL);
-    if (nsPtr == NULL) {
-        Tcl_Panic("Itcl: cannot create namespace: \"%s::methodset\" \n",
-	        ITCL_NAMESPACE);
-    }
-#endif
-
     nsPtr = Tcl_CreateNamespace(interp, ITCL_NAMESPACE"::internal::dicts",
             NULL, NULL);
     if (nsPtr == NULL) {
@@ -274,15 +265,6 @@ Initialize (
             ItclDumpPreserveInfo, NULL, NULL);
 #endif
     /* END for debugging only !!! */
-
-#if 0
-    Tcl_CreateObjCommand(interp,
-            ITCL_NAMESPACE"::methodset::callCCommand",
-            ItclCallCCommand, NULL, NULL);
-    Tcl_CreateObjCommand(interp,
-            ITCL_NAMESPACE"::methodset::objectUnknownCommand",
-            ItclObjectUnknownCommand, NULL, NULL);
-#endif
 
     /*
      *  Create the top-level data structure for tracking objects.
@@ -528,74 +510,6 @@ Itcl_SafeInit (
 
 /*
  * ------------------------------------------------------------------------
- *  ItclCallCCommand()
- *  syntax: is
- *  objv[0]    command name of myself (::itcl::methodset::callCCommand)
- * ------------------------------------------------------------------------
- */
-
-#if 0
-int
-ItclCallCCommand(
-    ClientData clientData,
-    Tcl_Interp *interp,
-    int objc,
-    Tcl_Obj *const *objv)
-{
-    Tcl_CmdProc *argProc;
-    Tcl_ObjCmdProc *objProc;
-    ClientData cData;
-    int result;
-
-    ItclShowArgs(2, "ItclCallCCommand", objc, objv);
-    if (!Itcl_FindC(interp, Tcl_GetString(objv[1])+1, &argProc,
-            &objProc, &cData)) {
-	Tcl_AppendResult(interp, "no such registered C command 1: \"",
-	        Tcl_GetString(objv[1]), "\"", NULL);
-        return TCL_ERROR;
-    }
-    if ((argProc == NULL) && (objProc == NULL)) {
-	Tcl_AppendResult(interp, "no such registered C command 2: \"",
-	        Tcl_GetString(objv[1]), "\"", NULL);
-        return TCL_ERROR;
-    }
-    result = TCL_ERROR;
-    if (argProc != NULL) {
-	const char **argv;
-	int i;
-
-	argv = (const char**)ckalloc((unsigned)((objc-1)*sizeof(char*)));
-	for (i=1;i<objc;i++) {
-	    argv[i-1] = Tcl_GetString(objv[i]);
-	}
-        result = (*argProc)(cData, interp, objc-1, argv);
-        ckfree((char*)argv);
-    }
-    if (objProc != NULL) {
-#ifdef FIXED_ITCL_CALL_CONTEXT
-	Tcl_Namespace *callerNsPtr;
-        ItclObjectInfo *infoPtr;
-        callerNsPtr = Itcl_GetUplevelNamespace(interp, 1);
-        ItclShowArgs(2, "CARGS", Itcl_GetCallFrameObjc(interp),
-	        Itcl_GetCallFrameObjv(interp));
-        infoPtr = (ItclObjectInfo *)Tcl_GetAssocData(interp,
-                ITCL_INTERP_DATA, NULL);
-
-/* FIXME have to use ItclCallContext here !!! */
-/*	Itcl_PushStack(callerNsPtr, &infoPtr->namespaceStack); */
-#endif
-        result = (*objProc)(cData, interp, Itcl_GetCallFrameObjc(interp)-1,
-	        Itcl_GetCallFrameObjv(interp)+1);
-#ifdef FIXED_ITCL_CALL_CONTEXT
-/*	Itcl_PopStack(&infoPtr->namespaceStack); */
-#endif
-    }
-    return result;
-}
-#endif
-
-/*
- * ------------------------------------------------------------------------
  *  ItclSetHullWindowName()
  *
  *
@@ -837,12 +751,6 @@ ItclFinishCmd(
     if (nsPtr != NULL) {
         Tcl_DeleteNamespace(nsPtr);
     }
-#if 0
-    nsPtr = Tcl_FindNamespace(infoPtr->interp, "::itcl::methodset", NULL, 0);
-    if (nsPtr != NULL) {
-        Tcl_DeleteNamespace(nsPtr);
-    }
-#endif
     nsPtr = Tcl_FindNamespace(infoPtr->interp, "::itcl::internal", NULL, 0);
     if (nsPtr != NULL) {
         Tcl_DeleteNamespace(nsPtr);
