@@ -1295,8 +1295,6 @@ Itcl_EvalMemberCode(
      */
     if (((mcode->flags & ITCL_IMPLEMENT_OBJCMD) != 0) ||
             ((mcode->flags & ITCL_IMPLEMENT_ARGCMD) != 0)) {
-	Tcl_Namespace *saveNsPtr = Tcl_GetCurrentNamespace(interp);
-//	Itcl_SetCallFrameNamespace(interp, imPtr->iclsPtr->nsPtr);
 
         if ((mcode->flags & ITCL_IMPLEMENT_OBJCMD) != 0) {
             result = (*mcode->cfunc.objCmd)(mcode->clientData,
@@ -1315,7 +1313,6 @@ Itcl_EvalMemberCode(
                 ckfree((char*)argv);
 	    }
         }
-//	Itcl_SetCallFrameNamespace(interp, saveNsPtr);
     } else {
         if ((mcode->flags & ITCL_IMPLEMENT_TCL) != 0) {
             callbackPtr = Itcl_GetCurrentCallbackPtr(interp);
@@ -2164,12 +2161,6 @@ Itcl_CmdAliasProc(
 	if (strcmp(cmdName, "@itcl-builtin-classunknown") == 0) {
 	    return Tcl_FindCommand(interp, "::itcl::builtin::classunknown", NULL, 0);
 	}
-#if 0
-	if (*cmdName == '@') {
-	    return Tcl_FindCommand(interp,
-	            ITCL_NAMESPACE"::methodset::callCCommand", NULL, 0);
-	}
-#endif
         return NULL;
     }
     clookup = (ItclCmdLookup *)Tcl_GetHashValue(hPtr);

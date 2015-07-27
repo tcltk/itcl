@@ -1244,88 +1244,6 @@ ItclInitObjectOptions(
 
 /*
  * ------------------------------------------------------------------------
- *  ItclInitObjectComponents()
- *
- *  Initialize all instance components with the empty string
- *  This is usually invoked automatically by Itcl_CreateObject(),
- *  when an object is created.
- * ------------------------------------------------------------------------
- */
-#if 0
-static int
-ItclInitObjectComponents(
-   Tcl_Interp *interp,
-   ItclObject *ioPtr,
-   ItclClass *iclsPtr,
-   const char *name)
-{
-    Tcl_DString buffer;
-    ItclClass *iclsPtr2;
-    ItclHierIter hier;
-    ItclComponent *icPtr;
-    Tcl_HashEntry *hPtr;
-    Tcl_HashEntry *hPtr2;
-    Tcl_HashSearch place;
-    Tcl_CallFrame frame;
-    Tcl_Namespace *varNsPtr;
-    const char *componentName;
-    int isNew;
-
-    icPtr = NULL;
-    Itcl_InitHierIter(&hier, iclsPtr);
-    iclsPtr2 = Itcl_AdvanceHierIter(&hier);
-    while (iclsPtr2 != NULL) {
-	/* now initialize the options which have an init value */
-        hPtr = Tcl_FirstHashEntry(&iclsPtr2->components, &place);
-        while (hPtr) {
-            icPtr = (ItclComponent *)Tcl_GetHashValue(hPtr);
-	    hPtr2 = Tcl_CreateHashEntry(&ioPtr->objectComponents,
-	            (char *)icPtr->namePtr, &isNew);
-	    if (isNew) {
-		Tcl_SetHashValue(hPtr2, icPtr);
-                componentName = Tcl_GetString(icPtr->namePtr);
-                Tcl_DStringInit(&buffer);
-	        Tcl_DStringAppend(&buffer, ITCL_VARIABLES_NAMESPACE, -1);
-	        if ((name[0] != ':') && (name[1] != ':')) {
-                     Tcl_DStringAppend(&buffer, "::", 2);
-	        }
-	        Tcl_DStringAppend(&buffer, name, -1);
-	        varNsPtr = Tcl_FindNamespace(interp,
-		        Tcl_DStringValue(&buffer), NULL, 0);
-	        if (varNsPtr == NULL) {
-	            varNsPtr = Tcl_CreateNamespace(interp,
-		            Tcl_DStringValue(&buffer), NULL, 0);
-	        }
-                Tcl_DStringFree(&buffer);
-	        /* now initialize the options which have an init value */
-                if (Itcl_PushCallFrame(interp, &frame, varNsPtr,
-                        /*isProcCallFrame*/0) != TCL_OK) {
-                    return TCL_ERROR;
-                }
-                if (Tcl_SetVar2(interp, Tcl_GetString(icPtr->namePtr),
-		        NULL,
-	                "",
-			TCL_NAMESPACE_ONLY) == NULL) {
-	            Itcl_PopCallFrame(interp);
-		    return TCL_ERROR;
-                }
-                Tcl_TraceVar2(interp, Tcl_GetString(icPtr->namePtr),
-                        NULL,
-                        TCL_TRACE_READS|TCL_TRACE_WRITES,
-                        ItclTraceComponentVar, (ClientData)ioPtr);
-	        Itcl_PopCallFrame(interp);
-            }
-            hPtr = Tcl_NextHashEntry(&place);
-        }
-        iclsPtr2 = Itcl_AdvanceHierIter(&hier);
-    }
-    Itcl_DeleteHierIter(&hier);
-    return TCL_OK;
-}
-#endif
-
-/*
- * ------------------------------------------------------------------------
  *  ItclInitObjectMethodVariables()
  *
  *  Collect all instance methdovariables for the given object instance to allow
@@ -3099,50 +3017,6 @@ ItclObjectCmd(
     }
     return result;
 }
-
-/*
- * ------------------------------------------------------------------------
- *  ItclObjectUnknownCommand()
- *  syntax: is
- *  objv[0]    command name of myself (::itcl::methodset::objectUnknownCommand)
- *  objv[1]    object name for [self]
- *  objv[2]    object name as found on the stack
- *  objv[3]    method name
- * ------------------------------------------------------------------------
- */
-
-#if 0
-int
-ItclObjectUnknownCommand(
-    ClientData clientData,
-    Tcl_Interp *interp,
-    int objc,
-    Tcl_Obj *const *objv)
-{
-    Tcl_Object oPtr;
-    Tcl_Command cmd;
-    Tcl_CmdInfo cmdInfo;
-    ItclObject *ioPtr;
-    ItclObjectInfo *infoPtr;
-
-    ItclShowArgs(1, "ItclObjectUnknownCommand", objc, objv);
-    cmd = Tcl_GetCommandFromObj(interp, objv[1]);
-    if (Tcl_GetCommandInfoFromToken(cmd, &cmdInfo) != 1) {
-        Tcl_AppendResult(interp, "PANIC: cannot get Tcl_GetCommandFromObj for: ", Tcl_GetString(objv[1]), " in ItclObjectUnknownCommand", NULL);
-        return TCL_ERROR;
-    }
-    oPtr = cmdInfo.objClientData;
-    infoPtr = (ItclObjectInfo *)Tcl_GetAssocData(interp,
-            ITCL_INTERP_DATA, NULL);
-    ioPtr = (ItclObject *)Tcl_ObjectGetMetadata(oPtr,
-            infoPtr->object_meta_type);
-    Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
-            "bad option \"", Tcl_GetString(objv[3]), "\": should be one of...",
-	    (char*)NULL);
-    ItclReportObjectUsage(interp, ioPtr, NULL, NULL);
-    return TCL_ERROR;
-}
-#endif
 
 /*
  * ------------------------------------------------------------------------

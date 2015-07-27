@@ -466,20 +466,10 @@ ItclGetInfoUsage(
     const char *spaces = "  ";
     int i;
 
-#if 0
-    Tcl_HashEntry *hPtr;
-    hPtr = Tcl_FindHashEntry(&infoPtr->namespaceClasses, (char *)
-            Tcl_GetCurrentNamespace(interp));
-    if (hPtr == NULL) {
-        return;
-    }
-    iclsPtr = Tcl_GetHashValue(hPtr);
-#else
     ItclObject *ioPtr;
     if (TCL_ERROR == Itcl_GetContext(interp, &iclsPtr, &ioPtr)) {
 	return;
     }
-#endif
     for (i=0; InfoMethodList[i].name != NULL; i++) {
 	if (strcmp(InfoMethodList[i].name, "vars") == 0) {
 	    /* we don't report that, as it is a special case
@@ -521,20 +511,10 @@ ItclGetInfoDelegatedUsage(
 
     int i;
 
-#if 0
-    Tcl_HashEntry *hPtr;
-    hPtr = Tcl_FindHashEntry(&infoPtr->namespaceClasses, (char *)
-            Tcl_GetCurrentNamespace(interp));
-    if (hPtr == NULL) {
-        return;
-    }
-    iclsPtr = Tcl_GetHashValue(hPtr);
-#else
     ItclObject *ioPtr;
     if (TCL_ERROR == Itcl_GetContext(interp, &iclsPtr, &ioPtr)) {
 	return;
     }
-#endif
     for (i=0; infoCmdsDelegated2[i].name != NULL; i++) {
 	name = infoCmdsDelegated2[i].name;
 	lastName = name;
@@ -587,7 +567,6 @@ Itcl_BiInfoClassCmd(
     int objc,              /* number of arguments */
     Tcl_Obj *const objv[]) /* argument objects */
 {
-    Tcl_Namespace *activeNs = Tcl_GetCurrentNamespace(interp);
     Tcl_Namespace *contextNs = NULL;
     ItclClass *contextIclsPtr = NULL;
     ItclObject *contextIoPtr;
@@ -642,11 +621,7 @@ Itcl_BiInfoClassCmd(
 
     assert(contextNs);
 
-    if (0 && contextNs->parentPtr == activeNs) {
-        name = contextNs->name;
-    } else {
         name = contextNs->fullName;
-    }
 
     Tcl_SetObjResult(interp, Tcl_NewStringObj(name, -1));
     return TCL_OK;
@@ -817,7 +792,6 @@ Itcl_BiInfoInheritCmd(
     int objc,              /* number of arguments */
     Tcl_Obj *const objv[]) /* argument objects */
 {
-    Tcl_Namespace *activeNs = Tcl_GetCurrentNamespace(interp);
     ItclClass *contextIclsPtr = NULL;
     ItclObject *contextIoPtr = NULL;
     Itcl_ListElem *elem;
@@ -850,11 +824,7 @@ Itcl_BiInfoInheritCmd(
     while (elem) {
 	Tcl_Obj *objPtr;
 	ItclClass *iclsPtr = (ItclClass*)Itcl_GetListValue(elem);
-        if (0 && iclsPtr->nsPtr->parentPtr == activeNs) {
-            objPtr = Tcl_NewStringObj(iclsPtr->nsPtr->name, -1);
-        } else {
             objPtr = Tcl_NewStringObj(iclsPtr->nsPtr->fullName, -1);
-        }
         Tcl_ListObjAppendElement((Tcl_Interp*)NULL, listPtr, objPtr);
         elem = Itcl_NextListElem(elem);
     }
@@ -882,7 +852,6 @@ Itcl_BiInfoHeritageCmd(
     int objc,              /* number of arguments */
     Tcl_Obj *const objv[]) /* argument objects */
 {
-    Tcl_Namespace *activeNs = Tcl_GetCurrentNamespace(interp);
     ItclClass *contextIclsPtr = NULL;
     ItclObject *contextIoPtr = NULL;
     ItclHierIter hier;
@@ -920,11 +889,7 @@ Itcl_BiInfoHeritageCmd(
 	            Tcl_GetString(iclsPtr->fullNamePtr), NULL);
             return TCL_ERROR;
         }
-        if (0 && iclsPtr->nsPtr->parentPtr == activeNs) {
-            objPtr = Tcl_NewStringObj(iclsPtr->nsPtr->name, -1);
-        } else {
             objPtr = Tcl_NewStringObj(iclsPtr->nsPtr->fullName, -1);
-        }
         Tcl_ListObjAppendElement((Tcl_Interp*)NULL, listPtr, objPtr);
     }
     Itcl_DeleteHierIter(&hier);
@@ -1496,15 +1461,6 @@ Itcl_BiInfoVarsCmd(
 	    return TCL_ERROR;
 	}
     }
-
-#if 0
-    nsPtr = Tcl_GetCurrentNamespace(interp);
-    if (nsPtr != NULL) {
-        hPtr = Tcl_FindHashEntry(&infoPtr->namespaceClasses,
-                (char *)nsPtr);
-	if (hPtr != NULL) {
-            iclsPtr = Tcl_GetHashValue(hPtr);
-#endif
 	    if (iclsPtr->flags & (ITCL_TYPE|ITCL_WIDGETADAPTOR|ITCL_WIDGET)) {
 	        /* don't use the ::tcl::info::vars command */
 	        useGlobalInfo = 0;
@@ -1512,10 +1468,6 @@ Itcl_BiInfoVarsCmd(
 		    pattern = Tcl_GetString(objv[1]);
 		}
 	    }
-#if 0
-        }
-    }
-#endif
     if (useGlobalInfo) {
         newObjv = (Tcl_Obj **)ckalloc(sizeof(Tcl_Obj *)*(objc));
         newObjv[0] = Tcl_NewStringObj("::tcl::info::vars", -1);
@@ -1558,10 +1510,6 @@ Itcl_BiInfoVarsCmd(
 	} else {
             nsPtr = Tcl_FindNamespace(interp, head, NULL, 0);
         }
-#if 0
-	if ((nsPtr != NULL) && Itcl_IsClassNamespace(nsPtr)) {
-	    infoPtr = Tcl_GetAssocData(interp, ITCL_INTERP_DATA, NULL);
-#endif
 	    hPtr = Tcl_FindHashEntry(&infoPtr->namespaceClasses,
 	            (char *)nsPtr);
 	    if (hPtr != NULL) {
@@ -1604,9 +1552,6 @@ Itcl_BiInfoVarsCmd(
 		    }
 		}
 	    }
-#if 0
-	}
-#endif
     }
     return result;
 }
@@ -2436,7 +2381,6 @@ Itcl_BiInfoWidgetCmd(
     int objc,              /* number of arguments */
     Tcl_Obj *const objv[]) /* argument objects */
 {
-    Tcl_Namespace *activeNs = Tcl_GetCurrentNamespace(interp);
     Tcl_Namespace *contextNs = NULL;
     Tcl_Obj *objPtr;
     ItclClass *contextIclsPtr;
@@ -2499,15 +2443,7 @@ Itcl_BiInfoWidgetCmd(
 #endif
     }
 
-    if (0 && contextNs == NULL) {
-        name = activeNs->fullName;
-    } else {
-        if (0 && contextNs->parentPtr == activeNs) {
-            name = contextNs->name;
-        } else {
             name = contextNs->fullName;
-        }
-    }
     if (!(contextIclsPtr->flags & ITCL_WIDGET)) {
 	Tcl_AppendResult(interp, "object or class is no widget", NULL);
         return TCL_ERROR;
@@ -2705,7 +2641,6 @@ Itcl_BiInfoTypeCmd(
     int objc,              /* number of arguments */
     Tcl_Obj *const objv[]) /* argument objects */
 {
-    Tcl_Namespace *activeNs = Tcl_GetCurrentNamespace(interp);
     Tcl_Namespace *contextNs = NULL;
     Tcl_Obj *objPtr;
     ItclClass *contextIclsPtr;
@@ -2768,15 +2703,7 @@ Itcl_BiInfoTypeCmd(
 #endif
     }
 
-    if (0 && contextNs == NULL) {
-        name = activeNs->fullName;
-    } else {
-        if (0 && contextNs->parentPtr == activeNs) {
-            name = contextNs->name;
-        } else {
             name = contextNs->fullName;
-        }
-    }
     if (!(contextIclsPtr->flags & ITCL_TYPE)) {
 	Tcl_AppendResult(interp, "object or class is no type", NULL);
         return TCL_ERROR;
@@ -2874,8 +2801,6 @@ Itcl_BiInfoDefaultCmd(
     Tcl_Obj *const objv[]) /* argument objects */
 {
     FOREACH_HASH_DECLS;
-    Tcl_Namespace *nsPtr;
-    Tcl_Obj *objPtr;
     ItclObject *ioPtr;
     ItclClass *iclsPtr;
     ItclMemberFunc *imPtr;
@@ -2915,37 +2840,10 @@ Itcl_BiInfoDefaultCmd(
 	while (argListPtr != NULL) {
 	    if (strcmp(argName, Tcl_GetString(argListPtr->namePtr)) == 0) {
 	        if (argListPtr->defaultValuePtr != NULL) {
-#if 0
-		    objPtr = NULL;
-		    nsPtr = Itcl_GetUplevelNamespace(interp, 1);
-		    if (nsPtr == NULL) {
-			Tcl_AppendResult(interp, "INTERNAL ERROR cannot get",
-			        " uplevel namespace in Itcl_InfoDefaultCmd",
-				NULL);
-		        return TCL_ERROR;
-		    }
-		    objPtr = NULL;
-		    if ((returnVarName[0] != ':') &
-		            (returnVarName[1] != ':')) {
-		        objPtr = Tcl_NewStringObj(nsPtr->fullName, -1);
-			if (strcmp(Tcl_GetString(objPtr), "::") != 0) {
-		            Tcl_AppendToObj(objPtr, "::", -1);
-			}
-		        Tcl_AppendToObj(objPtr, returnVarName, -1);
-		        returnVarName = Tcl_GetString(objPtr);
-		    }
-	            Tcl_SetVar2(interp, returnVarName, NULL,
-		            Tcl_GetString(argListPtr->defaultValuePtr), 0);
-		    if (objPtr != NULL) {
-		        Tcl_DecrRefCount(objPtr);
-		    }
-#else
 		    if (NULL == Tcl_ObjSetVar2(interp, objv[3], NULL,
 			    argListPtr->defaultValuePtr, TCL_LEAVE_ERR_MSG)) {
 			return TCL_ERROR;
 		    }
-#endif
-
 		    Tcl_SetResult(interp, "1", NULL);
 		    return TCL_OK;
 	        } else {
@@ -4233,7 +4131,6 @@ Itcl_BiInfoWidgetadaptorCmd(
     int objc,              /* number of arguments */
     Tcl_Obj *const objv[]) /* argument objects */
 {
-    Tcl_Namespace *activeNs = Tcl_GetCurrentNamespace(interp);
     Tcl_Namespace *contextNs = NULL;
     Tcl_Obj *objPtr;
     ItclClass *contextIclsPtr;
@@ -4296,15 +4193,7 @@ Itcl_BiInfoWidgetadaptorCmd(
 #endif
     }
 
-    if (0 && contextNs == NULL) {
-        name = activeNs->fullName;
-    } else {
-        if (0 && contextNs->parentPtr == activeNs) {
-            name = contextNs->name;
-        } else {
             name = contextNs->fullName;
-        }
-    }
     if (!(contextIclsPtr->flags & ITCL_WIDGETADAPTOR)) {
 	Tcl_AppendResult(interp, "object or class is no widgetadaptor", NULL);
         return TCL_ERROR;
@@ -4888,13 +4777,11 @@ Itcl_BiInfoDelegatedMethodCmd(
 {
     FOREACH_HASH_DECLS;
     Tcl_HashSearch place;
-    Tcl_Namespace *nsPtr;
     Tcl_Obj *resultPtr;
     Tcl_Obj *objPtr;
     Tcl_Obj *cmdNamePtr;
     ItclClass *contextIclsPtr;
     ItclObject *contextIoPtr;
-    ItclObjectInfo *infoPtr;
     ItclDelegatedFunction *idmPtr;
     ItclHierIter hier;
     ItclClass *iclsPtr;
@@ -4939,22 +4826,6 @@ Itcl_BiInfoDelegatedMethodCmd(
     }
     if (contextIoPtr != NULL) {
         contextIclsPtr = contextIoPtr->iclsPtr;
-#if 0
-    } else {
-    nsPtr = Itcl_GetUplevelNamespace(interp, 1);
-    infoPtr = contextIclsPtr->infoPtr;
-    hPtr = Tcl_FindHashEntry(&infoPtr->namespaceClasses, (char *)nsPtr);
-    if (hPtr == NULL) {
-	nsPtr = Tcl_GetCurrentNamespace(interp);
-	hPtr = Tcl_FindHashEntry(&infoPtr->namespaceClasses, (char *)nsPtr);
-        if (hPtr == NULL) {
-            Tcl_AppendResult(interp, "cannot find class name for namespace \"",
-	            nsPtr->fullName, "\"", NULL);
-	    return TCL_ERROR;
-        }
-    }
-    contextIclsPtr = Tcl_GetHashValue(hPtr);
-#endif
     }
 
     /*
@@ -5136,13 +5007,11 @@ Itcl_BiInfoDelegatedTypeMethodCmd(
 
     FOREACH_HASH_DECLS;
     Tcl_HashSearch place;
-    Tcl_Namespace *nsPtr;
     Tcl_Obj *resultPtr;
     Tcl_Obj *objPtr;
     Tcl_Obj *cmdNamePtr;
     ItclClass *contextIclsPtr;
     ItclObject *contextIoPtr;
-    ItclObjectInfo *infoPtr;
     ItclDelegatedFunction *idmPtr;
     ItclHierIter hier;
     ItclClass *iclsPtr;
@@ -5187,22 +5056,6 @@ Itcl_BiInfoDelegatedTypeMethodCmd(
     }
     if (contextIoPtr != NULL) {
         contextIclsPtr = contextIoPtr->iclsPtr;
-#if 0
-    } else {
-    nsPtr = Itcl_GetUplevelNamespace(interp, 1);
-    infoPtr = contextIclsPtr->infoPtr;
-    hPtr = Tcl_FindHashEntry(&infoPtr->namespaceClasses, (char *)nsPtr);
-    if (hPtr == NULL) {
-	nsPtr = Tcl_GetCurrentNamespace(interp);
-	hPtr = Tcl_FindHashEntry(&infoPtr->namespaceClasses, (char *)nsPtr);
-        if (hPtr == NULL) {
-            Tcl_AppendResult(interp, "cannot find class name for namespace \"",
-	            nsPtr->fullName, "\"", NULL);
-	    return TCL_ERROR;
-        }
-    }
-    contextIclsPtr = Tcl_GetHashValue(hPtr);
-#endif
     }
 
     /*
