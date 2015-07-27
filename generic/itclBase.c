@@ -242,12 +242,14 @@ Initialize (
         Tcl_Panic("Itcl: cannot create namespace: \"%s\" \n", ITCL_NAMESPACE);
     }
 
+#if 0
     nsPtr = Tcl_CreateNamespace(interp, ITCL_NAMESPACE"::methodset",
             NULL, NULL);
     if (nsPtr == NULL) {
         Tcl_Panic("Itcl: cannot create namespace: \"%s::methodset\" \n",
 	        ITCL_NAMESPACE);
     }
+#endif
 
     nsPtr = Tcl_CreateNamespace(interp, ITCL_NAMESPACE"::internal::dicts",
             NULL, NULL);
@@ -273,12 +275,14 @@ Initialize (
 #endif
     /* END for debugging only !!! */
 
+#if 0
     Tcl_CreateObjCommand(interp,
             ITCL_NAMESPACE"::methodset::callCCommand",
             ItclCallCCommand, NULL, NULL);
     Tcl_CreateObjCommand(interp,
             ITCL_NAMESPACE"::methodset::objectUnknownCommand",
             ItclObjectUnknownCommand, NULL, NULL);
+#endif
 
     /*
      *  Create the top-level data structure for tracking objects.
@@ -530,6 +534,7 @@ Itcl_SafeInit (
  * ------------------------------------------------------------------------
  */
 
+#if 0
 int
 ItclCallCCommand(
     ClientData clientData,
@@ -587,6 +592,7 @@ ItclCallCCommand(
     }
     return result;
 }
+#endif
 
 /*
  * ------------------------------------------------------------------------
@@ -831,10 +837,12 @@ ItclFinishCmd(
     if (nsPtr != NULL) {
         Tcl_DeleteNamespace(nsPtr);
     }
+#if 0
     nsPtr = Tcl_FindNamespace(infoPtr->interp, "::itcl::methodset", NULL, 0);
     if (nsPtr != NULL) {
         Tcl_DeleteNamespace(nsPtr);
     }
+#endif
     nsPtr = Tcl_FindNamespace(infoPtr->interp, "::itcl::internal", NULL, 0);
     if (nsPtr != NULL) {
         Tcl_DeleteNamespace(nsPtr);
