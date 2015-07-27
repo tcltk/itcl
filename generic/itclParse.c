@@ -1051,6 +1051,7 @@ if (imPtr->codePtr->flags & ITCL_IMPLEMENT_OBJCMD) {
 		    isDone = 1;
 		}
 		if (!isDone) {
+#if 0
                     if (imPtr->codePtr->flags & ITCL_IMPLEMENT_ARGCMD) {
                       Tcl_AppendToObj(bodyPtr, "::itcl::methodset::callCCommand ", -1);
 		    } else {
@@ -1058,6 +1059,7 @@ if (imPtr->codePtr->flags & ITCL_IMPLEMENT_OBJCMD) {
                         Tcl_AppendToObj(bodyPtr, "::itcl::methodset::callCCommand ", -1);
 		      }
 		    }
+#endif
 		    Tcl_AppendToObj(bodyPtr,
 		        Tcl_GetString(imPtr->codePtr->bodyPtr), -1);
                 }

@@ -3111,6 +3111,7 @@ ItclObjectCmd(
  * ------------------------------------------------------------------------
  */
 
+#if 0
 int
 ItclObjectUnknownCommand(
     ClientData clientData,
@@ -3141,6 +3142,7 @@ ItclObjectUnknownCommand(
     ItclReportObjectUsage(interp, ioPtr, NULL, NULL);
     return TCL_ERROR;
 }
+#endif
 
 /*
  * ------------------------------------------------------------------------

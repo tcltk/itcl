@@ -2164,10 +2164,12 @@ Itcl_CmdAliasProc(
 	if (strcmp(cmdName, "@itcl-builtin-classunknown") == 0) {
 	    return Tcl_FindCommand(interp, "::itcl::builtin::classunknown", NULL, 0);
 	}
+#if 0
 	if (*cmdName == '@') {
 	    return Tcl_FindCommand(interp,
 	            ITCL_NAMESPACE"::methodset::callCCommand", NULL, 0);
 	}
+#endif
         return NULL;
     }
     clookup = (ItclCmdLookup *)Tcl_GetHashValue(hPtr);
