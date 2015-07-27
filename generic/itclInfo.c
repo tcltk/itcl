@@ -1558,8 +1558,10 @@ Itcl_BiInfoVarsCmd(
 	} else {
             nsPtr = Tcl_FindNamespace(interp, head, NULL, 0);
         }
+#if 0
 	if ((nsPtr != NULL) && Itcl_IsClassNamespace(nsPtr)) {
 	    infoPtr = Tcl_GetAssocData(interp, ITCL_INTERP_DATA, NULL);
+#endif
 	    hPtr = Tcl_FindHashEntry(&infoPtr->namespaceClasses,
 	            (char *)nsPtr);
 	    if (hPtr != NULL) {
@@ -1602,7 +1604,9 @@ Itcl_BiInfoVarsCmd(
 		    }
 		}
 	    }
+#if 0
 	}
+#endif
     }
     return result;
 }
@@ -2495,10 +2499,10 @@ Itcl_BiInfoWidgetCmd(
 #endif
     }
 
-    if (contextNs == NULL) {
+    if (0 && contextNs == NULL) {
         name = activeNs->fullName;
     } else {
-        if (contextNs->parentPtr == activeNs) {
+        if (0 && contextNs->parentPtr == activeNs) {
             name = contextNs->name;
         } else {
             name = contextNs->fullName;
@@ -2764,7 +2768,7 @@ Itcl_BiInfoTypeCmd(
 #endif
     }
 
-    if (contextNs == NULL) {
+    if (0 && contextNs == NULL) {
         name = activeNs->fullName;
     } else {
         if (0 && contextNs->parentPtr == activeNs) {
@@ -4292,10 +4296,10 @@ Itcl_BiInfoWidgetadaptorCmd(
 #endif
     }
 
-    if (contextNs == NULL) {
+    if (0 && contextNs == NULL) {
         name = activeNs->fullName;
     } else {
-        if (contextNs->parentPtr == activeNs) {
+        if (0 && contextNs->parentPtr == activeNs) {
             name = contextNs->name;
         } else {
             name = contextNs->fullName;
