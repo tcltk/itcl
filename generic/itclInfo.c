@@ -1475,18 +1475,36 @@ Itcl_BiInfoVarsCmd(
     const char *name;
     int useGlobalInfo;
     int result;
+    ItclObject *ioPtr;
 
     ItclShowArgs(1, "Itcl_BiInfoVars", objc, objv);
     result = TCL_OK;
     useGlobalInfo = 1;
     pattern = NULL;
     infoPtr = (ItclObjectInfo *)clientData;
+
+    if (objc > 2) {
+	Tcl_WrongNumArgs(interp, 1, objv, " ?pattern?");
+	return TCL_ERROR;
+    }
+
+    if (TCL_OK != Itcl_GetContext(interp, &iclsPtr, &ioPtr)) {
+	if (objc == 2) {
+	    /* Give pattern a chance to determine context */
+	    Tcl_ResetResult(interp);
+	} else {
+	    return TCL_ERROR;
+	}
+    }
+
+#if 0
     nsPtr = Tcl_GetCurrentNamespace(interp);
     if (nsPtr != NULL) {
         hPtr = Tcl_FindHashEntry(&infoPtr->namespaceClasses,
                 (char *)nsPtr);
 	if (hPtr != NULL) {
             iclsPtr = Tcl_GetHashValue(hPtr);
+#endif
 	    if (iclsPtr->flags & (ITCL_TYPE|ITCL_WIDGETADAPTOR|ITCL_WIDGET)) {
 	        /* don't use the ::tcl::info::vars command */
 	        useGlobalInfo = 0;
@@ -1494,8 +1512,10 @@ Itcl_BiInfoVarsCmd(
 		    pattern = Tcl_GetString(objv[1]);
 		}
 	    }
+#if 0
         }
     }
+#endif
     if (useGlobalInfo) {
         newObjv = (Tcl_Obj **)ckalloc(sizeof(Tcl_Obj *)*(objc));
         newObjv[0] = Tcl_NewStringObj("::tcl::info::vars", -1);
