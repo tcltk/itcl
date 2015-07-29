@@ -2808,7 +2808,6 @@ Itcl_BiInfoDefaultCmd(
     ItclArgList *argListPtr;
     const char *methodName;
     const char *argName;
-    const char *returnVarName;
     const char *what;
     int found;
 
@@ -2828,7 +2827,6 @@ Itcl_BiInfoDefaultCmd(
     }
     methodName = Tcl_GetString(objv[1]);
     argName = Tcl_GetString(objv[2]);
-    returnVarName = Tcl_GetString(objv[3]);
     FOREACH_HASH_VALUE(imPtr, &iclsPtr->functions) {
         if (strcmp(methodName, Tcl_GetString(imPtr->namePtr)) == 0) {
 	    found = 1;
