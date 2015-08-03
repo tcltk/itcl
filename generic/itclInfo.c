@@ -1434,7 +1434,7 @@ Itcl_BiInfoVarsCmd(
     Tcl_Obj **newObjv;
     Tcl_Namespace *nsPtr;
     ItclObjectInfo *infoPtr;
-    ItclClass *iclsPtr;
+    ItclClass *iclsPtr = NULL;
     ItclVariable *ivPtr;
     const char *pattern;
     const char *name;
@@ -1461,6 +1461,7 @@ Itcl_BiInfoVarsCmd(
 	    return TCL_ERROR;
 	}
     }
+    if (iclsPtr) {
 	    if (iclsPtr->flags & (ITCL_TYPE|ITCL_WIDGETADAPTOR|ITCL_WIDGET)) {
 	        /* don't use the ::tcl::info::vars command */
 	        useGlobalInfo = 0;
@@ -1468,6 +1469,7 @@ Itcl_BiInfoVarsCmd(
 		    pattern = Tcl_GetString(objv[1]);
 		}
 	    }
+    }
     if (useGlobalInfo) {
         newObjv = (Tcl_Obj **)ckalloc(sizeof(Tcl_Obj *)*(objc));
         newObjv[0] = Tcl_NewStringObj("::tcl::info::vars", -1);
