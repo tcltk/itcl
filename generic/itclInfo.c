@@ -1764,7 +1764,8 @@ Itcl_BiInfoArgsCmd(
     ItclObject *contextIoPtr;
     const char *what = NULL;
 
-    if (Itcl_GetContext(interp, &contextIclsPtr, &contextIoPtr) != TCL_OK) {
+    if (objc > 1 &&
+	    Itcl_GetContext(interp, &contextIclsPtr, &contextIoPtr) != TCL_OK) {
 	int code;
 	Tcl_Obj *script;
 
