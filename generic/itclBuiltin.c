@@ -1077,11 +1077,11 @@ NRBiChainCmd(
      *  If it cannot be determined, do nothing.  Otherwise, trim
      *  off any leading path names.
      */
-    cObjv = Itcl_GetCallFrameObjv(interp);
+    cObjv = Itcl_GetCallVarFrameObjv(interp);
     if (cObjv == NULL) {
         return TCL_OK;
     }
-    cObjc = Itcl_GetCallFrameObjc(interp);
+    cObjc = Itcl_GetCallVarFrameObjc(interp);
 
     if ((Itcl_GetCallFrameClientData(interp) == NULL) || (objc == 1)) {
         /* that has been a direct call, so no object in front !! */
