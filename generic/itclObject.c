@@ -3251,7 +3251,7 @@ ItclMapMethodNameProc(
 		        return TCL_ERROR;
 		    }
                 } else {
-                    Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+                    Tcl_AppendResult(interp,
                            "bad option \"", token, "\": should be one of...",
                         (char*)NULL);
 	            ItclReportObjectUsage(interp, ioPtr, nsPtr, nsPtr);
