@@ -184,7 +184,10 @@ ItclDeleteClassMetadata(
 	    Tcl_DeleteHashEntry(hPtr);
 	}
 	Tcl_DeleteNamespace(iclsPtr->nsPtr);
+    } else {
+	ItclDestroyClass2(iclsPtr);
     }
+    ItclReleaseClass(iclsPtr);
 }
 
 static int
@@ -401,6 +404,7 @@ Itcl_CreateClass(
     }
     iclsPtr->clsPtr = Tcl_GetObjectAsClass(oPtr);
     iclsPtr->oPtr = oPtr;
+    ItclPreserveClass(iclsPtr);
     Tcl_ObjectSetMetadata(iclsPtr->oPtr, infoPtr->class_meta_type, iclsPtr);
     Tcl_ObjectSetMethodNameMapper(iclsPtr->oPtr, ItclMapMethodNameProc);
     cmd = Tcl_GetObjectCommand(iclsPtr->oPtr);
