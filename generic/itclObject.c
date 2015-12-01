@@ -2943,7 +2943,6 @@ ItclObjectCmd(
 	        Tcl_DecrRefCount(methodNamePtr);
 	    }
             methodNamePtr = objv[0];
-            Tcl_IncrRefCount(methodNamePtr);
         }
     }
     callbackPtr = Itcl_GetCurrentCallbackPtr(interp);
@@ -2994,6 +2993,7 @@ ItclObjectCmd(
         newObjv = (Tcl_Obj **)ckalloc(sizeof(Tcl_Obj *)*(objc+incr));
         myPtr = Tcl_NewStringObj("my", 2);
         Tcl_IncrRefCount(myPtr);
+        Tcl_IncrRefCount(methodNamePtr);
         newObjv[0] = myPtr;
         newObjv[1] = methodNamePtr;
         memcpy(newObjv+incr+1, objv+1, (sizeof(Tcl_Obj*)*(objc-1)));
