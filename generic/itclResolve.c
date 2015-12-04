@@ -321,6 +321,7 @@ Itcl_ClassVarResolver(
      *  find the object context,
      */
 
+    hPtr = NULL;
     idx = Itcl_GetStackSize(&infoPtr->contextStack) - 1;
     start_idx = idx;
     while (idx >= 0) {
