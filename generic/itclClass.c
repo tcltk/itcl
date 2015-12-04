@@ -245,6 +245,7 @@ Itcl_CreateClass(
     int result;
     int newEntry;
     ItclResolveInfo *resolveInfoPtr;
+    Tcl_Obj *cmdNamePtr;
 
     /*
      * check for an empty class name to avoid a crash
@@ -667,8 +668,14 @@ Itcl_CreateClass(
 
     ItclPreserveClass(iclsPtr);
     iclsPtr->accessCmd = Tcl_GetObjectCommand(oPtr);
-    Tcl_TraceCommand(interp, Tcl_GetCommandName(interp, iclsPtr->accessCmd),
+
+    cmdNamePtr = Tcl_NewObj();
+    Tcl_GetCommandFullName(interp, iclsPtr->accessCmd, cmdNamePtr);
+    
+    Tcl_TraceCommand(interp, Tcl_GetString(cmdNamePtr),
                 TCL_TRACE_DELETE, ClassCmdDeleteTrace, iclsPtr);
+
+    Tcl_DecrRefCount(cmdNamePtr);
     /* FIXME should set the class objects unknown command to Itcl_HandleClass */
 
     *rPtr = iclsPtr;
@@ -915,7 +922,10 @@ ItclDestroyClass(
     }
     iclsPtr->flags |= ITCL_CLASS_IS_DESTROYED;
     if (!(iclsPtr->flags & ITCL_CLASS_NS_IS_DESTROYED)) {
-        iclsPtr->accessCmd = NULL;
+	if (iclsPtr->accessCmd) {
+	    Tcl_DeleteCommandFromToken(iclsPtr->interp, iclsPtr->accessCmd);
+	    iclsPtr->accessCmd = NULL;
+	}
         Tcl_DeleteNamespace(iclsPtr->nsPtr);
     }
     ItclReleaseClass(iclsPtr);
@@ -948,6 +958,7 @@ ItclDestroyClassNamesp(
     ItclClass *iclsPtr2;
     ItclClass *basePtr;
     ItclClass *derivedPtr;
+
 
     iclsPtr = (ItclClass*)cdata;
     if (iclsPtr->flags & ITCL_CLASS_NS_IS_DESTROYED) {
