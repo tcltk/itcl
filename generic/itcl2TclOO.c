@@ -47,6 +47,19 @@ CallFinalizePMCall(
 }
 
 static int
+FreeCommand(
+    ClientData data[],
+    Tcl_Interp *interp,
+    int result)
+{
+    Command *cmdPtr = data[0];
+
+    ckfree(cmdPtr);
+
+    return result;
+}
+
+static int
 Tcl_InvokeClassProcedureMethod(
     Tcl_Interp *interp,
     Tcl_Obj *namePtr,           /* name of the method */
@@ -57,17 +70,18 @@ Tcl_InvokeClassProcedureMethod(
 {
     Proc *procPtr = pmPtr->procPtr;
     int flags = FRAME_IS_METHOD;
-    CallFrame frame;
-    CallFrame *framePtr = &frame;
+    CallFrame *framePtr = NULL;
     CallFrame **framePtrPtr1 = &framePtr;
     Tcl_CallFrame **framePtrPtr = (Tcl_CallFrame **)framePtrPtr1;
-    Command cmd;
+    Command *cmdPtr = ckalloc(sizeof(Command));
     int result;
 
-    memset(&cmd, 0, sizeof(Command));
-    cmd.nsPtr = (Namespace *) nsPtr;
-    cmd.clientData = NULL;
-    pmPtr->procPtr->cmdPtr = &cmd;
+    memset(cmdPtr, 0, sizeof(Command));
+    cmdPtr->nsPtr = (Namespace *) nsPtr;
+    cmdPtr->clientData = NULL;
+    pmPtr->procPtr->cmdPtr = cmdPtr;
+
+    Tcl_NRAddCallback(interp, FreeCommand, cmdPtr, NULL, NULL, NULL);
 
     result = TclProcCompileProc(interp, pmPtr->procPtr,
 	    pmPtr->procPtr->bodyPtr, (Namespace *) nsPtr, "body of method",
