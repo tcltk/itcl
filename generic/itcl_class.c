@@ -1144,6 +1144,9 @@ Itcl_ClassVarResolver(interp, name, context, flags, rPtr)
             vlookup = (ItclVarLookup*)Tcl_GetHashValue(entry);
         }
     }
+    if (vlookup->var.index >= contextObj->dataSize) {
+	return TCL_CONTINUE;
+    }
     *rPtr = (Tcl_Var)contextObj->data[vlookup->var.index];
     return TCL_OK;
 }

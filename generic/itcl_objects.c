@@ -964,8 +964,6 @@ ItclFreeObject(cdata)
 
     int dataSize = contextObj->dataSize;
 
-    contextObj->dataSize = -1;
-
     /*
      *  Install the class namespace and object context so that
      *  the object's data members can be destroyed via simple
@@ -1016,6 +1014,8 @@ ItclFreeObject(cdata)
         cdPtr = Itcl_AdvanceHierIter(&hier);
     }
     Itcl_DeleteHierIter(&hier);
+
+    contextObj->dataSize = -1;
 
     /*
      *  Free the memory associated with object-specific variables.
