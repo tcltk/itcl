@@ -443,9 +443,6 @@ ItclCreateObject(
     hPtr = Tcl_CreateHashEntry(&iclsPtr->infoPtr->objects,
         (char*)ioPtr, &newEntry);
     Tcl_SetHashValue(hPtr, (ClientData)ioPtr);
-    hPtr = Tcl_CreateHashEntry(&iclsPtr->infoPtr->objectNames,
-            (char*)ioPtr->namePtr, &newEntry);
-    Tcl_SetHashValue(hPtr, (ClientData)ioPtr);
 
     /* make the object instance known, for use as unique key if the object */
     /* is renamed. Used by mytypemethod etc. */
@@ -602,10 +599,6 @@ ItclCreateObject(
      *  its accessCmd member is NULL.
      */
     if (result == TCL_OK && (ioPtr->accessCmd != NULL))  {
-	ClientData pmPtr;
-	Tcl_Obj *namePtr;
-	Tcl_Obj *argumentPtr;
-	Tcl_Obj *bodyPtr;
 
 	if (!(ioPtr->iclsPtr->flags & ITCL_CLASS)) {
 	    result = DelegationInstall(interp, ioPtr, iclsPtr);
@@ -620,21 +613,18 @@ ItclCreateObject(
                 (char*)ioPtr, &newEntry);
         Tcl_SetHashValue(hPtr, (ClientData)ioPtr);
 
-        /* add the objects unknow command to handle all unknown sub commands */
-	namePtr = Tcl_NewStringObj("unknown", -1);
-	Tcl_IncrRefCount(namePtr);
-	argumentPtr = Tcl_NewStringObj("args", -1);
-	Tcl_IncrRefCount(argumentPtr);
-	bodyPtr = Tcl_NewStringObj("uplevel 1 ::itcl::builtin::objectunknown ",
-	        -1);
-	Tcl_AppendToObj(bodyPtr, Tcl_GetString(ioPtr->namePtr), -1);
-	Tcl_AppendToObj(bodyPtr, " $args", -1);
-	Tcl_IncrRefCount(bodyPtr);
-        Itcl_NewProcMethod(interp, ioPtr->oPtr, NULL, NULL, ItclProcErrorProc, 
-	    (ItclMemberFunc *)ioPtr, namePtr, argumentPtr, bodyPtr, &pmPtr);
-	Tcl_DecrRefCount(namePtr);
-	Tcl_DecrRefCount(argumentPtr);
-	Tcl_DecrRefCount(bodyPtr);
+	/*
+	 * This is an inelegant hack, left behind until the need for it
+	 * can be eliminated by getting the inheritance tree right.
+	 */
+
+        if (iclsPtr->flags
+		& (ITCL_ECLASS|ITCL_TYPE|ITCL_WIDGET|ITCL_WIDGETADAPTOR)) {
+	    Tcl_NewInstanceMethod(interp, ioPtr->oPtr,
+		    Tcl_NewStringObj("unknown", -1), 0,
+		    &itclRootMethodType, NULL);
+	}
+
         if (iclsPtr->flags & (ITCL_TYPE|ITCL_WIDGETADAPTOR)) {
             Tcl_Obj *objPtr = Tcl_NewObj();
             Tcl_GetCommandFullName(interp, ioPtr->accessCmd, objPtr);
@@ -951,7 +941,8 @@ ItclInitObjectVariables(
 	    }
             hPtr2 = Tcl_FindHashEntry(&ivPtr->iclsPtr->resolveVars, varName);
             if (hPtr2 == NULL) {
-                Tcl_Panic("before Itcl_RegisterObjectVariable hPtr2 == NULL!\n");
+                hPtr = Tcl_NextHashEntry(&place);
+	        continue;
             }
 #ifdef NEW_PROTO_RESOLVER
 	    vlookup = Tcl_GetHashValue(hPtr2);
@@ -1387,8 +1378,8 @@ FinalizeDeleteObject(
     int result)
 {
     ItclObject *contextIoPtr = data[0];
-    ItclDeleteObjectVariablesNamespace(interp, contextIoPtr);
     if (result == TCL_OK) {
+	ItclDeleteObjectVariablesNamespace(interp, contextIoPtr);
         Tcl_ResetResult(interp);
     }
 
@@ -2772,11 +2763,6 @@ ItclFreeObject(
     Tcl_DeleteHashTable(&ioPtr->objectMethodVariables);
     Tcl_DeleteHashTable(&ioPtr->objectDelegatedOptions);
     Tcl_DeleteHashTable(&ioPtr->objectDelegatedFunctions);
-    hPtr = Tcl_FindHashEntry(&ioPtr->infoPtr->objectNames,
-            (char *)ioPtr->namePtr);
-    if (hPtr != NULL) {
-        Tcl_DeleteHashEntry(hPtr);
-    }
     Tcl_DecrRefCount(ioPtr->namePtr);
     Tcl_DecrRefCount(ioPtr->origNamePtr);
     if (ioPtr->createNamePtr != NULL) {
@@ -3106,7 +3092,6 @@ ItclMapMethodNameProc(
     Tcl_DString buffer;
     Tcl_HashEntry *hPtr;
     Tcl_Namespace * myNsPtr;
-    Tcl_CmdInfo cmdInfo;
     ItclObject *ioPtr;
     ItclClass *iclsPtr;
     ItclClass *iclsPtr2;
@@ -3114,7 +3099,6 @@ ItclMapMethodNameProc(
     const char *head;
     const char *tail;
     const char *sp;
-    int result;
 
     iclsPtr = NULL;
     iclsPtr2 = NULL;
@@ -3123,12 +3107,6 @@ ItclMapMethodNameProc(
             ITCL_INTERP_DATA, NULL);
     ioPtr = (ItclObject *)Tcl_ObjectGetMetadata(oPtr,
             infoPtr->object_meta_type);
-    /* fix for SF bug #257 check if TclOO is still available! */
-    result = Tcl_GetCommandInfo(interp, "::oo::class", &cmdInfo);
-    if (result == 0) {
-      Tcl_AppendResult(interp, " missing ::oo::class command!", NULL);
-      return TCL_ERROR;
-    }
     hPtr = Tcl_FindHashEntry(&infoPtr->objects, (char *)ioPtr);
     if ((hPtr == NULL) || (ioPtr == NULL)) {
         /* try to get the class (if a class is creating an object) */
