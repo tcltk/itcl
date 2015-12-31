@@ -1598,7 +1598,7 @@ ItclBiObjectUnknownCmd(
 
     ItclShowArgs(1, "ItclBiObjectUnknownCmd", objc, objv);
 
-    if (objc < 3) {
+    if (objc < 2) {
         Tcl_WrongNumArgs(interp, 1, objv, "object method ?arg...?");
         return TCL_ERROR;
     }
@@ -1612,6 +1612,12 @@ ItclBiObjectUnknownCmd(
     } else {
         Tcl_AppendResult(interp, "INTERNAL ERROR in ItclBiObjectUnknownCmd",
 	        "cannot get ioPtr from infoPtr->objectNames", NULL);
+        return TCL_ERROR;
+    }
+    if (objc < 3) {
+        Tcl_AppendResult(interp, "wrong # args: should be one of...",
+		(char*)NULL);
+        ItclReportObjectUsage(interp, ioPtr, NULL, NULL);
         return TCL_ERROR;
     }
     iclsPtr = ioPtr->iclsPtr;
