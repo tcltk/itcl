@@ -294,15 +294,14 @@ test sfbug-255 { SF bug #255
 
 test fossilbug-8 { fossil bug 2cd667f270b68ef66d668338e09d144e20405e23
 } -body {
-    set ::test_status ""
     ::itcl::class ::Naughty {
         private method die {} {
         }
     }
-    catch {::Naughty die} msg
-    lappend ::test_status $msg 
-} -result {{invalid command name "die"}} \
-  -cleanup {::itcl::delete class ::Naughty}
+    ::Naughty die
+} -cleanup {
+    ::itcl::delete class ::Naughty
+} -result {die}
 
 test sfbug-256 { SF bug #256
 } -body {
