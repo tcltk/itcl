@@ -759,6 +759,26 @@ ItclClassBaseCmd(
         goto errorReturn;
     }
 
+    if (Itcl_FirstListElem(&iclsPtr->bases) == NULL) {
+	/* No [inherit]. Use default inheritance root. */
+	Tcl_Obj *cmdPtr = Tcl_NewListObj(4, NULL);
+
+	Tcl_ListObjAppendElement(NULL, cmdPtr,
+		Tcl_NewStringObj("::oo::define", -1));
+	Tcl_ListObjAppendElement(NULL, cmdPtr, iclsPtr->fullNamePtr);
+	Tcl_ListObjAppendElement(NULL, cmdPtr,
+		Tcl_NewStringObj("superclass", -1));
+	Tcl_ListObjAppendElement(NULL, cmdPtr,
+		Tcl_NewStringObj("::itcl::Root", -1));
+
+	Tcl_IncrRefCount(cmdPtr);
+	result = Tcl_EvalObj(interp, cmdPtr);
+	Tcl_DecrRefCount(cmdPtr);
+	if (result == TCL_ERROR) {
+	    goto errorReturn;
+	}
+    }
+
     /*
      *  At this point, parsing of the class definition has succeeded.
      *  Add built-in methods such as "configure" and "cget"--as long

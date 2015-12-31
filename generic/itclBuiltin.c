@@ -107,7 +107,6 @@ static Tcl_ObjCmdProc Itcl_BiInitOptionsCmd;
 static Tcl_Obj* ItclReportPublicOpt(Tcl_Interp *interp,
     ItclVariable *ivPtr, ItclObject *contextIoPtr);
 
-static Tcl_ObjCmdProc ItclBiObjectUnknownCmd;
 static Tcl_ObjCmdProc ItclBiClassUnknownCmd;
 /*
  *  Standard list of built-in methods for all objects.
@@ -306,9 +305,6 @@ Itcl_BiInit(
 
     Tcl_CreateObjCommand(interp, "::itcl::builtin::chain", Itcl_BiChainCmd,
             NULL, (Tcl_CmdDeleteProc*)NULL);
-
-    Tcl_CreateObjCommand(interp, "::itcl::builtin::objectunknown",
-            ItclBiObjectUnknownCmd, infoPtr, (Tcl_CmdDeleteProc*)NULL);
 
     Tcl_CreateObjCommand(interp, "::itcl::builtin::classunknown",
             ItclBiClassUnknownCmd, infoPtr, (Tcl_CmdDeleteProc*)NULL);
@@ -1550,20 +1546,17 @@ ItclBiClassUnknownCmd(
 
 /*
  * ------------------------------------------------------------------------
- *  ItclBiObjectUnknownCmd()
+ *  ItclUnknownGuts()
  *
- *  Invoked to handle the "objectunknown" command
- *  this is called whenever an object is called with an unknown method/proc
- *  following syntax:
- *
- *    unkownobject <object> <methodname> ?<arg> <arg>...?
+ *  The unknown method handler of the itcl::Root class -- all Itcl
+ *  objects land here when they cannot find a method.
  *
  * ------------------------------------------------------------------------
  */
-/* ARGSUSED */
-static int
-ItclBiObjectUnknownCmd(
-    ClientData clientData,   /* ItclObjectInfo Ptr */
+
+int
+ItclUnknownGuts(
+    ItclObject *ioPtr,	     /* The ItclObject seeking method */
     Tcl_Interp *interp,      /* current interpreter */
     int objc,                /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
@@ -1572,13 +1565,11 @@ ItclBiObjectUnknownCmd(
     Tcl_HashEntry *hPtr2;
     Tcl_Obj **newObjv;
     Tcl_Obj **lObjv;
-    Tcl_Obj *listPtr;
+    Tcl_Obj *listPtr = NULL;
     Tcl_Obj *objPtr;
     Tcl_Obj *resPtr;
     Tcl_DString buffer;
-    ItclObject *ioPtr;
     ItclClass *iclsPtr;
-    ItclObjectInfo *infoPtr;
     ItclComponent *icPtr;
     ItclDelegatedFunction *idmPtr;
     ItclDelegatedFunction *idmPtr2;
@@ -1596,24 +1587,6 @@ ItclBiObjectUnknownCmd(
     int isNew;
     int idx;
 
-    ItclShowArgs(1, "ItclBiObjectUnknownCmd", objc, objv);
-
-    if (objc < 2) {
-        Tcl_WrongNumArgs(interp, 1, objv, "object method ?arg...?");
-        return TCL_ERROR;
-    }
-
-    infoPtr = (ItclObjectInfo *)clientData;
-    ioPtr = NULL;
-    listPtr = NULL;
-    hPtr = Tcl_FindHashEntry(&infoPtr->objectNames, (char*)objv[1]);
-    if (hPtr != NULL) {
-        ioPtr = Tcl_GetHashValue(hPtr);
-    } else {
-        Tcl_AppendResult(interp, "INTERNAL ERROR in ItclBiObjectUnknownCmd",
-	        "cannot get ioPtr from infoPtr->objectNames", NULL);
-        return TCL_ERROR;
-    }
     if (objc < 3) {
         Tcl_AppendResult(interp, "wrong # args: should be one of...",
 		(char*)NULL);
