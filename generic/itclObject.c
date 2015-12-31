@@ -245,6 +245,13 @@ ItclCreateObject(
     ioPtr->constructed = (Tcl_HashTable*)ckalloc(sizeof(Tcl_HashTable));
     Tcl_InitObjHashTable(ioPtr->constructed);
 
+    ioPtr->oPtr = Tcl_NewObjectInstance(interp, iclsPtr->clsPtr, NULL,
+            /* nsName */ NULL, /* objc */ -1, /* objv */ NULL, /* skip */ 0);
+    if (ioPtr->oPtr == NULL) {
+	ckfree(ioPtr);
+        return TCL_ERROR;
+    }
+
     /*
      *  Add a command to the current namespace with the object name.
      *  This is done before invoking the constructors so that the
@@ -404,15 +411,13 @@ ItclCreateObject(
         } while (1);
 	ioPtr->createNamePtr = Tcl_NewStringObj(objName, -1);
     }
-    ioPtr->oPtr = Tcl_NewObjectInstance(interp, iclsPtr->clsPtr, objName,
-            /* nsName */ NULL, /* objc */ -1, /* objv */ NULL, /* skip */ 0);
-    if (ioPtr->oPtr == NULL) {
-	infoPtr->currIoPtr = saveCurrIoPtr;
-        ItclDeleteObjectVariablesNamespace(interp, ioPtr);
-        Itcl_ReleaseData((ClientData)ioPtr);
-        Itcl_ReleaseData((ClientData)ioPtr);
-	ioPtr->hadConstructorError = 16;    
-        return TCL_ERROR;
+
+    {
+	Tcl_Obj *tmp = Tcl_NewObj();
+
+	Tcl_GetCommandFullName(interp, Tcl_GetObjectCommand(ioPtr->oPtr), tmp);
+	Itcl_RenameCommand(interp, Tcl_GetString(tmp), objName);
+	Tcl_DecrRefCount(tmp);
     }
     Tcl_ObjectSetMethodNameMapper(ioPtr->oPtr, ItclMapMethodNameProc);
 
