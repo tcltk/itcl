@@ -951,7 +951,8 @@ ItclInitObjectVariables(
 	    }
             hPtr2 = Tcl_FindHashEntry(&ivPtr->iclsPtr->resolveVars, varName);
             if (hPtr2 == NULL) {
-                Tcl_Panic("before Itcl_RegisterObjectVariable hPtr2 == NULL!\n");
+                hPtr = Tcl_NextHashEntry(&place);
+	        continue;
             }
 #ifdef NEW_PROTO_RESOLVER
 	    vlookup = Tcl_GetHashValue(hPtr2);
