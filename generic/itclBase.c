@@ -819,7 +819,6 @@ ItclFinishCmd(
             "::oo::define ::itcl::clazz deletemethod unknown", -1, 0);
 
     /* first have to look for the remaining memory leaks, then remove the next ifdef */
-#ifdef LATER
     Itcl_RenameCommand(infoPtr->interp, "::itcl::clazz", "");
 
     /* tear down ::itcl namespace (this includes ::itcl::parser namespace) */
@@ -843,7 +842,10 @@ ItclFinishCmd(
     if (nsPtr != NULL) {
         Tcl_DeleteNamespace(nsPtr);
     }
-#endif
+    nsPtr = Tcl_FindNamespace(infoPtr->interp, "::itcl", NULL, 0);
+    if (nsPtr != NULL) {
+        Tcl_DeleteNamespace(nsPtr);
+    }
     /* remove the unknown method from top class */
     if (infoPtr->unknownNamePtr != NULL) {
         Tcl_DecrRefCount(infoPtr->unknownNamePtr);
