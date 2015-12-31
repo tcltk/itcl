@@ -413,6 +413,22 @@ test sfbug-261 { SF bug #261 } -setup {
     itcl::delete class A
 } -result hello
 
+test sfbug-273 { SF bug #273 } -setup {
+    itcl::class C {
+	public proc call {m} {$m}
+	public proc crash {} {
+	    call null
+	    info frame 2
+	    return ok
+	}
+	public proc null {} {}
+    }
+} -body {
+    C::call crash
+} -cleanup {
+    itcl::delete class C
+} -result ok
+
 #test sfbug-xxx { SF bug xxx
 #} -body {
 #    set ::test_status ""
