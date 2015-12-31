@@ -443,9 +443,6 @@ ItclCreateObject(
     hPtr = Tcl_CreateHashEntry(&iclsPtr->infoPtr->objects,
         (char*)ioPtr, &newEntry);
     Tcl_SetHashValue(hPtr, (ClientData)ioPtr);
-    hPtr = Tcl_CreateHashEntry(&iclsPtr->infoPtr->objectNames,
-            (char*)ioPtr->namePtr, &newEntry);
-    Tcl_SetHashValue(hPtr, (ClientData)ioPtr);
 
     /* make the object instance known, for use as unique key if the object */
     /* is renamed. Used by mytypemethod etc. */
@@ -602,10 +599,6 @@ ItclCreateObject(
      *  its accessCmd member is NULL.
      */
     if (result == TCL_OK && (ioPtr->accessCmd != NULL))  {
-	ClientData pmPtr;
-	Tcl_Obj *namePtr;
-	Tcl_Obj *argumentPtr;
-	Tcl_Obj *bodyPtr;
 
 	if (!(ioPtr->iclsPtr->flags & ITCL_CLASS)) {
 	    result = DelegationInstall(interp, ioPtr, iclsPtr);
@@ -620,21 +613,18 @@ ItclCreateObject(
                 (char*)ioPtr, &newEntry);
         Tcl_SetHashValue(hPtr, (ClientData)ioPtr);
 
-        /* add the objects unknow command to handle all unknown sub commands */
-	namePtr = Tcl_NewStringObj("unknown", -1);
-	Tcl_IncrRefCount(namePtr);
-	argumentPtr = Tcl_NewStringObj("args", -1);
-	Tcl_IncrRefCount(argumentPtr);
-	bodyPtr = Tcl_NewStringObj("uplevel 1 ::itcl::builtin::objectunknown ",
-	        -1);
-	Tcl_AppendToObj(bodyPtr, Tcl_GetString(ioPtr->namePtr), -1);
-	Tcl_AppendToObj(bodyPtr, " $args", -1);
-	Tcl_IncrRefCount(bodyPtr);
-        Itcl_NewProcMethod(interp, ioPtr->oPtr, NULL, NULL, ItclProcErrorProc, 
-	    (ItclMemberFunc *)ioPtr, namePtr, argumentPtr, bodyPtr, &pmPtr);
-	Tcl_DecrRefCount(namePtr);
-	Tcl_DecrRefCount(argumentPtr);
-	Tcl_DecrRefCount(bodyPtr);
+	/*
+	 * This is an inelegant hack, left behind until the need for it
+	 * can be eliminated by getting the inheritance tree right.
+	 */
+
+        if (iclsPtr->flags
+		& (ITCL_ECLASS|ITCL_TYPE|ITCL_WIDGET|ITCL_WIDGETADAPTOR)) {
+	    Tcl_NewInstanceMethod(interp, ioPtr->oPtr,
+		    Tcl_NewStringObj("unknown", -1), 0,
+		    &itclRootMethodType, NULL);
+	}
+
         if (iclsPtr->flags & (ITCL_TYPE|ITCL_WIDGETADAPTOR)) {
             Tcl_Obj *objPtr = Tcl_NewObj();
             Tcl_GetCommandFullName(interp, ioPtr->accessCmd, objPtr);
@@ -2855,11 +2845,6 @@ ItclFreeObject(
     Tcl_DeleteHashTable(&ioPtr->objectMethodVariables);
     Tcl_DeleteHashTable(&ioPtr->objectDelegatedOptions);
     Tcl_DeleteHashTable(&ioPtr->objectDelegatedFunctions);
-    hPtr = Tcl_FindHashEntry(&ioPtr->infoPtr->objectNames,
-            (char *)ioPtr->namePtr);
-    if (hPtr != NULL) {
-        Tcl_DeleteHashEntry(hPtr);
-    }
     Tcl_DecrRefCount(ioPtr->namePtr);
     Tcl_DecrRefCount(ioPtr->origNamePtr);
     if (ioPtr->createNamePtr != NULL) {

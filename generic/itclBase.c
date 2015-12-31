@@ -135,6 +135,38 @@ static ItclCmdsInfo itclCmds [] = {
 #ifdef ITCL_DEBUG_C_INTERFACE
 extern void RegisterDebugCFunctions( Tcl_Interp * interp);
 #endif
+
+static const Tcl_ObjectMetadataType objMDT = {
+    TCL_OO_METADATA_VERSION_CURRENT,
+    "ItclObject",
+    ItclDeleteObjectMetadata,	/* Not really used yet */
+    NULL
+};
+
+static Tcl_MethodCallProc RootCallProc;
+
+const Tcl_MethodType itclRootMethodType = {
+    TCL_OO_METHOD_VERSION_CURRENT,
+    "itcl root method",
+    RootCallProc,
+    NULL,
+    NULL
+};
+
+static int
+RootCallProc(
+    ClientData clientData,
+    Tcl_Interp *interp,
+    Tcl_ObjectContext context,
+    int objc,
+    Tcl_Obj *const *objv)
+{
+    Tcl_Object oPtr = Tcl_ObjectContextObject(context);
+
+    ItclObject *ioPtr = Tcl_ObjectGetMetadata(oPtr, &objMDT);
+
+    return ItclUnknownGuts(ioPtr, interp, objc+1, objv-1);
+}
 
 /*
  * ------------------------------------------------------------------------
@@ -180,7 +212,8 @@ Initialize (
     char *res_option;
     int opt;
     int isNew;
-    Tcl_Object clazzObjectPtr;
+    Tcl_Object clazzObjectPtr, root;
+    Tcl_Obj *objPtr;
 
     if (Tcl_InitStubs(interp, "8.6", 0) == NULL) {
         return TCL_ERROR;
@@ -248,15 +281,11 @@ Initialize (
     infoPtr->class_meta_type->name = "ItclClass";
     infoPtr->class_meta_type->deleteProc = ItclDeleteClassMetadata;
     infoPtr->class_meta_type->cloneProc = NULL;
-    infoPtr->object_meta_type = (Tcl_ObjectMetadataType *)ckalloc(
-            sizeof(Tcl_ObjectMetadataType));
-    infoPtr->object_meta_type->version = TCL_OO_METADATA_VERSION_CURRENT;
-    infoPtr->object_meta_type->name = "ItclObject";
-    infoPtr->object_meta_type->deleteProc = ItclDeleteObjectMetadata;
-    infoPtr->object_meta_type->cloneProc = NULL;
+
+    infoPtr->object_meta_type = &objMDT;
+
     Tcl_InitHashTable(&infoPtr->objects, TCL_ONE_WORD_KEYS);
     Tcl_InitHashTable(&infoPtr->objectCmds, TCL_ONE_WORD_KEYS);
-    Tcl_InitObjHashTable(&infoPtr->objectNames);
     Tcl_InitHashTable(&infoPtr->classes, TCL_ONE_WORD_KEYS);
     Tcl_InitObjHashTable(&infoPtr->nameClasses);
     Tcl_InitHashTable(&infoPtr->namespaceClasses, TCL_ONE_WORD_KEYS);
@@ -325,6 +354,15 @@ Initialize (
 #ifdef NEW_PROTO_RESOLVER
     ItclVarsAndCommandResolveInit(interp);
 #endif
+
+    objPtr = Tcl_NewStringObj("::oo::class", -1);
+    root = Tcl_NewObjectInstance(interp, Tcl_GetObjectAsClass(
+	    Tcl_GetObjectFromObj(interp, objPtr)), "::itcl::Root",
+	    NULL, 0, NULL, 0);
+    Tcl_DecrRefCount(objPtr);
+
+    Tcl_NewMethod(interp, Tcl_GetObjectAsClass(root),
+	    Tcl_NewStringObj("unknown", -1), 0, &itclRootMethodType, NULL);
 
     /* first create the Itcl base class as root of itcl classes */
     if (Tcl_EvalEx(interp, clazzClassScript, -1, 0) != TCL_OK) {
@@ -802,7 +840,7 @@ ItclFinishCmd(
     /* cleanup ensemble info */
     ItclFinishEnsemble(infoPtr);
 
-    ckfree((char *)infoPtr->object_meta_type);
+//    ckfree((char *)infoPtr->object_meta_type);
     ckfree((char *)infoPtr->class_meta_type);
 
     Itcl_DeleteStack(&infoPtr->clsStack);
