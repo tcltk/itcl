@@ -646,7 +646,6 @@ ItclClassBaseCmd(
 {
     Tcl_Obj *argumentPtr;
     Tcl_Obj *bodyPtr;
-    Tcl_CmdInfo cmdInfo;
     FOREACH_HASH_DECLS;
     Tcl_HashEntry *hPtr2;
     Tcl_Namespace *parserNs, *ooNs;
@@ -657,7 +656,6 @@ ItclClassBaseCmd(
     char *className;
     int isNewEntry;
     int result;
-    int result2;
     int noCleanup;
     ItclMemberFunc *imPtr;
 
@@ -944,12 +942,6 @@ ItclClassBaseCmd(
 		        Tcl_GetString(imPtr->codePtr->bodyPtr), -1);
                 }
 	        Tcl_AppendToObj(bodyPtr, " {*}$args]", -1);
-	    }
-	    /* fix for SF bug #257 check if TclOO is still available! */
-	    result2 = Tcl_GetCommandInfo(interp, "::oo::class", &cmdInfo);
-	    if (result2 == 0) {
-              Tcl_AppendResult(interp, " missing ::oo::class command!", NULL);
-	      return TCL_ERROR;
 	    }
 	    imPtr->tmPtr = (ClientData)Itcl_NewProcClassMethod(interp,
 	        iclsPtr->clsPtr, ItclCheckCallMethod, ItclAfterCallMethod,
