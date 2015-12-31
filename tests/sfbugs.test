@@ -438,6 +438,25 @@ test sfbug-261 { SF bug #261 } -setup {
     itcl::delete class A
 } -result hello
 
+test sfbug-265.1 { SF bug #265 } -setup {
+    itcl::class C {}
+} -body {
+    namespace eval A {C c}
+    namespace eval B {C c}
+} -cleanup {
+    itcl::delete class C
+} -result c
+test sfbug-265.2 { SF bug #265 } -setup {
+    itcl::class C {}
+    itcl::class B::C {}
+} -body {
+    C ::A::B
+    B::C ::A
+} -cleanup {
+    itcl::delete class B::C
+    itcl::delete class C
+} -result ::A
+
 test sfbug-268 { SF bug #268 } -setup {
     itcl::class C {
 	private variable v
