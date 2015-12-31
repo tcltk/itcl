@@ -58,12 +58,12 @@ static int ItclDestructBase(Tcl_Interp *interp, ItclObject *contextObj,
         ItclClass *contextClass, int flags);
 
 static int ItclInitObjectVariables(Tcl_Interp *interp, ItclObject *ioPtr,
-        ItclClass *iclsPtr, const char *name);
+        ItclClass *iclsPtr);
 static int ItclInitObjectCommands(Tcl_Interp *interp, ItclObject *ioPtr,
         ItclClass *iclsPtr, const char *name);
 static int ItclInitExtendedClassOptions(Tcl_Interp *interp, ItclObject *ioPtr);
 static int ItclInitObjectOptions(Tcl_Interp *interp, ItclObject *ioPtr,
-        ItclClass *iclsPtr, const char *name);
+        ItclClass *iclsPtr);
 static const char * GetConstructorVar(Tcl_Interp *interp, ItclClass *iclsPtr,
         const char *varName);
 static ItclClass * GetClassFromClassName(Tcl_Interp *interp,
@@ -273,8 +273,8 @@ ItclCreateObject(
     Tcl_IncrRefCount(ioPtr->origNamePtr);
     Tcl_DStringInit(&buffer);
     Tcl_DStringAppend(&buffer, ITCL_VARIABLES_NAMESPACE, -1);
-    Tcl_DStringAppend(&buffer, "::", 2);
-    Tcl_DStringAppend(&buffer, Tcl_GetString(ioPtr->namePtr), -1);
+    Tcl_DStringAppend(&buffer,
+	    (Tcl_GetObjectNamespace(ioPtr->oPtr))->fullName, -1);
     ioPtr->varNsNamePtr = Tcl_NewStringObj(Tcl_DStringValue(&buffer), -1);
     Tcl_IncrRefCount(ioPtr->varNsNamePtr);
     Tcl_DStringFree(&buffer);
@@ -300,7 +300,7 @@ ItclCreateObject(
      * and set all the init values for variables
      */
 
-    if (ItclInitObjectVariables(interp, ioPtr, iclsPtr, name) != TCL_OK) {
+    if (ItclInitObjectVariables(interp, ioPtr, iclsPtr) != TCL_OK) {
 	ioPtr->hadConstructorError = 11;    
 	result = TCL_ERROR;
         goto errorReturn;
@@ -316,7 +316,7 @@ ItclCreateObject(
 	if (iclsPtr->flags & (ITCL_ECLASS|ITCL_TYPE|ITCL_WIDGET|
 	        ITCL_WIDGETADAPTOR)) {
             ItclInitExtendedClassOptions(interp, ioPtr);
-            if (ItclInitObjectOptions(interp, ioPtr, iclsPtr, name) != TCL_OK) {
+            if (ItclInitObjectOptions(interp, ioPtr, iclsPtr) != TCL_OK) {
 	        Tcl_AppendResult(interp, "error in ItclInitObjectOptions",
 		        NULL);
 	        ioPtr->hadConstructorError = 13;    
@@ -517,7 +517,7 @@ ItclCreateObject(
 
     if (iclsPtr->flags & ITCL_ECLASS) {
         ItclInitExtendedClassOptions(interp, ioPtr);
-        if (ItclInitObjectOptions(interp, ioPtr, iclsPtr, name) != TCL_OK) {
+        if (ItclInitObjectOptions(interp, ioPtr, iclsPtr) != TCL_OK) {
                 Tcl_AppendResult(interp, "error in ItclInitObjectOptions",
 	        NULL);
             result = TCL_ERROR;
@@ -812,8 +812,7 @@ static int
 ItclInitObjectVariables(
    Tcl_Interp *interp,
    ItclObject *ioPtr,
-   ItclClass *iclsPtr,
-   const char *name)
+   ItclClass *iclsPtr)
 {
     Tcl_DString buffer;
     Tcl_DString buffer2;
@@ -839,7 +838,7 @@ ItclInitObjectVariables(
     ivPtr = NULL;
     /*
      * create all the variables for each class in the
-     * ::itcl::variables::<object>::<class> namespace as an
+     * ::itcl::variables::<object namespace>::<class> namespace as an
      * undefined variable using the Tcl "variable xx" command
      */
     itclOptionsIsSet = 0;
@@ -850,10 +849,8 @@ ItclInitObjectVariables(
     while (iclsPtr2 != NULL) {
 	Tcl_DStringInit(&buffer);
 	Tcl_DStringAppend(&buffer, ITCL_VARIABLES_NAMESPACE, -1);
-	if ((name[0] != ':') && (name[1] != ':')) {
-             Tcl_DStringAppend(&buffer, "::", 2);
-	}
-	Tcl_DStringAppend(&buffer, name, -1);
+	Tcl_DStringAppend(&buffer,
+		(Tcl_GetObjectNamespace(ioPtr->oPtr))->fullName, -1);
 	Tcl_DStringAppend(&buffer, iclsPtr2->nsPtr->fullName, -1);
 	varNsPtr = Tcl_FindNamespace(interp, Tcl_DStringValue(&buffer),
 	        NULL, 0);
@@ -875,10 +872,8 @@ ItclInitObjectVariables(
 		itclOptionsIsSet = 1;
                 Tcl_DStringInit(&buffer2);
 	        Tcl_DStringAppend(&buffer2, ITCL_VARIABLES_NAMESPACE, -1);
-	        if ((name[0] != ':') && (name[1] != ':')) {
-                     Tcl_DStringAppend(&buffer2, "::", 2);
-	        }
-	        Tcl_DStringAppend(&buffer2, name, -1);
+		Tcl_DStringAppend(&buffer,
+			(Tcl_GetObjectNamespace(ioPtr->oPtr))->fullName, -1);
 	        varNsPtr2 = Tcl_FindNamespace(interp,
 		        Tcl_DStringValue(&buffer2), NULL, 0);
 	        if (varNsPtr2 == NULL) {
@@ -1158,8 +1153,7 @@ int
 ItclInitObjectOptions(
    Tcl_Interp *interp,
    ItclObject *ioPtr,
-   ItclClass *iclsPtr,
-   const char *name)
+   ItclClass *iclsPtr)
 {
     Tcl_DString buffer;
     Tcl_HashEntry *hPtr;
@@ -1187,10 +1181,8 @@ ItclInitObjectOptions(
 		Tcl_SetHashValue(hPtr2, ioptPtr);
                 Tcl_DStringInit(&buffer);
 	        Tcl_DStringAppend(&buffer, ITCL_VARIABLES_NAMESPACE, -1);
-	        if ((name[0] != ':') && (name[1] != ':')) {
-                     Tcl_DStringAppend(&buffer, "::", 2);
-	        }
-	        Tcl_DStringAppend(&buffer, name, -1);
+		Tcl_DStringAppend(&buffer,
+			(Tcl_GetObjectNamespace(ioPtr->oPtr)->fullName), -1);
 	        varNsPtr = Tcl_FindNamespace(interp,
 		        Tcl_DStringValue(&buffer), NULL, 0);
 	        if (varNsPtr == NULL) {
