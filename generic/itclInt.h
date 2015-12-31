@@ -142,7 +142,7 @@ typedef struct ItclObjectInfo {
     Tcl_HashTable objects;          /* list of all known objects key is
                                      * ioPtr */
     Tcl_HashTable objectCmds;       /* list of known objects using accessCmd */
-    Tcl_HashTable objectNames;      /* list of known objects using namePtr */
+    Tcl_HashTable unused5;          /* list of known objects using namePtr */
     Tcl_HashTable classes;          /* list of all known classes,
                                      * key is iclsPtr */
     Tcl_HashTable nameClasses;      /* maps from fullNamePtr to iclsPtr */
@@ -166,10 +166,10 @@ typedef struct ItclObjectInfo {
     Tcl_ObjectMetadataType *class_meta_type;
                                     /* type for getting the Itcl class info
                                      * from a TclOO Tcl_Object */
-    Tcl_ObjectMetadataType *object_meta_type;
+    const Tcl_ObjectMetadataType *object_meta_type;
                                     /* type for getting the Itcl object info
                                      * from a TclOO Tcl_Object */
-    Tcl_Object clazzObjectPtr;      /* the root object of Itcl */
+    Tcl_Object unused1;             /* the root object of Itcl */
     Tcl_Class clazzClassPtr;        /* the root class of Itcl */
     struct EnsembleInfo *ensembleInfo;
     struct ItclClass *currContextIclsPtr;
@@ -197,9 +197,9 @@ typedef struct ItclObjectInfo {
     int itclHullCmdsInitted;        /* set to 1 if itclHullCmds.tcl has already
                                      * been called
 				     */
-    Tcl_Obj *unknownNamePtr;
-    Tcl_Obj *unknownArgumentPtr;
-    Tcl_Obj *unknownBodyPtr;
+    Tcl_Obj *unused2;
+    Tcl_Obj *unused3;
+    Tcl_Obj *unused4;
     Tcl_Obj *infoVarsPtr;
     Tcl_Obj *infoVars3Ptr;
     Tcl_Obj *infoVars4Ptr;
@@ -847,6 +847,11 @@ MODULE_SCOPE Tcl_ObjCmdProc Itcl_AddDelegatedFunctionCmd;
 MODULE_SCOPE Tcl_ObjCmdProc Itcl_SetComponentCmd;
 MODULE_SCOPE Tcl_ObjCmdProc Itcl_ClassHullTypeCmd;
 MODULE_SCOPE Tcl_ObjCmdProc Itcl_ClassWidgetClassCmd;
+
+MODULE_SCOPE const Tcl_MethodType itclRootMethodType;
+
+MODULE_SCOPE int ItclUnknownGuts(ItclObject *ioPtr, Tcl_Interp *interp,
+	int objc, Tcl_Obj *const objv[]);
 
 #include "itcl2TclOO.h"
 #ifdef NEW_PROTO_RESOLVER

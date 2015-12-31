@@ -407,7 +407,6 @@ Itcl_CreateClass(
     iclsPtr->oPtr = oPtr;
     ItclPreserveClass(iclsPtr);
     Tcl_ObjectSetMetadata(iclsPtr->oPtr, infoPtr->class_meta_type, iclsPtr);
-    Tcl_ObjectSetMethodNameMapper(iclsPtr->oPtr, ItclMapMethodNameProc);
     cmd = Tcl_GetObjectCommand(iclsPtr->oPtr);
     Tcl_GetCommandInfoFromToken(cmd, &cmdInfo);
     cmdInfo.deleteProc = ItclDestroyClass;
@@ -1531,6 +1530,53 @@ Itcl_HandleClass(
     int objc,                /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
 {
+    if (objc > 3) {
+	const char *token = Tcl_GetString(objv[3]);
+	const char *nsEnd = NULL;
+	const char *pos = token;
+	const char *tail = pos;
+	int fq = 0;
+	int code = TCL_OK;
+	Tcl_Obj *nsObj, *fqObj;
+
+	while ((pos = strstr(pos, "::"))) {
+	    if (pos == token) {
+		fq = 1;
+		nsEnd = token;
+	    } else if (pos[-1] != ':') {
+		nsEnd = pos - 1;
+	    }
+	    tail = pos + 2; pos++;
+	}
+
+	if (fq) {
+	    nsObj = Tcl_NewStringObj(token, nsEnd-token);
+	} else {
+	    Tcl_Namespace *nsPtr = Tcl_GetCurrentNamespace(interp);
+
+	    nsObj = Tcl_NewStringObj(nsPtr->fullName, -1);
+	    if (nsEnd) {
+		Tcl_AppendToObj(nsObj, "::", 2);
+		Tcl_AppendToObj(nsObj, token, nsEnd-token);
+	    }
+	}
+
+	fqObj = Tcl_DuplicateObj(nsObj);
+	Tcl_AppendToObj(fqObj, "::", 2);
+	Tcl_AppendToObj(fqObj, tail, -1);
+
+	if (Tcl_GetCommandFromObj(interp, fqObj)) {
+	    Tcl_AppendResult(interp, "command \"", tail,
+		    "\" already exists in namespace \"", Tcl_GetString(nsObj),
+		    "\"", NULL);
+	    code = TCL_ERROR;
+	}
+	Tcl_DecrRefCount(fqObj);
+	Tcl_DecrRefCount(nsObj);
+	if (code != TCL_OK) {
+	    return code;
+	}
+    }
     return ItclClassCreateObject(clientData, interp, objc, objv);
 }
 

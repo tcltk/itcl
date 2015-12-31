@@ -726,7 +726,6 @@ ItclClassBaseCmd(
 {
     Tcl_Obj *argumentPtr;
     Tcl_Obj *bodyPtr;
-    Tcl_CmdInfo cmdInfo;
     FOREACH_HASH_DECLS;
     Tcl_HashEntry *hPtr2;
     Tcl_Namespace *parserNs, *ooNs;
@@ -737,7 +736,6 @@ ItclClassBaseCmd(
     char *className;
     int isNewEntry;
     int result;
-    int result2;
     int noCleanup;
     ItclMemberFunc *imPtr;
 
@@ -841,6 +839,26 @@ ItclClassBaseCmd(
         goto errorReturn;
     }
 
+    if (Itcl_FirstListElem(&iclsPtr->bases) == NULL) {
+	/* No [inherit]. Use default inheritance root. */
+	Tcl_Obj *cmdPtr = Tcl_NewListObj(4, NULL);
+
+	Tcl_ListObjAppendElement(NULL, cmdPtr,
+		Tcl_NewStringObj("::oo::define", -1));
+	Tcl_ListObjAppendElement(NULL, cmdPtr, iclsPtr->fullNamePtr);
+	Tcl_ListObjAppendElement(NULL, cmdPtr,
+		Tcl_NewStringObj("superclass", -1));
+	Tcl_ListObjAppendElement(NULL, cmdPtr,
+		Tcl_NewStringObj("::itcl::Root", -1));
+
+	Tcl_IncrRefCount(cmdPtr);
+	result = Tcl_EvalObj(interp, cmdPtr);
+	Tcl_DecrRefCount(cmdPtr);
+	if (result == TCL_ERROR) {
+	    goto errorReturn;
+	}
+    }
+
     /*
      *  At this point, parsing of the class definition has succeeded.
      *  Add built-in methods such as "configure" and "cget"--as long
@@ -861,19 +879,6 @@ ItclClassBaseCmd(
     	    ClientData pmPtr;
 	    argumentPtr = imPtr->codePtr->argumentPtr;
 	    bodyPtr = imPtr->codePtr->bodyPtr;
-
-	    /*
-	     * fix for SF bug #257 check if TclOO is still available!
-	     * TODO: Is there some better way to do this from C?
-	     * SF bug 257 appears to demonstrate trouble when
-	     * iclsPtr->clsPtr == NULL.  What causes that?
-	     */
-
-	    result2 = Tcl_GetCommandInfo(interp, "::oo::class", &cmdInfo);
-	    if (result2 == 0) {
-              Tcl_AppendResult(interp, " missing ::oo::class command!", NULL);
-	      return TCL_ERROR;
-	    }
 
 if (imPtr->codePtr->flags & ITCL_IMPLEMENT_OBJCMD) {
     /* Implementation of this member is coded in C expecting Tcl_Obj */
