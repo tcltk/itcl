@@ -1542,6 +1542,7 @@ Itcl_HandleClass(
 	while ((pos = strstr(pos, "::"))) {
 	    if (pos == token) {
 		fq = 1;
+		nsEnd = token;
 	    } else if (pos[-1] != ':') {
 		nsEnd = pos - 1;
 	    }
