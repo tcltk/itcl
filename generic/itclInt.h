@@ -169,7 +169,7 @@ typedef struct ItclObjectInfo {
     Tcl_ObjectMetadataType *object_meta_type;
                                     /* type for getting the Itcl object info
                                      * from a TclOO Tcl_Object */
-    Tcl_Object clazzObjectPtr;      /* the root object of Itcl */
+    Tcl_Object unused1;             /* the root object of Itcl */
     Tcl_Class clazzClassPtr;        /* the root class of Itcl */
     struct EnsembleInfo *ensembleInfo;
     struct ItclClass *currContextIclsPtr;
@@ -197,9 +197,9 @@ typedef struct ItclObjectInfo {
     int itclHullCmdsInitted;        /* set to 1 if itclHullCmds.tcl has already
                                      * been called
 				     */
-    Tcl_Obj *unknownNamePtr;
-    Tcl_Obj *unknownArgumentPtr;
-    Tcl_Obj *unknownBodyPtr;
+    Tcl_Obj *unused2;
+    Tcl_Obj *unused3;
+    Tcl_Obj *unused4;
     Tcl_Obj *infoVarsPtr;
     Tcl_Obj *infoVars3Ptr;
     Tcl_Obj *infoVars4Ptr;

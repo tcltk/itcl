@@ -1205,7 +1205,7 @@ CallCreateObject(
             /*isProcCallFrame*/0) != TCL_OK) {
         return TCL_ERROR;
     }
-    result = Itcl_HandleClass(iclsPtr->infoPtr, interp, objc, objv);
+    result = ItclClassCreateObject(iclsPtr->infoPtr, interp, objc, objv);
     Itcl_PopCallFrame(interp);
     Tcl_DecrRefCount(objv[2]);
     Tcl_DecrRefCount(objv[1]);

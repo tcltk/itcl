@@ -93,30 +93,13 @@ static const char safeInitScript[] =
 "}";
 
 static const char *clazzClassScript =
-"set itclClass [::oo::class create ::itcl::clazz]\n"
-"::oo::define $itclClass superclass ::oo::class";
-
-
-static const char *clazzUnknownBody =
-"    set called [lindex [::info level 0] 0]\n"
-"    set myObj [uplevel 1 [list namespace which $called]]\n"
-"    if {[::itcl::is class $myObj]} {\n"
-"	 if {![string match ::* $m]} {\n"
-"	    set ns [uplevel 1 {namespace current}]\n"
-"	    set fq ${ns}::$m\n"
-"	 } else {\n"
-"	    set fq $m\n"
-"	    set ns [namespace qualifiers $fq]\n"
-"	 }\n"
-"	 if {[namespace which $fq] ne {}} {\n"
-"	    set qual [namespace qualifiers $fq]\n"
-"	    set tail [namespace tail $fq]\n"
-"	    if {$qual eq {}} {set qual ::}\n"
-"	    return -code error \"command \\\"$tail\\\" already exists in namespace \\\"$qual\\\"\"\n"
-"	 }\n"
-"        tailcall ::itcl::parser::handleClass $called [::oo::Helpers::self] $m {*}$args\n"
-"    }\n"
-"    next $m {*}$args\n";
+"::oo::class create ::itcl::clazz {\n"
+"  superclass ::oo::class\n"
+"  method unknown args {\n"
+"    tailcall ::itcl::parser::handleClass [lindex [info level 0] 0] [self] {*}$args\n"
+"  }\n"
+"  unexport create new unknown\n"
+"}";
 
 #define ITCL_IS_ENSEMBLE 0x1
 
@@ -152,35 +135,6 @@ static ItclCmdsInfo itclCmds [] = {
 #ifdef ITCL_DEBUG_C_INTERFACE
 extern void RegisterDebugCFunctions( Tcl_Interp * interp);
 #endif
-
-/*
- * ------------------------------------------------------------------------
- *  AddClassUnknowMethod()
- *
- * ------------------------------------------------------------------------
- */
-static int
-AddClassUnknowMethod(
-    Tcl_Interp *interp,
-    ItclObjectInfo *infoPtr,
-    Tcl_Class clsPtr)
-{
-    ClientData tmPtr, pmPtr;
-
-    infoPtr->unknownNamePtr = Tcl_NewStringObj("unknown", -1);
-    Tcl_IncrRefCount(infoPtr->unknownNamePtr);
-    infoPtr->unknownArgumentPtr = Tcl_NewStringObj("m args", -1);
-    Tcl_IncrRefCount(infoPtr->unknownArgumentPtr);
-    infoPtr->unknownBodyPtr = Tcl_NewStringObj(clazzUnknownBody, -1);
-    Tcl_IncrRefCount(infoPtr->unknownBodyPtr);
-    tmPtr = (ClientData)Itcl_NewProcClassMethod(interp,
-        clsPtr, NULL, NULL, NULL, NULL, infoPtr->unknownNamePtr,
-	infoPtr->unknownArgumentPtr, infoPtr->unknownBodyPtr, &pmPtr);
-    if (tmPtr == NULL) {
-        Tcl_Panic("cannot add class method unknown");
-    }
-    return TCL_OK;
-}
 
 /*
  * ------------------------------------------------------------------------
@@ -221,12 +175,12 @@ Initialize (
     Tcl_Namespace *nsPtr;
     Tcl_Namespace *itclNs;
     Tcl_HashEntry *hPtr;
-    Tcl_Obj *objPtr;
     ItclObjectInfo *infoPtr;
     const char * ret;
     char *res_option;
     int opt;
     int isNew;
+    Tcl_Object clazzObjectPtr;
 
     if (Tcl_InitStubs(interp, "8.6", 0) == NULL) {
         return TCL_ERROR;
@@ -376,23 +330,22 @@ Initialize (
     if (Tcl_EvalEx(interp, clazzClassScript, -1, 0) != TCL_OK) {
         Tcl_Panic("cannot create Itcl root class ::itcl::clazz");
     }
-    objPtr = Tcl_NewStringObj("::itcl::clazz", -1);
-    infoPtr->clazzObjectPtr = Tcl_GetObjectFromObj(interp, objPtr);
+    clazzObjectPtr = Tcl_GetObjectFromObj(interp, Tcl_GetObjResult(interp));
 
-    /* work around for SF bug #254 needed because of problem in TclOO 1.0.2 !! */
-    if (Tcl_PkgPresent(interp, "TclOO", "1.0.2", 1) != NULL) {
-	Itcl_IncrObjectRefCount(infoPtr->clazzObjectPtr);
-    }
 
-    Tcl_DecrRefCount(objPtr);
-    if (infoPtr->clazzObjectPtr == NULL) {
+    if (clazzObjectPtr == NULL) {
         Tcl_AppendResult(interp,
                 "ITCL: cannot get Object for ::itcl::clazz for class \"",
                 "::itcl::clazz", "\"", NULL);
         return TCL_ERROR;
     }
-    infoPtr->clazzClassPtr = Tcl_GetObjectAsClass(infoPtr->clazzObjectPtr);
-    AddClassUnknowMethod(interp, infoPtr, infoPtr->clazzClassPtr);
+
+    /* work around for SF bug #254 needed because of problem in TclOO 1.0.2 !! */
+    if (Tcl_PkgPresent(interp, "TclOO", "1.0.2", 1) != NULL) {
+	Itcl_IncrObjectRefCount(clazzObjectPtr);
+    }
+
+    infoPtr->clazzClassPtr = Tcl_GetObjectAsClass(clazzObjectPtr);
 
     /*
      *  Initialize the ensemble package first, since we need this
@@ -845,16 +798,6 @@ ItclFinishCmd(
     nsPtr = Tcl_FindNamespace(infoPtr->interp, "::itcl", NULL, 0);
     if (nsPtr != NULL) {
         Tcl_DeleteNamespace(nsPtr);
-    }
-    /* remove the unknown method from top class */
-    if (infoPtr->unknownNamePtr != NULL) {
-        Tcl_DecrRefCount(infoPtr->unknownNamePtr);
-    }
-    if (infoPtr->unknownArgumentPtr != NULL) {
-        Tcl_DecrRefCount(infoPtr->unknownArgumentPtr);
-    }
-    if (infoPtr->unknownBodyPtr != NULL) {
-        Tcl_DecrRefCount(infoPtr->unknownBodyPtr);
     }
 
     /* cleanup ensemble info */
