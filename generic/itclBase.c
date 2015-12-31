@@ -591,16 +591,15 @@ ItclCheckSetItclHull(
 	        "<objectName> <value>", NULL);
 	return TCL_ERROR;
     }
+
+    /* 
+     * This is an internal command, and is never called with an
+     * objectName value other than the empty list. Check that with
+     * an assertion so alternative handling can be removed.
+     */
+    assert( strlen(Tcl_GetString(objv[1])) == 0);
     infoPtr = (ItclObjectInfo *)clientData;
-    if (strlen(Tcl_GetString(objv[1])) > 0) {
-        hPtr = Tcl_FindHashEntry(&infoPtr->objectNames, (char *)objv[1]);
-        if (hPtr == NULL) {
-            Tcl_AppendResult(interp, "ItclCheckSetItclHull cannot find object\"",
-	            Tcl_GetString(objv[1]), "\"", NULL);
-	    return TCL_ERROR;
-        }
-        ioPtr = Tcl_GetHashValue(hPtr);
-    } else {
+    {
         ioPtr = infoPtr->currIoPtr;
 	if (ioPtr == NULL) {
             Tcl_AppendResult(interp, "ItclCheckSetItclHull cannot find object",
