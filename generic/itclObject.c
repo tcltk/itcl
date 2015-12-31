@@ -1469,8 +1469,8 @@ FinalizeDeleteObject(
     int result)
 {
     ItclObject *contextIoPtr = data[0];
-    ItclDeleteObjectVariablesNamespace(interp, contextIoPtr);
     if (result == TCL_OK) {
+	ItclDeleteObjectVariablesNamespace(interp, contextIoPtr);
         Tcl_ResetResult(interp);
     }
 
