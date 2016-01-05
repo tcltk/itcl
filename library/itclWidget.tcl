@@ -128,7 +128,7 @@ proc deletehull {newName oldName what} {
     }
 }
 
-proc hullandoptionsinstall {objectName className widgetClass hulltype args} {
+proc hullandoptionsinstall {objectName className widgetClass hulltype varNsName args} {
     if {$hulltype eq ""} {
         set hulltype frame
     }
@@ -149,6 +149,8 @@ proc hullandoptionsinstall {objectName className widgetClass hulltype args} {
         set widgetClass $className
 	set widgetClass [string totitle $widgetClass]
     }
+    # Ugly bypass to workaound interfaces.
+    set ::itcl::internal::varNsName $varNsName
     set cmd "set win $objectName; ::itcl::builtin::installhull using $hulltype -class $widgetClass $args"
     uplevel 2 $cmd
 }
@@ -170,13 +172,18 @@ proc installhull {args} {
 	}
 	1	{
 		set widgetName [lindex $args 0]
-		set varNsName ::itcl::internal::variables::$widgetName
+		set varNsName ::itcl::internal::variables[info object namespace $widgetName]
 	}
 	default	{
 		upvar win win
 		set widgetName $win
 
-		set varNsName ::itcl::internal::variables::$widgetName
+		if {[info exists ::itcl::internal::varNsName]} {
+		    set varNsName $::itcl::internal::varNsName
+		    unset ::itcl::internal::varNsName
+		} else {
+		    set varNsName ::itcl::internal::variables[info object namespace $widgetName]
+		}
 	        set widgetType [lindex $args 1]
 		incr replace
 		if {[llength $args] > 3 && [lindex $args 2] eq "-class"} {
