@@ -337,7 +337,7 @@ ItclCreateObject(
     saveCurrIoPtr = infoPtr->currIoPtr;
     infoPtr->currIoPtr = ioPtr;
     if (iclsPtr->flags & ITCL_WIDGET) {
-        newObjv = (Tcl_Obj **)ckalloc(sizeof(Tcl_Obj *) * (objc + 6));
+        newObjv = (Tcl_Obj **)ckalloc(sizeof(Tcl_Obj *) * (objc + 5));
         newObjv[0] = Tcl_NewStringObj(
                 "::itcl::internal::commands::hullandoptionsinstall", -1);
         newObjv[1] = ioPtr->namePtr;
@@ -356,16 +356,13 @@ ItclCreateObject(
             newObjv[4] = Tcl_NewStringObj("", -1);
         }
         Tcl_IncrRefCount(newObjv[4]);
-	newObjv[5] = ioPtr->varNsNamePtr;
-        Tcl_IncrRefCount(newObjv[5]);
-        memcpy(newObjv + 6, objv, (objc * sizeof(Tcl_Obj *)));
-        result = Tcl_EvalObjv(interp, objc+6, newObjv, 0);
+        memcpy(newObjv + 5, objv, (objc * sizeof(Tcl_Obj *)));
+        result = Tcl_EvalObjv(interp, objc+5, newObjv, 0);
         Tcl_DecrRefCount(newObjv[0]);
         Tcl_DecrRefCount(newObjv[1]);
         Tcl_DecrRefCount(newObjv[2]);
         Tcl_DecrRefCount(newObjv[3]);
         Tcl_DecrRefCount(newObjv[4]);
-        Tcl_DecrRefCount(newObjv[5]);
         ckfree((char *)newObjv);
         if (result != TCL_OK) {
 	    ioPtr->hadConstructorError = 15;    
@@ -1346,6 +1343,12 @@ ItclInitObjectMethodVariables(
         iclsPtr2 = Itcl_AdvanceHierIter(&hier);
     }
     Itcl_DeleteHierIter(&hier);
+
+    if (iclsPtr->flags & (ITCL_WIDGET|ITCL_WIDGETADAPTOR)) {
+	Tcl_SetVar2Ex(interp, "::itcl::internal::varNsName", name,
+		ioPtr->varNsNamePtr, 0);
+    }
+
     return TCL_OK;
 }
 
