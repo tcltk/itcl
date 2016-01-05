@@ -92,9 +92,10 @@ interp alias {} type {} ::itcl::type
 interp alias {} widgetadaptor {} ::itcl::widgetadaptor
 
 # Marks tests which are only for Tk.
-tcltest::testConstraint tk [info exists tk_version]
+tcltest::testConstraint tk [expr {![catch {package require Tk}]}]
 
 ::tcltest::loadTestedCommands
+package require itcl
 
 #-----------------------------------------------------------------------
 # Widgetadaptors
