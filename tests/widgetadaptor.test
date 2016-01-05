@@ -326,6 +326,21 @@ test widgetadaptor-1.11 {user-defined destructors are called
     mylabel destroy
 } -result {{created ::itcl::internal::widgets::hull1.label} {destroyed ::itcl::internal::widgets::hull1.label}}
 
+test widgetadaptor-1.12 {Constructor errors tolerated
+} -constraints {
+    tk
+} -body {
+    widgetadaptor mylabel {
+        constructor {args} {error foo}
+        destructor {}
+    }
+
+    # Without bug fix this will crash
+    mylabel .label
+} -cleanup {
+    mylabel destroy
+} -returnCodes error -result foo
+
 test widgetadaptor-1.14 {hull can be repeatedly renamed
 } -constraints {
     tk
