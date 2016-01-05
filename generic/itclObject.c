@@ -417,6 +417,8 @@ ItclCreateObject(
 
 	Tcl_GetCommandFullName(interp, Tcl_GetObjectCommand(ioPtr->oPtr), tmp);
 	Itcl_RenameCommand(interp, Tcl_GetString(tmp), objName);
+	Tcl_TraceCommand(interp, objName,
+            TCL_TRACE_RENAME|TCL_TRACE_DELETE, ObjectRenamedTrace, ioPtr);
 	Tcl_DecrRefCount(tmp);
     }
     Tcl_ObjectSetMethodNameMapper(ioPtr->oPtr, ItclMapMethodNameProc);
@@ -434,8 +436,6 @@ ItclCreateObject(
     resolveInfoPtr->flags = ITCL_RESOLVE_OBJECT;
     resolveInfoPtr->ioPtr = ioPtr;
     ioPtr->resolvePtr->clientData = resolveInfoPtr;
-    Tcl_TraceCommand(interp, Tcl_GetString(ioPtr->namePtr),
-            TCL_TRACE_RENAME|TCL_TRACE_DELETE, ObjectRenamedTrace, ioPtr);
 
     Tcl_ObjectSetMetadata(ioPtr->oPtr, iclsPtr->infoPtr->object_meta_type,
             ioPtr);
