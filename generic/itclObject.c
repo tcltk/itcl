@@ -369,17 +369,6 @@ ItclCreateObject(
             goto errorReturn;
         }
     }
-    if (iclsPtr->flags & (ITCL_WIDGET|ITCL_WIDGETADAPTOR)) {
-        if (ItclInitObjectMethodVariables(interp, ioPtr, iclsPtr, name)
-	        != TCL_OK) {
-	    Tcl_AppendResult(interp,
-	            "error in ItclInitObjectMethodVariables", NULL);
-	    infoPtr->currIoPtr = saveCurrIoPtr;
-	    result = TCL_ERROR;
-	    ioPtr->hadConstructorError = 16;    
-            goto errorReturn;
-        }
-    }
     objName = name;
     if (iclsPtr->flags & ITCL_WIDGETADAPTOR) {
         /* use a temporary name here as widgetadaptors often hijack the
