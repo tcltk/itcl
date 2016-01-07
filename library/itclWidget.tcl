@@ -170,13 +170,13 @@ proc installhull {args} {
 	}
 	1	{
 		set widgetName [lindex $args 0]
-		set varNsName ::itcl::internal::variables::$widgetName
+		set varNsName $::itcl::internal::varNsName($widgetName)
 	}
 	default	{
 		upvar win win
 		set widgetName $win
 
-		set varNsName ::itcl::internal::variables::$widgetName
+		set varNsName $::itcl::internal::varNsName($widgetName)
 	        set widgetType [lindex $args 1]
 		incr replace
 		if {[llength $args] > 3 && [lindex $args 2] eq "-class"} {
