@@ -198,6 +198,7 @@ ItclCreateObject(
     Tcl_HashEntry *hPtr;
     Tcl_Obj **newObjv;
     Tcl_Obj *objPtr;
+    Tcl_Obj *saveNsNamePtr = NULL;
     ItclObjectInfo *infoPtr;
     ItclObject *saveCurrIoPtr;
     ItclObject *ioPtr;
@@ -332,6 +333,17 @@ ItclCreateObject(
 	    result = TCL_ERROR;
             goto errorReturn;
         }
+
+	if (iclsPtr->flags & (ITCL_WIDGET|ITCL_WIDGETADAPTOR)) {
+	    saveNsNamePtr = Tcl_GetVar2Ex(interp,
+		    "::itcl::internal::varNsName", name, 0);
+	    if (saveNsNamePtr) {
+		Tcl_IncrRefCount(saveNsNamePtr);
+	    }
+	    Tcl_SetVar2Ex(interp, "::itcl::internal::varNsName", name,
+		    ioPtr->varNsNamePtr, 0);
+	}
+
     }
 
     saveCurrIoPtr = infoPtr->currIoPtr;
@@ -539,6 +551,14 @@ ItclCreateObject(
     }
 
     if (iclsPtr->flags & ITCL_WIDGETADAPTOR) {
+
+	if (saveNsNamePtr) {
+	    Tcl_SetVar2Ex(interp, "::itcl::internal::varNsName", name,
+		    saveNsNamePtr, 0);
+	    Tcl_DecrRefCount(saveNsNamePtr);
+	    saveNsNamePtr = NULL;
+	}
+
         Itcl_RenameCommand(interp, objName, name);
         ioPtr->createNamePtr = NULL;
         Tcl_TraceCommand(interp, Tcl_GetString(ioPtr->namePtr),
@@ -679,6 +699,12 @@ errorReturn:
      *  Destroy the "constructed" table in the object data, since
      *  it is no longer needed.
      */
+	if (saveNsNamePtr) {
+	    Tcl_SetVar2Ex(interp, "::itcl::internal::varNsName", name,
+		    saveNsNamePtr, 0);
+	    Tcl_DecrRefCount(saveNsNamePtr);
+	    saveNsNamePtr = NULL;
+	}
     if (infoPtr != NULL) {
         infoPtr->lastIoPtr = ioPtr;
         infoPtr->currIoPtr = saveCurrIoPtr;
@@ -1343,12 +1369,6 @@ ItclInitObjectMethodVariables(
         iclsPtr2 = Itcl_AdvanceHierIter(&hier);
     }
     Itcl_DeleteHierIter(&hier);
-
-    if (iclsPtr->flags & (ITCL_WIDGET|ITCL_WIDGETADAPTOR)) {
-	Tcl_SetVar2Ex(interp, "::itcl::internal::varNsName", name,
-		ioPtr->varNsNamePtr, 0);
-    }
-
     return TCL_OK;
 }
 
