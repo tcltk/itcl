@@ -287,7 +287,7 @@ test typeclass-rename-1.2 {instances can be renamed} -body {
     concat $a $b
 } -cleanup {
     dog destroy
-} -match glob -result {{::itcl::builtin::callinstance ItclInst*} ::itcl::internal::variables::fido::dog fido ::fido {::itcl::builtin::callinstance ItclInst*} ::itcl::internal::variables::fido::dog fido ::spot}
+} -match glob -result {{::itcl::builtin::callinstance ItclInst*} ::itcl::internal::variables::*::dog fido ::fido {::itcl::builtin::callinstance ItclInst*} ::itcl::internal::variables::*::dog fido ::spot}
 
 test rename-1.3 {rename to "" deletes an instance} -body {
     type dog { }
@@ -316,16 +316,18 @@ test rename-1.5 {creating an object twice destroys the first instance} -body {
     }
 
     dog fido
-    set a [namespace children ::itcl::internal::variables::fido]
+    set ns [info object namespace fido]
+    set a [namespace children ::itcl::internal::variables$ns]
     dog fido
-    set b [namespace children ::itcl::internal::variables::fido]
+    set ns [info object namespace fido]
+    set b [namespace children ::itcl::internal::variables$ns]
     fido destroy
-    set c [namespace which ::itcl::internal::variables::fido]
+    set c [namespace which ::itcl::internal::variables$ns]
 
     list $a $b $c
 } -cleanup {
     dog destroy
-} -result {::itcl::internal::variables::fido::dog ::itcl::internal::variables::fido::dog {}}
+} -match glob -result {::itcl::internal::variables::*::dog ::itcl::internal::variables::*::dog {}}
 
 
 test typeclass-component-1.1 {component defines variable} -body {
@@ -497,13 +499,14 @@ test destroy-1.1 {destroy cleans up the instance} -body {
 
     set a [namespace children ::dog::]
     dog create spot
-    set b [namespace children ::itcl::internal::variables::spot]
+    set ns [info object namespace spot]
+    set b [namespace children ::itcl::internal::variables$ns]
     spot destroy
-    set c [namespace which ::itcl::internal::variables::spot]
+    set c [namespace which ::itcl::internal::variables$ns]
     list $a $b $c [info commands ::dog::spot]
 } -cleanup {
     dog destroy
-} -result {{} ::itcl::internal::variables::spot::dog {} {}}
+} -match glob -result {{} ::itcl::internal::variables::*::dog {} {}}
 
 test destroy-1.2 {incomplete objects are destroyed} -body {
     array unset ::dog::snit_ivars
