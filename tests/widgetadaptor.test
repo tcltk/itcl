@@ -426,18 +426,18 @@ test widgetadaptor-1.16 {snit::widgetadaptor as hull
     set b [.label cget -text]
     .label configure -text "More Text"
     set c [.label cget -text]
-    set d [namespace children ::itcl::internal::variables]
+    set d [lsort [namespace children ::itcl::internal::variables]]
 
     destroy .label
 
-    set e [namespace children ::itcl::internal::variables]
+    set e [lsort [namespace children ::itcl::internal::variables]]
 
     mylabel2 destroy
     mylabel destroy
 
     tkbide
     list $a $b $c $d $e
-} -result {{method2: method1} {Some Text} {More Text} {::itcl::internal::variables::mylabel2 ::itcl::internal::variables::.label ::itcl::internal::variables::mylabel} {::itcl::internal::variables::mylabel2 ::itcl::internal::variables::mylabel}}
+} -result {{method2: method1} {Some Text} {More Text} {::itcl::internal::variables::mylabel ::itcl::internal::variables::mylabel2 ::itcl::internal::variables::oo} {::itcl::internal::variables::mylabel ::itcl::internal::variables::mylabel2 ::itcl::internal::variables::oo}}
 
 test widgetadaptor-1.17 {snit::widgetadaptor as hull; use rename
 } -constraints {
@@ -470,18 +470,18 @@ test widgetadaptor-1.17 {snit::widgetadaptor as hull; use rename
     set b [.label cget -text]
     .label configure -text "More Text"
     set c [.label cget -text]
-    set d [namespace children ::itcl::internal::variables]
+    set d [lsort [namespace children ::itcl::internal::variables]]
 
     rename .label ""
 
-    set e [namespace children ::itcl::internal::variables]
+    set e [lsort [namespace children ::itcl::internal::variables]]
 
     mylabel2 destroy
     mylabel destroy
 
     tkbide
     list $a $b $c $d $e
-} -result {{method2: method1} {Some Text} {More Text} {::itcl::internal::variables::mylabel2 ::itcl::internal::variables::.label ::itcl::internal::variables::mylabel} {::itcl::internal::variables::mylabel2 ::itcl::internal::variables::mylabel}}
+} -result {{method2: method1} {Some Text} {More Text} {::itcl::internal::variables::mylabel ::itcl::internal::variables::mylabel2 ::itcl::internal::variables::oo} {::itcl::internal::variables::mylabel ::itcl::internal::variables::mylabel2 ::itcl::internal::variables::oo}}
 
 test widgetadaptor-1.19 {error in widgetadaptor constructor
 } -constraints {
