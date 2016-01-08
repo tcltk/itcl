@@ -1700,7 +1700,7 @@ ItclUnknownGuts(
             Tcl_AppendToObj(objPtr, iclsPtr->nsPtr->fullName, -1);
 #else
             Tcl_AppendToObj(objPtr,
-		    (Tcl_GetObjectNamespace(iclsPtr->oPtr)->fullName, -1);
+		    (Tcl_GetObjectNamespace(iclsPtr->oPtr))->fullName, -1);
 #endif
             Tcl_AppendToObj(objPtr, "::", -1);
             Tcl_AppendToObj(objPtr,
@@ -3018,7 +3018,7 @@ Itcl_BiInstallComponentCmd(
         Tcl_AppendToObj(objPtr, Tcl_GetString(contextIclsPtr->fullNamePtr), -1);
 #else
 	Tcl_AppendToObj(objPtr,
-		(Tcl_GetObjectNamespace(contextIclsPtr->oPtr)->fullName, -1);
+		(Tcl_GetObjectNamespace(contextIclsPtr->oPtr))->fullName, -1);
 #endif
         Tcl_AppendToObj(objPtr, "::", -1);
         Tcl_AppendToObj(objPtr, componentName, -1);
