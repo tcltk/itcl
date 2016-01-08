@@ -1106,8 +1106,8 @@ ItclInitObjectVariables(
                         Tcl_Obj *objPtr2;
 		        objPtr2 = Tcl_NewStringObj(ITCL_VARIABLES_NAMESPACE,
 			        -1);
-                        Tcl_AppendToObj(objPtr2,
-		                Tcl_GetString(ivPtr->iclsPtr->fullNamePtr), -1);
+			Tcl_AppendToObj(objPtr2, (Tcl_GetObjectNamespace(
+				ivPtr->iclsPtr->oPtr))->fullName, -1);
                         Tcl_AppendToObj(objPtr2, "::", -1);
                         Tcl_AppendToObj(objPtr2, varName, -1);
 			/* itcl_hull is traced in itclParse.c */
@@ -1850,8 +1850,8 @@ ItclGetInstanceVar(
         }
     }
     if (doAppend) {
-        Tcl_DStringAppend(&buffer,
-                Tcl_GetString(contextIclsPtr->fullNamePtr), -1);
+        Tcl_DStringAppend(&buffer, (Tcl_GetObjectNamespace(
+		contextIclsPtr->oPtr))->fullName, -1);
     }
     nsPtr = Tcl_FindNamespace(interp, Tcl_DStringValue(&buffer), NULL, 0);
     Tcl_DStringFree(&buffer);
@@ -1924,8 +1924,8 @@ ItclGetCommonInstanceVar(
         }
     }
     if (doAppend) {
-        Tcl_DStringAppend(&buffer,
-                Tcl_GetString(contextIclsPtr->fullNamePtr), -1);
+        Tcl_DStringAppend(&buffer, (Tcl_GetObjectNamespace(
+		contextIclsPtr->oPtr))->fullName, -1);
     }
     nsPtr = Tcl_FindNamespace(interp, Tcl_DStringValue(&buffer), NULL, 0);
     Tcl_DStringFree(&buffer);
@@ -2055,8 +2055,8 @@ ItclSetInstanceVar(
         }
     }
     if (doAppend) {
-        Tcl_DStringAppend(&buffer,
-                Tcl_GetString(contextIclsPtr->fullNamePtr), -1);
+        Tcl_DStringAppend(&buffer, (Tcl_GetObjectNamespace(
+		contextIclsPtr->oPtr))->fullName, -1);
     }
     nsPtr = Tcl_FindNamespace(interp, Tcl_DStringValue(&buffer), NULL, 0);
     Tcl_DStringFree(&buffer);
@@ -3442,7 +3442,8 @@ ExpandDelegateAs(
 			            Tcl_NewStringObj(cp, ep-cp-1));
 			}
                         objPtr = Tcl_NewStringObj(ITCL_VARIABLES_NAMESPACE, -1);
-                        Tcl_AppendToObj(objPtr, iclsPtr->nsPtr->fullName, -1);
+			Tcl_AppendToObj(objPtr, (Tcl_GetObjectNamespace(
+				iclsPtr->oPtr))->fullName, -1);
                         Tcl_AppendToObj(objPtr, "::", -1);
                         Tcl_AppendToObj(objPtr,
 			        Tcl_GetString(componentNamePtr), -1);
@@ -3742,7 +3743,8 @@ GetConstructorVar(
     if (ivPtr->flags & ITCL_COMMON) {
         /* look for a common variable */
         objPtr = Tcl_NewStringObj(ITCL_VARIABLES_NAMESPACE, -1);
-        Tcl_AppendToObj(objPtr, iclsPtr->nsPtr->fullName, -1);
+        Tcl_AppendToObj(objPtr, (Tcl_GetObjectNamespace(
+		iclsPtr->oPtr))->fullName, -1);
         Tcl_AppendToObj(objPtr, "::", -1);
         Tcl_AppendToObj(objPtr, varName, -1);
         val = Tcl_GetVar2(interp, Tcl_GetString(objPtr), NULL, 0);
@@ -3805,7 +3807,10 @@ DelegationInstall(
 	    ivPtr = idmPtr->icPtr->ivPtr;
             if (ivPtr->flags & ITCL_COMMON) {
 	        objPtr = Tcl_NewStringObj(ITCL_VARIABLES_NAMESPACE, -1);
+
 	        Tcl_AppendToObj(objPtr, ivPtr->iclsPtr->nsPtr->fullName, -1);
+	        Tcl_AppendToObj(objPtr, (Tcl_GetObjectNamespace(
+			ivPtr->iclsPtr->oPtr))->fullName, -1);
 	        Tcl_AppendToObj(objPtr, "::", -1);
 	        Tcl_AppendToObj(objPtr,
 		        Tcl_GetString(idmPtr->icPtr->namePtr), -1);

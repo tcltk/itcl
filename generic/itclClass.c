@@ -143,7 +143,7 @@ ClassCmdDeleteTrace(
     Tcl_DStringAppend(&buffer, Tcl_GetString(iclsPtr->fullNamePtr), -1);
 #else
     Tcl_DStringAppend(&buffer,
-	    (Tcl_GetObjectNamespace(iclsPtr->oPtr))->fullNamePtr, -1);
+	    (Tcl_GetObjectNamespace(iclsPtr->oPtr))->fullName, -1);
 #endif
     nsPtr = Tcl_FindNamespace(interp, Tcl_DStringValue(&buffer), NULL, 0);
     Tcl_DStringFree(&buffer);
@@ -2348,7 +2348,7 @@ Itcl_GetCommonVar(
     ItclVariable *ivPtr;
     const char *cp;
     const char *lastCp;
-    Tcl_Object *oPtr = NULL;
+    Tcl_Object oPtr = NULL;
 
     lastCp = name;
     cp = name;
@@ -2381,7 +2381,7 @@ Itcl_GetCommonVar(
     } else {
 	int code = TCL_ERROR;
 	Tcl_Obj *classObjPtr = Tcl_NewStringObj(name, lastCp - name);
-	Tcl_Object *oPtr = Tcl_GetObjectFromObj(interp, classObjPtr);
+	Tcl_Object oPtr = Tcl_GetObjectFromObj(interp, classObjPtr);
 
 	if (oPtr) {
 	    ItclClass *iclsPtr = Tcl_ObjectGetMetadata(oPtr,
@@ -2406,7 +2406,7 @@ Itcl_GetCommonVar(
 	}
 	Tcl_DecrRefCount(classObjPtr);
 	if (code != TCL_OK) {
-	    return code;
+	    return NULL;
 	}
 
     }
