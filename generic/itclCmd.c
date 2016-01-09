@@ -769,6 +769,7 @@ Itcl_ScopeCmd(
 	        Tcl_AppendToObj(resultPtr, ITCL_VARIABLES_NAMESPACE, -1);
 		Tcl_AppendToObj(resultPtr, (Tcl_GetObjectNamespace(
 			contextIclsPtr->oPtr))->fullName, -1);
+		Tcl_AppendToObj(resultPtr, "::", -1);
 		Tcl_AppendToObj(resultPtr,
 			Tcl_GetString(vlookup->ivPtr->namePtr), -1);
 	    } else {
