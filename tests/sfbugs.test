@@ -488,6 +488,14 @@ test sfbug-273 { SF bug #273 } -setup {
     itcl::delete class C
 } -result ok
 
+test fossil-9 {d0126511d9} -setup {
+    itcl::class N::B {}
+} -body {
+    itcl::class N {}
+} -cleanup {
+    itcl::delete class N::B N
+} -result {}
+
 #test sfbug-xxx { SF bug xxx
 #} -body {
 #    set ::test_status ""
