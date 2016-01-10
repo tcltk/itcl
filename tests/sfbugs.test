@@ -468,7 +468,7 @@ test fossil-9 {d0126511d9} -setup {
     itcl::class N {}
 } -cleanup {
     itcl::delete class N::B N
-} -result ::N
+} -result {}
 
 #test sfbug-xxx { SF bug xxx
 #} -body {
