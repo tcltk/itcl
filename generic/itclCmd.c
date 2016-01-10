@@ -767,9 +767,15 @@ Itcl_ScopeCmd(
             Tcl_Obj *resultPtr = Tcl_GetObjResult(interp);
 	    if (vlookup->ivPtr->protection != ITCL_PUBLIC) {
 	        Tcl_AppendToObj(resultPtr, ITCL_VARIABLES_NAMESPACE, -1);
+		Tcl_AppendToObj(resultPtr, (Tcl_GetObjectNamespace(
+			contextIclsPtr->oPtr))->fullName, -1);
+		Tcl_AppendToObj(resultPtr, "::", -1);
+		Tcl_AppendToObj(resultPtr,
+			Tcl_GetString(vlookup->ivPtr->namePtr), -1);
+	    } else {
+		Tcl_AppendToObj(resultPtr,
+			Tcl_GetString(vlookup->ivPtr->fullNamePtr), -1);
 	    }
-            Tcl_AppendToObj(resultPtr,
-	        Tcl_GetString(vlookup->ivPtr->fullNamePtr), -1);
             if (openParen) {
                 *openParen = '(';
                 Tcl_AppendToObj(resultPtr, openParen, -1);
