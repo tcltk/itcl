@@ -139,7 +139,12 @@ ClassCmdDeleteTrace(
     /* delete the namespace for the common variables */
     Tcl_DStringInit(&buffer);
     Tcl_DStringAppend(&buffer, ITCL_VARIABLES_NAMESPACE, -1);
+#if 0
     Tcl_DStringAppend(&buffer, Tcl_GetString(iclsPtr->fullNamePtr), -1);
+#else
+    Tcl_DStringAppend(&buffer,
+	    (Tcl_GetObjectNamespace(iclsPtr->oPtr))->fullName, -1);
+#endif
     nsPtr = Tcl_FindNamespace(interp, Tcl_DStringValue(&buffer), NULL, 0);
     Tcl_DStringFree(&buffer);
     if (nsPtr != NULL) {
@@ -519,9 +524,15 @@ Itcl_CreateClass(
      */
     Tcl_DStringInit(&buffer);
     Tcl_DStringAppend(&buffer, ITCL_VARIABLES_NAMESPACE, -1);
+#if 0
     Tcl_DStringAppend(&buffer, Tcl_GetString(iclsPtr->fullNamePtr), -1);
+#else 
+    Tcl_DStringAppend(&buffer,
+	    (Tcl_GetObjectNamespace(iclsPtr->oPtr))->fullName, -1);
+#endif
     if (Tcl_CreateNamespace(interp, Tcl_DStringValue(&buffer),
             NULL, 0) == NULL) {
+	Tcl_ResetResult(interp);
         Tcl_AppendResult(interp, "ITCL: cannot create variables namespace \"",
         Tcl_DStringValue(&buffer), "\"", NULL);
         result = TCL_ERROR;
@@ -2337,6 +2348,7 @@ Itcl_GetCommonVar(
     ItclVariable *ivPtr;
     const char *cp;
     const char *lastCp;
+    Tcl_Object oPtr = NULL;
 
     lastCp = name;
     cp = name;
@@ -2359,11 +2371,53 @@ Itcl_GetCommonVar(
      *  the appropriate name resolution rules and by-passes any
      *  security restrictions.
      */
+
+    if (lastCp == name) {
+	/* 'name' is a simple name (this is untested!!!!) */
+
+	/* Use the context class passed in */
+	oPtr = contextIclsPtr->oPtr;
+
+    } else {
+	int code = TCL_ERROR;
+	Tcl_Obj *classObjPtr = Tcl_NewStringObj(name, lastCp - name - 2);
+	oPtr = Tcl_GetObjectFromObj(interp, classObjPtr);
+
+	if (oPtr) {
+	    ItclClass *iclsPtr = Tcl_ObjectGetMetadata(oPtr,
+		    contextIclsPtr->infoPtr->class_meta_type);
+	    if (iclsPtr) {
+
+		code = TCL_OK;
+		assert(oPtr == iclsPtr->oPtr);
+
+		/*
+		 * If the caller gave us a qualified name into
+		 * somewhere other than the context class, then
+		 * things are really weird.  Consider an assertion
+		 * to prevent, but for now keep the functioning
+		 * unchanged.
+		 *
+		 * assert(iclsPtr == contextIclsPtr);
+		 */
+
+	    }
+
+	}
+	Tcl_DecrRefCount(classObjPtr);
+	if (code != TCL_OK) {
+	    return NULL;
+	}
+
+    }
+
     Tcl_DStringInit(&buffer);
     if (ivPtr->protection != ITCL_PUBLIC) {
         Tcl_DStringAppend(&buffer, ITCL_VARIABLES_NAMESPACE, -1);
     }
-    Tcl_DStringAppend(&buffer, name, -1);
+    Tcl_DStringAppend(&buffer, (Tcl_GetObjectNamespace(oPtr))->fullName, -1);
+    Tcl_DStringAppend(&buffer, "::", -1);
+    Tcl_DStringAppend(&buffer, lastCp, -1);
 
     val = Tcl_GetVar2(interp, (const char *)Tcl_DStringValue(&buffer),
             (char*)NULL, 0);
