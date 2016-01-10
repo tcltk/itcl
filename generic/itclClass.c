@@ -2380,8 +2380,8 @@ Itcl_GetCommonVar(
 
     } else {
 	int code = TCL_ERROR;
-	Tcl_Obj *classObjPtr = Tcl_NewStringObj(name, lastCp - name);
-	Tcl_Object oPtr = Tcl_GetObjectFromObj(interp, classObjPtr);
+	Tcl_Obj *classObjPtr = Tcl_NewStringObj(name, lastCp - name - 2);
+	oPtr = Tcl_GetObjectFromObj(interp, classObjPtr);
 
 	if (oPtr) {
 	    ItclClass *iclsPtr = Tcl_ObjectGetMetadata(oPtr,
@@ -2416,6 +2416,7 @@ Itcl_GetCommonVar(
         Tcl_DStringAppend(&buffer, ITCL_VARIABLES_NAMESPACE, -1);
     }
     Tcl_DStringAppend(&buffer, (Tcl_GetObjectNamespace(oPtr))->fullName, -1);
+    Tcl_DStringAppend(&buffer, "::", -1);
     Tcl_DStringAppend(&buffer, lastCp, -1);
 
     val = Tcl_GetVar2(interp, (const char *)Tcl_DStringValue(&buffer),
