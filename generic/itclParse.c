@@ -1212,8 +1212,9 @@ ItclCheckForInitializedComponents(
 		if (idmPtr->icPtr->ivPtr->flags & ITCL_COMMON) {
 		    Tcl_Obj *objPtr;
 		    objPtr = Tcl_NewStringObj(ITCL_VARIABLES_NAMESPACE, -1);
-		    Tcl_AppendToObj(objPtr, Tcl_GetString(
-		            idmPtr->icPtr->ivPtr->iclsPtr->fullNamePtr), -1);
+		    Tcl_AppendToObj(objPtr, (Tcl_GetObjectNamespace(
+			    idmPtr->icPtr->ivPtr->iclsPtr->oPtr))->fullName,
+			    -1);
 		    Tcl_AppendToObj(objPtr, "::", -1);
 		    Tcl_AppendToObj(objPtr, Tcl_GetString(
 		            idmPtr->icPtr->ivPtr->namePtr), -1);
@@ -2138,7 +2139,12 @@ ItclInitClassCommon(
 	 * go to the variables namespace of the class */
         Tcl_DStringAppend(&buffer, ITCL_VARIABLES_NAMESPACE, -1);
     }
+#if 0
     Tcl_DStringAppend(&buffer, Tcl_GetString(ivPtr->iclsPtr->fullNamePtr), -1);
+#else
+    Tcl_DStringAppend(&buffer,
+	    (Tcl_GetObjectNamespace(ivPtr->iclsPtr->oPtr))->fullName, -1);
+#endif
     commonNsPtr = Tcl_FindNamespace(interp, Tcl_DStringValue(&buffer), NULL, 0);
     if (commonNsPtr == NULL) {
         Tcl_AppendResult(interp, "ITCL: cannot find common variables namespace",
