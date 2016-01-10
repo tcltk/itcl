@@ -3808,7 +3808,6 @@ DelegationInstall(
             if (ivPtr->flags & ITCL_COMMON) {
 	        objPtr = Tcl_NewStringObj(ITCL_VARIABLES_NAMESPACE, -1);
 
-	        Tcl_AppendToObj(objPtr, ivPtr->iclsPtr->nsPtr->fullName, -1);
 	        Tcl_AppendToObj(objPtr, (Tcl_GetObjectNamespace(
 			ivPtr->iclsPtr->oPtr))->fullName, -1);
 	        Tcl_AppendToObj(objPtr, "::", -1);
