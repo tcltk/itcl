@@ -462,12 +462,67 @@ test sfbug-273 { SF bug #273 } -setup {
     itcl::delete class C
 } -result ok
 
-test fossil-9 {d0126511d9} -setup {
+
+test sfbug-276.0 { SF bug #276 } -setup {
+  set ::answer {}
+  itcl::class A {
+    constructor {} {
+      set ::answer [uplevel namespace current]
+    }
+  }
+  itcl::class B {
+    inherit A
+    constructor {} {}
+  }
+} -body {
+  B b
+  set ::answer
+} -cleanup {
+  itcl::delete class A B
+  unset -nocomplain ::answer
+} -result ::B
+
+test sfbug-276.1 { SF bug #276 } -setup {
+  set ::answer {}
+  itcl::class A {
+    constructor {} {
+      lappend ::answer [uplevel namespace current]
+    }
+  }
+  itcl::class E {
+    constructor {} {
+      lappend ::answer [uplevel namespace current]
+    }
+  }
+  itcl::class B {
+    inherit A E
+    constructor {} {}
+  }
+} -body {
+  B b
+  set ::answer
+} -cleanup {
+  itcl::delete class A B E
+  unset -nocomplain ::answer
+} -result {::B ::B}
+
+test fossil-9.0 {d0126511d9} -setup {
     itcl::class N::B {}
 } -body {
     itcl::class N {}
 } -cleanup {
     itcl::delete class N::B N
+} -result {}
+
+test fossil-9.1 {d0126511d9} -setup {
+    itcl::class N::B {}
+    itcl::delete class N::B
+    namespace delete N
+} -body {
+    itcl::class N {}
+} -cleanup {
+    itcl::delete class N
+    catch {namespace delete N}
 } -result {}
 
 #test sfbug-xxx { SF bug xxx
