@@ -296,8 +296,7 @@ typedef struct ItclClass {
                                   /* the class constructor or NULL */
     struct ItclMemberFunc *destructor;
                                   /* the class destructor or NULL */
-    struct ItclMemberFunc *constructorInit;
-                                  /* the class constructor init code or NULL */
+    struct ItclMemberFunc *unused1;
     Tcl_Resolve *resolvePtr;
     Tcl_Obj *widgetClassPtr;      /* class name for widget if class is a
                                    * ::itcl::widget */
