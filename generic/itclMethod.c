@@ -640,7 +640,6 @@ ItclCreateMemberFunc(
     }
     if (strcmp(name, "___constructor_init") == 0) {
         imPtr->flags |= ITCL_CONINIT;
-        iclsPtr->constructorInit = imPtr;
     }
     if (strcmp(name, "constructor") == 0) {
         imPtr->flags |= ITCL_CONSTRUCTOR;
