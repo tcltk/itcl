@@ -639,7 +639,7 @@ ItclCreateMemberFunc(
 	}
     }
     if (strcmp(name, "___constructor_init") == 0) {
-        imPtr->flags |= ITCL_CONINIT;
+        imPtr->flags |= ITCL_CONSTRUCTOR;
     }
     if (strcmp(name, "constructor") == 0) {
         imPtr->flags |= ITCL_CONSTRUCTOR;
@@ -2614,17 +2614,6 @@ ItclProcErrorProc(
                 Tcl_AppendToObj(objPtr, " (", -1);
             }
         }
-        if (imPtr->flags & ITCL_CONINIT) {
-            Tcl_AppendToObj(objPtr, "while constructing object \"", -1);
-            Tcl_GetCommandFullName(interp, contextIoPtr->accessCmd, objPtr);
-            Tcl_AppendToObj(objPtr, "\" in ", -1);
-            Tcl_AppendToObj(objPtr,
-	            Tcl_GetString(imPtr->iclsPtr->fullNamePtr), -1);
-            Tcl_AppendToObj(objPtr, "::constructor", -1);
-            if ((imPtr->codePtr->flags & ITCL_IMPLEMENT_TCL) != 0) {
-                Tcl_AppendToObj(objPtr, " (", -1);
-            }
-        }
 	if (imPtr->flags & ITCL_DESTRUCTOR) {
 	    contextIoPtr->flags = 0;
 	    Tcl_AppendToObj(objPtr, "while deleting object \"", -1);
@@ -2635,7 +2624,7 @@ ItclProcErrorProc(
                 Tcl_AppendToObj(objPtr, " (", -1);
             }
         }
-	if (!(imPtr->flags & (ITCL_CONSTRUCTOR|ITCL_DESTRUCTOR|ITCL_CONINIT))) {
+	if (!(imPtr->flags & (ITCL_CONSTRUCTOR|ITCL_DESTRUCTOR))) {
             Tcl_AppendToObj(objPtr, "(", -1);
 
 	    hPtr = Tcl_FindHashEntry(&infoPtr->objects, (char *)contextIoPtr);

@@ -440,8 +440,6 @@ typedef struct ItclMemberCode {
 #define ITCL_DESTRUCTOR        0x040  /* non-zero => is a destructor */
 #define ITCL_ARG_SPEC          0x080  /* non-zero => has an argument spec */
 #define ITCL_BODY_SPEC         0x100  /* non-zero => has an body spec */
-#define ITCL_CONINIT           0x200  /* non-zero => is a constructor
-                                       * init code */
 #define ITCL_BUILTIN           0x400  /* non-zero => built-in method */
 #define ITCL_COMPONENT         0x800  /* non-zero => component */
 #define ITCL_TYPE_METHOD       0x1000 /* non-zero => typemethod */
