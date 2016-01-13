@@ -292,9 +292,9 @@ typedef struct ItclClass {
     Tcl_HashTable resolveCmds;    /* all possible names for functions in
                                    * this class (e.g., x, foo::x, etc.) */
     Tcl_HashTable contextCache;   /* cache for function contexts */
-    struct ItclMemberFunc *constructor;
+    struct ItclMemberFunc *unused2;
                                   /* the class constructor or NULL */
-    struct ItclMemberFunc *destructor;
+    struct ItclMemberFunc *unused3;
                                   /* the class destructor or NULL */
     struct ItclMemberFunc *unused1;
     Tcl_Resolve *resolvePtr;
