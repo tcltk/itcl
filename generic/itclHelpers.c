@@ -1387,11 +1387,6 @@ ItclAddClassFunctionDictInfo(
         Tcl_ListObjAppendElement(interp, listPtr,
 	        Tcl_NewStringObj("have_body", -1));
     }
-    if (imPtr->flags & ITCL_CONINIT) {
-        haveFlags = 1;
-        Tcl_ListObjAppendElement(interp, listPtr,
-	        Tcl_NewStringObj("constructor_init", -1));
-    }
     if (haveFlags) {
         if (AddDictEntry(interp, valuePtr2, "-flags", listPtr) != TCL_OK) {
             return TCL_ERROR;
