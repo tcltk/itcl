@@ -207,8 +207,6 @@ ItclHandleStubCmd(
     Tcl_ResetResult(interp);
     ItclShowArgs(1, "ItclHandleStubCmd", cmdlinec - 1, cmdlinev + 1);
     result = Tcl_EvalObjv(interp, cmdlinec - 1, cmdlinev + 1, TCL_EVAL_DIRECT);
-    Tcl_DecrRefCount(cmdlinev[0]);
-    Tcl_DecrRefCount(cmdlinev[1]);
     Tcl_DecrRefCount(cmdlinePtr);
     Tcl_DecrRefCount(objAutoLoad[0]);
     return result;

@@ -1874,8 +1874,6 @@ Itcl_ConstructBase(
         Tcl_NRAddCallback(interp, CallPublicObjectCmd, contextClass,
 	        INT2PTR(cmdlinec), cmdlinev, NULL);
         result = Itcl_NRRunCallbacks(interp, callbackPtr);
-	Tcl_DecrRefCount(cmdlinev[0]);
-	Tcl_DecrRefCount(cmdlinev[1]);
 	Tcl_DecrRefCount(cmdlinePtr);
         if (result != TCL_OK) {
 	    return result;
@@ -1992,8 +1990,6 @@ Itcl_InvokeMethodIfExists(
 	}
         result = Itcl_EvalMemberCode(interp, imPtr, contextObjectPtr,
 	        cmdlinec, cmdlinev);
-	Tcl_DecrRefCount(cmdlinev[0]);
-	Tcl_DecrRefCount(cmdlinev[1]);
 	ItclReleaseIMF(imPtr);
         Tcl_DecrRefCount(cmdlinePtr);
     } else {
