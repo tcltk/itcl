@@ -643,11 +643,9 @@ ItclCreateMemberFunc(
     }
     if (strcmp(name, "constructor") == 0) {
         imPtr->flags |= ITCL_CONSTRUCTOR;
-        iclsPtr->constructor = imPtr;
     }
     if (strcmp(name, "destructor") == 0) {
         imPtr->flags |= ITCL_DESTRUCTOR;
-        iclsPtr->destructor = imPtr;
     }
 
     Tcl_SetHashValue(hPtr, (ClientData)imPtr);
