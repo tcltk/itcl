@@ -162,10 +162,10 @@ RootCallProc(
     Tcl_Obj *const *objv)
 {
     Tcl_Object oPtr = Tcl_ObjectContextObject(context);
-
     ItclObject *ioPtr = Tcl_ObjectGetMetadata(oPtr, &objMDT);
+    ItclRootMethodProc *proc = (ItclRootMethodProc *)clientData;
 
-    return ItclUnknownGuts(ioPtr, interp, objc+1, objv-1);
+    return (*proc)(ioPtr, interp, objc+1, objv-1);
 }
 
 /*
@@ -330,7 +330,6 @@ Initialize (
     }
     infoPtr->useOldResolvers = opt;
     Itcl_InitStack(&infoPtr->clsStack);
-    Itcl_InitStack(&infoPtr->constructorStack);
 
     Tcl_SetAssocData(interp, ITCL_INTERP_DATA,
         (Tcl_InterpDeleteProc*)FreeItclObjectInfo, (ClientData)infoPtr);
@@ -348,7 +347,11 @@ Initialize (
     Tcl_DecrRefCount(objPtr);
 
     Tcl_NewMethod(interp, Tcl_GetObjectAsClass(root),
-	    Tcl_NewStringObj("unknown", -1), 0, &itclRootMethodType, NULL);
+	    Tcl_NewStringObj("unknown", -1), 0, &itclRootMethodType,
+	    ItclUnknownGuts);
+    Tcl_NewMethod(interp, Tcl_GetObjectAsClass(root),
+	    Tcl_NewStringObj("ItclConstructBase", -1), 0,
+	    &itclRootMethodType, ItclConstructGuts);
 
     /* first create the Itcl base class as root of itcl classes */
     if (Tcl_EvalEx(interp, clazzClassScript, -1, 0) != TCL_OK) {
@@ -756,11 +759,9 @@ ItclFinishCmd(
     /* cleanup ensemble info */
     ItclFinishEnsemble(infoPtr);
 
-//    ckfree((char *)infoPtr->object_meta_type);
     ckfree((char *)infoPtr->class_meta_type);
 
     Itcl_DeleteStack(&infoPtr->clsStack);
-    Itcl_DeleteStack(&infoPtr->constructorStack);
     /* clean up list pool */
     Itcl_FinishList();
 

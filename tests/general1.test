@@ -1,10 +1,10 @@
 #
 # Tests for general class handling
 # ----------------------------------------------------------------------
-#   AUTHOR:  Wolfgang Groﬂer, Arnulf Wiedemann
+#   AUTHOR:  Wolfgang Gro√üer, Arnulf Wiedemann
 #            wolfgang@grosser-erding.de, arnulf@wiedemann-pri.de
 # ----------------------------------------------------------------------
-#            Copyright (c) Wolfgang Groﬂer, Arnulf Wiedemann
+#            Copyright (c) Wolfgang Gro√üer, Arnulf Wiedemann
 # ======================================================================
 # See the file "license.terms" for information on usage and
 # redistribution of this file, and for a DISCLAIMER OF ALL WARRANTIES.
@@ -148,7 +148,6 @@ test general1-1.8 {private method may not be called} {
     set ::test_cd_watch ""
     list [catch {classC0 primC} msg] $msg
 } {1 {bad option "primC": should be one of...
-  classC0 ___constructor_init ?arg arg ...?
   classC0 cget -option
   classC0 chkThis
   classC0 configure ?-option? ?value -option value...?
@@ -165,7 +164,6 @@ test general1-1.9 {protected method may not be called} {
     set ::test_cd_watch ""
     list [catch {classC0 promC} msg] $msg
 } {1 {bad option "promC": should be one of...
-  classC0 ___constructor_init ?arg arg ...?
   classC0 cget -option
   classC0 chkThis
   classC0 configure ?-option? ?value -option value...?

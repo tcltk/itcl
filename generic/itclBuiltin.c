@@ -1155,11 +1155,6 @@ NRBiChainCmd(
             ItclShowArgs(1, "___chain", objc-1, newobjv+1);
             result = Itcl_EvalMemberCode(interp, imPtr, contextIoPtr,
 	            my_objc-1, newobjv+1);
-	    /* release "my" part and next arg which is added by
-	     * Itcl_CreateArgs */
-	    Tcl_DecrRefCount(newobjv[1]);
-	    Tcl_DecrRefCount(newobjv[0]);
-            /* release the rest */
             Tcl_DecrRefCount(cmdlinePtr);
             break;
         }

@@ -323,19 +323,14 @@ Itcl_CreateArgs(
 {
     int i;
     Tcl_Obj *listPtr;
-    Tcl_Obj *objPtr;
 
     ItclShowArgs(1, "Itcl_CreateArgs", objc, objv);
-    listPtr = Tcl_NewListObj(0, (Tcl_Obj**)NULL);
-    objPtr = Tcl_NewStringObj("my", -1);
-    Tcl_IncrRefCount(objPtr);
-    Tcl_ListObjAppendElement((Tcl_Interp*)NULL, listPtr, objPtr);
-    objPtr = Tcl_NewStringObj(string, -1);
-    Tcl_IncrRefCount(objPtr);
-    Tcl_ListObjAppendElement((Tcl_Interp*)NULL, listPtr, objPtr);
+    listPtr = Tcl_NewListObj(objc+2, NULL);
+    Tcl_ListObjAppendElement(NULL, listPtr, Tcl_NewStringObj("my", -1));
+    Tcl_ListObjAppendElement(NULL, listPtr, Tcl_NewStringObj(string, -1));
 
     for (i=0; i < objc; i++) {
-        Tcl_ListObjAppendElement((Tcl_Interp*)NULL, listPtr, objv[i]);
+        Tcl_ListObjAppendElement(NULL, listPtr, objv[i]);
     }
     return listPtr;
 }
@@ -1386,11 +1381,6 @@ ItclAddClassFunctionDictInfo(
         haveFlags = 1;
         Tcl_ListObjAppendElement(interp, listPtr,
 	        Tcl_NewStringObj("have_body", -1));
-    }
-    if (imPtr->flags & ITCL_CONINIT) {
-        haveFlags = 1;
-        Tcl_ListObjAppendElement(interp, listPtr,
-	        Tcl_NewStringObj("constructor_init", -1));
     }
     if (haveFlags) {
         if (AddDictEntry(interp, valuePtr2, "-flags", listPtr) != TCL_OK) {
