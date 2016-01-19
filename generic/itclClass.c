@@ -530,8 +530,9 @@ Itcl_CreateClass(
     Tcl_DStringAppend(&buffer,
 	    (Tcl_GetObjectNamespace(iclsPtr->oPtr))->fullName, -1);
 #endif
-    if (Tcl_CreateNamespace(interp, Tcl_DStringValue(&buffer),
-            NULL, 0) == NULL) {
+    if ((NULL == Tcl_FindNamespace(interp, Tcl_DStringValue(&buffer), NULL,
+	    TCL_GLOBAL_ONLY)) && (NULL == Tcl_CreateNamespace(interp,
+	    Tcl_DStringValue(&buffer), NULL, 0))) {
 	Tcl_ResetResult(interp);
         Tcl_AppendResult(interp, "ITCL: cannot create variables namespace \"",
         Tcl_DStringValue(&buffer), "\"", NULL);

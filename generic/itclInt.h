@@ -159,7 +159,7 @@ typedef struct ItclObjectInfo {
     Itcl_Stack clsStack;            /* stack of class definitions currently
                                      * being parsed */
     Itcl_Stack unused;              /* Removed */
-    Itcl_Stack constructorStack;    /* stack of constructor calls */
+    Itcl_Stack unused6;		    /* obsolete field */
     struct ItclObject *currIoPtr;   /* object currently being constructed
                                      * set only during calling of constructors
 				     * otherwise NULL */
@@ -292,12 +292,11 @@ typedef struct ItclClass {
     Tcl_HashTable resolveCmds;    /* all possible names for functions in
                                    * this class (e.g., x, foo::x, etc.) */
     Tcl_HashTable contextCache;   /* cache for function contexts */
-    struct ItclMemberFunc *constructor;
+    struct ItclMemberFunc *unused2;
                                   /* the class constructor or NULL */
-    struct ItclMemberFunc *destructor;
+    struct ItclMemberFunc *unused3;
                                   /* the class destructor or NULL */
-    struct ItclMemberFunc *constructorInit;
-                                  /* the class constructor init code or NULL */
+    struct ItclMemberFunc *unused1;
     Tcl_Resolve *resolvePtr;
     Tcl_Obj *widgetClassPtr;      /* class name for widget if class is a
                                    * ::itcl::widget */
@@ -441,8 +440,6 @@ typedef struct ItclMemberCode {
 #define ITCL_DESTRUCTOR        0x040  /* non-zero => is a destructor */
 #define ITCL_ARG_SPEC          0x080  /* non-zero => has an argument spec */
 #define ITCL_BODY_SPEC         0x100  /* non-zero => has an body spec */
-#define ITCL_CONINIT           0x200  /* non-zero => is a constructor
-                                       * init code */
 #define ITCL_BUILTIN           0x400  /* non-zero => built-in method */
 #define ITCL_COMPONENT         0x800  /* non-zero => component */
 #define ITCL_TYPE_METHOD       0x1000 /* non-zero => typemethod */
@@ -848,10 +845,12 @@ MODULE_SCOPE Tcl_ObjCmdProc Itcl_SetComponentCmd;
 MODULE_SCOPE Tcl_ObjCmdProc Itcl_ClassHullTypeCmd;
 MODULE_SCOPE Tcl_ObjCmdProc Itcl_ClassWidgetClassCmd;
 
-MODULE_SCOPE const Tcl_MethodType itclRootMethodType;
-
-MODULE_SCOPE int ItclUnknownGuts(ItclObject *ioPtr, Tcl_Interp *interp,
+typedef int (ItclRootMethodProc)(ItclObject *ioPtr, Tcl_Interp *interp,
 	int objc, Tcl_Obj *const objv[]);
+
+MODULE_SCOPE const Tcl_MethodType itclRootMethodType;
+MODULE_SCOPE ItclRootMethodProc ItclUnknownGuts;
+MODULE_SCOPE ItclRootMethodProc ItclConstructGuts;
 
 #include "itcl2TclOO.h"
 #ifdef NEW_PROTO_RESOLVER
