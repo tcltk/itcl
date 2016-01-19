@@ -419,6 +419,7 @@ test sfbug-265.1 { SF bug #265 } -setup {
     namespace eval B {C c}
 } -cleanup {
     itcl::delete class C
+    namespace delete A B
 } -result c
 test sfbug-265.2 { SF bug #265 } -setup {
     itcl::class C {}
@@ -429,6 +430,7 @@ test sfbug-265.2 { SF bug #265 } -setup {
 } -cleanup {
     itcl::delete class B::C
     itcl::delete class C
+    namespace delete A B
 } -result ::A
 
 test sfbug-268 { SF bug #268 } -setup {
@@ -467,7 +469,7 @@ test sfbug-276.0 { SF bug #276 } -setup {
   set ::answer {}
   itcl::class A {
     constructor {} {
-      set ::answer [uplevel namespace current]
+      lappend ::answer [uplevel namespace current]
     }
   }
   itcl::class B {
@@ -524,6 +526,21 @@ test fossil-9.1 {d0126511d9} -setup {
     itcl::delete class N
     catch {namespace delete N}
 } -result {}
+
+test fossil-9.2 {ec215db901} -setup {
+    set ::answer {}
+    itcl::class Object {
+	constructor {} {set n 1} {set ::answer $n}
+    }
+} -body {
+    Object foo
+    set ::answer
+} -cleanup {
+    itcl::delete class Object
+    unset -nocomplain ::anser
+} -result 1
+
+
 
 #test sfbug-xxx { SF bug xxx
 #} -body {

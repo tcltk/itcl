@@ -642,6 +642,22 @@ ItclCreateMemberFunc(
         imPtr->flags |= ITCL_CONSTRUCTOR;
     }
     if (strcmp(name, "constructor") == 0) {
+	/*
+	 * REVISE mcode->bodyPtr here!
+	 * Include a [my ItclConstructBase $iclsPtr] method call.
+	 * Inherited from itcl::Root
+	 */
+
+	Tcl_Obj *newBody = Tcl_NewStringObj("", -1);
+	Tcl_AppendToObj(newBody, 
+		"[::info object namespace ${this}]::my ItclConstructBase ", -1);
+	Tcl_AppendObjToObj(newBody, iclsPtr->fullNamePtr);
+	Tcl_AppendToObj(newBody, "\n", -1);
+
+	Tcl_AppendObjToObj(newBody, mcode->bodyPtr);
+	Tcl_DecrRefCount(mcode->bodyPtr);
+	mcode->bodyPtr = newBody;
+	Tcl_IncrRefCount(mcode->bodyPtr);
         imPtr->flags |= ITCL_CONSTRUCTOR;
     }
     if (strcmp(name, "destructor") == 0) {
@@ -1214,21 +1230,6 @@ CallItclObjectCmd(
  *  result string or an error message in the interpreter.
  * ------------------------------------------------------------------------
  */
-static int
-CallConstructBase(
-    ClientData data[],
-    Tcl_Interp *interp,
-    int result)
-{
-    ItclMemberFunc *imPtr = data[0];
-    ItclObject *contextIoPtr = data[1];
-    int objc = PTR2INT(data[2]);
-    Tcl_Obj *const* objv = data[3];
-
-    result = Itcl_ConstructBase(interp, contextIoPtr, imPtr->iclsPtr,
-	        objc, objv);
-    return result;
-}
 
 int
 Itcl_EvalMemberCode(
@@ -1260,29 +1261,6 @@ Itcl_EvalMemberCode(
      */
     Itcl_PreserveData((ClientData)mcode);
 
-    /*
-     *  If this code is a constructor, and if it is being invoked
-     *  when an object is first constructed (i.e., the "constructed"
-     *  table is still active within the object), then handle the
-     *  "initCode" associated with the constructor and make sure that
-     *  all base classes are properly constructed.
-     *
-     *  TRICKY NOTE:
-     *    The "initCode" must be executed here.  This is the only
-     *    opportunity where the arguments of the constructor are
-     *    available in a call frame.
-     */
-    if ((imPtr->flags & ITCL_CONSTRUCTOR) && (contextIoPtr != NULL) &&
-        contextIoPtr->constructed) {
-
-        callbackPtr = Itcl_GetCurrentCallbackPtr(interp);
-        Tcl_NRAddCallback(interp, CallConstructBase, imPtr, contextIoPtr,
-	        INT2PTR(objc), (ClientData)objv);
-        result = Itcl_NRRunCallbacks(interp, callbackPtr);
-        if (result != TCL_OK) {
-            goto evalMemberCodeDone;
-        }
-    }
     if ((imPtr->flags & ITCL_DESTRUCTOR) && (contextIoPtr != NULL)) {
         contextIoPtr->destructorHasBeenCalled = 1;
     }
@@ -1322,7 +1300,6 @@ Itcl_EvalMemberCode(
          }
     }
 
-evalMemberCodeDone:
     Itcl_ReleaseData((ClientData)mcode);
     return result;
 }
@@ -1792,24 +1769,6 @@ CallInvokeMethodIfExists(
     }
     return TCL_OK;
 }
-
-static int
-CallPublicObjectCmd(
-    ClientData data[],
-    Tcl_Interp *interp,
-    int result)
-{
-    ItclClass *contextClass = data[0];
-    int cmdlinec = PTR2INT(data[1]);
-    Tcl_Obj **cmdlinev = data[2];
-
-    result = Itcl_PublicObjectCmd(contextClass->infoPtr->currIoPtr->oPtr,
-            interp, contextClass->clsPtr, cmdlinec, cmdlinev);
-    if (result != TCL_OK) {
-        return TCL_ERROR;
-    }
-    return TCL_OK;
-}
 /*
  * ------------------------------------------------------------------------
  *  Itcl_ConstructBase()
@@ -1828,6 +1787,7 @@ CallPublicObjectCmd(
  *  returns TCL_ERROR, along with an error message in the interpreter.
  * ------------------------------------------------------------------------
  */
+
 int
 Itcl_ConstructBase(
     Tcl_Interp *interp,       /* interpreter */
@@ -1836,48 +1796,18 @@ Itcl_ConstructBase(
     int objc,
     Tcl_Obj *const *objv)
 {
-    int result;
+    int result = TCL_OK;
+    Tcl_Obj *objPtr;
     Itcl_ListElem *elem;
-    ItclClass *iclsPtr;
-    Tcl_HashEntry *entry;
-    Tcl_Obj *cmdlinePtr;
-    Tcl_Obj **cmdlinev;
-    void *callbackPtr;
-    int cmdlinec;
 
-    ItclShowArgs(1, "Itcl_ConstructBase", objc, objv);
     /*
      *  If the class has an "initCode", invoke it in the current context.
-     *
-     *  TRICKY NOTE:
-     *    This context is the call frame containing the arguments
-     *    for the constructor.  The "initCode" makes sense right
-     *    now--just before the body of the constructor is executed.
      */
-    Itcl_PushStack(contextClass, &contextClass->infoPtr->constructorStack);
-    if (contextClass->initCode) {
-        /*
-         *  Prepend the method name to the list of arguments.
-         */
-	int incr = 0;
-	if (strcmp(Tcl_GetString(objv[0]), "my") == 0) {
-	     /* number of args to skip depends on if we are called from
-	      * another constructor or directly */
-	     incr = 1;
-	}
-        cmdlinePtr = Itcl_CreateArgs(interp, "___constructor_init",
-	        objc-1-incr, objv+1+incr);
 
-        (void) Tcl_ListObjGetElements((Tcl_Interp*)NULL, cmdlinePtr,
-            &cmdlinec, &cmdlinev);
-        callbackPtr = Itcl_GetCurrentCallbackPtr(interp);
-        Tcl_NRAddCallback(interp, CallPublicObjectCmd, contextClass,
-	        INT2PTR(cmdlinec), cmdlinev, NULL);
-        result = Itcl_NRRunCallbacks(interp, callbackPtr);
-	Tcl_DecrRefCount(cmdlinePtr);
-        if (result != TCL_OK) {
-	    return result;
-	}
+    if (contextClass->initCode) {
+
+	/* TODO: NRE */
+	result = Tcl_EvalObj(interp, contextClass->initCode);
     }
 
     /*
@@ -1887,46 +1817,64 @@ Itcl_ConstructBase(
      *  in reverse order, so that least-specific classes are constructed
      *  first.
      */
-    elem = Itcl_LastListElem(&contextClass->bases);
-    while (elem != NULL) {
-        iclsPtr = (ItclClass*)Itcl_GetListValue(elem);
+
+    objPtr = Tcl_NewStringObj("constructor", -1);
+    Tcl_IncrRefCount(objPtr);
+    for (elem = Itcl_LastListElem(&contextClass->bases);
+	    result == TCL_OK && elem != NULL;
+	    elem = Itcl_PrevListElem(elem)) {
+	    
+	Tcl_HashEntry *entry;
+        ItclClass *iclsPtr = (ItclClass*)Itcl_GetListValue(elem);
 
         if (Tcl_FindHashEntry(contextObj->constructed,
-	        (char *)iclsPtr->namePtr) == NULL) {
-	    Tcl_Obj *objPtr;
+		(char *)iclsPtr->namePtr)) {
 
-            callbackPtr = Itcl_GetCurrentCallbackPtr(interp);
+	    /* Already constructed, nothing to do. */
+	    continue;
+	}
+
+        entry = Tcl_FindHashEntry(&iclsPtr->functions, (char *)objPtr);
+        if (entry) {
+            void *callbackPtr = Itcl_GetCurrentCallbackPtr(interp);
             Tcl_NRAddCallback(interp, CallInvokeMethodIfExists, iclsPtr,
 	            contextObj, INT2PTR(0), NULL);
             result = Itcl_NRRunCallbacks(interp, callbackPtr);
-            if (result != TCL_OK) {
-                return TCL_ERROR;
-            }
-            /*
-             *  The base class may not have a constructor, but its
-             *  own base classes could have one.  If the constructor
-             *  wasn't found in the last step, then other base classes
-             *  weren't constructed either.  Make sure that all of its
-             *  base classes are properly constructed.
-             */
-	    objPtr = Tcl_NewStringObj("constructor", -1);
-	    Tcl_IncrRefCount(objPtr);
-            entry = Tcl_FindHashEntry(&iclsPtr->functions, (char *)objPtr);
-	    Tcl_DecrRefCount(objPtr);
-            if (entry == NULL) {
-                result = Itcl_ConstructBase(interp, contextObj, iclsPtr,
-		        objc, objv);
-                if (result != TCL_OK) {
-                    return TCL_ERROR;
-                }
-            }
+	} else {
+            result = Itcl_ConstructBase(interp, contextObj, iclsPtr, objc, objv);
         }
-        elem = Itcl_PrevListElem(elem);
     }
-    Itcl_PopStack(&contextClass->infoPtr->constructorStack);
-    return TCL_OK;
+    Tcl_DecrRefCount(objPtr);
+    return result;
 }
 
+int
+ItclConstructGuts(
+    ItclObject *contextObj,
+    Tcl_Interp *interp,
+    int objc,
+    Tcl_Obj *const objv[])
+{
+    ItclClass *contextClass;
+
+    /* Ignore syntax error */
+    if (objc != 4) {
+	return TCL_OK;
+    }
+
+    /* Object is fully constructed. This becomes no-op. */
+    if (contextObj->constructed == NULL) {
+	return TCL_OK;
+    }
+
+    contextClass = Itcl_FindClass(interp, Tcl_GetString(objv[3]), 0);
+    if (contextClass == NULL) {
+	return TCL_OK;
+    }
+
+
+    return Itcl_ConstructBase(interp, contextObj, contextClass, objc, objv);
+}
 
 /*
  * ------------------------------------------------------------------------
@@ -2545,7 +2493,6 @@ ItclProcErrorProc(
     Tcl_Obj *procNameObj)
 {
     Tcl_Obj *objPtr;
-    Tcl_Namespace *upNsPtr;
     Tcl_HashEntry *hPtr;
     ItclObjectInfo *infoPtr;
     ItclCallContext *callContextPtr;
@@ -2553,9 +2500,6 @@ ItclProcErrorProc(
     ItclObject *contextIoPtr;
     ItclClass *currIclsPtr;
     char num[20];
-    int constructorStackIndex;
-    int constructorStackSize;
-    int isFirstLoop;
     int loopCnt;
 
     infoPtr = (ItclObjectInfo *)Tcl_GetAssocData(interp,
@@ -2563,42 +2507,14 @@ ItclProcErrorProc(
     callContextPtr = Itcl_PeekStack(&infoPtr->contextStack);
     currIclsPtr = NULL;
     loopCnt = 1;
-    isFirstLoop = 1;
-    upNsPtr = Itcl_GetUplevelNamespace(interp, 1);
-    constructorStackIndex = -1;
     objPtr = NULL;
-    while ((callContextPtr != NULL) && (loopCnt > 0)) {
+    if (callContextPtr != NULL) {
 	imPtr = callContextPtr->imPtr;
         contextIoPtr = callContextPtr->ioPtr;
         objPtr = Tcl_NewStringObj("\n    ", -1);
 
         if (imPtr->flags & ITCL_CONSTRUCTOR) {
-	    /* have to look for classes in construction where the constructor
-	     * has not yet been called, but only the initCode or the
-	     * inherited constructors
-	     */
-            if (isFirstLoop) {
-	        isFirstLoop = 0;
-                constructorStackSize = Itcl_GetStackSize(
-		        &imPtr->iclsPtr->infoPtr->constructorStack);
-	        constructorStackIndex = constructorStackSize;
-	        currIclsPtr = imPtr->iclsPtr;
-	    } else {
-	        currIclsPtr = (ItclClass *)Itcl_GetStackValue(
-	                &imPtr->iclsPtr->infoPtr->constructorStack,
-		        constructorStackIndex);
-            }
-	    if (constructorStackIndex < 0) {
-	        break;
-	    }
-	    if (currIclsPtr == NULL) {
-	        break;
-	    }
-	    if (upNsPtr == currIclsPtr->nsPtr) {
-	        break;
-	    }
-	    constructorStackIndex--;
-	    loopCnt++;
+	    currIclsPtr = imPtr->iclsPtr;
             Tcl_AppendToObj(objPtr, "while constructing object \"", -1);
             Tcl_GetCommandFullName(interp, contextIoPtr->accessCmd, objPtr);
             Tcl_AppendToObj(objPtr, "\" in ", -1);
@@ -2679,7 +2595,6 @@ ItclProcErrorProc(
 
         Tcl_AppendObjToErrorInfo(interp, objPtr);
 	objPtr = NULL;
-        loopCnt--;
     }
     if (objPtr != NULL) {
         Tcl_DecrRefCount(objPtr);

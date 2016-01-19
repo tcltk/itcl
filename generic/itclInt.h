@@ -159,7 +159,7 @@ typedef struct ItclObjectInfo {
     Itcl_Stack clsStack;            /* stack of class definitions currently
                                      * being parsed */
     Itcl_Stack contextStack;        /* stack of call contexts */
-    Itcl_Stack constructorStack;    /* stack of constructor calls */
+    Itcl_Stack unused6;		    /* obsolete field */
     struct ItclObject *currIoPtr;   /* object currently being constructed
                                      * set only during calling of constructors
 				     * otherwise NULL */
@@ -845,10 +845,12 @@ MODULE_SCOPE Tcl_ObjCmdProc Itcl_SetComponentCmd;
 MODULE_SCOPE Tcl_ObjCmdProc Itcl_ClassHullTypeCmd;
 MODULE_SCOPE Tcl_ObjCmdProc Itcl_ClassWidgetClassCmd;
 
-MODULE_SCOPE const Tcl_MethodType itclRootMethodType;
-
-MODULE_SCOPE int ItclUnknownGuts(ItclObject *ioPtr, Tcl_Interp *interp,
+typedef int (ItclRootMethodProc)(ItclObject *ioPtr, Tcl_Interp *interp,
 	int objc, Tcl_Obj *const objv[]);
+
+MODULE_SCOPE const Tcl_MethodType itclRootMethodType;
+MODULE_SCOPE ItclRootMethodProc ItclUnknownGuts;
+MODULE_SCOPE ItclRootMethodProc ItclConstructGuts;
 
 #include "itcl2TclOO.h"
 #ifdef NEW_PROTO_RESOLVER

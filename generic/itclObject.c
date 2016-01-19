@@ -481,13 +481,6 @@ ItclCreateObject(
     }
     ioPtr->hadConstructorError = -1;
     if (result != TCL_OK) {
-        int constructorStackSize;
-	/* clean up the constructor stack */
-        constructorStackSize = Itcl_GetStackSize(&infoPtr->constructorStack);
-	while (constructorStackSize > 0) {
-	    Itcl_PopStack(&infoPtr->constructorStack);
-	    constructorStackSize--;
-	}
         istate = Itcl_SaveInterpState(interp, result);
 	ItclDeleteObjectVariablesNamespace(interp, ioPtr);
 	if (ioPtr->accessCmd != (Tcl_Command) NULL) {
@@ -636,7 +629,7 @@ ItclCreateObject(
 		& (ITCL_ECLASS|ITCL_TYPE|ITCL_WIDGET|ITCL_WIDGETADAPTOR)) {
 	    Tcl_NewInstanceMethod(interp, ioPtr->oPtr,
 		    Tcl_NewStringObj("unknown", -1), 0,
-		    &itclRootMethodType, NULL);
+		    &itclRootMethodType, ItclUnknownGuts);
 	}
 
         if (iclsPtr->flags & (ITCL_TYPE|ITCL_WIDGETADAPTOR)) {
