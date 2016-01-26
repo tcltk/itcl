@@ -2531,7 +2531,6 @@ ItclProcErrorProc(
     ItclObject *contextIoPtr;
     ItclClass *currIclsPtr;
     char num[20];
-    int loopCnt;
     Itcl_Stack *stackPtr;
 
     /* Fetch the current call frame.  That determines context. */
@@ -2555,7 +2554,6 @@ ItclProcErrorProc(
     }
 
     currIclsPtr = NULL;
-    loopCnt = 1;
     objPtr = NULL;
     {
 	imPtr = callContextPtr->imPtr;
