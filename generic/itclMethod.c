@@ -2500,13 +2500,11 @@ ItclProcErrorProc(
     ItclObject *contextIoPtr;
     ItclClass *currIclsPtr;
     char num[20];
-    int loopCnt;
 
     infoPtr = (ItclObjectInfo *)Tcl_GetAssocData(interp,
             ITCL_INTERP_DATA, NULL);
     callContextPtr = Itcl_PeekStack(&infoPtr->contextStack);
     currIclsPtr = NULL;
-    loopCnt = 1;
     objPtr = NULL;
     if (callContextPtr != NULL) {
 	imPtr = callContextPtr->imPtr;
