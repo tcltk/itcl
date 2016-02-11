@@ -2031,12 +2031,8 @@ ItclInitClassCommon(
 	 * go to the variables namespace of the class */
         Tcl_DStringAppend(&buffer, ITCL_VARIABLES_NAMESPACE, -1);
     }
-#if 0
-    Tcl_DStringAppend(&buffer, Tcl_GetString(ivPtr->iclsPtr->fullNamePtr), -1);
-#else
     Tcl_DStringAppend(&buffer,
 	    (Tcl_GetObjectNamespace(ivPtr->iclsPtr->oPtr))->fullName, -1);
-#endif
     commonNsPtr = Tcl_FindNamespace(interp, Tcl_DStringValue(&buffer), NULL, 0);
     if (commonNsPtr == NULL) {
         Tcl_AppendResult(interp, "ITCL: cannot find common variables namespace",

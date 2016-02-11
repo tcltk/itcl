@@ -225,24 +225,6 @@ Itcl_PublicObjectCmd(
     return result;
 }
 
-#if 0
-static int
-Itcl_PrivateObjectCmd(
-    ClientData clientData,
-    Tcl_Interp *interp,
-    Tcl_Class clsPtr,
-    int objc,
-    Tcl_Obj *const *objv)
-{
-    Tcl_Object oPtr = (Tcl_Object)clientData;
-    int result;
-
-    result = TclOOInvokeObject(interp, oPtr, clsPtr, PRIVATE_METHOD,
-            objc, objv);
-    return result;
-}
-#endif
-
 /*
  * ----------------------------------------------------------------------
  *
@@ -333,29 +315,6 @@ Itcl_NewForwardClassMethod(
             flags, nameObj, prefixObj);
 }
 
-/*
- * ----------------------------------------------------------------------
- *
- * Itcl_NewForwardMethod --
- *
- *	Create a new forwarded method for an object for Itcl.
- *
- * ----------------------------------------------------------------------
- */
-
-#if 0
-Tcl_Method
-Itcl_NewForwardMethod(
-    Tcl_Interp *interp,
-    Tcl_Object oPtr,
-    int flags,
-    Tcl_Obj *nameObj,
-    Tcl_Obj *prefixObj)
-{
-    return (Tcl_Method)TclOONewForwardInstanceMethod(interp, (Object *)oPtr,
-            flags, nameObj, prefixObj);
-}
-#endif
 
 static Tcl_Obj *
 Itcl_TclOOObjectName(
