@@ -710,8 +710,10 @@ Itcl_BiConfigureCmd(
 
         ivPtr = vlookup->ivPtr;
         Tcl_DStringSetLength(&buffer2, 0);
-        Tcl_DStringAppend(&buffer2,
-	        Tcl_GetString(contextIoPtr->varNsNamePtr), -1);
+	if (!(ivPtr->flags & ITCL_COMMON)) {
+            Tcl_DStringAppend(&buffer2,
+	            Tcl_GetString(contextIoPtr->varNsNamePtr), -1);
+	}
         Tcl_DStringAppend(&buffer2,
 	        Tcl_GetString(ivPtr->iclsPtr->fullNamePtr), -1);
         Tcl_DStringAppend(&buffer2, "::", 2);
@@ -1691,12 +1693,8 @@ ItclUnknownGuts(
          */
         if (idmPtr->icPtr->ivPtr->flags & ITCL_COMMON) {
             objPtr = Tcl_NewStringObj(ITCL_VARIABLES_NAMESPACE, -1);
-#if 0
-            Tcl_AppendToObj(objPtr, iclsPtr->nsPtr->fullName, -1);
-#else
             Tcl_AppendToObj(objPtr,
 		    (Tcl_GetObjectNamespace(iclsPtr->oPtr))->fullName, -1);
-#endif
             Tcl_AppendToObj(objPtr, "::", -1);
             Tcl_AppendToObj(objPtr,
 	            Tcl_GetString(idmPtr->icPtr->namePtr), -1);
@@ -3009,12 +3007,8 @@ Itcl_BiInstallComponentCmd(
         }
         componentValue = Tcl_GetStringResult(interp);
         objPtr = Tcl_NewStringObj(ITCL_VARIABLES_NAMESPACE, -1);
-#if 0
-        Tcl_AppendToObj(objPtr, Tcl_GetString(contextIclsPtr->fullNamePtr), -1);
-#else
 	Tcl_AppendToObj(objPtr,
 		(Tcl_GetObjectNamespace(contextIclsPtr->oPtr))->fullName, -1);
-#endif
         Tcl_AppendToObj(objPtr, "::", -1);
         Tcl_AppendToObj(objPtr, componentName, -1);
 
