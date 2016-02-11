@@ -710,8 +710,10 @@ Itcl_BiConfigureCmd(
 
         ivPtr = vlookup->ivPtr;
         Tcl_DStringSetLength(&buffer2, 0);
-        Tcl_DStringAppend(&buffer2,
-	        Tcl_GetString(contextIoPtr->varNsNamePtr), -1);
+	if (!(ivPtr->flags & ITCL_COMMON)) {
+            Tcl_DStringAppend(&buffer2,
+	            Tcl_GetString(contextIoPtr->varNsNamePtr), -1);
+	}
         Tcl_DStringAppend(&buffer2,
 	        Tcl_GetString(ivPtr->iclsPtr->fullNamePtr), -1);
         Tcl_DStringAppend(&buffer2, "::", 2);
