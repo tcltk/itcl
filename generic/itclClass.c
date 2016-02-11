@@ -139,12 +139,8 @@ ClassCmdDeleteTrace(
     /* delete the namespace for the common variables */
     Tcl_DStringInit(&buffer);
     Tcl_DStringAppend(&buffer, ITCL_VARIABLES_NAMESPACE, -1);
-#if 0
-    Tcl_DStringAppend(&buffer, Tcl_GetString(iclsPtr->fullNamePtr), -1);
-#else
     Tcl_DStringAppend(&buffer,
 	    (Tcl_GetObjectNamespace(iclsPtr->oPtr))->fullName, -1);
-#endif
     nsPtr = Tcl_FindNamespace(interp, Tcl_DStringValue(&buffer), NULL, 0);
     Tcl_DStringFree(&buffer);
     if (nsPtr != NULL) {
@@ -524,12 +520,8 @@ Itcl_CreateClass(
      */
     Tcl_DStringInit(&buffer);
     Tcl_DStringAppend(&buffer, ITCL_VARIABLES_NAMESPACE, -1);
-#if 0
-    Tcl_DStringAppend(&buffer, Tcl_GetString(iclsPtr->fullNamePtr), -1);
-#else 
     Tcl_DStringAppend(&buffer,
 	    (Tcl_GetObjectNamespace(iclsPtr->oPtr))->fullName, -1);
-#endif
     if ((NULL == Tcl_FindNamespace(interp, Tcl_DStringValue(&buffer), NULL,
 	    TCL_GLOBAL_ONLY)) && (NULL == Tcl_CreateNamespace(interp,
 	    Tcl_DStringValue(&buffer), NULL, 0))) {
