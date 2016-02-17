@@ -216,6 +216,20 @@ test body-4.3 {try to redefine a body for a variable that was not declared} {
     list [catch {itcl::configbody test_icbody::nocode {return "new"}} msg] $msg
 } {1 {option "nocode" is not defined in class "::test_icbody"}}
 
+test body-5.1 {redefine constructors} -setup {
+    unset -nocomplain answer
+    itcl::class B {constructor {} {lappend ::answer B}}
+    itcl::class D {inherit B; constructor {} {lappend ::answer A}}
+} -body {
+    D d1
+    itcl::body D::constructor {} {lappend ::answer D}
+    D d2
+    set ::answer
+} -cleanup {
+    itcl::delete class B 
+    unset -nocomplain answer
+} -result {B A B D}
+
 # ----------------------------------------------------------------------
 #  Clean up
 # ----------------------------------------------------------------------
