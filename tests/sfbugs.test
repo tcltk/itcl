@@ -563,7 +563,7 @@ test fossil-9.2 {ec215db901} -setup {
     set ::answer
 } -cleanup {
     itcl::delete class Object
-    unset -nocomplain ::anser
+    unset -nocomplain ::answer
 } -result 1
 
 
