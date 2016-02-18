@@ -1594,14 +1594,6 @@ Itcl_ClassConstructorCmd(
         Tcl_IncrRefCount(iclsPtr->initCode);
         body = Tcl_GetString(objv[3]);
     }
-    if (iclsPtr->initCode != NULL) {
-	Tcl_Obj *initNamePtr;
-	initNamePtr = Tcl_NewStringObj("___constructor_init", -1);
-        if (Itcl_CreateMethod(interp, iclsPtr, initNamePtr, arglist,
-	        Tcl_GetString(iclsPtr->initCode)) != TCL_OK) {
-            return TCL_ERROR;
-        }
-    }
 
     if (Itcl_CreateMethod(interp, iclsPtr, namePtr, arglist, body) != TCL_OK) {
         return TCL_ERROR;

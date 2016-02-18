@@ -1051,7 +1051,6 @@ NRBiChainCmd(
     Tcl_Obj **newobjv;
     Tcl_Obj * const *cObjv;
     int cObjc;
-    int freeCmd;
     int idx;
     Tcl_Obj *objPtr;
 
@@ -1092,14 +1091,8 @@ NRBiChainCmd(
 	idx = 1;
     }
     cmd1 = (char *)ckalloc(strlen(Tcl_GetString(cObjv[idx]))+1);
-    freeCmd = 1;
     strcpy(cmd1, Tcl_GetString(cObjv[idx]));
     Itcl_ParseNamespPath(cmd1, &buffer, &head, &cmd);
-    if (strcmp(cmd, "___constructor_init") == 0) {
-	ckfree(cmd1);
-	freeCmd = 0;
-        cmd = "constructor";
-    }
 
     /*
      *  Look for the specified command in one of the base classes.
@@ -1129,9 +1122,7 @@ NRBiChainCmd(
      *  If found, execute it.  Otherwise, do nothing.
      */
     objPtr = Tcl_NewStringObj(cmd, -1);
-    if (freeCmd) {
-        ckfree(cmd1);
-    }
+    ckfree(cmd1);
     Tcl_IncrRefCount(objPtr);
     while ((iclsPtr = Itcl_AdvanceHierIter(&hier)) != NULL) {
         hPtr = Tcl_FindHashEntry(&iclsPtr->functions, (char *)objPtr);
