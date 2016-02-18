@@ -638,9 +638,6 @@ ItclCreateMemberFunc(
             imPtr->flags |= ITCL_COMMON;
 	}
     }
-    if (strcmp(name, "___constructor_init") == 0) {
-        imPtr->flags |= ITCL_CONSTRUCTOR;
-    }
     if (strcmp(name, "constructor") == 0) {
 	/*
 	 * REVISE mcode->bodyPtr here!
