@@ -2291,7 +2291,7 @@ do
   test -z "$as_dir" && as_dir=.
     for ac_exec_ext in '' $ac_executable_extensions; do
   if as_fn_executable_p "$as_dir/$ac_word$ac_exec_ext"; then
-    ac_cv_prog_CYGPATH="cygpath -w"
+    ac_cv_prog_CYGPATH="cygpath -m"
     $as_echo "$as_me:${as_lineno-$LINENO}: found $as_dir/$ac_word$ac_exec_ext" >&5
     break 2
   fi
@@ -2316,9 +2316,8 @@ fi
 	    TEA_PLATFORM="windows"
 	    ;;
 	*CYGWIN_*)
-	    CYGPATH=echo
 	    EXEEXT=".exe"
-	    # TEA_PLATFORM is determined later in LOAD_TCLCONFIG
+	    # CYGPATH and TEA_PLATFORM are determined later in LOAD_TCLCONFIG
 	    ;;
 	*)
 	    CYGPATH=echo
@@ -3446,9 +3445,51 @@ main ()
 }
 _ACEOF
 if ac_fn_c_try_compile "$LINENO"; then :
-  TEA_PLATFORM="unix"
+
+	    TEA_PLATFORM="unix"
+	    CYGPATH=echo
+
 else
-  TEA_PLATFORM="windows"
+
+	    TEA_PLATFORM="windows"
+	    # Extract the first word of "cygpath", so it can be a program name with args.
+set dummy cygpath; ac_word=$2
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
+$as_echo_n "checking for $ac_word... " >&6; }
+if ${ac_cv_prog_CYGPATH+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  if test -n "$CYGPATH"; then
+  ac_cv_prog_CYGPATH="$CYGPATH" # Let the user override the test.
+else
+as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $PATH
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+    for ac_exec_ext in '' $ac_executable_extensions; do
+  if as_fn_executable_p "$as_dir/$ac_word$ac_exec_ext"; then
+    ac_cv_prog_CYGPATH="cygpath -m"
+    $as_echo "$as_me:${as_lineno-$LINENO}: found $as_dir/$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+  done
+IFS=$as_save_IFS
+
+  test -z "$ac_cv_prog_CYGPATH" && ac_cv_prog_CYGPATH="echo"
+fi
+fi
+CYGPATH=$ac_cv_prog_CYGPATH
+if test -n "$CYGPATH"; then
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $CYGPATH" >&5
+$as_echo "$CYGPATH" >&6; }
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+fi
+
+
 
 fi
 rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
@@ -6617,13 +6658,31 @@ $as_echo "found $CELIB_DIR" >&6; }
 	        else
 		    runtime=-MD
 	        fi
+	        case "x`echo \${VisualStudioVersion}`" in
+	            x1[4-9]*)
+		        lflags="${lflags} -nodefaultlib:libucrt.lib"
+
+    vars="ucrt.lib"
+    for i in $vars; do
+	if test "${TEA_PLATFORM}" = "windows" -a "$GCC" = "yes" ; then
+	    # Convert foo.lib to -lfoo for GCC.  No-op if not *.lib
+	    i=`echo "$i" | sed -e 's/^\([^-].*\)\.lib$/-l\1/i'`
+	fi
+	PKG_LIBS="$PKG_LIBS $i"
+    done
+
+
+	            ;;
+	            *)
+	            ;;
+	        esac
 
                 if test "$do64bit" != "no" ; then
 		    # All this magic is necessary for the Win64 SDK RC1 - hobbs
 		    CC="\"${PATH64}/cl.exe\""
 		    CFLAGS="${CFLAGS} -I\"${MSSDK}/Include\" -I\"${MSSDK}/Include/crt\" -I\"${MSSDK}/Include/crt/sys\""
 		    RC="\"${MSSDK}/bin/rc.exe\""
-		    lflags="-nologo -MACHINE:${MACHINE} -LIBPATH:\"${MSSDK}/Lib/${MACHINE}\""
+		    lflags="${lflags} -nologo -MACHINE:${MACHINE} -LIBPATH:\"${MSSDK}/Lib/${MACHINE}\""
 		    LINKBIN="\"${PATH64}/link.exe\""
 		    CFLAGS_DEBUG="-nologo -Zi -Od -W3 ${runtime}d"
 		    CFLAGS_OPTIMIZE="-nologo -O2 -W2 ${runtime}"
@@ -6675,12 +6734,12 @@ _ACEOF
 		    CFLAGS_DEBUG="-nologo -Zi -Od"
 		    CFLAGS_OPTIMIZE="-nologo -Ox"
 		    lversion=`echo ${CEVERSION} | sed -e 's/\(.\)\(..\)/\1\.\2/'`
-		    lflags="-MACHINE:${ARCH} -LIBPATH:\"${CELIBPATH}\" -subsystem:windowsce,${lversion} -nologo"
+		    lflags="${lflags} -MACHINE:${ARCH} -LIBPATH:\"${CELIBPATH}\" -subsystem:windowsce,${lversion} -nologo"
 		    LINKBIN="\"${CEBINROOT}/link.exe\""
 
 		else
 		    RC="rc"
-		    lflags="-nologo"
+		    lflags="${lflags} -nologo"
 		    LINKBIN="link"
 		    CFLAGS_DEBUG="-nologo -Z7 -Od -W3 -WX ${runtime}d"
 		    CFLAGS_OPTIMIZE="-nologo -O2 -W2 ${runtime}"
@@ -8882,12 +8941,12 @@ $as_echo "${TCLSH_PROG}" >&6; }
 	eval itcl_LIB_FLAG="-litcl`echo ${PACKAGE_VERSION} | tr -d .`${DBGX}"
 	eval itcl_STUB_LIB_FLAG="-litclstub`echo ${PACKAGE_VERSION} | tr -d .`${DBGX}"
     fi
-    itcl_BUILD_LIB_SPEC="-L`pwd` ${itcl_LIB_FLAG}"
-    itcl_LIB_SPEC="-L${pkglibdir} ${itcl_LIB_FLAG}"
-    itcl_BUILD_STUB_LIB_SPEC="-L`pwd` ${itcl_STUB_LIB_FLAG}"
-    itcl_STUB_LIB_SPEC="-L${pkglibdir} ${itcl_STUB_LIB_FLAG}"
-    itcl_BUILD_STUB_LIB_PATH="`pwd`/${PKG_STUB_LIB_FILE}"
-    itcl_STUB_LIB_PATH="${pkglibdir}/${PKG_STUB_LIB_FILE}"
+    itcl_BUILD_LIB_SPEC="-L`$CYGPATH $(pwd)` ${itcl_LIB_FLAG}"
+    itcl_LIB_SPEC="-L`$CYGPATH ${pkglibdir}` ${itcl_LIB_FLAG}"
+    itcl_BUILD_STUB_LIB_SPEC="-L`$CYGPATH $(pwd)` ${itcl_STUB_LIB_FLAG}"
+    itcl_STUB_LIB_SPEC="-L`$CYGPATH ${pkglibdir}` ${itcl_STUB_LIB_FLAG}"
+    itcl_BUILD_STUB_LIB_PATH="`$CYGPATH $(pwd)`/${PKG_STUB_LIB_FILE}"
+    itcl_STUB_LIB_PATH="`$CYGPATH ${pkglibdir}`/${PKG_STUB_LIB_FILE}"
 
 
 
