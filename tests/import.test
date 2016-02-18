@@ -149,7 +149,6 @@ test import-2.4 {itcl::class handles stubs correctly
     }
 } -constraints {
     only_working_in_itcl3.4
-
 } -result {x ::test::foo2 ::test::foo2 ::test::foo2 ::test::foo2 0}
 
 test import-2.5 {itcl::class will overwrite stubs in an existing namespace} {
