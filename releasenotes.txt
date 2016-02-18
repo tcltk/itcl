@@ -1,4 +1,4 @@
-This is the release 4.0.2 of Itcl.
+This is the release 4.0.4 of Itcl.
 
 The difference to 4.0.*: in this release there are only bug fixes from SF and the fossil bug tracker for itcl.
 
