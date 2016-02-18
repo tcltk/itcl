@@ -638,9 +638,6 @@ ItclCreateMemberFunc(
             imPtr->flags |= ITCL_COMMON;
 	}
     }
-    if (strcmp(name, "___constructor_init") == 0) {
-        imPtr->flags |= ITCL_CONSTRUCTOR;
-    }
     if (strcmp(name, "constructor") == 0) {
 	/*
 	 * REVISE mcode->bodyPtr here!
@@ -757,6 +754,25 @@ Itcl_ChangeMemberFunc(
 
         Itcl_DeleteMemberCode((char*)mcode);
         return TCL_ERROR;
+    }
+
+    if (imPtr->flags & ITCL_CONSTRUCTOR) {
+	/*
+	 * REVISE mcode->bodyPtr here!
+	 * Include a [my ItclConstructBase $iclsPtr] method call.
+	 * Inherited from itcl::Root
+	 */
+
+	Tcl_Obj *newBody = Tcl_NewStringObj("", -1);
+	Tcl_AppendToObj(newBody, 
+		"[::info object namespace ${this}]::my ItclConstructBase ", -1);
+	Tcl_AppendObjToObj(newBody, imPtr->iclsPtr->fullNamePtr);
+	Tcl_AppendToObj(newBody, "\n", -1);
+
+	Tcl_AppendObjToObj(newBody, mcode->bodyPtr);
+	Tcl_DecrRefCount(mcode->bodyPtr);
+	mcode->bodyPtr = newBody;
+	Tcl_IncrRefCount(mcode->bodyPtr);
     }
 
     /*
