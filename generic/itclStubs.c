@@ -138,30 +138,6 @@ Itcl_StubExistsCmd(
 
 /*
  * ------------------------------------------------------------------------
- *  ItclStubUnknownCmd()
- *
- *  Invoked by Tcl whenever itcl has to handle "stub unknown" command to
- * ------------------------------------------------------------------------
- */
-#if 0
-static int
-ItclStubUnknownCmd(
-    ClientData clientData,   /* not used */
-    Tcl_Interp *interp,      /* current interpreter */
-    int objc,                /* number of arguments */
-    Tcl_Obj *const objv[])   /* argument objects */
-{
-    Tcl_AppendResult(interp,
-        "wrong # args: should be one of...",
-	"\n  stub create name",
-	"\n  stub exists name",
-	NULL);
-    return TCL_ERROR;
-}
-#endif
-
-/*
- * ------------------------------------------------------------------------
  *  ItclHandleStubCmd()
  *
  *  Invoked by Tcl to handle commands created by "stub create".
@@ -231,8 +207,6 @@ ItclHandleStubCmd(
     Tcl_ResetResult(interp);
     ItclShowArgs(1, "ItclHandleStubCmd", cmdlinec - 1, cmdlinev + 1);
     result = Tcl_EvalObjv(interp, cmdlinec - 1, cmdlinev + 1, TCL_EVAL_DIRECT);
-    Tcl_DecrRefCount(cmdlinev[0]);
-    Tcl_DecrRefCount(cmdlinev[1]);
     Tcl_DecrRefCount(cmdlinePtr);
     Tcl_DecrRefCount(objAutoLoad[0]);
     return result;

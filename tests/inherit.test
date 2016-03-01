@@ -124,7 +124,7 @@ test inherit-1.7 {destruction ok if destructors are missing} {
 } {{} {{skip destruct} {bar destruct} {geek destruct}}}
 
 
-test inherit-1.8 {errors during construction are cleaned up and reported} {
+test inherit-1.8 {errors during construction are cleaned up and reported} knownBug {
     global errorInfo test_cd_watch
     set test_cd_watch ""
     itcl::body test_cd_bar::constructor {args} {error "bar: failed"}
@@ -141,6 +141,8 @@ test inherit-1.8 {errors during construction are cleaned up and reported} {
     invoked from within
 "eval test_cd_foobar::constructor 1 2 fred $x"
     while constructing object "::test_cd_mongrel1" in ::test_cd_mongrel::constructor (body line 2)
+    invoked from within
+"::itcl::parser::handleClass test_cd_mongrel ::test_cd_mongrel #auto bob"
     invoked from within
 "test_cd_mongrel #auto bob"} {{foo: 1 2} {mongrel destruct} {foobar destruct} {foo destruct} {bar destruct} {geek destruct}}}
 

@@ -93,42 +93,13 @@ static const char safeInitScript[] =
 "}";
 
 static const char *clazzClassScript =
-"set itclClass [::oo::class create ::itcl::clazz]\n"
-"::oo::define $itclClass superclass ::oo::class";
-
-
-static const char *clazzUnknownBody =
-"    set mySelf [::oo::Helpers::self]\n"
-"    if {[::itcl::is class $mySelf]} {\n"
-"        set namespace [uplevel 1 namespace current]\n"
-"        set my_namespace $namespace\n"
-"        if {$my_namespace ne \"::\"} {\n"
-"            set my_namespace ${my_namespace}::\n"
-"        }\n"
-"        set my_class [::itcl::find classes ${my_namespace}$m]\n"
-"        if {[string length $my_class] > 0} {\n"
-"            # class already exists, it is a redefinition, so delete old class first\n"
-"	    ::itcl::delete class $my_class\n"
-"        }\n"
-"        set cmd [uplevel 1 [list ::info command ${my_namespace}$m]]\n"
-"        if {[string length $cmd] > 0} {\n"
-"            error \"command \\\"$m\\\" already exists in namespace \\\"$namespace\\\"\"\n"
-"        }\n"
-"    } \n"
-"    set myns [uplevel namespace current]\n"
-"    if {$myns ne \"::\"} {\n"
-"       set myns ${myns}::\n"
-"    }\n"
-"    set myObj [lindex [::info level 0] 0]\n"
-"    set cmd [list uplevel 1 ::itcl::parser::handleClass $myObj $mySelf $m {*}[list $args]]\n"
-"    set myErrorInfo {}\n"
-"    set obj {}\n"
-"    if {[catch {\n"
-"        eval $cmd\n"
-"    } obj myErrorInfo]} {\n"
-"	return -code error -errorinfo $::errorInfo $obj\n"
-"    }\n"
-"    return $obj\n";
+"::oo::class create ::itcl::clazz {\n"
+"  superclass ::oo::class\n"
+"  method unknown args {\n"
+"    tailcall ::itcl::parser::handleClass [lindex [info level 0] 0] [self] {*}$args\n"
+"  }\n"
+"  unexport create new unknown\n"
+"}";
 
 #define ITCL_IS_ENSEMBLE 0x1
 
@@ -164,34 +135,37 @@ static ItclCmdsInfo itclCmds [] = {
 #ifdef ITCL_DEBUG_C_INTERFACE
 extern void RegisterDebugCFunctions( Tcl_Interp * interp);
 #endif
-
-/*
- * ------------------------------------------------------------------------
- *  AddClassUnknowMethod()
- *
- * ------------------------------------------------------------------------
- */
-static int
-AddClassUnknowMethod(
-    Tcl_Interp *interp,
-    ItclObjectInfo *infoPtr,
-    Tcl_Class clsPtr)
-{
-    ClientData tmPtr, pmPtr;
 
-    infoPtr->unknownNamePtr = Tcl_NewStringObj("unknown", -1);
-    Tcl_IncrRefCount(infoPtr->unknownNamePtr);
-    infoPtr->unknownArgumentPtr = Tcl_NewStringObj("m args", -1);
-    Tcl_IncrRefCount(infoPtr->unknownArgumentPtr);
-    infoPtr->unknownBodyPtr = Tcl_NewStringObj(clazzUnknownBody, -1);
-    Tcl_IncrRefCount(infoPtr->unknownBodyPtr);
-    tmPtr = (ClientData)Itcl_NewProcClassMethod(interp,
-        clsPtr, NULL, NULL, NULL, NULL, infoPtr->unknownNamePtr,
-	infoPtr->unknownArgumentPtr, infoPtr->unknownBodyPtr, &pmPtr);
-    if (tmPtr == NULL) {
-        Tcl_Panic("cannot add class method unknown");
-    }
-    return TCL_OK;
+static const Tcl_ObjectMetadataType objMDT = {
+    TCL_OO_METADATA_VERSION_CURRENT,
+    "ItclObject",
+    ItclDeleteObjectMetadata,	/* Not really used yet */
+    NULL
+};
+
+static Tcl_MethodCallProc RootCallProc;
+
+const Tcl_MethodType itclRootMethodType = {
+    TCL_OO_METHOD_VERSION_CURRENT,
+    "itcl root method",
+    RootCallProc,
+    NULL,
+    NULL
+};
+
+static int
+RootCallProc(
+    ClientData clientData,
+    Tcl_Interp *interp,
+    Tcl_ObjectContext context,
+    int objc,
+    Tcl_Obj *const *objv)
+{
+    Tcl_Object oPtr = Tcl_ObjectContextObject(context);
+    ItclObject *ioPtr = Tcl_ObjectGetMetadata(oPtr, &objMDT);
+    ItclRootMethodProc *proc = (ItclRootMethodProc *)clientData;
+
+    return (*proc)(ioPtr, interp, objc+1, objv-1);
 }
 
 /*
@@ -233,12 +207,13 @@ Initialize (
     Tcl_Namespace *nsPtr;
     Tcl_Namespace *itclNs;
     Tcl_HashEntry *hPtr;
-    Tcl_Obj *objPtr;
     ItclObjectInfo *infoPtr;
     const char * ret;
     char *res_option;
     int opt;
     int isNew;
+    Tcl_Object clazzObjectPtr, root;
+    Tcl_Obj *objPtr;
 
     if (Tcl_InitStubs(interp, "8.6", 0) == NULL) {
         return TCL_ERROR;
@@ -306,15 +281,11 @@ Initialize (
     infoPtr->class_meta_type->name = "ItclClass";
     infoPtr->class_meta_type->deleteProc = ItclDeleteClassMetadata;
     infoPtr->class_meta_type->cloneProc = NULL;
-    infoPtr->object_meta_type = (Tcl_ObjectMetadataType *)ckalloc(
-            sizeof(Tcl_ObjectMetadataType));
-    infoPtr->object_meta_type->version = TCL_OO_METADATA_VERSION_CURRENT;
-    infoPtr->object_meta_type->name = "ItclObject";
-    infoPtr->object_meta_type->deleteProc = ItclDeleteObjectMetadata;
-    infoPtr->object_meta_type->cloneProc = NULL;
+
+    infoPtr->object_meta_type = &objMDT;
+
     Tcl_InitHashTable(&infoPtr->objects, TCL_ONE_WORD_KEYS);
     Tcl_InitHashTable(&infoPtr->objectCmds, TCL_ONE_WORD_KEYS);
-    Tcl_InitObjHashTable(&infoPtr->objectNames);
     Tcl_InitHashTable(&infoPtr->classes, TCL_ONE_WORD_KEYS);
     Tcl_InitObjHashTable(&infoPtr->nameClasses);
     Tcl_InitHashTable(&infoPtr->namespaceClasses, TCL_ONE_WORD_KEYS);
@@ -373,7 +344,6 @@ Initialize (
     infoPtr->useOldResolvers = opt;
     Itcl_InitStack(&infoPtr->clsStack);
     Itcl_InitStack(&infoPtr->contextStack);
-    Itcl_InitStack(&infoPtr->constructorStack);
 
     Tcl_SetAssocData(interp, ITCL_INTERP_DATA,
         (Tcl_InterpDeleteProc*)FreeItclObjectInfo, (ClientData)infoPtr);
@@ -384,27 +354,39 @@ Initialize (
     ItclVarsAndCommandResolveInit(interp);
 #endif
 
+    objPtr = Tcl_NewStringObj("::oo::class", -1);
+    root = Tcl_NewObjectInstance(interp, Tcl_GetObjectAsClass(
+	    Tcl_GetObjectFromObj(interp, objPtr)), "::itcl::Root",
+	    NULL, 0, NULL, 0);
+    Tcl_DecrRefCount(objPtr);
+
+    Tcl_NewMethod(interp, Tcl_GetObjectAsClass(root),
+	    Tcl_NewStringObj("unknown", -1), 0, &itclRootMethodType,
+	    ItclUnknownGuts);
+    Tcl_NewMethod(interp, Tcl_GetObjectAsClass(root),
+	    Tcl_NewStringObj("ItclConstructBase", -1), 0,
+	    &itclRootMethodType, ItclConstructGuts);
+
     /* first create the Itcl base class as root of itcl classes */
     if (Tcl_EvalEx(interp, clazzClassScript, -1, 0) != TCL_OK) {
         Tcl_Panic("cannot create Itcl root class ::itcl::clazz");
     }
-    objPtr = Tcl_NewStringObj("::itcl::clazz", -1);
-    infoPtr->clazzObjectPtr = Tcl_GetObjectFromObj(interp, objPtr);
+    clazzObjectPtr = Tcl_GetObjectFromObj(interp, Tcl_GetObjResult(interp));
 
-    /* work around for SF bug #254 needed because of problem in TclOO 1.0.2 !! */
-    if (Tcl_PkgPresent(interp, "TclOO", "1.0.2", 1) != NULL) {
-	Itcl_IncrObjectRefCount(infoPtr->clazzObjectPtr);
-    }
 
-    Tcl_DecrRefCount(objPtr);
-    if (infoPtr->clazzObjectPtr == NULL) {
+    if (clazzObjectPtr == NULL) {
         Tcl_AppendResult(interp,
                 "ITCL: cannot get Object for ::itcl::clazz for class \"",
                 "::itcl::clazz", "\"", NULL);
         return TCL_ERROR;
     }
-    infoPtr->clazzClassPtr = Tcl_GetObjectAsClass(infoPtr->clazzObjectPtr);
-    AddClassUnknowMethod(interp, infoPtr, infoPtr->clazzClassPtr);
+
+    /* work around for SF bug #254 needed because of problem in TclOO 1.0.2 !! */
+    if (Tcl_PkgPresent(interp, "TclOO", "1.0.2", 1) != NULL) {
+	Itcl_IncrObjectRefCount(clazzObjectPtr);
+    }
+
+    infoPtr->clazzClassPtr = Tcl_GetObjectAsClass(clazzObjectPtr);
 
     /*
      *  Initialize the ensemble package first, since we need this
@@ -572,10 +554,10 @@ ItclCallCCommand(
 	int i;
 
 	argv = (const char**)ckalloc((unsigned)((objc-1)*sizeof(char*)));
-	for (i=2;i<objc;i++) {
-	    argv[i-2] = Tcl_GetString(objv[i]);
+	for (i=1;i<objc;i++) {
+	    argv[i-1] = Tcl_GetString(objv[i]);
 	}
-        result = (*argProc)(cData, interp, objc-2, argv);
+        result = (*argProc)(cData, interp, objc-1, argv);
         ckfree((char*)argv);
     }
     if (objProc != NULL) {
@@ -650,16 +632,15 @@ ItclCheckSetItclHull(
 	        "<objectName> <value>", NULL);
 	return TCL_ERROR;
     }
+
+    /* 
+     * This is an internal command, and is never called with an
+     * objectName value other than the empty list. Check that with
+     * an assertion so alternative handling can be removed.
+     */
+    assert( strlen(Tcl_GetString(objv[1])) == 0);
     infoPtr = (ItclObjectInfo *)clientData;
-    if (strlen(Tcl_GetString(objv[1])) > 0) {
-        hPtr = Tcl_FindHashEntry(&infoPtr->objectNames, (char *)objv[1]);
-        if (hPtr == NULL) {
-            Tcl_AppendResult(interp, "ItclCheckSetItclHull cannot find object\"",
-	            Tcl_GetString(objv[1]), "\"", NULL);
-	    return TCL_ERROR;
-        }
-        ioPtr = Tcl_GetHashValue(hPtr);
-    } else {
+    {
         ioPtr = infoPtr->currIoPtr;
 	if (ioPtr == NULL) {
             Tcl_AppendResult(interp, "ItclCheckSetItclHull cannot find object",
@@ -799,7 +780,7 @@ ItclFinishCmd(
     }
     Tcl_DecrRefCount(ensObjPtr);
 
-    /* remove the itclinfo and vars entry from the info dict */
+    /* remove the vars entry from the info dict */
     /* and replace it by the original one */
     cmdPtr = Tcl_FindCommand(interp, "info", NULL, TCL_GLOBAL_ONLY);
     if (cmdPtr != NULL && Tcl_IsEnsemble(cmdPtr)) {
@@ -810,10 +791,6 @@ ItclFinishCmd(
 	    Tcl_DictObjRemove(interp, mapDict, objPtr);
 	    Tcl_DictObjPut(interp, mapDict, objPtr, infoPtr->infoVars4Ptr);
 	    Tcl_DecrRefCount(objPtr);
-
-            objPtr = Tcl_NewStringObj("itclinfo", -1);
-	    Tcl_DictObjRemove(interp, mapDict, objPtr);
-	    Tcl_DecrRefCount(objPtr);
 	    Tcl_SetEnsembleMappingDict(interp, cmdPtr, mapDict);
         }
     }
@@ -821,11 +798,9 @@ ItclFinishCmd(
      * ::itcl::builtin::Info
      * and ::itcl::builtin::Info::vars and vars is 2 here !! */
     /* seems to be as the tclOO commands are not yet deleted ?? */
-    Tcl_DecrRefCount(infoPtr->infoVars2Ptr);
     Tcl_DecrRefCount(infoPtr->infoVars3Ptr);
     Tcl_DecrRefCount(infoPtr->infoVars4Ptr);
     if (checkMemoryLeaks) {
-        Tcl_DecrRefCount(infoPtr->infoVars2Ptr);
         Tcl_DecrRefCount(infoPtr->infoVars3Ptr);
         Tcl_DecrRefCount(infoPtr->infoVars4Ptr);
     /* see comment above */
@@ -837,7 +812,6 @@ ItclFinishCmd(
             "::oo::define ::itcl::clazz deletemethod unknown", -1, 0);
 
     /* first have to look for the remaining memory leaks, then remove the next ifdef */
-#ifdef LATER
     Itcl_RenameCommand(infoPtr->interp, "::itcl::clazz", "");
 
     /* tear down ::itcl namespace (this includes ::itcl::parser namespace) */
@@ -861,27 +835,18 @@ ItclFinishCmd(
     if (nsPtr != NULL) {
         Tcl_DeleteNamespace(nsPtr);
     }
-#endif
-    /* remove the unknown method from top class */
-    if (infoPtr->unknownNamePtr != NULL) {
-        Tcl_DecrRefCount(infoPtr->unknownNamePtr);
-    }
-    if (infoPtr->unknownArgumentPtr != NULL) {
-        Tcl_DecrRefCount(infoPtr->unknownArgumentPtr);
-    }
-    if (infoPtr->unknownBodyPtr != NULL) {
-        Tcl_DecrRefCount(infoPtr->unknownBodyPtr);
+    nsPtr = Tcl_FindNamespace(infoPtr->interp, "::itcl", NULL, 0);
+    if (nsPtr != NULL) {
+        Tcl_DeleteNamespace(nsPtr);
     }
 
     /* cleanup ensemble info */
     ItclFinishEnsemble(infoPtr);
 
-    ckfree((char *)infoPtr->object_meta_type);
     ckfree((char *)infoPtr->class_meta_type);
 
     Itcl_DeleteStack(&infoPtr->clsStack);
     Itcl_DeleteStack(&infoPtr->contextStack);
-    Itcl_DeleteStack(&infoPtr->constructorStack);
     /* clean up list pool */
     Itcl_FinishList();
 

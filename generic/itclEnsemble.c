@@ -824,11 +824,6 @@ CreateEnsemble(
      *  If there is no parent data, then this is a top-level
      *  ensemble.  Create the ensemble by installing its access
      *  command.
-     *
-     *  BE CAREFUL:  Set the string-based proc to the wrapper
-     *    procedure TclInvokeObjectCommand.  Otherwise, the
-     *    ensemble command may fail.  For example, it will fail
-     *    when invoked as a hidden command.
      */
     if (parentEnsData == NULL) {
 	Tcl_Obj *unkObjPtr;
@@ -1711,21 +1706,22 @@ Itcl_EnsembleCmd(
     ensName = Tcl_GetString(objv[1]);
 
     if (ensData) {
-        if (FindEnsemblePart(interp, ensData, ensName, &ensPart) != TCL_OK) {
+        if (FindEnsemblePart(ensInfo->master, ensData, ensName, &ensPart) != TCL_OK) {
             ensPart = NULL;
         }
         if (ensPart == NULL) {
-            if (CreateEnsemble(interp, ensData, ensName) != TCL_OK) {
+            if (CreateEnsemble(ensInfo->master, ensData, ensName) != TCL_OK) {
+		Tcl_TransferResult(ensInfo->master, TCL_ERROR, interp);
                 return TCL_ERROR;
             }
-            if (FindEnsemblePart(interp, ensData, ensName, &ensPart)
+            if (FindEnsemblePart(ensInfo->master, ensData, ensName, &ensPart)
                     != TCL_OK) {
                 Tcl_Panic("Itcl_EnsembleCmd: can't create ensemble");
             }
         }
 
         cmd = ensPart->cmdPtr;
-        infoPtr = Tcl_GetAssocData(interp, ITCL_INTERP_DATA, &procPtr);
+        infoPtr = Tcl_GetAssocData(ensInfo->master, ITCL_INTERP_DATA, &procPtr);
         hPtr = Tcl_FindHashEntry(&infoPtr->ensembleInfo->ensembles,
 	        (char *)ensPart->cmdPtr);
         if (hPtr == NULL) {
@@ -1799,6 +1795,7 @@ Itcl_EnsembleCmd(
      */
     if (status == TCL_ERROR) {
 #ifdef NOTDEF
+#else
 	/* no longer needed, no extra interpreter !! */
         const char *errInfo = Tcl_GetVar2(ensInfo->parser, "::errorInfo",
             (char*)NULL, TCL_GLOBAL_ONLY);
@@ -1809,15 +1806,9 @@ Itcl_EnsembleCmd(
 #endif
 
         if (objc == 3) {
-	    Tcl_Obj *options = Tcl_GetReturnOptions(interp, status);
-	    Tcl_Obj *key = Tcl_NewStringObj("-errorline", -1);
-	    Tcl_Obj *stackTrace;
-	    Tcl_IncrRefCount(key);
-	    Tcl_DictObjGet(NULL, options, key, &stackTrace);
-	    Tcl_DecrRefCount(key);
 	    Tcl_AppendObjToErrorInfo(interp, Tcl_ObjPrintf(
-	            "\n    (\"ensemble\" body line %s)",
-	            Tcl_GetString(stackTrace)));
+	            "\n    (\"ensemble\" body line %d)",
+		    Tcl_GetErrorLine(ensInfo->parser)));
         }
     }
     Tcl_SetObjResult(interp, Tcl_GetObjResult(ensInfo->parser));
@@ -1870,7 +1861,7 @@ GetEnsembleParser(
      */
     ensInfo = (EnsembleParser*)ckalloc(sizeof(EnsembleParser));
     ensInfo->master = interp;
-    ensInfo->parser = interp;
+    ensInfo->parser = Tcl_CreateInterp();
     ensInfo->ensData = NULL;
 
 #ifdef NOTDEF
@@ -1896,6 +1887,8 @@ GetEnsembleParser(
         Tcl_DeleteCommandFromToken(ensInfo->parser, cmd);
     }
 
+#else
+    Tcl_DeleteNamespace(Tcl_GetGlobalNamespace(ensInfo->parser));
 #endif
     /*
      *  Add the allowed commands to the parser interpreter:
@@ -2026,8 +2019,9 @@ Itcl_EnsPartCmd(
 	result = TCL_ERROR;
 	goto errorOut;
     }
-    if (Tcl_CreateProc(interp, cmdInfo.namespacePtr, partName, objv[2], objv[3],
+    if (Tcl_CreateProc(ensInfo->master, cmdInfo.namespacePtr, partName, objv[2], objv[3],
             &procPtr) != TCL_OK) {
+	Tcl_TransferResult(ensInfo->master, TCL_ERROR, interp);
 	result = TCL_ERROR;
 	goto errorOut;
     }
@@ -2040,9 +2034,10 @@ Itcl_EnsPartCmd(
      *  if we try to compile the Tcl code for the part.  If
      *  anything goes wrong, clean up before bailing out.
      */
-    result = AddEnsemblePart(interp, ensData, partName, usage,
+    result = AddEnsemblePart(ensInfo->master, ensData, partName, usage,
         Tcl_GetObjInterpProc(), (ClientData)procPtr, _Tcl_ProcDeleteProc,
         ITCL_ENSEMBLE_ENSEMBLE, &ensPart);
+    Tcl_TransferResult(ensInfo->master, result, interp);
 
 errorOut:
     Tcl_DecrRefCount(usagePtr);

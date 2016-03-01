@@ -323,19 +323,14 @@ Itcl_CreateArgs(
 {
     int i;
     Tcl_Obj *listPtr;
-    Tcl_Obj *objPtr;
 
     ItclShowArgs(1, "Itcl_CreateArgs", objc, objv);
-    listPtr = Tcl_NewListObj(0, (Tcl_Obj**)NULL);
-    objPtr = Tcl_NewStringObj("my", -1);
-    Tcl_IncrRefCount(objPtr);
-    Tcl_ListObjAppendElement((Tcl_Interp*)NULL, listPtr, objPtr);
-    objPtr = Tcl_NewStringObj(string, -1);
-    Tcl_IncrRefCount(objPtr);
-    Tcl_ListObjAppendElement((Tcl_Interp*)NULL, listPtr, objPtr);
+    listPtr = Tcl_NewListObj(objc+2, NULL);
+    Tcl_ListObjAppendElement(NULL, listPtr, Tcl_NewStringObj("my", -1));
+    Tcl_ListObjAppendElement(NULL, listPtr, Tcl_NewStringObj(string, -1));
 
     for (i=0; i < objc; i++) {
-        Tcl_ListObjAppendElement((Tcl_Interp*)NULL, listPtr, objv[i]);
+        Tcl_ListObjAppendElement(NULL, listPtr, objv[i]);
     }
     return listPtr;
 }
@@ -360,18 +355,15 @@ ItclEnsembleSubCmd(
     int isRootEnsemble;
     ItclShowArgs(2, functionName, objc, objv);
 
-    newObjv = (Tcl_Obj **)ckalloc(sizeof(Tcl_Obj *)*(objc+1));
-    isRootEnsemble = Itcl_InitRewriteEnsemble(interp, 1, 2, objc, objv);
-    newObjv[0] = Tcl_NewStringObj("::info", -1);
+    newObjv = (Tcl_Obj **)ckalloc(sizeof(Tcl_Obj *)*(objc));
+    isRootEnsemble = Itcl_InitRewriteEnsemble(interp, 1, 1, objc, objv);
+    newObjv[0] = Tcl_NewStringObj("::itcl::builtin::Info", -1);
     Tcl_IncrRefCount(newObjv[0]);
-    newObjv[1] = Tcl_NewStringObj("itclinfo", -1);
-    Tcl_IncrRefCount(newObjv[1]);
     if (objc > 1) {
-        memcpy(newObjv+2, objv+1, sizeof(Tcl_Obj *) * (objc-1));
+        memcpy(newObjv+1, objv+1, sizeof(Tcl_Obj *) * (objc-1));
     }
-    result = Tcl_EvalObjv(interp, objc+1, newObjv, TCL_EVAL_INVOKE);
+    result = Tcl_EvalObjv(interp, objc, newObjv, TCL_EVAL_INVOKE);
     Tcl_DecrRefCount(newObjv[0]);
-    Tcl_DecrRefCount(newObjv[1]);
     ckfree((char *)newObjv);
     Itcl_ResetRewriteEnsemble(interp, isRootEnsemble);
     return result;
@@ -1389,11 +1381,6 @@ ItclAddClassFunctionDictInfo(
         haveFlags = 1;
         Tcl_ListObjAppendElement(interp, listPtr,
 	        Tcl_NewStringObj("have_body", -1));
-    }
-    if (imPtr->flags & ITCL_CONINIT) {
-        haveFlags = 1;
-        Tcl_ListObjAppendElement(interp, listPtr,
-	        Tcl_NewStringObj("constructor_init", -1));
     }
     if (haveFlags) {
         if (AddDictEntry(interp, valuePtr2, "-flags", listPtr) != TCL_OK) {

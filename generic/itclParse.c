@@ -644,13 +644,11 @@ ItclClassBaseCmd(
     Tcl_Obj *const objv[],   /* argument objects */
     ItclClass **iclsPtrPtr)  /* for returning iclsPtr */
 {
-    Tcl_DString buffer;
     Tcl_Obj *argumentPtr;
     Tcl_Obj *bodyPtr;
-    Tcl_CmdInfo cmdInfo;
     FOREACH_HASH_DECLS;
     Tcl_HashEntry *hPtr2;
-    Tcl_Namespace *parserNs;
+    Tcl_Namespace *parserNs, *ooNs;
     Tcl_CallFrame frame;
     ItclClass *iclsPtr;
     ItclVariable *ivPtr;
@@ -658,7 +656,6 @@ ItclClassBaseCmd(
     char *className;
     int isNewEntry;
     int result;
-    int result2;
     int noCleanup;
     ItclMemberFunc *imPtr;
 
@@ -709,6 +706,10 @@ ItclClassBaseCmd(
      */
     result = Tcl_Import(interp, iclsPtr->nsPtr, "::itcl::builtin::*",
         /* allowOverwrite */ 1);
+    ooNs = Tcl_GetObjectNamespace(iclsPtr->oPtr);
+    if ( result == TCL_OK && ooNs != iclsPtr->nsPtr) {
+	result = Tcl_Import(interp, ooNs, "::itcl::builtin::*", 1);
+    }
 
     if (result != TCL_OK) {
         Tcl_AppendObjToErrorInfo(interp, Tcl_ObjPrintf(
@@ -758,6 +759,26 @@ ItclClassBaseCmd(
         goto errorReturn;
     }
 
+    if (Itcl_FirstListElem(&iclsPtr->bases) == NULL) {
+	/* No [inherit]. Use default inheritance root. */
+	Tcl_Obj *cmdPtr = Tcl_NewListObj(4, NULL);
+
+	Tcl_ListObjAppendElement(NULL, cmdPtr,
+		Tcl_NewStringObj("::oo::define", -1));
+	Tcl_ListObjAppendElement(NULL, cmdPtr, iclsPtr->fullNamePtr);
+	Tcl_ListObjAppendElement(NULL, cmdPtr,
+		Tcl_NewStringObj("superclass", -1));
+	Tcl_ListObjAppendElement(NULL, cmdPtr,
+		Tcl_NewStringObj("::itcl::Root", -1));
+
+	Tcl_IncrRefCount(cmdPtr);
+	result = Tcl_EvalObj(interp, cmdPtr);
+	Tcl_DecrRefCount(cmdPtr);
+	if (result == TCL_ERROR) {
+	    goto errorReturn;
+	}
+    }
+
     /*
      *  At this point, parsing of the class definition has succeeded.
      *  Add built-in methods such as "configure" and "cget"--as long
@@ -774,9 +795,7 @@ ItclClassBaseCmd(
     Itcl_BuildVirtualTables(iclsPtr);
 
     /* make the methods and procs known to TclOO */
-    Tcl_DStringInit(&buffer);
     FOREACH_HASH_VALUE(imPtr, &iclsPtr->functions) {
-        if (!(imPtr->flags & ITCL_IMPLEMENT_NONE)) {
     	    ClientData pmPtr;
 	    argumentPtr = imPtr->codePtr->argumentPtr;
 	    bodyPtr = imPtr->codePtr->bodyPtr;
@@ -800,11 +819,6 @@ ItclClassBaseCmd(
 		if (strcmp(Tcl_GetString(imPtr->codePtr->bodyPtr),
 		        "@itcl-builtin-configure") == 0) {
 		    Tcl_AppendToObj(bodyPtr, "::itcl::builtin::configure", -1);
-		    isDone = 1;
-		}
-		if (strcmp(Tcl_GetString(imPtr->codePtr->bodyPtr),
-		        "@itcl-builtin-info") == 0) {
-		    Tcl_AppendToObj(bodyPtr, "::itcl::builtin::Info", -1);
 		    isDone = 1;
 		}
 		if (strcmp(Tcl_GetString(imPtr->codePtr->bodyPtr),
@@ -949,12 +963,6 @@ ItclClassBaseCmd(
                 }
 	        Tcl_AppendToObj(bodyPtr, " {*}$args]", -1);
 	    }
-	    /* fix for SF bug #257 check if TclOO is still available! */
-	    result2 = Tcl_GetCommandInfo(interp, "::oo::class", &cmdInfo);
-	    if (result2 == 0) {
-              Tcl_AppendResult(interp, " missing ::oo::class command!", NULL);
-	      return TCL_ERROR;
-	    }
 	    imPtr->tmPtr = (ClientData)Itcl_NewProcClassMethod(interp,
 	        iclsPtr->clsPtr, ItclCheckCallMethod, ItclAfterCallMethod,
                 ItclProcErrorProc, imPtr, imPtr->namePtr, argumentPtr,
@@ -963,7 +971,6 @@ ItclClassBaseCmd(
 	            (char *)imPtr->tmPtr, &isNewEntry);
 	    if (isNewEntry) {
 	        Tcl_SetHashValue(hPtr2, imPtr);
-		Itcl_PreserveData(iclsPtr);
 	    }
 	    if (iclsPtr->flags & (ITCL_TYPE|ITCL_WIDGET|ITCL_WIDGETADAPTOR)) {
 		if (argumentPtr == NULL) {
@@ -976,7 +983,6 @@ ItclClassBaseCmd(
 		 * entry in the procMethods map based on the old one.
 		 */
 		if (isNewEntry) {
-		    Itcl_ReleaseData(iclsPtr);
 		    Tcl_DeleteHashEntry(hPtr2);
 		}
 	        imPtr->tmPtr = (ClientData)Itcl_NewProcMethod(interp,
@@ -987,16 +993,14 @@ ItclClassBaseCmd(
 	    if ((imPtr->flags & ITCL_COMMON) == 0) {
 	        imPtr->accessCmd = Tcl_CreateObjCommand(interp,
 		        Tcl_GetString(imPtr->fullNamePtr),
-		        Itcl_ExecMethod, imPtr, Itcl_ReleaseData);
-		Itcl_PreserveData(imPtr);
+		        Itcl_ExecMethod, imPtr, ItclReleaseIMF);
+		ItclPreserveIMF(imPtr);
 	    } else {
 	        imPtr->accessCmd = Tcl_CreateObjCommand(interp,
 		        Tcl_GetString(imPtr->fullNamePtr),
-			Itcl_ExecProc, imPtr, Itcl_ReleaseData);
-		Itcl_PreserveData(imPtr);
+			Itcl_ExecProc, imPtr, ItclReleaseIMF);
+		ItclPreserveIMF(imPtr);
 	    }
-            Tcl_DStringInit(&buffer);
-        }
     }
     if (iclsPtr->flags & (ITCL_TYPE|ITCL_WIDGETADAPTOR)) {
 	/* initialize the typecomponents and typevariables */
@@ -1011,7 +1015,6 @@ ItclClassBaseCmd(
 	                Tcl_GetString(ivPtr->init),
 			TCL_NAMESPACE_ONLY) == NULL) {
                     Itcl_PopCallFrame(interp);
-                    Tcl_DStringFree(&buffer);
 		    result = TCL_ERROR;
 	            goto errorReturn;
                 }
@@ -1019,7 +1022,6 @@ ItclClassBaseCmd(
         }
         Itcl_PopCallFrame(interp);
     }
-    Tcl_DStringFree(&buffer);
     if (iclsPtr->typeConstructorPtr != NULL) {
         /* call the typeconstructor body */
         if (Itcl_PushCallFrame(interp, &frame, iclsPtr->nsPtr,
@@ -1102,8 +1104,9 @@ ItclCheckForInitializedComponents(
 		if (idmPtr->icPtr->ivPtr->flags & ITCL_COMMON) {
 		    Tcl_Obj *objPtr;
 		    objPtr = Tcl_NewStringObj(ITCL_VARIABLES_NAMESPACE, -1);
-		    Tcl_AppendToObj(objPtr, Tcl_GetString(
-		            idmPtr->icPtr->ivPtr->iclsPtr->fullNamePtr), -1);
+		    Tcl_AppendToObj(objPtr, (Tcl_GetObjectNamespace(
+			    idmPtr->icPtr->ivPtr->iclsPtr->oPtr))->fullName,
+			    -1);
 		    Tcl_AppendToObj(objPtr, "::", -1);
 		    Tcl_AppendToObj(objPtr, Tcl_GetString(
 		            idmPtr->icPtr->ivPtr->namePtr), -1);
@@ -1294,7 +1297,7 @@ Itcl_ClassInheritCmd(
         }
 
         Itcl_AppendList(&iclsPtr->bases, (ClientData)baseClsPtr);
-        Itcl_PreserveData((ClientData)baseClsPtr);
+	ItclPreserveClass(baseClsPtr);
     }
 
     /*
@@ -1414,7 +1417,7 @@ Itcl_ClassInheritCmd(
         Tcl_DStringAppend(&buffer, Tcl_GetString(baseClsPtr->fullNamePtr), -1);
 
         Itcl_AppendList(&baseClsPtr->derived, (ClientData)iclsPtr);
-        Itcl_PreserveData((ClientData)iclsPtr);
+	ItclPreserveClass(iclsPtr);
 
         elem = Itcl_NextListElem(elem);
     }
@@ -1436,7 +1439,7 @@ inheritError:
 
     elem = Itcl_FirstListElem(&iclsPtr->bases);
     while (elem) {
-        Itcl_ReleaseData( Itcl_GetListValue(elem) );
+	ItclReleaseClass( (ItclClass *)Itcl_GetListValue(elem) );
         elem = Itcl_DeleteListElem(elem);
     }
     return TCL_ERROR;
@@ -1590,14 +1593,6 @@ Itcl_ClassConstructorCmd(
         iclsPtr->initCode = objv[2];
         Tcl_IncrRefCount(iclsPtr->initCode);
         body = Tcl_GetString(objv[3]);
-    }
-    if (iclsPtr->initCode != NULL) {
-	Tcl_Obj *initNamePtr;
-	initNamePtr = Tcl_NewStringObj("___constructor_init", -1);
-        if (Itcl_CreateMethod(interp, iclsPtr, initNamePtr, arglist,
-	        Tcl_GetString(iclsPtr->initCode)) != TCL_OK) {
-            return TCL_ERROR;
-        }
     }
 
     if (Itcl_CreateMethod(interp, iclsPtr, namePtr, arglist, body) != TCL_OK) {
@@ -2028,7 +2023,8 @@ ItclInitClassCommon(
 	 * go to the variables namespace of the class */
         Tcl_DStringAppend(&buffer, ITCL_VARIABLES_NAMESPACE, -1);
     }
-    Tcl_DStringAppend(&buffer, Tcl_GetString(ivPtr->iclsPtr->fullNamePtr), -1);
+    Tcl_DStringAppend(&buffer,
+	    (Tcl_GetObjectNamespace(ivPtr->iclsPtr->oPtr))->fullName, -1);
     commonNsPtr = Tcl_FindNamespace(interp, Tcl_DStringValue(&buffer), NULL, 0);
     if (commonNsPtr == NULL) {
         Tcl_AppendResult(interp, "ITCL: cannot find common variables namespace",
