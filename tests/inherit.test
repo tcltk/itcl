@@ -124,7 +124,7 @@ test inherit-1.7 {destruction ok if destructors are missing} {
 } {{} {{skip destruct} {bar destruct} {geek destruct}}}
 
 
-test inherit-1.8 {errors during construction are cleaned up and reported} {
+test inherit-1.8 {errors during construction are cleaned up and reported} knownBug {
     global errorInfo test_cd_watch
     set test_cd_watch ""
     itcl::body test_cd_bar::constructor {args} {error "bar: failed"}
