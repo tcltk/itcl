@@ -681,7 +681,6 @@ Itcl_ScopeCmd(
     Tcl_HashEntry *hPtr;
     Tcl_Object oPtr;
     Tcl_InterpDeleteProc *procPtr;
-    Tcl_Obj *objPtr;
     Tcl_Obj *objPtr2;
     Tcl_Var var;
     Tcl_HashEntry *entry;
@@ -768,9 +767,15 @@ Itcl_ScopeCmd(
             Tcl_Obj *resultPtr = Tcl_GetObjResult(interp);
 	    if (vlookup->ivPtr->protection != ITCL_PUBLIC) {
 	        Tcl_AppendToObj(resultPtr, ITCL_VARIABLES_NAMESPACE, -1);
+		Tcl_AppendToObj(resultPtr, (Tcl_GetObjectNamespace(
+			contextIclsPtr->oPtr))->fullName, -1);
+		Tcl_AppendToObj(resultPtr, "::", -1);
+		Tcl_AppendToObj(resultPtr,
+			Tcl_GetString(vlookup->ivPtr->namePtr), -1);
+	    } else {
+		Tcl_AppendToObj(resultPtr,
+			Tcl_GetString(vlookup->ivPtr->fullNamePtr), -1);
 	    }
-            Tcl_AppendToObj(resultPtr,
-	        Tcl_GetString(vlookup->ivPtr->fullNamePtr), -1);
             if (openParen) {
                 *openParen = '(';
                 Tcl_AppendToObj(resultPtr, openParen, -1);
@@ -814,22 +819,13 @@ Itcl_ScopeCmd(
 	        doAppend = 0;
             }
         }
-        objPtr = Tcl_NewStringObj((char*)NULL, 0);
-        Tcl_IncrRefCount(objPtr);
-	if (doAppend) {
-	    Tcl_AppendToObj(objPtr, "::", -1);
-	    Tcl_AppendToObj(objPtr,
-	            Tcl_GetString(contextIoPtr->namePtr), -1);
-	} else {
-	    Tcl_AppendToObj(objPtr, "::", -1);
-	    Tcl_AppendToObj(objPtr,
-	            Tcl_GetString(contextIoPtr->namePtr), -1);
-	}
 
         objPtr2 = Tcl_NewStringObj((char*)NULL, 0);
         Tcl_IncrRefCount(objPtr2);
 	Tcl_AppendToObj(objPtr2, ITCL_VARIABLES_NAMESPACE, -1);
-	Tcl_AppendToObj(objPtr2, Tcl_GetString(objPtr), -1);
+	Tcl_AppendToObj(objPtr2,
+		(Tcl_GetObjectNamespace(contextIoPtr->oPtr))->fullName, -1);
+
         if (doAppend) {
             Tcl_AppendToObj(objPtr2,
 	            Tcl_GetString(vlookup->ivPtr->fullNamePtr), -1);
@@ -846,7 +842,6 @@ Itcl_ScopeCmd(
         }
         /* fix for SF bug #238 use Tcl_AppendResult instead of Tcl_AppendElement */
         Tcl_AppendResult(interp, Tcl_GetString(objPtr2), NULL);
-        Tcl_DecrRefCount(objPtr);
         Tcl_DecrRefCount(objPtr2);
     } else {
 
@@ -1751,7 +1746,6 @@ Itcl_AddComponentCmd(
     ItclComponent *icPtr;
     ItclVariable *ivPtr;
     const char *varName;
-    const char *name;
     int isNew;
     int result;
 
@@ -1790,11 +1784,8 @@ Itcl_AddComponentCmd(
     Tcl_SetHashValue(hPtr, icPtr);
     Tcl_DStringInit(&buffer);
     Tcl_DStringAppend(&buffer, ITCL_VARIABLES_NAMESPACE, -1);
-    name = Tcl_GetString(contextIoPtr->namePtr);
-    if ((name[0] != ':') && (name[1] != ':')) {
-            Tcl_DStringAppend(&buffer, "::", 2);
-    }
-    Tcl_DStringAppend(&buffer, name, -1);
+    Tcl_DStringAppend(&buffer,
+	    (Tcl_GetObjectNamespace(contextIoPtr->oPtr))->fullName, -1);
     Tcl_DStringAppend(&buffer, contextIclsPtr->nsPtr->fullName, -1);
     varNsPtr = Tcl_FindNamespace(interp, Tcl_DStringValue(&buffer),
         NULL, 0);

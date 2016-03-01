@@ -149,7 +149,6 @@ test import-2.4 {itcl::class handles stubs correctly
     }
 } -constraints {
     only_working_in_itcl3.4
-
 } -result {x ::test::foo2 ::test::foo2 ::test::foo2 ::test::foo2 0}
 
 test import-2.5 {itcl::class will overwrite stubs in an existing namespace} {
@@ -164,6 +163,17 @@ test import-2.5 {itcl::class will overwrite stubs in an existing namespace} {
         list [catch {::test::buried xx} result] $result [xx info class]
     }
 } {0 xx ::test::buried}
+
+test import-2.6 {itcl::class will overwrite stubs} {
+    $interp eval {
+        proc auto_load {cmd {namespace {}}} {
+            itcl::class $cmd { }
+            return 1
+        }
+        itcl::import::stub create ::test::zonk
+        list [catch {::test::zonk yy} result] $result [yy info class]
+    }
+} {0 yy ::test::zonk}
 
 catch {interp delete $interp}
 

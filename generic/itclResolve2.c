@@ -184,7 +184,6 @@ Itcl_ClassVarResolver2(
 
     Tcl_Namespace *upNsPtr;
     upNsPtr = Itcl_GetUplevelNamespace(interp, 1);
-    assert(Itcl_IsClassNamespace(nsPtr));
 
     /*
      *  If this is a global variable, handle it in the usual
@@ -318,8 +317,6 @@ Itcl_ClassCompiledVarResolver2(
     ItclVarLookup *vlookup;
     char *buffer;
     char storage[64];
-
-    assert(Itcl_IsClassNamespace(nsPtr));
 
     infoPtr = (ItclObjectInfo *)Tcl_GetAssocData(interp,
                 ITCL_INTERP_DATA, NULL);
