@@ -1082,7 +1082,7 @@ NRBiChainCmd(
 
     if ((Itcl_GetCallFrameClientData(interp) == NULL) || (objc == 1)) {
         /* that has been a direct call, so no object in front !! */
-        if (objc == 1 && cObjc == 2) {
+        if (objc == 1 && cObjc >= 2) {
             idx = 1;
         } else {
             idx = 0;
