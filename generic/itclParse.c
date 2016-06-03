@@ -2005,7 +2005,9 @@ ItclInitClassCommon(
     Tcl_Var varPtr;
     int result;
     int isNew;
+#ifdef NOTDEF
     IctlVarTraceInfo *traceInfoPtr;
+#endif
 
     result = TCL_OK;
     ivPtr->flags |= ITCL_COMMON;
@@ -2041,6 +2043,7 @@ ItclInitClassCommon(
     }
     result = Itcl_PushCallFrame(interp, &frame, commonNsPtr,
         /* isProcCallFrame */ 0);
+#ifdef NOTDEF
     traceInfoPtr = (IctlVarTraceInfo *)ckalloc(sizeof(IctlVarTraceInfo));
     memset (traceInfoPtr, 0, sizeof(IctlVarTraceInfo));
     traceInfoPtr->flags = ITCL_TRACE_CLASS;
@@ -2050,6 +2053,7 @@ ItclInitClassCommon(
     Tcl_TraceVar2(interp, Tcl_GetString(ivPtr->namePtr), NULL,
            TCL_TRACE_UNSETS, ItclTraceUnsetVar,
            (ClientData)traceInfoPtr);
+#endif
     Itcl_PopCallFrame(interp);
 
     /*
