@@ -956,7 +956,9 @@ ItclInitObjectVariables(
 	    vlookup = Tcl_GetHashValue(hPtr2);
 #endif
 	    if ((ivPtr->flags & ITCL_COMMON) == 0) {
+#ifdef NOTDEF
                 IctlVarTraceInfo *traceInfoPtr;
+#endif
 #ifndef NEW_PROTO_RESOLVER
                 varPtr = Tcl_NewNamespaceVar(interp, varNsPtr,
                         Tcl_GetString(ivPtr->namePtr));
@@ -971,6 +973,7 @@ ItclInitObjectVariables(
 		    Tcl_SetHashValue(hPtr2, varPtr);
 		} else {
 		}
+#ifdef NOTDEF
                 traceInfoPtr = (IctlVarTraceInfo *)ckalloc(
 		        sizeof(IctlVarTraceInfo));
                 memset (traceInfoPtr, 0, sizeof(IctlVarTraceInfo));
@@ -981,6 +984,7 @@ ItclInitObjectVariables(
                 Tcl_TraceVar2(interp, Tcl_GetString(ivPtr->namePtr), NULL,
                        TCL_TRACE_UNSETS, ItclTraceUnsetVar,
                        (ClientData)traceInfoPtr);
+#endif
 	        if (ivPtr->flags & (ITCL_THIS_VAR|ITCL_TYPE_VAR|
 		        ITCL_SELF_VAR|ITCL_SELFNS_VAR|ITCL_WIN_VAR)) {
                     int isDone = 0;
