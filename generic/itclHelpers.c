@@ -751,9 +751,11 @@ ItclAddObjectsDictInfo(
         return TCL_ERROR;
     }
     if (newValue1) {
-        if (Tcl_DictObjPut(interp, dictPtr, keyPtr1, valuePtr1) != TCL_OK) {
-            return TCL_ERROR;
-        }
+	/* Cannot fail. Screened non-dicts earlier. */
+        Tcl_DictObjPut(interp, dictPtr, keyPtr1, valuePtr1);
+    } else {
+	/* Don't leak the key val... */
+	Tcl_DecrRefCount(keyPtr1);
     }
     Tcl_SetVar2Ex(interp, ITCL_NAMESPACE"::internal::dicts::objects",
             NULL, dictPtr, 0);
@@ -785,26 +787,32 @@ ItclDeleteObjectsDictInfo(
     }
     keyPtr1 = Tcl_NewStringObj("instances", -1);
     if (Tcl_DictObjGet(interp, dictPtr, keyPtr1, &valuePtr) != TCL_OK) {
+	Tcl_DecrRefCount(keyPtr1);
         return TCL_ERROR;
     }
     if (valuePtr == NULL) {
 	/* looks like no object has been registered yet
 	 * so ignore and return OK */
+	Tcl_DecrRefCount(keyPtr1);
         return TCL_OK;
     }
     keyPtr = ioPtr->namePtr;
     if (Tcl_DictObjGet(interp, valuePtr, keyPtr, &valuePtr1) != TCL_OK) {
+	Tcl_DecrRefCount(keyPtr1);
         return TCL_ERROR;
     }
     if (valuePtr1 == NULL) {
 	/* looks like the object has not been constructed successfully
 	 * so ignore and return OK */
+	Tcl_DecrRefCount(keyPtr1);
         return TCL_OK;
     }
     if (Tcl_DictObjRemove(interp, valuePtr, keyPtr) != TCL_OK) {
         return TCL_ERROR;
     }
     if (Tcl_DictObjPut(interp, dictPtr, keyPtr1, valuePtr) != TCL_OK) {
+	/* This is very likely impossible. non-dict already screened. */
+	Tcl_DecrRefCount(keyPtr1);
         return TCL_ERROR;
     }
     Tcl_SetVar2Ex(interp, ITCL_NAMESPACE"::internal::dicts::objects",
