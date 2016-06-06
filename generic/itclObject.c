@@ -459,9 +459,6 @@ ItclCreateObject(
     hPtr = Tcl_CreateHashEntry(&iclsPtr->infoPtr->instances,
         (char*)objPtr, &newEntry);
     Tcl_SetHashValue(hPtr, (ClientData)ioPtr);
-    hPtr = Tcl_CreateHashEntry(&iclsPtr->infoPtr->objectInstances,
-        (char*)ioPtr, &newEntry);
-    Tcl_SetHashValue(hPtr, (ClientData)objPtr);
 
     /*
      *  Now construct the object.  Look for a constructor in the

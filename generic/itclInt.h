@@ -149,7 +149,7 @@ typedef struct ItclObjectInfo {
     Tcl_HashTable namespaceClasses; /* maps from nsPtr to iclsPtr */
     Tcl_HashTable procMethods;      /* maps from procPtr to mFunc */
     Tcl_HashTable instances;        /* maps from instanceNumber to ioPtr */
-    Tcl_HashTable objectInstances;  /* maps from ioPtr to instanceNumber */
+    Tcl_HashTable unused8;          /* maps from ioPtr to instanceNumber */
     Tcl_HashTable unused;           /* Obsolete field */
     Tcl_HashTable classTypes;       /* maps from class type i.e. "widget"
                                      * to define value i.e. ITCL_WIDGET */
