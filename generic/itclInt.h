@@ -182,7 +182,7 @@ typedef struct ItclObjectInfo {
     Tcl_Obj **unparsedObjv;         /* options not parsed by
                                        ItclExtendedConfigure/-Cget function */
     int functionFlags;              /* used for creating of ItclMemberCode */
-    int numInstances;               /* used for having a unique key for objects
+    int unused7;               /* used for having a unique key for objects
                                      * for use in mytypemethod etc. */
     struct ItclDelegatedOption *currIdoPtr;
                                     /* the current delegated option info */
