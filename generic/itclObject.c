@@ -208,7 +208,6 @@ ItclCreateObject(
     char unique[256];    /* buffer used for unique part of object names */
     int newEntry;
     ItclResolveInfo *resolveInfoPtr;
-    char str[100];
     /* objv[1]: class name */
     /* objv[2]: class full name */
     /* objv[3]: object name */
@@ -450,18 +449,19 @@ ItclCreateObject(
         (char*)ioPtr, &newEntry);
     Tcl_SetHashValue(hPtr, (ClientData)ioPtr);
 
-    /* make the object instance known, for use as unique key if the object */
-    /* is renamed. Used by mytypemethod etc. */
-    sprintf(str, "ItclInst%d", iclsPtr->infoPtr->numInstances);
-    /* FIXME need to free that when deleting object and to remove the entries!! */
-    objPtr = Tcl_NewStringObj(str, -1);
+    /* Use the TclOO object namespaces as a unique key in case the
+     * object is renamed. Used by mytypemethod, etc. */
+
+    /* At the moment this value is leaking. */
+    objPtr = Tcl_NewStringObj(
+	    (Tcl_GetObjectNamespace(ioPtr->oPtr))->fullName, -1);
+
     hPtr = Tcl_CreateHashEntry(&iclsPtr->infoPtr->instances,
         (char*)objPtr, &newEntry);
     Tcl_SetHashValue(hPtr, (ClientData)ioPtr);
     hPtr = Tcl_CreateHashEntry(&iclsPtr->infoPtr->objectInstances,
         (char*)ioPtr, &newEntry);
     Tcl_SetHashValue(hPtr, (ClientData)objPtr);
-    iclsPtr->infoPtr->numInstances++;
 
     /*
      *  Now construct the object.  Look for a constructor in the
