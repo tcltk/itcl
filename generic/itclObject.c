@@ -452,12 +452,8 @@ ItclCreateObject(
     /* Use the TclOO object namespaces as a unique key in case the
      * object is renamed. Used by mytypemethod, etc. */
 
-    /* At the moment this value is leaking. */
-    objPtr = Tcl_NewStringObj(
-	    (Tcl_GetObjectNamespace(ioPtr->oPtr))->fullName, -1);
-
     hPtr = Tcl_CreateHashEntry(&iclsPtr->infoPtr->instances,
-        (char*)objPtr, &newEntry);
+	(Tcl_GetObjectNamespace(ioPtr->oPtr))->fullName, &newEntry);
     Tcl_SetHashValue(hPtr, (ClientData)ioPtr);
 
     /*

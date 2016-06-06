@@ -3142,7 +3142,7 @@ Itcl_BiCallInstanceCmd(
     }
 
     hPtr = Tcl_FindHashEntry(&contextIclsPtr->infoPtr->instances,
-            (char *)objv[1]);
+            Tcl_GetString(objv[1]));
     if (hPtr == NULL) {
 	Tcl_AppendResult(interp,
 	        "no such instanceName \"",
@@ -3209,7 +3209,7 @@ Itcl_BiGetInstanceVarCmd(
     }
 
     hPtr = Tcl_FindHashEntry(&contextIclsPtr->infoPtr->instances,
-            (char *)objv[1]);
+            Tcl_GetString(objv[1]));
     if (hPtr == NULL) {
 	Tcl_AppendResult(interp,
 	        "no such instanceName \"",
