@@ -291,7 +291,6 @@ Initialize (
     Tcl_InitHashTable(&infoPtr->namespaceClasses, TCL_ONE_WORD_KEYS);
     Tcl_InitHashTable(&infoPtr->procMethods, TCL_ONE_WORD_KEYS);
     Tcl_InitObjHashTable(&infoPtr->instances);
-    Tcl_InitHashTable(&infoPtr->objectInstances, TCL_ONE_WORD_KEYS);
     Tcl_InitObjHashTable(&infoPtr->classTypes);
     infoPtr->ensembleInfo = (EnsembleInfo *)ckalloc(sizeof(EnsembleInfo));
     memset(infoPtr->ensembleInfo, 0, sizeof(EnsembleInfo));
