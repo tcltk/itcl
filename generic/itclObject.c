@@ -81,10 +81,21 @@ void
 ItclDeleteObjectMetadata(
     ClientData clientData)
 {
-    /*
-     * nothing to to yet, as there are only ItclClass or ItclObject pointers
-     * stored, which are freed elsewhere
-     */
+    ItclObject *ioPtr = (ItclObject *)clientData;
+    Tcl_HashEntry *hPtr;
+
+    if (ioPtr == NULL) return;		/* Safety */
+    if (ioPtr->oPtr == NULL) return;	/* Safety */
+    
+    hPtr = Tcl_FindHashEntry(&ioPtr->infoPtr->instances,
+	(Tcl_GetObjectNamespace(ioPtr->oPtr))->fullName);
+
+    if (hPtr == NULL) return;
+
+    if (clientData != Tcl_GetHashValue(hPtr)) {
+	Tcl_Panic("invalid instances entry");
+    }
+    Tcl_DeleteHashEntry(hPtr);
 }
 
 /*
@@ -208,7 +219,6 @@ ItclCreateObject(
     char unique[256];    /* buffer used for unique part of object names */
     int newEntry;
     ItclResolveInfo *resolveInfoPtr;
-    char str[100];
     /* objv[1]: class name */
     /* objv[2]: class full name */
     /* objv[3]: object name */
@@ -450,18 +460,12 @@ ItclCreateObject(
         (char*)ioPtr, &newEntry);
     Tcl_SetHashValue(hPtr, (ClientData)ioPtr);
 
-    /* make the object instance known, for use as unique key if the object */
-    /* is renamed. Used by mytypemethod etc. */
-    sprintf(str, "ItclInst%d", iclsPtr->infoPtr->numInstances);
-    /* FIXME need to free that when deleting object and to remove the entries!! */
-    objPtr = Tcl_NewStringObj(str, -1);
+    /* Use the TclOO object namespaces as a unique key in case the
+     * object is renamed. Used by mytypemethod, etc. */
+
     hPtr = Tcl_CreateHashEntry(&iclsPtr->infoPtr->instances,
-        (char*)objPtr, &newEntry);
+	(Tcl_GetObjectNamespace(ioPtr->oPtr))->fullName, &newEntry);
     Tcl_SetHashValue(hPtr, (ClientData)ioPtr);
-    hPtr = Tcl_CreateHashEntry(&iclsPtr->infoPtr->objectInstances,
-        (char*)ioPtr, &newEntry);
-    Tcl_SetHashValue(hPtr, (ClientData)objPtr);
-    iclsPtr->infoPtr->numInstances++;
 
     /*
      *  Now construct the object.  Look for a constructor in the
@@ -956,7 +960,9 @@ ItclInitObjectVariables(
 	    vlookup = Tcl_GetHashValue(hPtr2);
 #endif
 	    if ((ivPtr->flags & ITCL_COMMON) == 0) {
+#ifdef NOTDEF
                 IctlVarTraceInfo *traceInfoPtr;
+#endif
 #ifndef NEW_PROTO_RESOLVER
                 varPtr = Tcl_NewNamespaceVar(interp, varNsPtr,
                         Tcl_GetString(ivPtr->namePtr));
@@ -971,6 +977,7 @@ ItclInitObjectVariables(
 		    Tcl_SetHashValue(hPtr2, varPtr);
 		} else {
 		}
+#ifdef NOTDEF
                 traceInfoPtr = (IctlVarTraceInfo *)ckalloc(
 		        sizeof(IctlVarTraceInfo));
                 memset (traceInfoPtr, 0, sizeof(IctlVarTraceInfo));
@@ -981,6 +988,7 @@ ItclInitObjectVariables(
                 Tcl_TraceVar2(interp, Tcl_GetString(ivPtr->namePtr), NULL,
                        TCL_TRACE_UNSETS, ItclTraceUnsetVar,
                        (ClientData)traceInfoPtr);
+#endif
 	        if (ivPtr->flags & (ITCL_THIS_VAR|ITCL_TYPE_VAR|
 		        ITCL_SELF_VAR|ITCL_SELFNS_VAR|ITCL_WIN_VAR)) {
                     int isDone = 0;
