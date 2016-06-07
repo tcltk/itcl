@@ -3658,18 +3658,6 @@ Itcl_BiKeepComponentOptionCmd(
     int objc,                /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
 {
-#ifdef NOTDEF
-    Tcl_HashEntry *hPtr;
-    Tcl_HashEntry *hPtr2;
-    Tcl_Obj *objPtr;
-    ItclClass *iclsPtr;
-    ItclObject *ioPtr;
-    ItclDelegatedOption *idoPtr;
-    ItclComponent *icPtr;
-    const char *val;
-    int idx;
-    int isNew;
-#endif
     int result;
     ItclObjectInfo *infoPtr = (ItclObjectInfo*)clientData;
 
@@ -3683,73 +3671,6 @@ Itcl_BiKeepComponentOptionCmd(
     }
     result =  Tcl_EvalObjv(interp, objc, objv, 0);
     return result;
-#ifdef NOTDEF
-    iclsPtr = NULL;
-    if (Itcl_GetContext(interp, &iclsPtr, &ioPtr) != TCL_OK) {
-        return TCL_ERROR;
-    }
-    if (objc < 3) {
-	Tcl_AppendResult(interp, "wrong # args, should be: ",
-	        "keepcomponentoption component option ?option ...?", NULL);
-        return TCL_ERROR;
-    }
-    if (ioPtr != NULL) {
-        hPtr = Tcl_FindHashEntry(&ioPtr->objectComponents, (char *)objv[1]);
-        if (hPtr == NULL) {
-	    Tcl_AppendResult(interp,
-	            "keepcomponentoption cannot find component \"",
-	            Tcl_GetString(objv[1]), "\"", NULL);
-	    return TCL_ERROR;
-	}
-        icPtr = Tcl_GetHashValue(hPtr);
-	icPtr->haveKeptOptions = 1;
-	for (idx = 2; idx < objc; idx++) {
-	    hPtr = Tcl_CreateHashEntry(&icPtr->keptOptions, (char *)objv[idx],
-	            &isNew);
-            if (isNew) {
-	        Tcl_SetHashValue(hPtr, objv[idx]);
-	    }
-	    hPtr2 = Tcl_CreateHashEntry(&ioPtr->objectDelegatedOptions,
-	            (char *)objv[idx], &isNew);
-	    if (isNew) {
-		idoPtr = (ItclDelegatedOption *)ckalloc(sizeof(
-		        ItclDelegatedOption));
-		memset(idoPtr, 0, sizeof(ItclDelegatedOption));
-		Tcl_InitObjHashTable(&idoPtr->exceptions);
-		idoPtr->namePtr = objv[idx];
-		Tcl_IncrRefCount(idoPtr->namePtr);
-		idoPtr->resourceNamePtr = NULL;
-		if (idoPtr->resourceNamePtr != NULL) {
-		    Tcl_IncrRefCount(idoPtr->resourceNamePtr);
-		}
-		idoPtr->classNamePtr = NULL;
-		if (idoPtr->classNamePtr != NULL) {
-		    Tcl_IncrRefCount(idoPtr->classNamePtr);
-		}
-		idoPtr->icPtr = icPtr;
-		idoPtr->ioptPtr = NULL;
-		Tcl_SetHashValue(hPtr2, idoPtr);
-                val = ItclGetInstanceVar(interp, Tcl_GetString(icPtr->namePtr),
-		        NULL, ioPtr, iclsPtr);
-		if (val != NULL) {
-                    objPtr = Tcl_NewStringObj(val, -1);
-                    Tcl_AppendToObj(objPtr, " cget ", -1);
-                    Tcl_AppendToObj(objPtr, Tcl_GetString(objv[idx]), -1);
-                    Tcl_IncrRefCount(objPtr);
-                    result = Tcl_EvalObjEx(interp, objPtr, 0);
-                    Tcl_DecrRefCount(objPtr);
-		    if (result == TCL_OK) {
-		        ItclSetInstanceVar(interp, "itcl_options",
-		                Tcl_GetString(objv[idx]),
-			        Tcl_GetStringResult(interp), ioPtr, iclsPtr);
-		    }
-                }
-            }
-        }
-        ItclAddClassComponentDictInfo(interp, iclsPtr, icPtr);
-    }
-    return TCL_OK;
-#endif
 }
 
 /*
