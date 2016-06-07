@@ -3142,7 +3142,7 @@ Itcl_BiCallInstanceCmd(
     }
 
     hPtr = Tcl_FindHashEntry(&contextIclsPtr->infoPtr->instances,
-            (char *)objv[1]);
+            Tcl_GetString(objv[1]));
     if (hPtr == NULL) {
 	Tcl_AppendResult(interp,
 	        "no such instanceName \"",
@@ -3209,7 +3209,7 @@ Itcl_BiGetInstanceVarCmd(
     }
 
     hPtr = Tcl_FindHashEntry(&contextIclsPtr->infoPtr->instances,
-            (char *)objv[1]);
+            Tcl_GetString(objv[1]));
     if (hPtr == NULL) {
 	Tcl_AppendResult(interp,
 	        "no such instanceName \"",
@@ -3297,8 +3297,6 @@ Itcl_BiMyMethodCmd(
     int objc,                /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
 {
-    Tcl_HashEntry *hPtr;
-    Tcl_Obj *objPtr;
     Tcl_Obj *resultPtr;
     int i;
     ItclClass *contextIclsPtr;
@@ -3314,18 +3312,11 @@ Itcl_BiMyMethodCmd(
         return TCL_ERROR;
     }
     if (contextIoPtr != NULL) {
-        hPtr =Tcl_FindHashEntry(&contextIclsPtr->infoPtr->objectInstances,
-	        (char *)contextIoPtr);
-	if (hPtr == NULL) {
-	    Tcl_AppendResult(interp, "cannot find context object",
-	            " in objectInstances", NULL);
-            return TCL_ERROR;
-	}
-	objPtr = Tcl_GetHashValue(hPtr);
 	resultPtr = Tcl_NewListObj(0, NULL);
 	Tcl_ListObjAppendElement(interp, resultPtr,
 	        Tcl_NewStringObj("::itcl::builtin::callinstance", -1));
-	Tcl_ListObjAppendElement(interp, resultPtr, objPtr);
+	Tcl_ListObjAppendElement(interp, resultPtr, Tcl_NewStringObj(
+		(Tcl_GetObjectNamespace(contextIoPtr->oPtr))->fullName, -1));
 	for (i = 1; i < objc; i++) {
 	    Tcl_ListObjAppendElement(interp, resultPtr, objv[i]);
 	}
@@ -3458,7 +3449,6 @@ Itcl_BiMyVarCmd(
     int objc,                /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
 {
-    Tcl_HashEntry *hPtr;
     Tcl_Obj *resultPtr;
     ItclClass *contextIclsPtr;
     ItclObject *contextIoPtr;
@@ -3473,13 +3463,6 @@ Itcl_BiMyVarCmd(
         return TCL_ERROR;
     }
     if (contextIoPtr != NULL) {
-        hPtr =Tcl_FindHashEntry(&contextIclsPtr->infoPtr->objectInstances,
-	        (char *)contextIoPtr);
-	if (hPtr == NULL) {
-	    Tcl_AppendResult(interp, "cannot find context object",
-	            " in objectInstances", NULL);
-            return TCL_ERROR;
-	}
         resultPtr = Tcl_NewStringObj(Tcl_GetString(contextIoPtr->varNsNamePtr),
 	        -1);
 	Tcl_AppendToObj(resultPtr, "::", -1);

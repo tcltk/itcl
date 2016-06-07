@@ -276,8 +276,7 @@ Initialize (
     Tcl_InitObjHashTable(&infoPtr->nameClasses);
     Tcl_InitHashTable(&infoPtr->namespaceClasses, TCL_ONE_WORD_KEYS);
     Tcl_InitHashTable(&infoPtr->procMethods, TCL_ONE_WORD_KEYS);
-    Tcl_InitObjHashTable(&infoPtr->instances);
-    Tcl_InitHashTable(&infoPtr->objectInstances, TCL_ONE_WORD_KEYS);
+    Tcl_InitHashTable(&infoPtr->instances, TCL_STRING_KEYS);
     Tcl_InitHashTable(&infoPtr->frameContext, TCL_ONE_WORD_KEYS);
     Tcl_InitObjHashTable(&infoPtr->classTypes);
     infoPtr->ensembleInfo = (EnsembleInfo *)ckalloc(sizeof(EnsembleInfo));
