@@ -1866,32 +1866,6 @@ Itcl_BuildVirtualTables(
 	    vlookup->classVarInfoPtr = clientData2;
 #endif
 /* FIXME !!! should use for var lookup !! */
-#ifdef NOTDEF
-            /*
-             *  If this is a common variable, then keep a reference to
-             *  the variable directly.  Otherwise, keep an index into
-             *  the object's variable table.
-             */
-            if ((ivPtr->flags & ITCL_COMMON) != 0) {
-                nsPtr = (Namespace*)iclsPtr2->nsPtr;
-                hPtr = Tcl_FindHashEntry(&nsPtr->varTable, ivPtr->name);
-                assert(hPtr != NULL);
-
-                vlookup->var.common = (Tcl_Var)Tcl_GetHashValue(hPtr);
-            } else {
-                /*
-                 *  If this is a reference to the built-in "this"
-                 *  variable, then its index is "0".  Otherwise,
-                 *  add another slot to the end of the table.
-                 */
-                if ((ivPtr->flags & ITCL_THIS_VAR) != 0) {
-                    vlookup->var.index = 0;
-                }
-                else {
-                    vlookup->var.index = iclsPtr->numInstanceVars++;
-                }
-            }
-#endif
 
             /*
              *  Create all possible names for this variable and enter
@@ -2204,24 +2178,6 @@ Itcl_CreateOption(
         return TCL_ERROR;
     }
 
-#ifdef NOTDEF
-    /*
-     *  If this option has some "config" code, try to capture
-     *  its implementation.
-     */
-    if (config) {
-        if (Itcl_CreateMemberCode(interp, iclsPtr, (char*)NULL, config,
-                &mCodePtr) != TCL_OK) {
-            Tcl_DeleteHashEntry(hPtr);
-            return TCL_ERROR;
-        }
-        Itcl_PreserveData((ClientData)mCodePtr);
-        Itcl_EventuallyFree((ClientData)mCodePtr, Itcl_DeleteMemberCode);
-    } else {
-        mCodePtr = NULL;
-    }
-#endif
-        
     iclsPtr->numOptions++;
     ioptPtr->iclsPtr = iclsPtr;
     ioptPtr->codePtr = mCodePtr;

@@ -119,30 +119,6 @@ static void ComputeMinChars (Ensemble *ensData, int pos);
 static EnsembleParser* GetEnsembleParser (Tcl_Interp *interp);
 static void DeleteEnsParser (ClientData clientData, Tcl_Interp* interp);
 
-#ifdef NOTDEF
-static void
-DumpEnsemble(
-    Tcl_Interp *interp,
-    Ensemble *ensData)
-{
-    Ensemble *ensData2;
-    int i;
-
-    ensData2 = ensData;
-    while (1) {
-        fprintf(stderr, "ENS!%s!%d!\n",
-	        Tcl_GetCommandName(interp, ensData2->cmdPtr), ensData2->numParts);
-        for (i=0; i<ensData2->numParts; i++) {
-            fprintf(stderr, "  %d!%s!\n", i, ensData2->parts[i]->name);
-        }
-        if (ensData2->parent == NULL) {
-            break;
-        }
-        ensData2 = ensData2->parent->ensemble;
-    }
-}
-#endif
-
 
 /*
  *----------------------------------------------------------------------
@@ -591,11 +567,6 @@ Itcl_GetEnsembleUsageForObj(
      *  back to the command word for the entire ensemble.
      */
     chainObj = ensObjPtr;
-#ifdef NOTDEF
-    while (chainObj && chainObj->typePtr == &itclEnsInvocType) {
-         chainObj = (Tcl_Obj*)chainObj->internalRep.twoPtrValue.ptr2;
-    }
-#endif
 
     if (chainObj) {
         cmd = Tcl_GetCommandFromObj(interp, chainObj);
@@ -1794,8 +1765,6 @@ Itcl_EnsembleCmd(
      *  Otherwise, the offending command is reported twice.
      */
     if (status == TCL_ERROR) {
-#ifdef NOTDEF
-#else
 	/* no longer needed, no extra interpreter !! */
         const char *errInfo = Tcl_GetVar2(ensInfo->parser, "::errorInfo",
             (char*)NULL, TCL_GLOBAL_ONLY);
@@ -1803,7 +1772,6 @@ Itcl_EnsembleCmd(
         if (errInfo) {
             Tcl_AddObjErrorInfo(interp, (const char *)errInfo, -1);
         }
-#endif
 
         if (objc == 3) {
 	    Tcl_AppendObjToErrorInfo(interp, Tcl_ObjPrintf(
@@ -1864,32 +1832,7 @@ GetEnsembleParser(
     ensInfo->parser = Tcl_CreateInterp();
     ensInfo->ensData = NULL;
 
-#ifdef NOTDEF
-    /*
-     *  Remove all namespaces and all normal commands from the
-     *  parser interpreter.
-     */
-    nsPtr = Tcl_GetGlobalNamespace(ensInfo->parser);
-
-    for (hPtr = Tcl_FirstHashEntry(&nsPtr->childTable, &search);
-         hPtr != NULL;
-         hPtr = Tcl_FirstHashEntry(&nsPtr->childTable, &search)) {
-
-        childNs = (Tcl_Namespace*)Tcl_GetHashValue(hPtr);
-        Tcl_DeleteNamespace(childNs);
-    }
-
-    for (hPtr = Tcl_FirstHashEntry(&nsPtr->cmdTable, &search);
-         hPtr != NULL;
-         hPtr = Tcl_FirstHashEntry(&nsPtr->cmdTable, &search)) {
-
-        cmd = (Tcl_Command)Tcl_GetHashValue(hPtr);
-        Tcl_DeleteCommandFromToken(ensInfo->parser, cmd);
-    }
-
-#else
     Tcl_DeleteNamespace(Tcl_GetGlobalNamespace(ensInfo->parser));
-#endif
     /*
      *  Add the allowed commands to the parser interpreter:
      *  part, delete, ensemble
