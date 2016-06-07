@@ -2113,9 +2113,6 @@ ItclInitClassCommon(
     Tcl_Var varPtr;
     int result;
     int isNew;
-#ifdef NOTDEF
-    IctlVarTraceInfo *traceInfoPtr;
-#endif
 
     result = TCL_OK;
     ivPtr->flags |= ITCL_COMMON;
@@ -2151,17 +2148,6 @@ ItclInitClassCommon(
     }
     result = Itcl_PushCallFrame(interp, &frame, commonNsPtr,
         /* isProcCallFrame */ 0);
-#ifdef NOTDEF
-    traceInfoPtr = (IctlVarTraceInfo *)ckalloc(sizeof(IctlVarTraceInfo));
-    memset (traceInfoPtr, 0, sizeof(IctlVarTraceInfo));
-    traceInfoPtr->flags = ITCL_TRACE_CLASS;
-    traceInfoPtr->ioPtr = NULL;
-    traceInfoPtr->iclsPtr = ivPtr->iclsPtr;
-    traceInfoPtr->ivPtr = ivPtr;
-    Tcl_TraceVar2(interp, Tcl_GetString(ivPtr->namePtr), NULL,
-           TCL_TRACE_UNSETS, ItclTraceUnsetVar,
-           (ClientData)traceInfoPtr);
-#endif
     Itcl_PopCallFrame(interp);
 
     /*
@@ -2998,10 +2984,6 @@ ItclCreateComponent(
 
     if (iclsPtr == NULL) {
 	return TCL_OK;
-#ifdef NOTDEF
-	Tcl_AppendResult(interp, "INTERNAL ERROR in ItclCreateComponent, iclsPtr == NULL", NULL);
-        return TCL_ERROR;
-#endif
     }
     hPtr = Tcl_CreateHashEntry(&iclsPtr->components, (char *)componentPtr,
             &isNew);
@@ -3290,9 +3272,6 @@ ItclCreateDelegatedFunction(
     Tcl_Obj *exceptionsPtr,
     ItclDelegatedFunction **idmPtrPtr)
 {
-#ifdef NOTDEF
-    Tcl_HashEntry *hPtr;
-#endif
     ItclDelegatedFunction *idmPtr;
     const char **argv;
     int argc;
@@ -3323,16 +3302,6 @@ ItclCreateDelegatedFunction(
 	    objPtr = Tcl_NewStringObj(argv[i], -1);
 	    Tcl_CreateHashEntry(&idmPtr->exceptions, (char *)objPtr,
 	            &isNew);
-#ifdef NOTDEF
-	    hPtr2 = Tcl_FindHashEntry(&iclsPtr->functions, (char *)objPtr);
-/* FIXME !!! can only be done after a class/widget has been parsed completely !! */
-	    if (hPtr2 == NULL) {
-	        Tcl_AppendResult(interp, "no such method: \"",
-		        Tcl_GetString(objPtr), "\" found for delegation", NULL);
-	        return TCL_ERROR;
-	    }
-	    Tcl_SetHashValue(hPtr, Tcl_GetHashValue(hPtr2));
-#endif
 	}
     }
     if (idmPtrPtr != NULL) {
