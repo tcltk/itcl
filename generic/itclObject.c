@@ -81,10 +81,21 @@ void
 ItclDeleteObjectMetadata(
     ClientData clientData)
 {
-    /*
-     * nothing to to yet, as there are only ItclClass or ItclObject pointers
-     * stored, which are freed elsewhere
-     */
+    ItclObject *ioPtr = (ItclObject *)clientData;
+    Tcl_HashEntry *hPtr;
+
+    if (ioPtr == NULL) return;		/* Safety */
+    if (ioPtr->oPtr == NULL) return;	/* Safety */
+    
+    hPtr = Tcl_FindHashEntry(&ioPtr->infoPtr->instances,
+	(Tcl_GetObjectNamespace(ioPtr->oPtr))->fullName);
+
+    if (hPtr == NULL) return;
+
+    if (clientData != Tcl_GetHashValue(hPtr)) {
+	Tcl_Panic("invalid instances entry");
+    }
+    Tcl_DeleteHashEntry(hPtr);
 }
 
 /*
