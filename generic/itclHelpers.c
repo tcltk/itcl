@@ -479,6 +479,7 @@ AddDictEntry(
     }
     keyPtr = Tcl_NewStringObj(keyStr, -1);
     if (Tcl_DictObjPut(interp, dictPtr, keyPtr, valuePtr) != TCL_OK) {
+	Tcl_DecrRefCount(keyPtr);
         return TCL_ERROR;
     }
     return TCL_OK;
@@ -740,8 +741,8 @@ ItclAddObjectsDictInfo(
     }
     objPtr = Tcl_NewObj();
     Tcl_GetCommandFullName(interp, ioPtr->accessCmd, objPtr);
-    Tcl_IncrRefCount(objPtr);
     if (AddDictEntry(interp, valuePtr2, "-command", objPtr) != TCL_OK) {
+	Tcl_DecrRefCount(objPtr);
         return TCL_ERROR;
     }
     keyPtr = ioPtr->namePtr;
@@ -806,6 +807,7 @@ ItclDeleteObjectsDictInfo(
         return TCL_OK;
     }
     if (Tcl_DictObjRemove(interp, valuePtr, keyPtr) != TCL_OK) {
+	Tcl_DecrRefCount(keyPtr1);
         return TCL_ERROR;
     }
     if (Tcl_DictObjPut(interp, dictPtr, keyPtr1, valuePtr) != TCL_OK) {
@@ -813,6 +815,7 @@ ItclDeleteObjectsDictInfo(
 	Tcl_DecrRefCount(keyPtr1);
         return TCL_ERROR;
     }
+    Tcl_DecrRefCount(keyPtr1);
     Tcl_SetVar2Ex(interp, ITCL_NAMESPACE"::internal::dicts::objects",
             NULL, dictPtr, 0);
     return TCL_OK;
