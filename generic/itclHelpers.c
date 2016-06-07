@@ -369,51 +369,6 @@ ItclEnsembleSubCmd(
     return result;
 }
 
-#ifdef NOTDEF
-
-/*
- * ------------------------------------------------------------------------
- *  ItclTraceUnsetVar()
- * ------------------------------------------------------------------------
- */
-
-char *
-ItclTraceUnsetVar(
-    ClientData clientData,
-    Tcl_Interp *interp,
-    const char *name1,
-    const char *name2,
-    int flags)
-{
-    IctlVarTraceInfo *tracePtr;
-    Tcl_HashEntry *hPtr;
-
-    if (name2 != NULL) {
-        /* unsetting of an array element nothing to do */
-	return NULL;
-    }
-    /* also when unsetting variables, they stay alive until the class
-     * or object is teared down!!
-     */
-    tracePtr = (IctlVarTraceInfo *)clientData;
-    if (tracePtr->flags & ITCL_TRACE_CLASS) {
-        hPtr = Tcl_FindHashEntry(&tracePtr->iclsPtr->classCommons,
-	        (char *)tracePtr->ivPtr);
-	if (hPtr != NULL) {
-	    Tcl_DeleteHashEntry(hPtr);
-	}
-    }
-    if (tracePtr->flags & ITCL_TRACE_OBJECT) {
-        hPtr = Tcl_FindHashEntry(&tracePtr->ioPtr->objectVariables,
-	        (char *)tracePtr->ivPtr);
-	if (hPtr != NULL) {
-	    Tcl_DeleteHashEntry(hPtr);
-	}
-    }
-    ckfree((char *)tracePtr);
-    return NULL;
-}
-#endif
 
 /*
  * ------------------------------------------------------------------------

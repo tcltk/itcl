@@ -587,18 +587,6 @@ typedef struct ItclMethodVariable {
     Tcl_Obj *callbackPtr;
 } ItclMethodVariable;
 
-#ifdef NOTDEF
-typedef struct IctlVarTraceInfo {
-    int flags;
-    ItclVariable* ivPtr;
-    ItclClass *iclsPtr;
-    ItclObject *ioPtr;
-} IctlVarTraceInfo;
-
-#define ITCL_TRACE_CLASS		0x01
-#define ITCL_TRACE_OBJECT		0x02
-#endif
-
 #define VAR_TYPE_VARIABLE 	1
 #define VAR_TYPE_COMMON 	2
 
@@ -729,10 +717,6 @@ MODULE_SCOPE void ItclDeleteObjectVariablesNamespace(Tcl_Interp *interp,
 MODULE_SCOPE void ItclDeleteClassVariablesNamespace(Tcl_Interp *interp,
         ItclClass *iclsPtr);
 MODULE_SCOPE int ItclInfoInit(Tcl_Interp *interp);
-#ifdef NOTDEF
-MODULE_SCOPE char * ItclTraceUnsetVar(ClientData clientData, Tcl_Interp *interp,
-	const char *name1, const char *name2, int flags);
-#endif
 
 struct Tcl_ResolvedVarInfo;
 MODULE_SCOPE int Itcl_ClassCmdResolver(Tcl_Interp *interp, const char* name,
