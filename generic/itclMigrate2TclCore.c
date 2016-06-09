@@ -64,8 +64,26 @@ Tcl_NewNamespaceVar(
     varPtr = TclVarHashCreateVar(&((Namespace *)nsPtr)->varTable,
             varName, &new);
     TclSetVarNamespaceVar(varPtr);
-    VarHashRefCount(varPtr)++;
     return (Tcl_Var)varPtr;
+}
+
+void
+Itcl_PreserveVar(
+    Tcl_Var var)
+{
+    Var *varPtr = (Var *)var;
+
+    VarHashRefCount(varPtr)++;
+}
+
+void
+Itcl_ReleaseVar(
+    Tcl_Var var)
+{
+    Var *varPtr = (Var *)var;
+
+    VarHashRefCount(varPtr)--;
+    TclCleanupVar(varPtr, NULL);
 }
 
 Tcl_CallFrame *

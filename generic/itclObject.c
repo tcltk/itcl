@@ -971,6 +971,7 @@ ItclInitObjectVariables(
 	        hPtr2 = Tcl_CreateHashEntry(&ioPtr->objectVariables,
 		        (char *)ivPtr, &isNew);
 	        if (isNew) {
+		    Itcl_PreserveVar(varPtr);
 		    Tcl_SetHashValue(hPtr2, varPtr);
 		} else {
 		}
@@ -1078,6 +1079,7 @@ ItclInitObjectVariables(
 	            hPtr2 = Tcl_CreateHashEntry(&ioPtr->objectVariables,
 		            (char *)ivPtr, &isNew);
 	            if (isNew) {
+			Itcl_PreserveVar(varPtr);
 		        Tcl_SetHashValue(hPtr2, varPtr);
 		    } else {
 #ifdef NEW_PROTO_RESOLVER
@@ -2701,10 +2703,11 @@ static void
 ItclFreeObject(
     char * cdata)  /* object instance data */
 {
-    Tcl_HashEntry *hPtr;
+    FOREACH_HASH_DECLS;
     Tcl_HashSearch place;
     ItclCallContext *callContextPtr;
     ItclObject *ioPtr;
+    Tcl_Var var;
     
     ioPtr = (ItclObject*)cdata;
 
@@ -2742,6 +2745,10 @@ ItclFreeObject(
 	Tcl_DeleteHashEntry(hPtr);
         ckfree((char *)callContextPtr);
     }
+    FOREACH_HASH_VALUE(var, &ioPtr->objectVariables) {
+	Itcl_ReleaseVar(var);
+    }
+
     Tcl_DeleteHashTable(&ioPtr->contextCache);
     Tcl_DeleteHashTable(&ioPtr->objectVariables);
     Tcl_DeleteHashTable(&ioPtr->objectOptions);
