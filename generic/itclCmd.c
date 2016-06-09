@@ -1878,6 +1878,7 @@ Itcl_AddComponentCmd(
     hPtr = Tcl_CreateHashEntry(&contextIoPtr->objectVariables,
             (char *)ivPtr, &isNew);
     if (isNew) {
+	Itcl_PreserveVar(varPtr);
         Tcl_SetHashValue(hPtr, varPtr);
     } else {
     }
