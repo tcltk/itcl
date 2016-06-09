@@ -1083,6 +1083,7 @@ ItclFreeClass(
     Itcl_ListElem *elem;
     ItclVarLookup *vlookup;
     ItclCmdLookup *clookupPtr;
+    Tcl_Var var;
 
     iclsPtr = (ItclClass*)cdata;
     if (iclsPtr->flags & ITCL_CLASS_IS_FREED) {
@@ -1249,11 +1250,15 @@ ItclFreeClass(
     }
 
     /* FIXME !!!
-      free classCommons
       free contextCache
       free resolvePtr -- this is only needed for CallFrame Resolvers
                       -- not used at the moment
      */
+
+    FOREACH_HASH_VALUE(var, &iclsPtr->classCommons) {
+	Itcl_ReleaseVar(var);
+    }
+    Tcl_DeleteHashTable(&iclsPtr->classCommons);
 
     /*
      *  Free up the widget class name

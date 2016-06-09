@@ -2036,6 +2036,7 @@ ItclInitClassCommon(
     hPtr = Tcl_CreateHashEntry(&iclsPtr->classCommons, (char *)ivPtr,
             &isNew);
     if (isNew) {
+	Itcl_PreserveVar(varPtr);
         Tcl_SetHashValue(hPtr, varPtr);
     }
     result = Itcl_PushCallFrame(interp, &frame, commonNsPtr,
