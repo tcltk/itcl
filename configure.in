@@ -18,7 +18,7 @@ AC_INIT([itcl], [4.0.4])
 # as well as PKG_LIB_FILE and PKG_STUB_LIB_FILE.
 #--------------------------------------------------------------------
 
-TEA_INIT([3.9])
+TEA_INIT([3.10])
 
 AC_PROG_LN_S
 CONFIG_CLEAN_FILES=
@@ -189,16 +189,6 @@ AC_CHECK_TYPE([intptr_t], [
 	   type wide enough to hold a pointer.])
     fi
 ])
-
-#--------------------------------------------------------------------
-# Everyone should be linking against the Tcl stub library.  If you
-# can't for some reason, remove this definition.  If you aren't using
-# stubs, you also need to modify the SHLIB_LD_LIBS setting below to
-# link against the non-stubbed Tcl library.
-#--------------------------------------------------------------------
-
-AC_DEFINE(USE_TCL_STUBS, 1, [Use Tcl stubs])
-AC_DEFINE(USE_TCLOO_STUBS, 1, [Use TclOO stubs])
 
 #--------------------------------------------------------------------
 # This macro generates a line to use when building a library.  It
