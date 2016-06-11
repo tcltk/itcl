@@ -6141,17 +6141,6 @@ fi
 $as_echo "shared" >&6; }
 	SHARED_BUILD=1
         STUBS_BUILD=1
-
-$as_echo "#define USE_TCL_STUBS 1" >>confdefs.h
-
-
-$as_echo "#define USE_TCLOO_STUBS 1" >>confdefs.h
-
-	if test "${TEA_WINDOWINGSYSTEM}" != ""; then
-
-$as_echo "#define USE_TK_STUBS 1" >>confdefs.h
-
-        fi
     else
 	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: static" >&5
 $as_echo "static" >&6; }
@@ -6161,21 +6150,24 @@ $as_echo "#define STATIC_BUILD 1" >>confdefs.h
 
         if test "$stubs_ok" = "yes" ; then
           STUBS_BUILD=1
+        else
+          STUBS_BUILD=0
+        fi
+    fi
+    if test "${STUBS_BUILD}" = "1" ; then
 
 $as_echo "#define USE_TCL_STUBS 1" >>confdefs.h
 
 
 $as_echo "#define USE_TCLOO_STUBS 1" >>confdefs.h
 
-          if test "${TEA_WINDOWINGSYSTEM}" != ""; then
+      if test "${TEA_WINDOWINGSYSTEM}" != ""; then
 
 $as_echo "#define USE_TK_STUBS 1" >>confdefs.h
 
-          fi
-        else
-          STUBS_BUILD=0
-        fi
+      fi
     fi
+
 
 
 
