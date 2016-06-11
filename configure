@@ -634,13 +634,6 @@ itcl_BUILD_LIB_SPEC
 TCLSH_PROG
 itcl_LIB_FILE
 itcl_STUB_LIB_FILE
-PRACTCL_NAME_LIBRARY
-PRACTCL_VC_MANIFEST_EMBED_EXE
-PRACTCL_VC_MANIFEST_EMBED_DLL
-PRACTCL_STUB_LIB
-PRACTCL_STATIC_LIB
-PRACTCL_SHARED_LIB
-PRACTCL_TOOLSET
 VC_MANIFEST_EMBED_EXE
 VC_MANIFEST_EMBED_DLL
 RANLIB_STUB
@@ -654,7 +647,6 @@ CFLAGS_DEFAULT
 LD_LIBRARY_PATH_VAR
 SHLIB_CFLAGS
 SHLIB_LD_LIBS
-SHLIB_SUFFIX
 SHLIB_LD
 STLIB_LD
 CFLAGS_WARNING
@@ -6893,8 +6885,6 @@ fi
 		CFLAGS_OPTIMIZE="-O2 -fomit-frame-pointer"
 		SHLIB_LD='${CC} -shared'
 		UNSHARED_LIB_SUFFIX='${TCL_TRIM_DOTS}.a'
-  	PRACTCL_UNSHARED_LIB_SUFFIX='.a'
-
 		LDFLAGS_CONSOLE="-wl,--subsystem,console ${lflags}"
 		LDFLAGS_WINDOW="-wl,--subsystem,windows ${lflags}"
 
@@ -8148,13 +8138,11 @@ fi
 
     # TEA specific: use PACKAGE_VERSION instead of VERSION
     SHARED_LIB_SUFFIX='${PACKAGE_VERSION}${SHLIB_SUFFIX}'
-
 fi
     if test "$UNSHARED_LIB_SUFFIX" = ""; then :
 
     # TEA specific: use PACKAGE_VERSION instead of VERSION
     UNSHARED_LIB_SUFFIX='${PACKAGE_VERSION}.a'
-
 fi
 
     if test "${GCC}" = "yes" -a ${SHLIB_SUFFIX} = ".dll"; then
@@ -8332,7 +8320,6 @@ $as_echo "$tcl_cv_cast_to_union" >&6; }
 $as_echo "#define HAVE_CAST_TO_UNION 1" >>confdefs.h
 
 	fi
-
 
 
 
@@ -8808,16 +8795,10 @@ fi
 #--------------------------------------------------------------------
 
 
-  PRACTCL_TOOLSET="gcc"
-	PRACTCL_VC_MANIFEST_EMBED_DLL=:
-	PRACTCL_VC_MANIFEST_EMBED_EXE=:
-  if test "${TEA_PLATFORM}" = "windows" -a "$GCC" != "yes"; then
-	  PRACTCL_TOOLSET="msvc"
-	  PRACTCL_STATIC_LIB="%STLIB_LD% -out:%OUTFILE% %LIBRARY_OBJECTS%"
-	  PRACTCL_SHARED_LIB="%SHLIB_LD% %SHLIB_LD_LIBS% %LDFLAGS_DEFAULT% -out:%OUTFILE% %LIBRARY_OBJECTS%"
-	  MAKE_STATIC_LIB="\${STLIB_LD} -out:\$@ \$(PKG_OBJECTS)"
-	  MAKE_SHARED_LIB="\${SHLIB_LD} \${SHLIB_LD_LIBS} \${LDFLAGS_DEFAULT} -out:\$@ \$(PKG_OBJECTS)"
-	  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+    if test "${TEA_PLATFORM}" = "windows" -a "$GCC" != "yes"; then
+	MAKE_STATIC_LIB="\${STLIB_LD} -out:\$@ \$(PKG_OBJECTS)"
+	MAKE_SHARED_LIB="\${SHLIB_LD} \${SHLIB_LD_LIBS} \${LDFLAGS_DEFAULT} -out:\$@ \$(PKG_OBJECTS)"
+	cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
 #if defined(_MSC_VER) && _MSC_VER >= 1400
@@ -8828,12 +8809,10 @@ _ACEOF
 if (eval "$ac_cpp conftest.$ac_ext") 2>&5 |
   $EGREP "manifest needed" >/dev/null 2>&1; then :
 
-	    # Could do a CHECK_PROG for mt, but should always be with MSVC8+
-	    PRACTCL_VC_MANIFEST_EMBED_DLL="mt.exe -nologo -manifest %OUTFILE%.manifest -outputresource:%OUTFILE%\;2"
-	    PRACTCL_VC_MANIFEST_EMBED_EXE="mt.exe -nologo -manifest %OUTFILE%.manifest -outputresource:%OUTFILE%\;1"
-	    VC_MANIFEST_EMBED_DLL="if test -f \$@.manifest ; then mt.exe -nologo -manifest \$@.manifest -outputresource:\$@\;2 ; fi"
-	    VC_MANIFEST_EMBED_EXE="if test -f \$@.manifest ; then mt.exe -nologo -manifest \$@.manifest -outputresource:\$@\;1 ; fi"
-	    MAKE_SHARED_LIB="${MAKE_SHARED_LIB} ; ${VC_MANIFEST_EMBED_DLL}"
+	# Could do a CHECK_PROG for mt, but should always be with MSVC8+
+	VC_MANIFEST_EMBED_DLL="if test -f \$@.manifest ; then mt.exe -nologo -manifest \$@.manifest -outputresource:\$@\;2 ; fi"
+	VC_MANIFEST_EMBED_EXE="if test -f \$@.manifest ; then mt.exe -nologo -manifest \$@.manifest -outputresource:\$@\;1 ; fi"
+	MAKE_SHARED_LIB="${MAKE_SHARED_LIB} ; ${VC_MANIFEST_EMBED_DLL}"
 
     CLEANFILES="$CLEANFILES *.manifest"
 
@@ -8841,86 +8820,73 @@ if (eval "$ac_cpp conftest.$ac_ext") 2>&5 |
 fi
 rm -f conftest*
 
-		PRACTCL_STUB_LIB="%STLIB_LD% -nodefaultlib -out:%OUTFILE% %LIBRARY_OBJECTS%"
-	  MAKE_STUB_LIB="\${STLIB_LD} -nodefaultlib -out:\$@ \$(PKG_STUB_OBJECTS)"
-  else
-	  MAKE_STATIC_LIB="\${STLIB_LD} \$@ \$(PKG_OBJECTS)"
-	  MAKE_SHARED_LIB="\${SHLIB_LD} -o \$@ \$(PKG_OBJECTS) \${SHLIB_LD_LIBS}"
-	  MAKE_STUB_LIB="\${STLIB_LD} \$@ \$(PKG_STUB_OBJECTS)"
+	MAKE_STUB_LIB="\${STLIB_LD} -nodefaultlib -out:\$@ \$(PKG_STUB_OBJECTS)"
+    else
+	MAKE_STATIC_LIB="\${STLIB_LD} \$@ \$(PKG_OBJECTS)"
+	MAKE_SHARED_LIB="\${SHLIB_LD} -o \$@ \$(PKG_OBJECTS) \${SHLIB_LD_LIBS}"
+	MAKE_STUB_LIB="\${STLIB_LD} \$@ \$(PKG_STUB_OBJECTS)"
+    fi
 
-	  PRACTCL_STATIC_LIB="%STLIB_LD% %OUTFILE% %LIBRARY_OBJECTS%"
-	  PRACTCL_SHARED_LIB="%SHLIB_LD% -o %OUTFILE% %LIBRARY_OBJECTS% %SHLIB_LD_LIBS%"
-    PRACTCL_STUB_LIB="%STLIB_LD% %OUTFILE% %LIBRARY_OBJECTS%"
-  fi
+    if test "${SHARED_BUILD}" = "1" ; then
+	MAKE_LIB="${MAKE_SHARED_LIB} "
+    else
+	MAKE_LIB="${MAKE_STATIC_LIB} "
+    fi
 
-  if test "${SHARED_BUILD}" = "1" ; then
-	  MAKE_LIB="${MAKE_SHARED_LIB} "
-  else
-	  MAKE_LIB="${MAKE_STATIC_LIB} "
-  fi
+    #--------------------------------------------------------------------
+    # Shared libraries and static libraries have different names.
+    # Use the double eval to make sure any variables in the suffix is
+    # substituted. (@@@ Might not be necessary anymore)
+    #--------------------------------------------------------------------
 
-  #--------------------------------------------------------------------
-  # Shared libraries and static libraries have different names.
-  # Use the double eval to make sure any variables in the suffix is
-  # substituted. (@@@ Might not be necessary anymore)
-  #--------------------------------------------------------------------
-  if test "${TEA_PLATFORM}" = "windows" ; then
-	  PRACTCL_NAME_LIBRARY="%LIBRARY_PREFIX%%LIBRARY_NAME%%LIBRARY_VERSION_NODOTS%"
-	  if test "${SHARED_BUILD}" = "1" ; then
+    if test "${TEA_PLATFORM}" = "windows" ; then
+	if test "${SHARED_BUILD}" = "1" ; then
 	    # We force the unresolved linking of symbols that are really in
 	    # the private libraries of Tcl and Tk.
 	    if test x"${TK_BIN_DIR}" != x ; then
-			  SHLIB_LD_LIBS="${SHLIB_LD_LIBS} \"`${CYGPATH} ${TK_BIN_DIR}/${TK_STUB_LIB_FILE}`\""
+		SHLIB_LD_LIBS="${SHLIB_LD_LIBS} \"`${CYGPATH} ${TK_BIN_DIR}/${TK_STUB_LIB_FILE}`\""
 	    fi
 	    SHLIB_LD_LIBS="${SHLIB_LD_LIBS} \"`${CYGPATH} ${TCL_BIN_DIR}/${TCL_STUB_LIB_FILE}`\""
 	    if test "$GCC" = "yes"; then
-        SHLIB_LD_LIBS="${SHLIB_LD_LIBS} -static-libgcc"
+		SHLIB_LD_LIBS="${SHLIB_LD_LIBS} -static-libgcc"
 	    fi
 	    eval eval "PKG_LIB_FILE=${PACKAGE_LIB_PREFIX}${PACKAGE_NAME}${SHARED_LIB_SUFFIX}"
-	  else
+	else
 	    eval eval "PKG_LIB_FILE=${PACKAGE_LIB_PREFIX}${PACKAGE_NAME}${UNSHARED_LIB_SUFFIX}"
 	    if test "$GCC" = "yes"; then
-        PKG_LIB_FILE=lib${PKG_LIB_FILE}
+		PKG_LIB_FILE=lib${PKG_LIB_FILE}
 	    fi
-	  fi
-	  # Some packages build their own stubs libraries
-	  eval eval "PKG_STUB_LIB_FILE=${PACKAGE_LIB_PREFIX}${PACKAGE_NAME}stub${UNSHARED_LIB_SUFFIX}"
-    if test "$GCC" = "yes"; then
-      PKG_STUB_LIB_FILE=lib${PKG_STUB_LIB_FILE}
-    fi
-	  # These aren't needed on Windows (either MSVC or gcc)
-	  RANLIB=:
-	  RANLIB_STUB=:
-  else
-	  PRACTCL_NAME_LIBRARY="lib%LIBRARY_PREFIX%%LIBRARY_NAME%%LIBRARY_VERSION%"
-	  RANLIB_STUB="${RANLIB}"
-	  if test "${SHARED_BUILD}" = "1" ; then
-      SHLIB_LD_LIBS="${SHLIB_LD_LIBS} ${TCL_STUB_LIB_SPEC}"
-      if test x"${TK_BIN_DIR}" != x ; then
-        SHLIB_LD_LIBS="${SHLIB_LD_LIBS} ${TK_STUB_LIB_SPEC}"
-      fi
-      eval eval "PKG_LIB_FILE=lib${PACKAGE_LIB_PREFIX}${PACKAGE_NAME}${SHARED_LIB_SUFFIX}"
-      RANLIB=:
+	fi
+	# Some packages build their own stubs libraries
+	eval eval "PKG_STUB_LIB_FILE=${PACKAGE_LIB_PREFIX}${PACKAGE_NAME}stub${UNSHARED_LIB_SUFFIX}"
+	if test "$GCC" = "yes"; then
+	    PKG_STUB_LIB_FILE=lib${PKG_STUB_LIB_FILE}
+	fi
+	# These aren't needed on Windows (either MSVC or gcc)
+	RANLIB=:
+	RANLIB_STUB=:
     else
-      eval eval "PKG_LIB_FILE=lib${PACKAGE_LIB_PREFIX}${PACKAGE_NAME}${UNSHARED_LIB_SUFFIX}"
+	RANLIB_STUB="${RANLIB}"
+	if test "${SHARED_BUILD}" = "1" ; then
+	    SHLIB_LD_LIBS="${SHLIB_LD_LIBS} ${TCL_STUB_LIB_SPEC}"
+	    if test x"${TK_BIN_DIR}" != x ; then
+		SHLIB_LD_LIBS="${SHLIB_LD_LIBS} ${TK_STUB_LIB_SPEC}"
+	    fi
+	    eval eval "PKG_LIB_FILE=lib${PACKAGE_LIB_PREFIX}${PACKAGE_NAME}${SHARED_LIB_SUFFIX}"
+	    RANLIB=:
+	else
+	    eval eval "PKG_LIB_FILE=lib${PACKAGE_LIB_PREFIX}${PACKAGE_NAME}${UNSHARED_LIB_SUFFIX}"
+	fi
+	# Some packages build their own stubs libraries
+	eval eval "PKG_STUB_LIB_FILE=lib${PACKAGE_LIB_PREFIX}${PACKAGE_NAME}stub${UNSHARED_LIB_SUFFIX}"
     fi
-    # Some packages build their own stubs libraries
-    eval eval "PKG_STUB_LIB_FILE=lib${PACKAGE_LIB_PREFIX}${PACKAGE_NAME}stub${UNSHARED_LIB_SUFFIX}"
-  fi
 
-  # These are escaped so that only CFLAGS is picked up at configure time.
-  # The other values will be substituted at make time.
-  CFLAGS="${CFLAGS} \${CFLAGS_DEFAULT} \${CFLAGS_WARNING}"
-  if test "${SHARED_BUILD}" = "1" ; then
-    CFLAGS="${CFLAGS} \${SHLIB_CFLAGS}"
-  fi
-
-
-
-
-
-
-
+    # These are escaped so that only CFLAGS is picked up at configure time.
+    # The other values will be substituted at make time.
+    CFLAGS="${CFLAGS} \${CFLAGS_DEFAULT} \${CFLAGS_WARNING}"
+    if test "${SHARED_BUILD}" = "1" ; then
+	CFLAGS="${CFLAGS} \${SHLIB_CFLAGS}"
+    fi
 
 
 
