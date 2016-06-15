@@ -365,12 +365,6 @@ Itcl_ClassVarResolver(
         hPtr = Tcl_FindHashEntry(&infoPtr->objects, (char *)contextIoPtr);
         if (hPtr == NULL) {
             continue;
-#ifdef NOTDEF
-	    char str[20];
-	    sprintf(str, "%p", contextIoPtr);
-	    Tcl_AppendResult(interp, "contextIoPtr has vanished!!", str, NULL);
-            return TCL_ERROR;
-#endif
         }
         if (contextIoPtr->iclsPtr != vlookup->ivPtr->iclsPtr) {
 	    if (strcmp(Tcl_GetString(vlookup->ivPtr->namePtr), "this") == 0) {
