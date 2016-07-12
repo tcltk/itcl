@@ -313,7 +313,7 @@ dist-clean:
 
 dist: dist-clean doc
 	$(INSTALL_DATA_DIR) $(DIST_DIR)
-	cp -p $(srcdir)/license* $(srcdir)/aclocal.m4 $(srcdir)/configure \
+	cp -p $(srcdir)/license* $(srcdir)/aclocal.m4 $(srcdir)/configure* \
 		$(srcdir)/*.in  $(DIST_DIR)/
 	chmod 664 $(DIST_DIR)/Makefile.in $(DIST_DIR)/aclocal.m4
 	chmod 775 $(DIST_DIR)/configure $(DIST_DIR)/configure.ac
