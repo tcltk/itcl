@@ -480,7 +480,7 @@ ItclCreateMemberFunc(
      *  same name doesn't already exist.
      */
     hPtr = Tcl_CreateHashEntry(&iclsPtr->functions, (char *)namePtr, &newEntry);
-    if (!hPtr) {
+    if (!newEntry) {
         Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
             "\"", Tcl_GetString(namePtr), "\" already defined in class \"",
             Tcl_GetString(iclsPtr->fullNamePtr), "\"",

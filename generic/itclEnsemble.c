@@ -810,7 +810,7 @@ CreateEnsemble(
 	        Tcl_GetCurrentNamespace(interp), TCL_ENSEMBLE_PREFIX);
         hPtr = Tcl_CreateHashEntry(&infoPtr->ensembleInfo->ensembles,
                 (char *)ensData->cmdPtr, &isNew);
-	if (hPtr == NULL) {
+	if (!isNew) {
 	    result = TCL_ERROR;
 	    goto finish;
 	}
@@ -859,7 +859,7 @@ CreateEnsemble(
             Tcl_GetCurrentNamespace(interp), TCL_ENSEMBLE_PREFIX);
     hPtr = Tcl_CreateHashEntry(&infoPtr->ensembleInfo->ensembles,
             (char *)ensPart->cmdPtr, &isNew);
-    if (hPtr == NULL) {
+    if (!isNew) {
         result = TCL_ERROR;
         goto finish;
     }
