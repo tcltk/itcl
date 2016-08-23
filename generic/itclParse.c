@@ -753,7 +753,6 @@ ItclClassBaseCmd(
 	    Tcl_AppendObjToErrorInfo(interp, Tcl_ObjPrintf(
 		    "\n    (class \"%s\" body line %s)",
 		    className, Tcl_GetString(stackTrace)));
-	    iclsPtr->flags |= ITCL_CLASS_CONSTRUCT_ERROR;
 	}
         result = TCL_ERROR;
         goto errorReturn;

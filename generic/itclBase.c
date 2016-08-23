@@ -765,6 +765,13 @@ ItclFinishCmd(
     }
     Tcl_DeleteHashTable(&infoPtr->classTypes);
 
+    Tcl_DeleteHashTable(&infoPtr->procMethods);
+
+    Tcl_DeleteHashTable(&infoPtr->objectCmds);
+    Tcl_DeleteHashTable(&infoPtr->classes);
+    Tcl_DeleteHashTable(&infoPtr->nameClasses);
+    Tcl_DeleteHashTable(&infoPtr->namespaceClasses);
+
     nsPtr = Tcl_FindNamespace(interp, "::itcl::parser", NULL, 0);
     if (nsPtr != NULL) {
         Tcl_DeleteNamespace(nsPtr);

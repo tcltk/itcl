@@ -1155,14 +1155,8 @@ ItclFreeClass(
      *  Delete all function definitions.
      */
     FOREACH_HASH_VALUE(imPtr, &iclsPtr->functions) {
-	/* functions have Itcl_ReleaseData as deleteProc in the 
-	 * Tcl_Command structure of the class namespace !!
-	 * but if there was an error during parsing of the class body
-	 * the Tcl_Commands have not yet been built, so release here
-	 */
-	if (imPtr->iclsPtr->flags & ITCL_CLASS_CONSTRUCT_ERROR) {
-            ItclReleaseIMF(imPtr);
-	}
+	imPtr->iclsPtr = NULL;
+        ItclReleaseIMF(imPtr);
     }
     Tcl_DeleteHashTable(&iclsPtr->functions);
 
@@ -2552,11 +2546,13 @@ ItclDeleteFunction(
 {
     Tcl_HashEntry *hPtr;
 
+if (imPtr->iclsPtr) {
     hPtr = Tcl_FindHashEntry(&imPtr->iclsPtr->infoPtr->procMethods,
 	    (char *) imPtr->tmPtr);
     if (hPtr != NULL) {
 	Tcl_DeleteHashEntry(hPtr);
     }
+}
     hPtr = Tcl_FindHashEntry(&imPtr->infoPtr->classes, (char *)imPtr->iclsPtr);
     if (hPtr != NULL) {
 	/* unlink owerself from list of class functions */

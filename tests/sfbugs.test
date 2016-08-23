@@ -365,7 +365,7 @@ test sfbug-257 { SF bug #257
       lappend ::test_status $msg
     }
 } -result {{proc Hello World} {proc Hello World} {method Hello World} {invalid command name "cl10"}} \
-  -cleanup {catch {::itcl::delete class ::cl1}}
+  -cleanup {interp delete $interp}
 
 test sfbug-259 { SF bug #257 } -setup {
     interp create slave

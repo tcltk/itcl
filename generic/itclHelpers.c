@@ -181,7 +181,9 @@ ItclCreateArgList(
 	    }
             lastArglistPtr = arglistPtr;
 	    i++;
+	    ckfree((char *) defaultArgv);
         }
+	ckfree((char *) argv);
     }
     /*
      *  If anything went wrong, destroy whatever arguments were
