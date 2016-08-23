@@ -462,38 +462,15 @@ Itcl_CreateClass(
 
     hPtr = Tcl_CreateHashEntry(&infoPtr->nameClasses,
             (char *)iclsPtr->fullNamePtr, &newEntry);
-    if (hPtr == NULL) {
-	Tcl_AppendResult(interp,
-	        "ITCL: cannot create hash entry in infoPtr->nameClasses for ",
-		"class \"", Tcl_GetString(iclsPtr->fullNamePtr), "\"", NULL);
-	result = TCL_ERROR;
-        goto errorOut;
-    }
     Tcl_SetHashValue(hPtr, (ClientData)iclsPtr);
 
 
     hPtr = Tcl_CreateHashEntry(&infoPtr->namespaceClasses, (char *)classNs,
             &newEntry);
-    if (hPtr == NULL) {
-	Tcl_AppendResult(interp,
-	        "ITCL: cannot create hash entry in infoPtr->namespaceClasses",
-		" for class \"", 
-		Tcl_GetString(iclsPtr->fullNamePtr), "\"", NULL);
-	result = TCL_ERROR;
-        goto errorOut;
-    }
     Tcl_SetHashValue(hPtr, (ClientData)iclsPtr);
   if (classNs != ooNs) {
     hPtr = Tcl_CreateHashEntry(&infoPtr->namespaceClasses, (char *)ooNs,
             &newEntry);
-    if (hPtr == NULL) {
-	Tcl_AppendResult(interp,
-	        "ITCL: cannot create hash entry in infoPtr->namespaceClasses",
-		" for class \"", 
-		Tcl_GetString(iclsPtr->fullNamePtr), "\"", NULL);
-	result = TCL_ERROR;
-        goto errorOut;
-    }
     Tcl_SetHashValue(hPtr, (ClientData)iclsPtr);
 
     if (classNs->clientData && classNs->deleteProc) {
@@ -504,14 +481,6 @@ Itcl_CreateClass(
 }
 
     hPtr = Tcl_CreateHashEntry(&infoPtr->classes, (char *)iclsPtr, &newEntry);
-    if (hPtr == NULL) {
-	Tcl_AppendResult(interp,
-	        "ITCL: cannot create hash entry in infoPtr->classes",
-		" for class \"", 
-		Tcl_GetString(iclsPtr->fullNamePtr), "\"", NULL);
-	result = TCL_ERROR;
-        goto errorOut;
-    }
     Tcl_SetHashValue(hPtr, (ClientData)iclsPtr);
 
     /*
