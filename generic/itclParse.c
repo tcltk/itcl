@@ -3195,6 +3195,7 @@ ItclCreateDelegatedFunction(
 	    Tcl_CreateHashEntry(&idmPtr->exceptions, (char *)objPtr,
 	            &isNew);
 	}
+	ckfree((char *) argv);
     }
     if (idmPtrPtr != NULL) {
         *idmPtrPtr = idmPtr;
@@ -3705,6 +3706,8 @@ Itcl_HandleDelegateOptionCmd(
         Tcl_IncrRefCount(idoPtr->asPtr);
     }
     if (exceptionsPtr != NULL) {
+	ckfree((char *)argv);
+	argv = NULL;
         if (Tcl_SplitList(interp, Tcl_GetString(exceptionsPtr), &argc, &argv)
 	        != TCL_OK) {
 	    goto errorOut2;
@@ -3732,7 +3735,9 @@ errorOut1:
     if (classNamePtr != NULL) {
         Tcl_DecrRefCount(classNamePtr);
     }
-    ckfree((char *)argv);
+    if (argv) {
+	ckfree((char *)argv);
+    }
     return TCL_ERROR;
 }
 
@@ -3957,6 +3962,7 @@ delegate typemethod * ?to <componentName>? ?using <pattern>? ?except <typemethod
 	        hPtr = Tcl_CreateHashEntry(&idmPtr->exceptions, (char *)objPtr,
 	                &isNew);
 	    }
+	    ckfree((char *) argv);
         }
     }
     idmPtr->icPtr = icPtr;
