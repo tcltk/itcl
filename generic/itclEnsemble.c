@@ -422,9 +422,13 @@ Itcl_GetEnsemblePart(
     }
 
     Itcl_DiscardInterpState(state);
+    ckfree((char *)nameArgv);
     return 1;
 
 ensGetFail:
+    if (nameArgv) {
+	ckfree((char *)nameArgv);
+    }
     Itcl_RestoreInterpState(interp, state);
     return 0;
 }
@@ -519,9 +523,13 @@ Itcl_GetEnsembleUsage(
     GetEnsembleUsage(interp, ensData, objPtr);
 
     Itcl_DiscardInterpState(state);
+    ckfree((char *)nameArgv);
     return 1;
 
 ensUsageFail:
+    if (nameArgv) {
+	ckfree((char *)nameArgv);
+    }
     Itcl_RestoreInterpState(interp, state);
     return 0;
 }
@@ -802,7 +810,7 @@ CreateEnsemble(
 	        Tcl_GetCurrentNamespace(interp), TCL_ENSEMBLE_PREFIX);
         hPtr = Tcl_CreateHashEntry(&infoPtr->ensembleInfo->ensembles,
                 (char *)ensData->cmdPtr, &isNew);
-	if (hPtr == NULL) {
+	if (!isNew) {
 	    result = TCL_ERROR;
 	    goto finish;
 	}
@@ -851,7 +859,7 @@ CreateEnsemble(
             Tcl_GetCurrentNamespace(interp), TCL_ENSEMBLE_PREFIX);
     hPtr = Tcl_CreateHashEntry(&infoPtr->ensembleInfo->ensembles,
             (char *)ensPart->cmdPtr, &isNew);
-    if (hPtr == NULL) {
+    if (!isNew) {
         result = TCL_ERROR;
         goto finish;
     }

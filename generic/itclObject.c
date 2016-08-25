@@ -3265,6 +3265,7 @@ ExpandDelegateAs(
             Tcl_ListObjAppendElement(interp, listPtr,
                     Tcl_NewStringObj(argv[j], -1));
         }
+	ckfree((char *)argv);
     } else {
 	if (idmPtr->usingPtr != NULL) {
 	    char *cp;
