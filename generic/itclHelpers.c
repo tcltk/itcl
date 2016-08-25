@@ -161,6 +161,7 @@ ItclCreateArgList(
 	    }
 	    arglistPtr->namePtr = 
 	            Tcl_NewStringObj(defaultArgv[0], -1);
+	    Tcl_IncrRefCount(arglistPtr->namePtr);
 	    (*maxArgcPtr)++;
 	    if (defaultArgc == 1) {
 		(*argcPtr)++;
@@ -175,6 +176,7 @@ ItclCreateArgList(
 	    } else {
 	        arglistPtr->defaultValuePtr = 
 		        Tcl_NewStringObj(defaultArgv[1], -1);
+		Tcl_IncrRefCount(arglistPtr->defaultValuePtr);
 	        Tcl_AppendToObj(*usagePtr, "?", 1);
 	        Tcl_AppendToObj(*usagePtr, defaultArgv[0], -1);
 	        Tcl_AppendToObj(*usagePtr, "?", 1);
