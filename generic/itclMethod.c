@@ -375,6 +375,7 @@ ItclCreateMethod(
         Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
             "bad method name \"", Tcl_GetString(namePtr), "\"",
             (char*)NULL);
+	Tcl_DecrRefCount(namePtr);
         return TCL_ERROR;
     }
 
@@ -479,7 +480,7 @@ ItclCreateMemberFunc(
      *  same name doesn't already exist.
      */
     hPtr = Tcl_CreateHashEntry(&iclsPtr->functions, (char *)namePtr, &newEntry);
-    if (!hPtr) {
+    if (!newEntry) {
         Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
             "\"", Tcl_GetString(namePtr), "\" already defined in class \"",
             Tcl_GetString(iclsPtr->fullNamePtr), "\"",
@@ -2493,6 +2494,7 @@ ItclAfterCallMethod(
      */
     ioPtr = callContextPtr->ioPtr;
     if (ioPtr != NULL) {
+      if (imPtr->iclsPtr) {
         imPtr->iclsPtr->callRefCount--;
         if (imPtr->flags & (ITCL_CONSTRUCTOR | ITCL_DESTRUCTOR)) {
             if ((imPtr->flags & ITCL_DESTRUCTOR) && ioPtr &&
@@ -2506,6 +2508,7 @@ ItclAfterCallMethod(
                     (char *)imPtr->iclsPtr->namePtr, &newEntry);
             }
         }
+      }
         ioPtr->callRefCount--;
         if (ioPtr->flags & ITCL_OBJECT_SHOULD_VARNS_DELETE) {
             ItclDeleteObjectVariablesNamespace(interp, ioPtr);
