@@ -96,7 +96,7 @@ static const char *clazzClassScript =
 "::oo::class create ::itcl::clazz {\n"
 "  superclass ::oo::class\n"
 "  method unknown args {\n"
-"    tailcall ::itcl::parser::handleClass [lindex [info level 0] 0] [self] {*}$args\n"
+"    ::tailcall ::itcl::parser::handleClass [::lindex [::info level 0] 0] [self] {*}$args\n"
 "  }\n"
 "  unexport create new unknown\n"
 "}";
