@@ -838,6 +838,7 @@ typedef int (ItclRootMethodProc)(ItclObject *ioPtr, Tcl_Interp *interp,
 MODULE_SCOPE const Tcl_MethodType itclRootMethodType;
 MODULE_SCOPE ItclRootMethodProc ItclUnknownGuts;
 MODULE_SCOPE ItclRootMethodProc ItclConstructGuts;
+MODULE_SCOPE ItclRootMethodProc ItclInfoGuts;
 
 #include "itcl2TclOO.h"
 #ifdef NEW_PROTO_RESOLVER
