@@ -421,7 +421,7 @@ Itcl_InstallBiMethods(
      * work.
      */
 
-    if (result == TCL_OK) {
+    if (0 && result == TCL_OK) {
 	result = Itcl_CreateMethod(interp, iclsPtr,
 		Tcl_NewStringObj("info", -1), NULL, "@itcl-builtin-info");
     }
@@ -1575,6 +1575,7 @@ ItclUnknownGuts(
     int isNew;
     int idx;
 
+fprintf(stdout, "UNKNOWN GUTS\n"); fflush(stdout);
     if (objc < 3) {
         Tcl_AppendResult(interp, "wrong # args: should be one of...",
 		(char*)NULL);

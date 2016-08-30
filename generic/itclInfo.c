@@ -307,6 +307,25 @@ static const struct NameProcMap2 infoCmdsDelegated2[] = {
  * ------------------------------------------------------------------------
  */
 
+int
+ItclInfoGuts(
+    ItclObject *ioPtr,
+    Tcl_Interp *interp,
+    int objc,
+    Tcl_Obj *const objv[])
+{
+
+    fprintf(stdout, "NS: '%s'\n", Tcl_GetCurrentNamespace(interp)->fullName);
+    fflush(stdout);
+
+
+
+
+
+
+    return TCL_OK;
+}
+
 static int
 NRInfoWrap(
     ClientData clientData,
