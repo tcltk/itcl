@@ -207,5 +207,22 @@ test scope-4.2 {scope command allows access to slots in an array} {
 
 namespace delete test_scope_ns
 
+test scope-5.0 {Bug e5f529da75} -setup {
+    itcl::class B {
+	common c
+	method v {} {itcl::scope c}
+    }
+    itcl::class D {
+	inherit B
+	method v {} {itcl::scope c}
+    }
+    B b
+    D d
+} -body {
+    string equal [b v] [d v]
+} -cleanup {
+    itcl::delete class B
+} -result 1
+
 ::tcltest::cleanupTests
 return
