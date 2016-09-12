@@ -1809,9 +1809,7 @@ int
 Itcl_ConstructBase(
     Tcl_Interp *interp,       /* interpreter */
     ItclObject *contextObj,   /* object being constructed */
-    ItclClass *contextClass,  /* current class being constructed */
-    int objc,
-    Tcl_Obj *const *objv)
+    ItclClass *contextClass)  /* current class being constructed */
 {
     int result = TCL_OK;
     Tcl_Obj *objPtr;
@@ -1858,7 +1856,7 @@ Itcl_ConstructBase(
 	            contextObj, INT2PTR(0), NULL);
             result = Itcl_NRRunCallbacks(interp, callbackPtr);
 	} else {
-            result = Itcl_ConstructBase(interp, contextObj, iclsPtr, objc, objv);
+            result = Itcl_ConstructBase(interp, contextObj, iclsPtr);
         }
     }
     Tcl_DecrRefCount(objPtr);
@@ -1875,7 +1873,7 @@ ItclConstructGuts(
     ItclClass *contextClass;
 
     /* Ignore syntax error */
-    if (objc != 4) {
+    if (objc != 3) {
 	return TCL_OK;
     }
 
@@ -1884,13 +1882,13 @@ ItclConstructGuts(
 	return TCL_OK;
     }
 
-    contextClass = Itcl_FindClass(interp, Tcl_GetString(objv[3]), 0);
+    contextClass = Itcl_FindClass(interp, Tcl_GetString(objv[2]), 0);
     if (contextClass == NULL) {
 	return TCL_OK;
     }
 
 
-    return Itcl_ConstructBase(interp, contextObj, contextClass, objc, objv);
+    return Itcl_ConstructBase(interp, contextObj, contextClass);
 }
 
 /*
