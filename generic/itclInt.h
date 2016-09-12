@@ -205,6 +205,7 @@ typedef struct ItclObjectInfo {
     Tcl_Obj *infoVars4Ptr;
     Tcl_Obj *typeDestructorArgumentPtr;
     struct ItclObject *lastIoPtr;   /* last object constructed */
+    Tcl_Command infoCmd;
 } ItclObjectInfo;
 
 typedef struct EnsembleInfo {
@@ -715,7 +716,7 @@ MODULE_SCOPE void ItclDeleteObjectVariablesNamespace(Tcl_Interp *interp,
         ItclObject *ioPtr);
 MODULE_SCOPE void ItclDeleteClassVariablesNamespace(Tcl_Interp *interp,
         ItclClass *iclsPtr);
-MODULE_SCOPE int ItclInfoInit(Tcl_Interp *interp);
+MODULE_SCOPE int ItclInfoInit(Tcl_Interp *interp, ItclObjectInfo *infoPtr);
 
 struct Tcl_ResolvedVarInfo;
 MODULE_SCOPE int Itcl_ClassCmdResolver(Tcl_Interp *interp, const char* name,
