@@ -165,7 +165,7 @@ RootCallProc(
     ItclObject *ioPtr = Tcl_ObjectGetMetadata(oPtr, &objMDT);
     ItclRootMethodProc *proc = (ItclRootMethodProc *)clientData;
 
-    return (*proc)(ioPtr, interp, objc+1, objv-1);
+    return (*proc)(ioPtr, interp, objc, objv);
 }
 
 /*
