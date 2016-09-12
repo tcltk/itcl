@@ -309,7 +309,7 @@ Itcl_BiInit(
     Tcl_CreateObjCommand(interp, "::itcl::builtin::classunknown",
             ItclBiClassUnknownCmd, infoPtr, (Tcl_CmdDeleteProc*)NULL);
 
-    ItclInfoInit(interp);
+    ItclInfoInit(interp, infoPtr);
     /*
      *  Export all commands in the built-in namespace so we can
      *  import them later on.
@@ -421,7 +421,7 @@ Itcl_InstallBiMethods(
      * work.
      */
 
-    if (1 && result == TCL_OK) {
+    if (0 && result == TCL_OK) {
 	result = Itcl_CreateMethod(interp, iclsPtr,
 		Tcl_NewStringObj("info", -1), NULL, "@itcl-builtin-info");
     }
@@ -1575,7 +1575,6 @@ ItclUnknownGuts(
     int isNew;
     int idx;
 
-fprintf(stdout, "UNKNOWN GUTS: %d \n",objc); fflush(stdout);
     if (objc < 2) {
         Tcl_AppendResult(interp, "wrong # args: should be one of...",
 		(char*)NULL);

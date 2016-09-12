@@ -314,16 +314,34 @@ ItclInfoGuts(
     int objc,
     Tcl_Obj *const objv[])
 {
+    ItclObjectInfo *infoPtr = ioPtr->infoPtr;
+    Tcl_Namespace *savedNs = Tcl_GetCurrentNamespace(interp);
+    int code = TCL_OK;
 
-    fprintf(stdout, "NS: '%s'\n", Tcl_GetCurrentNamespace(interp)->fullName);
+    Itcl_SetCallFrameNamespace(interp, ioPtr->iclsPtr->nsPtr);
+
+    if (objc == 2) {
+	/*
+	 * No subcommand passed.  Give good usage message.  NOT the
+	 * default message of a Tcl ensemble.
+	 */
+
+	Tcl_Obj *objPtr = Tcl_NewStringObj(
+		"wrong # args: should be one of...\n", -1);
+	ItclGetInfoUsage(interp, objPtr, infoPtr);
+	Tcl_SetObjResult(interp, objPtr);
+	code = TCL_ERROR;
+    } else {
+
+    fprintf(stdout, "NS: '%s' %d, '%s'\n",
+Tcl_GetCurrentNamespace(interp)->fullName, objc,
+Tcl_GetString(objv[0]));
     fflush(stdout);
+    }
 
 
-
-
-
-
-    return TCL_OK;
+    Itcl_SetCallFrameNamespace(interp, savedNs);
+    return code;
 }
 
 static int
@@ -377,9 +395,23 @@ InfoWrap(
     return Tcl_NRCallObjProc(interp, NRInfoWrap, clientData, objc, objv);
 }
 
+static void
+InfoCmdDelete(
+    ClientData clientData,
+    Tcl_Interp *interp,
+    const char *oldName,
+    const char *newName,
+    int flags)
+{
+    ItclObjectInfo *infoPtr = (ItclObjectInfo *)clientData;
+
+    infoPtr->infoCmd = NULL;
+}
+
 int
 ItclInfoInit(
-    Tcl_Interp *interp)      /* current interpreter */
+    Tcl_Interp *interp,      /* current interpreter */
+    ItclObjectInfo *infoPtr)
 {
     Tcl_Namespace *nsPtr;
     Tcl_Command token;
@@ -389,9 +421,6 @@ ItclInfoInit(
     int result;
     int i;
 
-    ItclObjectInfo *infoPtr;
-    infoPtr = (ItclObjectInfo *)Tcl_GetAssocData(interp,
-            ITCL_INTERP_DATA, NULL);
     /*
      * Build the ensemble used to implement [info].
      */
@@ -400,8 +429,13 @@ ItclInfoInit(
     if (nsPtr == NULL) {
         Tcl_Panic("ITCL: error in creating namespace: ::itcl::builtin::Info \n");
     }
+    if (infoPtr->infoCmd) {
+	Tcl_Panic("Double init of info ensemble");
+    }
     token = Tcl_CreateEnsemble(interp, nsPtr->fullName, nsPtr,
         TCL_ENSEMBLE_PREFIX);
+    Tcl_TraceCommand(interp, nsPtr->fullName, TCL_TRACE_DELETE,
+	    InfoCmdDelete, (ClientData) infoPtr);
     token = Tcl_NRCreateCommand(interp, "::itcl::builtin::Wrap", InfoWrap,
 	    NRInfoWrap, token, NULL);
     Tcl_GetCommandInfoFromToken(token, &info);
