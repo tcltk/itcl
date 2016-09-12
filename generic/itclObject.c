@@ -509,7 +509,7 @@ ItclCreateObject(
      */
     objPtr = Tcl_NewStringObj("constructor", -1);
     if (Tcl_FindHashEntry(&iclsPtr->functions, (char *)objPtr) == NULL) {
-        result = Itcl_ConstructBase(interp, ioPtr, iclsPtr, objc, objv);
+        result = Itcl_ConstructBase(interp, ioPtr, iclsPtr);
     }
     Tcl_DecrRefCount(objPtr);
 

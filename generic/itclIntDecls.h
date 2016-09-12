@@ -216,8 +216,7 @@ ITCLAPI int		Itcl_ExecProc(ClientData clientData,
 /* 71 */
 ITCLAPI int		Itcl_ConstructBase(Tcl_Interp *interp,
 				ItclObject *contextObj,
-				ItclClass *contextClass, int objc,
-				Tcl_Obj *const *objv);
+				ItclClass *contextClass);
 /* 72 */
 ITCLAPI int		Itcl_InvokeMethodIfExists(Tcl_Interp *interp,
 				const char *name, ItclClass *contextClass,
@@ -591,7 +590,7 @@ typedef struct ItclIntStubs {
     int (*itcl_ExecMethod) (ClientData clientData, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]); /* 68 */
     int (*itcl_ExecProc) (ClientData clientData, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]); /* 69 */
     void (*reserved70)(void);
-    int (*itcl_ConstructBase) (Tcl_Interp *interp, ItclObject *contextObj, ItclClass *contextClass, int objc, Tcl_Obj *const *objv); /* 71 */
+    int (*itcl_ConstructBase) (Tcl_Interp *interp, ItclObject *contextObj, ItclClass *contextClass); /* 71 */
     int (*itcl_InvokeMethodIfExists) (Tcl_Interp *interp, const char *name, ItclClass *contextClass, ItclObject *contextObj, int objc, Tcl_Obj *const objv[]); /* 72 */
     void (*reserved73)(void);
     int (*itcl_ReportFuncErrors) (Tcl_Interp *interp, ItclMemberFunc *mfunc, ItclObject *contextObj, int result); /* 74 */
