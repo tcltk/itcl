@@ -1575,7 +1575,7 @@ ItclUnknownGuts(
     int isNew;
     int idx;
 
-    if (objc < 3) {
+    if (objc < 2) {
         Tcl_AppendResult(interp, "wrong # args: should be one of...",
 		(char*)NULL);
         ItclReportObjectUsage(interp, ioPtr, NULL, NULL);
@@ -1590,7 +1590,7 @@ ItclUnknownGuts(
     useComponent = 1;
     result = TCL_OK;
     idmPtr = NULL;
-    funcName = Tcl_GetString(objv[2]);
+    funcName = Tcl_GetString(objv[1]);
     if (strcmp(funcName, "itcl_hull") == 0) {
         isItclHull = 1;
     }
@@ -1603,11 +1603,11 @@ ItclUnknownGuts(
 		        icPtr->ivPtr->iclsPtr);
 	        if ((val != NULL) && (strlen(val) > 0)) {
                     newObjv = (Tcl_Obj **)ckalloc(sizeof(Tcl_Obj *) *
-		            (objc -1));
+		            (objc));
 		    newObjv[0] = Tcl_NewStringObj(val, -1);
 		    Tcl_IncrRefCount(newObjv[0]);
-		    memcpy(newObjv+1, objv+2, sizeof(Tcl_Obj *) * (objc-2));
-                    result = Tcl_EvalObjv(interp, objc-1, newObjv, 0);
+		    memcpy(newObjv+1, objv+1, sizeof(Tcl_Obj *) * (objc-1));
+                    result = Tcl_EvalObjv(interp, objc, newObjv, 0);
 		    Tcl_DecrRefCount(newObjv[0]);
 		    ckfree((char *)newObjv);
 	            return result;
@@ -1638,7 +1638,7 @@ ItclUnknownGuts(
     }
     iclsPtr = ioPtr->iclsPtr;
     found = 0;
-    hPtr = Tcl_FindHashEntry(&iclsPtr->delegatedFunctions, (char *)objv[2]);
+    hPtr = Tcl_FindHashEntry(&iclsPtr->delegatedFunctions, (char *)objv[1]);
     if (hPtr == NULL) {
         objPtr = Tcl_NewStringObj("*", -1);
         Tcl_IncrRefCount(objPtr);
@@ -1655,7 +1655,7 @@ ItclUnknownGuts(
     }
     if (isStar) {
        /* check if the function is in the exceptions */
-        hPtr2 = Tcl_FindHashEntry(&idmPtr->exceptions, (char *)objv[2]);
+        hPtr2 = Tcl_FindHashEntry(&idmPtr->exceptions, (char *)objv[1]);
         if (hPtr2 != NULL) {
 	    const char *sep = "";
 	    objPtr = Tcl_NewStringObj("unknown subcommand \"", -1);
@@ -1709,9 +1709,9 @@ ItclUnknownGuts(
         }
     }
 
-    offset = 2;
+    offset = 1;
     if (isStar) {
-        hPtr = Tcl_FindHashEntry(&idmPtr->exceptions, (char *)objv[2]);
+        hPtr = Tcl_FindHashEntry(&idmPtr->exceptions, (char *)objv[1]);
 	/* we have no method name in that case in the caller */
 	if (hPtr != NULL) {
 	    const char *sep = "";
@@ -1731,7 +1731,7 @@ ItclUnknownGuts(
 	}
     }
     if (idmPtr == NULL) {
-        Tcl_AppendResult(interp, "bad option \"", Tcl_GetString(objv[2]),
+        Tcl_AppendResult(interp, "bad option \"", Tcl_GetString(objv[1]),
                 "\": should be one of...", (char*)NULL);
         ItclReportObjectUsage(interp, ioPtr, NULL, NULL);
         return TCL_ERROR;
