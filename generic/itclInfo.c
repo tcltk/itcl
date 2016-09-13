@@ -307,6 +307,18 @@ static const struct NameProcMap2 infoCmdsDelegated2[] = {
  * ------------------------------------------------------------------------
  */
 
+static int
+RestoreNamespace(
+    ClientData data[],
+    Tcl_Interp *interp,
+    int result)
+{
+    Tcl_Namespace *savedNs = (Tcl_Namespace *) data[0];
+
+    Itcl_SetCallFrameNamespace(interp, savedNs);
+    return result;
+}
+
 int
 ItclInfoGuts(
     ItclObject *ioPtr,
@@ -316,7 +328,7 @@ ItclInfoGuts(
 {
     ItclObjectInfo *infoPtr = ioPtr->infoPtr;
     Tcl_Namespace *savedNs = Tcl_GetCurrentNamespace(interp);
-    int code = TCL_OK;
+    Tcl_CmdInfo info;
 
     Itcl_SetCallFrameNamespace(interp, ioPtr->iclsPtr->nsPtr);
 
@@ -330,18 +342,19 @@ ItclInfoGuts(
 		"wrong # args: should be one of...\n", -1);
 	ItclGetInfoUsage(interp, objPtr, infoPtr);
 	Tcl_SetObjResult(interp, objPtr);
-	code = TCL_ERROR;
-    } else {
-
-    fprintf(stdout, "NS: '%s' %d, '%s'\n",
-Tcl_GetCurrentNamespace(interp)->fullName, objc,
-Tcl_GetString(objv[0]));
-    fflush(stdout);
+	Itcl_SetCallFrameNamespace(interp, savedNs);
+	return TCL_ERROR;
     }
 
-
-    Itcl_SetCallFrameNamespace(interp, savedNs);
-    return code;
+    Tcl_NRAddCallback(interp, RestoreNamespace, savedNs, NULL, NULL, NULL);
+fprintf(stdout, "INFO: %d '%s' '%s'\n",
+objc, Tcl_GetString(objv[2]),
+Tcl_GetCurrentNamespace(interp)->fullName);
+fflush(stdout);
+    Tcl_GetCommandInfoFromToken(infoPtr->infoCmd, &info);
+//fprintf(stdout, "OK %p %p\n", infoPtr->infoCmd, info.objProc); fflush(stdout);
+    return Tcl_NRCallObjProc(interp, info.objProc, info.objClientData,
+	    objc-1, objv+1);
 }
 
 static int
@@ -436,6 +449,7 @@ ItclInfoInit(
         TCL_ENSEMBLE_PREFIX);
     Tcl_TraceCommand(interp, nsPtr->fullName, TCL_TRACE_DELETE,
 	    InfoCmdDelete, (ClientData) infoPtr);
+    infoPtr->infoCmd = token;
     token = Tcl_NRCreateCommand(interp, "::itcl::builtin::Wrap", InfoWrap,
 	    NRInfoWrap, token, NULL);
     Tcl_GetCommandInfoFromToken(token, &info);
@@ -1030,6 +1044,7 @@ Itcl_BiInfoFunctionCmd(
     ItclMemberCode *mcode;
     ItclHierIter hier;
 
+//fprintf(stdout, "IFC: %d\n", objc); fflush(stdout);
     ItclShowArgs(2, "Itcl_InfoFunctionCmd", objc, objv);
     /*
      *  If this command is not invoked within a class namespace,

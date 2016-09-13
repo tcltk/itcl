@@ -1438,6 +1438,7 @@ Itcl_GetContext(
             "namespace \"", activeNs->fullName, "\" is not a class namespace",
             (char*)NULL);
 
+fprintf(stdout, "FAIL1: '%s'\n", activeNs->fullName); fflush(stdout);
         return TCL_ERROR;
     }
     /*
@@ -1462,6 +1463,7 @@ Itcl_GetContext(
             "namespace \"", activeNs->fullName, "\" is not a class namespace",
             (char*)NULL);
 
+fprintf(stdout, "FAIL2\n"); fflush(stdout);
         return TCL_ERROR;
     }
 
