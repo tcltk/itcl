@@ -293,6 +293,9 @@ static const struct NameProcMap2 infoCmdsDelegated2[] = {
     { NULL, NULL, NULL, 0 }
 };
 
+static void ItclGetInfoUsage(Tcl_Interp *interp, Tcl_Obj*objPtr,
+	ItclObjectInfo *infoPtr, ItclClass *iclsPtr);
+
 
 /*
  * ------------------------------------------------------------------------
@@ -313,7 +316,6 @@ InfoGutsFinish(
     Tcl_Interp *interp,
     int result)
 {
-    Tcl_Namespace *savedNs = (Tcl_Namespace *) data[0];
     ItclObjectInfo *infoPtr = (ItclObjectInfo *) data[1];
     ItclCallContext *cPtr = (ItclCallContext *) data[2];
     ItclCallContext *popped;
@@ -324,7 +326,6 @@ InfoGutsFinish(
     }
     ckfree((char *) cPtr);
 
-    Itcl_SetCallFrameNamespace(interp, savedNs);
     return result;
 }
 
@@ -336,12 +337,10 @@ ItclInfoGuts(
     Tcl_Obj *const objv[])
 {
     ItclObjectInfo *infoPtr = ioPtr->infoPtr;
-    Tcl_Namespace *savedNs = Tcl_GetCurrentNamespace(interp);
     Tcl_CmdInfo info;
     ItclCallContext *cPtr;
 
-    Itcl_SetCallFrameNamespace(interp, ioPtr->iclsPtr->nsPtr);
-
+//fprintf(stdout, "GUTS\n"); fflush(stdout);
     if (objc == 2) {
 	/*
 	 * No subcommand passed.  Give good usage message.  NOT the
@@ -350,9 +349,8 @@ ItclInfoGuts(
 
 	Tcl_Obj *objPtr = Tcl_NewStringObj(
 		"wrong # args: should be one of...\n", -1);
-	ItclGetInfoUsage(interp, objPtr, infoPtr);
+	ItclGetInfoUsage(interp, objPtr, infoPtr, ioPtr->iclsPtr);
 	Tcl_SetObjResult(interp, objPtr);
-	Itcl_SetCallFrameNamespace(interp, savedNs);
 	return TCL_ERROR;
     }
 
@@ -365,13 +363,12 @@ ItclInfoGuts(
 
     Itcl_PushStack(cPtr, &infoPtr->contextStack);
 
-    Tcl_NRAddCallback(interp, InfoGutsFinish, savedNs, infoPtr, cPtr, NULL);
+    Tcl_NRAddCallback(interp, InfoGutsFinish, NULL, infoPtr, cPtr, NULL);
 //fprintf(stdout, "INFO: %d '%s' '%s'\n",
 //objc, Tcl_GetString(objv[2]),
 //Tcl_GetCurrentNamespace(interp)->fullName);
 //fflush(stdout);
     Tcl_GetCommandInfoFromToken(infoPtr->infoCmd, &info);
-//fprintf(stdout, "OK %p %p\n", infoPtr->infoCmd, info.objProc); fflush(stdout);
     return Tcl_NRCallObjProc(interp, info.objProc, info.objClientData,
 	    objc-1, objv+1);
 }
@@ -386,6 +383,7 @@ NRInfoWrap(
     Tcl_CmdInfo info;
     Tcl_Command token = (Tcl_Command) clientData;
 
+//fprintf(stdout, "WRAP\n"); fflush(stdout);
     if (objc == 1) {
 	/*
 	 * No subcommand passed.  Give good usage message.  NOT the
@@ -396,7 +394,7 @@ NRInfoWrap(
 		ITCL_INTERP_DATA, NULL);
 	Tcl_Obj *objPtr = Tcl_NewStringObj(
 		"wrong # args: should be one of...\n", -1);
-	ItclGetInfoUsage(interp, objPtr, infoPtr);
+	ItclGetInfoUsage(interp, objPtr, infoPtr, NULL);
 	Tcl_SetObjResult(interp, objPtr);
 	return TCL_ERROR;
     }
@@ -469,7 +467,7 @@ ItclInfoInit(
     Tcl_TraceCommand(interp, nsPtr->fullName, TCL_TRACE_DELETE,
 	    InfoCmdDelete, (ClientData) infoPtr);
     infoPtr->infoCmd = token;
-    token = Tcl_NRCreateCommand(interp, "::itcl::builtin::Wrap", InfoWrap,
+    token = Tcl_NRCreateCommand(interp, "::itcl::builtin::info", InfoWrap,
 	    NRInfoWrap, token, NULL);
     Tcl_GetCommandInfoFromToken(token, &info);
 
@@ -546,20 +544,25 @@ void
 ItclGetInfoUsage(
     Tcl_Interp *interp,
     Tcl_Obj *objPtr,       /* returns: summary of usage info */
-    ItclObjectInfo *infoPtr)
+    ItclObjectInfo *infoPtr,
+    ItclClass *iclsPtr)
 {
     Tcl_HashEntry *hPtr;
-    ItclClass *iclsPtr;
     const char *spaces = "  ";
 
     int i;
 
+    if (iclsPtr == NULL) {
     hPtr = Tcl_FindHashEntry(&infoPtr->namespaceClasses, (char *)
             Tcl_GetCurrentNamespace(interp));
     if (hPtr == NULL) {
+//fprintf(stdout, "NOT CLASS: '%s'\n", Tcl_GetCurrentNamespace(interp)->fullName); fflush(stdout);
         return;
+    } else {
+//fprintf(stdout, "CLASS: '%s'\n", Tcl_GetCurrentNamespace(interp)->fullName); fflush(stdout);
     }
     iclsPtr = Tcl_GetHashValue(hPtr);
+    }
     for (i=0; InfoMethodList[i].name != NULL; i++) {
 	if (strcmp(InfoMethodList[i].name, "vars") == 0) {
 	    /* we don't report that, as it is a special case
@@ -1726,7 +1729,7 @@ Itcl_BiInfoUnknownCmd(
         /* produce usage message */
         Tcl_Obj *objPtr = Tcl_NewStringObj(
 	        "wrong # args: should be one of...\n", -1);
-        ItclGetInfoUsage(interp, objPtr, (ItclObjectInfo *)clientData);
+        ItclGetInfoUsage(interp, objPtr, (ItclObjectInfo *)clientData, NULL);
 	Tcl_SetObjResult(interp, objPtr);
     }
     if (code == TCL_ERROR) {

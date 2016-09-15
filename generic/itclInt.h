@@ -701,8 +701,6 @@ MODULE_SCOPE int ItclAfterCallMethod(ClientData clientData, Tcl_Interp *interp,
 MODULE_SCOPE void ItclReportObjectUsage(Tcl_Interp *interp,
         ItclObject *contextIoPtr, Tcl_Namespace *callerNsPtr,
 	Tcl_Namespace *contextNsPtr);
-MODULE_SCOPE void ItclGetInfoUsage(Tcl_Interp *interp, Tcl_Obj *objPtr,
-        ItclObjectInfo *infoPtr);
 MODULE_SCOPE int ItclMapMethodNameProc(Tcl_Interp *interp, Tcl_Object oPtr,
         Tcl_Class *startClsPtr, Tcl_Obj *methodObj);
 MODULE_SCOPE int ItclCreateArgList(Tcl_Interp *interp, const char *str,
