@@ -328,6 +328,7 @@ typedef struct ItclHierIter {
 #define ITCL_TCLOO_OBJECT_IS_DELETED     0x20
 #define ITCL_OBJECT_DESTRUCT_ERROR       0x40
 #define ITCL_OBJECT_SHOULD_VARNS_DELETE  0x80
+#define ITCL_OBJECT_ROOT_METHOD          0x8000
 
 /*
  *  Representation for each [incr Tcl] object.
