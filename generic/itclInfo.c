@@ -308,12 +308,21 @@ static const struct NameProcMap2 infoCmdsDelegated2[] = {
  */
 
 static int
-RestoreNamespace(
+InfoGutsFinish(
     ClientData data[],
     Tcl_Interp *interp,
     int result)
 {
     Tcl_Namespace *savedNs = (Tcl_Namespace *) data[0];
+    ItclObjectInfo *infoPtr = (ItclObjectInfo *) data[1];
+    ItclCallContext *cPtr = (ItclCallContext *) data[2];
+    ItclCallContext *popped;
+
+    popped = Itcl_PopStack(&infoPtr->contextStack);
+    if (cPtr != popped) {
+	Tcl_Panic("Context stack mismatch!");
+    }
+    ckfree((char *) cPtr);
 
     Itcl_SetCallFrameNamespace(interp, savedNs);
     return result;
@@ -329,6 +338,7 @@ ItclInfoGuts(
     ItclObjectInfo *infoPtr = ioPtr->infoPtr;
     Tcl_Namespace *savedNs = Tcl_GetCurrentNamespace(interp);
     Tcl_CmdInfo info;
+    ItclCallContext *cPtr;
 
     Itcl_SetCallFrameNamespace(interp, ioPtr->iclsPtr->nsPtr);
 
@@ -346,11 +356,20 @@ ItclInfoGuts(
 	return TCL_ERROR;
     }
 
-    Tcl_NRAddCallback(interp, RestoreNamespace, savedNs, NULL, NULL, NULL);
-fprintf(stdout, "INFO: %d '%s' '%s'\n",
-objc, Tcl_GetString(objv[2]),
-Tcl_GetCurrentNamespace(interp)->fullName);
-fflush(stdout);
+    cPtr = (ItclCallContext *) ckalloc(sizeof(ItclCallContext));
+    cPtr->objectFlags = ITCL_OBJECT_ROOT_METHOD;
+    cPtr->nsPtr = NULL;
+    cPtr->ioPtr = ioPtr;
+    cPtr->imPtr = NULL;
+    cPtr->refCount = 1;
+
+    Itcl_PushStack(cPtr, &infoPtr->contextStack);
+
+    Tcl_NRAddCallback(interp, InfoGutsFinish, savedNs, infoPtr, cPtr, NULL);
+//fprintf(stdout, "INFO: %d '%s' '%s'\n",
+//objc, Tcl_GetString(objv[2]),
+//Tcl_GetCurrentNamespace(interp)->fullName);
+//fflush(stdout);
     Tcl_GetCommandInfoFromToken(infoPtr->infoCmd, &info);
 //fprintf(stdout, "OK %p %p\n", infoPtr->infoCmd, info.objProc); fflush(stdout);
     return Tcl_NRCallObjProc(interp, info.objProc, info.objClientData,
