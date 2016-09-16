@@ -340,7 +340,6 @@ ItclInfoGuts(
     Tcl_CmdInfo info;
     ItclCallContext *cPtr;
 
-//fprintf(stdout, "GUTS\n"); fflush(stdout);
     if (objc == 2) {
 	/*
 	 * No subcommand passed.  Give good usage message.  NOT the
@@ -364,10 +363,6 @@ ItclInfoGuts(
     Itcl_PushStack(cPtr, &infoPtr->contextStack);
 
     Tcl_NRAddCallback(interp, InfoGutsFinish, NULL, infoPtr, cPtr, NULL);
-//fprintf(stdout, "INFO: %d '%s' '%s'\n",
-//objc, Tcl_GetString(objv[2]),
-//Tcl_GetCurrentNamespace(interp)->fullName);
-//fflush(stdout);
     Tcl_GetCommandInfoFromToken(infoPtr->infoCmd, &info);
     return Tcl_NRCallObjProc(interp, info.objProc, info.objClientData,
 	    objc-1, objv+1);
@@ -383,7 +378,6 @@ NRInfoWrap(
     Tcl_CmdInfo info;
     Tcl_Command token = (Tcl_Command) clientData;
 
-//fprintf(stdout, "WRAP\n"); fflush(stdout);
     if (objc == 1) {
 	/*
 	 * No subcommand passed.  Give good usage message.  NOT the
@@ -556,10 +550,7 @@ ItclGetInfoUsage(
     hPtr = Tcl_FindHashEntry(&infoPtr->namespaceClasses, (char *)
             Tcl_GetCurrentNamespace(interp));
     if (hPtr == NULL) {
-//fprintf(stdout, "NOT CLASS: '%s'\n", Tcl_GetCurrentNamespace(interp)->fullName); fflush(stdout);
         return;
-    } else {
-//fprintf(stdout, "CLASS: '%s'\n", Tcl_GetCurrentNamespace(interp)->fullName); fflush(stdout);
     }
     iclsPtr = Tcl_GetHashValue(hPtr);
     }
@@ -1069,7 +1060,6 @@ Itcl_BiInfoFunctionCmd(
     ItclMemberCode *mcode;
     ItclHierIter hier;
 
-//fprintf(stdout, "IFC: %d\n", objc); fflush(stdout);
     ItclShowArgs(2, "Itcl_InfoFunctionCmd", objc, objv);
     /*
      *  If this command is not invoked within a class namespace,
