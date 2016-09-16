@@ -1422,13 +1422,24 @@ Itcl_GetContext(
 {
     Tcl_Namespace *activeNs = Tcl_GetCurrentNamespace(interp);
     Tcl_HashEntry *hPtr;
-    ItclCallContext *callContextPtr;
-    ItclObjectInfo *infoPtr;
+    ItclObjectInfo *infoPtr = (ItclObjectInfo *)Tcl_GetAssocData(interp,
+            ITCL_INTERP_DATA, NULL);
+    ItclCallContext *callContextPtr = Itcl_PeekStack(&infoPtr->contextStack);
 
     /*
      *  Return NULL for anything that cannot be found.
      */
     *ioPtrPtr = NULL;
+
+    if (callContextPtr
+	    && (callContextPtr->objectFlags & ITCL_OBJECT_ROOT_METHOD)) {
+	ItclObject *ioPtr = callContextPtr->ioPtr;
+
+	assert(ioPtr);
+	*ioPtrPtr = ioPtr;
+	*iclsPtrPtr = ioPtr->iclsPtr;
+	return TCL_OK;
+    }
 
     if (!Itcl_IsClassNamespace(activeNs)) {
         /*
@@ -1445,9 +1456,6 @@ Itcl_GetContext(
      *  all known info.  See if the current call frame is a known
      *  object context, and if so, return that context.
      */
-    infoPtr = (ItclObjectInfo *)Tcl_GetAssocData(interp,
-            ITCL_INTERP_DATA, NULL);
-    callContextPtr = Itcl_PeekStack(&infoPtr->contextStack);
     if ((callContextPtr != NULL) && (callContextPtr->imPtr != NULL)) {
         *iclsPtrPtr = callContextPtr->imPtr->iclsPtr;
     } else {

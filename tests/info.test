@@ -327,7 +327,7 @@ test info-4.1a {query class (wrong # args)} {
 
 test info-4.1b {query most-specific class} {
     list [ti info class] [ti do info class]
-} {::test_info ::test_info}
+} {test_info ::test_info}
 
 test info-4.2a {query inheritance info (wrong # args)} {
     list [catch {ti info inherit x} result] $result
@@ -335,7 +335,7 @@ test info-4.2a {query inheritance info (wrong # args)} {
 
 test info-4.2b {query inheritance info} {
     list [ti info inherit] [ti do info inherit]
-} {::test_info_base {}}
+} {test_info_base {}}
 
 test info-4.2c {query inheritance info} {
     ti do ti info inherit
@@ -347,7 +347,7 @@ test info-4.3a {query heritage info (wrong # args)} {
 
 test info-4.3b {query heritage info} {
     list [ti info heritage] [ti do info heritage]
-} {{::test_info ::test_info_base} ::test_info_base}
+} {{test_info test_info_base} ::test_info_base}
 
 test info-4.3c {query heritage info} {
     ti do ti info heritage

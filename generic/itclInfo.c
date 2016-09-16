@@ -293,6 +293,9 @@ static const struct NameProcMap2 infoCmdsDelegated2[] = {
     { NULL, NULL, NULL, 0 }
 };
 
+static void ItclGetInfoUsage(Tcl_Interp *interp, Tcl_Obj*objPtr,
+	ItclObjectInfo *infoPtr, ItclClass *iclsPtr);
+
 
 /*
  * ------------------------------------------------------------------------
@@ -308,6 +311,69 @@ static const struct NameProcMap2 infoCmdsDelegated2[] = {
  */
 
 static int
+InfoGutsFinish(
+    ClientData data[],
+    Tcl_Interp *interp,
+    int result)
+{
+    ItclObjectInfo *infoPtr = (ItclObjectInfo *) data[1];
+    ItclCallContext *cPtr = (ItclCallContext *) data[2];
+    ItclCallContext *popped;
+
+    popped = Itcl_PopStack(&infoPtr->contextStack);
+    if (cPtr != popped) {
+	Tcl_Panic("Context stack mismatch!");
+    }
+    ckfree((char *) cPtr);
+
+    return result;
+}
+
+int
+ItclInfoGuts(
+    ItclObject *ioPtr,
+    Tcl_Interp *interp,
+    int objc,
+    Tcl_Obj *const objv[])
+{
+    ItclObjectInfo *infoPtr = ioPtr->infoPtr;
+    Tcl_CmdInfo info;
+    ItclCallContext *cPtr;
+
+//fprintf(stdout, "GUTS\n"); fflush(stdout);
+    if (objc == 2) {
+	/*
+	 * No subcommand passed.  Give good usage message.  NOT the
+	 * default message of a Tcl ensemble.
+	 */
+
+	Tcl_Obj *objPtr = Tcl_NewStringObj(
+		"wrong # args: should be one of...\n", -1);
+	ItclGetInfoUsage(interp, objPtr, infoPtr, ioPtr->iclsPtr);
+	Tcl_SetObjResult(interp, objPtr);
+	return TCL_ERROR;
+    }
+
+    cPtr = (ItclCallContext *) ckalloc(sizeof(ItclCallContext));
+    cPtr->objectFlags = ITCL_OBJECT_ROOT_METHOD;
+    cPtr->nsPtr = NULL;
+    cPtr->ioPtr = ioPtr;
+    cPtr->imPtr = NULL;
+    cPtr->refCount = 1;
+
+    Itcl_PushStack(cPtr, &infoPtr->contextStack);
+
+    Tcl_NRAddCallback(interp, InfoGutsFinish, NULL, infoPtr, cPtr, NULL);
+//fprintf(stdout, "INFO: %d '%s' '%s'\n",
+//objc, Tcl_GetString(objv[2]),
+//Tcl_GetCurrentNamespace(interp)->fullName);
+//fflush(stdout);
+    Tcl_GetCommandInfoFromToken(infoPtr->infoCmd, &info);
+    return Tcl_NRCallObjProc(interp, info.objProc, info.objClientData,
+	    objc-1, objv+1);
+}
+
+static int
 NRInfoWrap(
     ClientData clientData,
     Tcl_Interp *interp,
@@ -317,6 +383,7 @@ NRInfoWrap(
     Tcl_CmdInfo info;
     Tcl_Command token = (Tcl_Command) clientData;
 
+//fprintf(stdout, "WRAP\n"); fflush(stdout);
     if (objc == 1) {
 	/*
 	 * No subcommand passed.  Give good usage message.  NOT the
@@ -327,7 +394,7 @@ NRInfoWrap(
 		ITCL_INTERP_DATA, NULL);
 	Tcl_Obj *objPtr = Tcl_NewStringObj(
 		"wrong # args: should be one of...\n", -1);
-	ItclGetInfoUsage(interp, objPtr, infoPtr);
+	ItclGetInfoUsage(interp, objPtr, infoPtr, NULL);
 	Tcl_SetObjResult(interp, objPtr);
 	return TCL_ERROR;
     }
@@ -358,9 +425,23 @@ InfoWrap(
     return Tcl_NRCallObjProc(interp, NRInfoWrap, clientData, objc, objv);
 }
 
+static void
+InfoCmdDelete(
+    ClientData clientData,
+    Tcl_Interp *interp,
+    const char *oldName,
+    const char *newName,
+    int flags)
+{
+    ItclObjectInfo *infoPtr = (ItclObjectInfo *)clientData;
+
+    infoPtr->infoCmd = NULL;
+}
+
 int
 ItclInfoInit(
-    Tcl_Interp *interp)      /* current interpreter */
+    Tcl_Interp *interp,      /* current interpreter */
+    ItclObjectInfo *infoPtr)
 {
     Tcl_Namespace *nsPtr;
     Tcl_Command token;
@@ -370,9 +451,6 @@ ItclInfoInit(
     int result;
     int i;
 
-    ItclObjectInfo *infoPtr;
-    infoPtr = (ItclObjectInfo *)Tcl_GetAssocData(interp,
-            ITCL_INTERP_DATA, NULL);
     /*
      * Build the ensemble used to implement [info].
      */
@@ -381,9 +459,15 @@ ItclInfoInit(
     if (nsPtr == NULL) {
         Tcl_Panic("ITCL: error in creating namespace: ::itcl::builtin::Info \n");
     }
+    if (infoPtr->infoCmd) {
+	Tcl_Panic("Double init of info ensemble");
+    }
     token = Tcl_CreateEnsemble(interp, nsPtr->fullName, nsPtr,
         TCL_ENSEMBLE_PREFIX);
-    token = Tcl_NRCreateCommand(interp, "::itcl::builtin::Wrap", InfoWrap,
+    Tcl_TraceCommand(interp, nsPtr->fullName, TCL_TRACE_DELETE,
+	    InfoCmdDelete, (ClientData) infoPtr);
+    infoPtr->infoCmd = token;
+    token = Tcl_NRCreateCommand(interp, "::itcl::builtin::info", InfoWrap,
 	    NRInfoWrap, token, NULL);
     Tcl_GetCommandInfoFromToken(token, &info);
 
@@ -460,20 +544,25 @@ void
 ItclGetInfoUsage(
     Tcl_Interp *interp,
     Tcl_Obj *objPtr,       /* returns: summary of usage info */
-    ItclObjectInfo *infoPtr)
+    ItclObjectInfo *infoPtr,
+    ItclClass *iclsPtr)
 {
     Tcl_HashEntry *hPtr;
-    ItclClass *iclsPtr;
     const char *spaces = "  ";
 
     int i;
 
+    if (iclsPtr == NULL) {
     hPtr = Tcl_FindHashEntry(&infoPtr->namespaceClasses, (char *)
             Tcl_GetCurrentNamespace(interp));
     if (hPtr == NULL) {
+//fprintf(stdout, "NOT CLASS: '%s'\n", Tcl_GetCurrentNamespace(interp)->fullName); fflush(stdout);
         return;
+    } else {
+//fprintf(stdout, "CLASS: '%s'\n", Tcl_GetCurrentNamespace(interp)->fullName); fflush(stdout);
     }
     iclsPtr = Tcl_GetHashValue(hPtr);
+    }
     for (i=0; InfoMethodList[i].name != NULL; i++) {
 	if (strcmp(InfoMethodList[i].name, "vars") == 0) {
 	    /* we don't report that, as it is a special case
@@ -770,13 +859,16 @@ Itcl_BiInfoContextCmd(
 {
     Tcl_Obj *listPtr;
     Tcl_Obj *objPtr;
-    ItclObject *ioPtr;
+    ItclObject *ioPtr = NULL;
     ItclClass *iclsPtr;
 
     ItclShowArgs(1, "Itcl_BiInfoContextCmd", objc, objv);
     iclsPtr = NULL;
     if (Itcl_GetContext(interp, &iclsPtr, &ioPtr) != TCL_OK) {
-        Tcl_AppendResult(interp, "cannot get context ", (char*)NULL);
+        return TCL_ERROR;
+    }
+    if (ioPtr == NULL) {
+        Tcl_AppendResult(interp, "cannot get object context ", (char*)NULL);
         return TCL_ERROR;
     }
     listPtr = Tcl_NewListObj(0, NULL);
@@ -977,6 +1069,7 @@ Itcl_BiInfoFunctionCmd(
     ItclMemberCode *mcode;
     ItclHierIter hier;
 
+//fprintf(stdout, "IFC: %d\n", objc); fflush(stdout);
     ItclShowArgs(2, "Itcl_InfoFunctionCmd", objc, objv);
     /*
      *  If this command is not invoked within a class namespace,
@@ -1639,7 +1732,7 @@ Itcl_BiInfoUnknownCmd(
         /* produce usage message */
         Tcl_Obj *objPtr = Tcl_NewStringObj(
 	        "wrong # args: should be one of...\n", -1);
-        ItclGetInfoUsage(interp, objPtr, (ItclObjectInfo *)clientData);
+        ItclGetInfoUsage(interp, objPtr, (ItclObjectInfo *)clientData, NULL);
 	Tcl_SetObjResult(interp, objPtr);
     }
     if (code == TCL_ERROR) {
@@ -1690,7 +1783,9 @@ Itcl_BiInfoBodyCmd(
 
     fallback:
 	script = Tcl_NewStringObj("::info body", -1);
-	Tcl_ListObjAppendElement(NULL, script, objv[1]);
+	if (objc == 2) {
+	    Tcl_ListObjAppendElement(NULL, script, objv[1]);
+	}
 	Tcl_IncrRefCount(script);
 	code = Tcl_EvalObjEx(interp, script, 0);
 	Tcl_DecrRefCount(script);
@@ -1791,7 +1886,9 @@ Itcl_BiInfoArgsCmd(
 
     fallback:
 	script = Tcl_NewStringObj("::info args", -1);
-	Tcl_ListObjAppendElement(NULL, script, objv[1]);
+	if (objc == 2) {
+	    Tcl_ListObjAppendElement(NULL, script, objv[1]);
+	}
 	Tcl_IncrRefCount(script);
 	code = Tcl_EvalObjEx(interp, script, 0);
 	Tcl_DecrRefCount(script);
