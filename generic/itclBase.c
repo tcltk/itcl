@@ -351,6 +351,9 @@ Initialize (
     Tcl_NewMethod(interp, Tcl_GetObjectAsClass(root),
 	    Tcl_NewStringObj("ItclConstructBase", -1), 0,
 	    &itclRootMethodType, ItclConstructGuts);
+    Tcl_NewMethod(interp, Tcl_GetObjectAsClass(root),
+	    Tcl_NewStringObj("info", -1), 1,
+	    &itclRootMethodType, ItclInfoGuts);
 
     /* first create the Itcl base class as root of itcl classes */
     if (Tcl_EvalEx(interp, clazzClassScript, -1, 0) != TCL_OK) {
