@@ -859,13 +859,16 @@ Itcl_BiInfoContextCmd(
 {
     Tcl_Obj *listPtr;
     Tcl_Obj *objPtr;
-    ItclObject *ioPtr;
+    ItclObject *ioPtr = NULL;
     ItclClass *iclsPtr;
 
     ItclShowArgs(1, "Itcl_BiInfoContextCmd", objc, objv);
     iclsPtr = NULL;
     if (Itcl_GetContext(interp, &iclsPtr, &ioPtr) != TCL_OK) {
-        Tcl_AppendResult(interp, "cannot get context ", (char*)NULL);
+        return TCL_ERROR;
+    }
+    if (ioPtr == NULL) {
+        Tcl_AppendResult(interp, "cannot get object context ", (char*)NULL);
         return TCL_ERROR;
     }
     listPtr = Tcl_NewListObj(0, NULL);
@@ -1780,7 +1783,9 @@ Itcl_BiInfoBodyCmd(
 
     fallback:
 	script = Tcl_NewStringObj("::info body", -1);
-	Tcl_ListObjAppendElement(NULL, script, objv[1]);
+	if (objc == 2) {
+	    Tcl_ListObjAppendElement(NULL, script, objv[1]);
+	}
 	Tcl_IncrRefCount(script);
 	code = Tcl_EvalObjEx(interp, script, 0);
 	Tcl_DecrRefCount(script);
@@ -1881,7 +1886,9 @@ Itcl_BiInfoArgsCmd(
 
     fallback:
 	script = Tcl_NewStringObj("::info args", -1);
-	Tcl_ListObjAppendElement(NULL, script, objv[1]);
+	if (objc == 2) {
+	    Tcl_ListObjAppendElement(NULL, script, objv[1]);
+	}
 	Tcl_IncrRefCount(script);
 	code = Tcl_EvalObjEx(interp, script, 0);
 	Tcl_DecrRefCount(script);
