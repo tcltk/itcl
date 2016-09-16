@@ -309,7 +309,7 @@ Itcl_BiInit(
     Tcl_CreateObjCommand(interp, "::itcl::builtin::classunknown",
             ItclBiClassUnknownCmd, infoPtr, (Tcl_CmdDeleteProc*)NULL);
 
-    ItclInfoInit(interp);
+    ItclInfoInit(interp, infoPtr);
     /*
      *  Export all commands in the built-in namespace so we can
      *  import them later on.
@@ -421,7 +421,8 @@ Itcl_InstallBiMethods(
      * work.
      */
 
-    if (result == TCL_OK) {
+    if (result == TCL_OK
+	    && (iclsPtr->flags & (ITCL_TYPE|ITCL_WIDGET|ITCL_WIDGETADAPTOR))) {
 	result = Itcl_CreateMethod(interp, iclsPtr,
 		Tcl_NewStringObj("info", -1), NULL, "@itcl-builtin-info");
     }

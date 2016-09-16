@@ -1434,6 +1434,14 @@ Itcl_GetContext(
 
 	assert(contextPtr);
 
+	if (contextPtr->objectFlags & ITCL_OBJECT_ROOT_METHOD) {
+	    ItclObject *ioPtr = contextPtr->ioPtr;
+
+	    *iclsPtrPtr = ioPtr->iclsPtr;
+	    *ioPtrPtr = ioPtr;
+	    return TCL_OK;
+	}
+
 	*iclsPtrPtr = contextPtr->imPtr->iclsPtr;
 	*ioPtrPtr = contextPtr->ioPtr ? contextPtr->ioPtr : infoPtr->currIoPtr;
 	return TCL_OK;
