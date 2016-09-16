@@ -205,6 +205,7 @@ typedef struct ItclObjectInfo {
     Tcl_Obj *infoVars4Ptr;
     Tcl_Obj *typeDestructorArgumentPtr;
     struct ItclObject *lastIoPtr;   /* last object constructed */
+    Tcl_Command infoCmd;
 } ItclObjectInfo;
 
 typedef struct EnsembleInfo {
@@ -327,6 +328,7 @@ typedef struct ItclHierIter {
 #define ITCL_TCLOO_OBJECT_IS_DELETED     0x20
 #define ITCL_OBJECT_DESTRUCT_ERROR       0x40
 #define ITCL_OBJECT_SHOULD_VARNS_DELETE  0x80
+#define ITCL_OBJECT_ROOT_METHOD          0x8000
 
 /*
  *  Representation for each [incr Tcl] object.
@@ -699,8 +701,6 @@ MODULE_SCOPE int ItclAfterCallMethod(ClientData clientData, Tcl_Interp *interp,
 MODULE_SCOPE void ItclReportObjectUsage(Tcl_Interp *interp,
         ItclObject *contextIoPtr, Tcl_Namespace *callerNsPtr,
 	Tcl_Namespace *contextNsPtr);
-MODULE_SCOPE void ItclGetInfoUsage(Tcl_Interp *interp, Tcl_Obj *objPtr,
-        ItclObjectInfo *infoPtr);
 MODULE_SCOPE int ItclMapMethodNameProc(Tcl_Interp *interp, Tcl_Object oPtr,
         Tcl_Class *startClsPtr, Tcl_Obj *methodObj);
 MODULE_SCOPE int ItclCreateArgList(Tcl_Interp *interp, const char *str,
@@ -715,7 +715,7 @@ MODULE_SCOPE void ItclDeleteObjectVariablesNamespace(Tcl_Interp *interp,
         ItclObject *ioPtr);
 MODULE_SCOPE void ItclDeleteClassVariablesNamespace(Tcl_Interp *interp,
         ItclClass *iclsPtr);
-MODULE_SCOPE int ItclInfoInit(Tcl_Interp *interp);
+MODULE_SCOPE int ItclInfoInit(Tcl_Interp *interp, ItclObjectInfo *infoPtr);
 
 struct Tcl_ResolvedVarInfo;
 MODULE_SCOPE int Itcl_ClassCmdResolver(Tcl_Interp *interp, const char* name,
@@ -838,6 +838,7 @@ typedef int (ItclRootMethodProc)(ItclObject *ioPtr, Tcl_Interp *interp,
 MODULE_SCOPE const Tcl_MethodType itclRootMethodType;
 MODULE_SCOPE ItclRootMethodProc ItclUnknownGuts;
 MODULE_SCOPE ItclRootMethodProc ItclConstructGuts;
+MODULE_SCOPE ItclRootMethodProc ItclInfoGuts;
 
 #include "itcl2TclOO.h"
 #ifdef NEW_PROTO_RESOLVER
