@@ -399,6 +399,17 @@ test info-5.2 {info exists} {
     list [ti do info exists args] [ti do info exists xyzzy]
 } {1 0}
 
+test info-6.0 {Bug a03f579f7d} -setup {
+    # Must not segfault
+    itcl::class C {
+	proc p {} {info vars}
+    }
+} -body {
+    C::p
+} -cleanup {
+    itcl::delete class C
+} -result {}
+
 # ----------------------------------------------------------------------
 #  Clean up
 # ----------------------------------------------------------------------
