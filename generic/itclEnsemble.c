@@ -119,30 +119,6 @@ static void ComputeMinChars (Ensemble *ensData, int pos);
 static EnsembleParser* GetEnsembleParser (Tcl_Interp *interp);
 static void DeleteEnsParser (ClientData clientData, Tcl_Interp* interp);
 
-#ifdef NOTDEF
-static void
-DumpEnsemble(
-    Tcl_Interp *interp,
-    Ensemble *ensData)
-{
-    Ensemble *ensData2;
-    int i;
-
-    ensData2 = ensData;
-    while (1) {
-        fprintf(stderr, "ENS!%s!%d!\n",
-	        Tcl_GetCommandName(interp, ensData2->cmdPtr), ensData2->numParts);
-        for (i=0; i<ensData2->numParts; i++) {
-            fprintf(stderr, "  %d!%s!\n", i, ensData2->parts[i]->name);
-        }
-        if (ensData2->parent == NULL) {
-            break;
-        }
-        ensData2 = ensData2->parent->ensemble;
-    }
-}
-#endif
-
 
 /*
  *----------------------------------------------------------------------
@@ -446,9 +422,13 @@ Itcl_GetEnsemblePart(
     }
 
     Itcl_DiscardInterpState(state);
+    ckfree((char *)nameArgv);
     return 1;
 
 ensGetFail:
+    if (nameArgv) {
+	ckfree((char *)nameArgv);
+    }
     Itcl_RestoreInterpState(interp, state);
     return 0;
 }
@@ -543,9 +523,13 @@ Itcl_GetEnsembleUsage(
     GetEnsembleUsage(interp, ensData, objPtr);
 
     Itcl_DiscardInterpState(state);
+    ckfree((char *)nameArgv);
     return 1;
 
 ensUsageFail:
+    if (nameArgv) {
+	ckfree((char *)nameArgv);
+    }
     Itcl_RestoreInterpState(interp, state);
     return 0;
 }
@@ -591,11 +575,6 @@ Itcl_GetEnsembleUsageForObj(
      *  back to the command word for the entire ensemble.
      */
     chainObj = ensObjPtr;
-#ifdef NOTDEF
-    while (chainObj && chainObj->typePtr == &itclEnsInvocType) {
-         chainObj = (Tcl_Obj*)chainObj->internalRep.twoPtrValue.ptr2;
-    }
-#endif
 
     if (chainObj) {
         cmd = Tcl_GetCommandFromObj(interp, chainObj);
@@ -824,11 +803,6 @@ CreateEnsemble(
      *  If there is no parent data, then this is a top-level
      *  ensemble.  Create the ensemble by installing its access
      *  command.
-     *
-     *  BE CAREFUL:  Set the string-based proc to the wrapper
-     *    procedure TclInvokeObjectCommand.  Otherwise, the
-     *    ensemble command may fail.  For example, it will fail
-     *    when invoked as a hidden command.
      */
     if (parentEnsData == NULL) {
 	Tcl_Obj *unkObjPtr;
@@ -836,7 +810,7 @@ CreateEnsemble(
 	        Tcl_GetCurrentNamespace(interp), TCL_ENSEMBLE_PREFIX);
         hPtr = Tcl_CreateHashEntry(&infoPtr->ensembleInfo->ensembles,
                 (char *)ensData->cmdPtr, &isNew);
-	if (hPtr == NULL) {
+	if (!isNew) {
 	    result = TCL_ERROR;
 	    goto finish;
 	}
@@ -885,7 +859,7 @@ CreateEnsemble(
             Tcl_GetCurrentNamespace(interp), TCL_ENSEMBLE_PREFIX);
     hPtr = Tcl_CreateHashEntry(&infoPtr->ensembleInfo->ensembles,
             (char *)ensPart->cmdPtr, &isNew);
-    if (hPtr == NULL) {
+    if (!isNew) {
         result = TCL_ERROR;
         goto finish;
     }
@@ -1711,21 +1685,22 @@ Itcl_EnsembleCmd(
     ensName = Tcl_GetString(objv[1]);
 
     if (ensData) {
-        if (FindEnsemblePart(interp, ensData, ensName, &ensPart) != TCL_OK) {
+        if (FindEnsemblePart(ensInfo->master, ensData, ensName, &ensPart) != TCL_OK) {
             ensPart = NULL;
         }
         if (ensPart == NULL) {
-            if (CreateEnsemble(interp, ensData, ensName) != TCL_OK) {
+            if (CreateEnsemble(ensInfo->master, ensData, ensName) != TCL_OK) {
+		Tcl_TransferResult(ensInfo->master, TCL_ERROR, interp);
                 return TCL_ERROR;
             }
-            if (FindEnsemblePart(interp, ensData, ensName, &ensPart)
+            if (FindEnsemblePart(ensInfo->master, ensData, ensName, &ensPart)
                     != TCL_OK) {
                 Tcl_Panic("Itcl_EnsembleCmd: can't create ensemble");
             }
         }
 
         cmd = ensPart->cmdPtr;
-        infoPtr = Tcl_GetAssocData(interp, ITCL_INTERP_DATA, &procPtr);
+        infoPtr = Tcl_GetAssocData(ensInfo->master, ITCL_INTERP_DATA, &procPtr);
         hPtr = Tcl_FindHashEntry(&infoPtr->ensembleInfo->ensembles,
 	        (char *)ensPart->cmdPtr);
         if (hPtr == NULL) {
@@ -1798,7 +1773,6 @@ Itcl_EnsembleCmd(
      *  Otherwise, the offending command is reported twice.
      */
     if (status == TCL_ERROR) {
-#ifdef NOTDEF
 	/* no longer needed, no extra interpreter !! */
         const char *errInfo = Tcl_GetVar2(ensInfo->parser, "::errorInfo",
             (char*)NULL, TCL_GLOBAL_ONLY);
@@ -1806,18 +1780,11 @@ Itcl_EnsembleCmd(
         if (errInfo) {
             Tcl_AddObjErrorInfo(interp, (const char *)errInfo, -1);
         }
-#endif
 
         if (objc == 3) {
-	    Tcl_Obj *options = Tcl_GetReturnOptions(interp, status);
-	    Tcl_Obj *key = Tcl_NewStringObj("-errorline", -1);
-	    Tcl_Obj *stackTrace;
-	    Tcl_IncrRefCount(key);
-	    Tcl_DictObjGet(NULL, options, key, &stackTrace);
-	    Tcl_DecrRefCount(key);
 	    Tcl_AppendObjToErrorInfo(interp, Tcl_ObjPrintf(
-	            "\n    (\"ensemble\" body line %s)",
-	            Tcl_GetString(stackTrace)));
+	            "\n    (\"ensemble\" body line %d)",
+		    Tcl_GetErrorLine(ensInfo->parser)));
         }
     }
     Tcl_SetObjResult(interp, Tcl_GetObjResult(ensInfo->parser));
@@ -1870,33 +1837,10 @@ GetEnsembleParser(
      */
     ensInfo = (EnsembleParser*)ckalloc(sizeof(EnsembleParser));
     ensInfo->master = interp;
-    ensInfo->parser = interp;
+    ensInfo->parser = Tcl_CreateInterp();
     ensInfo->ensData = NULL;
 
-#ifdef NOTDEF
-    /*
-     *  Remove all namespaces and all normal commands from the
-     *  parser interpreter.
-     */
-    nsPtr = Tcl_GetGlobalNamespace(ensInfo->parser);
-
-    for (hPtr = Tcl_FirstHashEntry(&nsPtr->childTable, &search);
-         hPtr != NULL;
-         hPtr = Tcl_FirstHashEntry(&nsPtr->childTable, &search)) {
-
-        childNs = (Tcl_Namespace*)Tcl_GetHashValue(hPtr);
-        Tcl_DeleteNamespace(childNs);
-    }
-
-    for (hPtr = Tcl_FirstHashEntry(&nsPtr->cmdTable, &search);
-         hPtr != NULL;
-         hPtr = Tcl_FirstHashEntry(&nsPtr->cmdTable, &search)) {
-
-        cmd = (Tcl_Command)Tcl_GetHashValue(hPtr);
-        Tcl_DeleteCommandFromToken(ensInfo->parser, cmd);
-    }
-
-#endif
+    Tcl_DeleteNamespace(Tcl_GetGlobalNamespace(ensInfo->parser));
     /*
      *  Add the allowed commands to the parser interpreter:
      *  part, delete, ensemble
@@ -2026,8 +1970,9 @@ Itcl_EnsPartCmd(
 	result = TCL_ERROR;
 	goto errorOut;
     }
-    if (Tcl_CreateProc(interp, cmdInfo.namespacePtr, partName, objv[2], objv[3],
+    if (Tcl_CreateProc(ensInfo->master, cmdInfo.namespacePtr, partName, objv[2], objv[3],
             &procPtr) != TCL_OK) {
+	Tcl_TransferResult(ensInfo->master, TCL_ERROR, interp);
 	result = TCL_ERROR;
 	goto errorOut;
     }
@@ -2040,9 +1985,10 @@ Itcl_EnsPartCmd(
      *  if we try to compile the Tcl code for the part.  If
      *  anything goes wrong, clean up before bailing out.
      */
-    result = AddEnsemblePart(interp, ensData, partName, usage,
+    result = AddEnsemblePart(ensInfo->master, ensData, partName, usage,
         Tcl_GetObjInterpProc(), (ClientData)procPtr, _Tcl_ProcDeleteProc,
         ITCL_ENSEMBLE_ENSEMBLE, &ensPart);
+    Tcl_TransferResult(ensInfo->master, result, interp);
 
 errorOut:
     Tcl_DecrRefCount(usagePtr);

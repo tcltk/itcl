@@ -646,7 +646,6 @@ ItclClassBaseCmd(
 {
     Tcl_Obj *argumentPtr;
     Tcl_Obj *bodyPtr;
-    Tcl_CmdInfo cmdInfo;
     FOREACH_HASH_DECLS;
     Tcl_HashEntry *hPtr2;
     Tcl_Namespace *parserNs, *ooNs;
@@ -657,7 +656,6 @@ ItclClassBaseCmd(
     char *className;
     int isNewEntry;
     int result;
-    int result2;
     int noCleanup;
     ItclMemberFunc *imPtr;
 
@@ -755,10 +753,29 @@ ItclClassBaseCmd(
 	    Tcl_AppendObjToErrorInfo(interp, Tcl_ObjPrintf(
 		    "\n    (class \"%s\" body line %s)",
 		    className, Tcl_GetString(stackTrace)));
-	    iclsPtr->flags |= ITCL_CLASS_CONSTRUCT_ERROR;
 	}
         result = TCL_ERROR;
         goto errorReturn;
+    }
+
+    if (Itcl_FirstListElem(&iclsPtr->bases) == NULL) {
+	/* No [inherit]. Use default inheritance root. */
+	Tcl_Obj *cmdPtr = Tcl_NewListObj(4, NULL);
+
+	Tcl_ListObjAppendElement(NULL, cmdPtr,
+		Tcl_NewStringObj("::oo::define", -1));
+	Tcl_ListObjAppendElement(NULL, cmdPtr, iclsPtr->fullNamePtr);
+	Tcl_ListObjAppendElement(NULL, cmdPtr,
+		Tcl_NewStringObj("superclass", -1));
+	Tcl_ListObjAppendElement(NULL, cmdPtr,
+		Tcl_NewStringObj("::itcl::Root", -1));
+
+	Tcl_IncrRefCount(cmdPtr);
+	result = Tcl_EvalObj(interp, cmdPtr);
+	Tcl_DecrRefCount(cmdPtr);
+	if (result == TCL_ERROR) {
+	    goto errorReturn;
+	}
     }
 
     /*
@@ -945,12 +962,6 @@ ItclClassBaseCmd(
                 }
 	        Tcl_AppendToObj(bodyPtr, " {*}$args]", -1);
 	    }
-	    /* fix for SF bug #257 check if TclOO is still available! */
-	    result2 = Tcl_GetCommandInfo(interp, "::oo::class", &cmdInfo);
-	    if (result2 == 0) {
-              Tcl_AppendResult(interp, " missing ::oo::class command!", NULL);
-	      return TCL_ERROR;
-	    }
 	    imPtr->tmPtr = (ClientData)Itcl_NewProcClassMethod(interp,
 	        iclsPtr->clsPtr, ItclCheckCallMethod, ItclAfterCallMethod,
                 ItclProcErrorProc, imPtr, imPtr->namePtr, argumentPtr,
@@ -1092,8 +1103,9 @@ ItclCheckForInitializedComponents(
 		if (idmPtr->icPtr->ivPtr->flags & ITCL_COMMON) {
 		    Tcl_Obj *objPtr;
 		    objPtr = Tcl_NewStringObj(ITCL_VARIABLES_NAMESPACE, -1);
-		    Tcl_AppendToObj(objPtr, Tcl_GetString(
-		            idmPtr->icPtr->ivPtr->iclsPtr->fullNamePtr), -1);
+		    Tcl_AppendToObj(objPtr, (Tcl_GetObjectNamespace(
+			    idmPtr->icPtr->ivPtr->iclsPtr->oPtr))->fullName,
+			    -1);
 		    Tcl_AppendToObj(objPtr, "::", -1);
 		    Tcl_AppendToObj(objPtr, Tcl_GetString(
 		            idmPtr->icPtr->ivPtr->namePtr), -1);
@@ -1581,14 +1593,6 @@ Itcl_ClassConstructorCmd(
         Tcl_IncrRefCount(iclsPtr->initCode);
         body = Tcl_GetString(objv[3]);
     }
-    if (iclsPtr->initCode != NULL) {
-	Tcl_Obj *initNamePtr;
-	initNamePtr = Tcl_NewStringObj("___constructor_init", -1);
-        if (Itcl_CreateMethod(interp, iclsPtr, initNamePtr, arglist,
-	        Tcl_GetString(iclsPtr->initCode)) != TCL_OK) {
-            return TCL_ERROR;
-        }
-    }
 
     if (Itcl_CreateMethod(interp, iclsPtr, namePtr, arglist, body) != TCL_OK) {
         return TCL_ERROR;
@@ -2000,7 +2004,6 @@ ItclInitClassCommon(
     Tcl_Var varPtr;
     int result;
     int isNew;
-    IctlVarTraceInfo *traceInfoPtr;
 
     result = TCL_OK;
     ivPtr->flags |= ITCL_COMMON;
@@ -2018,7 +2021,8 @@ ItclInitClassCommon(
 	 * go to the variables namespace of the class */
         Tcl_DStringAppend(&buffer, ITCL_VARIABLES_NAMESPACE, -1);
     }
-    Tcl_DStringAppend(&buffer, Tcl_GetString(ivPtr->iclsPtr->fullNamePtr), -1);
+    Tcl_DStringAppend(&buffer,
+	    (Tcl_GetObjectNamespace(ivPtr->iclsPtr->oPtr))->fullName, -1);
     commonNsPtr = Tcl_FindNamespace(interp, Tcl_DStringValue(&buffer), NULL, 0);
     if (commonNsPtr == NULL) {
         Tcl_AppendResult(interp, "ITCL: cannot find common variables namespace",
@@ -2031,19 +2035,11 @@ ItclInitClassCommon(
     hPtr = Tcl_CreateHashEntry(&iclsPtr->classCommons, (char *)ivPtr,
             &isNew);
     if (isNew) {
+	Itcl_PreserveVar(varPtr);
         Tcl_SetHashValue(hPtr, varPtr);
     }
     result = Itcl_PushCallFrame(interp, &frame, commonNsPtr,
         /* isProcCallFrame */ 0);
-    traceInfoPtr = (IctlVarTraceInfo *)ckalloc(sizeof(IctlVarTraceInfo));
-    memset (traceInfoPtr, 0, sizeof(IctlVarTraceInfo));
-    traceInfoPtr->flags = ITCL_TRACE_CLASS;
-    traceInfoPtr->ioPtr = NULL;
-    traceInfoPtr->iclsPtr = ivPtr->iclsPtr;
-    traceInfoPtr->ivPtr = ivPtr;
-    Tcl_TraceVar2(interp, Tcl_GetString(ivPtr->namePtr), NULL,
-           TCL_TRACE_UNSETS, ItclTraceUnsetVar,
-           (ClientData)traceInfoPtr);
     Itcl_PopCallFrame(interp);
 
     /*
@@ -2880,10 +2876,6 @@ ItclCreateComponent(
 
     if (iclsPtr == NULL) {
 	return TCL_OK;
-#ifdef NOTDEF
-	Tcl_AppendResult(interp, "INTERNAL ERROR in ItclCreateComponent, iclsPtr == NULL", NULL);
-        return TCL_ERROR;
-#endif
     }
     hPtr = Tcl_CreateHashEntry(&iclsPtr->components, (char *)componentPtr,
             &isNew);
@@ -3172,9 +3164,6 @@ ItclCreateDelegatedFunction(
     Tcl_Obj *exceptionsPtr,
     ItclDelegatedFunction **idmPtrPtr)
 {
-#ifdef NOTDEF
-    Tcl_HashEntry *hPtr;
-#endif
     ItclDelegatedFunction *idmPtr;
     const char **argv;
     int argc;
@@ -3205,17 +3194,8 @@ ItclCreateDelegatedFunction(
 	    objPtr = Tcl_NewStringObj(argv[i], -1);
 	    Tcl_CreateHashEntry(&idmPtr->exceptions, (char *)objPtr,
 	            &isNew);
-#ifdef NOTDEF
-	    hPtr2 = Tcl_FindHashEntry(&iclsPtr->functions, (char *)objPtr);
-/* FIXME !!! can only be done after a class/widget has been parsed completely !! */
-	    if (hPtr2 == NULL) {
-	        Tcl_AppendResult(interp, "no such method: \"",
-		        Tcl_GetString(objPtr), "\" found for delegation", NULL);
-	        return TCL_ERROR;
-	    }
-	    Tcl_SetHashValue(hPtr, Tcl_GetHashValue(hPtr2));
-#endif
 	}
+	ckfree((char *) argv);
     }
     if (idmPtrPtr != NULL) {
         *idmPtrPtr = idmPtr;
@@ -3726,6 +3706,8 @@ Itcl_HandleDelegateOptionCmd(
         Tcl_IncrRefCount(idoPtr->asPtr);
     }
     if (exceptionsPtr != NULL) {
+	ckfree((char *)argv);
+	argv = NULL;
         if (Tcl_SplitList(interp, Tcl_GetString(exceptionsPtr), &argc, &argv)
 	        != TCL_OK) {
 	    goto errorOut2;
@@ -3753,7 +3735,9 @@ errorOut1:
     if (classNamePtr != NULL) {
         Tcl_DecrRefCount(classNamePtr);
     }
-    ckfree((char *)argv);
+    if (argv) {
+	ckfree((char *)argv);
+    }
     return TCL_ERROR;
 }
 
@@ -3978,6 +3962,7 @@ delegate typemethod * ?to <componentName>? ?using <pattern>? ?except <typemethod
 	        hPtr = Tcl_CreateHashEntry(&idmPtr->exceptions, (char *)objPtr,
 	                &isNew);
 	    }
+	    ckfree((char *) argv);
         }
     }
     idmPtr->icPtr = icPtr;

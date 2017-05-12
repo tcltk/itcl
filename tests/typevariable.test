@@ -173,7 +173,7 @@ test ivariable-1.1 {myvar qualifies instance variables} -body {
     spot vname somevar
 } -cleanup {
     dog destroy
-} -result {::itcl::internal::variables::spot::dog::somevar}
+} -match glob -result {::itcl::internal::variables::*::dog::somevar}
 
 test ivariable-1.2 {undefined instance variables are OK} -body {
     type dog {
@@ -193,7 +193,7 @@ test ivariable-1.2 {undefined instance variables are OK} -body {
     dog create fido
     fido setgreeting Howdy
 
-    list [spot getgreeting] [fido getgreeting] [set ::itcl::internal::variables::spot::dog::greeting]
+    list [spot getgreeting] [fido getgreeting] [set ::itcl::internal::variables[info object namespace spot]::dog::greeting]
 } -cleanup {
     dog destroy
 } -result {Hey Howdy Hey}
@@ -207,10 +207,11 @@ test ivariable-1.3 {instance variables are destroyed automatically} -body {
     }
 
     dog create spot
-    set g1 $::itcl::internal::variables::spot::dog::greeting
+    set ns [info object namespace spot]
+    set g1 [set ::itcl::internal::variables${ns}::dog::greeting]
 
     spot destroy
-    list $g1 [info exists ::itcl::internal::variables::spot::dog::greeting]
+    list $g1 [info exists ::itcl::internal::variables${ns}::dog::greeting]
 } -cleanup {
     dog destroy
 } -result {Hi 0}

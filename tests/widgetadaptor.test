@@ -92,9 +92,10 @@ interp alias {} type {} ::itcl::type
 interp alias {} widgetadaptor {} ::itcl::widgetadaptor
 
 # Marks tests which are only for Tk.
-tcltest::testConstraint tk [info exists tk_version]
+tcltest::testConstraint tk [expr {![catch {package require Tk}]}]
 
 ::tcltest::loadTestedCommands
+package require itcl
 
 #-----------------------------------------------------------------------
 # Widgetadaptors
@@ -136,14 +137,14 @@ test widgetadaptor-1.2 {destroying a widget with destroy
     }
 
     mylabel create .label
-    set a [namespace children ::itcl::internal::variables]
+    set a [lsort [namespace children ::itcl::internal::variables]]
     destroy .label
-    set b [namespace children ::itcl::internal::variables]
+    set b [lsort [namespace children ::itcl::internal::variables]]
     tkbide
     list $a $b
 } -cleanup {
     mylabel destroy
-} -result {{::itcl::internal::variables::.label ::itcl::internal::variables::mylabel} ::itcl::internal::variables::mylabel}
+} -result {{::itcl::internal::variables::mylabel ::itcl::internal::variables::oo} {::itcl::internal::variables::mylabel ::itcl::internal::variables::oo}}
 
 test widgetadaptor-1.3 {destroying two widgets of the same type with destroy
 } -constraints {
@@ -157,15 +158,15 @@ test widgetadaptor-1.3 {destroying two widgets of the same type with destroy
 
     mylabel create .lab1
     mylabel create .lab2
-    set a [namespace children ::itcl::internal::variables]
+    set a [lsort [namespace children ::itcl::internal::variables]]
     destroy .lab1
     destroy .lab2
-    set b [namespace children ::itcl::internal::variables]
+    set b [lsort [namespace children ::itcl::internal::variables]]
     tkbide
     list $a $b
 } -cleanup {
     mylabel destroy
-} -result {{::itcl::internal::variables::.lab1 ::itcl::internal::variables::mylabel ::itcl::internal::variables::.lab2} ::itcl::internal::variables::mylabel}
+} -result {{::itcl::internal::variables::mylabel ::itcl::internal::variables::oo} {::itcl::internal::variables::mylabel ::itcl::internal::variables::oo}}
 
 test widgetadaptor-1.4 {destroying a widget with rename, then destroy type
 } -constraints {
@@ -178,14 +179,14 @@ test widgetadaptor-1.4 {destroying a widget with rename, then destroy type
     }
 
     mylabel create .label
-    set a [namespace children ::itcl::internal::variables]
+    set a [lsort [namespace children ::itcl::internal::variables]]
     rename .label ""
-    set b [namespace children ::itcl::internal::variables]
+    set b [lsort [namespace children ::itcl::internal::variables]]
 
     mylabel destroy
     tkbide
     list $a $b
-} -result {{::itcl::internal::variables::.label ::itcl::internal::variables::mylabel} ::itcl::internal::variables::mylabel}
+} -result {{::itcl::internal::variables::mylabel ::itcl::internal::variables::oo} {::itcl::internal::variables::mylabel ::itcl::internal::variables::oo}}
 
 test widgetadaptor-1.5 {destroying two widgets of the same type with rename
 } -constraints {
@@ -199,14 +200,14 @@ test widgetadaptor-1.5 {destroying two widgets of the same type with rename
 
     mylabel create .lab1
     mylabel create .lab2
-    set a [namespace children ::itcl::internal::variables]
+    set a [lsort [namespace children ::itcl::internal::variables]]
     rename .lab1 ""
     rename .lab2 ""
-    set b [namespace children ::itcl::internal::variables]
+    set b [lsort [namespace children ::itcl::internal::variables]]
     mylabel destroy
     tkbide
     list $a $b
-} -result {{::itcl::internal::variables::.lab1 ::itcl::internal::variables::mylabel ::itcl::internal::variables::.lab2} ::itcl::internal::variables::mylabel}
+} -result {{::itcl::internal::variables::mylabel ::itcl::internal::variables::oo} {::itcl::internal::variables::mylabel ::itcl::internal::variables::oo}}
 
 test widgetadaptor-1.6 {create/destroy twice, with destroy
 } -constraints {
@@ -230,7 +231,7 @@ test widgetadaptor-1.6 {create/destroy twice, with destroy
     mylabel destroy
     tkbide
     list $a $b $c
-} -result {{::itcl::internal::variables::.lab1 ::itcl::internal::variables::mylabel} {::itcl::internal::variables::.lab1 ::itcl::internal::variables::mylabel} ::itcl::internal::variables::mylabel}
+} -result {{::itcl::internal::variables::mylabel ::itcl::internal::variables::oo} {::itcl::internal::variables::mylabel ::itcl::internal::variables::oo} {::itcl::internal::variables::mylabel ::itcl::internal::variables::oo}}
 
 test widgetadaptor-1.7 {create/destroy twice, with rename
 } -constraints {
@@ -254,7 +255,7 @@ test widgetadaptor-1.7 {create/destroy twice, with rename
     mylabel destroy
     tkbide
     list $a $b $c
-} -result {{::itcl::internal::variables::.lab1 ::itcl::internal::variables::mylabel} {::itcl::internal::variables::.lab1 ::itcl::internal::variables::mylabel} ::itcl::internal::variables::mylabel}
+} -result {{::itcl::internal::variables::mylabel ::itcl::internal::variables::oo} {::itcl::internal::variables::mylabel ::itcl::internal::variables::oo} {::itcl::internal::variables::mylabel ::itcl::internal::variables::oo}}
 
 test widgetadaptor-1.8 {"create" is optional
 } -constraints {
@@ -324,6 +325,21 @@ test widgetadaptor-1.11 {user-defined destructors are called
 } -cleanup {
     mylabel destroy
 } -result {{created ::itcl::internal::widgets::hull1.label} {destroyed ::itcl::internal::widgets::hull1.label}}
+
+test widgetadaptor-1.12 {Constructor errors tolerated
+} -constraints {
+    tk
+} -body {
+    widgetadaptor mylabel {
+        constructor {args} {error foo}
+        destructor {}
+    }
+
+    # Without bug fix this will crash
+    mylabel .label
+} -cleanup {
+    mylabel destroy
+} -returnCodes error -result foo
 
 test widgetadaptor-1.14 {hull can be repeatedly renamed
 } -constraints {
@@ -410,18 +426,18 @@ test widgetadaptor-1.16 {snit::widgetadaptor as hull
     set b [.label cget -text]
     .label configure -text "More Text"
     set c [.label cget -text]
-    set d [namespace children ::itcl::internal::variables]
+    set d [lsort [namespace children ::itcl::internal::variables]]
 
     destroy .label
 
-    set e [namespace children ::itcl::internal::variables]
+    set e [lsort [namespace children ::itcl::internal::variables]]
 
     mylabel2 destroy
     mylabel destroy
 
     tkbide
     list $a $b $c $d $e
-} -result {{method2: method1} {Some Text} {More Text} {::itcl::internal::variables::mylabel2 ::itcl::internal::variables::.label ::itcl::internal::variables::mylabel} {::itcl::internal::variables::mylabel2 ::itcl::internal::variables::mylabel}}
+} -result {{method2: method1} {Some Text} {More Text} {::itcl::internal::variables::mylabel ::itcl::internal::variables::mylabel2 ::itcl::internal::variables::oo} {::itcl::internal::variables::mylabel ::itcl::internal::variables::mylabel2 ::itcl::internal::variables::oo}}
 
 test widgetadaptor-1.17 {snit::widgetadaptor as hull; use rename
 } -constraints {
@@ -454,18 +470,18 @@ test widgetadaptor-1.17 {snit::widgetadaptor as hull; use rename
     set b [.label cget -text]
     .label configure -text "More Text"
     set c [.label cget -text]
-    set d [namespace children ::itcl::internal::variables]
+    set d [lsort [namespace children ::itcl::internal::variables]]
 
     rename .label ""
 
-    set e [namespace children ::itcl::internal::variables]
+    set e [lsort [namespace children ::itcl::internal::variables]]
 
     mylabel2 destroy
     mylabel destroy
 
     tkbide
     list $a $b $c $d $e
-} -result {{method2: method1} {Some Text} {More Text} {::itcl::internal::variables::mylabel2 ::itcl::internal::variables::.label ::itcl::internal::variables::mylabel} {::itcl::internal::variables::mylabel2 ::itcl::internal::variables::mylabel}}
+} -result {{method2: method1} {Some Text} {More Text} {::itcl::internal::variables::mylabel ::itcl::internal::variables::mylabel2 ::itcl::internal::variables::oo} {::itcl::internal::variables::mylabel ::itcl::internal::variables::mylabel2 ::itcl::internal::variables::oo}}
 
 test widgetadaptor-1.19 {error in widgetadaptor constructor
 } -constraints {
