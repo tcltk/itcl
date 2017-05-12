@@ -320,15 +320,14 @@ test sfbug-255 { SF bug #255
 
 test fossilbug-8 { fossil bug 2cd667f270b68ef66d668338e09d144e20405e23
 } -body {
-    set ::test_status ""
     ::itcl::class ::Naughty {
         private method die {} {
         }
     }
-    catch {::Naughty die} msg
-    lappend ::test_status $msg 
-} -result {{invalid command name "die"}} \
-  -cleanup {::itcl::delete class ::Naughty}
+    ::Naughty die
+} -cleanup {
+    ::itcl::delete class ::Naughty
+} -result {die}
 
 test sfbug-256 { SF bug #256
 } -body {
@@ -392,7 +391,7 @@ test sfbug-257 { SF bug #257
       lappend ::test_status $msg
     }
 } -result {{proc Hello World} {proc Hello World} {method Hello World} {invalid command name "cl10"}} \
-  -cleanup {catch {::itcl::delete class ::cl1}}
+  -cleanup {interp delete $interp}
 
 test sfbug-259 { SF bug #257 } -setup {
     interp create slave
@@ -438,6 +437,136 @@ test sfbug-261 { SF bug #261 } -setup {
 } -cleanup {
     itcl::delete class A
 } -result hello
+
+test sfbug-265.1 { SF bug #265 } -setup {
+    itcl::class C {}
+} -body {
+    namespace eval A {C c}
+    namespace eval B {C c}
+} -cleanup {
+    itcl::delete class C
+    namespace delete A B
+} -result c
+test sfbug-265.2 { SF bug #265 } -setup {
+    itcl::class C {}
+    itcl::class B::C {}
+} -body {
+    C ::A::B
+    B::C ::A
+} -cleanup {
+    itcl::delete class B::C
+    itcl::delete class C
+    namespace delete A B
+} -result ::A
+
+test sfbug-268 { SF bug #268 } -setup {
+    itcl::class C {
+	private variable v
+	destructor {error foo}
+	public method demo {} {set v 0}
+    }
+    C c
+} -body {
+    catch {itcl::delete object c}
+    c demo
+} -cleanup {
+    rename c {}
+    itcl::delete class C
+} -result 0
+
+test sfbug-273 { SF bug #273 } -setup {
+    itcl::class C {
+	public proc call {m} {$m}
+	public proc crash {} {
+	    call null
+	    info frame 2
+	    return ok
+	}
+	public proc null {} {}
+    }
+} -body {
+    C::call crash
+} -cleanup {
+    itcl::delete class C
+} -result ok
+
+
+test sfbug-276.0 { SF bug #276 } -setup {
+  set ::answer {}
+  itcl::class A {
+    constructor {} {
+      lappend ::answer [uplevel namespace current]
+    }
+  }
+  itcl::class B {
+    inherit A
+    constructor {} {}
+  }
+} -body {
+  B b
+  set ::answer
+} -cleanup {
+  itcl::delete class A B
+  unset -nocomplain ::answer
+} -result ::B
+
+test sfbug-276.1 { SF bug #276 } -setup {
+  set ::answer {}
+  itcl::class A {
+    constructor {} {
+      lappend ::answer [uplevel namespace current]
+    }
+  }
+  itcl::class E {
+    constructor {} {
+      lappend ::answer [uplevel namespace current]
+    }
+  }
+  itcl::class B {
+    inherit A E
+    constructor {} {}
+  }
+} -body {
+  B b
+  set ::answer
+} -cleanup {
+  itcl::delete class A B E
+  unset -nocomplain ::answer
+} -result {::B ::B}
+
+test fossil-9.0 {d0126511d9} -setup {
+    itcl::class N::B {}
+} -body {
+    itcl::class N {}
+} -cleanup {
+    itcl::delete class N::B N
+} -result {}
+
+test fossil-9.1 {d0126511d9} -setup {
+    itcl::class N::B {}
+    itcl::delete class N::B
+    namespace delete N
+} -body {
+    itcl::class N {}
+} -cleanup {
+    itcl::delete class N
+    catch {namespace delete N}
+} -result {}
+
+test fossil-9.2 {ec215db901} -setup {
+    set ::answer {}
+    itcl::class Object {
+	constructor {} {set n 1} {set ::answer $n}
+    }
+} -body {
+    Object foo
+    set ::answer
+} -cleanup {
+    itcl::delete class Object
+    unset -nocomplain ::answer
+} -result 1
+
+
 
 #test sfbug-xxx { SF bug xxx
 #} -body {

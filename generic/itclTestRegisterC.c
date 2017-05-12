@@ -39,9 +39,6 @@ cArgFunc(
     int argc,
     const char **argv)
 {
-#ifdef NOTDEF
-    int i;
-#endif
     int result;
     ItclObjectInfo * infoPtr = NULL;
     ItclClass *iclsPtr = NULL;
@@ -76,12 +73,6 @@ cArgFunc(
       return TCL_ERROR;
     }
 
-#ifdef NOTDEF
-fprintf(stderr, "cArgFunc called:\n");
-for(i = 0; i<argc;i++) {
-    fprintf(stderr, "arg:%d:%s:\n", i, argv[i]);
-}
-#endif 
     /* try to create an object for a class as a test for calling a C function from
      * an Itcl class. See file CreateItclObjectWithC_example.tcl in library directory
      */

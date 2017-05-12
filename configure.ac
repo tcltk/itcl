@@ -1,6 +1,6 @@
 #!/bin/bash -norc
 #--------------------------------------------------------------------
-# Sample configure.in for Tcl Extensions.  The only places you should
+# Sample configure.ac for Tcl Extensions.  The only places you should
 # need to modify this file are marked by the string __CHANGE__
 #--------------------------------------------------------------------
 
@@ -10,7 +10,7 @@
 # so you can encode the package version directly into the source files.
 #-----------------------------------------------------------------------
 
-AC_INIT([itclwidget], [4.0.0])
+AC_INIT([itcl], [4.0.5])
 
 #--------------------------------------------------------------------
 # Call TEA_INIT as the first TEA_ macro to set up initial vars.
@@ -18,7 +18,7 @@ AC_INIT([itclwidget], [4.0.0])
 # as well as PKG_LIB_FILE and PKG_STUB_LIB_FILE.
 #--------------------------------------------------------------------
 
-TEA_INIT([3.9])
+TEA_INIT([3.10])
 
 AC_PROG_LN_S
 CONFIG_CLEAN_FILES=
@@ -33,16 +33,22 @@ AC_SUBST(CONFIG_CLEAN_FILES)
 AC_CONFIG_AUX_DIR(tclconfig)
 
 #--------------------------------------------------------------------
-# Load the tclConfig.sh, tkConfig.sh and itclConfig.sh file
+# Load the tclConfig.sh file
 #--------------------------------------------------------------------
 
 TEA_PATH_TCLCONFIG
 TEA_LOAD_TCLCONFIG
-TEA_PATH_TKCONFIG
-TEA_LOAD_TKCONFIG
 
-TEA_PATH_CONFIG(itcl)
-TEA_LOAD_CONFIG(itcl)
+if test "${TCL_MAJOR_VERSION}" -ne 8; then
+    AC_MSG_ERROR([${TCL_BIN_DIR}/tclConfig.sh is for Tcl ${TCL_VERSION}.
+Itcl ${PACKAGE_VERSION} needs Tcl 8.6 or higher.
+Use --with-tcl= option to indicate location of tclConfig.sh file for Tcl 8.6+.])
+fi
+if test "${TCL_MINOR_VERSION}" -lt 6; then
+    AC_MSG_ERROR([${TCL_BIN_DIR}/tclConfig.sh is for Tcl ${TCL_VERSION}.
+Itcl ${PACKAGE_VERSION} needs Tcl 8.6 or higher.
+Use --with-tcl= option to indicate location of tclConfig.sh file for Tcl 8.6+.])
+fi
 
 #-----------------------------------------------------------------------
 # Handle the --prefix=... option by defaulting to what Tcl gave.
@@ -72,26 +78,51 @@ TEA_SETUP_COMPILER
 
 
 TEA_ADD_SOURCES([
-                itclWidgetBase.c
-	        itclWidgetBuiltin.c
-                itclWidgetCmd.c
-                itclWidgetInfo.c
-                itclWidgetObject.c
-	        itclWidgetParse.c
-                itclWidgetStubInit.c
+                itcl2TclOO.c
+	        itclBase.c
+	        itclBuiltin.c
+                itclClass.c
+                itclCmd.c
+                itclEnsemble.c
+                itclHelpers.c
+	        itclInfo.c
+                itclLinkage.c
+                itclMethod.c
+                itclObject.c
+	        itclParse.c
+	        itclStubs.c
+                itclStubInit.c
+	        itclResolve.c
+	        itclTclIntStubsFcn.c
+	        itclUtil.c
+                itclMigrate2TclCore.c
+		itclTestRegisterC.c
                 ])
-TEA_ADD_HEADERS([
-                generic/itclWidgetInt.h
+TEA_ADD_HEADERS([generic/itcl.h
+                generic/itclDecls.h
+		generic/itclInt.h
+                generic/itclMigrate2TclCore.h
+                generic/itclTclIntStubsFcn.h
+                generic/itcl2TclOO.h
+                generic/itclIntDecls.h
 		])
 TEA_ADD_INCLUDES([-I. -I\"`${CYGPATH} ${srcdir}/generic`\"])
 TEA_ADD_LIBS([])
-TEA_ADD_CFLAGS([-I${itcl_INCLUDE_SPEC}])
-TEA_ADD_STUB_SOURCES(itclWidgetStubLib.c)
-TEA_ADD_TCL_SOURCES([])
+TEA_ADD_CFLAGS([])
+TEA_ADD_STUB_SOURCES(itclStubLib.c)
+TEA_ADD_TCL_SOURCES([library/itcl.tcl library/itclWidget.tcl library/itclHullCmds.tcl])
 
 #--------------------------------------------------------------------
 # __CHANGE__
 # A few miscellaneous platform-specific items:
+#
+# Define a special symbol for Windows (BUILD_itcl in this case) so
+# that we create the export library with the dll.  See sha1.h on how
+# to use this.
+#
+# Windows creates a few extra files that need to be cleaned up.
+# You can add more files to clean if your extension creates any extra
+# files.
 #
 # Define any extra compiler flags in the PACKAGE_CFLAGS variable.
 # These will be appended to the current set of compiler flags for
@@ -115,8 +146,6 @@ fi
 
 #TEA_PUBLIC_TCL_HEADERS
 TEA_PRIVATE_TCL_HEADERS
-TEA_PUBLIC_TK_HEADERS
-TEA_PRIVATE_ITCL_HEADERS
 
 #--------------------------------------------------------------------
 # Check whether --enable-threads or --disable-threads was given.
@@ -147,14 +176,24 @@ TEA_CONFIG_CFLAGS
 TEA_ENABLE_SYMBOLS
 
 #--------------------------------------------------------------------
-# Everyone should be linking against the Tcl stub library.  If you
-# can't for some reason, remove this definition.  If you aren't using
-# stubs, you also need to modify the SHLIB_LD_LIBS setting below to
-# link against the non-stubbed Tcl library.
+# Check for intptr_t (for INT2PTR & PTR2INT macros).
 #--------------------------------------------------------------------
 
-AC_DEFINE(USE_TCL_STUBS, 1, [Use Tcl stubs])
-AC_DEFINE(USE_TCLOO_STUBS, 1, [Use TclOO stubs])
+AC_CHECK_TYPE([intptr_t], [
+    AC_DEFINE([HAVE_INTPTR_T], 1, [Do we have the intptr_t type?])], [
+    AC_CACHE_CHECK([for pointer-size signed integer type], tcl_cv_intptr_t, [
+    for tcl_cv_intptr_t in "int" "long" "long long" none; do
+	if test "$tcl_cv_intptr_t" != none; then
+	    AC_COMPILE_IFELSE([AC_LANG_BOOL_COMPILE_TRY([AC_INCLUDES_DEFAULT],
+		    [[sizeof (void *) <= sizeof ($tcl_cv_intptr_t)]])], 
+		[tcl_ok=yes], [tcl_ok=no])
+	    test "$tcl_ok" = yes && break; fi
+    done])
+    if test "$tcl_cv_intptr_t" != none; then
+	AC_DEFINE_UNQUOTED([intptr_t], [$tcl_cv_intptr_t], [Signed integer
+	   type wide enough to hold a pointer.])
+    fi
+])
 
 #--------------------------------------------------------------------
 # This macro generates a line to use when building a library.  It
@@ -163,6 +202,18 @@ AC_DEFINE(USE_TCLOO_STUBS, 1, [Use TclOO stubs])
 #--------------------------------------------------------------------
 
 TEA_MAKE_LIB
+
+#--------------------------------------------------------------------
+# __CHANGE__
+# Change the name from exampeA_LIB_FILE to match your package name.
+# Use the stub_LIB_FILE substitution if your package creates a stub
+# library.
+#--------------------------------------------------------------------
+
+itcl_STUB_LIB_FILE=${PKG_STUB_LIB_FILE}
+itcl_LIB_FILE=${PKG_LIB_FILE}
+AC_SUBST(itcl_STUB_LIB_FILE)
+AC_SUBST(itcl_LIB_FILE)
 
 #--------------------------------------------------------------------
 # Find tclsh so that we can run pkg_mkIndex to generate the pkgIndex.tcl
@@ -175,7 +226,21 @@ TEA_MAKE_LIB
 TEA_PROG_TCLSH
 
 #--------------------------------------------------------------------
+# These are for itclConfig.sh
+#--------------------------------------------------------------------
+
+TEA_EXPORT_CONFIG([itcl])
+
+# itcl_SRC_DIR must be a fully qualified path
+eval itcl_SRC_DIR="$srcdir"
+itcl_SRC_DIR=`cd "${itcl_SRC_DIR}"; pwd`
+AC_SUBST(itcl_SRC_DIR)
+
+eval itcl_INCLUDE_SPEC="${itcl_SRC_DIR}/generic"
+AC_SUBST(itcl_INCLUDE_SPEC)
+
+#--------------------------------------------------------------------
 # Finally, substitute all of the various values into the Makefile.
 #--------------------------------------------------------------------
 
-AC_OUTPUT([Makefile pkgIndex.tcl])
+AC_OUTPUT([Makefile pkgIndex.tcl itclConfig.sh])

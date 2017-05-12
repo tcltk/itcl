@@ -135,10 +135,10 @@ test scope-3.2 {code command captures only class context} {
          [test_scope::pcontext itcl::code arg1 arg2]
 } {{namespace inscope ::test_scope {arg1 arg2}} {namespace inscope ::test_scope {arg1 arg2}}}
 
-test scope-3.3 {scope command captures class and object context} {
+test scope-3.3 {scope command captures class and object context} -body {
     list [test_scope0 mcontext itcl::scope priv] \
          [test_scope::pcontext itcl::scope pric]
-} {::itcl::internal::variables::test_scope0::test_scope::priv ::itcl::internal::variables::test_scope::pric}
+} -match glob -result {::itcl::internal::variables::*::test_scope::priv ::itcl::internal::variables::test_scope::pric}
 
 test scope-3.4 {scope command must recognize variable} {
     list [catch {test_scope0 mcontext itcl::scope xyzzy} msg] $msg
@@ -175,14 +175,14 @@ test scope-3.7 {code command provides access to methods} {
     set result
 } {{namespace inscope ::test_scope {::test_scope0 prim}} {prim: 1 2 3} {namespace inscope ::test_scope {::test_scope0 prom}} {prom: 1 2 3} {namespace inscope ::test_scope {::test_scope0 pubm}} {pubm: 1 2 3}}
 
-test scope-3.8 {scope command allows access to slots in an array} {
+test scope-3.8 {scope command allows access to slots in an array} -body {
     test_scope0 mcontext set varray(0) "defined"
     test_scope::pcontext set carray(0) "defined"
     list [catch {test_scope0 mcontext itcl::scope varray(0)} msg] $msg \
          [catch {test_scope0 mcontext itcl::scope varray(1)} msg] $msg \
          [catch {test_scope::pcontext itcl::scope carray(0)} msg] $msg \
          [catch {test_scope::pcontext itcl::scope carray(1)} msg] $msg
-} {0 ::itcl::internal::variables::test_scope0::test_scope::varray(0) 0 ::itcl::internal::variables::test_scope0::test_scope::varray(1) 0 ::itcl::internal::variables::test_scope::carray(0) 0 ::itcl::internal::variables::test_scope::carray(1)}
+} -match glob -result {0 ::itcl::internal::variables::*::test_scope::varray(0) 0 ::itcl::internal::variables::*::test_scope::varray(1) 0 ::itcl::internal::variables::test_scope::carray(0) 0 ::itcl::internal::variables::test_scope::carray(1)}
 
 itcl::delete class test_scope
 
@@ -206,6 +206,23 @@ test scope-4.2 {scope command allows access to slots in an array} {
 } {0 ::test_scope_ns::array(0) 0 ::test_scope_ns::array(1)}
 
 namespace delete test_scope_ns
+
+test scope-5.0 {Bug e5f529da75} -setup {
+    itcl::class B {
+	common c
+	method v {} {itcl::scope c}
+    }
+    itcl::class D {
+	inherit B
+	method v {} {itcl::scope c}
+    }
+    B b
+    D d
+} -body {
+    string equal [b v] [d v]
+} -cleanup {
+    itcl::delete class B
+} -result 1
 
 ::tcltest::cleanupTests
 return

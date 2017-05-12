@@ -306,7 +306,7 @@ declare 69 {
 }
 declare 71 {
     int Itcl_ConstructBase(Tcl_Interp *interp, ItclObject *contextObj,
-        ItclClass *contextClass, int objc, Tcl_Obj *const *objv)
+        ItclClass *contextClass)
 }
 declare 72 {
     int Itcl_InvokeMethodIfExists(Tcl_Interp *interp, const char *name,
