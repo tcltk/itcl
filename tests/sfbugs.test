@@ -566,6 +566,21 @@ test fossil-9.2 {ec215db901} -setup {
     unset -nocomplain ::answer
 } -result 1
 
+test fossil-9.3 {c45384364c} -setup {
+    itcl::class A {
+	method demo script {uplevel 1 $script}
+    }
+    A a
+    itcl::class B {
+	method demo script {eval $script; a demo $script}
+    }
+    B b
+} -body {
+    b demo {lappend result $this}
+} -cleanup {
+    itcl::delete class A B
+} -result {::b ::b}
+
 
 
 #test sfbug-xxx { SF bug xxx
