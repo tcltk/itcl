@@ -213,7 +213,7 @@ proc installcomponent {args} {
     upvar win win
 
     set className [uplevel 1 info class]
-    set myType [info types [namespace tail $className]]
+    set myType [${className}::info types [namespace tail $className]]
     set isType 0
     if {$myType ne ""} {
         set isType 1

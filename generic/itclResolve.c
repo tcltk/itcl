@@ -36,18 +36,6 @@ typedef struct ItclResolvedVarInfo {
     ItclVarLookup *vlookup;           /* Pointer to lookup info. */
 } ItclResolvedVarInfo;
 
-static const char * special_resolve_vars[] = {
-   "this",
-   "win",
-   "type",
-   "selfns",
-   "self",
-   "itk_option",
-   "itk_interior",
-   "itk_component",
-   NULL
-};
-
 static Tcl_Var ItclClassRuntimeVarResolver(
     Tcl_Interp *interp, Tcl_ResolvedVarInfo *vinfoPtr);
 
@@ -258,11 +246,6 @@ Itcl_ClassVarResolver(
     ItclObject *contextIoPtr;
     Tcl_HashEntry *hPtr;
     ItclVarLookup *vlookup;
-    ItclCallContext *callContextPtr;
-    int idx;
-    int start_idx;
-    int found;
-    const char **cp;
 
     contextIoPtr = NULL;
     /*
@@ -320,52 +303,15 @@ Itcl_ClassVarResolver(
      *  If this is an instance variable, then we have to
      *  find the object context,
      */
-
-    hPtr = NULL;
-    idx = Itcl_GetStackSize(&infoPtr->contextStack) - 1;
-    start_idx = idx;
-    while (idx >= 0) {
-	/* self and other special_resolve_vars can only be looked up in
-	 * the current object!! */
-	cp = &special_resolve_vars[0];
-	found = 0;
-	while (*cp != NULL) {
-	    if (strcmp(name, *cp) == 0) {
-		found = 1;
-		break;
-	    }
-	    cp++;
-	}
-	if (found) {
-            if (idx != start_idx) {
-                break;
-	    }
-        }
-        callContextPtr = Itcl_GetStackValue(&infoPtr->contextStack, idx);
-	idx--;
-        /* we first look in the current object, then we look if there is
-	 * perhaps a public variable on the
-	 * stack from another class object
-	 */
-        if (callContextPtr == NULL) {
-            continue;
-        }
-        if (callContextPtr->ioPtr == NULL) {
-            continue;
-        }
-        contextIoPtr = callContextPtr->ioPtr;
-
-        /*
-         *  TRICKY NOTE:  We've resolved the variable in the current
-         *    class context, but we must also be careful to get its
-         *    index from the most-specific class context.  Variables
-         *    are arranged differently depending on which class
-         *    constructed the object.
-         */
-        hPtr = Tcl_FindHashEntry(&infoPtr->objects, (char *)contextIoPtr);
-        if (hPtr == NULL) {
-            continue;
-        }
+    if (TCL_ERROR == Itcl_GetContext(interp, &iclsPtr, &contextIoPtr)
+	    || (contextIoPtr == NULL)) {
+	return TCL_CONTINUE;
+    }
+    /* Check that the object hasn't already been destroyed. */
+    hPtr = Tcl_FindHashEntry(&infoPtr->objects, (char *)contextIoPtr);
+    if (hPtr == NULL) {
+	return TCL_CONTINUE;
+    }
         if (contextIoPtr->iclsPtr != vlookup->ivPtr->iclsPtr) {
 	    if (strcmp(Tcl_GetString(vlookup->ivPtr->namePtr), "this") == 0) {
                 hPtr = Tcl_FindHashEntry(&contextIoPtr->iclsPtr->resolveVars,
@@ -378,15 +324,6 @@ Itcl_ClassVarResolver(
         }
         hPtr = Tcl_FindHashEntry(&contextIoPtr->objectVariables,
                 (char *)vlookup->ivPtr);
-	/* check if it is a public variable (must be one) if not top_level */
-	if (hPtr != NULL) {
-	    break;
-	}
-	/* self can only be looked up in the current object!! */
-	if (strcmp(name, "self") == 0) {
-	    break;
-	}
-    }
 
     if (hPtr == NULL) {
         return TCL_CONTINUE;
@@ -559,8 +496,6 @@ ItclClassRuntimeVarResolver(
                                        * for variable */
 {
     ItclVarLookup *vlookup = ((ItclResolvedVarInfo*)resVarInfo)->vlookup;
-    ItclCallContext *callContextPtr;
-
     ItclClass *iclsPtr;
     ItclObject *contextIoPtr;
     Tcl_HashEntry *hPtr;
@@ -576,7 +511,6 @@ ItclClassRuntimeVarResolver(
 	    return Tcl_GetHashValue(hPtr);
 	}
     }
-    iclsPtr = vlookup->ivPtr->iclsPtr;
 
     /*
      *  Otherwise, get the current object context and find the
@@ -585,21 +519,11 @@ ItclClassRuntimeVarResolver(
      *  TRICKY NOTE:  Get the index for this variable using the
      *    virtual table for the MOST-SPECIFIC class.
      */
+    if (TCL_ERROR == Itcl_GetContext(interp, &iclsPtr, &contextIoPtr)
+	    || (contextIoPtr == NULL)) {
+	return NULL;
+    }
 
-    callContextPtr = Itcl_PeekStack(&iclsPtr->infoPtr->contextStack);
-    if (callContextPtr == NULL) {
-        return NULL;
-    }
-    if (callContextPtr->ioPtr == NULL) {
-	if (iclsPtr->infoPtr->currIoPtr != NULL) {
-	    contextIoPtr = iclsPtr->infoPtr->currIoPtr;
-	} else {
-            return NULL;
-        }
-    } else {
-        contextIoPtr = callContextPtr->ioPtr;
-    }
-    if (contextIoPtr != NULL) {
         if (contextIoPtr->iclsPtr != vlookup->ivPtr->iclsPtr) {
 	    if (strcmp(Tcl_GetString(vlookup->ivPtr->namePtr), "this") == 0) {
 	        /* only for the this variable we need the one of the
@@ -673,8 +597,6 @@ ItclClassRuntimeVarResolver(
         if (hPtr != NULL) {
             return (Tcl_Var)Tcl_GetHashValue(hPtr);
         }
-    } else {
-    }
     return NULL;
 }
 

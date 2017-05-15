@@ -328,19 +328,19 @@ test inherit-4.3 {"info class" should be virtual} {
     list [test_cd_mongrel0 info class] \
          [test_cd_mongrel0 test_cd_foo::do info class] \
          [test_cd_mongrel0 test_cd_geek::do info class]
-} {test_cd_mongrel ::test_cd_mongrel ::test_cd_mongrel}
+} {::test_cd_mongrel ::test_cd_mongrel ::test_cd_mongrel}
 
 test inherit-4.4 {"info inherit" depends on class scope} {
     list [test_cd_mongrel0 info inherit] \
          [test_cd_mongrel0 test_cd_foo::do info inherit] \
          [test_cd_mongrel0 test_cd_foobar::do info inherit]
-} {{test_cd_foobar test_cd_geek} {} {::test_cd_foo ::test_cd_bar}}
+} {{::test_cd_foobar ::test_cd_geek} {} {::test_cd_foo ::test_cd_bar}}
 
 test inherit-4.5 {"info heritage" depends on class scope} {
     list [test_cd_mongrel0 info heritage] \
          [test_cd_mongrel0 test_cd_foo::do info heritage] \
          [test_cd_mongrel0 test_cd_foobar::do info heritage]
-} {{test_cd_mongrel test_cd_foobar test_cd_foo test_cd_bar test_cd_geek} ::test_cd_foo {::test_cd_foobar ::test_cd_foo ::test_cd_bar}}
+} {{::test_cd_mongrel ::test_cd_foobar ::test_cd_foo ::test_cd_bar ::test_cd_geek} ::test_cd_foo {::test_cd_foobar ::test_cd_foo ::test_cd_bar}}
 
 test inherit-4.6 {built-in "isa" method works} {
     set status ""

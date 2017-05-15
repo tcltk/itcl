@@ -2999,48 +2999,6 @@ ItclObjectCmd(
 
 /*
  * ------------------------------------------------------------------------
- *  ItclObjectUnknownCommand()
- *  syntax: is
- *  objv[0]    command name of myself (::itcl::methodset::objectUnknownCommand)
- *  objv[1]    object name for [self]
- *  objv[2]    object name as found on the stack
- *  objv[3]    method name
- * ------------------------------------------------------------------------
- */
-
-int
-ItclObjectUnknownCommand(
-    ClientData clientData,
-    Tcl_Interp *interp,
-    int objc,
-    Tcl_Obj *const *objv)
-{
-    Tcl_Object oPtr;
-    Tcl_Command cmd;
-    Tcl_CmdInfo cmdInfo;
-    ItclObject *ioPtr;
-    ItclObjectInfo *infoPtr;
-
-    ItclShowArgs(1, "ItclObjectUnknownCommand", objc, objv);
-    cmd = Tcl_GetCommandFromObj(interp, objv[1]);
-    if (Tcl_GetCommandInfoFromToken(cmd, &cmdInfo) != 1) {
-        Tcl_AppendResult(interp, "PANIC: cannot get Tcl_GetCommandFromObj for: ", Tcl_GetString(objv[1]), " in ItclObjectUnknownCommand", NULL);
-        return TCL_ERROR;
-    }
-    oPtr = cmdInfo.objClientData;
-    infoPtr = (ItclObjectInfo *)Tcl_GetAssocData(interp,
-            ITCL_INTERP_DATA, NULL);
-    ioPtr = (ItclObject *)Tcl_ObjectGetMetadata(oPtr,
-            infoPtr->object_meta_type);
-    Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
-            "bad option \"", Tcl_GetString(objv[3]), "\": should be one of...",
-	    (char*)NULL);
-    ItclReportObjectUsage(interp, ioPtr, NULL, NULL);
-    return TCL_ERROR;
-}
-
-/*
- * ------------------------------------------------------------------------
  *  GetClassFromClassName()
  * ------------------------------------------------------------------------
  */
