@@ -634,6 +634,86 @@ Itcl_ClassCmd(
  *
  * ------------------------------------------------------------------------
  */
+
+static Tcl_MethodCallProc ObjCallProc;
+static Tcl_MethodCallProc ArgCallProc;
+static Tcl_CloneProc CloneProc;
+
+static const Tcl_MethodType itclObjMethodType = {
+    TCL_OO_METHOD_VERSION_CURRENT,
+    "itcl objv method",
+    ObjCallProc,
+    ItclReleaseIMF,
+    CloneProc
+};
+
+static const Tcl_MethodType itclArgMethodType = {
+    TCL_OO_METHOD_VERSION_CURRENT,
+    "itcl argv method",
+    ArgCallProc,
+    ItclReleaseIMF,
+    CloneProc
+};
+
+static int
+CloneProc(
+    Tcl_Interp *interp,
+    ClientData original,
+    ClientData *copyPtr)
+{
+    ItclPreserveIMF((ItclMemberFunc *)original);
+    *copyPtr = original;
+    return TCL_OK;
+}
+
+static int
+CallAfterCallMethod(
+    ClientData data[],
+    Tcl_Interp *interp,
+    int result)
+{
+    ClientData clientData = data[0];
+    Tcl_ObjectContext context = data[1];
+
+    return ItclAfterCallMethod(clientData, interp, context, NULL, result);
+}
+
+static int
+ObjCallProc(
+    ClientData clientData,
+    Tcl_Interp *interp,
+    Tcl_ObjectContext context,
+    int objc,
+    Tcl_Obj *const *objv)
+{
+    ItclMemberFunc *imPtr = (ItclMemberFunc *)clientData;
+
+    if (TCL_ERROR == ItclCheckCallMethod(clientData, interp, context,
+	    NULL, NULL)) {
+	return TCL_ERROR;
+    }
+
+    Tcl_NRAddCallback(interp, CallAfterCallMethod, clientData, context,
+	    NULL, NULL);
+
+    if ((imPtr->flags & ITCL_COMMON) == 0) {
+	return Itcl_ExecMethod(clientData, interp, objc-1, objv+1);
+    } else {
+	return Itcl_ExecProc(clientData, interp, objc-1, objv+1);
+    }
+}
+
+static int
+ArgCallProc(
+    ClientData clientData,
+    Tcl_Interp *interp,
+    Tcl_ObjectContext context,
+    int objc,
+    Tcl_Obj *const *objv)
+{
+    return TCL_ERROR;
+}
+
 int
 ItclClassBaseCmd(
     ClientData clientData,   /* info for all known objects */
@@ -798,6 +878,31 @@ ItclClassBaseCmd(
     	    ClientData pmPtr;
 	    argumentPtr = imPtr->codePtr->argumentPtr;
 	    bodyPtr = imPtr->codePtr->bodyPtr;
+
+if (imPtr->codePtr->flags & ITCL_IMPLEMENT_OBJCMD) {
+    /* Implementation of this member is coded in C expecting Tcl_Obj */
+
+    imPtr->tmPtr = Tcl_NewMethod(interp, iclsPtr->clsPtr, imPtr->namePtr,
+	    1, &itclObjMethodType, (ClientData) imPtr);
+    ItclPreserveIMF(imPtr);
+
+    if (iclsPtr->flags & (ITCL_TYPE|ITCL_WIDGET|ITCL_WIDGETADAPTOR)) {
+	imPtr->tmPtr = Tcl_NewInstanceMethod(interp, iclsPtr->oPtr,
+		imPtr->namePtr, 1, &itclObjMethodType, (ClientData) imPtr);
+	ItclPreserveIMF(imPtr);
+    }
+
+} else if (imPtr->codePtr->flags & ITCL_IMPLEMENT_ARGCMD) {
+    /* Implementation of this member is coded in C expecting (char *) */
+
+    imPtr->tmPtr = Tcl_NewMethod(interp, iclsPtr->clsPtr, imPtr->namePtr,
+	    1, &itclArgMethodType, (ClientData) imPtr);
+
+		ItclPreserveIMF(imPtr);
+
+
+
+} else {
 	    if (imPtr->codePtr->flags & ITCL_BUILTIN) {
 		int isDone;
 		isDone = 0;
@@ -950,6 +1055,7 @@ ItclClassBaseCmd(
 		    isDone = 1;
 		}
 		if (!isDone) {
+#if 0
                     if (imPtr->codePtr->flags & ITCL_IMPLEMENT_ARGCMD) {
                       Tcl_AppendToObj(bodyPtr, "::itcl::methodset::callCCommand ", -1);
 		    } else {
@@ -957,6 +1063,7 @@ ItclClassBaseCmd(
                         Tcl_AppendToObj(bodyPtr, "::itcl::methodset::callCCommand ", -1);
 		      }
 		    }
+#endif
 		    Tcl_AppendToObj(bodyPtr,
 		        Tcl_GetString(imPtr->codePtr->bodyPtr), -1);
                 }
@@ -989,6 +1096,7 @@ ItclClassBaseCmd(
                     ItclProcErrorProc, imPtr, imPtr->namePtr, argumentPtr,
 		    bodyPtr, &pmPtr);
 	    }
+}
 	    if ((imPtr->flags & ITCL_COMMON) == 0) {
 	        imPtr->accessCmd = Tcl_CreateObjCommand(interp,
 		        Tcl_GetString(imPtr->fullNamePtr),

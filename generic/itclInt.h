@@ -150,7 +150,7 @@ typedef struct ItclObjectInfo {
     Tcl_HashTable procMethods;      /* maps from procPtr to mFunc */
     Tcl_HashTable instances;        /* maps from instanceNumber to ioPtr */
     Tcl_HashTable unused8;          /* maps from ioPtr to instanceNumber */
-    Tcl_HashTable unused;           /* Obsolete field */
+    Tcl_HashTable frameContext;     /* maps frame to context stack */
     Tcl_HashTable classTypes;       /* maps from class type i.e. "widget"
                                      * to define value i.e. ITCL_WIDGET */
     int protection;                 /* protection level currently in effect */
@@ -158,7 +158,7 @@ typedef struct ItclObjectInfo {
                                      * resolvers or the CallFrame resolvers */
     Itcl_Stack clsStack;            /* stack of class definitions currently
                                      * being parsed */
-    Itcl_Stack contextStack;        /* stack of call contexts */
+    Itcl_Stack unused;              /* Removed */
     Itcl_Stack unused6;		    /* obsolete field */
     struct ItclObject *currIoPtr;   /* object currently being constructed
                                      * set only during calling of constructors
