@@ -2293,9 +2293,6 @@ ItclCheckCallMethod(
     hPtr = NULL;
     imPtr = (ItclMemberFunc *)clientData;
     ItclPreserveIMF(imPtr);
-    if (imPtr->codePtr != NULL) {
-        Itcl_PreserveData(imPtr->codePtr);
-    }
     if (imPtr->flags & ITCL_CONSTRUCTOR) {
         ioPtr = imPtr->iclsPtr->infoPtr->currIoPtr;
     } else {
@@ -2414,9 +2411,6 @@ ItclCheckCallMethod(
     }
     return result;
 finishReturn:
-    if (imPtr->codePtr != NULL) {
-        Itcl_ReleaseData(imPtr->codePtr);
-    }
     ItclReleaseIMF(imPtr);
     return result;
 }
@@ -2505,9 +2499,6 @@ ItclAfterCallMethod(
     }
     result = call_result;
 finishReturn:
-    if (imPtr->codePtr != NULL) {
-        Itcl_ReleaseData(imPtr->codePtr);
-    }
     ItclReleaseIMF(imPtr);
     return result;
 }
