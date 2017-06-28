@@ -230,6 +230,25 @@ test body-5.1 {redefine constructors} -setup {
     unset -nocomplain answer
 } -result {B A B D}
 
+test body-6.1 {redefine class proc body} -setup {
+    unset -nocomplain ::answer
+    itcl::class C {
+	proc cheshire {} {
+	    lappend ::answer x
+	    itcl::body ::C::cheshire {} {}
+	}
+	constructor {args} {cheshire}
+    }
+} -body {
+    itcl::delete object [C #auto]
+    itcl::delete object [C #auto]
+    itcl::delete object [C #auto]
+    set ::answer
+} -cleanup {
+    itcl::delete class C
+    unset -nocomplain ::answer
+} -result x
+
 # ----------------------------------------------------------------------
 #  Clean up
 # ----------------------------------------------------------------------
