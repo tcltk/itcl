@@ -674,7 +674,9 @@ CallAfterCallMethod(
 {
     ClientData clientData = data[0];
     Tcl_ObjectContext context = data[1];
+    ClientData save = data[2];
 
+    ItclSetCallFrameClientData(interp, save);
     return ItclAfterCallMethod(clientData, interp, context, NULL, result);
 }
 
@@ -687,14 +689,44 @@ ObjCallProc(
     Tcl_Obj *const *objv)
 {
     ItclMemberFunc *imPtr = (ItclMemberFunc *)clientData;
+    Tcl_ObjectContext save = Itcl_GetCallFrameClientData(interp);
 
     if (TCL_ERROR == ItclCheckCallMethod(clientData, interp, context,
 	    NULL, NULL)) {
 	return TCL_ERROR;
     }
 
+    /*
+     * This is an ugly workaround.  Someday Itcl 4 should be generally
+     * better designed to replace such nastiness.
+     *
+     * This exists to fix [Itk Bug 38744a21a0] in Itk 4.1.  Starting
+     * with Itcl 4.1, we have the itclObjMethodType to attach Itcl
+     * methods coded as C routines to the TclOO foundation.  Trouble
+     * happens when one of those C routines calls Tcl*Eval*() and
+     * expects an Itcl object context to be in control.
+     *
+     * The Itcl routine ItclObjectCommand goes looking directly at
+     * the clientData of the interp's current frame to get the
+     * controlling Tcl_ObjectContext.  This is a horrifying internals
+     * intrusion that's been inherited.  Since that routine is expecting
+     * to find what's been left there by Tcl's procedure method machinery,
+     * we have to duplicate it here in our own method invocation machinery.
+     *
+     * Note that a lot of Itcl itself could be implemented via direct
+     * dispatch to C routines, but even more ugly somersaults are turned
+     * to fake passing through procedure methods instead.  This might
+     * be a first step to untangling some of those awful knots too.
+     */
+
+    if (TCL_OK != ItclSetCallFrameClientData(interp, (ClientData) context)) {
+	Tcl_SetObjResult(interp, Tcl_ObjPrintf(
+		"ObjCallProc: FAILED to set callframe context"));
+	return TCL_ERROR;
+    }
+
     Tcl_NRAddCallback(interp, CallAfterCallMethod, clientData, context,
-	    NULL, NULL);
+	    save, NULL);
 
     if ((imPtr->flags & ITCL_COMMON) == 0) {
 	return Itcl_ExecMethod(clientData, interp, objc-1, objv+1);
