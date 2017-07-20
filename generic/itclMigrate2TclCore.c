@@ -153,19 +153,6 @@ Itcl_GetCallFrameClientData(
 }
 
 int
-ItclSetCallFrameClientData(
-    Tcl_Interp *interp,
-    ClientData clientData)
-{
-    CallFrame *framePtr = ((Interp *)interp)->varFramePtr;
-    if (framePtr == NULL) {
-        return TCL_ERROR;
-    }
-    framePtr->clientData = clientData;
-    return TCL_OK;
-}
-
-int
 Itcl_SetCallFrameNamespace(
     Tcl_Interp *interp,
     Tcl_Namespace *nsPtr)

@@ -698,8 +698,6 @@ MODULE_SCOPE int ItclCheckCallMethod(ClientData clientData, Tcl_Interp *interp,
         Tcl_ObjectContext contextPtr, Tcl_CallFrame *framePtr, int *isFinished);
 MODULE_SCOPE int ItclAfterCallMethod(ClientData clientData, Tcl_Interp *interp,
         Tcl_ObjectContext contextPtr, Tcl_Namespace *nsPtr, int result);
-MODULE_SCOPE int ItclSetCallFrameClientData(Tcl_Interp *interp,
-	ClientData clientData);
 MODULE_SCOPE void ItclReportObjectUsage(Tcl_Interp *interp,
         ItclObject *contextIoPtr, Tcl_Namespace *callerNsPtr,
 	Tcl_Namespace *contextNsPtr);
