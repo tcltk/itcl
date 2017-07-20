@@ -2809,7 +2809,6 @@ ItclObjectCmd(
     Tcl_Obj **newObjv;
     Tcl_DString buffer;
     Tcl_Obj *myPtr;
-    ItclObjectInfo *infoPtr;
     ItclMemberFunc *imPtr;
     ItclClass *iclsPtr;
     Itcl_ListElem *elem;
@@ -2831,12 +2830,12 @@ ItclObjectCmd(
     myPtr = NULL;
     imPtr = (ItclMemberFunc *)clientData;
     iclsPtr = imPtr->iclsPtr;
-    infoPtr = imPtr->iclsPtr->infoPtr;
-    if ((oPtr == NULL) && (clsPtr == NULL)) {
-         isDirectCall = 1;
-    }
     if (oPtr == NULL) {
-	ClientData clientData2;
+	ItclClass *icPtr = NULL;
+	ItclObject *ioPtr = NULL;
+
+	isDirectCall = (clsPtr == NULL);
+
 	if ((imPtr->flags & ITCL_COMMON)
 	        && (imPtr->codePtr != NULL)
 	        && !(imPtr->codePtr->flags & ITCL_BUILTIN)) {
@@ -2844,31 +2843,12 @@ ItclObjectCmd(
 	            objc, objv);
             return result;
 	}
-	oPtr = NULL;
-	clientData2 = Itcl_GetCallFrameClientData(interp);
-	if ((clientData2 == NULL) && (oPtr == NULL)) {
-	    if (((imPtr->codePtr != NULL)
-	            && (imPtr->codePtr->flags & ITCL_BUILTIN))) {
-	        result = Itcl_InvokeProcedureMethod(imPtr->tmPtr, interp,
-	                objc, objv);
-                return result;
-	    }
-	    if (infoPtr->currIoPtr != NULL) {
-	        /* if we want to call methods in the constructor for example
-	         * config* methods, clientData
-	         * is still NULL, but we can use infoPtr->currIoPtr
-	         * for getting the TclOO object ptr
-	         */
-	        oPtr = infoPtr->currIoPtr->oPtr;
-	    } else {
-	        Tcl_AppendResult(interp,
-	                "ItclObjectCmd cannot get context object (NULL)", NULL);
-	        return TCL_ERROR;
-	    }
+
+	if (TCL_OK == Itcl_GetContext(interp, &icPtr, &ioPtr)) {
+	    oPtr = ioPtr ? ioPtr->oPtr : icPtr->oPtr;
+	} else {
+	    Tcl_Panic("No Context");
 	}
-	if (oPtr == NULL) {
-            oPtr = Tcl_ObjectContextObject((Tcl_ObjectContext)clientData2);
-        }
     }
     methodNamePtr = NULL;
     if (objv[0] != NULL) {
