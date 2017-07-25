@@ -195,6 +195,9 @@ static const ItclIntStubs itclIntStubs = {
     ItclCapitalize, /* 179 */
     ItclClassBaseCmd, /* 180 */
     ItclCreateComponent, /* 181 */
+    Itcl_SetContext, /* 182 */
+    Itcl_UnsetContext, /* 183 */
+    ItclGetInstanceVar, /* 184 */
 };
 
 static const ItclStubHooks itclStubHooks = {
