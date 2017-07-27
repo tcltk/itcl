@@ -29,6 +29,7 @@
  * See the file "license.terms" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  */
+#include <tclInt.h>
 #include "itclInt.h"
 
 /*
@@ -1724,12 +1725,25 @@ ItclGetInstanceVar(
     if (hPtr != NULL) {
         vlookup = Tcl_GetHashValue(hPtr);
         ivPtr = vlookup->ivPtr;
-    } else {
-    }
     /*
      *  Install the object context and access the data member
      *  like any other variable.
      */
+    hPtr = Tcl_FindHashEntry(&contextIoPtr->objectVariables, (char *)ivPtr);
+    if (hPtr) {
+	Tcl_Obj *varName = Tcl_NewObj();
+	Tcl_Var varPtr = Tcl_GetHashValue(hPtr);
+	Tcl_GetVariableFullName(interp, varPtr, varName);
+
+	val = Tcl_GetVar2(interp, Tcl_GetString(varName), name2,
+		TCL_LEAVE_ERR_MSG);
+	Tcl_DecrRefCount(varName);
+	if (val) {
+	    return val;
+	}
+    }
+    }
+
     isItclOptions = 0;
     if (strcmp(name1, "itcl_options") == 0) {
         isItclOptions = 1;
@@ -1934,6 +1948,19 @@ ItclSetInstanceVar(
      *  Install the object context and access the data member
      *  like any other variable.
      */
+
+    hPtr = Tcl_FindHashEntry(&contextIoPtr->objectVariables, (char *)ivPtr);
+    if (hPtr) {
+	Tcl_Obj *varName = Tcl_NewObj();
+	Tcl_Var varPtr = Tcl_GetHashValue(hPtr);
+	Tcl_GetVariableFullName(interp, varPtr, varName);
+
+	val = Tcl_SetVar2(interp, Tcl_GetString(varName), name2, value,
+		TCL_LEAVE_ERR_MSG);
+	Tcl_DecrRefCount(varName);
+	return val;
+    }
+
     isItclOptions = 0;
     if (strcmp(name1, "itcl_options") == 0) {
         isItclOptions = 1;
