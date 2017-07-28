@@ -609,3 +609,13 @@ declare 181 {
     int ItclCreateComponent(Tcl_Interp *interp, ItclClass *iclsPtr,
             Tcl_Obj *componentPtr, int type, ItclComponent **icPtrPtr)
 }
+declare 182 {
+    void Itcl_SetContext(Tcl_Interp *interp, ItclObject *ioPtr)
+}
+declare 183 {
+    void Itcl_UnsetContext(Tcl_Interp *interp)
+}
+declare 184 {
+    const char * ItclGetInstanceVar(Tcl_Interp *interp, const char *name,
+	    const char *name2, ItclObject *ioPtr, ItclClass *iclsPtr)
+}

@@ -741,9 +741,6 @@ MODULE_SCOPE int Itcl_CreateMethodVariable (Tcl_Interp *interp,
 	Tcl_Obj *callbackPtr, ItclMethodVariable **imvPtr);
 MODULE_SCOPE int DelegationInstall(Tcl_Interp *interp, ItclObject *ioPtr,
         ItclClass *iclsPtr);
-MODULE_SCOPE const char* ItclGetInstanceVar(Tcl_Interp *interp,
-        const char *name, const char *name2, ItclObject *contextIoPtr,
-	ItclClass *contextIclsPtr);
 MODULE_SCOPE const char* ItclGetCommonInstanceVar(Tcl_Interp *interp,
         const char *name, const char *name2, ItclObject *contextIoPtr,
 	ItclClass *contextIclsPtr);
