@@ -1411,6 +1411,62 @@ EquivArgLists(
  *  is not active.
  * ------------------------------------------------------------------------
  */
+
+void
+Itcl_SetContext(
+    Tcl_Interp *interp,
+    ItclObject *ioPtr)
+{
+    int new;
+    Itcl_Stack *stackPtr;
+    Tcl_CallFrame *framePtr = Itcl_GetUplevelCallFrame(interp, 0);
+    ItclObjectInfo *infoPtr = (ItclObjectInfo *)Tcl_GetAssocData(interp,
+            ITCL_INTERP_DATA, NULL);
+    Tcl_HashEntry *hPtr = Tcl_CreateHashEntry(&infoPtr->frameContext,
+	    (char *)framePtr, &new);
+    ItclCallContext *contextPtr
+	    = (ItclCallContext *) ckalloc(sizeof(ItclCallContext));
+
+    memset(contextPtr, 0, sizeof(ItclCallContext));
+    contextPtr->ioPtr = ioPtr;
+    contextPtr->refCount = 1;
+
+    if (!new) {
+	Tcl_Panic("frame already has context?!");
+    }
+    
+    stackPtr = (Itcl_Stack *) ckalloc(sizeof(Itcl_Stack));
+    Itcl_InitStack(stackPtr);
+    Tcl_SetHashValue(hPtr, stackPtr);
+
+    Itcl_PushStack(contextPtr, stackPtr);
+}
+
+void
+Itcl_UnsetContext(
+    Tcl_Interp *interp)
+{
+    Tcl_CallFrame *framePtr = Itcl_GetUplevelCallFrame(interp, 0);
+    ItclObjectInfo *infoPtr = (ItclObjectInfo *)Tcl_GetAssocData(interp,
+            ITCL_INTERP_DATA, NULL);
+    Tcl_HashEntry *hPtr = Tcl_FindHashEntry(&infoPtr->frameContext,
+	    (char *)framePtr);
+    Itcl_Stack *stackPtr = (Itcl_Stack *) Tcl_GetHashValue(hPtr);
+    ItclCallContext *contextPtr = Itcl_PopStack(stackPtr);
+
+    if (Itcl_GetStackSize(stackPtr) > 0) {
+	Tcl_Panic("frame context stack not empty!");
+    }
+    Itcl_DeleteStack(stackPtr);
+    ckfree((char *) stackPtr);
+    Tcl_DeleteHashEntry(hPtr);
+    contextPtr->refCount--;
+    if (contextPtr->refCount) {
+	Tcl_Panic("frame context ref count not zero!");
+    }
+    ckfree((char *)contextPtr);
+}
+
 int
 Itcl_GetContext(
     Tcl_Interp *interp,           /* current interpreter */
@@ -1442,7 +1498,8 @@ Itcl_GetContext(
 	    return TCL_OK;
 	}
 
-	*iclsPtrPtr = contextPtr->imPtr->iclsPtr;
+	*iclsPtrPtr = contextPtr->imPtr ? contextPtr->imPtr->iclsPtr
+		: contextPtr->ioPtr->iclsPtr;
 	*ioPtrPtr = contextPtr->ioPtr ? contextPtr->ioPtr : infoPtr->currIoPtr;
 	return TCL_OK;
     }
