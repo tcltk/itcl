@@ -619,8 +619,3 @@ declare 184 {
     const char * ItclGetInstanceVar(Tcl_Interp *interp, const char *name,
 	    const char *name2, ItclObject *ioPtr, ItclClass *iclsPtr)
 }
-declare 185 {
-    const char * ItclSetInstanceVar(Tcl_Interp *interp, const char *name,
-	    const char *name2, const char *value, ItclObject *ioPtr,
-	    ItclClass *iclsPtr)
-}
