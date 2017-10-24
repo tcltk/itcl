@@ -1080,7 +1080,7 @@ Itcl_IsObjectCmd(
      */
     if (classFlag) {
 	ItclObject *contextIoPtr;
-        if (Itcl_FindObject(interp, Tcl_GetCommandName(interp, cmd), &contextIoPtr) != TCL_OK) {
+        if (Itcl_FindObject(interp, cmdName, &contextIoPtr) != TCL_OK) {
             return TCL_ERROR;
         }
 	if (contextIoPtr == NULL) {
