@@ -970,10 +970,10 @@ ItclDestroyClassNamesp(
         if (ioPtr->iclsPtr == iclsPtr) {
 	    if ((ioPtr->accessCmd != NULL) && (!(ioPtr->flags &
 	            (ITCL_OBJECT_IS_DESTRUCTED)))) {
-		Itcl_PreserveData(ioPtr);
+		ItclPreserveObject(ioPtr);
                 Tcl_DeleteCommandFromToken(iclsPtr->interp, ioPtr->accessCmd);
 	        ioPtr->accessCmd = NULL;
-		Itcl_ReleaseData(ioPtr);
+		ItclReleaseObject(ioPtr);
 	        /*
 	         * Fix 227804: Whenever an object to delete was found we
 	         * have to reset the search to the beginning as the

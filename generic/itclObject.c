@@ -70,6 +70,24 @@ static const char * GetConstructorVar(Tcl_Interp *interp, ItclClass *iclsPtr,
 static ItclClass * GetClassFromClassName(Tcl_Interp *interp,
 	const char *className, ItclClass *iclsPtr);
 
+void
+ItclPreserveObject(
+    ItclObject *ioPtr)
+{
+    ioPtr->refCount++;
+}
+
+void
+ItclReleaseObject(
+    ClientData clientData)
+{
+    ItclObject *ioPtr = (ItclObject *)clientData;
+
+    if (--ioPtr->refCount == 0) {
+	ItclFreeObject((char *) clientData);
+    }
+}
+
 
 /*
  * ------------------------------------------------------------------------
@@ -269,7 +287,7 @@ ItclCreateObject(
      *  This is done before invoking the constructors so that the
      *  command can be used during construction to query info.
      */
-    Itcl_PreserveData((ClientData)ioPtr);
+    ItclPreserveObject(ioPtr);
 
     ioPtr->namePtr = Tcl_NewStringObj(name, -1);
     Tcl_IncrRefCount(ioPtr->namePtr);
@@ -299,8 +317,7 @@ ItclCreateObject(
     Tcl_InitObjHashTable(&ioPtr->objectMethodVariables);
     Tcl_InitHashTable(&ioPtr->contextCache, TCL_ONE_WORD_KEYS);
 
-    Itcl_PreserveData((ClientData)ioPtr);  /* while we're using this... */
-    Itcl_EventuallyFree((ClientData)ioPtr, ItclFreeObject);
+    ItclPreserveObject(ioPtr);
 
     /*
      *  Install the class namespace and object context so that
@@ -495,7 +512,7 @@ ItclCreateObject(
         result = Itcl_RestoreInterpState(interp, istate);
 	infoPtr->currIoPtr = saveCurrIoPtr;
 	/* need this for 2 ReleaseData at errorReturn!! */
-        Itcl_PreserveData(ioPtr);
+	ItclPreserveObject(ioPtr);
         goto errorReturn;
     } else {
 	/* a constructor cannot return a result as the object name
@@ -544,7 +561,7 @@ ItclCreateObject(
 	}
         result = Itcl_RestoreInterpState(interp, istate);
 	/* need this for 2 ReleaseData at errorReturn!! */
-        Itcl_PreserveData(ioPtr);
+	ItclPreserveObject(ioPtr);
         goto errorReturn;
     }
 
@@ -596,7 +613,7 @@ ItclCreateObject(
 	    }
             result = Itcl_RestoreInterpState(interp, istate);
 	    /* need this for 2 ReleaseData at errorReturn!! */
-            Itcl_PreserveData(ioPtr);
+	    ItclPreserveObject(ioPtr);
             goto errorReturn;
 	}
     }
@@ -688,7 +705,7 @@ ItclCreateObject(
     ckfree((char*)ioPtr->constructed);
     ioPtr->constructed = NULL;
     ItclAddObjectsDictInfo(interp, ioPtr);
-    Itcl_ReleaseData((ClientData)ioPtr);
+    ItclReleaseObject(ioPtr);
     return result;
 
 errorReturn:
@@ -713,8 +730,8 @@ errorReturn:
         ioPtr->constructed = NULL;
     }
     ItclDeleteObjectVariablesNamespace(interp, ioPtr);
-    Itcl_ReleaseData((ClientData)ioPtr);
-    Itcl_ReleaseData((ClientData)ioPtr);
+    ItclReleaseObject(ioPtr);
+    ItclReleaseObject(ioPtr);
     return result;
 }
 
@@ -1299,16 +1316,17 @@ Itcl_DeleteObject(
     Tcl_CmdInfo cmdInfo;
     Tcl_HashEntry *hPtr;
 
+
     Tcl_GetCommandInfoFromToken(contextIoPtr->accessCmd, &cmdInfo);
 
     contextIoPtr->flags |= ITCL_OBJECT_IS_DELETED;
-    Itcl_PreserveData((ClientData)contextIoPtr);
+    ItclPreserveObject(contextIoPtr);
 
     /*
      *  Invoke the object's destructors.
      */
     if (Itcl_DestructObject(interp, contextIoPtr, 0) != TCL_OK) {
-        Itcl_ReleaseData((ClientData)contextIoPtr);
+	ItclReleaseObject(contextIoPtr);
 	contextIoPtr->flags |=
 	        ITCL_TCLOO_OBJECT_IS_DELETED|ITCL_OBJECT_DESTRUCT_ERROR;
         return TCL_ERROR;
@@ -1332,7 +1350,7 @@ Itcl_DeleteObject(
     if ((contextIoPtr->accessCmd != NULL) && (!(contextIoPtr->flags &
             (ITCL_OBJECT_IS_RENAMED)))) {
     if (Tcl_GetCommandInfoFromToken(contextIoPtr->accessCmd, &cmdInfo) == 1) {
-        cmdInfo.deleteProc = Itcl_ReleaseData;
+        cmdInfo.deleteProc = ItclReleaseObject;
 	Tcl_SetCommandInfoFromToken(contextIoPtr->accessCmd, &cmdInfo);
 
         Tcl_DeleteCommandFromToken(interp, contextIoPtr->accessCmd);
@@ -1341,7 +1359,7 @@ Itcl_DeleteObject(
     contextIoPtr->oPtr = NULL;
     contextIoPtr->accessCmd = NULL;
 
-    Itcl_ReleaseData((ClientData)contextIoPtr);  /* object should die here */
+    ItclReleaseObject(contextIoPtr);
 
     return TCL_OK;
 }
@@ -2714,7 +2732,7 @@ ItclDestroyObject(
         }
         contextIoPtr->accessCmd = NULL;
     }
-    Itcl_ReleaseData((ClientData)contextIoPtr);
+    ItclReleaseObject(contextIoPtr);
 }
 
 /*
@@ -2723,7 +2741,7 @@ ItclDestroyObject(
  *
  *  Deletes all instance variables and frees all memory associated with
  *  the given object instance.  This is usually invoked automatically
- *  by Itcl_ReleaseData(), when an object's data is no longer being used.
+ *  by ItclReleaseObject(), when an object's data is no longer being used.
  * ------------------------------------------------------------------------
  */
 static void
