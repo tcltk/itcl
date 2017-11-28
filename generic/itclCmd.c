@@ -801,7 +801,7 @@ Itcl_ScopeCmd(
         if (contextIoPtr == NULL) {
             Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
                 "can't scope variable \"", token,
-                "\": missing object context\"",
+                "\": missing object context",
                 (char*)NULL);
             result = TCL_ERROR;
             goto scopeCmdDone;
