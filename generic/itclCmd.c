@@ -659,12 +659,8 @@ Itcl_DelObjectCmd(
  *    ::namesp::namesp::class::variable
  *
  *  If the <variable> is an instance variable, this procedure returns
- *  a name of the form:
- *
- *    @itcl ::namesp::namesp::object variable
- *
- *  This kind of scoped value is recognized by the Itcl_ScopedVarResolver
- *  proc, which handles variable resolution for the entire interpreter.
+ *  a name in a format that Tcl can use to find the same variable from
+ *  any context.
  *
  *  Returns TCL_OK/TCL_ERROR to indicate success/failure.
  * ------------------------------------------------------------------------
