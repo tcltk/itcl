@@ -3829,3 +3829,17 @@ ItclInitExtendedClassOptions(
     Itcl_DeleteHierIter(&hier);
     return TCL_OK;
 }
+
+ItclClass *
+ItclNamespace2Class(Tcl_Namespace *nsPtr)
+{
+    ItclObjectInfo * infoPtr;
+    Tcl_HashEntry *hPtr;
+    infoPtr = (ItclObjectInfo *)Tcl_GetAssocData(((Namespace *)nsPtr)->interp,
+	ITCL_INTERP_DATA, NULL);
+    hPtr = Tcl_FindHashEntry(&(infoPtr->namespaceClasses), nsPtr);
+    if (hPtr == NULL) {
+	return NULL;
+    }
+    return Tcl_GetHashValue(hPtr); 
+}

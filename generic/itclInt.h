@@ -103,10 +103,10 @@ typedef struct ItclPreserveInfoEntry {
 } ItclPreserveInfoEntry;
 
 typedef struct ItclPreserveInfo {
-    size_t refCount;
+    int refCount;
     ClientData clientData;
-    size_t size;
-    size_t numEntries;
+    int size;
+    int numEntries;
     ItclPreserveInfoEntry *entries;
 } ItclPreserveInfo;
 
@@ -745,6 +745,7 @@ MODULE_SCOPE int Itcl_CreateMethodVariable (Tcl_Interp *interp,
 	Tcl_Obj *callbackPtr, ItclMethodVariable **imvPtr);
 MODULE_SCOPE int DelegationInstall(Tcl_Interp *interp, ItclObject *ioPtr,
         ItclClass *iclsPtr);
+MODULE_SCOPE ItclClass *ItclNamespace2Class(Tcl_Namespace *nsPtr);
 MODULE_SCOPE const char* ItclGetCommonInstanceVar(Tcl_Interp *interp,
         const char *name, const char *name2, ItclObject *contextIoPtr,
 	ItclClass *contextIclsPtr);
