@@ -103,10 +103,10 @@ typedef struct ItclPreserveInfoEntry {
 } ItclPreserveInfoEntry;
 
 typedef struct ItclPreserveInfo {
-    int refCount;
+    size_t refCount;
     ClientData clientData;
-    int size;
-    int numEntries;
+    size_t size;
+    size_t numEntries;
     ItclPreserveInfoEntry *entries;
 } ItclPreserveInfo;
 
