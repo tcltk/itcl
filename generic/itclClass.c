@@ -1278,9 +1278,6 @@ Itcl_IsClassNamespace(
     Tcl_Namespace *nsPtr)  /* namespace being tested */
 {
     ItclClass *iclsPtr = ItclNamespace2Class(nsPtr);
-    if (iclsPtr == NULL) {
-	    return 0;
-    }
     return iclsPtr != NULL;
 }
 
