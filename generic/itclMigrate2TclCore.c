@@ -95,7 +95,7 @@ Itcl_GetUplevelCallFrame(
     if (level < 0) {
         return NULL;
     }
-    framePtr = ((Interp *)interp)->framePtr;
+    framePtr = ((Interp *)interp)->varFramePtr;
     while ((framePtr != NULL) && (level-- > 0)) {
         framePtr = framePtr->callerVarPtr;
     }
@@ -157,11 +157,11 @@ Itcl_SetCallFrameNamespace(
     Tcl_Interp *interp,
     Tcl_Namespace *nsPtr)
 {
-    CallFrame *framePtr = ((Interp *)interp)->framePtr;
+    CallFrame *framePtr = ((Interp *)interp)->varFramePtr;
     if (framePtr == NULL) {
         return TCL_ERROR;
     }
-    ((Interp *)interp)->framePtr->nsPtr = (Namespace *)nsPtr;
+    ((Interp *)interp)->varFramePtr->nsPtr = (Namespace *)nsPtr;
     return TCL_OK;
 }
 

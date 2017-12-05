@@ -71,7 +71,6 @@ Tcl_InvokeClassProcedureMethod(
     Tcl_Obj *const *objv)	/* Arguments as actually seen. */
 {
     Proc *procPtr = pmPtr->procPtr;
-    int flags = FRAME_IS_METHOD;
     CallFrame *framePtr = NULL;
     CallFrame **framePtrPtr1 = &framePtr;
     Tcl_CallFrame **framePtrPtr = (Tcl_CallFrame **)framePtrPtr1;
@@ -98,8 +97,7 @@ Tcl_InvokeClassProcedureMethod(
      */
 
 
-    flags |= FRAME_IS_PROC;
-    result = TclPushStackFrame(interp, framePtrPtr, nsPtr, flags);
+    result = TclPushStackFrame(interp, framePtrPtr, nsPtr, FRAME_IS_PROC);
     if (result != TCL_OK) {
 	return result;
     }
@@ -344,8 +342,7 @@ Itcl_SelfCmd(
     CallFrame *framePtr = iPtr->varFramePtr;
     CallContext *contextPtr;
 
-
-    if (framePtr == NULL || !(framePtr->isProcCallFrame & FRAME_IS_METHOD)) {
+    if (!Itcl_IsMethodCallFrame(interp)) {
         Tcl_AppendResult(interp, TclGetString(objv[0]),
                 " may only be called from inside a method", NULL);
         return TCL_ERROR;

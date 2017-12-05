@@ -575,7 +575,7 @@ Itcl_DbDumpPreserveInfo(
     FILE *fd;
     ItclPreserveInfo *ipiPtr;
     ItclPreserveInfoEntry *ipiePtr;
-    int j;
+    size_t j;
 
     if (fileName == NULL) {
         fd = stderr;
@@ -587,7 +587,7 @@ Itcl_DbDumpPreserveInfo(
 	if (ipiPtr->refCount == 0) {
 	    continue;
 	}
-	fprintf(stderr, "DAT!%p!%d!\n", ipiPtr->clientData, ipiPtr->refCount);
+	fprintf(stderr, "DAT!%p!%" TCL_LL_MODIFIER "u!\n", ipiPtr->clientData, (Tcl_WideUInt) ipiPtr->refCount);
         for (j = 0; j < ipiPtr->numEntries; j++) {
             ipiePtr = &ipiPtr->entries[j];
             if (ipiePtr->type != ITCL_PRESERVE_DELETED) {
@@ -734,8 +734,7 @@ ItclDbgReleaseData(
             ipiePtr->type = ITCL_PRESERVE_DECR;
             ipiePtr->line = line;
             ipiePtr->fileName = file;
-            ipiPtr->refCount--;
-            if (ipiPtr->refCount < 0) {
+            if (ipiPtr->refCount-- == 0) {
                 fprintf(stderr, "REFCOUNT < 0 for: %p!\n", cdata);
                 noDelete = 1;
             }

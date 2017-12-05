@@ -462,38 +462,15 @@ Itcl_CreateClass(
 
     hPtr = Tcl_CreateHashEntry(&infoPtr->nameClasses,
             (char *)iclsPtr->fullNamePtr, &newEntry);
-    if (hPtr == NULL) {
-	Tcl_AppendResult(interp,
-	        "ITCL: cannot create hash entry in infoPtr->nameClasses for ",
-		"class \"", Tcl_GetString(iclsPtr->fullNamePtr), "\"", NULL);
-	result = TCL_ERROR;
-        goto errorOut;
-    }
     Tcl_SetHashValue(hPtr, (ClientData)iclsPtr);
 
 
     hPtr = Tcl_CreateHashEntry(&infoPtr->namespaceClasses, (char *)classNs,
             &newEntry);
-    if (hPtr == NULL) {
-	Tcl_AppendResult(interp,
-	        "ITCL: cannot create hash entry in infoPtr->namespaceClasses",
-		" for class \"", 
-		Tcl_GetString(iclsPtr->fullNamePtr), "\"", NULL);
-	result = TCL_ERROR;
-        goto errorOut;
-    }
     Tcl_SetHashValue(hPtr, (ClientData)iclsPtr);
   if (classNs != ooNs) {
     hPtr = Tcl_CreateHashEntry(&infoPtr->namespaceClasses, (char *)ooNs,
             &newEntry);
-    if (hPtr == NULL) {
-	Tcl_AppendResult(interp,
-	        "ITCL: cannot create hash entry in infoPtr->namespaceClasses",
-		" for class \"", 
-		Tcl_GetString(iclsPtr->fullNamePtr), "\"", NULL);
-	result = TCL_ERROR;
-        goto errorOut;
-    }
     Tcl_SetHashValue(hPtr, (ClientData)iclsPtr);
 
     if (classNs->clientData && classNs->deleteProc) {
@@ -504,14 +481,6 @@ Itcl_CreateClass(
 }
 
     hPtr = Tcl_CreateHashEntry(&infoPtr->classes, (char *)iclsPtr, &newEntry);
-    if (hPtr == NULL) {
-	Tcl_AppendResult(interp,
-	        "ITCL: cannot create hash entry in infoPtr->classes",
-		" for class \"", 
-		Tcl_GetString(iclsPtr->fullNamePtr), "\"", NULL);
-	result = TCL_ERROR;
-        goto errorOut;
-    }
     Tcl_SetHashValue(hPtr, (ClientData)iclsPtr);
 
     /*
@@ -1001,10 +970,10 @@ ItclDestroyClassNamesp(
         if (ioPtr->iclsPtr == iclsPtr) {
 	    if ((ioPtr->accessCmd != NULL) && (!(ioPtr->flags &
 	            (ITCL_OBJECT_IS_DESTRUCTED)))) {
-		Itcl_PreserveData(ioPtr);
+		ItclPreserveObject(ioPtr);
                 Tcl_DeleteCommandFromToken(iclsPtr->interp, ioPtr->accessCmd);
 	        ioPtr->accessCmd = NULL;
-		Itcl_ReleaseData(ioPtr);
+		ItclReleaseObject(ioPtr);
 	        /*
 	         * Fix 227804: Whenever an object to delete was found we
 	         * have to reset the search to the beginning as the
@@ -1155,14 +1124,8 @@ ItclFreeClass(
      *  Delete all function definitions.
      */
     FOREACH_HASH_VALUE(imPtr, &iclsPtr->functions) {
-	/* functions have Itcl_ReleaseData as deleteProc in the 
-	 * Tcl_Command structure of the class namespace !!
-	 * but if there was an error during parsing of the class body
-	 * the Tcl_Commands have not yet been built, so release here
-	 */
-	if (imPtr->iclsPtr->flags & ITCL_CLASS_CONSTRUCT_ERROR) {
-            ItclReleaseIMF(imPtr);
-	}
+	imPtr->iclsPtr = NULL;
+        ItclReleaseIMF(imPtr);
     }
     Tcl_DeleteHashTable(&iclsPtr->functions);
 
@@ -1314,16 +1277,11 @@ int
 Itcl_IsClassNamespace(
     Tcl_Namespace *nsPtr)  /* namespace being tested */
 {
-    if (nsPtr == NULL) {
-	return 0;
+    ItclClass *iclsPtr = ItclNamespace2Class(nsPtr);
+    if (iclsPtr == NULL) {
+	    return 0;
     }
-    if (nsPtr->deleteProc == NULL) {
-	return 0;
-    }
-    if (nsPtr->deleteProc == ItclDestroyClass2) {
-	return 1;
-    }
-    return (nsPtr->deleteProc == _TclOONamespaceDeleteProc);
+    return iclsPtr != NULL;
 }
 
 
@@ -2552,11 +2510,13 @@ ItclDeleteFunction(
 {
     Tcl_HashEntry *hPtr;
 
+if (imPtr->iclsPtr) {
     hPtr = Tcl_FindHashEntry(&imPtr->iclsPtr->infoPtr->procMethods,
 	    (char *) imPtr->tmPtr);
     if (hPtr != NULL) {
 	Tcl_DeleteHashEntry(hPtr);
     }
+}
     hPtr = Tcl_FindHashEntry(&imPtr->infoPtr->classes, (char *)imPtr->iclsPtr);
     if (hPtr != NULL) {
 	/* unlink owerself from list of class functions */

@@ -659,12 +659,8 @@ Itcl_DelObjectCmd(
  *    ::namesp::namesp::class::variable
  *
  *  If the <variable> is an instance variable, this procedure returns
- *  a name of the form:
- *
- *    @itcl ::namesp::namesp::object variable
- *
- *  This kind of scoped value is recognized by the Itcl_ScopedVarResolver
- *  proc, which handles variable resolution for the entire interpreter.
+ *  a name in a format that Tcl can use to find the same variable from
+ *  any context.
  *
  *  Returns TCL_OK/TCL_ERROR to indicate success/failure.
  * ------------------------------------------------------------------------
@@ -767,15 +763,9 @@ Itcl_ScopeCmd(
             Tcl_Obj *resultPtr = Tcl_GetObjResult(interp);
 	    if (vlookup->ivPtr->protection != ITCL_PUBLIC) {
 	        Tcl_AppendToObj(resultPtr, ITCL_VARIABLES_NAMESPACE, -1);
-		Tcl_AppendToObj(resultPtr, (Tcl_GetObjectNamespace(
-			contextIclsPtr->oPtr))->fullName, -1);
-		Tcl_AppendToObj(resultPtr, "::", -1);
-		Tcl_AppendToObj(resultPtr,
-			Tcl_GetString(vlookup->ivPtr->namePtr), -1);
-	    } else {
-		Tcl_AppendToObj(resultPtr,
-			Tcl_GetString(vlookup->ivPtr->fullNamePtr), -1);
 	    }
+	    Tcl_AppendToObj(resultPtr,
+		    Tcl_GetString(vlookup->ivPtr->fullNamePtr), -1);
             if (openParen) {
                 *openParen = '(';
                 Tcl_AppendToObj(resultPtr, openParen, -1);
@@ -807,7 +797,7 @@ Itcl_ScopeCmd(
         if (contextIoPtr == NULL) {
             Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
                 "can't scope variable \"", token,
-                "\": missing object context\"",
+                "\": missing object context",
                 (char*)NULL);
             result = TCL_ERROR;
             goto scopeCmdDone;
@@ -1086,7 +1076,7 @@ Itcl_IsObjectCmd(
      */
     if (classFlag) {
 	ItclObject *contextIoPtr;
-        if (Itcl_FindObject(interp, Tcl_GetCommandName(interp, cmd), &contextIoPtr) != TCL_OK) {
+        if (Itcl_FindObject(interp, cmdName, &contextIoPtr) != TCL_OK) {
             return TCL_ERROR;
         }
 	if (contextIoPtr == NULL) {

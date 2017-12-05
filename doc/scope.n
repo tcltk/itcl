@@ -59,12 +59,8 @@ Radiobuttons \fC.rb1\fR and \fC.rb2\fR interact via the variable
 guarantees this by returning the fully qualified variable name
 \fC::foo::mode\fR.
 .PP
-You should never use the \fC@itcl\fR syntax directly.  For example,
-it is a bad idea to write code like this:
-.CS
-set {@itcl ::fred x} 3
-puts "value = ${@itcl ::fred x}"
-.CE
+You should never attempt to craft your own scoped variable names,
+even if you believe you've flawlessly reverse-engineered the encoding.
 Instead, you should always use the scope command to generate the
 variable name dynamically.  Then, you can pass that name to a widget
 or to any other bit of code in your program.

@@ -19,6 +19,32 @@ global ::test_status
 # ----------------------------------------------------------------------
 #  Test bugs of the SourceForge bug tracker for incrtcl
 # ----------------------------------------------------------------------
+
+test sfbug-163 {upvar has to resolve instance variables in caller} -setup {
+    itcl::class o1 {
+        public method getValue {name} {
+	    upvar $name val
+	    set val 22
+	}
+    }
+    itcl::class o2 {
+	public variable command
+	constructor {cls2} {
+	    $cls2 getValue command
+	}
+	public method b {cls2} {
+	    return $command
+	}
+    }
+    o1 test1
+    o2 test2 test1
+} -body {
+    test2 b test1
+} -cleanup {
+    itcl::delete class o2
+    itcl::delete class o1
+} -result 22
+
 test sfbug-187 {upvar with this variable SF bug #187
 } -body {
     ::itcl::class foo {
@@ -365,7 +391,7 @@ test sfbug-257 { SF bug #257
       lappend ::test_status $msg
     }
 } -result {{proc Hello World} {proc Hello World} {method Hello World} {invalid command name "cl10"}} \
-  -cleanup {catch {::itcl::delete class ::cl1}}
+  -cleanup {interp delete $interp}
 
 test sfbug-259 { SF bug #257 } -setup {
     interp create slave
@@ -539,6 +565,21 @@ test fossil-9.2 {ec215db901} -setup {
     itcl::delete class Object
     unset -nocomplain ::answer
 } -result 1
+
+test fossil-9.3 {c45384364c} -setup {
+    itcl::class A {
+	method demo script {uplevel 1 $script}
+    }
+    A a
+    itcl::class B {
+	method demo script {eval $script; a demo $script}
+    }
+    B b
+} -body {
+    b demo {lappend result $this}
+} -cleanup {
+    itcl::delete class A B
+} -result {::b ::b}
 
 
 
