@@ -39,12 +39,12 @@ AC_CONFIG_AUX_DIR(tclconfig)
 TEA_PATH_TCLCONFIG
 TEA_LOAD_TCLCONFIG
 
-if test "${TCL_MAJOR_VERSION}" -ne 8; then
+if test "${TCL_MAJOR_VERSION}" -lt 8; then
     AC_MSG_ERROR([${TCL_BIN_DIR}/tclConfig.sh is for Tcl ${TCL_VERSION}.
 Itcl ${PACKAGE_VERSION} needs Tcl 8.6 or higher.
 Use --with-tcl= option to indicate location of tclConfig.sh file for Tcl 8.6+.])
 fi
-if test "${TCL_MINOR_VERSION}" -lt 6; then
+if test "${TCL_MINOR_VERSION}" -lt 6 -a "${TCL_MAJOR_VERSION}" -eq 8; then
     AC_MSG_ERROR([${TCL_BIN_DIR}/tclConfig.sh is for Tcl ${TCL_VERSION}.
 Itcl ${PACKAGE_VERSION} needs Tcl 8.6 or higher.
 Use --with-tcl= option to indicate location of tclConfig.sh file for Tcl 8.6+.])

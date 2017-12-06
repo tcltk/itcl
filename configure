@@ -3523,12 +3523,12 @@ _ACEOF
 
 
 
-if test "${TCL_MAJOR_VERSION}" -ne 8; then
+if test "${TCL_MAJOR_VERSION}" -lt 8; then
     as_fn_error $? "${TCL_BIN_DIR}/tclConfig.sh is for Tcl ${TCL_VERSION}.
 Itcl ${PACKAGE_VERSION} needs Tcl 8.6 or higher.
 Use --with-tcl= option to indicate location of tclConfig.sh file for Tcl 8.6+." "$LINENO" 5
 fi
-if test "${TCL_MINOR_VERSION}" -lt 6; then
+if test "${TCL_MINOR_VERSION}" -lt 6 -a "${TCL_MAJOR_VERSION}" -eq 8; then
     as_fn_error $? "${TCL_BIN_DIR}/tclConfig.sh is for Tcl ${TCL_VERSION}.
 Itcl ${PACKAGE_VERSION} needs Tcl 8.6 or higher.
 Use --with-tcl= option to indicate location of tclConfig.sh file for Tcl 8.6+." "$LINENO" 5
