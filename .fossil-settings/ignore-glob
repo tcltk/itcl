@@ -1,0 +1,8 @@
+win/Debug*
+win/Release*
+win/version*.vc
+win/nmakehlp.exe
+win/nmakehlp.obj
+win/nmakehlp.out
+win/_junk.pch
+
