@@ -213,7 +213,7 @@ Initialize (
     int opt;
     int isNew;
     Tcl_Object clazzObjectPtr, root;
-    Tcl_Obj *objPtr;
+    Tcl_Obj *objPtr, *resPtr;
 
     if (Tcl_InitStubs(interp, "8.6", 0) == NULL) {
         return TCL_ERROR;
@@ -359,7 +359,15 @@ Initialize (
     if (Tcl_EvalEx(interp, clazzClassScript, -1, 0) != TCL_OK) {
         Tcl_Panic("cannot create Itcl root class ::itcl::clazz");
     }
-    clazzObjectPtr = Tcl_GetObjectFromObj(interp, Tcl_GetObjResult(interp));
+
+    resPtr = Tcl_GetObjResult(interp);
+	/*
+	 * Tcl_GetObjectFromObject can call Tcl_SetObjResult, so increment the
+	 * refcount first.
+	 */
+	Tcl_IncrRefCount(resPtr);
+    clazzObjectPtr = Tcl_GetObjectFromObj(interp, resPtr);
+	Tcl_DecrRefCount(resPtr);
 
 
     if (clazzObjectPtr == NULL) {
