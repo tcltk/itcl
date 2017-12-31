@@ -724,7 +724,8 @@ ItclFinishCmd(
         Tcl_GetEnsembleMappingDict(NULL, cmdPtr, &mapDict);
         if (mapDict != NULL) {
 
-            objPtr = Tcl_NewStringObj("vars", -1);
+	    objPtr = Tcl_NewStringObj("vars", -1);
+	    Tcl_IncrRefCount(objPtr);
 	    Tcl_DictObjRemove(interp, mapDict, objPtr);
 	    Tcl_DictObjPut(interp, mapDict, objPtr, infoPtr->infoVars4Ptr);
 	    Tcl_DecrRefCount(objPtr);
