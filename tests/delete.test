@@ -174,7 +174,9 @@ test delete-4.4 {an object being destructed can't be deleted} {
     list [catch {itcl::delete object $obj} msg] $msg
 } {1 {can't delete an object while it is being destructed}}
 
-namespace delete test_delete
+if {[namespace which [namespace current]::test_delete] ne {}} {
+    namespace delete test_delete
+}
 
 # ----------------------------------------------------------------------
 #  Delete objects using path names and scoped values
