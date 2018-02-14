@@ -173,6 +173,21 @@ FreeProcedureMethod(
     return result;
 }
 
+static void
+EnsembleErrorProc(
+    Tcl_Interp *interp,
+    Tcl_Obj *procNameObj)
+{
+    int overflow, limit = 60, nameLen;
+    const char *procName = Tcl_GetStringFromObj(procNameObj, &nameLen);
+
+    overflow = (nameLen > limit);
+    Tcl_AppendObjToErrorInfo(interp, Tcl_ObjPrintf(
+            "\n    (itcl ensemble part \"%.*s%s\" line %d)",
+            (overflow ? limit : nameLen), procName,
+            (overflow ? "..." : ""), Tcl_GetErrorLine(interp)));
+}
+
 int
 Itcl_InvokeEnsembleMethod(
     Tcl_Interp *interp,
@@ -188,6 +203,7 @@ Itcl_InvokeEnsembleMethod(
     pmPtr->version = TCLOO_PROCEDURE_METHOD_VERSION;
     pmPtr->procPtr = (Proc *)procPtr;
     pmPtr->flags = USE_DECLARER_NS;
+    pmPtr->errProc = EnsembleErrorProc;
 
     Tcl_NRAddCallback(interp, FreeProcedureMethod, pmPtr, NULL, NULL, NULL);
     return Tcl_InvokeClassProcedureMethod(interp, namePtr, nsPtr,
