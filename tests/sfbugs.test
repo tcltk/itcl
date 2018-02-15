@@ -581,6 +581,17 @@ test fossil-9.3 {c45384364c} -setup {
     itcl::delete class A B
 } -result {::b ::b}
 
+test sfbugs-281 {Resolve inherited common} -setup {
+    itcl::class Parent {protected common x 0}
+} -cleanup {
+    itcl::delete class Parent
+} -body {
+    itcl::class Child {
+	inherit Parent
+	set Parent::x
+    }
+} -result {}
+
 
 
 #test sfbug-xxx { SF bug xxx

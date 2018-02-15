@@ -1525,6 +1525,8 @@ Itcl_ClassInheritCmd(
     }
     Tcl_DStringFree(&buffer);
 
+    Itcl_BuildVirtualTables(iclsPtr);
+
     return result;
 
 
