@@ -2070,6 +2070,12 @@ Itcl_BiInfoOptionCmd(
      *  Return info for a specific option.
      */
     if (optionName) {
+	if (contextIoPtr == NULL) {
+	    Tcl_ResetResult(interp);
+	    Tcl_AppendResult(interp, "cannot access object-specific info ",
+		    "without an object context", (char*)NULL);
+	    return TCL_ERROR;
+	}
 	optionNamePtr = Tcl_NewStringObj(optionName, -1);
         hPtr = Tcl_FindHashEntry(&contextIoPtr->objectOptions,
 	        (char *)optionNamePtr);
@@ -4738,6 +4744,12 @@ Itcl_BiInfoDelegatedOptionCmd(
      *  Return info for a specific option.
      */
     if (optionName) {
+	if (contextIoPtr == NULL) {
+	    Tcl_ResetResult(interp);
+	    Tcl_AppendResult(interp, "cannot access object-specific info ",
+		    "without an object context", (char*)NULL);
+	    return TCL_ERROR;
+	}
 	optionNamePtr = Tcl_NewStringObj(optionName, -1);
         hPtr = Tcl_FindHashEntry(&contextIoPtr->objectDelegatedOptions,
 	        (char *)optionNamePtr);
@@ -5202,17 +5214,19 @@ Itcl_BiInfoDelegatedTypeMethodCmd(
 	}
         if (hPtr == NULL) {
             Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
-                 "\"", cmdName, "\" isn't a delegated typemethod in object \"",
-                Tcl_GetString(contextIoPtr->namePtr), "\"",
-                (char*)NULL);
+                 "\"", cmdName, "\" isn't a delegated typemethod in ",
+		contextIoPtr ? "object \"" : "class \"",
+		contextIoPtr ?  Tcl_GetString(contextIoPtr->namePtr)
+		: Tcl_GetString(contextIclsPtr->namePtr), "\"", (char*)NULL);
             return TCL_ERROR;
         }
         idmPtr = (ItclDelegatedFunction*)Tcl_GetHashValue(hPtr);
         if (!(idmPtr->flags & ITCL_TYPE_METHOD)) {
             Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
-                 "\"", cmdName, "\" isn't a delegated typemethod in object \"",
-                Tcl_GetString(contextIoPtr->namePtr), "\"",
-                (char*)NULL);
+                 "\"", cmdName, "\" isn't a delegated typemethod in ",
+		contextIoPtr ? "object \"" : "class \"",
+		contextIoPtr ?  Tcl_GetString(contextIoPtr->namePtr)
+		: Tcl_GetString(contextIclsPtr->namePtr), "\"", (char*)NULL);
             return TCL_ERROR;
 	}
         /*
