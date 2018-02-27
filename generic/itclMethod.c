@@ -1511,6 +1511,15 @@ Itcl_GetContext(
     hPtr = Tcl_FindHashEntry(&infoPtr->namespaceClasses, (char *)nsPtr);
     if (hPtr) {
 	*iclsPtrPtr = (ItclClass *)Tcl_GetHashValue(hPtr);
+
+	/*
+	 * DANGER! Following stanza of code was added to address a
+	 * regression from Itcl 4.0 -> Itcl 4.1 reported in Ticket
+	 * [c949e73d3e] without really understanding. May be trouble here!
+	 */
+	if ((*iclsPtrPtr)->nsPtr) {
+	    *ioPtrPtr = (*iclsPtrPtr)->infoPtr->currIoPtr;
+	}
 	return TCL_OK;
     }
 
