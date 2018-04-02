@@ -1565,12 +1565,8 @@ Itcl_BiInfoVarsCmd(
     }
 
     if (TCL_OK != Itcl_GetContext(interp, &iclsPtr, &ioPtr)) {
-	if (objc == 2) {
-	    /* Give pattern a chance to determine context */
-	    Tcl_ResetResult(interp);
-	} else {
-	    return TCL_ERROR;
-	}
+	/* Clear the error message */
+	Tcl_ResetResult(interp);
     }
     if (iclsPtr) {
 	    if (iclsPtr->flags & (ITCL_TYPE|ITCL_WIDGETADAPTOR|ITCL_WIDGET)) {
