@@ -2055,8 +2055,7 @@ Itcl_CreateVariable(
             Tcl_DeleteHashEntry(hPtr);
             return TCL_ERROR;
         }
-        Itcl_PreserveData((ClientData)mCodePtr);
-        Itcl_EventuallyFree((ClientData)mCodePtr, Itcl_DeleteMemberCode);
+	ItclPreserveMemberCode(mCodePtr);
     } else {
         mCodePtr = NULL;
     }
@@ -2119,10 +2118,8 @@ Itcl_CreateOption(
     ItclOption* ioptPtr)      /* new option definition */
 {
     int newEntry;
-    ItclMemberCode *mCodePtr;
     Tcl_HashEntry *hPtr;
 
-    mCodePtr = NULL;
     /*
      *  Add this option to the options table for the class.
      *  Make sure that the option name does not already exist.
@@ -2140,7 +2137,7 @@ Itcl_CreateOption(
 
     iclsPtr->numOptions++;
     ioptPtr->iclsPtr = iclsPtr;
-    ioptPtr->codePtr = mCodePtr;
+    ioptPtr->codePtr = NULL;
     ioptPtr->fullNamePtr = Tcl_NewStringObj(
             Tcl_GetString(iclsPtr->fullNamePtr), -1);
     Tcl_AppendToObj(ioptPtr->fullNamePtr, "::", 2);
@@ -2431,7 +2428,7 @@ if (ivPtr->arrayInitPtr != NULL) {
         }
     }
     if (ivPtr->codePtr != NULL) {
-        Itcl_ReleaseData(ivPtr->codePtr);
+	ItclReleaseMemberCode(ivPtr->codePtr);
     }
     Tcl_DecrRefCount(ivPtr->namePtr);
     Tcl_DecrRefCount(ivPtr->fullNamePtr);
@@ -2468,7 +2465,9 @@ ItclDeleteOption(
         Tcl_DecrRefCount(ioptPtr->classNamePtr);
     }
 
-    Itcl_ReleaseData(ioptPtr->codePtr); 
+    if (ioptPtr->codePtr) {
+	ItclReleaseMemberCode(ioptPtr->codePtr); 
+    }
     if (ioptPtr->defaultValuePtr != NULL) {
         Tcl_DecrRefCount(ioptPtr->defaultValuePtr);
     }
@@ -2524,7 +2523,7 @@ if (imPtr->iclsPtr) {
         }
     }
     if (imPtr->codePtr != NULL) {
-        Itcl_ReleaseData(imPtr->codePtr);
+        ItclReleaseMemberCode(imPtr->codePtr);
     }
     Tcl_DecrRefCount(imPtr->namePtr);
     Tcl_DecrRefCount(imPtr->fullNamePtr);

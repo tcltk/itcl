@@ -40,6 +40,7 @@ static int ItclCreateMemberCode(Tcl_Interp* interp, ItclClass *iclsPtr,
 static int ItclCreateMemberFunc(Tcl_Interp* interp, ItclClass *iclsPtr,
 	Tcl_Obj *namePtr, const char* arglist, const char* body,
         ItclMemberFunc** imPtrPtr, int flags);
+void    ItclFreeMemberCode (ItclMemberCode *mcodePtr);
 
 void
 ItclPreserveIMF(
@@ -56,6 +57,22 @@ ItclReleaseIMF(
 
     if (--imPtr->refCount == 0) {
 	Itcl_DeleteMemberFunc(clientData);
+    }
+}
+
+void
+ItclPreserveMemberCode(
+    ItclMemberCode *mcodePtr)
+{
+    mcodePtr->refCount++;
+}
+
+void
+ItclReleaseMemberCode(
+    ItclMemberCode *mcodePtr)
+{
+    if (--mcodePtr->refCount == 0) {
+	ItclFreeMemberCode(mcodePtr);
     }
 }
 
@@ -293,11 +310,10 @@ NRConfigBodyCmd(
         goto configBodyCmdDone;
     }
 
-    Itcl_PreserveData((ClientData)mcode);
-    Itcl_EventuallyFree((ClientData)mcode, Itcl_DeleteMemberCode);
+    ItclPreserveMemberCode(mcode);
 
     if (ivPtr->codePtr) {
-        Itcl_ReleaseData((ClientData)ivPtr->codePtr);
+        ItclReleaseMemberCode(ivPtr->codePtr);
     }
     ivPtr->codePtr = mcode;
 
@@ -498,9 +514,6 @@ ItclCreateMemberFunc(
         return TCL_ERROR;
     }
 
-    Itcl_PreserveData((ClientData)mcode);
-    Itcl_EventuallyFree((ClientData)mcode, Itcl_DeleteMemberCode);
-
     /*
      *  Allocate a member function definition and return.
      */
@@ -521,6 +534,7 @@ ItclCreateMemberFunc(
         Tcl_IncrRefCount(imPtr->origArgsPtr);
     }
     imPtr->codePtr    = mcode;
+    ItclPreserveMemberCode(mcode);
 
     if (imPtr->protection == ITCL_DEFAULT_PROTECT) {
         imPtr->protection = ITCL_PUBLIC;
@@ -779,10 +793,8 @@ Itcl_ChangeMemberFunc(
     /*
      *  Free up the old implementation and install the new one.
      */
-    Itcl_PreserveData((ClientData)mcode);
-    Itcl_EventuallyFree((ClientData)mcode, Itcl_DeleteMemberCode);
-
-    Itcl_ReleaseData((ClientData)imPtr->codePtr);
+    ItclPreserveMemberCode(mcode);
+    ItclReleaseMemberCode(imPtr->codePtr);
     imPtr->codePtr = mcode;
     if (mcode->flags & ITCL_IMPLEMENT_TCL) {
 	ClientData pmPtr;
@@ -1054,6 +1066,7 @@ ItclCreateMemberCode(
     }
 
     *mcodePtr = mcode;
+
     return TCL_OK;
 }
 
@@ -1066,15 +1079,13 @@ ItclCreateMemberCode(
  *  of the function.  If the body is of the form "@name", then it is
  *  treated as a label for a C procedure registered by Itcl_RegisterC().
  *
- *  The implementation is kept by the member function definition, and
- *  controlled by a preserve/release paradigm.  That way, if it is in
- *  use while it is being redefined, it will stay around long enough
- *  to avoid a core dump.
+ *  A member function definition holds a handle for the implementation, and
+ *  calls ItclReleaseMemberCode when finished with it.
  *
  *  If any errors are encountered, this procedure returns TCL_ERROR
  *  along with an error message in the interpreter.  Otherwise, it
- *  returns TCL_OK, and "mcodePtr" returns a pointer to the new
- *  implementation.
+ *  returns TCL_OK, and stores a pointer to the new implementation in
+ *  "mcodePtr".
  * ------------------------------------------------------------------------
  */
 int
@@ -1094,17 +1105,13 @@ Itcl_CreateMemberCode(
  *  Itcl_DeleteMemberCode()
  *
  *  Destroys all data associated with the given command implementation.
- *  Invoked automatically by Itcl_ReleaseData() when the implementation
+ *  Invoked automatically by ItclReleaseData() when the implementation
  *  is no longer being used.
  * ------------------------------------------------------------------------
  */
-void
-Itcl_DeleteMemberCode(
-    char* cdata)  /* pointer to member code definition */
+void ItclFreeMemberCode (
+    ItclMemberCode* mCodePtr)
 {
-    ItclMemberCode* mCodePtr;
-    
-    mCodePtr = (ItclMemberCode*)cdata;
     if (mCodePtr == NULL) {
         return;
     }
@@ -1122,6 +1129,14 @@ Itcl_DeleteMemberCode(
     }
     /* do NOT free mCodePtr->bodyPtr here !! that is done in TclOO!! */
     ckfree((char*)mCodePtr);
+}
+
+
+void
+Itcl_DeleteMemberCode(
+    char* cdata)  /* pointer to member code definition */
+{
+    ItclReleaseMemberCode((ItclMemberCode *)cdata);
 }
 
 
@@ -1276,7 +1291,7 @@ Itcl_EvalMemberCode(
      *  Bump the reference count on this code, in case it is
      *  redefined or deleted during execution.
      */
-    Itcl_PreserveData((ClientData)mcode);
+    ItclPreserveMemberCode(mcode);
 
     if ((imPtr->flags & ITCL_DESTRUCTOR) && (contextIoPtr != NULL)) {
         contextIoPtr->destructorHasBeenCalled = 1;
@@ -1314,7 +1329,7 @@ Itcl_EvalMemberCode(
          }
     }
 
-    Itcl_ReleaseData((ClientData)mcode);
+    ItclReleaseMemberCode(mcode);
     return result;
 }
 
