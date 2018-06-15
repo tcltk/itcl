@@ -316,35 +316,30 @@ dist-clean:
 
 dist: dist-clean doc
 	$(INSTALL_DATA_DIR) $(DIST_DIR)
-	cp -p $(srcdir)/license* $(srcdir)/aclocal.m4 $(srcdir)/configure* \
-		$(srcdir)/*.in  $(DIST_DIR)/
-	chmod 664 $(DIST_DIR)/Makefile.in $(DIST_DIR)/aclocal.m4
-	chmod 775 $(DIST_DIR)/configure $(DIST_DIR)/configure.ac
+	$(DIST_INSTALL_DATA) $(srcdir)/license.terms \
+		$(srcdir)/ChangeLog $(srcdir)/README \
+		$(srcdir)/aclocal.m4 $(srcdir)/configure.ac \
+		$(srcdir)/Makefile.in $(srcdir)/pkgIndex.tcl.in \
+		$(DIST_DIR)/
+	$(DIST_INSTALL_SCRIPT) $(srcdir)/configure $(DIST_DIR)/
 
 	$(INSTALL_DATA_DIR) $(DIST_DIR)/tclconfig
-	cp $(srcdir)/tclconfig/install-sh $(srcdir)/tclconfig/tcl.m4 \
+	$(DIST_INSTALL_DATA) $(srcdir)/tclconfig/README.txt \
+		$(srcdir)/tclconfig/tcl.m4 $(srcdir)/tclconfig/install-sh \
 		$(DIST_DIR)/tclconfig/
-	chmod 664 $(DIST_DIR)/tclconfig/tcl.m4
-	chmod +x $(DIST_DIR)/tclconfig/install-sh
 
 	list='doc generic library tests tools win'; \
 	for p in $$list; do \
 	    if test -d $(srcdir)/$$p ; then \
 		$(INSTALL_DATA_DIR) $(DIST_DIR)/$$p; \
-		for q in $(srcdir)/$$p/*; do \
-		    if test -f $$q ; then \
-			cp -p $$q $(DIST_DIR)/$$p/; \
-		    fi; \
-		done; \
+		$(DIST_INSTALL_DATA) $(srcdir)/$$p/* $(DIST_DIR)/$$p/; \
 	    fi; \
 	done
 
-	list='CHANGES ChangeLog INCOMPATIBLE README releasenotes.txt TODO'; \
-	for p in $$list; do \
-	    if test -f $(srcdir)/$$p ; then \
-		cp -p $(srcdir)/$$p $(DIST_DIR)/; \
-	    fi; \
-	done
+	$(DIST_INSTALL_DATA) \
+		$(srcdir)/itclConfig.sh.in \
+		$(srcdir)/TODO $(srcdir)/releasenotes.txt \
+		$(DIST_DIR)/
 
 	(cd $(DIST_ROOT); $(COMPRESS);)
 
