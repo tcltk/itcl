@@ -18,7 +18,7 @@ AC_INIT([itcl], [4.1.1])
 # as well as PKG_LIB_FILE and PKG_STUB_LIB_FILE.
 #--------------------------------------------------------------------
 
-TEA_INIT([3.10])
+TEA_INIT()
 
 AC_PROG_LN_S
 CONFIG_CLEAN_FILES=
