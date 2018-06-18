@@ -7,9 +7,12 @@
 # Copyright (c) 1998-2000 by Ajuba Solutions
 # All rights reserved.
 
-package require tcltest 2.1
+package prefer latest
 
-tcltest::testsDirectory [file dir [info script]]
+package require Tcl 8.6
+package require tcltest 2.2
+
+tcltest::configure {*}$argv -testdir [file dir [info script]]
 tcltest::runAllTests
 
 return

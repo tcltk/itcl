@@ -113,14 +113,14 @@ SHLIB_CFLAGS	= @SHLIB_CFLAGS@
 SHLIB_LD	= @SHLIB_LD@
 SHLIB_LD_LIBS	= @SHLIB_LD_LIBS@
 STLIB_LD	= @STLIB_LD@
-TCL_DEFS	= @TCL_DEFS@
+#TCL_DEFS	= @TCL_DEFS@
 TCL_BIN_DIR	= @TCL_BIN_DIR@
 TCL_SRC_DIR	= @TCL_SRC_DIR@
 #TK_BIN_DIR	= @TK_BIN_DIR@
 #TK_SRC_DIR	= @TK_SRC_DIR@
 
 # Not used, but retained for reference of what libs Tcl required
-TCL_LIBS	= @TCL_LIBS@
+#TCL_LIBS	= @TCL_LIBS@
 
 #========================================================================
 # TCLLIBPATH seeds the auto_path in Tcl's init.tcl so we can test our
@@ -137,8 +137,9 @@ PKG_ENV		= @LD_LIBRARY_PATH_VAR@="$(EXTRA_PATH):$(@LD_LIBRARY_PATH_VAR@)" \
 		  PATH="$(EXTRA_PATH):$(PATH)" \
 		  ITCL_LIBRARY=`@CYGPATH@ $(srcdir)/library` \
 		  TCLLIBPATH="$(TCLLIBPATH)"
+
 TCLSH_PROG	= @TCLSH_PROG@
-TCLSH		= $(PKG_ENV) $(TCLSH_ENV) $(TCLSH_PROG)
+TCLSH		= $(TCLSH_ENV) $(PKG_ENV) $(TCLSH_PROG)
 
 #WISH_ENV	= TK_LIBRARY=`@CYGPATH@ $(TK_SRC_DIR)/library`
 #WISH_PROG	= @WISH_PROG@
@@ -148,12 +149,19 @@ SHARED_BUILD	= @SHARED_BUILD@
 STUBS_BUILD	= @STUBS_BUILD@
 
 INCLUDES	= @PKG_INCLUDES@ @TCL_INCLUDES@
+#INCLUDES	= @PKG_INCLUDES@ @TCL_INCLUDES@ @TK_INCLUDES@ @TK_XINCLUDES@
 
 PKG_CFLAGS	= @PKG_CFLAGS@
 
-DEFS		= @DEFS@ $(PKG_CFLAGS) \
-		  -DITCL_LIBRARY=\"$(pkglibdir)\"
+# TCL_DEFS is not strictly need here, but if you remove it, then you
+# must make sure that configure.ac checks for the necessary components
+# that your library may use.  TCL_DEFS can actually be a problem if
+# you do not compile with a similar machine setup as the Tcl core was
+# compiled with.
+#DEFS		= $(TCL_DEFS) @DEFS@ $(PKG_CFLAGS)
+DEFS		= @DEFS@ $(PKG_CFLAGS) -DITCL_LIBRARY=\"$(pkglibdir)\"
 
+# Move pkgIndex.tcl to 'BINARIES' var if it is generated in the Makefile
 CONFIG_CLEAN_FILES = @CONFIG_CLEAN_FILES@ Makefile itclConfig.sh pkgIndex.tcl
 CLEANFILES	= @CLEANFILES@
 
@@ -163,8 +171,10 @@ AR		= @AR@
 CFLAGS		= @CFLAGS@
 COMPILE		= $(CC) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 
-VALGRINDARGS =	--tool=memcheck --num-callers=8 --leak-resolution=high \
-		--leak-check=yes --show-reachable=yes -v
+GDB		= gdb
+VALGRIND	= valgrind
+VALGRINDARGS	= --tool=memcheck --num-callers=8 --leak-resolution=high \
+		  --leak-check=yes --show-reachable=yes -v
 
 .SUFFIXES: .c .$(OBJEXT)
 
@@ -226,37 +236,45 @@ install-libraries: libraries
 install-doc: doc
 	@$(INSTALL_DATA_DIR) $(DESTDIR)$(mandir)/mann
 	@echo "Installing documentation in $(DESTDIR)$(mandir)"
-	@cd $(srcdir)/doc; for i in *.n; do \
-	    echo "Installing $$i"; \
-	    rm -f $(DESTDIR)$(mandir)/mann/`basename $$i`; \
-	    sed -e '/man\.macros/r man.macros' -e '/man\.macros/d' \
-		$$i > $(DESTDIR)$(mandir)/mann/$$i; \
-	    chmod 444 $(DESTDIR)$(mandir)/mann/$$i; \
+	@list='$(srcdir)/doc/*.n'; for i in $$list; do \
+	    if test X"$$i" = X'$(srcdir)/doc/*.n'; then break; fi; \
+	    bi=`basename $$i`; \
+	    echo "Installing $$bi"; \
+	    sed -e '/man\.macros/r $(srcdir)/doc/man.macros' -e '/man\.macros/d' $$i > $$bi.tmp \
+	    && $(INSTALL_DATA) $$bi.tmp $(DESTDIR)$(mandir)/mann/$$bi \
+	    && rm -f $$bi.tmp; \
 	done
 
 test: binaries libraries
-	@$(TCLSH) `@CYGPATH@ $(srcdir)/tests/all.tcl` $(TESTFLAGS) \
-		-load "if {[catch {package present ${PACKAGE_NAME}}]} {package forget ${PACKAGE_NAME}; package ifneeded ${PACKAGE_NAME} ${PACKAGE_VERSION} \
+	$(TCLSH) `@CYGPATH@ $(srcdir)/tests/all.tcl` $(TESTFLAGS) \
+	    -load  "if {[catch {package present ${PACKAGE_NAME}}]} {package forget ${PACKAGE_NAME}; \
+		    package ifneeded ${PACKAGE_NAME} ${PACKAGE_VERSION} \
 			[list load `@CYGPATH@ $(PKG_LIB_FILE)` $(PACKAGE_NAME)]}"
-
-genstubs: $(srcdir)/tools/genStubs.tcl $(srcdir)/generic/itcl.decls
-	@echo $(TCLSH) $(srcdir)/tools/genStubs.tcl $(srcdir)/generic $(srcdir)/generic/itcl.decls
-	@$(TCLSH) $(srcdir)/tools/genStubs.tcl $(srcdir)/generic $(srcdir)/generic/itcl.decls
 
 shell: binaries libraries
 	@$(TCLSH) $(SCRIPT)
 
 gdb:
-	$(PKG_ENV) $(TCLSH_ENV) gdb $(TCLSH_PROG) $(SCRIPT)
+	$(TCLSH_ENV) $(PKG_ENV) $(GDB) $(TCLSH_PROG) $(SCRIPT)
+
+gdb-test: binaries libraries 
+	$(TCLSH_ENV) $(PKG_ENV) $(GDB) \
+	    --args $(TCLSH_PROG) `@CYGPATH@ $(srcdir)/tests/all.tcl` \
+	    $(TESTFLAGS) -singleproc 1 \
+	    -load "package ifneeded $(PACKAGE_NAME) $(PACKAGE_VERSION) \
+		[list load `@CYGPATH@ $(PKG_LIB_FILE)` $(PACKAGE_NAME)]"
 
 valgrind: binaries libraries
-	$(PKG_ENV) $(TCLSH_ENV) valgrind $(VALGRINDARGS) $(TCLSH_PROG) \
-		`@CYGPATH@ $(srcdir)/tests/all.tcl` $(TESTFLAGS)
+	$(TCLSH_ENV) $(PKG_ENV) $(VALGRIND) $(VALGRINDARGS) $(TCLSH_PROG) \
+	    `@CYGPATH@ $(srcdir)/tests/all.tcl` $(TESTFLAGS)
 
 valgrindshell: binaries libraries
-	$(PKG_ENV) $(TCLSH_ENV) valgrind $(VALGRINDARGS) $(TCLSH_PROG) $(SCRIPT)
+	$(TCLSH_ENV) $(PKG_ENV) $(VALGRIND) $(VALGRINDARGS) $(TCLSH_PROG) $(SCRIPT)
 
 depend:
+
+genstubs: $(srcdir)/tools/genStubs.tcl $(srcdir)/generic/itcl.decls
+	$(TCLSH) $(srcdir)/tools/genStubs.tcl $(srcdir)/generic $(srcdir)/generic/itcl.decls
 
 #========================================================================
 # $(PKG_LIB_FILE) should be listed as part of the BINARIES variable
@@ -285,8 +303,8 @@ $(PKG_STUB_LIB_FILE): $(PKG_STUB_OBJECTS)
 # containing your extension.  If your sources are in a subdirectory,
 # you will have to modify the paths to reflect this:
 #
-# exampleA.$(OBJEXT): $(srcdir)/generic/exampleA.c
-# 	$(COMPILE) -c `@CYGPATH@ $(srcdir)/generic/exampleA.c` -o $@
+# sample.$(OBJEXT): $(srcdir)/generic/sample.c
+# 	$(COMPILE) -c `@CYGPATH@ $(srcdir)/generic/sample.c` -o $@
 #
 # Setting the VPATH variable to a list of paths will cause the makefile
 # to look into these paths when resolving .c to .obj dependencies.
@@ -316,17 +334,28 @@ dist-clean:
 
 dist: dist-clean doc
 	$(INSTALL_DATA_DIR) $(DIST_DIR)
-	$(DIST_INSTALL_DATA) $(srcdir)/license.terms \
-		$(srcdir)/ChangeLog $(srcdir)/README \
-		$(srcdir)/aclocal.m4 $(srcdir)/configure.ac \
-		$(srcdir)/Makefile.in $(srcdir)/pkgIndex.tcl.in \
-		$(DIST_DIR)/
+
+	# TEA files
+	$(DIST_INSTALL_DATA) $(srcdir)/Makefile.in \
+	    $(srcdir)/aclocal.m4 $(srcdir)/configure.ac \
+	    $(DIST_DIR)/
 	$(DIST_INSTALL_SCRIPT) $(srcdir)/configure $(DIST_DIR)/
 
 	$(INSTALL_DATA_DIR) $(DIST_DIR)/tclconfig
 	$(DIST_INSTALL_DATA) $(srcdir)/tclconfig/README.txt \
-		$(srcdir)/tclconfig/tcl.m4 $(srcdir)/tclconfig/install-sh \
-		$(DIST_DIR)/tclconfig/
+	    $(srcdir)/tclconfig/tcl.m4 $(srcdir)/tclconfig/install-sh \
+	    $(DIST_DIR)/tclconfig/
+
+	# Extension files
+	$(DIST_INSTALL_DATA) \
+	    $(srcdir)/ChangeLog \
+	    $(srcdir)/license.terms \
+	    $(srcdir)/README \
+	    $(srcdir)/pkgIndex.tcl.in \
+	    $(srcdir)/itclConfig.sh.in \
+	    $(srcdir)/TODO $(srcdir)/releasenotes.txt \
+	    $(srcdir)/.project \
+	    $(DIST_DIR)/
 
 	list='doc generic library tests tools win'; \
 	for p in $$list; do \
@@ -335,11 +364,6 @@ dist: dist-clean doc
 		$(DIST_INSTALL_DATA) $(srcdir)/$$p/* $(DIST_DIR)/$$p/; \
 	    fi; \
 	done
-
-	$(DIST_INSTALL_DATA) \
-		$(srcdir)/itclConfig.sh.in \
-		$(srcdir)/TODO $(srcdir)/releasenotes.txt \
-		$(DIST_DIR)/
 
 	(cd $(DIST_ROOT); $(COMPRESS);)
 
@@ -366,10 +390,9 @@ distclean: clean
 # Install binary object libraries.  On Windows this includes both .dll and
 # .lib files.  Because the .lib files are not explicitly listed anywhere,
 # we need to deduce their existence from the .dll file of the same name.
-# Additionally, the .dll files go into the bin directory, but the .lib
-# files go into the lib directory.  On Unix platforms, all library files
-# go into the lib directory.  In addition, this will generate the pkgIndex.tcl
-# file in the install location (assuming it can find a usable tclsh)
+# Library files go into the lib directory.
+# In addition, this will generate the pkgIndex.tcl
+# file in the install location (assuming it can find a usable tclsh shell)
 #
 # You should not have to modify this target.
 #========================================================================
@@ -438,6 +461,8 @@ uninstall-binaries:
 	done
 
 .PHONY: all binaries clean depend distclean doc install libraries test
+.PHONY: gdb gdb-test valgrind valgrindshell
+.PHONY: genstubs
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

@@ -16,8 +16,8 @@ itcl_VERSION='@PACKAGE_VERSION@'
 ITCL_VERSION='@PACKAGE_VERSION@'
 
 # The name of the Itcl library (may be either a .a file or a shared library):
-itcl_LIB_FILE=@itcl_LIB_FILE@
-ITCL_LIB_FILE=@itcl_LIB_FILE@
+itcl_LIB_FILE=@PKG_LIB_FILE@
+ITCL_LIB_FILE=@PKG_LIB_FILE@
 
 # String to pass to linker to pick up the Itcl library from its
 # build directory.
@@ -30,8 +30,8 @@ itcl_LIB_SPEC='@itcl_LIB_SPEC@'
 ITCL_LIB_SPEC='@itcl_LIB_SPEC@'
 
 # The name of the Itcl stub library (a .a file):
-itcl_STUB_LIB_FILE=@itcl_STUB_LIB_FILE@
-ITCL_STUB_LIB_FILE=@itcl_STUB_LIB_FILE@
+itcl_STUB_LIB_FILE=@PKG_STUB_LIB_FILE@
+ITCL_STUB_LIB_FILE=@PKG_STUB_LIB_FILE@
 
 # String to pass to linker to pick up the Itcl stub library from its
 # build directory.
