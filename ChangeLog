@@ -1,7 +1,7 @@
 NOTICE: This ChangeLog is no longer being maintained. To examine
 the series of changes checked into Itcl sources, follow the Timeline
 
-https://core.tcl.tk/itcl/timeline
+https://core.tcl-lang.org/itcl/timeline
 
 2014-11-06  Don Porter  <dgp@Users.sourceforge.net>
 	* generic/itclMigrate2TclCore.c: Fix for SF Bug 259.
