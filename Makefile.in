@@ -361,7 +361,11 @@ dist: dist-clean doc
 	for p in $$list; do \
 	    if test -d $(srcdir)/$$p ; then \
 		$(INSTALL_DATA_DIR) $(DIST_DIR)/$$p; \
-		$(DIST_INSTALL_DATA) $(srcdir)/$$p/* $(DIST_DIR)/$$p/; \
+		for q in $(srcdir)/$$p/*; do \
+		    if test -f $$q ; then \
+			$(DIST_INSTALL_DATA) $$q $(DIST_DIR)/$$p/; \
+		    fi; \
+		done; \
 	    fi; \
 	done
 
