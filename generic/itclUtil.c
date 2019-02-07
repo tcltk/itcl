@@ -827,7 +827,7 @@ void * ItclCkalloc(
  *
  * ------------------------------------------------------------------------
  */
-void ItclFree(void *ptr) {
+void ItclCkfree(void *ptr) {
     if (ptr == NULL) {
 	return;
     }

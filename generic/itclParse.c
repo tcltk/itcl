@@ -2420,7 +2420,7 @@ ItclDelObjectInfo(
 /* FIXME !!!
  free class_meta_type and object_meta_type
 */
-    ckfree((char*)infoPtr);
+    ItclCkfree(infoPtr);
 }
 
 /*

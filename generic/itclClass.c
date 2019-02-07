@@ -1261,7 +1261,7 @@ ItclFreeClass(
         ckfree((char *)iclsPtr->resolvePtr->clientData);
         ckfree((char *)iclsPtr->resolvePtr);
     }
-    ckfree((char*)iclsPtr);
+    ItclCkfree(iclsPtr);
 }
 
 
@@ -2438,7 +2438,7 @@ if (ivPtr->arrayInitPtr != NULL) {
     if (ivPtr->arrayInitPtr) {
         Tcl_DecrRefCount(ivPtr->arrayInitPtr);
     }
-    ckfree((char*)ivPtr);
+    ItclCkfree(ivPtr);
 }
 
 /*
@@ -2490,7 +2490,7 @@ ItclDeleteOption(
         Tcl_DecrRefCount(ioptPtr->validateMethodVarPtr);
     }
     Itcl_ReleaseData(ioptPtr->idoPtr);
-    ckfree((char*)ioptPtr);
+    ItclCkfree(ioptPtr);
 }
 
 /*
@@ -2606,7 +2606,7 @@ ItclDeleteDelegatedOption(
         }
     }
     Tcl_DeleteHashTable(&idoPtr->exceptions);
-    ckfree((char *)idoPtr);
+    ItclCkfree(idoPtr);
 }
 
 /*
