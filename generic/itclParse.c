@@ -2833,7 +2833,7 @@ ItclParseOption(
         init = Tcl_GetString(newObjv[1]);
     }
 
-    ioptPtr = (ItclOption*)ckalloc(sizeof(ItclOption));
+    ioptPtr = (ItclOption*)ItclCkalloc(sizeof(ItclOption), NULL);
     memset(ioptPtr, 0, sizeof(ItclOption));
     ioptPtr->protection   = Itcl_Protection(interp, 0);
     if (ioptPtr->protection == ITCL_DEFAULT_PROTECT) {
@@ -3774,7 +3774,7 @@ Itcl_HandleDelegateOptionCmd(
 	    return TCL_ERROR;
 	}
     }
-    idoPtr = (ItclDelegatedOption *)ckalloc(sizeof(ItclDelegatedOption));
+    idoPtr = (ItclDelegatedOption *)ItclCkalloc(sizeof(ItclDelegatedOption), NULL);
     memset(idoPtr, 0, sizeof(ItclDelegatedOption));
     Tcl_InitObjHashTable(&idoPtr->exceptions);
     if (*option != '*') {
@@ -3826,7 +3826,7 @@ Itcl_HandleDelegateOptionCmd(
     ItclAddDelegatedOptionDictInfo(interp, iclsPtr, idoPtr);
     return TCL_OK;
 errorOut2:
-    /* FIXME need to decr additional refCount's !! */
+    Itcl_ReleaseData(idoPtr);
 errorOut1:
     Tcl_DecrRefCount(optionNamePtr);
     if (resourceNamePtr != NULL) {

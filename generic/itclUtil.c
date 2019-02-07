@@ -556,15 +556,20 @@ Itcl_EventuallyFree(
     ClientData cdata,          /* data to be freed when not in use */
     Tcl_FreeProc *fproc)       /* procedure called to free data */
 {
+    ItclPresMemoryPrefix *blk;
+
     /*
      *  If the clientData value is NULL, do nothing.
      */
     if (cdata == NULL) {
         return;
     }
-    Tcl_EventuallyFree(cdata, fproc);
-    return;
 
+    /* Itcl memory block to ckalloc block */
+    blk = ((ItclPresMemoryPrefix *)cdata)-1;
+
+    /* Set new free proc */
+    blk->freeProc = fproc;
 }
 #ifdef ITCL_PRESERVE_DEBUG
 void
@@ -673,6 +678,7 @@ void
 Itcl_PreserveData(
     ClientData cdata)     /* data to be preserved */
 {
+    ItclPresMemoryPrefix *blk;
 
     /*
      *  If the clientData value is NULL, do nothing.
@@ -680,8 +686,12 @@ Itcl_PreserveData(
     if (cdata == NULL) {
         return;
     }
-    Tcl_Preserve(cdata);
-    return;
+
+    /* Itcl memory block to ckalloc block */
+    blk = ((ItclPresMemoryPrefix *)cdata)-1;
+
+    /* Increment preservation count */
+    ++blk->refCount;
 }
 #endif
 
@@ -750,6 +760,7 @@ void
 Itcl_ReleaseData(
     ClientData cdata)      /* data to be released */
 {
+    ItclPresMemoryPrefix *blk;
 
     /*
      *  If the clientData value is NULL, do nothing.
@@ -757,8 +768,77 @@ Itcl_ReleaseData(
     if (cdata == NULL) {
         return;
     }
-    Tcl_Release(cdata);
+
+    /* Itcl memory block to ckalloc block */
+    blk = ((ItclPresMemoryPrefix *)cdata)-1;
+
+    /* Decrement preservation count */
+    if (--blk->refCount) {
+	return;
+    }
+
+    /* Free it now */
+    if (blk->freeProc != NULL) {
+	Tcl_FreeProc *freeProc = blk->freeProc;
+	blk->freeProc = NULL;
+	freeProc(cdata);
+    } else {
+	ckfree(blk);
+    }
     return;
+}
+#endif
+
+/*
+ * ------------------------------------------------------------------------
+ * ItclCkalloc()
+ *
+ *	Allocate preservable memory. In opposite to ckalloc the result can be
+ *	supplied to preservation facilities of Itcl (Itcl_PreserveData).
+ *
+ * Results:
+ *	Pointer to new allocated memory.
+ * ------------------------------------------------------------------------
+ */
+#ifndef ITCL_PRESERVE_DEBUG
+void * ItclCkalloc(
+    size_t size,		/* Size of memory to allocate */
+    Tcl_FreeProc *freeProc	/* Function to actually do free (or NULL). */
+) {
+    ItclPresMemoryPrefix *blk = (ItclPresMemoryPrefix *)ckalloc(
+	size + sizeof(ItclPresMemoryPrefix));
+
+    if (!blk) { return NULL; };
+
+    blk->freeProc = freeProc;
+    blk->refCount = freeProc ? 1 : 0; /* Preserved once if freeProc set. */
+
+    /* ckalloc block to Itcl memory block */
+    return blk+1;
+}
+/*
+ * ------------------------------------------------------------------------
+ * ItclFree()
+ *
+ *	Release memory blocks (release preserved block).
+ *
+ * Results:
+ *	None.
+ *
+ * ------------------------------------------------------------------------
+ */
+void ItclFree(void *ptr) {
+    if (ptr == NULL) {
+	return;
+    }
+    /* Itcl memory block to ckalloc block */
+    ItclPresMemoryPrefix *blk = ((ItclPresMemoryPrefix *)ptr)-1;
+
+    assert(blk->refCount <= 0); /* it should be not preserved */
+    #if 0
+    assert(blk->freeProc == NULL); /* it should be released */
+    #endif
+    ckfree(blk);
 }
 #endif
 

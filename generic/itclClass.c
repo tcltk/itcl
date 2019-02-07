@@ -317,7 +317,7 @@ Itcl_CreateClass(
     /*
      *  Allocate class definition data.
      */
-    iclsPtr = (ItclClass*)ckalloc(sizeof(ItclClass));
+    iclsPtr = (ItclClass*)ItclCkalloc(sizeof(ItclClass), NULL);
     memset(iclsPtr, 0, sizeof(ItclClass));
     iclsPtr->interp = interp;
     iclsPtr->infoPtr = infoPtr;
@@ -2064,7 +2064,7 @@ Itcl_CreateVariable(
     /*
      *  If everything looks good, create the variable definition.
      */
-    ivPtr = (ItclVariable*)ckalloc(sizeof(ItclVariable));
+    ivPtr = (ItclVariable*)ItclCkalloc(sizeof(ItclVariable), NULL);
     memset(ivPtr, 0, sizeof(ItclVariable));
     ivPtr->iclsPtr      = iclsPtr;
     ivPtr->infoPtr      = iclsPtr->infoPtr;

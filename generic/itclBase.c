@@ -224,7 +224,7 @@ Initialize (
         return TCL_ERROR;
     }
 
-    infoPtr = (ItclObjectInfo*)ckalloc(sizeof(ItclObjectInfo));
+    infoPtr = (ItclObjectInfo*)ItclCkalloc(sizeof(ItclObjectInfo), NULL);
 
     nsPtr = Tcl_CreateNamespace(interp, ITCL_NAMESPACE, infoPtr, FreeItclObjectInfo);
     if (nsPtr == NULL) {
