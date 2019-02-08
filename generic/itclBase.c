@@ -212,6 +212,7 @@ Initialize (
     char *res_option;
     int opt;
     int isNew;
+    Tcl_Class tclCls;
     Tcl_Object clazzObjectPtr, root;
     Tcl_Obj *objPtr, *resPtr;
 
@@ -342,10 +343,15 @@ Initialize (
 #endif
 
     objPtr = Tcl_NewStringObj("::oo::class", -1);
-    root = Tcl_NewObjectInstance(interp, Tcl_GetObjectAsClass(
-	    Tcl_GetObjectFromObj(interp, objPtr)), "::itcl::Root",
-	    NULL, 0, NULL, 0);
+    Tcl_IncrRefCount(objPtr);
+    clazzObjectPtr = Tcl_GetObjectFromObj(interp, objPtr);
+    if (!clazzObjectPtr || !(tclCls = Tcl_GetObjectAsClass(clazzObjectPtr))) {
+	Tcl_DecrRefCount(objPtr);
+        return TCL_ERROR;
+    }
     Tcl_DecrRefCount(objPtr);
+    root = Tcl_NewObjectInstance(interp, tclCls, "::itcl::Root",
+	    NULL, 0, NULL, 0);
 
     Tcl_NewMethod(interp, Tcl_GetObjectAsClass(root),
 	    Tcl_NewStringObj("unknown", -1), 0, &itclRootMethodType,
@@ -382,6 +388,7 @@ Initialize (
 	Itcl_IncrObjectRefCount(clazzObjectPtr);
     }
 
+    infoPtr->clazzObjectPtr = clazzObjectPtr;
     infoPtr->clazzClassPtr = Tcl_GetObjectAsClass(clazzObjectPtr);
 
     /*
@@ -736,13 +743,23 @@ ItclFinishCmd(
      * ::itcl::builtin::Info
      * and ::itcl::builtin::Info::vars and vars is 2 here !! */
     /* seems to be as the tclOO commands are not yet deleted ?? */
-    Tcl_DecrRefCount(infoPtr->infoVars3Ptr);
-    Tcl_DecrRefCount(infoPtr->infoVars4Ptr);
+    if (infoPtr->infoVars3Ptr) {
+	Tcl_DecrRefCount(infoPtr->infoVars3Ptr);
+    }
+    if (infoPtr->infoVars4Ptr) {
+	Tcl_DecrRefCount(infoPtr->infoVars4Ptr);
+    }
     if (checkMemoryLeaks) {
-        Tcl_DecrRefCount(infoPtr->infoVars3Ptr);
-        Tcl_DecrRefCount(infoPtr->infoVars4Ptr);
+        if (infoPtr->infoVars3Ptr) {
+	    Tcl_DecrRefCount(infoPtr->infoVars3Ptr);
+	}
+	if (infoPtr->infoVars4Ptr) {
+	    Tcl_DecrRefCount(infoPtr->infoVars4Ptr);
+	}
     /* see comment above */
     }
+    infoPtr->infoVars3Ptr = NULL;
+    infoPtr->infoVars4Ptr = NULL;
 
     Tcl_DecrRefCount(infoPtr->typeDestructorArgumentPtr);
 
