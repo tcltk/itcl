@@ -128,7 +128,7 @@ ItclCreateArgList(
 		            commandName,
 			    "\" has argument with no name", NULL);
 		} else {
-		    char buf[10+1];
+		    char buf[TCL_INTEGER_SPACE];
 		    sprintf(buf, "%d", i);
 		    Tcl_AppendResult(interp, "argument #", buf,
 		            " has no name", NULL);
