@@ -274,6 +274,7 @@ test sfbug-Schelte {bug with onfo reported from Schelte SF bug xxx
 test sfbug-254 { SF bug #254
 } -body {
     set interp [interp create]
+    $interp eval [::tcltest::loadScript]
     $interp eval {
       package require itcl
 
@@ -367,6 +368,7 @@ test sfbug-256 { SF bug #256
 test sfbug-257 { SF bug #257
 } -body {
     set interp [interp create]
+    $interp eval [::tcltest::loadScript]
     $interp eval {
       package require itcl
       set ::test_status ""
