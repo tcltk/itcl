@@ -388,6 +388,7 @@ Initialize (
 	Itcl_IncrObjectRefCount(clazzObjectPtr);
     }
 
+    infoPtr->clazzObjectPtr = clazzObjectPtr;
     infoPtr->clazzClassPtr = Tcl_GetObjectAsClass(clazzObjectPtr);
 
     /*
