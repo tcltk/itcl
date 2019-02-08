@@ -311,7 +311,7 @@ test sfbug-254.2 { SF bug #254 + bug [1dc2d851eb]
 } -result {{::oo::class destroy worked} {oo-subsystem is deleted}} \
   -cleanup {interp delete $interp}
 
-test sfbug-254.3 { delete oo-subsystem should remove all classes + bug [1dc2d851eb]
+test sfbug-254.3 { delete oo-subsystem should remove all classes + summary of bug [1dc2d851eb]
 } -body {
     set interp [interp create]
     set ::test_status ""
@@ -329,6 +329,13 @@ test sfbug-254.3 { delete oo-subsystem should remove all classes + bug [1dc2d851
     if {[catch {
       $interp eval {
         ::test x
+      }
+    } msg]} {
+      lappend ::test_status $msg
+    }
+    if {[catch {
+      $interp eval {
+        ::itcl::class ::test2 {inherit ::test}
       }
     } msg]} {
       lappend ::test_status $msg
