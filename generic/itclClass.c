@@ -248,6 +248,14 @@ Itcl_CreateClass(
     ItclResolveInfo *resolveInfoPtr;
     Tcl_Obj *cmdNamePtr;
 
+    if (!infoPtr->clazzClassPtr 
+	|| !(oPtr = Tcl_GetClassAsObject(infoPtr->clazzClassPtr))
+	|| Tcl_ObjectDeleted(oPtr)
+    ) {
+	Tcl_AppendResult(interp, "oo-subsystem is deleted", NULL);
+	return TCL_ERROR;
+    }
+
     /*
      * check for an empty class name to avoid a crash
      */

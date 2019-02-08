@@ -308,7 +308,32 @@ test sfbug-254.2 { SF bug #254 + bug [1dc2d851eb]
     } msg]} {
       lappend ::test_status $msg
     }
-} -result {{::oo::class destroy worked} {::test does not refer to a class}} \
+} -result {{::oo::class destroy worked} {oo-subsystem is deleted}} \
+  -cleanup {interp delete $interp}
+
+test sfbug-254.3 { delete oo-subsystem should remove all classes + bug [1dc2d851eb]
+} -body {
+    set interp [interp create]
+    set ::test_status ""
+    $interp eval [::tcltest::loadScript]
+    $interp eval {
+      package require itcl
+
+      ::itcl::class ::test {}
+    }
+    lappend ::test_status "::test class created"
+    $interp eval {
+      oo::class destroy
+    }
+    lappend ::test_status "::oo::class destroy worked"
+    if {[catch {
+      $interp eval {
+        ::test x
+      }
+    } msg]} {
+      lappend ::test_status $msg
+    }
+} -result {{::test class created} {::oo::class destroy worked} {invalid command name "::test"}} \
   -cleanup {interp delete $interp}
 
 test sfbug-255 { SF bug #255
