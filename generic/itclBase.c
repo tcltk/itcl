@@ -345,16 +345,13 @@ Initialize (
     objPtr = Tcl_NewStringObj("::oo::class", -1);
     Tcl_IncrRefCount(objPtr);
     clazzObjectPtr = Tcl_GetObjectFromObj(interp, objPtr);
-    if (!clazzObjectPtr) {
+    if (!clazzObjectPtr || !(tclCls = Tcl_GetObjectAsClass(clazzObjectPtr))) {
+	Tcl_DecrRefCount(objPtr);
         return TCL_ERROR;
     }
-    tclCls = Tcl_GetObjectAsClass(clazzObjectPtr);
-    if (!tclCls) {
-        return TCL_ERROR;
-    }
+    Tcl_DecrRefCount(objPtr);
     root = Tcl_NewObjectInstance(interp, tclCls, "::itcl::Root",
 	    NULL, 0, NULL, 0);
-    Tcl_DecrRefCount(objPtr);
 
     Tcl_NewMethod(interp, Tcl_GetObjectAsClass(root),
 	    Tcl_NewStringObj("unknown", -1), 0, &itclRootMethodType,
