@@ -271,20 +271,45 @@ test sfbug-Schelte {bug with onfo reported from Schelte SF bug xxx
 } -result {{foo0 kerplunk hello world} {foo0 kerplunk hello world} {foo0 kerplunk hello world}} \
   -cleanup {::itcl::delete class foo}
 
-test sfbug-254 { SF bug #254 + bug [1dc2d851eb]
+test sfbug-254.1 { SF bug #254 + bug [1dc2d851eb]
 } -body {
     set interp [interp create]
+    set ::test_status ""
+    $interp eval {
+      oo::class destroy
+    }
+    lappend ::test_status "::oo::class destroy worked"
+    if {[catch {
+      $interp eval [::tcltest::loadScript]
+      $interp eval {
+        package require itcl
+      }
+    } msg]} {
+      lappend ::test_status $msg
+    }
+} -result {{::oo::class destroy worked} {::oo::class does not refer to an object}} \
+  -cleanup {interp delete $interp}
+
+test sfbug-254.2 { SF bug #254 + bug [1dc2d851eb]
+} -body {
+    set interp [interp create]
+    set ::test_status ""
+    $interp eval [::tcltest::loadScript]
     $interp eval {
       package require itcl
 
-      set ::test_status ""
       oo::class destroy
-      lappend ::test_status "::oo::class destroy worked"
-      ::itcl::class ::test {}
-      lappend ::test_status "::itcl::class worked"
     }
-} -result {{::oo::class destroy worked} {::itcl::class worked}} \
-  -cleanup { }
+    lappend ::test_status "::oo::class destroy worked"
+    if {[catch {
+      $interp eval {
+        ::itcl::class ::test {}
+      }
+    } msg]} {
+      lappend ::test_status $msg
+    }
+} -result {{::oo::class destroy worked} {::test does not refer to a class}} \
+  -cleanup {interp delete $interp}
 
 test sfbug-255 { SF bug #255
 } -body {
@@ -369,6 +394,7 @@ test sfbug-256 { SF bug #256
 test sfbug-257 { SF bug #257
 } -body {
     set interp [interp create]
+    $interp eval [::tcltest::loadScript]
     $interp eval {
       package require itcl
       set ::test_status ""
