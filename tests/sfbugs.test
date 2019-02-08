@@ -271,7 +271,7 @@ test sfbug-Schelte {bug with onfo reported from Schelte SF bug xxx
 } -result {{foo0 kerplunk hello world} {foo0 kerplunk hello world} {foo0 kerplunk hello world}} \
   -cleanup {::itcl::delete class foo}
 
-test sfbug-254 { SF bug #254
+test sfbug-254 { SF bug #254 + bug [1dc2d851eb]
 } -body {
     set interp [interp create]
     $interp eval {
@@ -280,8 +280,10 @@ test sfbug-254 { SF bug #254
       set ::test_status ""
       oo::class destroy
       lappend ::test_status "::oo::class destroy worked"
+      ::itcl::class ::test {}
+      lappend ::test_status "::itcl::class worked"
     }
-} -result {{::oo::class destroy worked}} \
+} -result {{::oo::class destroy worked} {::itcl::class worked}} \
   -cleanup { }
 
 test sfbug-255 { SF bug #255
