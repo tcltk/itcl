@@ -383,12 +383,6 @@ Initialize (
         return TCL_ERROR;
     }
 
-    /* work around for SF bug #254 needed because of problem in TclOO 1.0.2 !! */
-    if (Tcl_PkgPresent(interp, "TclOO", "1.0.2", 1) != NULL) {
-	Itcl_IncrObjectRefCount(clazzObjectPtr);
-    }
-
-    infoPtr->clazzObjectPtr = clazzObjectPtr;
     infoPtr->clazzClassPtr = Tcl_GetObjectAsClass(clazzObjectPtr);
 
     /*

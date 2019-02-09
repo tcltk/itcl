@@ -384,10 +384,3 @@ Itcl_IsMethodCallFrame(
     }
     return 1;
 }
-
-/* needed as work around for problem in Tcl 8.6.2 TclOO */
-void
-Itcl_IncrObjectRefCount(Tcl_Object ptr) {
-  Object * oPtr = (Object *) ptr;
-  oPtr->refCount++;
-}
