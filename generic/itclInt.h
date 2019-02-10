@@ -169,7 +169,7 @@ typedef struct ItclObjectInfo {
     const Tcl_ObjectMetadataType *object_meta_type;
                                     /* type for getting the Itcl object info
                                      * from a TclOO Tcl_Object */
-    Tcl_Object unused1;             /* the root object of Itcl */
+    Tcl_Object clazzObjectPtr;      /* the root object of Itcl */
     Tcl_Class clazzClassPtr;        /* the root class of Itcl */
     struct EnsembleInfo *ensembleInfo;
     struct ItclClass *currContextIclsPtr;
