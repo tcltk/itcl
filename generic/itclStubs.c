@@ -129,9 +129,9 @@ Itcl_StubExistsCmd(
     cmdPtr = Tcl_FindCommand(interp, cmdName, (Tcl_Namespace*)NULL, 0);
 
     if ((cmdPtr != NULL) && Itcl_IsStub(cmdPtr)) {
-        Tcl_SetIntObj(Tcl_GetObjResult(interp), 1);
+        Tcl_SetWideIntObj(Tcl_GetObjResult(interp), 1);
     } else {
-        Tcl_SetIntObj(Tcl_GetObjResult(interp), 0);
+        Tcl_SetWideIntObj(Tcl_GetObjResult(interp), 0);
     }
     return TCL_OK;
 }

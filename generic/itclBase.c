@@ -295,19 +295,19 @@ Initialize (
     Tcl_IncrRefCount(infoPtr->typeDestructorArgumentPtr);
     infoPtr->lastIoPtr = NULL;
 
-    Tcl_SetVar(interp, ITCL_NAMESPACE"::internal::dicts::classes", "", 0);
-    Tcl_SetVar(interp, ITCL_NAMESPACE"::internal::dicts::objects", "", 0);
-    Tcl_SetVar(interp, ITCL_NAMESPACE"::internal::dicts::classOptions", "", 0);
-    Tcl_SetVar(interp,
-            ITCL_NAMESPACE"::internal::dicts::classDelegatedOptions", "", 0);
-    Tcl_SetVar(interp,
-            ITCL_NAMESPACE"::internal::dicts::classComponents", "", 0);
-    Tcl_SetVar(interp,
-            ITCL_NAMESPACE"::internal::dicts::classVariables", "", 0);
-    Tcl_SetVar(interp,
-            ITCL_NAMESPACE"::internal::dicts::classFunctions", "", 0);
-    Tcl_SetVar(interp,
-            ITCL_NAMESPACE"::internal::dicts::classDelegatedFunctions", "", 0);
+    Tcl_SetVar2(interp, ITCL_NAMESPACE"::internal::dicts::classes", NULL, "", 0);
+    Tcl_SetVar2(interp, ITCL_NAMESPACE"::internal::dicts::objects", NULL, "", 0);
+    Tcl_SetVar2(interp, ITCL_NAMESPACE"::internal::dicts::classOptions", NULL, "", 0);
+    Tcl_SetVar2(interp,
+            ITCL_NAMESPACE"::internal::dicts::classDelegatedOptions", NULL, "", 0);
+    Tcl_SetVar2(interp,
+            ITCL_NAMESPACE"::internal::dicts::classComponents", NULL, "", 0);
+    Tcl_SetVar2(interp,
+            ITCL_NAMESPACE"::internal::dicts::classVariables", NULL, "", 0);
+    Tcl_SetVar2(interp,
+            ITCL_NAMESPACE"::internal::dicts::classFunctions", NULL, "", 0);
+    Tcl_SetVar2(interp,
+            ITCL_NAMESPACE"::internal::dicts::classDelegatedFunctions", NULL, "", 0);
 
     hPtr = Tcl_CreateHashEntry(&infoPtr->classTypes,
             (char *)Tcl_NewStringObj("class", -1), &isNew);
@@ -446,8 +446,8 @@ Initialize (
      *  Set up the variables containing version info.
      */
 
-    Tcl_SetVar(interp, "::itcl::version", ITCL_VERSION, TCL_NAMESPACE_ONLY);
-    Tcl_SetVar(interp, "::itcl::patchLevel", ITCL_PATCH_LEVEL,
+    Tcl_SetVar2(interp, "::itcl::version", NULL, ITCL_VERSION, TCL_NAMESPACE_ONLY);
+    Tcl_SetVar2(interp, "::itcl::patchLevel", NULL, ITCL_PATCH_LEVEL,
             TCL_NAMESPACE_ONLY);
 
 

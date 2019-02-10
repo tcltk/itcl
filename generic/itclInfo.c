@@ -1129,8 +1129,8 @@ Itcl_BiInfoFunctionCmd(
              */
             iflist = &iflistStorage[0];
             for (i=0 ; i < objc; i++) {
-                result = Tcl_GetIndexFromObj(interp, objv[i],
-                    options, "option", 0, (int*)(&iflist[i]));
+                result = Tcl_GetIndexFromObjStruct(interp, objv[i],
+                    options, sizeof(char *), "option", 0, (int*)(&iflist[i]));
                 if (result != TCL_OK) {
                     return TCL_ERROR;
                 }
@@ -1381,8 +1381,8 @@ Itcl_BiInfoVariableCmd(
              */
             ivlist = &ivlistStorage[0];
             for (i=0 ; i < objc; i++) {
-                result = Tcl_GetIndexFromObj(interp, objv[i],
-                    options, "option", 0, (int*)(&ivlist[i]));
+                result = Tcl_GetIndexFromObjStruct(interp, objv[i],
+                    options, sizeof(char *), "option", 0, (int*)(&ivlist[i]));
                 if (result != TCL_OK) {
                     return TCL_ERROR;
                 }
@@ -2098,8 +2098,8 @@ Itcl_BiInfoOptionCmd(
              */
             ioptlist = &ioptlistStorage[0];
             for (i=0 ; i < objc; i++) {
-                result = Tcl_GetIndexFromObj(interp, objv[i],
-                    options, "option", 0, (int*)(&ioptlist[i]));
+                result = Tcl_GetIndexFromObjStruct(interp, objv[i],
+                    options, sizeof(char *), "option", 0, (int*)(&ioptlist[i]));
                 if (result != TCL_OK) {
                     return TCL_ERROR;
                 }
@@ -2396,8 +2396,8 @@ Itcl_BiInfoComponentCmd(
              */
             icomplist = &icomplistStorage[0];
             for (i=0 ; i < objc; i++) {
-                result = Tcl_GetIndexFromObj(interp, objv[i],
-                    components, "component", 0, (int*)(&icomplist[i]));
+                result = Tcl_GetIndexFromObjStruct(interp, objv[i],
+                    components, sizeof(char *), "component", 0, (int*)(&icomplist[i]));
                 if (result != TCL_OK) {
                     return TCL_ERROR;
                 }
@@ -3119,8 +3119,8 @@ Itcl_BiInfoMethodCmd(
              */
             iflist = &iflistStorage[0];
             for (i=0 ; i < objc; i++) {
-                result = Tcl_GetIndexFromObj(interp, objv[i],
-                    options, "option", 0, (int*)(&iflist[i]));
+                result = Tcl_GetIndexFromObjStruct(interp, objv[i],
+                    options, sizeof(char *), "option", 0, (int*)(&iflist[i]));
                 if (result != TCL_OK) {
                     return TCL_ERROR;
                 }
@@ -3689,8 +3689,8 @@ Itcl_BiInfoTypeMethodCmd(
              */
             iflist = &iflistStorage[0];
             for (i=0 ; i < objc; i++) {
-                result = Tcl_GetIndexFromObj(interp, objv[i],
-                    options, "option", 0, (int*)(&iflist[i]));
+                result = Tcl_GetIndexFromObjStruct(interp, objv[i],
+                    options, sizeof(char *), "option", 0, (int*)(&iflist[i]));
                 if (result != TCL_OK) {
                     return TCL_ERROR;
                 }
@@ -4075,8 +4075,8 @@ Itcl_BiInfoTypeVariableCmd(
              */
             ivlist = &ivlistStorage[0];
             for (i=0 ; i < objc; i++) {
-                result = Tcl_GetIndexFromObj(interp, objv[i],
-                    options, "option", 0, (int*)(&ivlist[i]));
+                result = Tcl_GetIndexFromObjStruct(interp, objv[i],
+                    options, sizeof(char *), "option", 0, (int*)(&ivlist[i]));
                 if (result != TCL_OK) {
                     return TCL_ERROR;
                 }
@@ -4772,8 +4772,8 @@ Itcl_BiInfoDelegatedOptionCmd(
              */
             ioptlist = &ioptlistStorage[0];
             for (i=0 ; i < objc; i++) {
-                result = Tcl_GetIndexFromObj(interp, objv[i],
-                    options, "option", 0, (int*)(&ioptlist[i]));
+                result = Tcl_GetIndexFromObjStruct(interp, objv[i],
+                    options, sizeof(char *), "option", 0, (int*)(&ioptlist[i]));
                 if (result != TCL_OK) {
                     return TCL_ERROR;
                 }
@@ -5007,8 +5007,8 @@ Itcl_BiInfoDelegatedMethodCmd(
              */
             ioptlist = &ioptlistStorage[0];
             for (i=0 ; i < objc; i++) {
-                result = Tcl_GetIndexFromObj(interp, objv[i],
-                    options, "option", 0, (int*)(&ioptlist[i]));
+                result = Tcl_GetIndexFromObjStruct(interp, objv[i],
+                    options, sizeof(char *), "option", 0, (int*)(&ioptlist[i]));
                 if (result != TCL_OK) {
                     return TCL_ERROR;
                 }
@@ -5239,8 +5239,8 @@ Itcl_BiInfoDelegatedTypeMethodCmd(
              */
             ioptlist = &ioptlistStorage[0];
             for (i=0 ; i < objc; i++) {
-                result = Tcl_GetIndexFromObj(interp, objv[i],
-                    options, "option", 0, (int*)(&ioptlist[i]));
+                result = Tcl_GetIndexFromObjStruct(interp, objv[i],
+                    options, sizeof(char *), "option", 0, (int*)(&ioptlist[i]));
                 if (result != TCL_OK) {
                     return TCL_ERROR;
                 }

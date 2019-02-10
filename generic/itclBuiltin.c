@@ -490,9 +490,9 @@ Itcl_BiIsaCmd(
     }
 
     if (Itcl_ObjectIsa(contextIoPtr, iclsPtr)) {
-        Tcl_SetIntObj(Tcl_GetObjResult(interp), 1);
+        Tcl_SetWideIntObj(Tcl_GetObjResult(interp), 1);
     } else {
-        Tcl_SetIntObj(Tcl_GetObjResult(interp), 0);
+        Tcl_SetWideIntObj(Tcl_GetObjResult(interp), 0);
     }
     return TCL_OK;
 }

@@ -2158,8 +2158,8 @@ ItclInitClassCommon(
 	const char *val;
         Tcl_DStringAppend(&buffer, "::", -1);
         Tcl_DStringAppend(&buffer, Tcl_GetString(ivPtr->namePtr), -1);
-        val = Tcl_SetVar(interp,
-	        Tcl_DStringValue(&buffer), initStr,
+        val = Tcl_SetVar2(interp,
+	        Tcl_DStringValue(&buffer), NULL, initStr,
                 TCL_NAMESPACE_ONLY);
 
         if (!val) {
@@ -2931,9 +2931,9 @@ Itcl_ClassOptionCmd(
 
     if ((objc > 1) && (strcmp(Tcl_GetString(objv[1]), "add") == 0)) {
 	tkVersion = "8.6";
-        tkPackage = Tcl_PkgPresent(interp, "Tk", tkVersion, 0);
+        tkPackage = Tcl_PkgPresentEx(interp, "Tk", tkVersion, 0, NULL);
         if (tkPackage == NULL) {
-	    tkPackage = Tcl_PkgRequire(interp, "Tk", tkVersion, 0);
+	    tkPackage = Tcl_PkgRequireEx(interp, "Tk", tkVersion, 0, NULL);
 	}
 	if (tkPackage == NULL) {
 	    Tcl_AppendResult(interp, "cannot load package Tk", tkVersion,
