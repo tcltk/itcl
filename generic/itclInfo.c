@@ -2552,15 +2552,11 @@ Itcl_BiInfoWidgetCmd(
     } else {
         assert(contextIclsPtr != NULL);
         assert(contextIclsPtr->nsPtr != NULL);
-#ifdef NEW_PROTO_RESOLVER
-        contextNs = contextIclsPtr->nsPtr;
-#else
         if (contextIclsPtr->infoPtr->useOldResolvers) {
             contextNs = contextIclsPtr->nsPtr;
         } else {
             contextNs = contextIclsPtr->nsPtr;
         }
-#endif
     }
 
             name = contextNs->fullName;
@@ -2812,15 +2808,11 @@ Itcl_BiInfoTypeCmd(
     } else {
         assert(contextIclsPtr != NULL);
         assert(contextIclsPtr->nsPtr != NULL);
-#ifdef NEW_PROTO_RESOLVER
-        contextNs = contextIclsPtr->nsPtr;
-#else
         if (contextIclsPtr->infoPtr->useOldResolvers) {
             contextNs = contextIclsPtr->nsPtr;
         } else {
             contextNs = contextIclsPtr->nsPtr;
         }
-#endif
     }
 
             name = contextNs->fullName;
@@ -4300,15 +4292,11 @@ Itcl_BiInfoWidgetadaptorCmd(
     } else {
         assert(contextIclsPtr != NULL);
         assert(contextIclsPtr->nsPtr != NULL);
-#ifdef NEW_PROTO_RESOLVER
-        contextNs = contextIclsPtr->nsPtr;
-#else
         if (contextIclsPtr->infoPtr->useOldResolvers) {
             contextNs = contextIclsPtr->nsPtr;
         } else {
             contextNs = contextIclsPtr->nsPtr;
         }
-#endif
     }
 
             name = contextNs->fullName;

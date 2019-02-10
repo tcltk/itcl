@@ -196,10 +196,6 @@ FreeItclObjectInfo(
  * ------------------------------------------------------------------------
  */
 
-#ifdef NEW_PROTO_RESOLVER
-int ItclVarsAndCommandResolveInit(Tcl_Interp *interp);
-#endif
-
 static int
 Initialize (
     Tcl_Interp *interp)
@@ -337,10 +333,6 @@ Initialize (
     Tcl_SetAssocData(interp, ITCL_INTERP_DATA, NULL, (ClientData)infoPtr);
 
     Itcl_PreserveData((ClientData)infoPtr);
-
-#ifdef NEW_PROTO_RESOLVER
-    ItclVarsAndCommandResolveInit(interp);
-#endif
 
     objPtr = Tcl_NewStringObj("::oo::class", -1);
     Tcl_IncrRefCount(objPtr);
