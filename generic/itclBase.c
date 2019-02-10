@@ -383,6 +383,7 @@ Initialize (
         return TCL_ERROR;
     }
 
+    infoPtr->clazzObjectPtr = clazzObjectPtr;
     infoPtr->clazzClassPtr = Tcl_GetObjectAsClass(clazzObjectPtr);
 
     /*
