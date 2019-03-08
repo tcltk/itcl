@@ -253,7 +253,7 @@ Itcl_ParseInit(
     Tcl_CreateObjCommand(interp, "::itcl::configbody", Itcl_ConfigBodyCmd,
         (ClientData)NULL, (Tcl_CmdDeleteProc*)NULL);
 
-    Itcl_EventuallyFree((ClientData)infoPtr, ItclDelObjectInfo);
+    Itcl_EventuallyFree((ClientData)infoPtr, (Tcl_FreeProc *) ItclDelObjectInfo);
 
     /*
      *  Create the "itcl::find" command for high-level queries.
@@ -3799,7 +3799,7 @@ Itcl_HandleDelegateOptionCmd(
         idoPtr->namePtr = optionNamePtr;
     }
     Itcl_PreserveData(idoPtr);
-    Itcl_EventuallyFree((ClientData)idoPtr, ItclDeleteDelegatedOption);
+    Itcl_EventuallyFree((ClientData)idoPtr, (Tcl_FreeProc *) ItclDeleteDelegatedOption);
     idoPtr->icPtr = icPtr;
     idoPtr->asPtr = targetPtr;
     if (idoPtr->asPtr != NULL) {
