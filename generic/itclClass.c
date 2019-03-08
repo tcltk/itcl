@@ -57,7 +57,7 @@ ItclReleaseClass(
 {
     ItclClass *iclsPtr = (ItclClass *)clientData;
 
-    if (--iclsPtr->refCount == 0) {
+    if (iclsPtr->refCount-- <= 1) {
 	ItclFreeClass((char *) clientData);
     }
 }

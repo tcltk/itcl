@@ -83,7 +83,7 @@ ItclReleaseObject(
 {
     ItclObject *ioPtr = (ItclObject *)clientData;
 
-    if (--ioPtr->refCount == 0) {
+    if (ioPtr->refCount-- <= 1) {
 	ItclFreeObject((char *) clientData);
     }
 }
