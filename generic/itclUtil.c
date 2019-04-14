@@ -496,10 +496,8 @@ Itcl_SetListValue(elemPtr,val)
     Itcl_ListElem *elemPtr; /* list element being modified */
     ClientData val;         /* new value associated with element */
 {
-    Itcl_List *listPtr = elemPtr->owner;
-    assert(listPtr->validate == ITCL_VALID_LIST);
     assert(elemPtr != NULL);
-
+    assert(elemPtr->owner->validate == ITCL_VALID_LIST);
     elemPtr->value = val;
 }
 
@@ -828,11 +826,13 @@ void * ItclCkalloc(
  * ------------------------------------------------------------------------
  */
 void ItclCkfree(void *ptr) {
+    ItclPresMemoryPrefix *blk;
+    
     if (ptr == NULL) {
 	return;
     }
     /* Itcl memory block to ckalloc block */
-    ItclPresMemoryPrefix *blk = ((ItclPresMemoryPrefix *)ptr)-1;
+    blk = ((ItclPresMemoryPrefix *)ptr)-1;
 
     assert(blk->refCount <= 0); /* it should be not preserved */
     #if 0
