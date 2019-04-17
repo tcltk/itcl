@@ -969,7 +969,7 @@ ItclInitObjectVariables(
 		    goto errorCleanup;
                 }
 	    }
-            hPtr2 = Tcl_FindHashEntry(&ivPtr->iclsPtr->resolveVars, varName);
+            hPtr2 = ItclResolveVarEntry(ivPtr->iclsPtr, varName);
             if (hPtr2 == NULL) {
                 hPtr = Tcl_NextHashEntry(&place);
 	        continue;

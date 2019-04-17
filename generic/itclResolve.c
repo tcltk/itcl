@@ -314,7 +314,7 @@ Itcl_ClassVarResolver(
     }
         if (contextIoPtr->iclsPtr != vlookup->ivPtr->iclsPtr) {
 	    if (strcmp(Tcl_GetString(vlookup->ivPtr->namePtr), "this") == 0) {
-                hPtr = Tcl_FindHashEntry(&contextIoPtr->iclsPtr->resolveVars,
+                hPtr = ItclResolveVarEntry(contextIoPtr->iclsPtr,
                     Tcl_GetString(vlookup->ivPtr->namePtr));
 
                 if (hPtr != NULL) {
@@ -528,7 +528,7 @@ ItclClassRuntimeVarResolver(
 	    if (strcmp(Tcl_GetString(vlookup->ivPtr->namePtr), "this") == 0) {
 	        /* only for the this variable we need the one of the
 		 * contextIoPtr class */
-                hPtr = Tcl_FindHashEntry(&contextIoPtr->iclsPtr->resolveVars,
+                hPtr = ItclResolveVarEntry(contextIoPtr->iclsPtr,
                         Tcl_GetString(vlookup->ivPtr->namePtr));
 
                 if (hPtr != NULL) {
