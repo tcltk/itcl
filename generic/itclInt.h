@@ -54,12 +54,11 @@
  */
 
 #undef  assert
-#define DEBUG 1
-#ifndef  DEBUG
+#if defined(NDEBUG) && !defined(DEBUG)
 #define assert(EX) ((void)0)
-#else
+#else /* !NDEBUG || DEBUG */
 #define assert(EX) (void)((EX) || (Itcl_Assert(STRINGIFY(EX), __FILE__, __LINE__), 0))
-#endif  /* DEBUG */
+#endif
 
 #define ITCL_INTERP_DATA "itcl_data"
 #define ITCL_TK_VERSION "8.6"
