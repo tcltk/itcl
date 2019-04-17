@@ -1349,7 +1349,7 @@ Itcl_BiInfoVariableCmd(
      *  Return info for a specific variable.
      */
     if (varName) {
-        entry = Tcl_FindHashEntry(&contextIclsPtr->resolveVars, varName);
+        entry = ItclResolveVarEntry(contextIclsPtr, varName);
         if (entry == NULL) {
             Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
                 "\"", varName, "\" isn't a variable in class \"",
@@ -4036,7 +4036,7 @@ Itcl_BiInfoTypeVariableCmd(
      *  Return info for a specific variable.
      */
     if (varName) {
-        hPtr = Tcl_FindHashEntry(&contextIclsPtr->resolveVars, varName);
+        hPtr = ItclResolveVarEntry(contextIclsPtr, varName);
         if (hPtr == NULL) {
             Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
                 "\"", varName, "\" isn't a typevariable in class \"",

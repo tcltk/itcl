@@ -1739,7 +1739,7 @@ ItclGetInstanceVar(
         iclsPtr = contextIclsPtr;
     }
     ivPtr = NULL;
-    hPtr = Tcl_FindHashEntry(&iclsPtr->resolveVars, (char *)name1);
+    hPtr = ItclResolveVarEntry(iclsPtr, (char *)name1);
     if (hPtr != NULL) {
         vlookup = Tcl_GetHashValue(hPtr);
         ivPtr = vlookup->ivPtr;
@@ -1955,7 +1955,7 @@ ItclSetInstanceVar(
     } else {
         iclsPtr = contextIclsPtr;
     }
-    hPtr = Tcl_FindHashEntry(&iclsPtr->resolveVars, (char *)name1);
+    hPtr = ItclResolveVarEntry(iclsPtr, (char *)name1);
     if (hPtr != NULL) {
         vlookup = Tcl_GetHashValue(hPtr);
         ivPtr = vlookup->ivPtr;
@@ -3610,7 +3610,7 @@ GetConstructorVar(
     ItclVariable *ivPtr;
     const char *val;
 
-    hPtr = Tcl_FindHashEntry(&iclsPtr->resolveVars, (char *)varName);
+    hPtr = ItclResolveVarEntry(iclsPtr, (char *)varName);
     if (hPtr == NULL) {
 	/* no such variable */
         return NULL;

@@ -734,6 +734,9 @@ MODULE_SCOPE void ItclDeleteClassVariablesNamespace(Tcl_Interp *interp,
         ItclClass *iclsPtr);
 MODULE_SCOPE int ItclInfoInit(Tcl_Interp *interp, ItclObjectInfo *infoPtr);
 
+MODULE_SCOPE Tcl_HashEntry *ItclResolveVarEntry(
+	ItclClass* iclsPtr, const char *varName);
+
 struct Tcl_ResolvedVarInfo;
 MODULE_SCOPE int Itcl_ClassCmdResolver(Tcl_Interp *interp, const char* name,
 	Tcl_Namespace *nsPtr, int flags, Tcl_Command *rPtr);

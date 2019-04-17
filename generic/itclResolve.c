@@ -276,7 +276,7 @@ Itcl_ClassVarResolver(
     /*
      *  See if the variable is a known data member and accessible.
      */
-    hPtr = Tcl_FindHashEntry(&iclsPtr->resolveVars, name);
+    hPtr = ItclResolveVarEntry(iclsPtr, name);
     if (hPtr == NULL) {
         return TCL_CONTINUE;
     }
@@ -445,7 +445,7 @@ Itcl_ClassCompiledVarResolver(
     memcpy((void*)buffer, (void*)name, (size_t)length);
     buffer[length] = '\0';
 
-    hPtr = Tcl_FindHashEntry(&iclsPtr->resolveVars, buffer);
+    hPtr = ItclResolveVarEntry(iclsPtr, buffer);
 
     if (buffer != storage) {
         ckfree(buffer);
@@ -654,7 +654,7 @@ Itcl_ParseVarResolver(
      *  See if the requested variable is a recognized "common" member.
      *  If it is, make sure that access is allowed.
      */
-    hPtr = Tcl_FindHashEntry(&iclsPtr->resolveVars, name);
+    hPtr = ItclResolveVarEntry(iclsPtr, name);
     if (hPtr) {
         vlookup = (ItclVarLookup*)Tcl_GetHashValue(hPtr);
 
