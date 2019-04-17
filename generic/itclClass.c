@@ -1811,7 +1811,9 @@ Itcl_BuildVirtualTables(
 				Tcl_GetHashKey(&iclsPtr->resolveVars, hPtr);
 			}
 			/* reset vlookup for full-qualified names - new lookup */
-			vlookup = NULL;
+			if (vlookup->ivPtr != ivPtr) {
+			    vlookup = NULL;
+			}
 		    }
 		}
 		if (newEntry) {
