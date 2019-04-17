@@ -1713,8 +1713,6 @@ ItclResolveVarEntry(
 	return reshPtr;
     } else {
 
-    //!!!printf("====get======== %p : %s -- v: %s ===== \n", iclsPtr, Tcl_GetString(iclsPtr->fullNamePtr), lookupName);
-
     /* try to build virtual table for this var */
     const char *varName, *simpleName;
     Tcl_DString buffer, buffer2, *bufferC;
@@ -1725,19 +1723,24 @@ ItclResolveVarEntry(
     Tcl_Namespace* nsPtr;
     Tcl_Obj *vnObjPtr;
     int newEntry, processAncestors;
+
+    /* simple speedup: avoid lookup for ::itcl::internal's - not resolvable in a class */
+    if (strncmp(lookupName, ITCL_NAMESPACE, sizeof(ITCL_NAMESPACE)-1) == 0) {
+	return NULL;
+    }
     
     /* (de)qualify to simple name */
     varName = simpleName = lookupName;
     while(*varName) {
-        if (*varName++ == ':' && *varName++ == ':') {
-	    simpleName = varName;
-	    continue;
+        if (*varName++ == ':') {
+            if (*varName++ == ':') { simpleName = varName; }
         };
-        varName++;
     }
     vnObjPtr = Tcl_NewStringObj(simpleName, -1);
     
     processAncestors = simpleName != lookupName;
+
+    //!!! printf("====get======== %p : %s -- v: %s (%s), pa: %d ===== \n", iclsPtr, Tcl_GetString(iclsPtr->fullNamePtr), lookupName, simpleName, processAncestors);
     
     Tcl_DStringInit(&buffer);
     Tcl_DStringInit(&buffer2);
@@ -1774,14 +1777,12 @@ ItclResolveVarEntry(
             while (1) {
 		hPtr = Tcl_CreateHashEntry(&iclsPtr->resolveVars,
 		    varName, &newEntry);
-                //!!!printf("    **** find %p : %s : %s -> %p\n", iclsPtr2, Tcl_GetString(iclsPtr2->fullNamePtr), varName, hPtr);
-		if (!reshPtr) {
-		    reshPtr = hPtr;
-		}
+                //!!! printf("    **** %s %p : %s : %s -> %p\n", newEntry ? "find   " : "created", iclsPtr2, Tcl_GetString(iclsPtr2->fullNamePtr), varName, hPtr);
 
 		/* check for same name in current class */
 		if (!newEntry) {
 		    vlookup = (ItclVarLookup*)Tcl_GetHashValue(hPtr);
+		    //!!! printf("    **** exist %p : %p != %p / %s != %s && %d\n", vlookup, vlookup->ivPtr, ivPtr, Tcl_GetString(vlookup->ivPtr->fullNamePtr), Tcl_GetString(ivPtr->fullNamePtr), iclsPtr2 == iclsPtr);
 		    if (vlookup->ivPtr != ivPtr && iclsPtr2 == iclsPtr) {
 		    	/* if used multiple times - unbind, else - overwrite */
 			if (vlookup->usage > 1) {
@@ -1798,7 +1799,7 @@ ItclResolveVarEntry(
 			}
 			newEntry = 1;
 		    } else {
-#if 0
+#if 1
 		    	/* var exists and no correction necessary - next var */
 			if (!processAncestors) {
 			    break;
@@ -1810,9 +1811,12 @@ ItclResolveVarEntry(
 				Tcl_GetHashKey(&iclsPtr->resolveVars, hPtr);
 			}
 			/* reset vlookup for full-qualified names - new lookup */
-			vlookup = NULL;
+			if (vlookup->ivPtr != ivPtr) {
+			    vlookup = NULL;
+			}
 		    }
 		}
+		//!!! printf("    **** newEntry %d, vlookup: %p\n", newEntry, vlookup);
 		if (newEntry) {
 		    if (!vlookup) {
 			/* create new (or overwrite) */
@@ -1864,6 +1868,13 @@ ItclResolveVarEntry(
 		    vlookup->usage++;
 		}
 
+                /* if we have found it */
+                if (simpleName == lookupName || strcmp(varName, lookupName) == 0) {
+		    if (!reshPtr) {
+			reshPtr = hPtr;
+		    }
+		    break;
+                }
                 if (nsPtr == NULL) {
                     break;
                 }
@@ -1879,25 +1890,21 @@ ItclResolveVarEntry(
 
         }
 
-        iclsPtr2 = Itcl_AdvanceHierIter(&hier);
-
-	/* Stop create vars for ancestors (if already processed once) */
-	if (iclsPtr2 != iclsPtr && !processAncestors) {
-#if 0
-	    if (simpleName == lookupName) {
-	    	Tcl_DecrRefCount(vnObjPtr);
-		/* simple name */
-		return reshPtr;
-	    }
+	/* Stop create vars for ancestors (if not needed) */
+	if (!processAncestors && reshPtr) {
+#if 1
+	    /* simple name - don't need to check ancestors */
 	    break;
 #endif
 	}
+
+        iclsPtr2 = Itcl_AdvanceHierIter(&hier);
     }
     Itcl_DeleteHierIter(&hier);
 
 #if 0 /* DUMP var table */
     //!!!
-    printf("======== %p : %s ===== \n", iclsPtr2, Tcl_GetString(iclsPtr->fullNamePtr));
+    printf("===DUMP===== %p : %s ===== \n", iclsPtr, Tcl_GetString(iclsPtr->fullNamePtr));
 
     Itcl_InitHierIter(&hier, iclsPtr);
     iclsPtr2 = Itcl_AdvanceHierIter(&hier);
@@ -1946,8 +1953,10 @@ ItclResolveVarEntry(
 	Tcl_DStringFree(&buffer2);
 	Tcl_DecrRefCount(vnObjPtr);
 
-	reshPtr = Tcl_FindHashEntry(&iclsPtr->resolveVars, lookupName);
-	//!!!printf("====ret======== %p : %s ===== \n", reshPtr, reshPtr && ((ItclVarLookup*)Tcl_GetHashValue(reshPtr))->leastQualName ? ((ItclVarLookup*)Tcl_GetHashValue(reshPtr))->leastQualName : "<NULL>");
+	if (reshPtr == NULL) {
+	    reshPtr = Tcl_FindHashEntry(&iclsPtr->resolveVars, lookupName);
+	}
+	//!!! printf("====ret======== %p : %s ===== \n", reshPtr, reshPtr && ((ItclVarLookup*)Tcl_GetHashValue(reshPtr))->leastQualName ? ((ItclVarLookup*)Tcl_GetHashValue(reshPtr))->leastQualName : "<NULL>");
 	return reshPtr;
     }
 #endif
