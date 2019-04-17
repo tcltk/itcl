@@ -1119,7 +1119,7 @@ ItclAddClassVariableDictInfo(
     keyPtr = iclsPtr->fullNamePtr;
     dictPtr = Tcl_GetVar2Ex(interp,
              ITCL_NAMESPACE"::internal::dicts::classVariables",
-	     NULL, 0);
+	     NULL, TCL_GLOBAL_ONLY);
     if (dictPtr == NULL) {
         Tcl_AppendResult(interp, "cannot get dict ", ITCL_NAMESPACE,
 	        "::internal::dicts::classVariables", NULL);
@@ -1244,7 +1244,7 @@ ItclAddClassVariableDictInfo(
     }
     Tcl_SetVar2Ex(interp,
             ITCL_NAMESPACE"::internal::dicts::classVariables",
-            NULL, dictPtr, 0);
+            NULL, dictPtr, TCL_GLOBAL_ONLY);
     return TCL_OK;
 }
 
@@ -1270,7 +1270,7 @@ ItclAddClassFunctionDictInfo(
 
     dictPtr = Tcl_GetVar2Ex(interp,
              ITCL_NAMESPACE"::internal::dicts::classFunctions",
-	     NULL, 0);
+	     NULL, TCL_GLOBAL_ONLY);
     if (dictPtr == NULL) {
         Tcl_AppendResult(interp, "cannot get dict ", ITCL_NAMESPACE,
 	        "::internal::dicts::classFunctions", NULL);
@@ -1404,7 +1404,7 @@ ItclAddClassFunctionDictInfo(
     }
     Tcl_SetVar2Ex(interp,
             ITCL_NAMESPACE"::internal::dicts::classFunctions",
-            NULL, dictPtr, 0);
+            NULL, dictPtr, TCL_GLOBAL_ONLY);
     return TCL_OK;
 }
 

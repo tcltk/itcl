@@ -1754,7 +1754,7 @@ ItclGetInstanceVar(
 	Tcl_GetVariableFullName(interp, varPtr, varName);
 
 	val = Tcl_GetVar2(interp, Tcl_GetString(varName), name2,
-		TCL_LEAVE_ERR_MSG);
+		TCL_LEAVE_ERR_MSG | TCL_GLOBAL_ONLY);
 	Tcl_DecrRefCount(varName);
 	if (val) {
 	    return val;

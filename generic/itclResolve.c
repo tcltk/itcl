@@ -650,11 +650,6 @@ Itcl_ParseVarResolver(
     Tcl_HashEntry *hPtr;
     ItclVarLookup *vlookup;
 
-    /* simple speedup: avoid lookup for ::itcl::internal's - not resolvable in a class */
-    if (strncmp(name, ITCL_INTDICTS_NAMESPACE, sizeof(ITCL_INTDICTS_NAMESPACE)-1) == 0) {
-	return TCL_CONTINUE;
-    }
-
     /*
      *  See if the requested variable is a recognized "common" member.
      *  If it is, make sure that access is allowed.
