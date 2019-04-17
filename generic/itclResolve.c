@@ -650,39 +650,40 @@ Itcl_ParseVarResolver(
     Tcl_HashEntry *hPtr;
     ItclVarLookup *vlookup;
 
+    /* simple speedup: avoid lookup for ::itcl::internal's - not resolvable in a class */
+    if (strncmp(name, ITCL_INTDICTS_NAMESPACE, sizeof(ITCL_INTDICTS_NAMESPACE)-1) == 0) {
+	return TCL_CONTINUE;
+    }
+
     /*
      *  See if the requested variable is a recognized "common" member.
      *  If it is, make sure that access is allowed.
      */
     hPtr = ItclResolveVarEntry(iclsPtr, name);
-    if (hPtr) {
-        vlookup = (ItclVarLookup*)Tcl_GetHashValue(hPtr);
-
-        if ((vlookup->ivPtr->flags & ITCL_COMMON) != 0) {
-            if (!vlookup->accessible) {
-                Tcl_AppendResult(interp,
-                    "can't access \"", name, "\": ",
-                    Itcl_ProtectionStr(vlookup->ivPtr->protection),
-                    " variable",
-                    (char*)NULL);
-                return TCL_ERROR;
-            }
-	    hPtr = Tcl_FindHashEntry(&vlookup->ivPtr->iclsPtr->classCommons,
-	        (char *)vlookup->ivPtr);
-	    if (hPtr != NULL) {
-                *rPtr = Tcl_GetHashValue(hPtr);
-                return TCL_OK;
-	    }
-        }
+    if (!hPtr) {
+	return TCL_CONTINUE;
     }
 
-    /*
-     *  If the variable is not recognized, return TCL_CONTINUE and
-     *  let lookup continue via the normal name resolution rules.
-     *  This is important for variables like "errorInfo"
-     *  that might get set while the parser namespace is active.
-     */
-    return TCL_CONTINUE;
+    vlookup = (ItclVarLookup*)Tcl_GetHashValue(hPtr);
+
+    if ((vlookup->ivPtr->flags & ITCL_COMMON) == 0) {
+	return TCL_CONTINUE;
+    }
+    if (!vlookup->accessible) {
+        Tcl_AppendResult(interp,
+            "can't access \"", name, "\": ",
+            Itcl_ProtectionStr(vlookup->ivPtr->protection),
+            " variable",
+            (char*)NULL);
+        return TCL_ERROR;
+    }
+    hPtr = Tcl_FindHashEntry(&vlookup->ivPtr->iclsPtr->classCommons,
+        (char *)vlookup->ivPtr);
+    if (!hPtr) {
+	return TCL_CONTINUE;
+    }
+    *rPtr = Tcl_GetHashValue(hPtr);
+    return TCL_OK;
 }
 
 

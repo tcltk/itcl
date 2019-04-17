@@ -86,8 +86,10 @@
 
 #define ALLOC_CHUNK 8
 
-#define ITCL_VARIABLES_NAMESPACE "::itcl::internal::variables"
-#define ITCL_COMMANDS_NAMESPACE "::itcl::internal::commands"
+#define ITCL_INT_NAMESPACE	    ITCL_NAMESPACE"::internal"
+#define ITCL_INTDICTS_NAMESPACE	    ITCL_INT_NAMESPACE"::dicts"
+#define ITCL_VARIABLES_NAMESPACE    ITCL_INT_NAMESPACE"::variables"
+#define ITCL_COMMANDS_NAMESPACE	    ITCL_INT_NAMESPACE"::commands"
 
 #ifdef ITCL_PRESERVE_DEBUG
 #define ITCL_PRESERVE_BUCKET_SIZE 50

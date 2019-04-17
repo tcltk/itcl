@@ -1724,12 +1724,7 @@ ItclResolveVarEntry(
     Tcl_Obj *vnObjPtr;
     int newEntry, processAncestors;
     size_t varLen;
-
-    /* simple speedup: avoid lookup for ::itcl::internal's - not resolvable in a class */
-    if (strncmp(lookupName, ITCL_NAMESPACE, sizeof(ITCL_NAMESPACE)-1) == 0) {
-	return NULL;
-    }
-    
+  
     /* (de)qualify to simple name */
     varName = simpleName = lookupName;
     while(*varName) {
