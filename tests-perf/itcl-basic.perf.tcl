@@ -24,13 +24,31 @@ namespace eval ::itclTestPerf-Basic {
 namespace path {::tclTestPerf}
 
 
+## test cases covering regression on class count (memory preserve/release):
+proc test-cls-init {{reptime {3000 1000}}} {
+  set reptime [_adjust_maxcount $reptime 1000]
+  _test_run $reptime {
+    setup {set i 0; set k 0}
+    ## 1) create up-to 1000 classes (with 100 vars):
+    {itcl::class timeClass[incr i] { for {set j 0} {$j<100} {incr j} { public variable d$j } }}
+    ## 2) create up-to 1000 classes (with 100 vars):
+    {itcl::class finiClass[incr k] { for {set j 0} {$j<100} {incr j} { public variable d$j } }}
+    ## 2) delete up-to 1000 classes:
+    {itcl::delete class finiClass$k; if {[incr k -1] <= 0} break}
+    cleanup {while {$k > 0} {itcl::delete class finiClass$k; incr k -1}}
+    ## 1) delete up-to 1000 classes:
+    {itcl::delete class timeClass$i; if {[incr i -1] <= 0} break}
+    cleanup {while {$i > 0} {itcl::delete class timeClass$i; incr i -1}}
+  }
+}
+
 ## test cases covering run-time dependency to variable count of class with nested
 ## namespaces and class inheritances...
 ## original itcl-resolver (due to completely rebuild) has the complexity ca. O(nn**2,2**vn) here,
 ## so the deeper a class/inheritance and expecially the more variables it has,
 ## the worse the performance of class creation or modification.
 
-proc test-create {{reptime {3000 10000}}} {
+proc test-var-create {{reptime {3000 10000}}} {
   upvar maxv maxv
   foreach ns {{} ::test-itcl-ns1 ::test-itcl-ns1::test-itcl-ns2} {
     incr n
@@ -164,12 +182,14 @@ proc test-obj-instance {{reptime 1000}} {
 
 proc test {{reptime 1000}} {
   set reptm $reptime
-  lset reptm 0 [expr {min(3000,[lindex $reptm 0] * 3)}]
+  lset reptm 0 [expr {[lindex $reptm 0] * 10}]
   if {[llength $reptm] == 1} {
     lappend reptm 10000
   }
-  puts "==== class creation ====\n"
-  test-create $reptm
+  puts "==== initialization (preserve/release) ====\n"
+  test-cls-init $reptm
+  puts "==== class/var creation ====\n"
+  test-var-create $reptm
   puts "==== var access ====\n"
   test-access $reptime
   puts "==== object instance ====\n"
