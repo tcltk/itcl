@@ -1699,252 +1699,185 @@ ItclResolveVarEntry(
     ItclClass* iclsPtr,       /* class definition where to resolve variable */
     const char *lookupName)      /* name of variable being resolved */
 {
-#if 0
-    Tcl_HashEntry *reshPtr;
-
-    reshPtr = Tcl_FindHashEntry(&iclsPtr->resolveVars, lookupName);
-    printf("====get======== %p : %s -- v: %s -> %p ===== \n", iclsPtr, Tcl_GetString(iclsPtr->fullNamePtr), lookupName, reshPtr);
-    return reshPtr;
-#else
     Tcl_HashEntry *reshPtr, *hPtr;
 
     /* could be resolved directly */
     if ((reshPtr = Tcl_FindHashEntry(&iclsPtr->resolveVars, lookupName)) != NULL) {
 	return reshPtr;
     } else {
+	/* try to build virtual table for this var */
+	const char *varName, *simpleName;
+	Tcl_DString buffer, buffer2, *bufferC;
+	ItclHierIter hier;
+	ItclClass* iclsPtr2;
+	ItclVarLookup *vlookup;
+	ItclVariable *ivPtr;
+	Tcl_Namespace* nsPtr;
+	Tcl_Obj *vnObjPtr;
+	int newEntry, processAncestors;
+	size_t varLen;
+      
+	/* (de)qualify to simple name */
+	varName = simpleName = lookupName;
+	while(*varName) {
+	    if (*varName++ == ':') {
+		if (*varName++ == ':') { simpleName = varName; }
+	    };
+	}
+	vnObjPtr = Tcl_NewStringObj(simpleName, -1);
+	
+	processAncestors = simpleName != lookupName;
 
-    /* try to build virtual table for this var */
-    const char *varName, *simpleName;
-    Tcl_DString buffer, buffer2, *bufferC;
-    ItclHierIter hier;
-    ItclClass* iclsPtr2;
-    ItclVarLookup *vlookup;
-    ItclVariable *ivPtr;
-    Tcl_Namespace* nsPtr;
-    Tcl_Obj *vnObjPtr;
-    int newEntry, processAncestors;
-    size_t varLen;
-  
-    /* (de)qualify to simple name */
-    varName = simpleName = lookupName;
-    while(*varName) {
-        if (*varName++ == ':') {
-            if (*varName++ == ':') { simpleName = varName; }
-        };
-    }
-    vnObjPtr = Tcl_NewStringObj(simpleName, -1);
-    
-    processAncestors = simpleName != lookupName;
+	Tcl_DStringInit(&buffer);
+	Tcl_DStringInit(&buffer2);
 
-    //!!! printf("====get======== %p : %s -- v: %s (%s), pa: %d ===== \n", iclsPtr, Tcl_GetString(iclsPtr->fullNamePtr), lookupName, simpleName, processAncestors);
-    
-    Tcl_DStringInit(&buffer);
-    Tcl_DStringInit(&buffer2);
+	/*
+	 *  Scan through all classes in the hierarchy, from most to
+	 *  least specific.  Add a lookup entry for each variable
+	 *  into the table.
+	 */
+	Itcl_InitHierIter(&hier, iclsPtr);
+	iclsPtr2 = Itcl_AdvanceHierIter(&hier);
+	while (iclsPtr2 != NULL) {
 
-    /*
-     *  Scan through all classes in the hierarchy, from most to
-     *  least specific.  Add a lookup entry for each variable
-     *  into the table.
-     */
-    Itcl_InitHierIter(&hier, iclsPtr);
-    iclsPtr2 = Itcl_AdvanceHierIter(&hier);
-    while (iclsPtr2 != NULL) {
+	    hPtr = Tcl_FindHashEntry(&iclsPtr2->variables, vnObjPtr);
+	    if (hPtr) {
+		ivPtr = (ItclVariable*)Tcl_GetHashValue(hPtr);
 
-	hPtr = Tcl_FindHashEntry(&iclsPtr2->variables, vnObjPtr);
-        //!!!printf("    **** find %p : %s : %p\n", iclsPtr2, Tcl_GetString(iclsPtr2->fullNamePtr), hPtr);
-	if (hPtr) {
-	    ivPtr = (ItclVariable*)Tcl_GetHashValue(hPtr);
+		vlookup = NULL;
 
-            vlookup = NULL;
+		/*
+		 *  Create all possible names for this variable and enter
+		 *  them into the variable resolution table:
+		 *     var
+		 *     class::var
+		 *     namesp1::class::var
+		 *     namesp2::namesp1::class::var
+		 *     ...
+		 */
+		varName = simpleName; varLen = -1;
+		bufferC = &buffer;
+		nsPtr = iclsPtr2->nsPtr;
 
-            /*
-             *  Create all possible names for this variable and enter
-             *  them into the variable resolution table:
-             *     var
-             *     class::var
-             *     namesp1::class::var
-             *     namesp2::namesp1::class::var
-             *     ...
-             */
-            varName = simpleName; varLen = -1;
-            bufferC = &buffer;
-            nsPtr = iclsPtr2->nsPtr;
+		while (1) {
+		    hPtr = Tcl_CreateHashEntry(&iclsPtr->resolveVars,
+			varName, &newEntry);
 
-            while (1) {
-		hPtr = Tcl_CreateHashEntry(&iclsPtr->resolveVars,
-		    varName, &newEntry);
-                //!!! printf("    **** %s %p : %s : %s -> %p\n", newEntry ? "find   " : "created", iclsPtr2, Tcl_GetString(iclsPtr2->fullNamePtr), varName, hPtr);
-
-		/* check for same name in current class */
-		if (!newEntry) {
-		    vlookup = (ItclVarLookup*)Tcl_GetHashValue(hPtr);
-		    //!!! printf("    **** exist %p : %p != %p / %s != %s && %d\n", vlookup, vlookup->ivPtr, ivPtr, Tcl_GetString(vlookup->ivPtr->fullNamePtr), Tcl_GetString(ivPtr->fullNamePtr), iclsPtr2 == iclsPtr);
-		    if (vlookup->ivPtr != ivPtr && iclsPtr2 == iclsPtr) {
-		    	/* if used multiple times - unbind, else - overwrite */
-			if (vlookup->usage > 1) {
-			    /* correct leastQualName */
-			    vlookup->leastQualName = NULL;
-			    processAncestors = 1; /* correction in progress */
-			    /* should create new lookup */
-			    --vlookup->usage;
-			    vlookup = NULL;
-			} else {
-			    /* correct values (overwrite) */
-			    vlookup->usage = 0;
-			    goto setResVar;
-			}
-			newEntry = 1;
-		    } else {
-#if 1
-		    	/* var exists and no correction necessary - next var */
-			if (!processAncestors) {
-			    break;
-			}
-#endif
-			/* check leastQualName correction needed */
-			if (!vlookup->leastQualName) {
-			    vlookup->leastQualName = 
-				Tcl_GetHashKey(&iclsPtr->resolveVars, hPtr);
-			}
-			/* reset vlookup for full-qualified names - new lookup */
-			if (vlookup->ivPtr != ivPtr) {
-			    vlookup = NULL;
-			}
-		    }
-		}
-		//!!! printf("    **** newEntry %d, vlookup: %p\n", newEntry, vlookup);
-		if (newEntry) {
-		    if (!vlookup) {
-			/* create new (or overwrite) */
-			vlookup = (ItclVarLookup *)ckalloc(sizeof(ItclVarLookup));
-			vlookup->usage = 0;
-
-		    setResVar:
-
-			vlookup->ivPtr = ivPtr;
-			vlookup->leastQualName = 
-			    Tcl_GetHashKey(&iclsPtr->resolveVars, hPtr);
-
-			/*
-			 *  If this variable is PRIVATE to another class scope,
-			 *  then mark it as "inaccessible".
-			 */
-			vlookup->accessible = (ivPtr->protection != ITCL_PRIVATE ||
-				ivPtr->iclsPtr == iclsPtr);
-
-			/*
-			 *  Set aside the first object-specific slot for the built-in
-			 *  "this" variable.  Only allocate one of these, even though
-			 *  there is a definition for "this" in each class scope.
-			 *  Set aside the second and third object-specific slot for the built-in
-			 *  "itcl_options" and "itcl_option_components" variable.
-			 */
-			if (!iclsPtr->numInstanceVars) {
-			    iclsPtr->numInstanceVars++;
-			    iclsPtr->numInstanceVars++;
-			    iclsPtr->numInstanceVars++;
-			}
-			/*
-			 *  If this is a reference to the built-in "this"
-			 *  variable, then its index is "0".  Otherwise,
-			 *  add another slot to the end of the table.
-			 */
-			if ((ivPtr->flags & ITCL_THIS_VAR) != 0) {
-			    vlookup->varNum = 0;
-			} else {
-			    if ((ivPtr->flags & ITCL_OPTIONS_VAR) != 0) {
-				vlookup->varNum = 1;
+		    /* check for same name in current class */
+		    if (!newEntry) {
+			vlookup = (ItclVarLookup*)Tcl_GetHashValue(hPtr);
+			if (vlookup->ivPtr != ivPtr && iclsPtr2 == iclsPtr) {
+			    /* if used multiple times - unbind, else - overwrite */
+			    if (vlookup->usage > 1) {
+				/* correct leastQualName */
+				vlookup->leastQualName = NULL;
+				processAncestors = 1; /* correction in progress */
+				/* should create new lookup */
+				--vlookup->usage;
+				vlookup = NULL;
 			    } else {
-				vlookup->varNum = iclsPtr->numInstanceVars++;
+				/* correct values (overwrite) */
+				vlookup->usage = 0;
+				goto setResVar;
+			    }
+			    newEntry = 1;
+			} else {
+			    /* var exists and no correction necessary - next var */
+			    if (!processAncestors) {
+				break;
+			    }
+			    /* check leastQualName correction needed */
+			    if (!vlookup->leastQualName) {
+				vlookup->leastQualName = 
+				    Tcl_GetHashKey(&iclsPtr->resolveVars, hPtr);
+			    }
+			    /* reset vlookup for full-qualified names - new lookup */
+			    if (vlookup->ivPtr != ivPtr) {
+				vlookup = NULL;
 			    }
 			}
 		    }
+		    if (newEntry) {
+			if (!vlookup) {
+			    /* create new (or overwrite) */
+			    vlookup = (ItclVarLookup *)ckalloc(sizeof(ItclVarLookup));
+			    vlookup->usage = 0;
 
-		    Tcl_SetHashValue(hPtr, (ClientData)vlookup);
-		    vlookup->usage++;
+			setResVar:
+
+			    vlookup->ivPtr = ivPtr;
+			    vlookup->leastQualName = 
+				Tcl_GetHashKey(&iclsPtr->resolveVars, hPtr);
+
+			    /*
+			     *  If this variable is PRIVATE to another class scope,
+			     *  then mark it as "inaccessible".
+			     */
+			    vlookup->accessible = (ivPtr->protection != ITCL_PRIVATE ||
+				    ivPtr->iclsPtr == iclsPtr);
+
+			    /*
+			     *  Set aside the first object-specific slot for the built-in
+			     *  "this" variable.  Only allocate one of these, even though
+			     *  there is a definition for "this" in each class scope.
+			     *  Set aside the second and third object-specific slot for the built-in
+			     *  "itcl_options" and "itcl_option_components" variable.
+			     */
+			    if (!iclsPtr->numInstanceVars) {
+				iclsPtr->numInstanceVars += 3;
+			    }
+			    /*
+			     *  If this is a reference to the built-in "this"
+			     *  variable, then its index is "0".  Otherwise,
+			     *  add another slot to the end of the table.
+			     */
+			    if ((ivPtr->flags & ITCL_THIS_VAR) != 0) {
+				vlookup->varNum = 0;
+			    } else {
+				if ((ivPtr->flags & ITCL_OPTIONS_VAR) != 0) {
+				    vlookup->varNum = 1;
+				} else {
+				    vlookup->varNum = iclsPtr->numInstanceVars++;
+				}
+			    }
+			}
+
+			Tcl_SetHashValue(hPtr, (ClientData)vlookup);
+			vlookup->usage++;
+		    }
+
+		    /* if we have found it */
+		    if (simpleName == lookupName || strcmp(varName, lookupName) == 0) {
+			if (!reshPtr) {
+			    reshPtr = hPtr;
+			}
+			break;
+		    }
+		    if (nsPtr == NULL) {
+			break;
+		    }
+		    Tcl_DStringSetLength(bufferC, 0);
+		    Tcl_DStringAppend(bufferC, nsPtr->name, -1);
+		    Tcl_DStringAppend(bufferC, "::", 2);
+		    Tcl_DStringAppend(bufferC, varName, varLen);
+		    varName = Tcl_DStringValue(bufferC);
+		    varLen = Tcl_DStringLength(bufferC);
+		    bufferC = (bufferC == &buffer) ? &buffer2 : &buffer;
+
+		    nsPtr = nsPtr->parentPtr;
 		}
 
-                /* if we have found it */
-                if (simpleName == lookupName || strcmp(varName, lookupName) == 0) {
-		    if (!reshPtr) {
-			reshPtr = hPtr;
-		    }
-		    break;
-                }
-                if (nsPtr == NULL) {
-                    break;
-                }
-                Tcl_DStringSetLength(bufferC, 0);
-                Tcl_DStringAppend(bufferC, nsPtr->name, -1);
-                Tcl_DStringAppend(bufferC, "::", 2);
-                Tcl_DStringAppend(bufferC, varName, varLen);
-                varName = Tcl_DStringValue(bufferC);
-                varLen = Tcl_DStringLength(bufferC);
-                bufferC = (bufferC == &buffer) ? &buffer2 : &buffer;
+	    }
 
-                nsPtr = nsPtr->parentPtr;
-            }
+	    /* Stop create vars for ancestors (if not needed) */
+	    if (!processAncestors && reshPtr) {
+		/* simple name - don't need to check ancestors */
+		break;
+	    }
 
-        }
-
-	/* Stop create vars for ancestors (if not needed) */
-	if (!processAncestors && reshPtr) {
-#if 1
-	    /* simple name - don't need to check ancestors */
-	    break;
-#endif
+	    iclsPtr2 = Itcl_AdvanceHierIter(&hier);
 	}
-
-        iclsPtr2 = Itcl_AdvanceHierIter(&hier);
-    }
-    Itcl_DeleteHierIter(&hier);
-
-#if 0 /* DUMP var table */
-    //!!!
-    printf("===DUMP===== %p : %s ===== \n", iclsPtr, Tcl_GetString(iclsPtr->fullNamePtr));
-
-    Itcl_InitHierIter(&hier, iclsPtr);
-    iclsPtr2 = Itcl_AdvanceHierIter(&hier);
-    while (iclsPtr2 != NULL) {
-    	Tcl_HashSearch place;
-
-        //!!!
-        printf("  ****** %p : %s\n", iclsPtr2, Tcl_GetString(iclsPtr2->fullNamePtr));
-        hPtr = Tcl_FirstHashEntry(&iclsPtr2->variables, &place);
-        while (hPtr) {
-            ivPtr = (ItclVariable*)Tcl_GetHashValue(hPtr);
-
-            Tcl_DStringSetLength(&buffer, 0);
-            Tcl_DStringAppend(&buffer, Tcl_GetString(ivPtr->namePtr), -1);
-            nsPtr = iclsPtr2->nsPtr;
-
-            while (1) {
-                hPtr = Tcl_FindHashEntry(&iclsPtr->resolveVars, Tcl_DStringValue(&buffer));
-                if (hPtr) {
-                    vlookup = (ItclVarLookup *)Tcl_GetHashValue(hPtr);
-    
-                    //!!!
-                    printf("    **** %p : %s : %s -> %s, (%d) %p\n", iclsPtr2, Tcl_GetString(iclsPtr2->fullNamePtr), Tcl_DStringValue(&buffer), vlookup->leastQualName ? vlookup->leastQualName : "<NULL>", vlookup->usage, vlookup);
-                }
-                if (nsPtr == NULL) {
-                    break;
-                }
-                Tcl_DStringSetLength(&buffer2, 0);
-                Tcl_DStringAppend(&buffer2, Tcl_DStringValue(&buffer), -1);
-                Tcl_DStringSetLength(&buffer, 0);
-                Tcl_DStringAppend(&buffer, nsPtr->name, -1);
-                Tcl_DStringAppend(&buffer, "::", -1);
-                Tcl_DStringAppend(&buffer, Tcl_DStringValue(&buffer2), -1);
-
-                nsPtr = nsPtr->parentPtr;
-            }
-
-            hPtr = Tcl_NextHashEntry(&place);
-        }
-        iclsPtr2 = Itcl_AdvanceHierIter(&hier);
-    }
-    Itcl_DeleteHierIter(&hier);
-#endif
+	Itcl_DeleteHierIter(&hier);
 
 	Tcl_DStringFree(&buffer);
 	Tcl_DStringFree(&buffer2);
@@ -1953,10 +1886,8 @@ ItclResolveVarEntry(
 	if (reshPtr == NULL) {
 	    reshPtr = Tcl_FindHashEntry(&iclsPtr->resolveVars, lookupName);
 	}
-	//!!! printf("====ret======== %p : %s ===== \n", reshPtr, reshPtr && ((ItclVarLookup*)Tcl_GetHashValue(reshPtr))->leastQualName ? ((ItclVarLookup*)Tcl_GetHashValue(reshPtr))->leastQualName : "<NULL>");
 	return reshPtr;
     }
-#endif
 }
 
 /*
