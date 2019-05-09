@@ -1510,7 +1510,7 @@ ItclBiClassUnknownCmd(
 		Tcl_DecrRefCount(listPtr);
 	    }
 	    if (result == TCL_ERROR) {
-		resStr = Tcl_GetStringResult(interp);
+		resStr = Tcl_GetString(Tcl_GetObjResult(interp));
 		/* FIXME ugly hack at the moment !! */
 		if (strncmp(resStr, "wrong # args: should be ", 24) == 0) {
 		    resPtr = Tcl_NewStringObj("", -1);
@@ -1809,7 +1809,7 @@ ItclUnknownGuts(
     if (result == TCL_OK) {
         return TCL_OK;
     }
-    resStr = Tcl_GetStringResult(interp);
+    resStr = Tcl_GetString(Tcl_GetObjResult(interp));
     /* FIXME ugly hack at the moment !! */
     if (strncmp(resStr, "wrong # args: should be ", 24) == 0) {
         resPtr = Tcl_NewStringObj("", -1);
@@ -2994,7 +2994,7 @@ Itcl_BiInstallComponentCmd(
         if (result != TCL_OK) {
             return result;
         }
-        componentValue = Tcl_GetStringResult(interp);
+        componentValue = Tcl_GetString(Tcl_GetObjResult(interp));
         objPtr = Tcl_NewStringObj(ITCL_VARIABLES_NAMESPACE, -1);
 	Tcl_AppendToObj(objPtr,
 		(Tcl_GetObjectNamespace(contextIclsPtr->oPtr))->fullName, -1);
@@ -3769,7 +3769,7 @@ Itcl_BiIgnoreComponentOptionCmd(
 		    if (result == TCL_OK) {
 		        ItclSetInstanceVar(interp, "itcl_options",
 		                Tcl_GetString(objv[idx]),
-			        Tcl_GetStringResult(interp), ioPtr, iclsPtr);
+		                Tcl_GetString(Tcl_GetObjResult(interp)), ioPtr, iclsPtr);
 		    }
                 }
             }

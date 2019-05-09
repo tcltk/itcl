@@ -793,7 +793,7 @@ Itcl_BiInfoClassOptionsCmd(
     FOREACH_HASH_VALUE(ioptPtr, tablePtr) {
 	name = Tcl_GetString(ioptPtr->namePtr);
 	if ((pattern == NULL) ||
-                 Tcl_StringMatch(name, pattern)) {
+                 Tcl_StringCaseMatch(name, pattern, 0)) {
             Tcl_ListObjAppendElement(interp, listPtr,
 	            Tcl_NewStringObj(Tcl_GetString(ioptPtr->namePtr), -1));
         }
@@ -803,7 +803,7 @@ Itcl_BiInfoClassOptionsCmd(
         name = Tcl_GetString(idoPtr->namePtr);
 	if (strcmp(name, "*") != 0) {
 	    if ((pattern == NULL) ||
-                    Tcl_StringMatch(name, pattern)) {
+                    Tcl_StringCaseMatch(name, pattern, 0)) {
                 Tcl_ListObjAppendElement(interp, listPtr,
 	                Tcl_NewStringObj(Tcl_GetString(idoPtr->namePtr), -1));
 	    }
@@ -833,7 +833,7 @@ Itcl_BiInfoClassOptionsCmd(
 		    if (hPtr2 == NULL) {
 			name = Tcl_GetString(objPtr);
 	                if ((pattern == NULL) ||
-                                 Tcl_StringMatch(name, pattern)) {
+                                 Tcl_StringCaseMatch(name, pattern, 0)) {
 		            Tcl_ListObjAppendElement(interp, listPtr, objPtr);
 		        }
 		    }
@@ -1591,7 +1591,7 @@ Itcl_BiInfoVarsCmd(
 	    if ((ivPtr->flags & ITCL_VARIABLE) != 0) {
 		name = Tcl_GetString(ivPtr->namePtr);
                 if ((pattern == NULL) ||
-		        Tcl_StringMatch((const char *)name, pattern)) {
+		        Tcl_StringCaseMatch((const char *)name, pattern, 0)) {
 	            Tcl_ListObjAppendElement(interp, listPtr, ivPtr->namePtr);
 	        }
             }
@@ -3266,12 +3266,12 @@ Itcl_BiInfoMethodsCmd(
     }
     listPtr = Tcl_NewListObj(0, NULL);
     name = "destroy";
-    if ((pattern == NULL) || Tcl_StringMatch((const char *)name, pattern)) {
+    if ((pattern == NULL) || Tcl_StringCaseMatch((const char *)name, pattern, 0)) {
         Tcl_ListObjAppendElement(interp, listPtr,
                 Tcl_NewStringObj(name, -1));
     }
     name = "info";
-    if ((pattern == NULL) || Tcl_StringMatch((const char *)name, pattern)) {
+    if ((pattern == NULL) || Tcl_StringCaseMatch((const char *)name, pattern, 0)) {
         Tcl_ListObjAppendElement(interp, listPtr,
                 Tcl_NewStringObj(name, -1));
     }
@@ -3292,7 +3292,7 @@ Itcl_BiInfoMethodsCmd(
 		!(imPtr->flags & ITCL_COMMON) &&
 	        !(imPtr->codePtr->flags & ITCL_BUILTIN)) {
 	    if ((pattern == NULL) ||
-                     Tcl_StringMatch((const char *)name, pattern)) {
+                     Tcl_StringCaseMatch((const char *)name, pattern, 0)) {
 	        Tcl_ListObjAppendElement(interp, listPtr,
 		        Tcl_NewStringObj(Tcl_GetString(imPtr->namePtr), -1));
 	    }
@@ -3311,7 +3311,7 @@ Itcl_BiInfoMethodsCmd(
 	}
         if (idmPtr->flags & ITCL_METHOD) {
 	    if ((pattern == NULL) ||
-                     Tcl_StringMatch((const char *)name, pattern)) {
+                     Tcl_StringCaseMatch((const char *)name, pattern, 0)) {
 	        Tcl_ListObjAppendElement(interp, listPtr,
 		        Tcl_NewStringObj(Tcl_GetString(idmPtr->namePtr), -1));
 	    }
@@ -3385,7 +3385,7 @@ Itcl_BiInfoOptionsCmd(
     FOREACH_HASH_VALUE(ioptPtr, tablePtr) {
 	name = Tcl_GetString(ioptPtr->namePtr);
 	if ((pattern == NULL) ||
-                 Tcl_StringMatch(name, pattern)) {
+                 Tcl_StringCaseMatch(name, pattern, 0)) {
             Tcl_ListObjAppendElement(interp, listPtr,
 	            Tcl_NewStringObj(Tcl_GetString(ioptPtr->namePtr), -1));
         }
@@ -3399,7 +3399,7 @@ Itcl_BiInfoOptionsCmd(
         name = Tcl_GetString(idoPtr->namePtr);
 	if (strcmp(name, "*") != 0) {
 	    if ((pattern == NULL) ||
-                    Tcl_StringMatch(name, pattern)) {
+                    Tcl_StringCaseMatch(name, pattern, 0)) {
                 Tcl_ListObjAppendElement(interp, listPtr,
 	                Tcl_NewStringObj(Tcl_GetString(idoPtr->namePtr), -1));
 	    }
@@ -3429,7 +3429,7 @@ Itcl_BiInfoOptionsCmd(
 		    if (hPtr2 == NULL) {
 			name = Tcl_GetString(objPtr);
 	                if ((pattern == NULL) ||
-                                 Tcl_StringMatch(name, pattern)) {
+                                 Tcl_StringCaseMatch(name, pattern, 0)) {
 		            Tcl_ListObjAppendElement(interp, listPtr, objPtr);
 		        }
 		    }
@@ -3484,7 +3484,7 @@ Itcl_BiInfoTypesCmd(
 	if (iclsPtr->flags & ITCL_TYPE) {
 	    name = Tcl_GetString(iclsPtr->namePtr);
 	    if ((pattern == NULL) ||
-                     Tcl_StringMatch(name, pattern)) {
+                     Tcl_StringCaseMatch(name, pattern, 0)) {
                 Tcl_ListObjAppendElement(interp, listPtr,
 		        Tcl_NewStringObj(Tcl_GetString(iclsPtr->namePtr), -1));
             }
@@ -3553,7 +3553,7 @@ Itcl_BiInfoComponentsCmd(
         FOREACH_HASH_VALUE(icPtr, &iclsPtr2->components) {
             name = Tcl_GetString(icPtr->namePtr);
             if ((pattern == NULL) ||
-                     Tcl_StringMatch(name, pattern)) {
+                     Tcl_StringCaseMatch(name, pattern, 0)) {
                 Tcl_ListObjAppendElement(interp, listPtr,
 	                Tcl_NewStringObj(Tcl_GetString(icPtr->namePtr), -1));
             }
@@ -3836,17 +3836,17 @@ Itcl_BiInfoTypeMethodsCmd(
     }
     listPtr = Tcl_NewListObj(0, NULL);
     name = "create";
-    if ((pattern == NULL) || Tcl_StringMatch((const char *)name, pattern)) {
+    if ((pattern == NULL) || Tcl_StringCaseMatch((const char *)name, pattern, 0)) {
         Tcl_ListObjAppendElement(interp, listPtr,
 	        Tcl_NewStringObj(name, -1));
     }
     name = "destroy";
-    if ((pattern == NULL) || Tcl_StringMatch((const char *)name, pattern)) {
+    if ((pattern == NULL) || Tcl_StringCaseMatch((const char *)name, pattern, 0)) {
         Tcl_ListObjAppendElement(interp, listPtr,
                 Tcl_NewStringObj(name, -1));
     }
     name = "info";
-    if ((pattern == NULL) || Tcl_StringMatch((const char *)name, pattern)) {
+    if ((pattern == NULL) || Tcl_StringCaseMatch((const char *)name, pattern, 0)) {
         Tcl_ListObjAppendElement(interp, listPtr,
                 Tcl_NewStringObj(name, -1));
     }
@@ -3866,7 +3866,7 @@ Itcl_BiInfoTypeMethodsCmd(
 	}
         if (imPtr->flags & ITCL_TYPE_METHOD) {
 	    if ((pattern == NULL) ||
-                     Tcl_StringMatch((const char *)name, pattern)) {
+                     Tcl_StringCaseMatch((const char *)name, pattern, 0)) {
 	        Tcl_ListObjAppendElement(interp, listPtr,
 		        Tcl_NewStringObj(Tcl_GetString(imPtr->namePtr), -1));
 	    }
@@ -3888,7 +3888,7 @@ Itcl_BiInfoTypeMethodsCmd(
 	}
         if (idmPtr->flags & ITCL_TYPE_METHOD) {
 	    if ((pattern == NULL) ||
-                     Tcl_StringMatch((const char *)name, pattern)) {
+                     Tcl_StringCaseMatch((const char *)name, pattern, 0)) {
 	        Tcl_ListObjAppendElement(interp, listPtr,
 		        Tcl_NewStringObj(Tcl_GetString(idmPtr->namePtr), -1));
 	    }
@@ -3945,7 +3945,7 @@ Itcl_BiInfoTypeVarsCmd(
     listPtr = Tcl_NewListObj(0, NULL);
     FOREACH_HASH_VALUE(ivPtr, &iclsPtr->variables) {
         if ((pattern == NULL) ||
-            Tcl_StringMatch(Tcl_GetString(ivPtr->namePtr), pattern)) {
+            Tcl_StringCaseMatch(Tcl_GetString(ivPtr->namePtr), pattern, 0)) {
 	    if (ivPtr->flags & ITCL_TYPE_VARIABLE) {
                 Tcl_ListObjAppendElement(interp, listPtr, ivPtr->fullNamePtr);
 	    }
@@ -4379,7 +4379,7 @@ Itcl_BiInfoInstancesCmd(
 	        Tcl_GetCommandFullName(interp, ioPtr->accessCmd, objPtr);
             }
 	    if ((pattern == NULL) ||
-                     Tcl_StringMatch(Tcl_GetString(objPtr), pattern)) {
+                     Tcl_StringCaseMatch(Tcl_GetString(objPtr), pattern, 0)) {
 	        Tcl_ListObjAppendElement(interp, listPtr, objPtr);
 	    } else {
 	        Tcl_DecrRefCount(objPtr);
@@ -4442,7 +4442,7 @@ Itcl_BiInfoDelegatedOptionsCmd(
 	        (ITCL_TYPE|ITCL_WIDGETADAPTOR|ITCL_WIDGET|ITCL_ECLASS)) {
 	    name = Tcl_GetString(idoPtr->namePtr);
 	    if ((pattern == NULL) ||
-                     Tcl_StringMatch(name, pattern)) {
+                     Tcl_StringCaseMatch(name, pattern, 0)) {
 		objPtr = Tcl_NewListObj(0, NULL);
                 Tcl_ListObjAppendElement(interp, objPtr,
 	                idoPtr->namePtr);
@@ -4514,7 +4514,7 @@ Itcl_BiInfoDelegatedMethodsCmd(
 	        (ITCL_TYPE|ITCL_WIDGETADAPTOR|ITCL_WIDGET|ITCL_ECLASS)) {
 	    name = Tcl_GetString(idmPtr->namePtr);
 	    if ((pattern == NULL) ||
-                     Tcl_StringMatch(name, pattern)) {
+                     Tcl_StringCaseMatch(name, pattern, 0)) {
 		if ((idmPtr->flags & ITCL_TYPE_METHOD) == 0) {
 		    objPtr = Tcl_NewListObj(0, NULL);
                     Tcl_ListObjAppendElement(interp, objPtr,
@@ -4588,7 +4588,7 @@ Itcl_BiInfoDelegatedTypeMethodsCmd(
 	        (ITCL_TYPE|ITCL_WIDGETADAPTOR|ITCL_WIDGET|ITCL_ECLASS)) {
 	    name = Tcl_GetString(idmPtr->namePtr);
 	    if ((pattern == NULL) ||
-                     Tcl_StringMatch(name, pattern)) {
+                     Tcl_StringCaseMatch(name, pattern, 0)) {
 		if (idmPtr->flags & ITCL_TYPE_METHOD) {
 		    objPtr = Tcl_NewListObj(0, NULL);
                     Tcl_ListObjAppendElement(interp, objPtr,

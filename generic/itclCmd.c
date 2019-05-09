@@ -257,7 +257,7 @@ Itcl_FindClassesCmd(
 
                 if (newEntry &&
 			((pattern == NULL) ||
-			Tcl_StringMatch((const char *)cmdName, pattern))) {
+			Tcl_StringCaseMatch((const char *)cmdName, pattern, 0))) {
                     Tcl_ListObjAppendElement((Tcl_Interp*)NULL,
 			    Tcl_GetObjResult(interp), objPtr);
                 } else {
@@ -440,8 +440,8 @@ Itcl_FindObjectsCmd(
 
                 match = 0;
 		if (newEntry &&
-			(!pattern || Tcl_StringMatch((const char *)cmdName,
-			pattern))) {
+			(!pattern || Tcl_StringCaseMatch((const char *)cmdName,
+			pattern, 0))) {
                     if ((iclsPtr == NULL) ||
 		            (contextIoPtr->iclsPtr == iclsPtr)) {
                         if (isaDefn == NULL) {
