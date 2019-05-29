@@ -253,7 +253,7 @@ Itcl_ParseInit(
     Tcl_CreateObjCommand(interp, "::itcl::configbody", Itcl_ConfigBodyCmd,
         (ClientData)NULL, (Tcl_CmdDeleteProc*)NULL);
 
-    Itcl_EventuallyFree((ClientData)infoPtr, ItclDelObjectInfo);
+    Itcl_EventuallyFree((ClientData)infoPtr, (Tcl_FreeProc *) ItclDelObjectInfo);
 
     /*
      *  Create the "itcl::find" command for high-level queries.
@@ -2158,8 +2158,8 @@ ItclInitClassCommon(
 	const char *val;
         Tcl_DStringAppend(&buffer, "::", -1);
         Tcl_DStringAppend(&buffer, Tcl_GetString(ivPtr->namePtr), -1);
-        val = Tcl_SetVar(interp,
-	        Tcl_DStringValue(&buffer), initStr,
+        val = Tcl_SetVar2(interp,
+	        Tcl_DStringValue(&buffer), NULL, initStr,
                 TCL_NAMESPACE_ONLY);
 
         if (!val) {
@@ -2931,9 +2931,9 @@ Itcl_ClassOptionCmd(
 
     if ((objc > 1) && (strcmp(Tcl_GetString(objv[1]), "add") == 0)) {
 	tkVersion = "8.6";
-        tkPackage = Tcl_PkgPresent(interp, "Tk", tkVersion, 0);
+        tkPackage = Tcl_PkgPresentEx(interp, "Tk", tkVersion, 0, NULL);
         if (tkPackage == NULL) {
-	    tkPackage = Tcl_PkgRequire(interp, "Tk", tkVersion, 0);
+	    tkPackage = Tcl_PkgRequireEx(interp, "Tk", tkVersion, 0, NULL);
 	}
 	if (tkPackage == NULL) {
 	    Tcl_AppendResult(interp, "cannot load package Tk", tkVersion,
@@ -3799,7 +3799,7 @@ Itcl_HandleDelegateOptionCmd(
         idoPtr->namePtr = optionNamePtr;
     }
     Itcl_PreserveData(idoPtr);
-    Itcl_EventuallyFree((ClientData)idoPtr, ItclDeleteDelegatedOption);
+    Itcl_EventuallyFree((ClientData)idoPtr, (Tcl_FreeProc *) ItclDeleteDelegatedOption);
     idoPtr->icPtr = icPtr;
     idoPtr->asPtr = targetPtr;
     if (idoPtr->asPtr != NULL) {

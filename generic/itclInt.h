@@ -48,6 +48,17 @@
 #endif
 
 /*
+ * MSVC 8.0 started to mark many standard C library functions depreciated
+ * including the *printf family and others. Tell it to shut up.
+ * (_MSC_VER is 1200 for VC6, 1300 or 1310 for vc7.net, 1400 for 8.0)
+ */
+#if defined(_MSC_VER) && (_MSC_VER >= 1400)
+#   pragma warning(disable:4244)
+#   pragma warning(disable:4267)
+#   pragma warning(disable:4996)
+#endif
+
+/*
  * Since the Tcl/Tk distribution doesn't perform any asserts,
  * dynamic loading can fail to find the __assert function.
  * As a workaround, we'll include our own.

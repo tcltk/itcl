@@ -82,8 +82,8 @@ Initialize (
      *  Set up the variables containing version info.
      */
 
-    Tcl_SetVar(interp, "::itcl::widget::version", ITCL_VERSION, TCL_NAMESPACE_ONLY);
-    Tcl_SetVar(interp, "::itcl::widget::patchLevel", ITCL_PATCH_LEVEL,
+    Tcl_SetVar2(interp, "::itcl::widget::version", NULL, ITCL_VERSION, TCL_NAMESPACE_ONLY);
+    Tcl_SetVar2(interp, "::itcl::widget::patchLevel", NULL, ITCL_PATCH_LEVEL,
             TCL_NAMESPACE_ONLY);
 
 
@@ -91,7 +91,7 @@ Initialize (
      *  Package is now loaded.
      */
 
-    return Tcl_PkgProvide(interp, "itclwidget", ITCL_PATCH_LEVEL);
+    return Tcl_PkgProvideEx(interp, "itclwidget", ITCL_PATCH_LEVEL, NULL);
 }
 
 /*

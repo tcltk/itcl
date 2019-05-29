@@ -55,7 +55,7 @@ ItclReleaseIMF(
 {
     ItclMemberFunc *imPtr = (ItclMemberFunc *)clientData;
 
-    if (--imPtr->refCount == 0) {
+    if (imPtr->refCount-- <= 1) {
 	Itcl_DeleteMemberFunc(clientData);
     }
 }
@@ -71,7 +71,7 @@ void
 ItclReleaseMemberCode(
     ItclMemberCode *mcodePtr)
 {
-    if (--mcodePtr->refCount == 0) {
+    if (mcodePtr->refCount-- <= 1) {
 	ItclFreeMemberCode(mcodePtr);
     }
 }
@@ -1475,7 +1475,7 @@ Itcl_UnsetContext(
     Itcl_DeleteStack(stackPtr);
     ckfree((char *) stackPtr);
     Tcl_DeleteHashEntry(hPtr);
-    if (--contextPtr->refCount) {
+    if (contextPtr->refCount-- <= 1) {
 	Tcl_Panic("frame context ref count not zero!");
     }
     ckfree((char *)contextPtr);
@@ -2595,8 +2595,7 @@ ItclAfterCallMethod(
         }
     }
     
-    callContextPtr->refCount--;
-    if (callContextPtr->refCount == 0) {
+    if (callContextPtr->refCount-- <= 1) {
         if (callContextPtr->ioPtr != NULL) {
 	    hPtr = Tcl_FindHashEntry(&callContextPtr->ioPtr->contextCache,
 	            (char *)callContextPtr->imPtr);
