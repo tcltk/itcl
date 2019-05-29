@@ -206,7 +206,7 @@ proc test {{reptime 1000}} {
 if {[info exists ::argv0] && [file tail $::argv0] eq [file tail [info script]]} {
   array set in {-time 500 -lib {} -load {}}
   array set in $argv
-  if {$in(-load) eq ""} {
+  if {$in(-load) ne ""} {
     eval $in(-load)
   }
   if {![namespace exists ::itcl]} {
