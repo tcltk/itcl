@@ -83,7 +83,7 @@ ItclReleaseObject(
 {
     ItclObject *ioPtr = (ItclObject *)clientData;
 
-    if (--ioPtr->refCount == 0) {
+    if (ioPtr->refCount-- <= 1) {
 	ItclFreeObject((char *) clientData);
     }
 }
@@ -1041,8 +1041,8 @@ ItclInitObjectVariables(
 		            (ClientData)ioPtr);
 		    } else {
 	              if (ivPtr->init != NULL) {
-			if (Tcl_SetVar(interp,
-			        Tcl_GetString(ivPtr->namePtr),
+			if (Tcl_SetVar2(interp,
+			        Tcl_GetString(ivPtr->namePtr), NULL,
 			        Tcl_GetString(ivPtr->init),
 				TCL_NAMESPACE_ONLY) == NULL) {
 			    goto errorCleanup;
@@ -2209,7 +2209,7 @@ ItclTraceThisVar(
                 contextIoPtr->accessCmd, objPtr);
         }
         objName = Tcl_GetString(objPtr);
-        Tcl_SetVar(interp, (const char *)name1, objName, 0);
+        Tcl_SetVar2(interp, name1, NULL, objName, 0);
 
         Tcl_DecrRefCount(objPtr);
         return NULL;
@@ -2267,7 +2267,7 @@ ItclTraceWinVar(
 	}
         Tcl_SetStringObj(objPtr, tail, -1);
         objName = Tcl_GetString(objPtr);
-        Tcl_SetVar(interp, (const char *)name1, objName, 0);
+        Tcl_SetVar2(interp, name1, NULL, objName, 0);
 
         Tcl_DecrRefCount(objPtr);
         return NULL;
@@ -2320,7 +2320,7 @@ ItclTraceTypeVar(
         Tcl_SetStringObj(objPtr,
         Tcl_GetCurrentNamespace(contextIoPtr->iclsPtr->interp)->fullName, -1);
         objName = Tcl_GetString(objPtr);
-        Tcl_SetVar(interp, (const char *)name1, objName, 0);
+        Tcl_SetVar2(interp, name1, NULL, objName, 0);
 
         Tcl_DecrRefCount(objPtr);
         return NULL;
@@ -2387,7 +2387,7 @@ ItclTraceSelfVar(
                     contextIoPtr->accessCmd, objPtr);
         }
         objName = Tcl_GetString(objPtr);
-        Tcl_SetVar(interp, (const char *)name1, objName, 0);
+        Tcl_SetVar2(interp, name1, NULL, objName, 0);
 
         Tcl_DecrRefCount(objPtr);
         return NULL;
@@ -2439,7 +2439,7 @@ ItclTraceSelfnsVar(
         Tcl_AppendToObj(objPtr,
                 Tcl_GetString(contextIoPtr->iclsPtr->fullNamePtr), -1);
         objName = Tcl_GetString(objPtr);
-        Tcl_SetVar(interp, (const char *)name1, objName, 0);
+        Tcl_SetVar2(interp, name1, NULL, objName, 0);
 
         Tcl_DecrRefCount(objPtr);
         return NULL;

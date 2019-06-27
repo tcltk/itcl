@@ -1778,7 +1778,7 @@ Itcl_EnsembleCmd(
             (char*)NULL, TCL_GLOBAL_ONLY);
 
         if (errInfo) {
-            Tcl_AddObjErrorInfo(interp, (const char *)errInfo, -1);
+        	Tcl_AppendObjToErrorInfo(interp, Tcl_NewStringObj(errInfo, -1));
         }
 
         if (objc == 3) {

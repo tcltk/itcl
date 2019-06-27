@@ -101,7 +101,7 @@ ItclBiInfoHullTypesCmd(
 	name = *cPtrPtr;
         objPtr = Tcl_NewStringObj(name, -1);
         if ((pattern == NULL) ||
-                 Tcl_StringMatch(name, pattern)) {
+                 Tcl_StringCaseMatch(name, pattern, 0)) {
             Tcl_ListObjAppendElement(interp, listPtr, objPtr);
         }
         cPtrPtr++;
@@ -149,7 +149,7 @@ ItclBiInfoWidgetClassesCmd(
 	        if (isNew) {
 	            name = Tcl_GetString(iclsPtr->widgetClassPtr);
 	            if ((pattern == NULL) ||
-                             Tcl_StringMatch(name, pattern)) {
+                             Tcl_StringCaseMatch(name, pattern, 0)) {
                         Tcl_ListObjAppendElement(interp, listPtr,
 		                iclsPtr->widgetClassPtr);
 	            }
@@ -194,7 +194,7 @@ ItclBiInfoWidgetsCmd(
 	    name = Tcl_GetString(iclsPtr->namePtr);
 	    Tcl_IncrRefCount(iclsPtr->namePtr);
 	    if ((pattern == NULL) ||
-                     Tcl_StringMatch(name, pattern)) {
+                     Tcl_StringCaseMatch(name, pattern, 0)) {
                 Tcl_ListObjAppendElement(interp, listPtr, iclsPtr->namePtr);
             }
         }
@@ -234,7 +234,7 @@ ItclBiInfoWidgetAdaptorsCmd(
 	if (iclsPtr->flags & ITCL_WIDGETADAPTOR) {
 	    name = Tcl_GetString(iclsPtr->namePtr);
 	    if ((pattern == NULL) ||
-                     Tcl_StringMatch(name, pattern)) {
+                     Tcl_StringCaseMatch(name, pattern, 0)) {
                 Tcl_ListObjAppendElement(interp, listPtr, iclsPtr->namePtr);
             }
         }

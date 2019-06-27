@@ -257,7 +257,7 @@ Itcl_FindClassesCmd(
 
                 if (newEntry &&
 			((pattern == NULL) ||
-			Tcl_StringMatch((const char *)cmdName, pattern))) {
+			Tcl_StringCaseMatch((const char *)cmdName, pattern, 0))) {
                     Tcl_ListObjAppendElement((Tcl_Interp*)NULL,
 			    Tcl_GetObjResult(interp), objPtr);
                 } else {
@@ -440,8 +440,8 @@ Itcl_FindObjectsCmd(
 
                 match = 0;
 		if (newEntry &&
-			(!pattern || Tcl_StringMatch((const char *)cmdName,
-			pattern))) {
+			(!pattern || Tcl_StringCaseMatch((const char *)cmdName,
+			pattern, 0))) {
                     if ((iclsPtr == NULL) ||
 		            (contextIoPtr->iclsPtr == iclsPtr)) {
                         if (isaDefn == NULL) {
@@ -1066,7 +1066,7 @@ Itcl_IsObjectCmd(
      *    Need the NULL test, or the test will fail if cmd is NULL
      */
     if (cmd == NULL || ! Itcl_IsObject(cmd)) {
-        Tcl_SetObjResult(interp, Tcl_NewBooleanObj(0));
+        Tcl_SetObjResult(interp, Tcl_NewWideIntObj(0));
 	ckfree((char *)cmdName);
         return TCL_OK;
     }
@@ -1084,7 +1084,7 @@ Itcl_IsObjectCmd(
 	   contextIoPtr = iclsPtr->infoPtr->currIoPtr;
 	}
         if (! Itcl_ObjectIsa(contextIoPtr, iclsPtr)) {
-            Tcl_SetObjResult(interp, Tcl_NewBooleanObj(0));
+            Tcl_SetObjResult(interp, Tcl_NewWideIntObj(0));
 	    ckfree((char *)cmdName);
             return TCL_OK;
         }
@@ -1094,7 +1094,7 @@ Itcl_IsObjectCmd(
     /*
      *    Got this far, so assume that it is a valid object
      */
-    Tcl_SetObjResult(interp, Tcl_NewBooleanObj(1));
+    Tcl_SetObjResult(interp, Tcl_NewWideIntObj(1));
     ckfree(cmdName);
 
     return TCL_OK;
@@ -1154,9 +1154,9 @@ Itcl_IsClassCmd(
      *    isn't a class
      */
     if (iclsPtr != NULL) {
-        Tcl_SetObjResult(interp, Tcl_NewBooleanObj(1));
+        Tcl_SetObjResult(interp, Tcl_NewWideIntObj(1));
     } else {
-        Tcl_SetObjResult(interp, Tcl_NewBooleanObj(0));
+        Tcl_SetObjResult(interp, Tcl_NewWideIntObj(0));
     }
 
     ckfree(cname);

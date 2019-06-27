@@ -11,7 +11,7 @@ ITCLAPI const char *Itcl_InitStubs(
 	Tcl_Interp *, const char *version, int exact);
 #else
 
-#define Itcl_InitStubs(interp, version, exact) Tcl_PkgRequire(interp,"itcl",version,exact)
+#define Itcl_InitStubs(interp, version, exact) Tcl_PkgRequireEx(interp,"itcl",version,exact,NULL)
 
 #endif
 

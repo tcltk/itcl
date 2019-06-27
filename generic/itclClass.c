@@ -57,7 +57,7 @@ ItclReleaseClass(
 {
     ItclClass *iclsPtr = (ItclClass *)clientData;
 
-    if (--iclsPtr->refCount == 0) {
+    if (iclsPtr->refCount-- <= 1) {
 	ItclFreeClass((char *) clientData);
     }
 }
@@ -2038,7 +2038,7 @@ Itcl_CreateVariable(
 
     Tcl_SetHashValue(hPtr, (ClientData)ivPtr);
     Itcl_PreserveData((ClientData)ivPtr);
-    Itcl_EventuallyFree((ClientData)ivPtr, Itcl_DeleteVariable);
+    Itcl_EventuallyFree((ClientData)ivPtr, (Tcl_FreeProc *) Itcl_DeleteVariable);
 
     *ivPtrPtr = ivPtr;
     return TCL_OK;
@@ -2092,7 +2092,7 @@ Itcl_CreateOption(
     Tcl_IncrRefCount(ioptPtr->fullNamePtr);
     Tcl_SetHashValue(hPtr, (ClientData)ioptPtr);
     Itcl_PreserveData((ClientData)ioptPtr);
-    Itcl_EventuallyFree((ClientData)ioptPtr, ItclDeleteOption);
+    Itcl_EventuallyFree((ClientData)ioptPtr, (Tcl_FreeProc *) ItclDeleteOption);
     return TCL_OK;
 }
 
