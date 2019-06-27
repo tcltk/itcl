@@ -1475,7 +1475,7 @@ Itcl_UnsetContext(
     Itcl_DeleteStack(stackPtr);
     ckfree((char *) stackPtr);
     Tcl_DeleteHashEntry(hPtr);
-    if (contextPtr->refCount-- <= 1) {
+    if (contextPtr->refCount-- > 1) {
 	Tcl_Panic("frame context ref count not zero!");
     }
     ckfree((char *)contextPtr);
