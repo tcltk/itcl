@@ -261,7 +261,7 @@ gdb:
 gdb-test: binaries libraries 
 	$(TCLSH_ENV) $(PKG_ENV) $(GDB) \
 	    --args $(TCLSH_PROG) `@CYGPATH@ $(srcdir)/tests/all.tcl` \
-	    $(TESTFLAGS) -singleproc 1 -load "\"$(TESTLOADARG)\""
+	    $(TESTFLAGS) -singleproc 1 -load "$(TESTLOADARG)"
 
 valgrind: binaries libraries
 	$(TCLSH_ENV) $(PKG_ENV) $(VALGRIND) $(VALGRINDARGS) $(TCLSH_PROG) \
