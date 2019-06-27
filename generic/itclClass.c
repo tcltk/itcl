@@ -1120,7 +1120,6 @@ ItclFreeClass(
      *  Delete all function definitions.
      */
     FOREACH_HASH_VALUE(imPtr, &iclsPtr->functions) {
-	imPtr->iclsPtr = NULL;
         ItclReleaseIMF(imPtr);
     }
     Tcl_DeleteHashTable(&iclsPtr->functions);
@@ -2453,21 +2452,22 @@ ItclDeleteFunction(
 {
     Tcl_HashEntry *hPtr;
 
-if (imPtr->iclsPtr) {
-    hPtr = Tcl_FindHashEntry(&imPtr->iclsPtr->infoPtr->procMethods,
-	    (char *) imPtr->tmPtr);
-    if (hPtr != NULL) {
-	Tcl_DeleteHashEntry(hPtr);
-    }
-}
-    hPtr = Tcl_FindHashEntry(&imPtr->infoPtr->classes, (char *)imPtr->iclsPtr);
-    if (hPtr != NULL) {
-	/* unlink owerself from list of class functions */
-        hPtr = Tcl_FindHashEntry(&imPtr->iclsPtr->functions,
-                (char *)imPtr->namePtr);
-        if (hPtr != NULL) {
-            Tcl_DeleteHashEntry(hPtr);
-        }
+    if (imPtr->iclsPtr) {
+	hPtr = Tcl_FindHashEntry(&imPtr->iclsPtr->infoPtr->procMethods,
+		    (char *) imPtr->tmPtr);
+	if (hPtr != NULL) {
+	    Tcl_DeleteHashEntry(hPtr);
+	}
+	hPtr = Tcl_FindHashEntry(&imPtr->infoPtr->classes, (char *)imPtr->iclsPtr);
+	if (hPtr != NULL) {
+	    /* unlink owerself from list of class functions */
+	    hPtr = Tcl_FindHashEntry(&imPtr->iclsPtr->functions,
+		    (char *)imPtr->namePtr);
+	    if (hPtr != NULL) {
+		Tcl_DeleteHashEntry(hPtr);
+	    }
+	}
+	imPtr->iclsPtr = NULL;
     }
     if (imPtr->codePtr != NULL) {
         ItclReleaseMemberCode(imPtr->codePtr);
