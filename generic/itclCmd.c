@@ -1826,11 +1826,6 @@ Itcl_AddComponentCmd(
                 vlookup->leastQualName =
                     Tcl_GetHashKey(&contextIclsPtr->resolveVars, hPtr);
             }
-#ifdef NEW_PROTO_RESOLVER
-            Itcl_RegisterClassVariable(contextIclsPtr->infoPtr->interp,
-                     contextIclsPtr->nsPtr, Tcl_DStringValue(&buffer),
-                     vlookup->classVarInfoPtr);
-#endif
         }
 
         if (nsPtr == NULL) {

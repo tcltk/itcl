@@ -435,16 +435,6 @@ Itcl_CreateClass(
     }
 
     if (iclsPtr->infoPtr->useOldResolvers) {
-#ifdef NEW_PROTO_RESOLVER
-        Itcl_SetNamespaceResolvers(ooNs,
-                (Tcl_ResolveCmdProc*)Itcl_ClassCmdResolver2,
-                (Tcl_ResolveVarProc*)Itcl_ClassVarResolver2,
-                (Tcl_ResolveCompiledVarProc*)Itcl_ClassCompiledVarResolver2);
-        Itcl_SetNamespaceResolvers(classNs,
-                (Tcl_ResolveCmdProc*)Itcl_ClassCmdResolver2,
-                (Tcl_ResolveVarProc*)Itcl_ClassVarResolver2,
-                (Tcl_ResolveCompiledVarProc*)Itcl_ClassCompiledVarResolver2);
-#else
         Itcl_SetNamespaceResolvers(ooNs,
                 (Tcl_ResolveCmdProc*)Itcl_ClassCmdResolver,
                 (Tcl_ResolveVarProc*)Itcl_ClassVarResolver,
@@ -453,7 +443,6 @@ Itcl_CreateClass(
                 (Tcl_ResolveCmdProc*)Itcl_ClassCmdResolver,
                 (Tcl_ResolveVarProc*)Itcl_ClassVarResolver,
                 (Tcl_ResolveCompiledVarProc*)Itcl_ClassCompiledVarResolver);
-#endif
     } else {
         Tcl_SetNamespaceResolver(ooNs, iclsPtr->resolvePtr);
         Tcl_SetNamespaceResolver(classNs, iclsPtr->resolvePtr);
@@ -1737,10 +1726,6 @@ Itcl_BuildVirtualTables(
     ItclHierIter hier;
     ItclClass *iclsPtr2;
     ItclCmdLookup *clookupPtr;
-#ifdef NEW_PROTO_RESOLVER
-    ItclClassVarInfo *icviPtr;
-    ItclClassCmdInfo *icciPtr;
-#endif
     int newEntry;
 
     Tcl_DStringInit(&buffer);
@@ -1782,9 +1767,6 @@ Itcl_BuildVirtualTables(
     while (iclsPtr2 != NULL) {
         hPtr = Tcl_FirstHashEntry(&iclsPtr2->variables, &place);
         while (hPtr) {
-#ifdef NEW_PROTO_RESOLVER
-            int type = VAR_TYPE_VARIABLE;
-#endif
             ivPtr = (ItclVariable*)Tcl_GetHashValue(hPtr);
 
             vlookup = (ItclVarLookup *)ckalloc(sizeof(ItclVarLookup));
@@ -1799,11 +1781,6 @@ Itcl_BuildVirtualTables(
             vlookup->accessible = (ivPtr->protection != ITCL_PRIVATE ||
 	            ivPtr->iclsPtr == iclsPtr);
 
-	    if (ivPtr->flags & ITCL_COMMON) {
-#ifdef NEW_PROTO_RESOLVER
-	        type = VAR_TYPE_COMMON;
-#endif
-	    }
             /*
              *  If this is a reference to the built-in "this"
              *  variable, then its index is "0".  Otherwise,
@@ -1818,20 +1795,6 @@ Itcl_BuildVirtualTables(
 		    vlookup->varNum = iclsPtr->numInstanceVars++;
 	        }
 	    }
-#ifdef NEW_PROTO_RESOLVER
-	    icviPtr = (ItclClassVarInfo *)ckalloc(
-	            sizeof(ItclClassVarInfo));
-	    icviPtr->type = type;
-	    icviPtr->protection = ivPtr->protection;
-	    icviPtr->nsPtr = iclsPtr->nsPtr;
-	    icviPtr->declaringNsPtr = iclsPtr2->nsPtr;
-	    icviPtr->varNum = vlookup->varNum;
-	    ClientData clientData2;
-            clientData2 = Itcl_RegisterClassVariable(
-	            iclsPtr->infoPtr->interp, iclsPtr2->nsPtr,
-		    Tcl_GetString(ivPtr->namePtr), icviPtr);
-	    vlookup->classVarInfoPtr = clientData2;
-#endif
 /* FIXME !!! should use for var lookup !! */
 
             /*
@@ -1859,11 +1822,6 @@ Itcl_BuildVirtualTables(
                         vlookup->leastQualName =
                             Tcl_GetHashKey(&iclsPtr->resolveVars, hPtr);
                     }
-#ifdef NEW_PROTO_RESOLVER
-                    Itcl_RegisterClassVariable(iclsPtr->infoPtr->interp,
-		        iclsPtr->nsPtr, Tcl_DStringValue(&buffer),
-		        vlookup->classVarInfoPtr);
-#endif
                 }
 
                 if (nsPtr == NULL) {
@@ -1941,24 +1899,6 @@ Itcl_BuildVirtualTables(
 		    memset(clookupPtr, 0, sizeof(ItclCmdLookup));
 		    clookupPtr->imPtr = imPtr;
                     Tcl_SetHashValue(hPtr, (ClientData)clookupPtr);
-#ifdef NEW_PROTO_RESOLVER
-                    int type = CMD_TYPE_METHOD;
-	            if (imPtr->flags & ITCL_COMMON) {
-	                type = CMD_TYPE_PROC;
-	            }
-	            icciPtr = (ItclClassCmdInfo *)ckalloc(
-	                    sizeof(ItclClassCmdInfo));
-	            icciPtr->type = type;
-	            icciPtr->protection = imPtr->protection;
-	            icciPtr->nsPtr = iclsPtr->nsPtr;
-	            icciPtr->declaringNsPtr = iclsPtr2->nsPtr;
-	            ClientData clientData2;
-                    clientData2 = Itcl_RegisterClassCommand(
-	                    iclsPtr->infoPtr->interp, iclsPtr->nsPtr,
-		            Tcl_GetString(imPtr->namePtr), icciPtr);
-		    clookupPtr->classCmdInfoPtr = clientData2;
-		    clookupPtr->cmdPtr = imPtr->accessCmd;
-#endif
                 } else {
 		    Tcl_DecrRefCount(objPtr);
 		}

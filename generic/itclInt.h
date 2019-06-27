@@ -604,14 +604,6 @@ typedef struct ItclMethodVariable {
 #define VAR_TYPE_VARIABLE 	1
 #define VAR_TYPE_COMMON 	2
 
-typedef struct ItclClassVarInfo {
-    int type;
-    int protection;
-    int varNum;
-    Tcl_Namespace *nsPtr;
-    Tcl_Namespace *declaringNsPtr;
-} ItclClassVarInfo;
-
 #define CMD_TYPE_METHOD 	1
 #define CMD_TYPE_PROC 		2
 
@@ -636,7 +628,6 @@ typedef struct ItclVarLookup {
                                * taken from the resolveVars table, so
                                * it shouldn't be freed. */
     int varNum;
-    ItclClassVarInfo *classVarInfoPtr;
     Tcl_Var varPtr;
 } ItclVarLookup;
 
@@ -858,9 +849,6 @@ MODULE_SCOPE ItclRootMethodProc ItclConstructGuts;
 MODULE_SCOPE ItclRootMethodProc ItclInfoGuts;
 
 #include "itcl2TclOO.h"
-#ifdef NEW_PROTO_RESOLVER
-#include "itclVarsAndCmds.h"
-#endif
 
 /*
  * Include all the private API, generated from itcl.decls.
