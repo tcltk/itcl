@@ -751,81 +751,6 @@ ItclInitObjectCommands(
    ItclClass *iclsPtr,
    const char *name)
 {
-#ifdef NEW_PROTO_RESOLVER
-    Tcl_HashEntry *hPtr;
-    Tcl_HashEntry *entry;
-    Tcl_HashSearch place;
-    Tcl_Command cmdPtr;
-    Tcl_Obj *objPtr;
-    Tcl_Namespace *nsPtr;
-    ItclClass *iclsPtr2;
-    ItclClass *lastIclsPtr;
-    ItclHierIter hier;
-    ItclMemberFunc *imPtr;
-    ItclCmdLookup *clookup;
-    ItclCmdLookup *info_clookup;
-
-    info_clookup = NULL;
-    lastIclsPtr = NULL;
-    Tcl_ResetResult(interp);
-    Itcl_InitHierIter(&hier, iclsPtr);
-    iclsPtr2 = Itcl_AdvanceHierIter(&hier);
-    while (iclsPtr2 != NULL) {
-        entry = Tcl_FirstHashEntry(&iclsPtr2->functions, &place);
-        while (entry) {
-            imPtr = (ItclMemberFunc *)Tcl_GetHashValue(entry);
-	    hPtr = Tcl_FindHashEntry(&iclsPtr->resolveCmds,
-	            (char *)imPtr->namePtr);
-	    clookup = (ItclCmdLookup *)Tcl_GetHashValue(hPtr);
-	    cmdPtr = imPtr->accessCmd;
-            nsPtr = iclsPtr->nsPtr;
-	    if ((imPtr->flags & ITCL_COMMON) == 0) {
-		cmdPtr = Itcl_RegisterObjectCommand(interp, ioPtr,
-		        Tcl_GetString(imPtr->namePtr), clookup->classCmdInfoPtr,
-			cmdPtr, iclsPtr->nsPtr);
-            } else {
-		cmdPtr = Itcl_RegisterObjectCommand(interp, ioPtr,
-		        Tcl_GetString(imPtr->namePtr), clookup->classCmdInfoPtr,
-			cmdPtr, iclsPtr->nsPtr);
-	    }
-            entry = Tcl_NextHashEntry(&place);
-        }
-        lastIclsPtr = iclsPtr2;
-        iclsPtr2 = Itcl_AdvanceHierIter(&hier);
-    }
-
-    /* add some builtin functions to every class!! */
-    Itcl_InitHierIter(&hier, iclsPtr);
-    iclsPtr2 = Itcl_AdvanceHierIter(&hier);
-    while (iclsPtr2 != NULL) {
-	objPtr = Tcl_NewStringObj("info", -1);
-	hPtr = Tcl_FindHashEntry(&iclsPtr2->resolveCmds, objPtr);
-	Tcl_DecrRefCount(objPtr);
-	if (hPtr != NULL) {
-	    clookup = (ItclCmdLookup *)Tcl_GetHashValue(hPtr);
-	    cmdPtr = Itcl_RegisterObjectCommand(interp, ioPtr, "info",
-	            clookup->classCmdInfoPtr, cmdPtr, iclsPtr->nsPtr);
-	}
-	objPtr = Tcl_NewStringObj("isa", -1);
-	hPtr = Tcl_FindHashEntry(&iclsPtr2->resolveCmds, objPtr);
-	Tcl_DecrRefCount(objPtr);
-	if (hPtr != NULL) {
-	    clookup = (ItclCmdLookup *)Tcl_GetHashValue(hPtr);
-	    cmdPtr = Itcl_RegisterObjectCommand(interp, ioPtr, "isa",
-	            clookup->classCmdInfoPtr, cmdPtr, iclsPtr->nsPtr);
-	}
-	objPtr = Tcl_NewStringObj("setget", -1);
-	hPtr = Tcl_FindHashEntry(&iclsPtr2->resolveCmds, objPtr);
-	Tcl_DecrRefCount(objPtr);
-	if (hPtr != NULL) {
-	    clookup = (ItclCmdLookup *)Tcl_GetHashValue(hPtr);
-	    cmdPtr = Itcl_RegisterObjectCommand(interp, ioPtr, "setget",
-	            clookup->classCmdInfoPtr, cmdPtr, iclsPtr->nsPtr);
-	}
-        iclsPtr2 = Itcl_AdvanceHierIter(&hier);
-    }
-    Itcl_DeleteHierIter(&hier);
-#endif
     return TCL_OK;
 }
 
@@ -857,9 +782,6 @@ ItclInitObjectVariables(
     ItclHierIter hier;
     ItclVariable *ivPtr;
     ItclComponent *icPtr;
-#ifdef NEW_PROTO_RESOLVER
-    ItclVarLookup *vlookup;
-#endif
     const char *varName;
     const char *inheritComponentName;
     int itclOptionsIsSet;
@@ -974,24 +896,14 @@ ItclInitObjectVariables(
                 hPtr = Tcl_NextHashEntry(&place);
 	        continue;
             }
-#ifdef NEW_PROTO_RESOLVER
-	    vlookup = Tcl_GetHashValue(hPtr2);
-#endif
 	    if ((ivPtr->flags & ITCL_COMMON) == 0) {
-#ifndef NEW_PROTO_RESOLVER
                 varPtr = Tcl_NewNamespaceVar(interp, varNsPtr,
                         Tcl_GetString(ivPtr->namePtr));
-#else
-		varPtr = Itcl_RegisterObjectVariable(interp, ioPtr,
-		        Tcl_GetString(ivPtr->namePtr), vlookup->classVarInfoPtr,
-			NULL, varNsPtr);
-#endif
 	        hPtr2 = Tcl_CreateHashEntry(&ioPtr->objectVariables,
 		        (char *)ivPtr, &isNew);
 	        if (isNew) {
 		    Itcl_PreserveVar(varPtr);
 		    Tcl_SetHashValue(hPtr2, varPtr);
-		} else {
 		}
 	        if (ivPtr->flags & (ITCL_THIS_VAR|ITCL_TYPE_VAR|
 		        ITCL_SELF_VAR|ITCL_SELFNS_VAR|ITCL_WIN_VAR)) {
@@ -1099,13 +1011,6 @@ ItclInitObjectVariables(
 	            if (isNew) {
 			Itcl_PreserveVar(varPtr);
 		        Tcl_SetHashValue(hPtr2, varPtr);
-		    } else {
-#ifdef NEW_PROTO_RESOLVER
-		    varPtr = Itcl_RegisterObjectVariable(interp, ioPtr,
-		            Tcl_GetString(ivPtr->namePtr),
-			    vlookup->classVarInfoPtr,
-			    varPtr, varNsPtr);
-#endif
 	        }
 	        if (ivPtr->flags & ITCL_COMPONENT_VAR) {
 	            if (ivPtr->flags & ITCL_COMMON) {
