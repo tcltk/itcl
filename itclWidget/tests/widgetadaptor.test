@@ -58,6 +58,7 @@ proc testsNeedTcltest {version} {
 	    return
 	}
     } elseif {[package vcompare [package present tcltest] $version] >= 0} {
+	namespace import -force ::tcltest::*
 	return
     }
 
@@ -823,7 +824,6 @@ test wainfo-10.2 {widgetadaptor info components} -body {
 if {[llength [::info command ::itcl::dumppreserveinfo]] > 0} {
     ::itcl::finish  checkmemoryleaks
     ::itcl::dumppreserveinfo
-    ::itcl::dumprefcountinfo -nodeleted
 }
 
 ::tcltest::cleanupTests

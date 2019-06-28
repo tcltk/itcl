@@ -824,7 +824,6 @@ test wainfo-10.2 {widgetadaptor info components
 if {[llength [::info command ::itcl::dumppreserveinfo]] > 0} {
     ::itcl::finish  checkmemoryleaks
     ::itcl::dumppreserveinfo
-    ::itcl::dumprefcountinfo -nodeleted
 }
 
 ::tcltest::cleanupTests
