@@ -58,6 +58,7 @@ proc testsNeedTcltest {version} {
 	    return
 	}
     } elseif {[package vcompare [package present tcltest] $version] >= 0} {
+	namespace import -force ::tcltest::*
 	return
     }
 
