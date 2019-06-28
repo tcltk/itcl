@@ -17,10 +17,6 @@ static Tcl_ObjCmdProc ItclFinishCmd;
 static Tcl_ObjCmdProc ItclSetHullWindowName;
 static Tcl_ObjCmdProc ItclCheckSetItclHull;
 
-#ifdef OBJ_REF_COUNT_DEBUG
-static Tcl_ObjCmdProc ItclDumpRefCountInfo;
-#endif
-
 #ifdef ITCL_PRESERVE_DEBUG
 static Tcl_ObjCmdProc ItclDumpPreserveInfo;
 #endif
@@ -241,12 +237,6 @@ Initialize (
             NULL, NULL);
 
     /* for debugging only !!! */
-#ifdef OBJ_REF_COUNT_DEBUG
-    Tcl_CreateObjCommand(interp,
-            ITCL_NAMESPACE"::dumprefcountinfo",
-            ItclDumpRefCountInfo, NULL, NULL);
-#endif
-
 #ifdef ITCL_PRESERVE_DEBUG
     Tcl_CreateObjCommand(interp,
             ITCL_NAMESPACE"::dumppreserveinfo",
@@ -790,39 +780,6 @@ ItclFinishCmd(
     Itcl_ReleaseData((ClientData)infoPtr);
     return result;
 }
-
-#ifdef OBJ_REF_COUNT_DEBUG
-void Tcl_DbDumpRefCountInfo(const char *fileName, int noDeleted);
-
-
-/*
- * ------------------------------------------------------------------------
- *  ItclDumpRefCountInfo()
- *
- *  debugging routine to check for memory leaks in use of Tcl_Obj's
- *
- * ------------------------------------------------------------------------
- */
-static int
-ItclDumpRefCountInfo(
-    ClientData clientData,   /* unused */
-    Tcl_Interp *interp,      /* current interpreter */
-    int objc,                /* number of arguments */
-    Tcl_Obj *const objv[])   /* argument objects */
-{
-    int noDeleted;
-
-    noDeleted = 0;
-    if (objc > 1) {
-        if (strcmp(Tcl_GetString(objv[1]), "-nodeleted") == 0) {
-	    noDeleted = 1;
-	}
-    }
-    ItclShowArgs(0, "ItclDumpRefCountInfo", objc, objv);
-    Tcl_DbDumpRefCountInfo(NULL, noDeleted);
-    return TCL_OK;
-}
-#endif
 
 #ifdef ITCL_PRESERVE_DEBUG
 void Itcl_DbDumpPreserveInfo(const char *fileName);

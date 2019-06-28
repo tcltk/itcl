@@ -143,7 +143,7 @@ TCLSH		= $(TCLSH_ENV) $(PKG_ENV) $(TCLSH_PROG)
 
 TESTLOADARG = if {[catch {package present ${PACKAGE_NAME}}]} {package forget ${PACKAGE_NAME}; \
 		    package ifneeded ${PACKAGE_NAME} ${PACKAGE_VERSION} \
-			[list load `@CYGPATH@ $(PKG_LIB_FILE)` $(PACKAGE_NAME)]}
+			[list load `@CYGPATH@ $(top_builddir)/$(PKG_LIB_FILE)` $(PACKAGE_NAME)]}
 
 #WISH_ENV	= TK_LIBRARY=`@CYGPATH@ $(TK_SRC_DIR)/library`
 #WISH_PROG	= @WISH_PROG@
