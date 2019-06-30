@@ -217,18 +217,14 @@ Initialize (
         return TCL_ERROR;
     }
 
-    infoPtr = (ItclObjectInfo*)ckalloc(sizeof(ItclObjectInfo));
-
-    nsPtr = Tcl_CreateNamespace(interp, ITCL_NAMESPACE, infoPtr, FreeItclObjectInfo);
+    nsPtr = Tcl_CreateNamespace(interp, ITCL_NAMESPACE, NULL, NULL);
     if (nsPtr == NULL) {
-	ckfree(infoPtr);
         Tcl_Panic("Itcl: cannot create namespace: \"%s\" \n", ITCL_NAMESPACE);
     }
 
     nsPtr = Tcl_CreateNamespace(interp, ITCL_NAMESPACE"::internal::dicts",
             NULL, NULL);
     if (nsPtr == NULL) {
-	ckfree(infoPtr);
         Tcl_Panic("Itcl: cannot create namespace: \"%s::internal::dicts\" \n",
 	        ITCL_NAMESPACE);
     }
@@ -249,6 +245,7 @@ Initialize (
      *  Store this as "associated data" for easy access, but link
      *  it to the itcl namespace for ownership.
      */
+    infoPtr = (ItclObjectInfo*)ckalloc(sizeof(ItclObjectInfo));
     memset(infoPtr, 0, sizeof(ItclObjectInfo));
     infoPtr->interp = interp;
     infoPtr->class_meta_type = (Tcl_ObjectMetadataType *)ckalloc(
@@ -320,7 +317,8 @@ Initialize (
     infoPtr->useOldResolvers = opt;
     Itcl_InitStack(&infoPtr->clsStack);
 
-    Tcl_SetAssocData(interp, ITCL_INTERP_DATA, NULL, (ClientData)infoPtr);
+    Tcl_SetAssocData(interp, ITCL_INTERP_DATA,
+        (Tcl_InterpDeleteProc*)FreeItclObjectInfo, (ClientData)infoPtr);
 
     Itcl_PreserveData((ClientData)infoPtr);
 
@@ -349,14 +347,16 @@ Initialize (
     if (Tcl_EvalEx(interp, clazzClassScript, -1, 0) != TCL_OK) {
         Tcl_Panic("cannot create Itcl root class ::itcl::clazz");
     }
+
     resPtr = Tcl_GetObjResult(interp);
-    /*
-     * Tcl_GetObjectFromObject can call Tcl_SetObjResult, so increment the
-     * refcount first.
-     */
-    Tcl_IncrRefCount(resPtr);
+	/*
+	 * Tcl_GetObjectFromObject can call Tcl_SetObjResult, so increment the
+	 * refcount first.
+	 */
+	Tcl_IncrRefCount(resPtr);
     clazzObjectPtr = Tcl_GetObjectFromObj(interp, resPtr);
-    Tcl_DecrRefCount(resPtr);
+	Tcl_DecrRefCount(resPtr);
+
 
     if (clazzObjectPtr == NULL) {
         Tcl_AppendResult(interp,
@@ -653,7 +653,7 @@ ItclFinishCmd(
     Tcl_DecrRefCount(newObjv[0]);
     ckfree((char *)newObjv);
 
-    /* remove the unknown handler, to free the reference to the
+    /* remove the unknow handler, to free the reference to the
      * Tcl_Obj with the name of it */
     ensObjPtr = Tcl_NewStringObj("::itcl::builtin::Info::delegated", -1);
     cmdPtr = Tcl_FindEnsemble(interp, ensObjPtr, TCL_LEAVE_ERR_MSG);
