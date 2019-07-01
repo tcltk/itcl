@@ -124,7 +124,6 @@ static ItclCmdsInfo itclCmds [] = {
     { "::itcl::addcomponent", 0},
     { "::itcl::setcomponent", 0},
     { "::itcl::extendedclass", 0},
-    { "::itcl::genericclass", 0},
     { "::itcl::parser::delegate", ITCL_IS_ENSEMBLE},
     { NULL, 0},
 };
