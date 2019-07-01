@@ -511,6 +511,21 @@ if {[namespace which [namespace current]::test:arrays] ne {}} {
     ::itcl::delete class test_arrays
 }
 
+test basic-7.0 {itcl::finish} {
+    interp create i
+    load {} itcl i
+    i eval itcl::finish
+    interp delete i
+} {}
+test basic-7.1 {itcl namespace teardown} -setup {
+    interp create i
+} -body {
+    load {} itcl i
+    i eval {namespace delete itcl}
+} -cleanup {
+    interp delete i
+} -result {}
+
 
 ::tcltest::cleanupTests
 return
