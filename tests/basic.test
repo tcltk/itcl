@@ -418,7 +418,9 @@ test basic-5.9 {variable names can have ":" in them
     namespace eval :: {info globals test:global:2}
 } -result {test:global:2}
 
-::itcl::delete class test_globals
+if {[namespace which [namespace current]::test_globals] ne {}} {
+    ::itcl::delete class test_globals
+}
 
 
 # ----------------------------------------------------------------------
@@ -504,7 +506,25 @@ test basic-6.8 {common variables can be redefined
     test_arrays0 do set undefined "scalar"
 } -result {scalar}
 
-::itcl::delete class test_arrays
+if {[namespace which [namespace current]::test:arrays] ne {}} {
+    ::itcl::delete class test_arrays
+}
+
+test basic-7.0 {itcl::finish} {
+    interp create i
+    load {} itcl i
+    i eval itcl::finish
+    interp delete i
+} {}
+test basic-7.1 {itcl namespace teardown} -setup {
+    interp create i
+} -body {
+    load {} itcl i
+    i eval {namespace delete itcl}
+} -cleanup {
+    interp delete i
+} -result {}
+
 
 ::tcltest::cleanupTests
 return
