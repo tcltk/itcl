@@ -202,8 +202,11 @@ CallNewObjectInstance(
     Tcl_Object *oPtr = data[2];
     Tcl_Obj *nameObjPtr = data[3];
 
-    *oPtr = Tcl_NewObjectInstance(interp, infoPtr->clazzClassPtr,
-            path, path, 0, NULL, 0);
+    *oPtr = NULL;
+    if (infoPtr->clazzClassPtr) {
+	*oPtr = Tcl_NewObjectInstance(interp, infoPtr->clazzClassPtr,
+                path, path, 0, NULL, 0);
+    }
     if (*oPtr == NULL) {
         Tcl_AppendResult(interp,
                 "ITCL: cannot create Tcl_NewObjectInstance for class \"",
@@ -248,9 +251,7 @@ Itcl_CreateClass(
     ItclResolveInfo *resolveInfoPtr;
     Tcl_Obj *cmdNamePtr;
 
-    if (!infoPtr->clazzObjectPtr
-	|| Tcl_ObjectDeleted(infoPtr->clazzObjectPtr)
-    ) {
+    if (infoPtr->clazzObjectPtr == NULL) {
 	Tcl_AppendResult(interp, "oo-subsystem is deleted", NULL);
 	return TCL_ERROR;
     }

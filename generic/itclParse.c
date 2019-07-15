@@ -621,10 +621,7 @@ Itcl_ClassCmd(
     int objc,                /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
 {
-    ItclClass *iclsPtr;
-
-    return ItclClassBaseCmd(clientData, interp, ITCL_CLASS, objc, objv,
-            &iclsPtr);
+    return ItclClassBaseCmd(clientData, interp, ITCL_CLASS, objc, objv, NULL);
 }
 
 /*
