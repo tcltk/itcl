@@ -181,7 +181,6 @@ FreeItclObjectInfo(
     ClientData clientData)
 {
     ItclObjectInfo *infoPtr;
-fprintf(stdout, "ITCL NS DELETE...\n"); fflush(stdout);
 
     infoPtr = (ItclObjectInfo *)clientData;
     ItclFinishCmd(infoPtr, infoPtr->interp, 0, NULL);
@@ -633,7 +632,6 @@ ItclFinishCmd(
     int i;
     int result;
 
-fprintf(stdout, "IFC A\n"); fflush(stdout);
     ItclShowArgs(1, "ItclFinishCmd", objc, objv);
     result = TCL_OK;
     infoPtr = Tcl_GetAssocData(interp, ITCL_INTERP_DATA, NULL);
@@ -784,7 +782,6 @@ fprintf(stdout, "IFC A\n"); fflush(stdout);
     /* clean up list pool */
     Itcl_FinishList();
 
-fprintf(stdout, "IFC Z\n"); fflush(stdout);
     Itcl_ReleaseData((ClientData)infoPtr);
     return result;
 }

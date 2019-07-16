@@ -767,7 +767,6 @@ CreateEnsemble(
     char buf[20];
     Tcl_Obj *unkObjPtr;
 
-fprintf(stdout, "CE START\n"); fflush(stdout);
     /*
      *  Create the data associated with the ensemble.
      */
@@ -883,7 +882,6 @@ fprintf(stdout, "CE START\n"); fflush(stdout);
     result = TCL_OK;
 
 finish:
-fprintf(stdout, "CE FINISH\n"); fflush(stdout);
     Tcl_DStringFree(&buffer);
     return result;
 }
@@ -1683,7 +1681,6 @@ Itcl_EnsembleCmd(
     ensName = Tcl_GetString(objv[1]);
 
     if (ensData) {
-fprintf(stdout, "YES\n"); fflush(stdout);
         if (FindEnsemblePart(ensInfo->master, ensData, ensName, &ensPart) != TCL_OK) {
             ensPart = NULL;
         }
@@ -1733,7 +1730,6 @@ fprintf(stdout, "YES\n"); fflush(stdout);
                 (char*)NULL);
             return TCL_ERROR;
         }
-fprintf(stdout, "DINGO\n"); fflush(stdout);
         infoPtr = Tcl_GetAssocData(interp, ITCL_INTERP_DATA, NULL);
         hPtr = Tcl_FindHashEntry(&infoPtr->ensembleInfo->ensembles, (char *)cmd);
         if (hPtr == NULL) {
@@ -2232,11 +2228,7 @@ void
 ItclFinishEnsemble(
     ItclObjectInfo *infoPtr)
 {
-    EnsembleParser *ensInfo;
-
-    ensInfo = (EnsembleParser*) Tcl_GetAssocData(infoPtr->interp,
-            "itcl_ensembleParser", NULL);
-    ckfree((char *)ensInfo);
+    Tcl_DeleteAssocData(infoPtr->interp, "itcl_ensembleParser");
     /* FIXME have to cleanup contents of infoPtr->ensembleInfo */
     ckfree((char *)infoPtr->ensembleInfo);
 }
