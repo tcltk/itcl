@@ -2454,13 +2454,11 @@ ItclDeleteFunction(
 {
     Tcl_HashEntry *hPtr;
 
-if (imPtr->iclsPtr) {
-    hPtr = Tcl_FindHashEntry(&imPtr->iclsPtr->infoPtr->procMethods,
+    hPtr = Tcl_FindHashEntry(&imPtr->infoPtr->procMethods,
 	    (char *) imPtr->tmPtr);
     if (hPtr != NULL) {
 	Tcl_DeleteHashEntry(hPtr);
     }
-}
     hPtr = Tcl_FindHashEntry(&imPtr->infoPtr->classes, (char *)imPtr->iclsPtr);
     if (hPtr != NULL) {
 	/* unlink owerself from list of class functions */
