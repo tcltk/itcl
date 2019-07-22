@@ -124,13 +124,31 @@ static ItclCmdsInfo itclCmds [] = {
     { "::itcl::addcomponent", 0},
     { "::itcl::setcomponent", 0},
     { "::itcl::extendedclass", 0},
-    { "::itcl::genericclass", 0},
     { "::itcl::parser::delegate", ITCL_IS_ENSEMBLE},
     { NULL, 0},
 };
 #ifdef ITCL_DEBUG_C_INTERFACE
 extern void RegisterDebugCFunctions( Tcl_Interp * interp);
 #endif
+
+static Tcl_ObjectMetadataDeleteProc Demolition;
+
+static const Tcl_ObjectMetadataType canary = {
+    TCL_OO_METADATA_VERSION_CURRENT,
+    "Itcl Foundations",
+    Demolition,
+    NULL
+};
+
+void
+Demolition(
+    ClientData clientData)
+{
+    ItclObjectInfo *infoPtr = (ItclObjectInfo *)clientData;
+
+    infoPtr->clazzObjectPtr = NULL;
+    infoPtr->clazzClassPtr = NULL;
+}
 
 static const Tcl_ObjectMetadataType objMDT = {
     TCL_OO_METADATA_VERSION_CURRENT,
@@ -364,6 +382,8 @@ Initialize (
                 "::itcl::clazz", "\"", NULL);
         return TCL_ERROR;
     }
+
+    Tcl_ObjectSetMetadata(clazzObjectPtr, &canary, infoPtr);
 
     infoPtr->clazzObjectPtr = clazzObjectPtr;
     infoPtr->clazzClassPtr = Tcl_GetObjectAsClass(clazzObjectPtr);

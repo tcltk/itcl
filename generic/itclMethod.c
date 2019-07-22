@@ -661,7 +661,7 @@ ItclCreateMemberFunc(
 	 */
 
 	Tcl_Obj *newBody = Tcl_NewStringObj("", -1);
-	Tcl_AppendToObj(newBody, 
+	Tcl_AppendToObj(newBody,
 		"[::info object namespace ${this}]::my ItclConstructBase ", -1);
 	Tcl_AppendObjToObj(newBody, iclsPtr->fullNamePtr);
 	Tcl_AppendToObj(newBody, "\n", -1);
@@ -779,7 +779,7 @@ Itcl_ChangeMemberFunc(
 	 */
 
 	Tcl_Obj *newBody = Tcl_NewStringObj("", -1);
-	Tcl_AppendToObj(newBody, 
+	Tcl_AppendToObj(newBody,
 		"[::info object namespace ${this}]::my ItclConstructBase ", -1);
 	Tcl_AppendObjToObj(newBody, imPtr->iclsPtr->fullNamePtr);
 	Tcl_AppendToObj(newBody, "\n", -1);
@@ -880,7 +880,7 @@ ItclCreateMemberCode(
 	    while (argListPtr != NULL) {
 		cPtrPtr = &type_reserved_words[0];
 		while (*cPtrPtr != NULL) {
-	            if ((argListPtr->namePtr != NULL) && 
+	            if ((argListPtr->namePtr != NULL) &&
 		            (strcmp(Tcl_GetString(argListPtr->namePtr),
 		            *cPtrPtr) == 0)) {
 		        haveError = 1;
@@ -903,7 +903,7 @@ ItclCreateMemberCode(
 				"constructor") == 0)) {
 			    startStr = "";
 			}
-		        Tcl_AppendResult(interp, startStr, 
+		        Tcl_AppendResult(interp, startStr,
 				namePtr == NULL ? "??" :
 			        Tcl_GetString(namePtr),
 				"'s arglist may not contain \"",
@@ -1224,7 +1224,7 @@ CallItclObjectCmd(
     ItclObject *ioPtr = data[1];
     int objc = PTR2INT(data[2]);
     Tcl_Obj **objv = data[3];
-    
+
     ItclShowArgs(1, "CallItclObjectCmd", objc, objv);
     if (ioPtr != NULL) {
         ioPtr->hadConstructorError = 0;
@@ -1313,10 +1313,10 @@ Itcl_EvalMemberCode(
                 for (i=0; i < objc; i++) {
                     argv[i] = Tcl_GetStringFromObj(objv[i], (int*)NULL);
                 }
-        
+
                 result = (*mcode->cfunc.argCmd)(mcode->clientData,
                     interp, objc, (const char **)argv);
-        
+
                 ckfree((char*)argv);
 	    }
         }
@@ -1432,13 +1432,13 @@ Itcl_SetContext(
     Tcl_Interp *interp,
     ItclObject *ioPtr)
 {
-    int new;
+    int isNew;
     Itcl_Stack *stackPtr;
     Tcl_CallFrame *framePtr = Itcl_GetUplevelCallFrame(interp, 0);
     ItclObjectInfo *infoPtr = (ItclObjectInfo *)Tcl_GetAssocData(interp,
             ITCL_INTERP_DATA, NULL);
     Tcl_HashEntry *hPtr = Tcl_CreateHashEntry(&infoPtr->frameContext,
-	    (char *)framePtr, &new);
+	    (char *)framePtr, &isNew);
     ItclCallContext *contextPtr
 	    = (ItclCallContext *) ckalloc(sizeof(ItclCallContext));
 
@@ -1446,10 +1446,10 @@ Itcl_SetContext(
     contextPtr->ioPtr = ioPtr;
     contextPtr->refCount = 1;
 
-    if (!new) {
+    if (!isNew) {
 	Tcl_Panic("frame already has context?!");
     }
-    
+
     stackPtr = (Itcl_Stack *) ckalloc(sizeof(Itcl_Stack));
     Itcl_InitStack(stackPtr);
     Tcl_SetHashValue(hPtr, stackPtr);
@@ -1906,7 +1906,7 @@ Itcl_ConstructBase(
     for (elem = Itcl_LastListElem(&contextClass->bases);
 	    result == TCL_OK && elem != NULL;
 	    elem = Itcl_PrevListElem(elem)) {
-	    
+
 	Tcl_HashEntry *entry;
         ItclClass *iclsPtr = (ItclClass*)Itcl_GetListValue(elem);
 
@@ -2428,7 +2428,7 @@ ItclCheckCallMethod(
                 callContextPtr->imPtr = imPtr;
                 callContextPtr->refCount = 1;
 	    } else {
-	      if ((callContextPtr2->objectFlags == ioPtr->flags) 
+	      if ((callContextPtr2->objectFlags == ioPtr->flags)
 		    && (callContextPtr2->nsPtr == currNsPtr)) {
 	        callContextPtr = callContextPtr2;
                 callContextPtr->refCount++;
@@ -2533,7 +2533,7 @@ ItclAfterCallMethod(
     ItclObjectInfo *infoPtr = imPtr->infoPtr;
     Tcl_CallFrame *framePtr;
     Itcl_Stack *stackPtr;
-	
+
     hPtr = Tcl_FindHashEntry(&infoPtr->frameContext, (char *)contextPtr);
     assert(hPtr);
     stackPtr = (Itcl_Stack *)Tcl_GetHashValue(hPtr);
@@ -2594,7 +2594,7 @@ ItclAfterCallMethod(
             ItclDeleteObjectVariablesNamespace(interp, ioPtr);
         }
     }
-    
+
     if (callContextPtr->refCount-- <= 1) {
         if (callContextPtr->ioPtr != NULL) {
 	    hPtr = Tcl_FindHashEntry(&callContextPtr->ioPtr->contextCache,

@@ -202,8 +202,11 @@ CallNewObjectInstance(
     Tcl_Object *oPtr = data[2];
     Tcl_Obj *nameObjPtr = data[3];
 
-    *oPtr = Tcl_NewObjectInstance(interp, infoPtr->clazzClassPtr,
-            path, path, 0, NULL, 0);
+    *oPtr = NULL;
+    if (infoPtr->clazzClassPtr) {
+	*oPtr = Tcl_NewObjectInstance(interp, infoPtr->clazzClassPtr,
+                path, path, 0, NULL, 0);
+    }
     if (*oPtr == NULL) {
         Tcl_AppendResult(interp,
                 "ITCL: cannot create Tcl_NewObjectInstance for class \"",
@@ -248,9 +251,7 @@ Itcl_CreateClass(
     ItclResolveInfo *resolveInfoPtr;
     Tcl_Obj *cmdNamePtr;
 
-    if (!infoPtr->clazzObjectPtr
-	|| Tcl_ObjectDeleted(infoPtr->clazzObjectPtr)
-    ) {
+    if (infoPtr->clazzObjectPtr == NULL) {
 	Tcl_AppendResult(interp, "oo-subsystem is deleted", NULL);
 	return TCL_ERROR;
     }
@@ -1120,6 +1121,7 @@ ItclFreeClass(
      *  Delete all function definitions.
      */
     FOREACH_HASH_VALUE(imPtr, &iclsPtr->functions) {
+	imPtr->iclsPtr = NULL;
         ItclReleaseIMF(imPtr);
     }
     Tcl_DeleteHashTable(&iclsPtr->functions);
@@ -2452,22 +2454,19 @@ ItclDeleteFunction(
 {
     Tcl_HashEntry *hPtr;
 
-    if (imPtr->iclsPtr) {
-	hPtr = Tcl_FindHashEntry(&imPtr->iclsPtr->infoPtr->procMethods,
-		    (char *) imPtr->tmPtr);
-	if (hPtr != NULL) {
-	    Tcl_DeleteHashEntry(hPtr);
-	}
-	hPtr = Tcl_FindHashEntry(&imPtr->infoPtr->classes, (char *)imPtr->iclsPtr);
-	if (hPtr != NULL) {
-	    /* unlink owerself from list of class functions */
-	    hPtr = Tcl_FindHashEntry(&imPtr->iclsPtr->functions,
-		    (char *)imPtr->namePtr);
-	    if (hPtr != NULL) {
-		Tcl_DeleteHashEntry(hPtr);
-	    }
-	}
-	imPtr->iclsPtr = NULL;
+    hPtr = Tcl_FindHashEntry(&imPtr->infoPtr->procMethods,
+	    (char *) imPtr->tmPtr);
+    if (hPtr != NULL) {
+	Tcl_DeleteHashEntry(hPtr);
+    }
+    hPtr = Tcl_FindHashEntry(&imPtr->infoPtr->classes, (char *)imPtr->iclsPtr);
+    if (hPtr != NULL) {
+	/* unlink owerself from list of class functions */
+        hPtr = Tcl_FindHashEntry(&imPtr->iclsPtr->functions,
+                (char *)imPtr->namePtr);
+        if (hPtr != NULL) {
+            Tcl_DeleteHashEntry(hPtr);
+        }
     }
     if (imPtr->codePtr != NULL) {
         ItclReleaseMemberCode(imPtr->codePtr);

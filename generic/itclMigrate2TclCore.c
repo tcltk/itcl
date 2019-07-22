@@ -55,14 +55,14 @@ Tcl_NewNamespaceVar(
     const char *varName)
 {
     Var *varPtr = NULL;
-    int new;
+    int isNew;
 
     if ((nsPtr == NULL) || (varName == NULL)) {
         return NULL;
     }
 
     varPtr = TclVarHashCreateVar(&((Namespace *)nsPtr)->varTable,
-            varName, &new);
+            varName, &isNew);
     TclSetVarNamespaceVar(varPtr);
     return (Tcl_Var)varPtr;
 }
