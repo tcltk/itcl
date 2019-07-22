@@ -355,7 +355,7 @@ ItclInfoGuts(
     Tcl_CallFrame *framePtr;
     Tcl_HashEntry *hPtr;
     Itcl_Stack *stackPtr;
-    int new;
+    int isNew;
 
     if (objc == 2) {
 	/*
@@ -372,8 +372,8 @@ ItclInfoGuts(
 
     framePtr = Itcl_GetUplevelCallFrame(interp, 0);
 
-    hPtr = Tcl_CreateHashEntry(&infoPtr->frameContext, (char *)framePtr, &new);
-    if (new) {
+    hPtr = Tcl_CreateHashEntry(&infoPtr->frameContext, (char *)framePtr, &isNew);
+    if (isNew) {
 	stackPtr = (Itcl_Stack *) ckalloc(sizeof(Itcl_Stack));
 	Itcl_InitStack(stackPtr);
 	Tcl_SetHashValue(hPtr, stackPtr);
@@ -495,7 +495,7 @@ ItclInfoInit(
 
     /*
      * Make the C implementation of the "info" ensemble available as
-     * a method body.  This makes all [$object info] become the 
+     * a method body.  This makes all [$object info] become the
      * equivalent of [::itcl::builtin::Info] without any need for
      * tailcall to restore the right frame [87a1bc6e82].
      */
@@ -1523,7 +1523,7 @@ Itcl_BiInfoVariableCmd(
  * ------------------------------------------------------------------------
  *  Itcl_BiInfoVarsCmd()
  *
- *  Returns information regarding variables 
+ *  Returns information regarding variables
  *
  *    info vars ?pattern?
  *  uses ::info vars and adds Itcl common variables!!
@@ -1824,7 +1824,7 @@ Itcl_BiInfoBodyCmd(
             Tcl_SetObjResult(interp, Tcl_NewStringObj("<undefined>", -1));
         }
 	return TCL_OK;
-    } 
+    }
 
 	if (contextIclsPtr->flags &
 	        (ITCL_TYPE|ITCL_WIDGETADAPTOR|ITCL_WIDGET|ITCL_ECLASS)) {
@@ -1983,7 +1983,7 @@ Itcl_BiInfoOptionCmd(
     Tcl_Obj *optionNamePtr;
 
     static const char *options[] = {
-        "-cgetmethod", "-cgetmethodvar","-class", 
+        "-cgetmethod", "-cgetmethodvar","-class",
 	"-configuremethod", "-configuremethodvar",
 	"-default",
 	"-name", "-protection", "-resource",
@@ -2577,7 +2577,7 @@ Itcl_BiInfoWidgetCmd(
  *  Returns information regarding extendedclasses.
  *  Handles the following syntax:
  *
- *    info extendedclass ?className? 
+ *    info extendedclass ?className?
  *
  *  If the ?className? is not specified, then a list of all known
  *  data members is returned.  Otherwise, the information for a
@@ -2660,7 +2660,7 @@ Itcl_BiInfoExtendedClassCmd(
  *  Returns information regarding extendedclasses.
  *  Handles the following syntax:
  *
- *    info extendedclass ?className? 
+ *    info extendedclass ?className?
  *
  *  If the ?className? is not specified, then a list of all known
  *  data members is returned.  Otherwise, the information for a
@@ -2792,7 +2792,7 @@ Itcl_BiInfoTypeCmd(
 	}
 	if ((contextIoPtr == NULL) || (contextIclsPtr == NULL)) {
 	    Tcl_SetObjResult(interp, Tcl_NewStringObj(
-		    "\nget info like this instead: " 
+		    "\nget info like this instead: "
 		    "\n  namespace eval className { info type ...}", -1));
             return TCL_ERROR;
         }
@@ -3526,7 +3526,7 @@ Itcl_BiInfoComponentsCmd(
         iclsPtr = ioPtr->iclsPtr;
     }
     if (iclsPtr == NULL) {
-        Tcl_AppendResult(interp, "INTERNAL ERROR in Itcl_BiInfoComponentsCmd", 
+        Tcl_AppendResult(interp, "INTERNAL ERROR in Itcl_BiInfoComponentsCmd",
 	        " iclsPtr == NULL", NULL);
         return TCL_ERROR;
     }
@@ -4276,7 +4276,7 @@ Itcl_BiInfoWidgetadaptorCmd(
 	}
 	if ((contextIoPtr == NULL) || (contextIclsPtr == NULL)) {
             Tcl_SetObjResult(interp, Tcl_NewStringObj(
-		    "\nget info like this instead: " 
+		    "\nget info like this instead: "
 		    "\n  namespace eval className { info widgetadaptor ... }", -1));
             return TCL_ERROR;
         }

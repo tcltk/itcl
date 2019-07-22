@@ -3035,7 +3035,7 @@ ItclHandleClassComponent(
     ItclClass *iclsPtr;
     ItclComponent *icPtr;
     const char *usage;
-    const char *public;
+    const char *publ;
     int inherit;
     int haveInherit;
     int havePublic;
@@ -3069,7 +3069,7 @@ ItclHandleClassComponent(
     }
     inherit = 0;
     haveInherit = 0;
-    public = NULL;
+    publ = NULL;
     havePublic = 0;
     for (i = 2; i < objc; i++) {
         if (strcmp(Tcl_GetString(objv[i]), "-inherit") == 0) {
@@ -3113,7 +3113,7 @@ ItclHandleClassComponent(
 		            usage, NULL);
                     return TCL_ERROR;
 		}
-	        public = Tcl_GetString(objv[i + 1]);
+	        publ = Tcl_GetString(objv[i + 1]);
             } else {
                 Tcl_AppendResult(interp, "wrong syntax should be: ",
 		        usage, NULL);
@@ -3157,13 +3157,13 @@ ItclHandleClassComponent(
 	Tcl_DecrRefCount(newObjv[3]);
         ckfree((char *)newObjv);
     }
-    if (public != NULL) {
+    if (publ != NULL) {
         icPtr->flags |= ITCL_COMPONENT_PUBLIC;
 	newObjc = 4;
 	newObjv = (Tcl_Obj **)ckalloc(sizeof(Tcl_Obj*)*newObjc);
 	newObjv[0] = Tcl_NewStringObj("delegate::method", -1);
 	Tcl_IncrRefCount(newObjv[0]);
-	newObjv[1] = Tcl_NewStringObj(public, -1);
+	newObjv[1] = Tcl_NewStringObj(publ, -1);
 	Tcl_IncrRefCount(newObjv[1]);
 	newObjv[2] = Tcl_NewStringObj("to", -1);
 	Tcl_IncrRefCount(newObjv[2]);
