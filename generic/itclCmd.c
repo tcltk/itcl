@@ -676,7 +676,6 @@ Itcl_ScopeCmd(
     Tcl_Namespace *contextNsPtr;
     Tcl_HashEntry *hPtr;
     Tcl_Object oPtr;
-    Tcl_InterpDeleteProc *procPtr;
     Tcl_Obj *objPtr2;
     Tcl_Var var;
     Tcl_HashEntry *entry;
@@ -740,7 +739,7 @@ Itcl_ScopeCmd(
     contextIoPtr = NULL;
     contextIclsPtr = NULL;
     oPtr = NULL;
-    infoPtr = Tcl_GetAssocData(interp, ITCL_INTERP_DATA, &procPtr);
+    infoPtr = Tcl_GetAssocData(interp, ITCL_INTERP_DATA, NULL);
     hPtr = Tcl_FindHashEntry(&infoPtr->namespaceClasses, (char *)contextNsPtr);
     if (hPtr != NULL) {
         contextIclsPtr = (ItclClass *)Tcl_GetHashValue(hPtr);

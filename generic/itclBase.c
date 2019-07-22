@@ -17,10 +17,6 @@ static Tcl_ObjCmdProc ItclFinishCmd;
 static Tcl_ObjCmdProc ItclSetHullWindowName;
 static Tcl_ObjCmdProc ItclCheckSetItclHull;
 
-#ifdef OBJ_REF_COUNT_DEBUG
-static Tcl_ObjCmdProc ItclDumpRefCountInfo;
-#endif
-
 #ifdef ITCL_PRESERVE_DEBUG
 static Tcl_ObjCmdProc ItclDumpPreserveInfo;
 #endif
@@ -128,13 +124,31 @@ static ItclCmdsInfo itclCmds [] = {
     { "::itcl::addcomponent", 0},
     { "::itcl::setcomponent", 0},
     { "::itcl::extendedclass", 0},
-    { "::itcl::genericclass", 0},
     { "::itcl::parser::delegate", ITCL_IS_ENSEMBLE},
     { NULL, 0},
 };
 #ifdef ITCL_DEBUG_C_INTERFACE
 extern void RegisterDebugCFunctions( Tcl_Interp * interp);
 #endif
+
+static Tcl_ObjectMetadataDeleteProc Demolition;
+
+static const Tcl_ObjectMetadataType canary = {
+    TCL_OO_METADATA_VERSION_CURRENT,
+    "Itcl Foundations",
+    Demolition,
+    NULL
+};
+
+void
+Demolition(
+    ClientData clientData)
+{
+    ItclObjectInfo *infoPtr = (ItclObjectInfo *)clientData;
+
+    infoPtr->clazzObjectPtr = NULL;
+    infoPtr->clazzClassPtr = NULL;
+}
 
 static const Tcl_ObjectMetadataType objMDT = {
     TCL_OO_METADATA_VERSION_CURRENT,
@@ -241,12 +255,6 @@ Initialize (
             NULL, NULL);
 
     /* for debugging only !!! */
-#ifdef OBJ_REF_COUNT_DEBUG
-    Tcl_CreateObjCommand(interp,
-            ITCL_NAMESPACE"::dumprefcountinfo",
-            ItclDumpRefCountInfo, NULL, NULL);
-#endif
-
 #ifdef ITCL_PRESERVE_DEBUG
     Tcl_CreateObjCommand(interp,
             ITCL_NAMESPACE"::dumppreserveinfo",
@@ -374,6 +382,8 @@ Initialize (
                 "::itcl::clazz", "\"", NULL);
         return TCL_ERROR;
     }
+
+    Tcl_ObjectSetMetadata(clazzObjectPtr, &canary, infoPtr);
 
     infoPtr->clazzObjectPtr = clazzObjectPtr;
     infoPtr->clazzClassPtr = Tcl_GetObjectAsClass(clazzObjectPtr);
@@ -790,39 +800,6 @@ ItclFinishCmd(
     Itcl_ReleaseData((ClientData)infoPtr);
     return result;
 }
-
-#ifdef OBJ_REF_COUNT_DEBUG
-void Tcl_DbDumpRefCountInfo(const char *fileName, int noDeleted);
-
-
-/*
- * ------------------------------------------------------------------------
- *  ItclDumpRefCountInfo()
- *
- *  debugging routine to check for memory leaks in use of Tcl_Obj's
- *
- * ------------------------------------------------------------------------
- */
-static int
-ItclDumpRefCountInfo(
-    ClientData clientData,   /* unused */
-    Tcl_Interp *interp,      /* current interpreter */
-    int objc,                /* number of arguments */
-    Tcl_Obj *const objv[])   /* argument objects */
-{
-    int noDeleted;
-
-    noDeleted = 0;
-    if (objc > 1) {
-        if (strcmp(Tcl_GetString(objv[1]), "-nodeleted") == 0) {
-	    noDeleted = 1;
-	}
-    }
-    ItclShowArgs(0, "ItclDumpRefCountInfo", objc, objv);
-    Tcl_DbDumpRefCountInfo(NULL, noDeleted);
-    return TCL_OK;
-}
-#endif
 
 #ifdef ITCL_PRESERVE_DEBUG
 void Itcl_DbDumpPreserveInfo(const char *fileName);

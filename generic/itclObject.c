@@ -105,7 +105,7 @@ ItclDeleteObjectMetadata(
 
     if (ioPtr == NULL) return;		/* Safety */
     if (ioPtr->oPtr == NULL) return;	/* Safety */
-    
+
     hPtr = Tcl_FindHashEntry(&ioPtr->infoPtr->instances,
 	(Tcl_GetObjectNamespace(ioPtr->oPtr))->fullName);
 
@@ -330,13 +330,13 @@ ItclCreateObject(
      */
 
     if (ItclInitObjectVariables(interp, ioPtr, iclsPtr) != TCL_OK) {
-	ioPtr->hadConstructorError = 11;    
+	ioPtr->hadConstructorError = 11;
 	result = TCL_ERROR;
         goto errorReturn;
     }
     if (ItclInitObjectCommands(interp, ioPtr, iclsPtr, name) != TCL_OK) {
 	Tcl_AppendResult(interp, "error in ItclInitObjectCommands", NULL);
-	ioPtr->hadConstructorError = 12;    
+	ioPtr->hadConstructorError = 12;
 	result = TCL_ERROR;
         goto errorReturn;
     }
@@ -348,7 +348,7 @@ ItclCreateObject(
             if (ItclInitObjectOptions(interp, ioPtr, iclsPtr) != TCL_OK) {
 	        Tcl_AppendResult(interp, "error in ItclInitObjectOptions",
 		        NULL);
-	        ioPtr->hadConstructorError = 13;    
+	        ioPtr->hadConstructorError = 13;
 	        result = TCL_ERROR;
                 goto errorReturn;
             }
@@ -357,7 +357,7 @@ ItclCreateObject(
 	        != TCL_OK) {
 	    Tcl_AppendResult(interp,
 	            "error in ItclInitObjectMethodVariables", NULL);
-	    ioPtr->hadConstructorError = 14;    
+	    ioPtr->hadConstructorError = 14;
 	    result = TCL_ERROR;
             goto errorReturn;
         }
@@ -405,7 +405,7 @@ ItclCreateObject(
         Tcl_DecrRefCount(newObjv[4]);
         ckfree((char *)newObjv);
         if (result != TCL_OK) {
-	    ioPtr->hadConstructorError = 15;    
+	    ioPtr->hadConstructorError = 15;
             goto errorReturn;
         }
     }
@@ -580,7 +580,7 @@ ItclCreateObject(
                 TCL_TRACE_RENAME|TCL_TRACE_DELETE, ObjectRenamedTrace, ioPtr);
     }
     if (iclsPtr->flags & (ITCL_WIDGETADAPTOR)) {
-        /* 
+        /*
          * set all the init values for options
          */
 
@@ -871,7 +871,7 @@ ItclInitObjectVariables(
 				"\" now component \"",
 				Tcl_GetString(icPtr->namePtr), "\"", NULL);
 		        goto errorCleanup;
-				
+
 		    } else {
 		        inheritComponentName = Tcl_GetString(icPtr->namePtr);
 		    }
@@ -2124,7 +2124,7 @@ ItclTraceThisVar(
      *  Handle write traces on "this"
      */
     if ((flags & TCL_TRACE_WRITES) != 0) {
-        return "variable \"this\" cannot be modified";
+        return (char *)"variable \"this\" cannot be modified";
     }
     return NULL;
 }
@@ -2168,7 +2168,7 @@ ItclTraceWinVar(
         /* a window path name must not contain namespace parts !! */
         Itcl_ParseNamespPath(Tcl_GetString(contextIoPtr->origNamePtr), &buffer, &head, &tail);
 	if (tail == NULL) {
-	    return " INTERNAL ERROR tail == NULL in ItclTraceThisVar for win";
+	    return (char *)" INTERNAL ERROR tail == NULL in ItclTraceThisVar for win";
 	}
         Tcl_SetStringObj(objPtr, tail, -1);
         objName = Tcl_GetString(objPtr);
@@ -2183,7 +2183,7 @@ ItclTraceWinVar(
      */
     if ((flags & TCL_TRACE_WRITES) != 0) {
         if (!(contextIoPtr->iclsPtr->flags & ITCL_ECLASS)) {
-            return "variable \"win\" cannot be modified";
+            return (char *)"variable \"win\" cannot be modified";
         }
     }
     return NULL;
@@ -2235,7 +2235,7 @@ ItclTraceTypeVar(
      *  Handle write traces on "type"
      */
     if ((flags & TCL_TRACE_WRITES) != 0) {
-        return "variable \"type\" cannot be modified";
+        return (char *)"variable \"type\" cannot be modified";
     }
     return NULL;
 }
@@ -2302,7 +2302,7 @@ ItclTraceSelfVar(
      *  Handle write traces on "self"
      */
     if ((flags & TCL_TRACE_WRITES) != 0) {
-        return "variable \"self\" cannot be modified";
+        return (char *)"variable \"self\" cannot be modified";
     }
     return NULL;
 }
@@ -2354,7 +2354,7 @@ ItclTraceSelfnsVar(
      *  Handle write traces on "selfns"
      */
     if ((flags & TCL_TRACE_WRITES) != 0) {
-        return "variable \"selfns\" cannot be modified";
+        return (char *)"variable \"selfns\" cannot be modified";
     }
     return NULL;
 }
@@ -2399,7 +2399,7 @@ ItclTraceOptionVar(
         if ((flags & TCL_TRACE_READS) != 0) {
             return NULL;
         }
-    
+
         /*
          *  Handle write traces "itcl_options"
          */
@@ -2461,13 +2461,13 @@ ItclTraceComponentVar(
 	    }
             /* need to redo the delegation for this component !! */
             if (hPtr == NULL) {
-                return " INTERNAL ERROR cannot get component to write to";
+                return (char *)" INTERNAL ERROR cannot get component to write to";
             }
             icPtr = Tcl_GetHashValue(hPtr);
 	    val = ItclGetInstanceVar(interp, name1, NULL, ioPtr,
                     ioPtr->iclsPtr);
 	    if ((val == NULL) || (strlen(val) == 0)) {
-	        return " INTERNAL ERROR cannot get value for component";
+	        return (char *)" INTERNAL ERROR cannot get value for component";
 	    }
 	    componentValuePtr = Tcl_NewStringObj(val, -1);
             Tcl_IncrRefCount(componentValuePtr);
@@ -2495,12 +2495,12 @@ ItclTraceComponentVar(
     } else {
         icPtr = (ItclComponent *)cdata;
         /*
-         *  Handle read traces 
+         *  Handle read traces
          */
         if ((flags & TCL_TRACE_READS) != 0) {
             return NULL;
         }
-    
+
         /*
          *  Handle write traces
          */
@@ -2550,7 +2550,7 @@ ItclTraceItclHullVar(
 	hPtr = Tcl_FindHashEntry(&ioPtr->iclsPtr->variables, (char *)objPtr);
         Tcl_DecrRefCount(objPtr);
 	if (hPtr == NULL) {
-	    return "INTERNAL ERROR cannot find itcl_hull variable in class definition!!";
+	    return (char *)"INTERNAL ERROR cannot find itcl_hull variable in class definition!!";
 	}
 	ivPtr = Tcl_GetHashValue(hPtr);
         /*
@@ -2561,19 +2561,19 @@ ItclTraceItclHullVar(
 		ivPtr->initted = 1;
                 return NULL;
 	    } else {
-	        return "The itcl_hull component cannot be redefined";
+	        return (char *)"The itcl_hull component cannot be redefined";
 	    }
         }
 
     } else {
         ivPtr = (ItclVariable *)cdata;
         /*
-         *  Handle read traces 
+         *  Handle read traces
          */
         if ((flags & TCL_TRACE_READS) != 0) {
             return NULL;
         }
-    
+
         /*
          *  Handle write traces
          */
@@ -2658,7 +2658,7 @@ ItclFreeObject(
     ItclCallContext *callContextPtr;
     ItclObject *ioPtr;
     Tcl_Var var;
-    
+
     ioPtr = (ItclObject*)cdata;
 
     /*
@@ -3746,5 +3746,5 @@ ItclNamespace2Class(Tcl_Namespace *nsPtr)
     if (hPtr == NULL) {
 	return NULL;
     }
-    return Tcl_GetHashValue(hPtr); 
+    return Tcl_GetHashValue(hPtr);
 }

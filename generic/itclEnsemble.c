@@ -145,10 +145,9 @@ Itcl_EnsembleInit(
     Tcl_Interp *interp)         /* interpreter being initialized */
 {
     Tcl_DString buffer;
-    Tcl_InterpDeleteProc *procPtr;
     ItclObjectInfo *infoPtr;
 
-    infoPtr = Tcl_GetAssocData(interp, ITCL_INTERP_DATA, &procPtr);
+    infoPtr = Tcl_GetAssocData(interp, ITCL_INTERP_DATA, NULL);
     Tcl_CreateObjCommand(interp, "::itcl::ensemble",
         Itcl_EnsembleCmd, (ClientData)NULL, (Tcl_CmdDeleteProc*)NULL);
 
@@ -758,7 +757,6 @@ CreateEnsemble(
     Tcl_Obj *objPtr;
     Tcl_DString buffer;
     Tcl_HashEntry *hPtr;
-    Tcl_InterpDeleteProc *procPtr;
     Tcl_Obj *mapDict;
     Tcl_Obj *toObjPtr;
     ItclObjectInfo *infoPtr;
@@ -772,7 +770,7 @@ CreateEnsemble(
     /*
      *  Create the data associated with the ensemble.
      */
-    infoPtr = Tcl_GetAssocData(interp, ITCL_INTERP_DATA, &procPtr);
+    infoPtr = Tcl_GetAssocData(interp, ITCL_INTERP_DATA, NULL);
     infoPtr->ensembleInfo->numEnsembles++;
     ensData = (Ensemble*)ckalloc(sizeof(Ensemble));
     memset(ensData, 0, sizeof(Ensemble));
@@ -1061,7 +1059,6 @@ FindEnsemble(
     EnsemblePart *ensPart;
     Tcl_Obj *objPtr;
     Tcl_CmdInfo cmdInfo;
-    Tcl_InterpDeleteProc *procPtr;
     Tcl_HashEntry *hPtr;
     ItclObjectInfo *infoPtr;
 
@@ -1090,7 +1087,7 @@ FindEnsemble(
             (char*)NULL);
         return TCL_ERROR;
     }
-    infoPtr = Tcl_GetAssocData(interp, ITCL_INTERP_DATA, &procPtr);
+    infoPtr = Tcl_GetAssocData(interp, ITCL_INTERP_DATA, NULL);
     hPtr = Tcl_FindHashEntry(&infoPtr->ensembleInfo->ensembles, (char *)cmdPtr);
     if (hPtr == NULL) {
         Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
@@ -1647,7 +1644,6 @@ Itcl_EnsembleCmd(
     Tcl_Command cmd;
     Tcl_Obj *objPtr;
     Tcl_HashEntry *hPtr;
-    Tcl_InterpDeleteProc *procPtr;
     ItclObjectInfo *infoPtr;
 
     ItclShowArgs(1, "Itcl_EnsembleCmd", objc, objv);
@@ -1700,7 +1696,7 @@ Itcl_EnsembleCmd(
         }
 
         cmd = ensPart->cmdPtr;
-        infoPtr = Tcl_GetAssocData(ensInfo->master, ITCL_INTERP_DATA, &procPtr);
+        infoPtr = Tcl_GetAssocData(ensInfo->master, ITCL_INTERP_DATA, NULL);
         hPtr = Tcl_FindHashEntry(&infoPtr->ensembleInfo->ensembles,
 	        (char *)ensPart->cmdPtr);
         if (hPtr == NULL) {
@@ -1734,7 +1730,7 @@ Itcl_EnsembleCmd(
                 (char*)NULL);
             return TCL_ERROR;
         }
-        infoPtr = Tcl_GetAssocData(interp, ITCL_INTERP_DATA, &procPtr);
+        infoPtr = Tcl_GetAssocData(interp, ITCL_INTERP_DATA, NULL);
         hPtr = Tcl_FindHashEntry(&infoPtr->ensembleInfo->ensembles, (char *)cmd);
         if (hPtr == NULL) {
             Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
@@ -2129,7 +2125,6 @@ EnsembleUnknownCmd(
 {
     Tcl_Command cmd;
     Tcl_HashEntry *hPtr;
-    Tcl_InterpDeleteProc *procPtr;
     ItclObjectInfo *infoPtr;
     EnsemblePart *ensPart;
     Ensemble *ensData;
@@ -2141,7 +2136,7 @@ EnsembleUnknownCmd(
 	        Tcl_GetString(objv[1]), NULL);
         return TCL_ERROR;
     }
-    infoPtr = Tcl_GetAssocData(interp, ITCL_INTERP_DATA, &procPtr);
+    infoPtr = Tcl_GetAssocData(interp, ITCL_INTERP_DATA, NULL);
     hPtr = Tcl_FindHashEntry(&infoPtr->ensembleInfo->ensembles, (char *)cmd);
     if (hPtr == NULL) {
         Tcl_AppendResult(interp, "EnsembleUnknownCmd, ensemble struct not ",
@@ -2233,11 +2228,7 @@ void
 ItclFinishEnsemble(
     ItclObjectInfo *infoPtr)
 {
-    EnsembleParser *ensInfo;
-
-    ensInfo = (EnsembleParser*) Tcl_GetAssocData(infoPtr->interp,
-            "itcl_ensembleParser", NULL);
-    ckfree((char *)ensInfo);
+    Tcl_DeleteAssocData(infoPtr->interp, "itcl_ensembleParser");
     /* FIXME have to cleanup contents of infoPtr->ensembleInfo */
     ckfree((char *)infoPtr->ensembleInfo);
 }
