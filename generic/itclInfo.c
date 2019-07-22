@@ -2954,7 +2954,7 @@ Itcl_BiInfoDefaultCmd(
 			    argListPtr->defaultValuePtr, TCL_LEAVE_ERR_MSG)) {
 			return TCL_ERROR;
 		    }
-		    Tcl_SetResult(interp, "1", NULL);
+		    Tcl_SetResult(interp, (char *)"1", NULL);
 		    return TCL_OK;
 	        } else {
 	            Tcl_AppendResult(interp, "method \"", methodName,

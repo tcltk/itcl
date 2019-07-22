@@ -1596,13 +1596,13 @@ Itcl_ClassProtectionCmd(
     }
 
     if (result == TCL_BREAK) {
-        Tcl_SetResult(interp, "invoked \"break\" outside of a loop",
-            TCL_STATIC);
+        Tcl_SetResult(interp, (char *)"invoked \"break\" outside of a loop",
+                NULL);
         result = TCL_ERROR;
     } else {
         if (result == TCL_CONTINUE) {
-            Tcl_SetResult(interp, "invoked \"continue\" outside of a loop",
-                    TCL_STATIC);
+            Tcl_SetResult(interp, (char *)"invoked \"continue\" outside of a loop",
+                    NULL);
             result = TCL_ERROR;
         } else {
 	    if (result != TCL_OK) {
