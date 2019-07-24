@@ -631,26 +631,14 @@ ItclFinishCmd(
     Tcl_Command cmdPtr;
     ItclObjectInfo *infoPtr;
     ItclCmdsInfo *iciPtr;
-    int checkMemoryLeaks;
     int i;
-    int result;
+
+    Itcl_InterpState state = Itcl_SaveInterpState(interp, TCL_OK);
 
     ItclShowArgs(1, "ItclFinishCmd", objc, objv);
-    result = TCL_OK;
     infoPtr = Tcl_GetAssocData(interp, ITCL_INTERP_DATA, NULL);
     if (infoPtr == NULL) {
         infoPtr = (ItclObjectInfo *)clientData;
-    }
-    checkMemoryLeaks = 0;
-    if (objc > 1) {
-        if (strcmp(Tcl_GetString(objv[1]), "checkmemoryleaks") == 0) {
-	    /* if we have that option, the namespace of the Tcl ensembles
-	     * is not teared down, so we have to simulate it here to
-	     * have the correct reference counts for infoPtr->infoVars2Ptr
-	     * infoPtr->infoVars3Ptr and infoPtr->infoVars4Ptr
-	     */
-	    checkMemoryLeaks = 1;
-	}
     }
     newObjv = (Tcl_Obj **)ckalloc(sizeof(Tcl_Obj *) * 2);
     newObjv[0] = Tcl_NewStringObj("my", -1);;
@@ -660,7 +648,7 @@ ItclFinishCmd(
 	    break;
 	}
 	if ((iciPtr->flags & ITCL_IS_ENSEMBLE) == 0) {
-            result = Itcl_RenameCommand(interp, iciPtr->name, "");
+            Itcl_RenameCommand(interp, iciPtr->name, "");
 	} else {
 	    objPtr = Tcl_NewStringObj(iciPtr->name, -1);
             newObjv[1] = objPtr;
@@ -727,41 +715,25 @@ if (infoPtr->infoVarsPtr) {
 	Tcl_Obj *mapDict = NULL;
         Tcl_GetEnsembleMappingDict(NULL, cmdPtr, &mapDict);
         if (mapDict != NULL) {
-
-	    objPtr = Tcl_NewStringObj("vars", -1);
-	    Tcl_IncrRefCount(objPtr);
-	    Tcl_DictObjRemove(interp, mapDict, objPtr);
-	    Tcl_DictObjPut(interp, mapDict, objPtr, infoPtr->infoVarsPtr);
-	    Tcl_DecrRefCount(objPtr);
+	    Tcl_DictObjRemove(interp, mapDict, infoPtr->infoVars4Ptr);
+	    Tcl_DictObjPut(interp, mapDict, infoPtr->infoVars4Ptr,
+		    infoPtr->infoVarsPtr);
 	    Tcl_SetEnsembleMappingDict(interp, cmdPtr, mapDict);
         }
     }
-    /* FIXME have to figure out why the refCount of
-     * ::itcl::builtin::Info
-     * and ::itcl::builtin::Info::vars and vars is 2 here !! */
-    /* seems to be as the tclOO commands are not yet deleted ?? */
+}
     if (infoPtr->infoVarsPtr) {
 	Tcl_DecrRefCount(infoPtr->infoVarsPtr);
+	infoPtr->infoVarsPtr = NULL;
     }
     if (infoPtr->infoVars3Ptr) {
 	Tcl_DecrRefCount(infoPtr->infoVars3Ptr);
+	infoPtr->infoVars3Ptr = NULL;
     }
     if (infoPtr->infoVars4Ptr) {
 	Tcl_DecrRefCount(infoPtr->infoVars4Ptr);
+	infoPtr->infoVars4Ptr = NULL;
     }
-    if (checkMemoryLeaks) {
-        if (infoPtr->infoVars3Ptr) {
-	    Tcl_DecrRefCount(infoPtr->infoVars3Ptr);
-	}
-	if (infoPtr->infoVars4Ptr) {
-	    Tcl_DecrRefCount(infoPtr->infoVars4Ptr);
-	}
-    /* see comment above */
-    }
-    infoPtr->infoVarsPtr = NULL;
-    infoPtr->infoVars3Ptr = NULL;
-    infoPtr->infoVars4Ptr = NULL;
-}
 
     if (infoPtr->typeDestructorArgumentPtr) {
 	Tcl_DecrRefCount(infoPtr->typeDestructorArgumentPtr);
@@ -816,7 +788,8 @@ if (infoPtr->infoVarsPtr) {
 
     Itcl_ReleaseData((ClientData)infoPtr);
     }
-    return result;
+    Itcl_RestoreInterpState(interp, state);
+    return TCL_OK;
 }
 
 #ifdef ITCL_PRESERVE_DEBUG
