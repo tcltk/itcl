@@ -821,7 +821,7 @@ test wainfo-10.2 {widgetadaptor info components
 #---------------------------------------------------------------------
 # Clean up
 
-if {[llength [info commands memory]]} {
+if {[llength [info commands memory]] && [tcltest::testConstraint tk]} {
     if {[info exists stop]} return
     proc getbytes {} {lindex [split [memory info] \n] 3 3}
     proc leaktest {script {iterations 3}} {
