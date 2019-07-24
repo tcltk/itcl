@@ -1700,7 +1700,7 @@ Itcl_BiInfoUnknownCmd(
     if (Tcl_GetCommandFromObj(interp, objPtr)) {
 	usage = 0;
 	Tcl_ListObjReplace(NULL, listObj, 1, 0, objc-2, objv+2);
-	code = Tcl_EvalObj(interp, listObj);
+	code = Tcl_EvalObjEx(interp, listObj, 0);
 	if (code == TCL_ERROR) {
 	    /* Redirection to [::info] failed, but why? */
 	    Tcl_Obj *optDict = Tcl_GetReturnOptions(interp, code);
@@ -2954,7 +2954,7 @@ Itcl_BiInfoDefaultCmd(
 			    argListPtr->defaultValuePtr, TCL_LEAVE_ERR_MSG)) {
 			return TCL_ERROR;
 		    }
-		    Tcl_SetResult(interp, (char *)"1", NULL);
+		    Tcl_SetObjResult(interp, Tcl_NewWideIntObj(1));
 		    return TCL_OK;
 	        } else {
 	            Tcl_AppendResult(interp, "method \"", methodName,

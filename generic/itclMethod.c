@@ -1890,7 +1890,7 @@ Itcl_ConstructBase(
     if (contextClass->initCode) {
 
 	/* TODO: NRE */
-	result = Tcl_EvalObj(interp, contextClass->initCode);
+	result = Tcl_EvalObjEx(interp, contextClass->initCode, 0);
     }
 
     /*

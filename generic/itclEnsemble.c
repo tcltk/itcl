@@ -595,7 +595,7 @@ Itcl_GetEnsembleUsageForObj(
  *
  * GetEnsembleUsage --
  *
- *      
+ *
  *      Returns a summary of all of the parts of an ensemble and
  *      the meaning of their arguments.  Each part is listed on
  *      a separate line.  This procedure is used internally to
@@ -805,26 +805,26 @@ CreateEnsemble(
     if (parentEnsData == NULL) {
 	Tcl_Obj *unkObjPtr;
 	ensData->cmdPtr = Tcl_CreateEnsemble(interp, ensName,
-	        Tcl_GetCurrentNamespace(interp), TCL_ENSEMBLE_PREFIX);
-        hPtr = Tcl_CreateHashEntry(&infoPtr->ensembleInfo->ensembles,
-                (char *)ensData->cmdPtr, &isNew);
+		Tcl_GetCurrentNamespace(interp), TCL_ENSEMBLE_PREFIX);
+	hPtr = Tcl_CreateHashEntry(&infoPtr->ensembleInfo->ensembles,
+		(char *)ensData->cmdPtr, &isNew);
 	if (!isNew) {
 	    result = TCL_ERROR;
 	    goto finish;
 	}
-        Tcl_SetHashValue(hPtr, (ClientData)ensData);
-        unkObjPtr = Tcl_NewStringObj(ITCL_COMMANDS_NAMESPACE, -1);
-        Tcl_AppendToObj(unkObjPtr, "::ensembles::unknown", -1);
-        if (Tcl_SetEnsembleUnknownHandler(NULL, ensData->cmdPtr,
-                unkObjPtr) != TCL_OK) {
+	Tcl_SetHashValue(hPtr, (ClientData)ensData);
+	unkObjPtr = Tcl_NewStringObj(ITCL_COMMANDS_NAMESPACE, -1);
+	Tcl_AppendToObj(unkObjPtr, "::ensembles::unknown", -1);
+	if (Tcl_SetEnsembleUnknownHandler(NULL, ensData->cmdPtr,
+		unkObjPtr) != TCL_OK) {
 	    Tcl_DecrRefCount(unkObjPtr);
 	    result = TCL_ERROR;
 	    goto finish;
-        }
+	}
 
-	Tcl_SetResult(interp, Tcl_DStringValue(&buffer), TCL_VOLATILE);
-        result = TCL_OK;
-        goto finish;
+	Tcl_SetObjResult(interp, Tcl_NewStringObj(Tcl_DStringValue(&buffer), -1));
+	result = TCL_OK;
+	goto finish;
     }
 
     /*
@@ -1230,7 +1230,7 @@ CreateEnsemblePart(
  *
  * DeleteEnsemblePart --
  *
- *      Deletes a single part from an ensemble.  The part must have 
+ *      Deletes a single part from an ensemble.  The part must have
  *      been created previously by CreateEnsemblePart.
  *
  *      If the part has a delete proc, then it is called to free the
@@ -1439,7 +1439,7 @@ FindEnsemblePart(
             if (strncmp(partName, ensData->parts[i]->name, nlen) != 0) {
                 break;
             }
-            Tcl_AppendToObj(resultPtr, "\n  ", 3); 
+            Tcl_AppendToObj(resultPtr, "\n  ", 3);
             GetEnsemblePartUsage(interp, ensData, ensData->parts[i], resultPtr);
         }
         Tcl_SetObjResult(interp, resultPtr);
@@ -1745,7 +1745,7 @@ Itcl_EnsembleCmd(
     /*
      *  At this point, we have the data for the ensemble that is
      *  being manipulated.  Plug this into the parser, and then
-     *  interpret the rest of the arguments in the ensemble parser. 
+     *  interpret the rest of the arguments in the ensemble parser.
      */
     status = TCL_OK;
     savedEnsData = ensInfo->ensData;
@@ -2037,8 +2037,7 @@ Itcl_EnsembleErrorCmd(
         (char*)NULL);
     GetEnsembleUsage(interp, ensData, objPtr);
 
-    Tcl_SetResult(interp, Tcl_GetString(objPtr), TCL_VOLATILE);
-    Tcl_DecrRefCount(objPtr);
+    Tcl_SetObjResult(interp, objPtr);
     return TCL_ERROR;
 }
 
