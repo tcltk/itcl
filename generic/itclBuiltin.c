@@ -334,6 +334,7 @@ Itcl_BiInit(
 	    if(result != TCL_OK) {
               /* FIXME need code here!! */
 	    }
+	    Tcl_IncrRefCount(infoPtr->infoVarsPtr);
 
 	    infoPtr->infoVars3Ptr =
 	            Tcl_NewStringObj("::itcl::builtin::Info::vars", -1);

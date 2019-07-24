@@ -629,7 +629,6 @@ ItclFinishCmd(
     Tcl_Obj *objPtr;
     Tcl_Obj *ensObjPtr;
     Tcl_Command cmdPtr;
-    Tcl_Obj *mapDict;
     ItclObjectInfo *infoPtr;
     ItclCmdsInfo *iciPtr;
     int checkMemoryLeaks;
@@ -676,7 +675,7 @@ ItclFinishCmd(
     /* remove the unknown handler, to free the reference to the
      * Tcl_Obj with the name of it */
     ensObjPtr = Tcl_NewStringObj("::itcl::builtin::Info::delegated", -1);
-    cmdPtr = Tcl_FindEnsemble(interp, ensObjPtr, TCL_LEAVE_ERR_MSG);
+    cmdPtr = Tcl_FindEnsemble(interp, ensObjPtr, 0);
     if (cmdPtr != NULL) {
         Tcl_SetEnsembleUnknownHandler(NULL, cmdPtr, NULL);
     }
@@ -712,7 +711,6 @@ ItclFinishCmd(
         Tcl_DeleteNamespace(nsPtr);
     }
 
-    mapDict = NULL;
     ensObjPtr = Tcl_NewStringObj("::itcl::builtin::Info", -1);
     if (Tcl_FindNamespace(interp, Tcl_GetString(ensObjPtr), NULL, 0) != NULL) {
         Tcl_SetEnsembleUnknownHandler(NULL,
@@ -723,15 +721,17 @@ ItclFinishCmd(
 
     /* remove the vars entry from the info dict */
     /* and replace it by the original one */
+if (infoPtr->infoVarsPtr) {
     cmdPtr = Tcl_FindCommand(interp, "info", NULL, TCL_GLOBAL_ONLY);
     if (cmdPtr != NULL && Tcl_IsEnsemble(cmdPtr)) {
+	Tcl_Obj *mapDict = NULL;
         Tcl_GetEnsembleMappingDict(NULL, cmdPtr, &mapDict);
         if (mapDict != NULL) {
 
 	    objPtr = Tcl_NewStringObj("vars", -1);
 	    Tcl_IncrRefCount(objPtr);
 	    Tcl_DictObjRemove(interp, mapDict, objPtr);
-	    Tcl_DictObjPut(interp, mapDict, objPtr, infoPtr->infoVars4Ptr);
+	    Tcl_DictObjPut(interp, mapDict, objPtr, infoPtr->infoVarsPtr);
 	    Tcl_DecrRefCount(objPtr);
 	    Tcl_SetEnsembleMappingDict(interp, cmdPtr, mapDict);
         }
@@ -740,6 +740,9 @@ ItclFinishCmd(
      * ::itcl::builtin::Info
      * and ::itcl::builtin::Info::vars and vars is 2 here !! */
     /* seems to be as the tclOO commands are not yet deleted ?? */
+    if (infoPtr->infoVarsPtr) {
+	Tcl_DecrRefCount(infoPtr->infoVarsPtr);
+    }
     if (infoPtr->infoVars3Ptr) {
 	Tcl_DecrRefCount(infoPtr->infoVars3Ptr);
     }
@@ -755,10 +758,15 @@ ItclFinishCmd(
 	}
     /* see comment above */
     }
+    infoPtr->infoVarsPtr = NULL;
     infoPtr->infoVars3Ptr = NULL;
     infoPtr->infoVars4Ptr = NULL;
+}
 
-    Tcl_DecrRefCount(infoPtr->typeDestructorArgumentPtr);
+    if (infoPtr->typeDestructorArgumentPtr) {
+	Tcl_DecrRefCount(infoPtr->typeDestructorArgumentPtr);
+	infoPtr->typeDestructorArgumentPtr = NULL;
+    }
 
     Tcl_EvalEx(infoPtr->interp,
             "::oo::define ::itcl::clazz deletemethod unknown", -1, 0);
@@ -786,18 +794,28 @@ ItclFinishCmd(
     nsPtr = Tcl_FindNamespace(infoPtr->interp, "::itcl", NULL, 0);
     if (nsPtr != NULL) {
         Tcl_DeleteNamespace(nsPtr);
-    }
+    } else {
 
     /* cleanup ensemble info */
-    ItclFinishEnsemble(infoPtr);
+    if (infoPtr->ensembleInfo) {
+	Tcl_DeleteHashTable(&infoPtr->ensembleInfo->ensembles);
+	Tcl_DeleteHashTable(&infoPtr->ensembleInfo->subEnsembles);
+	ItclFinishEnsemble(infoPtr);
+	ckfree((char *)infoPtr->ensembleInfo);
+	infoPtr->ensembleInfo = NULL;
+    }
 
-    ckfree((char *)infoPtr->class_meta_type);
+    if (infoPtr->class_meta_type) {
+	ckfree((char *)infoPtr->class_meta_type);
+	infoPtr->class_meta_type = NULL;
+    }
 
     Itcl_DeleteStack(&infoPtr->clsStack);
     /* clean up list pool */
     Itcl_FinishList();
 
     Itcl_ReleaseData((ClientData)infoPtr);
+    }
     return result;
 }
 

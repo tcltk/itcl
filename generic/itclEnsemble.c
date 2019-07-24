@@ -2228,6 +2228,4 @@ ItclFinishEnsemble(
     ItclObjectInfo *infoPtr)
 {
     Tcl_DeleteAssocData(infoPtr->interp, "itcl_ensembleParser");
-    /* FIXME have to cleanup contents of infoPtr->ensembleInfo */
-    ckfree((char *)infoPtr->ensembleInfo);
 }
