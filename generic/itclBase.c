@@ -287,6 +287,8 @@ Initialize (
     Tcl_InitHashTable(&infoPtr->instances, TCL_STRING_KEYS);
     Tcl_InitHashTable(&infoPtr->frameContext, TCL_ONE_WORD_KEYS);
     Tcl_InitObjHashTable(&infoPtr->classTypes);
+    infoPtr->activeHash = 1;
+
     infoPtr->ensembleInfo = (EnsembleInfo *)ckalloc(sizeof(EnsembleInfo));
     memset(infoPtr->ensembleInfo, 0, sizeof(EnsembleInfo));
     Tcl_InitHashTable(&infoPtr->ensembleInfo->ensembles, TCL_ONE_WORD_KEYS);
@@ -669,6 +671,7 @@ ItclFinishCmd(
     }
     Tcl_DecrRefCount(ensObjPtr);
 
+if (infoPtr->activeHash) {
     while (1) {
         hPtr = Tcl_FirstHashEntry(&infoPtr->instances, &place);
 	if (hPtr == NULL) {
@@ -693,6 +696,8 @@ ItclFinishCmd(
     Tcl_DeleteHashTable(&infoPtr->classes);
     Tcl_DeleteHashTable(&infoPtr->nameClasses);
     Tcl_DeleteHashTable(&infoPtr->namespaceClasses);
+    infoPtr->activeHash = 0;
+}
 
     nsPtr = Tcl_FindNamespace(interp, "::itcl::parser", NULL, 0);
     if (nsPtr != NULL) {

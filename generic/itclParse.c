@@ -2382,6 +2382,8 @@ ItclFreeParserCommandData(
  *  Invoked when the management info for [incr Tcl] is no longer being
  *  used in an interpreter.  This will only occur when all class
  *  manipulation commands are removed from the interpreter.
+ *
+ *  See also FreeItclObjectInfo() in itclBase.c
  * ------------------------------------------------------------------------
  */
 static void
@@ -2412,11 +2414,9 @@ ItclDelObjectInfo(
 	    /*hPtr = Tcl_NextHashEntry(&place);*/
     }
     Tcl_DeleteHashTable(&infoPtr->objects);
+    Tcl_DeleteHashTable(&infoPtr->frameContext);
 
     Itcl_DeleteStack(&infoPtr->clsStack);
-/* FIXME !!!
- free class_meta_type and object_meta_type
-*/
     ckfree((char*)infoPtr);
 }
 
