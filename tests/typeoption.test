@@ -552,5 +552,29 @@ test optionreadonly-1.3 {Readonly options can't be set after creation} -body {
 #---------------------------------------------------------------------
 # Clean up
 
+if {[llength [info commands memory]]} {
+    if {[info exists stop]} return
+    proc getbytes {} {lindex [split [memory info] \n] 3 3}
+    proc leaktest {script {iterations 3}} {
+        set end [getbytes]
+        for {set i 0} {$i < $iterations} {incr i} {
+            uplevel 1 $script
+            set tmp $end
+            set end [getbytes]
+        }
+        return [expr {$end - $tmp}]
+    }
+    set leak [leaktest {
+        interp create i
+        load {} Itcl i
+        i eval {set stop 1}
+        i eval [list source [info script]]
+        interp delete i
+    }]
+    if {$leak} {
+        puts "LEAKED: $leak bytes"
+    }
+}
+
 cleanupTests
 return

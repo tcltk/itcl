@@ -977,8 +977,7 @@ Itcl_CodeCmd(
         objPtr = Tcl_NewListObj(objc-pos, &objv[pos]);
     }
     Tcl_ListObjAppendElement(interp, listPtr, objPtr);
-    Tcl_SetResult(interp, Tcl_GetString(listPtr), TCL_VOLATILE);
-    Tcl_DecrRefCount(listPtr);
+    Tcl_SetObjResult(interp, listPtr);
     return TCL_OK;
 }
 
@@ -1047,7 +1046,7 @@ Itcl_IsObjectCmd(
         }
 
     } /* end for objc loop */
-        
+
 
     /*
      *  The object name may be a scoped value of the form
@@ -1235,7 +1234,7 @@ Itcl_FilterDeleteCmd(
  * ------------------------------------------------------------------------
  *  Itcl_ForwardAddCmd()
  *
- *  Used to similar to iterp alias to forward the call of a method 
+ *  Used to similar to iterp alias to forward the call of a method
  *  to another method within the class
  *
  *  Returns TCL_OK/TCL_ERROR to indicate success/failure.
@@ -1432,7 +1431,7 @@ Itcl_AddOptionCmd(
     infoPtr = (ItclObjectInfo *)clientData;
     ItclShowArgs(1, "Itcl_AddOptionCmd", objc, objv);
     if (objc < 4) {
-        Tcl_WrongNumArgs(interp, 1, objv, 
+        Tcl_WrongNumArgs(interp, 1, objv,
 	        "className protection option optionName ...");
 	return TCL_ERROR;
     }
@@ -1475,7 +1474,7 @@ Itcl_AddOptionCmd(
  *
  *  Used to build an option for an [incr Tcl] object
  *
- *  Syntax: ::itcl::addobjectoption <object> <protection> option <optionSpec> 
+ *  Syntax: ::itcl::addobjectoption <object> <protection> option <optionSpec>
  *     ?-default <defaultValue>?
  *     ?-configuremethod <configuremethod>?
  *     ?-validatemethod <validatemethod>?
@@ -1510,11 +1509,11 @@ Itcl_AddObjectOptionCmd(
     infoPtr = (ItclObjectInfo *)clientData;
     ItclShowArgs(1, "Itcl_AddObjectOptionCmd", objc, objv);
     if (objc < 4) {
-        Tcl_WrongNumArgs(interp, 1, objv, 
+        Tcl_WrongNumArgs(interp, 1, objv,
 	        "objectName protection option optionName ...");
 	return TCL_ERROR;
     }
-    
+
     cmd = Tcl_FindCommand(interp, Tcl_GetString(objv[1]), NULL, 0);
     if (cmd == NULL) {
 	Tcl_AppendResult(interp, "object \"", Tcl_GetString(objv[1]),
@@ -1596,11 +1595,11 @@ Itcl_AddDelegatedOptionCmd(
     infoPtr = (ItclObjectInfo *)clientData;
     ItclShowArgs(1, "Itcl_AddDelegatedOptionCmd", objc, objv);
     if (objc < 4) {
-        Tcl_WrongNumArgs(interp, 1, objv, 
+        Tcl_WrongNumArgs(interp, 1, objv,
 	        "className protection option optionName ...");
 	return TCL_ERROR;
     }
-    
+
     cmd = Tcl_FindCommand(interp, Tcl_GetString(objv[1]), NULL, 0);
     if (cmd == NULL) {
 	Tcl_AppendResult(interp, "object \"", Tcl_GetString(objv[1]),
@@ -1660,11 +1659,11 @@ Itcl_AddDelegatedFunctionCmd(
     infoPtr = (ItclObjectInfo *)clientData;
     ItclShowArgs(1, "Itcl_AddDelegatedFunctionCmd", objc, objv);
     if (objc < 4) {
-        Tcl_WrongNumArgs(interp, 1, objv, 
+        Tcl_WrongNumArgs(interp, 1, objv,
 	        "className protection method/proc functionName ...");
 	return TCL_ERROR;
     }
-    
+
     cmd = Tcl_FindCommand(interp, Tcl_GetString(objv[1]), NULL, 0);
     if (cmd == NULL) {
 	Tcl_AppendResult(interp, "object \"", Tcl_GetString(objv[1]),
@@ -1742,7 +1741,7 @@ Itcl_AddComponentCmd(
     contextIoPtr = NULL;
     ItclShowArgs(1, "Itcl_AddComponentCmd", objc, objv);
     if (objc < 3) {
-        Tcl_WrongNumArgs(interp, 1, objv, 
+        Tcl_WrongNumArgs(interp, 1, objv,
 	        "objectName componentName");
 	return TCL_ERROR;
     }
@@ -1901,7 +1900,7 @@ Itcl_SetComponentCmd(
     contextIoPtr = NULL;
     ItclShowArgs(1, "Itcl_SetComponentCmd", objc, objv);
     if (objc < 4) {
-        Tcl_WrongNumArgs(interp, 1, objv, 
+        Tcl_WrongNumArgs(interp, 1, objv,
 	        "objectName componentName value");
 	return TCL_ERROR;
     }
@@ -2027,8 +2026,7 @@ Itcl_TypeClassCmd(
     result = Tcl_EvalObjEx(interp, objPtr, 0);
     Tcl_DecrRefCount(objPtr);
     objPtr = Tcl_NewStringObj(iclsPtr->nsPtr->fullName, -1);
-    Tcl_SetResult(interp, Tcl_GetString(objPtr), TCL_VOLATILE);
-    Tcl_DecrRefCount(objPtr);
+    Tcl_SetObjResult(interp, objPtr);
     return result;
 }
 

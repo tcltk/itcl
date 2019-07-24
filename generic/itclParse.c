@@ -847,7 +847,7 @@ ItclClassBaseCmd(
 		Tcl_NewStringObj("::itcl::Root", -1));
 
 	Tcl_IncrRefCount(cmdPtr);
-	result = Tcl_EvalObj(interp, cmdPtr);
+	result = Tcl_EvalObjEx(interp, cmdPtr, 0);
 	Tcl_DecrRefCount(cmdPtr);
 	if (result == TCL_ERROR) {
 	    goto errorReturn;
@@ -1596,13 +1596,13 @@ Itcl_ClassProtectionCmd(
     }
 
     if (result == TCL_BREAK) {
-        Tcl_SetResult(interp, (char *)"invoked \"break\" outside of a loop",
-                NULL);
+        Tcl_SetObjResult(interp, Tcl_NewStringObj("invoked \"break\" outside of a loop",
+                -1));
         result = TCL_ERROR;
     } else {
         if (result == TCL_CONTINUE) {
-            Tcl_SetResult(interp, (char *)"invoked \"continue\" outside of a loop",
-                    NULL);
+            Tcl_SetObjResult(interp, Tcl_NewStringObj("invoked \"continue\" outside of a loop",
+                    -1));
             result = TCL_ERROR;
         } else {
 	    if (result != TCL_OK) {
@@ -2382,6 +2382,8 @@ ItclFreeParserCommandData(
  *  Invoked when the management info for [incr Tcl] is no longer being
  *  used in an interpreter.  This will only occur when all class
  *  manipulation commands are removed from the interpreter.
+ *
+ *  See also FreeItclObjectInfo() in itclBase.c
  * ------------------------------------------------------------------------
  */
 static void
@@ -2412,11 +2414,9 @@ ItclDelObjectInfo(
 	    /*hPtr = Tcl_NextHashEntry(&place);*/
     }
     Tcl_DeleteHashTable(&infoPtr->objects);
+    Tcl_DeleteHashTable(&infoPtr->frameContext);
 
     Itcl_DeleteStack(&infoPtr->clsStack);
-/* FIXME !!!
- free class_meta_type and object_meta_type
-*/
     ItclCkfree(infoPtr);
 }
 

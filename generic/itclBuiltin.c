@@ -334,6 +334,7 @@ Itcl_BiInit(
 	    if(result != TCL_OK) {
               /* FIXME need code here!! */
 	    }
+	    Tcl_IncrRefCount(infoPtr->infoVarsPtr);
 
 	    infoPtr->infoVars3Ptr =
 	            Tcl_NewStringObj("::itcl::builtin::Info::vars", -1);
@@ -2311,9 +2312,8 @@ ItclExtendedConfigure(
         ioptPtr = (ItclOption *)Tcl_GetHashValue(hPtr2);
         resultPtr = ItclReportOption(interp, ioptPtr, contextIoPtr);
 	infoPtr->currIdoPtr = saveIdoPtr;
-        Tcl_SetResult(interp, Tcl_GetString(resultPtr), TCL_VOLATILE);
-	Tcl_DecrRefCount(resultPtr);
-        return TCL_OK;
+	Tcl_SetObjResult(interp, resultPtr);
+	return TCL_OK;
     }
     result = TCL_OK;
     /* set one or more options */
@@ -2847,7 +2847,7 @@ ItclExtendedSetGet(
         if (val == NULL) {
             result = TCL_ERROR;
         } else {
-	   Tcl_SetResult(interp, (char *)val, TCL_VOLATILE);
+	   Tcl_SetObjResult(interp, Tcl_NewStringObj(val, -1));
 	}
         return result;
     }
@@ -3593,7 +3593,7 @@ Itcl_BiSetupComponentCmd(
  *
  *      itcl_initoptions
  *          ?<optionName> <optionValue> <optionName> <optionValue> ...?
- * FIXME !!!! seems no longer been used !!! 
+ * FIXME !!!! seems no longer been used !!!
  *
  * ------------------------------------------------------------------------
  */
