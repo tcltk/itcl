@@ -2708,25 +2708,27 @@ ItclProcErrorProc(
             dictPtr = Tcl_GetReturnOptions(interp, TCL_ERROR);
 	    if (Tcl_DictObjGet(interp, dictPtr, keyPtr, &valuePtr) != TCL_OK) {
 	        /* how should we handle an error ? */
+		Tcl_DecrRefCount(dictPtr);
 		Tcl_DecrRefCount(keyPtr);
                 Tcl_DecrRefCount(objPtr);
 		return;
 	    }
             if (valuePtr == NULL) {
 	        /* how should we handle an error ? */
+		Tcl_DecrRefCount(dictPtr);
 		Tcl_DecrRefCount(keyPtr);
                 Tcl_DecrRefCount(objPtr);
 		return;
 	    }
             if (Tcl_GetIntFromObj(interp, valuePtr, &lineNo) != TCL_OK) {
 	        /* how should we handle an error ? */
+		Tcl_DecrRefCount(dictPtr);
 		Tcl_DecrRefCount(keyPtr);
-	        Tcl_DecrRefCount(valuePtr);
                 Tcl_DecrRefCount(objPtr);
 		return;
 	    }
+	    Tcl_DecrRefCount(dictPtr);
 	    Tcl_DecrRefCount(keyPtr);
-	    Tcl_DecrRefCount(valuePtr);
             Tcl_AppendToObj(objPtr, "body line ", -1);
             sprintf(num, "%d", lineNo);
             Tcl_AppendToObj(objPtr, num, -1);
