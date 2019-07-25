@@ -766,6 +766,9 @@ Itcl_BiConfigureCmd(
 
 configureDone:
     if (infoPtr->unparsedObjc > 0) {
+	while (infoPtr->unparsedObjc-- > 1) {
+	    Tcl_DecrRefCount(infoPtr->unparsedObjv[infoPtr->unparsedObjc]);
+	}
         ckfree ((char *)infoPtr->unparsedObjv);
         infoPtr->unparsedObjv = NULL;
         infoPtr->unparsedObjc = 0;
@@ -2413,6 +2416,7 @@ ItclExtendedConfigure(
 	    infoPtr->unparsedObjv[infoPtr->unparsedObjc-2] = objv[i];
 	    Tcl_IncrRefCount(infoPtr->unparsedObjv[infoPtr->unparsedObjc-2]);
 	    infoPtr->unparsedObjv[infoPtr->unparsedObjc-1] = objv[i+1];
+	    Tcl_IncrRefCount(infoPtr->unparsedObjv[infoPtr->unparsedObjc-1]);
 	    /* check if normal public variable/common ? */
 	    /* FIXME !!! temporary */
 	    continue;
