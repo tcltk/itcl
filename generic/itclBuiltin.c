@@ -334,6 +334,7 @@ Itcl_BiInit(
 	    if(result != TCL_OK) {
               /* FIXME need code here!! */
 	    }
+	    Tcl_IncrRefCount(infoPtr->infoVarsPtr);
 
 	    infoPtr->infoVars3Ptr =
 	            Tcl_NewStringObj("::itcl::builtin::Info::vars", -1);
@@ -765,6 +766,9 @@ Itcl_BiConfigureCmd(
 
 configureDone:
     if (infoPtr->unparsedObjc > 0) {
+	while (infoPtr->unparsedObjc-- > 1) {
+	    Tcl_DecrRefCount(infoPtr->unparsedObjv[infoPtr->unparsedObjc]);
+	}
         ckfree ((char *)infoPtr->unparsedObjv);
         infoPtr->unparsedObjv = NULL;
         infoPtr->unparsedObjc = 0;
@@ -2311,9 +2315,8 @@ ItclExtendedConfigure(
         ioptPtr = (ItclOption *)Tcl_GetHashValue(hPtr2);
         resultPtr = ItclReportOption(interp, ioptPtr, contextIoPtr);
 	infoPtr->currIdoPtr = saveIdoPtr;
-        Tcl_SetResult(interp, Tcl_GetString(resultPtr), TCL_VOLATILE);
-	Tcl_DecrRefCount(resultPtr);
-        return TCL_OK;
+	Tcl_SetObjResult(interp, resultPtr);
+	return TCL_OK;
     }
     result = TCL_OK;
     /* set one or more options */
@@ -2413,6 +2416,7 @@ ItclExtendedConfigure(
 	    infoPtr->unparsedObjv[infoPtr->unparsedObjc-2] = objv[i];
 	    Tcl_IncrRefCount(infoPtr->unparsedObjv[infoPtr->unparsedObjc-2]);
 	    infoPtr->unparsedObjv[infoPtr->unparsedObjc-1] = objv[i+1];
+	    Tcl_IncrRefCount(infoPtr->unparsedObjv[infoPtr->unparsedObjc-1]);
 	    /* check if normal public variable/common ? */
 	    /* FIXME !!! temporary */
 	    continue;
@@ -2847,7 +2851,7 @@ ItclExtendedSetGet(
         if (val == NULL) {
             result = TCL_ERROR;
         } else {
-	   Tcl_SetResult(interp, (char *)val, TCL_VOLATILE);
+	   Tcl_SetObjResult(interp, Tcl_NewStringObj(val, -1));
 	}
         return result;
     }
@@ -2991,6 +2995,7 @@ Itcl_BiInstallComponentCmd(
         memcpy(newObjv, objv + 3, sizeof(Tcl_Obj *) * ((objc - 3)));
         ItclShowArgs(1, "BiInstallComponent", objc - 3, newObjv);
         result = Tcl_EvalObjv(interp, objc - 3, newObjv, 0);
+	ckfree((char *)newObjv);
         if (result != TCL_OK) {
             return result;
         }
@@ -3002,6 +3007,7 @@ Itcl_BiInstallComponentCmd(
         Tcl_AppendToObj(objPtr, componentName, -1);
 
         Tcl_SetVar2(interp, Tcl_GetString(objPtr), NULL, componentValue, 0);
+	Tcl_DecrRefCount(objPtr);
 
     } else {
 	newObjv = (Tcl_Obj **)ckalloc(sizeof(Tcl_Obj *) * (objc + 1));
@@ -3593,7 +3599,7 @@ Itcl_BiSetupComponentCmd(
  *
  *      itcl_initoptions
  *          ?<optionName> <optionValue> <optionName> <optionValue> ...?
- * FIXME !!!! seems no longer been used !!! 
+ * FIXME !!!! seems no longer been used !!!
  *
  * ------------------------------------------------------------------------
  */

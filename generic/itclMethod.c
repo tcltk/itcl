@@ -875,6 +875,7 @@ ItclCreateMemberCode(
         mcode->usagePtr = usagePtr;
 	Tcl_IncrRefCount(mcode->usagePtr);
 	mcode->argumentPtr = Tcl_NewStringObj((const char *)arglist, -1);
+	Tcl_IncrRefCount(mcode->argumentPtr);
 	if (iclsPtr->flags & (ITCL_TYPE|ITCL_WIDGETADAPTOR)) {
 	    haveError = 0;
 	    while (argListPtr != NULL) {
@@ -916,7 +917,6 @@ ItclCreateMemberCode(
 	        argListPtr = argListPtr->nextPtr;
 	    }
 	}
-	Tcl_IncrRefCount(mcode->argumentPtr);
         mcode->flags   |= ITCL_ARG_SPEC;
     } else {
         argc = 0;
@@ -1127,7 +1127,6 @@ void ItclFreeMemberCode (
     if (mCodePtr->bodyPtr != NULL) {
         Tcl_DecrRefCount(mCodePtr->bodyPtr);
     }
-    /* do NOT free mCodePtr->bodyPtr here !! that is done in TclOO!! */
     ckfree((char*)mCodePtr);
 }
 
@@ -1890,7 +1889,7 @@ Itcl_ConstructBase(
     if (contextClass->initCode) {
 
 	/* TODO: NRE */
-	result = Tcl_EvalObj(interp, contextClass->initCode);
+	result = Tcl_EvalObjEx(interp, contextClass->initCode, 0);
     }
 
     /*
@@ -2708,25 +2707,27 @@ ItclProcErrorProc(
             dictPtr = Tcl_GetReturnOptions(interp, TCL_ERROR);
 	    if (Tcl_DictObjGet(interp, dictPtr, keyPtr, &valuePtr) != TCL_OK) {
 	        /* how should we handle an error ? */
+		Tcl_DecrRefCount(dictPtr);
 		Tcl_DecrRefCount(keyPtr);
                 Tcl_DecrRefCount(objPtr);
 		return;
 	    }
             if (valuePtr == NULL) {
 	        /* how should we handle an error ? */
+		Tcl_DecrRefCount(dictPtr);
 		Tcl_DecrRefCount(keyPtr);
                 Tcl_DecrRefCount(objPtr);
 		return;
 	    }
             if (Tcl_GetIntFromObj(interp, valuePtr, &lineNo) != TCL_OK) {
 	        /* how should we handle an error ? */
+		Tcl_DecrRefCount(dictPtr);
 		Tcl_DecrRefCount(keyPtr);
-	        Tcl_DecrRefCount(valuePtr);
                 Tcl_DecrRefCount(objPtr);
 		return;
 	    }
+	    Tcl_DecrRefCount(dictPtr);
 	    Tcl_DecrRefCount(keyPtr);
-	    Tcl_DecrRefCount(valuePtr);
             Tcl_AppendToObj(objPtr, "body line ", -1);
             sprintf(num, "%d", lineNo);
             Tcl_AppendToObj(objPtr, num, -1);

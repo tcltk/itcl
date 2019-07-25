@@ -818,10 +818,5 @@ test winfo-10.3 {widget info widgetclasses
 #---------------------------------------------------------------------
 # Clean up
 
-if {[llength [::info command ::itcl::dumppreserveinfo]] > 0} {
-    ::itcl::finish
-    ::itcl::dumppreserveinfo  checkmemoryleaks
-}
-
 ::tcltest::cleanupTests
 return

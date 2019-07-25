@@ -294,6 +294,7 @@ test sfbug-254.2 { SF bug #254 + bug [1dc2d851eb]
 } -body {
     set interp [interp create]
     set ::test_status ""
+    $interp eval {set ::tcl::inl_mem_test 0}
     $interp eval [::tcltest::loadScript]
     $interp eval {
       package require itcl
@@ -315,6 +316,7 @@ test sfbug-254.3 { delete oo-subsystem should remove all classes + summary of bu
 } -body {
     set interp [interp create]
     set ::test_status ""
+    $interp eval {set ::tcl::inl_mem_test 0}
     $interp eval [::tcltest::loadScript]
     $interp eval {
       package require itcl
@@ -426,6 +428,7 @@ test sfbug-256 { SF bug #256
 test sfbug-257 { SF bug #257
 } -body {
     set interp [interp create]
+    $interp eval {set ::tcl::inl_mem_test 0}
     $interp eval [::tcltest::loadScript]
     $interp eval {
       package require itcl

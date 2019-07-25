@@ -818,10 +818,12 @@ Itcl_BiInfoClassOptionsCmd(
 	            Tcl_GetString(idoPtr->icPtr->namePtr),
 	            NULL, ioPtr, ioPtr->iclsPtr);
             if ((val != NULL) && (strlen(val) != 0)) {
-	        objPtr = Tcl_NewStringObj(val, -1);
+		objPtr = Tcl_NewStringObj(val, -1);
 		Tcl_AppendToObj(objPtr, " configure", -1);
+		Tcl_IncrRefCount(objPtr);
 		result = Tcl_EvalObjEx(interp, objPtr, 0);
-	        if (result != TCL_OK) {
+		Tcl_DecrRefCount(objPtr);
+		if (result != TCL_OK) {
 		    return TCL_ERROR;
 		}
 	        listPtr2 = Tcl_GetObjResult(interp);
@@ -1700,7 +1702,7 @@ Itcl_BiInfoUnknownCmd(
     if (Tcl_GetCommandFromObj(interp, objPtr)) {
 	usage = 0;
 	Tcl_ListObjReplace(NULL, listObj, 1, 0, objc-2, objv+2);
-	code = Tcl_EvalObj(interp, listObj);
+	code = Tcl_EvalObjEx(interp, listObj, 0);
 	if (code == TCL_ERROR) {
 	    /* Redirection to [::info] failed, but why? */
 	    Tcl_Obj *optDict = Tcl_GetReturnOptions(interp, code);
@@ -2075,6 +2077,7 @@ Itcl_BiInfoOptionCmd(
 	optionNamePtr = Tcl_NewStringObj(optionName, -1);
         hPtr = Tcl_FindHashEntry(&contextIoPtr->objectOptions,
 	        (char *)optionNamePtr);
+        Tcl_DecrRefCount(optionNamePtr);
         if (hPtr == NULL) {
             Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
                  "\"", optionName, "\" isn't a option in object \"",
@@ -2222,7 +2225,6 @@ Itcl_BiInfoOptionCmd(
                         val = "<undefined>";
                     }
                     objPtr = Tcl_NewStringObj((const char *)val, -1);
-		    Tcl_IncrRefCount(objPtr);
                     break;
             }
 
@@ -2240,7 +2242,6 @@ Itcl_BiInfoOptionCmd(
          *  Return the list of available options.
          */
         resultPtr = Tcl_NewListObj(0, (Tcl_Obj**)NULL);
-	Tcl_IncrRefCount(resultPtr);
         Itcl_InitHierIter(&hier, contextIclsPtr);
         while ((iclsPtr=Itcl_AdvanceHierIter(&hier)) != NULL) {
             hPtr = Tcl_FirstHashEntry(&iclsPtr->options, &place);
@@ -2372,6 +2373,7 @@ Itcl_BiInfoComponentCmd(
 	        break;
 	    }
 	}
+	Tcl_DecrRefCount(componentNamePtr);
 	Itcl_DeleteHierIter(&hier);
         if (hPtr == NULL) {
             Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
@@ -2441,7 +2443,6 @@ Itcl_BiInfoComponentCmd(
                         val = "<undefined>";
                     }
                     objPtr = Tcl_NewStringObj((const char *)val, -1);
-		    Tcl_IncrRefCount(objPtr);
                     break;
             }
 
@@ -2459,7 +2460,6 @@ Itcl_BiInfoComponentCmd(
          *  Return the list of available components.
          */
         resultPtr = Tcl_NewListObj(0, (Tcl_Obj**)NULL);
-	Tcl_IncrRefCount(resultPtr);
         Itcl_InitHierIter(&hier, contextIclsPtr);
         while ((iclsPtr=Itcl_AdvanceHierIter(&hier)) != NULL) {
             hPtr = Tcl_FirstHashEntry(&iclsPtr->components, &place);
@@ -2954,7 +2954,7 @@ Itcl_BiInfoDefaultCmd(
 			    argListPtr->defaultValuePtr, TCL_LEAVE_ERR_MSG)) {
 			return TCL_ERROR;
 		    }
-		    Tcl_SetResult(interp, (char *)"1", NULL);
+		    Tcl_SetObjResult(interp, Tcl_NewWideIntObj(1));
 		    return TCL_OK;
 	        } else {
 	            Tcl_AppendResult(interp, "method \"", methodName,
@@ -4439,7 +4439,6 @@ Itcl_BiInfoDelegatedOptionsCmd(
 	                    idoPtr->icPtr->namePtr);
 		} else {
 		    objPtr2 = Tcl_NewStringObj("", -1);
-		    Tcl_IncrRefCount(objPtr2);
                     Tcl_ListObjAppendElement(interp, objPtr, objPtr2);
 		}
                 Tcl_ListObjAppendElement(interp, listPtr, objPtr);
@@ -4512,7 +4511,6 @@ Itcl_BiInfoDelegatedMethodsCmd(
 	                        idmPtr->icPtr->namePtr);
 		    } else {
 		        objPtr2 = Tcl_NewStringObj("", -1);
-		        Tcl_IncrRefCount(objPtr2);
                         Tcl_ListObjAppendElement(interp, objPtr, objPtr2);
 		    }
                     Tcl_ListObjAppendElement(interp, listPtr, objPtr);
@@ -4586,7 +4584,6 @@ Itcl_BiInfoDelegatedTypeMethodsCmd(
 	                        idmPtr->icPtr->namePtr);
 		    } else {
 		            objPtr2 = Tcl_NewStringObj("", -1);
-		        Tcl_IncrRefCount(objPtr2);
                         Tcl_ListObjAppendElement(interp, objPtr, objPtr2);
 		    }
                     Tcl_ListObjAppendElement(interp, listPtr, objPtr);
@@ -4737,6 +4734,7 @@ Itcl_BiInfoDelegatedOptionCmd(
 	optionNamePtr = Tcl_NewStringObj(optionName, -1);
         hPtr = Tcl_FindHashEntry(&contextIoPtr->objectDelegatedOptions,
 	        (char *)optionNamePtr);
+        Tcl_DecrRefCount(optionNamePtr);
         if (hPtr == NULL) {
             Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
                  "\"", optionName, "\" isn't an option in object \"",
@@ -4786,15 +4784,10 @@ Itcl_BiInfoDelegatedOptionCmd(
                 case BOptExceptionsIdx:
 		    {
 		    Tcl_Obj *entryObj;
-		    int hadEntries;
-		    hadEntries = 0;
 		    objPtr = Tcl_NewListObj(0, NULL);
 		    FOREACH_HASH_VALUE(entryObj, &idoptPtr->exceptions) {
 			Tcl_ListObjAppendElement(interp, objPtr, entryObj);
 		    }
-		    if (!hadEntries) {
-                        objPtr = Tcl_NewStringObj("", -1);
-                    }
                     }
                     break;
                 case BOptResourceIdx:
@@ -4845,7 +4838,6 @@ Itcl_BiInfoDelegatedOptionCmd(
          *  Return the list of available options.
          */
         resultPtr = Tcl_NewListObj(0, (Tcl_Obj**)NULL);
-	Tcl_IncrRefCount(resultPtr);
         Itcl_InitHierIter(&hier, contextIclsPtr);
         while ((iclsPtr=Itcl_AdvanceHierIter(&hier)) != NULL) {
             hPtr = Tcl_FirstHashEntry(&iclsPtr->delegatedOptions, &place);
@@ -4966,6 +4958,7 @@ Itcl_BiInfoDelegatedMethodCmd(
             hPtr = Tcl_FindHashEntry(&contextIclsPtr->delegatedFunctions,
 	            (char *)cmdNamePtr);
 	}
+	Tcl_DecrRefCount(cmdNamePtr);
         if (hPtr == NULL) {
             Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
                  "\"", cmdName, "\" isn't a delegated method in object \"",
@@ -5021,15 +5014,10 @@ Itcl_BiInfoDelegatedMethodCmd(
                 case BOptExceptionsIdx:
 		    {
 		    Tcl_Obj *entryObj;
-		    int hadEntries;
-		    hadEntries = 0;
 		    objPtr = Tcl_NewListObj(0, NULL);
 		    FOREACH_HASH_VALUE(entryObj, &idmPtr->exceptions) {
 			Tcl_ListObjAppendElement(interp, objPtr, entryObj);
 		    }
-		    if (!hadEntries) {
-                        objPtr = Tcl_NewStringObj("", -1);
-                    }
                     }
                     break;
                 case BOptUsingIdx:
@@ -5071,7 +5059,6 @@ Itcl_BiInfoDelegatedMethodCmd(
          *  Return the list of available options.
          */
         resultPtr = Tcl_NewListObj(0, (Tcl_Obj**)NULL);
-	Tcl_IncrRefCount(resultPtr);
         Itcl_InitHierIter(&hier, contextIclsPtr);
         while ((iclsPtr=Itcl_AdvanceHierIter(&hier)) != NULL) {
             hPtr = Tcl_FirstHashEntry(&iclsPtr->delegatedFunctions, &place);
@@ -5196,6 +5183,7 @@ Itcl_BiInfoDelegatedTypeMethodCmd(
             hPtr = Tcl_FindHashEntry(&contextIclsPtr->delegatedFunctions,
 	            (char *)cmdNamePtr);
 	}
+	Tcl_DecrRefCount(cmdNamePtr);
         if (hPtr == NULL) {
             Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
                  "\"", cmdName, "\" isn't a delegated typemethod in ",
@@ -5253,15 +5241,10 @@ Itcl_BiInfoDelegatedTypeMethodCmd(
                 case BOptExceptionsIdx:
 		    {
 		    Tcl_Obj *entryObj;
-		    int hadEntries;
-		    hadEntries = 0;
 		    objPtr = Tcl_NewListObj(0, NULL);
 		    FOREACH_HASH_VALUE(entryObj, &idmPtr->exceptions) {
 			Tcl_ListObjAppendElement(interp, objPtr, entryObj);
 		    }
-		    if (!hadEntries) {
-                        objPtr = Tcl_NewStringObj("", -1);
-                    }
                     }
                     break;
                 case BOptUsingIdx:
@@ -5303,7 +5286,6 @@ Itcl_BiInfoDelegatedTypeMethodCmd(
          *  Return the list of available options.
          */
         resultPtr = Tcl_NewListObj(0, (Tcl_Obj**)NULL);
-	Tcl_IncrRefCount(resultPtr);
         Itcl_InitHierIter(&hier, contextIclsPtr);
         while ((iclsPtr=Itcl_AdvanceHierIter(&hier)) != NULL) {
             hPtr = Tcl_FirstHashEntry(&iclsPtr->delegatedFunctions, &place);
