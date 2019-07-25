@@ -260,9 +260,6 @@ Initialize (
 	        ITCL_NAMESPACE);
     }
 
-    Tcl_CreateObjCommand(interp, ITCL_NAMESPACE"::finish", ItclFinishCmd,
-            NULL, NULL);
-
     /* for debugging only !!! */
 #ifdef ITCL_PRESERVE_DEBUG
     Tcl_CreateObjCommand(interp,
