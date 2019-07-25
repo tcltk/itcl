@@ -2995,6 +2995,7 @@ Itcl_BiInstallComponentCmd(
         memcpy(newObjv, objv + 3, sizeof(Tcl_Obj *) * ((objc - 3)));
         ItclShowArgs(1, "BiInstallComponent", objc - 3, newObjv);
         result = Tcl_EvalObjv(interp, objc - 3, newObjv, 0);
+	ckfree((char *)newObjv);
         if (result != TCL_OK) {
             return result;
         }
@@ -3006,6 +3007,7 @@ Itcl_BiInstallComponentCmd(
         Tcl_AppendToObj(objPtr, componentName, -1);
 
         Tcl_SetVar2(interp, Tcl_GetString(objPtr), NULL, componentValue, 0);
+	Tcl_DecrRefCount(objPtr);
 
     } else {
 	newObjv = (Tcl_Obj **)ckalloc(sizeof(Tcl_Obj *) * (objc + 1));
