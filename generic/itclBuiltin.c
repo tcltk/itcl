@@ -766,6 +766,9 @@ Itcl_BiConfigureCmd(
 
 configureDone:
     if (infoPtr->unparsedObjc > 0) {
+	while (infoPtr->unparsedObjc-- > 1) {
+	    Tcl_DecrRefCount(infoPtr->unparsedObjv[infoPtr->unparsedObjc]);
+	}
         ckfree ((char *)infoPtr->unparsedObjv);
         infoPtr->unparsedObjv = NULL;
         infoPtr->unparsedObjc = 0;
@@ -2413,6 +2416,7 @@ ItclExtendedConfigure(
 	    infoPtr->unparsedObjv[infoPtr->unparsedObjc-2] = objv[i];
 	    Tcl_IncrRefCount(infoPtr->unparsedObjv[infoPtr->unparsedObjc-2]);
 	    infoPtr->unparsedObjv[infoPtr->unparsedObjc-1] = objv[i+1];
+	    Tcl_IncrRefCount(infoPtr->unparsedObjv[infoPtr->unparsedObjc-1]);
 	    /* check if normal public variable/common ? */
 	    /* FIXME !!! temporary */
 	    continue;
@@ -2991,6 +2995,7 @@ Itcl_BiInstallComponentCmd(
         memcpy(newObjv, objv + 3, sizeof(Tcl_Obj *) * ((objc - 3)));
         ItclShowArgs(1, "BiInstallComponent", objc - 3, newObjv);
         result = Tcl_EvalObjv(interp, objc - 3, newObjv, 0);
+	ckfree((char *)newObjv);
         if (result != TCL_OK) {
             return result;
         }
@@ -3002,6 +3007,7 @@ Itcl_BiInstallComponentCmd(
         Tcl_AppendToObj(objPtr, componentName, -1);
 
         Tcl_SetVar2(interp, Tcl_GetString(objPtr), NULL, componentValue, 0);
+	Tcl_DecrRefCount(objPtr);
 
     } else {
 	newObjv = (Tcl_Obj **)ckalloc(sizeof(Tcl_Obj *) * (objc + 1));

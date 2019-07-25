@@ -235,6 +235,15 @@ Initialize (
         return TCL_ERROR;
     }
 
+    objPtr = Tcl_NewStringObj("::oo::class", -1);
+    Tcl_IncrRefCount(objPtr);
+    clazzObjectPtr = Tcl_GetObjectFromObj(interp, objPtr);
+    if (!clazzObjectPtr || !(tclCls = Tcl_GetObjectAsClass(clazzObjectPtr))) {
+	Tcl_DecrRefCount(objPtr);
+        return TCL_ERROR;
+    }
+    Tcl_DecrRefCount(objPtr);
+
     infoPtr = (ItclObjectInfo*)ItclCkalloc(sizeof(ItclObjectInfo), NULL);
 
     nsPtr = Tcl_CreateNamespace(interp, ITCL_NAMESPACE, infoPtr, FreeItclObjectInfo);
@@ -344,14 +353,6 @@ Initialize (
 
     Itcl_PreserveData((ClientData)infoPtr);
 
-    objPtr = Tcl_NewStringObj("::oo::class", -1);
-    Tcl_IncrRefCount(objPtr);
-    clazzObjectPtr = Tcl_GetObjectFromObj(interp, objPtr);
-    if (!clazzObjectPtr || !(tclCls = Tcl_GetObjectAsClass(clazzObjectPtr))) {
-	Tcl_DecrRefCount(objPtr);
-        return TCL_ERROR;
-    }
-    Tcl_DecrRefCount(objPtr);
     root = Tcl_NewObjectInstance(interp, tclCls, "::itcl::Root",
 	    NULL, 0, NULL, 0);
 

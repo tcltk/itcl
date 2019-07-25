@@ -1138,10 +1138,9 @@ ItclFreeClass(
      *  Delete all delegated functions.
      */
     FOREACH_HASH_VALUE(idmPtr, &iclsPtr->delegatedFunctions) {
-	if (idmPtr->icPtr != NULL) {
-	    if (idmPtr->icPtr->ivPtr->iclsPtr == iclsPtr) {
-                ItclDeleteDelegatedFunction(idmPtr);
-	    }
+	if ((idmPtr->icPtr == NULL)
+		|| (idmPtr->icPtr->ivPtr->iclsPtr == iclsPtr)) {
+            ItclDeleteDelegatedFunction(idmPtr);
 	}
     }
     Tcl_DeleteHashTable(&iclsPtr->delegatedFunctions);

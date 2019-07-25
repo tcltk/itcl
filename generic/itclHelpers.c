@@ -133,6 +133,7 @@ ItclCreateArgList(
 		    Tcl_AppendResult(interp, "argument #", buf,
 		            " has no name", NULL);
 		}
+		ckfree((char *) defaultArgv);
 	        result = TCL_ERROR;
 	        break;
 	    }
@@ -141,6 +142,7 @@ ItclCreateArgList(
 	            "too many fields in argument specifier \"",
 		    argv[i], "\"",
 		    (char*)NULL);
+		ckfree((char *) defaultArgv);
 	        result = TCL_ERROR;
 	        break;
 	    }
@@ -148,6 +150,7 @@ ItclCreateArgList(
 	        Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
 		        "bad argument name \"", defaultArgv[0], "\"",
 			(char*)NULL);
+		ckfree((char *) defaultArgv);
 		result = TCL_ERROR;
 		break;
 	    }
@@ -432,16 +435,16 @@ AddDictEntry(
     Tcl_Obj *valuePtr)
 {
     Tcl_Obj *keyPtr;
+    int code;
 
     if (valuePtr == NULL) {
         return TCL_OK;
     }
     keyPtr = Tcl_NewStringObj(keyStr, -1);
-    if (Tcl_DictObjPut(interp, dictPtr, keyPtr, valuePtr) != TCL_OK) {
-	Tcl_DecrRefCount(keyPtr);
-        return TCL_ERROR;
-    }
-    return TCL_OK;
+    Tcl_IncrRefCount(keyPtr);
+    code = Tcl_DictObjPut(interp, dictPtr, keyPtr, valuePtr);
+    Tcl_DecrRefCount(keyPtr);
+    return code;
 }
 
 /*

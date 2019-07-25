@@ -1984,6 +1984,9 @@ Itcl_EnsPartCmd(
     result = AddEnsemblePart(ensInfo->master, ensData, partName, usage,
         Tcl_GetObjInterpProc(), (ClientData)procPtr, _Tcl_ProcDeleteProc,
         ITCL_ENSEMBLE_ENSEMBLE, &ensPart);
+    if (result == TCL_ERROR) {
+	_Tcl_ProcDeleteProc(procPtr);
+    }
     Tcl_TransferResult(ensInfo->master, result, interp);
 
 errorOut:
