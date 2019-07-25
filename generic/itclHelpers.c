@@ -435,16 +435,16 @@ AddDictEntry(
     Tcl_Obj *valuePtr)
 {
     Tcl_Obj *keyPtr;
+    int code;
 
     if (valuePtr == NULL) {
         return TCL_OK;
     }
     keyPtr = Tcl_NewStringObj(keyStr, -1);
-    if (Tcl_DictObjPut(interp, dictPtr, keyPtr, valuePtr) != TCL_OK) {
-	Tcl_DecrRefCount(keyPtr);
-        return TCL_ERROR;
-    }
-    return TCL_OK;
+    Tcl_IncrRefCount(keyPtr);
+    code = Tcl_DictObjPut(interp, dictPtr, keyPtr, valuePtr);
+    Tcl_DecrRefCount(keyPtr);
+    return code;
 }
 
 /*
