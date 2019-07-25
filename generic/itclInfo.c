@@ -818,10 +818,12 @@ Itcl_BiInfoClassOptionsCmd(
 	            Tcl_GetString(idoPtr->icPtr->namePtr),
 	            NULL, ioPtr, ioPtr->iclsPtr);
             if ((val != NULL) && (strlen(val) != 0)) {
-	        objPtr = Tcl_NewStringObj(val, -1);
+		objPtr = Tcl_NewStringObj(val, -1);
 		Tcl_AppendToObj(objPtr, " configure", -1);
+		Tcl_IncrRefCount(objPtr);
 		result = Tcl_EvalObjEx(interp, objPtr, 0);
-	        if (result != TCL_OK) {
+		Tcl_DecrRefCount(objPtr);
+		if (result != TCL_OK) {
 		    return TCL_ERROR;
 		}
 	        listPtr2 = Tcl_GetObjResult(interp);
@@ -2075,7 +2077,7 @@ Itcl_BiInfoOptionCmd(
 	optionNamePtr = Tcl_NewStringObj(optionName, -1);
         hPtr = Tcl_FindHashEntry(&contextIoPtr->objectOptions,
 	        (char *)optionNamePtr);
-	Tcl_DecrRefCount(optionNamePtr);
+        Tcl_DecrRefCount(optionNamePtr);
         if (hPtr == NULL) {
             Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
                  "\"", optionName, "\" isn't a option in object \"",
@@ -2223,7 +2225,6 @@ Itcl_BiInfoOptionCmd(
                         val = "<undefined>";
                     }
                     objPtr = Tcl_NewStringObj((const char *)val, -1);
-		    Tcl_IncrRefCount(objPtr);
                     break;
             }
 
@@ -2442,7 +2443,6 @@ Itcl_BiInfoComponentCmd(
                         val = "<undefined>";
                     }
                     objPtr = Tcl_NewStringObj((const char *)val, -1);
-		    Tcl_IncrRefCount(objPtr);
                     break;
             }
 
@@ -4439,7 +4439,6 @@ Itcl_BiInfoDelegatedOptionsCmd(
 	                    idoPtr->icPtr->namePtr);
 		} else {
 		    objPtr2 = Tcl_NewStringObj("", -1);
-		    Tcl_IncrRefCount(objPtr2);
                     Tcl_ListObjAppendElement(interp, objPtr, objPtr2);
 		}
                 Tcl_ListObjAppendElement(interp, listPtr, objPtr);
@@ -4512,7 +4511,6 @@ Itcl_BiInfoDelegatedMethodsCmd(
 	                        idmPtr->icPtr->namePtr);
 		    } else {
 		        objPtr2 = Tcl_NewStringObj("", -1);
-		        Tcl_IncrRefCount(objPtr2);
                         Tcl_ListObjAppendElement(interp, objPtr, objPtr2);
 		    }
                     Tcl_ListObjAppendElement(interp, listPtr, objPtr);
@@ -4586,7 +4584,6 @@ Itcl_BiInfoDelegatedTypeMethodsCmd(
 	                        idmPtr->icPtr->namePtr);
 		    } else {
 		            objPtr2 = Tcl_NewStringObj("", -1);
-		        Tcl_IncrRefCount(objPtr2);
                         Tcl_ListObjAppendElement(interp, objPtr, objPtr2);
 		    }
                     Tcl_ListObjAppendElement(interp, listPtr, objPtr);
@@ -4737,6 +4734,7 @@ Itcl_BiInfoDelegatedOptionCmd(
 	optionNamePtr = Tcl_NewStringObj(optionName, -1);
         hPtr = Tcl_FindHashEntry(&contextIoPtr->objectDelegatedOptions,
 	        (char *)optionNamePtr);
+        Tcl_DecrRefCount(optionNamePtr);
         if (hPtr == NULL) {
             Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
                  "\"", optionName, "\" isn't an option in object \"",
@@ -4786,15 +4784,10 @@ Itcl_BiInfoDelegatedOptionCmd(
                 case BOptExceptionsIdx:
 		    {
 		    Tcl_Obj *entryObj;
-		    int hadEntries;
-		    hadEntries = 0;
 		    objPtr = Tcl_NewListObj(0, NULL);
 		    FOREACH_HASH_VALUE(entryObj, &idoptPtr->exceptions) {
 			Tcl_ListObjAppendElement(interp, objPtr, entryObj);
 		    }
-		    if (!hadEntries) {
-                        objPtr = Tcl_NewStringObj("", -1);
-                    }
                     }
                     break;
                 case BOptResourceIdx:
@@ -4845,7 +4838,6 @@ Itcl_BiInfoDelegatedOptionCmd(
          *  Return the list of available options.
          */
         resultPtr = Tcl_NewListObj(0, (Tcl_Obj**)NULL);
-	Tcl_IncrRefCount(resultPtr);
         Itcl_InitHierIter(&hier, contextIclsPtr);
         while ((iclsPtr=Itcl_AdvanceHierIter(&hier)) != NULL) {
             hPtr = Tcl_FirstHashEntry(&iclsPtr->delegatedOptions, &place);
