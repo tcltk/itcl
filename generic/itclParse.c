@@ -830,6 +830,7 @@ ItclClassBaseCmd(
 		    "\n    (class \"%s\" body line %s)",
 		    className, Tcl_GetString(stackTrace)));
 	}
+	Tcl_DecrRefCount(options);
         result = TCL_ERROR;
         goto errorReturn;
     }
