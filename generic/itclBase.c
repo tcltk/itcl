@@ -17,10 +17,6 @@ static Tcl_ObjCmdProc ItclFinishCmd;
 static Tcl_ObjCmdProc ItclSetHullWindowName;
 static Tcl_ObjCmdProc ItclCheckSetItclHull;
 
-#ifdef ITCL_PRESERVE_DEBUG
-static Tcl_ObjCmdProc ItclDumpPreserveInfo;
-#endif
-
 MODULE_SCOPE const ItclStubs itclStubs;
 
 static int Initialize(Tcl_Interp *interp);
@@ -259,14 +255,6 @@ Initialize (
         Tcl_Panic("Itcl: cannot create namespace: \"%s::internal::dicts\" \n",
 	        ITCL_NAMESPACE);
     }
-
-    /* for debugging only !!! */
-#ifdef ITCL_PRESERVE_DEBUG
-    Tcl_CreateObjCommand(interp,
-            ITCL_NAMESPACE"::dumppreserveinfo",
-            ItclDumpPreserveInfo, NULL, NULL);
-#endif
-    /* END for debugging only !!! */
 
     /*
      *  Create the top-level data structure for tracking objects.
@@ -794,29 +782,3 @@ if (infoPtr->infoVarsPtr) {
     Itcl_RestoreInterpState(interp, state);
     return TCL_OK;
 }
-
-#ifdef ITCL_PRESERVE_DEBUG
-void Itcl_DbDumpPreserveInfo(const char *fileName);
-
-
-/*
- * ------------------------------------------------------------------------
- *  ItclDumpPreserveInfo()
- *
- *  debugging routine to check for memory leaks in use of Itcl_PreserveData
- *  and Itcl_ReleaseData
- *
- * ------------------------------------------------------------------------
- */
-static int
-ItclDumpPreserveInfo(
-    ClientData clientData,   /* unused */
-    Tcl_Interp *interp,      /* current interpreter */
-    int objc,                /* number of arguments */
-    Tcl_Obj *const objv[])   /* argument objects */
-{
-    ItclShowArgs(0, "ItclDumpPreserveInfo", objc, objv);
-    Itcl_DbDumpPreserveInfo(NULL);
-    return TCL_OK;
-}
-#endif

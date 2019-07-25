@@ -101,29 +101,6 @@
 #define ITCL_VARIABLES_NAMESPACE "::itcl::internal::variables"
 #define ITCL_COMMANDS_NAMESPACE "::itcl::internal::commands"
 
-#ifdef ITCL_PRESERVE_DEBUG
-#define ITCL_PRESERVE_BUCKET_SIZE 50
-#define ITCL_PRESERVE_INCR 1
-#define ITCL_PRESERVE_DECR -1
-#define ITCL_PRESERVE_DELETED 0
-
-typedef struct ItclPreserveInfoEntry {
-    int type;
-    int line;
-    const char * fileName;
-} ItclPreserveInfoEntry;
-
-typedef struct ItclPreserveInfo {
-    size_t refCount;
-    ClientData clientData;
-    size_t size;
-    size_t numEntries;
-    ItclPreserveInfoEntry *entries;
-} ItclPreserveInfo;
-
-#endif
-
-
 typedef struct ItclFoundation {
     Itcl_Stack methodCallStack;
     Tcl_Command dispatchCommand;
