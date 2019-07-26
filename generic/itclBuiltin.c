@@ -272,6 +272,45 @@ static int BiMethodListLen = sizeof(BiMethodList)/sizeof(BiMethod);
  *  Returns TCL_OK/TCL_ERROR to indicate success/failure.
  * ------------------------------------------------------------------------
  */
+
+static void
+RestoreInfoVars(
+    ClientData clientData,
+    Tcl_Interp *interp,
+    const char *oldName,
+    const char *newName,
+    int flags)
+{
+    ItclObjectInfo *infoPtr = (ItclObjectInfo *)clientData;
+    Tcl_Command cmd;
+    Tcl_Obj *mapDict;
+
+    cmd = Tcl_FindCommand(interp, "info", NULL, TCL_GLOBAL_ONLY);
+    if (cmd == NULL || !Tcl_IsEnsemble(cmd)) {
+	goto done;
+    }
+    Tcl_GetEnsembleMappingDict(NULL, cmd, &mapDict);
+    if (mapDict == NULL) {
+	goto done;
+    }
+    if (infoPtr->infoVarsPtr == NULL || infoPtr->infoVars4Ptr == NULL) {
+	/* Safety */
+	goto done;
+    }
+    Tcl_DictObjPut(NULL, mapDict, infoPtr->infoVars4Ptr, infoPtr->infoVarsPtr);
+    Tcl_SetEnsembleMappingDict(interp, cmd, mapDict);
+
+done:
+    if (infoPtr->infoVarsPtr) {
+	Tcl_DecrRefCount(infoPtr->infoVarsPtr);
+	infoPtr->infoVarsPtr = NULL;
+    }
+    if (infoPtr->infoVars4Ptr) {
+	Tcl_DecrRefCount(infoPtr->infoVars4Ptr);
+	infoPtr->infoVars4Ptr = NULL;
+    }
+}
+
 int
 Itcl_BiInit(
     Tcl_Interp *interp,      /* current interpreter */
@@ -326,19 +365,21 @@ Itcl_BiInit(
     if (infoCmd != NULL && Tcl_IsEnsemble(infoCmd)) {
         Tcl_GetEnsembleMappingDict(NULL, infoCmd, &mapDict);
         if (mapDict != NULL) {
-            infoPtr->infoVars4Ptr =
-	            Tcl_NewStringObj("vars", -1);
+            infoPtr->infoVars4Ptr = Tcl_NewStringObj("vars", -1);
 	    Tcl_IncrRefCount(infoPtr->infoVars4Ptr);
-            result = Tcl_DictObjGet(interp, mapDict, infoPtr->infoVars4Ptr,
+            result = Tcl_DictObjGet(NULL, mapDict, infoPtr->infoVars4Ptr,
 	            &infoPtr->infoVarsPtr);
-	    if(result != TCL_OK) {
-              /* FIXME need code here!! */
+	    if (result == TCL_OK && infoPtr->infoVarsPtr) {
+		Tcl_IncrRefCount(infoPtr->infoVarsPtr);
+        	Tcl_DictObjPut(NULL, mapDict, infoPtr->infoVars4Ptr,
+	        	Tcl_NewStringObj("::itcl::builtin::Info::vars", -1));
+        	Tcl_SetEnsembleMappingDict(interp, infoCmd, mapDict);
+		Tcl_TraceCommand(interp, "::itcl::builtin::Info::vars",
+			TCL_TRACE_DELETE, RestoreInfoVars, infoPtr);
+	    } else {
+		Tcl_DecrRefCount(infoPtr->infoVars4Ptr);
+		infoPtr->infoVars4Ptr = NULL;
 	    }
-	    Tcl_IncrRefCount(infoPtr->infoVarsPtr);
-
-            Tcl_DictObjPut(NULL, mapDict, infoPtr->infoVars4Ptr,
-	            Tcl_NewStringObj("::itcl::builtin::Info::vars", -1));
-            Tcl_SetEnsembleMappingDict(interp, infoCmd, mapDict);
         }
     }
 

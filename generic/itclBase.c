@@ -571,29 +571,8 @@ FreeItclObjectInfo(
     Tcl_DeleteHashTable(&infoPtr->nameClasses);
     Tcl_DeleteHashTable(&infoPtr->namespaceClasses);
 
-    /* remove the vars entry from the info dict */
-    /* and replace it by the original one */
-if (infoPtr->infoVarsPtr) {
-    cmdPtr = Tcl_FindCommand(interp, "info", NULL, TCL_GLOBAL_ONLY);
-    if (cmdPtr != NULL && Tcl_IsEnsemble(cmdPtr)) {
-	Tcl_Obj *mapDict = NULL;
-        Tcl_GetEnsembleMappingDict(NULL, cmdPtr, &mapDict);
-        if (mapDict != NULL) {
-	    Tcl_DictObjRemove(interp, mapDict, infoPtr->infoVars4Ptr);
-	    Tcl_DictObjPut(interp, mapDict, infoPtr->infoVars4Ptr,
-		    infoPtr->infoVarsPtr);
-	    Tcl_SetEnsembleMappingDict(interp, cmdPtr, mapDict);
-        }
-    }
-}
-    if (infoPtr->infoVarsPtr) {
-	Tcl_DecrRefCount(infoPtr->infoVarsPtr);
-	infoPtr->infoVarsPtr = NULL;
-    }
-    if (infoPtr->infoVars4Ptr) {
-	Tcl_DecrRefCount(infoPtr->infoVars4Ptr);
-	infoPtr->infoVars4Ptr = NULL;
-    }
+    assert (infoPtr->infoVarsPtr == NULL);
+    assert (infoPtr->infoVars4Ptr == NULL);
 
     if (infoPtr->typeDestructorArgumentPtr) {
 	Tcl_DecrRefCount(infoPtr->typeDestructorArgumentPtr);
