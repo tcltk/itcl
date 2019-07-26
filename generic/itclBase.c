@@ -95,34 +95,6 @@ static const char *clazzClassScript =
 
 #define ITCL_IS_ENSEMBLE 0x1
 
-typedef struct ItclCmdsInfo {
-    const char *name;
-    int flags;
-} ItclCmdsInfo;
-static ItclCmdsInfo itclCmds [] = {
-    { "::itcl::class", 0},
-    { "::itcl::find", ITCL_IS_ENSEMBLE},
-    { "::itcl::delete", ITCL_IS_ENSEMBLE},
-    { "::itcl::is", ITCL_IS_ENSEMBLE},
-    { "::itcl::filter", ITCL_IS_ENSEMBLE},
-    { "::itcl::forward", ITCL_IS_ENSEMBLE},
-    { "::itcl::import::stub", ITCL_IS_ENSEMBLE},
-    { "::itcl::mixin", ITCL_IS_ENSEMBLE},
-    { "::itcl::parser::delegate", ITCL_IS_ENSEMBLE},
-    { "::itcl::type", 0},
-    { "::itcl::widget", 0},
-    { "::itcl::widgetadaptor", 0},
-    { "::itcl::nwidget", 0},
-    { "::itcl::addoption", 0},
-    { "::itcl::addobjectoption", 0},
-    { "::itcl::adddelegatedoption", 0},
-    { "::itcl::adddelegatedmethod", 0},
-    { "::itcl::addcomponent", 0},
-    { "::itcl::setcomponent", 0},
-    { "::itcl::extendedclass", 0},
-    { "::itcl::parser::delegate", ITCL_IS_ENSEMBLE},
-    { NULL, 0},
-};
 #ifdef ITCL_DEBUG_C_INTERFACE
 extern void RegisterDebugCFunctions( Tcl_Interp * interp);
 #endif
@@ -588,88 +560,17 @@ static void
 FreeItclObjectInfo(
     ClientData clientData)
 {
-    Tcl_HashEntry *hPtr;
-    Tcl_HashSearch place;
-    Tcl_Namespace *nsPtr;
-    Tcl_Obj **newObjv;
-    Tcl_Obj *objPtr;
-    Tcl_Obj *ensObjPtr;
-    Tcl_Command cmdPtr;
-    ItclCmdsInfo *iciPtr;
-    int i;
-
     ItclObjectInfo *infoPtr = (ItclObjectInfo *)clientData;
     Tcl_Interp *interp = infoPtr->interp;
+    Tcl_Command cmdPtr;
 
-    newObjv = (Tcl_Obj **)ckalloc(sizeof(Tcl_Obj *) * 2);
-    newObjv[0] = Tcl_NewStringObj("my", -1);;
-    for (i = 0; ;i++) {
-        iciPtr = &itclCmds[i];
-        if (iciPtr->name == NULL) {
-	    break;
-	}
-	if ((iciPtr->flags & ITCL_IS_ENSEMBLE) == 0) {
-            Itcl_RenameCommand(interp, iciPtr->name, "");
-	} else {
-	    objPtr = Tcl_NewStringObj(iciPtr->name, -1);
-            newObjv[1] = objPtr;
-	    Itcl_EnsembleDeleteCmd(infoPtr, infoPtr->interp, 2, newObjv);
-	    Tcl_DecrRefCount(objPtr);
-	}
-        iciPtr++;
-    }
-    Tcl_DecrRefCount(newObjv[0]);
-    ckfree((char *)newObjv);
-
-    /* remove the unknown handler, to free the reference to the
-     * Tcl_Obj with the name of it */
-    ensObjPtr = Tcl_NewStringObj("::itcl::builtin::Info::delegated", -1);
-    cmdPtr = Tcl_FindEnsemble(interp, ensObjPtr, 0);
-    if (cmdPtr != NULL) {
-        Tcl_SetEnsembleUnknownHandler(NULL, cmdPtr, NULL);
-    }
-    Tcl_DecrRefCount(ensObjPtr);
-
-if (infoPtr->activeHash) {
-    while (1) {
-        hPtr = Tcl_FirstHashEntry(&infoPtr->instances, &place);
-	if (hPtr == NULL) {
-	    break;
-	}
-	Tcl_DeleteHashEntry(hPtr);
-    }
     Tcl_DeleteHashTable(&infoPtr->instances);
-
-    while (1) {
-        hPtr = Tcl_FirstHashEntry(&infoPtr->classTypes, &place);
-	if (hPtr == NULL) {
-	    break;
-	}
-	Tcl_DeleteHashEntry(hPtr);
-    }
     Tcl_DeleteHashTable(&infoPtr->classTypes);
-
     Tcl_DeleteHashTable(&infoPtr->procMethods);
-
     Tcl_DeleteHashTable(&infoPtr->objectCmds);
     Tcl_DeleteHashTable(&infoPtr->classes);
     Tcl_DeleteHashTable(&infoPtr->nameClasses);
     Tcl_DeleteHashTable(&infoPtr->namespaceClasses);
-    infoPtr->activeHash = 0;
-}
-
-    nsPtr = Tcl_FindNamespace(interp, "::itcl::parser", NULL, 0);
-    if (nsPtr != NULL) {
-        Tcl_DeleteNamespace(nsPtr);
-    }
-
-    ensObjPtr = Tcl_NewStringObj("::itcl::builtin::Info", -1);
-    if (Tcl_FindNamespace(interp, Tcl_GetString(ensObjPtr), NULL, 0) != NULL) {
-        Tcl_SetEnsembleUnknownHandler(NULL,
-                Tcl_FindEnsemble(interp, ensObjPtr, TCL_LEAVE_ERR_MSG),
-	        NULL);
-    }
-    Tcl_DecrRefCount(ensObjPtr);
 
     /* remove the vars entry from the info dict */
     /* and replace it by the original one */
@@ -704,34 +605,6 @@ if (infoPtr->infoVarsPtr) {
 	infoPtr->typeDestructorArgumentPtr = NULL;
     }
 
-    Tcl_EvalEx(infoPtr->interp,
-            "::oo::define ::itcl::clazz deletemethod unknown", -1, 0);
-
-    /* first have to look for the remaining memory leaks, then remove the next ifdef */
-    Itcl_RenameCommand(infoPtr->interp, "::itcl::clazz", "");
-
-    /* tear down ::itcl namespace (this includes ::itcl::parser namespace) */
-    nsPtr = Tcl_FindNamespace(infoPtr->interp, "::itcl::parser", NULL, 0);
-    if (nsPtr != NULL) {
-        Tcl_DeleteNamespace(nsPtr);
-    }
-    nsPtr = Tcl_FindNamespace(infoPtr->interp, "::itcl::import", NULL, 0);
-    if (nsPtr != NULL) {
-        Tcl_DeleteNamespace(nsPtr);
-    }
-    nsPtr = Tcl_FindNamespace(infoPtr->interp, "::itcl::internal", NULL, 0);
-    if (nsPtr != NULL) {
-        Tcl_DeleteNamespace(nsPtr);
-    }
-    nsPtr = Tcl_FindNamespace(infoPtr->interp, "::itcl::builtin", NULL, 0);
-    if (nsPtr != NULL) {
-        Tcl_DeleteNamespace(nsPtr);
-    }
-    nsPtr = Tcl_FindNamespace(infoPtr->interp, "::itcl", NULL, 0);
-    if (nsPtr != NULL) {
-        Tcl_DeleteNamespace(nsPtr);
-    } else {
-
     /* cleanup ensemble info */
     if (infoPtr->ensembleInfo) {
 	Tcl_DeleteHashTable(&infoPtr->ensembleInfo->ensembles);
@@ -751,5 +624,4 @@ if (infoPtr->infoVarsPtr) {
     Itcl_FinishList();
 
     Itcl_ReleaseData((ClientData)infoPtr);
-    }
 }
