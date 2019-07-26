@@ -13,7 +13,7 @@
 #include <stdlib.h>
 #include "itclInt.h"
 
-static Tcl_ObjCmdProc ItclFinishCmd;
+static Tcl_NamespaceDeleteProc FreeItclObjectInfo;
 static Tcl_ObjCmdProc ItclSetHullWindowName;
 static Tcl_ObjCmdProc ItclCheckSetItclHull;
 
@@ -176,24 +176,6 @@ RootCallProc(
     ItclRootMethodProc *proc = (ItclRootMethodProc *)clientData;
 
     return (*proc)(ioPtr, interp, objc, objv);
-}
-
-/*
- * ------------------------------------------------------------------------
- *  FreeItclObjectInfo()
- *
- *  called when an interp is deleted to free up memory
- *
- * ------------------------------------------------------------------------
- */
-static void
-FreeItclObjectInfo(
-    ClientData clientData)
-{
-    ItclObjectInfo *infoPtr;
-
-    infoPtr = (ItclObjectInfo *)clientData;
-    ItclFinishCmd(infoPtr, infoPtr->interp, 0, NULL);
 }
 
 /*
@@ -596,19 +578,15 @@ ItclCheckSetItclHull(
 
 /*
  * ------------------------------------------------------------------------
- *  ItclFinishCmd()
+ *  FreeItclObjectInfo()
  *
- *  called when an interp is deleted to free up memory or called explicitly
- *  to check memory leaks
+ *  called when an interp is deleted to free up memory
  *
  * ------------------------------------------------------------------------
  */
-static int
-ItclFinishCmd(
-    ClientData clientData,   /* unused */
-    Tcl_Interp *interp,      /* current interpreter */
-    int objc,                /* number of arguments */
-    Tcl_Obj *const objv[])   /* argument objects */
+static void
+FreeItclObjectInfo(
+    ClientData clientData)
 {
     Tcl_HashEntry *hPtr;
     Tcl_HashSearch place;
@@ -617,17 +595,12 @@ ItclFinishCmd(
     Tcl_Obj *objPtr;
     Tcl_Obj *ensObjPtr;
     Tcl_Command cmdPtr;
-    ItclObjectInfo *infoPtr;
     ItclCmdsInfo *iciPtr;
     int i;
 
-    Itcl_InterpState state = Itcl_SaveInterpState(interp, TCL_OK);
+    ItclObjectInfo *infoPtr = (ItclObjectInfo *)clientData;
+    Tcl_Interp *interp = infoPtr->interp;
 
-    ItclShowArgs(1, "ItclFinishCmd", objc, objv);
-    infoPtr = Tcl_GetAssocData(interp, ITCL_INTERP_DATA, NULL);
-    if (infoPtr == NULL) {
-        infoPtr = (ItclObjectInfo *)clientData;
-    }
     newObjv = (Tcl_Obj **)ckalloc(sizeof(Tcl_Obj *) * 2);
     newObjv[0] = Tcl_NewStringObj("my", -1);;
     for (i = 0; ;i++) {
@@ -779,6 +752,4 @@ if (infoPtr->infoVarsPtr) {
 
     Itcl_ReleaseData((ClientData)infoPtr);
     }
-    Itcl_RestoreInterpState(interp, state);
-    return TCL_OK;
 }
