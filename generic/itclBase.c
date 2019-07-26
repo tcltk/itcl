@@ -618,7 +618,6 @@ if (infoPtr->infoVarsPtr) {
 	infoPtr->class_meta_type = NULL;
     }
 
-    Itcl_DeleteStack(&infoPtr->clsStack);
     /* clean up list pool */
     Itcl_FinishList();
 
