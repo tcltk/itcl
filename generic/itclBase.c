@@ -235,7 +235,6 @@ Initialize (
     Tcl_InitHashTable(&infoPtr->instances, TCL_STRING_KEYS);
     Tcl_InitHashTable(&infoPtr->frameContext, TCL_ONE_WORD_KEYS);
     Tcl_InitObjHashTable(&infoPtr->classTypes);
-    infoPtr->activeHash = 1;
 
     infoPtr->ensembleInfo = (EnsembleInfo *)ckalloc(sizeof(EnsembleInfo));
     memset(infoPtr->ensembleInfo, 0, sizeof(EnsembleInfo));

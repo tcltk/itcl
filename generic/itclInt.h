@@ -170,7 +170,7 @@ typedef struct ItclObjectInfo {
     Tcl_Obj **unparsedObjv;         /* options not parsed by
                                        ItclExtendedConfigure/-Cget function */
     int functionFlags;              /* used for creating of ItclMemberCode */
-    int activeHash;                 /* Hash tables are not yet delted */
+    int unused7;
     struct ItclDelegatedOption *currIdoPtr;
                                     /* the current delegated option info */
     int inOptionHandling;           /* used to indicate for type/widget ...
