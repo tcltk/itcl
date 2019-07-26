@@ -590,10 +590,6 @@ if (infoPtr->infoVarsPtr) {
 	Tcl_DecrRefCount(infoPtr->infoVarsPtr);
 	infoPtr->infoVarsPtr = NULL;
     }
-    if (infoPtr->infoVars3Ptr) {
-	Tcl_DecrRefCount(infoPtr->infoVars3Ptr);
-	infoPtr->infoVars3Ptr = NULL;
-    }
     if (infoPtr->infoVars4Ptr) {
 	Tcl_DecrRefCount(infoPtr->infoVars4Ptr);
 	infoPtr->infoVars4Ptr = NULL;

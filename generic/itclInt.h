@@ -188,7 +188,7 @@ typedef struct ItclObjectInfo {
     Tcl_Obj *unused3;
     Tcl_Obj *unused4;
     Tcl_Obj *infoVarsPtr;
-    Tcl_Obj *infoVars3Ptr;
+    Tcl_Obj *unused9;
     Tcl_Obj *infoVars4Ptr;
     Tcl_Obj *typeDestructorArgumentPtr;
     struct ItclObject *lastIoPtr;   /* last object constructed */

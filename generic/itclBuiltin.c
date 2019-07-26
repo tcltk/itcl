@@ -336,12 +336,8 @@ Itcl_BiInit(
 	    }
 	    Tcl_IncrRefCount(infoPtr->infoVarsPtr);
 
-	    infoPtr->infoVars3Ptr =
-	            Tcl_NewStringObj("::itcl::builtin::Info::vars", -1);
-	    /* FIXME see comment in itclBase.c ItclFinishCmd */
-	    Tcl_IncrRefCount(infoPtr->infoVars3Ptr);
             Tcl_DictObjPut(NULL, mapDict, infoPtr->infoVars4Ptr,
-	            infoPtr->infoVars3Ptr);
+	            Tcl_NewStringObj("::itcl::builtin::Info::vars", -1));
             Tcl_SetEnsembleMappingDict(interp, infoCmd, mapDict);
         }
     }
