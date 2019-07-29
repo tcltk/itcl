@@ -404,7 +404,13 @@ NRInfoWrap(
     Tcl_Obj *const objv[])
 {
     Tcl_CmdInfo info;
-    Tcl_Command token = (Tcl_Command) clientData;
+    ItclObjectInfo *infoPtr = (ItclObjectInfo *)clientData;
+
+    if (!infoPtr->infoCmd) {
+	Tcl_SetObjResult(interp, Tcl_NewStringObj(
+		"itcl info-subsystem is deleted", -1));
+	return TCL_ERROR;
+    }
 
     if (objc == 1) {
 	/*
@@ -412,8 +418,6 @@ NRInfoWrap(
 	 * default message of a Tcl ensemble.
 	 */
 
-	ItclObjectInfo *infoPtr = (ItclObjectInfo *)Tcl_GetAssocData(interp,
-		ITCL_INTERP_DATA, NULL);
 	Tcl_Obj *objPtr = Tcl_NewStringObj(
 		"wrong # args: should be one of...\n", -1);
 	ItclGetInfoUsage(interp, objPtr, infoPtr, NULL);
@@ -423,16 +427,7 @@ NRInfoWrap(
 
     /* Have a subcommand.  Pass on to the ensemble */
 
-    /*
-     * WARNING! WARNING! WARNING!
-     * We are doing NOTHING to guarantee that the command corresponding to
-     * token has not been deleted.  If it is deleted, this will fail very
-     * badly.  Another pass to plug up dependencies like this is in order.
-     * I'm not bothering now because the code is already overflowing with
-     * worse uncontrolled dependencies.  I'll clean the windows sometime
-     * later when the cracks in the foundation are filled in.
-     */
-    Tcl_GetCommandInfoFromToken(token, &info);
+    Tcl_GetCommandInfoFromToken(infoPtr->infoCmd, &info);
     return Tcl_NRCallObjProc(interp, info.objProc, info.objClientData,
 	    objc, objv);
 }
@@ -449,11 +444,7 @@ InfoWrap(
 
 static void
 InfoCmdDelete(
-    ClientData clientData,
-    Tcl_Interp *interp,
-    const char *oldName,
-    const char *newName,
-    int flags)
+    ClientData clientData)
 {
     ItclObjectInfo *infoPtr = (ItclObjectInfo *)clientData;
 
@@ -486,11 +477,9 @@ ItclInfoInit(
     }
     token = Tcl_CreateEnsemble(interp, nsPtr->fullName, nsPtr,
         TCL_ENSEMBLE_PREFIX);
-    Tcl_TraceCommand(interp, nsPtr->fullName, TCL_TRACE_DELETE,
-	    InfoCmdDelete, (ClientData) infoPtr);
     infoPtr->infoCmd = token;
     token = Tcl_NRCreateCommand(interp, "::itcl::builtin::info", InfoWrap,
-	    NRInfoWrap, token, NULL);
+	    NRInfoWrap, infoPtr, InfoCmdDelete);
     Tcl_GetCommandInfoFromToken(token, &info);
 
     /*
@@ -511,7 +500,8 @@ ItclInfoInit(
 	Tcl_AppendToObj(cmdObjPtr, "::", 2);
 	Tcl_AppendToObj(cmdObjPtr, InfoMethodList[i].name, -1);
         Tcl_CreateObjCommand(interp, Tcl_GetString(cmdObjPtr),
-                InfoMethodList[i].proc, infoPtr, NULL);
+                InfoMethodList[i].proc, infoPtr, 
+                InfoMethodList[i].proc == Itcl_BiInfoVarsCmd ? ItclRestoreInfoVars : NULL);
 	Tcl_DecrRefCount(cmdObjPtr);
     }
     unkObjPtr = Tcl_NewStringObj("::itcl::builtin::Info::unknown", -1);

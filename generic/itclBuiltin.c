@@ -262,26 +262,19 @@ static int BiMethodListLen = sizeof(BiMethodList)/sizeof(BiMethod);
 
 /*
  * ------------------------------------------------------------------------
- *  Itcl_BiInit()
+ *  ItclRestoreInfoVars()
  *
- *  Creates a namespace full of built-in methods/procs for [incr Tcl]
- *  classes.  This includes things like the "isa" method and "info"
- *  for querying class info.  Usually invoked by Itcl_Init() when
- *  [incr Tcl] is first installed into an interpreter.
+ *  Delete callback to restore original "info" ensemble (revert inject of Itcl)
  *
- *  Returns TCL_OK/TCL_ERROR to indicate success/failure.
  * ------------------------------------------------------------------------
  */
 
-static void
-RestoreInfoVars(
-    ClientData clientData,
-    Tcl_Interp *interp,
-    const char *oldName,
-    const char *newName,
-    int flags)
+void
+ItclRestoreInfoVars(
+    ClientData clientData)
 {
     ItclObjectInfo *infoPtr = (ItclObjectInfo *)clientData;
+    Tcl_Interp *interp = infoPtr->interp;
     Tcl_Command cmd;
     Tcl_Obj *mapDict;
 
@@ -310,6 +303,20 @@ done:
 	infoPtr->infoVars4Ptr = NULL;
     }
 }
+
+
+/*
+ * ------------------------------------------------------------------------
+ *  Itcl_BiInit()
+ *
+ *  Creates a namespace full of built-in methods/procs for [incr Tcl]
+ *  classes.  This includes things like the "isa" method and "info"
+ *  for querying class info.  Usually invoked by Itcl_Init() when
+ *  [incr Tcl] is first installed into an interpreter.
+ *
+ *  Returns TCL_OK/TCL_ERROR to indicate success/failure.
+ * ------------------------------------------------------------------------
+ */
 
 int
 Itcl_BiInit(
@@ -374,8 +381,10 @@ Itcl_BiInit(
         	Tcl_DictObjPut(NULL, mapDict, infoPtr->infoVars4Ptr,
 	        	Tcl_NewStringObj("::itcl::builtin::Info::vars", -1));
         	Tcl_SetEnsembleMappingDict(interp, infoCmd, mapDict);
-		Tcl_TraceCommand(interp, "::itcl::builtin::Info::vars",
-			TCL_TRACE_DELETE, RestoreInfoVars, infoPtr);
+        	/* 
+        	 * Note that ItclRestoreInfoVars is called in callback
+        	 * if built-in Itcl command info::vars or the ensemble get
+        	 * deleted (see ItclInfoInit registering that). */
 	    } else {
 		Tcl_DecrRefCount(infoPtr->infoVars4Ptr);
 		infoPtr->infoVars4Ptr = NULL;

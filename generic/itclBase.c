@@ -560,8 +560,6 @@ FreeItclObjectInfo(
     ClientData clientData)
 {
     ItclObjectInfo *infoPtr = (ItclObjectInfo *)clientData;
-    Tcl_Interp *interp = infoPtr->interp;
-    Tcl_Command cmdPtr;
 
     Tcl_DeleteHashTable(&infoPtr->instances);
     Tcl_DeleteHashTable(&infoPtr->classTypes);

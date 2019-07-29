@@ -797,6 +797,9 @@ MODULE_SCOPE int ItclAddClassDelegatedFunctionDictInfo(Tcl_Interp *interp,
         ItclClass *iclsPtr, ItclDelegatedFunction *idmPtr);
 MODULE_SCOPE int ItclClassCreateObject(ClientData clientData, Tcl_Interp *interp,
         int objc, Tcl_Obj *const objv[]);
+
+MODULE_SCOPE void ItclRestoreInfoVars(ClientData clientData);
+
 MODULE_SCOPE Tcl_ObjCmdProc Itcl_BiMyProcCmd;
 MODULE_SCOPE Tcl_ObjCmdProc Itcl_BiInstallComponentCmd;
 MODULE_SCOPE Tcl_ObjCmdProc Itcl_BiCallInstanceCmd;
