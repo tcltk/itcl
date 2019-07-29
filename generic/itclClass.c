@@ -93,66 +93,11 @@ static void
 ItclDestroyClass2(
     ClientData clientData)      /* The class being deleted. */
 {
-    ItclClass *iclsPtr;
+    ItclClass *iclsPtr = clientData;
 
-    iclsPtr = clientData;
     ItclDestroyClassNamesp(iclsPtr);
     ItclReleaseClass(iclsPtr);
 }
-
-/*
- * ------------------------------------------------------------------------
- *  ClassCmdDeleteTrace()
- *
- * ------------------------------------------------------------------------
- */
-
-static void
-ClassCmdDeleteTrace(
-    ClientData clientData,      /* The class being deleted. */
-    Tcl_Interp *interp,         /* The interpreter containing the object. */
-    const char *oldName,        /* What the object was (last) called. */
-    const char *newName,        /* Always NULL. */
-    int flags)                  /* Why was the object deleted? */
-{
-    Tcl_HashEntry *hPtr;
-    Tcl_DString buffer;
-    Tcl_Namespace *nsPtr;
-    ItclObjectInfo *infoPtr;
-    ItclClass *iclsPtr = clientData;
-
-    /*
-     * How is it decided what cleanup is done here tracing the access command deletion,
-     * versus what cleanup is done by the Tcl_CmdDeleteProc tied to the access command?
-     */
-
-    infoPtr = Tcl_GetAssocData(interp, ITCL_INTERP_DATA, NULL);
-    hPtr = Tcl_FindHashEntry(&infoPtr->classes, (char *)iclsPtr);
-    if (hPtr == NULL) {
-        return;
-    }
-    if (iclsPtr->flags & ITCL_CLASS_IS_RENAMED) {	/* DUMB! name for this flag */
-        return;				/* Flag very likely serves no purpose as well. */
-    }
-    iclsPtr->flags |= ITCL_CLASS_IS_RENAMED;		/* DUMB! name for this flag */
-    ItclPreserveClass(iclsPtr);
-    /* delete the namespace for the common variables */
-    Tcl_DStringInit(&buffer);
-    Tcl_DStringAppend(&buffer, ITCL_VARIABLES_NAMESPACE, -1);
-    Tcl_DStringAppend(&buffer,
-	    (Tcl_GetObjectNamespace(iclsPtr->oPtr))->fullName, -1);
-    nsPtr = Tcl_FindNamespace(interp, Tcl_DStringValue(&buffer), NULL, 0);
-    Tcl_DStringFree(&buffer);
-    if (nsPtr != NULL) {
-        Tcl_DeleteNamespace(nsPtr);
-    }
-    if (!(iclsPtr->flags & ITCL_CLASS_NS_IS_DESTROYED)) {
-        ItclDestroyClassNamesp(iclsPtr);
-    }
-    ItclReleaseClass(iclsPtr);
-    return;
-}
-
 
 /*
  * ------------------------------------------------------------------------
@@ -249,7 +194,6 @@ Itcl_CreateClass(
     int result;
     int newEntry;
     ItclResolveInfo *resolveInfoPtr;
-    Tcl_Obj *cmdNamePtr;
 
     if (infoPtr->clazzObjectPtr == NULL) {
 	Tcl_AppendResult(interp, "oo-subsystem is deleted", NULL);
@@ -638,13 +582,6 @@ Itcl_CreateClass(
     ItclPreserveClass(iclsPtr);
     iclsPtr->accessCmd = Tcl_GetObjectCommand(oPtr);
 
-    cmdNamePtr = Tcl_NewObj();
-    Tcl_GetCommandFullName(interp, iclsPtr->accessCmd, cmdNamePtr);
-    
-    Tcl_TraceCommand(interp, Tcl_GetString(cmdNamePtr),
-                TCL_TRACE_DELETE, ClassCmdDeleteTrace, iclsPtr);
-
-    Tcl_DecrRefCount(cmdNamePtr);
     /* FIXME should set the class objects unknown command to Itcl_HandleClass */
 
     *rPtr = iclsPtr;
@@ -983,6 +920,25 @@ ItclDestroyClassNamesp(
 	    }
         }
         hPtr = Tcl_NextHashEntry(&place);
+    }
+
+    /*
+     * Now there are no objects and inherited classes anymore, they could access a
+     * private/protected common variables, so delete the internal namespace.
+     */
+    {
+	Tcl_DString buffer;
+	Tcl_Namespace *nsPtr;
+
+	Tcl_DStringInit(&buffer);
+	Tcl_DStringAppend(&buffer, ITCL_VARIABLES_NAMESPACE, -1);
+	Tcl_DStringAppend(&buffer,
+	    (Tcl_GetObjectNamespace(iclsPtr->oPtr))->fullName, -1);
+	nsPtr = Tcl_FindNamespace(iclsPtr->interp, Tcl_DStringValue(&buffer), NULL, 0);
+	Tcl_DStringFree(&buffer);
+	if (nsPtr != NULL) {
+	    Tcl_DeleteNamespace(nsPtr);
+	}
     }
 
     /*
@@ -2363,8 +2319,6 @@ Itcl_DeleteVariable(
     ItclVariable *ivPtr;
 
     ivPtr = (ItclVariable *)cdata;
-if (ivPtr->arrayInitPtr != NULL) {
-}
     hPtr = Tcl_FindHashEntry(&ivPtr->infoPtr->classes, (char *)ivPtr->iclsPtr);
     if (hPtr != NULL) {
 	/* unlink owerself from list of class variables */

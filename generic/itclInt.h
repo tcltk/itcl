@@ -219,7 +219,7 @@ typedef struct EnsembleInfo {
 #define ITCL_CLASS_IS_DELETED              0x1000
 #define ITCL_CLASS_IS_DESTROYED            0x2000
 #define ITCL_CLASS_NS_IS_DESTROYED         0x4000
-#define ITCL_CLASS_IS_RENAMED              0x8000
+#define ITCL_CLASS_IS_RENAMED              0x8000 /* unused */
 #define ITCL_CLASS_IS_FREED               0x10000
 #define ITCL_CLASS_DERIVED_RELEASED       0x20000
 #define ITCL_CLASS_NS_TEARDOWN            0x40000
