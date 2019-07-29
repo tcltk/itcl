@@ -12,7 +12,10 @@ package prefer latest
 package require Tcl 8.6
 package require tcltest 2.2
 
-tcltest::configure {*}$argv -testdir [file dir [info script]] \
+if {"-testdir" ni $argv} {
+    lappend argv -testdir [file dir [info script]]
+}
+tcltest::configure {*}$argv \
 	-loadfile [file join [file dirname [info script]] helpers.tcl]
 tcltest::runAllTests
 

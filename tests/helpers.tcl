@@ -19,10 +19,14 @@ if {[llength [info commands memory]] && (
       return [expr {$end - $tmp}]
   }
   proc itcl_leaktest {testfile} {
-    set leak [leaktest [string map [list @test@ $testfile] {
+    set leak [leaktest [string map [list \
+      @test@ $testfile \
+      @testargv@ [if {[info exists ::argv]} {list tcltest::configure {*}$::argv}]
+    ] {
       interp create i
       load {} Itcl i
       i eval {set ::tcl::inl_mem_test 0}
+      i eval {package require tcltest; @testargv@}
       i eval [list source @test@]
       interp delete i
     }]]
