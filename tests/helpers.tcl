@@ -2,9 +2,18 @@
 #
 # This file contains helper scripts for all tests, like a mem-leak checker, etc.
 
+# -loadfile overwrites -load, so restore it from ::env(TESTFLAGS):
+if {[info exists ::env(TESTFLAGS)]} {
+  array set testargs $::env(TESTFLAGS)
+  if {[info exists ::testargs(-load)]} {
+    eval $::testargs(-load)
+  }
+  unset testargs
+}
+
 package require itcl
 
-if {[llength [info commands memory]] && (
+if {[namespace which -command memory] ne "" && (
     ![info exists ::tcl::inl_mem_test] || $::tcl::inl_mem_test
   )
 } {
