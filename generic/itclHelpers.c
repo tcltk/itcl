@@ -1,8 +1,8 @@
 /*
  * itclHelpers.c --
  *
- * This file contains the C-implemeted part of 
- * Itcl 
+ * This file contains the C-implemeted part of
+ * Itcl
  *
  * Copyright (c) 2007 by Arnulf P. Wiedemann
  *
@@ -162,7 +162,7 @@ ItclCreateArgList(
 	        lastArglistPtr->nextPtr = arglistPtr;
 	        Tcl_AppendToObj(*usagePtr, " ", 1);
 	    }
-	    arglistPtr->namePtr = 
+	    arglistPtr->namePtr =
 	            Tcl_NewStringObj(defaultArgv[0], -1);
 	    Tcl_IncrRefCount(arglistPtr->namePtr);
 	    (*maxArgcPtr)++;
@@ -177,7 +177,7 @@ ItclCreateArgList(
 	            Tcl_AppendToObj(*usagePtr, defaultArgv[0], -1);
 	        }
 	    } else {
-	        arglistPtr->defaultValuePtr = 
+	        arglistPtr->defaultValuePtr =
 		        Tcl_NewStringObj(defaultArgv[1], -1);
 		Tcl_IncrRefCount(arglistPtr->defaultValuePtr);
 	        Tcl_AppendToObj(*usagePtr, "?", 1);
@@ -389,7 +389,7 @@ ItclCapitalize(
 {
     Tcl_Obj *objPtr;
     char buf[2];
-    
+
     sprintf(buf, "%c", toupper(UCHAR(*str)));
     buf[1] = '\0';
     objPtr = Tcl_NewStringObj(buf, -1);

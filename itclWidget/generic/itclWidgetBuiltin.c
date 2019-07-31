@@ -254,7 +254,7 @@ Itcl_BiInstallHullCmd(
 
     if (contextIoPtr == NULL) {
         Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
-            "cannot installhull without an object context", 
+            "cannot installhull without an object context",
             (char*)NULL);
         return TCL_ERROR;
     }
@@ -362,7 +362,7 @@ Itcl_BiInstallHullCmd(
     }
     contextIoPtr->hullWindowNamePtr = Tcl_NewStringObj(widgetName, -1);
 /*
-fprintf(stderr, "REN!%s!%s!\n", widgetName, Tcl_DStringValue(&buffer)); 
+fprintf(stderr, "REN!%s!%s!\n", widgetName, Tcl_DStringValue(&buffer));
 */
     Itcl_RenameCommand(interp, widgetName,
             Tcl_DStringValue(&buffer));

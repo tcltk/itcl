@@ -500,7 +500,7 @@ ItclInfoInit(
 	Tcl_AppendToObj(cmdObjPtr, "::", 2);
 	Tcl_AppendToObj(cmdObjPtr, InfoMethodList[i].name, -1);
         Tcl_CreateObjCommand(interp, Tcl_GetString(cmdObjPtr),
-                InfoMethodList[i].proc, infoPtr, 
+                InfoMethodList[i].proc, infoPtr,
                 InfoMethodList[i].proc == Itcl_BiInfoVarsCmd ? ItclRestoreInfoVars : NULL);
 	Tcl_DecrRefCount(cmdObjPtr);
     }

@@ -64,7 +64,7 @@ name and possibly add some arguments:
 delegate method wagtail to tail as "wag briskly"
 .CE
 .PP
-A method cannot be both locally defined and delegated. 
+A method cannot be both locally defined and delegated.
 .RE
 .TP
 \fBdelegate method \fImethodName\fR ?\fBto \fIcomponentName\fR? \fBusing \fIpattern\fR
@@ -85,7 +85,7 @@ delegate method wag to tail
 delegate method wag to tail using "%c %m"
 .CE
 .PP
-Each element of the list becomes a single element of the delegated command 
+Each element of the list becomes a single element of the delegated command
 --it is never reparsed as a string.
 .PP
 Substitutions:
@@ -97,7 +97,7 @@ command as an argument, you'd write "%%c".
 .TP
 \fB%c\fR
 .
-This is replaced with the named component's command. 
+This is replaced with the named component's command.
 .TP
 \fB%j\fR
 .
@@ -120,11 +120,11 @@ This is replaced with the name of the instance's private namespace.
 .TP
 \fB%s\fR
 .
-This is replaced with the name of the instance command. 
+This is replaced with the name of the instance command.
 .TP
 \fB%t\fR
 .
-This is replaced with the fully qualified type name. 
+This is replaced with the fully qualified type name.
 .TP
 \fB%w\fR
 .
@@ -150,7 +150,7 @@ delegate method {tail *} to tail
 .CE
 .PP
 This implicitly defines the method tail whose subcommands will be
-delegated to the tail component. 
+delegated to the tail component.
 .PP
 The definitions for \fBdelegate proc\fR ... are the same as for method,
 the only difference being, that this is for procs.

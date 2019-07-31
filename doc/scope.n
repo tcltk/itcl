@@ -19,7 +19,7 @@ itcl::scope \- capture the namespace context for a variable
 Creates a scoped value for the specified \fIname\fR, which must
 be a variable name.  If the \fIname\fR is an instance variable,
 then the scope command returns a name which will resolve in any
-context as an instance variable belonging to \fIobject\fR.  
+context as an instance variable belonging to \fIobject\fR.
 The precise format of this name is an internal detail to Itcl.
 Use of such a scoped value makes it possible to use
 instance variables in conjunction with widgets.  For example, if you

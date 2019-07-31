@@ -381,7 +381,7 @@ Itcl_BiInit(
         	Tcl_DictObjPut(NULL, mapDict, infoPtr->infoVars4Ptr,
 	        	Tcl_NewStringObj("::itcl::builtin::Info::vars", -1));
         	Tcl_SetEnsembleMappingDict(interp, infoCmd, mapDict);
-        	/* 
+        	/*
         	 * Note that ItclRestoreInfoVars is called in callback
         	 * if built-in Itcl command info::vars or the ensemble get
         	 * deleted (see ItclInfoInit registering that). */

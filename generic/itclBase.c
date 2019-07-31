@@ -396,7 +396,7 @@ Initialize (
 
 #ifdef ITCL_DEBUG_C_INTERFACE
     RegisterDebugCFunctions(interp);
-#endif    
+#endif
     /*
      *  Package is now loaded.
      */
@@ -508,7 +508,7 @@ ItclCheckSetItclHull(
 	return TCL_ERROR;
     }
 
-    /* 
+    /*
      * This is an internal command, and is never called with an
      * objectName value other than the empty list. Check that with
      * an assertion so alternative handling can be removed.

@@ -42,7 +42,7 @@ Itcl_InitStubs(
     const ItclStubs *stubsPtr;
     const ItclIntStubs *intStubsPtr;
     const char *actualVersion;
-    
+
     actualVersion =
 	    Tcl_PkgRequireEx(interp, packageName, version, exact, &clientData);
     stubsPtr = clientData;

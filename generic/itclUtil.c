@@ -507,7 +507,7 @@ Itcl_FinishList()
 {
     Itcl_ListElem *listPtr;
     Itcl_ListElem *elemPtr;
-    
+
     listPtr = listPool;
     while (listPtr != NULL) {
         elemPtr = listPtr;
@@ -978,7 +978,7 @@ Itcl_DecodeScopedCommand(
     int listc;
     int result;
     int len;
-    
+
     nsPtr = NULL;
     len = strlen(name);
     cmdName = ckalloc((unsigned)strlen(name)+1);

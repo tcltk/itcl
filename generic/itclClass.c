@@ -120,7 +120,7 @@ ItclDeleteClassMetadata(
     Tcl_Namespace *ooNsPtr = Tcl_GetObjectNamespace(oPtr);
 
     if (ooNsPtr != iclsPtr->nsPtr) {
-	/* 
+	/*
 	 * Itcl's idea of the class namespace is different from that of TclOO.
 	 * Make sure both get torn down and pulled from tables.
 	 */
@@ -527,7 +527,7 @@ Itcl_CreateClass(
         ivPtr->protection = ITCL_PROTECTED;  /* always "protected" */
         ivPtr->flags |= ITCL_OPTIONS_VAR;    /* mark as "itcl_options"
 	                                      * variable */
-    
+
         hPtr = Tcl_CreateHashEntry(&iclsPtr->variables, (char *)namePtr,
 	        &newEntry);
         Tcl_SetHashValue(hPtr, (ClientData)ivPtr);
@@ -546,7 +546,7 @@ Itcl_CreateClass(
         ivPtr->protection = ITCL_PROTECTED;  /* always "protected" */
         ivPtr->flags |= ITCL_OPTION_COMP_VAR; /* mark as "itcl_option_components"
 	                                      * variable */
-    
+
         hPtr = Tcl_CreateHashEntry(&iclsPtr->variables, (char *)namePtr,
 	        &newEntry);
         Tcl_SetHashValue(hPtr, (ClientData)ivPtr);
@@ -562,7 +562,7 @@ Itcl_CreateClass(
 
         ivPtr->protection = ITCL_PROTECTED;  /* always "protected" */
         ivPtr->flags |= ITCL_THIS_VAR;       /* mark as "thiswin" variable */
-    
+
         hPtr = Tcl_CreateHashEntry(&iclsPtr->variables, (char *)namePtr,
 	        &newEntry);
         Tcl_SetHashValue(hPtr, (ClientData)ivPtr);
@@ -1421,7 +1421,7 @@ CallCreateObject(
  * ------------------------------------------------------------------------
  *  Itcl_HandleClass()
  *
- *  first argument is ::itcl::parser::handleClass 
+ *  first argument is ::itcl::parser::handleClass
  *  Invoked by Tcl whenever the user issues the command associated with
  *  a class name.  Handles the following syntax:
  *
@@ -1962,7 +1962,7 @@ Itcl_CreateVariable(
     } else {
         mCodePtr = NULL;
     }
-        
+
 
     /*
      *  If everything looks good, create the variable definition.
@@ -2057,7 +2057,7 @@ Itcl_CreateOption(
  *  Itcl_CreateMethodVariable()
  *
  *  Creates a new class methdovariable definition.  If this is a public
- *  methodvariable, 
+ *  methodvariable,
  *
  *  Returns TCL_ERROR along with an error message in the specified
  *  interpreter if anything goes wrong.  Otherwise, this returns
@@ -2367,7 +2367,7 @@ ItclDeleteOption(
     }
 
     if (ioptPtr->codePtr) {
-	ItclReleaseMemberCode(ioptPtr->codePtr); 
+	ItclReleaseMemberCode(ioptPtr->codePtr);
     }
     if (ioptPtr->defaultValuePtr != NULL) {
         Tcl_DecrRefCount(ioptPtr->defaultValuePtr);
