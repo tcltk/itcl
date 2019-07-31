@@ -22,7 +22,7 @@ if {[namespace which -command memory] ne "" && "-loadfile" ni $argv} {
 
 package prefer latest
 
-package require Tcl 8.6
+package require Tcl 8.6-
 package require tcltest 2.2
 
 tcltest::configure {*}$argv
