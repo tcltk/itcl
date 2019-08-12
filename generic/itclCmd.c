@@ -684,7 +684,7 @@ Itcl_ScopeCmd(
     ItclObjectInfo *infoPtr;
     ItclVarLookup *vlookup;
     char *openParen;
-    register char *p;
+    char *p;
     char *token;
     int doAppend;
     int result;

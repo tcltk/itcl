@@ -2283,7 +2283,7 @@ ItclClass*
 Itcl_AdvanceHierIter(
     ItclHierIter *iter)  /* iterator used for traversal */
 {
-    register Itcl_ListElem *elem;
+    Itcl_ListElem *elem;
     ItclClass *iclsPtr;
 
     iter->current = (ItclClass*)Itcl_PopStack(&iter->stack);

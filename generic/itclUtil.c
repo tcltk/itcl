@@ -747,7 +747,7 @@ Itcl_ParseNamespPath(
     const char **head,   /* returns "namesp::namesp::namesp" part */
     const char **tail)   /* returns "element" part */
 {
-    register char *sep, *newname;
+    char *sep, *newname;
 
     Tcl_DStringInit(buffer);
 
