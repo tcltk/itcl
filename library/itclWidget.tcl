@@ -19,14 +19,14 @@ namespace eval ::itcl {
 
 proc widget {name args} {
     set result [uplevel 1 ::itcl::internal::commands::genericclass widget $name $args]
-    # we handle create by owerselfs !! allow classunknown to handle that 
+    # we handle create by owerselfs !! allow classunknown to handle that
     oo::objdefine $result unexport create
     return $result
 }
 
 proc widgetadaptor {name args} {
     set result [uplevel 1 ::itcl::internal::commands::genericclass widgetadaptor $name $args]
-    # we handle create by owerselfs !! allow classunknown to handle that 
+    # we handle create by owerselfs !! allow classunknown to handle that
     oo::objdefine $result unexport create
     return $result
 }
@@ -334,7 +334,7 @@ proc hulltypes {args} {
     namespace upvar ::itcl::internal::dicts hullTypes hullTypes
 
     set numArgs [llength $args]
-    if {$numArgs > 1} { 
+    if {$numArgs > 1} {
         error "wrong # args should be: info hulltypes ?<pattern>?"
     }
     set pattern ""
@@ -350,7 +350,7 @@ proc hulltypes {args} {
 
 proc widgetclasses {args} {
     set numArgs [llength $args]
-    if {$numArgs > 1} { 
+    if {$numArgs > 1} {
         error "wrong # args should be: info widgetclasses ?<pattern>?"
     }
     set pattern ""
@@ -382,7 +382,7 @@ proc widgetclasses {args} {
 
 proc widgets {args} {
     set numArgs [llength $args]
-    if {$numArgs > 1} { 
+    if {$numArgs > 1} {
         error "wrong # args should be: info widgets ?<pattern>?"
     }
     set pattern ""
@@ -414,7 +414,7 @@ proc widgets {args} {
 
 proc widgetadaptors {args} {
     set numArgs [llength $args]
-    if {$numArgs > 1} { 
+    if {$numArgs > 1} {
         error "wrong # args should be: info widgetadaptors ?<pattern>?"
     }
     set pattern ""

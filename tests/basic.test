@@ -137,7 +137,7 @@ test basic-1.9 {objects can be recreated with the same name
 
 test basic-1.10 {objects can be destroyed by deleting their access command
 } -setup $setup2 -body {
-    rename ::x {} 
+    rename ::x {}
     itcl::find objects x
 } -cleanup $cleanup2 -result {}
 
@@ -356,7 +356,7 @@ test basic-4.7 {clean-up of internal facilities
 } -setup $setup4 -body {
     # check callbacks are called if class gets removed using all possible ways:
     # objects are properly destroyed,
-    # callback removing the namespace for the common private and protected variables 
+    # callback removing the namespace for the common private and protected variables
     # (in ITCL_VARIABLES_NAMESPACE) is called, etc
     set ::tcltest::itcl_basic_errors {}
     set ivns ::itcl::internal::variables[namespace which Counter]
