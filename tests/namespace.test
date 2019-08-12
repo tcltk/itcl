@@ -41,7 +41,7 @@ test namespace-1.1 {same class name can be used in different namespaces
                 if {$num == 0} {
                     set num 1
                 } else {
-                    set num [expr $num*$by]
+                    set num [expr {$num*$by}]
                 }
             }
             method do {args} {
