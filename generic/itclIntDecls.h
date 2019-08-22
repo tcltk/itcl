@@ -186,7 +186,7 @@ ITCLAPI int		Itcl_CreateMemberCode(Tcl_Interp *interp,
 				ItclClass *iclsPtr, const char *arglist,
 				const char *body, ItclMemberCode **mcodePtr);
 /* 58 */
-ITCLAPI void		Itcl_DeleteMemberCode(char *cdata);
+ITCLAPI void		Itcl_DeleteMemberCode(void *cdata);
 /* 59 */
 ITCLAPI int		Itcl_GetMemberCode(Tcl_Interp *interp,
 				ItclMemberFunc *mfunc);
@@ -586,7 +586,7 @@ typedef struct ItclIntStubs {
     int (*itcl_ChangeMemberFunc) (Tcl_Interp *interp, ItclMemberFunc *mfunc, const char *arglist, const char *body); /* 55 */
     void (*itcl_DeleteMemberFunc) (void *cdata); /* 56 */
     int (*itcl_CreateMemberCode) (Tcl_Interp *interp, ItclClass *iclsPtr, const char *arglist, const char *body, ItclMemberCode **mcodePtr); /* 57 */
-    void (*itcl_DeleteMemberCode) (char *cdata); /* 58 */
+    void (*itcl_DeleteMemberCode) (void *cdata); /* 58 */
     int (*itcl_GetMemberCode) (Tcl_Interp *interp, ItclMemberFunc *mfunc); /* 59 */
     void (*reserved60)(void);
     int (*itcl_EvalMemberCode) (Tcl_Interp *interp, ItclMemberFunc *mfunc, ItclObject *contextObj, int objc, Tcl_Obj *const objv[]); /* 61 */

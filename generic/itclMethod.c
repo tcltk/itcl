@@ -767,7 +767,7 @@ Itcl_ChangeMemberFunc(
             argsStr, "\"",
             NULL);
 
-        Itcl_DeleteMemberCode((char*)mcode);
+        Itcl_DeleteMemberCode(mcode);
         return TCL_ERROR;
     }
 
@@ -866,7 +866,7 @@ ItclCreateMemberCode(
     if (arglist) {
         if (ItclCreateArgList(interp, arglist, &argc, &maxArgc, &usagePtr,
 	        &argListPtr, NULL, NULL) != TCL_OK) {
-            Itcl_DeleteMemberCode((char*)mcode);
+            Itcl_DeleteMemberCode(mcode);
             return TCL_ERROR;
         }
         mcode->argcount = argc;
@@ -909,7 +909,7 @@ ItclCreateMemberCode(
 			        Tcl_GetString(namePtr),
 				"'s arglist may not contain \"",
 				*cPtrPtr, "\" explicitly", NULL);
-                        Itcl_DeleteMemberCode((char*)mcode);
+                        Itcl_DeleteMemberCode(mcode);
                         return TCL_ERROR;
 		    }
 		    cPtrPtr++;
@@ -1026,7 +1026,7 @@ ItclCreateMemberCode(
 		    Tcl_AppendResult(interp,
                             "no registered C procedure with name \"",
 			    body+1, "\"", NULL);
-                    Itcl_DeleteMemberCode((char*)mcode);
+                    Itcl_DeleteMemberCode(mcode);
                     return TCL_ERROR;
                 }
 
@@ -1133,7 +1133,7 @@ void ItclFreeMemberCode (
 
 void
 Itcl_DeleteMemberCode(
-    char* cdata)  /* pointer to member code definition */
+    void* cdata)  /* pointer to member code definition */
 {
     ItclReleaseMemberCode((ItclMemberCode *)cdata);
 }

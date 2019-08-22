@@ -283,7 +283,7 @@ declare 57 {
         const char *arglist, const char *body, ItclMemberCode **mcodePtr)
 }
 declare 58 {
-    void Itcl_DeleteMemberCode(char *cdata)
+    void Itcl_DeleteMemberCode(void *cdata)
 }
 declare 59 {
     int Itcl_GetMemberCode(Tcl_Interp *interp, ItclMemberFunc *mfunc)
