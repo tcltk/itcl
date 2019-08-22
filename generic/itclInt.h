@@ -52,10 +52,12 @@
  * including the *printf family and others. Tell it to shut up.
  * (_MSC_VER is 1200 for VC6, 1300 or 1310 for vc7.net, 1400 for 8.0)
  */
-#if defined(_MSC_VER) && (_MSC_VER >= 1400)
+#if defined(_MSC_VER)
 #   pragma warning(disable:4244)
-#   pragma warning(disable:4267)
-#   pragma warning(disable:4996)
+#   if _MSC_VER >= 1400
+#	pragma warning(disable:4267)
+#	pragma warning(disable:4996)
+#   endif
 #endif
 
 /*
@@ -86,7 +88,7 @@
     Tcl_HashEntry *hPtr;Tcl_HashSearch search
 #define FOREACH_HASH(key,val,tablePtr) \
     for(hPtr=Tcl_FirstHashEntry((tablePtr),&search); hPtr!=NULL ? \
-            ((key)=(void *)Tcl_GetHashKey((tablePtr),hPtr),\
+            ((key)=Tcl_GetHashKey((tablePtr),hPtr),\
             (val)=Tcl_GetHashValue(hPtr),1):0; hPtr=Tcl_NextHashEntry(&search))
 #define FOREACH_HASH_VALUE(val,tablePtr) \
     for(hPtr=Tcl_FirstHashEntry((tablePtr),&search); hPtr!=NULL ? \

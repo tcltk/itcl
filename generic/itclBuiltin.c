@@ -341,16 +341,15 @@ Itcl_BiInit(
 	Tcl_DStringAppend(&buffer, "::itcl::builtin::", -1);
 	Tcl_DStringAppend(&buffer, BiMethodList[i].name, -1);
         Tcl_CreateObjCommand(interp, Tcl_DStringValue(&buffer),
-	        BiMethodList[i].proc, (ClientData)infoPtr,
-		(Tcl_CmdDeleteProc*)NULL);
+	        BiMethodList[i].proc, infoPtr, NULL);
     }
     Tcl_DStringFree(&buffer);
 
     Tcl_CreateObjCommand(interp, "::itcl::builtin::chain", Itcl_BiChainCmd,
-            NULL, (Tcl_CmdDeleteProc*)NULL);
+            NULL, NULL);
 
     Tcl_CreateObjCommand(interp, "::itcl::builtin::classunknown",
-            ItclBiClassUnknownCmd, infoPtr, (Tcl_CmdDeleteProc*)NULL);
+            ItclBiClassUnknownCmd, infoPtr, NULL);
 
     ItclInfoInit(interp, infoPtr);
     /*
@@ -358,7 +357,7 @@ Itcl_BiInit(
      *  import them later on.
      */
     itclBiNs = Tcl_FindNamespace(interp, "::itcl::builtin",
-        (Tcl_Namespace*)NULL, TCL_LEAVE_ERR_MSG);
+        NULL, TCL_LEAVE_ERR_MSG);
 
     if ((itclBiNs == NULL) ||
         Tcl_Export(interp, itclBiNs, "[a-z]*", /* resetListFirst */ 1) != TCL_OK) {
@@ -491,7 +490,7 @@ Itcl_InstallBiMethods(
 /* ARGSUSED */
 int
 Itcl_BiIsaCmd(
-    ClientData clientData,   /* class definition */
+    void *clientData,   /* class definition */
     Tcl_Interp *interp,      /* current interpreter */
     int objc,                /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
@@ -514,14 +513,14 @@ Itcl_BiIsaCmd(
     if (contextIoPtr == NULL) {
         Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
             "improper usage: should be \"object isa className\"",
-            (char*)NULL);
+            NULL);
         return TCL_ERROR;
     }
     if (objc != 2) {
         token = Tcl_GetString(objv[0]);
         Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
             "wrong # args: should be \"object ", token, " className\"",
-            (char*)NULL);
+            NULL);
         return TCL_ERROR;
     }
 
@@ -570,7 +569,7 @@ Itcl_BiIsaCmd(
 /* ARGSUSED */
 int
 Itcl_BiConfigureCmd(
-    ClientData clientData,   /* class definition */
+    void *clientData,   /* class definition */
     Tcl_Interp *interp,      /* current interpreter */
     int objc,                /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
@@ -621,7 +620,7 @@ Itcl_BiConfigureCmd(
         Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
             "improper usage: should be ",
             "\"object configure ?-option? ?value -option value...?\"",
-            (char*)NULL);
+            NULL);
         return TCL_ERROR;
     }
 
@@ -654,7 +653,7 @@ Itcl_BiConfigureCmd(
      *  HANDLE:  configure
      */
     if (unparsedObjc == 1) {
-        resultPtr = Tcl_NewListObj(0, (Tcl_Obj**)NULL);
+        resultPtr = Tcl_NewListObj(0, NULL);
 
         Itcl_InitHierIter(&hier, contextIclsPtr);
         while ((iclsPtr=Itcl_AdvanceHierIter(&hier)) != NULL) {
@@ -664,7 +663,7 @@ Itcl_BiConfigureCmd(
                 if (ivPtr->protection == ITCL_PUBLIC) {
                     objPtr = ItclReportPublicOpt(interp, ivPtr, contextIoPtr);
 
-                    Tcl_ListObjAppendElement((Tcl_Interp*)NULL, resultPtr,
+                    Tcl_ListObjAppendElement(NULL, resultPtr,
                         objPtr);
                 }
                 hPtr = Tcl_NextHashEntry(&place);
@@ -680,12 +679,12 @@ Itcl_BiConfigureCmd(
          *  HANDLE:  configure -option
          */
         if (unparsedObjc == 2) {
-            token = Tcl_GetStringFromObj(unparsedObjv[1], (int*)NULL);
+            token = Tcl_GetString(unparsedObjv[1]);
             if (*token != '-') {
                 Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
                     "improper usage: should be ",
                     "\"object configure ?-option? ?value -option value...?\"",
-                    (char*)NULL);
+                    NULL);
                 return TCL_ERROR;
             }
 
@@ -701,7 +700,7 @@ Itcl_BiConfigureCmd(
             if (!vlookup) {
                 Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
                     "unknown option \"", token, "\"",
-                    (char*)NULL);
+                    NULL);
                 return TCL_ERROR;
             }
             resultPtr = ItclReportPublicOpt(interp,
@@ -742,13 +741,13 @@ Itcl_BiConfigureCmd(
 
         if (!vlookup || (vlookup->ivPtr->protection != ITCL_PUBLIC)) {
             Tcl_AppendResult(interp, "unknown option \"", token, "\"",
-                (char*)NULL);
+                NULL);
             result = TCL_ERROR;
             goto configureDone;
         }
         if (i == unparsedObjc-1) {
             Tcl_AppendResult(interp, "value for \"", token, "\" missing",
-                (char*)NULL);
+                NULL);
             result = TCL_ERROR;
             goto configureDone;
         }
@@ -765,12 +764,12 @@ Itcl_BiConfigureCmd(
         Tcl_DStringAppend(&buffer2,
 	        Tcl_GetString(ivPtr->namePtr), -1);
 	varName = Tcl_DStringValue(&buffer2);
-        lastval = Tcl_GetVar2(interp, varName, (char*)NULL, 0);
+        lastval = Tcl_GetVar2(interp, varName, NULL, 0);
         Tcl_DStringSetLength(&buffer, 0);
         Tcl_DStringAppend(&buffer, (lastval) ? lastval : "", -1);
 
         token = Tcl_GetString(unparsedObjv[i+1]);
-        if (Tcl_SetVar2(interp, varName, (char*)NULL, token,
+        if (Tcl_SetVar2(interp, varName, NULL, token,
                 TCL_LEAVE_ERR_MSG) == NULL) {
     	    Tcl_AppendObjToErrorInfo(interp, Tcl_ObjPrintf(
     		    "\n    (error in configuration of public variable \"%s\")",
@@ -802,7 +801,7 @@ Itcl_BiConfigureCmd(
         	    Tcl_AppendObjToErrorInfo(interp, Tcl_ObjPrintf(
         		    "\n    (error in configuration of public variable \"%s\")",
         		    Tcl_GetString(ivPtr->fullNamePtr)));
-                Tcl_SetVar2(interp, varName,(char*)NULL,
+                Tcl_SetVar2(interp, varName,NULL,
                     Tcl_DStringValue(&buffer), 0);
 
                 goto configureDone;
@@ -844,7 +843,7 @@ configureDone:
 /* ARGSUSED */
 int
 Itcl_BiCgetCmd(
-    ClientData clientData,   /* class definition */
+    void *clientData,   /* class definition */
     Tcl_Interp *interp,      /* current interpreter */
     int objc,                /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
@@ -870,7 +869,7 @@ Itcl_BiCgetCmd(
     if ((contextIoPtr == NULL) || objc != 2) {
         Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
             "improper usage: should be \"object cget -option\"",
-            (char*)NULL);
+            NULL);
         return TCL_ERROR;
     }
 
@@ -898,7 +897,7 @@ Itcl_BiCgetCmd(
     if ((vlookup == NULL) || (vlookup->ivPtr->protection != ITCL_PUBLIC)) {
         Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
             "unknown option \"", name, "\"",
-            (char*)NULL);
+            NULL);
         return TCL_ERROR;
     }
 
@@ -942,7 +941,7 @@ ItclReportPublicOpt(
     Tcl_Obj *listPtr;
     Tcl_Obj *objPtr;
 
-    listPtr = Tcl_NewListObj(0, (Tcl_Obj**)NULL);
+    listPtr = Tcl_NewListObj(0, NULL);
 
     /*
      *  Determine how the option name should be reported.
@@ -961,7 +960,7 @@ ItclReportPublicOpt(
     Tcl_DStringAppend(&optName, vlookup->leastQualName, -1);
 
     objPtr = Tcl_NewStringObj(Tcl_DStringValue(&optName), -1);
-    Tcl_ListObjAppendElement((Tcl_Interp*)NULL, listPtr, objPtr);
+    Tcl_ListObjAppendElement(NULL, listPtr, objPtr);
     Tcl_DStringFree(&optName);
 
 
@@ -970,7 +969,7 @@ ItclReportPublicOpt(
     } else {
         objPtr = Tcl_NewStringObj("<undefined>", -1);
     }
-    Tcl_ListObjAppendElement((Tcl_Interp*)NULL, listPtr, objPtr);
+    Tcl_ListObjAppendElement(NULL, listPtr, objPtr);
 
     val = Itcl_GetInstanceVar(interp, Tcl_GetString(ivPtr->namePtr),
             contextIoPtr, ivPtr->iclsPtr);
@@ -980,7 +979,7 @@ ItclReportPublicOpt(
     } else {
         objPtr = Tcl_NewStringObj("<undefined>", -1);
     }
-    Tcl_ListObjAppendElement((Tcl_Interp*)NULL, listPtr, objPtr);
+    Tcl_ListObjAppendElement(NULL, listPtr, objPtr);
 
     return listPtr;
 }
@@ -1009,31 +1008,31 @@ ItclReportOption(
     ItclDelegatedOption *idoPtr;
     const char *val;
 
-    listPtr = Tcl_NewListObj(0, (Tcl_Obj**)NULL);
+    listPtr = Tcl_NewListObj(0, NULL);
     idoPtr = ioptPtr->iclsPtr->infoPtr->currIdoPtr;
     if (idoPtr != NULL) {
-        Tcl_ListObjAppendElement((Tcl_Interp*)NULL, listPtr, idoPtr->namePtr);
+        Tcl_ListObjAppendElement(NULL, listPtr, idoPtr->namePtr);
 	if (idoPtr->resourceNamePtr == NULL) {
-            Tcl_ListObjAppendElement((Tcl_Interp*)NULL, listPtr,
+            Tcl_ListObjAppendElement(NULL, listPtr,
                     Tcl_NewStringObj("", -1));
 	    /* FIXME possible memory leak */
 	} else {
-            Tcl_ListObjAppendElement((Tcl_Interp*)NULL, listPtr,
+            Tcl_ListObjAppendElement(NULL, listPtr,
                     idoPtr->resourceNamePtr);
 	}
 	if (idoPtr->classNamePtr == NULL) {
-            Tcl_ListObjAppendElement((Tcl_Interp*)NULL, listPtr,
+            Tcl_ListObjAppendElement(NULL, listPtr,
                     Tcl_NewStringObj("", -1));
 	    /* FIXME possible memory leak */
 	} else {
-            Tcl_ListObjAppendElement((Tcl_Interp*)NULL, listPtr,
+            Tcl_ListObjAppendElement(NULL, listPtr,
 	            idoPtr->classNamePtr);
         }
     } else {
-        Tcl_ListObjAppendElement((Tcl_Interp*)NULL, listPtr, ioptPtr->namePtr);
-        Tcl_ListObjAppendElement((Tcl_Interp*)NULL, listPtr,
+        Tcl_ListObjAppendElement(NULL, listPtr, ioptPtr->namePtr);
+        Tcl_ListObjAppendElement(NULL, listPtr,
                 ioptPtr->resourceNamePtr);
-        Tcl_ListObjAppendElement((Tcl_Interp*)NULL, listPtr,
+        Tcl_ListObjAppendElement(NULL, listPtr,
 	        ioptPtr->classNamePtr);
     }
     if (ioptPtr->defaultValuePtr) {
@@ -1041,7 +1040,7 @@ ItclReportOption(
     } else {
         objPtr = Tcl_NewStringObj("<undefined>", -1);
     }
-    Tcl_ListObjAppendElement((Tcl_Interp*)NULL, listPtr, objPtr);
+    Tcl_ListObjAppendElement(NULL, listPtr, objPtr);
     val = ItclGetInstanceVar(interp, "itcl_options",
             Tcl_GetString(ioptPtr->namePtr),
             contextIoPtr, ioptPtr->iclsPtr);
@@ -1050,7 +1049,7 @@ ItclReportOption(
     } else {
         objPtr = Tcl_NewStringObj("<undefined>", -1);
     }
-    Tcl_ListObjAppendElement((Tcl_Interp*)NULL, listPtr, objPtr);
+    Tcl_ListObjAppendElement(NULL, listPtr, objPtr);
     return listPtr;
 }
 
@@ -1077,7 +1076,7 @@ ItclReportOption(
 /* ARGSUSED */
 static int
 NRBiChainCmd(
-    ClientData dummy,        /* not used */
+    void *dummy,        /* not used */
     Tcl_Interp *interp,      /* current interpreter */
     int objc,                /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
@@ -1113,7 +1112,7 @@ NRBiChainCmd(
         Tcl_ResetResult(interp);
         Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
             "cannot chain functions outside of a class context",
-            (char*)NULL);
+            NULL);
         return TCL_ERROR;
     }
 
@@ -1187,7 +1186,7 @@ NRBiChainCmd(
             cmdlinePtr = Itcl_CreateArgs(interp,
 	            Tcl_GetString(imPtr->fullNamePtr), objc-1, objv+1);
 
-            (void) Tcl_ListObjGetElements((Tcl_Interp*)NULL, cmdlinePtr,
+            (void) Tcl_ListObjGetElements(NULL, cmdlinePtr,
                 &my_objc, &newobjv);
 
 	    if (imPtr->flags & ITCL_CONSTRUCTOR) {
@@ -1209,7 +1208,7 @@ NRBiChainCmd(
 /* ARGSUSED */
 int
 Itcl_BiChainCmd(
-    ClientData clientData,
+    void *clientData,
     Tcl_Interp *interp,
     int objc,
     Tcl_Obj *const *objv)
@@ -1219,15 +1218,15 @@ Itcl_BiChainCmd(
 
 static int
 CallCreateObject(
-    ClientData data[],
+    void *data[],
     Tcl_Interp *interp,
     int result)
 {
     Tcl_CallFrame frame;
     Tcl_Namespace *nsPtr;
-    ItclClass *iclsPtr = data[0];
+    ItclClass *iclsPtr = (ItclClass *)data[0];
     int objc = PTR2INT(data[1]);
-    Tcl_Obj *const *objv = data[2];
+    Tcl_Obj *const *objv = (Tcl_Obj *const *)data[2];
 
     if (result != TCL_OK) {
         return result;
@@ -1288,7 +1287,7 @@ PrepareCreateObject(
     callbackPtr = Itcl_GetCurrentCallbackPtr(interp);
     ItclShowArgs(1, "CREATE", objc+3-offset, newObjv);
     Tcl_NRAddCallback(interp, CallCreateObject, iclsPtr,
-            INT2PTR(objc+3-offset), (ClientData)newObjv, NULL);
+            INT2PTR(objc+3-offset), newObjv, NULL);
     result = Itcl_NRRunCallbacks(interp, callbackPtr);
     if (result != TCL_OK) {
         if (iclsPtr->infoPtr->currIoPtr != NULL) {
@@ -1316,7 +1315,7 @@ PrepareCreateObject(
 /* ARGSUSED */
 static int
 ItclBiClassUnknownCmd(
-    ClientData clientData,   /* ItclObjectInfo Ptr */
+    void *clientData,   /* ItclObjectInfo Ptr */
     Tcl_Interp *interp,      /* current interpreter */
     int objc,                /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
@@ -1363,7 +1362,7 @@ ItclBiClassUnknownCmd(
 	        "cannot find class\n", NULL);
         return TCL_ERROR;
     }
-    iclsPtr = Tcl_GetHashValue(hPtr);
+    iclsPtr = (ItclClass *)Tcl_GetHashValue(hPtr);
     funcName = Tcl_GetString(objv[1]);
     if (strcmp(funcName, "create") == 0) {
         /* check if we have a user method create. If not, it is the builtin
@@ -1431,7 +1430,7 @@ ItclBiClassUnknownCmd(
 	            (char *)objPtr);
 	    Tcl_DecrRefCount(objPtr);
 	    if (hPtr != NULL) {
-	        idmPtr = Tcl_GetHashValue(hPtr);
+	        idmPtr = (ItclDelegatedFunction *)Tcl_GetHashValue(hPtr);
 	        isStar = 1;
 	    }
 	}
@@ -1459,7 +1458,7 @@ ItclBiClassUnknownCmd(
 	    }
 	}
 	if (hPtr != NULL) {
-	    idmPtr = Tcl_GetHashValue(hPtr);
+	    idmPtr = (ItclDelegatedFunction *)Tcl_GetHashValue(hPtr);
 	    val = NULL;
 	    if (idmPtr->icPtr != NULL) {
                 if (idmPtr->icPtr->ivPtr->flags & ITCL_COMMON) {
@@ -1625,7 +1624,7 @@ ItclUnknownGuts(
 
     if (objc < 2) {
         Tcl_AppendResult(interp, "wrong # args: should be one of...",
-		(char*)NULL);
+		NULL);
         ItclReportObjectUsage(interp, ioPtr, NULL, NULL);
         return TCL_ERROR;
     }
@@ -1694,12 +1693,12 @@ ItclUnknownGuts(
                 (char *)objPtr);
         Tcl_DecrRefCount(objPtr);
 	if (hPtr != NULL) {
-	    idmPtr = Tcl_GetHashValue(hPtr);
+	    idmPtr = (ItclDelegatedFunction *)Tcl_GetHashValue(hPtr);
             isStar = 1;
 	}
     } else {
-        found = 1;
-	idmPtr = Tcl_GetHashValue(hPtr);
+	found = 1;
+	idmPtr = (ItclDelegatedFunction *)Tcl_GetHashValue(hPtr);
     }
     if (isStar) {
        /* check if the function is in the exceptions */
@@ -1780,7 +1779,7 @@ ItclUnknownGuts(
     }
     if (idmPtr == NULL) {
         Tcl_AppendResult(interp, "bad option \"", Tcl_GetString(objv[1]),
-                "\": should be one of...", (char*)NULL);
+                "\": should be one of...", NULL);
         ItclReportObjectUsage(interp, ioPtr, NULL, NULL);
         return TCL_ERROR;
     }
@@ -1924,7 +1923,7 @@ static Tcl_Obj *makeAsOptionInfo(
 /* ARGSUSED */
 static int
 ItclExtendedConfigure(
-    ClientData clientData,   /* class definition */
+    void *clientData,   /* class definition */
     Tcl_Interp *interp,      /* current interpreter */
     int objc,                /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
@@ -1985,7 +1984,7 @@ ItclExtendedConfigure(
         Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
             "improper usage: should be ",
             "\"object configure ?-option? ?value -option value...?\"",
-            (char*)NULL);
+            NULL);
         return TCL_ERROR;
     }
 
@@ -2591,7 +2590,7 @@ ItclExtendedConfigure(
 /* ARGSUSED */
 static int
 ItclExtendedCget(
-    ClientData clientData,   /* class definition */
+    void *clientData,   /* class definition */
     Tcl_Interp *interp,      /* current interpreter */
     int objc,                /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
@@ -2628,7 +2627,7 @@ ItclExtendedCget(
     if ((contextIoPtr == NULL) || objc != 2) {
         Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
             "improper usage: should be \"object cget -option\"",
-            (char*)NULL);
+            NULL);
         return TCL_ERROR;
     }
 
@@ -2829,7 +2828,7 @@ ItclExtendedCget(
 /* ARGSUSED */
 static int
 ItclExtendedSetGet(
-    ClientData clientData,   /* class definition */
+    void *clientData,   /* class definition */
     Tcl_Interp *interp,      /* current interpreter */
     int objc,                /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
@@ -2861,7 +2860,7 @@ ItclExtendedSetGet(
     usageStr = "improper usage: should be \"object setget varName ?value?\"";
     if (contextIoPtr == NULL) {
         Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
-                usageStr, (char*)NULL);
+                usageStr, NULL);
         return TCL_ERROR;
     }
 
@@ -2879,7 +2878,7 @@ ItclExtendedSetGet(
     hPtr = NULL;
     if (objc < 2) {
         Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
-                usageStr, (char*)NULL);
+                usageStr, NULL);
         return TCL_ERROR;
     }
     /* look if it is an methodvariable at all */
@@ -2947,7 +2946,7 @@ ItclExtendedSetGet(
 /* ARGSUSED */
 int
 Itcl_BiInstallComponentCmd(
-    ClientData clientData,   /* class definition */
+    void *clientData,   /* class definition */
     Tcl_Interp *interp,      /* current interpreter */
     int objc,                /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
@@ -2978,7 +2977,7 @@ Itcl_BiInstallComponentCmd(
     if (contextIoPtr == NULL) {
         Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
             "improper usage: should be \"object installcomponent \"",
-            (char*)NULL);
+            NULL);
         return TCL_ERROR;
     }
     if (objc < 5) {
@@ -2988,7 +2987,7 @@ Itcl_BiInstallComponentCmd(
             "wrong # args: should be \"", token, " <componentName> using",
 	    " <widgetClassName> <widgetPathName>",
 	    " ?-option value -option value ...?\"",
-            (char*)NULL);
+            NULL);
         return TCL_ERROR;
     }
 
@@ -3082,7 +3081,7 @@ Itcl_BiInstallComponentCmd(
 /* ARGSUSED */
 static int
 Itcl_BiDestroyCmd(
-    ClientData clientData,   /* class definition */
+    void *clientData,   /* class definition */
     Tcl_Interp *interp,      /* current interpreter */
     int objc,                /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
@@ -3129,7 +3128,7 @@ Itcl_BiDestroyCmd(
     }
     if (objc != 1) {
         Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
-            "wrong # args: should be \"", Tcl_GetString(objv[0]), (char*)NULL);
+            "wrong # args: should be \"", Tcl_GetString(objv[0]), NULL);
         return TCL_ERROR;
     }
 
@@ -3159,7 +3158,7 @@ Itcl_BiDestroyCmd(
 /* ARGSUSED */
 int
 Itcl_BiCallInstanceCmd(
-    ClientData clientData,   /* class definition */
+    void *clientData,   /* class definition */
     Tcl_Interp *interp,      /* current interpreter */
     int objc,                /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
@@ -3187,7 +3186,7 @@ Itcl_BiCallInstanceCmd(
         token = Tcl_GetString(objv[0]);
         Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
             "wrong # args: should be \"", token, " <instanceName>",
-            (char*)NULL);
+            NULL);
         return TCL_ERROR;
     }
 
@@ -3199,7 +3198,7 @@ Itcl_BiCallInstanceCmd(
 		Tcl_GetString(objv[1]), "\"", NULL);
         return TCL_ERROR;
     }
-    ioPtr = Tcl_GetHashValue(hPtr);
+    ioPtr = (ItclObject *)Tcl_GetHashValue(hPtr);
     objPtr =Tcl_NewObj();
     Tcl_GetCommandFullName(interp, ioPtr->accessCmd, objPtr);
     newObjv = (Tcl_Obj **)ckalloc(sizeof(Tcl_Obj*) * (objc - 1));
@@ -3226,7 +3225,7 @@ Itcl_BiCallInstanceCmd(
 /* ARGSUSED */
 int
 Itcl_BiGetInstanceVarCmd(
-    ClientData clientData,   /* class definition */
+    void *clientData,   /* class definition */
     Tcl_Interp *interp,      /* current interpreter */
     int objc,                /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
@@ -3254,7 +3253,7 @@ Itcl_BiGetInstanceVarCmd(
         token = Tcl_GetString(objv[0]);
         Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
             "wrong # args: should be \"", token, " <instanceName>",
-            (char*)NULL);
+            NULL);
         return TCL_ERROR;
     }
 
@@ -3266,8 +3265,8 @@ Itcl_BiGetInstanceVarCmd(
 		Tcl_GetString(objv[1]), "\"", NULL);
         return TCL_ERROR;
     }
-    ioPtr = Tcl_GetHashValue(hPtr);
-    objPtr =Tcl_NewObj();
+    ioPtr = (ItclObject *)Tcl_GetHashValue(hPtr);
+    objPtr = Tcl_NewObj();
     Tcl_GetCommandFullName(interp, ioPtr->accessCmd, objPtr);
     newObjv = (Tcl_Obj **)ckalloc(sizeof(Tcl_Obj*) * (objc - 1));
     newObjv[0] = objPtr;
@@ -3292,7 +3291,7 @@ Itcl_BiGetInstanceVarCmd(
 /* ARGSUSED */
 int
 Itcl_BiMyTypeMethodCmd(
-    ClientData clientData,   /* class definition */
+    void *clientData,   /* class definition */
     Tcl_Interp *interp,      /* current interpreter */
     int objc,                /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
@@ -3342,7 +3341,7 @@ Itcl_BiMyTypeMethodCmd(
 /* ARGSUSED */
 int
 Itcl_BiMyMethodCmd(
-    ClientData clientData,   /* class definition */
+    void *clientData,   /* class definition */
     Tcl_Interp *interp,      /* current interpreter */
     int objc,                /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
@@ -3391,7 +3390,7 @@ Itcl_BiMyMethodCmd(
 /* ARGSUSED */
 int
 Itcl_BiMyProcCmd(
-    ClientData clientData,   /* class definition */
+    void *clientData,   /* class definition */
     Tcl_Interp *interp,      /* current interpreter */
     int objc,                /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
@@ -3442,7 +3441,7 @@ Itcl_BiMyProcCmd(
 /* ARGSUSED */
 int
 Itcl_BiMyTypeVarCmd(
-    ClientData clientData,   /* class definition */
+    void *clientData,   /* class definition */
     Tcl_Interp *interp,      /* current interpreter */
     int objc,                /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
@@ -3494,7 +3493,7 @@ Itcl_BiMyTypeVarCmd(
 /* ARGSUSED */
 int
 Itcl_BiMyVarCmd(
-    ClientData clientData,   /* class definition */
+    void *clientData,   /* class definition */
     Tcl_Interp *interp,      /* current interpreter */
     int objc,                /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
@@ -3538,7 +3537,7 @@ Itcl_BiMyVarCmd(
 /* ARGSUSED */
 int
 Itcl_BiItclHullCmd(
-    ClientData clientData,   /* class definition */
+    void *clientData,   /* class definition */
     Tcl_Interp *interp,      /* current interpreter */
     int objc,                /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
@@ -3580,7 +3579,7 @@ Itcl_BiItclHullCmd(
  */
 static int
 Itcl_BiCreateHullCmd(
-    ClientData clientData,   /* info for all known objects */
+    void *clientData,   /* info for all known objects */
     Tcl_Interp *interp,      /* current interpreter */
     int objc,                /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
@@ -3615,7 +3614,7 @@ Itcl_BiCreateHullCmd(
  */
 static int
 Itcl_BiSetupComponentCmd(
-    ClientData clientData,   /* info for all known objects */
+    void *clientData,   /* info for all known objects */
     Tcl_Interp *interp,      /* current interpreter */
     int objc,                /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
@@ -3651,7 +3650,7 @@ Itcl_BiSetupComponentCmd(
  */
 static int
 Itcl_BiInitOptionsCmd(
-    ClientData clientData,   /* info for all known objects */
+    void *clientData,   /* info for all known objects */
     Tcl_Interp *interp,      /* current interpreter */
     int objc,                /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
@@ -3703,7 +3702,7 @@ fprintf(stderr, "opt!%s!\n", Tcl_GetString(ioptPtr->namePtr));
  */
 static int
 Itcl_BiKeepComponentOptionCmd(
-    ClientData clientData,   /* info for all known objects */
+    void *clientData,   /* info for all known objects */
     Tcl_Interp *interp,      /* current interpreter */
     int objc,                /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
@@ -3738,7 +3737,7 @@ Itcl_BiKeepComponentOptionCmd(
  */
 static int
 Itcl_BiIgnoreComponentOptionCmd(
-    ClientData clientData,   /* info for all known objects */
+    void *clientData,   /* info for all known objects */
     Tcl_Interp *interp,      /* current interpreter */
     int objc,                /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
@@ -3781,7 +3780,7 @@ Itcl_BiIgnoreComponentOptionCmd(
 	            Tcl_GetString(objv[1]), "\"", NULL);
 	    return TCL_ERROR;
 	}
-        icPtr = Tcl_GetHashValue(hPtr);
+        icPtr = (ItclComponent *)Tcl_GetHashValue(hPtr);
 	icPtr->haveKeptOptions = 1;
 	for (idx = 2; idx < objc; idx++) {
 	    hPtr = Tcl_CreateHashEntry(&icPtr->keptOptions, (char *)objv[idx],

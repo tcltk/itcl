@@ -45,7 +45,7 @@ Itcl_InitStubs(
 
     actualVersion =
 	    Tcl_PkgRequireEx(interp, packageName, version, exact, &clientData);
-    stubsPtr = clientData;
+    stubsPtr = (const ItclStubs *)clientData;
     if ((actualVersion == NULL) || (clientData == NULL)) {
         return NULL;
     }

@@ -326,7 +326,7 @@ InfoGutsFinish(
 
     Itcl_Stack *stackPtr = (Itcl_Stack *) Tcl_GetHashValue(hPtr);
 
-    popped = Itcl_PopStack(stackPtr);
+    popped = (ItclCallContext *)Itcl_PopStack(stackPtr);
 
     if (Itcl_GetStackSize(stackPtr) == 0) {
 	Itcl_DeleteStack(stackPtr);
@@ -691,8 +691,8 @@ Itcl_BiInfoClassCmd(
         infoPtr = (ItclObjectInfo *)Tcl_GetAssocData(interp,
                 ITCL_INTERP_DATA, NULL);
 	if (clientData != NULL) {
-            oPtr = Tcl_ObjectContextObject(clientData);
-            contextIoPtr = Tcl_ObjectGetMetadata(oPtr,
+            oPtr = Tcl_ObjectContextObject((Tcl_ObjectContext)clientData);
+            contextIoPtr = (ItclObject *)Tcl_ObjectGetMetadata(oPtr,
 	            infoPtr->object_meta_type);
             contextIclsPtr = contextIoPtr->iclsPtr;
 	}
@@ -767,7 +767,7 @@ Itcl_BiInfoClassOptionsCmd(
     iclsPtr = NULL;
     pattern = NULL;
     if (Itcl_GetContext(interp, &iclsPtr, &ioPtr) != TCL_OK) {
-        Tcl_AppendResult(interp, "cannot get context ", (char*)NULL);
+        Tcl_AppendResult(interp, "cannot get context ", NULL);
         return TCL_ERROR;
     }
     if (objc > 2) {
@@ -867,7 +867,7 @@ Itcl_BiInfoContextCmd(
         return TCL_ERROR;
     }
     if (ioPtr == NULL) {
-        Tcl_AppendResult(interp, "cannot get object context ", (char*)NULL);
+        Tcl_AppendResult(interp, "cannot get object context ", NULL);
         return TCL_ERROR;
     }
     listPtr = Tcl_NewListObj(0, NULL);
@@ -922,13 +922,13 @@ Itcl_BiInfoInheritCmd(
      *  Return the list of base classes.
      */
 
-    listPtr = Tcl_NewListObj(0, (Tcl_Obj**)NULL);
+    listPtr = Tcl_NewListObj(0, NULL);
     elem = Itcl_FirstListElem(&contextIclsPtr->bases);
     while (elem) {
 	Tcl_Obj *objPtr;
 	ItclClass *iclsPtr = (ItclClass*)Itcl_GetListValue(elem);
             objPtr = Tcl_NewStringObj(iclsPtr->nsPtr->fullName, -1);
-        Tcl_ListObjAppendElement((Tcl_Interp*)NULL, listPtr, objPtr);
+        Tcl_ListObjAppendElement(NULL, listPtr, objPtr);
         elem = Itcl_NextListElem(elem);
     }
 
@@ -984,7 +984,7 @@ Itcl_BiInfoHeritageCmd(
      *  Traverse through the derivation hierarchy and return
      *  base class names.
      */
-    listPtr = Tcl_NewListObj(0, (Tcl_Obj**)NULL);
+    listPtr = Tcl_NewListObj(0, NULL);
     Itcl_InitHierIter(&hier, contextIclsPtr);
     while ((iclsPtr=Itcl_AdvanceHierIter(&hier)) != NULL) {
         if (iclsPtr->nsPtr == NULL) {
@@ -993,7 +993,7 @@ Itcl_BiInfoHeritageCmd(
             return TCL_ERROR;
         }
             objPtr = Tcl_NewStringObj(iclsPtr->nsPtr->fullName, -1);
-        Tcl_ListObjAppendElement((Tcl_Interp*)NULL, listPtr, objPtr);
+        Tcl_ListObjAppendElement(NULL, listPtr, objPtr);
     }
     Itcl_DeleteHierIter(&hier);
 
@@ -1031,7 +1031,7 @@ Itcl_BiInfoFunctionCmd(
 
     static const char *options[] = {
         "-args", "-body", "-name", "-protection", "-type",
-        (char*)NULL
+        NULL
     };
     enum BIfIdx {
         BIfArgsIdx, BIfBodyIdx, BIfNameIdx, BIfProtectIdx, BIfTypeIdx
@@ -1099,7 +1099,7 @@ Itcl_BiInfoFunctionCmd(
             Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
                 "\"", cmdName, "\" isn't a member function in class \"",
                 contextIclsPtr->nsPtr->fullName, "\"",
-                (char*)NULL);
+                NULL);
             return TCL_ERROR;
         }
 
@@ -1130,7 +1130,7 @@ Itcl_BiInfoFunctionCmd(
         }
 
         if (objc > 1) {
-            resultPtr = Tcl_NewListObj(0, (Tcl_Obj**)NULL);
+            resultPtr = Tcl_NewListObj(0, NULL);
         }
 
         for (i=0 ; i < objc; i++) {
@@ -1188,7 +1188,7 @@ Itcl_BiInfoFunctionCmd(
             if (objc == 1) {
                 resultPtr = objPtr;
             } else {
-                Tcl_ListObjAppendElement((Tcl_Interp*)NULL, resultPtr, objPtr);
+                Tcl_ListObjAppendElement(NULL, resultPtr, objPtr);
             }
         }
         Tcl_SetObjResult(interp, resultPtr);
@@ -1197,7 +1197,7 @@ Itcl_BiInfoFunctionCmd(
         /*
          *  Return the list of available commands.
          */
-        resultPtr = Tcl_NewListObj(0, (Tcl_Obj**)NULL);
+        resultPtr = Tcl_NewListObj(0, NULL);
 
         Itcl_InitHierIter(&hier, contextIclsPtr);
         while ((iclsPtr=Itcl_AdvanceHierIter(&hier)) != NULL) {
@@ -1226,7 +1226,7 @@ Itcl_BiInfoFunctionCmd(
 		if (useIt) {
                     objPtr = Tcl_NewStringObj(
 		            Tcl_GetString(imPtr->fullNamePtr), -1);
-                    Tcl_ListObjAppendElement((Tcl_Interp*)NULL,
+                    Tcl_ListObjAppendElement(NULL,
 		            resultPtr, objPtr);
                 }
 
@@ -1281,7 +1281,7 @@ Itcl_BiInfoVariableCmd(
 
     static const char *options[] = {
         "-config", "-init", "-name", "-protection", "-type",
-        "-value", (char*)NULL
+        "-value", NULL
     };
     enum BIvIdx {
         BIvConfigIdx, BIvInitIdx, BIvNameIdx, BIvProtectIdx,
@@ -1346,7 +1346,7 @@ Itcl_BiInfoVariableCmd(
             Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
                 "\"", varName, "\" isn't a variable in class \"",
                 contextIclsPtr->nsPtr->fullName, "\"",
-                (char*)NULL);
+                NULL);
             return TCL_ERROR;
         }
 
@@ -1382,7 +1382,7 @@ Itcl_BiInfoVariableCmd(
         }
 
         if (objc > 1) {
-            resultPtr = Tcl_NewListObj(0, (Tcl_Obj**)NULL);
+            resultPtr = Tcl_NewListObj(0, NULL);
         }
 
         for (i=0 ; i < objc; i++) {
@@ -1405,7 +1405,7 @@ Itcl_BiInfoVariableCmd(
                     if ((ivPtr->flags & ITCL_THIS_VAR) != 0) {
                         if ((contextIoPtr != NULL) &&
 			        (contextIoPtr->accessCmd != NULL)) {
-                            objPtr = Tcl_NewStringObj((char*)NULL, 0);
+                            objPtr = Tcl_NewStringObj(NULL, 0);
                             Tcl_GetCommandFullName(
                                 contextIoPtr->iclsPtr->interp,
                                 contextIoPtr->accessCmd, objPtr);
@@ -1452,7 +1452,7 @@ Itcl_BiInfoVariableCmd(
                             Tcl_AppendResult(interp,
                                     "cannot access object-specific info ",
                                     "without an object context",
-                                    (char*)NULL);
+                                    NULL);
                             return TCL_ERROR;
                         } else {
                             val = Itcl_GetInstanceVar(interp,
@@ -1470,7 +1470,7 @@ Itcl_BiInfoVariableCmd(
             if (objc == 1) {
                 resultPtr = objPtr;
             } else {
-                Tcl_ListObjAppendElement((Tcl_Interp*)NULL, resultPtr, objPtr);
+                Tcl_ListObjAppendElement(NULL, resultPtr, objPtr);
             }
         }
 	Tcl_ResetResult(interp);
@@ -1482,7 +1482,7 @@ Itcl_BiInfoVariableCmd(
          *  Return the list of available variables.  Report the built-in
          *  "this" variable only once, for the most-specific class.
          */
-        resultPtr = Tcl_NewListObj(0, (Tcl_Obj**)NULL);
+        resultPtr = Tcl_NewListObj(0, NULL);
         Itcl_InitHierIter(&hier, contextIclsPtr);
         while ((iclsPtr=Itcl_AdvanceHierIter(&hier)) != NULL) {
             entry = Tcl_FirstHashEntry(&iclsPtr->variables, &place);
@@ -1492,13 +1492,13 @@ Itcl_BiInfoVariableCmd(
                     if (iclsPtr == contextIclsPtr) {
                         objPtr = Tcl_NewStringObj(
 			        Tcl_GetString(ivPtr->fullNamePtr), -1);
-                        Tcl_ListObjAppendElement((Tcl_Interp*)NULL,
+                        Tcl_ListObjAppendElement(NULL,
                             resultPtr, objPtr);
                     }
                 } else {
                     objPtr = Tcl_NewStringObj(
 		            Tcl_GetString(ivPtr->fullNamePtr), -1);
-                    Tcl_ListObjAppendElement((Tcl_Interp*)NULL,
+                    Tcl_ListObjAppendElement(NULL,
                         resultPtr, objPtr);
                 }
                 entry = Tcl_NextHashEntry(&place);
@@ -1620,7 +1620,7 @@ Itcl_BiInfoVarsCmd(
 		int numElems;
 
 		Itcl_InitList(&varList);
-		iclsPtr = Tcl_GetHashValue(hPtr);
+		iclsPtr = (ItclClass *)Tcl_GetHashValue(hPtr);
 		resultListPtr = Tcl_GetObjResult(interp);
 		numElems = 0;
 /* FIXME !! should perhaps skip ___DO_NOT_DELETE_THIS_VARIABLE here !! */
@@ -1825,7 +1825,7 @@ Itcl_BiInfoBodyCmd(
 	}
 
     if (hPtr) {
-	ItclDelegatedFunction *idmPtr = Tcl_GetHashValue(hPtr);
+	ItclDelegatedFunction *idmPtr = (ItclDelegatedFunction *)Tcl_GetHashValue(hPtr);
         Tcl_Obj *objPtr = Tcl_NewStringObj("delegated ", -1);
 
 	if (idmPtr->flags & ITCL_TYPE_METHOD) {
@@ -1928,7 +1928,7 @@ Itcl_BiInfoArgsCmd(
     }
 
     if (hPtr) {
-	ItclDelegatedFunction *idmPtr = Tcl_GetHashValue(hPtr);
+	ItclDelegatedFunction *idmPtr = (ItclDelegatedFunction *)Tcl_GetHashValue(hPtr);
         Tcl_Obj *objPtr = Tcl_NewStringObj("delegated ", -1);
 
 	if (idmPtr->flags & ITCL_TYPE_METHOD) {
@@ -1980,7 +1980,7 @@ Itcl_BiInfoOptionCmd(
 	"-default",
 	"-name", "-protection", "-resource",
 	"-validatemethod", "-validatemethodvar",
-        "-value", (char*)NULL
+        "-value", NULL
     };
     enum BOptIdx {
         BOptCgetMethodIdx,
@@ -2061,7 +2061,7 @@ Itcl_BiInfoOptionCmd(
 	if (contextIoPtr == NULL) {
 	    Tcl_ResetResult(interp);
 	    Tcl_AppendResult(interp, "cannot access object-specific info ",
-		    "without an object context", (char*)NULL);
+		    "without an object context", NULL);
 	    return TCL_ERROR;
 	}
 	optionNamePtr = Tcl_NewStringObj(optionName, -1);
@@ -2072,7 +2072,7 @@ Itcl_BiInfoOptionCmd(
             Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
                  "\"", optionName, "\" isn't a option in object \"",
                 Tcl_GetString(contextIoPtr->namePtr), "\"",
-                (char*)NULL);
+                NULL);
             return TCL_ERROR;
         }
         ioptPtr = (ItclOption*)Tcl_GetHashValue(hPtr);
@@ -2100,7 +2100,7 @@ Itcl_BiInfoOptionCmd(
         }
 
         if (objc > 1) {
-            resultPtr = Tcl_NewListObj(0, (Tcl_Obj**)NULL);
+            resultPtr = Tcl_NewListObj(0, NULL);
         }
 
         for (i=0 ; i < objc; i++) {
@@ -2204,7 +2204,7 @@ Itcl_BiInfoOptionCmd(
                         Tcl_AppendResult(interp,
                                 "cannot access object-specific info ",
                                 "without an object context",
-                                (char*)NULL);
+                                NULL);
                         return TCL_ERROR;
                     } else {
                         val = ItclGetInstanceVar(interp, "itcl_options",
@@ -2221,7 +2221,7 @@ Itcl_BiInfoOptionCmd(
             if (objc == 1) {
                 resultPtr = objPtr;
             } else {
-                Tcl_ListObjAppendElement((Tcl_Interp*)NULL, resultPtr,
+                Tcl_ListObjAppendElement(NULL, resultPtr,
                     objPtr);
             }
         }
@@ -2231,14 +2231,14 @@ Itcl_BiInfoOptionCmd(
         /*
          *  Return the list of available options.
          */
-        resultPtr = Tcl_NewListObj(0, (Tcl_Obj**)NULL);
+        resultPtr = Tcl_NewListObj(0, NULL);
         Itcl_InitHierIter(&hier, contextIclsPtr);
         while ((iclsPtr=Itcl_AdvanceHierIter(&hier)) != NULL) {
             hPtr = Tcl_FirstHashEntry(&iclsPtr->options, &place);
             while (hPtr) {
                 ioptPtr = (ItclOption*)Tcl_GetHashValue(hPtr);
                 objPtr = ioptPtr->namePtr;
-                Tcl_ListObjAppendElement((Tcl_Interp*)NULL, resultPtr, objPtr);
+                Tcl_ListObjAppendElement(NULL, resultPtr, objPtr);
                 hPtr = Tcl_NextHashEntry(&place);
             }
         }
@@ -2278,7 +2278,7 @@ Itcl_BiInfoComponentCmd(
     Tcl_Obj *componentNamePtr;
 
     static const char *components[] = {
-	"-name", "-inherit", "-value", (char*)NULL
+	"-name", "-inherit", "-value", NULL
     };
     enum BCompIdx {
 	BCompNameIdx, BCompInheritIdx, BCompValueIdx
@@ -2331,7 +2331,7 @@ Itcl_BiInfoComponentCmd(
 	        nsPtr->fullName, "\"", NULL);
 	return TCL_ERROR;
     }
-    contextIclsPtr = Tcl_GetHashValue(hPtr);
+    contextIclsPtr = (ItclClass *)Tcl_GetHashValue(hPtr);
 
     /*
      *  Process args:
@@ -2369,7 +2369,7 @@ Itcl_BiInfoComponentCmd(
             Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
                 "\"", componentName, "\" isn't a component in class \"",
                 contextIclsPtr->nsPtr->fullName, "\"",
-                (char*)NULL);
+                NULL);
             return TCL_ERROR;
         }
         icPtr = (ItclComponent *)Tcl_GetHashValue(hPtr);
@@ -2397,7 +2397,7 @@ Itcl_BiInfoComponentCmd(
         }
 
         if (objc > 1) {
-            resultPtr = Tcl_NewListObj(0, (Tcl_Obj**)NULL);
+            resultPtr = Tcl_NewListObj(0, NULL);
         }
 
         for (i=0 ; i < objc; i++) {
@@ -2422,7 +2422,7 @@ Itcl_BiInfoComponentCmd(
                         Tcl_AppendResult(interp,
                                 "cannot access object-specific info ",
                                 "without an object context",
-                                (char*)NULL);
+                                NULL);
                         return TCL_ERROR;
                     } else {
                         val = ItclGetInstanceVar(interp,
@@ -2439,7 +2439,7 @@ Itcl_BiInfoComponentCmd(
             if (objc == 1) {
                 resultPtr = objPtr;
             } else {
-                Tcl_ListObjAppendElement((Tcl_Interp*)NULL, resultPtr,
+                Tcl_ListObjAppendElement(NULL, resultPtr,
                     objPtr);
             }
         }
@@ -2449,7 +2449,7 @@ Itcl_BiInfoComponentCmd(
         /*
          *  Return the list of available components.
          */
-        resultPtr = Tcl_NewListObj(0, (Tcl_Obj**)NULL);
+        resultPtr = Tcl_NewListObj(0, NULL);
         Itcl_InitHierIter(&hier, contextIclsPtr);
         while ((iclsPtr=Itcl_AdvanceHierIter(&hier)) != NULL) {
             hPtr = Tcl_FirstHashEntry(&iclsPtr->components, &place);
@@ -2457,7 +2457,7 @@ Itcl_BiInfoComponentCmd(
                 icPtr = (ItclComponent *)Tcl_GetHashValue(hPtr);
                 objPtr = Tcl_NewStringObj(
 		        Tcl_GetString(icPtr->ivPtr->fullNamePtr), -1);
-                Tcl_ListObjAppendElement((Tcl_Interp*)NULL, resultPtr, objPtr);
+                Tcl_ListObjAppendElement(NULL, resultPtr, objPtr);
                 hPtr = Tcl_NextHashEntry(&place);
             }
         }
@@ -2501,7 +2501,7 @@ Itcl_BiInfoWidgetCmd(
     if (objc != 1) {
         Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
             "wrong # args: should be \"info widget\"",
-            (char*)NULL);
+            NULL);
         return TCL_ERROR;
     }
 
@@ -2519,8 +2519,8 @@ Itcl_BiInfoWidgetCmd(
         infoPtr = (ItclObjectInfo *)Tcl_GetAssocData(interp,
                 ITCL_INTERP_DATA, NULL);
 	if (clientData != NULL) {
-            oPtr = Tcl_ObjectContextObject(clientData);
-            contextIoPtr = Tcl_ObjectGetMetadata(oPtr,
+            oPtr = Tcl_ObjectContextObject((Tcl_ObjectContext)clientData);
+            contextIoPtr = (ItclObject *)Tcl_ObjectGetMetadata(oPtr,
 	            infoPtr->object_meta_type);
             contextIclsPtr = contextIoPtr->iclsPtr;
 	}
@@ -2585,7 +2585,7 @@ Itcl_BiInfoExtendedClassCmd(
 {
 #ifdef NOTYET
     static const char *components[] = {
-	"-name", "-inherit", "-value", (char*)NULL
+	"-name", "-inherit", "-value", NULL
     };
     enum BCompIdx {
 	BCompNameIdx, BCompInheritIdx, BCompValueIdx
@@ -2668,7 +2668,7 @@ Itcl_BiInfoDelegatedCmd(
 {
 #ifdef NOTYET
     static const char *components[] = {
-	"-name", "-inherit", "-value", (char*)NULL
+	"-name", "-inherit", "-value", NULL
     };
     enum BCompIdx {
 	BCompNameIdx, BCompInheritIdx, BCompValueIdx
@@ -2757,7 +2757,7 @@ Itcl_BiInfoTypeCmd(
     if (objc != 1) {
         Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
             "wrong # args: should be \"info type\"",
-            (char*)NULL);
+            NULL);
         return TCL_ERROR;
     }
 
@@ -2775,8 +2775,8 @@ Itcl_BiInfoTypeCmd(
         infoPtr = (ItclObjectInfo *)Tcl_GetAssocData(interp,
                 ITCL_INTERP_DATA, NULL);
 	if (clientData != NULL) {
-            oPtr = Tcl_ObjectContextObject(clientData);
-            contextIoPtr = Tcl_ObjectGetMetadata(oPtr,
+            oPtr = Tcl_ObjectContextObject((Tcl_ObjectContext)clientData);
+            contextIoPtr = (ItclObject *)Tcl_ObjectGetMetadata(oPtr,
 	            infoPtr->object_meta_type);
             contextIclsPtr = contextIoPtr->iclsPtr;
 	}
@@ -2842,7 +2842,7 @@ Itcl_BiInfoHullTypeCmd(
     if (objc != 1) {
         Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
             "wrong # args: should be \"info hulltype\"",
-            (char*)NULL);
+            NULL);
         return TCL_ERROR;
     }
 
@@ -2860,8 +2860,8 @@ Itcl_BiInfoHullTypeCmd(
         infoPtr = (ItclObjectInfo *)Tcl_GetAssocData(interp,
                 ITCL_INTERP_DATA, NULL);
 	if (clientData != NULL) {
-            oPtr = Tcl_ObjectContextObject(clientData);
-            contextIoPtr = Tcl_ObjectGetMetadata(oPtr,
+            oPtr = Tcl_ObjectContextObject((Tcl_ObjectContext)clientData);
+            contextIoPtr = (ItclObject *)Tcl_ObjectGetMetadata(oPtr,
 	            infoPtr->object_meta_type);
             contextIclsPtr = contextIoPtr->iclsPtr;
 	}
@@ -3014,7 +3014,7 @@ Itcl_BiInfoMethodCmd(
 
     static const char *options[] = {
         "-args", "-body", "-name", "-protection", "-type",
-        (char*)NULL
+        NULL
     };
     enum BIfIdx {
         BIfArgsIdx, BIfBodyIdx, BIfNameIdx, BIfProtectIdx, BIfTypeIdx
@@ -3072,7 +3072,7 @@ Itcl_BiInfoMethodCmd(
             Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
                 "\"", cmdName, "\" isn't a method in class \"",
                 contextIclsPtr->nsPtr->fullName, "\"",
-                (char*)NULL);
+                NULL);
             return TCL_ERROR;
         }
 
@@ -3083,7 +3083,7 @@ Itcl_BiInfoMethodCmd(
             Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
                 "\"", cmdName, "\" isn't a method in class \"",
                 contextIclsPtr->nsPtr->fullName, "\"",
-                (char*)NULL);
+                NULL);
             return TCL_ERROR;
 	}
 
@@ -3110,7 +3110,7 @@ Itcl_BiInfoMethodCmd(
         }
 
         if (objc > 1) {
-            resultPtr = Tcl_NewListObj(0, (Tcl_Obj**)NULL);
+            resultPtr = Tcl_NewListObj(0, NULL);
         }
 
         for (i=0 ; i < objc; i++) {
@@ -3167,7 +3167,7 @@ Itcl_BiInfoMethodCmd(
             if (objc == 1) {
                 resultPtr = objPtr;
             } else {
-                Tcl_ListObjAppendElement((Tcl_Interp*)NULL, resultPtr, objPtr);
+                Tcl_ListObjAppendElement(NULL, resultPtr, objPtr);
             }
         }
         Tcl_SetObjResult(interp, resultPtr);
@@ -3176,7 +3176,7 @@ Itcl_BiInfoMethodCmd(
         /*
          *  Return the list of available commands.
          */
-        resultPtr = Tcl_NewListObj(0, (Tcl_Obj**)NULL);
+        resultPtr = Tcl_NewListObj(0, NULL);
 
         Itcl_InitHierIter(&hier, contextIclsPtr);
         while ((iclsPtr=Itcl_AdvanceHierIter(&hier)) != NULL) {
@@ -3191,7 +3191,7 @@ Itcl_BiInfoMethodCmd(
 		if (useIt) {
                     objPtr = Tcl_NewStringObj(
 		            Tcl_GetString(imPtr->fullNamePtr), -1);
-                    Tcl_ListObjAppendElement((Tcl_Interp*)NULL,
+                    Tcl_ListObjAppendElement(NULL,
 		            resultPtr, objPtr);
                 }
 
@@ -3237,7 +3237,7 @@ Itcl_BiInfoMethodsCmd(
     iclsPtr = NULL;
     pattern = NULL;
     if (Itcl_GetContext(interp, &iclsPtr, &ioPtr) != TCL_OK) {
-        Tcl_AppendResult(interp, "cannot get context ", (char*)NULL);
+        Tcl_AppendResult(interp, "cannot get context ", NULL);
         return TCL_ERROR;
     }
     if (ioPtr != NULL) {
@@ -3344,7 +3344,7 @@ Itcl_BiInfoOptionsCmd(
     iclsPtr = NULL;
     pattern = NULL;
     if (Itcl_GetContext(interp, &iclsPtr, &ioPtr) != TCL_OK) {
-        Tcl_AppendResult(interp, "cannot get context ", (char*)NULL);
+        Tcl_AppendResult(interp, "cannot get context ", NULL);
         return TCL_ERROR;
     }
     if (ioPtr != NULL) {
@@ -3509,7 +3509,7 @@ Itcl_BiInfoComponentsCmd(
     iclsPtr = NULL;
     pattern = NULL;
     if (Itcl_GetContext(interp, &iclsPtr, &ioPtr) != TCL_OK) {
-        Tcl_AppendResult(interp, "cannot get context ", (char*)NULL);
+        Tcl_AppendResult(interp, "cannot get context ", NULL);
         return TCL_ERROR;
     }
     if (ioPtr != NULL) {
@@ -3583,7 +3583,7 @@ Itcl_BiInfoTypeMethodCmd(
 
     static const char *options[] = {
         "-args", "-body", "-name", "-protection", "-type",
-        (char*)NULL
+        NULL
     };
     enum BIfIdx {
         BIfArgsIdx, BIfBodyIdx, BIfNameIdx, BIfProtectIdx, BIfTypeIdx
@@ -3642,7 +3642,7 @@ Itcl_BiInfoTypeMethodCmd(
             Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
                 "\"", cmdName, "\" isn't a typemethod in class \"",
                 contextIclsPtr->nsPtr->fullName, "\"",
-                (char*)NULL);
+                NULL);
             return TCL_ERROR;
         }
 
@@ -3653,7 +3653,7 @@ Itcl_BiInfoTypeMethodCmd(
             Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
                 "\"", cmdName, "\" isn't a typemethod in class \"",
                 contextIclsPtr->nsPtr->fullName, "\"",
-                (char*)NULL);
+                NULL);
             return TCL_ERROR;
 	}
 
@@ -3680,7 +3680,7 @@ Itcl_BiInfoTypeMethodCmd(
         }
 
         if (objc > 1) {
-            resultPtr = Tcl_NewListObj(0, (Tcl_Obj**)NULL);
+            resultPtr = Tcl_NewListObj(0, NULL);
         }
 
         for (i=0 ; i < objc; i++) {
@@ -3737,7 +3737,7 @@ Itcl_BiInfoTypeMethodCmd(
             if (objc == 1) {
                 resultPtr = objPtr;
             } else {
-                Tcl_ListObjAppendElement((Tcl_Interp*)NULL, resultPtr, objPtr);
+                Tcl_ListObjAppendElement(NULL, resultPtr, objPtr);
             }
         }
         Tcl_SetObjResult(interp, resultPtr);
@@ -3746,7 +3746,7 @@ Itcl_BiInfoTypeMethodCmd(
         /*
          *  Return the list of available commands.
          */
-        resultPtr = Tcl_NewListObj(0, (Tcl_Obj**)NULL);
+        resultPtr = Tcl_NewListObj(0, NULL);
 
         Itcl_InitHierIter(&hier, contextIclsPtr);
         while ((iclsPtr=Itcl_AdvanceHierIter(&hier)) != NULL) {
@@ -3761,7 +3761,7 @@ Itcl_BiInfoTypeMethodCmd(
 		if (useIt) {
                     objPtr = Tcl_NewStringObj(
 		            Tcl_GetString(imPtr->fullNamePtr), -1);
-                    Tcl_ListObjAppendElement((Tcl_Interp*)NULL,
+                    Tcl_ListObjAppendElement(NULL,
 		            resultPtr, objPtr);
                 }
 
@@ -3807,7 +3807,7 @@ Itcl_BiInfoTypeMethodsCmd(
     iclsPtr = NULL;
     pattern = NULL;
     if (Itcl_GetContext(interp, &iclsPtr, &ioPtr) != TCL_OK) {
-        Tcl_AppendResult(interp, "cannot get context ", (char*)NULL);
+        Tcl_AppendResult(interp, "cannot get context ", NULL);
         return TCL_ERROR;
     }
     if (ioPtr != NULL) {
@@ -3915,7 +3915,7 @@ Itcl_BiInfoTypeVarsCmd(
     iclsPtr = NULL;
     pattern = NULL;
     if (Itcl_GetContext(interp, &iclsPtr, &ioPtr) != TCL_OK) {
-        Tcl_AppendResult(interp, "cannot get context ", (char*)NULL);
+        Tcl_AppendResult(interp, "cannot get context ", NULL);
         return TCL_ERROR;
     }
     if (ioPtr != NULL) {
@@ -3973,7 +3973,7 @@ Itcl_BiInfoTypeVariableCmd(
 
     static const char *options[] = {
         "-init", "-name", "-protection", "-type",
-        "-value", (char*)NULL
+        "-value", NULL
     };
     enum BIvIdx {
         BIvInitIdx,
@@ -4031,7 +4031,7 @@ Itcl_BiInfoTypeVariableCmd(
             Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
                 "\"", varName, "\" isn't a typevariable in class \"",
                 contextIclsPtr->nsPtr->fullName, "\"",
-                (char*)NULL);
+                NULL);
             return TCL_ERROR;
         }
         vlookup = (ItclVarLookup*)Tcl_GetHashValue(hPtr);
@@ -4040,7 +4040,7 @@ Itcl_BiInfoTypeVariableCmd(
             Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
                 "\"", varName, "\" isn't a typevariable in class \"",
                 contextIclsPtr->nsPtr->fullName, "\"",
-                (char*)NULL);
+                NULL);
             return TCL_ERROR;
 	}
         /*
@@ -4066,7 +4066,7 @@ Itcl_BiInfoTypeVariableCmd(
         }
 
         if (objc > 1) {
-            resultPtr = Tcl_NewListObj(0, (Tcl_Obj**)NULL);
+            resultPtr = Tcl_NewListObj(0, NULL);
         }
 
         for (i=0 ; i < objc; i++) {
@@ -4079,7 +4079,7 @@ Itcl_BiInfoTypeVariableCmd(
                     if ((ivPtr->flags & ITCL_THIS_VAR) != 0) {
                         if ((contextIoPtr != NULL) &&
 			        (contextIoPtr->accessCmd != NULL)) {
-                            objPtr = Tcl_NewStringObj((char*)NULL, 0);
+                            objPtr = Tcl_NewStringObj(NULL, 0);
                             Tcl_GetCommandFullName(
                                 contextIoPtr->iclsPtr->interp,
                                 contextIoPtr->accessCmd, objPtr);
@@ -4126,7 +4126,7 @@ Itcl_BiInfoTypeVariableCmd(
                             Tcl_AppendResult(interp,
                                     "cannot access object-specific info ",
                                     "without an object context",
-                                    (char*)NULL);
+                                    NULL);
                             return TCL_ERROR;
                         } else {
                             val = Itcl_GetInstanceVar(interp,
@@ -4144,7 +4144,7 @@ Itcl_BiInfoTypeVariableCmd(
             if (objc == 1) {
                 resultPtr = objPtr;
             } else {
-                Tcl_ListObjAppendElement((Tcl_Interp*)NULL, resultPtr, objPtr);
+                Tcl_ListObjAppendElement(NULL, resultPtr, objPtr);
             }
         }
 	Tcl_ResetResult(interp);
@@ -4156,7 +4156,7 @@ Itcl_BiInfoTypeVariableCmd(
          *  Return the list of available variables.  Report the built-in
          *  "this" variable only once, for the most-specific class.
          */
-        resultPtr = Tcl_NewListObj(0, (Tcl_Obj**)NULL);
+        resultPtr = Tcl_NewListObj(0, NULL);
         Itcl_InitHierIter(&hier, contextIclsPtr);
         while ((iclsPtr=Itcl_AdvanceHierIter(&hier)) != NULL) {
             hPtr = Tcl_FirstHashEntry(&iclsPtr->variables, &place);
@@ -4167,13 +4167,13 @@ Itcl_BiInfoTypeVariableCmd(
                         if (iclsPtr == contextIclsPtr) {
                             objPtr = Tcl_NewStringObj(
 			            Tcl_GetString(ivPtr->fullNamePtr), -1);
-                            Tcl_ListObjAppendElement((Tcl_Interp*)NULL,
+                            Tcl_ListObjAppendElement(NULL,
                                 resultPtr, objPtr);
                         }
                     } else {
                         objPtr = Tcl_NewStringObj(
 		                Tcl_GetString(ivPtr->fullNamePtr), -1);
-                        Tcl_ListObjAppendElement((Tcl_Interp*)NULL,
+                        Tcl_ListObjAppendElement(NULL,
                             resultPtr, objPtr);
                     }
 		}
@@ -4241,7 +4241,7 @@ Itcl_BiInfoWidgetadaptorCmd(
     if (objc != 1) {
         Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
             "wrong # args: should be \"info widgetadaptor\"",
-            (char*)NULL);
+            NULL);
         return TCL_ERROR;
     }
 
@@ -4259,8 +4259,8 @@ Itcl_BiInfoWidgetadaptorCmd(
         infoPtr = (ItclObjectInfo *)Tcl_GetAssocData(interp,
                 ITCL_INTERP_DATA, NULL);
 	if (clientData != NULL) {
-            oPtr = Tcl_ObjectContextObject(clientData);
-            contextIoPtr = Tcl_ObjectGetMetadata(oPtr,
+            oPtr = Tcl_ObjectContextObject((Tcl_ObjectContext)clientData);
+            contextIoPtr = (ItclObject *)Tcl_ObjectGetMetadata(oPtr,
 	            infoPtr->object_meta_type);
             contextIclsPtr = contextIoPtr->iclsPtr;
 	}
@@ -4335,7 +4335,7 @@ Itcl_BiInfoInstancesCmd(
     iclsPtr = NULL;
     pattern = NULL;
     if (Itcl_GetContext(interp, &iclsPtr, &ioPtr) != TCL_OK) {
-        Tcl_AppendResult(interp, "cannot get context ", (char*)NULL);
+        Tcl_AppendResult(interp, "cannot get context ", NULL);
         return TCL_ERROR;
     }
     if (ioPtr != NULL) {
@@ -4653,7 +4653,7 @@ Itcl_BiInfoDelegatedOptionCmd(
 
     static const char *options[] = {
         "-as", "-class", "-component", "-exceptions",
-	"-name", "-resource", (char*)NULL
+	"-name", "-resource", NULL
     };
     enum BOptIdx {
         BOptAsIdx, BOptClassIdx, BOptComponentIdx, BOptExceptionsIdx,
@@ -4695,7 +4695,7 @@ Itcl_BiInfoDelegatedOptionCmd(
 	        nsPtr->fullName, "\"", NULL);
 	return TCL_ERROR;
     }
-    contextIclsPtr = Tcl_GetHashValue(hPtr);
+    contextIclsPtr = (ItclClass *)Tcl_GetHashValue(hPtr);
 
     /*
      *  Process args:
@@ -4718,7 +4718,7 @@ Itcl_BiInfoDelegatedOptionCmd(
 	if (contextIoPtr == NULL) {
 	    Tcl_ResetResult(interp);
 	    Tcl_AppendResult(interp, "cannot access object-specific info ",
-		    "without an object context", (char*)NULL);
+		    "without an object context", NULL);
 	    return TCL_ERROR;
 	}
 	optionNamePtr = Tcl_NewStringObj(optionName, -1);
@@ -4729,7 +4729,7 @@ Itcl_BiInfoDelegatedOptionCmd(
             Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
                  "\"", optionName, "\" isn't an option in object \"",
                 Tcl_GetString(contextIoPtr->namePtr), "\"",
-                (char*)NULL);
+                NULL);
             return TCL_ERROR;
         }
         idoptPtr = (ItclDelegatedOption*)Tcl_GetHashValue(hPtr);
@@ -4757,7 +4757,7 @@ Itcl_BiInfoDelegatedOptionCmd(
         }
 
         if (objc > 1) {
-            resultPtr = Tcl_NewListObj(0, (Tcl_Obj**)NULL);
+            resultPtr = Tcl_NewListObj(0, NULL);
         }
 
         for (i=0 ; i < objc; i++) {
@@ -4817,7 +4817,7 @@ Itcl_BiInfoDelegatedOptionCmd(
             if (objc == 1) {
                 resultPtr = objPtr;
             } else {
-                Tcl_ListObjAppendElement((Tcl_Interp*)NULL, resultPtr,
+                Tcl_ListObjAppendElement(NULL, resultPtr,
                     objPtr);
             }
         }
@@ -4827,14 +4827,14 @@ Itcl_BiInfoDelegatedOptionCmd(
         /*
          *  Return the list of available options.
          */
-        resultPtr = Tcl_NewListObj(0, (Tcl_Obj**)NULL);
+        resultPtr = Tcl_NewListObj(0, NULL);
         Itcl_InitHierIter(&hier, contextIclsPtr);
         while ((iclsPtr=Itcl_AdvanceHierIter(&hier)) != NULL) {
             hPtr = Tcl_FirstHashEntry(&iclsPtr->delegatedOptions, &place);
             while (hPtr) {
                 idoptPtr = (ItclDelegatedOption*)Tcl_GetHashValue(hPtr);
                 objPtr = idoptPtr->namePtr;
-                Tcl_ListObjAppendElement((Tcl_Interp*)NULL, resultPtr, objPtr);
+                Tcl_ListObjAppendElement(NULL, resultPtr, objPtr);
                 hPtr = Tcl_NextHashEntry(&place);
             }
         }
@@ -4885,7 +4885,7 @@ Itcl_BiInfoDelegatedMethodCmd(
 
     static const char *options[] = {
         "-as", "-component", "-exceptions",
-	"-name", "-using", (char*)NULL
+	"-name", "-using", NULL
     };
     enum BOptIdx {
         BOptAsIdx,
@@ -4953,7 +4953,7 @@ Itcl_BiInfoDelegatedMethodCmd(
             Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
                  "\"", cmdName, "\" isn't a delegated method in object \"",
                 Tcl_GetString(contextIoPtr->namePtr), "\"",
-                (char*)NULL);
+                NULL);
             return TCL_ERROR;
         }
         idmPtr = (ItclDelegatedFunction*)Tcl_GetHashValue(hPtr);
@@ -4961,7 +4961,7 @@ Itcl_BiInfoDelegatedMethodCmd(
             Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
                  "\"", cmdName, "\" isn't a delegated method in object \"",
                 Tcl_GetString(contextIoPtr->namePtr), "\"",
-                (char*)NULL);
+                NULL);
             return TCL_ERROR;
 	}
         /*
@@ -4987,7 +4987,7 @@ Itcl_BiInfoDelegatedMethodCmd(
         }
 
         if (objc > 1) {
-            resultPtr = Tcl_NewListObj(0, (Tcl_Obj**)NULL);
+            resultPtr = Tcl_NewListObj(0, NULL);
         }
 
         for (i=0 ; i < objc; i++) {
@@ -5038,7 +5038,7 @@ Itcl_BiInfoDelegatedMethodCmd(
             if (objc == 1) {
                 resultPtr = objPtr;
             } else {
-                Tcl_ListObjAppendElement((Tcl_Interp*)NULL, resultPtr,
+                Tcl_ListObjAppendElement(NULL, resultPtr,
                     objPtr);
             }
         }
@@ -5048,7 +5048,7 @@ Itcl_BiInfoDelegatedMethodCmd(
         /*
          *  Return the list of available options.
          */
-        resultPtr = Tcl_NewListObj(0, (Tcl_Obj**)NULL);
+        resultPtr = Tcl_NewListObj(0, NULL);
         Itcl_InitHierIter(&hier, contextIclsPtr);
         while ((iclsPtr=Itcl_AdvanceHierIter(&hier)) != NULL) {
             hPtr = Tcl_FirstHashEntry(&iclsPtr->delegatedFunctions, &place);
@@ -5056,7 +5056,7 @@ Itcl_BiInfoDelegatedMethodCmd(
                 idmPtr = (ItclDelegatedFunction *)Tcl_GetHashValue(hPtr);
 		if (idmPtr->flags & ITCL_METHOD) {
                     objPtr = idmPtr->namePtr;
-                    Tcl_ListObjAppendElement((Tcl_Interp*)NULL, resultPtr,
+                    Tcl_ListObjAppendElement(NULL, resultPtr,
 		            objPtr);
 		}
                 hPtr = Tcl_NextHashEntry(&place);
@@ -5110,7 +5110,7 @@ Itcl_BiInfoDelegatedTypeMethodCmd(
 
     static const char *options[] = {
         "-as", "-component", "-exceptions",
-	"-name", "-using", (char*)NULL
+	"-name", "-using", NULL
     };
     enum BOptIdx {
         BOptAsIdx,
@@ -5179,7 +5179,7 @@ Itcl_BiInfoDelegatedTypeMethodCmd(
                  "\"", cmdName, "\" isn't a delegated typemethod in ",
 		contextIoPtr ? "object \"" : "class \"",
 		contextIoPtr ?  Tcl_GetString(contextIoPtr->namePtr)
-		: Tcl_GetString(contextIclsPtr->namePtr), "\"", (char*)NULL);
+		: Tcl_GetString(contextIclsPtr->namePtr), "\"", NULL);
             return TCL_ERROR;
         }
         idmPtr = (ItclDelegatedFunction*)Tcl_GetHashValue(hPtr);
@@ -5188,7 +5188,7 @@ Itcl_BiInfoDelegatedTypeMethodCmd(
                  "\"", cmdName, "\" isn't a delegated typemethod in ",
 		contextIoPtr ? "object \"" : "class \"",
 		contextIoPtr ?  Tcl_GetString(contextIoPtr->namePtr)
-		: Tcl_GetString(contextIclsPtr->namePtr), "\"", (char*)NULL);
+		: Tcl_GetString(contextIclsPtr->namePtr), "\"", NULL);
             return TCL_ERROR;
 	}
         /*
@@ -5214,7 +5214,7 @@ Itcl_BiInfoDelegatedTypeMethodCmd(
         }
 
         if (objc > 1) {
-            resultPtr = Tcl_NewListObj(0, (Tcl_Obj**)NULL);
+            resultPtr = Tcl_NewListObj(0, NULL);
         }
 
         for (i=0 ; i < objc; i++) {
@@ -5265,7 +5265,7 @@ Itcl_BiInfoDelegatedTypeMethodCmd(
             if (objc == 1) {
                 resultPtr = objPtr;
             } else {
-                Tcl_ListObjAppendElement((Tcl_Interp*)NULL, resultPtr,
+                Tcl_ListObjAppendElement(NULL, resultPtr,
                     objPtr);
             }
         }
@@ -5275,7 +5275,7 @@ Itcl_BiInfoDelegatedTypeMethodCmd(
         /*
          *  Return the list of available options.
          */
-        resultPtr = Tcl_NewListObj(0, (Tcl_Obj**)NULL);
+        resultPtr = Tcl_NewListObj(0, NULL);
         Itcl_InitHierIter(&hier, contextIclsPtr);
         while ((iclsPtr=Itcl_AdvanceHierIter(&hier)) != NULL) {
             hPtr = Tcl_FirstHashEntry(&iclsPtr->delegatedFunctions, &place);
@@ -5283,7 +5283,7 @@ Itcl_BiInfoDelegatedTypeMethodCmd(
                 idmPtr = (ItclDelegatedFunction *)Tcl_GetHashValue(hPtr);
 		if (idmPtr->flags & ITCL_TYPE_METHOD) {
                     objPtr = idmPtr->namePtr;
-                    Tcl_ListObjAppendElement((Tcl_Interp*)NULL, resultPtr,
+                    Tcl_ListObjAppendElement(NULL, resultPtr,
 		            objPtr);
 		}
                 hPtr = Tcl_NextHashEntry(&place);

@@ -66,10 +66,10 @@ typedef struct InterpState {
  */
 
 void
-Itcl_Assert(testExpr, fileName, lineNumber)
-    const char *testExpr;   /* string representing test expression */
-    const char *fileName;   /* file name containing this call */
-    int lineNumber;	    /* line number containing this call */
+Itcl_Assert(
+    const char *testExpr,   /* string representing test expression */
+    const char *fileName,   /* file name containing this call */
+    int lineNumber)	    /* line number containing this call */
 {
     Tcl_Panic("Itcl Assertion failed: \"%s\" (line %d of %s)",
 	testExpr, lineNumber, fileName);
@@ -86,8 +86,8 @@ Itcl_Assert(testExpr, fileName, lineNumber)
  * ------------------------------------------------------------------------
  */
 void
-Itcl_InitStack(stack)
-    Itcl_Stack *stack;     /* stack to be initialized */
+Itcl_InitStack(
+    Itcl_Stack *stack)     /* stack to be initialized */
 {
     stack->values = stack->space;
     stack->max = sizeof(stack->space)/sizeof(ClientData);
@@ -103,8 +103,8 @@ Itcl_InitStack(stack)
  * ------------------------------------------------------------------------
  */
 void
-Itcl_DeleteStack(stack)
-    Itcl_Stack *stack;     /* stack to be deleted */
+Itcl_DeleteStack(
+    Itcl_Stack *stack)     /* stack to be deleted */
 {
     /*
      *  If memory was explicitly allocated (instead of using the
@@ -126,9 +126,9 @@ Itcl_DeleteStack(stack)
  * ------------------------------------------------------------------------
  */
 void
-Itcl_PushStack(cdata,stack)
-    ClientData cdata;      /* data to be pushed onto stack */
-    Itcl_Stack *stack;     /* stack */
+Itcl_PushStack(
+    ClientData cdata,      /* data to be pushed onto stack */
+    Itcl_Stack *stack)     /* stack */
 {
     ClientData *newStack;
 
@@ -157,14 +157,14 @@ Itcl_PushStack(cdata,stack)
  * ------------------------------------------------------------------------
  */
 ClientData
-Itcl_PopStack(stack)
-    Itcl_Stack *stack;  /* stack to be manipulated */
+Itcl_PopStack(
+    Itcl_Stack *stack)  /* stack to be manipulated */
 {
     if (stack->values && (stack->len > 0)) {
         stack->len--;
         return stack->values[stack->len];
     }
-    return (ClientData)NULL;
+    return NULL;
 }
 
 /*
@@ -175,13 +175,13 @@ Itcl_PopStack(stack)
  * ------------------------------------------------------------------------
  */
 ClientData
-Itcl_PeekStack(stack)
-    Itcl_Stack *stack;  /* stack to be examined */
+Itcl_PeekStack(
+    Itcl_Stack *stack)  /* stack to be examined */
 {
     if (stack->values && (stack->len > 0)) {
         return stack->values[stack->len-1];
     }
-    return (ClientData)NULL;
+    return NULL;
 }
 
 /*
@@ -193,15 +193,15 @@ Itcl_PeekStack(stack)
  * ------------------------------------------------------------------------
  */
 ClientData
-Itcl_GetStackValue(stack,pos)
-    Itcl_Stack *stack;  /* stack to be examined */
-    int pos;            /* get value at this index */
+Itcl_GetStackValue(
+    Itcl_Stack *stack,  /* stack to be examined */
+    int pos)            /* get value at this index */
 {
     if (stack->values && (stack->len > 0)) {
         assert(pos < stack->len);
         return stack->values[pos];
     }
-    return (ClientData)NULL;
+    return NULL;
 }
 
 
@@ -214,8 +214,8 @@ Itcl_GetStackValue(stack,pos)
  * ------------------------------------------------------------------------
  */
 void
-Itcl_InitList(listPtr)
-    Itcl_List *listPtr;     /* list to be initialized */
+Itcl_InitList(
+    Itcl_List *listPtr)     /* list to be initialized */
 {
     listPtr->validate = ITCL_VALID_LIST;
     listPtr->num      = 0;
@@ -234,8 +234,8 @@ Itcl_InitList(listPtr)
  * ------------------------------------------------------------------------
  */
 void
-Itcl_DeleteList(listPtr)
-    Itcl_List *listPtr;     /* list to be deleted */
+Itcl_DeleteList(
+    Itcl_List *listPtr)     /* list to be deleted */
 {
     Itcl_ListElem *elemPtr;
 
@@ -289,8 +289,8 @@ Itcl_CreateListElem(
  * ------------------------------------------------------------------------
  */
 Itcl_ListElem*
-Itcl_DeleteListElem(elemPtr)
-    Itcl_ListElem *elemPtr;     /* list element to be deleted */
+Itcl_DeleteListElem(
+    Itcl_ListElem *elemPtr)     /* list element to be deleted */
 {
     Itcl_List *listPtr;
     Itcl_ListElem *nextPtr;
@@ -333,9 +333,9 @@ Itcl_DeleteListElem(elemPtr)
  * ------------------------------------------------------------------------
  */
 Itcl_ListElem*
-Itcl_InsertList(listPtr,val)
-    Itcl_List *listPtr;     /* list being modified */
-    ClientData val;         /* value associated with new element */
+Itcl_InsertList(
+    Itcl_List *listPtr,     /* list being modified */
+    ClientData val)         /* value associated with new element */
 {
     Itcl_ListElem *elemPtr;
     assert(listPtr->validate == ITCL_VALID_LIST);
@@ -367,9 +367,9 @@ Itcl_InsertList(listPtr,val)
  * ------------------------------------------------------------------------
  */
 Itcl_ListElem*
-Itcl_InsertListElem(pos,val)
-    Itcl_ListElem *pos;     /* insert just before this element */
-    ClientData val;         /* value associated with new element */
+Itcl_InsertListElem(
+    Itcl_ListElem *pos,     /* insert just before this element */
+    ClientData val)         /* value associated with new element */
 {
     Itcl_List *listPtr;
     Itcl_ListElem *elemPtr;
@@ -409,9 +409,9 @@ Itcl_InsertListElem(pos,val)
  * ------------------------------------------------------------------------
  */
 Itcl_ListElem*
-Itcl_AppendList(listPtr,val)
-    Itcl_List *listPtr;     /* list being modified */
-    ClientData val;         /* value associated with new element */
+Itcl_AppendList(
+    Itcl_List *listPtr,     /* list being modified */
+    ClientData val)         /* value associated with new element */
 {
     Itcl_ListElem *elemPtr;
     assert(listPtr->validate == ITCL_VALID_LIST);
@@ -443,9 +443,9 @@ Itcl_AppendList(listPtr,val)
  * ------------------------------------------------------------------------
  */
 Itcl_ListElem*
-Itcl_AppendListElem(pos,val)
-    Itcl_ListElem *pos;     /* insert just after this element */
-    ClientData val;         /* value associated with new element */
+Itcl_AppendListElem(
+    Itcl_ListElem *pos,     /* insert just after this element */
+    ClientData val)         /* value associated with new element */
 {
     Itcl_List *listPtr;
     Itcl_ListElem *elemPtr;
@@ -483,9 +483,9 @@ Itcl_AppendListElem(pos,val)
  * ------------------------------------------------------------------------
  */
 void
-Itcl_SetListValue(elemPtr,val)
-    Itcl_ListElem *elemPtr; /* list element being modified */
-    ClientData val;         /* new value associated with element */
+Itcl_SetListValue(
+    Itcl_ListElem *elemPtr, /* list element being modified */
+    ClientData val)         /* new value associated with element */
 {
     Itcl_List *listPtr = elemPtr->owner;
     assert(listPtr->validate == ITCL_VALID_LIST);
@@ -628,9 +628,9 @@ Itcl_ReleaseData(
  * ------------------------------------------------------------------------
  */
 Itcl_InterpState
-Itcl_SaveInterpState(interp, status)
-    Tcl_Interp* interp;     /* interpreter being modified */
-    int status;             /* integer status code for current operation */
+Itcl_SaveInterpState(
+    Tcl_Interp* interp,     /* interpreter being modified */
+    int status)             /* integer status code for current operation */
 {
     return (Itcl_InterpState) Tcl_SaveInterpState(interp, status);
 }
@@ -650,9 +650,9 @@ Itcl_SaveInterpState(interp, status)
  * ------------------------------------------------------------------------
  */
 int
-Itcl_RestoreInterpState(interp, state)
-    Tcl_Interp* interp;       /* interpreter being modified */
-    Itcl_InterpState state;   /* token representing interpreter state */
+Itcl_RestoreInterpState(
+    Tcl_Interp* interp,       /* interpreter being modified */
+    Itcl_InterpState state)   /* token representing interpreter state */
 {
     return Tcl_RestoreInterpState(interp, (Tcl_InterpState)state);
 }
@@ -670,8 +670,8 @@ Itcl_RestoreInterpState(interp, state)
  * ------------------------------------------------------------------------
  */
 void
-Itcl_DiscardInterpState(state)
-    Itcl_InterpState state;  /* token representing interpreter state */
+Itcl_DiscardInterpState(
+    Itcl_InterpState state)  /* token representing interpreter state */
 {
     Tcl_DiscardInterpState((Tcl_InterpState)state);
     return;
@@ -694,9 +694,9 @@ Itcl_DiscardInterpState(state)
  * ------------------------------------------------------------------------
  */
 int
-Itcl_Protection(interp, newLevel)
-    Tcl_Interp *interp;  /* interpreter being queried */
-    int newLevel;        /* new protection level or 0 */
+Itcl_Protection(
+    Tcl_Interp *interp,  /* interpreter being queried */
+    int newLevel)        /* new protection level or 0 */
 {
     int oldVal;
     ItclObjectInfo *infoPtr;
@@ -706,7 +706,7 @@ Itcl_Protection(interp, newLevel)
      *  In any case, return the protection level as it stands right now.
      */
     infoPtr = (ItclObjectInfo*) Tcl_GetAssocData(interp, ITCL_INTERP_DATA,
-        (Tcl_InterpDeleteProc**)NULL);
+        NULL);
 
     assert(infoPtr != NULL);
     oldVal = infoPtr->protection;
@@ -843,7 +843,7 @@ Itcl_CanAccess2(
 	if (entry == NULL) {
 	    return 0;
 	}
-	fromIclsPtr = Tcl_GetHashValue(entry);
+	fromIclsPtr = (ItclClass *)Tcl_GetHashValue(entry);
 
         entry = Tcl_FindHashEntry(&fromIclsPtr->heritage,
 	        (char*)iclsPtr);
@@ -926,7 +926,7 @@ Itcl_CanAccessFunc(
 	if (hPtr == NULL) {
 	    return 0;
 	}
-        fromIclsPtr = Tcl_GetHashValue(hPtr);
+        fromIclsPtr = (ItclClass *)Tcl_GetHashValue(hPtr);
 
         if (Tcl_FindHashEntry(&iclsPtr->heritage, (char*)fromIclsPtr)) {
             entry = Tcl_FindHashEntry(&fromIclsPtr->resolveCmds,
@@ -981,7 +981,7 @@ Itcl_DecodeScopedCommand(
 
     nsPtr = NULL;
     len = strlen(name);
-    cmdName = ckalloc((unsigned)strlen(name)+1);
+    cmdName = (char *)ckalloc(strlen(name)+1);
     strcpy(cmdName, name);
 
     if ((*name == 'n') && (len > 17) && (strncmp(name, "namespace", 9) == 0)) {
@@ -998,17 +998,17 @@ Itcl_DecodeScopedCommand(
                     Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
                         "malformed command \"", name, "\": should be \"",
                         "namespace inscope namesp command\"",
-                        (char*)NULL);
+                        NULL);
                     result = TCL_ERROR;
                 } else {
                     nsPtr = Tcl_FindNamespace(interp, listv[2],
-                        (Tcl_Namespace*)NULL, TCL_LEAVE_ERR_MSG);
+                        NULL, TCL_LEAVE_ERR_MSG);
 
                     if (nsPtr == NULL) {
                         result = TCL_ERROR;
                     } else {
 		        ckfree(cmdName);
-                        cmdName = ckalloc((unsigned)(strlen(listv[3])+1));
+                        cmdName = (char *)ckalloc(strlen(listv[3])+1);
                         strcpy(cmdName, listv[3]);
                     }
                 }

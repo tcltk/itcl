@@ -110,7 +110,7 @@ static const Tcl_ObjectMetadataType canary = {
 
 void
 Demolition(
-    ClientData clientData)
+    void *clientData)
 {
     ItclObjectInfo *infoPtr = (ItclObjectInfo *)clientData;
 
@@ -137,14 +137,14 @@ const Tcl_MethodType itclRootMethodType = {
 
 static int
 RootCallProc(
-    ClientData clientData,
+    void *clientData,
     Tcl_Interp *interp,
     Tcl_ObjectContext context,
     int objc,
     Tcl_Obj *const *objv)
 {
     Tcl_Object oPtr = Tcl_ObjectContextObject(context);
-    ItclObject *ioPtr = Tcl_ObjectGetMetadata(oPtr, &objMDT);
+    ItclObject *ioPtr = (ItclObject *)Tcl_ObjectGetMetadata(oPtr, &objMDT);
     ItclRootMethodProc *proc = (ItclRootMethodProc *)clientData;
 
     return (*proc)(ioPtr, interp, objc, objv);
@@ -287,22 +287,22 @@ Initialize (
     infoPtr->useOldResolvers = opt;
     Itcl_InitStack(&infoPtr->clsStack);
 
-    Tcl_SetAssocData(interp, ITCL_INTERP_DATA, NULL, (ClientData)infoPtr);
+    Tcl_SetAssocData(interp, ITCL_INTERP_DATA, NULL, infoPtr);
 
-    Itcl_PreserveData((ClientData)infoPtr);
+    Itcl_PreserveData(infoPtr);
 
     root = Tcl_NewObjectInstance(interp, tclCls, "::itcl::Root",
 	    NULL, 0, NULL, 0);
 
     Tcl_NewMethod(interp, Tcl_GetObjectAsClass(root),
 	    Tcl_NewStringObj("unknown", -1), 0, &itclRootMethodType,
-	    ItclUnknownGuts);
+	    (void *)ItclUnknownGuts);
     Tcl_NewMethod(interp, Tcl_GetObjectAsClass(root),
 	    Tcl_NewStringObj("ItclConstructBase", -1), 0,
-	    &itclRootMethodType, ItclConstructGuts);
+	    &itclRootMethodType, (void *)ItclConstructGuts);
     Tcl_NewMethod(interp, Tcl_GetObjectAsClass(root),
 	    Tcl_NewStringObj("info", -1), 1,
-	    &itclRootMethodType, ItclInfoGuts);
+	    &itclRootMethodType, (void *)ItclInfoGuts);
 
     /* first create the Itcl base class as root of itcl classes */
     if (Tcl_EvalEx(interp, clazzClassScript, -1, 0) != TCL_OK) {
@@ -352,7 +352,7 @@ Initialize (
      *  Export all commands in the "itcl" namespace so that they
      *  can be imported with something like "namespace import itcl::*"
      */
-    itclNs = Tcl_FindNamespace(interp, "::itcl", (Tcl_Namespace*)NULL,
+    itclNs = Tcl_FindNamespace(interp, "::itcl", NULL,
         TCL_LEAVE_ERR_MSG);
 
     /*
@@ -466,7 +466,7 @@ Itcl_SafeInit (
  */
 static int
 ItclSetHullWindowName(
-    ClientData clientData,   /* infoPtr */
+    void *clientData,   /* infoPtr */
     Tcl_Interp *interp,      /* current interpreter */
     int objc,                /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
@@ -490,7 +490,7 @@ ItclSetHullWindowName(
  */
 static int
 ItclCheckSetItclHull(
-    ClientData clientData,   /* infoPtr */
+    void *clientData,   /* infoPtr */
     Tcl_Interp *interp,      /* current interpreter */
     int objc,                /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
@@ -531,7 +531,7 @@ ItclCheckSetItclHull(
 	        " variable for object \"", Tcl_GetString(objv[1]), "\"", NULL);
 	return TCL_ERROR;
     }
-    ivPtr = Tcl_GetHashValue(hPtr);
+    ivPtr = (ItclVariable *)Tcl_GetHashValue(hPtr);
     valueStr = Tcl_GetString(objv[2]);
     if (strcmp(valueStr, "2") == 0) {
         ivPtr->initted = 2;
@@ -557,7 +557,7 @@ ItclCheckSetItclHull(
  */
 static void
 FreeItclObjectInfo(
-    ClientData clientData)
+    void *clientData)
 {
     ItclObjectInfo *infoPtr = (ItclObjectInfo *)clientData;
 
@@ -594,5 +594,5 @@ FreeItclObjectInfo(
     /* clean up list pool */
     Itcl_FinishList();
 
-    Itcl_ReleaseData((ClientData)infoPtr);
+    Itcl_ReleaseData(infoPtr);
 }

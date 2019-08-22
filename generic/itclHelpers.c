@@ -141,7 +141,7 @@ ItclCreateArgList(
 	        Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
 	            "too many fields in argument specifier \"",
 		    argv[i], "\"",
-		    (char*)NULL);
+		    NULL);
 		ckfree((char *) defaultArgv);
 	        result = TCL_ERROR;
 	        break;
@@ -149,7 +149,7 @@ ItclCreateArgList(
 	    if (strstr(defaultArgv[0],"::")) {
 	        Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
 		        "bad argument name \"", defaultArgv[0], "\"",
-			(char*)NULL);
+			NULL);
 		ckfree((char *) defaultArgv);
 		result = TCL_ERROR;
 		break;
@@ -279,7 +279,7 @@ Itcl_EvalArgs(
             Tcl_ResetResult(interp);
             Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
                 "invalid command name \"",
-                Tcl_GetStringFromObj(objv[0], NULL), "\"", NULL);
+                Tcl_GetString(objv[0]), "\"", NULL);
             return TCL_ERROR;
         }
 

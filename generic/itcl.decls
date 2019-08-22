@@ -276,7 +276,7 @@ declare 55 {
         const char *arglist, const char *body)
 }
 declare 56 {
-    void Itcl_DeleteMemberFunc(char *cdata)
+    void Itcl_DeleteMemberFunc(void *cdata)
 }
 declare 57 {
     int Itcl_CreateMemberCode(Tcl_Interp *interp, ItclClass *iclsPtr, \
