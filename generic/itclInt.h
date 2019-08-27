@@ -639,13 +639,9 @@ typedef struct ItclPresMemoryPrefix {
     int refCount;		/* refernce (resp preserving) counter */
 } ItclPresMemoryPrefix;
 
-#ifndef ITCL_PRESERVE_DEBUG
 MODULE_SCOPE void *	ItclCkalloc(size_t size, Tcl_FreeProc *freeProc);
 MODULE_SCOPE void	ItclCkfree(void *ptr);
-#else
-#   define ItclCkalloc	ckalloc
-#   define ItclCkfree	ckfree
-#endif
+
 /*
  * The macro below is used to modify a "char" value (e.g. by casting
  * it to an unsigned character) so that it can be used safely with
