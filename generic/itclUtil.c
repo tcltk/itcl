@@ -682,9 +682,7 @@ void ItclCkfree(void *ptr) {
     blk = ((ItclPresMemoryPrefix *)ptr)-1;
 
     assert(blk->refCount <= 0); /* it should be not preserved */
-    #if 0
     assert(blk->freeProc == NULL); /* it should be released */
-    #endif
     ckfree(blk);
 }
 
