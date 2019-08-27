@@ -198,15 +198,15 @@ Itcl_ParseInit(
      *  definitions.
      */
     parserNs = Tcl_CreateNamespace(interp, "::itcl::parser",
-        (ClientData)infoPtr, Itcl_ReleaseData);
+        infoPtr, Itcl_ReleaseData);
 
     if (!parserNs) {
         Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
             " (cannot initialize itcl parser)",
-            (char*)NULL);
+            NULL);
         return TCL_ERROR;
     }
-    Itcl_PreserveData((ClientData)infoPtr);
+    Itcl_PreserveData(infoPtr);
 
     /*
      *  Add commands for parsing class definitions.
@@ -216,7 +216,7 @@ Itcl_ParseInit(
         Tcl_DStringAppend(&buffer, "::itcl::parser::", 16);
         Tcl_DStringAppend(&buffer, parseCmds[i].name, -1);
         Tcl_CreateObjCommand(interp, Tcl_DStringValue(&buffer),
-                parseCmds[i].objProc, (ClientData) infoPtr, NULL);
+                parseCmds[i].objProc, infoPtr, NULL);
         Tcl_DStringFree(&buffer);
     }
 
@@ -227,7 +227,7 @@ Itcl_ParseInit(
         pInfoPtr->pLevel = protectionCmds[i].protection;
         pInfoPtr->infoPtr = infoPtr;
         Tcl_CreateObjCommand(interp, Tcl_DStringValue(&buffer),
-                protectionCmds[i].objProc, (ClientData) pInfoPtr,
+                protectionCmds[i].objProc, pInfoPtr,
 		(Tcl_CmdDeleteProc*) ItclFreeParserCommandData);
         Tcl_DStringFree(&buffer);
     }
@@ -244,16 +244,16 @@ Itcl_ParseInit(
      *  Install the "class" command for defining new classes.
      */
     Tcl_CreateObjCommand(interp, "::itcl::class", Itcl_ClassCmd,
-        (ClientData)infoPtr, Itcl_ReleaseData);
-    Itcl_PreserveData((ClientData)infoPtr);
+        infoPtr, Itcl_ReleaseData);
+    Itcl_PreserveData(infoPtr);
 
     Tcl_CreateObjCommand(interp, "::itcl::body", Itcl_BodyCmd,
-        (ClientData)NULL, (Tcl_CmdDeleteProc*)NULL);
+        NULL, NULL);
 
     Tcl_CreateObjCommand(interp, "::itcl::configbody", Itcl_ConfigBodyCmd,
-        (ClientData)NULL, (Tcl_CmdDeleteProc*)NULL);
+        NULL, NULL);
 
-    Itcl_EventuallyFree((ClientData)infoPtr, (Tcl_FreeProc *) ItclDelObjectInfo);
+    Itcl_EventuallyFree(infoPtr, (Tcl_FreeProc *) ItclDelObjectInfo);
 
     /*
      *  Create the "itcl::find" command for high-level queries.
@@ -265,18 +265,18 @@ Itcl_ParseInit(
     if (Itcl_AddEnsemblePart(interp, "::itcl::find",
             "classes", "?pattern?",
             Itcl_FindClassesCmd,
-            (ClientData)infoPtr, Itcl_ReleaseData) != TCL_OK) {
+            infoPtr, Itcl_ReleaseData) != TCL_OK) {
         return TCL_ERROR;
     }
-    Itcl_PreserveData((ClientData)infoPtr);
+    Itcl_PreserveData(infoPtr);
 
     if (Itcl_AddEnsemblePart(interp, "::itcl::find",
             "objects", "?-class className? ?-isa className? ?pattern?",
             Itcl_FindObjectsCmd,
-            (ClientData)infoPtr, Itcl_ReleaseData) != TCL_OK) {
+            infoPtr, Itcl_ReleaseData) != TCL_OK) {
         return TCL_ERROR;
     }
-    Itcl_PreserveData((ClientData)infoPtr);
+    Itcl_PreserveData(infoPtr);
 
 
     /*
@@ -290,26 +290,26 @@ Itcl_ParseInit(
     if (Itcl_AddEnsemblePart(interp, "::itcl::delete",
             "class", "name ?name...?",
             Itcl_DelClassCmd,
-            (ClientData)infoPtr, Itcl_ReleaseData) != TCL_OK) {
+            infoPtr, Itcl_ReleaseData) != TCL_OK) {
         return TCL_ERROR;
     }
-    Itcl_PreserveData((ClientData)infoPtr);
+    Itcl_PreserveData(infoPtr);
 
     if (Itcl_AddEnsemblePart(interp, "::itcl::delete",
             "object", "name ?name...?",
             Itcl_DelObjectCmd,
-            (ClientData)infoPtr, Itcl_ReleaseData) != TCL_OK) {
+            infoPtr, Itcl_ReleaseData) != TCL_OK) {
         return TCL_ERROR;
     }
-    Itcl_PreserveData((ClientData)infoPtr);
+    Itcl_PreserveData(infoPtr);
 
     if (Itcl_AddEnsemblePart(interp, "::itcl::delete",
             "ensemble", "name ?name...?",
             Itcl_EnsembleDeleteCmd,
-            (ClientData)infoPtr, Itcl_ReleaseData) != TCL_OK) {
+            infoPtr, Itcl_ReleaseData) != TCL_OK) {
         return TCL_ERROR;
     }
-    Itcl_PreserveData((ClientData)infoPtr);
+    Itcl_PreserveData(infoPtr);
 
     /*
      *  Create the "itcl::is" command to test object
@@ -321,27 +321,27 @@ Itcl_ParseInit(
 
     if (Itcl_AddEnsemblePart(interp, "::itcl::is",
             "class", "name", Itcl_IsClassCmd,
-            (ClientData)infoPtr, Itcl_ReleaseData) != TCL_OK) {
+            infoPtr, Itcl_ReleaseData) != TCL_OK) {
         return TCL_ERROR;
     }
-    Itcl_PreserveData((ClientData)infoPtr);
+    Itcl_PreserveData(infoPtr);
 
     if (Itcl_AddEnsemblePart(interp, "::itcl::is",
             "object", "?-class classname? name", Itcl_IsObjectCmd,
-            (ClientData)infoPtr, Itcl_ReleaseData) != TCL_OK) {
+            infoPtr, Itcl_ReleaseData) != TCL_OK) {
         return TCL_ERROR;
     }
-    Itcl_PreserveData((ClientData)infoPtr);
+    Itcl_PreserveData(infoPtr);
 
 
     /*
      *  Add "code" and "scope" commands for handling scoped values.
      */
     Tcl_CreateObjCommand(interp, "::itcl::code", Itcl_CodeCmd,
-        (ClientData)NULL, (Tcl_CmdDeleteProc*)NULL);
+        NULL, NULL);
 
     Tcl_CreateObjCommand(interp, "::itcl::scope", Itcl_ScopeCmd,
-        (ClientData)NULL, (Tcl_CmdDeleteProc*)NULL);
+        NULL, NULL);
 
     /*
      *  Add the "filter" commands (add/delete)
@@ -351,18 +351,18 @@ Itcl_ParseInit(
     }
     if (Itcl_AddEnsemblePart(interp, "::itcl::filter",
             "add", "objectOrClass filter ? ... ?", Itcl_FilterAddCmd,
-            (ClientData)infoPtr, Itcl_ReleaseData) != TCL_OK) {
+            infoPtr, Itcl_ReleaseData) != TCL_OK) {
         return TCL_ERROR;
     }
-    Itcl_PreserveData((ClientData)infoPtr);
+    Itcl_PreserveData(infoPtr);
 
     if (Itcl_AddEnsemblePart(interp, "::itcl::filter",
             "delete", "objectOrClass filter ? ... ?", Itcl_FilterDeleteCmd,
-            (ClientData)infoPtr, Itcl_ReleaseData) != TCL_OK) {
+            infoPtr, Itcl_ReleaseData) != TCL_OK) {
         return TCL_ERROR;
     }
 
-    Itcl_PreserveData((ClientData)infoPtr);
+    Itcl_PreserveData(infoPtr);
 
     /*
      *  Add the "forward" commands (add/delete)
@@ -373,19 +373,19 @@ Itcl_ParseInit(
 
     if (Itcl_AddEnsemblePart(interp, "::itcl::forward",
             "add", "objectOrClass srcCommand targetCommand ? options ... ?",
-	    Itcl_ForwardAddCmd, (ClientData)infoPtr,
+	    Itcl_ForwardAddCmd, infoPtr,
 	    Itcl_ReleaseData) != TCL_OK) {
         return TCL_ERROR;
     }
-    Itcl_PreserveData((ClientData)infoPtr);
+    Itcl_PreserveData(infoPtr);
 
     if (Itcl_AddEnsemblePart(interp, "::itcl::forward",
             "delete", "objectOrClass targetCommand ? ... ?",
-	    Itcl_ForwardDeleteCmd, (ClientData)infoPtr,
+	    Itcl_ForwardDeleteCmd, infoPtr,
 	    Itcl_ReleaseData) != TCL_OK) {
         return TCL_ERROR;
     }
-    Itcl_PreserveData((ClientData)infoPtr);
+    Itcl_PreserveData(infoPtr);
 
     /*
      *  Add the "mixin" (add/delete) commands.
@@ -396,19 +396,19 @@ Itcl_ParseInit(
 
     if (Itcl_AddEnsemblePart(interp, "::itcl::mixin",
             "add", "objectOrClass class ? class ... ?",
-	    Itcl_MixinAddCmd, (ClientData)infoPtr,
+	    Itcl_MixinAddCmd, infoPtr,
 	    Itcl_ReleaseData) != TCL_OK) {
         return TCL_ERROR;
     }
-    Itcl_PreserveData((ClientData)infoPtr);
+    Itcl_PreserveData(infoPtr);
 
     if (Itcl_AddEnsemblePart(interp, "::itcl::mixin",
             "delete", "objectOrClass class ? class ... ?",
-	    Itcl_MixinDeleteCmd, (ClientData)infoPtr,
+	    Itcl_MixinDeleteCmd, infoPtr,
 	    Itcl_ReleaseData) != TCL_OK) {
         return TCL_ERROR;
     }
-    Itcl_PreserveData((ClientData)infoPtr);
+    Itcl_PreserveData(infoPtr);
 
     /*
      *  Add commands for handling import stubs at the Tcl level.
@@ -419,65 +419,65 @@ Itcl_ParseInit(
 
     if (Itcl_AddEnsemblePart(interp, "::itcl::import::stub",
             "create", "name", Itcl_StubCreateCmd,
-            (ClientData)NULL, (Tcl_CmdDeleteProc*)NULL) != TCL_OK) {
+            NULL, NULL) != TCL_OK) {
         return TCL_ERROR;
     }
     if (Itcl_AddEnsemblePart(interp, "::itcl::import::stub",
             "exists", "name", Itcl_StubExistsCmd,
-            (ClientData)NULL, (Tcl_CmdDeleteProc*)NULL) != TCL_OK) {
+            NULL, NULL) != TCL_OK) {
         return TCL_ERROR;
     }
 
     Tcl_CreateObjCommand(interp, "::itcl::type", Itcl_TypeClassCmd,
-        (ClientData)infoPtr, Itcl_ReleaseData);
-    Itcl_PreserveData((ClientData)infoPtr);
+        infoPtr, Itcl_ReleaseData);
+    Itcl_PreserveData(infoPtr);
 
     Tcl_CreateObjCommand(interp, "::itcl::widget", Itcl_WidgetCmd,
-        (ClientData)infoPtr, Itcl_ReleaseData);
-    Itcl_PreserveData((ClientData)infoPtr);
+        infoPtr, Itcl_ReleaseData);
+    Itcl_PreserveData(infoPtr);
 
     Tcl_CreateObjCommand(interp, "::itcl::widgetadaptor", Itcl_WidgetAdaptorCmd,
-        (ClientData)infoPtr, Itcl_ReleaseData);
-    Itcl_PreserveData((ClientData)infoPtr);
+        infoPtr, Itcl_ReleaseData);
+    Itcl_PreserveData(infoPtr);
 
     Tcl_CreateObjCommand(interp, "::itcl::nwidget", Itcl_NWidgetCmd,
-        (ClientData)infoPtr, Itcl_ReleaseData);
-    Itcl_PreserveData((ClientData)infoPtr);
+        infoPtr, Itcl_ReleaseData);
+    Itcl_PreserveData(infoPtr);
 
     Tcl_CreateObjCommand(interp, "::itcl::addoption", Itcl_AddOptionCmd,
-        (ClientData)infoPtr, Itcl_ReleaseData);
-    Itcl_PreserveData((ClientData)infoPtr);
+        infoPtr, Itcl_ReleaseData);
+    Itcl_PreserveData(infoPtr);
 
     Tcl_CreateObjCommand(interp, "::itcl::addobjectoption",
         Itcl_AddObjectOptionCmd,
-        (ClientData)infoPtr, Itcl_ReleaseData);
-    Itcl_PreserveData((ClientData)infoPtr);
+        infoPtr, Itcl_ReleaseData);
+    Itcl_PreserveData(infoPtr);
 
     Tcl_CreateObjCommand(interp, "::itcl::adddelegatedoption",
         Itcl_AddDelegatedOptionCmd,
-        (ClientData)infoPtr, Itcl_ReleaseData);
-    Itcl_PreserveData((ClientData)infoPtr);
+        infoPtr, Itcl_ReleaseData);
+    Itcl_PreserveData(infoPtr);
 
     Tcl_CreateObjCommand(interp, "::itcl::adddelegatedmethod",
         Itcl_AddDelegatedFunctionCmd,
-        (ClientData)infoPtr, Itcl_ReleaseData);
-    Itcl_PreserveData((ClientData)infoPtr);
+        infoPtr, Itcl_ReleaseData);
+    Itcl_PreserveData(infoPtr);
 
     Tcl_CreateObjCommand(interp, "::itcl::addcomponent", Itcl_AddComponentCmd,
-        (ClientData)infoPtr, Itcl_ReleaseData);
-    Itcl_PreserveData((ClientData)infoPtr);
+        infoPtr, Itcl_ReleaseData);
+    Itcl_PreserveData(infoPtr);
 
     Tcl_CreateObjCommand(interp, "::itcl::setcomponent", Itcl_SetComponentCmd,
-        (ClientData)infoPtr, Itcl_ReleaseData);
-    Itcl_PreserveData((ClientData)infoPtr);
+        infoPtr, Itcl_ReleaseData);
+    Itcl_PreserveData(infoPtr);
 
     Tcl_CreateObjCommand(interp, "::itcl::extendedclass", Itcl_ExtendedClassCmd,
-        (ClientData)infoPtr, Itcl_ReleaseData);
-    Itcl_PreserveData((ClientData)infoPtr);
+        infoPtr, Itcl_ReleaseData);
+    Itcl_PreserveData(infoPtr);
 
     Tcl_CreateObjCommand(interp, ITCL_COMMANDS_NAMESPACE "::genericclass",
-        ItclGenericClassCmd, (ClientData)infoPtr, Itcl_ReleaseData);
-    Itcl_PreserveData((ClientData)infoPtr);
+        ItclGenericClassCmd, infoPtr, Itcl_ReleaseData);
+    Itcl_PreserveData(infoPtr);
 
     /*
      *  Add the "delegate" (method/option) commands.
@@ -488,27 +488,27 @@ Itcl_ParseInit(
 
     if (Itcl_AddEnsemblePart(interp, "::itcl::parser::delegate",
             "method", "name to targetName as scipt using script",
-	    Itcl_ClassDelegateMethodCmd, (ClientData)infoPtr,
+	    Itcl_ClassDelegateMethodCmd, infoPtr,
 	    Itcl_ReleaseData) != TCL_OK) {
         return TCL_ERROR;
     }
-    Itcl_PreserveData((ClientData)infoPtr);
+    Itcl_PreserveData(infoPtr);
 
     if (Itcl_AddEnsemblePart(interp, "::itcl::parser::delegate",
             "typemethod", "name to targetName as scipt using script",
-	    Itcl_ClassDelegateTypeMethodCmd, (ClientData)infoPtr,
+	    Itcl_ClassDelegateTypeMethodCmd, infoPtr,
 	    Itcl_ReleaseData) != TCL_OK) {
         return TCL_ERROR;
     }
-    Itcl_PreserveData((ClientData)infoPtr);
+    Itcl_PreserveData(infoPtr);
 
     if (Itcl_AddEnsemblePart(interp, "::itcl::parser::delegate",
             "option", "option to targetOption as script",
-	    Itcl_ClassDelegateOptionCmd, (ClientData)infoPtr,
+	    Itcl_ClassDelegateOptionCmd, infoPtr,
 	    Itcl_ReleaseData) != TCL_OK) {
         return TCL_ERROR;
     }
-    Itcl_PreserveData((ClientData)infoPtr);
+    Itcl_PreserveData(infoPtr);
 
     return TCL_OK;
 }
@@ -669,7 +669,7 @@ CallAfterCallMethod(
     int result)
 {
     ClientData clientData = data[0];
-    Tcl_ObjectContext context = data[1];
+    Tcl_ObjectContext context = (Tcl_ObjectContext)data[1];
 
     return ItclAfterCallMethod(clientData, interp, context, NULL, result);
 }
@@ -752,7 +752,7 @@ ItclClassBaseCmd(
      *  If for some reason it is destroyed, bail out here.
      */
     parserNs = Tcl_FindNamespace(interp, "::itcl::parser",
-        (Tcl_Namespace*)NULL, TCL_LEAVE_ERR_MSG);
+        NULL, TCL_LEAVE_ERR_MSG);
 
     if (parserNs == NULL) {
         Tcl_AppendObjToErrorInfo(interp, Tcl_ObjPrintf(
@@ -799,7 +799,7 @@ ItclClassBaseCmd(
      *  becomes the current context for all commands in the parser.
      *  Activate the parser and evaluate the class definition.
      */
-    Itcl_PushStack((ClientData)iclsPtr, &infoPtr->clsStack);
+    Itcl_PushStack(iclsPtr, &infoPtr->clsStack);
 
     result = Itcl_PushCallFrame(interp, &frame, parserNs,
         /* isProcCallFrame */ 0);
@@ -880,12 +880,12 @@ if (imPtr->codePtr->flags & ITCL_IMPLEMENT_OBJCMD) {
     /* Implementation of this member is coded in C expecting Tcl_Obj */
 
     imPtr->tmPtr = Tcl_NewMethod(interp, iclsPtr->clsPtr, imPtr->namePtr,
-	    1, &itclObjMethodType, (ClientData) imPtr);
+	    1, &itclObjMethodType, imPtr);
     ItclPreserveIMF(imPtr);
 
     if (iclsPtr->flags & (ITCL_TYPE|ITCL_WIDGET|ITCL_WIDGETADAPTOR)) {
 	imPtr->tmPtr = Tcl_NewInstanceMethod(interp, iclsPtr->oPtr,
-		imPtr->namePtr, 1, &itclObjMethodType, (ClientData) imPtr);
+		imPtr->namePtr, 1, &itclObjMethodType, imPtr);
 	ItclPreserveIMF(imPtr);
     }
 
@@ -893,7 +893,7 @@ if (imPtr->codePtr->flags & ITCL_IMPLEMENT_OBJCMD) {
     /* Implementation of this member is coded in C expecting (char *) */
 
     imPtr->tmPtr = Tcl_NewMethod(interp, iclsPtr->clsPtr, imPtr->namePtr,
-	    1, &itclArgMethodType, (ClientData) imPtr);
+	    1, &itclArgMethodType, imPtr);
 
 		ItclPreserveIMF(imPtr);
 
@@ -1057,7 +1057,7 @@ if (imPtr->codePtr->flags & ITCL_IMPLEMENT_OBJCMD) {
                 }
 	        Tcl_AppendToObj(bodyPtr, " {*}$args]", -1);
 	    }
-	    imPtr->tmPtr = (ClientData)Itcl_NewProcClassMethod(interp,
+	    imPtr->tmPtr = Itcl_NewProcClassMethod(interp,
 	        iclsPtr->clsPtr, ItclCheckCallMethod, ItclAfterCallMethod,
                 ItclProcErrorProc, imPtr, imPtr->namePtr, argumentPtr,
 		bodyPtr, &pmPtr);
@@ -1079,7 +1079,7 @@ if (imPtr->codePtr->flags & ITCL_IMPLEMENT_OBJCMD) {
 		if (isNewEntry) {
 		    Tcl_DeleteHashEntry(hPtr2);
 		}
-	        imPtr->tmPtr = (ClientData)Itcl_NewProcMethod(interp,
+	        imPtr->tmPtr = Itcl_NewProcMethod(interp,
 	            iclsPtr->oPtr, ItclCheckCallMethod, ItclAfterCallMethod,
                     ItclProcErrorProc, imPtr, imPtr->namePtr, argumentPtr,
 		    bodyPtr, &pmPtr);
@@ -1327,7 +1327,7 @@ Itcl_ClassInheritCmd(
         while (elem) {
             cdPtr = (ItclClass*)Itcl_GetListValue(elem);
             Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
-                Tcl_GetString(cdPtr->namePtr), " ", (char*)NULL);
+                Tcl_GetString(cdPtr->namePtr), " ", NULL);
 
             elem = Itcl_NextListElem(elem);
         }
@@ -1335,7 +1335,7 @@ Itcl_ClassInheritCmd(
         Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
             "\" already defined for class \"",
 	    Tcl_GetString(iclsPtr->fullNamePtr), "\"",
-            (char*)NULL);
+            NULL);
         return TCL_ERROR;
     }
 
@@ -1369,11 +1369,11 @@ Itcl_ClassInheritCmd(
             Tcl_ResetResult(interp);
             Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
                 "cannot inherit from \"", token, "\"",
-                (char*)NULL);
+                NULL);
 
             if (errlen > 0) {
                 Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
-                    " (", errmsg, ")", (char*)NULL);
+                    " (", errmsg, ")", NULL);
             }
             Tcl_DecrRefCount(resultPtr);
             goto inheritError;
@@ -1387,11 +1387,11 @@ Itcl_ClassInheritCmd(
             Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
                 "class \"", Tcl_GetString(iclsPtr->namePtr),
 		"\" cannot inherit from itself",
-                (char*)NULL);
+                NULL);
             goto inheritError;
         }
 
-        Itcl_AppendList(&iclsPtr->bases, (ClientData)baseClsPtr);
+        Itcl_AppendList(&iclsPtr->bases, baseClsPtr);
 	ItclPreserveClass(baseClsPtr);
     }
 
@@ -1409,7 +1409,7 @@ Itcl_ClassInheritCmd(
                     "class \"", iclsPtr->fullNamePtr,
                     "\" cannot inherit base class \"",
                     cdPtr->fullNamePtr, "\" more than once",
-                    (char*)NULL);
+                    NULL);
                 goto inheritError;
             }
             elem2 = Itcl_NextListElem(elem2);
@@ -1449,11 +1449,11 @@ Itcl_ClassInheritCmd(
             "class \"", Tcl_GetString(iclsPtr->fullNamePtr),
 	    "\" inherits base class \"",
             Tcl_GetString(badCdPtr->fullNamePtr), "\" more than once:",
-            (char*)NULL);
+            NULL);
 
         cdPtr = iclsPtr;
         Itcl_InitStack(&stack);
-        Itcl_PushStack((ClientData)cdPtr, &stack);
+        Itcl_PushStack(cdPtr, &stack);
 
         /*
          *  Show paths leading to bad base class
@@ -1468,7 +1468,7 @@ Itcl_ClassInheritCmd(
                         cdPtr = (ItclClass*)Itcl_GetStackValue(&stack, i-1);
                         Tcl_AppendStringsToObj(resultPtr,
                             Tcl_GetString(cdPtr->namePtr), "->",
-                            (char*)NULL);
+                            NULL);
                     }
                 }
                 Tcl_AppendToObj(resultPtr,
@@ -1480,8 +1480,8 @@ Itcl_ClassInheritCmd(
             else {
                 elem = Itcl_LastListElem(&cdPtr->bases);
                 if (elem) {
-                    Itcl_PushStack((ClientData)cdPtr, &stack);
-                    Itcl_PushStack((ClientData)NULL, &stack);
+                    Itcl_PushStack(cdPtr, &stack);
+                    Itcl_PushStack(NULL, &stack);
                     while (elem) {
                         Itcl_PushStack(Itcl_GetListValue(elem), &stack);
                         elem = Itcl_PrevListElem(elem);
@@ -1511,7 +1511,7 @@ Itcl_ClassInheritCmd(
         Tcl_DStringAppend(&buffer, " ", -1);
         Tcl_DStringAppend(&buffer, Tcl_GetString(baseClsPtr->fullNamePtr), -1);
 
-        Itcl_AppendList(&baseClsPtr->derived, (ClientData)iclsPtr);
+        Itcl_AppendList(&baseClsPtr->derived, iclsPtr);
 	ItclPreserveClass(iclsPtr);
 
         elem = Itcl_NextListElem(elem);
@@ -1675,7 +1675,7 @@ Itcl_ClassConstructorCmd(
         Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
             "\"", Tcl_GetString(namePtr), "\" already defined in class \"",
             Tcl_GetString(iclsPtr->fullNamePtr), "\"",
-            (char*)NULL);
+            NULL);
         return TCL_ERROR;
     }
 
@@ -1742,11 +1742,11 @@ Itcl_ClassDestructorCmd(
         Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
             "\"", Tcl_GetString(namePtr), "\" already defined in class \"",
             Tcl_GetString(iclsPtr->fullNamePtr), "\"",
-            (char*)NULL);
+            NULL);
         return TCL_ERROR;
     }
 
-    if (Itcl_CreateMethod(interp, iclsPtr, namePtr, (char*)NULL, body)
+    if (Itcl_CreateMethod(interp, iclsPtr, namePtr, NULL, body)
         != TCL_OK) {
         return TCL_ERROR;
     }
@@ -1958,7 +1958,7 @@ Itcl_ClassTypeMethodCmd(
     }
     iclsPtr->infoPtr->functionFlags = 0;
     hPtr = Tcl_FindHashEntry(&iclsPtr->functions, (char *)namePtr);
-    imPtr = Tcl_GetHashValue(hPtr);
+    imPtr = (ItclMemberFunc *)Tcl_GetHashValue(hPtr);
     imPtr->flags |= ITCL_TYPE_METHOD;
     return TCL_OK;
 }
@@ -2046,7 +2046,7 @@ Itcl_ClassVariableCmd(
     if (strstr(Tcl_GetString(namePtr), "::")) {
         Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
             "bad variable name \"", Tcl_GetString(namePtr), "\"",
-            (char*)NULL);
+            NULL);
         return TCL_ERROR;
     }
 
@@ -2164,7 +2164,7 @@ ItclInitClassCommon(
             Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
                 "cannot initialize common variable \"",
                 Tcl_GetString(ivPtr->namePtr), "\"",
-                (char*)NULL);
+                NULL);
             return TCL_ERROR;
         }
     }
@@ -2184,7 +2184,7 @@ ItclInitClassCommon(
                 Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
                     "cannot initialize common variable \"",
                     Tcl_GetString(ivPtr->namePtr), "\"",
-                    (char*)NULL);
+                    NULL);
                 return TCL_ERROR;
             }
 	    i++;
@@ -2270,7 +2270,7 @@ ItclClassCommonCmd(
     if (strstr(Tcl_GetString(namePtr), "::")) {
         Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
             "bad variable name \"", Tcl_GetString(namePtr), "\"",
-            (char*)NULL);
+            NULL);
         return TCL_ERROR;
     }
 
@@ -2281,7 +2281,7 @@ ItclClassCommonCmd(
         }
     }
 
-    if (Itcl_CreateVariable(interp, iclsPtr, namePtr, initStr, (char*)NULL,
+    if (Itcl_CreateVariable(interp, iclsPtr, namePtr, initStr, NULL,
             &ivPtr) != TCL_OK) {
         return TCL_ERROR;
     }
@@ -2792,14 +2792,14 @@ ItclParseOption(
     if (strstr(name, "::")) {
         Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
                 "bad option name \"", name,
-	        "\", option names must not contain \"::\"", (char*)NULL);
+	        "\", option names must not contain \"::\"", NULL);
         result = TCL_ERROR;
         goto errorOut;
     }
     if (strstr(name, " ")) {
         Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
                 "bad option name \"", name,
-	        "\", option names must not contain \" \"", (char*)NULL);
+	        "\", option names must not contain \" \"", NULL);
         result = TCL_ERROR;
         goto errorOut;
     }
@@ -3005,7 +3005,7 @@ ItclCreateComponent(
 	Tcl_SetHashValue(hPtr, icPtr);
         ItclAddClassVariableDictInfo(interp, iclsPtr, ivPtr);
     } else {
-        icPtr =Tcl_GetHashValue(hPtr);
+        icPtr = (ItclComponent *)Tcl_GetHashValue(hPtr);
     }
     *icPtrPtr = icPtr;
     return TCL_OK;
@@ -3453,7 +3453,7 @@ delegate method * ?to <componentName>? ?using <pattern>? ?except <methods>?";
         }
     }
     if (hPtr != NULL) {
-        icPtr = Tcl_GetHashValue(hPtr);
+        icPtr = (ItclComponent *)Tcl_GetHashValue(hPtr);
     }
     if (*methodName != '*') {
 	/* FIXME !!! */
@@ -3625,14 +3625,14 @@ Itcl_HandleDelegateOptionCmd(
     if (strstr(option, "::")) {
         Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
                 "bad option name \"", option,
-	        "\", option names must not contain \"::\"", (char*)NULL);
+	        "\", option names must not contain \"::\"", NULL);
 	ckfree((char *)argv);
         return TCL_ERROR;
     }
     if (strstr(option, " ")) {
         Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
                 "bad option name \"", option,
-	        "\", option names must not contain \" \"", (char*)NULL);
+	        "\", option names must not contain \" \"", NULL);
 	ckfree((char *)argv);
         return TCL_ERROR;
     }
@@ -3747,7 +3747,7 @@ Itcl_HandleDelegateOptionCmd(
         }
     }
     if (hPtr != NULL) {
-        icPtr = Tcl_GetHashValue(hPtr);
+        icPtr = (ItclComponent *)Tcl_GetHashValue(hPtr);
     }
     if (*option != '*') {
 	/* FIXME !!! */
@@ -3797,7 +3797,7 @@ Itcl_HandleDelegateOptionCmd(
         idoPtr->namePtr = optionNamePtr;
     }
     Itcl_PreserveData(idoPtr);
-    Itcl_EventuallyFree((ClientData)idoPtr, (Tcl_FreeProc *) ItclDeleteDelegatedOption);
+    Itcl_EventuallyFree(idoPtr, (Tcl_FreeProc *) ItclDeleteDelegatedOption);
     idoPtr->icPtr = icPtr;
     idoPtr->asPtr = targetPtr;
     if (idoPtr->asPtr != NULL) {
@@ -4017,7 +4017,7 @@ delegate typemethod * ?to <componentName>? ?using <pattern>? ?except <typemethod
                 return TCL_ERROR;
             }
         } else {
-	    icPtr = Tcl_GetHashValue(hPtr);
+	    icPtr = (ItclComponent *)Tcl_GetHashValue(hPtr);
 	}
     } else {
         icPtr = NULL;
@@ -4195,7 +4195,7 @@ Itcl_ClassMethodVariableCmd(
     if (strstr(Tcl_GetString(namePtr), "::")) {
         Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
             "bad variable name \"", Tcl_GetString(namePtr), "\"",
-            (char*)NULL);
+            NULL);
         return TCL_ERROR;
     }
 
@@ -4298,7 +4298,7 @@ Itcl_ClassTypeConstructorCmd(
         Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
             "\"", Tcl_GetString(namePtr), "\" already defined in class \"",
             Tcl_GetString(iclsPtr->fullNamePtr), "\"",
-            (char*)NULL);
+            NULL);
         return TCL_ERROR;
     }
 

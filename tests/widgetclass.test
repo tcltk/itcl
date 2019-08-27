@@ -221,7 +221,7 @@ test install-1.4 {install queries option database
         }
 
         constructor {args} {
-            installcomponent text using text $win.text 
+            installcomponent text using text $win.text
         }
     }
 

@@ -81,7 +81,7 @@ Itcl_ClassCmdResolver(
     if (hPtr == NULL) {
         return TCL_CONTINUE;
     }
-    iclsPtr = Tcl_GetHashValue(hPtr);
+    iclsPtr = (ItclClass *)Tcl_GetHashValue(hPtr);
     /*
      *  If the command is a member function
      */
@@ -204,7 +204,7 @@ isCmdDeleted = 0;
 	    Tcl_AppendResult(interp,
 		"can't access \"", name, "\": deleted or redefined\n",
 		"(use the \"body\" command to redefine methods/procs)",
-		(char*)NULL);
+		NULL);
 	}
 	return TCL_ERROR;   /* disallow access! */
     }
@@ -271,7 +271,7 @@ Itcl_ClassVarResolver(
     if (hPtr == NULL) {
         return TCL_CONTINUE;
     }
-    iclsPtr = Tcl_GetHashValue(hPtr);
+    iclsPtr = (ItclClass *)Tcl_GetHashValue(hPtr);
 
     /*
      *  See if the variable is a known data member and accessible.
@@ -294,7 +294,7 @@ Itcl_ClassVarResolver(
 	hPtr = Tcl_FindHashEntry(&vlookup->ivPtr->iclsPtr->classCommons,
 	        (char *)vlookup->ivPtr);
 	if (hPtr != NULL) {
-	    *rPtr = Tcl_GetHashValue(hPtr);
+	    *rPtr = (Tcl_Var)Tcl_GetHashValue(hPtr);
             return TCL_OK;
 	}
     }
@@ -384,7 +384,7 @@ Itcl_ClassVarResolver(
         }
     }
     if (hPtr != NULL) {
-        *rPtr = Tcl_GetHashValue(hPtr);
+        *rPtr = (Tcl_Var)Tcl_GetHashValue(hPtr);
         return TCL_OK;
     }
     return TCL_CONTINUE;
@@ -432,7 +432,7 @@ Itcl_ClassCompiledVarResolver(
     if (hPtr == NULL) {
         return TCL_CONTINUE;
     }
-    iclsPtr = Tcl_GetHashValue(hPtr);
+    iclsPtr = (ItclClass *)Tcl_GetHashValue(hPtr);
     /*
      *  Copy the name to local storage so we can NULL terminate it.
      *  If the name is long, allocate extra space for it.
@@ -508,7 +508,7 @@ ItclClassRuntimeVarResolver(
 	hPtr = Tcl_FindHashEntry(&vlookup->ivPtr->iclsPtr->classCommons,
 	        (char *)vlookup->ivPtr);
 	if (hPtr != NULL) {
-	    return Tcl_GetHashValue(hPtr);
+	    return (Tcl_Var)Tcl_GetHashValue(hPtr);
 	}
     }
 
@@ -664,13 +664,13 @@ Itcl_ParseVarResolver(
                     "can't access \"", name, "\": ",
                     Itcl_ProtectionStr(vlookup->ivPtr->protection),
                     " variable",
-                    (char*)NULL);
+                    NULL);
                 return TCL_ERROR;
             }
 	    hPtr = Tcl_FindHashEntry(&vlookup->ivPtr->iclsPtr->classCommons,
 	        (char *)vlookup->ivPtr);
 	    if (hPtr != NULL) {
-                *rPtr = Tcl_GetHashValue(hPtr);
+                *rPtr = (Tcl_Var)Tcl_GetHashValue(hPtr);
                 return TCL_OK;
 	    }
         }
@@ -691,7 +691,7 @@ int
 ItclSetParserResolver(
     Tcl_Namespace *nsPtr)
 {
-    Itcl_SetNamespaceResolvers(nsPtr, (Tcl_ResolveCmdProc*)NULL,
-            Itcl_ParseVarResolver, (Tcl_ResolveCompiledVarProc*)NULL);
+    Itcl_SetNamespaceResolvers(nsPtr, NULL,
+            Itcl_ParseVarResolver, NULL);
     return TCL_OK;
 }

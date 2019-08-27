@@ -233,7 +233,7 @@ Itcl_IsCallFrameArgument(
 
         for (;localPtr != NULL; localPtr = localPtr->nextPtr) {
             if (TclIsVarArgument(localPtr)) {
-                register char *localName = localPtr->name;
+                char *localName = localPtr->name;
                 if ((name[0] == localName[0])
                         && (nameLen == localPtr->nameLength)
                         && (strcmp(name, localName) == 0)) {

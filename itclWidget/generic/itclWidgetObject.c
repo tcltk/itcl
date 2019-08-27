@@ -25,7 +25,7 @@
  * ------------------------------------------------------------------------
  *  ItclWidgetInitObjectOptions()
  *
- *  Init all instance options 
+ *  Init all instance options
  *  This is usually invoked automatically
  *  by Itcl_CreateObject(), when an object is created.
  * ------------------------------------------------------------------------

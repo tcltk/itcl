@@ -11,7 +11,7 @@ This directory contains the source code, documentation, and test scripts
 for the itcl extension. This version is the next major release to follow
 Itcl 3.4.  This version claims to be script level compatible with Itcl 3.4.
 
-Itcl is a freely-available open source package as in the past. 
+Itcl is a freely-available open source package as in the past.
 You can do virtually anything you like with it, such as modifying it,
 redistributing it, and selling it either in whole or in part.  See the file
 "license.terms" for complete information.
