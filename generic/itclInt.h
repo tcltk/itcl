@@ -88,11 +88,11 @@
     Tcl_HashEntry *hPtr;Tcl_HashSearch search
 #define FOREACH_HASH(key,val,tablePtr) \
     for(hPtr=Tcl_FirstHashEntry((tablePtr),&search); hPtr!=NULL ? \
-            ((key)=Tcl_GetHashKey((tablePtr),hPtr),\
-            (val)=Tcl_GetHashValue(hPtr),1):0; hPtr=Tcl_NextHashEntry(&search))
+	    (*(void **)&(key)=Tcl_GetHashKey((tablePtr),hPtr),\
+	    *(void **)&(val)=Tcl_GetHashValue(hPtr),1):0; hPtr=Tcl_NextHashEntry(&search))
 #define FOREACH_HASH_VALUE(val,tablePtr) \
     for(hPtr=Tcl_FirstHashEntry((tablePtr),&search); hPtr!=NULL ? \
-            ((val)=Tcl_GetHashValue(hPtr),1):0;hPtr=Tcl_NextHashEntry(&search))
+	    (*(void **)&(val)=Tcl_GetHashValue(hPtr),1):0;hPtr=Tcl_NextHashEntry(&search))
 
 /*
  * What sort of size of things we like to allocate.
