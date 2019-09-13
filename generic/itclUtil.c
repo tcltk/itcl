@@ -617,12 +617,8 @@ Itcl_ReleaseData(
     blk = ((PresMemoryPrefix *)cdata)-1;
 
     /* Usage sanity check */
-    if (blk->refCount == 0) {
-	Tcl_Panic("Itcl_ReleaseData: must call Itcl_PreserveData() first");
-    }
-    if (blk->freeProc == NULL) {
-	Tcl_Panic("Itcl_ReleaseData: must call Itcl_EventuallyFree() first");
-    }
+    assert(blk->refCount != 0); /* must call Itcl_PreserveData() first */
+    assert(blk->freeProc);	/* must call Itcl_EventuallyFree() first */
 
     /* Decrement preservation count */
     if (--blk->refCount) {
@@ -653,9 +649,7 @@ void * Itcl_Alloc(
     PresMemoryPrefix *blk;
 
     /* The ckalloc() in Tcl 8 can alloc at most UINT_MAX bytes */
-    if (size > UINT_MAX - sizeof(PresMemoryPrefix)) {
-	Tcl_Panic("Itcl_Alloc: cannot alloc %zu bytes", size);
-    }
+    assert (size <= UINT_MAX - sizeof(PresMemoryPrefix));
     numBytes = size + sizeof(PresMemoryPrefix);
 
     /* This will panic on allocation failure. No need to check return value. */
