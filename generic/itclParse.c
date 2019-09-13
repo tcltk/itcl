@@ -2831,8 +2831,7 @@ ItclParseOption(
         init = Tcl_GetString(newObjv[1]);
     }
 
-    ioptPtr = (ItclOption*)ItclCkalloc(sizeof(ItclOption), NULL);
-    memset(ioptPtr, 0, sizeof(ItclOption));
+    ioptPtr = (ItclOption*)Itcl_Alloc(sizeof(ItclOption));
     ioptPtr->protection   = Itcl_Protection(interp, 0);
     if (ioptPtr->protection == ITCL_DEFAULT_PROTECT) {
         ioptPtr->protection = ITCL_PROTECTED;
@@ -3772,8 +3771,7 @@ Itcl_HandleDelegateOptionCmd(
 	    return TCL_ERROR;
 	}
     }
-    idoPtr = (ItclDelegatedOption *)ItclCkalloc(sizeof(ItclDelegatedOption), NULL);
-    memset(idoPtr, 0, sizeof(ItclDelegatedOption));
+    idoPtr = (ItclDelegatedOption *)Itcl_Alloc(sizeof(ItclDelegatedOption));
     Tcl_InitObjHashTable(&idoPtr->exceptions);
     if (*option != '*') {
         if (targetPtr == NULL) {

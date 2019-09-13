@@ -627,7 +627,7 @@ typedef struct ItclCallContext {
     int refCount;
 } ItclCallContext;
 
-MODULE_SCOPE void *	ItclCkalloc(size_t size, Tcl_FreeProc *freeProc);
+MODULE_SCOPE void *	Itcl_Alloc(size_t size);
 MODULE_SCOPE void	ItclCkfree(void *ptr);
 
 /*

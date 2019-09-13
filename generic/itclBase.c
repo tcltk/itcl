@@ -194,7 +194,7 @@ Initialize (
     }
     Tcl_DecrRefCount(objPtr);
 
-    infoPtr = (ItclObjectInfo*)ItclCkalloc(sizeof(ItclObjectInfo), NULL);
+    infoPtr = (ItclObjectInfo*)Itcl_Alloc(sizeof(ItclObjectInfo));
 
     nsPtr = Tcl_CreateNamespace(interp, ITCL_NAMESPACE, infoPtr, FreeItclObjectInfo);
     if (nsPtr == NULL) {
@@ -215,7 +215,6 @@ Initialize (
      *  Store this as "associated data" for easy access, but link
      *  it to the itcl namespace for ownership.
      */
-    memset(infoPtr, 0, sizeof(ItclObjectInfo));
     infoPtr->interp = interp;
     infoPtr->class_meta_type = (Tcl_ObjectMetadataType *)ckalloc(
             sizeof(Tcl_ObjectMetadataType));

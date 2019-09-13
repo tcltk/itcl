@@ -29,6 +29,7 @@
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  */
 #include "itclInt.h"
+#include <limits.h>
 
 /*
  *  POOL OF LIST ELEMENTS FOR LINKED LIST
@@ -651,17 +652,22 @@ Itcl_ReleaseData(
  *	Pointer to new allocated memory.
  * ------------------------------------------------------------------------
  */
-void * ItclCkalloc(
-    size_t size,		/* Size of memory to allocate */
-    Tcl_FreeProc *freeProc	/* Function to actually do free (or NULL). */
-) {
-    PresMemoryPrefix *blk = (PresMemoryPrefix *)ckalloc(
-	size + sizeof(PresMemoryPrefix));
+void * Itcl_Alloc(
+    size_t size)	/* Size of memory to allocate */
+{
+    size_t numBytes;
+    PresMemoryPrefix *blk;
 
-    if (!blk) { return NULL; };
+    /* The ckalloc() in Tcl 8 can alloc at most UINT_MAX bytes */
+    if (size > UINT_MAX - sizeof(PresMemoryPrefix)) {
+	Tcl_Panic("Itcl_Alloc: cannot alloc %zu bytes", size);
+    }
+    numBytes = size + sizeof(PresMemoryPrefix);
 
-    blk->freeProc = freeProc;
-    blk->refCount = freeProc ? 1 : 0; /* Preserved once if freeProc set. */
+    blk = (PresMemoryPrefix *)ckalloc(numBytes);
+
+    /* Itcl_Alloc defined to zero-init memory it allocates */
+    memset(blk, 0, numBytes);
 
     /* ckalloc block to Itcl memory block */
     return blk+1;
