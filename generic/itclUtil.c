@@ -678,7 +678,7 @@ void * Itcl_Alloc(
  *
  * ------------------------------------------------------------------------
  */
-void ItclCkfree(void *ptr) {
+void Itcl_Free(void *ptr) {
     PresMemoryPrefix *blk;
     
     if (ptr == NULL) {
@@ -687,7 +687,7 @@ void ItclCkfree(void *ptr) {
     /* Itcl memory block to ckalloc block */
     blk = ((PresMemoryPrefix *)ptr)-1;
 
-    assert(blk->refCount <= 0); /* it should be not preserved */
+    assert(blk->refCount == 0); /* it should be not preserved */
     assert(blk->freeProc == NULL); /* it should be released */
     ckfree(blk);
 }

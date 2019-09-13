@@ -198,14 +198,14 @@ Initialize (
 
     nsPtr = Tcl_CreateNamespace(interp, ITCL_NAMESPACE, infoPtr, FreeItclObjectInfo);
     if (nsPtr == NULL) {
-	ItclCkfree(infoPtr);
+	Itcl_Free(infoPtr);
         Tcl_Panic("Itcl: cannot create namespace: \"%s\" \n", ITCL_NAMESPACE);
     }
 
     nsPtr = Tcl_CreateNamespace(interp, ITCL_NAMESPACE"::internal::dicts",
             NULL, NULL);
     if (nsPtr == NULL) {
-	ItclCkfree(infoPtr);
+	Itcl_Free(infoPtr);
         Tcl_Panic("Itcl: cannot create namespace: \"%s::internal::dicts\" \n",
 	        ITCL_NAMESPACE);
     }

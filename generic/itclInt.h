@@ -628,7 +628,7 @@ typedef struct ItclCallContext {
 } ItclCallContext;
 
 MODULE_SCOPE void *	Itcl_Alloc(size_t size);
-MODULE_SCOPE void	ItclCkfree(void *ptr);
+MODULE_SCOPE void	Itcl_Free(void *ptr);
 
 /*
  * The macro below is used to modify a "char" value (e.g. by casting

@@ -2418,7 +2418,7 @@ ItclDelObjectInfo(
     Tcl_DeleteHashTable(&infoPtr->frameContext);
 
     Itcl_DeleteStack(&infoPtr->clsStack);
-    ItclCkfree(infoPtr);
+    Itcl_Free(infoPtr);
 }
 
 /*

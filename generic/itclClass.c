@@ -1212,7 +1212,7 @@ ItclFreeClass(
         ckfree((char *)iclsPtr->resolvePtr->clientData);
         ckfree((char *)iclsPtr->resolvePtr);
     }
-    ItclCkfree(iclsPtr);
+    Itcl_Free(iclsPtr);
 }
 
 
@@ -2337,7 +2337,7 @@ Itcl_DeleteVariable(
     if (ivPtr->arrayInitPtr) {
         Tcl_DecrRefCount(ivPtr->arrayInitPtr);
     }
-    ItclCkfree(ivPtr);
+    Itcl_Free(ivPtr);
 }
 
 /*
@@ -2389,7 +2389,7 @@ ItclDeleteOption(
         Tcl_DecrRefCount(ioptPtr->validateMethodVarPtr);
     }
     Itcl_ReleaseData(ioptPtr->idoPtr);
-    ItclCkfree(ioptPtr);
+    Itcl_Free(ioptPtr);
 }
 
 /*
@@ -2503,7 +2503,7 @@ ItclDeleteDelegatedOption(
         }
     }
     Tcl_DeleteHashTable(&idoPtr->exceptions);
-    ItclCkfree(idoPtr);
+    Itcl_Free(idoPtr);
 }
 
 /*
