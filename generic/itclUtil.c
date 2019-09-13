@@ -539,11 +539,10 @@ typedef struct PresMemoryPrefix {
  * ------------------------------------------------------------------------
  *  Itcl_EventuallyFree()
  *
- *  Registers a piece of data so that it will be freed when no longer
- *  in use.  The data is registered with an initial usage count of "0".
- *  Future calls to Itcl_PreserveData() increase this usage count, and
- *  calls to Itcl_ReleaseData() decrease the count until it reaches
- *  zero and the data is freed.
+ *  Asscociates with cdata (allocated by Itcl_Alloc()) a routine to
+ *  be called when cdata should be freed. This routine will be called
+ *  when the number of Itcl_ReleaseData() calls on cdata  matches the
+ *  number of Itcl_PreserveData() calls on cdata.
  * ------------------------------------------------------------------------
  */
 void
@@ -553,9 +552,6 @@ Itcl_EventuallyFree(
 {
     PresMemoryPrefix *blk;
 
-    /*
-     *  If the clientData value is NULL, do nothing.
-     */
     if (cdata == NULL) {
         return;
     }
@@ -585,9 +581,6 @@ Itcl_PreserveData(
 {
     PresMemoryPrefix *blk;
 
-    /*
-     *  If the clientData value is NULL, do nothing.
-     */
     if (cdata == NULL) {
         return;
     }
@@ -614,10 +607,8 @@ Itcl_ReleaseData(
     ClientData cdata)      /* data to be released */
 {
     PresMemoryPrefix *blk;
+    Tcl_FreeProc *freeProc;
 
-    /*
-     *  If the clientData value is NULL, do nothing.
-     */
     if (cdata == NULL) {
         return;
     }
@@ -625,25 +616,28 @@ Itcl_ReleaseData(
     /* Itcl memory block to ckalloc block */
     blk = ((PresMemoryPrefix *)cdata)-1;
 
+    /* Usage sanity check */
+    if (blk->refCount == 0) {
+	Tcl_Panic("Itcl_ReleaseData: must call Itcl_PreserveData() first");
+    }
+    if (blk->freeProc == NULL) {
+	Tcl_Panic("Itcl_ReleaseData: must call Itcl_EventuallyFree() first");
+    }
+
     /* Decrement preservation count */
     if (--blk->refCount) {
 	return;
     }
 
-    /* Free it now */
-    if (blk->freeProc != NULL) {
-	Tcl_FreeProc *freeProc = blk->freeProc;
-	blk->freeProc = NULL;
-	freeProc(cdata);
-    } else {
-	ckfree(blk);
-    }
-    return;
+    /* Free cdata now */
+    freeProc = blk->freeProc;
+    blk->freeProc = NULL;
+    freeProc(cdata);
 }
 
 /*
  * ------------------------------------------------------------------------
- * ItclCkalloc()
+ * Itcl_Alloc()
  *
  *	Allocate preservable memory. In opposite to ckalloc the result can be
  *	supplied to preservation facilities of Itcl (Itcl_PreserveData).
@@ -664,6 +658,7 @@ void * Itcl_Alloc(
     }
     numBytes = size + sizeof(PresMemoryPrefix);
 
+    /* This will panic on allocation failure. No need to check return value. */
     blk = (PresMemoryPrefix *)ckalloc(numBytes);
 
     /* Itcl_Alloc defined to zero-init memory it allocates */
@@ -676,7 +671,7 @@ void * Itcl_Alloc(
  * ------------------------------------------------------------------------
  * ItclFree()
  *
- *	Release memory blocks (release preserved block).
+ *	Release memory allocated by Itcl_Alloc() that was never preserved.
  *
  * Results:
  *	None.
