@@ -627,18 +627,6 @@ typedef struct ItclCallContext {
     int refCount;
 } ItclCallContext;
 
-/*
- * Itcl memory management facilities providing architectural enhancement, that
- * allow usage of fast Itcl_PreserveData/Itcl_ReleaseData for allocated pointer.
- *
- * TODO: Because Itcl_PreserveData/Itcl_ReleaseData are public API, check whether
- * this function are should be moved to bpublic API too (currently internal API only).
- */
-typedef struct ItclPresMemoryPrefix {
-    Tcl_FreeProc *freeProc;	/* free function called by last Itcl_ReleaseData */
-    int refCount;		/* refernce (resp preserving) counter */
-} ItclPresMemoryPrefix;
-
 MODULE_SCOPE void *	ItclCkalloc(size_t size, Tcl_FreeProc *freeProc);
 MODULE_SCOPE void	ItclCkfree(void *ptr);
 

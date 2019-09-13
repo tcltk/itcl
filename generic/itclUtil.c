@@ -524,12 +524,17 @@ Itcl_FinishList()
  *
  *  The following procedures manage generic reference-counted data.
  *  They are similar in spirit to the Tcl_Preserve/Tcl_Release
- *  procedures defined in the Tcl/Tk core.  But these procedures use
- *  a hash table instead of a linked list to maintain the references,
- *  so they scale better.  Also, the Tcl procedures have a bad behavior
- *  during the "exit" command.  Their exit handler shuts them down
- *  when other data is still being reference-counted and cleaned up.
- *
+ *  procedures defined in the Tcl/Tk core.  But these procedures attach a
+ *  refcount directly to the allocated memory, and then use it to govern
+ *  shared access and properly timed release.
+ */
+
+typedef struct PresMemoryPrefix {
+    Tcl_FreeProc *freeProc;     /* called by last Itcl_ReleaseData */
+    int refCount;               /* refernce (resp preserving) counter */
+} PresMemoryPrefix;
+
+/*
  * ------------------------------------------------------------------------
  *  Itcl_EventuallyFree()
  *
@@ -545,7 +550,7 @@ Itcl_EventuallyFree(
     ClientData cdata,          /* data to be freed when not in use */
     Tcl_FreeProc *fproc)       /* procedure called to free data */
 {
-    ItclPresMemoryPrefix *blk;
+    PresMemoryPrefix *blk;
 
     /*
      *  If the clientData value is NULL, do nothing.
@@ -555,7 +560,7 @@ Itcl_EventuallyFree(
     }
 
     /* Itcl memory block to ckalloc block */
-    blk = ((ItclPresMemoryPrefix *)cdata)-1;
+    blk = ((PresMemoryPrefix *)cdata)-1;
 
     /* Set new free proc */
     blk->freeProc = fproc;
@@ -577,7 +582,7 @@ void
 Itcl_PreserveData(
     ClientData cdata)     /* data to be preserved */
 {
-    ItclPresMemoryPrefix *blk;
+    PresMemoryPrefix *blk;
 
     /*
      *  If the clientData value is NULL, do nothing.
@@ -587,7 +592,7 @@ Itcl_PreserveData(
     }
 
     /* Itcl memory block to ckalloc block */
-    blk = ((ItclPresMemoryPrefix *)cdata)-1;
+    blk = ((PresMemoryPrefix *)cdata)-1;
 
     /* Increment preservation count */
     ++blk->refCount;
@@ -607,7 +612,7 @@ void
 Itcl_ReleaseData(
     ClientData cdata)      /* data to be released */
 {
-    ItclPresMemoryPrefix *blk;
+    PresMemoryPrefix *blk;
 
     /*
      *  If the clientData value is NULL, do nothing.
@@ -617,7 +622,7 @@ Itcl_ReleaseData(
     }
 
     /* Itcl memory block to ckalloc block */
-    blk = ((ItclPresMemoryPrefix *)cdata)-1;
+    blk = ((PresMemoryPrefix *)cdata)-1;
 
     /* Decrement preservation count */
     if (--blk->refCount) {
@@ -650,8 +655,8 @@ void * ItclCkalloc(
     size_t size,		/* Size of memory to allocate */
     Tcl_FreeProc *freeProc	/* Function to actually do free (or NULL). */
 ) {
-    ItclPresMemoryPrefix *blk = (ItclPresMemoryPrefix *)ckalloc(
-	size + sizeof(ItclPresMemoryPrefix));
+    PresMemoryPrefix *blk = (PresMemoryPrefix *)ckalloc(
+	size + sizeof(PresMemoryPrefix));
 
     if (!blk) { return NULL; };
 
@@ -673,13 +678,13 @@ void * ItclCkalloc(
  * ------------------------------------------------------------------------
  */
 void ItclCkfree(void *ptr) {
-    ItclPresMemoryPrefix *blk;
+    PresMemoryPrefix *blk;
     
     if (ptr == NULL) {
 	return;
     }
     /* Itcl memory block to ckalloc block */
-    blk = ((ItclPresMemoryPrefix *)ptr)-1;
+    blk = ((PresMemoryPrefix *)ptr)-1;
 
     assert(blk->refCount <= 0); /* it should be not preserved */
     assert(blk->freeProc == NULL); /* it should be released */
