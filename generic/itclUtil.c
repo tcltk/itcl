@@ -532,7 +532,7 @@ Itcl_FinishList()
 
 typedef struct PresMemoryPrefix {
     Tcl_FreeProc *freeProc;     /* called by last Itcl_ReleaseData */
-    int refCount;               /* refernce (resp preserving) counter */
+    size_t refCount;            /* refernce (resp preserving) counter */
 } PresMemoryPrefix;
 
 /*
