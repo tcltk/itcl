@@ -269,7 +269,8 @@ Itcl_CreateClass(
     /*
      *  Allocate class definition data.
      */
-    iclsPtr = (ItclClass*)Itcl_Alloc(sizeof(ItclClass));
+    iclsPtr = (ItclClass*)ckalloc(sizeof(ItclClass));
+    memset (iclsPtr, 0, sizeof(ItclClass));
     iclsPtr->interp = interp;
     iclsPtr->infoPtr = infoPtr;
     Itcl_PreserveData(infoPtr);
@@ -1212,7 +1213,7 @@ ItclFreeClass(
         ckfree((char *)iclsPtr->resolvePtr->clientData);
         ckfree((char *)iclsPtr->resolvePtr);
     }
-    Itcl_Free(iclsPtr);
+    ckfree(iclsPtr);
 }
 
 
