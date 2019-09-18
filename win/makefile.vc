@@ -72,7 +72,7 @@ if {[package vsatisfies 8.0 [package provide Tcl]]} {
 } else {
     set add {t}
 }
-if {[info exists ::tcl_platform(debug)] && $$::tcl_platform(debug) && \
+if {[::tcl::pkgconfig get debug] && \
         [file exists [file join $$dir itcl$(VERSION)$${add}g.dll]]} {
     package ifneeded Itcl $(DOTVERSION) [list load [file join $$dir itcl$(VERSION)$${add}g.dll] Itcl]
 } else {
