@@ -19,9 +19,6 @@
 PROJECT         = itcl
 NEED_TCL_SOURCE = 1
 RCFILE      = itcl.rc
-# Tcl 8.6 etc. compile with /DUNICODE. ITcl pre-nmake reform compiled
-# without -DUNICODE. Keep that behaviour for now.
-USE_WIDECHAR_API  = 0
 
 !include "rules-ext.vc"
 
