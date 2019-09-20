@@ -374,7 +374,6 @@ typedef struct ItclObject {
     int noComponentTrace;         /* don't call component traces if
                                    * setting components in DelegationInstall */
     int hadConstructorError;      /* needed for multiple calls of CallItclObjectCmd */
-    int refCount;
 } ItclObject;
 
 #define ITCL_IGNORE_ERRS  0x002  /* useful for construction/destruction */
@@ -674,9 +673,6 @@ MODULE_SCOPE void ItclReleaseClass(ClientData iclsPtr);
 
 MODULE_SCOPE void ItclPreserveMemberCode(ItclMemberCode *mcodePtr);
 MODULE_SCOPE void ItclReleaseMemberCode(ItclMemberCode *mcodePtr);
-
-MODULE_SCOPE void ItclPreserveObject(ItclObject *ioPtr);
-MODULE_SCOPE void ItclReleaseObject(ClientData ioPtr);
 
 MODULE_SCOPE ItclFoundation *ItclGetFoundation(Tcl_Interp *interp);
 MODULE_SCOPE Tcl_ObjCmdProc ItclClassCommandDispatcher;

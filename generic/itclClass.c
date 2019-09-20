@@ -270,7 +270,7 @@ Itcl_CreateClass(
      *  Allocate class definition data.
      */
     iclsPtr = (ItclClass*)ckalloc(sizeof(ItclClass));
-    memset (iclsPtr, 0, sizeof(ItclClass));
+    memset(iclsPtr, 0, sizeof(ItclClass));
     iclsPtr->interp = interp;
     iclsPtr->infoPtr = infoPtr;
     Itcl_PreserveData(infoPtr);
@@ -293,7 +293,7 @@ Itcl_CreateClass(
     Itcl_InitList(&iclsPtr->derived);
 
     resolveInfoPtr = (ItclResolveInfo *) ckalloc(sizeof(ItclResolveInfo));
-    memset (resolveInfoPtr, 0, sizeof(ItclResolveInfo));
+    memset(resolveInfoPtr, 0, sizeof(ItclResolveInfo));
     resolveInfoPtr->flags = ITCL_RESOLVE_CLASS;
     resolveInfoPtr->iclsPtr = iclsPtr;
     iclsPtr->resolvePtr = (Tcl_Resolve *)ckalloc(sizeof(Tcl_Resolve));
@@ -904,10 +904,10 @@ ItclDestroyClassNamesp(
         if (ioPtr->iclsPtr == iclsPtr) {
 	    if ((ioPtr->accessCmd != NULL) && (!(ioPtr->flags &
 	            (ITCL_OBJECT_IS_DESTRUCTED)))) {
-		ItclPreserveObject(ioPtr);
+		Itcl_PreserveData(ioPtr);
                 Tcl_DeleteCommandFromToken(iclsPtr->interp, ioPtr->accessCmd);
 	        ioPtr->accessCmd = NULL;
-		ItclReleaseObject(ioPtr);
+		Itcl_ReleaseData(ioPtr);
 	        /*
 	         * Fix 227804: Whenever an object to delete was found we
 	         * have to reset the search to the beginning as the

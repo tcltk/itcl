@@ -2487,7 +2487,7 @@ ItclCheckCallMethod(
 
     if (ioPtr != NULL) {
         ioPtr->callRefCount++;
-	ItclPreserveObject(ioPtr);
+	Itcl_PreserveData(ioPtr);
     }
     imPtr->iclsPtr->callRefCount++;
     if (!imPtr->iclsPtr->infoPtr->useOldResolvers) {
@@ -2601,7 +2601,7 @@ ItclAfterCallMethod(
             if (hPtr == NULL) {
                 ckfree((char *)callContextPtr);
 	    }
-	    ItclReleaseObject(ioPtr);
+	    Itcl_ReleaseData(ioPtr);
         } else {
             ckfree((char *)callContextPtr);
         }
