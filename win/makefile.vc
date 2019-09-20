@@ -19,9 +19,6 @@
 PROJECT         = itcl
 NEED_TCL_SOURCE = 1
 RCFILE      = itcl.rc
-# Tcl 8.6 etc. compile with /DUNICODE. ITcl pre-nmake reform compiled
-# without -DUNICODE. Keep that behaviour for now.
-USE_WIDECHAR_API  = 0
 
 !include "rules-ext.vc"
 
@@ -72,7 +69,7 @@ if {[package vsatisfies 8.0 [package provide Tcl]]} {
 } else {
     set add {t}
 }
-if {[info exists ::tcl_platform(debug)] && $$::tcl_platform(debug) && \
+if {[::tcl::pkgconfig get debug] && \
         [file exists [file join $$dir itcl$(VERSION)$${add}g.dll]]} {
     package ifneeded Itcl $(DOTVERSION) [list load [file join $$dir itcl$(VERSION)$${add}g.dll] Itcl]
 } else {
