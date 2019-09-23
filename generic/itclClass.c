@@ -1958,7 +1958,7 @@ Itcl_CreateVariable(
             Tcl_DeleteHashEntry(hPtr);
             return TCL_ERROR;
         }
-	ItclPreserveMemberCode(mCodePtr);
+	Itcl_PreserveData(mCodePtr);
     } else {
         mCodePtr = NULL;
     }
@@ -2328,7 +2328,7 @@ Itcl_DeleteVariable(
         }
     }
     if (ivPtr->codePtr != NULL) {
-	ItclReleaseMemberCode(ivPtr->codePtr);
+	Itcl_ReleaseData(ivPtr->codePtr);
     }
     Tcl_DecrRefCount(ivPtr->namePtr);
     Tcl_DecrRefCount(ivPtr->fullNamePtr);
@@ -2366,7 +2366,7 @@ ItclDeleteOption(
     }
 
     if (ioptPtr->codePtr) {
-	ItclReleaseMemberCode(ioptPtr->codePtr);
+	Itcl_ReleaseData(ioptPtr->codePtr);
     }
     if (ioptPtr->defaultValuePtr != NULL) {
         Tcl_DecrRefCount(ioptPtr->defaultValuePtr);
@@ -2421,7 +2421,7 @@ ItclDeleteFunction(
         }
     }
     if (imPtr->codePtr != NULL) {
-        ItclReleaseMemberCode(imPtr->codePtr);
+        Itcl_ReleaseData(imPtr->codePtr);
     }
     Tcl_DecrRefCount(imPtr->namePtr);
     Tcl_DecrRefCount(imPtr->fullNamePtr);
