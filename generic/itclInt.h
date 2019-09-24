@@ -504,7 +504,6 @@ typedef struct ItclMemberFunc {
     ClientData tmPtr;           /* TclOO methodPtr */
     ItclDelegatedFunction *idmPtr;
                                 /* if the function is delegated != NULL */
-    int refCount;
 } ItclMemberFunc;
 
 /*
@@ -663,9 +662,6 @@ MODULE_SCOPE Tcl_ObjCmdProc ItclCallCCommand;
 MODULE_SCOPE Tcl_ObjCmdProc ItclObjectUnknownCommand;
 MODULE_SCOPE int ItclCheckCallProc(ClientData clientData, Tcl_Interp *interp,
         Tcl_ObjectContext contextPtr, Tcl_CallFrame *framePtr, int *isFinished);
-
-MODULE_SCOPE void ItclPreserveIMF(ItclMemberFunc *imPtr);
-MODULE_SCOPE void ItclReleaseIMF(ClientData imPtr);
 
 MODULE_SCOPE void ItclPreserveClass(ItclClass *iclsPtr);
 MODULE_SCOPE void ItclReleaseClass(ClientData iclsPtr);

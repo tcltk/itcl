@@ -40,26 +40,8 @@ static int ItclCreateMemberCode(Tcl_Interp* interp, ItclClass *iclsPtr,
 static int ItclCreateMemberFunc(Tcl_Interp* interp, ItclClass *iclsPtr,
 	Tcl_Obj *namePtr, const char* arglist, const char* body,
         ItclMemberFunc** imPtrPtr, int flags);
-void    ItclFreeMemberCode (ItclMemberCode *mcodePtr);
+static void FreeMemberCode(ItclMemberCode *mcodePtr);
 
-void
-ItclPreserveIMF(
-    ItclMemberFunc *imPtr)
-{
-    imPtr->refCount++;
-}
-
-void
-ItclReleaseIMF(
-    ClientData clientData)
-{
-    ItclMemberFunc *imPtr = (ItclMemberFunc *)clientData;
-
-    if (imPtr->refCount-- <= 1) {
-	Itcl_DeleteMemberFunc(clientData);
-    }
-}
-
 /*
  * ------------------------------------------------------------------------
  *  Itcl_BodyCmd()
@@ -501,8 +483,8 @@ ItclCreateMemberFunc(
     /*
      *  Allocate a member function definition and return.
      */
-    imPtr = (ItclMemberFunc*)ckalloc(sizeof(ItclMemberFunc));
-    memset(imPtr, 0, sizeof(ItclMemberFunc));
+    imPtr = (ItclMemberFunc*)Itcl_Alloc(sizeof(ItclMemberFunc));
+    Itcl_EventuallyFree(imPtr, (Tcl_FreeProc *)Itcl_DeleteMemberFunc);
     imPtr->iclsPtr    = iclsPtr;
     imPtr->infoPtr    = iclsPtr->infoPtr;
     imPtr->protection = Itcl_Protection(interp, 0);
@@ -661,7 +643,7 @@ ItclCreateMemberFunc(
     }
 
     Tcl_SetHashValue(hPtr, imPtr);
-    imPtr->refCount = 1;
+    Itcl_PreserveData(imPtr);
 
     *imPtrPtr = imPtr;
     return TCL_OK;
@@ -846,7 +828,7 @@ ItclCreateMemberCode(
      *  Allocate some space to hold the implementation.
      */
     mcode = (ItclMemberCode*)Itcl_Alloc(sizeof(ItclMemberCode));
-    Itcl_EventuallyFree(mcode, (Tcl_FreeProc *)ItclFreeMemberCode);
+    Itcl_EventuallyFree(mcode, (Tcl_FreeProc *)FreeMemberCode);
 
     if (arglist) {
         if (ItclCreateArgList(interp, arglist, &argc, &maxArgc, &usagePtr,
@@ -1097,7 +1079,7 @@ Itcl_CreateMemberCode(
  *  is no longer being used.
  * ------------------------------------------------------------------------
  */
-void ItclFreeMemberCode (
+void FreeMemberCode (
     ItclMemberCode* mCodePtr)
 {
     if (mCodePtr == NULL) {
@@ -1717,9 +1699,9 @@ NRExecMethod(
      *  Execute the code for the method.  Be careful to protect
      *  the method in case it gets deleted during execution.
      */
-    ItclPreserveIMF(imPtr);
+    Itcl_PreserveData(imPtr);
     result = Itcl_EvalMemberCode(interp, imPtr, ioPtr, objc, objv);
-    ItclReleaseIMF(imPtr);
+    Itcl_ReleaseData(imPtr);
     return result;
 }
 
@@ -1803,11 +1785,11 @@ NRExecProc(
      *  Execute the code for the proc.  Be careful to protect
      *  the proc in case it gets deleted during execution.
      */
-    ItclPreserveIMF(imPtr);
+    Itcl_PreserveData(imPtr);
 
     result = Itcl_EvalMemberCode(interp, imPtr, NULL,
         objc, objv);
-    ItclReleaseIMF(imPtr);
+    Itcl_ReleaseData(imPtr);
     return result;
 }
 
@@ -2000,7 +1982,7 @@ Itcl_InvokeMethodIfExists(
          *  Execute the code for the method.  Be careful to protect
          *  the method in case it gets deleted during execution.
          */
-	ItclPreserveIMF(imPtr);
+	Itcl_PreserveData(imPtr);
 
 	if (contextObjectPtr->oPtr == NULL) {
             Tcl_DecrRefCount(cmdlinePtr);
@@ -2008,7 +1990,7 @@ Itcl_InvokeMethodIfExists(
 	}
         result = Itcl_EvalMemberCode(interp, imPtr, contextObjectPtr,
 	        cmdlinec, cmdlinev);
-	ItclReleaseIMF(imPtr);
+	Itcl_ReleaseData(imPtr);
         Tcl_DecrRefCount(cmdlinePtr);
     } else {
         if (contextClassPtr->flags &
@@ -2338,7 +2320,7 @@ ItclCheckCallMethod(
     oPtr = NULL;
     hPtr = NULL;
     imPtr = (ItclMemberFunc *)clientData;
-    ItclPreserveIMF(imPtr);
+    Itcl_PreserveData(imPtr);
     if (imPtr->flags & ITCL_CONSTRUCTOR) {
         ioPtr = imPtr->iclsPtr->infoPtr->currIoPtr;
     } else {
@@ -2488,7 +2470,7 @@ ItclCheckCallMethod(
     }
     return result;
 finishReturn:
-    ItclReleaseIMF(imPtr);
+    Itcl_ReleaseData(imPtr);
     return result;
 }
 
@@ -2596,7 +2578,7 @@ ItclAfterCallMethod(
     }
     result = call_result;
 finishReturn:
-    ItclReleaseIMF(imPtr);
+    Itcl_ReleaseData(imPtr);
     return result;
 }
 

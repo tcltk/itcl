@@ -1078,7 +1078,7 @@ ItclFreeClass(
      */
     FOREACH_HASH_VALUE(imPtr, &iclsPtr->functions) {
 	imPtr->iclsPtr = NULL;
-        ItclReleaseIMF(imPtr);
+        Itcl_ReleaseData(imPtr);
     }
     Tcl_DeleteHashTable(&iclsPtr->functions);
 
@@ -2443,7 +2443,7 @@ ItclDeleteFunction(
     if (imPtr->argListPtr != NULL) {
         ItclDeleteArgList(imPtr->argListPtr);
     }
-    ckfree((char*)imPtr);
+    Itcl_Free(imPtr);
 }
 
 /*
