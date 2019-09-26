@@ -40,42 +40,8 @@ static int ItclCreateMemberCode(Tcl_Interp* interp, ItclClass *iclsPtr,
 static int ItclCreateMemberFunc(Tcl_Interp* interp, ItclClass *iclsPtr,
 	Tcl_Obj *namePtr, const char* arglist, const char* body,
         ItclMemberFunc** imPtrPtr, int flags);
-void    ItclFreeMemberCode (ItclMemberCode *mcodePtr);
+static void FreeMemberCode(ItclMemberCode *mcodePtr);
 
-void
-ItclPreserveIMF(
-    ItclMemberFunc *imPtr)
-{
-    imPtr->refCount++;
-}
-
-void
-ItclReleaseIMF(
-    ClientData clientData)
-{
-    ItclMemberFunc *imPtr = (ItclMemberFunc *)clientData;
-
-    if (imPtr->refCount-- <= 1) {
-	Itcl_DeleteMemberFunc(clientData);
-    }
-}
-
-void
-ItclPreserveMemberCode(
-    ItclMemberCode *mcodePtr)
-{
-    mcodePtr->refCount++;
-}
-
-void
-ItclReleaseMemberCode(
-    ItclMemberCode *mcodePtr)
-{
-    if (mcodePtr->refCount-- <= 1) {
-	ItclFreeMemberCode(mcodePtr);
-    }
-}
-
 /*
  * ------------------------------------------------------------------------
  *  Itcl_BodyCmd()
@@ -121,7 +87,7 @@ NRBodyCmd(
         Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
             "wrong # args: should be \"",
             token, " class::func arglist body\"",
-            (char*)NULL);
+            NULL);
         return TCL_ERROR;
     }
 
@@ -136,7 +102,7 @@ NRBodyCmd(
     if (!head || *head == '\0') {
         Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
             "missing class specifier for body declaration \"", token, "\"",
-            (char*)NULL);
+            NULL);
         status = TCL_ERROR;
         goto bodyCmdDone;
     }
@@ -171,7 +137,7 @@ NRBodyCmd(
         Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
             "function \"", tail, "\" is not defined in class \"",
             Tcl_GetString(iclsPtr->fullNamePtr), "\"",
-            (char*)NULL);
+            NULL);
         status = TCL_ERROR;
         goto bodyCmdDone;
     }
@@ -257,7 +223,7 @@ NRConfigBodyCmd(
     if ((head == NULL) || (*head == '\0')) {
         Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
             "missing class specifier for body declaration \"", token, "\"",
-            (char*)NULL);
+            NULL);
         status = TCL_ERROR;
         goto configBodyCmdDone;
     }
@@ -287,7 +253,7 @@ NRConfigBodyCmd(
         Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
             "option \"", tail, "\" is not defined in class \"",
             Tcl_GetString(iclsPtr->fullNamePtr), "\"",
-            (char*)NULL);
+            NULL);
         status = TCL_ERROR;
         goto configBodyCmdDone;
     }
@@ -297,23 +263,23 @@ NRConfigBodyCmd(
         Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
                 "option \"", Tcl_GetString(ivPtr->fullNamePtr),
                 "\" is not a public configuration option",
-                (char*)NULL);
+                NULL);
         status = TCL_ERROR;
         goto configBodyCmdDone;
     }
 
     token = Tcl_GetString(objv[2]);
 
-    if (Itcl_CreateMemberCode(interp, iclsPtr, (char*)NULL, token,
+    if (Itcl_CreateMemberCode(interp, iclsPtr, NULL, token,
             &mcode) != TCL_OK) {
         status = TCL_ERROR;
         goto configBodyCmdDone;
     }
 
-    ItclPreserveMemberCode(mcode);
+    Itcl_PreserveData(mcode);
 
     if (ivPtr->codePtr) {
-        ItclReleaseMemberCode(ivPtr->codePtr);
+        Itcl_ReleaseData(ivPtr->codePtr);
     }
     ivPtr->codePtr = mcode;
 
@@ -390,7 +356,7 @@ ItclCreateMethod(
     if (strstr(Tcl_GetString(namePtr),"::")) {
         Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
             "bad method name \"", Tcl_GetString(namePtr), "\"",
-            (char*)NULL);
+            NULL);
 	Tcl_DecrRefCount(namePtr);
         return TCL_ERROR;
     }
@@ -439,7 +405,7 @@ Itcl_CreateProc(
     if (strstr(Tcl_GetString(namePtr),"::")) {
         Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
             "bad proc name \"", Tcl_GetString(namePtr), "\"",
-            (char*)NULL);
+            NULL);
         return TCL_ERROR;
     }
 
@@ -500,7 +466,7 @@ ItclCreateMemberFunc(
         Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
             "\"", Tcl_GetString(namePtr), "\" already defined in class \"",
             Tcl_GetString(iclsPtr->fullNamePtr), "\"",
-            (char*)NULL);
+            NULL);
         return TCL_ERROR;
     }
 
@@ -517,8 +483,8 @@ ItclCreateMemberFunc(
     /*
      *  Allocate a member function definition and return.
      */
-    imPtr = (ItclMemberFunc*)ckalloc(sizeof(ItclMemberFunc));
-    memset(imPtr, 0, sizeof(ItclMemberFunc));
+    imPtr = (ItclMemberFunc*)Itcl_Alloc(sizeof(ItclMemberFunc));
+    Itcl_EventuallyFree(imPtr, (Tcl_FreeProc *)Itcl_DeleteMemberFunc);
     imPtr->iclsPtr    = iclsPtr;
     imPtr->infoPtr    = iclsPtr->infoPtr;
     imPtr->protection = Itcl_Protection(interp, 0);
@@ -534,7 +500,7 @@ ItclCreateMemberFunc(
         Tcl_IncrRefCount(imPtr->origArgsPtr);
     }
     imPtr->codePtr    = mcode;
-    ItclPreserveMemberCode(mcode);
+    Itcl_PreserveData(mcode);
 
     if (imPtr->protection == ITCL_DEFAULT_PROTECT) {
         imPtr->protection = ITCL_PUBLIC;
@@ -676,8 +642,8 @@ ItclCreateMemberFunc(
         imPtr->flags |= ITCL_DESTRUCTOR;
     }
 
-    Tcl_SetHashValue(hPtr, (ClientData)imPtr);
-    imPtr->refCount = 1;
+    Tcl_SetHashValue(hPtr, imPtr);
+    Itcl_PreserveData(imPtr);
 
     *imPtrPtr = imPtr;
     return TCL_OK;
@@ -765,9 +731,10 @@ Itcl_ChangeMemberFunc(
             "argument list changed for function \"",
             Tcl_GetString(imPtr->fullNamePtr), "\": should be \"",
             argsStr, "\"",
-            (char*)NULL);
+            NULL);
 
-        Itcl_DeleteMemberCode((char*)mcode);
+	Itcl_PreserveData(mcode);
+	Itcl_ReleaseData(mcode);
         return TCL_ERROR;
     }
 
@@ -793,12 +760,12 @@ Itcl_ChangeMemberFunc(
     /*
      *  Free up the old implementation and install the new one.
      */
-    ItclPreserveMemberCode(mcode);
-    ItclReleaseMemberCode(imPtr->codePtr);
+    Itcl_PreserveData(mcode);
+    Itcl_ReleaseData(imPtr->codePtr);
     imPtr->codePtr = mcode;
     if (mcode->flags & ITCL_IMPLEMENT_TCL) {
 	ClientData pmPtr;
-        imPtr->tmPtr = (ClientData)Itcl_NewProcClassMethod(interp,
+        imPtr->tmPtr = Itcl_NewProcClassMethod(interp,
 	    imPtr->iclsPtr->clsPtr, ItclCheckCallMethod, ItclAfterCallMethod,
 	    ItclProcErrorProc, imPtr, imPtr->namePtr, mcode->argumentPtr,
 	    mcode->bodyPtr, &pmPtr);
@@ -860,13 +827,14 @@ ItclCreateMemberCode(
     /*
      *  Allocate some space to hold the implementation.
      */
-    mcode = (ItclMemberCode*)ckalloc(sizeof(ItclMemberCode));
-    memset(mcode, 0, sizeof(ItclMemberCode));
+    mcode = (ItclMemberCode*)Itcl_Alloc(sizeof(ItclMemberCode));
+    Itcl_EventuallyFree(mcode, (Tcl_FreeProc *)FreeMemberCode);
 
     if (arglist) {
         if (ItclCreateArgList(interp, arglist, &argc, &maxArgc, &usagePtr,
 	        &argListPtr, NULL, NULL) != TCL_OK) {
-            Itcl_DeleteMemberCode((char*)mcode);
+	    Itcl_PreserveData(mcode);
+	    Itcl_ReleaseData(mcode);
             return TCL_ERROR;
         }
         mcode->argcount = argc;
@@ -909,7 +877,8 @@ ItclCreateMemberCode(
 			        Tcl_GetString(namePtr),
 				"'s arglist may not contain \"",
 				*cPtrPtr, "\" explicitly", NULL);
-                        Itcl_DeleteMemberCode((char*)mcode);
+			Itcl_PreserveData(mcode);
+			Itcl_ReleaseData(mcode);
                         return TCL_ERROR;
 		    }
 		    cPtrPtr++;
@@ -1025,8 +994,9 @@ ItclCreateMemberCode(
 		        &cdata)) {
 		    Tcl_AppendResult(interp,
                             "no registered C procedure with name \"",
-			    body+1, "\"", (char*)NULL);
-                    Itcl_DeleteMemberCode((char*)mcode);
+			    body+1, "\"", NULL);
+		    Itcl_PreserveData(mcode);
+		    Itcl_ReleaseData(mcode);
                     return TCL_ERROR;
                 }
 
@@ -1080,7 +1050,7 @@ ItclCreateMemberCode(
  *  treated as a label for a C procedure registered by Itcl_RegisterC().
  *
  *  A member function definition holds a handle for the implementation, and
- *  calls ItclReleaseMemberCode when finished with it.
+ *  uses Itcl_PreserveData and Itcl_ReleaseData to manage its interest in it.
  *
  *  If any errors are encountered, this procedure returns TCL_ERROR
  *  along with an error message in the interpreter.  Otherwise, it
@@ -1109,7 +1079,7 @@ Itcl_CreateMemberCode(
  *  is no longer being used.
  * ------------------------------------------------------------------------
  */
-void ItclFreeMemberCode (
+void FreeMemberCode (
     ItclMemberCode* mCodePtr)
 {
     if (mCodePtr == NULL) {
@@ -1127,15 +1097,15 @@ void ItclFreeMemberCode (
     if (mCodePtr->bodyPtr != NULL) {
         Tcl_DecrRefCount(mCodePtr->bodyPtr);
     }
-    ckfree((char*)mCodePtr);
+    Itcl_Free(mCodePtr);
 }
 
 
 void
 Itcl_DeleteMemberCode(
-    char* cdata)  /* pointer to member code definition */
+    void* cdata)  /* pointer to member code definition */
 {
-    ItclReleaseMemberCode((ItclMemberCode *)cdata);
+    Itcl_ReleaseData((ItclMemberCode *)cdata);
 }
 
 
@@ -1203,7 +1173,7 @@ Itcl_GetMemberCode(
         Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
             "member function \"", Tcl_GetString(imPtr->fullNamePtr),
             "\" is not defined and cannot be autoloaded",
-            (char*)NULL);
+            NULL);
         return TCL_ERROR;
     }
 
@@ -1219,10 +1189,10 @@ CallItclObjectCmd(
     int result)
 {
     Tcl_Object oPtr;
-    ItclMemberFunc *imPtr = data[0];
-    ItclObject *ioPtr = data[1];
+    ItclMemberFunc *imPtr = (ItclMemberFunc *)data[0];
+    ItclObject *ioPtr = (ItclObject *)data[1];
     int objc = PTR2INT(data[2]);
-    Tcl_Obj **objv = data[3];
+    Tcl_Obj **objv = (Tcl_Obj **)data[3];
 
     ItclShowArgs(1, "CallItclObjectCmd", objc, objv);
     if (ioPtr != NULL) {
@@ -1290,7 +1260,7 @@ Itcl_EvalMemberCode(
      *  Bump the reference count on this code, in case it is
      *  redefined or deleted during execution.
      */
-    ItclPreserveMemberCode(mcode);
+    Itcl_PreserveData(mcode);
 
     if ((imPtr->flags & ITCL_DESTRUCTOR) && (contextIoPtr != NULL)) {
         contextIoPtr->destructorHasBeenCalled = 1;
@@ -1310,7 +1280,7 @@ Itcl_EvalMemberCode(
                 char **argv;
                 argv = (char**)ckalloc( (unsigned)(objc*sizeof(char*)) );
                 for (i=0; i < objc; i++) {
-                    argv[i] = Tcl_GetStringFromObj(objv[i], (int*)NULL);
+                    argv[i] = Tcl_GetString(objv[i]);
                 }
 
                 result = (*mcode->cfunc.argCmd)(mcode->clientData,
@@ -1328,7 +1298,7 @@ Itcl_EvalMemberCode(
          }
     }
 
-    ItclReleaseMemberCode(mcode);
+    Itcl_ReleaseData(mcode);
     return result;
 }
 
@@ -1466,7 +1436,7 @@ Itcl_UnsetContext(
     Tcl_HashEntry *hPtr = Tcl_FindHashEntry(&infoPtr->frameContext,
 	    (char *)framePtr);
     Itcl_Stack *stackPtr = (Itcl_Stack *) Tcl_GetHashValue(hPtr);
-    ItclCallContext *contextPtr = Itcl_PopStack(stackPtr);
+    ItclCallContext *contextPtr = (ItclCallContext *)Itcl_PopStack(stackPtr);
 
     if (Itcl_GetStackSize(stackPtr) > 0) {
 	Tcl_Panic("frame context stack not empty!");
@@ -1499,7 +1469,7 @@ Itcl_GetContext(
     if (hPtr) {
 	/* Frame maps to a context stack. */
 	Itcl_Stack *stackPtr = (Itcl_Stack *)Tcl_GetHashValue(hPtr);
-	ItclCallContext *contextPtr = Itcl_PeekStack(stackPtr);
+	ItclCallContext *contextPtr = (ItclCallContext *)Itcl_PeekStack(stackPtr);
 
 	assert(contextPtr);
 
@@ -1612,10 +1582,10 @@ Itcl_GetMemberFuncUsage(
                 name = (char *) Tcl_GetCommandName(
 		    contextIoPtr->iclsPtr->interp, contextIoPtr->accessCmd);
                 Tcl_AppendStringsToObj(objPtr, name, " ",
-		        Tcl_GetString(imPtr->namePtr), (char*)NULL);
+		        Tcl_GetString(imPtr->namePtr), NULL);
             } else {
                 Tcl_AppendStringsToObj(objPtr, "<object> ",
-		        Tcl_GetString(imPtr->namePtr), (char*)NULL);
+		        Tcl_GetString(imPtr->namePtr), NULL);
 	    }
         }
     } else {
@@ -1693,7 +1663,7 @@ NRExecMethod(
     if (ioPtr == NULL) {
         Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
             "cannot access object-specific info without an object context",
-            (char*)NULL);
+            NULL);
         return TCL_ERROR;
     }
 
@@ -1729,9 +1699,9 @@ NRExecMethod(
      *  Execute the code for the method.  Be careful to protect
      *  the method in case it gets deleted during execution.
      */
-    ItclPreserveIMF(imPtr);
+    Itcl_PreserveData(imPtr);
     result = Itcl_EvalMemberCode(interp, imPtr, ioPtr, objc, objv);
-    ItclReleaseIMF(imPtr);
+    Itcl_ReleaseData(imPtr);
     return result;
 }
 
@@ -1782,18 +1752,18 @@ NRExecProc(
 	    ItclMemberFunc *imPtr2 = NULL;
             Tcl_HashEntry *hPtr;
 	    Tcl_ObjectContext context;
-	    context = Itcl_GetCallFrameClientData(interp);
+	    context = (Tcl_ObjectContext)Itcl_GetCallFrameClientData(interp);
             if (context == NULL) {
                 Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
                         "can't access \"", Tcl_GetString(imPtr->fullNamePtr),
 			"\": ", Itcl_ProtectionStr(imPtr->protection),
-			" function", (char*)NULL);
+			" function", NULL);
                 return TCL_ERROR;
             }
 	    hPtr = Tcl_FindHashEntry(&imPtr->iclsPtr->infoPtr->procMethods,
 	            (char *)Tcl_ObjectContextMethod(context));
 	    if (hPtr != NULL) {
-	        imPtr2 = Tcl_GetHashValue(hPtr);
+	        imPtr2 = (ItclMemberFunc *)Tcl_GetHashValue(hPtr);
 	    }
 	    if ((imPtr->protection & ITCL_PRIVATE) && (imPtr2 != NULL) &&
 	            (imPtr->iclsPtr->nsPtr != imPtr2->iclsPtr->nsPtr)) {
@@ -1806,7 +1776,7 @@ NRExecProc(
             Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
                     "can't access \"", Tcl_GetString(imPtr->fullNamePtr),
 		    "\": ", Itcl_ProtectionStr(imPtr->protection),
-		    " function", (char*)NULL);
+		    " function", NULL);
             return TCL_ERROR;
         }
     }
@@ -1815,11 +1785,11 @@ NRExecProc(
      *  Execute the code for the proc.  Be careful to protect
      *  the proc in case it gets deleted during execution.
      */
-    ItclPreserveIMF(imPtr);
+    Itcl_PreserveData(imPtr);
 
-    result = Itcl_EvalMemberCode(interp, imPtr, (ItclObject*)NULL,
+    result = Itcl_EvalMemberCode(interp, imPtr, NULL,
         objc, objv);
-    ItclReleaseIMF(imPtr);
+    Itcl_ReleaseData(imPtr);
     return result;
 }
 
@@ -1840,10 +1810,10 @@ CallInvokeMethodIfExists(
     Tcl_Interp *interp,
     int result)
 {
-    ItclClass *iclsPtr = data[0];
-    ItclObject *contextObj = data[1];
+    ItclClass *iclsPtr = (ItclClass *)data[0];
+    ItclObject *contextObj = (ItclObject *)data[1];
     int objc = PTR2INT(data[2]);
-    Tcl_Obj* const* objv = data[3];
+    Tcl_Obj *const *objv = (Tcl_Obj *const *)data[3];
 
     result = Itcl_InvokeMethodIfExists(interp, "constructor",
             iclsPtr, contextObj, objc, (Tcl_Obj* const*)objv);
@@ -2004,7 +1974,7 @@ Itcl_InvokeMethodIfExists(
          */
         cmdlinePtr = Itcl_CreateArgs(interp, name, objc, objv);
 
-        (void) Tcl_ListObjGetElements((Tcl_Interp*)NULL, cmdlinePtr,
+        (void) Tcl_ListObjGetElements(NULL, cmdlinePtr,
             &cmdlinec, &cmdlinev);
 
         ItclShowArgs(1, "EMC", cmdlinec, cmdlinev);
@@ -2012,7 +1982,7 @@ Itcl_InvokeMethodIfExists(
          *  Execute the code for the method.  Be careful to protect
          *  the method in case it gets deleted during execution.
          */
-	ItclPreserveIMF(imPtr);
+	Itcl_PreserveData(imPtr);
 
 	if (contextObjectPtr->oPtr == NULL) {
             Tcl_DecrRefCount(cmdlinePtr);
@@ -2020,7 +1990,7 @@ Itcl_InvokeMethodIfExists(
 	}
         result = Itcl_EvalMemberCode(interp, imPtr, contextObjectPtr,
 	        cmdlinec, cmdlinev);
-	ItclReleaseIMF(imPtr);
+	Itcl_ReleaseData(imPtr);
         Tcl_DecrRefCount(cmdlinePtr);
     } else {
         if (contextClassPtr->flags &
@@ -2131,7 +2101,7 @@ Itcl_CmdAliasProc(
     if (hPtr == NULL) {
 	return NULL;
     }
-    iclsPtr = Tcl_GetHashValue(hPtr);
+    iclsPtr = (ItclClass *)Tcl_GetHashValue(hPtr);
     objPtr = Tcl_NewStringObj(cmdName, -1);
     hPtr = Tcl_FindHashEntry(&iclsPtr->resolveCmds, (char *)objPtr);
     Tcl_DecrRefCount(objPtr);
@@ -2248,14 +2218,14 @@ Itcl_VarAliasProc(
     infoPtr = iclsPtr->infoPtr;
     hPtr = Tcl_FindHashEntry(&infoPtr->namespaceClasses, (char *)nsPtr);
     if (hPtr != NULL) {
-        iclsPtr = Tcl_GetHashValue(hPtr);
+        iclsPtr = (ItclClass *)Tcl_GetHashValue(hPtr);
     }
     hPtr = ItclResolveVarEntry(iclsPtr, varName);
     if (hPtr == NULL) {
 	/* no class/object variable */
         return NULL;
     }
-    ivlPtr = Tcl_GetHashValue(hPtr);
+    ivlPtr = (ItclVarLookup *)Tcl_GetHashValue(hPtr);
     if (ivlPtr == NULL) {
         return NULL;
     }
@@ -2280,7 +2250,7 @@ Itcl_VarAliasProc(
 	}
     }
     if (hPtr != NULL) {
-        varPtr = Tcl_GetHashValue(hPtr);
+        varPtr = (Tcl_Var)Tcl_GetHashValue(hPtr);
     }
     return varPtr;
 }
@@ -2350,7 +2320,7 @@ ItclCheckCallMethod(
     oPtr = NULL;
     hPtr = NULL;
     imPtr = (ItclMemberFunc *)clientData;
-    ItclPreserveIMF(imPtr);
+    Itcl_PreserveData(imPtr);
     if (imPtr->flags & ITCL_CONSTRUCTOR) {
         ioPtr = imPtr->iclsPtr->infoPtr->currIoPtr;
     } else {
@@ -2373,8 +2343,8 @@ ItclCheckCallMethod(
 	    result = TCL_ERROR;
 	    goto finishReturn;
 	}
-        oPtr = Tcl_ObjectContextObject(contextPtr);
-	ioPtr = Tcl_ObjectGetMetadata(oPtr,
+	oPtr = Tcl_ObjectContextObject(contextPtr);
+	ioPtr = (ItclObject *)Tcl_ObjectGetMetadata(oPtr,
 	        imPtr->iclsPtr->infoPtr->object_meta_type);
     }
     if ((imPtr->codePtr != NULL) &&
@@ -2418,7 +2388,7 @@ ItclCheckCallMethod(
     if (ioPtr != NULL) {
         hPtr = Tcl_CreateHashEntry(&ioPtr->contextCache, (char *)imPtr, &isNew);
         if (!isNew) {
-	    callContextPtr2 = Tcl_GetHashValue(hPtr);
+	    callContextPtr2 = (ItclCallContext *)Tcl_GetHashValue(hPtr);
 	    if (callContextPtr2->refCount == 0) {
 	        callContextPtr = callContextPtr2;
                 callContextPtr->objectFlags = ioPtr->flags;
@@ -2487,7 +2457,7 @@ ItclCheckCallMethod(
 
     if (ioPtr != NULL) {
         ioPtr->callRefCount++;
-	ItclPreserveObject(ioPtr);
+	Itcl_PreserveData(ioPtr);
     }
     imPtr->iclsPtr->callRefCount++;
     if (!imPtr->iclsPtr->infoPtr->useOldResolvers) {
@@ -2500,7 +2470,7 @@ ItclCheckCallMethod(
     }
     return result;
 finishReturn:
-    ItclReleaseIMF(imPtr);
+    Itcl_ReleaseData(imPtr);
     return result;
 }
 
@@ -2536,7 +2506,7 @@ ItclAfterCallMethod(
     hPtr = Tcl_FindHashEntry(&infoPtr->frameContext, (char *)contextPtr);
     assert(hPtr);
     stackPtr = (Itcl_Stack *)Tcl_GetHashValue(hPtr);
-    framePtr = Itcl_PopStack(stackPtr);
+    framePtr = (Tcl_CallFrame *)Itcl_PopStack(stackPtr);
     if (Itcl_GetStackSize(stackPtr) == 0) {
 	Itcl_DeleteStack(stackPtr);
 	ckfree((char *) stackPtr);
@@ -2546,7 +2516,7 @@ ItclAfterCallMethod(
     hPtr = Tcl_FindHashEntry(&infoPtr->frameContext, (char *)framePtr);
     assert(hPtr);
     stackPtr = (Itcl_Stack *)Tcl_GetHashValue(hPtr);
-    callContextPtr = Itcl_PopStack(stackPtr);
+    callContextPtr = (ItclCallContext *)Itcl_PopStack(stackPtr);
     if (Itcl_GetStackSize(stackPtr) == 0) {
 	Itcl_DeleteStack(stackPtr);
 	ckfree((char *) stackPtr);
@@ -2601,14 +2571,14 @@ ItclAfterCallMethod(
             if (hPtr == NULL) {
                 ckfree((char *)callContextPtr);
 	    }
-	    ItclReleaseObject(ioPtr);
+	    Itcl_ReleaseData(ioPtr);
         } else {
             ckfree((char *)callContextPtr);
         }
     }
     result = call_result;
 finishReturn:
-    ItclReleaseIMF(imPtr);
+    Itcl_ReleaseData(imPtr);
     return result;
 }
 
@@ -2641,7 +2611,7 @@ ItclProcErrorProc(
 
     /* Frame maps to a context stack. */
     stackPtr = (Itcl_Stack *)Tcl_GetHashValue(hPtr);
-    callContextPtr = Itcl_PeekStack(stackPtr);
+    callContextPtr = (ItclCallContext *)Itcl_PeekStack(stackPtr);
 
     if (callContextPtr == NULL) {
 	return;

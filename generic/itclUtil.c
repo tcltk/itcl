@@ -29,10 +29,7 @@
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  */
 #include "itclInt.h"
-
-#ifdef ITCL_PRESERVE_DEBUG
-#include <malloc.h>
-#endif
+#include <limits.h>
 
 /*
  *  POOL OF LIST ELEMENTS FOR LINKED LIST
@@ -59,11 +56,6 @@ typedef struct InterpState {
 
 #define TCL_STATE_VALID 0x01233210  /* magic bit pattern for validation */
 
-#ifdef ITCL_PRESERVE_DEBUG
-static Tcl_HashTable itclPreserveInfos;
-static int itclPreserveInfoInitted = 0;
-#endif
-
 
 /*
  * ------------------------------------------------------------------------
@@ -75,10 +67,10 @@ static int itclPreserveInfoInitted = 0;
  */
 
 void
-Itcl_Assert(testExpr, fileName, lineNumber)
-    const char *testExpr;   /* string representing test expression */
-    const char *fileName;   /* file name containing this call */
-    int lineNumber;	    /* line number containing this call */
+Itcl_Assert(
+    const char *testExpr,   /* string representing test expression */
+    const char *fileName,   /* file name containing this call */
+    int lineNumber)	    /* line number containing this call */
 {
     Tcl_Panic("Itcl Assertion failed: \"%s\" (line %d of %s)",
 	testExpr, lineNumber, fileName);
@@ -95,8 +87,8 @@ Itcl_Assert(testExpr, fileName, lineNumber)
  * ------------------------------------------------------------------------
  */
 void
-Itcl_InitStack(stack)
-    Itcl_Stack *stack;     /* stack to be initialized */
+Itcl_InitStack(
+    Itcl_Stack *stack)     /* stack to be initialized */
 {
     stack->values = stack->space;
     stack->max = sizeof(stack->space)/sizeof(ClientData);
@@ -112,8 +104,8 @@ Itcl_InitStack(stack)
  * ------------------------------------------------------------------------
  */
 void
-Itcl_DeleteStack(stack)
-    Itcl_Stack *stack;     /* stack to be deleted */
+Itcl_DeleteStack(
+    Itcl_Stack *stack)     /* stack to be deleted */
 {
     /*
      *  If memory was explicitly allocated (instead of using the
@@ -135,9 +127,9 @@ Itcl_DeleteStack(stack)
  * ------------------------------------------------------------------------
  */
 void
-Itcl_PushStack(cdata,stack)
-    ClientData cdata;      /* data to be pushed onto stack */
-    Itcl_Stack *stack;     /* stack */
+Itcl_PushStack(
+    ClientData cdata,      /* data to be pushed onto stack */
+    Itcl_Stack *stack)     /* stack */
 {
     ClientData *newStack;
 
@@ -166,14 +158,14 @@ Itcl_PushStack(cdata,stack)
  * ------------------------------------------------------------------------
  */
 ClientData
-Itcl_PopStack(stack)
-    Itcl_Stack *stack;  /* stack to be manipulated */
+Itcl_PopStack(
+    Itcl_Stack *stack)  /* stack to be manipulated */
 {
     if (stack->values && (stack->len > 0)) {
         stack->len--;
         return stack->values[stack->len];
     }
-    return (ClientData)NULL;
+    return NULL;
 }
 
 /*
@@ -184,13 +176,13 @@ Itcl_PopStack(stack)
  * ------------------------------------------------------------------------
  */
 ClientData
-Itcl_PeekStack(stack)
-    Itcl_Stack *stack;  /* stack to be examined */
+Itcl_PeekStack(
+    Itcl_Stack *stack)  /* stack to be examined */
 {
     if (stack->values && (stack->len > 0)) {
         return stack->values[stack->len-1];
     }
-    return (ClientData)NULL;
+    return NULL;
 }
 
 /*
@@ -202,15 +194,15 @@ Itcl_PeekStack(stack)
  * ------------------------------------------------------------------------
  */
 ClientData
-Itcl_GetStackValue(stack,pos)
-    Itcl_Stack *stack;  /* stack to be examined */
-    int pos;            /* get value at this index */
+Itcl_GetStackValue(
+    Itcl_Stack *stack,  /* stack to be examined */
+    int pos)            /* get value at this index */
 {
     if (stack->values && (stack->len > 0)) {
         assert(pos < stack->len);
         return stack->values[pos];
     }
-    return (ClientData)NULL;
+    return NULL;
 }
 
 
@@ -223,8 +215,8 @@ Itcl_GetStackValue(stack,pos)
  * ------------------------------------------------------------------------
  */
 void
-Itcl_InitList(listPtr)
-    Itcl_List *listPtr;     /* list to be initialized */
+Itcl_InitList(
+    Itcl_List *listPtr)     /* list to be initialized */
 {
     listPtr->validate = ITCL_VALID_LIST;
     listPtr->num      = 0;
@@ -243,8 +235,8 @@ Itcl_InitList(listPtr)
  * ------------------------------------------------------------------------
  */
 void
-Itcl_DeleteList(listPtr)
-    Itcl_List *listPtr;     /* list to be deleted */
+Itcl_DeleteList(
+    Itcl_List *listPtr)     /* list to be deleted */
 {
     Itcl_ListElem *elemPtr;
 
@@ -298,8 +290,8 @@ Itcl_CreateListElem(
  * ------------------------------------------------------------------------
  */
 Itcl_ListElem*
-Itcl_DeleteListElem(elemPtr)
-    Itcl_ListElem *elemPtr;     /* list element to be deleted */
+Itcl_DeleteListElem(
+    Itcl_ListElem *elemPtr)     /* list element to be deleted */
 {
     Itcl_List *listPtr;
     Itcl_ListElem *nextPtr;
@@ -342,9 +334,9 @@ Itcl_DeleteListElem(elemPtr)
  * ------------------------------------------------------------------------
  */
 Itcl_ListElem*
-Itcl_InsertList(listPtr,val)
-    Itcl_List *listPtr;     /* list being modified */
-    ClientData val;         /* value associated with new element */
+Itcl_InsertList(
+    Itcl_List *listPtr,     /* list being modified */
+    ClientData val)         /* value associated with new element */
 {
     Itcl_ListElem *elemPtr;
     assert(listPtr->validate == ITCL_VALID_LIST);
@@ -376,9 +368,9 @@ Itcl_InsertList(listPtr,val)
  * ------------------------------------------------------------------------
  */
 Itcl_ListElem*
-Itcl_InsertListElem(pos,val)
-    Itcl_ListElem *pos;     /* insert just before this element */
-    ClientData val;         /* value associated with new element */
+Itcl_InsertListElem(
+    Itcl_ListElem *pos,     /* insert just before this element */
+    ClientData val)         /* value associated with new element */
 {
     Itcl_List *listPtr;
     Itcl_ListElem *elemPtr;
@@ -418,9 +410,9 @@ Itcl_InsertListElem(pos,val)
  * ------------------------------------------------------------------------
  */
 Itcl_ListElem*
-Itcl_AppendList(listPtr,val)
-    Itcl_List *listPtr;     /* list being modified */
-    ClientData val;         /* value associated with new element */
+Itcl_AppendList(
+    Itcl_List *listPtr,     /* list being modified */
+    ClientData val)         /* value associated with new element */
 {
     Itcl_ListElem *elemPtr;
     assert(listPtr->validate == ITCL_VALID_LIST);
@@ -452,9 +444,9 @@ Itcl_AppendList(listPtr,val)
  * ------------------------------------------------------------------------
  */
 Itcl_ListElem*
-Itcl_AppendListElem(pos,val)
-    Itcl_ListElem *pos;     /* insert just after this element */
-    ClientData val;         /* value associated with new element */
+Itcl_AppendListElem(
+    Itcl_ListElem *pos,     /* insert just after this element */
+    ClientData val)         /* value associated with new element */
 {
     Itcl_List *listPtr;
     Itcl_ListElem *elemPtr;
@@ -492,9 +484,9 @@ Itcl_AppendListElem(pos,val)
  * ------------------------------------------------------------------------
  */
 void
-Itcl_SetListValue(elemPtr,val)
-    Itcl_ListElem *elemPtr; /* list element being modified */
-    ClientData val;         /* new value associated with element */
+Itcl_SetListValue(
+    Itcl_ListElem *elemPtr, /* list element being modified */
+    ClientData val)         /* new value associated with element */
 {
     assert(elemPtr != NULL);
     assert(elemPtr->owner->validate == ITCL_VALID_LIST);
@@ -514,7 +506,7 @@ Itcl_FinishList()
 {
     Itcl_ListElem *listPtr;
     Itcl_ListElem *elemPtr;
-    
+
     listPtr = listPool;
     while (listPtr != NULL) {
         elemPtr = listPtr;
@@ -533,20 +525,24 @@ Itcl_FinishList()
  *
  *  The following procedures manage generic reference-counted data.
  *  They are similar in spirit to the Tcl_Preserve/Tcl_Release
- *  procedures defined in the Tcl/Tk core.  But these procedures use
- *  a hash table instead of a linked list to maintain the references,
- *  so they scale better.  Also, the Tcl procedures have a bad behavior
- *  during the "exit" command.  Their exit handler shuts them down
- *  when other data is still being reference-counted and cleaned up.
- *
+ *  procedures defined in the Tcl/Tk core.  But these procedures attach a
+ *  refcount directly to the allocated memory, and then use it to govern
+ *  shared access and properly timed release.
+ */
+
+typedef struct PresMemoryPrefix {
+    Tcl_FreeProc *freeProc;     /* called by last Itcl_ReleaseData */
+    size_t refCount;            /* refernce (resp preserving) counter */
+} PresMemoryPrefix;
+
+/*
  * ------------------------------------------------------------------------
  *  Itcl_EventuallyFree()
  *
- *  Registers a piece of data so that it will be freed when no longer
- *  in use.  The data is registered with an initial usage count of "0".
- *  Future calls to Itcl_PreserveData() increase this usage count, and
- *  calls to Itcl_ReleaseData() decrease the count until it reaches
- *  zero and the data is freed.
+ *  Asscociates with cdata (allocated by Itcl_Alloc()) a routine to
+ *  be called when cdata should be freed. This routine will be called
+ *  when the number of Itcl_ReleaseData() calls on cdata  matches the
+ *  number of Itcl_PreserveData() calls on cdata.
  * ------------------------------------------------------------------------
  */
 void
@@ -554,57 +550,18 @@ Itcl_EventuallyFree(
     ClientData cdata,          /* data to be freed when not in use */
     Tcl_FreeProc *fproc)       /* procedure called to free data */
 {
-    ItclPresMemoryPrefix *blk;
+    PresMemoryPrefix *blk;
 
-    /*
-     *  If the clientData value is NULL, do nothing.
-     */
     if (cdata == NULL) {
         return;
     }
 
     /* Itcl memory block to ckalloc block */
-    blk = ((ItclPresMemoryPrefix *)cdata)-1;
+    blk = ((PresMemoryPrefix *)cdata)-1;
 
     /* Set new free proc */
     blk->freeProc = fproc;
 }
-#ifdef ITCL_PRESERVE_DEBUG
-void
-Itcl_DbDumpPreserveInfo(
-    const char *fileName)
-{
-    FOREACH_HASH_DECLS;
-    FILE *fd;
-    ItclPreserveInfo *ipiPtr;
-    ItclPreserveInfoEntry *ipiePtr;
-    size_t j;
-
-    if (fileName == NULL) {
-        fd = stderr;
-    } else {
-        fd = fopen(fileName, "w");
-    }
-    fprintf(fd, "type\taddr\tfile\tline\n");
-    FOREACH_HASH_VALUE(ipiPtr, &itclPreserveInfos) {
-	if (ipiPtr->refCount == 0) {
-	    continue;
-	}
-	fprintf(stderr, "DAT!%p!%" TCL_LL_MODIFIER "u!\n", ipiPtr->clientData, (Tcl_WideUInt) ipiPtr->refCount);
-        for (j = 0; j < ipiPtr->numEntries; j++) {
-            ipiePtr = &ipiPtr->entries[j];
-            if (ipiePtr->type != ITCL_PRESERVE_DELETED) {
-                fprintf(fd, "%s\t%p\t%s\t%d\n", 
-                        ipiePtr->type == ITCL_PRESERVE_INCR ? "INCR" : "DECR",
-                        ipiPtr->clientData, ipiePtr->fileName, ipiePtr->line);
-            }
-        }
-    }
-    if (fd != stderr) {
-        fclose(fd);
-    }
-}
-#endif
 
 /*
  * ------------------------------------------------------------------------
@@ -618,80 +575,22 @@ Itcl_DbDumpPreserveInfo(
  *  freed.
  * ------------------------------------------------------------------------
  */
-#ifdef ITCL_PRESERVE_DEBUG
-void
-ItclDbgPreserveData(
-    ClientData cdata,     /* data to be preserved */
-    int line,
-    const char *file)
-{
-
-    /*
-     *  If the clientData value is NULL, do nothing.
-     */
-    if (cdata == NULL) {
-        return;
-    }
-    {
-	Tcl_HashEntry *hPtr;
-        ItclPreserveInfo *ipiPtr;
-        ItclPreserveInfoEntry *ipiePtr;
-	int isNew;
-
-        if (!itclPreserveInfoInitted) {
-            Tcl_InitHashTable(&itclPreserveInfos, TCL_ONE_WORD_KEYS);
-            itclPreserveInfoInitted = 1;
-        }
-	hPtr = Tcl_CreateHashEntry(&itclPreserveInfos, cdata, &isNew);
-	if (isNew) {
-	    ipiPtr = (ItclPreserveInfo *)ckalloc(sizeof(ItclPreserveInfo));
-	    ipiPtr->refCount = 0;
-	    ipiPtr->size = ITCL_PRESERVE_BUCKET_SIZE;
-	    ipiPtr->numEntries = 0;
-	    ipiPtr->clientData = cdata;
-	    ipiPtr->entries = (ItclPreserveInfoEntry *)malloc(
-	            sizeof(ItclPreserveInfoEntry) * ipiPtr->size);
-	    Tcl_SetHashValue(hPtr, ipiPtr);
-	}
-	ipiPtr = Tcl_GetHashValue(hPtr);
-        if (ipiPtr->numEntries >= ipiPtr->size) {
-            ipiPtr->size += ITCL_PRESERVE_BUCKET_SIZE;
-            ipiPtr->entries = (ItclPreserveInfoEntry *)
-                    realloc((char *)ipiPtr->entries,
-                    sizeof(ItclPreserveInfoEntry) *
-                    ipiPtr->size);
-        }
-        ipiePtr = &ipiPtr->entries[ipiPtr->numEntries++];
-        ipiePtr->type = ITCL_PRESERVE_INCR;
-        ipiePtr->line = line;
-        ipiePtr->fileName = file;
-        ipiPtr->refCount++;
-    }
-
-    Tcl_Preserve(cdata);
-    return;
-}
-# else
 void
 Itcl_PreserveData(
     ClientData cdata)     /* data to be preserved */
 {
-    ItclPresMemoryPrefix *blk;
+    PresMemoryPrefix *blk;
 
-    /*
-     *  If the clientData value is NULL, do nothing.
-     */
     if (cdata == NULL) {
         return;
     }
 
     /* Itcl memory block to ckalloc block */
-    blk = ((ItclPresMemoryPrefix *)cdata)-1;
+    blk = ((PresMemoryPrefix *)cdata)-1;
 
     /* Increment preservation count */
     ++blk->refCount;
 }
-#endif
 
 /*
  * ------------------------------------------------------------------------
@@ -703,93 +602,38 @@ Itcl_PreserveData(
  *  automatically freed.
  * ------------------------------------------------------------------------
  */
-#ifdef ITCL_PRESERVE_DEBUG
-void
-ItclDbgReleaseData(
-    ClientData cdata,      /* data to be released */
-    int line,
-    const char *file)
-{
-
-    int noDelete = 0;
-
-    /*
-     *  If the clientData value is NULL, do nothing.
-     */
-    if (cdata == NULL) {
-        return;
-    }
-    {
-	Tcl_HashEntry *hPtr;
-        ItclPreserveInfo *ipiPtr;
-        ItclPreserveInfoEntry *ipiePtr;
-
-        if (!itclPreserveInfoInitted) {
-            Tcl_InitHashTable(&itclPreserveInfos, TCL_ONE_WORD_KEYS);
-            itclPreserveInfoInitted = 1;
-        }
-	hPtr = Tcl_FindHashEntry(&itclPreserveInfos, cdata);
-	if (hPtr != NULL) {
-	    ipiPtr = Tcl_GetHashValue(hPtr);
-            if (ipiPtr->numEntries >= ipiPtr->size) {
-                ipiPtr->size += ITCL_PRESERVE_BUCKET_SIZE;
-                ipiPtr->entries = (ItclPreserveInfoEntry *)
-                        realloc((char *)ipiPtr->entries,
-                        sizeof(ItclPreserveInfoEntry) *
-                        ipiPtr->size);
-            }
-            ipiePtr = &ipiPtr->entries[ipiPtr->numEntries++];
-            ipiePtr->type = ITCL_PRESERVE_DECR;
-            ipiePtr->line = line;
-            ipiePtr->fileName = file;
-            if (ipiPtr->refCount-- == 0) {
-                fprintf(stderr, "REFCOUNT < 0 for: %p!\n", cdata);
-                noDelete = 1;
-            }
-	}
-    }
-    if (!noDelete) {
-        Tcl_Release(cdata);
-    }
-    return;
-}
-#else
 void
 Itcl_ReleaseData(
     ClientData cdata)      /* data to be released */
 {
-    ItclPresMemoryPrefix *blk;
+    PresMemoryPrefix *blk;
+    Tcl_FreeProc *freeProc;
 
-    /*
-     *  If the clientData value is NULL, do nothing.
-     */
     if (cdata == NULL) {
         return;
     }
 
     /* Itcl memory block to ckalloc block */
-    blk = ((ItclPresMemoryPrefix *)cdata)-1;
+    blk = ((PresMemoryPrefix *)cdata)-1;
+
+    /* Usage sanity check */
+    assert(blk->refCount != 0); /* must call Itcl_PreserveData() first */
+    assert(blk->freeProc);	/* must call Itcl_EventuallyFree() first */
 
     /* Decrement preservation count */
     if (--blk->refCount) {
 	return;
     }
 
-    /* Free it now */
-    if (blk->freeProc != NULL) {
-	Tcl_FreeProc *freeProc = blk->freeProc;
-	blk->freeProc = NULL;
-	freeProc(cdata);
-    } else {
-	ckfree(blk);
-    }
-    return;
+    /* Free cdata now */
+    freeProc = blk->freeProc;
+    blk->freeProc = NULL;
+    freeProc(cdata);
 }
-#endif
 
 /*
  * ------------------------------------------------------------------------
- * ItclCkalloc()
+ * Itcl_Alloc()
  *
  *	Allocate preservable memory. In opposite to ckalloc the result can be
  *	supplied to preservation facilities of Itcl (Itcl_PreserveData).
@@ -798,18 +642,21 @@ Itcl_ReleaseData(
  *	Pointer to new allocated memory.
  * ------------------------------------------------------------------------
  */
-#ifndef ITCL_PRESERVE_DEBUG
-void * ItclCkalloc(
-    size_t size,		/* Size of memory to allocate */
-    Tcl_FreeProc *freeProc	/* Function to actually do free (or NULL). */
-) {
-    ItclPresMemoryPrefix *blk = (ItclPresMemoryPrefix *)ckalloc(
-	size + sizeof(ItclPresMemoryPrefix));
+void * Itcl_Alloc(
+    size_t size)	/* Size of memory to allocate */
+{
+    size_t numBytes;
+    PresMemoryPrefix *blk;
 
-    if (!blk) { return NULL; };
+    /* The ckalloc() in Tcl 8 can alloc at most UINT_MAX bytes */
+    assert (size <= UINT_MAX - sizeof(PresMemoryPrefix));
+    numBytes = size + sizeof(PresMemoryPrefix);
 
-    blk->freeProc = freeProc;
-    blk->refCount = freeProc ? 1 : 0; /* Preserved once if freeProc set. */
+    /* This will panic on allocation failure. No need to check return value. */
+    blk = (PresMemoryPrefix *)ckalloc(numBytes);
+
+    /* Itcl_Alloc defined to zero-init memory it allocates */
+    memset(blk, 0, numBytes);
 
     /* ckalloc block to Itcl memory block */
     return blk+1;
@@ -818,29 +665,26 @@ void * ItclCkalloc(
  * ------------------------------------------------------------------------
  * ItclFree()
  *
- *	Release memory blocks (release preserved block).
+ *	Release memory allocated by Itcl_Alloc() that was never preserved.
  *
  * Results:
  *	None.
  *
  * ------------------------------------------------------------------------
  */
-void ItclCkfree(void *ptr) {
-    ItclPresMemoryPrefix *blk;
+void Itcl_Free(void *ptr) {
+    PresMemoryPrefix *blk;
     
     if (ptr == NULL) {
 	return;
     }
     /* Itcl memory block to ckalloc block */
-    blk = ((ItclPresMemoryPrefix *)ptr)-1;
+    blk = ((PresMemoryPrefix *)ptr)-1;
 
-    assert(blk->refCount <= 0); /* it should be not preserved */
-    #if 0
+    assert(blk->refCount == 0); /* it should be not preserved */
     assert(blk->freeProc == NULL); /* it should be released */
-    #endif
     ckfree(blk);
 }
-#endif
 
 /*
  * ------------------------------------------------------------------------
@@ -860,9 +704,9 @@ void ItclCkfree(void *ptr) {
  * ------------------------------------------------------------------------
  */
 Itcl_InterpState
-Itcl_SaveInterpState(interp, status)
-    Tcl_Interp* interp;     /* interpreter being modified */
-    int status;             /* integer status code for current operation */
+Itcl_SaveInterpState(
+    Tcl_Interp* interp,     /* interpreter being modified */
+    int status)             /* integer status code for current operation */
 {
     return (Itcl_InterpState) Tcl_SaveInterpState(interp, status);
 }
@@ -882,9 +726,9 @@ Itcl_SaveInterpState(interp, status)
  * ------------------------------------------------------------------------
  */
 int
-Itcl_RestoreInterpState(interp, state)
-    Tcl_Interp* interp;       /* interpreter being modified */
-    Itcl_InterpState state;   /* token representing interpreter state */
+Itcl_RestoreInterpState(
+    Tcl_Interp* interp,       /* interpreter being modified */
+    Itcl_InterpState state)   /* token representing interpreter state */
 {
     return Tcl_RestoreInterpState(interp, (Tcl_InterpState)state);
 }
@@ -902,8 +746,8 @@ Itcl_RestoreInterpState(interp, state)
  * ------------------------------------------------------------------------
  */
 void
-Itcl_DiscardInterpState(state)
-    Itcl_InterpState state;  /* token representing interpreter state */
+Itcl_DiscardInterpState(
+    Itcl_InterpState state)  /* token representing interpreter state */
 {
     Tcl_DiscardInterpState((Tcl_InterpState)state);
     return;
@@ -926,9 +770,9 @@ Itcl_DiscardInterpState(state)
  * ------------------------------------------------------------------------
  */
 int
-Itcl_Protection(interp, newLevel)
-    Tcl_Interp *interp;  /* interpreter being queried */
-    int newLevel;        /* new protection level or 0 */
+Itcl_Protection(
+    Tcl_Interp *interp,  /* interpreter being queried */
+    int newLevel)        /* new protection level or 0 */
 {
     int oldVal;
     ItclObjectInfo *infoPtr;
@@ -938,7 +782,7 @@ Itcl_Protection(interp, newLevel)
      *  In any case, return the protection level as it stands right now.
      */
     infoPtr = (ItclObjectInfo*) Tcl_GetAssocData(interp, ITCL_INTERP_DATA,
-        (Tcl_InterpDeleteProc**)NULL);
+        NULL);
 
     assert(infoPtr != NULL);
     oldVal = infoPtr->protection;
@@ -979,7 +823,7 @@ Itcl_ParseNamespPath(
     const char **head,   /* returns "namesp::namesp::namesp" part */
     const char **tail)   /* returns "element" part */
 {
-    register char *sep, *newname;
+    char *sep, *newname;
 
     Tcl_DStringInit(buffer);
 
@@ -1075,7 +919,7 @@ Itcl_CanAccess2(
 	if (entry == NULL) {
 	    return 0;
 	}
-	fromIclsPtr = Tcl_GetHashValue(entry);
+	fromIclsPtr = (ItclClass *)Tcl_GetHashValue(entry);
 
         entry = Tcl_FindHashEntry(&fromIclsPtr->heritage,
 	        (char*)iclsPtr);
@@ -1158,7 +1002,7 @@ Itcl_CanAccessFunc(
 	if (hPtr == NULL) {
 	    return 0;
 	}
-        fromIclsPtr = Tcl_GetHashValue(hPtr);
+        fromIclsPtr = (ItclClass *)Tcl_GetHashValue(hPtr);
 
         if (Tcl_FindHashEntry(&iclsPtr->heritage, (char*)fromIclsPtr)) {
             entry = Tcl_FindHashEntry(&fromIclsPtr->resolveCmds,
@@ -1210,10 +1054,10 @@ Itcl_DecodeScopedCommand(
     int listc;
     int result;
     int len;
-    
+
     nsPtr = NULL;
     len = strlen(name);
-    cmdName = ckalloc((unsigned)strlen(name)+1);
+    cmdName = (char *)ckalloc(strlen(name)+1);
     strcpy(cmdName, name);
 
     if ((*name == 'n') && (len > 17) && (strncmp(name, "namespace", 9) == 0)) {
@@ -1230,17 +1074,17 @@ Itcl_DecodeScopedCommand(
                     Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
                         "malformed command \"", name, "\": should be \"",
                         "namespace inscope namesp command\"",
-                        (char*)NULL);
+                        NULL);
                     result = TCL_ERROR;
                 } else {
                     nsPtr = Tcl_FindNamespace(interp, listv[2],
-                        (Tcl_Namespace*)NULL, TCL_LEAVE_ERR_MSG);
+                        NULL, TCL_LEAVE_ERR_MSG);
 
                     if (nsPtr == NULL) {
                         result = TCL_ERROR;
                     } else {
 		        ckfree(cmdName);
-                        cmdName = ckalloc((unsigned)(strlen(listv[3])+1));
+                        cmdName = (char *)ckalloc(strlen(listv[3])+1);
                         strcpy(cmdName, listv[3]);
                     }
                 }
@@ -1261,22 +1105,3 @@ Itcl_DecodeScopedCommand(
     *rCmdPtr = cmdName;
     return TCL_OK;
 }
-
-#ifdef ITCL_PRESERVE_DEBUG
-#undef Itcl_PreserveData
-#undef Itcl_ReleaseData
-
-void
-Itcl_PreserveData(
-    ClientData cdata)
-{
-    ItclDbgPreserveData(cdata, 0, "");
-}
-
-void
-Itcl_ReleaseData(
-    ClientData cdata)
-{
-    ItclDbgReleaseData(cdata, 0, "");
-}
-#endif

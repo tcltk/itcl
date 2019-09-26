@@ -446,7 +446,7 @@ test sfbug-257 { SF bug #257
       ::cl1::p1
       $obj1 p1
       $obj1 m1
-  
+
       catch {
       $obj1 m1
       ::cl1::p1

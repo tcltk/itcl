@@ -29,7 +29,7 @@ proc testsNeedTcl {version} {
     if {[package vsatisfies [package provide Tcl] ${version}-]} return
 
     puts "    Aborting the tests found in \"[file tail [info script]]\""
-    puts "    Requiring at least Tcl $version, have [package present Tcl]."
+    puts "    Requiring at least Tcl $version, have [package provide Tcl]."
 
     # This causes a 'return' in the calling scope.
     return -code return
@@ -221,7 +221,7 @@ test install-1.4 {install queries option database
         }
 
         constructor {args} {
-            installcomponent text using text $win.text 
+            installcomponent text using text $win.text
         }
     }
 

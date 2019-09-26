@@ -223,7 +223,7 @@ AC_CHECK_TYPE([intptr_t], [
     for tcl_cv_intptr_t in "int" "long" "long long" none; do
 	if test "$tcl_cv_intptr_t" != none; then
 	    AC_COMPILE_IFELSE([AC_LANG_BOOL_COMPILE_TRY([AC_INCLUDES_DEFAULT],
-		    [[sizeof (void *) <= sizeof ($tcl_cv_intptr_t)]])], 
+		    [[sizeof (void *) <= sizeof ($tcl_cv_intptr_t)]])],
 		[tcl_ok=yes], [tcl_ok=no])
 	    test "$tcl_ok" = yes && break; fi
     done])

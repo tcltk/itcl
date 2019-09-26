@@ -11,10 +11,6 @@
 
 AC_PREREQ(2.57)
 
-dnl TEA extensions pass us the version of TEA they think they
-dnl are compatible with (must be set in TEA_INIT below)
-dnl TEA_VERSION="3.10"
-
 # Possible values for key variables defined:
 #
 # TEA_WINDOWINGSYSTEM - win32 aqua x11 (mirrors 'tk windowingsystem')
@@ -109,6 +105,9 @@ AC_DEFUN([TEA_PATH_TCLCONFIG], [
 			`ls -d /Library/Frameworks 2>/dev/null` \
 			`ls -d /Network/Library/Frameworks 2>/dev/null` \
 			`ls -d /System/Library/Frameworks 2>/dev/null` \
+			`ls -d /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/Library/Frameworks/Tcl.framework 2>/dev/null` \
+			`ls -d /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/Network/Library/Frameworks/Tcl.framework 2>/dev/null` \
+			`ls -d /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/System/Library/Frameworks/Tcl.framework 2>/dev/null` \
 			; do
 		    if test -f "$i/Tcl.framework/tclConfig.sh" ; then
 			ac_cv_c_tclconfig="`(cd $i/Tcl.framework; pwd)`"
@@ -137,10 +136,15 @@ AC_DEFUN([TEA_PATH_TCLCONFIG], [
 			`ls -d ${prefix}/lib 2>/dev/null` \
 			`ls -d /usr/local/lib 2>/dev/null` \
 			`ls -d /usr/contrib/lib 2>/dev/null` \
+			`ls -d /usr/pkg/lib 2>/dev/null` \
 			`ls -d /usr/lib 2>/dev/null` \
 			`ls -d /usr/lib64 2>/dev/null` \
 			`ls -d /usr/lib/tcl8.6 2>/dev/null` \
 			`ls -d /usr/lib/tcl8.5 2>/dev/null` \
+			`ls -d /usr/local/lib/tcl8.6 2>/dev/null` \
+			`ls -d /usr/local/lib/tcl8.5 2>/dev/null` \
+			`ls -d /usr/local/lib/tcl/tcl8.6 2>/dev/null` \
+			`ls -d /usr/local/lib/tcl/tcl8.5 2>/dev/null` \
 			; do
 		    if test -f "$i/tclConfig.sh" ; then
 			ac_cv_c_tclconfig="`(cd $i; pwd)`"
@@ -264,6 +268,9 @@ AC_DEFUN([TEA_PATH_TKCONFIG], [
 			`ls -d /Library/Frameworks 2>/dev/null` \
 			`ls -d /Network/Library/Frameworks 2>/dev/null` \
 			`ls -d /System/Library/Frameworks 2>/dev/null` \
+			`ls -d /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/Library/Frameworks/Tcl.framework 2>/dev/null` \
+			`ls -d /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/Network/Library/Frameworks/Tcl.framework 2>/dev/null` \
+			`ls -d /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/System/Library/Frameworks/Tcl.framework 2>/dev/null` \
 			; do
 		    if test -f "$i/Tk.framework/tkConfig.sh" ; then
 			ac_cv_c_tkconfig="`(cd $i/Tk.framework; pwd)`"
@@ -279,8 +286,15 @@ AC_DEFUN([TEA_PATH_TKCONFIG], [
 			`ls -d ${prefix}/lib 2>/dev/null` \
 			`ls -d /usr/local/lib 2>/dev/null` \
 			`ls -d /usr/contrib/lib 2>/dev/null` \
+			`ls -d /usr/pkg/lib 2>/dev/null` \
 			`ls -d /usr/lib 2>/dev/null` \
 			`ls -d /usr/lib64 2>/dev/null` \
+			`ls -d /usr/lib/tk8.6 2>/dev/null` \
+			`ls -d /usr/lib/tk8.5 2>/dev/null` \
+			`ls -d /usr/local/lib/tk8.6 2>/dev/null` \
+			`ls -d /usr/local/lib/tk8.5 2>/dev/null` \
+			`ls -d /usr/local/lib/tcl/tk8.6 2>/dev/null` \
+			`ls -d /usr/local/lib/tcl/tk8.5 2>/dev/null` \
 			; do
 		    if test -f "$i/tkConfig.sh" ; then
 			ac_cv_c_tkconfig="`(cd $i; pwd)`"
@@ -349,6 +363,8 @@ AC_DEFUN([TEA_PATH_TKCONFIG], [
 #		TCL_BIN_DIR
 #		TCL_SRC_DIR
 #		TCL_LIB_FILE
+#		TCL_ZIP_FILE
+#		TCL_ZIPFS_SUPPORT
 #------------------------------------------------------------------------
 
 AC_DEFUN([TEA_LOAD_TCLCONFIG], [
@@ -424,7 +440,8 @@ AC_DEFUN([TEA_LOAD_TCLCONFIG], [
 		#error win32
 	    #endif
 	], [
-	    TEA_PLATFORM="unix"
+	    # first test we've already retrieved platform (cross-compile), fallback to unix otherwise:
+	    TEA_PLATFORM="${TEA_PLATFORM-unix}"
 	    CYGPATH=echo
 	], [
 	    TEA_PLATFORM="windows"
@@ -783,7 +800,7 @@ AC_DEFUN([TEA_ENABLE_SHARED], [
 AC_DEFUN([TEA_ENABLE_THREADS], [
     AC_ARG_ENABLE(threads,
 	AC_HELP_STRING([--enable-threads],
-	    [build with threads]),
+	    [build with threads (default: on)]),
 	[tcl_ok=$enableval], [tcl_ok=yes])
 
     if test "${enable_threads+set}" = set; then
@@ -865,14 +882,6 @@ AC_DEFUN([TEA_ENABLE_THREADS], [
 		AC_MSG_WARN([
     Building ${PACKAGE_NAME} without threads enabled, but building against Tcl
     that IS thread-enabled.  It is recommended to use --enable-threads.])
-	    fi
-	    ;;
-	*)
-	    if test "${TCL_THREADS}" = "1"; then
-		AC_MSG_WARN([
-    --enable-threads requested, but building against a Tcl that is NOT
-    thread-enabled.  This is an OK configuration that will also run in
-    a thread-enabled core.])
 	    fi
 	    ;;
     esac
@@ -1140,17 +1149,6 @@ AC_DEFUN([TEA_CONFIG_CFLAGS], [
 	[doRpath=$enableval], [doRpath=yes])
     AC_MSG_RESULT([$doRpath])
 
-    # TEA specific: Cross-compiling options for Windows/CE builds?
-
-    AS_IF([test "${TEA_PLATFORM}" = windows], [
-	AC_MSG_CHECKING([if Windows/CE build is requested])
-	AC_ARG_ENABLE(wince,
-	    AC_HELP_STRING([--enable-wince],
-		[enable Win/CE support (where applicable)]),
-	    [doWince=$enableval], [doWince=no])
-	AC_MSG_RESULT([$doWince])
-    ])
-
     # Set the variable "system" to hold the name and version number
     # for the system.
 
@@ -1223,65 +1221,6 @@ AC_DEFUN([TEA_CONFIG_CFLAGS], [
 		fi
 	    fi
 
-	    if test "$doWince" != "no" ; then
-		if test "$do64bit" != "no" ; then
-		    AC_MSG_ERROR([Windows/CE and 64-bit builds incompatible])
-		fi
-		if test "$GCC" = "yes" ; then
-		    AC_MSG_ERROR([Windows/CE and GCC builds incompatible])
-		fi
-		TEA_PATH_CELIB
-		# Set defaults for common evc4/PPC2003 setup
-		# Currently Tcl requires 300+, possibly 420+ for sockets
-		CEVERSION=420; 		# could be 211 300 301 400 420 ...
-		TARGETCPU=ARMV4;	# could be ARMV4 ARM MIPS SH3 X86 ...
-		ARCH=ARM;		# could be ARM MIPS X86EM ...
-		PLATFORM="Pocket PC 2003"; # or "Pocket PC 2002"
-		if test "$doWince" != "yes"; then
-		    # If !yes then the user specified something
-		    # Reset ARCH to allow user to skip specifying it
-		    ARCH=
-		    eval `echo $doWince | awk -F, '{ \
-	    if (length([$]1)) { printf "CEVERSION=\"%s\"\n", [$]1; \
-	    if ([$]1 < 400)   { printf "PLATFORM=\"Pocket PC 2002\"\n" } }; \
-	    if (length([$]2)) { printf "TARGETCPU=\"%s\"\n", toupper([$]2) }; \
-	    if (length([$]3)) { printf "ARCH=\"%s\"\n", toupper([$]3) }; \
-	    if (length([$]4)) { printf "PLATFORM=\"%s\"\n", [$]4 }; \
-		    }'`
-		    if test "x${ARCH}" = "x" ; then
-			ARCH=$TARGETCPU;
-		    fi
-		fi
-		OSVERSION=WCE$CEVERSION;
-	    	if test "x${WCEROOT}" = "x" ; then
-			WCEROOT="C:/Program Files/Microsoft eMbedded C++ 4.0"
-		    if test ! -d "${WCEROOT}" ; then
-			WCEROOT="C:/Program Files/Microsoft eMbedded Tools"
-		    fi
-		fi
-		if test "x${SDKROOT}" = "x" ; then
-		    SDKROOT="C:/Program Files/Windows CE Tools"
-		    if test ! -d "${SDKROOT}" ; then
-			SDKROOT="C:/Windows CE Tools"
-		    fi
-		fi
-		WCEROOT=`echo "$WCEROOT" | sed -e 's!\\\!/!g'`
-		SDKROOT=`echo "$SDKROOT" | sed -e 's!\\\!/!g'`
-		if test ! -d "${SDKROOT}/${OSVERSION}/${PLATFORM}/Lib/${TARGETCPU}" \
-		    -o ! -d "${WCEROOT}/EVC/${OSVERSION}/bin"; then
-		    AC_MSG_ERROR([could not find PocketPC SDK or target compiler to enable WinCE mode [$CEVERSION,$TARGETCPU,$ARCH,$PLATFORM]])
-		    doWince="no"
-		else
-		    # We could PATH_NOSPACE these, but that's not important,
-		    # as long as we quote them when used.
-		    CEINCLUDE="${SDKROOT}/${OSVERSION}/${PLATFORM}/include"
-		    if test -d "${CEINCLUDE}/${TARGETCPU}" ; then
-			CEINCLUDE="${CEINCLUDE}/${TARGETCPU}"
-		    fi
-		    CELIBPATH="${SDKROOT}/${OSVERSION}/${PLATFORM}/Lib/${TARGETCPU}"
-    		fi
-	    fi
-
 	    if test "$GCC" != "yes" ; then
 	        if test "${SHARED_BUILD}" = "0" ; then
 		    runtime=-MT
@@ -1309,32 +1248,6 @@ AC_DEFUN([TEA_CONFIG_CFLAGS], [
 		    # Avoid 'unresolved external symbol __security_cookie'
 		    # errors, c.f. http://support.microsoft.com/?id=894573
 		    TEA_ADD_LIBS([bufferoverflowU.lib])
-		elif test "$doWince" != "no" ; then
-		    CEBINROOT="${WCEROOT}/EVC/${OSVERSION}/bin"
-		    if test "${TARGETCPU}" = "X86"; then
-			CC="\"${CEBINROOT}/cl.exe\""
-		    else
-			CC="\"${CEBINROOT}/cl${ARCH}.exe\""
-		    fi
-		    CFLAGS="$CFLAGS -I\"${CELIB_DIR}/inc\" -I\"${CEINCLUDE}\""
-		    RC="\"${WCEROOT}/Common/EVC/bin/rc.exe\""
-		    arch=`echo ${ARCH} | awk '{print tolower([$]0)}'`
-		    defs="${ARCH} _${ARCH}_ ${arch} PALM_SIZE _MT _WINDOWS"
-		    if test "${SHARED_BUILD}" = "1" ; then
-			# Static CE builds require static celib as well
-		    	defs="${defs} _DLL"
-		    fi
-		    for i in $defs ; do
-			AC_DEFINE_UNQUOTED($i, 1, [WinCE def ]$i)
-		    done
-		    AC_DEFINE_UNQUOTED(_WIN32_WCE, $CEVERSION, [_WIN32_WCE version])
-		    AC_DEFINE_UNQUOTED(UNDER_CE, $CEVERSION, [UNDER_CE version])
-		    CFLAGS_DEBUG="-nologo -Zi -Od"
-		    CFLAGS_OPTIMIZE="-nologo -Ox"
-		    lversion=`echo ${CEVERSION} | sed -e 's/\(.\)\(..\)/\1\.\2/'`
-		    lflags="${lflags} -MACHINE:${ARCH} -LIBPATH:\"${CELIBPATH}\" -subsystem:windowsce,${lversion} -nologo"
-		    LINKBIN="\"${CEBINROOT}/link.exe\""
-		    AC_SUBST(CELIB_DIR)
 		else
 		    RC="rc"
 		    lflags="${lflags} -nologo"
@@ -1396,13 +1309,8 @@ AC_DEFUN([TEA_CONFIG_CFLAGS], [
 		# This essentially turns it all on.
 		LDFLAGS_DEBUG="-debug -debugtype:cv"
 		LDFLAGS_OPTIMIZE="-release"
-		if test "$doWince" != "no" ; then
-		    LDFLAGS_CONSOLE="-link ${lflags}"
-		    LDFLAGS_WINDOW=${LDFLAGS_CONSOLE}
-		else
-		    LDFLAGS_CONSOLE="-link -subsystem:console ${lflags}"
-		    LDFLAGS_WINDOW="-link -subsystem:windows ${lflags}"
-		fi
+		LDFLAGS_CONSOLE="-link -subsystem:console ${lflags}"
+		LDFLAGS_WINDOW="-link -subsystem:windows ${lflags}"
 	    fi
 
 	    SHLIB_SUFFIX=".dll"
@@ -1499,7 +1407,7 @@ AC_DEFUN([TEA_CONFIG_CFLAGS], [
 	    LDFLAGS="$LDFLAGS -Wl,--export-dynamic"
 	    SHLIB_CFLAGS="-fPIC"
 	    SHLIB_SUFFIX=".so"
-	    SHLIB_LD='${CC} -shared ${CFLAGS} ${LDFLAGS}'
+	    SHLIB_LD='${CC} ${CFLAGS} ${LDFLAGS} -shared'
 	    AC_CHECK_LIB(network, inet_ntoa, [LIBS="$LIBS -lnetwork"])
 	    ;;
 	HP-UX-*.11.*)
@@ -1610,7 +1518,7 @@ AC_DEFUN([TEA_CONFIG_CFLAGS], [
 	    CFLAGS_OPTIMIZE="-O2 -fomit-frame-pointer"
 
 	    # TEA specific: use LDFLAGS_DEFAULT instead of LDFLAGS
-	    SHLIB_LD='${CC} -shared ${CFLAGS} ${LDFLAGS_DEFAULT}'
+	    SHLIB_LD='${CC} ${CFLAGS} ${LDFLAGS_DEFAULT} -shared'
 	    LDFLAGS="$LDFLAGS -Wl,--export-dynamic"
 	    AS_IF([test $doRpath = yes], [
 		CC_SEARCH_FLAGS='-Wl,-rpath,${LIB_RUNTIME_DIR}'])
@@ -1649,37 +1557,21 @@ AC_DEFUN([TEA_CONFIG_CFLAGS], [
 	OpenBSD-*)
 	    arch=`arch -s`
 	    case "$arch" in
-	    vax)
-		SHLIB_SUFFIX=""
-		SHARED_LIB_SUFFIX=""
-		LDFLAGS=""
+	    alpha|sparc64)
+		SHLIB_CFLAGS="-fPIC"
 		;;
 	    *)
-		case "$arch" in
-		alpha|sparc64)
-		    SHLIB_CFLAGS="-fPIC"
-		    ;;
-		*)
-		    SHLIB_CFLAGS="-fpic"
-		    ;;
-		esac
-		SHLIB_LD='${CC} -shared ${SHLIB_CFLAGS}'
-		SHLIB_SUFFIX=".so"
-		AS_IF([test $doRpath = yes], [
-		    CC_SEARCH_FLAGS='-Wl,-rpath,${LIB_RUNTIME_DIR}'])
-		LD_SEARCH_FLAGS=${CC_SEARCH_FLAGS}
-		SHARED_LIB_SUFFIX='${TCL_TRIM_DOTS}.so${SHLIB_VERSION}'
-		LDFLAGS="-Wl,-export-dynamic"
+		SHLIB_CFLAGS="-fpic"
 		;;
 	    esac
-	    case "$arch" in
-	    vax)
-		CFLAGS_OPTIMIZE="-O1"
-		;;
-	    *)
-		CFLAGS_OPTIMIZE="-O2"
-		;;
-	    esac
+	    SHLIB_LD='${CC} ${SHLIB_CFLAGS} -shared'
+	    SHLIB_SUFFIX=".so"
+	    AS_IF([test $doRpath = yes], [
+		CC_SEARCH_FLAGS='-Wl,-rpath,${LIB_RUNTIME_DIR}'])
+	    LD_SEARCH_FLAGS=${CC_SEARCH_FLAGS}
+	    SHARED_LIB_SUFFIX='${TCL_TRIM_DOTS}.so${SHLIB_VERSION}'
+	    LDFLAGS="-Wl,-export-dynamic"
+	    CFLAGS_OPTIMIZE="-O2"
 	    AS_IF([test "${TCL_THREADS}" = "1"], [
 		# On OpenBSD:	Compile with -pthread
 		#		Don't link with -lpthread
@@ -1693,7 +1585,7 @@ AC_DEFUN([TEA_CONFIG_CFLAGS], [
 	NetBSD-*)
 	    # NetBSD has ELF and can use 'cc -shared' to build shared libs
 	    SHLIB_CFLAGS="-fPIC"
-	    SHLIB_LD='${CC} -shared ${SHLIB_CFLAGS}'
+	    SHLIB_LD='${CC} ${SHLIB_CFLAGS} -shared'
 	    SHLIB_SUFFIX=".so"
 	    LDFLAGS="$LDFLAGS -export-dynamic"
 	    AS_IF([test $doRpath = yes], [
@@ -1706,7 +1598,7 @@ AC_DEFUN([TEA_CONFIG_CFLAGS], [
 	    	LDFLAGS="$LDFLAGS -pthread"
 	    ])
 	    ;;
-	FreeBSD-*)
+	DragonFly-*|FreeBSD-*)
 	    # This configuration from FreeBSD Ports.
 	    SHLIB_CFLAGS="-fPIC"
 	    SHLIB_LD="${CC} -shared"
@@ -1792,10 +1684,6 @@ AC_DEFUN([TEA_CONFIG_CFLAGS], [
 	    vers=`echo ${PACKAGE_VERSION} | sed -e 's/^\([[0-9]]\{1,5\}\)\(\(\.[[0-9]]\{1,3\}\)\{0,2\}\).*$/\1\2/p' -e d`
 	    SHLIB_LD="${SHLIB_LD} -current_version ${vers:-0} -compatibility_version ${vers:-0}"
 	    SHLIB_SUFFIX=".dylib"
-	    # Don't use -prebind when building for Mac OS X 10.4 or later only:
-	    AS_IF([test "`echo "${MACOSX_DEPLOYMENT_TARGET}" | awk -F '10\\.' '{print int([$]2)}'`" -lt 4 -a \
-		"`echo "${CPPFLAGS}" | awk -F '-mmacosx-version-min=10\\.' '{print int([$]2)}'`" -lt 4], [
-		LDFLAGS="$LDFLAGS -prebind"])
 	    LDFLAGS="$LDFLAGS -headerpad_max_install_names"
 	    AC_CACHE_CHECK([if ld accepts -search_paths_first flag],
 		    tcl_cv_ld_search_paths_first, [
@@ -2066,9 +1954,9 @@ dnl # preprocessing tests use only CPPFLAGS.
 	case $system in
 	    AIX-*) ;;
 	    BSD/OS*) ;;
-	    CYGWIN_*|MINGW32_*) ;;
+	    CYGWIN_*|MINGW32_*|MINGW64_*|MSYS_*) ;;
 	    IRIX*) ;;
-	    NetBSD-*|FreeBSD-*|OpenBSD-*) ;;
+	    NetBSD-*|DragonFly-*|FreeBSD-*|OpenBSD-*) ;;
 	    Darwin-*) ;;
 	    SCO_SV-3.2*) ;;
 	    windows) ;;
@@ -2611,58 +2499,6 @@ AC_DEFUN([TEA_TIME_HANDLER], [
 ])
 
 #--------------------------------------------------------------------
-# TEA_BUGGY_STRTOD
-#
-#	Under Solaris 2.4, strtod returns the wrong value for the
-#	terminating character under some conditions.  Check for this
-#	and if the problem exists use a substitute procedure
-#	"fixstrtod" (provided by Tcl) that corrects the error.
-#	Also, on Compaq's Tru64 Unix 5.0,
-#	strtod(" ") returns 0.0 instead of a failure to convert.
-#
-# Arguments:
-#	none
-#
-# Results:
-#
-#	Might defines some of the following vars:
-#		strtod (=fixstrtod)
-#--------------------------------------------------------------------
-
-AC_DEFUN([TEA_BUGGY_STRTOD], [
-    AC_CHECK_FUNC(strtod, tcl_strtod=1, tcl_strtod=0)
-    if test "$tcl_strtod" = 1; then
-	AC_CACHE_CHECK([for Solaris2.4/Tru64 strtod bugs], tcl_cv_strtod_buggy,[
-	    AC_TRY_RUN([
-		extern double strtod();
-		int main() {
-		    char *infString="Inf", *nanString="NaN", *spaceString=" ";
-		    char *term;
-		    double value;
-		    value = strtod(infString, &term);
-		    if ((term != infString) && (term[-1] == 0)) {
-			exit(1);
-		    }
-		    value = strtod(nanString, &term);
-		    if ((term != nanString) && (term[-1] == 0)) {
-			exit(1);
-		    }
-		    value = strtod(spaceString, &term);
-		    if (term == (spaceString+1)) {
-			exit(1);
-		    }
-		    exit(0);
-		}], tcl_cv_strtod_buggy=ok, tcl_cv_strtod_buggy=buggy,
-		    tcl_cv_strtod_buggy=buggy)])
-	if test "$tcl_cv_strtod_buggy" = buggy; then
-	    AC_LIBOBJ([fixstrtod])
-	    USE_COMPAT=1
-	    AC_DEFINE(strtod, fixstrtod, [Do we want to use the strtod() in compat?])
-	fi
-    fi
-])
-
-#--------------------------------------------------------------------
 # TEA_TCL_LINK_LIBS
 #
 #	Search for the libraries needed to link the Tcl shell.
@@ -2746,6 +2582,58 @@ AC_DEFUN([TEA_TCL_LINK_LIBS], [
     TCL_LIBS='${DL_LIBS} ${LIBS} ${MATH_LIBS}'
     AC_SUBST(TCL_LIBS)
     AC_SUBST(MATH_LIBS)
+])
+
+#--------------------------------------------------------------------
+# TEA_BUGGY_STRTOD
+#
+#	Under Solaris 2.4, strtod returns the wrong value for the
+#	terminating character under some conditions.  Check for this
+#	and if the problem exists use a substitute procedure
+#	"fixstrtod" (provided by Tcl) that corrects the error.
+#	Also, on Compaq's Tru64 Unix 5.0,
+#	strtod(" ") returns 0.0 instead of a failure to convert.
+#
+# Arguments:
+#	none
+#
+# Results:
+#
+#	Might defines some of the following vars:
+#		strtod (=fixstrtod)
+#--------------------------------------------------------------------
+
+AC_DEFUN([TEA_BUGGY_STRTOD], [
+    AC_CHECK_FUNC(strtod, tcl_strtod=1, tcl_strtod=0)
+    if test "$tcl_strtod" = 1; then
+	AC_CACHE_CHECK([for Solaris2.4/Tru64 strtod bugs], tcl_cv_strtod_buggy,[
+	    AC_TRY_RUN([
+		extern double strtod();
+		int main() {
+		    char *infString="Inf", *nanString="NaN", *spaceString=" ";
+		    char *term;
+		    double value;
+		    value = strtod(infString, &term);
+		    if ((term != infString) && (term[-1] == 0)) {
+			exit(1);
+		    }
+		    value = strtod(nanString, &term);
+		    if ((term != nanString) && (term[-1] == 0)) {
+			exit(1);
+		    }
+		    value = strtod(spaceString, &term);
+		    if (term == (spaceString+1)) {
+			exit(1);
+		    }
+		    exit(0);
+		}], tcl_cv_strtod_buggy=ok, tcl_cv_strtod_buggy=buggy,
+		    tcl_cv_strtod_buggy=buggy)])
+	if test "$tcl_cv_strtod_buggy" = buggy; then
+	    AC_LIBOBJ([fixstrtod])
+	    USE_COMPAT=1
+	    AC_DEFINE(strtod, fixstrtod, [Do we want to use the strtod() in compat?])
+	fi
+    fi
 ])
 
 #--------------------------------------------------------------------
@@ -2909,23 +2797,14 @@ AC_DEFUN([TEA_TCL_64BIT_FLAGS], [
 #------------------------------------------------------------------------
 
 AC_DEFUN([TEA_INIT], [
-    # TEA extensions pass this us the version of TEA they think they
-    # are compatible with.
-    TEA_VERSION="3.10"
+    TEA_VERSION="3.13"
 
-    AC_MSG_CHECKING([for correct TEA configuration])
+    AC_MSG_CHECKING([TEA configuration])
     if test x"${PACKAGE_NAME}" = x ; then
 	AC_MSG_ERROR([
 The PACKAGE_NAME variable must be defined by your TEA configure.ac])
     fi
-    if test x"$1" = x ; then
-	AC_MSG_ERROR([
-TEA version not specified.])
-    elif test "$1" != "${TEA_VERSION}" ; then
-	AC_MSG_RESULT([warning: requested TEA version "$1", have "${TEA_VERSION}"])
-    else
-	AC_MSG_RESULT([ok (TEA ${TEA_VERSION})])
-    fi
+    AC_MSG_RESULT([ok (TEA ${TEA_VERSION})])
 
     # If the user did not set CFLAGS, set it now to keep macros
     # like AC_PROG_CC and AC_TRY_COMPILE from adding "-g -O2".
@@ -2934,7 +2813,7 @@ TEA version not specified.])
     fi
 
     case "`uname -s`" in
-	*win32*|*WIN32*|*MINGW32_*)
+	*win32*|*WIN32*|*MINGW32_*|*MINGW64_*|*MSYS_*)
 	    AC_CHECK_PROG(CYGPATH, cygpath, cygpath -m, echo)
 	    EXEEXT=".exe"
 	    TEA_PLATFORM="windows"
@@ -3353,10 +3232,6 @@ AC_DEFUN([TEA_SETUP_COMPILER], [
     if test "${TEA_PLATFORM}" = "unix" ; then
 	TEA_TCL_LINK_LIBS
 	TEA_MISSING_POSIX_HEADERS
-	# Let the user call this, because if it triggers, they will
-	# need a compat/strtod.c that is correct.  Users can also
-	# use Tcl_GetDouble(FromObj) instead.
-	#TEA_BUGGY_STRTOD
     fi
 ])
 
@@ -4173,6 +4048,7 @@ AC_DEFUN([TEA_PATH_CONFIG], [
 			`ls -d ${prefix}/lib 2>/dev/null` \
 			`ls -d /usr/local/lib 2>/dev/null` \
 			`ls -d /usr/contrib/lib 2>/dev/null` \
+			`ls -d /usr/pkg/lib 2>/dev/null` \
 			`ls -d /usr/lib 2>/dev/null` \
 			`ls -d /usr/lib64 2>/dev/null` \
 			; do
@@ -4341,71 +4217,151 @@ AC_DEFUN([TEA_EXPORT_CONFIG], [
 
 
 #------------------------------------------------------------------------
-# TEA_PATH_CELIB --
+# TEA_INSTALLER --
 #
-#	Locate Keuchel's celib emulation layer for targeting Win/CE
+#	Configure the installer.
 #
 # Arguments:
 #	none
 #
 # Results:
-#
-#	Adds the following arguments to configure:
-#		--with-celib=...
-#
-#	Defines the following vars:
-#		CELIB_DIR	Full path to the directory containing
-#				the include and platform lib files
+#	Substitutes the following vars:
+#		INSTALL
+#		INSTALL_DATA_DIR
+#		INSTALL_DATA
+#		INSTALL_PROGRAM
+#		INSTALL_SCRIPT
+#		INSTALL_LIBRARY
 #------------------------------------------------------------------------
 
-AC_DEFUN([TEA_PATH_CELIB], [
-    # First, look for one uninstalled.
-    # the alternative search directory is invoked by --with-celib
+AC_DEFUN([TEA_INSTALLER], [
+    INSTALL='$(SHELL) $(srcdir)/tclconfig/install-sh -c'
+    INSTALL_DATA_DIR='${INSTALL} -d -m 755'
+    INSTALL_DATA='${INSTALL} -m 644'
+    INSTALL_PROGRAM='${INSTALL} -m 755'
+    INSTALL_SCRIPT='${INSTALL} -m 755'
 
-    if test x"${no_celib}" = x ; then
-	# we reset no_celib in case something fails here
-	no_celib=true
-	AC_ARG_WITH(celib,[  --with-celib=DIR        use Windows/CE support library from DIR], with_celibconfig=${withval})
-	AC_MSG_CHECKING([for Windows/CE celib directory])
-	AC_CACHE_VAL(ac_cv_c_celibconfig,[
-	    # First check to see if --with-celibconfig was specified.
-	    if test x"${with_celibconfig}" != x ; then
-		if test -d "${with_celibconfig}/inc" ; then
-		    ac_cv_c_celibconfig=`(cd ${with_celibconfig}; pwd)`
-		else
-		    AC_MSG_ERROR([${with_celibconfig} directory doesn't contain inc directory])
-		fi
-	    fi
+    TEA_CONFIG_SYSTEM
+    case $system in
+	HP-UX-*) INSTALL_LIBRARY='${INSTALL} -m 755' ;;
+	      *) INSTALL_LIBRARY='${INSTALL} -m 644' ;;
+    esac
 
-	    # then check for a celib library
-	    if test x"${ac_cv_c_celibconfig}" = x ; then
-		for i in \
-			../celib-palm-3.0 \
-			../celib \
-			../../celib-palm-3.0 \
-			../../celib \
-			`ls -dr ../celib-*3.[[0-9]]* 2>/dev/null` \
-			${srcdir}/../celib-palm-3.0 \
-			${srcdir}/../celib \
-			`ls -dr ${srcdir}/../celib-*3.[[0-9]]* 2>/dev/null` \
-			; do
-		    if test -d "$i/inc" ; then
-			ac_cv_c_celibconfig=`(cd $i; pwd)`
-			break
-		    fi
-		done
-	    fi
-	])
-	if test x"${ac_cv_c_celibconfig}" = x ; then
-	    AC_MSG_ERROR([Cannot find celib support library directory])
-	else
-	    no_celib=
-	    CELIB_DIR=${ac_cv_c_celibconfig}
-	    CELIB_DIR=`echo "$CELIB_DIR" | sed -e 's!\\\!/!g'`
-	    AC_MSG_RESULT([found $CELIB_DIR])
-	fi
-    fi
+    AC_SUBST(INSTALL)
+    AC_SUBST(INSTALL_DATA_DIR)
+    AC_SUBST(INSTALL_DATA)
+    AC_SUBST(INSTALL_PROGRAM)
+    AC_SUBST(INSTALL_SCRIPT)
+    AC_SUBST(INSTALL_LIBRARY)
 ])
+
+###
+# Tip 430 - ZipFS Modifications
+###
+#------------------------------------------------------------------------
+# SC_ZIPFS_SUPPORT
+#	Locate a zip encoder installed on the system path, or none.
+#
+# Arguments:
+#	none
+#
+# Results:
+#	Substitutes the following vars:
+#		TCL_ZIP_FILE
+#		TCL_ZIPFS_SUPPORT
+#		TCL_ZIPFS_FLAG
+#		ZIP_PROG
+#------------------------------------------------------------------------
+
+#------------------------------------------------------------------------
+# SC_PROG_ZIP
+#	Locate a zip encoder installed on the system path, or none.
+#
+# Arguments:
+#	none
+#
+# Results:
+#	Substitutes the following vars:
+#		ZIP_PROG
+#       ZIP_PROG_OPTIONS
+#       ZIP_PROG_VFSSEARCH
+#       ZIP_INSTALL_OBJS
+#------------------------------------------------------------------------
+AC_DEFUN([TEA_ZIPFS_SUPPORT], [
+    AC_MSG_CHECKING([for zipfs support])
+    ZIP_PROG=""
+    ZIP_PROG_OPTIONS=""
+    ZIP_PROG_VFSSEARCH=""
+    INSTALL_MSGS=""
+    # If our native tclsh processes the "install" command line option
+    # we can use it to mint zip files
+    AS_IF([$TCLSH_PROG install],[
+      ZIP_PROG=${TCLSH_PROG}
+      ZIP_PROG_OPTIONS="install mkzip"
+      ZIP_PROG_VFSSEARCH="."
+      AC_MSG_RESULT([Can use Native Tclsh for Zip encoding])
+    ])
+    if test "x$ZIP_PROG" = "x" ; then
+        AC_CACHE_VAL(ac_cv_path_zip, [
+        search_path=`echo ${PATH} | sed -e 's/:/ /g'`
+        for dir in $search_path ; do
+            for j in `ls -r $dir/zip 2> /dev/null` \
+                `ls -r $dir/zip 2> /dev/null` ; do
+            if test x"$ac_cv_path_zip" = x ; then
+                if test -f "$j" ; then
+                ac_cv_path_zip=$j
+                break
+                fi
+            fi
+            done
+        done
+        ])
+        if test -f "$ac_cv_path_zip" ; then
+            ZIP_PROG="$ac_cv_path_zip "
+            AC_MSG_RESULT([$ZIP_PROG])
+            ZIP_PROG_OPTIONS="-rq"
+            ZIP_PROG_VFSSEARCH="."
+            AC_MSG_RESULT([Found INFO Zip in environment])
+            # Use standard arguments for zip
+        fi
+    fi
+    if test "x$ZIP_PROG" = "x" ; then
+	    # It is not an error if an installed version of Zip can't be located.
+        ZIP_PROG=""
+        ZIP_PROG_OPTIONS=""
+        ZIP_PROG_VFSSEARCH=""
+        TCL_ZIPFS_SUPPORT=0
+        TCL_ZIPFS_FLAG=
+    else
+        # ZIPFS Support
+       eval "TCL_ZIP_FILE=\"${TCL_ZIP_FILE}\""
+       if test ${TCL_ZIP_FILE} = "" ; then
+          TCL_ZIPFS_SUPPORT=0
+          TCL_ZIPFS_FLAG=
+          INSTALL_LIBRARIES=install-libraries
+          INSTALL_MSGS=install-msgs
+       else
+           if test ${SHARED_BUILD} = 1 ; then
+              TCL_ZIPFS_SUPPORT=1
+              INSTALL_LIBRARIES=install-libraries-zipfs-shared
+           else
+              TCL_ZIPFS_SUPPORT=2
+              INSTALL_LIBRARIES=install-libraries-zipfs-static
+           fi
+          TCL_ZIPFS_FLAG=-DTCL_ZIPFS_SUPPORT
+       fi
+    fi
+
+    AC_SUBST(TCL_ZIP_FILE)
+    AC_SUBST(TCL_ZIPFS_SUPPORT)
+    AC_SUBST(TCL_ZIPFS_FLAG)
+    AC_SUBST(ZIP_PROG)
+    AC_SUBST(ZIP_PROG_OPTIONS)
+    AC_SUBST(ZIP_PROG_VFSSEARCH)
+    AC_SUBST(INSTALL_LIBRARIES)
+    AC_SUBST(INSTALL_MSGS)
+])
+
 # Local Variables:
 # mode: autoconf
 # End:

@@ -125,7 +125,7 @@ proc createhull {widget_type path args} {
     rename ${tmp}_ ::$tmp
     set exists [uplevel 1 ::info exists itcl_hull]
     if {!$exists} {
-	# that does not yet work, beacause of problems with resolving 
+	# that does not yet work, beacause of problems with resolving
         ::itcl::addcomponent $my_this itcl_hull
     }
     upvar itcl_hull itcl_hull
@@ -133,7 +133,7 @@ proc createhull {widget_type path args} {
 #puts stderr "IC![::info command $my_win]!"
     set exists [uplevel 1 ::info exists itcl_interior]
     if {!$exists} {
-	# that does not yet work, beacause of problems with resolving 
+	# that does not yet work, beacause of problems with resolving
         ::itcl::addcomponent $this itcl_interior
     }
     upvar itcl_interior itcl_interior
@@ -196,7 +196,7 @@ proc addToItclOptions {my_class my_win myOptions argsDict} {
         }
     }
 }
- 
+
 # ======================= setupcomponent ===========================
 
 proc setupcomponent {comp using widget_type path args} {

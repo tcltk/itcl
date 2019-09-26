@@ -181,15 +181,6 @@ typedef struct Itcl_InterpState_ *Itcl_InterpState;
 
 #include "itclDecls.h"
 
-#ifdef ITCL_PRESERVE_DEBUG
-#undef Itcl_PreserveData
-#undef Itcl_ReleaseData
-void ItclDbgPreserveData(ClientData cdata, int line, const char *file);
-void ItclDbgReleaseData(ClientData cdata, int line, const char *file);
-#define Itcl_PreserveData(addr) ItclDbgPreserveData(addr, __LINE__, __FILE__)
-#define Itcl_ReleaseData(addr) ItclDbgReleaseData(addr, __LINE__, __FILE__)
-#endif
-
 #endif /* RC_INVOKED */
 
 /*
