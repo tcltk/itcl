@@ -89,6 +89,12 @@ declare 24 {
 declare 25 {
     void Itcl_DiscardInterpState(Itcl_InterpState state)
 }
+declare 26 {
+    void * Itcl_Alloc(size_t size)
+}
+declare 27 {
+    void Itcl_Free(void *ptr)
+}
 
 
 # private API

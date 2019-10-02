@@ -624,9 +624,6 @@ typedef struct ItclCallContext {
     int refCount;
 } ItclCallContext;
 
-MODULE_SCOPE void *	Itcl_Alloc(size_t size);
-MODULE_SCOPE void	Itcl_Free(void *ptr);
-
 /*
  * The macro below is used to modify a "char" value (e.g. by casting
  * it to an unsigned character) so that it can be used safely with

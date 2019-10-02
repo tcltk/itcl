@@ -235,6 +235,8 @@ const ItclStubs itclStubs = {
     Itcl_SaveInterpState, /* 23 */
     Itcl_RestoreInterpState, /* 24 */
     Itcl_DiscardInterpState, /* 25 */
+    Itcl_Alloc, /* 26 */
+    Itcl_Free, /* 27 */
 };
 
 /* !END!: Do not edit above this line. */
