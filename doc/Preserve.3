@@ -50,7 +50,8 @@ of Itcl encounter these performance scaling issues and require an
 alternative that does not suffer from them.
 .PP
 \fBItcl_Alloc\fR returns an untyped pointer to an allocated block
-of memory of at least \fIsize\fR bytes.
+of memory of at least \fIsize\fR bytes. All \fIsize\fR bytes are
+initialized to zero.
 .PP
 A module calls \fBItcl_PreserveData\fR on a pointer \fIptr\fR 
 allocated by \fBItcl_Alloc\fR to prevent deallocation of that memory while
