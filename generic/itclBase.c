@@ -194,18 +194,18 @@ Initialize (
     }
     Tcl_DecrRefCount(objPtr);
 
-    infoPtr = (ItclObjectInfo*)ckalloc(sizeof(ItclObjectInfo));
+    infoPtr = (ItclObjectInfo*)Itcl_Alloc(sizeof(ItclObjectInfo));
 
     nsPtr = Tcl_CreateNamespace(interp, ITCL_NAMESPACE, infoPtr, FreeItclObjectInfo);
     if (nsPtr == NULL) {
-	ckfree(infoPtr);
+	Itcl_Free(infoPtr);
         Tcl_Panic("Itcl: cannot create namespace: \"%s\" \n", ITCL_NAMESPACE);
     }
 
     nsPtr = Tcl_CreateNamespace(interp, ITCL_NAMESPACE"::internal::dicts",
             NULL, NULL);
     if (nsPtr == NULL) {
-	ckfree(infoPtr);
+	Itcl_Free(infoPtr);
         Tcl_Panic("Itcl: cannot create namespace: \"%s::internal::dicts\" \n",
 	        ITCL_NAMESPACE);
     }
@@ -215,7 +215,6 @@ Initialize (
      *  Store this as "associated data" for easy access, but link
      *  it to the itcl namespace for ownership.
      */
-    memset(infoPtr, 0, sizeof(ItclObjectInfo));
     infoPtr->interp = interp;
     infoPtr->class_meta_type = (Tcl_ObjectMetadataType *)ckalloc(
             sizeof(Tcl_ObjectMetadataType));

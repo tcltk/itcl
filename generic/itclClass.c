@@ -293,7 +293,7 @@ Itcl_CreateClass(
     Itcl_InitList(&iclsPtr->derived);
 
     resolveInfoPtr = (ItclResolveInfo *) ckalloc(sizeof(ItclResolveInfo));
-    memset (resolveInfoPtr, 0, sizeof(ItclResolveInfo));
+    memset(resolveInfoPtr, 0, sizeof(ItclResolveInfo));
     resolveInfoPtr->flags = ITCL_RESOLVE_CLASS;
     resolveInfoPtr->iclsPtr = iclsPtr;
     iclsPtr->resolvePtr = (Tcl_Resolve *)ckalloc(sizeof(Tcl_Resolve));
@@ -904,10 +904,10 @@ ItclDestroyClassNamesp(
         if (ioPtr->iclsPtr == iclsPtr) {
 	    if ((ioPtr->accessCmd != NULL) && (!(ioPtr->flags &
 	            (ITCL_OBJECT_IS_DESTRUCTED)))) {
-		ItclPreserveObject(ioPtr);
+		Itcl_PreserveData(ioPtr);
                 Tcl_DeleteCommandFromToken(iclsPtr->interp, ioPtr->accessCmd);
 	        ioPtr->accessCmd = NULL;
-		ItclReleaseObject(ioPtr);
+		Itcl_ReleaseData(ioPtr);
 	        /*
 	         * Fix 227804: Whenever an object to delete was found we
 	         * have to reset the search to the beginning as the
@@ -1078,7 +1078,7 @@ ItclFreeClass(
      */
     FOREACH_HASH_VALUE(imPtr, &iclsPtr->functions) {
 	imPtr->iclsPtr = NULL;
-        ItclReleaseIMF(imPtr);
+        Itcl_ReleaseData(imPtr);
     }
     Tcl_DeleteHashTable(&iclsPtr->functions);
 
@@ -1213,7 +1213,7 @@ ItclFreeClass(
         ckfree((char *)iclsPtr->resolvePtr->clientData);
         ckfree((char *)iclsPtr->resolvePtr);
     }
-    ckfree((char*)iclsPtr);
+    ckfree(iclsPtr);
 }
 
 
@@ -1958,7 +1958,7 @@ Itcl_CreateVariable(
             Tcl_DeleteHashEntry(hPtr);
             return TCL_ERROR;
         }
-	ItclPreserveMemberCode(mCodePtr);
+	Itcl_PreserveData(mCodePtr);
     } else {
         mCodePtr = NULL;
     }
@@ -1967,8 +1967,7 @@ Itcl_CreateVariable(
     /*
      *  If everything looks good, create the variable definition.
      */
-    ivPtr = (ItclVariable*)ckalloc(sizeof(ItclVariable));
-    memset(ivPtr, 0, sizeof(ItclVariable));
+    ivPtr = (ItclVariable*)Itcl_Alloc(sizeof(ItclVariable));
     ivPtr->iclsPtr      = iclsPtr;
     ivPtr->infoPtr      = iclsPtr->infoPtr;
     ivPtr->protection   = Itcl_Protection(interp, 0);
@@ -2329,7 +2328,7 @@ Itcl_DeleteVariable(
         }
     }
     if (ivPtr->codePtr != NULL) {
-	ItclReleaseMemberCode(ivPtr->codePtr);
+	Itcl_ReleaseData(ivPtr->codePtr);
     }
     Tcl_DecrRefCount(ivPtr->namePtr);
     Tcl_DecrRefCount(ivPtr->fullNamePtr);
@@ -2339,7 +2338,7 @@ Itcl_DeleteVariable(
     if (ivPtr->arrayInitPtr) {
         Tcl_DecrRefCount(ivPtr->arrayInitPtr);
     }
-    ckfree((char*)ivPtr);
+    Itcl_Free(ivPtr);
 }
 
 /*
@@ -2367,7 +2366,7 @@ ItclDeleteOption(
     }
 
     if (ioptPtr->codePtr) {
-	ItclReleaseMemberCode(ioptPtr->codePtr);
+	Itcl_ReleaseData(ioptPtr->codePtr);
     }
     if (ioptPtr->defaultValuePtr != NULL) {
         Tcl_DecrRefCount(ioptPtr->defaultValuePtr);
@@ -2391,7 +2390,7 @@ ItclDeleteOption(
         Tcl_DecrRefCount(ioptPtr->validateMethodVarPtr);
     }
     Itcl_ReleaseData(ioptPtr->idoPtr);
-    ckfree((char*)ioptPtr);
+    Itcl_Free(ioptPtr);
 }
 
 /*
@@ -2422,7 +2421,7 @@ ItclDeleteFunction(
         }
     }
     if (imPtr->codePtr != NULL) {
-        ItclReleaseMemberCode(imPtr->codePtr);
+        Itcl_ReleaseData(imPtr->codePtr);
     }
     Tcl_DecrRefCount(imPtr->namePtr);
     Tcl_DecrRefCount(imPtr->fullNamePtr);
@@ -2444,7 +2443,7 @@ ItclDeleteFunction(
     if (imPtr->argListPtr != NULL) {
         ItclDeleteArgList(imPtr->argListPtr);
     }
-    ckfree((char*)imPtr);
+    Itcl_Free(imPtr);
 }
 
 /*
@@ -2505,7 +2504,7 @@ ItclDeleteDelegatedOption(
         }
     }
     Tcl_DeleteHashTable(&idoPtr->exceptions);
-    ckfree((char *)idoPtr);
+    Itcl_Free(idoPtr);
 }
 
 /*

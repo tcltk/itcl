@@ -29,6 +29,7 @@
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  */
 #include "itclInt.h"
+#include <limits.h>
 
 /*
  *  POOL OF LIST ELEMENTS FOR LINKED LIST
@@ -487,10 +488,8 @@ Itcl_SetListValue(
     Itcl_ListElem *elemPtr, /* list element being modified */
     ClientData val)         /* new value associated with element */
 {
-    Itcl_List *listPtr = elemPtr->owner;
-    assert(listPtr->validate == ITCL_VALID_LIST);
     assert(elemPtr != NULL);
-
+    assert(elemPtr->owner->validate == ITCL_VALID_LIST);
     elemPtr->value = val;
 }
 
@@ -526,20 +525,24 @@ Itcl_FinishList()
  *
  *  The following procedures manage generic reference-counted data.
  *  They are similar in spirit to the Tcl_Preserve/Tcl_Release
- *  procedures defined in the Tcl/Tk core.  But these procedures use
- *  a hash table instead of a linked list to maintain the references,
- *  so they scale better.  Also, the Tcl procedures have a bad behavior
- *  during the "exit" command.  Their exit handler shuts them down
- *  when other data is still being reference-counted and cleaned up.
- *
+ *  procedures defined in the Tcl/Tk core.  But these procedures attach a
+ *  refcount directly to the allocated memory, and then use it to govern
+ *  shared access and properly timed release.
+ */
+
+typedef struct PresMemoryPrefix {
+    Tcl_FreeProc *freeProc;     /* called by last Itcl_ReleaseData */
+    size_t refCount;            /* refernce (resp preserving) counter */
+} PresMemoryPrefix;
+
+/*
  * ------------------------------------------------------------------------
  *  Itcl_EventuallyFree()
  *
- *  Registers a piece of data so that it will be freed when no longer
- *  in use.  The data is registered with an initial usage count of "0".
- *  Future calls to Itcl_PreserveData() increase this usage count, and
- *  calls to Itcl_ReleaseData() decrease the count until it reaches
- *  zero and the data is freed.
+ *  Asscociates with cdata (allocated by Itcl_Alloc()) a routine to
+ *  be called when cdata should be freed. This routine will be called
+ *  when the number of Itcl_ReleaseData() calls on cdata  matches the
+ *  number of Itcl_PreserveData() calls on cdata.
  * ------------------------------------------------------------------------
  */
 void
@@ -547,15 +550,17 @@ Itcl_EventuallyFree(
     ClientData cdata,          /* data to be freed when not in use */
     Tcl_FreeProc *fproc)       /* procedure called to free data */
 {
-    /*
-     *  If the clientData value is NULL, do nothing.
-     */
+    PresMemoryPrefix *blk;
+
     if (cdata == NULL) {
         return;
     }
-    Tcl_EventuallyFree(cdata, fproc);
-    return;
 
+    /* Itcl memory block to ckalloc block */
+    blk = ((PresMemoryPrefix *)cdata)-1;
+
+    /* Set new free proc */
+    blk->freeProc = fproc;
 }
 
 /*
@@ -574,15 +579,17 @@ void
 Itcl_PreserveData(
     ClientData cdata)     /* data to be preserved */
 {
+    PresMemoryPrefix *blk;
 
-    /*
-     *  If the clientData value is NULL, do nothing.
-     */
     if (cdata == NULL) {
         return;
     }
-    Tcl_Preserve(cdata);
-    return;
+
+    /* Itcl memory block to ckalloc block */
+    blk = ((PresMemoryPrefix *)cdata)-1;
+
+    /* Increment preservation count */
+    ++blk->refCount;
 }
 
 /*
@@ -599,15 +606,84 @@ void
 Itcl_ReleaseData(
     ClientData cdata)      /* data to be released */
 {
+    PresMemoryPrefix *blk;
+    Tcl_FreeProc *freeProc;
 
-    /*
-     *  If the clientData value is NULL, do nothing.
-     */
     if (cdata == NULL) {
         return;
     }
-    Tcl_Release(cdata);
-    return;
+
+    /* Itcl memory block to ckalloc block */
+    blk = ((PresMemoryPrefix *)cdata)-1;
+
+    /* Usage sanity check */
+    assert(blk->refCount != 0); /* must call Itcl_PreserveData() first */
+    assert(blk->freeProc);	/* must call Itcl_EventuallyFree() first */
+
+    /* Decrement preservation count */
+    if (--blk->refCount) {
+	return;
+    }
+
+    /* Free cdata now */
+    freeProc = blk->freeProc;
+    blk->freeProc = NULL;
+    freeProc(cdata);
+}
+
+/*
+ * ------------------------------------------------------------------------
+ * Itcl_Alloc()
+ *
+ *	Allocate preservable memory. In opposite to ckalloc the result can be
+ *	supplied to preservation facilities of Itcl (Itcl_PreserveData).
+ *
+ * Results:
+ *	Pointer to new allocated memory.
+ * ------------------------------------------------------------------------
+ */
+void * Itcl_Alloc(
+    size_t size)	/* Size of memory to allocate */
+{
+    size_t numBytes;
+    PresMemoryPrefix *blk;
+
+    /* The ckalloc() in Tcl 8 can alloc at most UINT_MAX bytes */
+    assert (size <= UINT_MAX - sizeof(PresMemoryPrefix));
+    numBytes = size + sizeof(PresMemoryPrefix);
+
+    /* This will panic on allocation failure. No need to check return value. */
+    blk = (PresMemoryPrefix *)ckalloc(numBytes);
+
+    /* Itcl_Alloc defined to zero-init memory it allocates */
+    memset(blk, 0, numBytes);
+
+    /* ckalloc block to Itcl memory block */
+    return blk+1;
+}
+/*
+ * ------------------------------------------------------------------------
+ * ItclFree()
+ *
+ *	Release memory allocated by Itcl_Alloc() that was never preserved.
+ *
+ * Results:
+ *	None.
+ *
+ * ------------------------------------------------------------------------
+ */
+void Itcl_Free(void *ptr) {
+    PresMemoryPrefix *blk;
+    
+    if (ptr == NULL) {
+	return;
+    }
+    /* Itcl memory block to ckalloc block */
+    blk = ((PresMemoryPrefix *)ptr)-1;
+
+    assert(blk->refCount == 0); /* it should be not preserved */
+    assert(blk->freeProc == NULL); /* it should be released */
+    ckfree(blk);
 }
 
 /*

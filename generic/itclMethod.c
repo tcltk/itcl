@@ -40,42 +40,8 @@ static int ItclCreateMemberCode(Tcl_Interp* interp, ItclClass *iclsPtr,
 static int ItclCreateMemberFunc(Tcl_Interp* interp, ItclClass *iclsPtr,
 	Tcl_Obj *namePtr, const char* arglist, const char* body,
         ItclMemberFunc** imPtrPtr, int flags);
-void    ItclFreeMemberCode (ItclMemberCode *mcodePtr);
+static void FreeMemberCode(ItclMemberCode *mcodePtr);
 
-void
-ItclPreserveIMF(
-    ItclMemberFunc *imPtr)
-{
-    imPtr->refCount++;
-}
-
-void
-ItclReleaseIMF(
-    ClientData clientData)
-{
-    ItclMemberFunc *imPtr = (ItclMemberFunc *)clientData;
-
-    if (imPtr->refCount-- <= 1) {
-	Itcl_DeleteMemberFunc(clientData);
-    }
-}
-
-void
-ItclPreserveMemberCode(
-    ItclMemberCode *mcodePtr)
-{
-    mcodePtr->refCount++;
-}
-
-void
-ItclReleaseMemberCode(
-    ItclMemberCode *mcodePtr)
-{
-    if (mcodePtr->refCount-- <= 1) {
-	ItclFreeMemberCode(mcodePtr);
-    }
-}
-
 /*
  * ------------------------------------------------------------------------
  *  Itcl_BodyCmd()
@@ -310,10 +276,10 @@ NRConfigBodyCmd(
         goto configBodyCmdDone;
     }
 
-    ItclPreserveMemberCode(mcode);
+    Itcl_PreserveData(mcode);
 
     if (ivPtr->codePtr) {
-        ItclReleaseMemberCode(ivPtr->codePtr);
+        Itcl_ReleaseData(ivPtr->codePtr);
     }
     ivPtr->codePtr = mcode;
 
@@ -517,8 +483,8 @@ ItclCreateMemberFunc(
     /*
      *  Allocate a member function definition and return.
      */
-    imPtr = (ItclMemberFunc*)ckalloc(sizeof(ItclMemberFunc));
-    memset(imPtr, 0, sizeof(ItclMemberFunc));
+    imPtr = (ItclMemberFunc*)Itcl_Alloc(sizeof(ItclMemberFunc));
+    Itcl_EventuallyFree(imPtr, (Tcl_FreeProc *)Itcl_DeleteMemberFunc);
     imPtr->iclsPtr    = iclsPtr;
     imPtr->infoPtr    = iclsPtr->infoPtr;
     imPtr->protection = Itcl_Protection(interp, 0);
@@ -534,7 +500,7 @@ ItclCreateMemberFunc(
         Tcl_IncrRefCount(imPtr->origArgsPtr);
     }
     imPtr->codePtr    = mcode;
-    ItclPreserveMemberCode(mcode);
+    Itcl_PreserveData(mcode);
 
     if (imPtr->protection == ITCL_DEFAULT_PROTECT) {
         imPtr->protection = ITCL_PUBLIC;
@@ -677,7 +643,7 @@ ItclCreateMemberFunc(
     }
 
     Tcl_SetHashValue(hPtr, imPtr);
-    imPtr->refCount = 1;
+    Itcl_PreserveData(imPtr);
 
     *imPtrPtr = imPtr;
     return TCL_OK;
@@ -767,7 +733,8 @@ Itcl_ChangeMemberFunc(
             argsStr, "\"",
             NULL);
 
-        Itcl_DeleteMemberCode(mcode);
+	Itcl_PreserveData(mcode);
+	Itcl_ReleaseData(mcode);
         return TCL_ERROR;
     }
 
@@ -793,8 +760,8 @@ Itcl_ChangeMemberFunc(
     /*
      *  Free up the old implementation and install the new one.
      */
-    ItclPreserveMemberCode(mcode);
-    ItclReleaseMemberCode(imPtr->codePtr);
+    Itcl_PreserveData(mcode);
+    Itcl_ReleaseData(imPtr->codePtr);
     imPtr->codePtr = mcode;
     if (mcode->flags & ITCL_IMPLEMENT_TCL) {
 	ClientData pmPtr;
@@ -860,13 +827,14 @@ ItclCreateMemberCode(
     /*
      *  Allocate some space to hold the implementation.
      */
-    mcode = (ItclMemberCode*)ckalloc(sizeof(ItclMemberCode));
-    memset(mcode, 0, sizeof(ItclMemberCode));
+    mcode = (ItclMemberCode*)Itcl_Alloc(sizeof(ItclMemberCode));
+    Itcl_EventuallyFree(mcode, (Tcl_FreeProc *)FreeMemberCode);
 
     if (arglist) {
         if (ItclCreateArgList(interp, arglist, &argc, &maxArgc, &usagePtr,
 	        &argListPtr, NULL, NULL) != TCL_OK) {
-            Itcl_DeleteMemberCode(mcode);
+	    Itcl_PreserveData(mcode);
+	    Itcl_ReleaseData(mcode);
             return TCL_ERROR;
         }
         mcode->argcount = argc;
@@ -909,7 +877,8 @@ ItclCreateMemberCode(
 			        Tcl_GetString(namePtr),
 				"'s arglist may not contain \"",
 				*cPtrPtr, "\" explicitly", NULL);
-                        Itcl_DeleteMemberCode(mcode);
+			Itcl_PreserveData(mcode);
+			Itcl_ReleaseData(mcode);
                         return TCL_ERROR;
 		    }
 		    cPtrPtr++;
@@ -1026,7 +995,8 @@ ItclCreateMemberCode(
 		    Tcl_AppendResult(interp,
                             "no registered C procedure with name \"",
 			    body+1, "\"", NULL);
-                    Itcl_DeleteMemberCode(mcode);
+		    Itcl_PreserveData(mcode);
+		    Itcl_ReleaseData(mcode);
                     return TCL_ERROR;
                 }
 
@@ -1080,7 +1050,7 @@ ItclCreateMemberCode(
  *  treated as a label for a C procedure registered by Itcl_RegisterC().
  *
  *  A member function definition holds a handle for the implementation, and
- *  calls ItclReleaseMemberCode when finished with it.
+ *  uses Itcl_PreserveData and Itcl_ReleaseData to manage its interest in it.
  *
  *  If any errors are encountered, this procedure returns TCL_ERROR
  *  along with an error message in the interpreter.  Otherwise, it
@@ -1109,7 +1079,7 @@ Itcl_CreateMemberCode(
  *  is no longer being used.
  * ------------------------------------------------------------------------
  */
-void ItclFreeMemberCode (
+void FreeMemberCode (
     ItclMemberCode* mCodePtr)
 {
     if (mCodePtr == NULL) {
@@ -1127,7 +1097,7 @@ void ItclFreeMemberCode (
     if (mCodePtr->bodyPtr != NULL) {
         Tcl_DecrRefCount(mCodePtr->bodyPtr);
     }
-    ckfree((char*)mCodePtr);
+    Itcl_Free(mCodePtr);
 }
 
 
@@ -1135,7 +1105,7 @@ void
 Itcl_DeleteMemberCode(
     void* cdata)  /* pointer to member code definition */
 {
-    ItclReleaseMemberCode((ItclMemberCode *)cdata);
+    Itcl_ReleaseData((ItclMemberCode *)cdata);
 }
 
 
@@ -1290,7 +1260,7 @@ Itcl_EvalMemberCode(
      *  Bump the reference count on this code, in case it is
      *  redefined or deleted during execution.
      */
-    ItclPreserveMemberCode(mcode);
+    Itcl_PreserveData(mcode);
 
     if ((imPtr->flags & ITCL_DESTRUCTOR) && (contextIoPtr != NULL)) {
         contextIoPtr->destructorHasBeenCalled = 1;
@@ -1328,7 +1298,7 @@ Itcl_EvalMemberCode(
          }
     }
 
-    ItclReleaseMemberCode(mcode);
+    Itcl_ReleaseData(mcode);
     return result;
 }
 
@@ -1729,9 +1699,9 @@ NRExecMethod(
      *  Execute the code for the method.  Be careful to protect
      *  the method in case it gets deleted during execution.
      */
-    ItclPreserveIMF(imPtr);
+    Itcl_PreserveData(imPtr);
     result = Itcl_EvalMemberCode(interp, imPtr, ioPtr, objc, objv);
-    ItclReleaseIMF(imPtr);
+    Itcl_ReleaseData(imPtr);
     return result;
 }
 
@@ -1815,11 +1785,11 @@ NRExecProc(
      *  Execute the code for the proc.  Be careful to protect
      *  the proc in case it gets deleted during execution.
      */
-    ItclPreserveIMF(imPtr);
+    Itcl_PreserveData(imPtr);
 
     result = Itcl_EvalMemberCode(interp, imPtr, NULL,
         objc, objv);
-    ItclReleaseIMF(imPtr);
+    Itcl_ReleaseData(imPtr);
     return result;
 }
 
@@ -2012,7 +1982,7 @@ Itcl_InvokeMethodIfExists(
          *  Execute the code for the method.  Be careful to protect
          *  the method in case it gets deleted during execution.
          */
-	ItclPreserveIMF(imPtr);
+	Itcl_PreserveData(imPtr);
 
 	if (contextObjectPtr->oPtr == NULL) {
             Tcl_DecrRefCount(cmdlinePtr);
@@ -2020,7 +1990,7 @@ Itcl_InvokeMethodIfExists(
 	}
         result = Itcl_EvalMemberCode(interp, imPtr, contextObjectPtr,
 	        cmdlinec, cmdlinev);
-	ItclReleaseIMF(imPtr);
+	Itcl_ReleaseData(imPtr);
         Tcl_DecrRefCount(cmdlinePtr);
     } else {
         if (contextClassPtr->flags &
@@ -2350,7 +2320,7 @@ ItclCheckCallMethod(
     oPtr = NULL;
     hPtr = NULL;
     imPtr = (ItclMemberFunc *)clientData;
-    ItclPreserveIMF(imPtr);
+    Itcl_PreserveData(imPtr);
     if (imPtr->flags & ITCL_CONSTRUCTOR) {
         ioPtr = imPtr->iclsPtr->infoPtr->currIoPtr;
     } else {
@@ -2487,7 +2457,7 @@ ItclCheckCallMethod(
 
     if (ioPtr != NULL) {
         ioPtr->callRefCount++;
-	ItclPreserveObject(ioPtr);
+	Itcl_PreserveData(ioPtr);
     }
     imPtr->iclsPtr->callRefCount++;
     if (!imPtr->iclsPtr->infoPtr->useOldResolvers) {
@@ -2500,7 +2470,7 @@ ItclCheckCallMethod(
     }
     return result;
 finishReturn:
-    ItclReleaseIMF(imPtr);
+    Itcl_ReleaseData(imPtr);
     return result;
 }
 
@@ -2601,14 +2571,14 @@ ItclAfterCallMethod(
             if (hPtr == NULL) {
                 ckfree((char *)callContextPtr);
 	    }
-	    ItclReleaseObject(ioPtr);
+	    Itcl_ReleaseData(ioPtr);
         } else {
             ckfree((char *)callContextPtr);
         }
     }
     result = call_result;
 finishReturn:
-    ItclReleaseIMF(imPtr);
+    Itcl_ReleaseData(imPtr);
     return result;
 }
 

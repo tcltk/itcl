@@ -374,7 +374,6 @@ typedef struct ItclObject {
     int noComponentTrace;         /* don't call component traces if
                                    * setting components in DelegationInstall */
     int hadConstructorError;      /* needed for multiple calls of CallItclObjectCmd */
-    int refCount;
 } ItclObject;
 
 #define ITCL_IGNORE_ERRS  0x002  /* useful for construction/destruction */
@@ -404,7 +403,6 @@ typedef struct ItclMemberCode {
         Tcl_ObjCmdProc *objCmd; /* (objc,objv) C implementation */
     } cfunc;
     ClientData clientData;      /* client data for C implementations */
-    int refCount;
 } ItclMemberCode;
 
 /*
@@ -506,7 +504,6 @@ typedef struct ItclMemberFunc {
     ClientData tmPtr;           /* TclOO methodPtr */
     ItclDelegatedFunction *idmPtr;
                                 /* if the function is delegated != NULL */
-    int refCount;
 } ItclMemberFunc;
 
 /*
@@ -663,17 +660,8 @@ MODULE_SCOPE Tcl_ObjCmdProc ItclObjectUnknownCommand;
 MODULE_SCOPE int ItclCheckCallProc(ClientData clientData, Tcl_Interp *interp,
         Tcl_ObjectContext contextPtr, Tcl_CallFrame *framePtr, int *isFinished);
 
-MODULE_SCOPE void ItclPreserveIMF(ItclMemberFunc *imPtr);
-MODULE_SCOPE void ItclReleaseIMF(ClientData imPtr);
-
 MODULE_SCOPE void ItclPreserveClass(ItclClass *iclsPtr);
 MODULE_SCOPE void ItclReleaseClass(ClientData iclsPtr);
-
-MODULE_SCOPE void ItclPreserveMemberCode(ItclMemberCode *mcodePtr);
-MODULE_SCOPE void ItclReleaseMemberCode(ItclMemberCode *mcodePtr);
-
-MODULE_SCOPE void ItclPreserveObject(ItclObject *ioPtr);
-MODULE_SCOPE void ItclReleaseObject(ClientData ioPtr);
 
 MODULE_SCOPE ItclFoundation *ItclGetFoundation(Tcl_Interp *interp);
 MODULE_SCOPE Tcl_ObjCmdProc ItclClassCommandDispatcher;

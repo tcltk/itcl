@@ -639,7 +639,7 @@ static const Tcl_MethodType itclObjMethodType = {
     TCL_OO_METHOD_VERSION_CURRENT,
     "itcl objv method",
     ObjCallProc,
-    ItclReleaseIMF,
+    Itcl_ReleaseData,
     CloneProc
 };
 
@@ -647,7 +647,7 @@ static const Tcl_MethodType itclArgMethodType = {
     TCL_OO_METHOD_VERSION_CURRENT,
     "itcl argv method",
     ArgCallProc,
-    ItclReleaseIMF,
+    Itcl_ReleaseData,
     CloneProc
 };
 
@@ -657,7 +657,7 @@ CloneProc(
     ClientData original,
     ClientData *copyPtr)
 {
-    ItclPreserveIMF((ItclMemberFunc *)original);
+    Itcl_PreserveData((ItclMemberFunc *)original);
     *copyPtr = original;
     return TCL_OK;
 }
@@ -881,12 +881,12 @@ if (imPtr->codePtr->flags & ITCL_IMPLEMENT_OBJCMD) {
 
     imPtr->tmPtr = Tcl_NewMethod(interp, iclsPtr->clsPtr, imPtr->namePtr,
 	    1, &itclObjMethodType, imPtr);
-    ItclPreserveIMF(imPtr);
+    Itcl_PreserveData(imPtr);
 
     if (iclsPtr->flags & (ITCL_TYPE|ITCL_WIDGET|ITCL_WIDGETADAPTOR)) {
 	imPtr->tmPtr = Tcl_NewInstanceMethod(interp, iclsPtr->oPtr,
 		imPtr->namePtr, 1, &itclObjMethodType, imPtr);
-	ItclPreserveIMF(imPtr);
+	Itcl_PreserveData(imPtr);
     }
 
 } else if (imPtr->codePtr->flags & ITCL_IMPLEMENT_ARGCMD) {
@@ -895,7 +895,7 @@ if (imPtr->codePtr->flags & ITCL_IMPLEMENT_OBJCMD) {
     imPtr->tmPtr = Tcl_NewMethod(interp, iclsPtr->clsPtr, imPtr->namePtr,
 	    1, &itclArgMethodType, imPtr);
 
-		ItclPreserveIMF(imPtr);
+		Itcl_PreserveData(imPtr);
 
 
 
@@ -1088,13 +1088,13 @@ if (imPtr->codePtr->flags & ITCL_IMPLEMENT_OBJCMD) {
 	    if ((imPtr->flags & ITCL_COMMON) == 0) {
 	        imPtr->accessCmd = Tcl_CreateObjCommand(interp,
 		        Tcl_GetString(imPtr->fullNamePtr),
-		        Itcl_ExecMethod, imPtr, ItclReleaseIMF);
-		ItclPreserveIMF(imPtr);
+		        Itcl_ExecMethod, imPtr, Itcl_ReleaseData);
+		Itcl_PreserveData(imPtr);
 	    } else {
 	        imPtr->accessCmd = Tcl_CreateObjCommand(interp,
 		        Tcl_GetString(imPtr->fullNamePtr),
-			Itcl_ExecProc, imPtr, ItclReleaseIMF);
-		ItclPreserveIMF(imPtr);
+			Itcl_ExecProc, imPtr, Itcl_ReleaseData);
+		Itcl_PreserveData(imPtr);
 	    }
     }
     if (iclsPtr->flags & (ITCL_TYPE|ITCL_WIDGETADAPTOR)) {
@@ -2418,7 +2418,7 @@ ItclDelObjectInfo(
     Tcl_DeleteHashTable(&infoPtr->frameContext);
 
     Itcl_DeleteStack(&infoPtr->clsStack);
-    ckfree((char*)infoPtr);
+    Itcl_Free(infoPtr);
 }
 
 /*
@@ -2831,8 +2831,7 @@ ItclParseOption(
         init = Tcl_GetString(newObjv[1]);
     }
 
-    ioptPtr = (ItclOption*)ckalloc(sizeof(ItclOption));
-    memset(ioptPtr, 0, sizeof(ItclOption));
+    ioptPtr = (ItclOption*)Itcl_Alloc(sizeof(ItclOption));
     ioptPtr->protection   = Itcl_Protection(interp, 0);
     if (ioptPtr->protection == ITCL_DEFAULT_PROTECT) {
         ioptPtr->protection = ITCL_PROTECTED;
@@ -3772,8 +3771,7 @@ Itcl_HandleDelegateOptionCmd(
 	    return TCL_ERROR;
 	}
     }
-    idoPtr = (ItclDelegatedOption *)ckalloc(sizeof(ItclDelegatedOption));
-    memset(idoPtr, 0, sizeof(ItclDelegatedOption));
+    idoPtr = (ItclDelegatedOption *)Itcl_Alloc(sizeof(ItclDelegatedOption));
     Tcl_InitObjHashTable(&idoPtr->exceptions);
     if (*option != '*') {
         if (targetPtr == NULL) {
@@ -3824,7 +3822,7 @@ Itcl_HandleDelegateOptionCmd(
     ItclAddDelegatedOptionDictInfo(interp, iclsPtr, idoPtr);
     return TCL_OK;
 errorOut2:
-    /* FIXME need to decr additional refCount's !! */
+    Itcl_ReleaseData(idoPtr);
 errorOut1:
     Tcl_DecrRefCount(optionNamePtr);
     if (resourceNamePtr != NULL) {
