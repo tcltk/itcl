@@ -105,7 +105,7 @@ test info-2.2a {info: public variables} {
     ti info variable pubv
 } {public variable ::test_info::pubv public {set pubv "public: $pubv"} new-public}
 
-test info-2.2b {info: public variables} {
+test info-2.2b {info: public variables} -body {
     list [ti info variable pubv -protection] \
          [ti info variable pubv -type] \
          [ti info variable pubv -name] \
@@ -113,33 +113,33 @@ test info-2.2b {info: public variables} {
          [ti info variable pubv -config] \
          [ti info variable pubv -value] \
          [ti info variable pubv -scope] \
-} {public variable ::test_info::pubv public {set pubv "public: $pubv"} new-public ::itcl::internal::variables::oo::Obj15::test_info::pubv}
+} -match glob -result {public variable ::test_info::pubv public {set pubv "public: $pubv"} new-public ::itcl::internal::variables::oo::Obj*::test_info::pubv}
 
 test info-2.3a {info: protected variables} {
     ti info variable prov
 } {protected variable ::test_info::prov protected new-protected}
 
-test info-2.3b {info: protected variables} {
+test info-2.3b {info: protected variables} -body {
     list [ti info variable prov -protection] \
          [ti info variable prov -type] \
          [ti info variable prov -name] \
          [ti info variable prov -init] \
          [ti info variable prov -value] \
          [ti info variable prov -scope] \
-} {protected variable ::test_info::prov protected new-protected ::itcl::internal::variables::oo::Obj15::test_info::prov}
+} -match glob -result {protected variable ::test_info::prov protected new-protected ::itcl::internal::variables::oo::Obj*::test_info::prov}
 
 test info-2.4a {info: private variables} {
     ti info variable priv
 } {private variable ::test_info::priv private new-private}
 
-test info-2.4b {info: private variables} {
+test info-2.4b {info: private variables} -body {
     list [ti info variable priv -protection] \
          [ti info variable priv -type] \
          [ti info variable priv -name] \
          [ti info variable priv -init] \
          [ti info variable priv -value] \
          [ti info variable priv -scope] \
-} {private variable ::test_info::priv private new-private ::itcl::internal::variables::oo::Obj15::test_info::priv}
+} -match glob -result {private variable ::test_info::priv private new-private ::itcl::internal::variables::oo::Obj*::test_info::priv}
 
 test info-2.5 {"this" variable is built in} {
     ti info variable this
