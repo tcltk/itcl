@@ -381,16 +381,27 @@ level, the type (method/proc), the qualified name, the argument list
 and the body.  Flags can be used to request specific elements from
 this list.
 .TP
-\fIobjName \fBinfo variable\fR ?\fIvarName\fR? ?\fB-protection\fR? ?\fB-type\fR? ?\fB-name\fR? ?\fB-init\fR? ?\fB-value\fR? ?\fB-config\fR?
+\fIobjName \fBinfo variable\fR ?\fIvarName\fR? ?\fB-protection\fR? ?\fB-type\fR? ?\fB-name\fR? ?\fB-init\fR? ?\fB-value\fR? ?\fB-config\fR? ?\fB-scope\fR?
 .
 With no arguments, this command returns a list of all object-specific
 variables and common data members.  If \fIvarName\fR is specified, it
-returns information for a specific data member.  If no flags are
-specified, this command returns a list with the following elements:  the
-protection level, the type (variable/common), the qualified name, the
-initial value, and the current value.  If \fIvarName\fR is a public
-variable, the "config" code is included on this list.  Flags can be
-used to request specific elements from this list.
+returns information for a specific data member.  
+Flags can be specified with \fIvarName\fR in an arbitrary order. 
+The result is a list of the specific information in exactly the
+same order as the flags are specified.
+
+If no flags are given, this command returns a list 
+as if the followings flags have been specified:
+.IP
+\fB-protection\fR \fB-type\fR \fB-name\fR \fB-init\fR \fB-value\fR ?\fB-config\fR?
+
+The \fB-config\fR result is only present if \fIvarName\fR is a public
+variable. It contains the code that is executed at initialization 
+of \fIvarName\fR. The \fB-scope\fR flag gives the namespace context
+of \fIvarName\fR. Herewith the variable can be accessed from outside 
+the object like any other variable. It is similar to the result of 
+the \fBitcl::scope\fR command.
+
 .RE
 .SH "CHAINING METHODS/PROCS"
 .PP
