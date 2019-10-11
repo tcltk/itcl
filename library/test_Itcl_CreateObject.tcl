@@ -1,7 +1,7 @@
 # this is a program for testing the stubs interface ItclCreateObject.
 # it uses itclTestRegisterC.c with the call C function functionality,
 # so it also tests that feature.
-# you need to define in Makefile CFLAGS: -DITCL_DEBUG_C_INTERFACE 
+# you need to define in Makefile CFLAGS: -DITCL_DEBUG_C_INTERFACE
 # for makeing that work.
 package require itcl
 

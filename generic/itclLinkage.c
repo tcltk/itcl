@@ -74,12 +74,12 @@ static void ItclFreeC(ClientData clientData, Tcl_Interp *interp);
  * ------------------------------------------------------------------------
  */
 int
-Itcl_RegisterC(interp, name, proc, clientData, deleteProc)
-    Tcl_Interp *interp;             /* interpreter handling this registration */
-    const char *name;               /* symbolic name for procedure */
-    Tcl_CmdProc *proc;              /* procedure handling Tcl command */
-    ClientData clientData;          /* client data associated with proc */
-    Tcl_CmdDeleteProc *deleteProc;  /* proc called to free up client data */
+Itcl_RegisterC(
+    Tcl_Interp *interp,             /* interpreter handling this registration */
+    const char *name,               /* symbolic name for procedure */
+    Tcl_CmdProc *proc,              /* procedure handling Tcl command */
+    ClientData clientData,          /* client data associated with proc */
+    Tcl_CmdDeleteProc *deleteProc)  /* proc called to free up client data */
 {
     int newEntry;
     Tcl_HashEntry *entry;
@@ -92,7 +92,7 @@ Itcl_RegisterC(interp, name, proc, clientData, deleteProc)
     if (!proc) {
         Tcl_AppendResult(interp, "initialization error: null pointer for ",
             "C procedure \"", name, "\"",
-            (char*)NULL);
+            NULL);
         return TCL_ERROR;
     }
 
@@ -108,7 +108,7 @@ Itcl_RegisterC(interp, name, proc, clientData, deleteProc)
         if (cfunc->argCmdProc != NULL && cfunc->argCmdProc != proc) {
             Tcl_AppendResult(interp, "initialization error: C procedure ",
                 "with name \"", name, "\" already defined",
-                (char*)NULL);
+                NULL);
             return TCL_ERROR;
         }
 
@@ -124,7 +124,7 @@ Itcl_RegisterC(interp, name, proc, clientData, deleteProc)
     cfunc->clientData = clientData;
     cfunc->deleteProc = deleteProc;
 
-    Tcl_SetHashValue(entry, (ClientData)cfunc);
+    Tcl_SetHashValue(entry, cfunc);
     return TCL_OK;
 }
 
@@ -158,12 +158,12 @@ Itcl_RegisterC(interp, name, proc, clientData, deleteProc)
  * ------------------------------------------------------------------------
  */
 int
-Itcl_RegisterObjC(interp, name, proc, clientData, deleteProc)
-    Tcl_Interp *interp;     /* interpreter handling this registration */
-    const char *name;       /* symbolic name for procedure */
-    Tcl_ObjCmdProc *proc;   /* procedure handling Tcl command */
-    ClientData clientData;          /* client data associated with proc */
-    Tcl_CmdDeleteProc *deleteProc;  /* proc called to free up client data */
+Itcl_RegisterObjC(
+    Tcl_Interp *interp,     /* interpreter handling this registration */
+    const char *name,       /* symbolic name for procedure */
+    Tcl_ObjCmdProc *proc,   /* procedure handling Tcl command */
+    ClientData clientData,          /* client data associated with proc */
+    Tcl_CmdDeleteProc *deleteProc)  /* proc called to free up client data */
 {
     int newEntry;
     Tcl_HashEntry *entry;
@@ -176,7 +176,7 @@ Itcl_RegisterObjC(interp, name, proc, clientData, deleteProc)
     if (!proc) {
         Tcl_AppendResult(interp, "initialization error: null pointer for ",
             "C procedure \"", name, "\"",
-            (char*)NULL);
+            NULL);
         return TCL_ERROR;
     }
 
@@ -192,7 +192,7 @@ Itcl_RegisterObjC(interp, name, proc, clientData, deleteProc)
         if (cfunc->objCmdProc != NULL && cfunc->objCmdProc != proc) {
             Tcl_AppendResult(interp, "initialization error: C procedure ",
                 "with name \"", name, "\" already defined",
-                (char*)NULL);
+                NULL);
             return TCL_ERROR;
         }
 
@@ -209,7 +209,7 @@ Itcl_RegisterObjC(interp, name, proc, clientData, deleteProc)
     cfunc->clientData = clientData;
     cfunc->deleteProc = deleteProc;
 
-    Tcl_SetHashValue(entry, (ClientData)cfunc);
+    Tcl_SetHashValue(entry, cfunc);
     return TCL_OK;
 }
 
@@ -244,7 +244,7 @@ Itcl_FindC(
 
     if (interp) {
         procTable = (Tcl_HashTable*)Tcl_GetAssocData(interp,
-            "itcl_RegC", (Tcl_InterpDeleteProc**)NULL);
+            "itcl_RegC", NULL);
 
         if (procTable) {
             entry = Tcl_FindHashEntry(procTable, name);
@@ -270,8 +270,8 @@ Itcl_FindC(
  * ------------------------------------------------------------------------
  */
 static Tcl_HashTable*
-ItclGetRegisteredProcs(interp)
-    Tcl_Interp *interp;  /* interpreter handling this registration */
+ItclGetRegisteredProcs(
+    Tcl_Interp *interp)  /* interpreter handling this registration */
 {
     Tcl_HashTable* procTable;
 
@@ -279,13 +279,13 @@ ItclGetRegisteredProcs(interp)
      *  If the registration table does not yet exist, then create it.
      */
     procTable = (Tcl_HashTable*)Tcl_GetAssocData(interp, "itcl_RegC",
-        (Tcl_InterpDeleteProc**)NULL);
+        NULL);
 
     if (!procTable) {
         procTable = (Tcl_HashTable*)ckalloc(sizeof(Tcl_HashTable));
         Tcl_InitHashTable(procTable, TCL_STRING_KEYS);
         Tcl_SetAssocData(interp, "itcl_RegC", ItclFreeC,
-            (ClientData)procTable);
+            procTable);
     }
     return procTable;
 }
@@ -301,9 +301,9 @@ ItclGetRegisteredProcs(interp)
  * ------------------------------------------------------------------------
  */
 static void
-ItclFreeC(clientData, interp)
-    ClientData clientData;       /* associated data */
-    Tcl_Interp *interp;          /* intepreter being deleted */
+ItclFreeC(
+    ClientData clientData,       /* associated data */
+    Tcl_Interp *interp)          /* intepreter being deleted */
 {
     Tcl_HashTable *tablePtr = (Tcl_HashTable*)clientData;
     Tcl_HashSearch place;

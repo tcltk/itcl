@@ -19,7 +19,7 @@ dnl	to configure the system for the local environment.
 # so that we create the export library with the dll.
 #-----------------------------------------------------------------------
 
-AC_INIT([itcl], [4.1.2])
+AC_INIT([itcl], [4.2.0])
 
 #--------------------------------------------------------------------
 # Call TEA_INIT as the first TEA_ macro to set up initial vars.
@@ -223,7 +223,7 @@ AC_CHECK_TYPE([intptr_t], [
     for tcl_cv_intptr_t in "int" "long" "long long" none; do
 	if test "$tcl_cv_intptr_t" != none; then
 	    AC_COMPILE_IFELSE([AC_LANG_BOOL_COMPILE_TRY([AC_INCLUDES_DEFAULT],
-		    [[sizeof (void *) <= sizeof ($tcl_cv_intptr_t)]])], 
+		    [[sizeof (void *) <= sizeof ($tcl_cv_intptr_t)]])],
 		[tcl_ok=yes], [tcl_ok=no])
 	    test "$tcl_ok" = yes && break; fi
     done])

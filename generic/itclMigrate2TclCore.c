@@ -55,14 +55,14 @@ Tcl_NewNamespaceVar(
     const char *varName)
 {
     Var *varPtr = NULL;
-    int new;
+    int isNew;
 
     if ((nsPtr == NULL) || (varName == NULL)) {
         return NULL;
     }
 
     varPtr = TclVarHashCreateVar(&((Namespace *)nsPtr)->varTable,
-            varName, &new);
+            varName, &isNew);
     TclSetVarNamespaceVar(varPtr);
     return (Tcl_Var)varPtr;
 }
@@ -233,7 +233,7 @@ Itcl_IsCallFrameArgument(
 
         for (;localPtr != NULL; localPtr = localPtr->nextPtr) {
             if (TclIsVarArgument(localPtr)) {
-                register char *localName = localPtr->name;
+                char *localName = localPtr->name;
                 if ((name[0] == localName[0])
                         && (nameLen == localPtr->nameLength)
                         && (strcmp(name, localName) == 0)) {
@@ -243,45 +243,4 @@ Itcl_IsCallFrameArgument(
         }
     }
     return 0;
-}
-
-int
-Itcl_IsCallFrameLinkVar(
-    Tcl_Interp *interp,
-    const char *name)
-{
-    CallFrame *varFramePtr = ((Interp *)interp)->framePtr;
-    Proc *procPtr;
-
-    if (varFramePtr == NULL) {
-        return 0;
-    }
-    if (!varFramePtr->isProcCallFrame) {
-        return 0;
-    }
-    procPtr = varFramePtr->procPtr;
-    /*
-     *  Search through compiled locals first...
-     */
-    if (procPtr) {
-        CompiledLocal *localPtr = procPtr->firstLocalPtr;
-        int nameLen = strlen(name);
-
-        for (;localPtr != NULL; localPtr = localPtr->nextPtr) {
-            if (TclIsVarLink(localPtr)) {
-                register char *localName = localPtr->name;
-                if ((name[0] == localName[0])
-                        && (nameLen == localPtr->nameLength)
-                        && (strcmp(name, localName) == 0)) {
-                    return 1;
-                }
-            }
-        }
-    }
-    return 0;
-}
-
-int 
-Itcl_IsVarLink(Tcl_Var varPtr) {
-    return TclIsVarLink((Var *)varPtr);
 }

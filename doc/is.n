@@ -33,7 +33,7 @@ Returns 1 if command is a class, and returns 0 otherwise.
 .PP
 The fully qualified name of the class needs to be given as the \fIcommand\fR
 argument. So, if a class resides in a namespace, then the namespace needs to
-be specified as well. So, if a class \fBC\fR resides in a namespace \fBN\fR, then 
+be specified as well. So, if a class \fBC\fR resides in a namespace \fBN\fR, then
 the command should be called like:
 .PP
 .CS

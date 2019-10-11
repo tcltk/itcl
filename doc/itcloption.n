@@ -67,12 +67,12 @@ The option statement may include the following options:
 \fB-default\fI defvalue\fR
 .
 Defines the option's default value; the option's default value will be ""
-otherwise. 
+otherwise.
 .TP
 \fB-readonly\fR
 .
 The option is handled read-only -- it can only be set using configure at
-creation time, i.e., in the type's constructor. 
+creation time, i.e., in the type's constructor.
 .TP
 \fB-cgetmethod\fI methodName\fR
 .
@@ -91,7 +91,7 @@ code is equivalent to (though slower than) Itcl's default handling of cget:
         }
 .CE
 .PP
-Note that it's possible for any number of options to share a -cgetmethod. 
+Note that it's possible for any number of options to share a -cgetmethod.
 .RE
 .TP
 \fB-cgetmethodvar\fI varName\fR
@@ -119,7 +119,7 @@ handling of configure:
         }
 .CE
 .PP
-Note that it's possible for any number of options to share a single -configuremethod. 
+Note that it's possible for any number of options to share a single -configuremethod.
 .RE
 .TP
 \fB-configuremethodvar\fI varName\fR
@@ -148,7 +148,7 @@ For example, this code verifies that -flag's value is a valid Boolean value:
         }
 .CE
 .PP
-Note that it's possible for any number of options to share a single -validatemethod. 
+Note that it's possible for any number of options to share a single -validatemethod.
 .RE
 .TP
 \fB-validatemethodvar\fI varName\fR

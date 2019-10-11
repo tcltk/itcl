@@ -85,7 +85,7 @@ Itcl_StubCreateCmd(
      *  get the full name of this command later on.
      */
     cmdPtr = Tcl_CreateObjCommand(interp, cmdName,
-        ItclHandleStubCmd, (ClientData)NULL,
+        ItclHandleStubCmd, NULL,
         (Tcl_CmdDeleteProc*)ItclDeleteStub);
 
     Tcl_GetCommandInfoFromToken(cmdPtr, &cmdInfo);
@@ -126,12 +126,12 @@ Itcl_StubExistsCmd(
     }
     cmdName = Tcl_GetString(objv[1]);
 
-    cmdPtr = Tcl_FindCommand(interp, cmdName, (Tcl_Namespace*)NULL, 0);
+    cmdPtr = Tcl_FindCommand(interp, cmdName, NULL, 0);
 
     if ((cmdPtr != NULL) && Itcl_IsStub(cmdPtr)) {
-        Tcl_SetIntObj(Tcl_GetObjResult(interp), 1);
+        Tcl_SetWideIntObj(Tcl_GetObjResult(interp), 1);
     } else {
-        Tcl_SetIntObj(Tcl_GetObjResult(interp), 0);
+        Tcl_SetWideIntObj(Tcl_GetObjResult(interp), 0);
     }
     return TCL_OK;
 }
@@ -169,7 +169,7 @@ ItclHandleStubCmd(
 
     ItclShowArgs(1, "ItclHandleStubCmd", objc, objv);
     cmdPtr = (Tcl_Command) clientData;
-    cmdNamePtr = Tcl_NewStringObj((char*)NULL, 0);
+    cmdNamePtr = Tcl_NewStringObj(NULL, 0);
     Tcl_IncrRefCount(cmdNamePtr);
     Tcl_GetCommandFullName(interp, cmdPtr, cmdNamePtr);
     cmdName = Tcl_GetString(cmdNamePtr);
@@ -190,7 +190,7 @@ ItclHandleStubCmd(
     if ((result != TCL_OK) || !loaded) {
         Tcl_ResetResult(interp);
         Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
-            "can't autoload \"", cmdName, "\"", (char*)NULL);
+            "can't autoload \"", cmdName, "\"", NULL);
         Tcl_DecrRefCount(cmdNamePtr);
         return TCL_ERROR;
     }
@@ -200,7 +200,7 @@ ItclHandleStubCmd(
      *  Invoke the command again with the arguments passed in.
      */
     cmdlinePtr = Itcl_CreateArgs(interp, cmdName, objc - 1, objv + 1);
-    (void) Tcl_ListObjGetElements((Tcl_Interp*)NULL, cmdlinePtr,
+    (void) Tcl_ListObjGetElements(NULL, cmdlinePtr,
         &cmdlinec, &cmdlinev);
 
     Tcl_DecrRefCount(cmdNamePtr);

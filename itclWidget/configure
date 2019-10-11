@@ -640,7 +640,6 @@ CFLAGS_WARNING
 CFLAGS_OPTIMIZE
 CFLAGS_DEBUG
 RC
-CELIB_DIR
 AR
 STUBS_BUILD
 SHARED_BUILD
@@ -771,8 +770,6 @@ enable_stubs
 enable_64bit
 enable_64bit_vis
 enable_rpath
-enable_wince
-with_celib
 enable_symbols
 '
       ac_precious_vars='build_alias
@@ -1393,14 +1390,13 @@ Optional Features:
   --disable-option-checking  ignore unrecognized --enable/--with options
   --disable-FEATURE       do not include FEATURE (same as --enable-FEATURE=no)
   --enable-FEATURE[=ARG]  include FEATURE [ARG=yes]
-  --enable-threads        build with threads
+  --enable-threads        build with threads (default: on)
   --enable-shared         build and link with shared libraries (default: on)
   --enable-stubs          build and link with stub libraries. Always true for
                           shared builds (default: on)
   --enable-64bit          enable 64bit support (default: off)
   --enable-64bit-vis      enable 64bit Sparc VIS support (default: off)
   --disable-rpath         disable rpath support (default: on)
-  --enable-wince          enable Win/CE support (where applicable)
   --enable-symbols        build with debugging symbols (default: off)
 
 Optional Packages:
@@ -1413,7 +1409,6 @@ Optional Packages:
   --with-tclinclude       directory containing the public Tcl header files
   --with-tkinclude        directory containing the public Tk header files
   --with-itclinclude       directory containing the public Itcl header files
-  --with-celib=DIR        use Windows/CE support library from DIR
 
 Some influential environment variables:
   CC          C compiler command
@@ -2212,26 +2207,16 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 #--------------------------------------------------------------------
 
 
-    # TEA extensions pass this us the version of TEA they think they
-    # are compatible with.
-    TEA_VERSION="3.10"
+    TEA_VERSION="3.13"
 
-    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for correct TEA configuration" >&5
-$as_echo_n "checking for correct TEA configuration... " >&6; }
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking TEA configuration" >&5
+$as_echo_n "checking TEA configuration... " >&6; }
     if test x"${PACKAGE_NAME}" = x ; then
 	as_fn_error $? "
 The PACKAGE_NAME variable must be defined by your TEA configure.ac" "$LINENO" 5
     fi
-    if test x"3.9" = x ; then
-	as_fn_error $? "
-TEA version not specified." "$LINENO" 5
-    elif test "3.9" != "${TEA_VERSION}" ; then
-	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: warning: requested TEA version \"3.9\", have \"${TEA_VERSION}\"" >&5
-$as_echo "warning: requested TEA version \"3.9\", have \"${TEA_VERSION}\"" >&6; }
-    else
-	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: ok (TEA ${TEA_VERSION})" >&5
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: ok (TEA ${TEA_VERSION})" >&5
 $as_echo "ok (TEA ${TEA_VERSION})" >&6; }
-    fi
 
     # If the user did not set CFLAGS, set it now to keep macros
     # like AC_PROG_CC and AC_TRY_COMPILE from adding "-g -O2".
@@ -2240,7 +2225,7 @@ $as_echo "ok (TEA ${TEA_VERSION})" >&6; }
     fi
 
     case "`uname -s`" in
-	*win32*|*WIN32*|*MINGW32_*)
+	*win32*|*WIN32*|*MINGW32_*|*MINGW64_*|*MSYS_*)
 	    # Extract the first word of "cygpath", so it can be a program name with args.
 set dummy cygpath; ac_word=$2
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
@@ -2461,6 +2446,9 @@ $as_echo "$as_me: WARNING: --with-tcl argument should refer to directory contain
 			`ls -d /Library/Frameworks 2>/dev/null` \
 			`ls -d /Network/Library/Frameworks 2>/dev/null` \
 			`ls -d /System/Library/Frameworks 2>/dev/null` \
+			`ls -d /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/Library/Frameworks/Tcl.framework 2>/dev/null` \
+			`ls -d /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/Network/Library/Frameworks/Tcl.framework 2>/dev/null` \
+			`ls -d /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/System/Library/Frameworks/Tcl.framework 2>/dev/null` \
 			; do
 		    if test -f "$i/Tcl.framework/tclConfig.sh" ; then
 			ac_cv_c_tclconfig="`(cd $i/Tcl.framework; pwd)`"
@@ -2489,10 +2477,15 @@ $as_echo "$as_me: WARNING: --with-tcl argument should refer to directory contain
 			`ls -d ${prefix}/lib 2>/dev/null` \
 			`ls -d /usr/local/lib 2>/dev/null` \
 			`ls -d /usr/contrib/lib 2>/dev/null` \
+			`ls -d /usr/pkg/lib 2>/dev/null` \
 			`ls -d /usr/lib 2>/dev/null` \
 			`ls -d /usr/lib64 2>/dev/null` \
 			`ls -d /usr/lib/tcl8.6 2>/dev/null` \
 			`ls -d /usr/lib/tcl8.5 2>/dev/null` \
+			`ls -d /usr/local/lib/tcl8.6 2>/dev/null` \
+			`ls -d /usr/local/lib/tcl8.5 2>/dev/null` \
+			`ls -d /usr/local/lib/tcl/tcl8.6 2>/dev/null` \
+			`ls -d /usr/local/lib/tcl/tcl8.5 2>/dev/null` \
 			; do
 		    if test -f "$i/tclConfig.sh" ; then
 			ac_cv_c_tclconfig="`(cd $i; pwd)`"
@@ -3413,7 +3406,8 @@ main ()
 _ACEOF
 if ac_fn_c_try_compile "$LINENO"; then :
 
-	    TEA_PLATFORM="unix"
+	    # first test we've already retrieved platform (cross-compile), fallback to unix otherwise:
+	    TEA_PLATFORM="${TEA_PLATFORM-unix}"
 	    CYGPATH=echo
 
 else
@@ -3558,6 +3552,9 @@ $as_echo "$as_me: WARNING: --with-tk argument should refer to directory containi
 			`ls -d /Library/Frameworks 2>/dev/null` \
 			`ls -d /Network/Library/Frameworks 2>/dev/null` \
 			`ls -d /System/Library/Frameworks 2>/dev/null` \
+			`ls -d /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/Library/Frameworks/Tcl.framework 2>/dev/null` \
+			`ls -d /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/Network/Library/Frameworks/Tcl.framework 2>/dev/null` \
+			`ls -d /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/System/Library/Frameworks/Tcl.framework 2>/dev/null` \
 			; do
 		    if test -f "$i/Tk.framework/tkConfig.sh" ; then
 			ac_cv_c_tkconfig="`(cd $i/Tk.framework; pwd)`"
@@ -3573,8 +3570,15 @@ $as_echo "$as_me: WARNING: --with-tk argument should refer to directory containi
 			`ls -d ${prefix}/lib 2>/dev/null` \
 			`ls -d /usr/local/lib 2>/dev/null` \
 			`ls -d /usr/contrib/lib 2>/dev/null` \
+			`ls -d /usr/pkg/lib 2>/dev/null` \
 			`ls -d /usr/lib 2>/dev/null` \
 			`ls -d /usr/lib64 2>/dev/null` \
+			`ls -d /usr/lib/tk8.6 2>/dev/null` \
+			`ls -d /usr/lib/tk8.5 2>/dev/null` \
+			`ls -d /usr/local/lib/tk8.6 2>/dev/null` \
+			`ls -d /usr/local/lib/tk8.5 2>/dev/null` \
+			`ls -d /usr/local/lib/tcl/tk8.6 2>/dev/null` \
+			`ls -d /usr/local/lib/tcl/tk8.5 2>/dev/null` \
 			; do
 		    if test -f "$i/tkConfig.sh" ; then
 			ac_cv_c_tkconfig="`(cd $i; pwd)`"
@@ -3801,6 +3805,7 @@ $as_echo "$as_me: WARNING: --with-itcl argument should refer to directory contai
 			`ls -d ${prefix}/lib 2>/dev/null` \
 			`ls -d /usr/local/lib 2>/dev/null` \
 			`ls -d /usr/contrib/lib 2>/dev/null` \
+			`ls -d /usr/pkg/lib 2>/dev/null` \
 			`ls -d /usr/lib 2>/dev/null` \
 			`ls -d /usr/lib64 2>/dev/null` \
 			; do
@@ -5841,10 +5846,6 @@ fi
 done
 
 
-	# Let the user call this, because if it triggers, they will
-	# need a compat/strtod.c that is correct.  Users can also
-	# use Tcl_GetDouble(FromObj) instead.
-	#TEA_BUGGY_STRTOD
     fi
 
 
@@ -6731,18 +6732,6 @@ $as_echo "$as_me: WARNING:
     that IS thread-enabled.  It is recommended to use --enable-threads." >&2;}
 	    fi
 	    ;;
-	*)
-	    if test "${TCL_THREADS}" = "1"; then
-		{ $as_echo "$as_me:${as_lineno-$LINENO}: WARNING:
-    --enable-threads requested, but building against a Tcl that is NOT
-    thread-enabled.  This is an OK configuration that will also run in
-    a thread-enabled core." >&5
-$as_echo "$as_me: WARNING:
-    --enable-threads requested, but building against a Tcl that is NOT
-    thread-enabled.  This is an OK configuration that will also run in
-    a thread-enabled core." >&2;}
-	    fi
-	    ;;
     esac
 
 
@@ -7014,24 +7003,6 @@ fi
     { $as_echo "$as_me:${as_lineno-$LINENO}: result: $doRpath" >&5
 $as_echo "$doRpath" >&6; }
 
-    # TEA specific: Cross-compiling options for Windows/CE builds?
-
-    if test "${TEA_PLATFORM}" = windows; then :
-
-	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking if Windows/CE build is requested" >&5
-$as_echo_n "checking if Windows/CE build is requested... " >&6; }
-	# Check whether --enable-wince was given.
-if test "${enable_wince+set}" = set; then :
-  enableval=$enable_wince; doWince=$enableval
-else
-  doWince=no
-fi
-
-	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $doWince" >&5
-$as_echo "$doWince" >&6; }
-
-fi
-
     # Set the variable "system" to hold the name and version number
     # for the system.
 
@@ -7233,124 +7204,6 @@ $as_echo "   Using 64-bit $MACHINE mode" >&6; }
 		fi
 	    fi
 
-	    if test "$doWince" != "no" ; then
-		if test "$do64bit" != "no" ; then
-		    as_fn_error $? "Windows/CE and 64-bit builds incompatible" "$LINENO" 5
-		fi
-		if test "$GCC" = "yes" ; then
-		    as_fn_error $? "Windows/CE and GCC builds incompatible" "$LINENO" 5
-		fi
-
-    # First, look for one uninstalled.
-    # the alternative search directory is invoked by --with-celib
-
-    if test x"${no_celib}" = x ; then
-	# we reset no_celib in case something fails here
-	no_celib=true
-
-# Check whether --with-celib was given.
-if test "${with_celib+set}" = set; then :
-  withval=$with_celib; with_celibconfig=${withval}
-fi
-
-	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for Windows/CE celib directory" >&5
-$as_echo_n "checking for Windows/CE celib directory... " >&6; }
-	if ${ac_cv_c_celibconfig+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-
-	    # First check to see if --with-celibconfig was specified.
-	    if test x"${with_celibconfig}" != x ; then
-		if test -d "${with_celibconfig}/inc" ; then
-		    ac_cv_c_celibconfig=`(cd ${with_celibconfig}; pwd)`
-		else
-		    as_fn_error $? "${with_celibconfig} directory doesn't contain inc directory" "$LINENO" 5
-		fi
-	    fi
-
-	    # then check for a celib library
-	    if test x"${ac_cv_c_celibconfig}" = x ; then
-		for i in \
-			../celib-palm-3.0 \
-			../celib \
-			../../celib-palm-3.0 \
-			../../celib \
-			`ls -dr ../celib-*3.[0-9]* 2>/dev/null` \
-			${srcdir}/../celib-palm-3.0 \
-			${srcdir}/../celib \
-			`ls -dr ${srcdir}/../celib-*3.[0-9]* 2>/dev/null` \
-			; do
-		    if test -d "$i/inc" ; then
-			ac_cv_c_celibconfig=`(cd $i; pwd)`
-			break
-		    fi
-		done
-	    fi
-
-fi
-
-	if test x"${ac_cv_c_celibconfig}" = x ; then
-	    as_fn_error $? "Cannot find celib support library directory" "$LINENO" 5
-	else
-	    no_celib=
-	    CELIB_DIR=${ac_cv_c_celibconfig}
-	    CELIB_DIR=`echo "$CELIB_DIR" | sed -e 's!\\\!/!g'`
-	    { $as_echo "$as_me:${as_lineno-$LINENO}: result: found $CELIB_DIR" >&5
-$as_echo "found $CELIB_DIR" >&6; }
-	fi
-    fi
-
-		# Set defaults for common evc4/PPC2003 setup
-		# Currently Tcl requires 300+, possibly 420+ for sockets
-		CEVERSION=420; 		# could be 211 300 301 400 420 ...
-		TARGETCPU=ARMV4;	# could be ARMV4 ARM MIPS SH3 X86 ...
-		ARCH=ARM;		# could be ARM MIPS X86EM ...
-		PLATFORM="Pocket PC 2003"; # or "Pocket PC 2002"
-		if test "$doWince" != "yes"; then
-		    # If !yes then the user specified something
-		    # Reset ARCH to allow user to skip specifying it
-		    ARCH=
-		    eval `echo $doWince | awk -F, '{ \
-	    if (length($1)) { printf "CEVERSION=\"%s\"\n", $1; \
-	    if ($1 < 400)   { printf "PLATFORM=\"Pocket PC 2002\"\n" } }; \
-	    if (length($2)) { printf "TARGETCPU=\"%s\"\n", toupper($2) }; \
-	    if (length($3)) { printf "ARCH=\"%s\"\n", toupper($3) }; \
-	    if (length($4)) { printf "PLATFORM=\"%s\"\n", $4 }; \
-		    }'`
-		    if test "x${ARCH}" = "x" ; then
-			ARCH=$TARGETCPU;
-		    fi
-		fi
-		OSVERSION=WCE$CEVERSION;
-	    	if test "x${WCEROOT}" = "x" ; then
-			WCEROOT="C:/Program Files/Microsoft eMbedded C++ 4.0"
-		    if test ! -d "${WCEROOT}" ; then
-			WCEROOT="C:/Program Files/Microsoft eMbedded Tools"
-		    fi
-		fi
-		if test "x${SDKROOT}" = "x" ; then
-		    SDKROOT="C:/Program Files/Windows CE Tools"
-		    if test ! -d "${SDKROOT}" ; then
-			SDKROOT="C:/Windows CE Tools"
-		    fi
-		fi
-		WCEROOT=`echo "$WCEROOT" | sed -e 's!\\\!/!g'`
-		SDKROOT=`echo "$SDKROOT" | sed -e 's!\\\!/!g'`
-		if test ! -d "${SDKROOT}/${OSVERSION}/${PLATFORM}/Lib/${TARGETCPU}" \
-		    -o ! -d "${WCEROOT}/EVC/${OSVERSION}/bin"; then
-		    as_fn_error $? "could not find PocketPC SDK or target compiler to enable WinCE mode $CEVERSION,$TARGETCPU,$ARCH,$PLATFORM" "$LINENO" 5
-		    doWince="no"
-		else
-		    # We could PATH_NOSPACE these, but that's not important,
-		    # as long as we quote them when used.
-		    CEINCLUDE="${SDKROOT}/${OSVERSION}/${PLATFORM}/include"
-		    if test -d "${CEINCLUDE}/${TARGETCPU}" ; then
-			CEINCLUDE="${CEINCLUDE}/${TARGETCPU}"
-		    fi
-		    CELIBPATH="${SDKROOT}/${OSVERSION}/${PLATFORM}/Lib/${TARGETCPU}"
-    		fi
-	    fi
-
 	    if test "$GCC" != "yes" ; then
 	        if test "${SHARED_BUILD}" = "0" ; then
 		    runtime=-MT
@@ -7397,44 +7250,6 @@ $as_echo "found $CELIB_DIR" >&6; }
 	PKG_LIBS="$PKG_LIBS $i"
     done
 
-
-		elif test "$doWince" != "no" ; then
-		    CEBINROOT="${WCEROOT}/EVC/${OSVERSION}/bin"
-		    if test "${TARGETCPU}" = "X86"; then
-			CC="\"${CEBINROOT}/cl.exe\""
-		    else
-			CC="\"${CEBINROOT}/cl${ARCH}.exe\""
-		    fi
-		    CFLAGS="$CFLAGS -I\"${CELIB_DIR}/inc\" -I\"${CEINCLUDE}\""
-		    RC="\"${WCEROOT}/Common/EVC/bin/rc.exe\""
-		    arch=`echo ${ARCH} | awk '{print tolower($0)}'`
-		    defs="${ARCH} _${ARCH}_ ${arch} PALM_SIZE _MT _WINDOWS"
-		    if test "${SHARED_BUILD}" = "1" ; then
-			# Static CE builds require static celib as well
-		    	defs="${defs} _DLL"
-		    fi
-		    for i in $defs ; do
-
-cat >>confdefs.h <<_ACEOF
-#define $i 1
-_ACEOF
-
-		    done
-
-cat >>confdefs.h <<_ACEOF
-#define _WIN32_WCE $CEVERSION
-_ACEOF
-
-
-cat >>confdefs.h <<_ACEOF
-#define UNDER_CE $CEVERSION
-_ACEOF
-
-		    CFLAGS_DEBUG="-nologo -Zi -Od"
-		    CFLAGS_OPTIMIZE="-nologo -Ox"
-		    lversion=`echo ${CEVERSION} | sed -e 's/\(.\)\(..\)/\1\.\2/'`
-		    lflags="${lflags} -MACHINE:${ARCH} -LIBPATH:\"${CELIBPATH}\" -subsystem:windowsce,${lversion} -nologo"
-		    LINKBIN="\"${CEBINROOT}/link.exe\""
 
 		else
 		    RC="rc"
@@ -7608,13 +7423,8 @@ $as_echo "$ac_cv_cross" >&6; }
 		# This essentially turns it all on.
 		LDFLAGS_DEBUG="-debug -debugtype:cv"
 		LDFLAGS_OPTIMIZE="-release"
-		if test "$doWince" != "no" ; then
-		    LDFLAGS_CONSOLE="-link ${lflags}"
-		    LDFLAGS_WINDOW=${LDFLAGS_CONSOLE}
-		else
-		    LDFLAGS_CONSOLE="-link -subsystem:console ${lflags}"
-		    LDFLAGS_WINDOW="-link -subsystem:windows ${lflags}"
-		fi
+		LDFLAGS_CONSOLE="-link -subsystem:console ${lflags}"
+		LDFLAGS_WINDOW="-link -subsystem:windows ${lflags}"
 	    fi
 
 	    SHLIB_SUFFIX=".dll"
@@ -7772,7 +7582,7 @@ fi
 	    LDFLAGS="$LDFLAGS -Wl,--export-dynamic"
 	    SHLIB_CFLAGS="-fPIC"
 	    SHLIB_SUFFIX=".so"
-	    SHLIB_LD='${CC} -shared ${CFLAGS} ${LDFLAGS}'
+	    SHLIB_LD='${CC} ${CFLAGS} ${LDFLAGS} -shared'
 	    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for inet_ntoa in -lnetwork" >&5
 $as_echo_n "checking for inet_ntoa in -lnetwork... " >&6; }
 if ${ac_cv_lib_network_inet_ntoa+:} false; then :
@@ -7999,7 +7809,7 @@ fi
 	    CFLAGS_OPTIMIZE="-O2 -fomit-frame-pointer"
 
 	    # TEA specific: use LDFLAGS_DEFAULT instead of LDFLAGS
-	    SHLIB_LD='${CC} -shared ${CFLAGS} ${LDFLAGS_DEFAULT}'
+	    SHLIB_LD='${CC} ${CFLAGS} ${LDFLAGS_DEFAULT} -shared'
 	    LDFLAGS="$LDFLAGS -Wl,--export-dynamic"
 	    if test $doRpath = yes; then :
 
@@ -8075,39 +7885,23 @@ fi
 	OpenBSD-*)
 	    arch=`arch -s`
 	    case "$arch" in
-	    vax)
-		SHLIB_SUFFIX=""
-		SHARED_LIB_SUFFIX=""
-		LDFLAGS=""
+	    alpha|sparc64)
+		SHLIB_CFLAGS="-fPIC"
 		;;
 	    *)
-		case "$arch" in
-		alpha|sparc64)
-		    SHLIB_CFLAGS="-fPIC"
-		    ;;
-		*)
-		    SHLIB_CFLAGS="-fpic"
-		    ;;
-		esac
-		SHLIB_LD='${CC} -shared ${SHLIB_CFLAGS}'
-		SHLIB_SUFFIX=".so"
-		if test $doRpath = yes; then :
+		SHLIB_CFLAGS="-fpic"
+		;;
+	    esac
+	    SHLIB_LD='${CC} ${SHLIB_CFLAGS} -shared'
+	    SHLIB_SUFFIX=".so"
+	    if test $doRpath = yes; then :
 
-		    CC_SEARCH_FLAGS='-Wl,-rpath,${LIB_RUNTIME_DIR}'
+		CC_SEARCH_FLAGS='-Wl,-rpath,${LIB_RUNTIME_DIR}'
 fi
-		LD_SEARCH_FLAGS=${CC_SEARCH_FLAGS}
-		SHARED_LIB_SUFFIX='${TCL_TRIM_DOTS}.so${SHLIB_VERSION}'
-		LDFLAGS="-Wl,-export-dynamic"
-		;;
-	    esac
-	    case "$arch" in
-	    vax)
-		CFLAGS_OPTIMIZE="-O1"
-		;;
-	    *)
-		CFLAGS_OPTIMIZE="-O2"
-		;;
-	    esac
+	    LD_SEARCH_FLAGS=${CC_SEARCH_FLAGS}
+	    SHARED_LIB_SUFFIX='${TCL_TRIM_DOTS}.so${SHLIB_VERSION}'
+	    LDFLAGS="-Wl,-export-dynamic"
+	    CFLAGS_OPTIMIZE="-O2"
 	    if test "${TCL_THREADS}" = "1"; then :
 
 		# On OpenBSD:	Compile with -pthread
@@ -8123,7 +7917,7 @@ fi
 	NetBSD-*)
 	    # NetBSD has ELF and can use 'cc -shared' to build shared libs
 	    SHLIB_CFLAGS="-fPIC"
-	    SHLIB_LD='${CC} -shared ${SHLIB_CFLAGS}'
+	    SHLIB_LD='${CC} ${SHLIB_CFLAGS} -shared'
 	    SHLIB_SUFFIX=".so"
 	    LDFLAGS="$LDFLAGS -export-dynamic"
 	    if test $doRpath = yes; then :
@@ -8140,7 +7934,7 @@ fi
 
 fi
 	    ;;
-	FreeBSD-*)
+	DragonFly-*|FreeBSD-*)
 	    # This configuration from FreeBSD Ports.
 	    SHLIB_CFLAGS="-fPIC"
 	    SHLIB_LD="${CC} -shared"
@@ -8314,12 +8108,6 @@ fi
 	    vers=`echo ${PACKAGE_VERSION} | sed -e 's/^\([0-9]\{1,5\}\)\(\(\.[0-9]\{1,3\}\)\{0,2\}\).*$/\1\2/p' -e d`
 	    SHLIB_LD="${SHLIB_LD} -current_version ${vers:-0} -compatibility_version ${vers:-0}"
 	    SHLIB_SUFFIX=".dylib"
-	    # Don't use -prebind when building for Mac OS X 10.4 or later only:
-	    if test "`echo "${MACOSX_DEPLOYMENT_TARGET}" | awk -F '10\\.' '{print int($2)}'`" -lt 4 -a \
-		"`echo "${CPPFLAGS}" | awk -F '-mmacosx-version-min=10\\.' '{print int($2)}'`" -lt 4; then :
-
-		LDFLAGS="$LDFLAGS -prebind"
-fi
 	    LDFLAGS="$LDFLAGS -headerpad_max_install_names"
 	    { $as_echo "$as_me:${as_lineno-$LINENO}: checking if ld accepts -search_paths_first flag" >&5
 $as_echo_n "checking if ld accepts -search_paths_first flag... " >&6; }
@@ -8774,9 +8562,9 @@ fi
 	case $system in
 	    AIX-*) ;;
 	    BSD/OS*) ;;
-	    CYGWIN_*|MINGW32_*) ;;
+	    CYGWIN_*|MINGW32_*|MINGW64_*|MSYS_*) ;;
 	    IRIX*) ;;
-	    NetBSD-*|FreeBSD-*|OpenBSD-*) ;;
+	    NetBSD-*|DragonFly-*|FreeBSD-*|OpenBSD-*) ;;
 	    Darwin-*) ;;
 	    SCO_SV-3.2*) ;;
 	    windows) ;;

@@ -61,7 +61,7 @@ https://core.tcl-lang.org/itcl/timeline
 	tracker.
 2014-02-18  Arnulf P. Wiedemann  <wiede@users.sourceforge.net>
 	* generic/itclResolve.c:
-	* generic/itclObject.c: fix for upvar problem (SF bug #187) in 
+	* generic/itclObject.c: fix for upvar problem (SF bug #187) in
 	splitting up the trace handlers for this, win, type, self and selfns.
 	Also doing traces for linked variables to one of these.
 2014-02-16  Arnulf P. Wiedemann  <wiede@users.sourceforge.net>
@@ -291,7 +291,7 @@ https://core.tcl-lang.org/itcl/timeline
 
 	* itcl/generic/itcl2TclOO.c (Itcl_NRRunCallbacks):
 	Tcl's [Patch 3072080] (a saner NRE): TclNRRunCallbacks lost one
-	argument. 
+	argument.
 
 2010-08-22  Arnulf P.Wiedemann  <wiede@users.sourceforge.net>
         * itclInt.h, itclObject.c, itclInfo.c: fix for BiInfoHeritageCmd
@@ -317,7 +317,7 @@ https://core.tcl-lang.org/itcl/timeline
 	* itcl2Tcloo.h:         fix for SF bug #2993648
 	* itclBuiltin.c:        added an empty line for beautifying
 	* itclCmd.c:            in Itcl_IsObjectCmd if in constructor use the correct ioPtr
-	* itclObject.c:         in Itcl_ObjectIsa check for contextIoPtr == NULL 
+	* itclObject.c:         in Itcl_ObjectIsa check for contextIoPtr == NULL
 	                        to avoid segmentation violation
 2010-04-21  Arnulf P.Wiedemann  <wiede@users.sourceforge.net>
 	* itclCmd.c:		Add missing Tcl_DStringFree for [itcl Bug 2983809]
@@ -326,7 +326,7 @@ https://core.tcl-lang.org/itcl/timeline
 	* itclParse.c:
 	* itclResolve.c:
 
-	* itclParse.c:          better error message when using: public mthod ... 
+	* itclParse.c:          better error message when using: public mthod ...
 	                        instead of public method ...
 2010-04-08  Don Porter  <dgp@Users.sourceforge.net>
 	* itclInt.h:		Add #ifdef guards to attempt inclusion of
@@ -393,12 +393,12 @@ https://core.tcl-lang.org/itcl/timeline
 				 NRE calling
 
 2009-10-23  Arnulf P. Wiedemann <wiede@users.sourceforge.net>
-	* itclMigrate2TclCore.c: added Itcl_GetUplevelCallFrame and 
+	* itclMigrate2TclCore.c: added Itcl_GetUplevelCallFrame and
 	                         Itcl_ActivateCallFrame functions
 	                         same as in Itcl3.4. They are needed to call
 				 the itk_component command with the suitable
 				 call frame as this is needed for access to the
-	                         proc local vars. This was the fix for SF 
+	                         proc local vars. This was the fix for SF
 				 bug #2840994
 	* itclStubInit.c:
 	* itcl.decls:
@@ -478,7 +478,7 @@ https://core.tcl-lang.org/itcl/timeline
 
 2008-02-21 Arnulf P. Wiedemann <wiede@users.sf.net>
         * fix for SF bug 2595708 itclParse.c and itclBuiltin.c
-	* fix for problem with scope command path reported by 
+	* fix for problem with scope command path reported by
 	* Harald Krummeck on c.l.t ItclCmd.c
 2008-02-02 Arnulf P. Wiedemann <wiede@users.sf.net>
         * generic/itcl.h configure.in:
@@ -504,7 +504,7 @@ https://core.tcl-lang.org/itcl/timeline
 				here are similar funtions to itclWidget.tcl for
 				use by ::itcl::extendedclass
 
-	* generic/itclUtil.c:	malloc.h include now bracketed with 
+	* generic/itclUtil.c:	malloc.h include now bracketed with
 				#ifdef ITCL_PRESERVE_DEBUG as it is only used
 				for debugging. I have to look for a solution
 				using memory.h as a portable version, but
@@ -514,18 +514,18 @@ https://core.tcl-lang.org/itcl/timeline
 				necessary, as im am checking stuff done by
 				ckalloc and ckfree, so these cannot be used.
 2009-01-15 David Gravereaux <davygrvy@pobox.com>
-	* generic/itcl2TclOO.h:  More cleanups changing the last of the 
-	* generic/itclClass.c:   'EXTERN' macros to just be 'extern' as we 
-	* win/.cvsignore:        aren't importing the declaration, just  
-	* win/itcl.rc:           sharing it internally.  This caused warnings 
-	* win/makefile.vc:       on windows during the link stage as it was 
-	* win/nmakehlp.c:        getting confused about 'why are you 
+	* generic/itcl2TclOO.h:  More cleanups changing the last of the
+	* generic/itclClass.c:   'EXTERN' macros to just be 'extern' as we
+	* win/.cvsignore:        aren't importing the declaration, just
+	* win/itcl.rc:           sharing it internally.  This caused warnings
+	* win/makefile.vc:       on windows during the link stage as it was
+	* win/nmakehlp.c:        getting confused about 'why are you
 	* win/rules.vc:          importing an internal function?'
 2009-01-15 David Gravereaux <davygrvy@pobox.com>
 	* generic/itclMigrate2TclCore.h:    All build errors squashed
 	* generic/itclStubLib.c:
 	* generic/itclTclIntStubFcn.h:
-	* win/makefile.vc:  
+	* win/makefile.vc:
 2009-01-14 David Gravereaux <davygrvy@pobox.com>
 	* generic/itclBase.c:
 	* generic/itclBuiltin.c:
@@ -543,7 +543,7 @@ https://core.tcl-lang.org/itcl/timeline
 	* generic/itclTclIntStubsFcn.c:
 	* win/makefile.vc:
 		Changes to allow compiling on windows with
-		MSVC++.  Double declaration of internal 
+		MSVC++.  Double declaration of internal
 		functions not yet repaired.  DOESN'T
 		BUILD YET with makefile.vc.
 2009-01-14 Daniel A. Steffen <das@users.sourceforge.net>
@@ -554,8 +554,8 @@ https://core.tcl-lang.org/itcl/timeline
 2008-12-11 Arnulf P. Wiedemann <wiede@users.sf.net>
     * itcl-ng first beta release 4.0b1
 2008-12-06 Arnulf P. Wiedemann <wiede@users.sf.net>
-    * built enhanced functions for chasing memory leaks in adding 
-    * functionality to the functions available in Tcl core 
+    * built enhanced functions for chasing memory leaks in adding
+    * functionality to the functions available in Tcl core
     * and fixed a lot of leaks of that class
 2008-11-30 Arnulf P. Wiedemann <wiede@users.sf.net>
     * built functions for chasing memory leaks and fixed a lot of those

@@ -60,7 +60,7 @@ cArgFunc(
     Tcl_IncrRefCount(objv[1]);
     Tcl_IncrRefCount(objv[2]);
     Tcl_IncrRefCount(objv[3]);
-    infoPtr = (ClientData)Tcl_GetAssocData(interp, ITCL_INTERP_DATA, NULL);
+    infoPtr = (ItclObjectInfo *)Tcl_GetAssocData(interp, ITCL_INTERP_DATA, NULL);
     FOREACH_HASH_VALUE(classPtr,&infoPtr->nameClasses) {
         if (strcmp(Tcl_GetString(objv[1]), Tcl_GetString(classPtr->fullNamePtr)) == 0 ||
                 strcmp(Tcl_GetString(objv[2]), Tcl_GetString(classPtr->fullNamePtr)) == 0) {
@@ -101,7 +101,7 @@ for(i = 0; i<objc;i++) {
 }
     nsPtr = Tcl_GetCurrentNamespace(interp);
 fprintf(stderr, "IP:%p %p %p !%s!\n",interp, clientData, nsPtr, nsPtr->fullName);
-    infoPtr = (ClientData)Tcl_GetAssocData(interp, ITCL_INTERP_DATA, NULL);
+    infoPtr = (ItclObjectInfo *)Tcl_GetAssocData(interp, ITCL_INTERP_DATA, NULL);
     FOREACH_HASH_VALUE(classPtr,&infoPtr->nameClasses) {
         if (strcmp(Tcl_GetString(objv[1]), Tcl_GetString(classPtr->fullNamePtr)) == 0 ||
                 strcmp(Tcl_GetString(objv[2]), Tcl_GetString(classPtr->fullNamePtr)) == 0) {

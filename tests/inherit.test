@@ -162,6 +162,8 @@ test inherit-1.9 {errors during destruction prevent object delete} {
 "itcl::delete object mongrel1"} {{mongrel destruct} {foobar destruct} {foo destruct}} mongrel1}
 
 test inherit-1.10 {errors during destruction prevent class delete} {
+    itcl::body test_cd_bar::destructor {} {error "bar: failed"}
+    test_cd_mongrel mongrel2 xxx
     list [catch {itcl::delete class test_cd_foo} msg] $msg
 } {1 {bar: failed}}
 

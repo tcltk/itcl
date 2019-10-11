@@ -25,7 +25,7 @@
  * ------------------------------------------------------------------------
  *  ItclWidgetInitObjectOptions()
  *
- *  Init all instance options 
+ *  Init all instance options
  *  This is usually invoked automatically
  *  by Itcl_CreateObject(), when an object is created.
  * ------------------------------------------------------------------------
@@ -261,7 +261,7 @@ InstallComponent(
 	Tcl_AppendToObj(objPtr, " configure", -1);
         result = Tcl_EvalObjEx(interp, objPtr, 0);
 	startIdx = 5;
-        Tcl_SplitList(interp, Tcl_GetStringResult(interp), &argc, &argv);
+        Tcl_SplitList(interp, Tcl_GetString(Tcl_GetObjResult(interp)), &argc, &argv);
         newObjv = (Tcl_Obj **)ckalloc(sizeof(Tcl_Obj *) *
                (objc - startIdx + 2 + (argc * 2)));
         /* insert delegated options before any options on the command line */
@@ -361,7 +361,7 @@ InstallComponent(
     if (starOption) {
         componentValue = widgetPath;
     } else {
-        componentValue = Tcl_GetStringResult(interp);
+        componentValue = Tcl_GetString(Tcl_GetObjResult(interp));
     }
     /* FIXME need something like ItclSetInstanceCommonVar here */
     objPtr = Tcl_NewStringObj(ITCL_VARIABLES_NAMESPACE, -1);

@@ -112,8 +112,7 @@ Itcl_WidgetBiInit(
 	Tcl_DStringAppend(&buffer, "::itcl::builtin::", -1);
 	Tcl_DStringAppend(&buffer, BiMethodList[i].name, -1);
         Tcl_CreateObjCommand(interp, Tcl_DStringValue(&buffer),
-	        BiMethodList[i].proc, (ClientData)infoPtr,
-		(Tcl_CmdDeleteProc*)NULL);
+	        BiMethodList[i].proc, (ClientData)infoPtr, NULL);
     }
     Tcl_DStringFree(&buffer);
     return TCL_OK;
@@ -254,8 +253,7 @@ Itcl_BiInstallHullCmd(
 
     if (contextIoPtr == NULL) {
         Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
-            "cannot installhull without an object context", 
-            (char*)NULL);
+            "cannot installhull without an object context", NULL);
         return TCL_ERROR;
     }
     if (objc < 3) {
@@ -263,7 +261,7 @@ Itcl_BiInstallHullCmd(
             token = Tcl_GetString(objv[0]);
             Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
                 "wrong # args: should be \"", token,
-	        "\" name|using <widgetType> ?arg ...?\"", (char*)NULL);
+	        "\" name|using <widgetType> ?arg ...?\"", NULL);
             return TCL_ERROR;
 	}
     }
@@ -362,7 +360,7 @@ Itcl_BiInstallHullCmd(
     }
     contextIoPtr->hullWindowNamePtr = Tcl_NewStringObj(widgetName, -1);
 /*
-fprintf(stderr, "REN!%s!%s!\n", widgetName, Tcl_DStringValue(&buffer)); 
+fprintf(stderr, "REN!%s!%s!\n", widgetName, Tcl_DStringValue(&buffer));
 */
     Itcl_RenameCommand(interp, widgetName,
             Tcl_DStringValue(&buffer));

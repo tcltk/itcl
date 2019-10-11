@@ -89,6 +89,12 @@ declare 24 {
 declare 25 {
     void Itcl_DiscardInterpState(Itcl_InterpState state)
 }
+declare 26 {
+    void * Itcl_Alloc(size_t size)
+}
+declare 27 {
+    void Itcl_Free(void *ptr)
+}
 
 
 # private API
@@ -276,14 +282,14 @@ declare 55 {
         const char *arglist, const char *body)
 }
 declare 56 {
-    void Itcl_DeleteMemberFunc(char *cdata)
+    void Itcl_DeleteMemberFunc(void *cdata)
 }
 declare 57 {
     int Itcl_CreateMemberCode(Tcl_Interp *interp, ItclClass *iclsPtr, \
         const char *arglist, const char *body, ItclMemberCode **mcodePtr)
 }
 declare 58 {
-    void Itcl_DeleteMemberCode(char *cdata)
+    void Itcl_DeleteMemberCode(void *cdata)
 }
 declare 59 {
     int Itcl_GetMemberCode(Tcl_Interp *interp, ItclMemberFunc *mfunc)

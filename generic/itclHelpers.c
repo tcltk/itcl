@@ -1,8 +1,8 @@
 /*
  * itclHelpers.c --
  *
- * This file contains the C-implemeted part of 
- * Itcl 
+ * This file contains the C-implemeted part of
+ * Itcl
  *
  * Copyright (c) 2007 by Arnulf P. Wiedemann
  *
@@ -128,11 +128,12 @@ ItclCreateArgList(
 		            commandName,
 			    "\" has argument with no name", NULL);
 		} else {
-	            char buf[10];
+		    char buf[TCL_INTEGER_SPACE];
 		    sprintf(buf, "%d", i);
 		    Tcl_AppendResult(interp, "argument #", buf,
 		            " has no name", NULL);
 		}
+		ckfree((char *) defaultArgv);
 	        result = TCL_ERROR;
 	        break;
 	    }
@@ -140,14 +141,16 @@ ItclCreateArgList(
 	        Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
 	            "too many fields in argument specifier \"",
 		    argv[i], "\"",
-		    (char*)NULL);
+		    NULL);
+		ckfree((char *) defaultArgv);
 	        result = TCL_ERROR;
 	        break;
 	    }
 	    if (strstr(defaultArgv[0],"::")) {
 	        Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
 		        "bad argument name \"", defaultArgv[0], "\"",
-			(char*)NULL);
+			NULL);
+		ckfree((char *) defaultArgv);
 		result = TCL_ERROR;
 		break;
 	    }
@@ -159,7 +162,7 @@ ItclCreateArgList(
 	        lastArglistPtr->nextPtr = arglistPtr;
 	        Tcl_AppendToObj(*usagePtr, " ", 1);
 	    }
-	    arglistPtr->namePtr = 
+	    arglistPtr->namePtr =
 	            Tcl_NewStringObj(defaultArgv[0], -1);
 	    Tcl_IncrRefCount(arglistPtr->namePtr);
 	    (*maxArgcPtr)++;
@@ -174,7 +177,7 @@ ItclCreateArgList(
 	            Tcl_AppendToObj(*usagePtr, defaultArgv[0], -1);
 	        }
 	    } else {
-	        arglistPtr->defaultValuePtr = 
+	        arglistPtr->defaultValuePtr =
 		        Tcl_NewStringObj(defaultArgv[1], -1);
 		Tcl_IncrRefCount(arglistPtr->defaultValuePtr);
 	        Tcl_AppendToObj(*usagePtr, "?", 1);
@@ -276,7 +279,7 @@ Itcl_EvalArgs(
             Tcl_ResetResult(interp);
             Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
                 "invalid command name \"",
-                Tcl_GetStringFromObj(objv[0], NULL), "\"", NULL);
+                Tcl_GetString(objv[0]), "\"", NULL);
             return TCL_ERROR;
         }
 
@@ -386,7 +389,7 @@ ItclCapitalize(
 {
     Tcl_Obj *objPtr;
     char buf[2];
-    
+
     sprintf(buf, "%c", toupper(UCHAR(*str)));
     buf[1] = '\0';
     objPtr = Tcl_NewStringObj(buf, -1);
@@ -432,16 +435,16 @@ AddDictEntry(
     Tcl_Obj *valuePtr)
 {
     Tcl_Obj *keyPtr;
+    int code;
 
     if (valuePtr == NULL) {
         return TCL_OK;
     }
     keyPtr = Tcl_NewStringObj(keyStr, -1);
-    if (Tcl_DictObjPut(interp, dictPtr, keyPtr, valuePtr) != TCL_OK) {
-	Tcl_DecrRefCount(keyPtr);
-        return TCL_ERROR;
-    }
-    return TCL_OK;
+    Tcl_IncrRefCount(keyPtr);
+    code = Tcl_DictObjPut(interp, dictPtr, keyPtr, valuePtr);
+    Tcl_DecrRefCount(keyPtr);
+    return code;
 }
 
 /*
