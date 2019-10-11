@@ -418,7 +418,7 @@ itcl::class Toaster {
         if {$crumbs > 50} {
             error "== FIRE! FIRE! =="
         }
-        set crumbs [expr $crumbs+4*$nslices]
+        set crumbs [expr {$crumbs+4*$nslices}]
     }
     method clean {} {
         set crumbs 0
