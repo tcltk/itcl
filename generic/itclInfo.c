@@ -201,7 +201,7 @@ static const InfoMethod InfoMethodList[] = {
 	ITCL_TYPE|ITCL_WIDGETADAPTOR|ITCL_WIDGET|ITCL_ECLASS
     },
     { "variable",
-        "?name? ?-protection? ?-type? ?-name? ?-init? ?-value? ?-config?",
+        "?name? ?-protection? ?-type? ?-name? ?-init? ?-value? ?-config? ?-scope?",
         Itcl_BiInfoVariableCmd,
 	ITCL_CLASS|ITCL_TYPE|ITCL_WIDGETADAPTOR|ITCL_WIDGET|ITCL_ECLASS
     },
@@ -1256,6 +1256,7 @@ Itcl_BiInfoFunctionCmd(
  *  to indicate success/failure.
  * ------------------------------------------------------------------------
  */
+/*&&&1*/
 /* ARGSUSED */
 int
 Itcl_BiInfoVariableCmd(
@@ -1279,14 +1280,19 @@ Itcl_BiInfoVariableCmd(
     int i;
     int result;
 
+    ClientData cfClientData;
+    ItclObjectInfo *infoPtr;
+    Tcl_Object oPtr;
+    int doAppend;
+
     static const char *options[] = {
         "-config", "-init", "-name", "-protection", "-type",
-        "-value", NULL
+        "-value", "-scope", NULL
     };
     enum BIvIdx {
         BIvConfigIdx, BIvInitIdx, BIvNameIdx, BIvProtectIdx,
-        BIvTypeIdx, BIvValueIdx
-    } *ivlist, ivlistStorage[6];
+        BIvTypeIdx, BIvValueIdx, BIvScopeIdx
+    } *ivlist, ivlistStorage[7];
 
     static enum BIvIdx DefInfoVariable[5] = {
         BIvProtectIdx,
@@ -1304,7 +1310,6 @@ Itcl_BiInfoVariableCmd(
         BIvConfigIdx,
         BIvValueIdx
     };
-
 
     ItclShowArgs(1, "Itcl_BiInfoVariableCmd", objc, objv);
     resultPtr = NULL;
@@ -1327,7 +1332,7 @@ Itcl_BiInfoVariableCmd(
 
     /*
      *  Process args:
-     *  ?varName? ?-protection? ?-type? ?-name? ?-init? ?-config? ?-value?
+     *  ?varName? ?-protection? ?-type? ?-name? ?-init? ?-config? ?-value? ?-scope?
      */
     objv++;  /* skip over command name */
     objc--;
@@ -1464,6 +1469,78 @@ Itcl_BiInfoVariableCmd(
                         val = "<undefined>";
                     }
                     objPtr = Tcl_NewStringObj((const char *)val, -1);
+                    break;
+
+                case BIvScopeIdx:
+                    entry = Tcl_FindHashEntry(&contextIclsPtr->resolveVars, varName);
+                    if (!entry) {
+                        Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+                              "variable \"", varName, "\" not found in class \"",
+                              Tcl_GetString(contextIclsPtr->fullNamePtr), "\"",
+                              (char*)NULL);
+                        return TCL_ERROR;
+                    }
+                    vlookup = (ItclVarLookup*)Tcl_GetHashValue(entry);
+
+                    if (vlookup->ivPtr->flags & ITCL_COMMON) {
+                        objPtr = Tcl_NewStringObj("", -1);
+
+                        if (vlookup->ivPtr->protection != ITCL_PUBLIC) {
+                            Tcl_AppendToObj(objPtr, ITCL_VARIABLES_NAMESPACE, -1);
+                        }
+                        Tcl_AppendToObj(objPtr,
+                                Tcl_GetString(vlookup->ivPtr->fullNamePtr), -1);
+                    } else {
+                        /*
+                         *  If this is not a common variable, then we better have
+                         *  an object context.  Return the name as a fully qualified name.
+                         */
+                        infoPtr = contextIclsPtr->infoPtr;
+                        cfClientData = Itcl_GetCallFrameClientData(interp);
+                        if (cfClientData != NULL) {
+                            oPtr = Tcl_ObjectContextObject((Tcl_ObjectContext)cfClientData);
+                            if (oPtr != NULL) {
+                                contextIoPtr = (ItclObject*)Tcl_ObjectGetMetadata(
+                                        oPtr, infoPtr->object_meta_type);
+                            }
+                        }
+
+                        if (contextIoPtr == NULL) {
+                            if (infoPtr->currIoPtr != NULL) {
+                                contextIoPtr = infoPtr->currIoPtr;
+                            }
+                        }
+
+                        if (contextIoPtr == NULL) {
+                            Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+                                "can't scope variable \"", varName,
+                                "\": missing object context",
+                                (char*)NULL);
+                            return TCL_ERROR;
+                        }
+
+                        doAppend = 1;
+                        if (contextIclsPtr->flags & ITCL_ECLASS) {
+                            if (strcmp(varName, "itcl_options") == 0) {
+                                doAppend = 0;
+                            }
+                        }
+
+                        objPtr = Tcl_NewStringObj((char*)NULL, 0);
+                        Tcl_IncrRefCount(objPtr);
+                        Tcl_AppendToObj(objPtr, ITCL_VARIABLES_NAMESPACE, -1);
+                        Tcl_AppendToObj(objPtr,
+                                (Tcl_GetObjectNamespace(contextIoPtr->oPtr))->fullName, -1);
+
+                        if (doAppend) {
+                            Tcl_AppendToObj(objPtr,
+                                    Tcl_GetString(vlookup->ivPtr->fullNamePtr), -1);
+                        } else {
+                            Tcl_AppendToObj(objPtr, "::", -1);
+                            Tcl_AppendToObj(objPtr,
+                                    Tcl_GetString(vlookup->ivPtr->namePtr), -1);
+                        }
+                    }
                     break;
             }
 
