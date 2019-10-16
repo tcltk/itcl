@@ -241,7 +241,7 @@ NRConfigBodyCmd(
      *  containing the variable definition is the requested class.
      */
     vlookup = NULL;
-    entry = Tcl_FindHashEntry(&iclsPtr->resolveVars, tail);
+    entry = ItclResolveVarEntry(iclsPtr, tail);
     if (entry) {
         vlookup = (ItclVarLookup*)Tcl_GetHashValue(entry);
         if (vlookup->ivPtr->iclsPtr != iclsPtr) {
@@ -2220,7 +2220,7 @@ Itcl_VarAliasProc(
     if (hPtr != NULL) {
         iclsPtr = (ItclClass *)Tcl_GetHashValue(hPtr);
     }
-    hPtr = Tcl_FindHashEntry(&iclsPtr->resolveVars, varName);
+    hPtr = ItclResolveVarEntry(iclsPtr, varName);
     if (hPtr == NULL) {
 	/* no class/object variable */
         return NULL;

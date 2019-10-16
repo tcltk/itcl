@@ -873,7 +873,7 @@ ItclInitObjectVariables(
 		    goto errorCleanup;
                 }
 	    }
-            hPtr2 = Tcl_FindHashEntry(&ivPtr->iclsPtr->resolveVars, varName);
+            hPtr2 = ItclResolveVarEntry(ivPtr->iclsPtr, varName);
             if (hPtr2 == NULL) {
                 hPtr = Tcl_NextHashEntry(&place);
 	        continue;
@@ -1626,7 +1626,7 @@ ItclGetInstanceVar(
         iclsPtr = contextIclsPtr;
     }
     ivPtr = NULL;
-    hPtr = Tcl_FindHashEntry(&iclsPtr->resolveVars, (char *)name1);
+    hPtr = ItclResolveVarEntry(iclsPtr, (char *)name1);
     if (hPtr != NULL) {
         vlookup = (ItclVarLookup *)Tcl_GetHashValue(hPtr);
         ivPtr = vlookup->ivPtr;
@@ -1641,7 +1641,7 @@ ItclGetInstanceVar(
 	Tcl_GetVariableFullName(interp, varPtr, varName);
 
 	val = Tcl_GetVar2(interp, Tcl_GetString(varName), name2,
-		TCL_LEAVE_ERR_MSG);
+		TCL_LEAVE_ERR_MSG | TCL_GLOBAL_ONLY);
 	Tcl_DecrRefCount(varName);
 	if (val) {
 	    return val;
@@ -1842,7 +1842,7 @@ ItclSetInstanceVar(
     } else {
         iclsPtr = contextIclsPtr;
     }
-    hPtr = Tcl_FindHashEntry(&iclsPtr->resolveVars, (char *)name1);
+    hPtr = ItclResolveVarEntry(iclsPtr, (char *)name1);
     if (hPtr != NULL) {
         vlookup = (ItclVarLookup *)Tcl_GetHashValue(hPtr);
         ivPtr = vlookup->ivPtr;
@@ -3496,7 +3496,7 @@ GetConstructorVar(
     ItclVariable *ivPtr;
     const char *val;
 
-    hPtr = Tcl_FindHashEntry(&iclsPtr->resolveVars, (char *)varName);
+    hPtr = ItclResolveVarEntry(iclsPtr, (char *)varName);
     if (hPtr == NULL) {
 	/* no such variable */
         return NULL;

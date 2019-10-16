@@ -747,7 +747,7 @@ Itcl_ScopeCmd(
     if (Itcl_IsClassNamespace(contextNsPtr)) {
 	ClientData clientData;
 
-        entry = Tcl_FindHashEntry(&contextIclsPtr->resolveVars, token);
+        entry = ItclResolveVarEntry(contextIclsPtr, token);
         if (!entry) {
             Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
                 "variable \"", token, "\" not found in class \"",

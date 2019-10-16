@@ -689,7 +689,7 @@ Itcl_BiConfigureCmd(
             }
 
             vlookup = NULL;
-            hPtr = Tcl_FindHashEntry(&contextIclsPtr->resolveVars, token+1);
+            hPtr = ItclResolveVarEntry(contextIclsPtr, token+1);
             if (hPtr) {
                 vlookup = (ItclVarLookup*)Tcl_GetHashValue(hPtr);
 
@@ -730,9 +730,9 @@ Itcl_BiConfigureCmd(
         vlookup = NULL;
         token = Tcl_GetString(unparsedObjv[i]);
         if (*token == '-') {
-            hPtr = Tcl_FindHashEntry(&contextIclsPtr->resolveVars, token+1);
+            hPtr = ItclResolveVarEntry(contextIclsPtr, token+1);
             if (hPtr == NULL) {
-                hPtr = Tcl_FindHashEntry(&contextIclsPtr->resolveVars, token);
+                hPtr = ItclResolveVarEntry(contextIclsPtr, token);
 	    }
             if (hPtr) {
                 vlookup = (ItclVarLookup*)Tcl_GetHashValue(hPtr);
@@ -889,7 +889,7 @@ Itcl_BiCgetCmd(
     name = Tcl_GetString(objv[1]);
 
     vlookup = NULL;
-    hPtr = Tcl_FindHashEntry(&contextIclsPtr->resolveVars, name+1);
+    hPtr = ItclResolveVarEntry(contextIclsPtr, name+1);
     if (hPtr) {
         vlookup = (ItclVarLookup*)Tcl_GetHashValue(hPtr);
     }
@@ -953,7 +953,7 @@ ItclReportPublicOpt(
     Tcl_DStringAppend(&optName, "-", -1);
 
     iclsPtr = (ItclClass*)contextIoPtr->iclsPtr;
-    hPtr = Tcl_FindHashEntry(&iclsPtr->resolveVars,
+    hPtr = ItclResolveVarEntry(iclsPtr,
             Tcl_GetString(ivPtr->fullNamePtr));
     assert(hPtr != NULL);
     vlookup = (ItclVarLookup*)Tcl_GetHashValue(hPtr);

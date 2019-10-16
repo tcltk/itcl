@@ -202,7 +202,7 @@ Initialize (
         Tcl_Panic("Itcl: cannot create namespace: \"%s\" \n", ITCL_NAMESPACE);
     }
 
-    nsPtr = Tcl_CreateNamespace(interp, ITCL_NAMESPACE"::internal::dicts",
+    nsPtr = Tcl_CreateNamespace(interp, ITCL_INTDICTS_NAMESPACE,
             NULL, NULL);
     if (nsPtr == NULL) {
 	Itcl_Free(infoPtr);
