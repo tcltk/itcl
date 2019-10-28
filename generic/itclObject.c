@@ -53,7 +53,7 @@ static char* ItclTraceItclHullVar(ClientData cdata, Tcl_Interp *interp,
 	const char *name1, const char *name2, int flags);
 
 static void ItclDestroyObject(ClientData clientData);
-static Tcl_FreeProc FreeObject;
+static void FreeObject(char *cdata);
 
 static int ItclDestructBase(Tcl_Interp *interp, ItclObject *contextObj,
         ItclClass *contextClass, int flags);
@@ -248,7 +248,7 @@ ItclCreateObject(
      *  Create a new object and initialize it.
      */
     ioPtr = (ItclObject*)Itcl_Alloc(sizeof(ItclObject));
-    Itcl_EventuallyFree(ioPtr, FreeObject);
+    Itcl_EventuallyFree(ioPtr, (Tcl_FreeProc *)FreeObject);
     ioPtr->iclsPtr = iclsPtr;
     ioPtr->interp = interp;
     ioPtr->infoPtr = infoPtr;
