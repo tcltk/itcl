@@ -644,6 +644,18 @@ test fossil-9.3 {c45384364c} -setup {
     itcl::delete class A B
 } -result {::b ::b}
 
+test fossil-9.4 {9eea4912b9} -setup {
+    itcl::class A {
+	public method foo WRONG
+    }
+} -body {
+    itcl::body A::foo {RIGHT} {}
+    A a
+    a info args foo
+} -cleanup {
+    itcl::delete class A
+} -result RIGHT
+
 test sfbugs-281 {Resolve inherited common} -setup {
     itcl::class Parent {protected common x 0}
 } -cleanup {

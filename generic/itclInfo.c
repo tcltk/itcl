@@ -1991,7 +1991,7 @@ Itcl_BiInfoArgsCmd(
          */
         if ((mcode && mcode->argListPtr != NULL)
 		|| ((imPtr->flags & ITCL_ARG_SPEC) != 0)) {
-	    Tcl_SetObjResult(interp, imPtr->usagePtr);
+	    Tcl_SetObjResult(interp, mcode->usagePtr);
         } else {
 	    Tcl_SetObjResult(interp, Tcl_NewStringObj("<undefined>", -1));
         }
