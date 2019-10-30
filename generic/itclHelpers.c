@@ -250,11 +250,7 @@ Itcl_EvalArgs(
     int objc,                /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
 {
-    int result;
     Tcl_Command cmd;
-    int cmdlinec;
-    Tcl_Obj **cmdlinev;
-    Tcl_Obj *cmdlinePtr = NULL;
     Tcl_CmdInfo infoPtr;
 
     /*
@@ -264,44 +260,21 @@ Itcl_EvalArgs(
      */
     cmd = Tcl_GetCommandFromObj(interp, objv[0]);
 
-    cmdlinec = objc;
-    cmdlinev = (Tcl_Obj	**) objv;
-
     /*
-     * If the command is still not found, handle it with the
-     * "unknown" proc.
+     * If the command is not found, we have no hope of a truly fast
+     * dispatch, so the smart thing to do is just fall back to the
+     * conventional tools.
      */
     if (cmd == NULL) {
-        cmd = Tcl_FindCommand(interp, "unknown",
-            (Tcl_Namespace *) NULL, /*flags*/ TCL_GLOBAL_ONLY);
-
-        if (cmd == NULL) {
-            Tcl_ResetResult(interp);
-            Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
-                "invalid command name \"",
-                Tcl_GetString(objv[0]), "\"", NULL);
-            return TCL_ERROR;
-        }
-
-        cmdlinePtr = Itcl_CreateArgs(interp, "unknown", objc, objv);
-        Tcl_ListObjGetElements(NULL, cmdlinePtr, &cmdlinec, &cmdlinev);
+	return Tcl_EvalObjv(interp, objc, objv, 0);
     }
 
     /*
      *  Finally, invoke the command's Tcl_ObjCmdProc.  Be careful
      *  to pass in the proper client data.
      */
-    Tcl_ResetResult(interp);
-    result = Tcl_GetCommandInfoFromToken(cmd, &infoPtr);
-    if (result == 1) {
-        result = (infoPtr.objProc)(infoPtr.objClientData, interp,
-                cmdlinec, cmdlinev);
-    }
-
-    if (cmdlinePtr) {
-        Tcl_DecrRefCount(cmdlinePtr);
-    }
-    return result;
+    Tcl_GetCommandInfoFromToken(cmd, &infoPtr);
+    return (infoPtr.objProc)(infoPtr.objClientData, interp, objc, objv);
 }
 
 
