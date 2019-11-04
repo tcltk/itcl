@@ -460,9 +460,6 @@ Itcl_CreateClass(
             NULL, &ivPtr);
         ivPtr->protection = ITCL_PROTECTED;  /* always "protected" */
         ivPtr->flags |= ITCL_TYPE_VAR;       /* mark as "type" variable */
-        hPtr = Tcl_CreateHashEntry(&iclsPtr->variables, (char *)namePtr,
-	        &newEntry);
-        Tcl_SetHashValue(hPtr, ivPtr);
     }
 
     if (iclsPtr->flags & (ITCL_ECLASS)) {
@@ -471,9 +468,6 @@ Itcl_CreateClass(
             NULL, &ivPtr);
         ivPtr->protection = ITCL_PROTECTED;  /* always "protected" */
         ivPtr->flags |= ITCL_WIN_VAR;        /* mark as "win" variable */
-        hPtr = Tcl_CreateHashEntry(&iclsPtr->variables, (char *)namePtr,
-	        &newEntry);
-        Tcl_SetHashValue(hPtr, ivPtr);
     }
     if (iclsPtr->flags & (ITCL_TYPE|ITCL_WIDGET|ITCL_WIDGETADAPTOR)) {
         namePtr = Tcl_NewStringObj("self", -1);
@@ -481,38 +475,24 @@ Itcl_CreateClass(
             NULL, &ivPtr);
         ivPtr->protection = ITCL_PROTECTED;  /* always "protected" */
         ivPtr->flags |= ITCL_SELF_VAR;       /* mark as "self" variable */
-        hPtr = Tcl_CreateHashEntry(&iclsPtr->variables, (char *)namePtr,
-	        &newEntry);
-        Tcl_SetHashValue(hPtr, ivPtr);
 
         namePtr = Tcl_NewStringObj("selfns", -1);
         (void) Itcl_CreateVariable(interp, iclsPtr, namePtr, NULL,
             NULL, &ivPtr);
         ivPtr->protection = ITCL_PROTECTED;  /* always "protected" */
         ivPtr->flags |= ITCL_SELFNS_VAR;     /* mark as "selfns" variable */
-        hPtr = Tcl_CreateHashEntry(&iclsPtr->variables, (char *)namePtr,
-	        &newEntry);
-        Tcl_SetHashValue(hPtr, ivPtr);
 
         namePtr = Tcl_NewStringObj("win", -1);
         (void) Itcl_CreateVariable(interp, iclsPtr, namePtr, NULL,
             NULL, &ivPtr);
         ivPtr->protection = ITCL_PROTECTED;  /* always "protected" */
         ivPtr->flags |= ITCL_WIN_VAR;        /* mark as "win" variable */
-        hPtr = Tcl_CreateHashEntry(&iclsPtr->variables, (char *)namePtr,
-	        &newEntry);
-        Tcl_SetHashValue(hPtr, ivPtr);
     }
     namePtr = Tcl_NewStringObj("this", -1);
     (void) Itcl_CreateVariable(interp, iclsPtr, namePtr, NULL,
             NULL, &ivPtr);
-
     ivPtr->protection = ITCL_PROTECTED;  /* always "protected" */
     ivPtr->flags |= ITCL_THIS_VAR;       /* mark as "this" variable */
-
-    hPtr = Tcl_CreateHashEntry(&iclsPtr->variables, (char *)namePtr,
-            &newEntry);
-    Tcl_SetHashValue(hPtr, ivPtr);
 
     if (infoPtr->currClassFlags &
             (ITCL_ECLASS|ITCL_TYPE|ITCL_WIDGETADAPTOR|ITCL_WIDGET)) {
@@ -523,15 +503,9 @@ Itcl_CreateClass(
         namePtr = Tcl_NewStringObj("itcl_options", -1);
         (void) Itcl_CreateVariable(interp, iclsPtr, namePtr, NULL,
                 NULL, &ivPtr);
-
         ivPtr->protection = ITCL_PROTECTED;  /* always "protected" */
         ivPtr->flags |= ITCL_OPTIONS_VAR;    /* mark as "itcl_options"
 	                                      * variable */
-
-        hPtr = Tcl_CreateHashEntry(&iclsPtr->variables, (char *)namePtr,
-	        &newEntry);
-        Tcl_SetHashValue(hPtr, ivPtr);
-
     }
     if (infoPtr->currClassFlags &
             ITCL_ECLASS) {
@@ -542,15 +516,9 @@ Itcl_CreateClass(
         namePtr = Tcl_NewStringObj("itcl_option_components", -1);
         (void) Itcl_CreateVariable(interp, iclsPtr, namePtr, NULL,
                 NULL, &ivPtr);
-
         ivPtr->protection = ITCL_PROTECTED;  /* always "protected" */
         ivPtr->flags |= ITCL_OPTION_COMP_VAR; /* mark as "itcl_option_components"
 	                                      * variable */
-
-        hPtr = Tcl_CreateHashEntry(&iclsPtr->variables, (char *)namePtr,
-	        &newEntry);
-        Tcl_SetHashValue(hPtr, ivPtr);
-
     }
     if (infoPtr->currClassFlags & (ITCL_WIDGET|ITCL_WIDGETADAPTOR)) {
         /*
@@ -559,13 +527,8 @@ Itcl_CreateClass(
         namePtr = Tcl_NewStringObj("thiswin", -1);
         (void) Itcl_CreateVariable(interp, iclsPtr, namePtr, NULL,
                 NULL, &ivPtr);
-
         ivPtr->protection = ITCL_PROTECTED;  /* always "protected" */
         ivPtr->flags |= ITCL_THIS_VAR;       /* mark as "thiswin" variable */
-
-        hPtr = Tcl_CreateHashEntry(&iclsPtr->variables, (char *)namePtr,
-	        &newEntry);
-        Tcl_SetHashValue(hPtr, ivPtr);
     }
     if (infoPtr->currClassFlags & (ITCL_WIDGET|ITCL_WIDGETADAPTOR)) {
         /* create the itcl_hull component */
@@ -2139,7 +2102,7 @@ Itcl_CreateOption(
 
 /*
  * ------------------------------------------------------------------------
- *  Itcl_CreateMethodVariable()
+ *  ItclCreateMethodVariable(), Itcl_CreateMethodVariable()
  *
  *  Creates a new class methdovariable definition.  If this is a public
  *  methodvariable,
@@ -2150,10 +2113,9 @@ Itcl_CreateOption(
  * ------------------------------------------------------------------------
  */
 int
-Itcl_CreateMethodVariable(
+ItclCreateMethodVariable(
     Tcl_Interp *interp,       /* interpreter managing this transaction */
-    ItclClass* iclsPtr,       /* class containing this variable */
-    Tcl_Obj* namePtr,         /* variable name */
+    ItclVariable *ivPtr,      /* variable reference (from Itcl_CreateVariable) */
     Tcl_Obj* defaultPtr,      /* initial value */
     Tcl_Obj* callbackPtr,     /* code invoked when variable is set */
     ItclMethodVariable** imvPtrPtr)
@@ -2167,31 +2129,27 @@ Itcl_CreateMethodVariable(
      *  Add this methodvariable to the options table for the class.
      *  Make sure that the methodvariable name does not already exist.
      */
-    hPtr = Tcl_CreateHashEntry(&iclsPtr->methodVariables,
-            (char *)namePtr, &isNew);
+    hPtr = Tcl_CreateHashEntry(&ivPtr->iclsPtr->methodVariables,
+            (char *)ivPtr->namePtr, &isNew);
     if (!isNew) {
         Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
-            "methdovariable name \"", Tcl_GetString(namePtr),
+            "methdovariable name \"", Tcl_GetString(ivPtr->namePtr),
 	    "\" already defined in class \"",
-            Tcl_GetString (iclsPtr->fullNamePtr), "\"",
+            Tcl_GetString (ivPtr->iclsPtr->fullNamePtr), "\"",
             NULL);
         return TCL_ERROR;
     }
-    Tcl_IncrRefCount(namePtr);
 
     /*
      *  If everything looks good, create the option definition.
      */
     imvPtr = (ItclMethodVariable*)ckalloc(sizeof(ItclMethodVariable));
     memset(imvPtr, 0, sizeof(ItclMethodVariable));
-    imvPtr->iclsPtr      = iclsPtr;
+    imvPtr->iclsPtr      = ivPtr->iclsPtr;
     imvPtr->protection   = Itcl_Protection(interp, 0);
-    imvPtr->namePtr      = namePtr;
+    imvPtr->namePtr      = ivPtr->namePtr;
     Tcl_IncrRefCount(imvPtr->namePtr);
-    imvPtr->fullNamePtr = Tcl_NewStringObj(
-            Tcl_GetString(iclsPtr->fullNamePtr), -1);
-    Tcl_AppendToObj(imvPtr->fullNamePtr, "::", 2);
-    Tcl_AppendToObj(imvPtr->fullNamePtr, Tcl_GetString(namePtr), -1);
+    imvPtr->fullNamePtr = ivPtr->fullNamePtr;
     Tcl_IncrRefCount(imvPtr->fullNamePtr);
     imvPtr->defaultValuePtr    = defaultPtr;
     if (defaultPtr != NULL) {
@@ -2212,6 +2170,42 @@ Itcl_CreateMethodVariable(
     return TCL_OK;
 }
 
+/* 
+ * TODO: remove this if unused (seems to be internal API only),
+ *       now superseded by ItclCreateMethodVariable.
+ */
+int
+Itcl_CreateMethodVariable(
+    Tcl_Interp *interp,       /* interpreter managing this transaction */
+    ItclClass* iclsPtr,       /* class containing this variable */
+    Tcl_Obj* namePtr,         /* variable name */
+    Tcl_Obj* defaultPtr,      /* initial value */
+    Tcl_Obj* callbackPtr,     /* code invoked when variable is set */
+    ItclMethodVariable** imvPtrPtr)
+                              /* returns: new methdovariable definition */
+{
+    ItclVariable *ivPtr;
+    Tcl_HashEntry *hPtr;
+
+    /*
+     *  Search variable reference (ivPtr).
+     */
+    hPtr = Tcl_FindHashEntry(&iclsPtr->variables, (char *)namePtr);
+    if (!hPtr || !(ivPtr = (ItclVariable*)Tcl_GetHashValue(hPtr))) {
+        Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+            "variable name \"", Tcl_GetString(namePtr),
+	    "\" is not declared in class \"",
+            Tcl_GetString (iclsPtr->fullNamePtr), "\"",
+            NULL);
+        return TCL_ERROR;
+    }
+
+    /*
+     *  Create method variable.
+     */
+    return ItclCreateMethodVariable(interp, ivPtr, defaultPtr, callbackPtr,
+		imvPtrPtr);
+}
 
 
 /*

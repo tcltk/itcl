@@ -4223,7 +4223,7 @@ Itcl_ClassMethodVariableCmd(
         return TCL_ERROR;
     }
     iclsPtr->numVariables++;
-    result = Itcl_CreateMethodVariable(interp, iclsPtr, namePtr, defaultPtr,
+    result = ItclCreateMethodVariable(interp, ivPtr, defaultPtr,
             callbackPtr, &imvPtr);
     if (result != TCL_OK) {
         return result;
