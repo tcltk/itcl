@@ -1858,7 +1858,7 @@ ItclResolveVarEntry(
  *    Used primarily in Itcl_ClassCmdResolver() to resolve all
  *    command references in a namespace.
  *
- *  DATA MEMBERS:  resolveVars
+ *  DATA MEMBERS:  resolveVars (built on demand, moved to ItclResolveVarEntry)
  *    Used primarily in Itcl_ClassVarResolver() to quickly resolve
  *    variable references in each class scope.
  *
