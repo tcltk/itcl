@@ -539,6 +539,26 @@ test basic-6.8 {common variables can be redefined
     test_arrays0 do set undefined "scalar"
 } -result {scalar}
 
+test basic-7.1 {variable lookup before a common creation (bug [777ae99cfb])} -body {
+    itcl::class A {
+	private common cv "A::cv"
+	public proc cv {} {set cv}
+    }
+    itcl::class B {
+	inherit A
+	public common res {}
+	lappend res [info exists cv]
+	#private common cv "B::cv"
+	private common cv
+	lappend cv "B::cv-add"
+	public proc cv {} {set cv}
+    }
+    lappend B::res [A::cv] [B::cv]
+    set B::res
+} -result {0 A::cv B::cv-add} -cleanup {
+    itcl::delete class B A
+}
+
 if {[namespace which test_arrays] ne {}} {
     ::itcl::delete class test_arrays
 }
