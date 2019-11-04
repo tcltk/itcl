@@ -539,6 +539,54 @@ test basic-6.8 {common variables can be redefined
     test_arrays0 do set undefined "scalar"
 } -result {scalar}
 
+proc testVarResolver {{access private} {init 0}} {
+  eval [string map [list \$access $access \$init $init] {
+    itcl::class A {
+	$access common cv "A::cv"
+	public proc cv {} {set cv}
+    }
+    itcl::class B {
+	inherit A
+	public common res {}
+	lappend res [info exists cv]
+	if {$init} {
+	    $access common cv ""
+	} else {
+	    $access common cv
+	}
+	lappend res [info exists cv]
+	lappend cv "B::cv-add"
+	public proc cv {} {set cv}
+    }
+    lappend B::res [A::cv] [B::cv]
+    set B::res
+  }]
+}
+test basic-7.1-a {variable lookup before a common creation (bug [777ae99cfb])} -body {
+    # private uninitialized var:
+    testVarResolver private 0
+} -result {0 0 A::cv B::cv-add} -cleanup {
+    itcl::delete class B A
+}
+test basic-7.1-b {variable lookup before a common creation (bug [777ae99cfb])} -body {
+    # public uninitialized var:
+    testVarResolver public 0
+} -result {1 0 A::cv B::cv-add} -cleanup {
+    itcl::delete class B A
+}
+test basic-7.2-a {variable lookup before a common creation (bug [777ae99cfb])} -body {
+    # private initialized var:
+    testVarResolver private 1
+} -result {0 1 A::cv B::cv-add} -cleanup {
+    itcl::delete class B A
+}
+test basic-7.2-b {variable lookup before a common creation (bug [777ae99cfb])} -body {
+    # public initialized var:
+    testVarResolver public 1
+} -result {1 1 A::cv B::cv-add} -cleanup {
+    itcl::delete class B A
+}
+
 if {[namespace which test_arrays] ne {}} {
     ::itcl::delete class test_arrays
 }

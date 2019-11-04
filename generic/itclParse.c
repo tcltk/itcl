@@ -582,7 +582,6 @@ ItclGenericClassCmd(
             return TCL_ERROR;
         }
         iclsPtr->numVariables++;
-        Itcl_BuildVirtualTables(iclsPtr);
     }
     Tcl_ResetResult(interp);
     Tcl_AppendResult(interp, Tcl_GetString(iclsPtr->fullNamePtr), NULL);
@@ -2136,25 +2135,14 @@ ItclInitClassCommon(
     Itcl_PopCallFrame(interp);
 
     /*
-     *  TRICKY NOTE:  Make sure to rebuild the virtual tables for this
-     *    class so that this variable is ready to access.  The variable
-     *    resolver for the parser namespace needs this info to find the
-     *    variable if the developer tries to set it within the class
-     *    definition.
-     *
      *  If an initialization value was specified, then initialize
-     *  the variable now.
+     *  the variable now, otherwise be sure the variable is uninitialized.
      */
-    Itcl_BuildVirtualTables(iclsPtr);
 
     if (initStr != NULL) {
 	const char *val;
-        Tcl_DStringAppend(&buffer, "::", -1);
-        Tcl_DStringAppend(&buffer, Tcl_GetString(ivPtr->namePtr), -1);
-        val = Tcl_SetVar2(interp,
-	        Tcl_DStringValue(&buffer), NULL, initStr,
-                TCL_NAMESPACE_ONLY);
-
+	val = Tcl_SetVar2(interp, Tcl_GetString(ivPtr->fullNamePtr), NULL,
+		initStr, TCL_NAMESPACE_ONLY);
         if (!val) {
             Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
                 "cannot initialize common variable \"",
@@ -2162,18 +2150,22 @@ ItclInitClassCommon(
                 NULL);
             return TCL_ERROR;
         }
+    } else {
+	/* previous var-lookup in class body (in ::itcl::parser) could obtain
+	 * inherited common vars, so be sure it does not exists after new
+	 * common creation (simply remove this reference). */
+	Tcl_UnsetVar2(interp, Tcl_GetString(ivPtr->fullNamePtr), NULL,
+		TCL_NAMESPACE_ONLY);
     }
     if (ivPtr->arrayInitPtr != NULL) {
 	int i;
 	int argc;
 	const char **argv;
 	const char *val;
-        Tcl_DStringAppend(&buffer, "::", -1);
-        Tcl_DStringAppend(&buffer, Tcl_GetString(ivPtr->namePtr), -1);
 	result = Tcl_SplitList(interp, Tcl_GetString(ivPtr->arrayInitPtr),
 	        &argc, &argv);
 	for (i = 0; i < argc; i++) {
-            val = Tcl_SetVar2(interp, Tcl_DStringValue(&buffer), argv[i],
+            val = Tcl_SetVar2(interp, Tcl_GetString(ivPtr->fullNamePtr), argv[i],
                     argv[i + 1], TCL_NAMESPACE_ONLY);
             if (!val) {
                 Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
@@ -4226,7 +4218,7 @@ Itcl_ClassMethodVariableCmd(
         return TCL_ERROR;
     }
     iclsPtr->numVariables++;
-    result = Itcl_CreateMethodVariable(interp, iclsPtr, namePtr, defaultPtr,
+    result = ItclCreateMethodVariable(interp, ivPtr, defaultPtr,
             callbackPtr, &imvPtr);
     if (result != TCL_OK) {
         return result;

@@ -716,6 +716,9 @@ MODULE_SCOPE int ItclSetParserResolver(Tcl_Namespace *nsPtr);
 MODULE_SCOPE void ItclProcErrorProc(Tcl_Interp *interp, Tcl_Obj *procNameObj);
 MODULE_SCOPE int Itcl_CreateOption (Tcl_Interp *interp, ItclClass *iclsPtr,
 	ItclOption *ioptPtr);
+MODULE_SCOPE int ItclCreateMethodVariable(Tcl_Interp *interp,
+	ItclVariable *ivPtr, Tcl_Obj* defaultPtr, Tcl_Obj* callbackPtr,
+	ItclMethodVariable** imvPtrPtr);
 MODULE_SCOPE int Itcl_CreateMethodVariable (Tcl_Interp *interp,
         ItclClass *iclsPtr, Tcl_Obj *name, Tcl_Obj *defaultPtr,
 	Tcl_Obj *callbackPtr, ItclMethodVariable **imvPtr);
