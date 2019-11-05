@@ -2169,44 +2169,6 @@ ItclCreateMethodVariable(
     *imvPtrPtr = imvPtr;
     return TCL_OK;
 }
-
-/* 
- * TODO: remove this if unused (seems to be internal API only),
- *       now superseded by ItclCreateMethodVariable.
- */
-int
-Itcl_CreateMethodVariable(
-    Tcl_Interp *interp,       /* interpreter managing this transaction */
-    ItclClass* iclsPtr,       /* class containing this variable */
-    Tcl_Obj* namePtr,         /* variable name */
-    Tcl_Obj* defaultPtr,      /* initial value */
-    Tcl_Obj* callbackPtr,     /* code invoked when variable is set */
-    ItclMethodVariable** imvPtrPtr)
-                              /* returns: new methdovariable definition */
-{
-    ItclVariable *ivPtr;
-    Tcl_HashEntry *hPtr;
-
-    /*
-     *  Search variable reference (ivPtr).
-     */
-    hPtr = Tcl_FindHashEntry(&iclsPtr->variables, (char *)namePtr);
-    if (!hPtr || !(ivPtr = (ItclVariable*)Tcl_GetHashValue(hPtr))) {
-        Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
-            "variable name \"", Tcl_GetString(namePtr),
-	    "\" is not declared in class \"",
-            Tcl_GetString (iclsPtr->fullNamePtr), "\"",
-            NULL);
-        return TCL_ERROR;
-    }
-
-    /*
-     *  Create method variable.
-     */
-    return ItclCreateMethodVariable(interp, ivPtr, defaultPtr, callbackPtr,
-		imvPtrPtr);
-}
-
 
 /*
  * ------------------------------------------------------------------------
