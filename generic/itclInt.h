@@ -719,9 +719,6 @@ MODULE_SCOPE int Itcl_CreateOption (Tcl_Interp *interp, ItclClass *iclsPtr,
 MODULE_SCOPE int ItclCreateMethodVariable(Tcl_Interp *interp,
 	ItclVariable *ivPtr, Tcl_Obj* defaultPtr, Tcl_Obj* callbackPtr,
 	ItclMethodVariable** imvPtrPtr);
-MODULE_SCOPE int Itcl_CreateMethodVariable (Tcl_Interp *interp,
-        ItclClass *iclsPtr, Tcl_Obj *name, Tcl_Obj *defaultPtr,
-	Tcl_Obj *callbackPtr, ItclMethodVariable **imvPtr);
 MODULE_SCOPE int DelegationInstall(Tcl_Interp *interp, ItclObject *ioPtr,
         ItclClass *iclsPtr);
 MODULE_SCOPE ItclClass *ItclNamespace2Class(Tcl_Namespace *nsPtr);

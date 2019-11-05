@@ -2102,7 +2102,7 @@ Itcl_CreateOption(
 
 /*
  * ------------------------------------------------------------------------
- *  ItclCreateMethodVariable(), Itcl_CreateMethodVariable()
+ *  ItclCreateMethodVariable()
  *
  *  Creates a new class methdovariable definition.  If this is a public
  *  methodvariable,
