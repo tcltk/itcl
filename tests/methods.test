@@ -153,6 +153,22 @@ test methods-2.1 {covers leak condition test for compiled locals, no args} {
     }
     list 0
 } 0
+test methods-2.2 {covers leak condition test for nested methods calls within eval, bug [8e632ce049]} -setup {
+    itcl::class C1 {
+	proc factory {} {
+	    set obj [C1 #auto]
+	    $obj myeval [list $obj read]
+	    itcl::delete object $obj
+	}
+	method myeval {script} { eval $script }
+	method read {} { myeval {} }
+    }
+} -body {
+    time { C1::factory } 50
+    list 0
+} -result 0 -cleanup {
+    itcl::delete class C1
+}
 
 # ----------------------------------------------------------------------
 #  Clean up

@@ -2456,8 +2456,8 @@ ItclCheckCallMethod(
     Itcl_PushStack(framePtr, stackPtr);
 
     if (ioPtr != NULL) {
-        ioPtr->callRefCount++;
-	Itcl_PreserveData(ioPtr);
+	ioPtr->callRefCount++;
+	Itcl_PreserveData(ioPtr); /* ++ preserve until ItclAfterCallMethod releases it */
     }
     imPtr->iclsPtr->callRefCount++;
     if (!imPtr->iclsPtr->infoPtr->useOldResolvers) {
@@ -2571,10 +2571,13 @@ ItclAfterCallMethod(
             if (hPtr == NULL) {
                 ckfree((char *)callContextPtr);
 	    }
-	    Itcl_ReleaseData(ioPtr);
         } else {
             ckfree((char *)callContextPtr);
         }
+    }
+
+    if (ioPtr != NULL) {
+	Itcl_ReleaseData(ioPtr); /* -- paired release for preserve in ItclCheckCallMethod */
     }
     result = call_result;
 finishReturn:
