@@ -129,6 +129,8 @@ Itcl_InitRewriteEnsemble(
     int objc,
     Tcl_Obj *const *objv)
 {
+    (void)objc;
+
     return TclInitRewriteEnsemble(interp, numRemoved, numInserted, objv);
 }
 

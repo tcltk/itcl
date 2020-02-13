@@ -109,13 +109,16 @@ ItclDeleteObjectMetadata(
 static void
 ObjectRenamedTrace(
     ClientData clientData,      /* The object being deleted. */
-    Tcl_Interp *interp,         /* The interpreter containing the object. */
+    Tcl_Interp *dummy,         /* The interpreter containing the object. */
     const char *oldName,        /* What the object was (last) called. */
     const char *newName,        /* Always NULL ??. not for itk!! */
     int flags)                  /* Why was the object deleted? */
 {
     ItclObject *ioPtr = (ItclObject *)clientData;
     Itcl_InterpState istate;
+    (void)dummy;
+    (void)oldName;
+    (void)flags;
 
     if (newName != NULL) {
 	/* FIXME should enter the new name in the hashtables for objects etc. */
@@ -733,6 +736,11 @@ ItclInitObjectCommands(
    ItclClass *iclsPtr,
    const char *name)
 {
+    (void)interp;
+    (void)ioPtr;
+    (void)iclsPtr;
+    (void)name;
+
     return TCL_OK;
 }
 
@@ -1150,7 +1158,7 @@ ItclInitObjectOptions(
  */
 int
 ItclInitObjectMethodVariables(
-   Tcl_Interp *interp,
+   Tcl_Interp *dummy,
    ItclObject *ioPtr,
    ItclClass *iclsPtr,
    const char *name)
@@ -1162,6 +1170,8 @@ ItclInitObjectMethodVariables(
     Tcl_HashEntry *hPtr2;
     Tcl_HashSearch place;
     int isNew;
+    (void)dummy;
+    (void)name;
 
     imvPtr = NULL;
     Itcl_InitHierIter(&hier, iclsPtr);
@@ -1940,6 +1950,7 @@ ItclReportObjectUsage(
     char *name;
     int ignore;
     int cmp;
+    (void)callerNsPtr;
 
     if (contextIoPtr == NULL) {
         resultPtr = Tcl_GetObjResult(interp);
@@ -2081,6 +2092,7 @@ ItclTraceThisVar(
     ItclObject *contextIoPtr = (ItclObject*)cdata;
     Tcl_Obj *objPtr;
     const char *objName;
+    (void)name2;
 
     /* because of SF bug #187 use a different trace handler for "this", "win", "type"
      * *self" and "selfns"
@@ -2141,6 +2153,7 @@ ItclTraceWinVar(
     const char *objName;
     const char *head;
     const char *tail;
+    (void)name2;
 
     /*
      *  Handle read traces on "win"
@@ -2198,6 +2211,7 @@ ItclTraceTypeVar(
     ItclObject *contextIoPtr = (ItclObject*)cdata;
     Tcl_Obj *objPtr;
     const char *objName;
+    (void)name2;
 
     /*
      *  Handle read traces on "type"
@@ -2249,6 +2263,7 @@ ItclTraceSelfVar(
     ItclObject *contextIoPtr = (ItclObject*)cdata;
     Tcl_Obj *objPtr;
     const char *objName;
+    (void)name2;
 
     /*
      *  Handle read traces on "self"
@@ -2316,6 +2331,7 @@ ItclTraceSelfnsVar(
     ItclObject *contextIoPtr = (ItclObject*)cdata;
     Tcl_Obj *objPtr;
     const char *objName;
+    (void)name2;
 
     /*
      *  Handle read traces on "selfns"
@@ -2363,6 +2379,9 @@ ItclTraceOptionVar(
 {
     ItclObject *ioPtr;
     ItclOption *ioptPtr;
+    (void)interp;
+    (void)name1;
+    (void)name2;
 
 /* FIXME !!! */
 /* don't know yet if ItclTraceOptionVar is really needed !! */
@@ -2419,6 +2438,7 @@ ItclTraceComponentVar(
     ItclComponent *icPtr;
     ItclDelegatedFunction *idmPtr;
     const char *val;
+    (void)name2;
 
 /* FIXME should free memory on unset or rename!! */
     if (cdata != NULL) {
@@ -2516,6 +2536,7 @@ ItclTraceItclHullVar(
     ItclObjectInfo *infoPtr;
     ItclObject *ioPtr;
     ItclVariable *ivPtr;
+    (void)name2;
 
 /* FIXME !!! */
 /* FIXME should free memory on unset or rename!! */
@@ -3311,8 +3332,8 @@ ExpandDelegateAs(
 			    }
 		            break;
 		        } else {
-			    /* fall through */
 			}
+		    /* FALLTHRU */
 		    default:
 		      {
 			char buf[2];
@@ -3437,7 +3458,7 @@ DelegateFunction(
 
 int
 DelegatedOptionsInstall(
-    Tcl_Interp *interp,
+    Tcl_Interp *dummy,
     ItclClass *iclsPtr)
 {
     Tcl_HashEntry *hPtr2;
@@ -3446,6 +3467,7 @@ DelegatedOptionsInstall(
     ItclOption *ioptPtr;
     FOREACH_HASH_DECLS;
     char *optionName;
+    (void)dummy;
 
     FOREACH_HASH_VALUE(idoPtr, &iclsPtr->delegatedOptions) {
 	optionName = Tcl_GetString(idoPtr->namePtr);

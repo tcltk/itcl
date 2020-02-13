@@ -649,6 +649,7 @@ Itcl_ParseVarResolver(
 
     Tcl_HashEntry *hPtr;
     ItclVarLookup *vlookup;
+    (void)flags;
 
     /*
      *  See if the requested variable is a recognized "common" member.

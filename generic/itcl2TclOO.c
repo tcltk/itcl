@@ -52,11 +52,12 @@ CallFinalizePMCall(
 static int
 FreeCommand(
     void *data[],
-    Tcl_Interp *interp,
+    Tcl_Interp *dummy,
     int result)
 {
     Command *cmdPtr = (Command *)data[0];
     Proc *procPtr = (Proc *)data[1];
+    (void)dummy;
 
     ckfree(cmdPtr);
     procPtr->cmdPtr = NULL;
@@ -168,10 +169,12 @@ Itcl_InvokeProcedureMethod(
 static int
 FreeProcedureMethod(
     void *data[],
-    Tcl_Interp *interp,
+    Tcl_Interp *dummy,
     int result)
 {
     ProcedureMethod *pmPtr = (ProcedureMethod *)data[0];
+    (void)dummy;
+
     ckfree(pmPtr);
     return result;
 }
@@ -352,7 +355,7 @@ Itcl_TclOOObjectName(
 
 int
 Itcl_SelfCmd(
-    void *clientData,
+    void *dummy,
     Tcl_Interp *interp,
     int objc,
     Tcl_Obj *const *objv)
@@ -360,6 +363,7 @@ Itcl_SelfCmd(
     Interp *iPtr = (Interp *) interp;
     CallFrame *framePtr = iPtr->varFramePtr;
     CallContext *contextPtr;
+    (void)dummy;
 
     if (!Itcl_IsMethodCallFrame(interp)) {
         Tcl_AppendResult(interp, TclGetString(objv[0]),

@@ -169,7 +169,7 @@ ItclShowArgs(1, "EVAL2", objc+1, newObjv);
 /* ARGSUSED */
 int
 Itcl_FindClassesCmd(
-    ClientData clientData,   /* class/object info */
+    ClientData dummy,   /* class/object info */
     Tcl_Interp *interp,      /* current interpreter */
     int objc,                /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
@@ -189,6 +189,7 @@ Itcl_FindClassesCmd(
     int newEntry;
     int handledActiveNs;
     int forceFullNames = 0;
+    (void)dummy;
 
     ItclShowArgs(2, "Itcl_FindClassesCmd", objc, objv);
     if (objc > 2) {
@@ -302,7 +303,7 @@ Itcl_FindClassesCmd(
  */
 int
 Itcl_FindObjectsCmd(
-    ClientData clientData,   /* class/object info */
+    ClientData dummy,   /* class/object info */
     Tcl_Interp *interp,      /* current interpreter */
     int objc,                /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
@@ -332,6 +333,7 @@ Itcl_FindObjectsCmd(
     Tcl_CmdInfo cmdInfo;
     Tcl_Namespace *nsPtr;
     Tcl_Obj *objPtr;
+    (void)dummy;
 
     /*
      *  Parse arguments:
@@ -501,7 +503,7 @@ Itcl_FindObjectsCmd(
 /* ARGSUSED */
 static int
 NRDelClassCmd(
-    ClientData clientData,   /* unused */
+    ClientData dummy,   /* unused */
     Tcl_Interp *interp,      /* current interpreter */
     int objc,                /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
@@ -509,6 +511,7 @@ NRDelClassCmd(
     int i;
     char *name;
     ItclClass *iclsPtr;
+    (void)dummy;
 
     ItclShowArgs(1, "Itcl_DelClassCmd", objc, objv);
     /*
@@ -586,7 +589,7 @@ CallDeleteObject(
 
 static int
 NRDelObjectCmd(
-    ClientData clientData,   /* object management info */
+    ClientData dummy,   /* object management info */
     Tcl_Interp *interp,      /* current interpreter */
     int objc,                /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
@@ -596,6 +599,7 @@ NRDelObjectCmd(
     void *callbackPtr;
     int i;
     int result;
+    (void)dummy;
 
     ItclShowArgs(1, "Itcl_DelObjectCmd", objc, objv);
     /*
@@ -688,6 +692,7 @@ Itcl_ScopeCmd(
     char *token;
     int doAppend;
     int result;
+    (void)dummy;
 
     ItclShowArgs(1, "Itcl_ScopeCmd", objc, objv);
     if (objc != 2) {
@@ -907,6 +912,7 @@ Itcl_CodeCmd(
     Tcl_Obj *objPtr;
     const char *token;
     int pos;
+    (void)dummy;
 
     ItclShowArgs(1, "Itcl_CodeCmd", objc, objv);
     /*
@@ -997,7 +1003,7 @@ Itcl_CodeCmd(
  */
 int
 Itcl_IsObjectCmd(
-    ClientData clientData,   /* class/object info */
+    ClientData dummy,   /* class/object info */
     Tcl_Interp *interp,      /* current interpreter */
     int objc,                /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
@@ -1012,6 +1018,7 @@ Itcl_IsObjectCmd(
     Tcl_Command     cmd;
     Tcl_Namespace   *contextNs = NULL;
     ItclClass       *iclsPtr = NULL;
+    (void)dummy;
 
     /*
      *    Handle the arguments.
@@ -1115,7 +1122,7 @@ Itcl_IsObjectCmd(
  */
 int
 Itcl_IsClassCmd(
-    ClientData clientData,   /* class/object info */
+    ClientData dummy,   /* class/object info */
     Tcl_Interp *interp,      /* current interpreter */
     int objc,                /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
@@ -1125,6 +1132,7 @@ Itcl_IsClassCmd(
     char           *name;
     ItclClass      *iclsPtr = NULL;
     Tcl_Namespace  *contextNs = NULL;
+    (void)dummy;
 
     /*
      *    Need itcl::is class classname
@@ -1183,6 +1191,7 @@ Itcl_FilterAddCmd(
 {
     Tcl_Obj **newObjv;
     int result;
+    (void)dummy;
 
     ItclShowArgs(1, "Itcl_FilterCmd", objc, objv);
 /*    Tcl_Namespace *contextNs = Tcl_GetCurrentNamespace(interp); */
@@ -1223,6 +1232,8 @@ Itcl_FilterDeleteCmd(
     int objc,                /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
 {
+    (void)dummy;
+
     ItclShowArgs(1, "Itcl_FilterDeleteCmd", objc, objv);
 /*    Tcl_Namespace *contextNs = Tcl_GetCurrentNamespace(interp); */
 
@@ -1252,6 +1263,7 @@ Itcl_ForwardAddCmd(
     Tcl_Method mPtr;
     ItclObjectInfo *infoPtr;
     ItclClass *iclsPtr;
+    (void)dummy;
 
     ItclShowArgs(1, "Itcl_ForwardAddCmd", objc, objv);
     if (objc < 3) {
@@ -1296,6 +1308,8 @@ Itcl_ForwardDeleteCmd(
     int objc,                /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
 {
+    (void)dummy;
+
     ItclShowArgs(1, "Itcl_ForwardDeleteCmd", objc, objv);
 /*    Tcl_Namespace *contextNs = Tcl_GetCurrentNamespace(interp); */
 
@@ -1322,6 +1336,7 @@ Itcl_MixinAddCmd(
 {
     Tcl_Obj **newObjv;
     int result;
+    (void)dummy;
 
     ItclShowArgs(1, "Itcl_MixinAddCmd", objc, objv);
     if (objc < 3) {
@@ -1360,6 +1375,8 @@ Itcl_MixinDeleteCmd(
     int objc,                /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
 {
+    (void)dummy;
+
     ItclShowArgs(1, "Itcl_MixinDeleteCmd", objc, objv);
 /*    Tcl_Namespace *contextNs = Tcl_GetCurrentNamespace(interp); */
 
@@ -1716,7 +1733,7 @@ Itcl_AddDelegatedFunctionCmd(
 /* ARGSUSED */
 int
 Itcl_AddComponentCmd(
-    ClientData clientData,   /* infoPtr */
+    ClientData dummy,   /* infoPtr */
     Tcl_Interp *interp,      /* current interpreter */
     int objc,                /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
@@ -1736,6 +1753,7 @@ Itcl_AddComponentCmd(
     const char *varName;
     int isNew;
     int result;
+    (void)dummy;
 
     result = TCL_OK;
     contextIoPtr = NULL;
@@ -1880,7 +1898,7 @@ Itcl_AddComponentCmd(
 /* ARGSUSED */
 int
 Itcl_SetComponentCmd(
-    ClientData clientData,   /* infoPtr */
+    ClientData dummy,   /* infoPtr */
     Tcl_Interp *interp,      /* current interpreter */
     int objc,                /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
@@ -1895,6 +1913,7 @@ Itcl_SetComponentCmd(
     const char *name;
     const char *val;
     int result;
+    (void)dummy;
 
     result = TCL_OK;
     contextIoPtr = NULL;

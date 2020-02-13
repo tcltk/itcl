@@ -303,12 +303,13 @@ ItclGetRegisteredProcs(
 static void
 ItclFreeC(
     ClientData clientData,       /* associated data */
-    Tcl_Interp *interp)          /* intepreter being deleted */
+    Tcl_Interp *dummy)          /* interpreter being deleted */
 {
     Tcl_HashTable *tablePtr = (Tcl_HashTable*)clientData;
     Tcl_HashSearch place;
     Tcl_HashEntry *entry;
     ItclCfunc *cfunc;
+    (void)dummy;
 
     entry = Tcl_FirstHashEntry(tablePtr, &place);
     while (entry) {

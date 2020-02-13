@@ -652,10 +652,12 @@ static const Tcl_MethodType itclArgMethodType = {
 
 static int
 CloneProc(
-    Tcl_Interp *interp,
+    Tcl_Interp *dummy,
     ClientData original,
     ClientData *copyPtr)
 {
+    (void)dummy;
+
     Itcl_PreserveData((ItclMemberFunc *)original);
     *copyPtr = original;
     return TCL_OK;
@@ -668,6 +670,7 @@ CallAfterCallMethod(
     int result)
 {
     ClientData clientData = data[0];
+
     Tcl_ObjectContext context = (Tcl_ObjectContext)data[1];
 
     return ItclAfterCallMethod(clientData, interp, context, NULL, result);
@@ -706,6 +709,12 @@ ArgCallProc(
     int objc,
     Tcl_Obj *const *objv)
 {
+    (void)clientData;
+    (void)interp;
+    (void)context;
+    (void)objc;
+    (void)objv;
+
     return TCL_ERROR;
 }
 
@@ -2476,6 +2485,9 @@ Itcl_ClassMixinCmd(
     int objc,                /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
 {
+    (void)clientData;
+    (void)interp;
+
     ItclShowArgs(0, "Itcl_ClassMixinCmd", objc, objv);
     return TCL_OK;
 }
@@ -2594,6 +2606,7 @@ ItclParseOption(
     int result;
     int i;
     const char *cp;
+    (void)infoPtr;
 
     ItclShowArgs(1, "ItclParseOption", objc, objv);
     pLevel = Itcl_Protection(interp, 0);

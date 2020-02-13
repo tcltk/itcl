@@ -628,7 +628,7 @@ Itcl_ReleaseData(
     /* Free cdata now */
     freeProc = blk->freeProc;
     blk->freeProc = NULL;
-    freeProc(cdata);
+    freeProc((char *)cdata);
 }
 
 /*

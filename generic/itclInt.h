@@ -653,7 +653,7 @@ MODULE_SCOPE int _itcl_debug_level;
 MODULE_SCOPE void ItclShowArgs(int level, const char *str, int objc,
 	Tcl_Obj * const* objv);
 #else
-#define ItclShowArgs(a,b,c,d)
+#define ItclShowArgs(a,b,c,d) do {(void)(c);(void)(d);} while(0)
 #endif
 
 MODULE_SCOPE Tcl_ObjCmdProc ItclCallCCommand;

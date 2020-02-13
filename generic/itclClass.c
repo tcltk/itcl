@@ -146,6 +146,7 @@ CallNewObjectInstance(
     const char *path = (const char *)data[1];
     Tcl_Object *oPtr = (Tcl_Object *)data[2];
     Tcl_Obj *nameObjPtr = (Tcl_Obj *)data[3];
+    (void)result;
 
     *oPtr = NULL;
     if (infoPtr->clazzClassPtr) {
@@ -566,6 +567,8 @@ ItclDeleteClassVariablesNamespace(
     Tcl_Interp *interp,
     ItclClass *iclsPtr)
 {
+    (void)interp;
+    (void)iclsPtr;
     /* TODO: why is this being skipped? */
     return;
 }
@@ -1707,7 +1710,7 @@ ItclResolveVarEntry(
 			    }
 			    /* check leastQualName correction needed */
 			    if (!vlookup->leastQualName) {
-				vlookup->leastQualName = 
+				vlookup->leastQualName = (char *)
 				    Tcl_GetHashKey(&iclsPtr->resolveVars, hPtr);
 			    }
 			    /* reset vlookup for full-qualified names - new lookup */
@@ -1725,7 +1728,7 @@ ItclResolveVarEntry(
 			setResVar:
 
 			    vlookup->ivPtr = ivPtr;
-			    vlookup->leastQualName = 
+			    vlookup->leastQualName = (char *)
 				Tcl_GetHashKey(&iclsPtr->resolveVars, hPtr);
 
 			    /*
@@ -1859,7 +1862,7 @@ Itcl_BuildVirtualTables(
         if (hPtr == NULL) {
             break;
         }
-        clookupPtr = Tcl_GetHashValue(hPtr);
+        clookupPtr = (ItclCmdLookup *)Tcl_GetHashValue(hPtr);
         ckfree((char *)clookupPtr);
 	Tcl_DeleteHashEntry(hPtr);
     }

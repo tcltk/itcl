@@ -466,15 +466,16 @@ Itcl_SafeInit (
 static int
 ItclSetHullWindowName(
     void *clientData,   /* infoPtr */
-    Tcl_Interp *interp,      /* current interpreter */
+    Tcl_Interp *dummy,      /* current interpreter */
     int objc,                /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
 {
     ItclObjectInfo *infoPtr;
+    (void)dummy;
 
     infoPtr = (ItclObjectInfo *)clientData;
-    if (infoPtr->currIoPtr != NULL) {
-        infoPtr->currIoPtr->hullWindowNamePtr = objv[1];
+    if ((infoPtr->currIoPtr != NULL) && (objc > 1)) {
+	infoPtr->currIoPtr->hullWindowNamePtr = objv[1];
 	Tcl_IncrRefCount(infoPtr->currIoPtr->hullWindowNamePtr);
     }
     return TCL_OK;

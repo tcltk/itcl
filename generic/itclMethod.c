@@ -64,7 +64,7 @@ static void FreeMemberCode(ItclMemberCode *mcodePtr);
  */
 static int
 NRBodyCmd(
-    ClientData clientData,   /*  */
+    ClientData dummy,   /*  */
     Tcl_Interp *interp,      /* current interpreter */
     int objc,                /* number of arguments */
     Tcl_Obj *const *objv)    /* argument objects */
@@ -80,6 +80,7 @@ NRBodyCmd(
     char *arglist;
     char *body;
     int status = TCL_OK;
+    (void)dummy;
 
     ItclShowArgs(2, "Itcl_BodyCmd", objc, objv);
     if (objc != 4) {
@@ -205,6 +206,7 @@ NRConfigBodyCmd(
     ItclVariable *ivPtr;
     ItclMemberCode *mcode;
     Tcl_HashEntry *entry;
+    (void)dummy;
 
     ItclShowArgs(2, "Itcl_ConfigBodyCmd", objc, objv);
     if (objc != 3) {
@@ -1319,12 +1321,13 @@ Itcl_EvalMemberCode(
 
 static int
 EquivArgLists(
-    Tcl_Interp *interp,
+    Tcl_Interp *dummy,
     ItclArgList *origArgs,
     ItclArgList *realArgs)
 {
     ItclArgList *currPtr;
     char *argName;
+    (void)dummy;
 
     for (currPtr=origArgs; currPtr != NULL; currPtr=currPtr->nextPtr) {
 	if ((realArgs != NULL) && (realArgs->namePtr == NULL)) {
@@ -2061,6 +2064,9 @@ Itcl_ReportFuncErrors(
     ItclObject *contextObj,    /* object context for this command */
     int result)                /* integer status code from proc body */
 {
+    (void)interp;
+    (void)imPtr;
+    (void)contextObj;
 /* FIXME !!! */
 /* adapt to use of ItclProcErrorProc for stubs compatibility !! */
     return result;
@@ -2189,7 +2195,7 @@ Itcl_CmdAliasProc(
  */
 Tcl_Var
 Itcl_VarAliasProc(
-    Tcl_Interp *interp,
+    Tcl_Interp *dummy,
     Tcl_Namespace *nsPtr,
     const char *varName,
     ClientData clientData)
@@ -2203,6 +2209,7 @@ Itcl_VarAliasProc(
     ItclResolveInfo *resolveInfoPtr;
     ItclCallContext *callContextPtr;
     Tcl_Var varPtr;
+    (void)dummy;
 
     varPtr = NULL;
     hPtr = NULL;
@@ -2272,6 +2279,8 @@ ItclCheckCallProc(
 {
     int result;
     ItclMemberFunc *imPtr;
+    (void)contextPtr;
+    (void)framePtr;
 
     imPtr = (ItclMemberFunc *)clientData;
     if (!imPtr->iclsPtr->infoPtr->useOldResolvers) {
@@ -2495,6 +2504,7 @@ ItclAfterCallMethod(
     ItclCallContext *callContextPtr;
     int newEntry;
     int result;
+    (void)nsPtr;
 
     imPtr = (ItclMemberFunc *)clientData;
     callContextPtr = NULL;
@@ -2599,6 +2609,7 @@ ItclProcErrorProc(
     ItclClass *currIclsPtr;
     char num[20];
     Itcl_Stack *stackPtr;
+    (void)procNameObj;
 
     /* Fetch the current call frame.  That determines context. */
     Tcl_CallFrame *framePtr = Itcl_GetUplevelCallFrame(interp, 0);
