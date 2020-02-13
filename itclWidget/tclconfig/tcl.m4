@@ -104,7 +104,6 @@ AC_DEFUN([TEA_PATH_TCLCONFIG], [
 		for i in `ls -d ~/Library/Frameworks 2>/dev/null` \
 			`ls -d /Library/Frameworks 2>/dev/null` \
 			`ls -d /Network/Library/Frameworks 2>/dev/null` \
-			`ls -d /System/Library/Frameworks 2>/dev/null` \
 			`ls -d /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/Library/Frameworks/Tcl.framework 2>/dev/null` \
 			`ls -d /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/Network/Library/Frameworks/Tcl.framework 2>/dev/null` \
 			`ls -d /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/System/Library/Frameworks/Tcl.framework 2>/dev/null` \
@@ -267,7 +266,6 @@ AC_DEFUN([TEA_PATH_TKCONFIG], [
 		for i in `ls -d ~/Library/Frameworks 2>/dev/null` \
 			`ls -d /Library/Frameworks 2>/dev/null` \
 			`ls -d /Network/Library/Frameworks 2>/dev/null` \
-			`ls -d /System/Library/Frameworks 2>/dev/null` \
 			`ls -d /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/Library/Frameworks/Tcl.framework 2>/dev/null` \
 			`ls -d /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/Network/Library/Frameworks/Tcl.framework 2>/dev/null` \
 			`ls -d /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/System/Library/Frameworks/Tcl.framework 2>/dev/null` \
@@ -937,10 +935,6 @@ AC_DEFUN([TEA_ENABLE_SYMBOLS], [
 	    AC_MSG_RESULT([yes (standard debugging)])
 	fi
     fi
-    # TEA specific:
-    if test "${TEA_PLATFORM}" != "windows" ; then
-	LDFLAGS_DEFAULT="${LDFLAGS}"
-    fi
     AC_SUBST(CFLAGS_DEFAULT)
     AC_SUBST(LDFLAGS_DEFAULT)
     AC_SUBST(TCL_DBGX)
@@ -1014,6 +1008,7 @@ AC_DEFUN([TEA_ENABLE_LANGINFO], [
 #	Defines the following var:
 #
 #	system -	System/platform/version identification code.
+#
 #--------------------------------------------------------------------
 
 AC_DEFUN([TEA_CONFIG_SYSTEM], [
@@ -1029,6 +1024,9 @@ AC_DEFUN([TEA_CONFIG_SYSTEM], [
 	    else
 		if test "`uname -s`" = "AIX" ; then
 		    tcl_cv_sys_version=AIX-`uname -v`.`uname -r`
+		fi
+		if test "`uname -s`" = "NetBSD" -a -f /etc/debian_version ; then
+		    tcl_cv_sys_version=NetBSD-Debian
 		fi
 	    fi
 	fi
@@ -1189,36 +1187,16 @@ AC_DEFUN([TEA_CONFIG_CFLAGS], [
     case $system in
 	# TEA specific:
 	windows)
-	    # This is a 2-stage check to make sure we have the 64-bit SDK
-	    # We have to know where the SDK is installed.
-	    # This magic is based on MS Platform SDK for Win2003 SP1 - hobbs
-	    # MACHINE is IX86 for LINK, but this is used by the manifest,
-	    # which requires x86|amd64|ia64.
 	    MACHINE="X86"
 	    if test "$do64bit" != "no" ; then
-		if test "x${MSSDK}x" = "xx" ; then
-		    MSSDK="C:/Progra~1/Microsoft Platform SDK"
-		fi
-		MSSDK=`echo "$MSSDK" | sed -e  's!\\\!/!g'`
-		PATH64=""
 		case "$do64bit" in
 		    amd64|x64|yes)
 			MACHINE="AMD64" ; # default to AMD64 64-bit build
-			PATH64="${MSSDK}/Bin/Win64/x86/AMD64"
 			;;
 		    ia64)
 			MACHINE="IA64"
-			PATH64="${MSSDK}/Bin/Win64"
 			;;
 		esac
-		if test "$GCC" != "yes" -a ! -d "${PATH64}" ; then
-		    AC_MSG_WARN([Could not find 64-bit $MACHINE SDK to enable 64bit mode])
-		    AC_MSG_WARN([Ensure latest Platform SDK is installed])
-		    do64bit="no"
-		else
-		    AC_MSG_RESULT([   Using 64-bit $MACHINE mode])
-		    do64bit_ok="yes"
-		fi
 	    fi
 
 	    if test "$GCC" != "yes" ; then
@@ -1237,12 +1215,10 @@ AC_DEFUN([TEA_CONFIG_CFLAGS], [
 	        esac
 
                 if test "$do64bit" != "no" ; then
-		    # All this magic is necessary for the Win64 SDK RC1 - hobbs
-		    CC="\"${PATH64}/cl.exe\""
-		    CFLAGS="${CFLAGS} -I\"${MSSDK}/Include\" -I\"${MSSDK}/Include/crt\" -I\"${MSSDK}/Include/crt/sys\""
-		    RC="\"${MSSDK}/bin/rc.exe\""
-		    lflags="${lflags} -nologo -MACHINE:${MACHINE} -LIBPATH:\"${MSSDK}/Lib/${MACHINE}\""
-		    LINKBIN="\"${PATH64}/link.exe\""
+		    CC="cl.exe"
+		    RC="rc.exe"
+		    lflags="${lflags} -nologo -MACHINE:${MACHINE} "
+		    LINKBIN="link.exe"
 		    CFLAGS_DEBUG="-nologo -Zi -Od -W3 ${runtime}d"
 		    CFLAGS_OPTIMIZE="-nologo -O2 -W2 ${runtime}"
 		    # Avoid 'unresolved external symbol __security_cookie'
@@ -1280,14 +1256,14 @@ AC_DEFUN([TEA_CONFIG_CFLAGS], [
 		      if test "$ac_cv_cross" = "yes"; then
 			case "$do64bit" in
 			    amd64|x64|yes)
-				CC="x86_64-w64-mingw32-gcc"
+				CC="x86_64-w64-mingw32-${CC}"
 				LD="x86_64-w64-mingw32-ld"
 				AR="x86_64-w64-mingw32-ar"
 				RANLIB="x86_64-w64-mingw32-ranlib"
 				RC="x86_64-w64-mingw32-windres"
 			    ;;
 			    *)
-				CC="i686-w64-mingw32-gcc"
+				CC="i686-w64-mingw32-${CC}"
 				LD="i686-w64-mingw32-ld"
 				AR="i686-w64-mingw32-ar"
 				RANLIB="i686-w64-mingw32-ranlib"
@@ -1319,7 +1295,7 @@ AC_DEFUN([TEA_CONFIG_CFLAGS], [
 	    TCL_LIB_VERSIONS_OK=nodots
     	    ;;
 	AIX-*)
-	    AS_IF([test "${TCL_THREADS}" = "1" -a "$GCC" != "yes"], [
+	    AS_IF([test "$GCC" != "yes"], [
 		# AIX requires the _r compiler when gcc isn't being used
 		case "${CC}" in
 		    *_r|*_r\ *)
@@ -1385,6 +1361,13 @@ AC_DEFUN([TEA_CONFIG_CFLAGS], [
 	    #-----------------------------------------------------------
 	    AC_CHECK_LIB(bind, inet_ntoa, [LIBS="$LIBS -lbind -lsocket"])
 	    ;;
+	BSD/OS-2.1*|BSD/OS-3*)
+	    SHLIB_CFLAGS=""
+	    SHLIB_LD="shlicc -r"
+	    SHLIB_SUFFIX=".so"
+	    CC_SEARCH_FLAGS=""
+	    LD_SEARCH_FLAGS=""
+	    ;;
 	BSD/OS-4.*)
 	    SHLIB_CFLAGS="-export-dynamic -fPIC"
 	    SHLIB_LD='${CC} -shared'
@@ -1396,10 +1379,18 @@ AC_DEFUN([TEA_CONFIG_CFLAGS], [
 	CYGWIN_*)
 	    SHLIB_CFLAGS=""
 	    SHLIB_LD='${CC} -shared'
-	    SHLIB_LD_LIBS="${SHLIB_LD_LIBS} -Wl,--out-implib,\$[@].a"
 	    SHLIB_SUFFIX=".dll"
+	    SHLIB_LD_LIBS="${SHLIB_LD_LIBS} -Wl,--out-implib,\$[@].a"
 	    EXEEXT=".exe"
 	    do64bit_ok=yes
+	    CC_SEARCH_FLAGS=""
+	    LD_SEARCH_FLAGS=""
+	    ;;
+	dgux*)
+	    SHLIB_CFLAGS="-K PIC"
+	    SHLIB_LD='${CC} -G'
+	    SHLIB_LD_LIBS=""
+	    SHLIB_SUFFIX=".so"
 	    CC_SEARCH_FLAGS=""
 	    LD_SEARCH_FLAGS=""
 	    ;;
@@ -1419,15 +1410,13 @@ AC_DEFUN([TEA_CONFIG_CFLAGS], [
 
 	    AS_IF([test "`uname -m`" = ia64], [
 		SHLIB_SUFFIX=".so"
-		# Use newer C++ library for C++ extensions
-		#if test "$GCC" != "yes" ; then
-		#   CPPFLAGS="-AA"
-		#fi
 	    ], [
 		SHLIB_SUFFIX=".sl"
 	    ])
 	    AC_CHECK_LIB(dld, shl_load, tcl_ok=yes, tcl_ok=no)
 	    AS_IF([test "$tcl_ok" = yes], [
+		SHLIB_CFLAGS="+z"
+		SHLIB_LD="ld -b"
 		LDFLAGS="$LDFLAGS -Wl,-E"
 		CC_SEARCH_FLAGS='-Wl,+s,+b,${LIB_RUNTIME_DIR}:.'
 		LD_SEARCH_FLAGS='+s +b ${LIB_RUNTIME_DIR}:.'
@@ -1438,10 +1427,6 @@ AC_DEFUN([TEA_CONFIG_CFLAGS], [
 		LD_SEARCH_FLAGS=${CC_SEARCH_FLAGS}
 	    ], [
 		CFLAGS="$CFLAGS -z"
-		# Users may want PA-RISC 1.1/2.0 portable code - needs HP cc
-		#CFLAGS="$CFLAGS +DAportable"
-		SHLIB_CFLAGS="+z"
-		SHLIB_LD="ld -b"
 	    ])
 
 	    # Check to enable 64-bit flags for compiler/linker
@@ -1466,6 +1451,27 @@ AC_DEFUN([TEA_CONFIG_CFLAGS], [
 		    LDFLAGS_ARCH="+DD64"
 		])
 	    ]) ;;
+	HP-UX-*.08.*|HP-UX-*.09.*|HP-UX-*.10.*)
+	    SHLIB_SUFFIX=".sl"
+	    AC_CHECK_LIB(dld, shl_load, tcl_ok=yes, tcl_ok=no)
+	    AS_IF([test "$tcl_ok" = yes], [
+		SHLIB_CFLAGS="+z"
+		SHLIB_LD="ld -b"
+		SHLIB_LD_LIBS=""
+		LDFLAGS="$LDFLAGS -Wl,-E"
+		CC_SEARCH_FLAGS='-Wl,+s,+b,${LIB_RUNTIME_DIR}:.'
+		LD_SEARCH_FLAGS='+s +b ${LIB_RUNTIME_DIR}:.'
+		LD_LIBRARY_PATH_VAR="SHLIB_PATH"
+	    ]) ;;
+	IRIX-5.*)
+	    SHLIB_CFLAGS=""
+	    SHLIB_LD="ld -shared -rdata_shared"
+	    SHLIB_SUFFIX=".so"
+	    AC_LIBOBJ(mkstemp)
+	    AS_IF([test $doRpath = yes], [
+		CC_SEARCH_FLAGS='-Wl,-rpath,${LIB_RUNTIME_DIR}'
+		LD_SEARCH_FLAGS='-rpath ${LIB_RUNTIME_DIR}'])
+	    ;;
 	IRIX-6.*)
 	    SHLIB_CFLAGS=""
 	    SHLIB_LD="ld -n32 -shared -rdata_shared"
@@ -1510,7 +1516,7 @@ AC_DEFUN([TEA_CONFIG_CFLAGS], [
 	        ])
 	    ])
 	    ;;
-	Linux*|GNU*|NetBSD-Debian)
+	Linux*|GNU*|NetBSD-Debian|DragonFly-*|FreeBSD-*)
 	    SHLIB_CFLAGS="-fPIC"
 	    SHLIB_SUFFIX=".so"
 
@@ -1520,6 +1526,17 @@ AC_DEFUN([TEA_CONFIG_CFLAGS], [
 	    # TEA specific: use LDFLAGS_DEFAULT instead of LDFLAGS
 	    SHLIB_LD='${CC} ${CFLAGS} ${LDFLAGS_DEFAULT} -shared'
 	    LDFLAGS="$LDFLAGS -Wl,--export-dynamic"
+
+	    case $system in
+	    DragonFly-*|FreeBSD-*)
+		AS_IF([test "${TCL_THREADS}" = "1"], [
+		    # The -pthread needs to go in the LDFLAGS, not LIBS
+		    LIBS=`echo $LIBS | sed s/-pthread//`
+		    CFLAGS="$CFLAGS $PTHREAD_CFLAGS"
+		    LDFLAGS="$LDFLAGS $PTHREAD_LIBS"])
+	    ;;
+            esac
+
 	    AS_IF([test $doRpath = yes], [
 		CC_SEARCH_FLAGS='-Wl,-rpath,${LIB_RUNTIME_DIR}'])
 	    LD_SEARCH_FLAGS=${CC_SEARCH_FLAGS}
@@ -1570,14 +1587,12 @@ AC_DEFUN([TEA_CONFIG_CFLAGS], [
 		CC_SEARCH_FLAGS='-Wl,-rpath,${LIB_RUNTIME_DIR}'])
 	    LD_SEARCH_FLAGS=${CC_SEARCH_FLAGS}
 	    SHARED_LIB_SUFFIX='${TCL_TRIM_DOTS}.so${SHLIB_VERSION}'
-	    LDFLAGS="-Wl,-export-dynamic"
+	    LDFLAGS="$LDFLAGS -Wl,-export-dynamic"
 	    CFLAGS_OPTIMIZE="-O2"
-	    AS_IF([test "${TCL_THREADS}" = "1"], [
-		# On OpenBSD:	Compile with -pthread
-		#		Don't link with -lpthread
-		LIBS=`echo $LIBS | sed s/-lpthread//`
-		CFLAGS="$CFLAGS -pthread"
-	    ])
+	    # On OpenBSD:	Compile with -pthread
+	    #		Don't link with -lpthread
+	    LIBS=`echo $LIBS | sed s/-lpthread//`
+	    CFLAGS="$CFLAGS -pthread"
 	    # OpenBSD doesn't do version numbers with dots.
 	    UNSHARED_LIB_SUFFIX='${TCL_TRIM_DOTS}.a'
 	    TCL_LIB_VERSIONS_OK=nodots
@@ -1591,37 +1606,10 @@ AC_DEFUN([TEA_CONFIG_CFLAGS], [
 	    AS_IF([test $doRpath = yes], [
 		CC_SEARCH_FLAGS='-Wl,-rpath,${LIB_RUNTIME_DIR}'])
 	    LD_SEARCH_FLAGS=${CC_SEARCH_FLAGS}
-	    AS_IF([test "${TCL_THREADS}" = "1"], [
-		# The -pthread needs to go in the CFLAGS, not LIBS
-		LIBS=`echo $LIBS | sed s/-pthread//`
-		CFLAGS="$CFLAGS -pthread"
-	    	LDFLAGS="$LDFLAGS -pthread"
-	    ])
-	    ;;
-	DragonFly-*|FreeBSD-*)
-	    # This configuration from FreeBSD Ports.
-	    SHLIB_CFLAGS="-fPIC"
-	    SHLIB_LD="${CC} -shared"
-	    SHLIB_LD_LIBS="${SHLIB_LD_LIBS} -Wl,-soname,\$[@]"
-	    SHLIB_SUFFIX=".so"
-	    LDFLAGS=""
-	    AS_IF([test $doRpath = yes], [
-		CC_SEARCH_FLAGS='-Wl,-rpath,${LIB_RUNTIME_DIR}'
-		LD_SEARCH_FLAGS='-Wl,-rpath,${LIB_RUNTIME_DIR}'])
-	    AS_IF([test "${TCL_THREADS}" = "1"], [
-		# The -pthread needs to go in the LDFLAGS, not LIBS
-		LIBS=`echo $LIBS | sed s/-pthread//`
-		CFLAGS="$CFLAGS $PTHREAD_CFLAGS"
-		LDFLAGS="$LDFLAGS $PTHREAD_LIBS"])
-	    case $system in
-	    FreeBSD-3.*)
-		# Version numbers are dot-stripped by system policy.
-		TCL_TRIM_DOTS=`echo ${PACKAGE_VERSION} | tr -d .`
-		UNSHARED_LIB_SUFFIX='${TCL_TRIM_DOTS}.a'
-		SHARED_LIB_SUFFIX='${TCL_TRIM_DOTS}\$\{DBGX\}.so.1'
-		TCL_LIB_VERSIONS_OK=nodots
-		;;
-	    esac
+	    # The -pthread needs to go in the CFLAGS, not LIBS
+	    LIBS=`echo $LIBS | sed s/-pthread//`
+	    CFLAGS="$CFLAGS -pthread"
+	    LDFLAGS="$LDFLAGS -pthread"
 	    ;;
 	Darwin-*)
 	    CFLAGS_OPTIMIZE="-Os"
@@ -1761,16 +1749,14 @@ AC_DEFUN([TEA_CONFIG_CFLAGS], [
 	    AS_IF([test "$GCC" = yes], [CFLAGS="$CFLAGS -mieee"], [
 		CFLAGS="$CFLAGS -DHAVE_TZSET -std1 -ieee"])
 	    # see pthread_intro(3) for pthread support on osf1, k.furukawa
-	    AS_IF([test "${TCL_THREADS}" = 1], [
-		CFLAGS="$CFLAGS -DHAVE_PTHREAD_ATTR_SETSTACKSIZE"
-		CFLAGS="$CFLAGS -DTCL_THREAD_STACK_MIN=PTHREAD_STACK_MIN*64"
-		LIBS=`echo $LIBS | sed s/-lpthreads//`
-		AS_IF([test "$GCC" = yes], [
-		    LIBS="$LIBS -lpthread -lmach -lexc"
-		], [
-		    CFLAGS="$CFLAGS -pthread"
-		    LDFLAGS="$LDFLAGS -pthread"
-		])
+	    CFLAGS="$CFLAGS -DHAVE_PTHREAD_ATTR_SETSTACKSIZE"
+	    CFLAGS="$CFLAGS -DTCL_THREAD_STACK_MIN=PTHREAD_STACK_MIN*64"
+	    LIBS=`echo $LIBS | sed s/-lpthreads//`
+	    AS_IF([test "$GCC" = yes], [
+		LIBS="$LIBS -lpthread -lmach -lexc"
+	    ], [
+		CFLAGS="$CFLAGS -pthread"
+		LDFLAGS="$LDFLAGS -pthread"
 	    ])
 	    ;;
 	QNX-6*)
@@ -2070,9 +2056,13 @@ dnl # preprocessing tests use only CPPFLAGS.
 		    [Defined when compiler supports casting to union type.])
 	fi
 
+	AC_CHECK_HEADER(stdbool.h, [AC_DEFINE(HAVE_STDBOOL_H, 1, [Do we have <stdbool.h>?])],)
+
     AC_SUBST(CFLAGS_DEBUG)
     AC_SUBST(CFLAGS_OPTIMIZE)
     AC_SUBST(CFLAGS_WARNING)
+    AC_SUBST(LDFLAGS_DEBUG)
+    AC_SUBST(LDFLAGS_OPTIMIZE)
 
     AC_SUBST(STLIB_LD)
     AC_SUBST(SHLIB_LD)
@@ -2695,9 +2685,10 @@ AC_DEFUN([TEA_TCL_EARLY_FLAGS],[
 #	Might define the following vars:
 #		TCL_WIDE_INT_IS_LONG
 #		TCL_WIDE_INT_TYPE
-#		HAVE_STRUCT_DIRENT64
+#		HAVE_STRUCT_DIRENT64, HAVE_DIR64
 #		HAVE_STRUCT_STAT64
 #		HAVE_TYPE_OFF64_T
+#
 #--------------------------------------------------------------------
 
 AC_DEFUN([TEA_TCL_64BIT_FLAGS], [
@@ -2707,15 +2698,15 @@ AC_DEFUN([TEA_TCL_64BIT_FLAGS], [
 	# See if the compiler knows natively about __int64
 	AC_TRY_COMPILE(,[__int64 value = (__int64) 0;],
 	    tcl_type_64bit=__int64, tcl_type_64bit="long long")
-	# See if we should use long anyway  Note that we substitute in the
+	# See if we could use long anyway  Note that we substitute in the
 	# type that is our current guess for a 64-bit type inside this check
 	# program, so it should be modified only carefully...
         AC_TRY_COMPILE(,[switch (0) {
             case 1: case (sizeof(]${tcl_type_64bit}[)==sizeof(long)): ;
         }],tcl_cv_type_64bit=${tcl_type_64bit})])
     if test "${tcl_cv_type_64bit}" = none ; then
-	AC_DEFINE(TCL_WIDE_INT_IS_LONG, 1, [Are wide integers to be implemented with C 'long's?])
-	AC_MSG_RESULT([using long])
+	AC_DEFINE(TCL_WIDE_INT_IS_LONG, 1, [Do 'long' and 'long long' have the same size (64-bit)?])
+	AC_MSG_RESULT([yes])
     elif test "${tcl_cv_type_64bit}" = "__int64" \
 		-a "${TEA_PLATFORM}" = "windows" ; then
 	# TEA specific: We actually want to use the default tcl.h checks in
@@ -2733,6 +2724,15 @@ AC_DEFUN([TEA_TCL_64BIT_FLAGS], [
 		tcl_cv_struct_dirent64=yes,tcl_cv_struct_dirent64=no)])
 	if test "x${tcl_cv_struct_dirent64}" = "xyes" ; then
 	    AC_DEFINE(HAVE_STRUCT_DIRENT64, 1, [Is 'struct dirent64' in <sys/types.h>?])
+	fi
+
+	AC_CACHE_CHECK([for DIR64], tcl_cv_DIR64,[
+	    AC_TRY_COMPILE([#include <sys/types.h>
+#include <dirent.h>],[struct dirent64 *p; DIR64 d = opendir64(".");
+            p = readdir64(d); rewinddir64(d); closedir64(d);],
+		tcl_cv_DIR64=yes,tcl_cv_DIR64=no)])
+	if test "x${tcl_cv_DIR64}" = "xyes" ; then
+	    AC_DEFINE(HAVE_DIR64, 1, [Is 'DIR64' in <sys/types.h>?])
 	fi
 
 	AC_CACHE_CHECK([for struct stat64], tcl_cv_struct_stat64,[
@@ -3058,7 +3058,7 @@ AC_DEFUN([TEA_ADD_LIBS], [
     for i in $vars; do
 	if test "${TEA_PLATFORM}" = "windows" -a "$GCC" = "yes" ; then
 	    # Convert foo.lib to -lfoo for GCC.  No-op if not *.lib
-	    i=`echo "$i" | sed -e 's/^\([[^-]].*\)\.lib[$]/-l\1/i'`
+	    i=`echo "$i" | sed -e 's/^\([[^-]].*\)\.[[lL]][[iI]][[bB]][$]/-l\1/'`
 	fi
 	PKG_LIBS="$PKG_LIBS $i"
     done
@@ -3263,7 +3263,7 @@ AC_DEFUN([TEA_SETUP_COMPILER], [
 AC_DEFUN([TEA_MAKE_LIB], [
     if test "${TEA_PLATFORM}" = "windows" -a "$GCC" != "yes"; then
 	MAKE_STATIC_LIB="\${STLIB_LD} -out:\[$]@ \$(PKG_OBJECTS)"
-	MAKE_SHARED_LIB="\${SHLIB_LD} \${SHLIB_LD_LIBS} \${LDFLAGS_DEFAULT} -out:\[$]@ \$(PKG_OBJECTS)"
+	MAKE_SHARED_LIB="\${SHLIB_LD} \${LDFLAGS} \${LDFLAGS_DEFAULT} -out:\[$]@ \$(PKG_OBJECTS) \${SHLIB_LD_LIBS}"
 	AC_EGREP_CPP([manifest needed], [
 #if defined(_MSC_VER) && _MSC_VER >= 1400
 print("manifest needed")
@@ -3278,7 +3278,7 @@ print("manifest needed")
 	MAKE_STUB_LIB="\${STLIB_LD} -nodefaultlib -out:\[$]@ \$(PKG_STUB_OBJECTS)"
     else
 	MAKE_STATIC_LIB="\${STLIB_LD} \[$]@ \$(PKG_OBJECTS)"
-	MAKE_SHARED_LIB="\${SHLIB_LD} -o \[$]@ \$(PKG_OBJECTS) \${SHLIB_LD_LIBS}"
+	MAKE_SHARED_LIB="\${SHLIB_LD} \${LDFLAGS} \${LDFLAGS_DEFAULT} -o \[$]@ \$(PKG_OBJECTS) \${SHLIB_LD_LIBS}"
 	MAKE_STUB_LIB="\${STLIB_LD} \[$]@ \$(PKG_STUB_OBJECTS)"
     fi
 
