@@ -169,6 +169,33 @@ test methods-2.2 {covers leak condition test for nested methods calls within eva
 } -result 0 -cleanup {
     itcl::delete class C1
 }
+test methods-2.3 {call of method after object is destroyed inside other methods, SF-bug [c1289b1c32]} -setup {
+    proc c1test {} {
+	return c1test
+    }
+    itcl::class C1 {
+	public method m1 {} {
+	    itcl::delete object $this
+	    c1test
+	}
+	public method m2 {} {
+	    rename $this {}
+	    c1test
+	}
+	public method c1test {} {
+	   return C1::c1test
+	}
+    }
+} -body {   
+    set result {}
+    set obj [C1 #auto]
+    lappend result [catch {$obj m1} v] $v [namespace which -command $obj]
+    set obj [C1 #auto]
+    lappend result [catch {$obj m2} v] $v [namespace which -command $obj]
+} -match glob -result {1 * {} 1 * {}} -cleanup {
+    itcl::delete class C1
+    rename c1test {}
+}
 
 # ----------------------------------------------------------------------
 #  Clean up
