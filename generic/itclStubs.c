@@ -62,7 +62,7 @@ Itcl_IsStub(
  */
 int
 Itcl_StubCreateCmd(
-    ClientData dummy,   /* not used */
+    TCL_UNUSED(ClientData),   /* not used */
     Tcl_Interp *interp,      /* current interpreter */
     int objc,                /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
@@ -70,7 +70,6 @@ Itcl_StubCreateCmd(
     Tcl_Command cmdPtr;
     char *cmdName;
     Tcl_CmdInfo cmdInfo;
-    (void)dummy;
 
     ItclShowArgs(1, "Itcl_StubCreateCmd", objc, objv);
     if (objc != 2) {
@@ -113,14 +112,13 @@ Itcl_StubCreateCmd(
  */
 int
 Itcl_StubExistsCmd(
-    ClientData dummy,   /* not used */
+    TCL_UNUSED(ClientData),   /* not used */
     Tcl_Interp *interp,      /* current interpreter */
     int objc,                /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
 {
     Tcl_Command cmdPtr;
     char *cmdName;
-    (void)dummy;
 
     if (objc != 2) {
         Tcl_WrongNumArgs(interp, 1, objv, "name");
@@ -226,9 +224,8 @@ ItclHandleStubCmd(
 /* ARGSUSED */
 static void
 ItclDeleteStub(
-    ClientData cdata)      /* not used */
+    TCL_UNUSED(ClientData))      /* not used */
 {
-    (void)cdata;
     /* do nothing */
 }
 

@@ -28,7 +28,7 @@ Itcl_SetCallFrameResolver(
 #ifdef ITCL_USE_MODIFIED_TCL_H
 	framePtr->isProcCallFrame |= FRAME_HAS_RESOLVER;
 	framePtr->resolvePtr = resolvePtr;
-#else
+#elif defined(__cplusplus)
 	(void)resolvePtr;
 #endif
 	return TCL_OK;
@@ -46,7 +46,7 @@ _Tcl_SetNamespaceResolver(
     }
 #ifdef ITCL_USE_MODIFIED_TCL_H
     ((Namespace *)nsPtr)->resolvePtr = resolvePtr;
-#else
+#elif defined(__cplusplus)
     (void)resolvePtr;
 #endif
     return TCL_OK;
@@ -54,13 +54,12 @@ _Tcl_SetNamespaceResolver(
 
 Tcl_Var
 Tcl_NewNamespaceVar(
-    Tcl_Interp *dummy,
+    TCL_UNUSED(Tcl_Interp *),
     Tcl_Namespace *nsPtr,
     const char *varName)
 {
     Var *varPtr = NULL;
     int isNew;
-    (void)dummy;
 
     if ((nsPtr == NULL) || (varName == NULL)) {
         return NULL;

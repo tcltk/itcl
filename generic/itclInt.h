@@ -60,6 +60,14 @@
 #   endif
 #endif
 
+#ifndef TCL_UNUSED
+#   if defined(__cplusplus)
+#	define TCL_UNUSED(T) T
+#   else
+#	define TCL_UNUSED(T) T JOIN(dummy, __LINE__)
+#   endif
+#endif
+
 /*
  * Since the Tcl/Tk distribution doesn't perform any asserts,
  * dynamic loading can fail to find the __assert function.
