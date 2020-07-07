@@ -266,9 +266,6 @@ AC_DEFUN([TEA_PATH_TKCONFIG], [
 		for i in `ls -d ~/Library/Frameworks 2>/dev/null` \
 			`ls -d /Library/Frameworks 2>/dev/null` \
 			`ls -d /Network/Library/Frameworks 2>/dev/null` \
-			`ls -d /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/Library/Frameworks/Tcl.framework 2>/dev/null` \
-			`ls -d /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/Network/Library/Frameworks/Tcl.framework 2>/dev/null` \
-			`ls -d /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/System/Library/Frameworks/Tcl.framework 2>/dev/null` \
 			; do
 		    if test -f "$i/Tk.framework/tkConfig.sh" ; then
 			ac_cv_c_tkconfig="`(cd $i/Tk.framework; pwd)`"
@@ -285,10 +282,10 @@ AC_DEFUN([TEA_PATH_TKCONFIG], [
 			`ls -d /usr/local/lib 2>/dev/null` \
 			`ls -d /usr/contrib/lib 2>/dev/null` \
 			`ls -d /usr/pkg/lib 2>/dev/null` \
-			`ls -d /usr/lib 2>/dev/null` \
-			`ls -d /usr/lib64 2>/dev/null` \
 			`ls -d /usr/lib/tk8.6 2>/dev/null` \
 			`ls -d /usr/lib/tk8.5 2>/dev/null` \
+			`ls -d /usr/lib 2>/dev/null` \
+			`ls -d /usr/lib64 2>/dev/null` \
 			`ls -d /usr/local/lib/tk8.6 2>/dev/null` \
 			`ls -d /usr/local/lib/tk8.5 2>/dev/null` \
 			`ls -d /usr/local/lib/tcl/tk8.6 2>/dev/null` \
@@ -375,10 +372,6 @@ AC_DEFUN([TEA_LOAD_TCLCONFIG], [
         AC_MSG_RESULT([could not find ${TCL_BIN_DIR}/tclConfig.sh])
     fi
 
-    # eval is required to do the TCL_DBGX substitution
-    eval "TCL_LIB_FILE=\"${TCL_LIB_FILE}\""
-    eval "TCL_STUB_LIB_FILE=\"${TCL_STUB_LIB_FILE}\""
-
     # If the TCL_BIN_DIR is the build directory (not the install directory),
     # then set the common variable name to the value of the build variables.
     # For example, the variable TCL_LIB_SPEC will be set to the value
@@ -411,12 +404,6 @@ AC_DEFUN([TEA_LOAD_TCLCONFIG], [
 		;;
 	esac
     fi
-
-    # eval is required to do the TCL_DBGX substitution
-    eval "TCL_LIB_FLAG=\"${TCL_LIB_FLAG}\""
-    eval "TCL_LIB_SPEC=\"${TCL_LIB_SPEC}\""
-    eval "TCL_STUB_LIB_FLAG=\"${TCL_STUB_LIB_FLAG}\""
-    eval "TCL_STUB_LIB_SPEC=\"${TCL_STUB_LIB_SPEC}\""
 
     AC_SUBST(TCL_VERSION)
     AC_SUBST(TCL_PATCH_LEVEL)
@@ -493,10 +480,6 @@ AC_DEFUN([TEA_LOAD_TKCONFIG], [
         AC_MSG_RESULT([could not find ${TK_BIN_DIR}/tkConfig.sh])
     fi
 
-    # eval is required to do the TK_DBGX substitution
-    eval "TK_LIB_FILE=\"${TK_LIB_FILE}\""
-    eval "TK_STUB_LIB_FILE=\"${TK_STUB_LIB_FILE}\""
-
     # If the TK_BIN_DIR is the build directory (not the install directory),
     # then set the common variable name to the value of the build variables.
     # For example, the variable TK_LIB_SPEC will be set to the value
@@ -529,12 +512,6 @@ AC_DEFUN([TEA_LOAD_TKCONFIG], [
 		;;
 	esac
     fi
-
-    # eval is required to do the TK_DBGX substitution
-    eval "TK_LIB_FLAG=\"${TK_LIB_FLAG}\""
-    eval "TK_LIB_SPEC=\"${TK_LIB_SPEC}\""
-    eval "TK_STUB_LIB_FLAG=\"${TK_STUB_LIB_FLAG}\""
-    eval "TK_STUB_LIB_SPEC=\"${TK_STUB_LIB_SPEC}\""
 
     # TEA specific: Ensure windowingsystem is defined
     if test "${TEA_PLATFORM}" = "unix" ; then
@@ -592,14 +569,14 @@ AC_DEFUN([TEA_PROG_TCLSH], [
     if test -f "${TCL_BIN_DIR}/Makefile" ; then
         # tclConfig.sh is in Tcl build directory
         if test "${TEA_PLATFORM}" = "windows"; then
-          if test -f "${TCL_BIN_DIR}/tclsh${TCL_MAJOR_VERSION}${TCL_MINOR_VERSION}${TCL_DBGX}${EXEEXT}" ; then
-            TCLSH_PROG="${TCL_BIN_DIR}/tclsh${TCL_MAJOR_VERSION}${TCL_MINOR_VERSION}${TCL_DBGX}${EXEEXT}"
-          elif test -f "${TCL_BIN_DIR}/tclsh${TCL_MAJOR_VERSION}${TCL_MINOR_VERSION}${TCL_DBGX}s${EXEEXT}" ; then
-            TCLSH_PROG="${TCL_BIN_DIR}/tclsh${TCL_MAJOR_VERSION}${TCL_MINOR_VERSION}${TCL_DBGX}s${EXEEXT}"
-          elif test -f "${TCL_BIN_DIR}/tclsh${TCL_MAJOR_VERSION}${TCL_MINOR_VERSION}${TCL_DBGX}t${EXEEXT}" ; then
-            TCLSH_PROG="${TCL_BIN_DIR}/tclsh${TCL_MAJOR_VERSION}${TCL_MINOR_VERSION}${TCL_DBGX}t${EXEEXT}"
-          elif test -f "${TCL_BIN_DIR}/tclsh${TCL_MAJOR_VERSION}${TCL_MINOR_VERSION}${TCL_DBGX}st${EXEEXT}" ; then
-            TCLSH_PROG="${TCL_BIN_DIR}/tclsh${TCL_MAJOR_VERSION}${TCL_MINOR_VERSION}${TCL_DBGX}st${EXEEXT}"
+          if test -f "${TCL_BIN_DIR}/tclsh${TCL_MAJOR_VERSION}${TCL_MINOR_VERSION}${EXEEXT}" ; then
+            TCLSH_PROG="${TCL_BIN_DIR}/tclsh${TCL_MAJOR_VERSION}${TCL_MINOR_VERSION}${EXEEXT}"
+          elif test -f "${TCL_BIN_DIR}/tclsh${TCL_MAJOR_VERSION}${TCL_MINOR_VERSION}s${EXEEXT}" ; then
+            TCLSH_PROG="${TCL_BIN_DIR}/tclsh${TCL_MAJOR_VERSION}${TCL_MINOR_VERSION}s${EXEEXT}"
+          elif test -f "${TCL_BIN_DIR}/tclsh${TCL_MAJOR_VERSION}${TCL_MINOR_VERSION}t${EXEEXT}" ; then
+            TCLSH_PROG="${TCL_BIN_DIR}/tclsh${TCL_MAJOR_VERSION}${TCL_MINOR_VERSION}t${EXEEXT}"
+          elif test -f "${TCL_BIN_DIR}/tclsh${TCL_MAJOR_VERSION}${TCL_MINOR_VERSION}st${EXEEXT}" ; then
+            TCLSH_PROG="${TCL_BIN_DIR}/tclsh${TCL_MAJOR_VERSION}${TCL_MINOR_VERSION}st${EXEEXT}"
           fi
         else
             TCLSH_PROG="${TCL_BIN_DIR}/tclsh"
@@ -607,9 +584,9 @@ AC_DEFUN([TEA_PROG_TCLSH], [
     else
         # tclConfig.sh is in install location
         if test "${TEA_PLATFORM}" = "windows"; then
-            TCLSH_PROG="tclsh${TCL_MAJOR_VERSION}${TCL_MINOR_VERSION}${TCL_DBGX}${EXEEXT}"
+            TCLSH_PROG="tclsh${TCL_MAJOR_VERSION}${TCL_MINOR_VERSION}${EXEEXT}"
         else
-            TCLSH_PROG="tclsh${TCL_MAJOR_VERSION}.${TCL_MINOR_VERSION}${TCL_DBGX}"
+            TCLSH_PROG="tclsh${TCL_MAJOR_VERSION}.${TCL_MINOR_VERSION}"
         fi
         list="`ls -d ${TCL_BIN_DIR}/../bin 2>/dev/null` \
               `ls -d ${TCL_BIN_DIR}/..     2>/dev/null` \
@@ -650,14 +627,14 @@ AC_DEFUN([TEA_PROG_WISH], [
     if test -f "${TK_BIN_DIR}/Makefile" ; then
         # tkConfig.sh is in Tk build directory
         if test "${TEA_PLATFORM}" = "windows"; then
-          if test -f "${TK_BIN_DIR}/wish${TK_MAJOR_VERSION}${TK_MINOR_VERSION}${TK_DBGX}${EXEEXT}" ; then
-            WISH_PROG="${TK_BIN_DIR}/wish${TK_MAJOR_VERSION}${TK_MINOR_VERSION}${TK_DBGX}${EXEEXT}"
-          elif test -f "${TK_BIN_DIR}/wish${TK_MAJOR_VERSION}${TK_MINOR_VERSION}${TK_DBGX}s${EXEEXT}" ; then
-            WISH_PROG="${TK_BIN_DIR}/wish${TK_MAJOR_VERSION}${TK_MINOR_VERSION}${TK_DBGX}$s{EXEEXT}"
-          elif test -f "${TK_BIN_DIR}/wish${TK_MAJOR_VERSION}${TK_MINOR_VERSION}${TK_DBGX}t${EXEEXT}" ; then
-            WISH_PROG="${TK_BIN_DIR}/wish${TK_MAJOR_VERSION}${TK_MINOR_VERSION}${TK_DBGX}t${EXEEXT}"
-          elif test -f "${TK_BIN_DIR}/wish${TK_MAJOR_VERSION}${TK_MINOR_VERSION}${TK_DBGX}st${EXEEXT}" ; then
-            WISH_PROG="${TK_BIN_DIR}/wish${TK_MAJOR_VERSION}${TK_MINOR_VERSION}${TK_DBGX}st${EXEEXT}"
+          if test -f "${TK_BIN_DIR}/wish${TK_MAJOR_VERSION}${TK_MINOR_VERSION}${EXEEXT}" ; then
+            WISH_PROG="${TK_BIN_DIR}/wish${TK_MAJOR_VERSION}${TK_MINOR_VERSION}${EXEEXT}"
+          elif test -f "${TK_BIN_DIR}/wish${TK_MAJOR_VERSION}${TK_MINOR_VERSION}s${EXEEXT}" ; then
+            WISH_PROG="${TK_BIN_DIR}/wish${TK_MAJOR_VERSION}${TK_MINOR_VERSION}$s{EXEEXT}"
+          elif test -f "${TK_BIN_DIR}/wish${TK_MAJOR_VERSION}${TK_MINOR_VERSION}t${EXEEXT}" ; then
+            WISH_PROG="${TK_BIN_DIR}/wish${TK_MAJOR_VERSION}${TK_MINOR_VERSION}t${EXEEXT}"
+          elif test -f "${TK_BIN_DIR}/wish${TK_MAJOR_VERSION}${TK_MINOR_VERSION}st${EXEEXT}" ; then
+            WISH_PROG="${TK_BIN_DIR}/wish${TK_MAJOR_VERSION}${TK_MINOR_VERSION}st${EXEEXT}"
           fi
         else
             WISH_PROG="${TK_BIN_DIR}/wish"
@@ -665,9 +642,9 @@ AC_DEFUN([TEA_PROG_WISH], [
     else
         # tkConfig.sh is in install location
         if test "${TEA_PLATFORM}" = "windows"; then
-            WISH_PROG="wish${TK_MAJOR_VERSION}${TK_MINOR_VERSION}${TK_DBGX}${EXEEXT}"
+            WISH_PROG="wish${TK_MAJOR_VERSION}${TK_MINOR_VERSION}${EXEEXT}"
         else
-            WISH_PROG="wish${TK_MAJOR_VERSION}.${TK_MINOR_VERSION}${TK_DBGX}"
+            WISH_PROG="wish${TK_MAJOR_VERSION}.${TK_MINOR_VERSION}"
         fi
         list="`ls -d ${TK_BIN_DIR}/../bin 2>/dev/null` \
               `ls -d ${TK_BIN_DIR}/..     2>/dev/null` \
@@ -911,8 +888,6 @@ AC_DEFUN([TEA_ENABLE_THREADS], [
 #				Sets to "$(CFLAGS_OPTIMIZE) -DNDEBUG" if false
 #		LDFLAGS_DEFAULT	Sets to $(LDFLAGS_DEBUG) if true
 #				Sets to $(LDFLAGS_OPTIMIZE) if false
-#		DBGX		Formerly used as debug library extension;
-#				always blank now.
 #------------------------------------------------------------------------
 
 AC_DEFUN([TEA_ENABLE_SYMBOLS], [
@@ -923,7 +898,6 @@ AC_DEFUN([TEA_ENABLE_SYMBOLS], [
 	AC_HELP_STRING([--enable-symbols],
 	    [build with debugging symbols (default: off)]),
 	[tcl_ok=$enableval], [tcl_ok=no])
-    DBGX=""
     if test "$tcl_ok" = "no"; then
 	CFLAGS_DEFAULT="${CFLAGS_OPTIMIZE} -DNDEBUG"
 	LDFLAGS_DEFAULT="${LDFLAGS_OPTIMIZE}"
@@ -937,7 +911,6 @@ AC_DEFUN([TEA_ENABLE_SYMBOLS], [
     fi
     AC_SUBST(CFLAGS_DEFAULT)
     AC_SUBST(LDFLAGS_DEFAULT)
-    AC_SUBST(TCL_DBGX)
 
     if test "$tcl_ok" = "mem" -o "$tcl_ok" = "all"; then
 	AC_DEFINE(TCL_MEM_DEBUG, 1, [Is memory debugging enabled?])
@@ -1332,11 +1305,11 @@ AC_DEFUN([TEA_CONFIG_CFLAGS], [
 		# AIX-5 uses ELF style dynamic libraries on IA-64, but not PPC
 		SHLIB_LD="/usr/ccs/bin/ld -G -z text"
 		AS_IF([test "$GCC" = yes], [
-		    CC_SEARCH_FLAGS='-Wl,-R,${LIB_RUNTIME_DIR}'
+		    CC_SEARCH_FLAGS='"-Wl,-R,${LIB_RUNTIME_DIR}"'
 		], [
-		    CC_SEARCH_FLAGS='-R${LIB_RUNTIME_DIR}'
+		    CC_SEARCH_FLAGS='"-R${LIB_RUNTIME_DIR}"'
 		])
-		LD_SEARCH_FLAGS='-R ${LIB_RUNTIME_DIR}'
+		LD_SEARCH_FLAGS='-R "${LIB_RUNTIME_DIR}"'
 	    ], [
 		AS_IF([test "$GCC" = yes], [
 		    SHLIB_LD='${CC} -shared -Wl,-bexpall'
@@ -1345,7 +1318,7 @@ AC_DEFUN([TEA_CONFIG_CFLAGS], [
 		    LDFLAGS="$LDFLAGS -brtl"
 		])
 		SHLIB_LD="${SHLIB_LD} ${SHLIB_LD_FLAGS}"
-		CC_SEARCH_FLAGS='-L${LIB_RUNTIME_DIR}'
+		CC_SEARCH_FLAGS='"-L${LIB_RUNTIME_DIR}"'
 		LD_SEARCH_FLAGS=${CC_SEARCH_FLAGS}
 	    ])
 	    ;;
@@ -1418,8 +1391,8 @@ AC_DEFUN([TEA_CONFIG_CFLAGS], [
 		SHLIB_CFLAGS="+z"
 		SHLIB_LD="ld -b"
 		LDFLAGS="$LDFLAGS -Wl,-E"
-		CC_SEARCH_FLAGS='-Wl,+s,+b,${LIB_RUNTIME_DIR}:.'
-		LD_SEARCH_FLAGS='+s +b ${LIB_RUNTIME_DIR}:.'
+		CC_SEARCH_FLAGS='"-Wl,+s,+b,${LIB_RUNTIME_DIR}:."'
+		LD_SEARCH_FLAGS='+s +b "${LIB_RUNTIME_DIR}:."'
 		LD_LIBRARY_PATH_VAR="SHLIB_PATH"
 	    ])
 	    AS_IF([test "$GCC" = yes], [
@@ -1438,7 +1411,7 @@ AC_DEFUN([TEA_CONFIG_CFLAGS], [
 			    do64bit_ok=yes
 			    SHLIB_LD='${CC} -shared'
 			    AS_IF([test $doRpath = yes], [
-				CC_SEARCH_FLAGS='-Wl,-rpath,${LIB_RUNTIME_DIR}'])
+				CC_SEARCH_FLAGS='"-Wl,-rpath,${LIB_RUNTIME_DIR}"'])
 			    LD_SEARCH_FLAGS=${CC_SEARCH_FLAGS}
 			    ;;
 			*)
@@ -1459,8 +1432,8 @@ AC_DEFUN([TEA_CONFIG_CFLAGS], [
 		SHLIB_LD="ld -b"
 		SHLIB_LD_LIBS=""
 		LDFLAGS="$LDFLAGS -Wl,-E"
-		CC_SEARCH_FLAGS='-Wl,+s,+b,${LIB_RUNTIME_DIR}:.'
-		LD_SEARCH_FLAGS='+s +b ${LIB_RUNTIME_DIR}:.'
+		CC_SEARCH_FLAGS='"-Wl,+s,+b,${LIB_RUNTIME_DIR}:."'
+		LD_SEARCH_FLAGS='+s +b "${LIB_RUNTIME_DIR}:."'
 		LD_LIBRARY_PATH_VAR="SHLIB_PATH"
 	    ]) ;;
 	IRIX-5.*)
@@ -1469,16 +1442,16 @@ AC_DEFUN([TEA_CONFIG_CFLAGS], [
 	    SHLIB_SUFFIX=".so"
 	    AC_LIBOBJ(mkstemp)
 	    AS_IF([test $doRpath = yes], [
-		CC_SEARCH_FLAGS='-Wl,-rpath,${LIB_RUNTIME_DIR}'
-		LD_SEARCH_FLAGS='-rpath ${LIB_RUNTIME_DIR}'])
+		CC_SEARCH_FLAGS='"-Wl,-rpath,${LIB_RUNTIME_DIR}"'
+		LD_SEARCH_FLAGS='-rpath "${LIB_RUNTIME_DIR}"'])
 	    ;;
 	IRIX-6.*)
 	    SHLIB_CFLAGS=""
 	    SHLIB_LD="ld -n32 -shared -rdata_shared"
 	    SHLIB_SUFFIX=".so"
 	    AS_IF([test $doRpath = yes], [
-		CC_SEARCH_FLAGS='-Wl,-rpath,${LIB_RUNTIME_DIR}'
-		LD_SEARCH_FLAGS='-rpath ${LIB_RUNTIME_DIR}'])
+		CC_SEARCH_FLAGS='"-Wl,-rpath,${LIB_RUNTIME_DIR}"'
+		LD_SEARCH_FLAGS='-rpath "${LIB_RUNTIME_DIR}"'])
 	    AS_IF([test "$GCC" = yes], [
 		CFLAGS="$CFLAGS -mabi=n32"
 		LDFLAGS="$LDFLAGS -mabi=n32"
@@ -1500,8 +1473,8 @@ AC_DEFUN([TEA_CONFIG_CFLAGS], [
 	    SHLIB_LD="ld -n32 -shared -rdata_shared"
 	    SHLIB_SUFFIX=".so"
 	    AS_IF([test $doRpath = yes], [
-		CC_SEARCH_FLAGS='-Wl,-rpath,${LIB_RUNTIME_DIR}'
-		LD_SEARCH_FLAGS='-rpath ${LIB_RUNTIME_DIR}'])
+		CC_SEARCH_FLAGS='"-Wl,-rpath,${LIB_RUNTIME_DIR}"'
+		LD_SEARCH_FLAGS='-rpath "${LIB_RUNTIME_DIR}"'])
 
 	    # Check to enable 64-bit flags for compiler/linker
 
@@ -1538,7 +1511,7 @@ AC_DEFUN([TEA_CONFIG_CFLAGS], [
             esac
 
 	    AS_IF([test $doRpath = yes], [
-		CC_SEARCH_FLAGS='-Wl,-rpath,${LIB_RUNTIME_DIR}'])
+		CC_SEARCH_FLAGS='"-Wl,-rpath,${LIB_RUNTIME_DIR}"'])
 	    LD_SEARCH_FLAGS=${CC_SEARCH_FLAGS}
 	    AS_IF([test "`uname -m`" = "alpha"], [CFLAGS="$CFLAGS -mieee"])
 	    AS_IF([test $do64bit = yes], [
@@ -1568,8 +1541,8 @@ AC_DEFUN([TEA_CONFIG_CFLAGS], [
 	    SHLIB_LD='${CC} -shared'
 	    LD_FLAGS="-Wl,--export-dynamic"
 	    AS_IF([test $doRpath = yes], [
-		CC_SEARCH_FLAGS='-Wl,-rpath,${LIB_RUNTIME_DIR}'
-		LD_SEARCH_FLAGS='-Wl,-rpath,${LIB_RUNTIME_DIR}'])
+		CC_SEARCH_FLAGS='"-Wl,-rpath,${LIB_RUNTIME_DIR}"'
+		LD_SEARCH_FLAGS='"-Wl,-rpath,${LIB_RUNTIME_DIR}"'])
 	    ;;
 	OpenBSD-*)
 	    arch=`arch -s`
@@ -1584,7 +1557,7 @@ AC_DEFUN([TEA_CONFIG_CFLAGS], [
 	    SHLIB_LD='${CC} ${SHLIB_CFLAGS} -shared'
 	    SHLIB_SUFFIX=".so"
 	    AS_IF([test $doRpath = yes], [
-		CC_SEARCH_FLAGS='-Wl,-rpath,${LIB_RUNTIME_DIR}'])
+		CC_SEARCH_FLAGS='"-Wl,-rpath,${LIB_RUNTIME_DIR}"'])
 	    LD_SEARCH_FLAGS=${CC_SEARCH_FLAGS}
 	    SHARED_LIB_SUFFIX='${TCL_TRIM_DOTS}.so${SHLIB_VERSION}'
 	    LDFLAGS="$LDFLAGS -Wl,-export-dynamic"
@@ -1604,7 +1577,7 @@ AC_DEFUN([TEA_CONFIG_CFLAGS], [
 	    SHLIB_SUFFIX=".so"
 	    LDFLAGS="$LDFLAGS -export-dynamic"
 	    AS_IF([test $doRpath = yes], [
-		CC_SEARCH_FLAGS='-Wl,-rpath,${LIB_RUNTIME_DIR}'])
+		CC_SEARCH_FLAGS='"-Wl,-rpath,${LIB_RUNTIME_DIR}"'])
 	    LD_SEARCH_FLAGS=${CC_SEARCH_FLAGS}
 	    # The -pthread needs to go in the CFLAGS, not LIBS
 	    LIBS=`echo $LIBS | sed s/-pthread//`
@@ -1744,7 +1717,7 @@ AC_DEFUN([TEA_CONFIG_CFLAGS], [
 	    ])
 	    SHLIB_SUFFIX=".so"
 	    AS_IF([test $doRpath = yes], [
-		CC_SEARCH_FLAGS='-Wl,-rpath,${LIB_RUNTIME_DIR}'
+		CC_SEARCH_FLAGS='"-Wl,-rpath,${LIB_RUNTIME_DIR}"'
 		LD_SEARCH_FLAGS='-rpath ${LIB_RUNTIME_DIR}'])
 	    AS_IF([test "$GCC" = yes], [CFLAGS="$CFLAGS -mieee"], [
 		CFLAGS="$CFLAGS -DHAVE_TZSET -std1 -ieee"])
@@ -1797,11 +1770,11 @@ AC_DEFUN([TEA_CONFIG_CFLAGS], [
 	    SHLIB_SUFFIX=".so"
 	    AS_IF([test "$GCC" = yes], [
 		SHLIB_LD='${CC} -shared'
-		CC_SEARCH_FLAGS='-Wl,-R,${LIB_RUNTIME_DIR}'
+		CC_SEARCH_FLAGS='"-Wl,-R,${LIB_RUNTIME_DIR}"'
 		LD_SEARCH_FLAGS=${CC_SEARCH_FLAGS}
 	    ], [
 		SHLIB_LD="/usr/ccs/bin/ld -G -z text"
-		CC_SEARCH_FLAGS='-R ${LIB_RUNTIME_DIR}'
+		CC_SEARCH_FLAGS='-R "${LIB_RUNTIME_DIR}"'
 		LD_SEARCH_FLAGS=${CC_SEARCH_FLAGS}
 	    ])
 	    ;;
@@ -1867,7 +1840,7 @@ AC_DEFUN([TEA_CONFIG_CFLAGS], [
 	    SHLIB_SUFFIX=".so"
 	    AS_IF([test "$GCC" = yes], [
 		SHLIB_LD='${CC} -shared'
-		CC_SEARCH_FLAGS='-Wl,-R,${LIB_RUNTIME_DIR}'
+		CC_SEARCH_FLAGS='"-Wl,-R,${LIB_RUNTIME_DIR}"'
 		LD_SEARCH_FLAGS=${CC_SEARCH_FLAGS}
 		AS_IF([test "$do64bit_ok" = yes], [
 		    AS_IF([test "$arch" = "sparcv9 sparc"], [
@@ -1894,8 +1867,8 @@ AC_DEFUN([TEA_CONFIG_CFLAGS], [
 		    *)
 			SHLIB_LD='/usr/ccs/bin/ld -G -z text';;
 		esac
-		CC_SEARCH_FLAGS='-Wl,-R,${LIB_RUNTIME_DIR}'
-		LD_SEARCH_FLAGS='-R ${LIB_RUNTIME_DIR}'
+		CC_SEARCH_FLAGS='"-Wl,-R,${LIB_RUNTIME_DIR}"'
+		LD_SEARCH_FLAGS='-R "${LIB_RUNTIME_DIR}"'
 	    ])
 	    ;;
 	UNIX_SV* | UnixWare-5*)
@@ -2196,97 +2169,6 @@ int main() {
 ])
 
 #--------------------------------------------------------------------
-# TEA_MISSING_POSIX_HEADERS
-#
-#	Supply substitutes for missing POSIX header files.  Special
-#	notes:
-#	    - stdlib.h doesn't define strtol, strtoul, or
-#	      strtod in some versions of SunOS
-#	    - some versions of string.h don't declare procedures such
-#	      as strstr
-#
-# Arguments:
-#	none
-#
-# Results:
-#
-#	Defines some of the following vars:
-#		NO_DIRENT_H
-#		NO_ERRNO_H
-#		NO_VALUES_H
-#		HAVE_LIMITS_H or NO_LIMITS_H
-#		NO_STDLIB_H
-#		NO_STRING_H
-#		NO_SYS_WAIT_H
-#		NO_DLFCN_H
-#		HAVE_SYS_PARAM_H
-#
-#		HAVE_STRING_H ?
-#
-# tkUnixPort.h checks for HAVE_LIMITS_H, so do both HAVE and
-# CHECK on limits.h
-#--------------------------------------------------------------------
-
-AC_DEFUN([TEA_MISSING_POSIX_HEADERS], [
-    AC_CACHE_CHECK([dirent.h], tcl_cv_dirent_h, [
-    AC_TRY_LINK([#include <sys/types.h>
-#include <dirent.h>], [
-#ifndef _POSIX_SOURCE
-#   ifdef __Lynx__
-	/*
-	 * Generate compilation error to make the test fail:  Lynx headers
-	 * are only valid if really in the POSIX environment.
-	 */
-
-	missing_procedure();
-#   endif
-#endif
-DIR *d;
-struct dirent *entryPtr;
-char *p;
-d = opendir("foobar");
-entryPtr = readdir(d);
-p = entryPtr->d_name;
-closedir(d);
-], tcl_cv_dirent_h=yes, tcl_cv_dirent_h=no)])
-
-    if test $tcl_cv_dirent_h = no; then
-	AC_DEFINE(NO_DIRENT_H, 1, [Do we have <dirent.h>?])
-    fi
-
-    # TEA specific:
-    AC_CHECK_HEADER(errno.h, , [AC_DEFINE(NO_ERRNO_H, 1, [Do we have <errno.h>?])])
-    AC_CHECK_HEADER(float.h, , [AC_DEFINE(NO_FLOAT_H, 1, [Do we have <float.h>?])])
-    AC_CHECK_HEADER(values.h, , [AC_DEFINE(NO_VALUES_H, 1, [Do we have <values.h>?])])
-    AC_CHECK_HEADER(limits.h,
-	[AC_DEFINE(HAVE_LIMITS_H, 1, [Do we have <limits.h>?])],
-	[AC_DEFINE(NO_LIMITS_H, 1, [Do we have <limits.h>?])])
-    AC_CHECK_HEADER(stdlib.h, tcl_ok=1, tcl_ok=0)
-    AC_EGREP_HEADER(strtol, stdlib.h, , tcl_ok=0)
-    AC_EGREP_HEADER(strtoul, stdlib.h, , tcl_ok=0)
-    AC_EGREP_HEADER(strtod, stdlib.h, , tcl_ok=0)
-    if test $tcl_ok = 0; then
-	AC_DEFINE(NO_STDLIB_H, 1, [Do we have <stdlib.h>?])
-    fi
-    AC_CHECK_HEADER(string.h, tcl_ok=1, tcl_ok=0)
-    AC_EGREP_HEADER(strstr, string.h, , tcl_ok=0)
-    AC_EGREP_HEADER(strerror, string.h, , tcl_ok=0)
-
-    # See also memmove check below for a place where NO_STRING_H can be
-    # set and why.
-
-    if test $tcl_ok = 0; then
-	AC_DEFINE(NO_STRING_H, 1, [Do we have <string.h>?])
-    fi
-
-    AC_CHECK_HEADER(sys/wait.h, , [AC_DEFINE(NO_SYS_WAIT_H, 1, [Do we have <sys/wait.h>?])])
-    AC_CHECK_HEADER(dlfcn.h, , [AC_DEFINE(NO_DLFCN_H, 1, [Do we have <dlfcn.h>?])])
-
-    # OS/390 lacks sys/param.h (and doesn't need it, by chance).
-    AC_HAVE_HEADERS(sys/param.h)
-])
-
-#--------------------------------------------------------------------
 # TEA_PATH_X
 #
 #	Locate the X11 header files and the X11 library archive.  Try
@@ -2437,6 +2319,7 @@ AC_DEFUN([TEA_BLOCKING_STYLE], [
 #		HAVE_TM_GMTOFF
 #		HAVE_TM_TZADJ
 #		HAVE_TIMEZONE_VAR
+#
 #--------------------------------------------------------------------
 
 AC_DEFUN([TEA_TIME_HANDLER], [
@@ -2444,7 +2327,7 @@ AC_DEFUN([TEA_TIME_HANDLER], [
     AC_HEADER_TIME
     AC_STRUCT_TIMEZONE
 
-    AC_CHECK_FUNCS(gmtime_r localtime_r)
+    AC_CHECK_FUNCS(gmtime_r localtime_r mktime)
 
     AC_CACHE_CHECK([tm_tzadj in struct tm], tcl_cv_member_tm_tzadj, [
 	AC_TRY_COMPILE([#include <time.h>], [struct tm tm; tm.tm_tzadj;],
@@ -2489,41 +2372,86 @@ AC_DEFUN([TEA_TIME_HANDLER], [
 ])
 
 #--------------------------------------------------------------------
-# TEA_TCL_LINK_LIBS
+# TEA_BUGGY_STRTOD
 #
-#	Search for the libraries needed to link the Tcl shell.
-#	Things like the math library (-lm) and socket stuff (-lsocket vs.
-#	-lnsl) are dealt with here.
+#	Under Solaris 2.4, strtod returns the wrong value for the
+#	terminating character under some conditions.  Check for this
+#	and if the problem exists use a substitute procedure
+#	"fixstrtod" (provided by Tcl) that corrects the error.
+#	Also, on Compaq's Tru64 Unix 5.0,
+#	strtod(" ") returns 0.0 instead of a failure to convert.
 #
 # Arguments:
-#	Requires the following vars to be set in the Makefile:
-#		DL_LIBS (not in TEA, only needed in core)
-#		LIBS
-#		MATH_LIBS
+#	none
 #
 # Results:
 #
-#	Substitutes the following vars:
-#		TCL_LIBS
-#		MATH_LIBS
+#	Might defines some of the following vars:
+#		strtod (=fixstrtod)
+#--------------------------------------------------------------------
+
+AC_DEFUN([TEA_BUGGY_STRTOD], [
+    AC_CHECK_FUNC(strtod, tcl_strtod=1, tcl_strtod=0)
+    if test "$tcl_strtod" = 1; then
+	AC_CACHE_CHECK([for Solaris2.4/Tru64 strtod bugs], tcl_cv_strtod_buggy,[
+	    AC_TRY_RUN([
+		#include <stdlib.h>
+		extern double strtod();
+		int main() {
+		    char *infString="Inf", *nanString="NaN", *spaceString=" ";
+		    char *term;
+		    double value;
+		    value = strtod(infString, &term);
+		    if ((term != infString) && (term[-1] == 0)) {
+			exit(1);
+		    }
+		    value = strtod(nanString, &term);
+		    if ((term != nanString) && (term[-1] == 0)) {
+			exit(1);
+		    }
+		    value = strtod(spaceString, &term);
+		    if (term == (spaceString+1)) {
+			exit(1);
+		    }
+		    exit(0);
+		}], tcl_cv_strtod_buggy=ok, tcl_cv_strtod_buggy=buggy,
+		    tcl_cv_strtod_buggy=buggy)])
+	if test "$tcl_cv_strtod_buggy" = buggy; then
+	    AC_LIBOBJ([fixstrtod])
+	    USE_COMPAT=1
+	    AC_DEFINE(strtod, fixstrtod, [Do we want to use the strtod() in compat?])
+	fi
+    fi
+])
+
+#--------------------------------------------------------------------
+# TEA_TCL_LINK_LIBS
+#
+#	Search for the libraries needed to link the Tcl shell.
+#	Things like the math library (-lm), socket stuff (-lsocket vs.
+#	-lnsl), zlib (-lz) and libtommath (-ltommath) are dealt with here.
+#
+# Arguments:
+#	None.
+#
+# Results:
 #
 #	Might append to the following vars:
 #		LIBS
+#		MATH_LIBS
 #
 #	Might define the following vars:
 #		HAVE_NET_ERRNO_H
+#
 #--------------------------------------------------------------------
 
 AC_DEFUN([TEA_TCL_LINK_LIBS], [
     #--------------------------------------------------------------------
     # On a few very rare systems, all of the libm.a stuff is
     # already in libc.a.  Set compiler flags accordingly.
-    # Also, Linux requires the "ieee" library for math to work
-    # right (and it must appear before "-lm").
     #--------------------------------------------------------------------
 
     AC_CHECK_FUNC(sin, MATH_LIBS="", MATH_LIBS="-lm")
-    AC_CHECK_LIB(ieee, main, [MATH_LIBS="-lieee $MATH_LIBS"])
 
     #--------------------------------------------------------------------
     # Interactive UNIX requires -linet instead of -lsocket, plus it
@@ -2565,65 +2493,10 @@ AC_DEFUN([TEA_TCL_LINK_LIBS], [
     fi
     AC_CHECK_FUNC(gethostbyname, , [AC_CHECK_LIB(nsl, gethostbyname,
 	    [LIBS="$LIBS -lnsl"])])
-
-    # TEA specific: Don't perform the eval of the libraries here because
-    # DL_LIBS won't be set until we call TEA_CONFIG_CFLAGS
-
-    TCL_LIBS='${DL_LIBS} ${LIBS} ${MATH_LIBS}'
-    AC_SUBST(TCL_LIBS)
-    AC_SUBST(MATH_LIBS)
-])
-
-#--------------------------------------------------------------------
-# TEA_BUGGY_STRTOD
-#
-#	Under Solaris 2.4, strtod returns the wrong value for the
-#	terminating character under some conditions.  Check for this
-#	and if the problem exists use a substitute procedure
-#	"fixstrtod" (provided by Tcl) that corrects the error.
-#	Also, on Compaq's Tru64 Unix 5.0,
-#	strtod(" ") returns 0.0 instead of a failure to convert.
-#
-# Arguments:
-#	none
-#
-# Results:
-#
-#	Might defines some of the following vars:
-#		strtod (=fixstrtod)
-#--------------------------------------------------------------------
-
-AC_DEFUN([TEA_BUGGY_STRTOD], [
-    AC_CHECK_FUNC(strtod, tcl_strtod=1, tcl_strtod=0)
-    if test "$tcl_strtod" = 1; then
-	AC_CACHE_CHECK([for Solaris2.4/Tru64 strtod bugs], tcl_cv_strtod_buggy,[
-	    AC_TRY_RUN([
-		extern double strtod();
-		int main() {
-		    char *infString="Inf", *nanString="NaN", *spaceString=" ";
-		    char *term;
-		    double value;
-		    value = strtod(infString, &term);
-		    if ((term != infString) && (term[-1] == 0)) {
-			exit(1);
-		    }
-		    value = strtod(nanString, &term);
-		    if ((term != nanString) && (term[-1] == 0)) {
-			exit(1);
-		    }
-		    value = strtod(spaceString, &term);
-		    if (term == (spaceString+1)) {
-			exit(1);
-		    }
-		    exit(0);
-		}], tcl_cv_strtod_buggy=ok, tcl_cv_strtod_buggy=buggy,
-		    tcl_cv_strtod_buggy=buggy)])
-	if test "$tcl_cv_strtod_buggy" = buggy; then
-	    AC_LIBOBJ([fixstrtod])
-	    USE_COMPAT=1
-	    AC_DEFINE(strtod, fixstrtod, [Do we want to use the strtod() in compat?])
-	fi
-    fi
+    AC_CHECK_FUNC(mp_log_u32, , [AC_CHECK_LIB(tommath, mp_log_u32,
+	    [LIBS="$LIBS -ltommath"])])
+    AC_CHECK_FUNC(deflateSetHeader, , [AC_CHECK_LIB(z, deflateSetHeader,
+	    [LIBS="$LIBS -lz"])])
 ])
 
 #--------------------------------------------------------------------
@@ -2641,6 +2514,7 @@ AC_DEFUN([TEA_BUGGY_STRTOD], [
 #		_ISOC99_SOURCE
 #		_LARGEFILE64_SOURCE
 #		_LARGEFILE_SOURCE64
+#
 #--------------------------------------------------------------------
 
 AC_DEFUN([TEA_TCL_EARLY_FLAG],[
@@ -2866,6 +2740,9 @@ The PACKAGE_NAME variable must be defined by your TEA configure.ac])
     AC_SUBST(PKG_INCLUDES)
     AC_SUBST(PKG_LIBS)
     AC_SUBST(PKG_CFLAGS)
+
+    # Configure the installer.
+    TEA_INSTALLER
 ])
 
 #------------------------------------------------------------------------
@@ -3157,20 +3034,6 @@ AC_DEFUN([TEA_SETUP_COMPILER_CC], [
     AC_PROG_CC
     AC_PROG_CPP
 
-    INSTALL='$(SHELL) $(srcdir)/tclconfig/install-sh -c'
-    INSTALL_DATA_DIR='${INSTALL} -d -m 755'
-    INSTALL_DATA='${INSTALL} -m 644'
-    INSTALL_PROGRAM='${INSTALL}'
-    INSTALL_SCRIPT='${INSTALL}'
-    INSTALL_LIBRARY='${INSTALL_DATA}'
-
-    AC_SUBST(INSTALL)
-    AC_SUBST(INSTALL_DATA_DIR)
-    AC_SUBST(INSTALL_DATA)
-    AC_SUBST(INSTALL_PROGRAM)
-    AC_SUBST(INSTALL_SCRIPT)
-    AC_SUBST(INSTALL_LIBRARY)
-
     #--------------------------------------------------------------------
     # Checks to see if the make program sets the $MAKE variable.
     #--------------------------------------------------------------------
@@ -3229,10 +3092,6 @@ AC_DEFUN([TEA_SETUP_COMPILER], [
     #--------------------------------------------------------------------
 
     AC_C_BIGENDIAN
-    if test "${TEA_PLATFORM}" = "unix" ; then
-	TEA_TCL_LINK_LIBS
-	TEA_MISSING_POSIX_HEADERS
-    fi
 ])
 
 #------------------------------------------------------------------------
@@ -3787,176 +3646,6 @@ AC_DEFUN([TEA_PUBLIC_TK_HEADERS], [
 ])
 
 #------------------------------------------------------------------------
-# TEA_PUBLIC_ITCL_HEADERS --
-#
-#	Locate the installed public itcl header files
-#
-# Arguments:
-#	None.
-#
-# Requires:
-#	CYGPATH must be set
-#
-# Results:
-#
-#	Adds a --with-itclinclude switch to configure.
-#	Result is cached.
-#
-#	Substitutes the following vars:
-#		ITCL_INCLUDES
-#------------------------------------------------------------------------
-
-AC_DEFUN([TEA_PUBLIC_ITCL_HEADERS], [
-    AC_MSG_CHECKING([for Itcl public headers])
-
-    AC_ARG_WITH(itclinclude, [  --with-itclinclude       directory containing the public Itcl header files], with_itclinclude=${withval})
-
-    AC_CACHE_VAL(ac_cv_c_itclh, [
-	# Use the value from --with-itclinclude, if it was given
-
-	if test x"${with_itclinclude}" != x ; then
-	    if test -f "${with_itclinclude}/itcl.h" ; then
-		ac_cv_c_itclh=${with_itclinclude}
-	    else
-		AC_MSG_ERROR([${with_itclinclude} directory does not contain itcl.h])
-	    fi
-	else
-	    list=""
-	    if test "`uname -s`" = "Darwin"; then
-		# If Itcl was built as a framework, attempt to use
-		# the framework's Headers directory.
-		case ${ITCL_DEFS} in
-		    *ITCL_FRAMEWORK*)
-			list="`ls -d ${ITCL_BIN_DIR}/Headers 2>/dev/null`"
-			;;
-		esac
-	    fi
-
-	    # Look in the source dir only if Itcl is not installed,
-	    # and in that situation, look there before installed locations.
-	    if test -f "${ITCL_BIN_DIR}/Makefile" ; then
-		list="$list `ls -d ${ITCL_SRC_DIR}/generic 2>/dev/null`"
-	    fi
-
-	    # Check order: pkg --prefix location, Itcl's --prefix location,
-	    # relative to directory of itclConfig.sh, Tcl's --prefix location,
-	    # relative to directory of tclConfig.sh.
-
-	    eval "temp_includedir=${includedir}"
-	    list="$list \
-		`ls -d ${temp_includedir}        2>/dev/null` \
-		`ls -d ${ITCL_PREFIX}/include    2>/dev/null` \
-		`ls -d ${ITCL_BIN_DIR}/../include 2>/dev/null` \
-		`ls -d ${TCL_PREFIX}/include     2>/dev/null` \
-		`ls -d ${TCL_BIN_DIR}/../include 2>/dev/null`"
-	    if test "${TEA_PLATFORM}" != "windows" -o "$GCC" = "yes"; then
-		list="$list /usr/local/include /usr/include"
-		if test x"${ITCL_INCLUDE_SPEC}" != x ; then
-		    d=`echo "${ITCL_INCLUDE_SPEC}" | sed -e 's/^-I//'`
-		    list="$list `ls -d ${d} 2>/dev/null`"
-		fi
-	    fi
-	    for i in $list ; do
-		if test -f "$i/itcl.h" ; then
-		    ac_cv_c_itclh=$i
-		    break
-		fi
-	    done
-	fi
-    ])
-
-    # Print a message based on how we determined the include path
-
-    if test x"${ac_cv_c_itclh}" = x ; then
-	AC_MSG_ERROR([itcl.h not found.  Please specify its location with --with-itclinclude])
-    else
-	AC_MSG_RESULT([${ac_cv_c_itclh}])
-    fi
-
-    # Convert to a native path and substitute into the output files.
-
-    INCLUDE_DIR_NATIVE=`${CYGPATH} ${ac_cv_c_itclh}`
-
-    ITCL_INCLUDES=-I\"${INCLUDE_DIR_NATIVE}\"
-
-    AC_SUBST(ITCL_INCLUDES)
-])
-
-#------------------------------------------------------------------------
-# TEA_PRIVATE_ITCL_HEADERS --
-#
-#	Locate the private Itcl include files
-#
-# Arguments:
-#
-#	Requires:
-#		ITCL_SRC_DIR	Assumes that TEA_LOAD_ITCLCONFIG has
-#				 already been called.
-#
-# Results:
-#
-#	Substitutes the following vars:
-#		ITCL_INCLUDES
-#------------------------------------------------------------------------
-
-AC_DEFUN([TEA_PRIVATE_ITCL_HEADERS], [
-    # Allow for --with-itclinclude to take effect and define ${ac_cv_c_itclh}
-    AC_REQUIRE([TEA_PUBLIC_ITCL_HEADERS])
-    AC_MSG_CHECKING([for Itcl private include files])
-
-    ITCL_SRC_DIR_NATIVE=`${CYGPATH} ${ITCL_SRC_DIR}`
-    ITCL_TOP_DIR_NATIVE=\"${ITCL_SRC_DIR_NATIVE}\"
-
-    # Check to see if itcl<Plat>Port.h isn't already with the public headers
-    # Don't look for itclInt.h because that resides with itcl.h in the core
-    # sources, but the <plat>Port headers are in a different directory
-    if test "${TEA_PLATFORM}" = "windows" -a \
-	-f "${ac_cv_c_itclh}/itclWinPort.h"; then
-	result="private headers found with public headers"
-    elif test "${TEA_PLATFORM}" = "unix" -a \
-	-f "${ac_cv_c_itclh}/itclUnixPort.h"; then
-	result="private headers found with public headers"
-    else
-	ITCL_GENERIC_DIR_NATIVE=\"${ITCL_SRC_DIR_NATIVE}/generic\"
-	if test "${TEA_PLATFORM}" = "windows"; then
-	    ITCL_PLATFORM_DIR_NATIVE=\"${ITCL_SRC_DIR_NATIVE}/win\"
-	else
-	    ITCL_PLATFORM_DIR_NATIVE=\"${ITCL_SRC_DIR_NATIVE}/unix\"
-	fi
-	# Overwrite the previous ITCL_INCLUDES as this should capture both
-	# public and private headers in the same set.
-	# We want to ensure these are substituted so as not to require
-	# any *_NATIVE vars be defined in the Makefile
-	ITCL_INCLUDES="-I${ITCL_GENERIC_DIR_NATIVE} -I${ITCL_PLATFORM_DIR_NATIVE}"
-	if test "`uname -s`" = "Darwin"; then
-	    # If Itcl was built as a framework, attempt to use
-	    # the framework's Headers and PrivateHeaders directories
-	    case ${ITCL_DEFS} in
-		*ITCL_FRAMEWORK*)
-			if test -d "${ITCL_BIN_DIR}/Headers" -a \
-				-d "${ITCL_BIN_DIR}/PrivateHeaders"; then
-			    ITCL_INCLUDES="-I\"${ITCL_BIN_DIR}/Headers\" -I\"${ITCL_BIN_DIR}/PrivateHeaders\" ${ITCL_INCLUDES}"
-			else
-			    ITCL_INCLUDES="${ITCL_INCLUDES} ${ITCL_INCLUDE_SPEC} `echo "${ITCL_INCLUDE_SPEC}" | sed -e 's/Headers/PrivateHeaders/'`"
-			fi
-			;;
-	    esac
-	    result="Using ${ITCL_INCLUDES}"
-	else
-	    if test ! -f "${ITCL_SRC_DIR}/generic/itclInt.h" ; then
-		AC_MSG_ERROR([Cannot find private header itclInt.h in ${ITCL_SRC_DIR}])
-	    fi
-	    result="Using srcdir found in itclConfig.sh: ${ITCL_SRC_DIR}"
-	fi
-    fi
-
-    AC_SUBST(ITCL_TOP_DIR_NATIVE)
-
-    AC_SUBST(ITCL_INCLUDES)
-    AC_MSG_RESULT([${result}])
-])
-
-#------------------------------------------------------------------------
 # TEA_PATH_CONFIG --
 #
 #	Locate the ${1}Config.sh file and perform a sanity check on
@@ -4190,11 +3879,11 @@ AC_DEFUN([TEA_EXPORT_CONFIG], [
     # pkglibdir must be a fully qualified path and (not ${exec_prefix}/lib)
     eval pkglibdir="[$]{libdir}/$1${PACKAGE_VERSION}"
     if test "${TCL_LIB_VERSIONS_OK}" = "ok"; then
-	eval $1_LIB_FLAG="-l$1${PACKAGE_VERSION}${DBGX}"
-	eval $1_STUB_LIB_FLAG="-l$1stub${PACKAGE_VERSION}${DBGX}"
+	eval $1_LIB_FLAG="-l$1${PACKAGE_VERSION}"
+	eval $1_STUB_LIB_FLAG="-l$1stub${PACKAGE_VERSION}"
     else
-	eval $1_LIB_FLAG="-l$1`echo ${PACKAGE_VERSION} | tr -d .`${DBGX}"
-	eval $1_STUB_LIB_FLAG="-l$1stub`echo ${PACKAGE_VERSION} | tr -d .`${DBGX}"
+	eval $1_LIB_FLAG="-l$1`echo ${PACKAGE_VERSION} | tr -d .`"
+	eval $1_STUB_LIB_FLAG="-l$1stub`echo ${PACKAGE_VERSION} | tr -d .`"
     fi
     $1_BUILD_LIB_SPEC="-L`$CYGPATH $(pwd)` ${$1_LIB_FLAG}"
     $1_LIB_SPEC="-L`$CYGPATH ${pkglibdir}` ${$1_LIB_FLAG}"
