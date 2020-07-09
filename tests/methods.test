@@ -186,7 +186,7 @@ test methods-2.3 {call of method after object is destroyed inside other methods,
 	   return C1::c1test
 	}
     }
-} -body {   
+} -body {
     set result {}
     set obj [C1 #auto]
     lappend result [catch {$obj m1} v] $v [namespace which -command $obj]

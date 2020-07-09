@@ -674,7 +674,7 @@ void * Itcl_Alloc(
  */
 void Itcl_Free(void *ptr) {
     PresMemoryPrefix *blk;
-    
+
     if (ptr == NULL) {
 	return;
     }

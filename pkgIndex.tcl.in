@@ -1,7 +1,7 @@
 # Tcl package index file, version 1.0
 #
 # Do NOT try this command
-# 
+#
 #   if {![package vsatisfies [package provide Tcl] 8.6-]} {return}
 #
 # as a way to accept working with all of Tcl 8.6, Tcl 8.X, X>6, and

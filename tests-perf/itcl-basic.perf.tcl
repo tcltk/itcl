@@ -3,16 +3,16 @@
 # ------------------------------------------------------------------------
 #
 # itcl-basic.perf.tcl --
-# 
+#
 #  This file provides performance tests for comparison of basic itcl-speed.
 #
 # ------------------------------------------------------------------------
-# 
+#
 # Copyright (c) 2019 Serg G. Brester (aka sebres)
-# 
+#
 # See the file "license.terms" for information on usage and redistribution
 # of this file.
-# 
+#
 
 
 if {![namespace exists ::tclTestPerf]} {
@@ -70,7 +70,7 @@ proc test-var-create {{reptime {3000 10000}}} {
         set inh $in_inh
         if {$inh ne ""} {
           puts "% inherit $inh"
-          ::tclTestPerf::_test_iter 2 [timerate { 
+          ::tclTestPerf::_test_iter 2 [timerate {
             inherit $inh
           } 1 1]
         }
@@ -139,7 +139,7 @@ proc test-access {{reptime 1000}} {
       {o cget -pub[incr j]}
 
       # $n) obj-var cfg/cget
-      {o configure -pub1} 
+      {o configure -pub1}
       {o cget -pub1}
 
       # $n) cls-com resolve

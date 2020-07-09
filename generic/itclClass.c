@@ -1638,7 +1638,7 @@ ItclResolveVarEntry(
 	Tcl_Obj *vnObjPtr;
 	int newEntry, processAncestors;
 	size_t varLen;
-      
+
 	/* (de)qualify to simple name */
 	varName = simpleName = lookupName;
 	while(*varName) {
@@ -1647,7 +1647,7 @@ ItclResolveVarEntry(
 	    };
 	}
 	vnObjPtr = Tcl_NewStringObj(simpleName, -1);
-	
+
 	processAncestors = simpleName != lookupName;
 
 	Tcl_DStringInit(&buffer);
