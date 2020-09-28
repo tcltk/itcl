@@ -3063,7 +3063,7 @@ ItclHandleClassComponent(
 		" Only these can have components", NULL);
 	return TCL_ERROR;
     }
-    if ((objc < 2) && (objc > 6)) {
+    if ((objc < 2) || (objc > 6)) {
         Tcl_AppendResult(interp, "wrong # args should be: ", usage, NULL);
         return TCL_ERROR;
     }
