@@ -57,11 +57,13 @@ ItclReleaseClass(
 {
     ItclClass *iclsPtr = (ItclClass *)clientData;
 
+    assert(iclsPtr->refCount != 0);
     if (iclsPtr->refCount-- <= 1) {
 	ItclFreeClass((char *) clientData);
     }
 }
-
+
+
 /*
  * ------------------------------------------------------------------------
  *  Itcl_DeleteMemberFunc()
@@ -133,7 +135,6 @@ ItclDeleteClassMetadata(
     } else {
 	ItclDestroyClass2(iclsPtr);
     }
-    ItclReleaseClass(iclsPtr);
 }
 
 static int
