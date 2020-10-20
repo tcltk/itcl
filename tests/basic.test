@@ -114,12 +114,12 @@ test basic-1.6 {objects have an access command
     namespace which -command x
 } -cleanup $cleanup2 -result ::x
 
-test basic-1.7a {objects are added to the master list
+test basic-1.7a {objects are added to the global list
 } -setup $setup2 -body {
     itcl::find objects x
 } -cleanup $cleanup2 -result x
 
-test basic-1.7b {objects are added to the master list
+test basic-1.7b {objects are added to the global list
 } -setup $setup2 -body {
     itcl::find objects -class Counter x
 } -cleanup $cleanup2 -result x

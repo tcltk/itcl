@@ -457,12 +457,12 @@ test sfbug-257 { SF bug #257
   -cleanup {interp delete $interp}
 
 test sfbug-259 { SF bug #257 } -setup {
-    interp create slave
-    load {} Itcl slave
+    interp create child
+    load {} Itcl child
 } -cleanup {
-    interp delete slave
+    interp delete child
 } -body {
-    slave eval {
+    child eval {
 proc do_uplevel { body } {
     uplevel 1 $body
 }

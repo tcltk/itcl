@@ -82,8 +82,8 @@ typedef struct Ensemble {
  *  Data shared by ensemble access commands and ensemble parser:
  */
 typedef struct EnsembleParser {
-    Tcl_Interp* master;           /* master interp containing ensembles */
-    Tcl_Interp* parser;           /* slave interp for parsing */
+    Tcl_Interp* interp;           /* interpreter containing ensembles */
+    Tcl_Interp* parser;           /* child interp for parsing */
     Ensemble* ensData;            /* add parts to this ensemble */
 } EnsembleParser;
 
@@ -1681,22 +1681,22 @@ Itcl_EnsembleCmd(
     ensName = Tcl_GetString(objv[1]);
 
     if (ensData) {
-        if (FindEnsemblePart(ensInfo->master, ensData, ensName, &ensPart) != TCL_OK) {
+        if (FindEnsemblePart(ensInfo->interp, ensData, ensName, &ensPart) != TCL_OK) {
             ensPart = NULL;
         }
         if (ensPart == NULL) {
-            if (CreateEnsemble(ensInfo->master, ensData, ensName) != TCL_OK) {
-		Tcl_TransferResult(ensInfo->master, TCL_ERROR, interp);
+            if (CreateEnsemble(ensInfo->interp, ensData, ensName) != TCL_OK) {
+		Tcl_TransferResult(ensInfo->interp, TCL_ERROR, interp);
                 return TCL_ERROR;
             }
-            if (FindEnsemblePart(ensInfo->master, ensData, ensName, &ensPart)
+            if (FindEnsemblePart(ensInfo->interp, ensData, ensName, &ensPart)
                     != TCL_OK) {
                 Tcl_Panic("Itcl_EnsembleCmd: can't create ensemble");
             }
         }
 
         cmd = ensPart->cmdPtr;
-        infoPtr = (ItclObjectInfo *)Tcl_GetAssocData(ensInfo->master, ITCL_INTERP_DATA, NULL);
+        infoPtr = (ItclObjectInfo *)Tcl_GetAssocData(ensInfo->interp, ITCL_INTERP_DATA, NULL);
         hPtr = Tcl_FindHashEntry(&infoPtr->ensembleInfo->ensembles,
 	        (char *)ensPart->cmdPtr);
         if (hPtr == NULL) {
@@ -1764,7 +1764,7 @@ Itcl_EnsembleCmd(
 
     /*
      *  Copy the result from the parser interpreter to the
-     *  master interpreter.  If an error was encountered,
+     *  parent interpreter.  If an error was encountered,
      *  copy the error info first, and then set the result.
      *  Otherwise, the offending command is reported twice.
      */
@@ -1795,7 +1795,7 @@ Itcl_EnsembleCmd(
  *
  * GetEnsembleParser --
  *
- *      Returns the slave interpreter that acts as a parser for
+ *      Returns the child interpreter that acts as a parser for
  *      the body of an "ensemble" definition.  The first time that
  *      this is called for an interpreter, the parser is created
  *      and registered as associated data.  After that, it is
@@ -1828,11 +1828,11 @@ GetEnsembleParser(
     }
 
     /*
-     *  Create a slave interpreter that can be used to parse
+     *  Create a child interpreter that can be used to parse
      *  the body of an ensemble definition.
      */
     ensInfo = (EnsembleParser*)ckalloc(sizeof(EnsembleParser));
-    ensInfo->master = interp;
+    ensInfo->interp = interp;
     ensInfo->parser = Tcl_CreateInterp();
     ensInfo->ensData = NULL;
 
@@ -1867,7 +1867,7 @@ GetEnsembleParser(
  * DeleteEnsParser --
  *
  *      Called when an interpreter is destroyed to clean up the
- *      ensemble parser within it.  Destroys the slave interpreter
+ *      ensemble parser within it.  Destroys the child interpreter
  *      and frees up the data associated with it.
  *
  * Results:
@@ -1968,9 +1968,9 @@ Itcl_EnsPartCmd(
 	result = TCL_ERROR;
 	goto errorOut;
     }
-    if (Tcl_CreateProc(ensInfo->master, cmdInfo.namespacePtr, partName, objv[2], objv[3],
+    if (Tcl_CreateProc(ensInfo->interp, cmdInfo.namespacePtr, partName, objv[2], objv[3],
             &procPtr) != TCL_OK) {
-	Tcl_TransferResult(ensInfo->master, TCL_ERROR, interp);
+	Tcl_TransferResult(ensInfo->interp, TCL_ERROR, interp);
 	result = TCL_ERROR;
 	goto errorOut;
     }
@@ -1983,13 +1983,13 @@ Itcl_EnsPartCmd(
      *  if we try to compile the Tcl code for the part.  If
      *  anything goes wrong, clean up before bailing out.
      */
-    result = AddEnsemblePart(ensInfo->master, ensData, partName, usage,
+    result = AddEnsemblePart(ensInfo->interp, ensData, partName, usage,
         (Tcl_ObjCmdProc *)Tcl_GetObjInterpProc(), procPtr, _Tcl_ProcDeleteProc,
         ITCL_ENSEMBLE_ENSEMBLE, &ensPart);
     if (result == TCL_ERROR) {
 	_Tcl_ProcDeleteProc(procPtr);
     }
-    Tcl_TransferResult(ensInfo->master, result, interp);
+    Tcl_TransferResult(ensInfo->interp, result, interp);
 
 errorOut:
     Tcl_DecrRefCount(usagePtr);

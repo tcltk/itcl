@@ -364,7 +364,7 @@ Itcl_BiInit(
         return TCL_ERROR;
     }
     /*
-     * Install into the master [info] ensemble.
+     * Install into the [info] ensemble.
      */
 
     infoCmd = Tcl_FindCommand(interp, "info", NULL, TCL_GLOBAL_ONLY);
