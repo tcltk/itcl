@@ -1,0 +1,174 @@
+language: c
+addons:
+  apt:
+    sources:
+      - ubuntu-toolchain-r-test
+    packages:
+      - binutils-mingw-w64-i686
+      - binutils-mingw-w64-x86-64
+      - gcc-mingw-w64
+      - gcc-mingw-w64-base
+      - gcc-mingw-w64-i686
+      - gcc-mingw-w64-x86-64
+      - gcc-multilib
+      - tcl8.6-dev
+  homebrew:
+    packages:
+      - tcl-tk
+jobs:
+  include:
+# Testing on Linux GCC
+    - name: "Linux/GCC/Shared"
+      os: linux
+      dist: focal
+      compiler: gcc
+    - name: "Linux/GCC/Shared/bionic"
+      os: linux
+      dist: bionic
+      compiler: gcc
+    - name: "Linux/GCC/Shared/xenial"
+      os: linux
+      dist: xenial
+      compiler: gcc
+    - name: "Linux/GCC/Static"
+      os: linux
+      dist: focal
+      compiler: gcc
+      env:
+        - CFGOPT="--disable-shared"
+    - name: "Linux/GCC/Debug"
+      os: linux
+      dist: focal
+      compiler: gcc
+      env:
+        - CFGOPT="--enable-symbols"
+# Newer/Older versions of GCC
+    - name: "Linux/GCC 10/Shared"
+      os: linux
+      dist: focal
+      compiler: gcc-10
+      addons:
+        apt:
+          packages:
+            - g++-10
+    - name: "Linux/GCC 5/Shared"
+      os: linux
+      dist: bionic
+      compiler: gcc-5
+      addons:
+        apt:
+          packages:
+            - g++-5
+# Testing on Linux Clang
+    - name: "Linux/Clang/Shared"
+      os: linux
+      dist: focal
+      compiler: clang
+    - name: "Linux/Clang/Static"
+      os: linux
+      dist: focal
+      compiler: clang
+      env:
+        - CFGOPT="--disable-shared"
+    - name: "Linux/Clang/Debug"
+      os: linux
+      dist: focal
+      compiler: clang
+      env:
+        - CFGOPT="--enable-symbols"
+# Testing on Mac, various styles
+    - name: "macOS/Xcode 12/Shared"
+      os: osx
+      osx_image: xcode12
+      env:
+        - CFGOPT="--with-tcl=/usr/local/opt/tcl-tk/lib CFLAGS=-I/usr/local/opt/tcl-tk/include"
+      install:
+        - ./configure ${CFGOPT} "--prefix=$HOME" || (cat config.log && exit 1)
+    - name: "macOS/Xcode 12/Static"
+      os: osx
+      osx_image: xcode12
+      env:
+        - CFGOPT="--with-tcl=/usr/local/opt/tcl-tk/lib --disable-shared CFLAGS=-I/usr/local/opt/tcl-tk/include"
+      install:
+        - ./configure ${CFGOPT} "--prefix=$HOME" || (cat config.log && exit 1)
+      script: *mactest
+    - name: "macOS/Xcode 12/Debug"
+      os: osx
+      osx_image: xcode12
+      env:
+        - CFGOPT="--with-tcl=/usr/local/opt/tcl-tk/lib --enable-symbols CFLAGS=-I/usr/local/opt/tcl-tk/include"
+      install:
+        - ./configure ${CFGOPT} "--prefix=$HOME" || (cat config.log && exit 1)
+# Older MacOS versions
+    - name: "macOS/Xcode 11/Shared"
+      os: osx
+      osx_image: xcode11.7
+      env:
+        - CFGOPT="--with-tcl=/usr/local/opt/tcl-tk/lib CFLAGS=-I/usr/local/opt/tcl-tk/include CPPFLAGS=-mmacosx-version-min=10.14"
+      install:
+        - ./configure ${CFGOPT} "--prefix=$HOME" || (cat config.log && exit 1)
+      script: *mactest
+    - name: "macOS/Xcode 10/Shared"
+      os: osx
+      osx_image: xcode10.3
+      addons:
+        homebrew:
+          packages:
+            - tcl-tk
+          update: true
+      env:
+        - CFGOPT="--with-tcl=/usr/local/opt/tcl-tk/lib CFLAGS=-I/usr/local/opt/tcl-tk/include CPPFLAGS=-mmacosx-version-min=10.14"
+      install:
+        - ./configure ${CFGOPT} "--prefix=$HOME" || (cat config.log && exit 1)
+    - name: "macOS/Xcode 9/Shared"
+      os: osx
+      osx_image: xcode9.4
+      addons:
+        homebrew:
+          packages:
+            - tcl-tk
+          update: true
+      env:
+        - CFGOPT="--with-tcl=/usr/local/opt/tcl-tk/lib CFLAGS=-I/usr/local/opt/tcl-tk/include CPPFLAGS=-mmacosx-version-min=10.13"
+      install:
+        - ./configure ${CFGOPT} "--prefix=$HOME" || (cat config.log && exit 1)
+# Test on Windows with MSVC native
+#   - name: "Windows/MSVC/Shared"
+#     os: windows
+#     compiler: cl
+#     env: &vcenv
+#       - VCDIR="/C/Program Files (x86)/Microsoft Visual Studio/2017/BuildTools/VC/Auxiliary/Build"
+#     before_install: &vcpreinst
+#       - PATH="$PATH:$VCDIR"
+#     install: []
+#     script:
+#       - cmd.exe //C vcvarsall.bat x64 '&&' nmake '-f' makefile.vc all tktest
+# "make dist" only
+    - name: "Linux: make dist"
+      os: linux
+      dist: focal
+      compiler: gcc
+      script:
+        - touch ../doc/man.macros
+        - make dist
+before_install:
+  - |-
+      case $TRAVIS_OS_NAME in
+        windows)
+          choco install -y magicsplat-tcl-tk
+          ;;
+      esac
+install:
+  - mkdir "$HOME/install dir"
+  - mkdir tclconfig
+  - curl https://core.tcl-lang.org/tclconfig/raw/install-sh?name=f46cea65709582bed664d69a40095db0490968df69c355e30cd8905f0b60a153 >tclconfig/install-sh
+  - ./configure ${CFGOPT} "--prefix=$HOME/install dir" || (cat config.log && exit 1)
+script:
+  - make
+  - make install
+  - make test >out.txt
+  - grep -q "Failed	0" out.txt
+cache:
+  directories:
+  - $HOME/AppData/Local/Temp/chocolatey
+  - $HOME/AppData/Local/Apps/Tcl86
