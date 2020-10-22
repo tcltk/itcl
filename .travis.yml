@@ -82,32 +82,22 @@ jobs:
       osx_image: xcode12
       env:
         - CFGOPT="--with-tcl=/usr/local/opt/tcl-tk/lib CFLAGS=-I/usr/local/opt/tcl-tk/include"
-      install:
-        - ./configure ${CFGOPT} "--prefix=$HOME" || (cat config.log && exit 1)
     - name: "macOS/Xcode 12/Static"
       os: osx
       osx_image: xcode12
       env:
         - CFGOPT="--with-tcl=/usr/local/opt/tcl-tk/lib --disable-shared CFLAGS=-I/usr/local/opt/tcl-tk/include"
-      install:
-        - ./configure ${CFGOPT} "--prefix=$HOME" || (cat config.log && exit 1)
-      script: *mactest
     - name: "macOS/Xcode 12/Debug"
       os: osx
       osx_image: xcode12
       env:
         - CFGOPT="--with-tcl=/usr/local/opt/tcl-tk/lib --enable-symbols CFLAGS=-I/usr/local/opt/tcl-tk/include"
-      install:
-        - ./configure ${CFGOPT} "--prefix=$HOME" || (cat config.log && exit 1)
 # Older MacOS versions
     - name: "macOS/Xcode 11/Shared"
       os: osx
       osx_image: xcode11.7
       env:
         - CFGOPT="--with-tcl=/usr/local/opt/tcl-tk/lib CFLAGS=-I/usr/local/opt/tcl-tk/include CPPFLAGS=-mmacosx-version-min=10.14"
-      install:
-        - ./configure ${CFGOPT} "--prefix=$HOME" || (cat config.log && exit 1)
-      script: *mactest
     - name: "macOS/Xcode 10/Shared"
       os: osx
       osx_image: xcode10.3
@@ -118,8 +108,6 @@ jobs:
           update: true
       env:
         - CFGOPT="--with-tcl=/usr/local/opt/tcl-tk/lib CFLAGS=-I/usr/local/opt/tcl-tk/include CPPFLAGS=-mmacosx-version-min=10.14"
-      install:
-        - ./configure ${CFGOPT} "--prefix=$HOME" || (cat config.log && exit 1)
     - name: "macOS/Xcode 9/Shared"
       os: osx
       osx_image: xcode9.4
@@ -130,8 +118,6 @@ jobs:
           update: true
       env:
         - CFGOPT="--with-tcl=/usr/local/opt/tcl-tk/lib CFLAGS=-I/usr/local/opt/tcl-tk/include CPPFLAGS=-mmacosx-version-min=10.13"
-      install:
-        - ./configure ${CFGOPT} "--prefix=$HOME" || (cat config.log && exit 1)
 # Test on Windows with MSVC native
 #   - name: "Windows/MSVC/Shared"
 #     os: windows
@@ -149,7 +135,6 @@ jobs:
       dist: focal
       compiler: gcc
       script:
-        - touch ../doc/man.macros
         - make dist
 before_install:
   - |-
@@ -162,11 +147,13 @@ install:
   - mkdir "$HOME/install dir"
   - mkdir tclconfig
   - curl https://core.tcl-lang.org/tclconfig/raw/install-sh?name=f46cea65709582bed664d69a40095db0490968df69c355e30cd8905f0b60a153 >tclconfig/install-sh
+  - touch tclconfig/README.txt
+  - touch tclconfig/tcl.m4
   - ./configure ${CFGOPT} "--prefix=$HOME/install dir" || (cat config.log && exit 1)
 script:
   - make
-  - make install
   - make test >out.txt
+  - cat out.txt
   - grep -q "Failed	0" out.txt
 cache:
   directories:
