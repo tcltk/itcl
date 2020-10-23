@@ -60,6 +60,11 @@
 #   endif
 #endif
 
+#ifndef JOIN
+#  define JOIN(a,b) JOIN1(a,b)
+#  define JOIN1(a,b) a##b
+#endif
+
 #ifndef TCL_UNUSED
 #   if defined(__cplusplus)
 #	define TCL_UNUSED(T) T
