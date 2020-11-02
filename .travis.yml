@@ -30,12 +30,6 @@ jobs:
       os: linux
       dist: xenial
       compiler: gcc
-    - name: "Linux/GCC/Static"
-      os: linux
-      dist: focal
-      compiler: gcc
-      env:
-        - CFGOPT="--disable-shared"
     - name: "Linux/GCC/Debug"
       os: linux
       dist: focal
@@ -64,12 +58,6 @@ jobs:
       os: linux
       dist: focal
       compiler: clang
-    - name: "Linux/Clang/Static"
-      os: linux
-      dist: focal
-      compiler: clang
-      env:
-        - CFGOPT="--disable-shared"
     - name: "Linux/Clang/Debug"
       os: linux
       dist: focal
@@ -77,47 +65,42 @@ jobs:
       env:
         - CFGOPT="--enable-symbols"
 # Testing on Mac, various styles
-    - name: "macOS/Xcode 12/Shared"
-      os: osx
-      osx_image: xcode12
-      env:
-        - CFGOPT="--with-tcl=/usr/local/opt/tcl-tk/lib CFLAGS=-I/usr/local/opt/tcl-tk/include"
-    - name: "macOS/Xcode 12/Static"
-      os: osx
-      osx_image: xcode12
-      env:
-        - CFGOPT="--with-tcl=/usr/local/opt/tcl-tk/lib --disable-shared CFLAGS=-I/usr/local/opt/tcl-tk/include"
-    - name: "macOS/Xcode 12/Debug"
-      os: osx
-      osx_image: xcode12
-      env:
-        - CFGOPT="--with-tcl=/usr/local/opt/tcl-tk/lib --enable-symbols CFLAGS=-I/usr/local/opt/tcl-tk/include"
+#   - name: "macOS/Xcode 12/Shared"
+#     os: osx
+#     osx_image: xcode12
+#     env:
+#       - CFGOPT="--with-gdbm --with-lmdb --with-tcl=/usr/local/opt/tcl-tk/lib CFLAGS=-I/usr/local/opt/tcl-tk/include"
+#   - name: "macOS/Xcode 12/Debug"
+#     os: osx
+#     osx_image: xcode12
+#     env:
+#       - CFGOPT="--with-gdbm --with-lmdb --with-tcl=/usr/local/opt/tcl-tk/lib --enable-symbols CFLAGS=-I/usr/local/opt/tcl-tk/include"
 # Older MacOS versions
-    - name: "macOS/Xcode 11/Shared"
-      os: osx
-      osx_image: xcode11.7
-      env:
-        - CFGOPT="--with-tcl=/usr/local/opt/tcl-tk/lib CFLAGS=-I/usr/local/opt/tcl-tk/include CPPFLAGS=-mmacosx-version-min=10.14"
-    - name: "macOS/Xcode 10/Shared"
-      os: osx
-      osx_image: xcode10.3
-      addons:
-        homebrew:
-          packages:
-            - tcl-tk
-          update: true
-      env:
-        - CFGOPT="--with-tcl=/usr/local/opt/tcl-tk/lib CFLAGS=-I/usr/local/opt/tcl-tk/include CPPFLAGS=-mmacosx-version-min=10.14"
-    - name: "macOS/Xcode 9/Shared"
-      os: osx
-      osx_image: xcode9.4
-      addons:
-        homebrew:
-          packages:
-            - tcl-tk
-          update: true
-      env:
-        - CFGOPT="--with-tcl=/usr/local/opt/tcl-tk/lib CFLAGS=-I/usr/local/opt/tcl-tk/include CPPFLAGS=-mmacosx-version-min=10.13"
+#   - name: "macOS/Xcode 11/Shared"
+#     os: osx
+#     osx_image: xcode11.7
+#     env:
+#       - CFGOPT="--with-tcl=/usr/local/opt/tcl-tk/lib CFLAGS=-I/usr/local/opt/tcl-tk/include CPPFLAGS=-mmacosx-version-min=10.14"
+#   - name: "macOS/Xcode 10/Shared"
+#     os: osx
+#     osx_image: xcode10.3
+#     addons:
+#       homebrew:
+#         packages:
+#           - tcl-tk
+#         update: true
+#     env:
+#       - CFGOPT="--with-tcl=/usr/local/opt/tcl-tk/lib CFLAGS=-I/usr/local/opt/tcl-tk/include CPPFLAGS=-mmacosx-version-min=10.14"
+#   - name: "macOS/Xcode 9/Shared"
+#     os: osx
+#     osx_image: xcode9.4
+#     addons:
+#       homebrew:
+#         packages:
+#           - tcl-tk
+#         update: true
+#     env:
+#       - CFGOPT="--with-tcl=/usr/local/opt/tcl-tk/lib CFLAGS=-I/usr/local/opt/tcl-tk/include CPPFLAGS=-mmacosx-version-min=10.13"
 # Test on Windows with MSVC native
 #   - name: "Windows/MSVC/Shared"
 #     os: windows
@@ -146,15 +129,16 @@ before_install:
 install:
   - mkdir "$HOME/install dir"
   - mkdir tclconfig
-  - curl https://core.tcl-lang.org/tclconfig/raw/install-sh?name=f46cea65709582bed664d69a40095db0490968df69c355e30cd8905f0b60a153 >tclconfig/install-sh
   - touch tclconfig/README.txt
   - touch tclconfig/tcl.m4
-  - ./configure ${CFGOPT} "--prefix=$HOME/install dir" || (cat config.log && exit 1)
+  - curl https://core.tcl-lang.org/tclconfig/raw/install-sh?name=f46cea65709582bed664d69a40095db0490968df69c355e30cd8905f0b60a153 >tclconfig/install-sh
+  - ./configure ${CFGOPT} "--prefix=$HOME/install dir" "--exec-prefix=$HOME/install dir" || (cat config.log && exit 1)
 script:
-  - make
+  - make || echo "Something wrong, maybe a hickup, let's try again"
   - make test >out.txt
   - cat out.txt
   - grep -q "Failed	0" out.txt
+  - make install
 cache:
   directories:
   - $HOME/AppData/Local/Temp/chocolatey
