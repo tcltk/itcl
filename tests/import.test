@@ -14,7 +14,8 @@
 package require tcltest 2.2
 namespace import ::tcltest::test
 ::tcltest::loadTestedCommands
-set ::itcllib [lindex [package ifneeded itcl [package require itcl]] 1]
+package require itcl
+set ::itcllib [info loaded {} Itcl]
 
 # ----------------------------------------------------------------------
 #  Test "itcl::import::stub" command
@@ -45,7 +46,7 @@ test import-1.3 {"stub exists" requires one argument} {
 set interp [interp create]
 $interp eval {set ::tcl::inl_mem_test 0}
 $interp eval "
-    [list ::load $::itcllib itcl]
+    [list ::load $::itcllib Itcl]
     [::tcltest::configure -load]
     proc auto_load {cmd {namespace {}}} {
         global debug
@@ -95,7 +96,7 @@ catch {interp delete $interp}
 set interp [interp create]
 $interp eval {set ::tcl::inl_mem_test 0}
 $interp eval "
-    [list ::load $::itcllib itcl]
+    [list ::load $::itcllib Itcl]
     [::tcltest::configure -load]
     proc auto_load {cmd {namespace {}}} {
         proc \$cmd {args} \[format {return \"%s: \$args\"} \$cmd\]
