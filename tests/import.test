@@ -15,7 +15,7 @@ package require tcltest 2.2
 namespace import ::tcltest::test
 ::tcltest::loadTestedCommands
 package require itcl
-set ::itcllib [info loaded {} Itcl]
+set ::itcllib [lindex [lsearch -exact -index 1 -inline [info loaded] Itcl] 0]
 
 # ----------------------------------------------------------------------
 #  Test "itcl::import::stub" command
