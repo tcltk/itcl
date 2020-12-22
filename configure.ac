@@ -19,7 +19,7 @@ dnl	to configure the system for the local environment.
 # so that we create the export library with the dll.
 #-----------------------------------------------------------------------
 
-AC_INIT([itcl], [4.2.1])
+AC_INIT([itcl],[4.2.1])
 
 #--------------------------------------------------------------------
 # Call TEA_INIT as the first TEA_ macro to set up initial vars.
@@ -272,4 +272,5 @@ AC_SUBST(itcl_INCLUDE_SPEC)
 # which require substituting the AC variables in. Include these here.
 #--------------------------------------------------------------------
 
-AC_OUTPUT([Makefile pkgIndex.tcl itclConfig.sh])
+AC_CONFIG_FILES([Makefile pkgIndex.tcl itclConfig.sh])
+AC_OUTPUT

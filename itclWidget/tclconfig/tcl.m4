@@ -9,7 +9,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 
-AC_PREREQ(2.57)
+AC_PREREQ(2.69)
 
 # Possible values for key variables defined:
 #
@@ -50,9 +50,9 @@ AC_DEFUN([TEA_PATH_TCLCONFIG], [
 	# we reset no_tcl in case something fails here
 	no_tcl=true
 	AC_ARG_WITH(tcl,
-	    AC_HELP_STRING([--with-tcl],
+	    AS_HELP_STRING([--with-tcl],
 		[directory containing tcl configuration (tclConfig.sh)]),
-	    with_tclconfig="${withval}")
+	    [with_tclconfig="${withval}"])
 	AC_MSG_CHECKING([for Tcl configuration])
 	AC_CACHE_VAL(ac_cv_c_tclconfig,[
 
@@ -212,9 +212,9 @@ AC_DEFUN([TEA_PATH_TKCONFIG], [
 	# we reset no_tk in case something fails here
 	no_tk=true
 	AC_ARG_WITH(tk,
-	    AC_HELP_STRING([--with-tk],
+	    AS_HELP_STRING([--with-tk],
 		[directory containing tk configuration (tkConfig.sh)]),
-	    with_tkconfig="${withval}")
+	    [with_tkconfig="${withval}"])
 	AC_MSG_CHECKING([for Tk configuration])
 	AC_CACHE_VAL(ac_cv_c_tkconfig,[
 
@@ -690,7 +690,7 @@ AC_DEFUN([TEA_PROG_WISH], [
 AC_DEFUN([TEA_ENABLE_SHARED], [
     AC_MSG_CHECKING([how to build libraries])
     AC_ARG_ENABLE(shared,
-	AC_HELP_STRING([--enable-shared],
+	AS_HELP_STRING([--enable-shared],
 	    [build and link with shared libraries (default: on)]),
 	[shared_ok=$enableval], [shared_ok=yes])
 
@@ -702,7 +702,7 @@ AC_DEFUN([TEA_ENABLE_SHARED], [
     fi
 
     AC_ARG_ENABLE(stubs,
-	AC_HELP_STRING([--enable-stubs],
+	AS_HELP_STRING([--enable-stubs],
 	    [build and link with stub libraries. Always true for shared builds (default: on)]),
 	[stubs_ok=$enableval], [stubs_ok=yes])
 
@@ -774,7 +774,7 @@ AC_DEFUN([TEA_ENABLE_SHARED], [
 
 AC_DEFUN([TEA_ENABLE_THREADS], [
     AC_ARG_ENABLE(threads,
-	AC_HELP_STRING([--enable-threads],
+	AS_HELP_STRING([--enable-threads],
 	    [build with threads (default: on)]),
 	[tcl_ok=$enableval], [tcl_ok=yes])
 
@@ -895,7 +895,7 @@ AC_DEFUN([TEA_ENABLE_SYMBOLS], [
     AC_REQUIRE([TEA_CONFIG_CFLAGS])
     AC_MSG_CHECKING([for build with symbols])
     AC_ARG_ENABLE(symbols,
-	AC_HELP_STRING([--enable-symbols],
+	AS_HELP_STRING([--enable-symbols],
 	    [build with debugging symbols (default: off)]),
 	[tcl_ok=$enableval], [tcl_ok=no])
     if test "$tcl_ok" = "no"; then
@@ -945,7 +945,7 @@ AC_DEFUN([TEA_ENABLE_SYMBOLS], [
 
 AC_DEFUN([TEA_ENABLE_LANGINFO], [
     AC_ARG_ENABLE(langinfo,
-	AC_HELP_STRING([--enable-langinfo],
+	AS_HELP_STRING([--enable-langinfo],
 	    [use nl_langinfo if possible to determine encoding at startup, otherwise use old heuristic (default: on)]),
 	[langinfo_ok=$enableval], [langinfo_ok=yes])
 
@@ -1077,7 +1077,7 @@ AC_DEFUN([TEA_CONFIG_CFLAGS], [
 
     AC_MSG_CHECKING([if 64bit support is requested])
     AC_ARG_ENABLE(64bit,
-	AC_HELP_STRING([--enable-64bit],
+	AS_HELP_STRING([--enable-64bit],
 	    [enable 64bit support (default: off)]),
 	[do64bit=$enableval], [do64bit=no])
     AC_MSG_RESULT([$do64bit])
@@ -1086,7 +1086,7 @@ AC_DEFUN([TEA_CONFIG_CFLAGS], [
 
     AC_MSG_CHECKING([if 64bit Sparc VIS support is requested])
     AC_ARG_ENABLE(64bit-vis,
-	AC_HELP_STRING([--enable-64bit-vis],
+	AS_HELP_STRING([--enable-64bit-vis],
 	    [enable 64bit Sparc VIS support (default: off)]),
 	[do64bitVIS=$enableval], [do64bitVIS=no])
     AC_MSG_RESULT([$do64bitVIS])
@@ -1115,7 +1115,7 @@ AC_DEFUN([TEA_CONFIG_CFLAGS], [
 
     AC_MSG_CHECKING([if rpath support is requested])
     AC_ARG_ENABLE(rpath,
-	AC_HELP_STRING([--disable-rpath],
+	AS_HELP_STRING([--disable-rpath],
 	    [disable rpath support (default: on)]),
 	[doRpath=$enableval], [doRpath=yes])
     AC_MSG_RESULT([$doRpath])

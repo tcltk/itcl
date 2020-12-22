@@ -10,7 +10,7 @@
 # so you can encode the package version directly into the source files.
 #-----------------------------------------------------------------------
 
-AC_INIT([itclwidget], [4.2.1])
+AC_INIT([itclwidget],[4.2.1])
 
 #--------------------------------------------------------------------
 # Call TEA_INIT as the first TEA_ macro to set up initial vars.
@@ -178,4 +178,5 @@ TEA_PROG_TCLSH
 # Finally, substitute all of the various values into the Makefile.
 #--------------------------------------------------------------------
 
-AC_OUTPUT([Makefile pkgIndex.tcl])
+AC_CONFIG_FILES([Makefile pkgIndex.tcl])
+AC_OUTPUT
