@@ -1592,6 +1592,11 @@ ItclClassCreateObject(
     if (objName == NULL) {
         objName = token;
     }
+    if (*objName == '\0') {
+        Tcl_AppendResult(interp, "object name must not be empty", NULL);
+        Tcl_SetErrorCode(interp, "TCL", "OO", "EMPTY_NAME", NULL);
+        return TCL_ERROR;
+    }
 
     /*
      *  Try to create a new object.  If successful, return the
