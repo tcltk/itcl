@@ -195,6 +195,20 @@ test basic-1.20 {
     ::itcl::delete class \u6210bcd
 } -result {bar}
 
+test basic-1.21 {error on empty class name
+} -body {
+    itcl::class {} {}
+} -returnCodes error -result {invalid class name ""}
+
+test basic-1.22 {error on empty object name
+} -setup {
+    itcl::class ::A {}
+} -body {
+    ::A {}
+} -cleanup {
+    ::itcl::delete class ::A
+} -returnCodes error -result {object name must not be empty}
+
 # ----------------------------------------------------------------------
 #  #auto names
 # ----------------------------------------------------------------------
