@@ -1,0 +1,60 @@
+name: Linux
+on: [push]
+defaults:
+  run:
+    shell: bash
+    working-directory: unix
+jobs:
+  build:
+    runs-on: ubuntu-20.04
+    strategy:
+      matrix:
+        compiler:
+          - "gcc"
+          - "g++"
+          - "clang"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Setup Environment (compiler=${{ matrix.compiler }})
+        run: |
+          sudo apt-get install tcl8.6-dev
+          mkdir "$HOME/install dir"
+          echo "CFGOPT=--with-tcl=/usr/lib/tcl8.6" >> $GITHUB_ENV
+          echo "CC=$COMPILER" >> $GITHUB_ENV
+        env:
+          COMPILER: ${{ matrix.compiler }}
+          OPTS: ${{ matrix.compiler }}
+      - name: Configure
+        run: |
+          ./configure $CFGOPT "--prefix=$HOME/install dir" || {
+            cat config.log
+            echo "::error::Failure during Configure"
+            exit 1
+          }
+      - name: Build
+        run: |
+          make binaries libraries|| {
+            echo "::error::Failure during Build"
+            exit 1
+          }
+      - name: Run Tests
+        run: |
+          make test || {
+            echo "::error::Failure during Test"
+            exit 1
+          }
+        env:
+          ERROR_ON_FAILURES: 1
+      - name: Test-Drive Installation
+        run: |
+          make install || {
+            echo "::error::Failure during Install"
+            exit 1
+          }
+      - name: Create Distribution Package
+        run: |
+          make dist || {
+            echo "::error::Failure during Distribute"
+            exit 1
+          }

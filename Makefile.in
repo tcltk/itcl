@@ -75,6 +75,7 @@ bindir		= @bindir@
 libdir		= @libdir@
 includedir	= @includedir@
 datarootdir	= @datarootdir@
+runstatedir	= @runstatedir@
 datadir		= @datadir@
 mandir		= @mandir@
 
