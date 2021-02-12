@@ -3,7 +3,6 @@ on: [push]
 defaults:
   run:
     shell: bash
-    working-directory: unix
 jobs:
   build:
     runs-on: ubuntu-20.04
