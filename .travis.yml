@@ -69,12 +69,12 @@ jobs:
 #     os: osx
 #     osx_image: xcode12
 #     env:
-#       - CFGOPT="--with-gdbm --with-lmdb --with-tcl=/usr/local/opt/tcl-tk/lib CFLAGS=-I/usr/local/opt/tcl-tk/include"
+#       - CFGOPT="--with-tcl=/usr/local/opt/tcl-tk/lib CFLAGS=-I/usr/local/opt/tcl-tk/include"
 #   - name: "macOS/Xcode 12/Debug"
 #     os: osx
 #     osx_image: xcode12
 #     env:
-#       - CFGOPT="--with-gdbm --with-lmdb --with-tcl=/usr/local/opt/tcl-tk/lib --enable-symbols CFLAGS=-I/usr/local/opt/tcl-tk/include"
+#       - CFGOPT="--with-tcl=/usr/local/opt/tcl-tk/lib --enable-symbols CFLAGS=-I/usr/local/opt/tcl-tk/include"
 # Older MacOS versions
 #   - name: "macOS/Xcode 11/Shared"
 #     os: osx

@@ -19,6 +19,8 @@ jobs:
         run: |
           sudo apt-get install tcl8.6-dev
           mkdir "$HOME/install dir"
+          curl https://core.tcl-lang.org/tclconfig/tarball/main/tclconfig.tar.gz >tclconfig.tar.gz
+          tar xfz tclconfig.tar.gz
           echo "CFGOPT=--with-tcl=/usr/lib/tcl8.6" >> $GITHUB_ENV
           echo "CC=$COMPILER" >> $GITHUB_ENV
         env:
@@ -26,14 +28,14 @@ jobs:
           OPTS: ${{ matrix.compiler }}
       - name: Configure
         run: |
-          ./configure $CFGOPT "--prefix=$HOME/install dir" || {
+          ./configure $CFGOPT "--prefix=$HOME/install dir" "--exec-prefix=$HOME/install dir" || {
             cat config.log
             echo "::error::Failure during Configure"
             exit 1
           }
       - name: Build
         run: |
-          make binaries libraries|| {
+          make || {
             echo "::error::Failure during Build"
             exit 1
           }
