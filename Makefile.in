@@ -442,7 +442,7 @@ install-lib-binaries: binaries
 #========================================================================
 
 install-bin-binaries: binaries
-	@$(INSTALL_DATA_DIR) $(DESTDIR)$(bindir)
+	@$(INSTALL_DATA_DIR) "$(DESTDIR)$(bindir)"
 	@list='$(bin_BINARIES)'; for p in $$list; do \
 	  if test -f $$p; then \
 	    echo " $(INSTALL_PROGRAM) $$p $(DESTDIR)$(bindir)/$$p"; \
