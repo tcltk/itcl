@@ -64,18 +64,20 @@ DISABLE_TARGET_test = 1
 pkgindex:   $(OUT_DIR)\pkgIndex.tcl
 $(OUT_DIR)\pkgIndex.tcl:
 	@$(COPY) << "$(OUT_DIR)\pkgIndex.tcl"
-if {[package vsatisfies 8.0 [package provide Tcl]]} {
-    set add 80
+# -*- tcl -*-
+# Tcl package index file, version 1.1
+#
+
+if {![package vsatisfies [package provide Tcl] 8.6-]} {return}
+
+if {[package vsatisfies [package provide Tcl] 9.0-]} {
+    package ifneeded itcl $(DOTVERSION) \
+	    [list load [file join $$dir tcl9itcl$(VERSION).dll] Itcl]
 } else {
-    set add {t}
+    package ifneeded itcl $(DOTVERSION) \
+	    [list load [file join $$dir itcl$(VERSION).dll] Itcl]
 }
-if {[::tcl::pkgconfig get debug] && \
-        [file exists [file join $$dir itcl$(VERSION)$${add}g.dll]]} {
-    package ifneeded Itcl $(DOTVERSION) [list load [file join $$dir itcl$(VERSION)$${add}g.dll] Itcl]
-} else {
-    package ifneeded Itcl $(DOTVERSION) [list load [file join $$dir itcl$(VERSION)$${add}.dll] Itcl]
-}
-unset add
+package ifneeded Itcl $(DOTVERSION) [list package require -exact itcl $(DOTVERSION)]
 <<
 
 !if $(STATIC_BUILD)
