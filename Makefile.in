@@ -318,6 +318,20 @@ VPATH = $(srcdir):$(srcdir)/generic:$(srcdir)/unix:$(srcdir)/win:$(srcdir)/macos
 .c.@OBJEXT@:
 	$(COMPILE) -c `@CYGPATH@ $<` -o $@
 
+itclCmd.@OBJEXT@:	itclUuid.h
+
+$(srcdir)/manifest.uuid:
+	printf "git-" >$(srcdir)/manifest.uuid
+	(cd $(srcdir); git rev-parse HEAD >>$(srcdir)/manifest.uuid || \
+	    (printf "svn-r" >$(srcdir)/manifest.uuid ; \
+	    svn info --show-item last-changed-revision >>$(srcdir)/manifest.uuid) || \
+	    printf "unknown" >$(srcdir)/manifest.uuid)
+
+itclUuid.h:	$(srcdir)/manifest.uuid
+	echo "#define ITCL_VERSION_UUID \\" >$@
+	cat $(srcdir)/manifest.uuid >>$@
+	echo "" >>$@
+
 #========================================================================
 # Distribution creation
 # You may need to tweak this target to make it work correctly.
@@ -333,10 +347,6 @@ DIST_INSTALL_SCRIPT	= CPPROG='cp -p' $(INSTALL) -m 755
 
 dist-clean:
 	rm -rf $(DIST_DIR) $(DIST_ROOT)/$(PKG_DIR).tar.*
-
-$(srcdir)/manifest.uuid:
-	printf "git." >$(srcdir)/manifest.uuid
-	git rev-parse HEAD >>$(srcdir)/manifest.uuid
 
 dist: dist-clean doc $(srcdir)/manifest.uuid
 	$(INSTALL_DATA_DIR) $(DIST_DIR)

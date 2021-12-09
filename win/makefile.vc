@@ -56,6 +56,14 @@ PRJ_HEADERS_PUBLIC = \
 	$(GENERICDIR)\itcl.h \
 	$(GENERICDIR)\itclDecls.h
 
+(ROOT)\manifest.uuid:
+   copy $(WIN_DIR)\gitmanifest.in $(ROOT)\manifest.uuid
+   git rev-parse HEAD >>$(ROOT)\manifest.uuid
+
+$(TMP_DIR)\itclUuid.h:	$(ROOT)\manifest.uuid
+	copy $(WIN_DIR)\itclUuid.h.in+$(ROOT)\manifest.uuid $(TMP_DIR)\itclUuid.h
+
+(TMP_DIR)\itclBase.obj: $(TMP_DIR)\itclUuid.h
 
 # Define the standard targets except we have a custom test target
 DISABLE_TARGET_test = 1
