@@ -2173,7 +2173,7 @@ ItclInitClassCommon(
 	const char *val;
 	result = Tcl_SplitList(interp, Tcl_GetString(ivPtr->arrayInitPtr),
 	        &argc, &argv);
-	for (i = 0; i < argc; i++) {
+	for (i = 0; i < argc; i += 2) {
             val = Tcl_SetVar2(interp, Tcl_GetString(ivPtr->fullNamePtr), argv[i],
                     argv[i + 1], TCL_NAMESPACE_ONLY);
             if (!val) {
@@ -2183,7 +2183,6 @@ ItclInitClassCommon(
                     NULL);
                 return TCL_ERROR;
             }
-	    i++;
         }
         ckfree((char *)argv);
     }
@@ -3071,7 +3070,7 @@ ItclHandleClassComponent(
     haveInherit = 0;
     publ = NULL;
     havePublic = 0;
-    for (i = 2; i < objc; i++) {
+    for (i = 2; i < objc; i += 2) {
         if (strcmp(Tcl_GetString(objv[i]), "-inherit") == 0) {
 	    if (haveInherit) {
                 Tcl_AppendResult(interp, "wrong syntax should be: ",
@@ -3120,7 +3119,6 @@ ItclHandleClassComponent(
                 return TCL_ERROR;
 	    }
 	}
-	i++;
     }
     storageClass = ITCL_COMMON;
     if (iclsPtr->flags & ITCL_ECLASS) {

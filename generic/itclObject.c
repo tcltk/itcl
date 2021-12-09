@@ -965,7 +965,7 @@ ItclInitObjectVariables(
 	                Tcl_SplitList(interp,
 			        Tcl_GetString(ivPtr->arrayInitPtr),
 	                        &argc, &argv);
-	                for (i = 0; i < argc; i++) {
+	                for (i = 0; i < argc; i += 2) {
                             val = Tcl_SetVar2(interp,
 			            Tcl_DStringValue(&buffer3), argv[i],
                                     argv[i + 1], TCL_NAMESPACE_ONLY);
@@ -976,7 +976,6 @@ ItclInitObjectVariables(
                                     NULL);
                                 return TCL_ERROR;
                             }
-	                    i++;
                         }
 			Tcl_DStringFree(&buffer3);
 		        ckfree((char *)argv);
