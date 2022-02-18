@@ -1167,6 +1167,9 @@ AC_DEFUN([TEA_CONFIG_CFLAGS], [
 		    amd64|x64|yes)
 			MACHINE="AMD64" ; # default to AMD64 64-bit build
 			;;
+		    arm64|aarch64)
+			MACHINE="ARM64"
+			;;
 		    ia64)
 			MACHINE="IA64"
 			;;
@@ -1235,6 +1238,13 @@ AC_DEFUN([TEA_CONFIG_CFLAGS], [
 				AR="x86_64-w64-mingw32-ar"
 				RANLIB="x86_64-w64-mingw32-ranlib"
 				RC="x86_64-w64-mingw32-windres"
+			    ;;
+			    arm64|aarch64)
+				CC="aarch64-w64-mingw32-clang"
+				LD="aarch64-w64-mingw32-ld"
+				AR="aarch64-w64-mingw32-ar"
+				RANLIB="aarch64-w64-mingw32-ranlib"
+				RC="aarch64-w64-mingw32-windres"
 			    ;;
 			    *)
 				CC="i686-w64-mingw32-${CC}"
@@ -2353,7 +2363,8 @@ AC_DEFUN([TEA_TIME_HANDLER], [
     # (like convex) have timezone functions, etc.
     #
     AC_CACHE_CHECK([long timezone variable], tcl_cv_timezone_long, [
-	AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <time.h>]],
+	AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <time.h>
+#include <stdlib.h>]],
 	[[extern long timezone;
 	    timezone += 1;
 	    exit (0);]])],
@@ -2365,7 +2376,8 @@ AC_DEFUN([TEA_TIME_HANDLER], [
 	# On some systems (eg IRIX 6.2), timezone is a time_t and not a long.
 	#
 	AC_CACHE_CHECK([time_t timezone variable], tcl_cv_timezone_time, [
-	    AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <time.h>]],
+	    AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <time.h>
+#include <stdlib.h>]],
 	    [[extern time_t timezone;
 		timezone += 1;
 		exit (0);]])],
