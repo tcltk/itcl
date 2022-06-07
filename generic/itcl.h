@@ -137,7 +137,7 @@ ITCL_EXTERN int Itcl_SafeInit(Tcl_Interp *interp);
  */
 typedef struct Itcl_Stack {
     void **values;               /* values on stack */
-#if TCL_MAJOR_VERSION > 9
+#if TCL_MAJOR_VERSION > 8
     size_t len;                  /* number of values on stack */
     size_t max;                  /* maximum size of stack */
 #else
@@ -162,7 +162,7 @@ typedef struct Itcl_ListElem {
 
 typedef struct Itcl_List {
     int validate;                /* validation stamp */
-#if TCL_MAJOR_VERSION > 9
+#if TCL_MAJOR_VERSION > 8
     size_t num;                  /* number of elements */
 #else
     int num;

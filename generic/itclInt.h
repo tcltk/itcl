@@ -614,7 +614,7 @@ typedef struct ItclMethodVariable {
 typedef struct ItclClassCmdInfo {
     int type;
     int protection;
-#if TCL_MAJOR_VERSION > 8
+#if TCL_MAJOR_VERSION < 9
     int cmdNum; /* not actually used */
 #endif
     Tcl_Namespace *nsPtr;
@@ -642,7 +642,7 @@ typedef struct ItclVarLookup {
  */
 typedef struct ItclCmdLookup {
     ItclMemberFunc* imPtr;    /* function definition */
-#if TCL_MAJOR_VERSION > 8
+#if TCL_MAJOR_VERSION < 9
     int cmdNum; /* not actually used */
 #endif
     ItclClassCmdInfo *classCmdInfoPtr;
