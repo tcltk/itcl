@@ -271,7 +271,7 @@ static int BiMethodListLen = sizeof(BiMethodList)/sizeof(BiMethod);
 
 void
 ItclRestoreInfoVars(
-    ClientData clientData)
+    void *clientData)
 {
     ItclObjectInfo *infoPtr = (ItclObjectInfo *)clientData;
     Tcl_Interp *interp = infoPtr->interp;
@@ -487,7 +487,7 @@ Itcl_InstallBiMethods(
  *  in its heritage.  Returns 1 if so, and 0 otherwise.
  * ------------------------------------------------------------------------
  */
-/* ARGSUSED */
+
 int
 Itcl_BiIsaCmd(
     void *dummy,   /* class definition */
@@ -567,7 +567,7 @@ Itcl_BiIsaCmd(
  *  is executed, to bring the object up to date.
  * ------------------------------------------------------------------------
  */
-/* ARGSUSED */
+
 int
 Itcl_BiConfigureCmd(
     void *dummy,   /* class definition */
@@ -842,7 +842,7 @@ configureDone:
  *  with name <option>.
  * ------------------------------------------------------------------------
  */
-/* ARGSUSED */
+
 int
 Itcl_BiCgetCmd(
     void *dummy,   /* class definition */
@@ -1076,7 +1076,7 @@ ItclReportOption(
  *  so the code will not have to change if the base class changes.
  * ------------------------------------------------------------------------
  */
-/* ARGSUSED */
+
 static int
 NRBiChainCmd(
     void *dummy,        /* not used */
@@ -1178,7 +1178,7 @@ NRBiChainCmd(
     while ((iclsPtr = Itcl_AdvanceHierIter(&hier)) != NULL) {
         hPtr = Tcl_FindHashEntry(&iclsPtr->functions, (char *)objPtr);
         if (hPtr) {
-	    int my_objc;
+	    ItclSizeT my_objc;
             imPtr = (ItclMemberFunc*)Tcl_GetHashValue(hPtr);
 
             /*
@@ -1209,7 +1209,7 @@ NRBiChainCmd(
     Itcl_DeleteHierIter(&hier);
     return result;
 }
-/* ARGSUSED */
+
 int
 Itcl_BiChainCmd(
     void *clientData,
@@ -1316,7 +1316,7 @@ PrepareCreateObject(
  *
  * ------------------------------------------------------------------------
  */
-/* ARGSUSED */
+
 static int
 ItclBiClassUnknownCmd(
     void *clientData,   /* ItclObjectInfo Ptr */
@@ -1341,7 +1341,7 @@ ItclBiClassUnknownCmd(
     const char *resStr;
     const char *val;
     const char *funcName;
-    int lObjc;
+    ItclSizeT lObjc;
     int result;
     int offset;
     int useComponent;
@@ -1349,7 +1349,7 @@ ItclBiClassUnknownCmd(
     int isTypeMethod;
     int isStar;
     int isNew;
-    int idx;
+    ItclSizeT idx;
 
     ItclShowArgs(1, "ItclBiClassUnknownCmd", objc, objv);
     listPtr = NULL;
@@ -1615,7 +1615,7 @@ ItclUnknownGuts(
     const char *resStr;
     const char *val;
     const char *funcName;
-    int lObjc;
+    ItclSizeT lObjc;
     int result;
     int offset;
     int useComponent;
@@ -1624,7 +1624,7 @@ ItclUnknownGuts(
     int isStar;
     int isTypeMethod;
     int isNew;
-    int idx;
+    ItclSizeT idx;
 
     if (objc < 2) {
         Tcl_AppendResult(interp, "wrong # args: should be one of...",
@@ -1881,11 +1881,11 @@ static Tcl_Obj *makeAsOptionInfo(
     Tcl_Interp *interp,
     Tcl_Obj *optNamePtr,
     ItclDelegatedOption *idoPtr,
-    int lObjc2,
+    ItclSizeT lObjc2,
     Tcl_Obj * const *lObjv2)
 {
     Tcl_Obj *objPtr;
-    int j;
+    ItclSizeT j;
 
     objPtr = Tcl_NewListObj(0, NULL);
     Tcl_ListObjAppendElement(interp, objPtr, Tcl_NewStringObj(
@@ -1924,7 +1924,7 @@ static Tcl_Obj *makeAsOptionInfo(
  *  is executed, to bring the object up to date.
  * ------------------------------------------------------------------------
  */
-/* ARGSUSED */
+
 static int
 ItclExtendedConfigure(
     void *dummy,   /* class definition */
@@ -1963,10 +1963,10 @@ ItclExtendedConfigure(
     ItclOption *ioptPtr;
     ItclObjectInfo *infoPtr;
     const char *val;
-    int lObjc;
-    int lObjc2;
-    int lObjc3;
-    int i;
+    ItclSizeT lObjc;
+    ItclSizeT lObjc2;
+    ItclSizeT lObjc3;
+    ItclSizeT i;
     int j;
     int isNew;
     int result;
@@ -2592,7 +2592,7 @@ ItclExtendedConfigure(
  *  with name <option>.
  * ------------------------------------------------------------------------
  */
-/* ARGSUSED */
+
 static int
 ItclExtendedCget(
     void *dummy,   /* class definition */
@@ -2831,7 +2831,7 @@ ItclExtendedCget(
  *
  * ------------------------------------------------------------------------
  */
-/* ARGSUSED */
+
 static int
 ItclExtendedSetGet(
     void *dummy,   /* class definition */
@@ -2950,7 +2950,7 @@ ItclExtendedSetGet(
  *
  * ------------------------------------------------------------------------
  */
-/* ARGSUSED */
+
 int
 Itcl_BiInstallComponentCmd(
     void *dummy,   /* class definition */
@@ -3085,7 +3085,7 @@ Itcl_BiInstallComponentCmd(
  *
  * ------------------------------------------------------------------------
  */
-/* ARGSUSED */
+
 static int
 Itcl_BiDestroyCmd(
     void *dummy,   /* class definition */
@@ -3163,7 +3163,7 @@ Itcl_BiDestroyCmd(
  *
  * ------------------------------------------------------------------------
  */
-/* ARGSUSED */
+
 int
 Itcl_BiCallInstanceCmd(
     void *dummy,   /* class definition */
@@ -3231,7 +3231,7 @@ Itcl_BiCallInstanceCmd(
  *
  * ------------------------------------------------------------------------
  */
-/* ARGSUSED */
+
 int
 Itcl_BiGetInstanceVarCmd(
     void *dummy,   /* class definition */
@@ -3298,7 +3298,7 @@ Itcl_BiGetInstanceVarCmd(
  *
  * ------------------------------------------------------------------------
  */
-/* ARGSUSED */
+
 int
 Itcl_BiMyTypeMethodCmd(
     void *dummy,   /* class definition */
@@ -3349,7 +3349,7 @@ Itcl_BiMyTypeMethodCmd(
  *
  * ------------------------------------------------------------------------
  */
-/* ARGSUSED */
+
 int
 Itcl_BiMyMethodCmd(
     void *dummy,   /* class definition */
@@ -3399,7 +3399,7 @@ Itcl_BiMyMethodCmd(
  *
  * ------------------------------------------------------------------------
  */
-/* ARGSUSED */
+
 int
 Itcl_BiMyProcCmd(
     void *dummy,   /* class definition */
@@ -3451,7 +3451,7 @@ Itcl_BiMyProcCmd(
  *
  * ------------------------------------------------------------------------
  */
-/* ARGSUSED */
+
 int
 Itcl_BiMyTypeVarCmd(
     void *dummy,   /* class definition */
@@ -3504,7 +3504,7 @@ Itcl_BiMyTypeVarCmd(
  *
  * ------------------------------------------------------------------------
  */
-/* ARGSUSED */
+
 int
 Itcl_BiMyVarCmd(
     void *dummy,   /* class definition */
@@ -3549,7 +3549,7 @@ Itcl_BiMyVarCmd(
  *
  * ------------------------------------------------------------------------
  */
-/* ARGSUSED */
+
 int
 Itcl_BiItclHullCmd(
     void *dummy,   /* class definition */

@@ -19,7 +19,7 @@ ITCLAPI const char *Itcl_InitStubs(
 /* !BEGIN!: Do not edit below this line. */
 
 #define ITCL_STUBS_EPOCH 0
-#define ITCL_STUBS_REVISION 152
+#define ITCL_STUBS_REVISION 153
 
 #ifdef __cplusplus
 extern "C" {
@@ -96,6 +96,8 @@ ITCLAPI void		Itcl_DiscardInterpState(Itcl_InterpState state);
 ITCLAPI void *		Itcl_Alloc(size_t size);
 /* 27 */
 ITCLAPI void		Itcl_Free(void *ptr);
+/* 28 */
+ITCLAPI void *		ItclGetStackValue(Itcl_Stack *stack, size_t pos);
 
 typedef struct {
     const struct ItclIntStubs *itclIntStubs;
@@ -135,6 +137,7 @@ typedef struct ItclStubs {
     void (*itcl_DiscardInterpState) (Itcl_InterpState state); /* 25 */
     void * (*itcl_Alloc) (size_t size); /* 26 */
     void (*itcl_Free) (void *ptr); /* 27 */
+    void * (*itclGetStackValue) (Itcl_Stack *stack, size_t pos); /* 28 */
 } ItclStubs;
 
 extern const ItclStubs *itclStubsPtr;
@@ -203,9 +206,16 @@ extern const ItclStubs *itclStubsPtr;
 	(itclStubsPtr->itcl_Alloc) /* 26 */
 #define Itcl_Free \
 	(itclStubsPtr->itcl_Free) /* 27 */
+#define ItclGetStackValue \
+	(itclStubsPtr->itclGetStackValue) /* 28 */
 
 #endif /* defined(USE_ITCL_STUBS) */
 
 /* !END!: Do not edit above this line. */
+
+#if TCL_MAJOR_VERSION > 8
+#    undef Itcl_GetStackValue
+#    define Itcl_GetStackValue ItclGetStackValue
+#endif
 
 #endif /* _ITCLDECLS */

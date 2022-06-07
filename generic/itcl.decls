@@ -95,6 +95,10 @@ declare 26 {
 declare 27 {
     void Itcl_Free(void *ptr)
 }
+declare 28 {
+    void *ItclGetStackValue(Itcl_Stack *stack, size_t pos)
+}
+
 
 
 # private API
@@ -142,11 +146,11 @@ declare 12 {
         Tcl_Namespace **rNsPtr, char **rCmdPtr)
 }
 declare 13 {
-    int Itcl_EvalArgs(Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
+    int Itcl_EvalArgs(Tcl_Interp *interp, ItclSizeT objc, Tcl_Obj *const objv[])
 }
 declare 14 {
     Tcl_Obj *Itcl_CreateArgs(Tcl_Interp *interp, const char *string,
-        int objc, Tcl_Obj *const objv[])
+        ItclSizeT objc, Tcl_Obj *const objv[])
 }
 declare 17 {
     int Itcl_GetContext(Tcl_Interp *interp, ItclClass **iclsPtrPtr,
@@ -238,7 +242,7 @@ declare 41 {
 
 declare 44 {
     int Itcl_CreateObject(Tcl_Interp *interp, const char* name, ItclClass *iclsPtr,
-        int objc, Tcl_Obj *const objv[], ItclObject **rioPtr)
+        ItclSizeT objc, Tcl_Obj *const objv[], ItclObject **rioPtr)
 }
 declare 45 {
     int Itcl_DeleteObject(Tcl_Interp *interp, ItclObject *contextObj)
@@ -296,7 +300,7 @@ declare 59 {
 }
 declare 61 {
     int Itcl_EvalMemberCode(Tcl_Interp *interp, ItclMemberFunc *mfunc,
-        ItclObject *contextObj, int objc, Tcl_Obj *const objv[])
+        ItclObject *contextObj, ItclSizeT objc, Tcl_Obj *const objv[])
 }
 declare 67 {
     void Itcl_GetMemberFuncUsage(ItclMemberFunc *mfunc,
@@ -316,7 +320,7 @@ declare 71 {
 }
 declare 72 {
     int Itcl_InvokeMethodIfExists(Tcl_Interp *interp, const char *name,
-        ItclClass *contextClass, ItclObject *contextObj, int objc,
+        ItclClass *contextClass, ItclObject *contextObj, ItclSizeT objc,
         Tcl_Obj *const objv[])
 }
 declare 74 {
@@ -555,7 +559,7 @@ declare 165 {
     int Itcl_SetCallFrameNamespace(Tcl_Interp *interp, Tcl_Namespace *nsPtr)
 }
 declare 166 {
-    int Itcl_GetCallFrameObjc(Tcl_Interp *interp)
+    ItclSizeT Itcl_GetCallFrameObjc(Tcl_Interp *interp)
 }
 declare 167 {
     Tcl_Obj *const *Itcl_GetCallFrameObjv(Tcl_Interp *interp)

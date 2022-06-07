@@ -47,7 +47,7 @@ _Tcl_GetObjInterpProc(
 
 void
 _Tcl_ProcDeleteProc(
-    ClientData clientData)
+    void *clientData)
 {
     TclProcDeleteProc(clientData);
 }
@@ -124,9 +124,9 @@ Itcl_GetNamespaceChildTable(
 int
 Itcl_InitRewriteEnsemble(
     Tcl_Interp *interp,
-    int numRemoved,
-    int numInserted,
-    TCL_UNUSED(int) /* objc */,
+    size_t numRemoved,
+    size_t numInserted,
+    TCL_UNUSED(size_t) /* objc */,
     Tcl_Obj *const *objv)
 {
     return TclInitRewriteEnsemble(interp, numRemoved, numInserted, objv);

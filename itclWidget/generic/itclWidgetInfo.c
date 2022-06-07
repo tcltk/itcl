@@ -74,7 +74,7 @@ ItclWidgetInfoInit(
 
 int
 ItclBiInfoHullTypesCmd(
-    ClientData clientData,   /* info for all known objects */
+    void *clientData,        /* info for all known objects */
     Tcl_Interp *interp,      /* current interpreter */
     int objc,                /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
@@ -112,7 +112,7 @@ ItclBiInfoHullTypesCmd(
 
 int
 ItclBiInfoWidgetClassesCmd(
-    ClientData clientData,   /* info for all known objects */
+    void *clientData,        /* info for all known objects */
     Tcl_Interp *interp,      /* current interpreter */
     int objc,                /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
@@ -164,7 +164,7 @@ ItclBiInfoWidgetClassesCmd(
 
 int
 ItclBiInfoWidgetsCmd(
-    ClientData clientData,   /* info for all known objects */
+    void *clientData,        /* info for all known objects */
     Tcl_Interp *interp,      /* current interpreter */
     int objc,                /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
@@ -205,7 +205,7 @@ ItclBiInfoWidgetsCmd(
 
 int
 ItclBiInfoWidgetAdaptorsCmd(
-    ClientData clientData,   /* info for all known objects */
+    void *clientData,        /* info for all known objects */
     Tcl_Interp *interp,      /* current interpreter */
     int objc,                /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */

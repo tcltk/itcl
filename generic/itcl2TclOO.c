@@ -52,12 +52,11 @@ CallFinalizePMCall(
 static int
 FreeCommand(
     void *data[],
-    Tcl_Interp *dummy,
+    TCL_UNUSED(Tcl_Interp *),
     int result)
 {
     Command *cmdPtr = (Command *)data[0];
     Proc *procPtr = (Proc *)data[1];
-    (void)dummy;
 
     ckfree(cmdPtr);
     procPtr->cmdPtr = NULL;
@@ -169,11 +168,10 @@ Itcl_InvokeProcedureMethod(
 static int
 FreeProcedureMethod(
     void *data[],
-    Tcl_Interp *dummy,
+    TCL_UNUSED(Tcl_Interp *),
     int result)
 {
     ProcedureMethod *pmPtr = (ProcedureMethod *)data[0];
-    (void)dummy;
 
     ckfree(pmPtr);
     return result;
@@ -200,7 +198,7 @@ Itcl_InvokeEnsembleMethod(
     Tcl_Namespace *nsPtr,       /* namespace to call the method in */
     Tcl_Obj *namePtr,           /* name of the method */
     Tcl_Proc *procPtr,
-    int objc,			/* Number of arguments. */
+    size_t objc,			/* Number of arguments. */
     Tcl_Obj *const *objv)	/* Arguments as actually seen. */
 {
     ProcedureMethod *pmPtr = (ProcedureMethod *)ckalloc(sizeof(ProcedureMethod));
@@ -362,7 +360,7 @@ Itcl_TclOOObjectName(
 
 int
 Itcl_SelfCmd(
-    void *dummy,
+    TCL_UNUSED(void *),
     Tcl_Interp *interp,
     int objc,
     Tcl_Obj *const *objv)
@@ -370,7 +368,6 @@ Itcl_SelfCmd(
     Interp *iPtr = (Interp *) interp;
     CallFrame *framePtr = iPtr->varFramePtr;
     CallContext *contextPtr;
-    (void)dummy;
 
     if (!Itcl_IsMethodCallFrame(interp)) {
         Tcl_AppendResult(interp, TclGetString(objv[0]),

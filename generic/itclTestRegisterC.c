@@ -34,7 +34,7 @@ Tcl_ObjCmdProc cObjFunc;
 
 int
 cArgFunc(
-    ClientData clientData,
+    void *clientData,
     Tcl_Interp *interp,
     int argc,
     const char **argv)
@@ -82,7 +82,7 @@ cArgFunc(
 
 int
 cObjFunc(
-    ClientData clientData,
+    void *clientData,
     Tcl_Interp *interp,
     int objc,
     Tcl_Obj *const *objv)

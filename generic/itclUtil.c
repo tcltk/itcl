@@ -91,7 +91,7 @@ Itcl_InitStack(
     Itcl_Stack *stack)     /* stack to be initialized */
 {
     stack->values = stack->space;
-    stack->max = sizeof(stack->space)/sizeof(ClientData);
+    stack->max = sizeof(stack->space)/sizeof(void *);
     stack->len = 0;
 }
 
@@ -128,19 +128,19 @@ Itcl_DeleteStack(
  */
 void
 Itcl_PushStack(
-    ClientData cdata,      /* data to be pushed onto stack */
+    void *cdata,           /* data to be pushed onto stack */
     Itcl_Stack *stack)     /* stack */
 {
-    ClientData *newStack;
+    void **newStack;
 
     if (stack->len+1 >= stack->max) {
         stack->max = 2*stack->max;
-        newStack = (ClientData*)
-            ckalloc((unsigned)(stack->max*sizeof(ClientData)));
+        newStack = (void **)
+            ckalloc(stack->max*sizeof(void *));
 
         if (stack->values) {
-            memcpy((char*)newStack, (char*)stack->values,
-                (size_t)(stack->len*sizeof(ClientData)));
+            memcpy(newStack, stack->values,
+                stack->len*sizeof(void *));
 
             if (stack->values != stack->space)
                 ckfree((char*)stack->values);
@@ -157,7 +157,7 @@ Itcl_PushStack(
  *  Pops a bit of client data from the top of the given stack.
  * ------------------------------------------------------------------------
  */
-ClientData
+void *
 Itcl_PopStack(
     Itcl_Stack *stack)  /* stack to be manipulated */
 {
@@ -175,7 +175,7 @@ Itcl_PopStack(
  *  Gets the current value from the top of the given stack.
  * ------------------------------------------------------------------------
  */
-ClientData
+void *
 Itcl_PeekStack(
     Itcl_Stack *stack)  /* stack to be examined */
 {
@@ -193,10 +193,23 @@ Itcl_PeekStack(
  *  first value pushed onto the stack.
  * ------------------------------------------------------------------------
  */
-ClientData
+#undef Itcl_GetStackValue
+void *
 Itcl_GetStackValue(
     Itcl_Stack *stack,  /* stack to be examined */
     int pos)            /* get value at this index */
+{
+    if (stack->values && (stack->len > 0)) {
+        assert(pos < stack->len);
+        return stack->values[pos];
+    }
+    return NULL;
+}
+
+void *
+ItclGetStackValue(
+    Itcl_Stack *stack,  /* stack to be examined */
+    size_t pos)         /* get value at this index */
 {
     if (stack->values && (stack->len > 0)) {
         assert(pos < stack->len);
@@ -336,7 +349,7 @@ Itcl_DeleteListElem(
 Itcl_ListElem*
 Itcl_InsertList(
     Itcl_List *listPtr,     /* list being modified */
-    ClientData val)         /* value associated with new element */
+    void *val)              /* value associated with new element */
 {
     Itcl_ListElem *elemPtr;
     assert(listPtr->validate == ITCL_VALID_LIST);
@@ -370,7 +383,7 @@ Itcl_InsertList(
 Itcl_ListElem*
 Itcl_InsertListElem(
     Itcl_ListElem *pos,     /* insert just before this element */
-    ClientData val)         /* value associated with new element */
+    void *val)              /* value associated with new element */
 {
     Itcl_List *listPtr;
     Itcl_ListElem *elemPtr;
@@ -412,7 +425,7 @@ Itcl_InsertListElem(
 Itcl_ListElem*
 Itcl_AppendList(
     Itcl_List *listPtr,     /* list being modified */
-    ClientData val)         /* value associated with new element */
+    void *val)              /* value associated with new element */
 {
     Itcl_ListElem *elemPtr;
     assert(listPtr->validate == ITCL_VALID_LIST);
@@ -446,7 +459,7 @@ Itcl_AppendList(
 Itcl_ListElem*
 Itcl_AppendListElem(
     Itcl_ListElem *pos,     /* insert just after this element */
-    ClientData val)         /* value associated with new element */
+    void *val)              /* value associated with new element */
 {
     Itcl_List *listPtr;
     Itcl_ListElem *elemPtr;
@@ -486,7 +499,7 @@ Itcl_AppendListElem(
 void
 Itcl_SetListValue(
     Itcl_ListElem *elemPtr, /* list element being modified */
-    ClientData val)         /* new value associated with element */
+    void *val)              /* new value associated with element */
 {
     assert(elemPtr != NULL);
     assert(elemPtr->owner->validate == ITCL_VALID_LIST);
@@ -547,7 +560,7 @@ typedef struct PresMemoryPrefix {
  */
 void
 Itcl_EventuallyFree(
-    ClientData cdata,          /* data to be freed when not in use */
+    void *cdata,               /* data to be freed when not in use */
     Tcl_FreeProc *fproc)       /* procedure called to free data */
 {
     PresMemoryPrefix *blk;
@@ -577,7 +590,7 @@ Itcl_EventuallyFree(
  */
 void
 Itcl_PreserveData(
-    ClientData cdata)     /* data to be preserved */
+    void *cdata)     /* data to be preserved */
 {
     PresMemoryPrefix *blk;
 
@@ -604,7 +617,7 @@ Itcl_PreserveData(
  */
 void
 Itcl_ReleaseData(
-    ClientData cdata)      /* data to be released */
+    void *cdata)      /* data to be released */
 {
     PresMemoryPrefix *blk;
     Tcl_FreeProc *freeProc;
@@ -648,8 +661,12 @@ void * Itcl_Alloc(
     size_t numBytes;
     PresMemoryPrefix *blk;
 
+#if TCL_MAJOR_VERSION < 9
     /* The ckalloc() in Tcl 8 can alloc at most UINT_MAX bytes */
     assert (size <= UINT_MAX - sizeof(PresMemoryPrefix));
+#else
+    assert (size < -sizeof(PresMemoryPrefix));
+#endif
     numBytes = size + sizeof(PresMemoryPrefix);
 
     /* This will panic on allocation failure. No need to check return value. */
@@ -1051,9 +1068,9 @@ Itcl_DecodeScopedCommand(
     char *cmdName;
     const char *pos;
     const char **listv;
-    int listc;
+    ItclSizeT listc;
     int result;
-    int len;
+    size_t len;
 
     nsPtr = NULL;
     len = strlen(name);

@@ -64,7 +64,7 @@ static void FreeMemberCode(ItclMemberCode *mcodePtr);
  */
 static int
 NRBodyCmd(
-    TCL_UNUSED(ClientData),   /*  */
+    TCL_UNUSED(void *),      /*  */
     Tcl_Interp *interp,      /* current interpreter */
     int objc,                /* number of arguments */
     Tcl_Obj *const *objv)    /* argument objects */
@@ -155,10 +155,10 @@ bodyCmdDone:
     return status;
 }
 
-/* ARGSUSED */
+
 int
 Itcl_BodyCmd(
-    ClientData clientData,
+    void *clientData,
     Tcl_Interp *interp,
     int objc,
     Tcl_Obj *const *objv)
@@ -186,10 +186,10 @@ Itcl_BodyCmd(
  *  Returns TCL_OK/TCL_ERROR to indicate success/failure.
  * ------------------------------------------------------------------------
  */
-/* ARGSUSED */
+
 static int
 NRConfigBodyCmd(
-    TCL_UNUSED(ClientData),        /* unused */
+    TCL_UNUSED(void *),      /* unused */
     Tcl_Interp *interp,      /* current interpreter */
     int objc,                /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
@@ -288,10 +288,10 @@ configBodyCmdDone:
     return status;
 }
 
-/* ARGSUSED */
+
 int
 Itcl_ConfigBodyCmd(
-    ClientData clientData,
+    void *clientData,
     Tcl_Interp *interp,
     int objc,
     Tcl_Obj *const *objv)
@@ -764,22 +764,22 @@ Itcl_ChangeMemberFunc(
     Itcl_ReleaseData(imPtr->codePtr);
     imPtr->codePtr = mcode;
     if (mcode->flags & ITCL_IMPLEMENT_TCL) {
-	ClientData pmPtr;
-        imPtr->tmPtr = Itcl_NewProcClassMethod(interp,
-	    imPtr->iclsPtr->clsPtr, ItclCheckCallMethod, ItclAfterCallMethod,
-	    ItclProcErrorProc, imPtr, imPtr->namePtr, mcode->argumentPtr,
-	    mcode->bodyPtr, &pmPtr);
-        hPtr = Tcl_CreateHashEntry(&imPtr->iclsPtr->infoPtr->procMethods,
-                (char *)imPtr->tmPtr, &isNewEntry);
-        if (isNewEntry) {
-            Tcl_SetHashValue(hPtr, imPtr);
-        }
+	void *pmPtr;
+	imPtr->tmPtr = Itcl_NewProcClassMethod(interp,
+		imPtr->iclsPtr->clsPtr, ItclCheckCallMethod, ItclAfterCallMethod,
+		ItclProcErrorProc, imPtr, imPtr->namePtr, mcode->argumentPtr,
+		mcode->bodyPtr, &pmPtr);
+	hPtr = Tcl_CreateHashEntry(&imPtr->iclsPtr->infoPtr->procMethods,
+		(char *)imPtr->tmPtr, &isNewEntry);
+	if (isNewEntry) {
+	    Tcl_SetHashValue(hPtr, imPtr);
+	}
     }
     ItclAddClassFunctionDictInfo(interp, imPtr->iclsPtr, imPtr);
     return TCL_OK;
 }
 
-static const char * type_reserved_words [] = {
+static const char * const type_reserved_words[] = {
     "type",
     "self",
     "selfns",
@@ -816,12 +816,12 @@ ItclCreateMemberCode(
     Tcl_Obj *namePtr,
     int flags)
 {
-    int argc;
-    int maxArgc;
+    ItclSizeT argc;
+    ItclSizeT maxArgc;
     Tcl_Obj *usagePtr;
     ItclArgList *argListPtr;
     ItclMemberCode *mcode;
-    const char **cPtrPtr;
+    const char *const *cPtrPtr;
     int haveError;
 
     /*
@@ -907,10 +907,10 @@ ItclCreateMemberCode(
     if (body == NULL) {
         /* No-op */
     } else {
-        if (*body == '@') {
-            Tcl_CmdProc *argCmdProc;
-            Tcl_ObjCmdProc *objCmdProc;
-            ClientData cdata;
+	if (*body == '@') {
+	    Tcl_CmdProc *argCmdProc;
+	    Tcl_ObjCmdProc *objCmdProc;
+	    void *cdata;
 	    int isDone;
 
 	    isDone = 0;
@@ -1184,7 +1184,7 @@ Itcl_GetMemberCode(
 
 static int
 CallItclObjectCmd(
-    ClientData data[],
+    void *data[],
     Tcl_Interp *interp,
     int result)
 {
@@ -1237,13 +1237,13 @@ Itcl_EvalMemberCode(
     Tcl_Interp *interp,       /* current interpreter */
     ItclMemberFunc *imPtr,    /* member func, or NULL (for error messages) */
     ItclObject *contextIoPtr,   /* object context, or NULL */
-    int objc,                 /* number of arguments */
+    ItclSizeT objc,                 /* number of arguments */
     Tcl_Obj *const objv[])    /* argument objects */
 {
     ItclMemberCode *mcode;
     void *callbackPtr;
     int result = TCL_OK;
-    int i;
+    ItclSizeT i;
 
     ItclShowArgs(1, "Itcl_EvalMemberCode", objc, objv);
     /*
@@ -1278,7 +1278,7 @@ Itcl_EvalMemberCode(
         } else {
             if ((mcode->flags & ITCL_IMPLEMENT_ARGCMD) != 0) {
                 char **argv;
-                argv = (char**)ckalloc( (unsigned)(objc*sizeof(char*)) );
+                argv = (char**)ckalloc(objc*sizeof(char*));
                 for (i=0; i < objc; i++) {
                     argv[i] = Tcl_GetString(objv[i]);
                 }
@@ -1636,7 +1636,7 @@ Itcl_GetMemberFuncUsage(
  */
 static int
 NRExecMethod(
-    ClientData clientData,   /* method definition */
+    void *clientData,        /* method definition */
     Tcl_Interp *interp,      /* current interpreter */
     int objc,                /* number of arguments */
     Tcl_Obj *const *objv)    /* argument objects */
@@ -1705,10 +1705,10 @@ NRExecMethod(
     return result;
 }
 
-/* ARGSUSED */
+
 int
 Itcl_ExecMethod(
-    ClientData clientData,
+    void *clientData,
     Tcl_Interp *interp,
     int objc,
     Tcl_Obj *const *objv)
@@ -1733,7 +1733,7 @@ Itcl_ExecMethod(
  */
 static int
 NRExecProc(
-    ClientData clientData,   /* proc definition */
+    void *clientData,        /* proc definition */
     Tcl_Interp *interp,      /* current interpreter */
     int objc,                /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
@@ -1793,10 +1793,10 @@ NRExecProc(
     return result;
 }
 
-/* ARGSUSED */
+
 int
 Itcl_ExecProc(
-    ClientData clientData,
+    void *clientData,
     Tcl_Interp *interp,
     int objc,
     Tcl_Obj *const *objv)
@@ -1806,7 +1806,7 @@ Itcl_ExecProc(
 
 static int
 CallInvokeMethodIfExists(
-    ClientData data[],
+    void *data[],
     Tcl_Interp *interp,
     int result)
 {
@@ -1950,7 +1950,7 @@ Itcl_InvokeMethodIfExists(
     const char *name,             /* name of desired method */
     ItclClass *contextClassPtr,   /* current class being constructed */
     ItclObject *contextObjectPtr, /* object being constructed */
-    int objc,                     /* number of arguments */
+    ItclSizeT objc,               /* number of arguments */
     Tcl_Obj *const objv[])        /* argument objects */
 {
     Tcl_HashEntry *hPtr;
@@ -1959,7 +1959,7 @@ Itcl_InvokeMethodIfExists(
     Tcl_Obj **newObjv;
     Tcl_CallFrame frame;
     ItclMemberFunc *imPtr;
-    int cmdlinec;
+    ItclSizeT cmdlinec;
     int result = TCL_OK;
     Tcl_Obj *objPtr = Tcl_NewStringObj(name, -1);
 
@@ -1974,7 +1974,7 @@ Itcl_InvokeMethodIfExists(
          */
         cmdlinePtr = Itcl_CreateArgs(interp, name, objc, objv);
 
-        (void) Tcl_ListObjGetElements(NULL, cmdlinePtr,
+        (void)Tcl_ListObjGetElements(NULL, cmdlinePtr,
             &cmdlinec, &cmdlinev);
 
         ItclShowArgs(1, "EMC", cmdlinec, cmdlinev);
@@ -2077,7 +2077,7 @@ Itcl_CmdAliasProc(
     Tcl_Interp *interp,
     Tcl_Namespace *nsPtr,
     const char *cmdName,
-    ClientData clientData)
+    void *clientData)
 {
     Tcl_HashEntry *hPtr;
     Tcl_Obj *objPtr;
@@ -2192,7 +2192,7 @@ Itcl_VarAliasProc(
     TCL_UNUSED(Tcl_Interp*),
     Tcl_Namespace *nsPtr,
     const char *varName,
-    ClientData clientData)
+    void *clientData)
 {
 
     Tcl_HashEntry *hPtr;
@@ -2264,7 +2264,7 @@ Itcl_VarAliasProc(
  */
 int
 ItclCheckCallProc(
-    ClientData clientData,
+    void *clientData,
     Tcl_Interp *interp,
     TCL_UNUSED(Tcl_ObjectContext),
     TCL_UNUSED(Tcl_CallFrame*),
@@ -2294,7 +2294,7 @@ ItclCheckCallProc(
  */
 int
 ItclCheckCallMethod(
-    ClientData clientData,
+    void *clientData,
     Tcl_Interp *interp,
     Tcl_ObjectContext contextPtr,
     Tcl_CallFrame *framePtr,
@@ -2312,8 +2312,8 @@ ItclCheckCallMethod(
     ItclMemberFunc *imPtr;
     int result;
     int isNew;
-    int cObjc;
-    int min_allowed_args;
+    ItclSizeT cObjc;
+    ItclSizeT min_allowed_args;
 
     ItclObjectInfo *infoPtr;
 
@@ -2483,7 +2483,7 @@ finishReturn:
  */
 int
 ItclAfterCallMethod(
-    ClientData clientData,
+    void *clientData,
     Tcl_Interp *interp,
     Tcl_ObjectContext contextPtr,
     TCL_UNUSED(Tcl_Namespace*),

@@ -37,12 +37,12 @@
 typedef struct ItclCfunc {
     Tcl_CmdProc *argCmdProc;        /* old-style (argc,argv) command handler */
     Tcl_ObjCmdProc *objCmdProc;     /* new (objc,objv) command handler */
-    ClientData clientData;          /* client data passed into this function */
+    void *clientData;               /* client data passed into this function */
     Tcl_CmdDeleteProc *deleteProc;  /* proc called to free clientData */
 } ItclCfunc;
 
 static Tcl_HashTable* ItclGetRegisteredProcs(Tcl_Interp *interp);
-static void ItclFreeC(ClientData clientData, Tcl_Interp *interp);
+static void ItclFreeC(void *clientData, Tcl_Interp *interp);
 
 
 /*
@@ -78,7 +78,7 @@ Itcl_RegisterC(
     Tcl_Interp *interp,             /* interpreter handling this registration */
     const char *name,               /* symbolic name for procedure */
     Tcl_CmdProc *proc,              /* procedure handling Tcl command */
-    ClientData clientData,          /* client data associated with proc */
+    void *clientData,               /* client data associated with proc */
     Tcl_CmdDeleteProc *deleteProc)  /* proc called to free up client data */
 {
     int newEntry;
@@ -162,7 +162,7 @@ Itcl_RegisterObjC(
     Tcl_Interp *interp,     /* interpreter handling this registration */
     const char *name,       /* symbolic name for procedure */
     Tcl_ObjCmdProc *proc,   /* procedure handling Tcl command */
-    ClientData clientData,          /* client data associated with proc */
+    void *clientData,       /* client data associated with proc */
     Tcl_CmdDeleteProc *deleteProc)  /* proc called to free up client data */
 {
     int newEntry;
@@ -232,7 +232,7 @@ Itcl_FindC(
     const char *name,             /* symbolic name for procedure */
     Tcl_CmdProc **argProcPtr,     /* returns (argc,argv) command handler */
     Tcl_ObjCmdProc **objProcPtr,  /* returns (objc,objv) command handler */
-    ClientData *cDataPtr)         /* returns client data */
+    void **cDataPtr)              /* returns client data */
 {
     Tcl_HashEntry *entry;
     Tcl_HashTable *procTable;
@@ -302,7 +302,7 @@ ItclGetRegisteredProcs(
  */
 static void
 ItclFreeC(
-    ClientData clientData,       /* associated data */
+    void *clientData,            /* associated data */
     TCL_UNUSED(Tcl_Interp *))    /* interpreter being deleted */
 {
     Tcl_HashTable *tablePtr = (Tcl_HashTable*)clientData;

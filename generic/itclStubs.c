@@ -12,8 +12,8 @@
 
 #include "itclInt.h"
 
-static void ItclDeleteStub(ClientData cdata);
-static int ItclHandleStubCmd(ClientData clientData, Tcl_Interp *interp,
+static void ItclDeleteStub(void *cdata);
+static int ItclHandleStubCmd(void *clientData, Tcl_Interp *interp,
         int objc, Tcl_Obj *const objv[]);
 
 
@@ -62,7 +62,7 @@ Itcl_IsStub(
  */
 int
 Itcl_StubCreateCmd(
-    TCL_UNUSED(ClientData),   /* not used */
+    TCL_UNUSED(void *),      /* not used */
     Tcl_Interp *interp,      /* current interpreter */
     int objc,                /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
@@ -112,7 +112,7 @@ Itcl_StubCreateCmd(
  */
 int
 Itcl_StubExistsCmd(
-    TCL_UNUSED(ClientData),   /* not used */
+    TCL_UNUSED(void *),      /* not used */
     Tcl_Interp *interp,      /* current interpreter */
     int objc,                /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
@@ -151,7 +151,7 @@ Itcl_StubExistsCmd(
  */
 static int
 ItclHandleStubCmd(
-    ClientData clientData,   /* command token for this stub */
+    void *clientData,        /* command token for this stub */
     Tcl_Interp *interp,      /* current interpreter */
     int objc,                /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
@@ -165,7 +165,7 @@ ItclHandleStubCmd(
     char *cmdName;
     int result;
     int loaded;
-    int cmdlinec;
+    ItclSizeT cmdlinec;
 
     ItclShowArgs(1, "ItclHandleStubCmd", objc, objv);
     cmdPtr = (Tcl_Command) clientData;
@@ -200,7 +200,7 @@ ItclHandleStubCmd(
      *  Invoke the command again with the arguments passed in.
      */
     cmdlinePtr = Itcl_CreateArgs(interp, cmdName, objc - 1, objv + 1);
-    (void) Tcl_ListObjGetElements(NULL, cmdlinePtr,
+    (void)Tcl_ListObjGetElements(NULL, cmdlinePtr,
         &cmdlinec, &cmdlinev);
 
     Tcl_DecrRefCount(cmdNamePtr);
@@ -221,10 +221,10 @@ ItclHandleStubCmd(
  *  does nothing, but its presence identifies a command as a stub.
  * ------------------------------------------------------------------------
  */
-/* ARGSUSED */
+
 static void
 ItclDeleteStub(
-    TCL_UNUSED(ClientData))      /* not used */
+    TCL_UNUSED(void *))      /* not used */
 {
     /* do nothing */
 }

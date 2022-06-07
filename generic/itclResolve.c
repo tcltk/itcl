@@ -414,7 +414,7 @@ int
 Itcl_ClassCompiledVarResolver(
     Tcl_Interp *interp,         /* current interpreter */
     const char* name,           /* name of the variable being accessed */
-    int length,                 /* number of characters in name */
+    ItclSizeT length,           /* number of characters in name */
     Tcl_Namespace *nsPtr,       /* namespace performing the resolution */
     Tcl_ResolvedVarInfo **rPtr) /* returns: info that makes it possible to
                                  *   resolve the variable at runtime */
@@ -437,12 +437,12 @@ Itcl_ClassCompiledVarResolver(
      *  Copy the name to local storage so we can NULL terminate it.
      *  If the name is long, allocate extra space for it.
      */
-    if ((unsigned int)length < sizeof(storage)) {
+    if ((size_t)length < sizeof(storage)) {
         buffer = storage;
     } else {
-        buffer = (char*)ckalloc((unsigned)(length+1));
+        buffer = (char*)ckalloc(length+1);
     }
-    memcpy((void*)buffer, (void*)name, (size_t)length);
+    memcpy(buffer, name, length);
     buffer[length] = '\0';
 
     hPtr = ItclResolveVarEntry(iclsPtr, buffer);
@@ -634,13 +634,13 @@ ItclClassRuntimeVarResolver(
  *
  * ------------------------------------------------------------------------
  */
-/* ARGSUSED */
+
 int
 Itcl_ParseVarResolver(
     Tcl_Interp *interp,        /* current interpreter */
-    const char* name,        /* name of the variable being accessed */
+    const char* name,          /* name of the variable being accessed */
     Tcl_Namespace *contextNs,  /* namespace context */
-    int flags,                 /* TCL_GLOBAL_ONLY => global variable
+    TCL_UNUSED(int),           /* TCL_GLOBAL_ONLY => global variable
                                 * TCL_NAMESPACE_ONLY => namespace variable */
     Tcl_Var* rPtr)             /* returns: Tcl_Var for desired variable */
 {
@@ -649,7 +649,6 @@ Itcl_ParseVarResolver(
 
     Tcl_HashEntry *hPtr;
     ItclVarLookup *vlookup;
-    (void)flags;
 
     /*
      *  See if the requested variable is a recognized "common" member.

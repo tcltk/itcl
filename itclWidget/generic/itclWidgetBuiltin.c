@@ -54,7 +54,7 @@ Tcl_CommandTraceProc ItclHullContentsDeleted;
  * ------------------------------------------------------------------------
  */
 void ItclHullContentsDeleted(
-    ClientData clientData,
+    void *clientData,
     Tcl_Interp *interp,
     const char *oldName,
     const char *newName,
@@ -112,7 +112,7 @@ Itcl_WidgetBiInit(
 	Tcl_DStringAppend(&buffer, "::itcl::builtin::", -1);
 	Tcl_DStringAppend(&buffer, BiMethodList[i].name, -1);
         Tcl_CreateObjCommand(interp, Tcl_DStringValue(&buffer),
-	        BiMethodList[i].proc, (ClientData)infoPtr, NULL);
+	        BiMethodList[i].proc, (void *)infoPtr, NULL);
     }
     Tcl_DStringFree(&buffer);
     return TCL_OK;
@@ -193,10 +193,10 @@ Itcl_InstallWidgetBiMethods(
  *
  * ------------------------------------------------------------------------
  */
-/* ARGSUSED */
+
 int
 Itcl_BiInstallHullCmd(
-    ClientData clientData,   /* ItclObjectInfo *Ptr */
+    void *clientData,        /* ItclObjectInfo *Ptr */
     Tcl_Interp *interp,      /* current interpreter */
     int objc,                /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */

@@ -29,10 +29,10 @@
  *  Returns TCL_OK/TCL_ERROR to indicate success/failure.
  * ------------------------------------------------------------------------
  */
-/* ARGSUSED */
+
 int
 _Itcl_WidgetCmd(
-    ClientData clientData,   /* infoPtr */
+    void *clientData,        /* infoPtr */
     Tcl_Interp *interp,      /* current interpreter */
     int objc,                /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
@@ -71,10 +71,10 @@ _Itcl_WidgetCmd(
  *  Returns TCL_OK/TCL_ERROR to indicate success/failure.
  * ------------------------------------------------------------------------
  */
-/* ARGSUSED */
+
 int
 _Itcl_WidgetAdaptorCmd(
-    ClientData clientData,   /* infoPtr */
+    void *clientData,        /* infoPtr */
     Tcl_Interp *interp,      /* current interpreter */
     int objc,                /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */

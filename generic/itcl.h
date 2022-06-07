@@ -136,10 +136,15 @@ ITCL_EXTERN int Itcl_SafeInit(Tcl_Interp *interp);
  *  Generic stack.
  */
 typedef struct Itcl_Stack {
-    ClientData *values;          /* values on stack */
-    int len;                     /* number of values on stack */
-    int max;                     /* maximum size of stack */
-    ClientData space[5];         /* initial space for stack data */
+    void **values;               /* values on stack */
+#if TCL_MAJOR_VERSION > 9
+    size_t len;                  /* number of values on stack */
+    size_t max;                  /* maximum size of stack */
+#else
+    int len;
+    int max;
+#endif
+    void *space[5];              /* initial space for stack data */
 } Itcl_Stack;
 
 #define Itcl_GetStackSize(stackPtr) ((stackPtr)->len)
@@ -150,14 +155,18 @@ typedef struct Itcl_Stack {
 struct Itcl_List;
 typedef struct Itcl_ListElem {
     struct Itcl_List* owner;     /* list containing this element */
-    ClientData value;            /* value associated with this element */
+    void *value;                 /* value associated with this element */
     struct Itcl_ListElem *prev;  /* previous element in linked list */
     struct Itcl_ListElem *next;  /* next element in linked list */
 } Itcl_ListElem;
 
 typedef struct Itcl_List {
     int validate;                /* validation stamp */
-    int num;                     /* number of elements */
+#if TCL_MAJOR_VERSION > 9
+    size_t num;                  /* number of elements */
+#else
+    int num;
+#endif
     struct Itcl_ListElem *head;  /* previous element in linked list */
     struct Itcl_ListElem *tail;  /* next element in linked list */
 } Itcl_List;

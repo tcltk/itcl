@@ -38,7 +38,7 @@ Itcl_InitStubs(
 {
     const char *packageName = "itcl";
     const char *errMsg = NULL;
-    ClientData clientData = NULL;
+    void *clientData = NULL;
     const ItclStubs *stubsPtr;
     const ItclIntStubs *intStubsPtr;
     const char *actualVersion;

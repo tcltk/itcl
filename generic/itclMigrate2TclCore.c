@@ -142,7 +142,7 @@ Itcl_GetUplevelNamespace(
     return (Tcl_Namespace *)framePtr->nsPtr;
 }
 
-ClientData
+void *
 Itcl_GetCallFrameClientData(
     Tcl_Interp *interp)
 {
@@ -191,7 +191,7 @@ Itcl_GetCallVarFrameObjv(
     return framePtr->objv;
 }
 
-int
+ItclSizeT
 Itcl_GetCallFrameObjc(
     Tcl_Interp *interp)
 {

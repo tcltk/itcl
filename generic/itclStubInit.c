@@ -5,6 +5,8 @@
 
 #include "itclInt.h"
 
+#undef Itcl_GetStackValue
+
 MODULE_SCOPE const ItclStubs itclStubs;
 /* !BEGIN!: Do not edit below this line. */
 
@@ -237,6 +239,7 @@ const ItclStubs itclStubs = {
     Itcl_DiscardInterpState, /* 25 */
     Itcl_Alloc, /* 26 */
     Itcl_Free, /* 27 */
+    ItclGetStackValue, /* 28 */
 };
 
 /* !END!: Do not edit above this line. */

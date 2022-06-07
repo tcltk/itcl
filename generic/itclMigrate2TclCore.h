@@ -5,16 +5,16 @@
 #define FRAME_HAS_RESOLVER 0x100
 typedef Tcl_Command (Tcl_CmdAliasProc)(Tcl_Interp *interp,
         Tcl_Namespace *nsPtr, const char *cmdName,
-        ClientData clientData);
+        void *clientData);
 typedef Tcl_Var (Tcl_VarAliasProc)(Tcl_Interp *interp,
         Tcl_Namespace *nsPtr, const char *varName,
-        ClientData clientData);
+        void *clientData);
 
 #ifndef _TCL_RESOLVE_DEFINED
 typedef struct Tcl_Resolve {
     Tcl_VarAliasProc *varProcPtr;
     Tcl_CmdAliasProc *cmdProcPtr;
-    ClientData clientData;
+    void *clientData;
 } Tcl_Resolve;
 #define _TCL_RESOLVE_DEFINED 1
 #endif
@@ -39,9 +39,15 @@ typedef struct Tcl_ResolvedVarInfo {
     Tcl_ResolveVarDeleteProc *deleteProc;
 } Tcl_ResolvedVarInfo;
 
+#if TCL_MAJOR_VERSION > 8
+typedef int (Tcl_ResolveCompiledVarProc) (Tcl_Interp *interp,
+	const char *name, size_t length, Tcl_Namespace *context,
+	Tcl_ResolvedVarInfo **rPtr);
+#else
 typedef int (Tcl_ResolveCompiledVarProc) (Tcl_Interp *interp,
 	const char *name, int length, Tcl_Namespace *context,
 	Tcl_ResolvedVarInfo **rPtr);
+#endif
 
 typedef int (Tcl_ResolveVarProc) (Tcl_Interp *interp, const char *name,
 	Tcl_Namespace *context, int flags, Tcl_Var *rPtr);

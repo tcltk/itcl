@@ -527,13 +527,12 @@ Itcl_SafeInit (
  */
 static int
 ItclSetHullWindowName(
-    void *clientData,   /* infoPtr */
-    Tcl_Interp *dummy,      /* current interpreter */
+    void *clientData,        /* infoPtr */
+    TCL_UNUSED(Tcl_Interp *),/* current interpreter */
     int objc,                /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
 {
     ItclObjectInfo *infoPtr;
-    (void)dummy;
 
     infoPtr = (ItclObjectInfo *)clientData;
     if ((infoPtr->currIoPtr != NULL) && (objc > 1)) {

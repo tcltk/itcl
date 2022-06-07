@@ -541,7 +541,7 @@ Itcl_ParseInit(
  */
 static int
 ItclGenericClassCmd(
-    ClientData clientData,   /* info for all known objects */
+    void *clientData,        /* info for all known objects */
     Tcl_Interp *interp,      /* current interpreter */
     int objc,                /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
@@ -615,7 +615,7 @@ ItclGenericClassCmd(
  */
 int
 Itcl_ClassCmd(
-    ClientData clientData,   /* info for all known objects */
+    void *clientData,        /* info for all known objects */
     Tcl_Interp *interp,      /* current interpreter */
     int objc,                /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
@@ -652,12 +652,10 @@ static const Tcl_MethodType itclArgMethodType = {
 
 static int
 CloneProc(
-    Tcl_Interp *dummy,
-    ClientData original,
-    ClientData *copyPtr)
+    TCL_UNUSED(Tcl_Interp *),
+    void *original,
+    void **copyPtr)
 {
-    (void)dummy;
-
     Itcl_PreserveData((ItclMemberFunc *)original);
     *copyPtr = original;
     return TCL_OK;
@@ -665,11 +663,11 @@ CloneProc(
 
 static int
 CallAfterCallMethod(
-    ClientData data[],
+    void *data[],
     Tcl_Interp *interp,
     int result)
 {
-    ClientData clientData = data[0];
+    void *clientData = data[0];
 
     Tcl_ObjectContext context = (Tcl_ObjectContext)data[1];
 
@@ -678,7 +676,7 @@ CallAfterCallMethod(
 
 static int
 ObjCallProc(
-    ClientData clientData,
+    void *clientData,
     Tcl_Interp *interp,
     Tcl_ObjectContext context,
     int objc,
@@ -703,24 +701,18 @@ ObjCallProc(
 
 static int
 ArgCallProc(
-    ClientData clientData,
-    Tcl_Interp *interp,
-    Tcl_ObjectContext context,
-    int objc,
-    Tcl_Obj *const *objv)
+    TCL_UNUSED(void *),
+    TCL_UNUSED(Tcl_Interp *),
+    TCL_UNUSED(Tcl_ObjectContext),
+    TCL_UNUSED(int),
+    TCL_UNUSED(Tcl_Obj *const *))
 {
-    (void)clientData;
-    (void)interp;
-    (void)context;
-    (void)objc;
-    (void)objv;
-
     return TCL_ERROR;
 }
 
 int
 ItclClassBaseCmd(
-    ClientData clientData,   /* info for all known objects */
+    void *clientData,        /* info for all known objects */
     Tcl_Interp *interp,      /* current interpreter */
     int flags,               /* flags: ITCL_CLASS, ITCL_TYPE,
                               * ITCL_WIDGET or ITCL_WIDGETADAPTOR */
@@ -880,9 +872,9 @@ ItclClassBaseCmd(
 
     /* make the methods and procs known to TclOO */
     FOREACH_HASH_VALUE(imPtr, &iclsPtr->functions) {
-    	    ClientData pmPtr;
-	    argumentPtr = imPtr->codePtr->argumentPtr;
-	    bodyPtr = imPtr->codePtr->bodyPtr;
+	    void *pmPtr;
+	argumentPtr = imPtr->codePtr->argumentPtr;
+	bodyPtr = imPtr->codePtr->bodyPtr;
 
 if (imPtr->codePtr->flags & ITCL_IMPLEMENT_OBJCMD) {
     /* Implementation of this member is coded in C expecting Tcl_Obj */
@@ -1290,7 +1282,7 @@ ItclCheckForInitializedComponents(
  */
 int
 Itcl_ClassInheritCmd(
-    ClientData clientData,   /* info for all known objects */
+    void *clientData,        /* info for all known objects */
     Tcl_Interp *interp,      /* current interpreter */
     int objc,                /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
@@ -1298,7 +1290,7 @@ Itcl_ClassInheritCmd(
     ItclObjectInfo *infoPtr = (ItclObjectInfo*)clientData;
     ItclClass *iclsPtr = (ItclClass*)Itcl_PeekStack(&infoPtr->clsStack);
     int result;
-    int i;
+    ItclSizeT i;
     int newEntry;
     int haveClasses;
     const char *token;
@@ -1573,7 +1565,7 @@ inheritError:
  */
 int
 Itcl_ClassProtectionCmd(
-    ClientData clientData,   /* protection level (public/protected/private) */
+    void *clientData,   /* protection level (public/protected/private) */
     Tcl_Interp *interp,      /* current interpreter */
     int objc,                /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
@@ -1650,7 +1642,7 @@ Itcl_ClassProtectionCmd(
  */
 int
 Itcl_ClassConstructorCmd(
-    ClientData clientData,   /* info for all known objects */
+    void *clientData,        /* info for all known objects */
     Tcl_Interp *interp,      /* current interpreter */
     int objc,                /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
@@ -1716,7 +1708,7 @@ Itcl_ClassConstructorCmd(
  */
 int
 Itcl_ClassDestructorCmd(
-    ClientData clientData,   /* info for all known objects */
+    void *clientData,        /* info for all known objects */
     Tcl_Interp *interp,      /* current interpreter */
     int objc,                /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
@@ -1770,7 +1762,7 @@ Itcl_ClassDestructorCmd(
  */
 int
 Itcl_ClassMethodCmd(
-    ClientData clientData,   /* info for all known objects */
+    void *clientData,        /* info for all known objects */
     Tcl_Interp *interp,      /* current interpreter */
     int objc,                /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
@@ -1833,7 +1825,7 @@ Itcl_ClassMethodCmd(
  */
 int
 Itcl_ClassProcCmd(
-    ClientData clientData,   /* info for all known objects */
+    void *clientData,        /* info for all known objects */
     Tcl_Interp *interp,      /* current interpreter */
     int objc,                /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
@@ -1904,7 +1896,7 @@ Itcl_ClassProcCmd(
  */
 static int
 Itcl_ClassTypeMethodCmd(
-    ClientData clientData,   /* info for all known objects */
+    void *clientData,        /* info for all known objects */
     Tcl_Interp *interp,      /* current interpreter */
     int objc,                /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
@@ -1980,7 +1972,7 @@ Itcl_ClassTypeMethodCmd(
  */
 int
 Itcl_ClassVariableCmd(
-    ClientData clientData,   /* info for all known objects */
+    void *clientData,        /* info for all known objects */
     Tcl_Interp *interp,      /* current interpreter */
     int objc,                /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
@@ -2167,8 +2159,8 @@ ItclInitClassCommon(
 		TCL_NAMESPACE_ONLY);
     }
     if (ivPtr->arrayInitPtr != NULL) {
-	int i;
-	int argc;
+	ItclSizeT i;
+	ItclSizeT argc;
 	const char **argv;
 	const char *val;
 	result = Tcl_SplitList(interp, Tcl_GetString(ivPtr->arrayInitPtr),
@@ -2204,7 +2196,7 @@ ItclInitClassCommon(
  */
 static int
 ItclClassCommonCmd(
-    ClientData clientData,   /* info for all known objects */
+    void *clientData,        /* info for all known objects */
     Tcl_Interp *interp,      /* current interpreter */
     int objc,                /* number of arguments */
     Tcl_Obj *const objv[],   /* argument objects */
@@ -2309,7 +2301,7 @@ ItclClassCommonCmd(
  */
 static int
 Itcl_ClassTypeVariableCmd(
-    ClientData clientData,   /* info for all known objects */
+    void *clientData,        /* info for all known objects */
     Tcl_Interp *interp,      /* current interpreter */
     int objc,                /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
@@ -2342,7 +2334,7 @@ Itcl_ClassTypeVariableCmd(
  */
 int
 Itcl_ClassCommonCmd(
-    ClientData clientData,   /* info for all known objects */
+    void *clientData,        /* info for all known objects */
     Tcl_Interp *interp,      /* current interpreter */
     int objc,                /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
@@ -2366,7 +2358,7 @@ Itcl_ClassCommonCmd(
  */
 static void
 ItclFreeParserCommandData(
-    ClientData cdata)  /* client data to be destroyed */
+    void *cdata)  /* client data to be destroyed */
 {
     ckfree(cdata);
 }
@@ -2425,7 +2417,7 @@ ItclDelObjectInfo(
  */
 static int
 Itcl_ClassFilterCmd(
-    ClientData clientData,   /* info for all known objects */
+    void *clientData,        /* info for all known objects */
     Tcl_Interp *interp,      /* current interpreter */
     int objc,                /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
@@ -2479,14 +2471,11 @@ ItclShowArgs(1, "Itcl_ClassFilterCmd2", objc+2, newObjv);
  */
 static int
 Itcl_ClassMixinCmd(
-    ClientData clientData,   /* info for all known objects */
-    Tcl_Interp *interp,      /* current interpreter */
+    TCL_UNUSED(void *),      /* info for all known objects */
+    TCL_UNUSED(Tcl_Interp *),/* current interpreter */
     int objc,                /* number of arguments */
-    Tcl_Obj *const objv[])   /* argument objects */
+    Tcl_Obj *const *objv)    /* argument objects */
 {
-    (void)clientData;
-    (void)interp;
-
     ItclShowArgs(0, "Itcl_ClassMixinCmd", objc, objv);
     return TCL_OK;
 }
@@ -2503,7 +2492,7 @@ Itcl_ClassMixinCmd(
  */
 static int
 Itcl_WidgetCmd(
-    ClientData clientData,   /* info for all known objects */
+    void *clientData,        /* info for all known objects */
     Tcl_Interp *interp,      /* current interpreter */
     int objc,                /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
@@ -2535,7 +2524,7 @@ Itcl_WidgetCmd(
  */
 static int
 Itcl_WidgetAdaptorCmd(
-    ClientData clientData,   /* info for all known objects */
+    void *clientData,        /* info for all known objects */
     Tcl_Interp *interp,      /* current interpreter */
     int objc,                /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
@@ -2569,7 +2558,7 @@ Itcl_WidgetAdaptorCmd(
  */
 int
 ItclParseOption(
-    ItclObjectInfo *infoPtr, /* info for all known objects */
+    TCL_UNUSED(ItclObjectInfo *), /* info for all known objects */
     Tcl_Interp *interp,      /* current interpreter */
     size_t objc,                /* number of arguments */
     Tcl_Obj *const objv[],   /* argument objects */
@@ -2597,7 +2586,7 @@ ItclParseOption(
     const char *name;
     const char *resourceName;
     const char *className;
-    int argc;
+    ItclSizeT argc;
     int pLevel;
     int readOnly;
     int newObjc;
@@ -2605,7 +2594,6 @@ ItclParseOption(
     int result;
     size_t i;
     const char *cp;
-    (void)infoPtr;
 
     ItclShowArgs(1, "ItclParseOption", objc, objv);
     pLevel = Itcl_Protection(interp, 0);
@@ -2902,7 +2890,7 @@ errorOut:
  */
 int
 Itcl_ClassOptionCmd(
-    ClientData clientData,   /* info for all known objects */
+    void *clientData,        /* info for all known objects */
     Tcl_Interp *interp,      /* current interpreter */
     int objc,                /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
@@ -3023,7 +3011,7 @@ ItclCreateComponent(
  */
 static int
 ItclHandleClassComponent(
-    ClientData clientData,   /* info for all known objects */
+    void *clientData,        /* info for all known objects */
     Tcl_Interp *interp,      /* current interpreter */
     int objc,                /* number of arguments */
     Tcl_Obj *const objv[],   /* argument objects */
@@ -3199,7 +3187,7 @@ ItclHandleClassComponent(
  */
 static int
 Itcl_ClassComponentCmd(
-    ClientData clientData,   /* info for all known objects */
+    void *clientData,        /* info for all known objects */
     Tcl_Interp *interp,      /* current interpreter */
     int objc,                /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
@@ -3223,7 +3211,7 @@ Itcl_ClassComponentCmd(
  */
 static int
 Itcl_ClassTypeComponentCmd(
-    ClientData clientData,   /* info for all known objects */
+    void *clientData,        /* info for all known objects */
     Tcl_Interp *interp,      /* current interpreter */
     int objc,                /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
@@ -3261,9 +3249,9 @@ ItclCreateDelegatedFunction(
 {
     ItclDelegatedFunction *idmPtr;
     const char **argv;
-    int argc;
+    ItclSizeT argc;
     int isNew;
-    int i;
+    ItclSizeT i;
 
     idmPtr = (ItclDelegatedFunction *)ckalloc(sizeof(ItclDelegatedFunction));
     memset(idmPtr, 0, sizeof(ItclDelegatedFunction));
@@ -3492,7 +3480,7 @@ errorOut:
  */
 static int
 Itcl_ClassDelegateMethodCmd(
-    ClientData clientData,   /* info for all known objects */
+    void *clientData,        /* info for all known objects */
     Tcl_Interp *interp,      /* current interpreter */
     int objc,                /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
@@ -3574,7 +3562,7 @@ Itcl_HandleDelegateOptionCmd(
     const char *token;
     const char **argv;
     int foundOpt;
-    int argc;
+    ItclSizeT argc;
     int isStarOption;
     int isNew;
     size_t i;
@@ -3849,7 +3837,7 @@ errorOut1:
  */
 static int
 Itcl_ClassDelegateOptionCmd(
-    ClientData clientData,   /* info for all known objects */
+    void *clientData,        /* info for all known objects */
     Tcl_Interp *interp,      /* current interpreter */
     int objc,                /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
@@ -3907,7 +3895,7 @@ Itcl_ClassDelegateOptionCmd(
  */
 static int
 Itcl_ClassDelegateTypeMethodCmd(
-    ClientData clientData,   /* info for all known objects */
+    void *clientData,        /* info for all known objects */
     Tcl_Interp *interp,      /* current interpreter */
     int objc,                /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
@@ -3928,9 +3916,9 @@ Itcl_ClassDelegateTypeMethodCmd(
     const char *token;
     const char **argv;
     int foundOpt;
-    int argc;
+    ItclSizeT argc;
     int isNew;
-    int i;
+    ItclSizeT i;
 
     ItclShowArgs(1, "Itcl_ClassDelegateTypeMethodCmd", objc, objv);
     usageStr = "delegate typemethod <typeMethodName> to <componentName> ?as <targetName>?\n\
@@ -4089,10 +4077,10 @@ delegate typemethod * ?to <componentName>? ?using <pattern>? ?except <typemethod
  *  Returns TCL_OK/TCL_ERROR to indicate success/failure.
  * ------------------------------------------------------------------------
  */
-/* ARGSUSED */
+
 static int
 Itcl_ClassForwardCmd(
-    ClientData clientData,   /* unused */
+    void *clientData,        /* unused */
     Tcl_Interp *interp,      /* current interpreter */
     int objc,                /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
@@ -4139,10 +4127,10 @@ Itcl_ClassForwardCmd(
  *  Returns TCL_OK/TCL_ERROR to indicate success/failure.
  * ------------------------------------------------------------------------
  */
-/* ARGSUSED */
+
 static int
 Itcl_ClassMethodVariableCmd(
-    ClientData clientData,   /* unused */
+    void *clientData,        /* unused */
     Tcl_Interp *interp,      /* current interpreter */
     int objc,                /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
@@ -4262,7 +4250,7 @@ Itcl_ClassMethodVariableCmd(
  */
 static int
 Itcl_ClassTypeConstructorCmd(
-    ClientData clientData,   /* info for all known objects */
+    void *clientData,        /* info for all known objects */
     Tcl_Interp *interp,      /* current interpreter */
     int objc,                /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */

@@ -41,11 +41,11 @@ MODULE_SCOPE int HullAndOptionsInstall(Tcl_Interp *interp, ItclObject *ioPtr,
 	int *newObjc, Tcl_Obj **newObjv);
 MODULE_SCOPE int InstallComponent(Tcl_Interp *interp, ItclObject *ioPtr,
         ItclClass *iclsPtr, int objc, Tcl_Obj * const objv[]);
-MODULE_SCOPE int Itcl_BiInstallHullCmd (ClientData clientData,
+MODULE_SCOPE int Itcl_BiInstallHullCmd (void *clientData,
         Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]);
-MODULE_SCOPE int ItclWidgetConfigure(ClientData clientData, Tcl_Interp *interp,
+MODULE_SCOPE int ItclWidgetConfigure(void *clientData, Tcl_Interp *interp,
         int objc, Tcl_Obj *const objv[]);
-MODULE_SCOPE int ItclWidgetCget(ClientData clientData, Tcl_Interp *interp,
+MODULE_SCOPE int ItclWidgetCget(void *clientData, Tcl_Interp *interp,
         int objc, Tcl_Obj *const objv[]);
 MODULE_SCOPE int Itcl_WidgetParseInit(Tcl_Interp *interp,
         ItclObjectInfo *infoPtr);

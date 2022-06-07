@@ -77,21 +77,21 @@ int
 ItclCreateArgList(
     Tcl_Interp *interp,		/* interpreter managing this function */
     const char *str,		/* string representing argument list */
-    int *argcPtr,		/* number of mandatory arguments */
-    int *maxArgcPtr,		/* number of arguments parsed */
+    ItclSizeT *argcPtr,		/* number of mandatory arguments */
+    ItclSizeT *maxArgcPtr,		/* number of arguments parsed */
     Tcl_Obj **usagePtr,         /* store usage message for arguments here */
     ItclArgList **arglistPtrPtr,
     				/* returns pointer to parsed argument list */
     ItclMemberFunc *dummy,
     const char *commandName)
 {
-    int argc;
-    int defaultArgc;
+    ItclSizeT argc;
+    ItclSizeT defaultArgc;
     const char **argv;
     const char **defaultArgv;
     ItclArgList *arglistPtr;
     ItclArgList *lastArglistPtr;
-    int i;
+    ItclSizeT i;
     int hadArgsArgument;
     int result;
     (void)dummy;
@@ -130,7 +130,7 @@ ItclCreateArgList(
 			    "\" has argument with no name", NULL);
 		} else {
 		    char buf[TCL_INTEGER_SPACE];
-		    sprintf(buf, "%d", i);
+		    sprintf(buf, "%" ITCL_Z_MODIFIER "d", i);
 		    Tcl_AppendResult(interp, "argument #", buf,
 		            " has no name", NULL);
 		}
@@ -248,7 +248,7 @@ ItclDeleteArgList(
 int
 Itcl_EvalArgs(
     Tcl_Interp *interp,      /* current interpreter */
-    int objc,                /* number of arguments */
+    ItclSizeT objc,          /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
 {
     Tcl_Command cmd;
@@ -275,7 +275,7 @@ Itcl_EvalArgs(
      *  to pass in the proper client data.
      */
     Tcl_GetCommandInfoFromToken(cmd, &infoPtr);
-    return (infoPtr.objProc)(infoPtr.objClientData, interp, objc, objv);
+    return infoPtr.objProc(infoPtr.objClientData, interp, objc, objv);
 }
 
 
@@ -299,10 +299,10 @@ Tcl_Obj*
 Itcl_CreateArgs(
     Tcl_Interp *dummy,      /* current interpreter */
     const char *string,      /* first command word */
-    int objc,                /* number of arguments */
+    ItclSizeT objc,                /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
 {
-    int i;
+    ItclSizeT i;
     Tcl_Obj *listPtr;
     (void)dummy;
 
@@ -325,7 +325,7 @@ Itcl_CreateArgs(
 
 int
 ItclEnsembleSubCmd(
-    ClientData dummy,
+    void *dummy,
     Tcl_Interp *interp,
     const char *ensembleName,
     int objc,

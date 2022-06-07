@@ -5,10 +5,18 @@
 #ifndef _ITCLINTDECLS
 #define _ITCLINTDECLS
 
+#if !defined(ItclSizeT)
+    #if TCL_MAJOR_VERSION > 8
+	#define ItclSizeT size_t
+    #else
+	#define ItclSizeT int
+    #endif
+#endif
+
 /* !BEGIN!: Do not edit below this line. */
 
 #define ITCLINT_STUBS_EPOCH 0
-#define ITCLINT_STUBS_REVISION 152
+#define ITCLINT_STUBS_REVISION 153
 
 #ifdef __cplusplus
 extern "C" {
@@ -53,11 +61,11 @@ ITCLAPI int		Itcl_DecodeScopedCommand(Tcl_Interp *interp,
 				const char *name, Tcl_Namespace **rNsPtr,
 				char **rCmdPtr);
 /* 13 */
-ITCLAPI int		Itcl_EvalArgs(Tcl_Interp *interp, int objc,
+ITCLAPI int		Itcl_EvalArgs(Tcl_Interp *interp, ItclSizeT objc,
 				Tcl_Obj *const objv[]);
 /* 14 */
 ITCLAPI Tcl_Obj *	Itcl_CreateArgs(Tcl_Interp *interp,
-				const char *string, int objc,
+				const char *string, ItclSizeT objc,
 				Tcl_Obj *const objv[]);
 /* Slot 15 is reserved */
 /* Slot 16 is reserved */
@@ -141,7 +149,7 @@ ITCLAPI const char *	Itcl_GetCommonVar(Tcl_Interp *interp,
 /* 44 */
 ITCLAPI int		Itcl_CreateObject(Tcl_Interp *interp,
 				const char*name, ItclClass *iclsPtr,
-				int objc, Tcl_Obj *const objv[],
+				ItclSizeT objc, Tcl_Obj *const objv[],
 				ItclObject **rioPtr);
 /* 45 */
 ITCLAPI int		Itcl_DeleteObject(Tcl_Interp *interp,
@@ -194,7 +202,7 @@ ITCLAPI int		Itcl_GetMemberCode(Tcl_Interp *interp,
 /* 61 */
 ITCLAPI int		Itcl_EvalMemberCode(Tcl_Interp *interp,
 				ItclMemberFunc *mfunc,
-				ItclObject *contextObj, int objc,
+				ItclObject *contextObj, ItclSizeT objc,
 				Tcl_Obj *const objv[]);
 /* Slot 62 is reserved */
 /* Slot 63 is reserved */
@@ -220,7 +228,7 @@ ITCLAPI int		Itcl_ConstructBase(Tcl_Interp *interp,
 /* 72 */
 ITCLAPI int		Itcl_InvokeMethodIfExists(Tcl_Interp *interp,
 				const char *name, ItclClass *contextClass,
-				ItclObject *contextObj, int objc,
+				ItclObject *contextObj, ItclSizeT objc,
 				Tcl_Obj *const objv[]);
 /* Slot 73 is reserved */
 /* 74 */
@@ -458,7 +466,7 @@ ITCLAPI ClientData	Itcl_GetCallFrameClientData(Tcl_Interp *interp);
 ITCLAPI int		Itcl_SetCallFrameNamespace(Tcl_Interp *interp,
 				Tcl_Namespace *nsPtr);
 /* 166 */
-ITCLAPI int		Itcl_GetCallFrameObjc(Tcl_Interp *interp);
+ITCLAPI ItclSizeT	Itcl_GetCallFrameObjc(Tcl_Interp *interp);
 /* 167 */
 ITCLAPI Tcl_Obj *const * Itcl_GetCallFrameObjv(Tcl_Interp *interp);
 /* 168 */
@@ -541,8 +549,8 @@ typedef struct ItclIntStubs {
     void (*reserved10)(void);
     void (*itcl_ParseNamespPath) (const char *name, Tcl_DString *buffer, const char **head, const char **tail); /* 11 */
     int (*itcl_DecodeScopedCommand) (Tcl_Interp *interp, const char *name, Tcl_Namespace **rNsPtr, char **rCmdPtr); /* 12 */
-    int (*itcl_EvalArgs) (Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]); /* 13 */
-    Tcl_Obj * (*itcl_CreateArgs) (Tcl_Interp *interp, const char *string, int objc, Tcl_Obj *const objv[]); /* 14 */
+    int (*itcl_EvalArgs) (Tcl_Interp *interp, ItclSizeT objc, Tcl_Obj *const objv[]); /* 13 */
+    Tcl_Obj * (*itcl_CreateArgs) (Tcl_Interp *interp, const char *string, ItclSizeT objc, Tcl_Obj *const objv[]); /* 14 */
     void (*reserved15)(void);
     void (*reserved16)(void);
     int (*itcl_GetContext) (Tcl_Interp *interp, ItclClass **iclsPtrPtr, ItclObject **ioPtrPtr); /* 17 */
@@ -572,7 +580,7 @@ typedef struct ItclIntStubs {
     const char * (*itcl_GetCommonVar) (Tcl_Interp *interp, const char *name, ItclClass *contextClass); /* 41 */
     void (*reserved42)(void);
     void (*reserved43)(void);
-    int (*itcl_CreateObject) (Tcl_Interp *interp, const char*name, ItclClass *iclsPtr, int objc, Tcl_Obj *const objv[], ItclObject **rioPtr); /* 44 */
+    int (*itcl_CreateObject) (Tcl_Interp *interp, const char*name, ItclClass *iclsPtr, ItclSizeT objc, Tcl_Obj *const objv[], ItclObject **rioPtr); /* 44 */
     int (*itcl_DeleteObject) (Tcl_Interp *interp, ItclObject *contextObj); /* 45 */
     int (*itcl_DestructObject) (Tcl_Interp *interp, ItclObject *contextObj, int flags); /* 46 */
     void (*reserved47)(void);
@@ -589,7 +597,7 @@ typedef struct ItclIntStubs {
     void (*itcl_DeleteMemberCode) (void *cdata); /* 58 */
     int (*itcl_GetMemberCode) (Tcl_Interp *interp, ItclMemberFunc *mfunc); /* 59 */
     void (*reserved60)(void);
-    int (*itcl_EvalMemberCode) (Tcl_Interp *interp, ItclMemberFunc *mfunc, ItclObject *contextObj, int objc, Tcl_Obj *const objv[]); /* 61 */
+    int (*itcl_EvalMemberCode) (Tcl_Interp *interp, ItclMemberFunc *mfunc, ItclObject *contextObj, ItclSizeT objc, Tcl_Obj *const objv[]); /* 61 */
     void (*reserved62)(void);
     void (*reserved63)(void);
     void (*reserved64)(void);
@@ -600,7 +608,7 @@ typedef struct ItclIntStubs {
     int (*itcl_ExecProc) (ClientData clientData, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]); /* 69 */
     void (*reserved70)(void);
     int (*itcl_ConstructBase) (Tcl_Interp *interp, ItclObject *contextObj, ItclClass *contextClass); /* 71 */
-    int (*itcl_InvokeMethodIfExists) (Tcl_Interp *interp, const char *name, ItclClass *contextClass, ItclObject *contextObj, int objc, Tcl_Obj *const objv[]); /* 72 */
+    int (*itcl_InvokeMethodIfExists) (Tcl_Interp *interp, const char *name, ItclClass *contextClass, ItclObject *contextObj, ItclSizeT objc, Tcl_Obj *const objv[]); /* 72 */
     void (*reserved73)(void);
     int (*itcl_ReportFuncErrors) (Tcl_Interp *interp, ItclMemberFunc *mfunc, ItclObject *contextObj, int result); /* 74 */
     int (*itcl_ParseInit) (Tcl_Interp *interp, ItclObjectInfo *info); /* 75 */
@@ -694,7 +702,7 @@ typedef struct ItclIntStubs {
     ClientData (*itcl_GetCallFrameClientData) (Tcl_Interp *interp); /* 163 */
     void (*reserved164)(void);
     int (*itcl_SetCallFrameNamespace) (Tcl_Interp *interp, Tcl_Namespace *nsPtr); /* 165 */
-    int (*itcl_GetCallFrameObjc) (Tcl_Interp *interp); /* 166 */
+    ItclSizeT (*itcl_GetCallFrameObjc) (Tcl_Interp *interp); /* 166 */
     Tcl_Obj *const * (*itcl_GetCallFrameObjv) (Tcl_Interp *interp); /* 167 */
     int (*itcl_NWidgetCmd) (ClientData infoPtr, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]); /* 168 */
     int (*itcl_AddOptionCmd) (ClientData infoPtr, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]); /* 169 */
