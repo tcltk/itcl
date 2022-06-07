@@ -99,7 +99,6 @@ tcltest::testConstraint tk [info exists tk_version]
 
 ::tcltest::loadTestedCommands
 
-if {1} {
 #-----------------------------------------------------------------------
 # Widgetadaptors
 
@@ -597,7 +596,6 @@ test installhull-1.4 {
     myframe destroy
 } -result {red}
 
-puts stderr installhull-1.5
 test installhull-1.5 {
     Option values read from the option database are overridden by options
     explicitly passed, even if delegated under a different name.
@@ -676,9 +674,6 @@ test option-2.6 {configure -opt unknown to implicit component} -constraints {
     myframe destroy
 } -result {unknown option "-quux"}
 
-# end
-}
-
 test iinfo-6.5 {info options with unknown delegated options} -constraints {
     tk
 } -body {
@@ -697,7 +692,7 @@ test iinfo-6.5 {info options with unknown delegated options} -constraints {
     set a
 } -cleanup {
     myframe destroy
-} -result {-background -bd -bg -borderwidth -class -colormap -container -cursor -foo -height -highlightbackground -highlightcolor -highlightthickness -padx -pady -relief -takefocus -visual -width}
+} -match glob -result {-background *-bd -bg*-borderwidth -class -colormap -container -cursor -foo -height -highlightbackground -highlightcolor -highlightthickness -padx -pady -relief -takefocus*-visual -width}
 
 test iinfo-6.7 {info options with exceptions} -constraints {
     tk
@@ -717,7 +712,7 @@ test iinfo-6.7 {info options with exceptions} -constraints {
     set a
 } -cleanup {
     myframe destroy
-} -result {-bd -bg -borderwidth -class -colormap -container -cursor -foo -height -highlightbackground -highlightcolor -highlightthickness -padx -pady -relief -takefocus -visual -width}
+} -match glob -result {*-bd -bg*-borderwidth -class -colormap -container -cursor -foo -height -highlightbackground -highlightcolor -highlightthickness -padx -pady -relief -takefocus*-visual -width}
 
 test iinfo-6.8 {info options with pattern} -constraints {
     tk
@@ -762,7 +757,7 @@ test tinfo-3.2 {widget info instances} -constraints {
     mylabel destroy
 } -result {.lab1 .lab2}
 
-test widgetclass-1.2 {can't set widgetclass for snit::widgetadaptors} -constraints {
+test widgetclass-1.2 {can't set widgetclass for itcl::widgetadaptors} -constraints {
     tk
 } -body {
     widgetadaptor dog {
@@ -772,7 +767,7 @@ test widgetclass-1.2 {can't set widgetclass for snit::widgetadaptors} -constrain
     error
 } -result {can't set widgetclass for ::itcl::widgetadaptor}
 
-test hulltype-1.2 {can't set hulltype for snit::widgetadaptors} -constraints {
+test hulltype-1.2 {can't set hulltype for itcl::widgetadaptors} -constraints {
     tk
 } -body {
     widgetadaptor dog {

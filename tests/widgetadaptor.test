@@ -686,7 +686,7 @@ test iinfo-6.5 {info options with unknown delegated options
     set a
 } -cleanup {
     myframe destroy
-} -result {-background -bd -bg -borderwidth -class -colormap -container -cursor -foo -height -highlightbackground -highlightcolor -highlightthickness -padx -pady -relief -takefocus -visual -width}
+} -match glob -result {-background *-bd -bg*-borderwidth -class -colormap -container -cursor -foo -height -highlightbackground -highlightcolor -highlightthickness -padx -pady -relief -takefocus*-visual -width}
 
 test iinfo-6.7 {info options with exceptions
 } -constraints {
@@ -707,7 +707,7 @@ test iinfo-6.7 {info options with exceptions
     set a
 } -cleanup {
     myframe destroy
-} -result {-bd -bg -borderwidth -class -colormap -container -cursor -foo -height -highlightbackground -highlightcolor -highlightthickness -padx -pady -relief -takefocus -visual -width}
+} -match glob -result {*-bd -bg*-borderwidth -class -colormap -container -cursor -foo -height -highlightbackground -highlightcolor -highlightthickness -padx -pady -relief -takefocus*-visual -width}
 
 test iinfo-6.8 {info options with pattern
 } -constraints {
