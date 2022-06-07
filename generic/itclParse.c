@@ -178,7 +178,7 @@ static const struct {
  * ------------------------------------------------------------------------
  *  Itcl_ParseInit()
  *
- *  Invoked by Itcl_Init() whenever a new interpeter is created to add
+ *  Invoked by Itcl_Init() whenever a new interpreter is created to add
  *  [incr Tcl] facilities.  Adds the commands needed to parse class
  *  definitions.
  * ------------------------------------------------------------------------
@@ -2571,7 +2571,7 @@ int
 ItclParseOption(
     ItclObjectInfo *infoPtr, /* info for all known objects */
     Tcl_Interp *interp,      /* current interpreter */
-    int objc,                /* number of arguments */
+    size_t objc,                /* number of arguments */
     Tcl_Obj *const objv[],   /* argument objects */
     ItclClass *iclsPtr,
     ItclObject *ioPtr,
@@ -2603,7 +2603,7 @@ ItclParseOption(
     int newObjc;
     int foundOption;
     int result;
-    int i;
+    size_t i;
     const char *cp;
     (void)infoPtr;
 
@@ -3319,7 +3319,7 @@ Itcl_HandleDelegateMethodCmd(
     ItclClass *iclsPtr,      /* != NULL for delegate method otherwise NULL */
     ItclDelegatedFunction **idmPtrPtr,
                              /* where to return idoPtr */
-    int objc,                /* number of arguments */
+    size_t objc,                /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
 {
     Tcl_Obj *methodNamePtr;
@@ -3336,7 +3336,7 @@ Itcl_HandleDelegateMethodCmd(
     const char *component;
     const char *token;
     int result;
-    int i;
+    size_t i;
     int foundOpt;
 
     ItclShowArgs(1, "Itcl_HandleDelegateMethodCmd", objc, objv);
@@ -3552,7 +3552,7 @@ Itcl_HandleDelegateOptionCmd(
     ItclClass *iclsPtr,      /* != NULL for delegate option otherwise NULL */
     ItclDelegatedOption **idoPtrPtr,
                              /* where to return idoPtr */
-    int objc,                /* number of arguments */
+    size_t objc,                /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
 
 {
@@ -3577,7 +3577,7 @@ Itcl_HandleDelegateOptionCmd(
     int argc;
     int isStarOption;
     int isNew;
-    int i;
+    size_t i;
     const char *cp;
 
     ItclShowArgs(1, "Itcl_HandleDelegatedOptionCmd", objc, objv);

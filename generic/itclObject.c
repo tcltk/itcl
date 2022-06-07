@@ -202,7 +202,7 @@ ItclCreateObject(
     Tcl_Interp *interp,      /* interpreter mananging new object */
     const char* name,        /* name of new object */
     ItclClass *iclsPtr,        /* class for new object */
-    int objc,                /* number of arguments */
+    size_t objc,                /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
 {
     int result = TCL_OK;
@@ -2753,7 +2753,7 @@ ItclObjectCmd(
     Tcl_Interp *interp,
     Tcl_Object oPtr,
     Tcl_Class clsPtr,
-    int objc,
+    size_t objc,
     Tcl_Obj *const *objv)
 {
     Tcl_Obj *methodNamePtr;

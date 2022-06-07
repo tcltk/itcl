@@ -1467,7 +1467,7 @@ int
 ItclClassCreateObject(
     ClientData clientData,   /* IclObjectInfo */
     Tcl_Interp *interp,      /* current interpreter */
-    int objc,                /* number of arguments */
+    size_t objc,                /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
 {
     Tcl_DString buffer;  /* buffer used to build object names */

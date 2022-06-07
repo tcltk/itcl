@@ -26,10 +26,10 @@ void
 ItclShowArgs(
     int level,
     const char *str,
-    int objc,
+    size_t objc,
     Tcl_Obj * const* objv)
 {
-    int i;
+    size_t i;
 
     if (level > _itcl_debug_level) {
         return;

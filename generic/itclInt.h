@@ -663,7 +663,7 @@ typedef struct ItclCallContext {
 
 #ifdef ITCL_DEBUG
 MODULE_SCOPE int _itcl_debug_level;
-MODULE_SCOPE void ItclShowArgs(int level, const char *str, int objc,
+MODULE_SCOPE void ItclShowArgs(int level, const char *str, size_t objc,
 	Tcl_Obj * const* objv);
 #else
 #define ItclShowArgs(a,b,c,d) do {(void)(c);(void)(d);} while(0)
@@ -698,9 +698,9 @@ MODULE_SCOPE int ItclCreateArgList(Tcl_Interp *interp, const char *str,
 	ItclArgList **arglistPtrPtr, ItclMemberFunc *imPtr,
 	const char *commandName);
 MODULE_SCOPE int ItclObjectCmd(ClientData clientData, Tcl_Interp *interp,
-        Tcl_Object oPtr, Tcl_Class clsPtr, int objc, Tcl_Obj *const *objv);
+        Tcl_Object oPtr, Tcl_Class clsPtr, size_t objc, Tcl_Obj *const *objv);
 MODULE_SCOPE int ItclCreateObject (Tcl_Interp *interp, const char* name,
-        ItclClass *iclsPtr, int objc, Tcl_Obj *const objv[]);
+        ItclClass *iclsPtr, size_t objc, Tcl_Obj *const objv[]);
 MODULE_SCOPE void ItclDeleteObjectVariablesNamespace(Tcl_Interp *interp,
         ItclObject *ioPtr);
 MODULE_SCOPE void ItclDeleteClassVariablesNamespace(Tcl_Interp *interp,
@@ -752,10 +752,10 @@ MODULE_SCOPE int DelegatedOptionsInstall(Tcl_Interp *interp,
         ItclClass *iclsPtr);
 MODULE_SCOPE int Itcl_HandleDelegateOptionCmd(Tcl_Interp *interp,
         ItclObject *ioPtr, ItclClass *iclsPtr, ItclDelegatedOption **idoPtrPtr,
-        int objc, Tcl_Obj *const objv[]);
+        size_t objc, Tcl_Obj *const objv[]);
 MODULE_SCOPE int Itcl_HandleDelegateMethodCmd(Tcl_Interp *interp,
         ItclObject *ioPtr, ItclClass *iclsPtr,
-	ItclDelegatedFunction **idmPtrPtr, int objc, Tcl_Obj *const objv[]);
+	ItclDelegatedFunction **idmPtrPtr, size_t objc, Tcl_Obj *const objv[]);
 MODULE_SCOPE int DelegateFunction(Tcl_Interp *interp, ItclObject *ioPtr,
         ItclClass *iclsPtr, Tcl_Obj *componentNamePtr,
         ItclDelegatedFunction *idmPtr);
@@ -766,7 +766,7 @@ MODULE_SCOPE ItclOption* ItclNewOption(Tcl_Interp *interp, ItclObject *ioPtr,
         ItclClass *iclsPtr, Tcl_Obj *namePtr, const char *resourceName,
         const char *className, char *init, ItclMemberCode *mCodePtr);
 MODULE_SCOPE int ItclParseOption(ItclObjectInfo *infoPtr, Tcl_Interp *interp,
-        int objc, Tcl_Obj *const objv[], ItclClass *iclsPtr,
+        size_t objc, Tcl_Obj *const objv[], ItclClass *iclsPtr,
 	ItclObject *ioPtr, ItclOption **ioptPtrPtr);
 MODULE_SCOPE void ItclDestroyClassNamesp(ClientData cdata);
 MODULE_SCOPE int ExpandDelegateAs(Tcl_Interp *interp, ItclObject *ioPtr,
@@ -803,7 +803,7 @@ MODULE_SCOPE int ItclAddClassFunctionDictInfo(Tcl_Interp *interp,
 MODULE_SCOPE int ItclAddClassDelegatedFunctionDictInfo(Tcl_Interp *interp,
         ItclClass *iclsPtr, ItclDelegatedFunction *idmPtr);
 MODULE_SCOPE int ItclClassCreateObject(ClientData clientData, Tcl_Interp *interp,
-        int objc, Tcl_Obj *const objv[]);
+        size_t objc, Tcl_Obj *const objv[]);
 
 MODULE_SCOPE void ItclRestoreInfoVars(ClientData clientData);
 
