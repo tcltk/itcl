@@ -595,8 +595,8 @@ Itcl_BiConfigureCmd(
     const char *lastval;
     const char *token;
     char *varName;
-    int i;
-    int unparsedObjc;
+    ItclSizeT i;
+    ItclSizeT unparsedObjc;
     int result;
     (void)dummy;
 

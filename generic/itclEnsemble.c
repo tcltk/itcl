@@ -69,7 +69,7 @@ typedef struct Ensemble {
     EnsemblePart **parts;       /* list of parts in this ensemble */
     int numParts;               /* number of parts in part list */
     int maxParts;               /* current size of parts list */
-    int ensembleId;             /* this ensembles id */
+    ItclSizeT ensembleId;       /* this ensembles id */
     Tcl_Command cmdPtr;         /* command representing this ensemble */
     EnsemblePart* parent;       /* parent part for sub-ensembles
                                  * NULL => toplevel ensemble */
@@ -786,7 +786,7 @@ CreateEnsemble(
     memset(ensData->parts, 0, ensData->maxParts*sizeof(EnsemblePart*));
     Tcl_DStringInit(&buffer);
     Tcl_DStringAppend(&buffer, ITCL_COMMANDS_NAMESPACE "::ensembles::", -1);
-    sprintf(buf, "%d", ensData->ensembleId);
+    sprintf(buf, "%" ITCL_Z_MODIFIER "u", ensData->ensembleId);
     Tcl_DStringAppend(&buffer, buf, -1);
     ensData->nsPtr = Tcl_CreateNamespace(interp, Tcl_DStringValue(&buffer),
             ensData, DeleteEnsemble);
@@ -840,7 +840,7 @@ CreateEnsemble(
     Tcl_DStringSetLength(&buffer, 0);
     Tcl_DStringAppend(&buffer, infoPtr->ensembleInfo->ensembleNsPtr->fullName, -1);
     Tcl_DStringAppend(&buffer, "::subensembles::", -1);
-    sprintf(buf, "%d", parentEnsData->ensembleId);
+    sprintf(buf, "%" ITCL_Z_MODIFIER "u", parentEnsData->ensembleId);
     Tcl_DStringAppend(&buffer, buf, -1);
     Tcl_DStringAppend(&buffer, "::", 2);
     Tcl_DStringAppend(&buffer, ensName, -1);

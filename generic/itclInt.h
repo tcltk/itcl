@@ -196,7 +196,7 @@ typedef struct ItclObjectInfo {
                                      * handling */
     int currClassFlags;             /* flags for the class just in creation */
     int buildingWidget;             /* set if in construction of a widget */
-    int unparsedObjc;               /* number options not parsed by
+    ItclSizeT unparsedObjc;         /* number options not parsed by
                                        ItclExtendedConfigure/-Cget function */
     Tcl_Obj **unparsedObjv;         /* options not parsed by
                                        ItclExtendedConfigure/-Cget function */
@@ -229,7 +229,7 @@ typedef struct ItclObjectInfo {
 typedef struct EnsembleInfo {
     Tcl_HashTable ensembles;        /* list of all known ensembles */
     Tcl_HashTable subEnsembles;     /* list of all known subensembles */
-    int numEnsembles;
+    ItclSizeT numEnsembles;
     Tcl_Namespace *ensembleNsPtr;
 } EnsembleInfo;
 /*
@@ -301,7 +301,7 @@ typedef struct ItclClass {
                                      in this class.  Look up simple string
                                      names and get back
 				     ItclMethodVariable* ptrs */
-    int numInstanceVars;          /* number of instance vars in variables
+    ItclSizeT numInstanceVars;    /* number of instance vars in variables
                                      table */
     Tcl_HashTable classCommons;   /* used for storing variable namespace
                                    * string for Tcl_Resolve */
@@ -322,15 +322,15 @@ typedef struct ItclClass {
                                    * ::itcl::widget */
     Tcl_Object oPtr;		  /* TclOO class object */
     Tcl_Class  clsPtr;            /* TclOO class */
-    int numCommons;               /* number of commons in this class */
-    int numVariables;             /* number of variables in this class */
-    int numOptions;               /* number of options in this class */
-    int unique;                   /* unique number for #auto generation */
+    ItclSizeT numCommons;         /* number of commons in this class */
+    ItclSizeT numVariables;       /* number of variables in this class */
+    ItclSizeT numOptions;         /* number of options in this class */
+    ItclSizeT unique;             /* unique number for #auto generation */
     int flags;                    /* maintains class status */
-    int callRefCount;             /* prevent deleting of class if refcount>1 */
+    ItclSizeT callRefCount;       /* prevent deleting of class if refcount>1 */
     Tcl_Obj *typeConstructorPtr;  /* initialization for types */
     int destructorHasBeenCalled;  /* prevent multiple invocations of destrcutor */
-    int refCount;
+    ItclSizeT refCount;
 } ItclClass;
 
 typedef struct ItclHierIter {
@@ -395,7 +395,7 @@ typedef struct ItclObject {
     Tcl_Object oPtr;             /* the TclOO object */
     Tcl_Resolve *resolvePtr;
     int flags;
-    int callRefCount;             /* prevent deleting of object if refcount > 1 */
+    ItclSizeT callRefCount;       /* prevent deleting of object if refcount > 1 */
     Tcl_Obj *hullWindowNamePtr;   /* the window path name for the hull
                                    * (before renaming in installhull) */
     int destructorHasBeenCalled;  /* is set when the destructor is called
@@ -614,7 +614,9 @@ typedef struct ItclMethodVariable {
 typedef struct ItclClassCmdInfo {
     int type;
     int protection;
-    int cmdNum;
+#if TCL_MAJOR_VERSION > 8
+    int cmdNum; /* not actually used */
+#endif
     Tcl_Namespace *nsPtr;
     Tcl_Namespace *declaringNsPtr;
 } ItclClassCmdInfo;
@@ -631,7 +633,7 @@ typedef struct ItclVarLookup {
                                * the fewest qualifiers.  This string is
                                * taken from the resolveVars table, so
                                * it shouldn't be freed. */
-    int varNum;
+    ItclSizeT varNum;
     Tcl_Var varPtr;
 } ItclVarLookup;
 
@@ -640,7 +642,9 @@ typedef struct ItclVarLookup {
  */
 typedef struct ItclCmdLookup {
     ItclMemberFunc* imPtr;    /* function definition */
-    int cmdNum;
+#if TCL_MAJOR_VERSION > 8
+    int cmdNum; /* not actually used */
+#endif
     ItclClassCmdInfo *classCmdInfoPtr;
     Tcl_Command cmdPtr;
 } ItclCmdLookup;
@@ -650,7 +654,7 @@ typedef struct ItclCallContext {
     Tcl_Namespace *nsPtr;
     ItclObject *ioPtr;
     ItclMemberFunc *imPtr;
-    int refCount;
+    ItclSizeT refCount;
 } ItclCallContext;
 
 /*

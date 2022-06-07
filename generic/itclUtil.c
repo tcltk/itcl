@@ -630,11 +630,11 @@ Itcl_ReleaseData(
     blk = ((PresMemoryPrefix *)cdata)-1;
 
     /* Usage sanity check */
-    assert(blk->refCount != 0); /* must call Itcl_PreserveData() first */
+    assert(blk->refCount > 0); /* must call Itcl_PreserveData() first */
     assert(blk->freeProc);	/* must call Itcl_EventuallyFree() first */
 
     /* Decrement preservation count */
-    if (--blk->refCount) {
+    if (blk->refCount-- > 1) {
 	return;
     }
 

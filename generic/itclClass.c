@@ -57,7 +57,7 @@ ItclReleaseClass(
 {
     ItclClass *iclsPtr = (ItclClass *)clientData;
 
-    assert(iclsPtr->refCount != 0);
+    assert(iclsPtr->refCount > 0);
     if (iclsPtr->refCount-- <= 1) {
 	ItclFreeClass(clientData);
     }
@@ -1552,7 +1552,7 @@ ItclClassCreateObject(
                 do {
 		    Tcl_CmdInfo dummy;
 
-                    sprintf(unique,"%.200s%d", Tcl_GetString(iclsPtr->namePtr),
+                    sprintf(unique,"%.200s%" ITCL_Z_MODIFIER "u", Tcl_GetString(iclsPtr->namePtr),
                         iclsPtr->unique++);
                     unique[0] = tolower(UCHAR(unique[0]));
 
@@ -1749,7 +1749,7 @@ ItclResolveVarEntry(
 			     *  Set aside the second and third object-specific slot for the built-in
 			     *  "itcl_options" and "itcl_option_components" variable.
 			     */
-			    if (!iclsPtr->numInstanceVars) {
+			    if (iclsPtr->numInstanceVars == 0) {
 				iclsPtr->numInstanceVars += 3;
 			    }
 			    /*

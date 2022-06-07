@@ -407,7 +407,7 @@ ItclCreateObject(
         do {
 	    Tcl_CmdInfo dummy;
 
-            sprintf(unique,"%.200s_%d", name, iclsPtr->unique++);
+            sprintf(unique,"%.200s_%" ITCL_Z_MODIFIER "u", name, iclsPtr->unique++);
             unique[0] = tolower(UCHAR(unique[0]));
 
             Tcl_DStringSetLength(&buffer, 0);
