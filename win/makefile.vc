@@ -3,12 +3,12 @@
 # Makefile for ITcl
 #
 # Basic build, test and install
-#   nmake /s /nologo /f makefile.vc INSTALLDIR=c:\path\to\installdir TCLDIR=c:\path\to\tcl\source
-#   nmake /s /nologo /f makefile.vc INSTALLDIR=c:\path\to\installdir TCLDIR=c:\path\to\tcl\source test
-#   nmake /s /nologo /f makefile.vc INSTALLDIR=c:\path\to\installdir TCLDIR=c:\path\to\tcl\source install
+#   nmake /f makefile.vc INSTALLDIR=c:\path\to\installdir TCLDIR=c:\path\to\tcl\source
+#   nmake /f makefile.vc INSTALLDIR=c:\path\to\installdir TCLDIR=c:\path\to\tcl\source test
+#   nmake /f makefile.vc INSTALLDIR=c:\path\to\installdir TCLDIR=c:\path\to\tcl\source install
 #
-# For other build options (debug, static etc.)
-# See TIP 477 (https://core.tcl.tk/tips/doc/trunk/tip/477.md) for
+# For other build options (debug, static etc.),
+# See TIP 477 (https://core.tcl-lang.org/tips/doc/main/tip/477.md) for
 # detailed documentation.
 #
 # See the file "license.terms" for information on usage and redistribution
@@ -19,6 +19,9 @@
 PROJECT         = itcl
 NEED_TCL_SOURCE = 1
 RCFILE      = itcl.rc
+
+PRJ_DEFINES = $(PRJ_DEFINES) -DTCL_NO_DEPRECATED=1
+PRJ_DEFINES = $(PRJ_DEFINES) -I$(TMP_DIR)
 
 !include "rules-ext.vc"
 
@@ -106,3 +109,6 @@ genstubs:
 	$(TCLSH) $(TOOLSDIR)\genStubs.tcl $(GENERICDIR) \
 	       $(GENERICDIR)\$(PROJECT).decls $(GENERICDIR)\$(PROJECT)Int.decls
 !endif
+
+# Explicit dependency rules
+$(GENERICDIR)\itclBase.c : $(GENERICDIR)\itclInt.h $(TMP_DIR)\itclUuid.h
