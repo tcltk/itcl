@@ -355,8 +355,8 @@ typedef struct ItclObject {
     ItclClass *iclsPtr;          /* most-specific class */
     Tcl_Command accessCmd;       /* object access command */
 
-    Tcl_HashTable* constructed;  /* temp storage used during construction */
-    Tcl_HashTable* destructed;   /* temp storage used during destruction */
+    Tcl_HashTable *constructed;  /* temp storage used during construction */
+    Tcl_HashTable *destructed;   /* temp storage used during destruction */
     Tcl_HashTable objectVariables;
                                  /* used for storing Tcl_Var entries for
 				  * variable resolving, key is ivPtr of

@@ -2716,7 +2716,7 @@ Itcl_BiInfoExtendedClassCmd(
     }
     contextIclsPtr = Tcl_GetHashValue(hPtr);
 
-#elif defined __cplusplus
+#else
     (void)interp;
     (void)objc;
     (void)objv;
@@ -2803,7 +2803,7 @@ Itcl_BiInfoDelegatedCmd(
     }
     contextIclsPtr = Tcl_GetHashValue(hPtr);
 
-#elif defined __cplusplus
+#else
     (void)interp;
     (void)objc;
     (void)objv;

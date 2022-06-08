@@ -82,7 +82,7 @@ ItclCreateArgList(
     Tcl_Obj **usagePtr,         /* store usage message for arguments here */
     ItclArgList **arglistPtrPtr,
     				/* returns pointer to parsed argument list */
-    ItclMemberFunc *dummy,
+    TCL_UNUSED(ItclMemberFunc *),
     const char *commandName)
 {
     ItclSizeT argc;
@@ -94,7 +94,6 @@ ItclCreateArgList(
     ItclSizeT i;
     int hadArgsArgument;
     int result;
-    (void)dummy;
 
     *arglistPtrPtr = NULL;
     lastArglistPtr = NULL;
@@ -297,14 +296,13 @@ Itcl_EvalArgs(
  */
 Tcl_Obj*
 Itcl_CreateArgs(
-    Tcl_Interp *dummy,      /* current interpreter */
+    TCL_UNUSED(Tcl_Interp *),/* current interpreter */
     const char *string,      /* first command word */
-    ItclSizeT objc,                /* number of arguments */
+    ItclSizeT objc,          /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
 {
     ItclSizeT i;
     Tcl_Obj *listPtr;
-    (void)dummy;
 
     ItclShowArgs(1, "Itcl_CreateArgs", objc, objv);
     listPtr = Tcl_NewListObj(objc+2, NULL);
@@ -325,19 +323,16 @@ Itcl_CreateArgs(
 
 int
 ItclEnsembleSubCmd(
-    void *dummy,
+    TCL_UNUSED(void *),
     Tcl_Interp *interp,
-    const char *ensembleName,
+    TCL_UNUSED(const char *),
     int objc,
     Tcl_Obj *const *objv,
-    const char *functionName)
+    TCL_UNUSED(const char *))
 {
     int result;
     Tcl_Obj **newObjv;
     int isRootEnsemble;
-    (void)dummy;
-    (void)ensembleName;
-    (void)functionName;
 
     ItclShowArgs(2, functionName, objc, objv);
 

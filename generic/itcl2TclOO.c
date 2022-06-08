@@ -232,7 +232,7 @@ Itcl_PublicObjectCmd(
     void *clientData,
     Tcl_Interp *interp,
     Tcl_Class clsPtr,
-    int objc,
+    size_t objc,
     Tcl_Obj *const *objv)
 {
     Tcl_Object oPtr = (Tcl_Object)clientData;

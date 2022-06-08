@@ -1882,10 +1882,9 @@ GetEnsembleParser(
 static void
 DeleteEnsParser(
     void *clientData,        /* client data for ensemble-related commands */
-    Tcl_Interp *dummy)       /* interpreter containing the data */
+    TCL_UNUSED(Tcl_Interp *))/* interpreter containing the data */
 {
     EnsembleParser* ensInfo = (EnsembleParser*)clientData;
-    (void)dummy;
 
     Tcl_DeleteInterp(ensInfo->parser);
     ckfree((char*)ensInfo);
@@ -2026,14 +2025,13 @@ int
 Itcl_EnsembleErrorCmd(
     void *clientData,        /* ensemble info */
     Tcl_Interp *interp,      /* current interpreter */
-    int objc,                /* number of arguments */
+    TCL_UNUSED(ItclSizeT),   /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
 {
     Ensemble *ensData = (Ensemble*)clientData;
 
     char *cmdName;
     Tcl_Obj *objPtr;
-    (void)objc;
 
     cmdName = Tcl_GetString(objv[0]);
 
@@ -2123,7 +2121,7 @@ EnsembleSubCmd(
 
 static int
 EnsembleUnknownCmd(
-    void *dummy,        /* not used */
+    TCL_UNUSED(void *),      /* not used */
     Tcl_Interp *interp,      /* current interpreter */
     int objc,                /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
@@ -2133,7 +2131,6 @@ EnsembleUnknownCmd(
     ItclObjectInfo *infoPtr;
     EnsemblePart *ensPart;
     Ensemble *ensData;
-    (void)dummy;
 
     ItclShowArgs(2, "EnsembleUnknownCmd", objc, objv);
     cmd = Tcl_GetCommandFromObj(interp, objv[1]);

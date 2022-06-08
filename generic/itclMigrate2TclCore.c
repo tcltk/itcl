@@ -169,7 +169,7 @@ Itcl_SetCallFrameNamespace(
     return TCL_OK;
 }
 
-int
+size_t
 Itcl_GetCallVarFrameObjc(
     Tcl_Interp *interp)
 {
@@ -180,7 +180,7 @@ Itcl_GetCallVarFrameObjc(
     return framePtr->objc;
 }
 
-Tcl_Obj * const *
+Tcl_Obj *const *
 Itcl_GetCallVarFrameObjv(
     Tcl_Interp *interp)
 {
@@ -202,7 +202,7 @@ Itcl_GetCallFrameObjc(
     return ((Interp *)interp)->framePtr->objc;
 }
 
-Tcl_Obj * const *
+Tcl_Obj *const *
 Itcl_GetCallFrameObjv(
     Tcl_Interp *interp)
 {

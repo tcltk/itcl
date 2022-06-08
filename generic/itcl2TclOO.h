@@ -21,7 +21,7 @@ MODULE_SCOPE Tcl_Method Itcl_NewProcMethod(Tcl_Interp *interp, Tcl_Object oPtr,
         ProcErrorProc *errProc, void *clientData, Tcl_Obj *nameObj,
 	Tcl_Obj *argsObj, Tcl_Obj *bodyObj, void **clientData2);
 MODULE_SCOPE int Itcl_PublicObjectCmd(void *clientData, Tcl_Interp *interp,
-        Tcl_Class clsPtr, int objc, Tcl_Obj *const *objv);
+        Tcl_Class clsPtr, size_t objc, Tcl_Obj *const *objv);
 MODULE_SCOPE Tcl_Method Itcl_NewForwardClassMethod(Tcl_Interp *interp,
         Tcl_Class clsPtr, int flags, Tcl_Obj *nameObj, Tcl_Obj *prefixObj);
 MODULE_SCOPE int Itcl_SelfCmd(void *clientData, Tcl_Interp *interp,

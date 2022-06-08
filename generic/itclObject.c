@@ -109,16 +109,13 @@ ItclDeleteObjectMetadata(
 static void
 ObjectRenamedTrace(
     void *clientData,           /* The object being deleted. */
-    Tcl_Interp *dummy,          /* The interpreter containing the object. */
-    const char *oldName,        /* What the object was (last) called. */
+    TCL_UNUSED(Tcl_Interp *),   /* The interpreter containing the object. */
+    TCL_UNUSED(const char *),   /* What the object was (last) called. */
     const char *newName,        /* Always NULL ??. not for itk!! */
-    int flags)                  /* Why was the object deleted? */
+    TCL_UNUSED(int))            /* Why was the object deleted? */
 {
     ItclObject *ioPtr = (ItclObject *)clientData;
     Itcl_InterpState istate;
-    (void)dummy;
-    (void)oldName;
-    (void)flags;
 
     if (newName != NULL) {
 	/* FIXME should enter the new name in the hashtables for objects etc. */
@@ -731,16 +728,11 @@ errorReturn:
  */
 static int
 ItclInitObjectCommands(
-   Tcl_Interp *interp,
-   ItclObject *ioPtr,
-   ItclClass *iclsPtr,
-   const char *name)
+   TCL_UNUSED(Tcl_Interp *),
+   TCL_UNUSED(ItclObject *),
+   TCL_UNUSED(ItclClass *),
+   TCL_UNUSED(const char *))
 {
-    (void)interp;
-    (void)ioPtr;
-    (void)iclsPtr;
-    (void)name;
-
     return TCL_OK;
 }
 
@@ -1157,10 +1149,10 @@ ItclInitObjectOptions(
  */
 int
 ItclInitObjectMethodVariables(
-   Tcl_Interp *dummy,
+   TCL_UNUSED(Tcl_Interp *),
    ItclObject *ioPtr,
    ItclClass *iclsPtr,
-   const char *name)
+   TCL_UNUSED(const char *))
 {
     ItclClass *iclsPtr2;
     ItclHierIter hier;
@@ -1169,8 +1161,6 @@ ItclInitObjectMethodVariables(
     Tcl_HashEntry *hPtr2;
     Tcl_HashSearch place;
     int isNew;
-    (void)dummy;
-    (void)name;
 
     imvPtr = NULL;
     Itcl_InitHierIter(&hier, iclsPtr);
@@ -1932,7 +1922,7 @@ void
 ItclReportObjectUsage(
     Tcl_Interp *interp,           /* current interpreter */
     ItclObject *contextIoPtr,     /* current object */
-    Tcl_Namespace *callerNsPtr,
+    TCL_UNUSED(Tcl_Namespace *),
     Tcl_Namespace *contextNsPtr)  /* the context namespace */
 {
     Tcl_Obj *namePtr;
@@ -1949,7 +1939,6 @@ ItclReportObjectUsage(
     char *name;
     int ignore;
     int cmp;
-    (void)callerNsPtr;
 
     if (contextIoPtr == NULL) {
         resultPtr = Tcl_GetObjResult(interp);
@@ -2085,13 +2074,12 @@ ItclTraceThisVar(
     void *cdata,	      /* object instance data */
     Tcl_Interp *interp,	  /* interpreter managing this variable */
     const char *name1,    /* variable name */
-    const char *name2,    /* unused */
+    TCL_UNUSED(const char *),/* unused */
     int flags)		      /* flags indicating read/write */
 {
     ItclObject *contextIoPtr = (ItclObject*)cdata;
     Tcl_Obj *objPtr;
     const char *objName;
-    (void)name2;
 
     /* because of SF bug #187 use a different trace handler for "this", "win", "type"
      * *self" and "selfns"
@@ -2143,7 +2131,7 @@ ItclTraceWinVar(
     void *cdata,          /* object instance data */
     Tcl_Interp *interp,	  /* interpreter managing this variable */
     const char *name1,    /* variable name */
-    const char *name2,    /* unused */
+    TCL_UNUSED(const char *),/* unused */
     int flags)            /* flags indicating read/write */
 {
     ItclObject *contextIoPtr = (ItclObject*)cdata;
@@ -2152,7 +2140,6 @@ ItclTraceWinVar(
     const char *objName;
     const char *head;
     const char *tail;
-    (void)name2;
 
     /*
      *  Handle read traces on "win"
@@ -2204,13 +2191,12 @@ ItclTraceTypeVar(
     void *cdata,          /* object instance data */
     Tcl_Interp *interp,	  /* interpreter managing this variable */
     const char *name1,    /* variable name */
-    const char *name2,    /* unused */
+    TCL_UNUSED(const char *),/* unused */
     int flags)            /* flags indicating read/write */
 {
     ItclObject *contextIoPtr = (ItclObject*)cdata;
     Tcl_Obj *objPtr;
     const char *objName;
-    (void)name2;
 
     /*
      *  Handle read traces on "type"
@@ -2256,13 +2242,12 @@ ItclTraceSelfVar(
     void *cdata,          /* object instance data */
     Tcl_Interp *interp,	  /* interpreter managing this variable */
     const char *name1,    /* variable name */
-    const char *name2,    /* unused */
+    TCL_UNUSED(const char *),/* unused */
     int flags)            /* flags indicating read/write */
 {
     ItclObject *contextIoPtr = (ItclObject*)cdata;
     Tcl_Obj *objPtr;
     const char *objName;
-    (void)name2;
 
     /*
      *  Handle read traces on "self"
@@ -2324,13 +2309,12 @@ ItclTraceSelfnsVar(
     void *cdata,          /* object instance data */
     Tcl_Interp *interp,	  /* interpreter managing this variable */
     const char *name1,    /* variable name */
-    const char *name2,    /* unused */
+    TCL_UNUSED(const char *),/* unused */
     int flags)	          /* flags indicating read/write */
 {
     ItclObject *contextIoPtr = (ItclObject*)cdata;
     Tcl_Obj *objPtr;
     const char *objName;
-    (void)name2;
 
     /*
      *  Handle read traces on "selfns"
@@ -2371,16 +2355,13 @@ ItclTraceSelfnsVar(
 static char*
 ItclTraceOptionVar(
     void *cdata,            /* object instance data */
-    Tcl_Interp *interp,	    /* interpreter managing this variable */
-    const char *name1,      /* variable name */
-    const char *name2,      /* unused */
+    TCL_UNUSED(Tcl_Interp *),/* interpreter managing this variable */
+    TCL_UNUSED(const char *),/* variable name */
+    TCL_UNUSED(const char *),/* unused */
     int flags)              /* flags indicating read/write */
 {
     ItclObject *ioPtr;
     ItclOption *ioptPtr;
-    (void)interp;
-    (void)name1;
-    (void)name2;
 
 /* FIXME !!! */
 /* don't know yet if ItclTraceOptionVar is really needed !! */
@@ -2424,7 +2405,7 @@ ItclTraceComponentVar(
     void *cdata,            /* object instance data */
     Tcl_Interp *interp,	    /* interpreter managing this variable */
     const char *name1,      /* variable name */
-    const char *name2,      /* unused */
+    TCL_UNUSED(const char *),/* unused */
     int flags)              /* flags indicating read/write */
 {
     FOREACH_HASH_DECLS;
@@ -2437,7 +2418,6 @@ ItclTraceComponentVar(
     ItclComponent *icPtr;
     ItclDelegatedFunction *idmPtr;
     const char *val;
-    (void)name2;
 
 /* FIXME should free memory on unset or rename!! */
     if (cdata != NULL) {
@@ -2527,7 +2507,7 @@ ItclTraceItclHullVar(
     void *cdata,            /* object instance data */
     Tcl_Interp *interp,	    /* interpreter managing this variable */
     const char *name1,      /* variable name */
-    const char *name2,      /* unused */
+    TCL_UNUSED(const char *),/* unused */
     int flags)              /* flags indicating read/write */
 {
     Tcl_HashEntry *hPtr;
@@ -2535,7 +2515,6 @@ ItclTraceItclHullVar(
     ItclObjectInfo *infoPtr;
     ItclObject *ioPtr;
     ItclVariable *ivPtr;
-    (void)name2;
 
 /* FIXME !!! */
 /* FIXME should free memory on unset or rename!! */
@@ -2739,7 +2718,7 @@ CallPublicObjectCmd(
     Tcl_Object *oPtr = (Tcl_Object *)data[0];
     Tcl_Class clsPtr = (Tcl_Class)data[1];
     Tcl_Obj *const *objv = (Tcl_Obj *const *)data[3];
-    int objc = PTR2INT(data[2]);
+    size_t objc = PTR2INT(data[2]);
 
     ItclShowArgs(1, "CallPublicObjectCmd", objc, objv);
     result = Itcl_PublicObjectCmd(oPtr, interp, clsPtr, objc, objv);
@@ -3457,7 +3436,7 @@ DelegateFunction(
 
 int
 DelegatedOptionsInstall(
-    Tcl_Interp *dummy,
+    TCL_UNUSED(Tcl_Interp *),
     ItclClass *iclsPtr)
 {
     Tcl_HashEntry *hPtr2;
@@ -3466,7 +3445,6 @@ DelegatedOptionsInstall(
     ItclOption *ioptPtr;
     FOREACH_HASH_DECLS;
     char *optionName;
-    (void)dummy;
 
     FOREACH_HASH_VALUE(idoPtr, &iclsPtr->delegatedOptions) {
 	optionName = Tcl_GetString(idoPtr->namePtr);

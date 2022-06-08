@@ -477,7 +477,7 @@ declare 108 {
 }
 declare 109 {
     int Itcl_EnsembleErrorCmd(ClientData clientData, Tcl_Interp *interp,
-        int objc, Tcl_Obj *const objv[])
+        ItclSizeT objc, Tcl_Obj *const objv[])
 }
 declare 115 {
     void Itcl_Assert(const char *testExpr, const char *fileName, int lineNum)

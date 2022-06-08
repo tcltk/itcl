@@ -141,13 +141,12 @@ static int
 CallNewObjectInstance(
     void *data[],
     Tcl_Interp *interp,
-    int result)
+    TCL_UNUSED(int))
 {
     ItclObjectInfo *infoPtr = (ItclObjectInfo *)data[0];
     const char *path = (const char *)data[1];
     Tcl_Object *oPtr = (Tcl_Object *)data[2];
     Tcl_Obj *nameObjPtr = (Tcl_Obj *)data[3];
-    (void)result;
 
     *oPtr = NULL;
     if (infoPtr->clazzClassPtr) {

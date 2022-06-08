@@ -362,7 +362,7 @@ ITCLAPI int		Itcl_EnsPartCmd(ClientData clientData,
 				Tcl_Obj *const objv[]);
 /* 109 */
 ITCLAPI int		Itcl_EnsembleErrorCmd(ClientData clientData,
-				Tcl_Interp *interp, int objc,
+				Tcl_Interp *interp, ItclSizeT objc,
 				Tcl_Obj *const objv[]);
 /* Slot 110 is reserved */
 /* Slot 111 is reserved */
@@ -645,7 +645,7 @@ typedef struct ItclIntStubs {
     int (*itcl_GetEnsembleUsageForObj) (Tcl_Interp *interp, Tcl_Obj *ensObjPtr, Tcl_Obj *objPtr); /* 106 */
     int (*itcl_EnsembleCmd) (ClientData clientData, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]); /* 107 */
     int (*itcl_EnsPartCmd) (ClientData clientData, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]); /* 108 */
-    int (*itcl_EnsembleErrorCmd) (ClientData clientData, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]); /* 109 */
+    int (*itcl_EnsembleErrorCmd) (ClientData clientData, Tcl_Interp *interp, ItclSizeT objc, Tcl_Obj *const objv[]); /* 109 */
     void (*reserved110)(void);
     void (*reserved111)(void);
     void (*reserved112)(void);
