@@ -69,6 +69,8 @@
 #ifndef TCL_UNUSED
 #   if defined(__cplusplus)
 #	define TCL_UNUSED(T) T
+#   elif defined(__GNUC__) && (__GNUC__ > 2)
+#	define TCL_UNUSED(T) T JOIN(dummy, __LINE__) __attribute__((unused))
 #   else
 #	define TCL_UNUSED(T) T JOIN(dummy, __LINE__)
 #   endif
