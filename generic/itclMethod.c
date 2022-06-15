@@ -1904,7 +1904,7 @@ int
 ItclConstructGuts(
     ItclObject *contextObj,
     Tcl_Interp *interp,
-    int objc,
+    ItclSizeT objc,
     Tcl_Obj *const objv[])
 {
     ItclClass *contextClass;

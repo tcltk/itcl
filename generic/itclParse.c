@@ -630,20 +630,20 @@ Itcl_ClassCmd(
  * ------------------------------------------------------------------------
  */
 
-static Tcl_MethodCallProc ObjCallProc;
-static Tcl_MethodCallProc ArgCallProc;
+static Tcl_MethodCallProc2 ObjCallProc;
+static Tcl_MethodCallProc2 ArgCallProc;
 static Tcl_CloneProc CloneProc;
 
-static const Tcl_MethodType itclObjMethodType = {
-    TCL_OO_METHOD_VERSION_CURRENT,
+static const Tcl_MethodType2 itclObjMethodType = {
+    TCL_OO_METHOD_VERSION_2,
     "itcl objv method",
     ObjCallProc,
     Itcl_ReleaseData,
     CloneProc
 };
 
-static const Tcl_MethodType itclArgMethodType = {
-    TCL_OO_METHOD_VERSION_CURRENT,
+static const Tcl_MethodType2 itclArgMethodType = {
+    TCL_OO_METHOD_VERSION_2,
     "itcl argv method",
     ArgCallProc,
     Itcl_ReleaseData,
@@ -679,7 +679,7 @@ ObjCallProc(
     void *clientData,
     Tcl_Interp *interp,
     Tcl_ObjectContext context,
-    int objc,
+    ItclSizeT objc,
     Tcl_Obj *const *objv)
 {
     ItclMemberFunc *imPtr = (ItclMemberFunc *)clientData;
@@ -704,7 +704,7 @@ ArgCallProc(
     TCL_UNUSED(void *),
     TCL_UNUSED(Tcl_Interp *),
     TCL_UNUSED(Tcl_ObjectContext),
-    TCL_UNUSED(int),
+    TCL_UNUSED(ItclSizeT),
     TCL_UNUSED(Tcl_Obj *const *))
 {
     return TCL_ERROR;
@@ -879,12 +879,12 @@ ItclClassBaseCmd(
 if (imPtr->codePtr->flags & ITCL_IMPLEMENT_OBJCMD) {
     /* Implementation of this member is coded in C expecting Tcl_Obj */
 
-    imPtr->tmPtr = Tcl_NewMethod(interp, iclsPtr->clsPtr, imPtr->namePtr,
+    imPtr->tmPtr = Tcl_NewMethod2(interp, iclsPtr->clsPtr, imPtr->namePtr,
 	    1, &itclObjMethodType, imPtr);
     Itcl_PreserveData(imPtr);
 
     if (iclsPtr->flags & (ITCL_TYPE|ITCL_WIDGET|ITCL_WIDGETADAPTOR)) {
-	imPtr->tmPtr = Tcl_NewInstanceMethod(interp, iclsPtr->oPtr,
+	imPtr->tmPtr = Tcl_NewInstanceMethod2(interp, iclsPtr->oPtr,
 		imPtr->namePtr, 1, &itclObjMethodType, imPtr);
 	Itcl_PreserveData(imPtr);
     }
@@ -892,7 +892,7 @@ if (imPtr->codePtr->flags & ITCL_IMPLEMENT_OBJCMD) {
 } else if (imPtr->codePtr->flags & ITCL_IMPLEMENT_ARGCMD) {
     /* Implementation of this member is coded in C expecting (char *) */
 
-    imPtr->tmPtr = Tcl_NewMethod(interp, iclsPtr->clsPtr, imPtr->namePtr,
+    imPtr->tmPtr = Tcl_NewMethod2(interp, iclsPtr->clsPtr, imPtr->namePtr,
 	    1, &itclArgMethodType, imPtr);
 
 		Itcl_PreserveData(imPtr);

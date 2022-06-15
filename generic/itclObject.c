@@ -631,7 +631,7 @@ ItclCreateObject(
 
         if (iclsPtr->flags
 		& (ITCL_ECLASS|ITCL_TYPE|ITCL_WIDGET|ITCL_WIDGETADAPTOR)) {
-	    Tcl_NewInstanceMethod(interp, ioPtr->oPtr,
+	    Tcl_NewInstanceMethod2(interp, ioPtr->oPtr,
 		    Tcl_NewStringObj("unknown", -1), 0,
 		    &itclRootMethodType, (void *)ItclUnknownGuts);
 	}

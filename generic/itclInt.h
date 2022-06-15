@@ -80,6 +80,16 @@
 #   define ITCL_Z_MODIFIER TCL_Z_MODIFIER
 #else
 #   define ITCL_Z_MODIFIER ""
+#   undef Tcl_MethodIsType2
+#   undef Tcl_NewInstanceMethod2
+#   undef Tcl_NewMethod2
+#   undef Tcl_MethodType2
+#   undef Tcl_MethodCallProc2
+#   define Tcl_MethodIsType2 Tcl_MethodIsType
+#   define Tcl_NewInstanceMethod2 Tcl_NewInstanceMethod
+#   define Tcl_NewMethod2 Tcl_NewMethod
+#   define Tcl_MethodType2 Tcl_MethodType
+#   define Tcl_MethodCallProc2 Tcl_MethodCallProc
 #endif
 
 #if !defined(ItclSizeT)
@@ -842,9 +852,9 @@ MODULE_SCOPE Tcl_ObjCmdProc Itcl_ClassHullTypeCmd;
 MODULE_SCOPE Tcl_ObjCmdProc Itcl_ClassWidgetClassCmd;
 
 typedef int (ItclRootMethodProc)(ItclObject *ioPtr, Tcl_Interp *interp,
-	int objc, Tcl_Obj *const objv[]);
+	ItclSizeT objc, Tcl_Obj *const objv[]);
 
-MODULE_SCOPE const Tcl_MethodType itclRootMethodType;
+MODULE_SCOPE const Tcl_MethodType2 itclRootMethodType;
 MODULE_SCOPE ItclRootMethodProc ItclUnknownGuts;
 MODULE_SCOPE ItclRootMethodProc ItclConstructGuts;
 MODULE_SCOPE ItclRootMethodProc ItclInfoGuts;

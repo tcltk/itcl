@@ -346,7 +346,7 @@ int
 ItclInfoGuts(
     ItclObject *ioPtr,
     Tcl_Interp *interp,
-    int objc,
+    ItclSizeT objc,
     Tcl_Obj *const objv[])
 {
     ItclObjectInfo *infoPtr = ioPtr->infoPtr;

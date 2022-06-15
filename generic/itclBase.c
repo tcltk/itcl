@@ -126,10 +126,10 @@ static const Tcl_ObjectMetadataType objMDT = {
     NULL
 };
 
-static Tcl_MethodCallProc RootCallProc;
+static Tcl_MethodCallProc2 RootCallProc;
 
-const Tcl_MethodType itclRootMethodType = {
-    TCL_OO_METHOD_VERSION_CURRENT,
+const Tcl_MethodType2 itclRootMethodType = {
+    TCL_OO_METHOD_VERSION_2,
     "itcl root method",
     RootCallProc,
     NULL,
@@ -141,7 +141,7 @@ RootCallProc(
     void *clientData,
     Tcl_Interp *interp,
     Tcl_ObjectContext context,
-    int objc,
+    ItclSizeT objc,
     Tcl_Obj *const *objv)
 {
     Tcl_Object oPtr = Tcl_ObjectContextObject(context);
@@ -300,13 +300,13 @@ Initialize (
     root = Tcl_NewObjectInstance(interp, tclCls, "::itcl::Root",
 	    NULL, 0, NULL, 0);
 
-    Tcl_NewMethod(interp, Tcl_GetObjectAsClass(root),
+    Tcl_NewMethod2(interp, Tcl_GetObjectAsClass(root),
 	    Tcl_NewStringObj("unknown", -1), 0, &itclRootMethodType,
 	    (void *)ItclUnknownGuts);
-    Tcl_NewMethod(interp, Tcl_GetObjectAsClass(root),
+    Tcl_NewMethod2(interp, Tcl_GetObjectAsClass(root),
 	    Tcl_NewStringObj("ItclConstructBase", -1), 0,
 	    &itclRootMethodType, (void *)ItclConstructGuts);
-    Tcl_NewMethod(interp, Tcl_GetObjectAsClass(root),
+    Tcl_NewMethod2(interp, Tcl_GetObjectAsClass(root),
 	    Tcl_NewStringObj("info", -1), 1,
 	    &itclRootMethodType, (void *)ItclInfoGuts);
 
