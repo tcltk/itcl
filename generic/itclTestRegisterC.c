@@ -30,13 +30,13 @@
 #include "itclInt.h"
 
 Tcl_CmdProc cArgFunc;
-Tcl_ObjCmdProc2 cObjFunc;
+Tcl_ObjCmdProc cObjFunc;
 
 int
 cArgFunc(
     void *clientData,
     Tcl_Interp *interp,
-    ItclSizeT argc,
+    int argc,
     const char **argv)
 {
     int result;

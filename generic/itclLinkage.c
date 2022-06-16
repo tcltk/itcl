@@ -30,6 +30,7 @@
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  */
 #include "itclInt.h"
+#include <limits.h>
 
 /*
  *  These records store the pointers for all "RegisterC" functions.
@@ -158,19 +159,6 @@ Itcl_RegisterC(
  * ------------------------------------------------------------------------
  */
 
-#if TCL_MAJOR_VERSION > 8
-int
-Itcl_RegisterObjC(
-    Tcl_Interp *interp,     /* interpreter handling this registration */
-    const char *name,       /* symbolic name for procedure */
-    Tcl_ObjCmdProc *proc,   /* procedure handling Tcl command */
-    void *clientData,       /* client data associated with proc */
-    Tcl_CmdDeleteProc *deleteProc)  /* proc called to free up client data */
-{
-    return 0;
-}
-#endif
-
 int
 Itcl_RegisterObjC2(
     Tcl_Interp *interp,     /* interpreter handling this registration */
@@ -227,7 +215,59 @@ Itcl_RegisterObjC2(
     return TCL_OK;
 }
 
-
+#if TCL_MAJOR_VERSION > 8
+
+typedef struct {
+    void *clientData; /* Arbitrary value to pass to object function. */
+    Tcl_ObjCmdProc *proc;
+    Tcl_CmdDeleteProc *deleteProc;
+} CmdWrapperInfo;
+
+
+static int cmdWrapperProc(void *clientData,
+	Tcl_Interp *interp,
+	size_t objc,
+	struct Tcl_Obj * const *objv)
+{
+    CmdWrapperInfo *info = (CmdWrapperInfo *)clientData;
+    if (objc > INT_MAX) {
+	Tcl_WrongNumArgs(interp, 1, objv, "?args?");
+	return TCL_ERROR;
+    }
+    return info->proc(info->clientData, interp, objc, objv);
+}
+
+static void cmdWrapperDeleteProc(void *clientData) {
+    CmdWrapperInfo *info = (CmdWrapperInfo *)clientData;
+
+    clientData = info->clientData;
+    Tcl_CmdDeleteProc *deleteProc = info->deleteProc;
+    ckfree(info);
+    if (deleteProc != NULL) {
+	deleteProc(clientData);
+    }
+}
+
+int
+Itcl_RegisterObjC(
+    Tcl_Interp *interp,     /* interpreter handling this registration */
+    const char *name,       /* symbolic name for procedure */
+    Tcl_ObjCmdProc *proc,   /* procedure handling Tcl command */
+    void *clientData,       /* client data associated with proc */
+    Tcl_CmdDeleteProc *deleteProc)  /* proc called to free up client data */
+{
+    CmdWrapperInfo *info = (CmdWrapperInfo *)ckalloc(sizeof(CmdWrapperInfo));
+    info->proc = proc;
+    info->deleteProc = deleteProc;
+    info->clientData = clientData;
+
+    return Itcl_RegisterObjC2(interp, name,
+	    (proc ? cmdWrapperProc : NULL),
+	    info, cmdWrapperDeleteProc);
+
+}
+#endif
+
 /*
  * ------------------------------------------------------------------------
  *  Itcl_FindC()
@@ -240,19 +280,6 @@ Itcl_RegisterObjC2(
  *  otherwise.
  * ------------------------------------------------------------------------
  */
-
-#if TCL_MAJOR_VERSION > 8
-int
-Itcl_FindC(
-    Tcl_Interp *interp,           /* interpreter handling this registration */
-    const char *name,             /* symbolic name for procedure */
-    Tcl_CmdProc **argProcPtr,     /* returns (argc,argv) command handler */
-    Tcl_ObjCmdProc **objProcPtr,  /* returns (objc,objv) command handler */
-    void **cDataPtr)              /* returns client data */
-{
-    return 0;
-}
-#endif
 
 int
 Itcl_FindC2(
@@ -287,7 +314,27 @@ Itcl_FindC2(
     return (*argProcPtr != NULL || *objProcPtr != NULL);
 }
 
-
+#if TCL_MAJOR_VERSION > 8
+int
+Itcl_FindC(
+    Tcl_Interp *interp,           /* interpreter handling this registration */
+    const char *name,             /* symbolic name for procedure */
+    Tcl_CmdProc **argProcPtr,     /* returns (argc,argv) command handler */
+    Tcl_ObjCmdProc **objProcPtr,  /* returns (objc,objv) command handler */
+    void **cDataPtr)              /* returns client data */
+{
+	Tcl_ObjCmdProc2 *proc2;
+    int result = Itcl_FindC2(interp, name, argProcPtr, &proc2, cDataPtr);
+    if (result && proc2 == cmdWrapperProc) {
+        CmdWrapperInfo *info = (CmdWrapperInfo *)ckalloc(sizeof(CmdWrapperInfo));
+        *objProcPtr = info->proc;
+        *cDataPtr = info->clientData;
+    }
+    return result;
+}
+#endif
+
+
 /*
  * ------------------------------------------------------------------------
  *  ItclGetRegisteredProcs()
