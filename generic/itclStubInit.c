@@ -7,6 +7,11 @@
 
 #undef Itcl_GetStackValue
 
+#if TCL_MAJOR_VERSION < 9
+#    define Itcl_RegisterObjC 0
+#    define Itcl_FindC 0
+#endif
+
 MODULE_SCOPE const ItclStubs itclStubs;
 /* !BEGIN!: Do not edit below this line. */
 

@@ -96,6 +96,10 @@
 #   define Tcl_NRCreateCommand2 Tcl_NRCreateCommand
 #   undef Tcl_NRCallObjProc2
 #   define Tcl_NRCallObjProc2 Tcl_NRCallObjProc
+#   undef Itcl_RegisterObjC2
+#   define  Itcl_RegisterObjC2 Itcl_RegisterObjC
+#   undef Itcl_FindC2
+#   define Itcl_FindC2 Itcl_FindC
 #   undef TCL_OO_METHOD_VERSION_2
 #   define TCL_OO_METHOD_VERSION_2 TCL_OO_METHOD_VERSION_CURRENT
 #endif
