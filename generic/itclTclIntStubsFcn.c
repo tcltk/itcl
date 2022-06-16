@@ -38,11 +38,11 @@ _Tcl_CreateProc(
     return code;
 }
 
-Tcl_ObjCmdProc *
+Tcl_ObjCmdProc2 *
 _Tcl_GetObjInterpProc(
     void)
 {
-    return (Tcl_ObjCmdProc *)TclGetObjInterpProc();
+    return (Tcl_ObjCmdProc2 *)TclGetObjInterpProc();
 }
 
 void

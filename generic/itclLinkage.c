@@ -36,7 +36,7 @@
  */
 typedef struct ItclCfunc {
     Tcl_CmdProc *argCmdProc;        /* old-style (argc,argv) command handler */
-    Tcl_ObjCmdProc *objCmdProc;     /* new (objc,objv) command handler */
+    Tcl_ObjCmdProc2 *objCmdProc;     /* new (objc,objv) command handler */
     void *clientData;               /* client data passed into this function */
     Tcl_CmdDeleteProc *deleteProc;  /* proc called to free clientData */
 } ItclCfunc;
@@ -157,11 +157,25 @@ Itcl_RegisterC(
  *  in interp->result) if anything goes wrong.
  * ------------------------------------------------------------------------
  */
+
+#if TCL_MAJOR_VERSION > 8
 int
 Itcl_RegisterObjC(
     Tcl_Interp *interp,     /* interpreter handling this registration */
     const char *name,       /* symbolic name for procedure */
     Tcl_ObjCmdProc *proc,   /* procedure handling Tcl command */
+    void *clientData,       /* client data associated with proc */
+    Tcl_CmdDeleteProc *deleteProc)  /* proc called to free up client data */
+{
+    return 0;
+}
+#endif
+
+int
+Itcl_RegisterObjC2(
+    Tcl_Interp *interp,     /* interpreter handling this registration */
+    const char *name,       /* symbolic name for procedure */
+    Tcl_ObjCmdProc2 *proc,   /* procedure handling Tcl command */
     void *clientData,       /* client data associated with proc */
     Tcl_CmdDeleteProc *deleteProc)  /* proc called to free up client data */
 {
@@ -226,12 +240,26 @@ Itcl_RegisterObjC(
  *  otherwise.
  * ------------------------------------------------------------------------
  */
+
+#if TCL_MAJOR_VERSION > 8
 int
 Itcl_FindC(
     Tcl_Interp *interp,           /* interpreter handling this registration */
     const char *name,             /* symbolic name for procedure */
     Tcl_CmdProc **argProcPtr,     /* returns (argc,argv) command handler */
     Tcl_ObjCmdProc **objProcPtr,  /* returns (objc,objv) command handler */
+    void **cDataPtr)              /* returns client data */
+{
+    return 0;
+}
+#endif
+
+int
+Itcl_FindC2(
+    Tcl_Interp *interp,           /* interpreter handling this registration */
+    const char *name,             /* symbolic name for procedure */
+    Tcl_CmdProc **argProcPtr,     /* returns (argc,argv) command handler */
+    Tcl_ObjCmdProc2 **objProcPtr,  /* returns (objc,objv) command handler */
     void **cDataPtr)              /* returns client data */
 {
     Tcl_HashEntry *entry;

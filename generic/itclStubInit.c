@@ -240,6 +240,8 @@ const ItclStubs itclStubs = {
     Itcl_Alloc, /* 26 */
     Itcl_Free, /* 27 */
     ItclGetStackValue, /* 28 */
+    Itcl_RegisterObjC2, /* 29 */
+    Itcl_FindC2, /* 30 */
 };
 
 /* !END!: Do not edit above this line. */

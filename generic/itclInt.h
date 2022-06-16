@@ -90,6 +90,14 @@
 #   define Tcl_NewMethod2 Tcl_NewMethod
 #   define Tcl_MethodType2 Tcl_MethodType
 #   define Tcl_MethodCallProc2 Tcl_MethodCallProc
+#   undef Tcl_CreateObjCommand2
+#   define Tcl_CreateObjCommand2 Tcl_CreateObjCommand
+#   undef Tcl_NRCreateCommand2
+#   define Tcl_NRCreateCommand2 Tcl_NRCreateCommand
+#   undef Tcl_NRCallObjProc2
+#   define Tcl_NRCallObjProc2 Tcl_NRCallObjProc
+#   undef TCL_OO_METHOD_VERSION_2
+#   define TCL_OO_METHOD_VERSION_2 TCL_OO_METHOD_VERSION_CURRENT
 #endif
 
 #if !defined(ItclSizeT)
@@ -441,7 +449,7 @@ typedef struct ItclMemberCode {
     ItclArgList *argListPtr;    /* the parsed arguments */
     union {
         Tcl_CmdProc *argCmd;    /* (argc,argv) C implementation */
-        Tcl_ObjCmdProc *objCmd; /* (objc,objv) C implementation */
+        Tcl_ObjCmdProc2 *objCmd; /* (objc,objv) C implementation */
     } cfunc;
     void *clientData;           /* client data for C implementations */
 } ItclMemberCode;
@@ -697,8 +705,8 @@ MODULE_SCOPE void ItclShowArgs(int level, const char *str, size_t objc,
 #define ItclShowArgs(a,b,c,d) do {(void)(c);(void)(d);} while(0)
 #endif
 
-MODULE_SCOPE Tcl_ObjCmdProc ItclCallCCommand;
-MODULE_SCOPE Tcl_ObjCmdProc ItclObjectUnknownCommand;
+MODULE_SCOPE Tcl_ObjCmdProc2 ItclCallCCommand;
+MODULE_SCOPE Tcl_ObjCmdProc2 ItclObjectUnknownCommand;
 MODULE_SCOPE int ItclCheckCallProc(void *clientData, Tcl_Interp *interp,
 	Tcl_ObjectContext contextPtr, Tcl_CallFrame *framePtr, int *isFinished);
 
@@ -706,7 +714,7 @@ MODULE_SCOPE void ItclPreserveClass(ItclClass *iclsPtr);
 MODULE_SCOPE void ItclReleaseClass(void *iclsPtr);
 
 MODULE_SCOPE ItclFoundation *ItclGetFoundation(Tcl_Interp *interp);
-MODULE_SCOPE Tcl_ObjCmdProc ItclClassCommandDispatcher;
+MODULE_SCOPE Tcl_ObjCmdProc2 ItclClassCommandDispatcher;
 MODULE_SCOPE Tcl_Command Itcl_CmdAliasProc(Tcl_Interp *interp,
 	Tcl_Namespace *nsPtr, const char *cmdName, void *clientData);
 MODULE_SCOPE Tcl_Var Itcl_VarAliasProc(Tcl_Interp *interp,
@@ -772,7 +780,7 @@ MODULE_SCOPE void ItclDeleteObjectMetadata(void *clientData);
 MODULE_SCOPE void ItclDeleteClassMetadata(void *clientData);
 MODULE_SCOPE void ItclDeleteArgList(ItclArgList *arglistPtr);
 MODULE_SCOPE int Itcl_ClassOptionCmd(void *clientData, Tcl_Interp *interp,
-	int objc, Tcl_Obj *const objv[]);
+	ItclSizeT objc, Tcl_Obj *const objv[]);
 MODULE_SCOPE int DelegatedOptionsInstall(Tcl_Interp *interp,
 	ItclClass *iclsPtr);
 MODULE_SCOPE int Itcl_HandleDelegateOptionCmd(Tcl_Interp *interp,
@@ -808,7 +816,7 @@ MODULE_SCOPE void Itcl_FinishList();
 MODULE_SCOPE void ItclDeleteDelegatedFunction(ItclDelegatedFunction *idmPtr);
 MODULE_SCOPE void ItclFinishEnsemble(ItclObjectInfo *infoPtr);
 MODULE_SCOPE int Itcl_EnsembleDeleteCmd(void *clientData,
-	Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]);
+	Tcl_Interp *interp, ItclSizeT objc, Tcl_Obj *const objv[]);
 MODULE_SCOPE int ItclAddClassesDictInfo(Tcl_Interp *interp, ItclClass *iclsPtr);
 MODULE_SCOPE int ItclDeleteClassesDictInfo(Tcl_Interp *interp,
 	ItclClass *iclsPtr);
@@ -832,24 +840,24 @@ MODULE_SCOPE int ItclClassCreateObject(void *clientData, Tcl_Interp *interp,
 
 MODULE_SCOPE void ItclRestoreInfoVars(void *clientData);
 
-MODULE_SCOPE Tcl_ObjCmdProc Itcl_BiMyProcCmd;
-MODULE_SCOPE Tcl_ObjCmdProc Itcl_BiInstallComponentCmd;
-MODULE_SCOPE Tcl_ObjCmdProc Itcl_BiCallInstanceCmd;
-MODULE_SCOPE Tcl_ObjCmdProc Itcl_BiGetInstanceVarCmd;
-MODULE_SCOPE Tcl_ObjCmdProc Itcl_BiMyTypeMethodCmd;
-MODULE_SCOPE Tcl_ObjCmdProc Itcl_BiMyMethodCmd;
-MODULE_SCOPE Tcl_ObjCmdProc Itcl_BiMyTypeVarCmd;
-MODULE_SCOPE Tcl_ObjCmdProc Itcl_BiMyVarCmd;
-MODULE_SCOPE Tcl_ObjCmdProc Itcl_BiItclHullCmd;
-MODULE_SCOPE Tcl_ObjCmdProc Itcl_ThisCmd;
-MODULE_SCOPE Tcl_ObjCmdProc Itcl_ExtendedClassCmd;
-MODULE_SCOPE Tcl_ObjCmdProc Itcl_TypeClassCmd;
-MODULE_SCOPE Tcl_ObjCmdProc Itcl_AddObjectOptionCmd;
-MODULE_SCOPE Tcl_ObjCmdProc Itcl_AddDelegatedOptionCmd;
-MODULE_SCOPE Tcl_ObjCmdProc Itcl_AddDelegatedFunctionCmd;
-MODULE_SCOPE Tcl_ObjCmdProc Itcl_SetComponentCmd;
-MODULE_SCOPE Tcl_ObjCmdProc Itcl_ClassHullTypeCmd;
-MODULE_SCOPE Tcl_ObjCmdProc Itcl_ClassWidgetClassCmd;
+MODULE_SCOPE Tcl_ObjCmdProc2 Itcl_BiMyProcCmd;
+MODULE_SCOPE Tcl_ObjCmdProc2 Itcl_BiInstallComponentCmd;
+MODULE_SCOPE Tcl_ObjCmdProc2 Itcl_BiCallInstanceCmd;
+MODULE_SCOPE Tcl_ObjCmdProc2 Itcl_BiGetInstanceVarCmd;
+MODULE_SCOPE Tcl_ObjCmdProc2 Itcl_BiMyTypeMethodCmd;
+MODULE_SCOPE Tcl_ObjCmdProc2 Itcl_BiMyMethodCmd;
+MODULE_SCOPE Tcl_ObjCmdProc2 Itcl_BiMyTypeVarCmd;
+MODULE_SCOPE Tcl_ObjCmdProc2 Itcl_BiMyVarCmd;
+MODULE_SCOPE Tcl_ObjCmdProc2 Itcl_BiItclHullCmd;
+MODULE_SCOPE Tcl_ObjCmdProc2 Itcl_ThisCmd;
+MODULE_SCOPE Tcl_ObjCmdProc2 Itcl_ExtendedClassCmd;
+MODULE_SCOPE Tcl_ObjCmdProc2 Itcl_TypeClassCmd;
+MODULE_SCOPE Tcl_ObjCmdProc2 Itcl_AddObjectOptionCmd;
+MODULE_SCOPE Tcl_ObjCmdProc2 Itcl_AddDelegatedOptionCmd;
+MODULE_SCOPE Tcl_ObjCmdProc2 Itcl_AddDelegatedFunctionCmd;
+MODULE_SCOPE Tcl_ObjCmdProc2 Itcl_SetComponentCmd;
+MODULE_SCOPE Tcl_ObjCmdProc2 Itcl_ClassHullTypeCmd;
+MODULE_SCOPE Tcl_ObjCmdProc2 Itcl_ClassWidgetClassCmd;
 
 typedef int (ItclRootMethodProc)(ItclObject *ioPtr, Tcl_Interp *interp,
 	ItclSizeT objc, Tcl_Obj *const objv[]);

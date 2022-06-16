@@ -120,25 +120,25 @@ static void ItclDelObjectInfo(char* cdata);
 static int ItclInitClassCommon(Tcl_Interp *interp, ItclClass *iclsPtr,
         ItclVariable *ivPtr, const char *initStr);
 
-static Tcl_ObjCmdProc Itcl_ClassTypeVariableCmd;
-static Tcl_ObjCmdProc Itcl_ClassTypeMethodCmd;
-static Tcl_ObjCmdProc Itcl_ClassFilterCmd;
-static Tcl_ObjCmdProc Itcl_ClassMixinCmd;
-static Tcl_ObjCmdProc Itcl_WidgetCmd;
-static Tcl_ObjCmdProc Itcl_WidgetAdaptorCmd;
-static Tcl_ObjCmdProc Itcl_ClassComponentCmd;
-static Tcl_ObjCmdProc Itcl_ClassTypeComponentCmd;
-static Tcl_ObjCmdProc Itcl_ClassDelegateMethodCmd;
-static Tcl_ObjCmdProc Itcl_ClassDelegateOptionCmd;
-static Tcl_ObjCmdProc Itcl_ClassDelegateTypeMethodCmd;
-static Tcl_ObjCmdProc Itcl_ClassForwardCmd;
-static Tcl_ObjCmdProc Itcl_ClassMethodVariableCmd;
-static Tcl_ObjCmdProc Itcl_ClassTypeConstructorCmd;
-static Tcl_ObjCmdProc ItclGenericClassCmd;
+static Tcl_ObjCmdProc2 Itcl_ClassTypeVariableCmd;
+static Tcl_ObjCmdProc2 Itcl_ClassTypeMethodCmd;
+static Tcl_ObjCmdProc2 Itcl_ClassFilterCmd;
+static Tcl_ObjCmdProc2 Itcl_ClassMixinCmd;
+static Tcl_ObjCmdProc2 Itcl_WidgetCmd;
+static Tcl_ObjCmdProc2 Itcl_WidgetAdaptorCmd;
+static Tcl_ObjCmdProc2 Itcl_ClassComponentCmd;
+static Tcl_ObjCmdProc2 Itcl_ClassTypeComponentCmd;
+static Tcl_ObjCmdProc2 Itcl_ClassDelegateMethodCmd;
+static Tcl_ObjCmdProc2 Itcl_ClassDelegateOptionCmd;
+static Tcl_ObjCmdProc2 Itcl_ClassDelegateTypeMethodCmd;
+static Tcl_ObjCmdProc2 Itcl_ClassForwardCmd;
+static Tcl_ObjCmdProc2 Itcl_ClassMethodVariableCmd;
+static Tcl_ObjCmdProc2 Itcl_ClassTypeConstructorCmd;
+static Tcl_ObjCmdProc2 ItclGenericClassCmd;
 
 static const struct {
     const char *name;
-    Tcl_ObjCmdProc *objProc;
+    Tcl_ObjCmdProc2 *objProc;
 } parseCmds[] = {
     {"common", Itcl_ClassCommonCmd},
     {"component", Itcl_ClassComponentCmd},
@@ -165,7 +165,7 @@ static const struct {
 
 static const struct {
     const char *name;
-    Tcl_ObjCmdProc *objProc;
+    Tcl_ObjCmdProc2 *objProc;
     int protection;
 } protectionCmds[] = {
     {"private", Itcl_ClassProtectionCmd, ITCL_PRIVATE},
@@ -215,7 +215,7 @@ Itcl_ParseInit(
     for (i=0 ; parseCmds[i].name ; i++) {
         Tcl_DStringAppend(&buffer, "::itcl::parser::", 16);
         Tcl_DStringAppend(&buffer, parseCmds[i].name, -1);
-        Tcl_CreateObjCommand(interp, Tcl_DStringValue(&buffer),
+        Tcl_CreateObjCommand2(interp, Tcl_DStringValue(&buffer),
                 parseCmds[i].objProc, infoPtr, NULL);
         Tcl_DStringFree(&buffer);
     }
@@ -226,7 +226,7 @@ Itcl_ParseInit(
         pInfoPtr = (ProtectionCmdInfo*)ckalloc(sizeof(ProtectionCmdInfo));
         pInfoPtr->pLevel = protectionCmds[i].protection;
         pInfoPtr->infoPtr = infoPtr;
-        Tcl_CreateObjCommand(interp, Tcl_DStringValue(&buffer),
+        Tcl_CreateObjCommand2(interp, Tcl_DStringValue(&buffer),
                 protectionCmds[i].objProc, pInfoPtr,
 		(Tcl_CmdDeleteProc*) ItclFreeParserCommandData);
         Tcl_DStringFree(&buffer);
@@ -243,14 +243,14 @@ Itcl_ParseInit(
     /*
      *  Install the "class" command for defining new classes.
      */
-    Tcl_CreateObjCommand(interp, "::itcl::class", Itcl_ClassCmd,
+    Tcl_CreateObjCommand2(interp, "::itcl::class", Itcl_ClassCmd,
         infoPtr, Itcl_ReleaseData);
     Itcl_PreserveData(infoPtr);
 
-    Tcl_CreateObjCommand(interp, "::itcl::body", Itcl_BodyCmd,
+    Tcl_CreateObjCommand2(interp, "::itcl::body", Itcl_BodyCmd,
         NULL, NULL);
 
-    Tcl_CreateObjCommand(interp, "::itcl::configbody", Itcl_ConfigBodyCmd,
+    Tcl_CreateObjCommand2(interp, "::itcl::configbody", Itcl_ConfigBodyCmd,
         NULL, NULL);
 
     Itcl_EventuallyFree(infoPtr, (Tcl_FreeProc *) ItclDelObjectInfo);
@@ -337,10 +337,10 @@ Itcl_ParseInit(
     /*
      *  Add "code" and "scope" commands for handling scoped values.
      */
-    Tcl_CreateObjCommand(interp, "::itcl::code", Itcl_CodeCmd,
+    Tcl_CreateObjCommand2(interp, "::itcl::code", Itcl_CodeCmd,
         NULL, NULL);
 
-    Tcl_CreateObjCommand(interp, "::itcl::scope", Itcl_ScopeCmd,
+    Tcl_CreateObjCommand2(interp, "::itcl::scope", Itcl_ScopeCmd,
         NULL, NULL);
 
     /*
@@ -428,54 +428,54 @@ Itcl_ParseInit(
         return TCL_ERROR;
     }
 
-    Tcl_CreateObjCommand(interp, "::itcl::type", Itcl_TypeClassCmd,
+    Tcl_CreateObjCommand2(interp, "::itcl::type", Itcl_TypeClassCmd,
         infoPtr, Itcl_ReleaseData);
     Itcl_PreserveData(infoPtr);
 
-    Tcl_CreateObjCommand(interp, "::itcl::widget", Itcl_WidgetCmd,
+    Tcl_CreateObjCommand2(interp, "::itcl::widget", Itcl_WidgetCmd,
         infoPtr, Itcl_ReleaseData);
     Itcl_PreserveData(infoPtr);
 
-    Tcl_CreateObjCommand(interp, "::itcl::widgetadaptor", Itcl_WidgetAdaptorCmd,
+    Tcl_CreateObjCommand2(interp, "::itcl::widgetadaptor", Itcl_WidgetAdaptorCmd,
         infoPtr, Itcl_ReleaseData);
     Itcl_PreserveData(infoPtr);
 
-    Tcl_CreateObjCommand(interp, "::itcl::nwidget", Itcl_NWidgetCmd,
+    Tcl_CreateObjCommand2(interp, "::itcl::nwidget", Itcl_NWidgetCmd,
         infoPtr, Itcl_ReleaseData);
     Itcl_PreserveData(infoPtr);
 
-    Tcl_CreateObjCommand(interp, "::itcl::addoption", Itcl_AddOptionCmd,
+    Tcl_CreateObjCommand2(interp, "::itcl::addoption", Itcl_AddOptionCmd,
         infoPtr, Itcl_ReleaseData);
     Itcl_PreserveData(infoPtr);
 
-    Tcl_CreateObjCommand(interp, "::itcl::addobjectoption",
+    Tcl_CreateObjCommand2(interp, "::itcl::addobjectoption",
         Itcl_AddObjectOptionCmd,
         infoPtr, Itcl_ReleaseData);
     Itcl_PreserveData(infoPtr);
 
-    Tcl_CreateObjCommand(interp, "::itcl::adddelegatedoption",
+    Tcl_CreateObjCommand2(interp, "::itcl::adddelegatedoption",
         Itcl_AddDelegatedOptionCmd,
         infoPtr, Itcl_ReleaseData);
     Itcl_PreserveData(infoPtr);
 
-    Tcl_CreateObjCommand(interp, "::itcl::adddelegatedmethod",
+    Tcl_CreateObjCommand2(interp, "::itcl::adddelegatedmethod",
         Itcl_AddDelegatedFunctionCmd,
         infoPtr, Itcl_ReleaseData);
     Itcl_PreserveData(infoPtr);
 
-    Tcl_CreateObjCommand(interp, "::itcl::addcomponent", Itcl_AddComponentCmd,
+    Tcl_CreateObjCommand2(interp, "::itcl::addcomponent", Itcl_AddComponentCmd,
         infoPtr, Itcl_ReleaseData);
     Itcl_PreserveData(infoPtr);
 
-    Tcl_CreateObjCommand(interp, "::itcl::setcomponent", Itcl_SetComponentCmd,
+    Tcl_CreateObjCommand2(interp, "::itcl::setcomponent", Itcl_SetComponentCmd,
         infoPtr, Itcl_ReleaseData);
     Itcl_PreserveData(infoPtr);
 
-    Tcl_CreateObjCommand(interp, "::itcl::extendedclass", Itcl_ExtendedClassCmd,
+    Tcl_CreateObjCommand2(interp, "::itcl::extendedclass", Itcl_ExtendedClassCmd,
         infoPtr, Itcl_ReleaseData);
     Itcl_PreserveData(infoPtr);
 
-    Tcl_CreateObjCommand(interp, ITCL_COMMANDS_NAMESPACE "::genericclass",
+    Tcl_CreateObjCommand2(interp, ITCL_COMMANDS_NAMESPACE "::genericclass",
         ItclGenericClassCmd, infoPtr, Itcl_ReleaseData);
     Itcl_PreserveData(infoPtr);
 
@@ -543,7 +543,7 @@ static int
 ItclGenericClassCmd(
     void *clientData,        /* info for all known objects */
     Tcl_Interp *interp,      /* current interpreter */
-    int objc,                /* number of arguments */
+    ItclSizeT objc,          /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
 {
     Tcl_Obj *namePtr;
@@ -617,7 +617,7 @@ int
 Itcl_ClassCmd(
     void *clientData,        /* info for all known objects */
     Tcl_Interp *interp,      /* current interpreter */
-    int objc,                /* number of arguments */
+    ItclSizeT objc,          /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
 {
     return ItclClassBaseCmd(clientData, interp, ITCL_CLASS, objc, objv, NULL);
@@ -716,7 +716,7 @@ ItclClassBaseCmd(
     Tcl_Interp *interp,      /* current interpreter */
     int flags,               /* flags: ITCL_CLASS, ITCL_TYPE,
                               * ITCL_WIDGET or ITCL_WIDGETADAPTOR */
-    int objc,                /* number of arguments */
+    ItclSizeT objc,          /* number of arguments */
     Tcl_Obj *const objv[],   /* argument objects */
     ItclClass **iclsPtrPtr)  /* for returning iclsPtr */
 {
@@ -1086,12 +1086,12 @@ if (imPtr->codePtr->flags & ITCL_IMPLEMENT_OBJCMD) {
 	    }
 }
 	    if ((imPtr->flags & ITCL_COMMON) == 0) {
-	        imPtr->accessCmd = Tcl_CreateObjCommand(interp,
+	        imPtr->accessCmd = Tcl_CreateObjCommand2(interp,
 		        Tcl_GetString(imPtr->fullNamePtr),
 		        Itcl_ExecMethod, imPtr, Itcl_ReleaseData);
 		Itcl_PreserveData(imPtr);
 	    } else {
-	        imPtr->accessCmd = Tcl_CreateObjCommand(interp,
+	        imPtr->accessCmd = Tcl_CreateObjCommand2(interp,
 		        Tcl_GetString(imPtr->fullNamePtr),
 			Itcl_ExecProc, imPtr, Itcl_ReleaseData);
 		Itcl_PreserveData(imPtr);
@@ -1284,7 +1284,7 @@ int
 Itcl_ClassInheritCmd(
     void *clientData,        /* info for all known objects */
     Tcl_Interp *interp,      /* current interpreter */
-    int objc,                /* number of arguments */
+    ItclSizeT objc,          /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
 {
     ItclObjectInfo *infoPtr = (ItclObjectInfo*)clientData;
@@ -1567,7 +1567,7 @@ int
 Itcl_ClassProtectionCmd(
     void *clientData,   /* protection level (public/protected/private) */
     Tcl_Interp *interp,      /* current interpreter */
-    int objc,                /* number of arguments */
+    ItclSizeT objc,          /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
 {
     ProtectionCmdInfo *pInfo = (ProtectionCmdInfo*)clientData;
@@ -1644,7 +1644,7 @@ int
 Itcl_ClassConstructorCmd(
     void *clientData,        /* info for all known objects */
     Tcl_Interp *interp,      /* current interpreter */
-    int objc,                /* number of arguments */
+    ItclSizeT objc,          /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
 {
     ItclObjectInfo *infoPtr = (ItclObjectInfo*)clientData;
@@ -1710,7 +1710,7 @@ int
 Itcl_ClassDestructorCmd(
     void *clientData,        /* info for all known objects */
     Tcl_Interp *interp,      /* current interpreter */
-    int objc,                /* number of arguments */
+    ItclSizeT objc,          /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
 {
     ItclObjectInfo *infoPtr = (ItclObjectInfo*)clientData;
@@ -1764,7 +1764,7 @@ int
 Itcl_ClassMethodCmd(
     void *clientData,        /* info for all known objects */
     Tcl_Interp *interp,      /* current interpreter */
-    int objc,                /* number of arguments */
+    ItclSizeT objc,          /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
 {
     Tcl_Obj *namePtr;
@@ -1827,7 +1827,7 @@ int
 Itcl_ClassProcCmd(
     void *clientData,        /* info for all known objects */
     Tcl_Interp *interp,      /* current interpreter */
-    int objc,                /* number of arguments */
+    ItclSizeT objc,          /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
 {
     FOREACH_HASH_DECLS;
@@ -1898,7 +1898,7 @@ static int
 Itcl_ClassTypeMethodCmd(
     void *clientData,        /* info for all known objects */
     Tcl_Interp *interp,      /* current interpreter */
-    int objc,                /* number of arguments */
+    ItclSizeT objc,          /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
 {
     FOREACH_HASH_DECLS;
@@ -1974,7 +1974,7 @@ int
 Itcl_ClassVariableCmd(
     void *clientData,        /* info for all known objects */
     Tcl_Interp *interp,      /* current interpreter */
-    int objc,                /* number of arguments */
+    ItclSizeT objc,          /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
 {
     Tcl_Obj *namePtr;
@@ -2198,7 +2198,7 @@ static int
 ItclClassCommonCmd(
     void *clientData,        /* info for all known objects */
     Tcl_Interp *interp,      /* current interpreter */
-    int objc,                /* number of arguments */
+    ItclSizeT objc,          /* number of arguments */
     Tcl_Obj *const objv[],   /* argument objects */
     int protection,
     ItclVariable **ivPtrPtr)
@@ -2303,7 +2303,7 @@ static int
 Itcl_ClassTypeVariableCmd(
     void *clientData,        /* info for all known objects */
     Tcl_Interp *interp,      /* current interpreter */
-    int objc,                /* number of arguments */
+    ItclSizeT objc,          /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
 {
     ItclVariable *ivPtr;
@@ -2336,7 +2336,7 @@ int
 Itcl_ClassCommonCmd(
     void *clientData,        /* info for all known objects */
     Tcl_Interp *interp,      /* current interpreter */
-    int objc,                /* number of arguments */
+    ItclSizeT objc,          /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
 {
     ItclVariable *ivPtr;
@@ -2351,9 +2351,9 @@ Itcl_ClassCommonCmd(
  *  ItclFreeParserCommandData()
  *
  *  This callback will free() up memory dynamically allocated
- *  and passed as the ClientData argument to Tcl_CreateObjCommand.
+ *  and passed as the ClientData argument to Tcl_CreateObjCommand2.
  *  This callback is required because one can not simply pass
- *  a pointer to the free() or ckfree() to Tcl_CreateObjCommand.
+ *  a pointer to the free() or ckfree() to Tcl_CreateObjCommand2.
  * ------------------------------------------------------------------------
  */
 static void
@@ -2419,7 +2419,7 @@ static int
 Itcl_ClassFilterCmd(
     void *clientData,        /* info for all known objects */
     Tcl_Interp *interp,      /* current interpreter */
-    int objc,                /* number of arguments */
+    ItclSizeT objc,          /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
 {
     Tcl_Obj **newObjv;
@@ -2473,7 +2473,7 @@ static int
 Itcl_ClassMixinCmd(
     TCL_UNUSED(void *),      /* info for all known objects */
     TCL_UNUSED(Tcl_Interp *),/* current interpreter */
-    int objc,                /* number of arguments */
+    ItclSizeT objc,          /* number of arguments */
     Tcl_Obj *const *objv)    /* argument objects */
 {
     ItclShowArgs(0, "Itcl_ClassMixinCmd", objc, objv);
@@ -2494,7 +2494,7 @@ static int
 Itcl_WidgetCmd(
     void *clientData,        /* info for all known objects */
     Tcl_Interp *interp,      /* current interpreter */
-    int objc,                /* number of arguments */
+    ItclSizeT objc,          /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
 {
     ItclObjectInfo *infoPtr;
@@ -2526,7 +2526,7 @@ static int
 Itcl_WidgetAdaptorCmd(
     void *clientData,        /* info for all known objects */
     Tcl_Interp *interp,      /* current interpreter */
-    int objc,                /* number of arguments */
+    ItclSizeT objc,          /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
 {
     ItclObjectInfo *infoPtr;
@@ -2892,7 +2892,7 @@ int
 Itcl_ClassOptionCmd(
     void *clientData,        /* info for all known objects */
     Tcl_Interp *interp,      /* current interpreter */
-    int objc,                /* number of arguments */
+    ItclSizeT objc,          /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
 {
     ItclOption *ioptPtr;
@@ -3013,7 +3013,7 @@ static int
 ItclHandleClassComponent(
     void *clientData,        /* info for all known objects */
     Tcl_Interp *interp,      /* current interpreter */
-    int objc,                /* number of arguments */
+    ItclSizeT objc,          /* number of arguments */
     Tcl_Obj *const objv[],   /* argument objects */
     ItclComponent **icPtrPtr)
 {
@@ -3189,7 +3189,7 @@ static int
 Itcl_ClassComponentCmd(
     void *clientData,        /* info for all known objects */
     Tcl_Interp *interp,      /* current interpreter */
-    int objc,                /* number of arguments */
+    ItclSizeT objc,          /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
 {
     ItclComponent *icPtr;
@@ -3213,7 +3213,7 @@ static int
 Itcl_ClassTypeComponentCmd(
     void *clientData,        /* info for all known objects */
     Tcl_Interp *interp,      /* current interpreter */
-    int objc,                /* number of arguments */
+    ItclSizeT objc,          /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
 {
     ItclComponent *icPtr;
@@ -3482,7 +3482,7 @@ static int
 Itcl_ClassDelegateMethodCmd(
     void *clientData,        /* info for all known objects */
     Tcl_Interp *interp,      /* current interpreter */
-    int objc,                /* number of arguments */
+    ItclSizeT objc,          /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
 {
     Tcl_HashEntry *hPtr;
@@ -3839,7 +3839,7 @@ static int
 Itcl_ClassDelegateOptionCmd(
     void *clientData,        /* info for all known objects */
     Tcl_Interp *interp,      /* current interpreter */
-    int objc,                /* number of arguments */
+    ItclSizeT objc,          /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
 {
     Tcl_HashEntry *hPtr;
@@ -3897,7 +3897,7 @@ static int
 Itcl_ClassDelegateTypeMethodCmd(
     void *clientData,        /* info for all known objects */
     Tcl_Interp *interp,      /* current interpreter */
-    int objc,                /* number of arguments */
+    ItclSizeT objc,          /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
 {
     Tcl_Obj *typeMethodNamePtr;
@@ -4082,7 +4082,7 @@ static int
 Itcl_ClassForwardCmd(
     void *clientData,        /* unused */
     Tcl_Interp *interp,      /* current interpreter */
-    int objc,                /* number of arguments */
+    ItclSizeT objc,          /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
 {
     Tcl_Obj *prefixObj;
@@ -4132,7 +4132,7 @@ static int
 Itcl_ClassMethodVariableCmd(
     void *clientData,        /* unused */
     Tcl_Interp *interp,      /* current interpreter */
-    int objc,                /* number of arguments */
+    ItclSizeT objc,          /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
 {
     Tcl_Obj *namePtr;
@@ -4252,7 +4252,7 @@ static int
 Itcl_ClassTypeConstructorCmd(
     void *clientData,        /* info for all known objects */
     Tcl_Interp *interp,      /* current interpreter */
-    int objc,                /* number of arguments */
+    ItclSizeT objc,          /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
 {
     ItclObjectInfo *infoPtr = (ItclObjectInfo*)clientData;

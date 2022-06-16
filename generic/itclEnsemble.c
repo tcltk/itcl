@@ -46,7 +46,7 @@ typedef struct EnsemblePart {
     char *usage;                /* usage string describing syntax */
     struct Ensemble* ensemble;  /* ensemble containing this part */
     ItclArgList *arglistPtr;    /* the parsed argument list */
-    Tcl_ObjCmdProc *objProc;    /* handling procedure for part */
+    Tcl_ObjCmdProc2 *objProc;    /* handling procedure for part */
     void *clientData;           /* the procPtr for the part */
     Tcl_CmdDeleteProc *deleteProc;
                                 /* procedure used to destroy client data */
@@ -88,9 +88,9 @@ typedef struct EnsembleParser {
 } EnsembleParser;
 
 static int EnsembleSubCmd(void *clientData, Tcl_Interp *interp,
-        int objc, Tcl_Obj *const objv[]);
+        ItclSizeT objc, Tcl_Obj *const objv[]);
 static int EnsembleUnknownCmd(void *dummy, Tcl_Interp *interp,
-    int objc, Tcl_Obj *const objv[]);
+    ItclSizeT objc, Tcl_Obj *const objv[]);
 
 /*
  *  Forward declarations for the procedures used in this file.
@@ -103,7 +103,7 @@ static int CreateEnsemble (Tcl_Interp *interp,
     Ensemble *parentEnsData, const char *ensName);
 static int AddEnsemblePart (Tcl_Interp *interp,
     Ensemble* ensData, const char* partName, const char* usageInfo,
-    Tcl_ObjCmdProc *objProc, void *clientData,
+    Tcl_ObjCmdProc2 *objProc, void *clientData,
     Tcl_CmdDeleteProc *deleteProc, int flags, EnsemblePart **rVal);
 static int FindEnsemble (Tcl_Interp *interp, const char **nameArgv,
     ItclSizeT nameArgc, Ensemble** ensDataPtr);
@@ -148,7 +148,7 @@ Itcl_EnsembleInit(
     ItclObjectInfo *infoPtr;
 
     infoPtr = (ItclObjectInfo *)Tcl_GetAssocData(interp, ITCL_INTERP_DATA, NULL);
-    Tcl_CreateObjCommand(interp, "::itcl::ensemble",
+    Tcl_CreateObjCommand2(interp, "::itcl::ensemble",
         Itcl_EnsembleCmd, NULL, NULL);
 
     Tcl_DStringInit(&buffer);
@@ -162,7 +162,7 @@ Itcl_EnsembleInit(
 	        Tcl_DStringValue(&buffer), NULL);
         return TCL_ERROR;
     }
-    Tcl_CreateObjCommand(interp,
+    Tcl_CreateObjCommand2(interp,
             ITCL_COMMANDS_NAMESPACE "::ensembles::unknown",
 	    EnsembleUnknownCmd, NULL, NULL);
     return TCL_OK;
@@ -305,7 +305,7 @@ Itcl_AddEnsemblePart(
     const char* ensName,           /* ensemble containing this part */
     const char* partName,          /* name of the new part */
     const char* usageInfo,         /* usage info for argument list */
-    Tcl_ObjCmdProc *objProc,       /* handling procedure for part */
+    Tcl_ObjCmdProc2 *objProc,       /* handling procedure for part */
     void *clientData,              /* client data associated with part */
     Tcl_CmdDeleteProc *deleteProc) /* procedure used to destroy client data */
 {
@@ -581,6 +581,11 @@ Itcl_GetEnsembleUsageForObj(
             return 0;
         }
         if (infoPtr.deleteProc == DeleteEnsemble) {
+#if TCL_MAJOR_VERSION > 8
+            if (infoPtr.isNativeObjectProc == 2) {
+                ensData = (Ensemble*)infoPtr.objClientData2;
+            } else
+#endif
             ensData = (Ensemble*)infoPtr.objClientData;
             GetEnsembleUsage(interp, ensData, objPtr);
             return 1;
@@ -921,7 +926,7 @@ AddEnsemblePart(
     Ensemble* ensData,             /* ensemble that will contain this part */
     const char* partName,          /* name of the new part */
     const char* usageInfo,         /* usage info for argument list */
-    Tcl_ObjCmdProc *objProc,       /* handling procedure for part */
+    Tcl_ObjCmdProc2 *objProc,       /* handling procedure for part */
     void *clientData,              /* client data associated with part */
     Tcl_CmdDeleteProc *deleteProc, /* procedure used to destroy client data */
     int flags,
@@ -959,7 +964,7 @@ AddEnsemblePart(
     Tcl_IncrRefCount(ensPart->namePtr);
     Tcl_IncrRefCount(ensPart->mapNamePtr);
     Tcl_DictObjPut(NULL, mapDict, ensPart->namePtr, ensPart->mapNamePtr);
-    cmd = Tcl_CreateObjCommand(interp, Tcl_GetString(ensPart->mapNamePtr),
+    cmd = Tcl_CreateObjCommand2(interp, Tcl_GetString(ensPart->mapNamePtr),
             EnsembleSubCmd, ensPart, DeleteEnsemblePart);
     if (cmd == NULL) {
         Tcl_DictObjRemove(NULL, mapDict, ensPart->namePtr);
@@ -1130,6 +1135,11 @@ FindEnsemble(
         if (Tcl_GetCommandInfoFromToken(cmdPtr, &cmdInfo) != 1) {
             return TCL_ERROR;
         }
+#if TCL_MAJOR_VERSION > 8
+        if (cmdInfo.isNativeObjectProc == 2) {
+            ensData = (Ensemble*)cmdInfo.objClientData2;
+        } else
+#endif
         ensData = (Ensemble*)cmdInfo.objClientData;
     }
     *ensDataPtr = ensData;
@@ -1632,7 +1642,7 @@ int
 Itcl_EnsembleCmd(
     void *clientData,        /* ensemble data */
     Tcl_Interp *interp,      /* current interpreter */
-    int objc,                /* number of arguments */
+    ItclSizeT objc,          /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
 {
     int status;
@@ -1841,13 +1851,13 @@ GetEnsembleParser(
      *  Add the allowed commands to the parser interpreter:
      *  part, delete, ensemble
      */
-    Tcl_CreateObjCommand(ensInfo->parser, "part", Itcl_EnsPartCmd,
+    Tcl_CreateObjCommand2(ensInfo->parser, "part", Itcl_EnsPartCmd,
         ensInfo, NULL);
 
-    Tcl_CreateObjCommand(ensInfo->parser, "option", Itcl_EnsPartCmd,
+    Tcl_CreateObjCommand2(ensInfo->parser, "option", Itcl_EnsPartCmd,
         ensInfo, NULL);
 
-    Tcl_CreateObjCommand(ensInfo->parser, "ensemble", Itcl_EnsembleCmd,
+    Tcl_CreateObjCommand2(ensInfo->parser, "ensemble", Itcl_EnsembleCmd,
         ensInfo, NULL);
 
     /*
@@ -1924,7 +1934,7 @@ int
 Itcl_EnsPartCmd(
     void *clientData,        /* ensemble data */
     Tcl_Interp *interp,      /* current interpreter */
-    int objc,                /* number of arguments */
+    ItclSizeT objc,          /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
 {
     Tcl_Obj *usagePtr;
@@ -1983,7 +1993,7 @@ Itcl_EnsPartCmd(
      *  anything goes wrong, clean up before bailing out.
      */
     result = AddEnsemblePart(ensInfo->interp, ensData, partName, usage,
-        (Tcl_ObjCmdProc *)Tcl_GetObjInterpProc(), procPtr, _Tcl_ProcDeleteProc,
+        (Tcl_ObjCmdProc2 *)Tcl_GetObjInterpProc(), procPtr, _Tcl_ProcDeleteProc,
         ITCL_ENSEMBLE_ENSEMBLE, &ensPart);
     if (result == TCL_ERROR) {
 	_Tcl_ProcDeleteProc(procPtr);
@@ -2086,7 +2096,7 @@ static int
 EnsembleSubCmd(
     void *clientData,      /* ensPart struct pointer */
     Tcl_Interp *interp,         /* Current interpreter. */
-    int objc,                   /* Number of arguments. */
+    ItclSizeT objc,             /* Number of arguments. */
     Tcl_Obj *const objv[])      /* Argument objects. */
 {
     int result;
@@ -2123,7 +2133,7 @@ static int
 EnsembleUnknownCmd(
     TCL_UNUSED(void *),      /* not used */
     Tcl_Interp *interp,      /* current interpreter */
-    int objc,                /* number of arguments */
+    ItclSizeT objc,          /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
 {
     Tcl_Command cmd;
@@ -2185,7 +2195,7 @@ int
 Itcl_EnsembleDeleteCmd(
     void *clientData,        /* infoPtr */
     Tcl_Interp *interp,      /* current interpreter */
-    int objc,                /* number of arguments */
+    ItclSizeT objc,          /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
 {
     Tcl_HashEntry *hPtr;

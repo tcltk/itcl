@@ -14,7 +14,7 @@
 
 static void ItclDeleteStub(void *cdata);
 static int ItclHandleStubCmd(void *clientData, Tcl_Interp *interp,
-        int objc, Tcl_Obj *const objv[]);
+        ItclSizeT objc, Tcl_Obj *const objv[]);
 
 
 /*
@@ -64,7 +64,7 @@ int
 Itcl_StubCreateCmd(
     TCL_UNUSED(void *),      /* not used */
     Tcl_Interp *interp,      /* current interpreter */
-    int objc,                /* number of arguments */
+    ItclSizeT objc,          /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
 {
     Tcl_Command cmdPtr;
@@ -84,11 +84,16 @@ Itcl_StubCreateCmd(
      *  on as a stub.  Save the cmd token as client data, so we can
      *  get the full name of this command later on.
      */
-    cmdPtr = Tcl_CreateObjCommand(interp, cmdName,
+    cmdPtr = Tcl_CreateObjCommand2(interp, cmdName,
         ItclHandleStubCmd, NULL,
         (Tcl_CmdDeleteProc*)ItclDeleteStub);
 
     Tcl_GetCommandInfoFromToken(cmdPtr, &cmdInfo);
+#if TCL_MAJOR_VERSION > 8
+    if (cmdInfo.isNativeObjectProc == 2) {
+	cmdInfo.objClientData2 = cmdPtr;
+    } else
+#endif
     cmdInfo.objClientData = cmdPtr;
     Tcl_SetCommandInfoFromToken(cmdPtr, &cmdInfo);
 
@@ -114,7 +119,7 @@ int
 Itcl_StubExistsCmd(
     TCL_UNUSED(void *),      /* not used */
     Tcl_Interp *interp,      /* current interpreter */
-    int objc,                /* number of arguments */
+    ItclSizeT objc,          /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
 {
     Tcl_Command cmdPtr;
@@ -153,7 +158,7 @@ static int
 ItclHandleStubCmd(
     void *clientData,        /* command token for this stub */
     Tcl_Interp *interp,      /* current interpreter */
-    int objc,                /* number of arguments */
+    ItclSizeT objc,          /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
 {
     Tcl_Command cmdPtr;

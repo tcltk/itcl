@@ -98,7 +98,16 @@ declare 27 {
 declare 28 {
     void *ItclGetStackValue(Itcl_Stack *stack, size_t pos)
 }
-
+declare 29 {
+    int Itcl_RegisterObjC2(Tcl_Interp *interp, const char *name,
+        Tcl_ObjCmdProc2 *proc, void *clientData,
+        Tcl_CmdDeleteProc *deleteProc)
+}
+declare 30 {
+    int Itcl_FindC2(Tcl_Interp *interp, const char *name,
+	Tcl_CmdProc **argProcPtr, Tcl_ObjCmdProc2 **objProcPtr,
+	void **cDataPtr)
+}
 
 
 # private API
@@ -167,35 +176,35 @@ declare 20 {
 }
 declare 21 {
     int Itcl_FindClassesCmd(ClientData clientData, Tcl_Interp *interp,
-        int objc, Tcl_Obj *const objv[])
+        ItclSizeT objc, Tcl_Obj *const objv[])
 }
 declare 22 {
     int Itcl_FindObjectsCmd(ClientData clientData, Tcl_Interp *interp,
-        int objc, Tcl_Obj *const objv[])
+        ItclSizeT objc, Tcl_Obj *const objv[])
 }
 declare 24 {
     int Itcl_DelClassCmd(ClientData clientData, Tcl_Interp *interp,
-        int objc, Tcl_Obj *const objv[])
+        ItclSizeT objc, Tcl_Obj *const objv[])
 }
 declare 25 {
     int Itcl_DelObjectCmd(ClientData clientData, Tcl_Interp *interp,
-        int objc, Tcl_Obj *const objv[])
+        ItclSizeT objc, Tcl_Obj *const objv[])
 }
 declare 26 {
     int Itcl_ScopeCmd(ClientData clientData, Tcl_Interp *interp,
-        int objc, Tcl_Obj *const objv[])
+        ItclSizeT objc, Tcl_Obj *const objv[])
 }
 declare 27 {
     int Itcl_CodeCmd(ClientData clientData, Tcl_Interp *interp,
-        int objc, Tcl_Obj *const objv[])
+        ItclSizeT objc, Tcl_Obj *const objv[])
 }
 declare 28 {
     int Itcl_StubCreateCmd(ClientData clientData, Tcl_Interp *interp,
-        int objc, Tcl_Obj *const objv[])
+        ItclSizeT objc, Tcl_Obj *const objv[])
 }
 declare 29 {
     int Itcl_StubExistsCmd(ClientData clientData, Tcl_Interp *interp,
-        int objc, Tcl_Obj *const objv[])
+        ItclSizeT objc, Tcl_Obj *const objv[])
 }
 declare 30 {
     int Itcl_IsStub(Tcl_Command cmd)
@@ -218,7 +227,7 @@ declare 33 {
 }
 declare 34 {
     int Itcl_HandleClass(ClientData clientData, Tcl_Interp *interp,
-        int objc, Tcl_Obj *const objv[])
+        ItclSizeT objc, Tcl_Obj *const objv[])
 }
 declare 38 {
     void Itcl_BuildVirtualTables(ItclClass *iclsPtr)
@@ -261,11 +270,11 @@ declare 48 {
 #
 
 declare 50 {
-    int Itcl_BodyCmd(ClientData dummy, Tcl_Interp *interp, int objc,
+    int Itcl_BodyCmd(ClientData dummy, Tcl_Interp *interp, ItclSizeT objc,
         Tcl_Obj *const objv[])
 }
 declare 51 {
-    int Itcl_ConfigBodyCmd(ClientData dummy, Tcl_Interp *interp, int objc,
+    int Itcl_ConfigBodyCmd(ClientData dummy, Tcl_Interp *interp, ItclSizeT objc,
         Tcl_Obj *const objv[])
 }
 declare 52 {
@@ -307,12 +316,12 @@ declare 67 {
         ItclObject *contextObj, Tcl_Obj *objPtr)
 }
 declare 68 {
-    int Itcl_ExecMethod(ClientData clientData, Tcl_Interp *interp, int objc,
+    int Itcl_ExecMethod(ClientData clientData, Tcl_Interp *interp, ItclSizeT objc,
         Tcl_Obj *const objv[])
 }
 declare 69 {
     int Itcl_ExecProc(ClientData clientData, Tcl_Interp *interp,
-        int objc, Tcl_Obj *const objv[])
+        ItclSizeT objc, Tcl_Obj *const objv[])
 }
 declare 71 {
     int Itcl_ConstructBase(Tcl_Interp *interp, ItclObject *contextObj,
@@ -337,40 +346,40 @@ declare 75 {
     int Itcl_ParseInit(Tcl_Interp *interp, ItclObjectInfo *info)
 }
 declare 76 {
-    int Itcl_ClassCmd(ClientData clientData, Tcl_Interp *interp, int objc,
+    int Itcl_ClassCmd(ClientData clientData, Tcl_Interp *interp, ItclSizeT objc,
         Tcl_Obj *const objv[])
 }
 declare 77 {
     int Itcl_ClassInheritCmd(ClientData clientData, Tcl_Interp *interp,
-        int objc, Tcl_Obj *const objv[])
+        ItclSizeT objc, Tcl_Obj *const objv[])
 }
 declare 78 {
     int Itcl_ClassProtectionCmd(ClientData clientData, Tcl_Interp *interp,
-        int objc, Tcl_Obj *const objv[])
+        ItclSizeT objc, Tcl_Obj *const objv[])
 }
 declare 79 {
     int Itcl_ClassConstructorCmd(ClientData clientData, Tcl_Interp *interp,
-        int objc, Tcl_Obj *const objv[])
+        ItclSizeT objc, Tcl_Obj *const objv[])
 }
 declare 80 {
     int Itcl_ClassDestructorCmd(ClientData clientData, Tcl_Interp *interp,
-        int objc, Tcl_Obj *const objv[])
+        ItclSizeT objc, Tcl_Obj *const objv[])
 }
 declare 81 {
     int Itcl_ClassMethodCmd(ClientData clientData, Tcl_Interp *interp,
-        int objc, Tcl_Obj *const objv[])
+        ItclSizeT objc, Tcl_Obj *const objv[])
 }
 declare 82 {
     int Itcl_ClassProcCmd(ClientData clientData, Tcl_Interp *interp,
-        int objc, Tcl_Obj *const objv[])
+        ItclSizeT objc, Tcl_Obj *const objv[])
 }
 declare 83 {
     int Itcl_ClassVariableCmd(ClientData clientData, Tcl_Interp *interp,
-        int objc, Tcl_Obj *const objv[])
+        ItclSizeT objc, Tcl_Obj *const objv[])
 }
 declare 84 {
     int Itcl_ClassCommonCmd(ClientData clientData, Tcl_Interp *interp,
-        int objc, Tcl_Obj *const objv[])
+        ItclSizeT objc, Tcl_Obj *const objv[])
 }
 declare 85 {
     int Itcl_ParseVarResolver(Tcl_Interp *interp, const char *name,
@@ -389,50 +398,50 @@ declare 87 {
 }
 declare 88 {
     int Itcl_BiIsaCmd(ClientData clientData, Tcl_Interp *interp,
-        int objc, Tcl_Obj *const objv[])
+        ItclSizeT objc, Tcl_Obj *const objv[])
 }
 declare 89 {
     int Itcl_BiConfigureCmd(ClientData clientData, Tcl_Interp *interp,
-        int objc, Tcl_Obj *const objv[])
+        ItclSizeT objc, Tcl_Obj *const objv[])
 }
 declare 90 {
-    int Itcl_BiCgetCmd(ClientData clientData, Tcl_Interp *interp, int objc,
+    int Itcl_BiCgetCmd(ClientData clientData, Tcl_Interp *interp, ItclSizeT objc,
         Tcl_Obj *const objv[])
 }
 declare 91 {
-    int Itcl_BiChainCmd(ClientData dummy, Tcl_Interp *interp, int objc,
+    int Itcl_BiChainCmd(ClientData dummy, Tcl_Interp *interp, ItclSizeT objc,
         Tcl_Obj *const objv[])
 }
 declare 92 {
-    int Itcl_BiInfoClassCmd(ClientData dummy, Tcl_Interp *interp, int objc,
+    int Itcl_BiInfoClassCmd(ClientData dummy, Tcl_Interp *interp, ItclSizeT objc,
         Tcl_Obj *const objv[])
 }
 declare 93 {
-    int Itcl_BiInfoInheritCmd(ClientData dummy, Tcl_Interp *interp, int objc,
+    int Itcl_BiInfoInheritCmd(ClientData dummy, Tcl_Interp *interp, ItclSizeT objc,
         Tcl_Obj *const objv[])
 }
 declare 94 {
     int Itcl_BiInfoHeritageCmd(ClientData dummy, Tcl_Interp *interp,
-        int objc, Tcl_Obj *const objv[])
+        ItclSizeT objc, Tcl_Obj *const objv[])
 }
 declare 95 {
     int Itcl_BiInfoFunctionCmd(ClientData dummy, Tcl_Interp *interp,
-        int objc, Tcl_Obj *const objv[])
+        ItclSizeT objc, Tcl_Obj *const objv[])
 }
 declare 96 {
     int Itcl_BiInfoVariableCmd(ClientData dummy, Tcl_Interp *interp,
-        int objc, Tcl_Obj *const objv[])
+        ItclSizeT objc, Tcl_Obj *const objv[])
 }
 declare 97 {
-    int Itcl_BiInfoBodyCmd(ClientData dummy, Tcl_Interp *interp, int objc,
+    int Itcl_BiInfoBodyCmd(ClientData dummy, Tcl_Interp *interp, ItclSizeT objc,
         Tcl_Obj *const objv[])
 }
 declare 98 {
-    int Itcl_BiInfoArgsCmd(ClientData dummy, Tcl_Interp *interp, int objc,
+    int Itcl_BiInfoArgsCmd(ClientData dummy, Tcl_Interp *interp, ItclSizeT objc,
         Tcl_Obj *const objv[])
 }
 #declare 99 {
-#    int Itcl_DefaultInfoCmd(ClientData dummy, Tcl_Interp *interp, int objc,
+#    int Itcl_DefaultInfoCmd(ClientData dummy, Tcl_Interp *interp, ItclSizeT objc,
 #        Tcl_Obj *const objv[])
 #}
 
@@ -449,7 +458,7 @@ declare 101 {
 }
 declare 102 {
     int Itcl_AddEnsemblePart(Tcl_Interp *interp, const char *ensName,
-        const char *partName, const char *usageInfo, Tcl_ObjCmdProc *objProc,
+        const char *partName, const char *usageInfo, Tcl_ObjCmdProc2 *objProc,
         ClientData clientData, Tcl_CmdDeleteProc *deleteProc)
 }
 declare 103 {
@@ -468,11 +477,11 @@ declare 106 {
         Tcl_Obj *objPtr)
 }
 declare 107 {
-    int Itcl_EnsembleCmd(ClientData clientData, Tcl_Interp *interp, int objc,
+    int Itcl_EnsembleCmd(ClientData clientData, Tcl_Interp *interp, ItclSizeT objc,
         Tcl_Obj *const objv[])
 }
 declare 108 {
-    int Itcl_EnsPartCmd(ClientData clientData, Tcl_Interp *interp, int objc,
+    int Itcl_EnsPartCmd(ClientData clientData, Tcl_Interp *interp, ItclSizeT objc,
         Tcl_Obj *const objv[])
 }
 declare 109 {
@@ -484,11 +493,11 @@ declare 115 {
 }
 declare 116 {
     int Itcl_IsObjectCmd(ClientData clientData, Tcl_Interp *interp,
-    int objc, Tcl_Obj *const objv[])
+    ItclSizeT objc, Tcl_Obj *const objv[])
 }
 declare 117 {
     int Itcl_IsClassCmd(ClientData clientData, Tcl_Interp *interp,
-    int objc, Tcl_Obj *const objv[])
+    ItclSizeT objc, Tcl_Obj *const objv[])
 }
 
 #
@@ -497,27 +506,27 @@ declare 117 {
 
 declare 140 {
     int Itcl_FilterAddCmd(ClientData clientData, Tcl_Interp *interp,
-        int objc, Tcl_Obj *const objv[])
+        ItclSizeT objc, Tcl_Obj *const objv[])
 }
 declare 141 {
     int Itcl_FilterDeleteCmd(ClientData clientData, Tcl_Interp *interp,
-        int objc, Tcl_Obj *const objv[])
+        ItclSizeT objc, Tcl_Obj *const objv[])
 }
 declare 142 {
     int Itcl_ForwardAddCmd(ClientData clientData, Tcl_Interp *interp,
-        int objc, Tcl_Obj *const objv[])
+        ItclSizeT objc, Tcl_Obj *const objv[])
 }
 declare 143 {
     int Itcl_ForwardDeleteCmd(ClientData clientData, Tcl_Interp *interp,
-        int objc, Tcl_Obj *const objv[])
+        ItclSizeT objc, Tcl_Obj *const objv[])
 }
 declare 144 {
     int Itcl_MixinAddCmd(ClientData clientData, Tcl_Interp *interp,
-        int objc, Tcl_Obj *const objv[])
+        ItclSizeT objc, Tcl_Obj *const objv[])
 }
 declare 145 {
     int Itcl_MixinDeleteCmd(ClientData clientData, Tcl_Interp *interp,
-        int objc, Tcl_Obj *const objv[])
+        ItclSizeT objc, Tcl_Obj *const objv[])
 }
 
 #
@@ -525,16 +534,16 @@ declare 145 {
 #
 
 #declare 150 {
-#    int Itcl_BiInfoCmd(ClientData clientData, Tcl_Interp *interp, int objc,
+#    int Itcl_BiInfoCmd(ClientData clientData, Tcl_Interp *interp, ItclSizeT objc,
 #        Tcl_Obj *const objv[])
 #}
 declare 151 {
     int Itcl_BiInfoUnknownCmd(ClientData dummy, Tcl_Interp *interp,
-        int objc, Tcl_Obj *const objv[])
+        ItclSizeT objc, Tcl_Obj *const objv[])
 }
 declare 152 {
     int Itcl_BiInfoVarsCmd(ClientData dummy, Tcl_Interp *interp,
-        int objc, Tcl_Obj *const objv[])
+        ItclSizeT objc, Tcl_Obj *const objv[])
 }
 declare 153 {
     int Itcl_CanAccess2(ItclClass *iclsPtr, int protection,
@@ -546,7 +555,7 @@ declare 160 {
 }
 declare 161 {
     int ItclEnsembleSubCmd(ClientData clientData, Tcl_Interp *interp,
-            const char *ensembleName, int objc, Tcl_Obj *const *objv,
+            const char *ensembleName, ItclSizeT objc, Tcl_Obj *const *objv,
             const char *functionName)
 }
 declare 162 {
@@ -566,23 +575,23 @@ declare 167 {
 }
 declare 168 {
     int Itcl_NWidgetCmd(ClientData infoPtr, Tcl_Interp *interp,
-        int objc, Tcl_Obj *const objv[])
+        ItclSizeT objc, Tcl_Obj *const objv[])
 }
 declare 169 {
     int Itcl_AddOptionCmd(ClientData infoPtr, Tcl_Interp *interp,
-        int objc, Tcl_Obj *const objv[])
+        ItclSizeT objc, Tcl_Obj *const objv[])
 }
 declare 170 {
     int Itcl_AddComponentCmd(ClientData infoPtr, Tcl_Interp *interp,
-        int objc, Tcl_Obj *const objv[])
+        ItclSizeT objc, Tcl_Obj *const objv[])
 }
 declare 171 {
-    int Itcl_BiInfoOptionCmd(ClientData dummy, Tcl_Interp *interp, int objc,
+    int Itcl_BiInfoOptionCmd(ClientData dummy, Tcl_Interp *interp, ItclSizeT objc,
         Tcl_Obj *const objv[])
 }
 declare 172 {
     int Itcl_BiInfoComponentCmd(ClientData dummy, Tcl_Interp *interp,
-        int objc, Tcl_Obj *const objv[])
+        ItclSizeT objc, Tcl_Obj *const objv[])
 }
 declare 173 {
     int Itcl_RenameCommand(Tcl_Interp *interp, const char *oldName,
@@ -613,7 +622,7 @@ declare 179 {
 }
 declare 180 {
     int ItclClassBaseCmd(ClientData clientData, Tcl_Interp *interp,
-            int flags, int objc, Tcl_Obj *const objv[], ItclClass **iclsPtrPtr)
+            int flags, ItclSizeT objc, Tcl_Obj *const objv[], ItclClass **iclsPtrPtr)
 }
 declare 181 {
     int ItclCreateComponent(Tcl_Interp *interp, ItclClass *iclsPtr,
