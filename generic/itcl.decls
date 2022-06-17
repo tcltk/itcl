@@ -414,31 +414,31 @@ declare 91 {
         Tcl_Obj *const objv[])
 }
 declare 92 {
-    int Itcl_BiInfoClassCmd(ClientData dummy, Tcl_Interp *interp, int objc,
+    int Itcl_BiInfoClassCmd(ClientData dummy, Tcl_Interp *interp, size_t objc,
         Tcl_Obj *const objv[])
 }
 declare 93 {
-    int Itcl_BiInfoInheritCmd(ClientData dummy, Tcl_Interp *interp, int objc,
+    int Itcl_BiInfoInheritCmd(ClientData dummy, Tcl_Interp *interp, size_t objc,
         Tcl_Obj *const objv[])
 }
 declare 94 {
     int Itcl_BiInfoHeritageCmd(ClientData dummy, Tcl_Interp *interp,
-        int objc, Tcl_Obj *const objv[])
+        size_t objc, Tcl_Obj *const objv[])
 }
 declare 95 {
     int Itcl_BiInfoFunctionCmd(ClientData dummy, Tcl_Interp *interp,
-        int objc, Tcl_Obj *const objv[])
+        size_t objc, Tcl_Obj *const objv[])
 }
 declare 96 {
     int Itcl_BiInfoVariableCmd(ClientData dummy, Tcl_Interp *interp,
-        int objc, Tcl_Obj *const objv[])
+        size_t objc, Tcl_Obj *const objv[])
 }
 declare 97 {
-    int Itcl_BiInfoBodyCmd(ClientData dummy, Tcl_Interp *interp, int objc,
+    int Itcl_BiInfoBodyCmd(ClientData dummy, Tcl_Interp *interp, size_t objc,
         Tcl_Obj *const objv[])
 }
 declare 98 {
-    int Itcl_BiInfoArgsCmd(ClientData dummy, Tcl_Interp *interp, int objc,
+    int Itcl_BiInfoArgsCmd(ClientData dummy, Tcl_Interp *interp, size_t objc,
         Tcl_Obj *const objv[])
 }
 #declare 99 {
@@ -478,11 +478,11 @@ declare 106 {
         Tcl_Obj *objPtr)
 }
 declare 107 {
-    int Itcl_EnsembleCmd(ClientData clientData, Tcl_Interp *interp, int objc,
+    int Itcl_EnsembleCmd(ClientData clientData, Tcl_Interp *interp, size_t objc,
         Tcl_Obj *const objv[])
 }
 declare 108 {
-    int Itcl_EnsPartCmd(ClientData clientData, Tcl_Interp *interp, int objc,
+    int Itcl_EnsPartCmd(ClientData clientData, Tcl_Interp *interp, size_t objc,
         Tcl_Obj *const objv[])
 }
 declare 109 {
@@ -540,11 +540,11 @@ declare 145 {
 #}
 declare 151 {
     int Itcl_BiInfoUnknownCmd(ClientData dummy, Tcl_Interp *interp,
-        int objc, Tcl_Obj *const objv[])
+        size_t objc, Tcl_Obj *const objv[])
 }
 declare 152 {
     int Itcl_BiInfoVarsCmd(ClientData dummy, Tcl_Interp *interp,
-        int objc, Tcl_Obj *const objv[])
+        size_t objc, Tcl_Obj *const objv[])
 }
 declare 153 {
     int Itcl_CanAccess2(ItclClass *iclsPtr, int protection,
@@ -587,12 +587,12 @@ declare 170 {
         int objc, Tcl_Obj *const objv[])
 }
 declare 171 {
-    int Itcl_BiInfoOptionCmd(ClientData dummy, Tcl_Interp *interp, int objc,
-        Tcl_Obj *const objv[])
+    int Itcl_BiInfoOptionCmd(ClientData dummy, Tcl_Interp *interp,
+        size_t objc, Tcl_Obj *const objv[])
 }
 declare 172 {
     int Itcl_BiInfoComponentCmd(ClientData dummy, Tcl_Interp *interp,
-        int objc, Tcl_Obj *const objv[])
+        size_t objc, Tcl_Obj *const objv[])
 }
 declare 173 {
     int Itcl_RenameCommand(Tcl_Interp *interp, const char *oldName,

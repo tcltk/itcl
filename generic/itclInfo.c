@@ -31,38 +31,38 @@
  */
 #include "itclInt.h"
 
-static Tcl_ObjCmdProc Itcl_BiInfoClassOptionsCmd;
-static Tcl_ObjCmdProc Itcl_BiInfoComponentsCmd;
-static Tcl_ObjCmdProc Itcl_BiInfoDefaultCmd;
-static Tcl_ObjCmdProc Itcl_BiInfoDelegatedCmd;
-static Tcl_ObjCmdProc Itcl_BiInfoExtendedClassCmd;
-static Tcl_ObjCmdProc Itcl_BiInfoInstancesCmd;
-static Tcl_ObjCmdProc Itcl_BiInfoHullTypeCmd;
-static Tcl_ObjCmdProc Itcl_BiInfoMethodCmd;
-static Tcl_ObjCmdProc Itcl_BiInfoMethodsCmd;
-static Tcl_ObjCmdProc Itcl_BiInfoOptionsCmd;
-static Tcl_ObjCmdProc Itcl_BiInfoTypeCmd;
-static Tcl_ObjCmdProc Itcl_BiInfoTypeMethodCmd;
-static Tcl_ObjCmdProc Itcl_BiInfoTypeMethodsCmd;
-static Tcl_ObjCmdProc Itcl_BiInfoTypesCmd;
-static Tcl_ObjCmdProc Itcl_BiInfoTypeVarsCmd;
-static Tcl_ObjCmdProc Itcl_BiInfoTypeVariableCmd;
-static Tcl_ObjCmdProc Itcl_BiInfoVariablesCmd;
-static Tcl_ObjCmdProc Itcl_BiInfoWidgetadaptorCmd;
-static Tcl_ObjCmdProc Itcl_BiInfoWidgetCmd;
-static Tcl_ObjCmdProc Itcl_BiInfoDelegatedOptionsCmd;
-static Tcl_ObjCmdProc Itcl_BiInfoDelegatedMethodsCmd;
-static Tcl_ObjCmdProc Itcl_BiInfoDelegatedTypeMethodsCmd;
-static Tcl_ObjCmdProc Itcl_BiInfoDelegatedOptionCmd;
-static Tcl_ObjCmdProc Itcl_BiInfoDelegatedMethodCmd;
-static Tcl_ObjCmdProc Itcl_BiInfoDelegatedTypeMethodCmd;
-static Tcl_ObjCmdProc Itcl_BiInfoDelegatedUnknownCmd;
-static Tcl_ObjCmdProc Itcl_BiInfoContextCmd;
+static Tcl_ObjCmdProc2 Itcl_BiInfoClassOptionsCmd;
+static Tcl_ObjCmdProc2 Itcl_BiInfoComponentsCmd;
+static Tcl_ObjCmdProc2 Itcl_BiInfoDefaultCmd;
+static Tcl_ObjCmdProc2 Itcl_BiInfoDelegatedCmd;
+static Tcl_ObjCmdProc2 Itcl_BiInfoExtendedClassCmd;
+static Tcl_ObjCmdProc2 Itcl_BiInfoInstancesCmd;
+static Tcl_ObjCmdProc2 Itcl_BiInfoHullTypeCmd;
+static Tcl_ObjCmdProc2 Itcl_BiInfoMethodCmd;
+static Tcl_ObjCmdProc2 Itcl_BiInfoMethodsCmd;
+static Tcl_ObjCmdProc2 Itcl_BiInfoOptionsCmd;
+static Tcl_ObjCmdProc2 Itcl_BiInfoTypeCmd;
+static Tcl_ObjCmdProc2 Itcl_BiInfoTypeMethodCmd;
+static Tcl_ObjCmdProc2 Itcl_BiInfoTypeMethodsCmd;
+static Tcl_ObjCmdProc2 Itcl_BiInfoTypesCmd;
+static Tcl_ObjCmdProc2 Itcl_BiInfoTypeVarsCmd;
+static Tcl_ObjCmdProc2 Itcl_BiInfoTypeVariableCmd;
+static Tcl_ObjCmdProc2 Itcl_BiInfoVariablesCmd;
+static Tcl_ObjCmdProc2 Itcl_BiInfoWidgetadaptorCmd;
+static Tcl_ObjCmdProc2 Itcl_BiInfoWidgetCmd;
+static Tcl_ObjCmdProc2 Itcl_BiInfoDelegatedOptionsCmd;
+static Tcl_ObjCmdProc2 Itcl_BiInfoDelegatedMethodsCmd;
+static Tcl_ObjCmdProc2 Itcl_BiInfoDelegatedTypeMethodsCmd;
+static Tcl_ObjCmdProc2 Itcl_BiInfoDelegatedOptionCmd;
+static Tcl_ObjCmdProc2 Itcl_BiInfoDelegatedMethodCmd;
+static Tcl_ObjCmdProc2 Itcl_BiInfoDelegatedTypeMethodCmd;
+static Tcl_ObjCmdProc2 Itcl_BiInfoDelegatedUnknownCmd;
+static Tcl_ObjCmdProc2 Itcl_BiInfoContextCmd;
 
 typedef struct InfoMethod {
     const char* name;        /* method name */
     const char* usage;       /* string describing usage */
-    Tcl_ObjCmdProc *proc;    /* implementation C proc */
+    Tcl_ObjCmdProc2 *proc;    /* implementation C proc */
     int flags;               /* which class commands have it */
 } InfoMethod;
 
@@ -250,7 +250,7 @@ static const InfoMethod InfoMethodList[] = {
 struct NameProcMap2 {
     const char* name;        /* method name */
     const char* usage;       /* string describing usage */
-    Tcl_ObjCmdProc *proc;    /* implementation C proc */
+    Tcl_ObjCmdProc2 *proc;    /* implementation C proc */
     int flags;               /* which class commands have it */
 };
 
@@ -499,13 +499,13 @@ ItclInfoInit(
 
 	Tcl_AppendToObj(cmdObjPtr, "::", 2);
 	Tcl_AppendToObj(cmdObjPtr, InfoMethodList[i].name, -1);
-        Tcl_CreateObjCommand(interp, Tcl_GetString(cmdObjPtr),
+        Tcl_CreateObjCommand2(interp, Tcl_GetString(cmdObjPtr),
                 InfoMethodList[i].proc, infoPtr,
                 InfoMethodList[i].proc == Itcl_BiInfoVarsCmd ? ItclRestoreInfoVars : NULL);
 	Tcl_DecrRefCount(cmdObjPtr);
     }
     unkObjPtr = Tcl_NewStringObj("::itcl::builtin::Info::unknown", -1);
-    Tcl_CreateObjCommand(interp, Tcl_GetString(unkObjPtr),
+    Tcl_CreateObjCommand2(interp, Tcl_GetString(unkObjPtr),
 	    Itcl_BiInfoUnknownCmd, infoPtr, NULL);
     if (Tcl_SetEnsembleUnknownHandler(NULL,
             Tcl_FindEnsemble(interp, ensObjPtr, TCL_LEAVE_ERR_MSG),
@@ -529,7 +529,7 @@ ItclInfoInit(
         TCL_ENSEMBLE_PREFIX);
     Tcl_Export(interp, nsPtr, "[a-z]*", 1);
     for (i=0 ; infoCmdsDelegated2[i].name!=NULL ; i++) {
-        Tcl_CreateObjCommand(interp, infoCmdsDelegated2[i].name,
+        Tcl_CreateObjCommand2(interp, infoCmdsDelegated2[i].name,
                 infoCmdsDelegated2[i].proc, infoPtr, NULL);
     }
     ensObjPtr = Tcl_NewStringObj("::itcl::builtin::Info::delegated",
@@ -663,7 +663,7 @@ int
 Itcl_BiInfoClassCmd(
     TCL_UNUSED(void *),    /* ItclObjectInfo Ptr */
     Tcl_Interp *interp,    /* current interpreter */
-    int objc,              /* number of arguments */
+    size_t objc,              /* number of arguments */
     Tcl_Obj *const objv[]) /* argument objects */
 {
     Tcl_Namespace *contextNs = NULL;
@@ -743,7 +743,7 @@ static int
 Itcl_BiInfoClassOptionsCmd(
     TCL_UNUSED(void *),    /* ItclObjectInfo Ptr */
     Tcl_Interp *interp,    /* current interpreter */
-    int objc,              /* number of arguments */
+    size_t objc,              /* number of arguments */
     Tcl_Obj *const objv[]) /* argument objects */
 {
     FOREACH_HASH_DECLS;
@@ -854,7 +854,7 @@ static int
 Itcl_BiInfoContextCmd(
     TCL_UNUSED(void *),    /* ItclObjectInfo Ptr */
     Tcl_Interp *interp,    /* current interpreter */
-    int objc,              /* number of arguments */
+    size_t objc,              /* number of arguments */
     Tcl_Obj *const objv[]) /* argument objects */
 {
     Tcl_Obj *listPtr;
@@ -893,7 +893,7 @@ int
 Itcl_BiInfoInheritCmd(
     TCL_UNUSED(void *),    /* ItclObjectInfo Ptr */
     Tcl_Interp *interp,    /* current interpreter */
-    int objc,              /* number of arguments */
+    size_t objc,              /* number of arguments */
     Tcl_Obj *const objv[]) /* argument objects */
 {
     ItclClass *contextIclsPtr = NULL;
@@ -953,7 +953,7 @@ int
 Itcl_BiInfoHeritageCmd(
     TCL_UNUSED(void *),    /* ItclObjectInfo Ptr */
     Tcl_Interp *interp,    /* current interpreter */
-    int objc,              /* number of arguments */
+    size_t objc,              /* number of arguments */
     Tcl_Obj *const objv[]) /* argument objects */
 {
     ItclClass *contextIclsPtr = NULL;
@@ -1023,14 +1023,14 @@ int
 Itcl_BiInfoFunctionCmd(
     TCL_UNUSED(void *),    /* ItclObjectInfo Ptr */
     Tcl_Interp *interp,    /* current interpreter */
-    int objc,              /* number of arguments */
+    size_t objc,              /* number of arguments */
     Tcl_Obj *const objv[]) /* argument objects */
 {
     char *cmdName = NULL;
     Tcl_Obj *resultPtr = NULL;
     Tcl_Obj *objPtr = NULL;
 
-    static const char *options[] = {
+    static const char *const options[] = {
         "-args", "-body", "-name", "-protection", "-type",
         NULL
     };
@@ -1286,7 +1286,7 @@ Itcl_BiInfoVariableCmd(
     Tcl_Object oPtr;
     int doAppend;
 
-    static const char *options[] = {
+    static const char *const options[] = {
         "-config", "-init", "-name", "-protection", "-type",
         "-value", "-scope", NULL
     };
@@ -1607,7 +1607,7 @@ int
 Itcl_BiInfoVarsCmd(
     void *clientData, /* ItclObjectInfo Ptr */
     Tcl_Interp *interp,    /* current interpreter */
-    int objc,              /* number of arguments */
+    size_t objc,              /* number of arguments */
     Tcl_Obj *const objv[]) /* argument objects */
 {
     FOREACH_HASH_DECLS;
@@ -1747,7 +1747,7 @@ int
 Itcl_BiInfoUnknownCmd(
     void *clientData,   /* ItclObjectInfo Ptr */
     Tcl_Interp *interp,      /* current interpreter */
-    int objc,                /* number of arguments */
+    size_t objc,                /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
 {
     Tcl_Obj *objPtr, *listObj;
@@ -1832,7 +1832,7 @@ int
 Itcl_BiInfoBodyCmd(
     TCL_UNUSED(void *),    /* ItclObjectInfo Ptr */
     Tcl_Interp *interp,    /* current interpreter */
-    int objc,              /* number of arguments */
+    size_t objc,              /* number of arguments */
     Tcl_Obj *const objv[]) /* argument objects */
 {
     Tcl_HashEntry *hPtr;
@@ -1935,7 +1935,7 @@ int
 Itcl_BiInfoArgsCmd(
     TCL_UNUSED(void *),    /* ItclObjectInfo Ptr */
     Tcl_Interp *interp,    /* current interpreter */
-    int objc,              /* number of arguments */
+    size_t objc,              /* number of arguments */
     Tcl_Obj *const objv[]) /* argument objects */
 {
     Tcl_HashEntry *hPtr = NULL;
@@ -2044,7 +2044,7 @@ int
 Itcl_BiInfoOptionCmd(
     TCL_UNUSED(void *),    /* ItclObjectInfo Ptr */
     Tcl_Interp *interp,    /* current interpreter */
-    int objc,              /* number of arguments */
+    size_t objc,              /* number of arguments */
     Tcl_Obj *const objv[]) /* argument objects */
 {
     char *optionName = NULL;
@@ -2052,7 +2052,7 @@ Itcl_BiInfoOptionCmd(
     Tcl_Obj *objPtr = NULL;
     Tcl_Obj *optionNamePtr;
 
-    static const char *options[] = {
+    static const char *const options[] = {
         "-cgetmethod", "-cgetmethodvar","-class",
 	"-configuremethod", "-configuremethodvar",
 	"-default",
@@ -2347,7 +2347,7 @@ int
 Itcl_BiInfoComponentCmd(
     TCL_UNUSED(void *),    /* ItclObjectInfo Ptr */
     Tcl_Interp *interp,    /* current interpreter */
-    int objc,              /* number of arguments */
+    size_t objc,              /* number of arguments */
     Tcl_Obj *const objv[]) /* argument objects */
 {
     char *componentName = NULL;
@@ -2355,7 +2355,7 @@ Itcl_BiInfoComponentCmd(
     Tcl_Obj *objPtr = NULL;
     Tcl_Obj *componentNamePtr;
 
-    static const char *components[] = {
+    static const char *const components[] = {
 	"-name", "-inherit", "-value", NULL
     };
     enum BCompIdx {
@@ -2566,7 +2566,7 @@ static int
 Itcl_BiInfoWidgetCmd(
     TCL_UNUSED(void *),    /* ItclObjectInfo Ptr */
     Tcl_Interp *interp,    /* current interpreter */
-    int objc,              /* number of arguments */
+    size_t objc,              /* number of arguments */
     Tcl_Obj *const objv[]) /* argument objects */
 {
     Tcl_Namespace *contextNs = NULL;
@@ -2658,11 +2658,11 @@ static int
 Itcl_BiInfoExtendedClassCmd(
     TCL_UNUSED(void *),    /* ItclObjectInfo Ptr */
     Tcl_Interp *interp,    /* current interpreter */
-    int objc,              /* number of arguments */
+    size_t objc,              /* number of arguments */
     Tcl_Obj *const objv[]) /* argument objects */
 {
 #ifdef NOTYET
-    static const char *components[] = {
+    static const char *const components[] = {
 	"-name", "-inherit", "-value", NULL
     };
     enum BCompIdx {
@@ -2745,11 +2745,11 @@ static int
 Itcl_BiInfoDelegatedCmd(
     TCL_UNUSED(void *),    /* ItclObjectInfo Ptr */
     Tcl_Interp *interp,    /* current interpreter */
-    int objc,              /* number of arguments */
+    size_t objc,              /* number of arguments */
     Tcl_Obj *const objv[]) /* argument objects */
 {
 #ifdef NOTYET
-    static const char *components[] = {
+    static const char *const components[] = {
 	"-name", "-inherit", "-value", NULL
     };
     enum BCompIdx {
@@ -2830,7 +2830,7 @@ static int
 Itcl_BiInfoTypeCmd(
     TCL_UNUSED(void *),    /* ItclObjectInfo Ptr */
     Tcl_Interp *interp,    /* current interpreter */
-    int objc,              /* number of arguments */
+    size_t objc,              /* number of arguments */
     Tcl_Obj *const objv[]) /* argument objects */
 {
     Tcl_Namespace *contextNs = NULL;
@@ -2918,7 +2918,7 @@ static int
 Itcl_BiInfoHullTypeCmd(
     TCL_UNUSED(void *),    /* ItclObjectInfo Ptr */
     Tcl_Interp *interp,    /* current interpreter */
-    int objc,              /* number of arguments */
+    size_t objc,              /* number of arguments */
     Tcl_Obj *const objv[]) /* argument objects */
 {
     ItclClass *contextIclsPtr;
@@ -2985,7 +2985,7 @@ static int
 Itcl_BiInfoDefaultCmd(
     TCL_UNUSED(void *),    /* ItclObjectInfo Ptr */
     Tcl_Interp *interp,    /* current interpreter */
-    int objc,              /* number of arguments */
+    size_t objc,              /* number of arguments */
     Tcl_Obj *const objv[]) /* argument objects */
 {
     FOREACH_HASH_DECLS;
@@ -3080,7 +3080,7 @@ static int
 Itcl_BiInfoMethodCmd(
     TCL_UNUSED(void *),    /* ItclObjectInfo Ptr */
     Tcl_Interp *interp,    /* current interpreter */
-    int objc,              /* number of arguments */
+    size_t objc,              /* number of arguments */
     Tcl_Obj *const objv[]) /* argument objects */
 {
     Tcl_Obj *resultPtr;
@@ -3098,7 +3098,7 @@ Itcl_BiInfoMethodCmd(
     int i;
     int result;
 
-    static const char *options[] = {
+    static const char *const options[] = {
         "-args", "-body", "-name", "-protection", "-type",
         NULL
     };
@@ -3307,7 +3307,7 @@ static int
 Itcl_BiInfoMethodsCmd(
     TCL_UNUSED(void *),    /* ItclObjectInfo Ptr */
     Tcl_Interp *interp,    /* current interpreter */
-    int objc,              /* number of arguments */
+    size_t objc,              /* number of arguments */
     Tcl_Obj *const objv[]) /* argument objects */
 {
     FOREACH_HASH_DECLS;
@@ -3405,7 +3405,7 @@ static int
 Itcl_BiInfoOptionsCmd(
     TCL_UNUSED(void *),    /* ItclObjectInfo Ptr */
     Tcl_Interp *interp,    /* current interpreter */
-    int objc,              /* number of arguments */
+    size_t objc,              /* number of arguments */
     Tcl_Obj *const objv[]) /* argument objects */
 {
     FOREACH_HASH_DECLS;
@@ -3525,7 +3525,7 @@ static int
 Itcl_BiInfoTypesCmd(
     void *clientData,      /* ItclObjectInfo Ptr */
     Tcl_Interp *interp,    /* current interpreter */
-    int objc,              /* number of arguments */
+    size_t objc,              /* number of arguments */
     Tcl_Obj *const objv[]) /* argument objects */
 {
     FOREACH_HASH_DECLS;
@@ -3578,7 +3578,7 @@ static int
 Itcl_BiInfoComponentsCmd(
     TCL_UNUSED(void *),    /* ItclObjectInfo Ptr */
     Tcl_Interp *interp,    /* current interpreter */
-    int objc,              /* number of arguments */
+    size_t objc,              /* number of arguments */
     Tcl_Obj *const objv[]) /* argument objects */
 {
     FOREACH_HASH_DECLS;
@@ -3649,7 +3649,7 @@ static int
 Itcl_BiInfoTypeMethodCmd(
     TCL_UNUSED(void *),    /* ItclObjectInfo Ptr */
     Tcl_Interp *interp,    /* current interpreter */
-    int objc,              /* number of arguments */
+    size_t objc,              /* number of arguments */
     Tcl_Obj *const objv[]) /* argument objects */
 {
     Tcl_Obj *resultPtr;
@@ -3667,7 +3667,7 @@ Itcl_BiInfoTypeMethodCmd(
     int i;
     int result;
 
-    static const char *options[] = {
+    static const char *const options[] = {
         "-args", "-body", "-name", "-protection", "-type",
         NULL
     };
@@ -3877,7 +3877,7 @@ static int
 Itcl_BiInfoTypeMethodsCmd(
     TCL_UNUSED(void *),    /* ItclObjectInfo Ptr */
     Tcl_Interp *interp,    /* current interpreter */
-    int objc,              /* number of arguments */
+    size_t objc,              /* number of arguments */
     Tcl_Obj *const objv[]) /* argument objects */
 {
     FOREACH_HASH_DECLS;
@@ -3982,7 +3982,7 @@ static int
 Itcl_BiInfoTypeVarsCmd(
     TCL_UNUSED(void *),    /* ItclObjectInfo Ptr */
     Tcl_Interp *interp,    /* current interpreter */
-    int objc,              /* number of arguments */
+    size_t objc,              /* number of arguments */
     Tcl_Obj *const objv[]) /* argument objects */
 {
     FOREACH_HASH_DECLS;
@@ -4039,7 +4039,7 @@ static int
 Itcl_BiInfoTypeVariableCmd(
     TCL_UNUSED(void *),    /* ItclObjectInfo Ptr */
     Tcl_Interp *interp,    /* current interpreter */
-    int objc,              /* number of arguments */
+    size_t objc,              /* number of arguments */
     Tcl_Obj *const objv[]) /* argument objects */
 {
     Tcl_Obj *resultPtr;
@@ -4057,7 +4057,7 @@ Itcl_BiInfoTypeVariableCmd(
     int i;
     int result;
 
-    static const char *options[] = {
+    static const char *const options[] = {
         "-init", "-name", "-protection", "-type",
         "-value", NULL
     };
@@ -4289,7 +4289,7 @@ static int
 Itcl_BiInfoVariablesCmd(
     TCL_UNUSED(void *),    /* ItclObjectInfo Ptr */
     Tcl_Interp *interp,    /* current interpreter */
-    int objc,              /* number of arguments */
+    size_t objc,              /* number of arguments */
     Tcl_Obj *const objv[]) /* argument objects */
 {
     ItclShowArgs(1, "Itcl_BiInfoVariablesCmd", objc, objv);
@@ -4314,7 +4314,7 @@ static int
 Itcl_BiInfoWidgetadaptorCmd(
     TCL_UNUSED(void *),    /* ItclObjectInfo Ptr */
     Tcl_Interp *interp,    /* current interpreter */
-    int objc,              /* number of arguments */
+    size_t objc,              /* number of arguments */
     Tcl_Obj *const objv[]) /* argument objects */
 {
     Tcl_Namespace *contextNs = NULL;
@@ -4401,7 +4401,7 @@ static int
 Itcl_BiInfoInstancesCmd(
     void *clientData,      /* ItclObjectInfo Ptr */
     Tcl_Interp *interp,    /* current interpreter */
-    int objc,              /* number of arguments */
+    size_t objc,              /* number of arguments */
     Tcl_Obj *const objv[]) /* argument objects */
 {
     FOREACH_HASH_DECLS;
@@ -4470,7 +4470,7 @@ static int
 Itcl_BiInfoDelegatedOptionsCmd(
     TCL_UNUSED(void *),    /* ItclObjectInfo Ptr */
     Tcl_Interp *interp,    /* current interpreter */
-    int objc,              /* number of arguments */
+    size_t objc,              /* number of arguments */
     Tcl_Obj *const objv[]) /* argument objects */
 {
     FOREACH_HASH_DECLS;
@@ -4541,7 +4541,7 @@ static int
 Itcl_BiInfoDelegatedMethodsCmd(
     TCL_UNUSED(void *),    /* ItclObjectInfo Ptr */
     Tcl_Interp *interp,    /* current interpreter */
-    int objc,              /* number of arguments */
+    size_t objc,              /* number of arguments */
     Tcl_Obj *const objv[]) /* argument objects */
 {
     FOREACH_HASH_DECLS;
@@ -4614,7 +4614,7 @@ static int
 Itcl_BiInfoDelegatedTypeMethodsCmd(
     TCL_UNUSED(void *),    /* ItclObjectInfo Ptr */
     Tcl_Interp *interp,    /* current interpreter */
-    int objc,              /* number of arguments */
+    size_t objc,              /* number of arguments */
     Tcl_Obj *const objv[]) /* argument objects */
 {
     FOREACH_HASH_DECLS;
@@ -4683,7 +4683,7 @@ static int
 Itcl_BiInfoDelegatedUnknownCmd(
     void *clientData,        /* ItclObjectInfo Ptr */
     Tcl_Interp *interp,      /* current interpreter */
-    int objc,                /* number of arguments */
+    size_t objc,                /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
 {
     Tcl_Obj *objPtr;
@@ -4718,7 +4718,7 @@ static int
 Itcl_BiInfoDelegatedOptionCmd(
     TCL_UNUSED(void *),    /* ItclObjectInfo Ptr */
     Tcl_Interp *interp,    /* current interpreter */
-    int objc,              /* number of arguments */
+    size_t objc,              /* number of arguments */
     Tcl_Obj *const objv[]) /* argument objects */
 {
     FOREACH_HASH_DECLS;
@@ -4737,7 +4737,7 @@ Itcl_BiInfoDelegatedOptionCmd(
     int i;
     int result;
 
-    static const char *options[] = {
+    static const char *const options[] = {
         "-as", "-class", "-component", "-exceptions",
 	"-name", "-resource", NULL
     };
@@ -4952,7 +4952,7 @@ static int
 Itcl_BiInfoDelegatedMethodCmd(
     TCL_UNUSED(void *),    /* ItclObjectInfo Ptr */
     Tcl_Interp *interp,    /* current interpreter */
-    int objc,              /* number of arguments */
+    size_t objc,              /* number of arguments */
     Tcl_Obj *const objv[]) /* argument objects */
 {
     FOREACH_HASH_DECLS;
@@ -4969,7 +4969,7 @@ Itcl_BiInfoDelegatedMethodCmd(
     int i;
     int result;
 
-    static const char *options[] = {
+    static const char *const options[] = {
         "-as", "-component", "-exceptions",
 	"-name", "-using", NULL
     };
@@ -5176,7 +5176,7 @@ static int
 Itcl_BiInfoDelegatedTypeMethodCmd(
     TCL_UNUSED(void *),    /* ItclObjectInfo Ptr */
     Tcl_Interp *interp,    /* current interpreter */
-    int objc,              /* number of arguments */
+    size_t objc,              /* number of arguments */
     Tcl_Obj *const objv[]) /* argument objects */
 {
 
@@ -5194,7 +5194,7 @@ Itcl_BiInfoDelegatedTypeMethodCmd(
     int i;
     int result;
 
-    static const char *options[] = {
+    static const char *const options[] = {
         "-as", "-component", "-exceptions",
 	"-name", "-using", NULL
     };

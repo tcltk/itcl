@@ -301,31 +301,31 @@ ITCLAPI int		Itcl_BiChainCmd(ClientData dummy, Tcl_Interp *interp,
 				size_t objc, Tcl_Obj *const objv[]);
 /* 92 */
 ITCLAPI int		Itcl_BiInfoClassCmd(ClientData dummy,
-				Tcl_Interp *interp, int objc,
+				Tcl_Interp *interp, size_t objc,
 				Tcl_Obj *const objv[]);
 /* 93 */
 ITCLAPI int		Itcl_BiInfoInheritCmd(ClientData dummy,
-				Tcl_Interp *interp, int objc,
+				Tcl_Interp *interp, size_t objc,
 				Tcl_Obj *const objv[]);
 /* 94 */
 ITCLAPI int		Itcl_BiInfoHeritageCmd(ClientData dummy,
-				Tcl_Interp *interp, int objc,
+				Tcl_Interp *interp, size_t objc,
 				Tcl_Obj *const objv[]);
 /* 95 */
 ITCLAPI int		Itcl_BiInfoFunctionCmd(ClientData dummy,
-				Tcl_Interp *interp, int objc,
+				Tcl_Interp *interp, size_t objc,
 				Tcl_Obj *const objv[]);
 /* 96 */
 ITCLAPI int		Itcl_BiInfoVariableCmd(ClientData dummy,
-				Tcl_Interp *interp, int objc,
+				Tcl_Interp *interp, size_t objc,
 				Tcl_Obj *const objv[]);
 /* 97 */
 ITCLAPI int		Itcl_BiInfoBodyCmd(ClientData dummy,
-				Tcl_Interp *interp, int objc,
+				Tcl_Interp *interp, size_t objc,
 				Tcl_Obj *const objv[]);
 /* 98 */
 ITCLAPI int		Itcl_BiInfoArgsCmd(ClientData dummy,
-				Tcl_Interp *interp, int objc,
+				Tcl_Interp *interp, size_t objc,
 				Tcl_Obj *const objv[]);
 /* Slot 99 is reserved */
 /* 100 */
@@ -354,11 +354,11 @@ ITCLAPI int		Itcl_GetEnsembleUsageForObj(Tcl_Interp *interp,
 				Tcl_Obj *ensObjPtr, Tcl_Obj *objPtr);
 /* 107 */
 ITCLAPI int		Itcl_EnsembleCmd(ClientData clientData,
-				Tcl_Interp *interp, int objc,
+				Tcl_Interp *interp, size_t objc,
 				Tcl_Obj *const objv[]);
 /* 108 */
 ITCLAPI int		Itcl_EnsPartCmd(ClientData clientData,
-				Tcl_Interp *interp, int objc,
+				Tcl_Interp *interp, size_t objc,
 				Tcl_Obj *const objv[]);
 /* 109 */
 ITCLAPI int		Itcl_EnsembleErrorCmd(ClientData clientData,
@@ -433,11 +433,11 @@ ITCLAPI int		Itcl_MixinDeleteCmd(ClientData clientData,
 /* Slot 150 is reserved */
 /* 151 */
 ITCLAPI int		Itcl_BiInfoUnknownCmd(ClientData dummy,
-				Tcl_Interp *interp, int objc,
+				Tcl_Interp *interp, size_t objc,
 				Tcl_Obj *const objv[]);
 /* 152 */
 ITCLAPI int		Itcl_BiInfoVarsCmd(ClientData dummy,
-				Tcl_Interp *interp, int objc,
+				Tcl_Interp *interp, size_t objc,
 				Tcl_Obj *const objv[]);
 /* 153 */
 ITCLAPI int		Itcl_CanAccess2(ItclClass *iclsPtr, int protection,
@@ -483,11 +483,11 @@ ITCLAPI int		Itcl_AddComponentCmd(ClientData infoPtr,
 				Tcl_Obj *const objv[]);
 /* 171 */
 ITCLAPI int		Itcl_BiInfoOptionCmd(ClientData dummy,
-				Tcl_Interp *interp, int objc,
+				Tcl_Interp *interp, size_t objc,
 				Tcl_Obj *const objv[]);
 /* 172 */
 ITCLAPI int		Itcl_BiInfoComponentCmd(ClientData dummy,
-				Tcl_Interp *interp, int objc,
+				Tcl_Interp *interp, size_t objc,
 				Tcl_Obj *const objv[]);
 /* 173 */
 ITCLAPI int		Itcl_RenameCommand(Tcl_Interp *interp,
@@ -628,13 +628,13 @@ typedef struct ItclIntStubs {
     int (*itcl_BiConfigureCmd) (ClientData clientData, Tcl_Interp *interp, size_t objc, Tcl_Obj *const objv[]); /* 89 */
     int (*itcl_BiCgetCmd) (ClientData clientData, Tcl_Interp *interp, size_t objc, Tcl_Obj *const objv[]); /* 90 */
     int (*itcl_BiChainCmd) (ClientData dummy, Tcl_Interp *interp, size_t objc, Tcl_Obj *const objv[]); /* 91 */
-    int (*itcl_BiInfoClassCmd) (ClientData dummy, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]); /* 92 */
-    int (*itcl_BiInfoInheritCmd) (ClientData dummy, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]); /* 93 */
-    int (*itcl_BiInfoHeritageCmd) (ClientData dummy, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]); /* 94 */
-    int (*itcl_BiInfoFunctionCmd) (ClientData dummy, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]); /* 95 */
-    int (*itcl_BiInfoVariableCmd) (ClientData dummy, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]); /* 96 */
-    int (*itcl_BiInfoBodyCmd) (ClientData dummy, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]); /* 97 */
-    int (*itcl_BiInfoArgsCmd) (ClientData dummy, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]); /* 98 */
+    int (*itcl_BiInfoClassCmd) (ClientData dummy, Tcl_Interp *interp, size_t objc, Tcl_Obj *const objv[]); /* 92 */
+    int (*itcl_BiInfoInheritCmd) (ClientData dummy, Tcl_Interp *interp, size_t objc, Tcl_Obj *const objv[]); /* 93 */
+    int (*itcl_BiInfoHeritageCmd) (ClientData dummy, Tcl_Interp *interp, size_t objc, Tcl_Obj *const objv[]); /* 94 */
+    int (*itcl_BiInfoFunctionCmd) (ClientData dummy, Tcl_Interp *interp, size_t objc, Tcl_Obj *const objv[]); /* 95 */
+    int (*itcl_BiInfoVariableCmd) (ClientData dummy, Tcl_Interp *interp, size_t objc, Tcl_Obj *const objv[]); /* 96 */
+    int (*itcl_BiInfoBodyCmd) (ClientData dummy, Tcl_Interp *interp, size_t objc, Tcl_Obj *const objv[]); /* 97 */
+    int (*itcl_BiInfoArgsCmd) (ClientData dummy, Tcl_Interp *interp, size_t objc, Tcl_Obj *const objv[]); /* 98 */
     void (*reserved99)(void);
     int (*itcl_EnsembleInit) (Tcl_Interp *interp); /* 100 */
     int (*itcl_CreateEnsemble) (Tcl_Interp *interp, const char *ensName); /* 101 */
@@ -643,8 +643,8 @@ typedef struct ItclIntStubs {
     int (*itcl_IsEnsemble) (Tcl_CmdInfo *infoPtr); /* 104 */
     int (*itcl_GetEnsembleUsage) (Tcl_Interp *interp, const char *ensName, Tcl_Obj *objPtr); /* 105 */
     int (*itcl_GetEnsembleUsageForObj) (Tcl_Interp *interp, Tcl_Obj *ensObjPtr, Tcl_Obj *objPtr); /* 106 */
-    int (*itcl_EnsembleCmd) (ClientData clientData, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]); /* 107 */
-    int (*itcl_EnsPartCmd) (ClientData clientData, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]); /* 108 */
+    int (*itcl_EnsembleCmd) (ClientData clientData, Tcl_Interp *interp, size_t objc, Tcl_Obj *const objv[]); /* 107 */
+    int (*itcl_EnsPartCmd) (ClientData clientData, Tcl_Interp *interp, size_t objc, Tcl_Obj *const objv[]); /* 108 */
     int (*itcl_EnsembleErrorCmd) (ClientData clientData, Tcl_Interp *interp, ItclSizeT objc, Tcl_Obj *const objv[]); /* 109 */
     void (*reserved110)(void);
     void (*reserved111)(void);
@@ -687,8 +687,8 @@ typedef struct ItclIntStubs {
     void (*reserved148)(void);
     void (*reserved149)(void);
     void (*reserved150)(void);
-    int (*itcl_BiInfoUnknownCmd) (ClientData dummy, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]); /* 151 */
-    int (*itcl_BiInfoVarsCmd) (ClientData dummy, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]); /* 152 */
+    int (*itcl_BiInfoUnknownCmd) (ClientData dummy, Tcl_Interp *interp, size_t objc, Tcl_Obj *const objv[]); /* 151 */
+    int (*itcl_BiInfoVarsCmd) (ClientData dummy, Tcl_Interp *interp, size_t objc, Tcl_Obj *const objv[]); /* 152 */
     int (*itcl_CanAccess2) (ItclClass *iclsPtr, int protection, Tcl_Namespace *fromNsPtr); /* 153 */
     void (*reserved154)(void);
     void (*reserved155)(void);
@@ -707,8 +707,8 @@ typedef struct ItclIntStubs {
     int (*itcl_NWidgetCmd) (ClientData infoPtr, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]); /* 168 */
     int (*itcl_AddOptionCmd) (ClientData infoPtr, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]); /* 169 */
     int (*itcl_AddComponentCmd) (ClientData infoPtr, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]); /* 170 */
-    int (*itcl_BiInfoOptionCmd) (ClientData dummy, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]); /* 171 */
-    int (*itcl_BiInfoComponentCmd) (ClientData dummy, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]); /* 172 */
+    int (*itcl_BiInfoOptionCmd) (ClientData dummy, Tcl_Interp *interp, size_t objc, Tcl_Obj *const objv[]); /* 171 */
+    int (*itcl_BiInfoComponentCmd) (ClientData dummy, Tcl_Interp *interp, size_t objc, Tcl_Obj *const objv[]); /* 172 */
     int (*itcl_RenameCommand) (Tcl_Interp *interp, const char *oldName, const char *newName); /* 173 */
     int (*itcl_PushCallFrame) (Tcl_Interp *interp, Tcl_CallFrame *framePtr, Tcl_Namespace *nsPtr, int isProcCallFrame); /* 174 */
     void (*itcl_PopCallFrame) (Tcl_Interp *interp); /* 175 */
