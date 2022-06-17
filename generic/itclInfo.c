@@ -392,6 +392,12 @@ ItclInfoGuts(
 
     Tcl_NRAddCallback(interp, InfoGutsFinish, framePtr, infoPtr, cPtr, NULL);
     Tcl_GetCommandInfoFromToken(infoPtr->infoCmd, &info);
+#if TCL_MAJOR_VERSION > 8
+    if (info.isNativeObjectProc == 2) {
+	return Tcl_NRCallObjProc2(interp, info.objProc2, info.objClientData2,
+		    objc-1, objv+1);
+    }
+#endif
     return Tcl_NRCallObjProc(interp, info.objProc, info.objClientData,
 	    objc-1, objv+1);
 }
@@ -428,6 +434,12 @@ NRInfoWrap(
     /* Have a subcommand.  Pass on to the ensemble */
 
     Tcl_GetCommandInfoFromToken(infoPtr->infoCmd, &info);
+#if TCL_MAJOR_VERSION > 8
+    if (info.isNativeObjectProc == 2) {
+	return Tcl_NRCallObjProc2(interp, info.objProc2, info.objClientData2,
+		    objc, objv);
+    }
+#endif
     return Tcl_NRCallObjProc(interp, info.objProc, info.objClientData,
 	    objc, objv);
 }
@@ -488,6 +500,12 @@ ItclInfoInit(
      * equivalent of [::itcl::builtin::Info] without any need for
      * tailcall to restore the right frame [87a1bc6e82].
      */
+#if TCL_MAJOR_VERSION > 8
+    if (info.isNativeObjectProc == 2) {
+	Itcl_RegisterObjC2(interp, "itcl-builtin-info", info.objProc2,
+		info.objClientData2, NULL);
+    } else
+#endif
     Itcl_RegisterObjC(interp, "itcl-builtin-info", info.objProc,
 	info.objClientData, NULL);
 

@@ -347,7 +347,7 @@ declare 75 {
     int Itcl_ParseInit(Tcl_Interp *interp, ItclObjectInfo *info)
 }
 declare 76 {
-    int Itcl_ClassCmd(ClientData clientData, Tcl_Interp *interp, int objc,
+    int Itcl_ClassCmd(ClientData clientData, Tcl_Interp *interp, size_t objc,
         Tcl_Obj *const objv[])
 }
 declare 77 {
@@ -556,7 +556,7 @@ declare 160 {
 }
 declare 161 {
     int ItclEnsembleSubCmd(ClientData clientData, Tcl_Interp *interp,
-            const char *ensembleName, int objc, Tcl_Obj *const *objv,
+            const char *ensembleName, size_t objc, Tcl_Obj *const *objv,
             const char *functionName)
 }
 declare 162 {
@@ -623,7 +623,7 @@ declare 179 {
 }
 declare 180 {
     int ItclClassBaseCmd(ClientData clientData, Tcl_Interp *interp,
-            int flags, int objc, Tcl_Obj *const objv[], ItclClass **iclsPtrPtr)
+            int flags, size_t objc, Tcl_Obj *const objv[], ItclClass **iclsPtrPtr)
 }
 declare 181 {
     int ItclCreateComponent(Tcl_Interp *interp, ItclClass *iclsPtr,

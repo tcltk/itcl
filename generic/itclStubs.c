@@ -26,6 +26,17 @@ static int ItclHandleStubCmd(void *clientData, Tcl_Interp *interp,
  *  the command is indeed a stub.
  * ------------------------------------------------------------------------
  */
+
+#if TCL_MAJOR_VERSION < 9
+typedef struct {
+    void *clientData; /* Arbitrary value to pass to object function. */
+    Tcl_ObjCmdProc2 *proc;
+    Tcl_ObjCmdProc2 *nreProc;
+    Tcl_CmdDeleteProc *deleteProc;
+} CmdWrapperInfo;
+
+#endif
+
 int
 Itcl_IsStub(
     Tcl_Command cmdPtr)      /* command being tested */
@@ -42,6 +53,15 @@ Itcl_IsStub(
         if (cmdInfo.deleteProc == ItclDeleteStub) {
             return 1;
         }
+#if TCL_MAJOR_VERSION < 9
+        if (cmdInfo.isNativeObjectProc == 2) {
+            /* Since deleteProc is not available directly .... */
+            CmdWrapperInfo *info = (CmdWrapperInfo *)cmdInfo.objClientData;
+            if (info->deleteProc == ItclDeleteStub) {
+                return 1;
+            }
+        }
+#endif
     }
     return 0;
 }
@@ -60,6 +80,7 @@ Itcl_IsStub(
  *  the real command <name> to be autoloaded.
  * ------------------------------------------------------------------------
  */
+
 int
 Itcl_StubCreateCmd(
     TCL_UNUSED(void *),      /* not used */
@@ -86,10 +107,20 @@ Itcl_StubCreateCmd(
      */
     cmdPtr = Tcl_CreateObjCommand(interp, cmdName,
         ItclHandleStubCmd, NULL,
-        (Tcl_CmdDeleteProc*)ItclDeleteStub);
+        ItclDeleteStub);
 
     Tcl_GetCommandInfoFromToken(cmdPtr, &cmdInfo);
-    cmdInfo.objClientData = cmdPtr;
+    if (cmdInfo.isNativeObjectProc == 2) {
+#if TCL_MAJOR_VERSION > 8
+	cmdInfo.objClientData2 = cmdPtr;
+#else
+    /* Since objClientData2 is not available directly .... */
+	CmdWrapperInfo *info = (CmdWrapperInfo *)cmdInfo.objClientData;
+	info->clientData = cmdPtr;
+#endif
+    } else {
+	cmdInfo.objClientData = cmdPtr;
+    }
     Tcl_SetCommandInfoFromToken(cmdPtr, &cmdInfo);
 
     return TCL_OK;

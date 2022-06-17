@@ -228,7 +228,7 @@ Itcl_ParseInit(
         pInfoPtr->infoPtr = infoPtr;
         Tcl_CreateObjCommand2(interp, Tcl_DStringValue(&buffer),
                 protectionCmds[i].objProc, pInfoPtr,
-		(Tcl_CmdDeleteProc*) ItclFreeParserCommandData);
+                ItclFreeParserCommandData);
         Tcl_DStringFree(&buffer);
     }
 
@@ -243,7 +243,7 @@ Itcl_ParseInit(
     /*
      *  Install the "class" command for defining new classes.
      */
-    Tcl_CreateObjCommand(interp, "::itcl::class", Itcl_ClassCmd,
+    Tcl_CreateObjCommand2(interp, "::itcl::class", Itcl_ClassCmd,
         infoPtr, Itcl_ReleaseData);
     Itcl_PreserveData(infoPtr);
 
@@ -617,7 +617,7 @@ int
 Itcl_ClassCmd(
     void *clientData,        /* info for all known objects */
     Tcl_Interp *interp,      /* current interpreter */
-    int objc,                /* number of arguments */
+    size_t objc,                /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
 {
     return ItclClassBaseCmd(clientData, interp, ITCL_CLASS, objc, objv, NULL);
@@ -716,7 +716,7 @@ ItclClassBaseCmd(
     Tcl_Interp *interp,      /* current interpreter */
     int flags,               /* flags: ITCL_CLASS, ITCL_TYPE,
                               * ITCL_WIDGET or ITCL_WIDGETADAPTOR */
-    int objc,                /* number of arguments */
+    size_t objc,                /* number of arguments */
     Tcl_Obj *const objv[],   /* argument objects */
     ItclClass **iclsPtrPtr)  /* for returning iclsPtr */
 {

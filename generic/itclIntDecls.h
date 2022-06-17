@@ -240,7 +240,7 @@ ITCLAPI int		Itcl_ParseInit(Tcl_Interp *interp,
 				ItclObjectInfo *info);
 /* 76 */
 ITCLAPI int		Itcl_ClassCmd(ClientData clientData,
-				Tcl_Interp *interp, int objc,
+				Tcl_Interp *interp, size_t objc,
 				Tcl_Obj *const objv[]);
 /* 77 */
 ITCLAPI int		Itcl_ClassInheritCmd(ClientData clientData,
@@ -454,7 +454,7 @@ ITCLAPI int		Itcl_SetCallFrameResolver(Tcl_Interp *interp,
 /* 161 */
 ITCLAPI int		ItclEnsembleSubCmd(ClientData clientData,
 				Tcl_Interp *interp, const char *ensembleName,
-				int objc, Tcl_Obj *const *objv,
+				size_t objc, Tcl_Obj *const *objv,
 				const char *functionName);
 /* 162 */
 ITCLAPI Tcl_Namespace *	 Itcl_GetUplevelNamespace(Tcl_Interp *interp,
@@ -513,7 +513,7 @@ ITCLAPI const char*	ItclSetInstanceVar(Tcl_Interp *interp,
 ITCLAPI Tcl_Obj *	ItclCapitalize(const char *str);
 /* 180 */
 ITCLAPI int		ItclClassBaseCmd(ClientData clientData,
-				Tcl_Interp *interp, int flags, int objc,
+				Tcl_Interp *interp, int flags, size_t objc,
 				Tcl_Obj *const objv[],
 				ItclClass **iclsPtrPtr);
 /* 181 */
@@ -612,7 +612,7 @@ typedef struct ItclIntStubs {
     void (*reserved73)(void);
     int (*itcl_ReportFuncErrors) (Tcl_Interp *interp, ItclMemberFunc *mfunc, ItclObject *contextObj, int result); /* 74 */
     int (*itcl_ParseInit) (Tcl_Interp *interp, ItclObjectInfo *info); /* 75 */
-    int (*itcl_ClassCmd) (ClientData clientData, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]); /* 76 */
+    int (*itcl_ClassCmd) (ClientData clientData, Tcl_Interp *interp, size_t objc, Tcl_Obj *const objv[]); /* 76 */
     int (*itcl_ClassInheritCmd) (ClientData clientData, Tcl_Interp *interp, size_t objc, Tcl_Obj *const objv[]); /* 77 */
     int (*itcl_ClassProtectionCmd) (ClientData clientData, Tcl_Interp *interp, size_t objc, Tcl_Obj *const objv[]); /* 78 */
     int (*itcl_ClassConstructorCmd) (ClientData clientData, Tcl_Interp *interp, size_t objc, Tcl_Obj *const objv[]); /* 79 */
@@ -697,7 +697,7 @@ typedef struct ItclIntStubs {
     void (*reserved158)(void);
     void (*reserved159)(void);
     int (*itcl_SetCallFrameResolver) (Tcl_Interp *interp, Tcl_Resolve *resolvePtr); /* 160 */
-    int (*itclEnsembleSubCmd) (ClientData clientData, Tcl_Interp *interp, const char *ensembleName, int objc, Tcl_Obj *const *objv, const char *functionName); /* 161 */
+    int (*itclEnsembleSubCmd) (ClientData clientData, Tcl_Interp *interp, const char *ensembleName, size_t objc, Tcl_Obj *const *objv, const char *functionName); /* 161 */
     Tcl_Namespace * (*itcl_GetUplevelNamespace) (Tcl_Interp *interp, int level); /* 162 */
     ClientData (*itcl_GetCallFrameClientData) (Tcl_Interp *interp); /* 163 */
     void (*reserved164)(void);
@@ -716,7 +716,7 @@ typedef struct ItclIntStubs {
     Tcl_CallFrame * (*itcl_ActivateCallFrame) (Tcl_Interp *interp, Tcl_CallFrame *framePtr); /* 177 */
     const char* (*itclSetInstanceVar) (Tcl_Interp *interp, const char *name, const char *name2, const char *value, ItclObject *contextIoPtr, ItclClass *contextIclsPtr); /* 178 */
     Tcl_Obj * (*itclCapitalize) (const char *str); /* 179 */
-    int (*itclClassBaseCmd) (ClientData clientData, Tcl_Interp *interp, int flags, int objc, Tcl_Obj *const objv[], ItclClass **iclsPtrPtr); /* 180 */
+    int (*itclClassBaseCmd) (ClientData clientData, Tcl_Interp *interp, int flags, size_t objc, Tcl_Obj *const objv[], ItclClass **iclsPtrPtr); /* 180 */
     int (*itclCreateComponent) (Tcl_Interp *interp, ItclClass *iclsPtr, Tcl_Obj *componentPtr, int type, ItclComponent **icPtrPtr); /* 181 */
     void (*itcl_SetContext) (Tcl_Interp *interp, ItclObject *ioPtr); /* 182 */
     void (*itcl_UnsetContext) (Tcl_Interp *interp); /* 183 */

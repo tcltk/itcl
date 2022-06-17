@@ -581,6 +581,11 @@ Itcl_GetEnsembleUsageForObj(
             return 0;
         }
         if (infoPtr.deleteProc == DeleteEnsemble) {
+#if TCL_MAJOR_VERSION > 8
+            if (infoPtr.isNativeObjectProc == 2) {
+                ensData = (Ensemble*)infoPtr.objClientData2;
+            } else
+#endif
             ensData = (Ensemble*)infoPtr.objClientData;
             GetEnsembleUsage(interp, ensData, objPtr);
             return 1;
@@ -1130,6 +1135,11 @@ FindEnsemble(
         if (Tcl_GetCommandInfoFromToken(cmdPtr, &cmdInfo) != 1) {
             return TCL_ERROR;
         }
+#if TCL_MAJOR_VERSION > 8
+        if (cmdInfo.isNativeObjectProc == 2) {
+            ensData = (Ensemble*)cmdInfo.objClientData2;
+        } else
+#endif
         ensData = (Ensemble*)cmdInfo.objClientData;
     }
     *ensDataPtr = ensData;
