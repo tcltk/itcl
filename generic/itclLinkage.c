@@ -31,6 +31,13 @@
  */
 #include "itclInt.h"
 
+#if TCL_MAJOR_VERSION < 9 && TCL_MINOR_VERSION < 7
+#   define Tcl_ObjCmdProc2 void
+typedef int (ObjCmdProc2)(void *, Tcl_Interp *, size_t, Tcl_Obj * const*);
+#else
+#   define ObjCmdProc2 Tcl_ObjCmdProc2
+#endif
+
 /*
  *  These records store the pointers for all "RegisterC" functions.
  */
@@ -213,6 +220,54 @@ Itcl_RegisterObjC(
     return TCL_OK;
 }
 
+typedef struct {
+    void *clientData; /* Arbitrary value to pass to object function. */
+    ObjCmdProc2 *proc;
+    Tcl_CmdDeleteProc *deleteProc;
+} CmdWrapperInfo;
+
+
+static int cmdWrapperProc(void *clientData,
+    Tcl_Interp *interp,
+    int objc,
+    struct Tcl_Obj * const *objv)
+{
+    CmdWrapperInfo *info = (CmdWrapperInfo *)clientData;
+    return info->proc(info->clientData, interp, objc, objv);
+}
+
+static void cmdWrapperDeleteProc(void *clientData) {
+    CmdWrapperInfo *info = (CmdWrapperInfo *)clientData;
+
+    clientData = info->clientData;
+    Tcl_CmdDeleteProc *deleteProc = info->deleteProc;
+    ckfree(info);
+    if (deleteProc != NULL) {
+	deleteProc(clientData);
+    }
+}
+
+int
+Itcl_RegisterObjC2(
+    Tcl_Interp *interp,     /* interpreter handling this registration */
+    const char *name,       /* symbolic name for procedure */
+    Tcl_ObjCmdProc2 *proc,   /* procedure handling Tcl command */
+    void *clientData,       /* client data associated with proc */
+    Tcl_CmdDeleteProc *deleteProc)  /* proc called to free up client data */
+{
+    CmdWrapperInfo *info = (CmdWrapperInfo *)ckalloc(sizeof(CmdWrapperInfo));
+    info->proc = (ObjCmdProc2 *)proc;
+    info->deleteProc = deleteProc;
+    info->clientData = clientData;
+
+    int result = Itcl_RegisterObjC(interp, name,
+	    (proc ? cmdWrapperProc : NULL),
+	    info, cmdWrapperDeleteProc);
+    if (result != TCL_OK) {
+	ckfree(info);
+    }
+    return result;
+}
 
 /*
  * ------------------------------------------------------------------------
@@ -259,6 +314,23 @@ Itcl_FindC(
     return (*argProcPtr != NULL || *objProcPtr != NULL);
 }
 
+int
+Itcl_FindC2(
+    Tcl_Interp *interp,           /* interpreter handling this registration */
+    const char *name,             /* symbolic name for procedure */
+    Tcl_CmdProc **argProcPtr,     /* returns (argc,argv) command handler */
+    Tcl_ObjCmdProc2 **objProcPtr,  /* returns (objc,objv) command handler */
+    void **cDataPtr)              /* returns client data */
+{
+    Tcl_ObjCmdProc *proc;
+    int result = Itcl_FindC(interp, name, argProcPtr, &proc, cDataPtr);
+    if (result && proc == cmdWrapperProc) {
+        CmdWrapperInfo *info = (CmdWrapperInfo *)ckalloc(sizeof(CmdWrapperInfo));
+        *objProcPtr = info->proc;
+        *cDataPtr = info->clientData;
+    }
+    return result;
+}
 
 /*
  * ------------------------------------------------------------------------

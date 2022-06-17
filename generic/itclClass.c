@@ -449,7 +449,7 @@ Itcl_CreateClass(
     Tcl_DStringInit(&buffer);
     Tcl_DStringAppend(&buffer, Tcl_GetString(iclsPtr->fullNamePtr), -1);
     Tcl_DStringAppend(&buffer, "::this", -1);
-    iclsPtr->thisCmd = Tcl_CreateObjCommand(interp, Tcl_DStringValue(&buffer),
+    iclsPtr->thisCmd = Tcl_CreateObjCommand2(interp, Tcl_DStringValue(&buffer),
             Itcl_ThisCmd, iclsPtr, NULL);
 
     /*

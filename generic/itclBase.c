@@ -15,8 +15,8 @@
 #include "itclUuid.h"
 
 static Tcl_NamespaceDeleteProc FreeItclObjectInfo;
-static Tcl_ObjCmdProc ItclSetHullWindowName;
-static Tcl_ObjCmdProc ItclCheckSetItclHull;
+static Tcl_ObjCmdProc2 ItclSetHullWindowName;
+static Tcl_ObjCmdProc2 ItclCheckSetItclHull;
 
 MODULE_SCOPE const ItclStubs itclStubs;
 
@@ -384,10 +384,10 @@ Initialize (
         return TCL_ERROR;
     }
 
-    Tcl_CreateObjCommand(interp,
+    Tcl_CreateObjCommand2(interp,
             ITCL_NAMESPACE"::internal::commands::sethullwindowname",
             ItclSetHullWindowName, infoPtr, NULL);
-    Tcl_CreateObjCommand(interp,
+    Tcl_CreateObjCommand2(interp,
             ITCL_NAMESPACE"::internal::commands::checksetitclhull",
             ItclCheckSetItclHull, infoPtr, NULL);
 
@@ -529,7 +529,7 @@ static int
 ItclSetHullWindowName(
     void *clientData,        /* infoPtr */
     TCL_UNUSED(Tcl_Interp *),/* current interpreter */
-    int objc,                /* number of arguments */
+    size_t objc,                /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
 {
     ItclObjectInfo *infoPtr;
@@ -553,7 +553,7 @@ static int
 ItclCheckSetItclHull(
     void *clientData,   /* infoPtr */
     Tcl_Interp *interp,      /* current interpreter */
-    int objc,                /* number of arguments */
+    size_t objc,                /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
 {
     Tcl_HashEntry *hPtr;

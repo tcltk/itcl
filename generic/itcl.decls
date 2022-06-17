@@ -98,6 +98,16 @@ declare 27 {
 declare 28 {
     void *ItclGetStackValue(Itcl_Stack *stack, size_t pos)
 }
+declare 29 {
+    int Itcl_RegisterObjC2(Tcl_Interp *interp, const char *name,
+        Tcl_ObjCmdProc2 *proc, void *clientData,
+        Tcl_CmdDeleteProc *deleteProc)
+}
+declare 30 {
+    int Itcl_FindC2(Tcl_Interp *interp, const char *name,
+        Tcl_CmdProc **argProcPtr, Tcl_ObjCmdProc2 **objProcPtr,
+        void **cDataPtr)
+}
 
 
 
@@ -389,18 +399,18 @@ declare 87 {
 }
 declare 88 {
     int Itcl_BiIsaCmd(ClientData clientData, Tcl_Interp *interp,
-        int objc, Tcl_Obj *const objv[])
+        size_t objc, Tcl_Obj *const objv[])
 }
 declare 89 {
     int Itcl_BiConfigureCmd(ClientData clientData, Tcl_Interp *interp,
-        int objc, Tcl_Obj *const objv[])
+        size_t objc, Tcl_Obj *const objv[])
 }
 declare 90 {
-    int Itcl_BiCgetCmd(ClientData clientData, Tcl_Interp *interp, int objc,
+    int Itcl_BiCgetCmd(ClientData clientData, Tcl_Interp *interp, size_t objc,
         Tcl_Obj *const objv[])
 }
 declare 91 {
-    int Itcl_BiChainCmd(ClientData dummy, Tcl_Interp *interp, int objc,
+    int Itcl_BiChainCmd(ClientData dummy, Tcl_Interp *interp, size_t objc,
         Tcl_Obj *const objv[])
 }
 declare 92 {

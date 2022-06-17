@@ -15,11 +15,14 @@ ITCLAPI const char *Itcl_InitStubs(
 
 #endif
 
+#if TCL_MAJOR_VERSION < 9 && TCL_MINOR_VERSION < 7
+#   define Tcl_ObjCmdProc2 void
+#endif
 
 /* !BEGIN!: Do not edit below this line. */
 
 #define ITCL_STUBS_EPOCH 0
-#define ITCL_STUBS_REVISION 153
+#define ITCL_STUBS_REVISION 155
 
 #ifdef __cplusplus
 extern "C" {
@@ -98,6 +101,16 @@ ITCLAPI void *		Itcl_Alloc(size_t size);
 ITCLAPI void		Itcl_Free(void *ptr);
 /* 28 */
 ITCLAPI void *		ItclGetStackValue(Itcl_Stack *stack, size_t pos);
+/* 29 */
+ITCLAPI int		Itcl_RegisterObjC2(Tcl_Interp *interp,
+				const char *name, Tcl_ObjCmdProc2 *proc,
+				void *clientData,
+				Tcl_CmdDeleteProc *deleteProc);
+/* 30 */
+ITCLAPI int		Itcl_FindC2(Tcl_Interp *interp, const char *name,
+				Tcl_CmdProc **argProcPtr,
+				Tcl_ObjCmdProc2 **objProcPtr,
+				void **cDataPtr);
 
 typedef struct {
     const struct ItclIntStubs *itclIntStubs;
@@ -138,6 +151,8 @@ typedef struct ItclStubs {
     void * (*itcl_Alloc) (size_t size); /* 26 */
     void (*itcl_Free) (void *ptr); /* 27 */
     void * (*itclGetStackValue) (Itcl_Stack *stack, size_t pos); /* 28 */
+    int (*itcl_RegisterObjC2) (Tcl_Interp *interp, const char *name, Tcl_ObjCmdProc2 *proc, void *clientData, Tcl_CmdDeleteProc *deleteProc); /* 29 */
+    int (*itcl_FindC2) (Tcl_Interp *interp, const char *name, Tcl_CmdProc **argProcPtr, Tcl_ObjCmdProc2 **objProcPtr, void **cDataPtr); /* 30 */
 } ItclStubs;
 
 extern const ItclStubs *itclStubsPtr;
@@ -208,6 +223,10 @@ extern const ItclStubs *itclStubsPtr;
 	(itclStubsPtr->itcl_Free) /* 27 */
 #define ItclGetStackValue \
 	(itclStubsPtr->itclGetStackValue) /* 28 */
+#define Itcl_RegisterObjC2 \
+	(itclStubsPtr->itcl_RegisterObjC2) /* 29 */
+#define Itcl_FindC2 \
+	(itclStubsPtr->itcl_FindC2) /* 30 */
 
 #endif /* defined(USE_ITCL_STUBS) */
 
@@ -216,6 +235,9 @@ extern const ItclStubs *itclStubsPtr;
 #if TCL_MAJOR_VERSION > 8
 #    undef Itcl_GetStackValue
 #    define Itcl_GetStackValue ItclGetStackValue
+#elif TCL_MINOR_VERSION < 7
+#   undef Tcl_ObjCmdProc2
 #endif
+
 
 #endif /* _ITCLDECLS */

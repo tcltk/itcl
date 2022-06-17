@@ -822,16 +822,16 @@ MODULE_SCOPE int ItclClassCreateObject(void *clientData, Tcl_Interp *interp,
 
 MODULE_SCOPE void ItclRestoreInfoVars(void *clientData);
 
-MODULE_SCOPE Tcl_ObjCmdProc Itcl_BiMyProcCmd;
-MODULE_SCOPE Tcl_ObjCmdProc Itcl_BiInstallComponentCmd;
-MODULE_SCOPE Tcl_ObjCmdProc Itcl_BiCallInstanceCmd;
-MODULE_SCOPE Tcl_ObjCmdProc Itcl_BiGetInstanceVarCmd;
-MODULE_SCOPE Tcl_ObjCmdProc Itcl_BiMyTypeMethodCmd;
-MODULE_SCOPE Tcl_ObjCmdProc Itcl_BiMyMethodCmd;
-MODULE_SCOPE Tcl_ObjCmdProc Itcl_BiMyTypeVarCmd;
-MODULE_SCOPE Tcl_ObjCmdProc Itcl_BiMyVarCmd;
-MODULE_SCOPE Tcl_ObjCmdProc Itcl_BiItclHullCmd;
-MODULE_SCOPE Tcl_ObjCmdProc Itcl_ThisCmd;
+MODULE_SCOPE Tcl_ObjCmdProc2 Itcl_BiMyProcCmd;
+MODULE_SCOPE Tcl_ObjCmdProc2 Itcl_BiInstallComponentCmd;
+MODULE_SCOPE Tcl_ObjCmdProc2 Itcl_BiCallInstanceCmd;
+MODULE_SCOPE Tcl_ObjCmdProc2 Itcl_BiGetInstanceVarCmd;
+MODULE_SCOPE Tcl_ObjCmdProc2 Itcl_BiMyTypeMethodCmd;
+MODULE_SCOPE Tcl_ObjCmdProc2 Itcl_BiMyMethodCmd;
+MODULE_SCOPE Tcl_ObjCmdProc2 Itcl_BiMyTypeVarCmd;
+MODULE_SCOPE Tcl_ObjCmdProc2 Itcl_BiMyVarCmd;
+MODULE_SCOPE Tcl_ObjCmdProc2 Itcl_BiItclHullCmd;
+MODULE_SCOPE Tcl_ObjCmdProc2 Itcl_ThisCmd;
 MODULE_SCOPE Tcl_ObjCmdProc Itcl_ExtendedClassCmd;
 MODULE_SCOPE Tcl_ObjCmdProc Itcl_TypeClassCmd;
 MODULE_SCOPE Tcl_ObjCmdProc Itcl_AddObjectOptionCmd;

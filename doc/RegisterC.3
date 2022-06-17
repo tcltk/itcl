@@ -9,7 +9,7 @@
 .BS
 '\" Note:  do not modify the .SH NAME line immediately below!
 .SH NAME
-Itcl_RegisterC, Itcl_RegisterObjC, Itcl_FindC \- Associate a symbolic name with a C procedure.
+Itcl_RegisterC, Itcl_RegisterObjC, Itcl_RegisterObjC2, Itcl_FindC, Itcl_FindC2 \- Associate a symbolic name with a C procedure.
 .SH SYNOPSIS
 .nf
 \fB#include <itcl.h>\fR
@@ -21,7 +21,13 @@ int
 \fBItcl_RegisterObjC\fR(\fIinterp, cmdName, objProc, clientData, deleteProc\fR)
 
 int
+\fBItcl_RegisterObjC2\fR(\fIinterp, cmdName, objProc2, clientData, deleteProc\fR)
+
+int
 \fBItcl_FindC\fR(\fIinterp, cmdName, argProcPtr, objProcPtr, cDataPtr\fR)
+
+int
+\fBItcl_FindC2\fR(\fIinterp, cmdName, argProcPtr, objProcPtr2, cDataPtr\fR)
 .fi
 .SH ARGUMENTS
 .AP Tcl_Interp *interp in
@@ -36,8 +42,12 @@ Implementation of new command:  \fIargProc\fR will be called whenever
 The Tcl_CmdProc * to receive the pointer.
 .AP Tcl_ObjCmdProc *objProc in
 Implementation of the new command: \fIobjProc\fR will be called whenever
+.AP Tcl_ObjCmdProc2 *objProc2 in
+Implementation of the new command: \fIobjProc2\fR will be called whenever
 .AP Tcl_ObjCmdProc **objProcPtr in/out
 The Tcl_ObjCmdProc * to receive the pointer.
+.AP Tcl_ObjCmdProc2 **objProcPtr2 in/out
+The Tcl_ObjCmdProc2 * to receive the pointer.
 .AP ClientData clientData in
 Arbitrary one-word value to pass to \fIproc\fR and \fIdeleteProc\fR.
 .AP ClientData *cDataPtr in/out

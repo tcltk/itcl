@@ -65,7 +65,7 @@ int
 Itcl_ThisCmd(
     void *clientData,
     Tcl_Interp *interp,
-    int objc,
+    size_t objc,
     Tcl_Obj *const *objv)
 {
     FOREACH_HASH_DECLS;
