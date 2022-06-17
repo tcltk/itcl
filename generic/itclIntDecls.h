@@ -99,11 +99,11 @@ ITCLAPI int		Itcl_DelObjectCmd(ClientData clientData,
 				Tcl_Obj *const objv[]);
 /* 26 */
 ITCLAPI int		Itcl_ScopeCmd(ClientData clientData,
-				Tcl_Interp *interp, int objc,
+				Tcl_Interp *interp, size_t objc,
 				Tcl_Obj *const objv[]);
 /* 27 */
 ITCLAPI int		Itcl_CodeCmd(ClientData clientData,
-				Tcl_Interp *interp, int objc,
+				Tcl_Interp *interp, size_t objc,
 				Tcl_Obj *const objv[]);
 /* 28 */
 ITCLAPI int		Itcl_StubCreateCmd(ClientData clientData,
@@ -127,7 +127,7 @@ ITCLAPI Tcl_Namespace *	 Itcl_FindClassNamespace(Tcl_Interp *interp,
 				const char *path);
 /* 34 */
 ITCLAPI int		Itcl_HandleClass(ClientData clientData,
-				Tcl_Interp *interp, int objc,
+				Tcl_Interp *interp, size_t objc,
 				Tcl_Obj *const objv[]);
 /* Slot 35 is reserved */
 /* Slot 36 is reserved */
@@ -165,10 +165,10 @@ ITCLAPI const char *	Itcl_GetInstanceVar(Tcl_Interp *interp,
 /* Slot 49 is reserved */
 /* 50 */
 ITCLAPI int		Itcl_BodyCmd(ClientData dummy, Tcl_Interp *interp,
-				int objc, Tcl_Obj *const objv[]);
+				size_t objc, Tcl_Obj *const objv[]);
 /* 51 */
 ITCLAPI int		Itcl_ConfigBodyCmd(ClientData dummy,
-				Tcl_Interp *interp, int objc,
+				Tcl_Interp *interp, size_t objc,
 				Tcl_Obj *const objv[]);
 /* 52 */
 ITCLAPI int		Itcl_CreateMethod(Tcl_Interp *interp,
@@ -214,11 +214,11 @@ ITCLAPI void		Itcl_GetMemberFuncUsage(ItclMemberFunc *mfunc,
 				ItclObject *contextObj, Tcl_Obj *objPtr);
 /* 68 */
 ITCLAPI int		Itcl_ExecMethod(ClientData clientData,
-				Tcl_Interp *interp, int objc,
+				Tcl_Interp *interp, size_t objc,
 				Tcl_Obj *const objv[]);
 /* 69 */
 ITCLAPI int		Itcl_ExecProc(ClientData clientData,
-				Tcl_Interp *interp, int objc,
+				Tcl_Interp *interp, size_t objc,
 				Tcl_Obj *const objv[]);
 /* Slot 70 is reserved */
 /* 71 */
@@ -244,35 +244,35 @@ ITCLAPI int		Itcl_ClassCmd(ClientData clientData,
 				Tcl_Obj *const objv[]);
 /* 77 */
 ITCLAPI int		Itcl_ClassInheritCmd(ClientData clientData,
-				Tcl_Interp *interp, int objc,
+				Tcl_Interp *interp, size_t objc,
 				Tcl_Obj *const objv[]);
 /* 78 */
 ITCLAPI int		Itcl_ClassProtectionCmd(ClientData clientData,
-				Tcl_Interp *interp, int objc,
+				Tcl_Interp *interp, size_t objc,
 				Tcl_Obj *const objv[]);
 /* 79 */
 ITCLAPI int		Itcl_ClassConstructorCmd(ClientData clientData,
-				Tcl_Interp *interp, int objc,
+				Tcl_Interp *interp, size_t objc,
 				Tcl_Obj *const objv[]);
 /* 80 */
 ITCLAPI int		Itcl_ClassDestructorCmd(ClientData clientData,
-				Tcl_Interp *interp, int objc,
+				Tcl_Interp *interp, size_t objc,
 				Tcl_Obj *const objv[]);
 /* 81 */
 ITCLAPI int		Itcl_ClassMethodCmd(ClientData clientData,
-				Tcl_Interp *interp, int objc,
+				Tcl_Interp *interp, size_t objc,
 				Tcl_Obj *const objv[]);
 /* 82 */
 ITCLAPI int		Itcl_ClassProcCmd(ClientData clientData,
-				Tcl_Interp *interp, int objc,
+				Tcl_Interp *interp, size_t objc,
 				Tcl_Obj *const objv[]);
 /* 83 */
 ITCLAPI int		Itcl_ClassVariableCmd(ClientData clientData,
-				Tcl_Interp *interp, int objc,
+				Tcl_Interp *interp, size_t objc,
 				Tcl_Obj *const objv[]);
 /* 84 */
 ITCLAPI int		Itcl_ClassCommonCmd(ClientData clientData,
-				Tcl_Interp *interp, int objc,
+				Tcl_Interp *interp, size_t objc,
 				Tcl_Obj *const objv[]);
 /* 85 */
 ITCLAPI int		Itcl_ParseVarResolver(Tcl_Interp *interp,
@@ -471,15 +471,15 @@ ITCLAPI ItclSizeT	Itcl_GetCallFrameObjc(Tcl_Interp *interp);
 ITCLAPI Tcl_Obj *const * Itcl_GetCallFrameObjv(Tcl_Interp *interp);
 /* 168 */
 ITCLAPI int		Itcl_NWidgetCmd(ClientData infoPtr,
-				Tcl_Interp *interp, int objc,
+				Tcl_Interp *interp, size_t objc,
 				Tcl_Obj *const objv[]);
 /* 169 */
 ITCLAPI int		Itcl_AddOptionCmd(ClientData infoPtr,
-				Tcl_Interp *interp, int objc,
+				Tcl_Interp *interp, size_t objc,
 				Tcl_Obj *const objv[]);
 /* 170 */
 ITCLAPI int		Itcl_AddComponentCmd(ClientData infoPtr,
-				Tcl_Interp *interp, int objc,
+				Tcl_Interp *interp, size_t objc,
 				Tcl_Obj *const objv[]);
 /* 171 */
 ITCLAPI int		Itcl_BiInfoOptionCmd(ClientData dummy,
@@ -562,15 +562,15 @@ typedef struct ItclIntStubs {
     void (*reserved23)(void);
     int (*itcl_DelClassCmd) (ClientData clientData, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]); /* 24 */
     int (*itcl_DelObjectCmd) (ClientData clientData, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]); /* 25 */
-    int (*itcl_ScopeCmd) (ClientData clientData, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]); /* 26 */
-    int (*itcl_CodeCmd) (ClientData clientData, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]); /* 27 */
+    int (*itcl_ScopeCmd) (ClientData clientData, Tcl_Interp *interp, size_t objc, Tcl_Obj *const objv[]); /* 26 */
+    int (*itcl_CodeCmd) (ClientData clientData, Tcl_Interp *interp, size_t objc, Tcl_Obj *const objv[]); /* 27 */
     int (*itcl_StubCreateCmd) (ClientData clientData, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]); /* 28 */
     int (*itcl_StubExistsCmd) (ClientData clientData, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]); /* 29 */
     int (*itcl_IsStub) (Tcl_Command cmd); /* 30 */
     int (*itcl_CreateClass) (Tcl_Interp *interp, const char *path, ItclObjectInfo *info, ItclClass **rPtr); /* 31 */
     int (*itcl_DeleteClass) (Tcl_Interp *interp, ItclClass *iclsPtr); /* 32 */
     Tcl_Namespace * (*itcl_FindClassNamespace) (Tcl_Interp *interp, const char *path); /* 33 */
-    int (*itcl_HandleClass) (ClientData clientData, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]); /* 34 */
+    int (*itcl_HandleClass) (ClientData clientData, Tcl_Interp *interp, size_t objc, Tcl_Obj *const objv[]); /* 34 */
     void (*reserved35)(void);
     void (*reserved36)(void);
     void (*reserved37)(void);
@@ -586,8 +586,8 @@ typedef struct ItclIntStubs {
     void (*reserved47)(void);
     const char * (*itcl_GetInstanceVar) (Tcl_Interp *interp, const char *name, ItclObject *contextIoPtr, ItclClass *contextIclsPtr); /* 48 */
     void (*reserved49)(void);
-    int (*itcl_BodyCmd) (ClientData dummy, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]); /* 50 */
-    int (*itcl_ConfigBodyCmd) (ClientData dummy, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]); /* 51 */
+    int (*itcl_BodyCmd) (ClientData dummy, Tcl_Interp *interp, size_t objc, Tcl_Obj *const objv[]); /* 50 */
+    int (*itcl_ConfigBodyCmd) (ClientData dummy, Tcl_Interp *interp, size_t objc, Tcl_Obj *const objv[]); /* 51 */
     int (*itcl_CreateMethod) (Tcl_Interp *interp, ItclClass *iclsPtr, Tcl_Obj *namePtr, const char *arglist, const char *body); /* 52 */
     int (*itcl_CreateProc) (Tcl_Interp *interp, ItclClass *iclsPtr, Tcl_Obj *namePtr, const char *arglist, const char *body); /* 53 */
     int (*itcl_CreateMemberFunc) (Tcl_Interp *interp, ItclClass *iclsPtr, Tcl_Obj *name, const char *arglist, const char *body, ItclMemberFunc **mfuncPtr); /* 54 */
@@ -604,8 +604,8 @@ typedef struct ItclIntStubs {
     void (*reserved65)(void);
     void (*reserved66)(void);
     void (*itcl_GetMemberFuncUsage) (ItclMemberFunc *mfunc, ItclObject *contextObj, Tcl_Obj *objPtr); /* 67 */
-    int (*itcl_ExecMethod) (ClientData clientData, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]); /* 68 */
-    int (*itcl_ExecProc) (ClientData clientData, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]); /* 69 */
+    int (*itcl_ExecMethod) (ClientData clientData, Tcl_Interp *interp, size_t objc, Tcl_Obj *const objv[]); /* 68 */
+    int (*itcl_ExecProc) (ClientData clientData, Tcl_Interp *interp, size_t objc, Tcl_Obj *const objv[]); /* 69 */
     void (*reserved70)(void);
     int (*itcl_ConstructBase) (Tcl_Interp *interp, ItclObject *contextObj, ItclClass *contextClass); /* 71 */
     int (*itcl_InvokeMethodIfExists) (Tcl_Interp *interp, const char *name, ItclClass *contextClass, ItclObject *contextObj, ItclSizeT objc, Tcl_Obj *const objv[]); /* 72 */
@@ -613,14 +613,14 @@ typedef struct ItclIntStubs {
     int (*itcl_ReportFuncErrors) (Tcl_Interp *interp, ItclMemberFunc *mfunc, ItclObject *contextObj, int result); /* 74 */
     int (*itcl_ParseInit) (Tcl_Interp *interp, ItclObjectInfo *info); /* 75 */
     int (*itcl_ClassCmd) (ClientData clientData, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]); /* 76 */
-    int (*itcl_ClassInheritCmd) (ClientData clientData, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]); /* 77 */
-    int (*itcl_ClassProtectionCmd) (ClientData clientData, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]); /* 78 */
-    int (*itcl_ClassConstructorCmd) (ClientData clientData, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]); /* 79 */
-    int (*itcl_ClassDestructorCmd) (ClientData clientData, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]); /* 80 */
-    int (*itcl_ClassMethodCmd) (ClientData clientData, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]); /* 81 */
-    int (*itcl_ClassProcCmd) (ClientData clientData, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]); /* 82 */
-    int (*itcl_ClassVariableCmd) (ClientData clientData, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]); /* 83 */
-    int (*itcl_ClassCommonCmd) (ClientData clientData, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]); /* 84 */
+    int (*itcl_ClassInheritCmd) (ClientData clientData, Tcl_Interp *interp, size_t objc, Tcl_Obj *const objv[]); /* 77 */
+    int (*itcl_ClassProtectionCmd) (ClientData clientData, Tcl_Interp *interp, size_t objc, Tcl_Obj *const objv[]); /* 78 */
+    int (*itcl_ClassConstructorCmd) (ClientData clientData, Tcl_Interp *interp, size_t objc, Tcl_Obj *const objv[]); /* 79 */
+    int (*itcl_ClassDestructorCmd) (ClientData clientData, Tcl_Interp *interp, size_t objc, Tcl_Obj *const objv[]); /* 80 */
+    int (*itcl_ClassMethodCmd) (ClientData clientData, Tcl_Interp *interp, size_t objc, Tcl_Obj *const objv[]); /* 81 */
+    int (*itcl_ClassProcCmd) (ClientData clientData, Tcl_Interp *interp, size_t objc, Tcl_Obj *const objv[]); /* 82 */
+    int (*itcl_ClassVariableCmd) (ClientData clientData, Tcl_Interp *interp, size_t objc, Tcl_Obj *const objv[]); /* 83 */
+    int (*itcl_ClassCommonCmd) (ClientData clientData, Tcl_Interp *interp, size_t objc, Tcl_Obj *const objv[]); /* 84 */
     int (*itcl_ParseVarResolver) (Tcl_Interp *interp, const char *name, Tcl_Namespace *contextNs, int flags, Tcl_Var *rPtr); /* 85 */
     int (*itcl_BiInit) (Tcl_Interp *interp, ItclObjectInfo *infoPtr); /* 86 */
     int (*itcl_InstallBiMethods) (Tcl_Interp *interp, ItclClass *cdefn); /* 87 */
@@ -704,9 +704,9 @@ typedef struct ItclIntStubs {
     int (*itcl_SetCallFrameNamespace) (Tcl_Interp *interp, Tcl_Namespace *nsPtr); /* 165 */
     ItclSizeT (*itcl_GetCallFrameObjc) (Tcl_Interp *interp); /* 166 */
     Tcl_Obj *const * (*itcl_GetCallFrameObjv) (Tcl_Interp *interp); /* 167 */
-    int (*itcl_NWidgetCmd) (ClientData infoPtr, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]); /* 168 */
-    int (*itcl_AddOptionCmd) (ClientData infoPtr, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]); /* 169 */
-    int (*itcl_AddComponentCmd) (ClientData infoPtr, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]); /* 170 */
+    int (*itcl_NWidgetCmd) (ClientData infoPtr, Tcl_Interp *interp, size_t objc, Tcl_Obj *const objv[]); /* 168 */
+    int (*itcl_AddOptionCmd) (ClientData infoPtr, Tcl_Interp *interp, size_t objc, Tcl_Obj *const objv[]); /* 169 */
+    int (*itcl_AddComponentCmd) (ClientData infoPtr, Tcl_Interp *interp, size_t objc, Tcl_Obj *const objv[]); /* 170 */
     int (*itcl_BiInfoOptionCmd) (ClientData dummy, Tcl_Interp *interp, size_t objc, Tcl_Obj *const objv[]); /* 171 */
     int (*itcl_BiInfoComponentCmd) (ClientData dummy, Tcl_Interp *interp, size_t objc, Tcl_Obj *const objv[]); /* 172 */
     int (*itcl_RenameCommand) (Tcl_Interp *interp, const char *oldName, const char *newName); /* 173 */

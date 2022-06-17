@@ -160,7 +160,7 @@ int
 Itcl_BodyCmd(
     void *clientData,
     Tcl_Interp *interp,
-    int objc,
+    size_t objc,
     Tcl_Obj *const *objv)
 {
     return Tcl_NRCallObjProc(interp, NRBodyCmd, clientData, objc, objv);
@@ -293,7 +293,7 @@ int
 Itcl_ConfigBodyCmd(
     void *clientData,
     Tcl_Interp *interp,
-    int objc,
+    size_t objc,
     Tcl_Obj *const *objv)
 {
     return Tcl_NRCallObjProc(interp, NRConfigBodyCmd, clientData, objc, objv);
@@ -1710,7 +1710,7 @@ int
 Itcl_ExecMethod(
     void *clientData,
     Tcl_Interp *interp,
-    int objc,
+    size_t objc,
     Tcl_Obj *const *objv)
 {
     return Tcl_NRCallObjProc(interp, NRExecMethod, clientData, objc, objv);
@@ -1798,7 +1798,7 @@ int
 Itcl_ExecProc(
     void *clientData,
     Tcl_Interp *interp,
-    int objc,
+    size_t objc,
     Tcl_Obj *const *objv)
 {
     return Tcl_NRCallObjProc(interp, NRExecProc, clientData, objc, objv);

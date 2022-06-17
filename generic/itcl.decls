@@ -193,11 +193,11 @@ declare 25 {
 }
 declare 26 {
     int Itcl_ScopeCmd(ClientData clientData, Tcl_Interp *interp,
-        int objc, Tcl_Obj *const objv[])
+        size_t objc, Tcl_Obj *const objv[])
 }
 declare 27 {
     int Itcl_CodeCmd(ClientData clientData, Tcl_Interp *interp,
-        int objc, Tcl_Obj *const objv[])
+        size_t objc, Tcl_Obj *const objv[])
 }
 declare 28 {
     int Itcl_StubCreateCmd(ClientData clientData, Tcl_Interp *interp,
@@ -228,7 +228,7 @@ declare 33 {
 }
 declare 34 {
     int Itcl_HandleClass(ClientData clientData, Tcl_Interp *interp,
-        int objc, Tcl_Obj *const objv[])
+        size_t objc, Tcl_Obj *const objv[])
 }
 declare 38 {
     void Itcl_BuildVirtualTables(ItclClass *iclsPtr)
@@ -271,11 +271,11 @@ declare 48 {
 #
 
 declare 50 {
-    int Itcl_BodyCmd(ClientData dummy, Tcl_Interp *interp, int objc,
+    int Itcl_BodyCmd(ClientData dummy, Tcl_Interp *interp, size_t objc,
         Tcl_Obj *const objv[])
 }
 declare 51 {
-    int Itcl_ConfigBodyCmd(ClientData dummy, Tcl_Interp *interp, int objc,
+    int Itcl_ConfigBodyCmd(ClientData dummy, Tcl_Interp *interp, size_t objc,
         Tcl_Obj *const objv[])
 }
 declare 52 {
@@ -317,12 +317,12 @@ declare 67 {
         ItclObject *contextObj, Tcl_Obj *objPtr)
 }
 declare 68 {
-    int Itcl_ExecMethod(ClientData clientData, Tcl_Interp *interp, int objc,
+    int Itcl_ExecMethod(ClientData clientData, Tcl_Interp *interp, size_t objc,
         Tcl_Obj *const objv[])
 }
 declare 69 {
     int Itcl_ExecProc(ClientData clientData, Tcl_Interp *interp,
-        int objc, Tcl_Obj *const objv[])
+        size_t objc, Tcl_Obj *const objv[])
 }
 declare 71 {
     int Itcl_ConstructBase(Tcl_Interp *interp, ItclObject *contextObj,
@@ -352,35 +352,35 @@ declare 76 {
 }
 declare 77 {
     int Itcl_ClassInheritCmd(ClientData clientData, Tcl_Interp *interp,
-        int objc, Tcl_Obj *const objv[])
+        size_t objc, Tcl_Obj *const objv[])
 }
 declare 78 {
     int Itcl_ClassProtectionCmd(ClientData clientData, Tcl_Interp *interp,
-        int objc, Tcl_Obj *const objv[])
+        size_t objc, Tcl_Obj *const objv[])
 }
 declare 79 {
     int Itcl_ClassConstructorCmd(ClientData clientData, Tcl_Interp *interp,
-        int objc, Tcl_Obj *const objv[])
+        size_t objc, Tcl_Obj *const objv[])
 }
 declare 80 {
     int Itcl_ClassDestructorCmd(ClientData clientData, Tcl_Interp *interp,
-        int objc, Tcl_Obj *const objv[])
+        size_t objc, Tcl_Obj *const objv[])
 }
 declare 81 {
     int Itcl_ClassMethodCmd(ClientData clientData, Tcl_Interp *interp,
-        int objc, Tcl_Obj *const objv[])
+        size_t objc, Tcl_Obj *const objv[])
 }
 declare 82 {
     int Itcl_ClassProcCmd(ClientData clientData, Tcl_Interp *interp,
-        int objc, Tcl_Obj *const objv[])
+        size_t objc, Tcl_Obj *const objv[])
 }
 declare 83 {
     int Itcl_ClassVariableCmd(ClientData clientData, Tcl_Interp *interp,
-        int objc, Tcl_Obj *const objv[])
+        size_t objc, Tcl_Obj *const objv[])
 }
 declare 84 {
     int Itcl_ClassCommonCmd(ClientData clientData, Tcl_Interp *interp,
-        int objc, Tcl_Obj *const objv[])
+        size_t objc, Tcl_Obj *const objv[])
 }
 declare 85 {
     int Itcl_ParseVarResolver(Tcl_Interp *interp, const char *name,
@@ -576,15 +576,15 @@ declare 167 {
 }
 declare 168 {
     int Itcl_NWidgetCmd(ClientData infoPtr, Tcl_Interp *interp,
-        int objc, Tcl_Obj *const objv[])
+        size_t objc, Tcl_Obj *const objv[])
 }
 declare 169 {
     int Itcl_AddOptionCmd(ClientData infoPtr, Tcl_Interp *interp,
-        int objc, Tcl_Obj *const objv[])
+        size_t objc, Tcl_Obj *const objv[])
 }
 declare 170 {
     int Itcl_AddComponentCmd(ClientData infoPtr, Tcl_Interp *interp,
-        int objc, Tcl_Obj *const objv[])
+        size_t objc, Tcl_Obj *const objv[])
 }
 declare 171 {
     int Itcl_BiInfoOptionCmd(ClientData dummy, Tcl_Interp *interp,

@@ -1263,7 +1263,7 @@ int
 Itcl_BiInfoVariableCmd(
     TCL_UNUSED(void *),    /* ItclObjectInfo Ptr */
     Tcl_Interp *interp,    /* current interpreter */
-    int objc,              /* number of arguments */
+    size_t objc,              /* number of arguments */
     Tcl_Obj *const objv[]) /* argument objects */
 {
     Tcl_Obj *resultPtr;

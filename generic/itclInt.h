@@ -762,7 +762,7 @@ MODULE_SCOPE void ItclDeleteObjectMetadata(void *clientData);
 MODULE_SCOPE void ItclDeleteClassMetadata(void *clientData);
 MODULE_SCOPE void ItclDeleteArgList(ItclArgList *arglistPtr);
 MODULE_SCOPE int Itcl_ClassOptionCmd(void *clientData, Tcl_Interp *interp,
-	int objc, Tcl_Obj *const objv[]);
+	size_t objc, Tcl_Obj *const objv[]);
 MODULE_SCOPE int DelegatedOptionsInstall(Tcl_Interp *interp,
 	ItclClass *iclsPtr);
 MODULE_SCOPE int Itcl_HandleDelegateOptionCmd(Tcl_Interp *interp,
@@ -832,14 +832,14 @@ MODULE_SCOPE Tcl_ObjCmdProc2 Itcl_BiMyTypeVarCmd;
 MODULE_SCOPE Tcl_ObjCmdProc2 Itcl_BiMyVarCmd;
 MODULE_SCOPE Tcl_ObjCmdProc2 Itcl_BiItclHullCmd;
 MODULE_SCOPE Tcl_ObjCmdProc2 Itcl_ThisCmd;
-MODULE_SCOPE Tcl_ObjCmdProc Itcl_ExtendedClassCmd;
-MODULE_SCOPE Tcl_ObjCmdProc Itcl_TypeClassCmd;
-MODULE_SCOPE Tcl_ObjCmdProc Itcl_AddObjectOptionCmd;
-MODULE_SCOPE Tcl_ObjCmdProc Itcl_AddDelegatedOptionCmd;
-MODULE_SCOPE Tcl_ObjCmdProc Itcl_AddDelegatedFunctionCmd;
-MODULE_SCOPE Tcl_ObjCmdProc Itcl_SetComponentCmd;
-MODULE_SCOPE Tcl_ObjCmdProc Itcl_ClassHullTypeCmd;
-MODULE_SCOPE Tcl_ObjCmdProc Itcl_ClassWidgetClassCmd;
+MODULE_SCOPE Tcl_ObjCmdProc2 Itcl_ExtendedClassCmd;
+MODULE_SCOPE Tcl_ObjCmdProc2 Itcl_TypeClassCmd;
+MODULE_SCOPE Tcl_ObjCmdProc2 Itcl_AddObjectOptionCmd;
+MODULE_SCOPE Tcl_ObjCmdProc2 Itcl_AddDelegatedOptionCmd;
+MODULE_SCOPE Tcl_ObjCmdProc2 Itcl_AddDelegatedFunctionCmd;
+MODULE_SCOPE Tcl_ObjCmdProc2 Itcl_SetComponentCmd;
+MODULE_SCOPE Tcl_ObjCmdProc2 Itcl_ClassHullTypeCmd;
+MODULE_SCOPE Tcl_ObjCmdProc2 Itcl_ClassWidgetClassCmd;
 
 typedef int (ItclRootMethodProc)(ItclObject *ioPtr, Tcl_Interp *interp,
 	int objc, Tcl_Obj *const objv[]);

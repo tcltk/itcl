@@ -670,7 +670,7 @@ int
 Itcl_ScopeCmd(
     TCL_UNUSED(void *),      /* unused */
     Tcl_Interp *interp,      /* current interpreter */
-    int objc,                /* number of arguments */
+    size_t objc,                /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
 {
     Tcl_Namespace *contextNsPtr;
@@ -898,7 +898,7 @@ int
 Itcl_CodeCmd(
     TCL_UNUSED(void *),      /* unused */
     Tcl_Interp *interp,      /* current interpreter */
-    int objc,                /* number of arguments */
+    size_t objc,                /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
 {
     Tcl_Namespace *contextNs = Tcl_GetCurrentNamespace(interp);
@@ -1381,7 +1381,7 @@ int
 Itcl_NWidgetCmd(
     void *clientData,        /* infoPtr */
     Tcl_Interp *interp,      /* current interpreter */
-    int objc,                /* number of arguments */
+    size_t objc,                /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
 {
     ItclClass *iclsPtr;
@@ -1417,7 +1417,7 @@ int
 Itcl_AddOptionCmd(
     void *clientData,        /* infoPtr */
     Tcl_Interp *interp,      /* current interpreter */
-    int objc,                /* number of arguments */
+    size_t objc,                /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
 {
     Tcl_HashEntry *hPtr;
@@ -1492,7 +1492,7 @@ int
 Itcl_AddObjectOptionCmd(
     void *clientData,        /* infoPtr */
     Tcl_Interp *interp,      /* current interpreter */
-    int objc,                /* number of arguments */
+    size_t objc,                /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
 {
     Tcl_HashEntry *hPtr;
@@ -1580,7 +1580,7 @@ int
 Itcl_AddDelegatedOptionCmd(
     void *clientData,        /* infoPtr */
     Tcl_Interp *interp,      /* current interpreter */
-    int objc,                /* number of arguments */
+    size_t objc,                /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
 {
     Tcl_HashEntry *hPtr;
@@ -1640,7 +1640,7 @@ int
 Itcl_AddDelegatedFunctionCmd(
     void *clientData,        /* infoPtr */
     Tcl_Interp *interp,      /* current interpreter */
-    int objc,                /* number of arguments */
+    size_t objc,                /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
 {
     Tcl_HashEntry *hPtr;
@@ -1718,7 +1718,7 @@ int
 Itcl_AddComponentCmd(
     TCL_UNUSED(void *),      /* infoPtr */
     Tcl_Interp *interp,      /* current interpreter */
-    int objc,                /* number of arguments */
+    size_t objc,                /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
 {
     Tcl_HashEntry *hPtr;
@@ -1882,7 +1882,7 @@ int
 Itcl_SetComponentCmd(
     TCL_UNUSED(void *),      /* infoPtr */
     Tcl_Interp *interp,      /* current interpreter */
-    int objc,                /* number of arguments */
+    size_t objc,                /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
 {
     FOREACH_HASH_DECLS;
@@ -1968,7 +1968,7 @@ int
 Itcl_ExtendedClassCmd(
     void *clientData,        /* infoPtr */
     Tcl_Interp *interp,      /* current interpreter */
-    int objc,                /* number of arguments */
+    size_t objc,                /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
 {
     ItclClass *iclsPtr;
@@ -2001,7 +2001,7 @@ int
 Itcl_TypeClassCmd(
     void *clientData,        /* infoPtr */
     Tcl_Interp *interp,      /* current interpreter */
-    int objc,                /* number of arguments */
+    size_t objc,                /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
 {
     Tcl_Obj *objPtr;
@@ -2044,7 +2044,7 @@ int
 Itcl_ClassHullTypeCmd(
     void *clientData,        /* infoPtr */
     Tcl_Interp *interp,      /* current interpreter */
-    int objc,                /* number of arguments */
+    size_t objc,                /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
 {
     ItclClass *iclsPtr;
@@ -2129,7 +2129,7 @@ int
 Itcl_ClassWidgetClassCmd(
     void *clientData,        /* infoPtr */
     Tcl_Interp *interp,      /* current interpreter */
-    int objc,                /* number of arguments */
+    size_t objc,                /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
 {
     ItclClass *iclsPtr;
