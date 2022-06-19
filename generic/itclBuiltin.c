@@ -1078,7 +1078,7 @@ static int
 NRBiChainCmd(
     TCL_UNUSED(void *),      /* not used */
     Tcl_Interp *interp,      /* current interpreter */
-    int objc,                /* number of arguments */
+    size_t objc,                /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
 {
     int result = TCL_OK;
@@ -1213,7 +1213,7 @@ Itcl_BiChainCmd(
     size_t objc,
     Tcl_Obj *const *objv)
 {
-    return Tcl_NRCallObjProc(interp, NRBiChainCmd, clientData, objc, objv);
+    return Tcl_NRCallObjProc2(interp, NRBiChainCmd, clientData, objc, objv);
 }
 
 static int

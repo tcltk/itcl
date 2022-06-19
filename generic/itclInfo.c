@@ -406,7 +406,7 @@ static int
 NRInfoWrap(
     void *clientData,
     Tcl_Interp *interp,
-    int objc,
+    size_t objc,
     Tcl_Obj *const objv[])
 {
     Tcl_CmdInfo info;
@@ -448,10 +448,10 @@ static int
 InfoWrap(
     void *clientData,
     Tcl_Interp *interp,
-    int objc,
+    size_t objc,
     Tcl_Obj *const objv[])
 {
-    return Tcl_NRCallObjProc(interp, NRInfoWrap, clientData, objc, objv);
+    return Tcl_NRCallObjProc2(interp, NRInfoWrap, clientData, objc, objv);
 }
 
 static void
@@ -490,7 +490,7 @@ ItclInfoInit(
     token = Tcl_CreateEnsemble(interp, nsPtr->fullName, nsPtr,
         TCL_ENSEMBLE_PREFIX);
     infoPtr->infoCmd = token;
-    token = Tcl_NRCreateCommand(interp, "::itcl::builtin::info", InfoWrap,
+    token = Tcl_NRCreateCommand2(interp, "::itcl::builtin::info", InfoWrap,
 	    NRInfoWrap, infoPtr, InfoCmdDelete);
     Tcl_GetCommandInfoFromToken(token, &info);
 

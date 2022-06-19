@@ -47,7 +47,7 @@ static int
 NRThisCmd(
     void *clientData,        /* class info */
     Tcl_Interp *interp,      /* current interpreter */
-    int objc,                /* number of arguments */
+    size_t objc,                /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
 {
     void *clientData2;
@@ -149,7 +149,7 @@ ItclShowArgs(1, "EVAL2", objc+1, newObjv);
 	        "\" has no method: \"", Tcl_GetString(objv[1]), "\"", NULL);
         return TCL_ERROR;
     }
-    return Tcl_NRCallObjProc(interp, NRThisCmd, clientData, objc, objv);
+    return Tcl_NRCallObjProc2(interp, NRThisCmd, clientData, objc, objv);
 }
 
 
@@ -503,7 +503,7 @@ static int
 NRDelClassCmd(
     TCL_UNUSED(void *),      /* unused */
     Tcl_Interp *interp,      /* current interpreter */
-    int objc,                /* number of arguments */
+    size_t objc,                /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
 {
     int i;
@@ -549,7 +549,7 @@ Itcl_DelClassCmd(
     int objc,
     Tcl_Obj *const *objv)
 {
-    return Tcl_NRCallObjProc(interp, NRDelClassCmd, clientData, objc, objv);
+    return Tcl_NRCallObjProc2(interp, NRDelClassCmd, clientData, objc, objv);
 }
 
 
@@ -588,7 +588,7 @@ static int
 NRDelObjectCmd(
     TCL_UNUSED(void *),      /* object management info */
     Tcl_Interp *interp,      /* current interpreter */
-    int objc,                /* number of arguments */
+    size_t objc,                /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
 {
     ItclObject *contextIoPtr;
@@ -636,7 +636,7 @@ Itcl_DelObjectCmd(
     int objc,
     Tcl_Obj *const *objv)
 {
-    return Tcl_NRCallObjProc(interp, NRDelObjectCmd, clientData, objc, objv);
+    return Tcl_NRCallObjProc2(interp, NRDelObjectCmd, clientData, objc, objv);
 }
 
 
