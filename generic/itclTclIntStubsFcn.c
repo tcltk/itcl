@@ -42,7 +42,7 @@ Tcl_ObjCmdProc2 *
 _Tcl_GetObjInterpProc(
     void)
 {
-    return (Tcl_ObjCmdProc2 *)TclGetObjInterpProc();
+    return TclGetObjInterpProc();
 }
 
 void
