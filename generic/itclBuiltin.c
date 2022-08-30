@@ -1225,7 +1225,7 @@ CallCreateObject(
     Tcl_CallFrame frame;
     Tcl_Namespace *nsPtr;
     ItclClass *iclsPtr = (ItclClass *)data[0];
-    int objc = PTR2INT(data[1]);
+    ItclSizeT objc = PTR2INT(data[1]);
     Tcl_Obj *const *objv = (Tcl_Obj *const *)data[2];
 
     if (result != TCL_OK) {
@@ -1248,7 +1248,7 @@ static int
 PrepareCreateObject(
    Tcl_Interp *interp,
    ItclClass *iclsPtr,
-   int objc,
+   ItclSizeT objc,
    Tcl_Obj *const *objv)
 {
     Tcl_HashEntry *hPtr;

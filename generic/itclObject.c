@@ -199,7 +199,7 @@ ItclCreateObject(
     Tcl_Interp *interp,      /* interpreter mananging new object */
     const char* name,        /* name of new object */
     ItclClass *iclsPtr,        /* class for new object */
-    size_t objc,                /* number of arguments */
+    ItclSizeT objc,                /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
 {
     int result = TCL_OK;
@@ -2718,7 +2718,7 @@ CallPublicObjectCmd(
     Tcl_Object *oPtr = (Tcl_Object *)data[0];
     Tcl_Class clsPtr = (Tcl_Class)data[1];
     Tcl_Obj *const *objv = (Tcl_Obj *const *)data[3];
-    size_t objc = PTR2INT(data[2]);
+    ItclSizeT objc = PTR2INT(data[2]);
 
     ItclShowArgs(1, "CallPublicObjectCmd", objc, objv);
     result = Itcl_PublicObjectCmd(oPtr, interp, clsPtr, objc, objv);
@@ -2732,7 +2732,7 @@ ItclObjectCmd(
     Tcl_Interp *interp,
     Tcl_Object oPtr,
     Tcl_Class clsPtr,
-    size_t objc,
+    ItclSizeT objc,
     Tcl_Obj *const *objv)
 {
     Tcl_Obj *methodNamePtr;

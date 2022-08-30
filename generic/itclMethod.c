@@ -1191,7 +1191,7 @@ CallItclObjectCmd(
     Tcl_Object oPtr;
     ItclMemberFunc *imPtr = (ItclMemberFunc *)data[0];
     ItclObject *ioPtr = (ItclObject *)data[1];
-    int objc = PTR2INT(data[2]);
+    ItclSizeT objc = PTR2INT(data[2]);
     Tcl_Obj **objv = (Tcl_Obj **)data[3];
 
     ItclShowArgs(1, "CallItclObjectCmd", objc, objv);
@@ -1812,7 +1812,7 @@ CallInvokeMethodIfExists(
 {
     ItclClass *iclsPtr = (ItclClass *)data[0];
     ItclObject *contextObj = (ItclObject *)data[1];
-    int objc = PTR2INT(data[2]);
+    ItclSizeT objc = PTR2INT(data[2]);
     Tcl_Obj *const *objv = (Tcl_Obj *const *)data[3];
 
     result = Itcl_InvokeMethodIfExists(interp, "constructor",

@@ -2560,7 +2560,7 @@ int
 ItclParseOption(
     TCL_UNUSED(ItclObjectInfo *), /* info for all known objects */
     Tcl_Interp *interp,      /* current interpreter */
-    size_t objc,                /* number of arguments */
+    ItclSizeT objc,                /* number of arguments */
     Tcl_Obj *const objv[],   /* argument objects */
     ItclClass *iclsPtr,
     ItclObject *ioPtr,
@@ -3307,7 +3307,7 @@ Itcl_HandleDelegateMethodCmd(
     ItclClass *iclsPtr,      /* != NULL for delegate method otherwise NULL */
     ItclDelegatedFunction **idmPtrPtr,
                              /* where to return idoPtr */
-    size_t objc,                /* number of arguments */
+    ItclSizeT objc,                /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
 {
     Tcl_Obj *methodNamePtr;
@@ -3324,7 +3324,7 @@ Itcl_HandleDelegateMethodCmd(
     const char *component;
     const char *token;
     int result;
-    size_t i;
+    ItclSizeT i;
     int foundOpt;
 
     ItclShowArgs(1, "Itcl_HandleDelegateMethodCmd", objc, objv);
@@ -3540,7 +3540,7 @@ Itcl_HandleDelegateOptionCmd(
     ItclClass *iclsPtr,      /* != NULL for delegate option otherwise NULL */
     ItclDelegatedOption **idoPtrPtr,
                              /* where to return idoPtr */
-    size_t objc,                /* number of arguments */
+    ItclSizeT objc,                /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
 
 {

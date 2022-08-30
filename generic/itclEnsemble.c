@@ -2071,7 +2071,7 @@ CallInvokeEnsembleMethod(
 {
     Tcl_Namespace *nsPtr = (Tcl_Namespace *)data[0];
     EnsemblePart *ensPart = (EnsemblePart *)data[1];
-    size_t objc = PTR2INT(data[2]);
+    ItclSizeT objc = PTR2INT(data[2]);
     Tcl_Obj *const *objv = (Tcl_Obj *const *)data[3];
 
     result = Itcl_InvokeEnsembleMethod(interp, nsPtr, ensPart->namePtr,
@@ -2086,7 +2086,7 @@ CallInvokeEnsembleMethod2(
     int result)
 {
     EnsemblePart *ensPart = (EnsemblePart *)data[0];
-    int objc = PTR2INT(data[1]);
+    ItclSizeT objc = PTR2INT(data[1]);
     Tcl_Obj *const*objv = (Tcl_Obj *const*)data[2];
     result = (*ensPart->objProc)(ensPart->clientData, interp, objc, objv);
     return result;

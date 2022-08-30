@@ -70,7 +70,7 @@ Tcl_InvokeClassProcedureMethod(
     Tcl_Obj *namePtr,           /* name of the method */
     Tcl_Namespace *nsPtr,       /* namespace for calling method */
     ProcedureMethod *pmPtr,     /* method type specific data */
-    int objc,			/* Number of arguments. */
+    ItclSizeT objc,			/* Number of arguments. */
     Tcl_Obj *const *objv)	/* Arguments as actually seen. */
 {
     Proc *procPtr = pmPtr->procPtr;
@@ -147,7 +147,7 @@ int
 Itcl_InvokeProcedureMethod(
     void *clientData,	/* Pointer to some per-method context. */
     Tcl_Interp *interp,
-    int objc,			/* Number of arguments. */
+    ItclSizeT objc,			/* Number of arguments. */
     Tcl_Obj *const *objv)	/* Arguments as actually seen. */
 {
     Tcl_Namespace *nsPtr;
@@ -362,7 +362,7 @@ int
 Itcl_SelfCmd(
     TCL_UNUSED(void *),
     Tcl_Interp *interp,
-    int objc,
+    ItclSizeT objc,
     Tcl_Obj *const *objv)
 {
     Interp *iPtr = (Interp *) interp;

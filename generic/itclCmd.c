@@ -503,7 +503,7 @@ static int
 NRDelClassCmd(
     TCL_UNUSED(void *),      /* unused */
     Tcl_Interp *interp,      /* current interpreter */
-	ItclSizeT objc,                /* number of arguments */
+    ItclSizeT objc,                /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
 {
     int i;
