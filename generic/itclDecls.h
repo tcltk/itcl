@@ -33,30 +33,29 @@ extern "C" {
 /* Slot 1 is reserved */
 /* 2 */
 ITCLAPI int		Itcl_RegisterC(Tcl_Interp *interp, const char *name,
-				Tcl_CmdProc *proc, ClientData clientData,
+				Tcl_CmdProc *proc, void *clientData,
 				Tcl_CmdDeleteProc *deleteProc);
 /* 3 */
 ITCLAPI int		Itcl_RegisterObjC(Tcl_Interp *interp,
 				const char *name, Tcl_ObjCmdProc *proc,
-				ClientData clientData,
+				void *clientData,
 				Tcl_CmdDeleteProc *deleteProc);
 /* 4 */
 ITCLAPI int		Itcl_FindC(Tcl_Interp *interp, const char *name,
 				Tcl_CmdProc **argProcPtr,
-				Tcl_ObjCmdProc **objProcPtr,
-				ClientData *cDataPtr);
+				Tcl_ObjCmdProc **objProcPtr, void **cDataPtr);
 /* 5 */
 ITCLAPI void		Itcl_InitStack(Itcl_Stack *stack);
 /* 6 */
 ITCLAPI void		Itcl_DeleteStack(Itcl_Stack *stack);
 /* 7 */
-ITCLAPI void		Itcl_PushStack(ClientData cdata, Itcl_Stack *stack);
+ITCLAPI void		Itcl_PushStack(void *cdata, Itcl_Stack *stack);
 /* 8 */
-ITCLAPI ClientData	Itcl_PopStack(Itcl_Stack *stack);
+ITCLAPI void *		Itcl_PopStack(Itcl_Stack *stack);
 /* 9 */
-ITCLAPI ClientData	Itcl_PeekStack(Itcl_Stack *stack);
+ITCLAPI void *		Itcl_PeekStack(Itcl_Stack *stack);
 /* 10 */
-ITCLAPI ClientData	Itcl_GetStackValue(Itcl_Stack *stack, int pos);
+ITCLAPI void *		Itcl_GetStackValue(Itcl_Stack *stack, int pos);
 /* 11 */
 ITCLAPI void		Itcl_InitList(Itcl_List *listPtr);
 /* 12 */
@@ -66,25 +65,21 @@ ITCLAPI Itcl_ListElem *	 Itcl_CreateListElem(Itcl_List *listPtr);
 /* 14 */
 ITCLAPI Itcl_ListElem *	 Itcl_DeleteListElem(Itcl_ListElem *elemPtr);
 /* 15 */
-ITCLAPI Itcl_ListElem *	 Itcl_InsertList(Itcl_List *listPtr, ClientData val);
+ITCLAPI Itcl_ListElem *	 Itcl_InsertList(Itcl_List *listPtr, void *val);
 /* 16 */
-ITCLAPI Itcl_ListElem *	 Itcl_InsertListElem(Itcl_ListElem *pos,
-				ClientData val);
+ITCLAPI Itcl_ListElem *	 Itcl_InsertListElem(Itcl_ListElem *pos, void *val);
 /* 17 */
-ITCLAPI Itcl_ListElem *	 Itcl_AppendList(Itcl_List *listPtr, ClientData val);
+ITCLAPI Itcl_ListElem *	 Itcl_AppendList(Itcl_List *listPtr, void *val);
 /* 18 */
-ITCLAPI Itcl_ListElem *	 Itcl_AppendListElem(Itcl_ListElem *pos,
-				ClientData val);
+ITCLAPI Itcl_ListElem *	 Itcl_AppendListElem(Itcl_ListElem *pos, void *val);
 /* 19 */
-ITCLAPI void		Itcl_SetListValue(Itcl_ListElem *elemPtr,
-				ClientData val);
+ITCLAPI void		Itcl_SetListValue(Itcl_ListElem *elemPtr, void *val);
 /* 20 */
-ITCLAPI void		Itcl_EventuallyFree(ClientData cdata,
-				Tcl_FreeProc *fproc);
+ITCLAPI void		Itcl_EventuallyFree(void *cdata, Tcl_FreeProc *fproc);
 /* 21 */
-ITCLAPI void		Itcl_PreserveData(ClientData cdata);
+ITCLAPI void		Itcl_PreserveData(void *cdata);
 /* 22 */
-ITCLAPI void		Itcl_ReleaseData(ClientData cdata);
+ITCLAPI void		Itcl_ReleaseData(void *cdata);
 /* 23 */
 ITCLAPI Itcl_InterpState Itcl_SaveInterpState(Tcl_Interp *interp, int status);
 /* 24 */
@@ -111,27 +106,27 @@ typedef struct ItclStubs {
 
     void (*reserved0)(void);
     void (*reserved1)(void);
-    int (*itcl_RegisterC) (Tcl_Interp *interp, const char *name, Tcl_CmdProc *proc, ClientData clientData, Tcl_CmdDeleteProc *deleteProc); /* 2 */
-    int (*itcl_RegisterObjC) (Tcl_Interp *interp, const char *name, Tcl_ObjCmdProc *proc, ClientData clientData, Tcl_CmdDeleteProc *deleteProc); /* 3 */
-    int (*itcl_FindC) (Tcl_Interp *interp, const char *name, Tcl_CmdProc **argProcPtr, Tcl_ObjCmdProc **objProcPtr, ClientData *cDataPtr); /* 4 */
+    int (*itcl_RegisterC) (Tcl_Interp *interp, const char *name, Tcl_CmdProc *proc, void *clientData, Tcl_CmdDeleteProc *deleteProc); /* 2 */
+    int (*itcl_RegisterObjC) (Tcl_Interp *interp, const char *name, Tcl_ObjCmdProc *proc, void *clientData, Tcl_CmdDeleteProc *deleteProc); /* 3 */
+    int (*itcl_FindC) (Tcl_Interp *interp, const char *name, Tcl_CmdProc **argProcPtr, Tcl_ObjCmdProc **objProcPtr, void **cDataPtr); /* 4 */
     void (*itcl_InitStack) (Itcl_Stack *stack); /* 5 */
     void (*itcl_DeleteStack) (Itcl_Stack *stack); /* 6 */
-    void (*itcl_PushStack) (ClientData cdata, Itcl_Stack *stack); /* 7 */
-    ClientData (*itcl_PopStack) (Itcl_Stack *stack); /* 8 */
-    ClientData (*itcl_PeekStack) (Itcl_Stack *stack); /* 9 */
-    ClientData (*itcl_GetStackValue) (Itcl_Stack *stack, int pos); /* 10 */
+    void (*itcl_PushStack) (void *cdata, Itcl_Stack *stack); /* 7 */
+    void * (*itcl_PopStack) (Itcl_Stack *stack); /* 8 */
+    void * (*itcl_PeekStack) (Itcl_Stack *stack); /* 9 */
+    void * (*itcl_GetStackValue) (Itcl_Stack *stack, int pos); /* 10 */
     void (*itcl_InitList) (Itcl_List *listPtr); /* 11 */
     void (*itcl_DeleteList) (Itcl_List *listPtr); /* 12 */
     Itcl_ListElem * (*itcl_CreateListElem) (Itcl_List *listPtr); /* 13 */
     Itcl_ListElem * (*itcl_DeleteListElem) (Itcl_ListElem *elemPtr); /* 14 */
-    Itcl_ListElem * (*itcl_InsertList) (Itcl_List *listPtr, ClientData val); /* 15 */
-    Itcl_ListElem * (*itcl_InsertListElem) (Itcl_ListElem *pos, ClientData val); /* 16 */
-    Itcl_ListElem * (*itcl_AppendList) (Itcl_List *listPtr, ClientData val); /* 17 */
-    Itcl_ListElem * (*itcl_AppendListElem) (Itcl_ListElem *pos, ClientData val); /* 18 */
-    void (*itcl_SetListValue) (Itcl_ListElem *elemPtr, ClientData val); /* 19 */
-    void (*itcl_EventuallyFree) (ClientData cdata, Tcl_FreeProc *fproc); /* 20 */
-    void (*itcl_PreserveData) (ClientData cdata); /* 21 */
-    void (*itcl_ReleaseData) (ClientData cdata); /* 22 */
+    Itcl_ListElem * (*itcl_InsertList) (Itcl_List *listPtr, void *val); /* 15 */
+    Itcl_ListElem * (*itcl_InsertListElem) (Itcl_ListElem *pos, void *val); /* 16 */
+    Itcl_ListElem * (*itcl_AppendList) (Itcl_List *listPtr, void *val); /* 17 */
+    Itcl_ListElem * (*itcl_AppendListElem) (Itcl_ListElem *pos, void *val); /* 18 */
+    void (*itcl_SetListValue) (Itcl_ListElem *elemPtr, void *val); /* 19 */
+    void (*itcl_EventuallyFree) (void *cdata, Tcl_FreeProc *fproc); /* 20 */
+    void (*itcl_PreserveData) (void *cdata); /* 21 */
+    void (*itcl_ReleaseData) (void *cdata); /* 22 */
     Itcl_InterpState (*itcl_SaveInterpState) (Tcl_Interp *interp, int status); /* 23 */
     int (*itcl_RestoreInterpState) (Tcl_Interp *interp, Itcl_InterpState state); /* 24 */
     void (*itcl_DiscardInterpState) (Itcl_InterpState state); /* 25 */
