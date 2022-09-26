@@ -20,7 +20,7 @@ PROJECT         = itcl
 NEED_TCL_SOURCE = 1
 RCFILE      = itcl.rc
 
-PRJ_DEFINES = $(PRJ_DEFINES) -DTCL_NO_DEPRECATED=1
+PRJ_DEFINES = $(PRJ_DEFINES)
 PRJ_DEFINES = $(PRJ_DEFINES) -I$(TMP_DIR)
 
 !include "rules-ext.vc"
