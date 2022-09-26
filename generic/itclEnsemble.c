@@ -1983,7 +1983,7 @@ Itcl_EnsPartCmd(
      *  anything goes wrong, clean up before bailing out.
      */
     result = AddEnsemblePart(ensInfo->interp, ensData, partName, usage,
-        (Tcl_ObjCmdProc *)Tcl_GetObjInterpProc(), procPtr, _Tcl_ProcDeleteProc,
+        Tcl_GetObjInterpProc(), procPtr, _Tcl_ProcDeleteProc,
         ITCL_ENSEMBLE_ENSEMBLE, &ensPart);
     if (result == TCL_ERROR) {
 	_Tcl_ProcDeleteProc(procPtr);
