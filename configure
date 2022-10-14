@@ -778,6 +778,7 @@ ac_subst_files=''
 ac_user_opts='
 enable_option_checking
 with_tcl
+with_tcl8
 with_tclinclude
 enable_threads
 enable_shared
@@ -1428,6 +1429,7 @@ Optional Packages:
   --without-PACKAGE       do not use PACKAGE (same as --with-PACKAGE=no)
   --with-tcl              directory containing tcl configuration
                           (tclConfig.sh)
+  --with-tcl8             Compile for Tcl8 in Tcl9 environment
   --with-tclinclude       directory containing the public Tcl header files
 
 Some influential environment variables:
@@ -2752,6 +2754,13 @@ fi
 if test ${with_tcl+y}
 then :
   withval=$with_tcl; with_tclconfig="${withval}"
+fi
+
+
+# Check whether --with-tcl8 was given.
+if test ${with_tcl8+y}
+then :
+  withval=$with_tcl8; with_tcl8="${withval}"
 fi
 
 	{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for Tcl configuration" >&5
@@ -9044,10 +9053,13 @@ rm -rf conftest*
 
     PACKAGE_LIB_PREFIX8="${PACKAGE_LIB_PREFIX}"
     PACKAGE_LIB_PREFIX9="${PACKAGE_LIB_PREFIX}tcl9"
-    if test "${TCL_MAJOR_VERSION}" -gt 8 ; then
+    if test "${TCL_MAJOR_VERSION}" -gt 8 -a x"${with_tcl8}" == x; then
 	PACKAGE_LIB_PREFIX="${PACKAGE_LIB_PREFIX9}"
     else
 	PACKAGE_LIB_PREFIX="${PACKAGE_LIB_PREFIX8}"
+
+printf "%s\n" "#define TCL_MAJOR_VERSION 8" >>confdefs.h
+
     fi
     if test "${TEA_PLATFORM}" = "windows" ; then
 	if test "${SHARED_BUILD}" = "1" ; then
