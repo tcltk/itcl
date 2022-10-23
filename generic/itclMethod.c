@@ -816,8 +816,8 @@ ItclCreateMemberCode(
     Tcl_Obj *namePtr,
     int flags)
 {
-    ItclSizeT argc;
-    ItclSizeT maxArgc;
+    Tcl_Size argc;
+    Tcl_Size maxArgc;
     Tcl_Obj *usagePtr;
     ItclArgList *argListPtr;
     ItclMemberCode *mcode;
@@ -1237,13 +1237,13 @@ Itcl_EvalMemberCode(
     Tcl_Interp *interp,       /* current interpreter */
     ItclMemberFunc *imPtr,    /* member func, or NULL (for error messages) */
     ItclObject *contextIoPtr,   /* object context, or NULL */
-    ItclSizeT objc,                 /* number of arguments */
+    Tcl_Size objc,                 /* number of arguments */
     Tcl_Obj *const objv[])    /* argument objects */
 {
     ItclMemberCode *mcode;
     void *callbackPtr;
     int result = TCL_OK;
-    ItclSizeT i;
+    Tcl_Size i;
 
     ItclShowArgs(1, "Itcl_EvalMemberCode", objc, objv);
     /*
@@ -1950,7 +1950,7 @@ Itcl_InvokeMethodIfExists(
     const char *name,             /* name of desired method */
     ItclClass *contextClassPtr,   /* current class being constructed */
     ItclObject *contextObjectPtr, /* object being constructed */
-    ItclSizeT objc,               /* number of arguments */
+    Tcl_Size objc,               /* number of arguments */
     Tcl_Obj *const objv[])        /* argument objects */
 {
     Tcl_HashEntry *hPtr;
@@ -1959,7 +1959,7 @@ Itcl_InvokeMethodIfExists(
     Tcl_Obj **newObjv;
     Tcl_CallFrame frame;
     ItclMemberFunc *imPtr;
-    ItclSizeT cmdlinec;
+    Tcl_Size cmdlinec;
     int result = TCL_OK;
     Tcl_Obj *objPtr = Tcl_NewStringObj(name, -1);
 
@@ -2312,8 +2312,8 @@ ItclCheckCallMethod(
     ItclMemberFunc *imPtr;
     int result;
     int isNew;
-    ItclSizeT cObjc;
-    ItclSizeT min_allowed_args;
+    Tcl_Size cObjc;
+    Tcl_Size min_allowed_args;
 
     ItclObjectInfo *infoPtr;
 

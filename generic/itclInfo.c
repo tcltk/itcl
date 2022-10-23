@@ -772,9 +772,9 @@ Itcl_BiInfoClassOptionsCmd(
     const char *name;
     const char *val;
     const char *pattern;
-    ItclSizeT lObjc;
+    Tcl_Size lObjc;
     int result;
-    ItclSizeT i;
+    Tcl_Size i;
 
     ItclShowArgs(1, "Itcl_BiInfoClassOptionsCmd", objc, objv);
     iclsPtr = NULL;
@@ -3434,9 +3434,9 @@ Itcl_BiInfoOptionsCmd(
     const char *name;
     const char *val;
     const char *pattern;
-    ItclSizeT lObjc;
+    Tcl_Size lObjc;
     int result;
-    ItclSizeT i;
+    Tcl_Size i;
 
     ItclShowArgs(1, "Itcl_BiInfoOptionsCmd", objc, objv);
     iclsPtr = NULL;

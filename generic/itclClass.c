@@ -1372,7 +1372,7 @@ CallCreateObject(
 {
     Tcl_Obj *objNamePtr = (Tcl_Obj *)data[0];
     ItclClass *iclsPtr = (ItclClass *)data[1];
-    ItclSizeT objc = PTR2INT(data[2]);
+    Tcl_Size objc = PTR2INT(data[2]);
     Tcl_Obj **objv = (Tcl_Obj **)data[3];
 
     if (result == TCL_OK) {

@@ -594,8 +594,8 @@ Itcl_BiConfigureCmd(
     const char *lastval;
     const char *token;
     char *varName;
-    ItclSizeT i;
-    ItclSizeT unparsedObjc;
+    Tcl_Size i;
+    Tcl_Size unparsedObjc;
     int result;
 
     ItclShowArgs(1, "Itcl_BiConfigureCmd", objc, objv);
@@ -1174,7 +1174,7 @@ NRBiChainCmd(
     while ((iclsPtr = Itcl_AdvanceHierIter(&hier)) != NULL) {
         hPtr = Tcl_FindHashEntry(&iclsPtr->functions, (char *)objPtr);
         if (hPtr) {
-	    ItclSizeT my_objc;
+	    Tcl_Size my_objc;
             imPtr = (ItclMemberFunc*)Tcl_GetHashValue(hPtr);
 
             /*
@@ -1337,7 +1337,7 @@ ItclBiClassUnknownCmd(
     const char *resStr;
     const char *val;
     const char *funcName;
-    ItclSizeT lObjc;
+    Tcl_Size lObjc;
     int result;
     int offset;
     int useComponent;
@@ -1345,7 +1345,7 @@ ItclBiClassUnknownCmd(
     int isTypeMethod;
     int isStar;
     int isNew;
-    ItclSizeT idx;
+    Tcl_Size idx;
 
     ItclShowArgs(1, "ItclBiClassUnknownCmd", objc, objv);
     listPtr = NULL;
@@ -1611,7 +1611,7 @@ ItclUnknownGuts(
     const char *resStr;
     const char *val;
     const char *funcName;
-    ItclSizeT lObjc;
+    Tcl_Size lObjc;
     int result;
     int offset;
     int useComponent;
@@ -1620,7 +1620,7 @@ ItclUnknownGuts(
     int isStar;
     int isTypeMethod;
     int isNew;
-    ItclSizeT idx;
+    Tcl_Size idx;
 
     if (objc < 2) {
         Tcl_AppendResult(interp, "wrong # args: should be one of...",
@@ -1877,11 +1877,11 @@ static Tcl_Obj *makeAsOptionInfo(
     Tcl_Interp *interp,
     Tcl_Obj *optNamePtr,
     ItclDelegatedOption *idoPtr,
-    ItclSizeT lObjc2,
+    Tcl_Size lObjc2,
     Tcl_Obj *const *lObjv2)
 {
     Tcl_Obj *objPtr;
-    ItclSizeT j;
+    Tcl_Size j;
 
     objPtr = Tcl_NewListObj(0, NULL);
     Tcl_ListObjAppendElement(interp, objPtr, Tcl_NewStringObj(
@@ -1959,10 +1959,10 @@ ItclExtendedConfigure(
     ItclOption *ioptPtr;
     ItclObjectInfo *infoPtr;
     const char *val;
-    ItclSizeT lObjc;
-    ItclSizeT lObjc2;
-    ItclSizeT lObjc3;
-    ItclSizeT i;
+    Tcl_Size lObjc;
+    Tcl_Size lObjc2;
+    Tcl_Size lObjc3;
+    Tcl_Size i;
     int j;
     int isNew;
     int result;

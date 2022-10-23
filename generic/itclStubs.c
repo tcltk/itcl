@@ -165,7 +165,7 @@ ItclHandleStubCmd(
     char *cmdName;
     int result;
     int loaded;
-    ItclSizeT cmdlinec;
+    Tcl_Size cmdlinec;
 
     ItclShowArgs(1, "ItclHandleStubCmd", objc, objv);
     cmdPtr = (Tcl_Command) clientData;

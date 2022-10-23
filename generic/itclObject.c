@@ -149,7 +149,7 @@ Itcl_CreateObject(
     Tcl_Interp *interp,      /* interpreter mananging new object */
     const char* name,        /* name of new object */
     ItclClass *iclsPtr,      /* class for new object */
-    ItclSizeT objc,          /* number of arguments */
+    Tcl_Size objc,          /* number of arguments */
     Tcl_Obj *const objv[],   /* argument objects */
     ItclObject **rioPtr)     /* the created object */
 {
@@ -944,8 +944,8 @@ ItclInitObjectVariables(
 	              }
 	              if (ivPtr->arrayInitPtr != NULL) {
 			Tcl_DString buffer3;
-	                ItclSizeT i;
-	                ItclSizeT argc;
+	                Tcl_Size i;
+	                Tcl_Size argc;
 	                const char **argv;
 	                const char *val;
 
@@ -3159,8 +3159,8 @@ ExpandDelegateAs(
     Tcl_Obj *objPtr;
     const char **argv;
     const char *val;
-    ItclSizeT argc;
-    ItclSizeT j;
+    Tcl_Size argc;
+    Tcl_Size j;
 
 
     if (idmPtr->icPtr == NULL) {

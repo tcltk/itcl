@@ -191,7 +191,7 @@ Itcl_GetCallVarFrameObjv(
     return framePtr->objv;
 }
 
-ItclSizeT
+Tcl_Size
 Itcl_GetCallFrameObjc(
     Tcl_Interp *interp)
 {

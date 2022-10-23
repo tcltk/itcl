@@ -1068,7 +1068,7 @@ Itcl_DecodeScopedCommand(
     char *cmdName;
     const char *pos;
     const char **listv;
-    ItclSizeT listc;
+    Tcl_Size listc;
     int result;
     size_t len;
 

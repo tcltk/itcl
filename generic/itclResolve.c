@@ -414,7 +414,7 @@ int
 Itcl_ClassCompiledVarResolver(
     Tcl_Interp *interp,         /* current interpreter */
     const char* name,           /* name of the variable being accessed */
-    ItclSizeT length,           /* number of characters in name */
+    Tcl_Size length,           /* number of characters in name */
     Tcl_Namespace *nsPtr,       /* namespace performing the resolution */
     Tcl_ResolvedVarInfo **rPtr) /* returns: info that makes it possible to
                                  *   resolve the variable at runtime */

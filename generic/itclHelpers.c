@@ -77,21 +77,21 @@ int
 ItclCreateArgList(
     Tcl_Interp *interp,		/* interpreter managing this function */
     const char *str,		/* string representing argument list */
-    ItclSizeT *argcPtr,		/* number of mandatory arguments */
-    ItclSizeT *maxArgcPtr,		/* number of arguments parsed */
+    Tcl_Size *argcPtr,		/* number of mandatory arguments */
+    Tcl_Size *maxArgcPtr,		/* number of arguments parsed */
     Tcl_Obj **usagePtr,         /* store usage message for arguments here */
     ItclArgList **arglistPtrPtr,
     				/* returns pointer to parsed argument list */
     TCL_UNUSED(ItclMemberFunc *),
     const char *commandName)
 {
-    ItclSizeT argc;
-    ItclSizeT defaultArgc;
+    Tcl_Size argc;
+    Tcl_Size defaultArgc;
     const char **argv;
     const char **defaultArgv;
     ItclArgList *arglistPtr;
     ItclArgList *lastArglistPtr;
-    ItclSizeT i;
+    Tcl_Size i;
     int hadArgsArgument;
     int result;
 
@@ -247,7 +247,7 @@ ItclDeleteArgList(
 int
 Itcl_EvalArgs(
     Tcl_Interp *interp,      /* current interpreter */
-    ItclSizeT objc,          /* number of arguments */
+    Tcl_Size objc,          /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
 {
     Tcl_Command cmd;
@@ -303,10 +303,10 @@ Tcl_Obj*
 Itcl_CreateArgs(
     TCL_UNUSED(Tcl_Interp *),/* current interpreter */
     const char *string,      /* first command word */
-    ItclSizeT objc,          /* number of arguments */
+    Tcl_Size objc,          /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
 {
-    ItclSizeT i;
+    Tcl_Size i;
     Tcl_Obj *listPtr;
 
     ItclShowArgs(1, "Itcl_CreateArgs", objc, objv);

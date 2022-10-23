@@ -69,7 +69,7 @@ typedef struct Ensemble {
     EnsemblePart **parts;       /* list of parts in this ensemble */
     int numParts;               /* number of parts in part list */
     int maxParts;               /* current size of parts list */
-    ItclSizeT ensembleId;       /* this ensembles id */
+    Tcl_Size ensembleId;       /* this ensembles id */
     Tcl_Command cmdPtr;         /* command representing this ensemble */
     EnsemblePart* parent;       /* parent part for sub-ensembles
                                  * NULL => toplevel ensemble */
@@ -106,7 +106,7 @@ static int AddEnsemblePart (Tcl_Interp *interp,
     Tcl_ObjCmdProc *objProc, void *clientData,
     Tcl_CmdDeleteProc *deleteProc, int flags, EnsemblePart **rVal);
 static int FindEnsemble (Tcl_Interp *interp, const char **nameArgv,
-    ItclSizeT nameArgc, Ensemble** ensDataPtr);
+    Tcl_Size nameArgc, Ensemble** ensDataPtr);
 static int CreateEnsemblePart (Tcl_Interp *interp,
     Ensemble *ensData, const char* partName, EnsemblePart **ensPartPtr);
 static void DeleteEnsemblePart (void *clientData);
@@ -209,7 +209,7 @@ Itcl_CreateEnsemble(
     const char* ensName)           /* name of the new ensemble */
 {
     const char **nameArgv = NULL;
-    ItclSizeT nameArgc;
+    Tcl_Size nameArgc;
     Ensemble *parentEnsData;
 
     /*
@@ -310,7 +310,7 @@ Itcl_AddEnsemblePart(
     Tcl_CmdDeleteProc *deleteProc) /* procedure used to destroy client data */
 {
     const char **nameArgv = NULL;
-    ItclSizeT nameArgc;
+    Tcl_Size nameArgc;
     Ensemble *ensData;
     EnsemblePart *ensPart;
 
@@ -384,7 +384,7 @@ Itcl_GetEnsemblePart(
     Tcl_CmdInfo *infoPtr)          /* returns: info associated with part */
 {
     const char **nameArgv = NULL;
-    ItclSizeT nameArgc;
+    Tcl_Size nameArgc;
     Ensemble *ensData;
     EnsemblePart *ensPart;
     Itcl_InterpState state;
@@ -494,7 +494,7 @@ Itcl_GetEnsembleUsage(
     Tcl_Obj *objPtr)       /* returns: summary of usage info */
 {
     const char **nameArgv = NULL;
-    ItclSizeT nameArgc;
+    Tcl_Size nameArgc;
     Ensemble *ensData;
     Itcl_InterpState state;
 
@@ -1050,10 +1050,10 @@ static int
 FindEnsemble(
     Tcl_Interp *interp,            /* interpreter containing the ensemble */
     const char **nameArgv,         /* path of names leading to ensemble */
-    ItclSizeT nameArgc,                  /* number of strings in nameArgv */
+    Tcl_Size nameArgc,                  /* number of strings in nameArgv */
     Ensemble** ensDataPtr)         /* returns: ensemble data */
 {
-    ItclSizeT i;
+    Tcl_Size i;
     Tcl_Command cmdPtr;
     Ensemble *ensData;
     EnsemblePart *ensPart;
@@ -1936,8 +1936,8 @@ Itcl_EnsPartCmd(
     char *partName;
     char *usage;
     int result;
-    ItclSizeT argc;
-    ItclSizeT maxArgc;
+    Tcl_Size argc;
+    Tcl_Size maxArgc;
     Tcl_CmdInfo cmdInfo;
 
     ItclShowArgs(1, "Itcl_EnsPartCmd", objc, objv);
@@ -2025,7 +2025,7 @@ int
 Itcl_EnsembleErrorCmd(
     void *clientData,        /* ensemble info */
     Tcl_Interp *interp,      /* current interpreter */
-    TCL_UNUSED(ItclSizeT),   /* number of arguments */
+    TCL_UNUSED(Tcl_Size),   /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
 {
     Ensemble *ensData = (Ensemble*)clientData;

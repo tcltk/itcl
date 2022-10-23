@@ -1290,7 +1290,7 @@ Itcl_ClassInheritCmd(
     ItclObjectInfo *infoPtr = (ItclObjectInfo*)clientData;
     ItclClass *iclsPtr = (ItclClass*)Itcl_PeekStack(&infoPtr->clsStack);
     int result;
-    ItclSizeT i;
+    Tcl_Size i;
     int newEntry;
     int haveClasses;
     const char *token;
@@ -2159,8 +2159,8 @@ ItclInitClassCommon(
 		TCL_NAMESPACE_ONLY);
     }
     if (ivPtr->arrayInitPtr != NULL) {
-	ItclSizeT i;
-	ItclSizeT argc;
+	Tcl_Size i;
+	Tcl_Size argc;
 	const char **argv;
 	const char *val;
 	result = Tcl_SplitList(interp, Tcl_GetString(ivPtr->arrayInitPtr),
@@ -2586,7 +2586,7 @@ ItclParseOption(
     const char *name;
     const char *resourceName;
     const char *className;
-    ItclSizeT argc;
+    Tcl_Size argc;
     int pLevel;
     int readOnly;
     int newObjc;
@@ -3249,9 +3249,9 @@ ItclCreateDelegatedFunction(
 {
     ItclDelegatedFunction *idmPtr;
     const char **argv;
-    ItclSizeT argc;
+    Tcl_Size argc;
     int isNew;
-    ItclSizeT i;
+    Tcl_Size i;
 
     idmPtr = (ItclDelegatedFunction *)ckalloc(sizeof(ItclDelegatedFunction));
     memset(idmPtr, 0, sizeof(ItclDelegatedFunction));
@@ -3562,7 +3562,7 @@ Itcl_HandleDelegateOptionCmd(
     const char *token;
     const char **argv;
     int foundOpt;
-    ItclSizeT argc;
+    Tcl_Size argc;
     int isStarOption;
     int isNew;
     size_t i;
@@ -3916,9 +3916,9 @@ Itcl_ClassDelegateTypeMethodCmd(
     const char *token;
     const char **argv;
     int foundOpt;
-    ItclSizeT argc;
+    Tcl_Size argc;
     int isNew;
-    ItclSizeT i;
+    Tcl_Size i;
 
     ItclShowArgs(1, "Itcl_ClassDelegateTypeMethodCmd", objc, objv);
     usageStr = "delegate typemethod <typeMethodName> to <componentName> ?as <targetName>?\n\

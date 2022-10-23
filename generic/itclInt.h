@@ -82,12 +82,8 @@
 #   define ITCL_Z_MODIFIER ""
 #endif
 
-#if !defined(ItclSizeT)
-    #if TCL_MAJOR_VERSION > 8
-	#define ItclSizeT size_t
-    #else
-	#define ItclSizeT int
-    #endif
+#if !defined(Tcl_Size)
+#   define Tcl_Size int
 #endif
 
 /*
@@ -198,7 +194,7 @@ typedef struct ItclObjectInfo {
                                      * handling */
     int currClassFlags;             /* flags for the class just in creation */
     int buildingWidget;             /* set if in construction of a widget */
-    ItclSizeT unparsedObjc;         /* number options not parsed by
+    Tcl_Size unparsedObjc;         /* number options not parsed by
                                        ItclExtendedConfigure/-Cget function */
     Tcl_Obj **unparsedObjv;         /* options not parsed by
                                        ItclExtendedConfigure/-Cget function */
@@ -231,7 +227,7 @@ typedef struct ItclObjectInfo {
 typedef struct EnsembleInfo {
     Tcl_HashTable ensembles;        /* list of all known ensembles */
     Tcl_HashTable subEnsembles;     /* list of all known subensembles */
-    ItclSizeT numEnsembles;
+    Tcl_Size numEnsembles;
     Tcl_Namespace *ensembleNsPtr;
 } EnsembleInfo;
 /*
@@ -303,7 +299,7 @@ typedef struct ItclClass {
                                      in this class.  Look up simple string
                                      names and get back
 				     ItclMethodVariable* ptrs */
-    ItclSizeT numInstanceVars;    /* number of instance vars in variables
+    Tcl_Size numInstanceVars;    /* number of instance vars in variables
                                      table */
     Tcl_HashTable classCommons;   /* used for storing variable namespace
                                    * string for Tcl_Resolve */
@@ -324,15 +320,15 @@ typedef struct ItclClass {
                                    * ::itcl::widget */
     Tcl_Object oPtr;		  /* TclOO class object */
     Tcl_Class  clsPtr;            /* TclOO class */
-    ItclSizeT numCommons;         /* number of commons in this class */
-    ItclSizeT numVariables;       /* number of variables in this class */
-    ItclSizeT numOptions;         /* number of options in this class */
-    ItclSizeT unique;             /* unique number for #auto generation */
+    Tcl_Size numCommons;         /* number of commons in this class */
+    Tcl_Size numVariables;       /* number of variables in this class */
+    Tcl_Size numOptions;         /* number of options in this class */
+    Tcl_Size unique;             /* unique number for #auto generation */
     int flags;                    /* maintains class status */
-    ItclSizeT callRefCount;       /* prevent deleting of class if refcount>1 */
+    Tcl_Size callRefCount;       /* prevent deleting of class if refcount>1 */
     Tcl_Obj *typeConstructorPtr;  /* initialization for types */
     int destructorHasBeenCalled;  /* prevent multiple invocations of destrcutor */
-    ItclSizeT refCount;
+    Tcl_Size refCount;
 } ItclClass;
 
 typedef struct ItclHierIter {
@@ -397,7 +393,7 @@ typedef struct ItclObject {
     Tcl_Object oPtr;             /* the TclOO object */
     Tcl_Resolve *resolvePtr;
     int flags;
-    ItclSizeT callRefCount;       /* prevent deleting of object if refcount > 1 */
+    Tcl_Size callRefCount;       /* prevent deleting of object if refcount > 1 */
     Tcl_Obj *hullWindowNamePtr;   /* the window path name for the hull
                                    * (before renaming in installhull) */
     int destructorHasBeenCalled;  /* is set when the destructor is called
@@ -423,8 +419,8 @@ typedef struct ItclResolveInfo {
  */
 typedef struct ItclMemberCode {
     int flags;                  /* flags describing implementation */
-    ItclSizeT argcount;         /* number of args in arglist */
-    ItclSizeT maxargcount;      /* max number of args in arglist */
+    Tcl_Size argcount;         /* number of args in arglist */
+    Tcl_Size maxargcount;      /* max number of args in arglist */
     Tcl_Obj *usagePtr;          /* usage string for error messages */
     Tcl_Obj *argumentPtr;       /* the function arguments */
     Tcl_Obj *bodyPtr;           /* the function body */
@@ -523,8 +519,8 @@ typedef struct ItclMemberFunc {
     ItclObjectInfo *infoPtr;
     ItclMemberCode *codePtr;    /* code associated with member */
     Tcl_Command accessCmd;      /* Tcl command installed for this function */
-    ItclSizeT argcount;         /* number of args in arglist */
-    ItclSizeT maxargcount;      /* max number of args in arglist */
+    Tcl_Size argcount;         /* number of args in arglist */
+    Tcl_Size maxargcount;      /* max number of args in arglist */
     Tcl_Obj *usagePtr;          /* usage string for error messages */
     Tcl_Obj *argumentPtr;       /* the function arguments */
     Tcl_Obj *builtinArgumentPtr; /* the function arguments for builtin functions */
@@ -635,7 +631,7 @@ typedef struct ItclVarLookup {
                                * the fewest qualifiers.  This string is
                                * taken from the resolveVars table, so
                                * it shouldn't be freed. */
-    ItclSizeT varNum;
+    Tcl_Size varNum;
     Tcl_Var varPtr;
 } ItclVarLookup;
 
@@ -656,7 +652,7 @@ typedef struct ItclCallContext {
     Tcl_Namespace *nsPtr;
     ItclObject *ioPtr;
     ItclMemberFunc *imPtr;
-    ItclSizeT refCount;
+    Tcl_Size refCount;
 } ItclCallContext;
 
 /*
@@ -712,7 +708,7 @@ MODULE_SCOPE void ItclReportObjectUsage(Tcl_Interp *interp,
 MODULE_SCOPE int ItclMapMethodNameProc(Tcl_Interp *interp, Tcl_Object oPtr,
 	Tcl_Class *startClsPtr, Tcl_Obj *methodObj);
 MODULE_SCOPE int ItclCreateArgList(Tcl_Interp *interp, const char *str,
-	ItclSizeT *argcPtr, ItclSizeT *maxArgcPtr, Tcl_Obj **usagePtr,
+	Tcl_Size *argcPtr, Tcl_Size *maxArgcPtr, Tcl_Obj **usagePtr,
 	ItclArgList **arglistPtrPtr, ItclMemberFunc *imPtr,
 	const char *commandName);
 MODULE_SCOPE int ItclObjectCmd(void *clientData, Tcl_Interp *interp,
@@ -734,7 +730,7 @@ MODULE_SCOPE int Itcl_ClassCmdResolver(Tcl_Interp *interp, const char* name,
 MODULE_SCOPE int Itcl_ClassVarResolver(Tcl_Interp *interp, const char* name,
 	Tcl_Namespace *nsPtr, int flags, Tcl_Var *rPtr);
 MODULE_SCOPE int Itcl_ClassCompiledVarResolver(Tcl_Interp *interp,
-	const char* name, ItclSizeT length, Tcl_Namespace *nsPtr,
+	const char* name, Tcl_Size length, Tcl_Namespace *nsPtr,
 	struct Tcl_ResolvedVarInfo **rPtr);
 MODULE_SCOPE int Itcl_ClassCmdResolver2(Tcl_Interp *interp, const char* name,
 	Tcl_Namespace *nsPtr, int flags, Tcl_Command *rPtr);
