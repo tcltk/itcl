@@ -76,14 +76,10 @@
 #   endif
 #endif
 
-#if TCL_MAJOR_VERSION > 8
-#   define ITCL_Z_MODIFIER TCL_Z_MODIFIER
-#else
+#if TCL_MAJOR_VERSION == 8
 #   define ITCL_Z_MODIFIER ""
-#endif
-
-#if !defined(Tcl_Size)
-#   define Tcl_Size int
+#else
+#   define ITCL_Z_MODIFIER TCL_Z_MODIFIER
 #endif
 
 /*
@@ -612,7 +608,7 @@ typedef struct ItclMethodVariable {
 typedef struct ItclClassCmdInfo {
     int type;
     int protection;
-#if TCL_MAJOR_VERSION < 9
+#if TCL_MAJOR_VERSION == 8
     int cmdNum; /* not actually used */
 #endif
     Tcl_Namespace *nsPtr;
@@ -640,7 +636,7 @@ typedef struct ItclVarLookup {
  */
 typedef struct ItclCmdLookup {
     ItclMemberFunc* imPtr;    /* function definition */
-#if TCL_MAJOR_VERSION < 9
+#if TCL_MAJOR_VERSION == 8
     int cmdNum; /* not actually used */
 #endif
     ItclClassCmdInfo *classCmdInfoPtr;

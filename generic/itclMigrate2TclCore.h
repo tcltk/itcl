@@ -39,15 +39,9 @@ typedef struct Tcl_ResolvedVarInfo {
     Tcl_ResolveVarDeleteProc *deleteProc;
 } Tcl_ResolvedVarInfo;
 
-#if TCL_MAJOR_VERSION > 8
 typedef int (Tcl_ResolveCompiledVarProc) (Tcl_Interp *interp,
-	const char *name, size_t length, Tcl_Namespace *context,
+	const char *name, Tcl_Size length, Tcl_Namespace *context,
 	Tcl_ResolvedVarInfo **rPtr);
-#else
-typedef int (Tcl_ResolveCompiledVarProc) (Tcl_Interp *interp,
-	const char *name, int length, Tcl_Namespace *context,
-	Tcl_ResolvedVarInfo **rPtr);
-#endif
 
 typedef int (Tcl_ResolveVarProc) (Tcl_Interp *interp, const char *name,
 	Tcl_Namespace *context, int flags, Tcl_Var *rPtr);

@@ -5,10 +5,6 @@
 #ifndef _ITCLINTDECLS
 #define _ITCLINTDECLS
 
-#if !defined(Tcl_Size)
-#   define Tcl_Size int
-#endif
-
 /* !BEGIN!: Do not edit below this line. */
 
 #define ITCLINT_STUBS_EPOCH 0
