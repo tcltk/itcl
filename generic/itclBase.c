@@ -192,7 +192,7 @@ Initialize (
         return TCL_ERROR;
     }
 
-    objPtr = Tcl_NewStringObj("::oo::class", -1);
+    objPtr = Tcl_NewStringObj("::oo::class", TCL_INDEX_NONE);
     Tcl_IncrRefCount(objPtr);
     clazzObjectPtr = Tcl_GetObjectFromObj(interp, objPtr);
     if (!clazzObjectPtr || !(tclCls = Tcl_GetObjectAsClass(clazzObjectPtr))) {
@@ -250,7 +250,7 @@ Initialize (
     infoPtr->protection = ITCL_DEFAULT_PROTECT;
     infoPtr->currClassFlags = 0;
     infoPtr->buildingWidget = 0;
-    infoPtr->typeDestructorArgumentPtr = Tcl_NewStringObj("", -1);
+    infoPtr->typeDestructorArgumentPtr = Tcl_NewStringObj("", TCL_INDEX_NONE);
     Tcl_IncrRefCount(infoPtr->typeDestructorArgumentPtr);
     infoPtr->lastIoPtr = NULL;
 
@@ -269,19 +269,19 @@ Initialize (
             ITCL_NAMESPACE"::internal::dicts::classDelegatedFunctions", NULL, "", 0);
 
     hPtr = Tcl_CreateHashEntry(&infoPtr->classTypes,
-            (char *)Tcl_NewStringObj("class", -1), &isNew);
+            (char *)Tcl_NewStringObj("class", TCL_INDEX_NONE), &isNew);
     Tcl_SetHashValue(hPtr, ITCL_CLASS);
     hPtr = Tcl_CreateHashEntry(&infoPtr->classTypes,
-            (char *)Tcl_NewStringObj("type", -1), &isNew);
+            (char *)Tcl_NewStringObj("type", TCL_INDEX_NONE), &isNew);
     Tcl_SetHashValue(hPtr, ITCL_TYPE);
     hPtr = Tcl_CreateHashEntry(&infoPtr->classTypes,
-            (char *)Tcl_NewStringObj("widget", -1), &isNew);
+            (char *)Tcl_NewStringObj("widget", TCL_INDEX_NONE), &isNew);
     Tcl_SetHashValue(hPtr, ITCL_WIDGET);
     hPtr = Tcl_CreateHashEntry(&infoPtr->classTypes,
-            (char *)Tcl_NewStringObj("widgetadaptor", -1), &isNew);
+            (char *)Tcl_NewStringObj("widgetadaptor", TCL_INDEX_NONE), &isNew);
     Tcl_SetHashValue(hPtr, ITCL_WIDGETADAPTOR);
     hPtr = Tcl_CreateHashEntry(&infoPtr->classTypes,
-            (char *)Tcl_NewStringObj("extendedclass", -1), &isNew);
+            (char *)Tcl_NewStringObj("extendedclass", TCL_INDEX_NONE), &isNew);
     Tcl_SetHashValue(hPtr, ITCL_ECLASS);
 
     res_option = getenv("ITCL_USE_OLD_RESOLVERS");
@@ -301,17 +301,17 @@ Initialize (
 	    NULL, 0, NULL, 0);
 
     Tcl_NewMethod(interp, Tcl_GetObjectAsClass(root),
-	    Tcl_NewStringObj("unknown", -1), 0, &itclRootMethodType,
+	    Tcl_NewStringObj("unknown", TCL_INDEX_NONE), 0, &itclRootMethodType,
 	    (void *)ItclUnknownGuts);
     Tcl_NewMethod(interp, Tcl_GetObjectAsClass(root),
-	    Tcl_NewStringObj("ItclConstructBase", -1), 0,
+	    Tcl_NewStringObj("ItclConstructBase", TCL_INDEX_NONE), 0,
 	    &itclRootMethodType, (void *)ItclConstructGuts);
     Tcl_NewMethod(interp, Tcl_GetObjectAsClass(root),
-	    Tcl_NewStringObj("info", -1), 1,
+	    Tcl_NewStringObj("info", TCL_INDEX_NONE), 1,
 	    &itclRootMethodType, (void *)ItclInfoGuts);
 
     /* first create the Itcl base class as root of itcl classes */
-    if (Tcl_EvalEx(interp, clazzClassScript, -1, 0) != TCL_OK) {
+    if (Tcl_EvalEx(interp, clazzClassScript, TCL_INDEX_NONE, 0) != TCL_OK) {
         Tcl_Panic("cannot create Itcl root class ::itcl::clazz");
     }
     resPtr = Tcl_GetObjResult(interp);
@@ -490,7 +490,7 @@ Itcl_Init (
         return TCL_ERROR;
     }
 
-    return  Tcl_EvalEx(interp, initScript, -1, 0);
+    return  Tcl_EvalEx(interp, initScript, TCL_INDEX_NONE, 0);
 }
 
 /*
@@ -515,7 +515,7 @@ Itcl_SafeInit (
     if (Initialize(interp) != TCL_OK) {
         return TCL_ERROR;
     }
-    return Tcl_EvalEx(interp, safeInitScript, -1, 0);
+    return Tcl_EvalEx(interp, safeInitScript, TCL_INDEX_NONE, 0);
 }
 
 /*
@@ -584,7 +584,7 @@ ItclCheckSetItclHull(
 	    return TCL_ERROR;
         }
     }
-    objPtr = Tcl_NewStringObj("itcl_hull", -1);
+    objPtr = Tcl_NewStringObj("itcl_hull", TCL_INDEX_NONE);
     hPtr = Tcl_FindHashEntry(&ioPtr->iclsPtr->variables, (char *)objPtr);
     Tcl_DecrRefCount(objPtr);
     if (hPtr == NULL) {

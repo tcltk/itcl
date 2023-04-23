@@ -364,7 +364,7 @@ ItclInfoGuts(
 	 */
 
 	Tcl_Obj *objPtr = Tcl_NewStringObj(
-		"wrong # args: should be one of...\n", -1);
+		"wrong # args: should be one of...\n", TCL_INDEX_NONE);
 	ItclGetInfoUsage(interp, objPtr, infoPtr, ioPtr->iclsPtr);
 	Tcl_SetObjResult(interp, objPtr);
 	return TCL_ERROR;
@@ -414,7 +414,7 @@ NRInfoWrap(
 
     if (!infoPtr->infoCmd) {
 	Tcl_SetObjResult(interp, Tcl_NewStringObj(
-		"itcl info-subsystem is deleted", -1));
+		"itcl info-subsystem is deleted", TCL_INDEX_NONE));
 	return TCL_ERROR;
     }
 
@@ -425,7 +425,7 @@ NRInfoWrap(
 	 */
 
 	Tcl_Obj *objPtr = Tcl_NewStringObj(
-		"wrong # args: should be one of...\n", -1);
+		"wrong # args: should be one of...\n", TCL_INDEX_NONE);
 	ItclGetInfoUsage(interp, objPtr, infoPtr, NULL);
 	Tcl_SetObjResult(interp, objPtr);
 	return TCL_ERROR;
@@ -504,19 +504,19 @@ ItclInfoInit(
 	info.objClientData, NULL);
 
     Tcl_Export(interp, nsPtr, "[a-z]*", 1);
-    ensObjPtr = Tcl_NewStringObj("::itcl::builtin::Info", -1);
+    ensObjPtr = Tcl_NewStringObj("::itcl::builtin::Info", TCL_INDEX_NONE);
 
     for (i=0 ; InfoMethodList[i].name!=NULL ; i++) {
 	Tcl_Obj *cmdObjPtr = Tcl_DuplicateObj(ensObjPtr);
 
 	Tcl_AppendToObj(cmdObjPtr, "::", 2);
-	Tcl_AppendToObj(cmdObjPtr, InfoMethodList[i].name, -1);
+	Tcl_AppendToObj(cmdObjPtr, InfoMethodList[i].name, TCL_INDEX_NONE);
         Tcl_CreateObjCommand(interp, Tcl_GetString(cmdObjPtr),
                 InfoMethodList[i].proc, infoPtr,
                 InfoMethodList[i].proc == Itcl_BiInfoVarsCmd ? ItclRestoreInfoVars : NULL);
 	Tcl_DecrRefCount(cmdObjPtr);
     }
-    unkObjPtr = Tcl_NewStringObj("::itcl::builtin::Info::unknown", -1);
+    unkObjPtr = Tcl_NewStringObj("::itcl::builtin::Info::unknown", TCL_INDEX_NONE);
     Tcl_CreateObjCommand(interp, Tcl_GetString(unkObjPtr),
 	    Itcl_BiInfoUnknownCmd, infoPtr, NULL);
     if (Tcl_SetEnsembleUnknownHandler(NULL,
@@ -545,9 +545,9 @@ ItclInfoInit(
                 infoCmdsDelegated2[i].proc, infoPtr, NULL);
     }
     ensObjPtr = Tcl_NewStringObj("::itcl::builtin::Info::delegated",
-            -1);
+            TCL_INDEX_NONE);
     unkObjPtr = Tcl_NewStringObj(
-            "::itcl::builtin::Info::delegated::unknown", -1);
+            "::itcl::builtin::Info::delegated::unknown", TCL_INDEX_NONE);
     result = TCL_OK;
     if (Tcl_SetEnsembleUnknownHandler(NULL,
             Tcl_FindEnsemble(interp, ensObjPtr, TCL_LEAVE_ERR_MSG),
@@ -588,18 +588,18 @@ ItclGetInfoUsage(
 	    continue;
 	}
 	    if (iclsPtr->flags & InfoMethodList[i].flags) {
-                Tcl_AppendToObj(objPtr, spaces, -1);
-                Tcl_AppendToObj(objPtr, "info ", -1);
-                Tcl_AppendToObj(objPtr, InfoMethodList[i].name, -1);
+                Tcl_AppendToObj(objPtr, spaces, TCL_INDEX_NONE);
+                Tcl_AppendToObj(objPtr, "info ", TCL_INDEX_NONE);
+                Tcl_AppendToObj(objPtr, InfoMethodList[i].name, TCL_INDEX_NONE);
 	        if (strlen(InfoMethodList[i].usage) > 0) {
-                  Tcl_AppendToObj(objPtr, " ", -1);
-                  Tcl_AppendToObj(objPtr, InfoMethodList[i].usage, -1);
+                  Tcl_AppendToObj(objPtr, " ", TCL_INDEX_NONE);
+                  Tcl_AppendToObj(objPtr, InfoMethodList[i].usage, TCL_INDEX_NONE);
 	        }
                 spaces = "\n  ";
 	    }
     }
         Tcl_AppendToObj(objPtr,
-            "\n...and others described on the man page", -1);
+            "\n...and others described on the man page", TCL_INDEX_NONE);
 }
 
 /*
@@ -643,18 +643,18 @@ ItclGetInfoDelegatedUsage(
 	    continue;
 	}
 	    if (iclsPtr->flags & infoCmdsDelegated2[i].flags) {
-                Tcl_AppendToObj(objPtr, spaces, -1);
-                Tcl_AppendToObj(objPtr, "info ", -1);
-                Tcl_AppendToObj(objPtr, name, -1);
+                Tcl_AppendToObj(objPtr, spaces, TCL_INDEX_NONE);
+                Tcl_AppendToObj(objPtr, "info ", TCL_INDEX_NONE);
+                Tcl_AppendToObj(objPtr, name, TCL_INDEX_NONE);
 	        if (strlen(infoCmdsDelegated2[i].usage) > 0) {
-                  Tcl_AppendToObj(objPtr, " ", -1);
-                  Tcl_AppendToObj(objPtr, infoCmdsDelegated2[i].usage, -1);
+                  Tcl_AppendToObj(objPtr, " ", TCL_INDEX_NONE);
+                  Tcl_AppendToObj(objPtr, infoCmdsDelegated2[i].usage, TCL_INDEX_NONE);
 	        }
                 spaces = "\n  ";
 	    }
     }
         Tcl_AppendToObj(objPtr,
-            "\n...and others described on the man page", -1);
+            "\n...and others described on the man page", TCL_INDEX_NONE);
 }
 
 /*
@@ -712,7 +712,7 @@ Itcl_BiInfoClassCmd(
 	if ((contextIoPtr == NULL) || (contextIclsPtr == NULL)) {
 	    Tcl_SetObjResult(interp, Tcl_NewStringObj(
 		    "\nget info like this instead: " \
-		    "\n  namespace eval className { info class }", -1));
+		    "\n  namespace eval className { info class }", TCL_INDEX_NONE));
 		    return TCL_ERROR;
 	}
     }
@@ -734,7 +734,7 @@ Itcl_BiInfoClassCmd(
 
         name = contextNs->fullName;
 
-    Tcl_SetObjResult(interp, Tcl_NewStringObj(name, -1));
+    Tcl_SetObjResult(interp, Tcl_NewStringObj(name, TCL_INDEX_NONE));
     return TCL_OK;
 }
 
@@ -798,7 +798,7 @@ Itcl_BiInfoClassOptionsCmd(
 	if ((pattern == NULL) ||
                  Tcl_StringCaseMatch(name, pattern, 0)) {
             Tcl_ListObjAppendElement(interp, listPtr,
-	            Tcl_NewStringObj(Tcl_GetString(ioptPtr->namePtr), -1));
+	            Tcl_NewStringObj(Tcl_GetString(ioptPtr->namePtr), TCL_INDEX_NONE));
         }
     }
     tablePtr = &iclsPtr->delegatedOptions;
@@ -808,7 +808,7 @@ Itcl_BiInfoClassOptionsCmd(
 	    if ((pattern == NULL) ||
                     Tcl_StringCaseMatch(name, pattern, 0)) {
                 Tcl_ListObjAppendElement(interp, listPtr,
-	                Tcl_NewStringObj(Tcl_GetString(idoPtr->namePtr), -1));
+	                Tcl_NewStringObj(Tcl_GetString(idoPtr->namePtr), TCL_INDEX_NONE));
 	    }
         } else {
 	    if (idoPtr->icPtr == NULL) {
@@ -821,8 +821,8 @@ Itcl_BiInfoClassOptionsCmd(
 	            Tcl_GetString(idoPtr->icPtr->namePtr),
 	            NULL, ioPtr, ioPtr->iclsPtr);
             if ((val != NULL) && (strlen(val) != 0)) {
-		objPtr = Tcl_NewStringObj(val, -1);
-		Tcl_AppendToObj(objPtr, " configure", -1);
+		objPtr = Tcl_NewStringObj(val, TCL_INDEX_NONE);
+		Tcl_AppendToObj(objPtr, " configure", TCL_INDEX_NONE);
 		Tcl_IncrRefCount(objPtr);
 		result = Tcl_EvalObjEx(interp, objPtr, 0);
 		Tcl_DecrRefCount(objPtr);
@@ -884,9 +884,9 @@ Itcl_BiInfoContextCmd(
         return TCL_ERROR;
     }
     listPtr = Tcl_NewListObj(0, NULL);
-    objPtr = Tcl_NewStringObj(Tcl_GetString(iclsPtr->namePtr), -1);
+    objPtr = Tcl_NewStringObj(Tcl_GetString(iclsPtr->namePtr), TCL_INDEX_NONE);
     Tcl_ListObjAppendElement(interp, listPtr, objPtr);
-    objPtr = Tcl_NewStringObj(Tcl_GetString(ioPtr->namePtr), -1);
+    objPtr = Tcl_NewStringObj(Tcl_GetString(ioPtr->namePtr), TCL_INDEX_NONE);
     Tcl_ListObjAppendElement(interp, listPtr, objPtr);
     Tcl_SetObjResult(interp, listPtr);
     return TCL_OK;
@@ -927,7 +927,7 @@ Itcl_BiInfoInheritCmd(
     if (Itcl_GetContext(interp, &contextIclsPtr, &contextIoPtr) != TCL_OK) {
 	Tcl_SetObjResult(interp, Tcl_NewStringObj(
             "\nget info like this instead: "
-            "\n  namespace eval className { info inherit }", -1));
+            "\n  namespace eval className { info inherit }", TCL_INDEX_NONE));
         return TCL_ERROR;
     }
 
@@ -940,7 +940,7 @@ Itcl_BiInfoInheritCmd(
     while (elem) {
 	Tcl_Obj *objPtr;
 	ItclClass *iclsPtr = (ItclClass*)Itcl_GetListValue(elem);
-            objPtr = Tcl_NewStringObj(iclsPtr->nsPtr->fullName, -1);
+            objPtr = Tcl_NewStringObj(iclsPtr->nsPtr->fullName, TCL_INDEX_NONE);
         Tcl_ListObjAppendElement(NULL, listPtr, objPtr);
         elem = Itcl_NextListElem(elem);
     }
@@ -989,7 +989,7 @@ Itcl_BiInfoHeritageCmd(
     if (Itcl_GetContext(interp, &contextIclsPtr, &contextIoPtr) != TCL_OK) {
 	Tcl_SetObjResult(interp, Tcl_NewStringObj(
             "\nget info like this instead: "
-            "\n  namespace eval className { info heritage }", -1));
+            "\n  namespace eval className { info heritage }", TCL_INDEX_NONE));
         return TCL_ERROR;
     }
 
@@ -1005,7 +1005,7 @@ Itcl_BiInfoHeritageCmd(
 	            Tcl_GetString(iclsPtr->fullNamePtr), NULL);
             return TCL_ERROR;
         }
-            objPtr = Tcl_NewStringObj(iclsPtr->nsPtr->fullName, -1);
+            objPtr = Tcl_NewStringObj(iclsPtr->nsPtr->fullName, TCL_INDEX_NONE);
         Tcl_ListObjAppendElement(NULL, listPtr, objPtr);
     }
     Itcl_DeleteHierIter(&hier);
@@ -1080,7 +1080,7 @@ Itcl_BiInfoFunctionCmd(
     if (Itcl_GetContext(interp, &contextIclsPtr, &contextIoPtr) != TCL_OK) {
 	Tcl_SetObjResult(interp, Tcl_NewStringObj(
             "\nget info like this instead: "
-            "\n  namespace eval className { info function ... }", -1));
+            "\n  namespace eval className { info function ... }", TCL_INDEX_NONE));
         return TCL_ERROR;
     }
     if (contextIoPtr != NULL) {
@@ -1104,7 +1104,7 @@ Itcl_BiInfoFunctionCmd(
      */
     if (cmdName) {
 	ItclCmdLookup *clookup;
-	objPtr = Tcl_NewStringObj(cmdName, -1);
+	objPtr = Tcl_NewStringObj(cmdName, TCL_INDEX_NONE);
         entry = Tcl_FindHashEntry(&contextIclsPtr->resolveCmds, (char *)objPtr);
 	Tcl_DecrRefCount(objPtr);
 	objPtr = NULL;
@@ -1152,22 +1152,22 @@ Itcl_BiInfoFunctionCmd(
                     if (mcode && mcode->argListPtr) {
 			if (imPtr->usagePtr == NULL) {
                             objPtr = Tcl_NewStringObj(
-			            Tcl_GetString(mcode->usagePtr), -1);
+			            Tcl_GetString(mcode->usagePtr), TCL_INDEX_NONE);
 			} else {
                             objPtr = Tcl_NewStringObj(
-			            Tcl_GetString(imPtr->usagePtr), -1);
+			            Tcl_GetString(imPtr->usagePtr), TCL_INDEX_NONE);
 		        }
                     } else {
 		        if ((imPtr->flags & ITCL_ARG_SPEC) != 0) {
 			    if (imPtr->usagePtr == NULL) {
                                 objPtr = Tcl_NewStringObj(
-				        Tcl_GetString(mcode->usagePtr), -1);
+				        Tcl_GetString(mcode->usagePtr), TCL_INDEX_NONE);
 			    } else {
 			        objPtr = Tcl_NewStringObj(
-				        Tcl_GetString(imPtr->usagePtr), -1);
+				        Tcl_GetString(imPtr->usagePtr), TCL_INDEX_NONE);
 			    }
                         } else {
-                            objPtr = Tcl_NewStringObj("<undefined>", -1);
+                            objPtr = Tcl_NewStringObj("<undefined>", TCL_INDEX_NONE);
                         }
 		    }
                     break;
@@ -1175,26 +1175,26 @@ Itcl_BiInfoFunctionCmd(
                 case BIfBodyIdx:
                     if (mcode && Itcl_IsMemberCodeImplemented(mcode)) {
                         objPtr = Tcl_NewStringObj(
-			        Tcl_GetString(mcode->bodyPtr), -1);
+			        Tcl_GetString(mcode->bodyPtr), TCL_INDEX_NONE);
                     } else {
-                        objPtr = Tcl_NewStringObj("<undefined>", -1);
+                        objPtr = Tcl_NewStringObj("<undefined>", TCL_INDEX_NONE);
                     }
                     break;
 
                 case BIfNameIdx:
                     objPtr = Tcl_NewStringObj(
-		            Tcl_GetString(imPtr->fullNamePtr), -1);
+		            Tcl_GetString(imPtr->fullNamePtr), TCL_INDEX_NONE);
                     break;
 
                 case BIfProtectIdx:
                     val = Itcl_ProtectionStr(imPtr->protection);
-                    objPtr = Tcl_NewStringObj(val, -1);
+                    objPtr = Tcl_NewStringObj(val, TCL_INDEX_NONE);
                     break;
 
                 case BIfTypeIdx:
                     val = ((imPtr->flags & ITCL_COMMON) != 0)
                         ? "proc" : "method";
-                    objPtr = Tcl_NewStringObj(val, -1);
+                    objPtr = Tcl_NewStringObj(val, TCL_INDEX_NONE);
                     break;
             }
 
@@ -1238,7 +1238,7 @@ Itcl_BiInfoFunctionCmd(
 		}
 		if (useIt) {
                     objPtr = Tcl_NewStringObj(
-		            Tcl_GetString(imPtr->fullNamePtr), -1);
+		            Tcl_GetString(imPtr->fullNamePtr), TCL_INDEX_NONE);
                     Tcl_ListObjAppendElement(NULL,
 		            resultPtr, objPtr);
                 }
@@ -1336,7 +1336,7 @@ Itcl_BiInfoVariableCmd(
     if (Itcl_GetContext(interp, &contextIclsPtr, &contextIoPtr) != TCL_OK) {
 	Tcl_SetObjResult(interp, Tcl_NewStringObj(
             "\nget info like this instead: "
-            "\n  namespace eval className { info variable ... }", -1));
+            "\n  namespace eval className { info variable ... }", TCL_INDEX_NONE));
         return TCL_ERROR;
     }
     if (contextIoPtr != NULL) {
@@ -1409,9 +1409,9 @@ Itcl_BiInfoVariableCmd(
                     if (ivPtr->codePtr &&
 		            Itcl_IsMemberCodeImplemented(ivPtr->codePtr)) {
                         objPtr = Tcl_NewStringObj(
-			        Tcl_GetString(ivPtr->codePtr->bodyPtr), -1);
+			        Tcl_GetString(ivPtr->codePtr->bodyPtr), TCL_INDEX_NONE);
                     } else {
-                        objPtr = Tcl_NewStringObj("", -1);
+                        objPtr = Tcl_NewStringObj("", TCL_INDEX_NONE);
                     }
                     break;
 
@@ -1428,32 +1428,32 @@ Itcl_BiInfoVariableCmd(
                                 contextIoPtr->iclsPtr->interp,
                                 contextIoPtr->accessCmd, objPtr);
                         } else {
-                            objPtr = Tcl_NewStringObj("<objectName>", -1);
+                            objPtr = Tcl_NewStringObj("<objectName>", TCL_INDEX_NONE);
                         }
                     } else {
 		        if (vlookup->ivPtr->init) {
 			    objPtr = Tcl_NewStringObj(
-			            Tcl_GetString(vlookup->ivPtr->init), -1);
+			            Tcl_GetString(vlookup->ivPtr->init), TCL_INDEX_NONE);
                         } else {
-                            objPtr = Tcl_NewStringObj("<undefined>", -1);
+                            objPtr = Tcl_NewStringObj("<undefined>", TCL_INDEX_NONE);
 		        }
                     }
                     break;
 
                 case BIvNameIdx:
                     objPtr = Tcl_NewStringObj(
-		            Tcl_GetString(ivPtr->fullNamePtr), -1);
+		            Tcl_GetString(ivPtr->fullNamePtr), TCL_INDEX_NONE);
                     break;
 
                 case BIvProtectIdx:
                     val = Itcl_ProtectionStr(ivPtr->protection);
-                    objPtr = Tcl_NewStringObj((const char *)val, -1);
+                    objPtr = Tcl_NewStringObj((const char *)val, TCL_INDEX_NONE);
                     break;
 
                 case BIvTypeIdx:
                     val = ((ivPtr->flags & ITCL_COMMON) != 0)
                         ? "common" : "variable";
-                    objPtr = Tcl_NewStringObj((const char *)val, -1);
+                    objPtr = Tcl_NewStringObj((const char *)val, TCL_INDEX_NONE);
                     break;
 
                 case BIvValueIdx:
@@ -1481,7 +1481,7 @@ Itcl_BiInfoVariableCmd(
                     if (val == NULL) {
                         val = "<undefined>";
                     }
-                    objPtr = Tcl_NewStringObj((const char *)val, -1);
+                    objPtr = Tcl_NewStringObj((const char *)val, TCL_INDEX_NONE);
                     break;
 
                 case BIvScopeIdx:
@@ -1496,13 +1496,13 @@ Itcl_BiInfoVariableCmd(
                     vlookup = (ItclVarLookup*)Tcl_GetHashValue(entry);
 
                     if (vlookup->ivPtr->flags & ITCL_COMMON) {
-                        objPtr = Tcl_NewStringObj("", -1);
+                        objPtr = Tcl_NewStringObj("", TCL_INDEX_NONE);
 
                         if (vlookup->ivPtr->protection != ITCL_PUBLIC) {
-                            Tcl_AppendToObj(objPtr, ITCL_VARIABLES_NAMESPACE, -1);
+                            Tcl_AppendToObj(objPtr, ITCL_VARIABLES_NAMESPACE, TCL_INDEX_NONE);
                         }
                         Tcl_AppendToObj(objPtr,
-                                Tcl_GetString(vlookup->ivPtr->fullNamePtr), -1);
+                                Tcl_GetString(vlookup->ivPtr->fullNamePtr), TCL_INDEX_NONE);
                     } else {
                         /*
                          *  If this is not a common variable, then we better have
@@ -1541,17 +1541,17 @@ Itcl_BiInfoVariableCmd(
 
                         objPtr = Tcl_NewStringObj((char*)NULL, 0);
                         Tcl_IncrRefCount(objPtr);
-                        Tcl_AppendToObj(objPtr, ITCL_VARIABLES_NAMESPACE, -1);
+                        Tcl_AppendToObj(objPtr, ITCL_VARIABLES_NAMESPACE, TCL_INDEX_NONE);
                         Tcl_AppendToObj(objPtr,
-                                (Tcl_GetObjectNamespace(contextIoPtr->oPtr))->fullName, -1);
+                                (Tcl_GetObjectNamespace(contextIoPtr->oPtr))->fullName, TCL_INDEX_NONE);
 
                         if (doAppend) {
                             Tcl_AppendToObj(objPtr,
-                                    Tcl_GetString(vlookup->ivPtr->fullNamePtr), -1);
+                                    Tcl_GetString(vlookup->ivPtr->fullNamePtr), TCL_INDEX_NONE);
                         } else {
-                            Tcl_AppendToObj(objPtr, "::", -1);
+                            Tcl_AppendToObj(objPtr, "::", TCL_INDEX_NONE);
                             Tcl_AppendToObj(objPtr,
-                                    Tcl_GetString(vlookup->ivPtr->namePtr), -1);
+                                    Tcl_GetString(vlookup->ivPtr->namePtr), TCL_INDEX_NONE);
                         }
                     }
                     break;
@@ -1581,13 +1581,13 @@ Itcl_BiInfoVariableCmd(
                 if ((ivPtr->flags & ITCL_THIS_VAR) != 0) {
                     if (iclsPtr == contextIclsPtr) {
                         objPtr = Tcl_NewStringObj(
-			        Tcl_GetString(ivPtr->fullNamePtr), -1);
+			        Tcl_GetString(ivPtr->fullNamePtr), TCL_INDEX_NONE);
                         Tcl_ListObjAppendElement(NULL,
                             resultPtr, objPtr);
                     }
                 } else {
                     objPtr = Tcl_NewStringObj(
-		            Tcl_GetString(ivPtr->fullNamePtr), -1);
+		            Tcl_GetString(ivPtr->fullNamePtr), TCL_INDEX_NONE);
                     Tcl_ListObjAppendElement(NULL,
                         resultPtr, objPtr);
                 }
@@ -1661,7 +1661,7 @@ Itcl_BiInfoVarsCmd(
     }
     if (useGlobalInfo) {
         newObjv = (Tcl_Obj **)ckalloc(sizeof(Tcl_Obj *)*(objc));
-        newObjv[0] = Tcl_NewStringObj("::tcl::info::vars", -1);
+        newObjv[0] = Tcl_NewStringObj("::tcl::info::vars", TCL_INDEX_NONE);
         Tcl_IncrRefCount(newObjv[0]);
         memcpy(newObjv+1, objv+1, sizeof(Tcl_Obj *)*(objc-1));
         result = Tcl_EvalObjv(interp, objc, newObjv, 0);
@@ -1680,7 +1680,7 @@ Itcl_BiInfoVarsCmd(
 	}
 	/* always add the itcl_options variable */
         Tcl_ListObjAppendElement(interp, listPtr,
-	        Tcl_NewStringObj("itcl_options", -1));
+	        Tcl_NewStringObj("itcl_options", TCL_INDEX_NONE));
         Tcl_SetObjResult(interp, listPtr);
         return TCL_OK;
     }
@@ -1718,10 +1718,10 @@ Itcl_BiInfoVarsCmd(
 		    if ((ivPtr->flags & ITCL_VARIABLE) != 0) {
 		        if (head != NULL) {
 		            namePtr = Tcl_NewStringObj(
-			            Tcl_GetString(ivPtr->fullNamePtr), -1);
+			            Tcl_GetString(ivPtr->fullNamePtr), TCL_INDEX_NONE);
 		        } else {
 		            namePtr = Tcl_NewStringObj(
-			            Tcl_GetString(ivPtr->namePtr), -1);
+			            Tcl_GetString(ivPtr->namePtr), TCL_INDEX_NONE);
 		        }
 		        Tcl_ListObjAppendElement(interp, resultListPtr,
 		                namePtr);
@@ -1731,10 +1731,10 @@ Itcl_BiInfoVarsCmd(
 		        if (ivPtr->protection != ITCL_PUBLIC) {
 			    if (head != NULL) {
 			        namePtr = Tcl_NewStringObj(
-				        Tcl_GetString(ivPtr->fullNamePtr), -1);
+				        Tcl_GetString(ivPtr->fullNamePtr), TCL_INDEX_NONE);
 			    } else {
 			        namePtr = Tcl_NewStringObj(
-				        Tcl_GetString(ivPtr->namePtr), -1);
+				        Tcl_GetString(ivPtr->namePtr), TCL_INDEX_NONE);
 			    }
 		            Tcl_ListObjAppendElement(interp, resultListPtr,
 			            namePtr);
@@ -1771,12 +1771,12 @@ Itcl_BiInfoUnknownCmd(
     if (objc < 2) {
 	/* Namespace ensemble unknown callbacks never do this. */
 	Tcl_SetObjResult(interp, Tcl_NewStringObj(
-		"unknown callback should not be called directly", -1));
+		"unknown callback should not be called directly", TCL_INDEX_NONE));
 	return TCL_ERROR;
     }
 
     /* Redirect to the [::info] command. */
-    objPtr = Tcl_NewStringObj("::info", -1);
+    objPtr = Tcl_NewStringObj("::info", TCL_INDEX_NONE);
     listObj = Tcl_NewListObj(1, &objPtr);
     Tcl_IncrRefCount(listObj);
     if (Tcl_GetCommandFromObj(interp, objPtr)) {
@@ -1786,7 +1786,7 @@ Itcl_BiInfoUnknownCmd(
 	if (code == TCL_ERROR) {
 	    /* Redirection to [::info] failed, but why? */
 	    Tcl_Obj *optDict = Tcl_GetReturnOptions(interp, code);
-	    Tcl_Obj *key = Tcl_NewStringObj("-errorcode", -1);
+	    Tcl_Obj *key = Tcl_NewStringObj("-errorcode", TCL_INDEX_NONE);
 	    Tcl_Obj *val, *elem;
 
 	    Tcl_DictObjGet(NULL, optDict, key, &val);
@@ -1811,7 +1811,7 @@ Itcl_BiInfoUnknownCmd(
     if (usage) {
         /* produce usage message */
         Tcl_Obj *objPtr = Tcl_NewStringObj(
-	        "wrong # args: should be one of...\n", -1);
+	        "wrong # args: should be one of...\n", TCL_INDEX_NONE);
         ItclGetInfoUsage(interp, objPtr, (ItclObjectInfo *)clientData, NULL);
 	Tcl_SetObjResult(interp, objPtr);
     }
@@ -1821,7 +1821,7 @@ Itcl_BiInfoUnknownCmd(
 
     /* Return a command to replicate the non-error redirect outcome */
     listObj = Tcl_NewStringObj(
-	    "::apply {{o m args} {::tailcall ::return -options $o $m}}", -1);
+	    "::apply {{o m args} {::tailcall ::return -options $o $m}}", TCL_INDEX_NONE);
     Tcl_ListObjAppendElement(NULL, listObj, Tcl_GetReturnOptions(interp,code));
     Tcl_ListObjAppendElement(NULL, listObj, Tcl_GetObjResult(interp));
     Tcl_SetObjResult(interp, listObj);
@@ -1862,7 +1862,7 @@ Itcl_BiInfoBodyCmd(
 	 */
 
     fallback:
-	script = Tcl_NewStringObj("::info body", -1);
+	script = Tcl_NewStringObj("::info body", TCL_INDEX_NONE);
 	if (objc == 2) {
 	    Tcl_ListObjAppendElement(NULL, script, objv[1]);
 	}
@@ -1903,7 +1903,7 @@ Itcl_BiInfoBodyCmd(
         if (mcode && Itcl_IsMemberCodeImplemented(mcode)) {
             Tcl_SetObjResult(interp, mcode->bodyPtr);
         } else {
-            Tcl_SetObjResult(interp, Tcl_NewStringObj("<undefined>", -1));
+            Tcl_SetObjResult(interp, Tcl_NewStringObj("<undefined>", TCL_INDEX_NONE));
         }
 	return TCL_OK;
     }
@@ -1916,15 +1916,15 @@ Itcl_BiInfoBodyCmd(
 
     if (hPtr) {
 	ItclDelegatedFunction *idmPtr = (ItclDelegatedFunction *)Tcl_GetHashValue(hPtr);
-        Tcl_Obj *objPtr = Tcl_NewStringObj("delegated ", -1);
+        Tcl_Obj *objPtr = Tcl_NewStringObj("delegated ", TCL_INDEX_NONE);
 
 	if (idmPtr->flags & ITCL_TYPE_METHOD) {
 	    what = "typemethod";
 	}
-	Tcl_AppendToObj(objPtr, what, -1);
-	Tcl_AppendToObj(objPtr, " \"", -1);
+	Tcl_AppendToObj(objPtr, what, TCL_INDEX_NONE);
+	Tcl_AppendToObj(objPtr, " \"", TCL_INDEX_NONE);
 	Tcl_AppendObjToObj(objPtr, objv[1]);
-	Tcl_AppendToObj(objPtr, "\"", -1);
+	Tcl_AppendToObj(objPtr, "\"", TCL_INDEX_NONE);
         Tcl_SetObjResult(interp, objPtr);
         return TCL_ERROR;
     }
@@ -1966,7 +1966,7 @@ Itcl_BiInfoArgsCmd(
 	 */
 
     fallback:
-	script = Tcl_NewStringObj("::info args", -1);
+	script = Tcl_NewStringObj("::info args", TCL_INDEX_NONE);
 	if (objc == 2) {
 	    Tcl_ListObjAppendElement(NULL, script, objv[1]);
 	}
@@ -2006,7 +2006,7 @@ Itcl_BiInfoArgsCmd(
 		|| ((imPtr->flags & ITCL_ARG_SPEC) != 0)) {
 	    Tcl_SetObjResult(interp, mcode->usagePtr);
         } else {
-	    Tcl_SetObjResult(interp, Tcl_NewStringObj("<undefined>", -1));
+	    Tcl_SetObjResult(interp, Tcl_NewStringObj("<undefined>", TCL_INDEX_NONE));
         }
 	return TCL_OK;
     }
@@ -2019,15 +2019,15 @@ Itcl_BiInfoArgsCmd(
 
     if (hPtr) {
 	ItclDelegatedFunction *idmPtr = (ItclDelegatedFunction *)Tcl_GetHashValue(hPtr);
-        Tcl_Obj *objPtr = Tcl_NewStringObj("delegated ", -1);
+        Tcl_Obj *objPtr = Tcl_NewStringObj("delegated ", TCL_INDEX_NONE);
 
 	if (idmPtr->flags & ITCL_TYPE_METHOD) {
 	    what = "typemethod";
 	}
-	Tcl_AppendToObj(objPtr, what, -1);
-	Tcl_AppendToObj(objPtr, " \"", -1);
+	Tcl_AppendToObj(objPtr, what, TCL_INDEX_NONE);
+	Tcl_AppendToObj(objPtr, " \"", TCL_INDEX_NONE);
 	Tcl_AppendObjToObj(objPtr, objv[1]);
-	Tcl_AppendToObj(objPtr, "\"", -1);
+	Tcl_AppendToObj(objPtr, "\"", TCL_INDEX_NONE);
         Tcl_SetObjResult(interp, objPtr);
         return TCL_ERROR;
     }
@@ -2122,7 +2122,7 @@ Itcl_BiInfoOptionCmd(
     if (Itcl_GetContext(interp, &contextIclsPtr, &contextIoPtr) != TCL_OK) {
 	Tcl_SetObjResult(interp, Tcl_NewStringObj(
             "\nget info like this instead: "
-            "\n  namespace eval className { info option ... }", -1));
+            "\n  namespace eval className { info option ... }", TCL_INDEX_NONE));
         return TCL_ERROR;
     }
     if (contextIoPtr != NULL) {
@@ -2154,7 +2154,7 @@ Itcl_BiInfoOptionCmd(
 		    "without an object context", NULL);
 	    return TCL_ERROR;
 	}
-	optionNamePtr = Tcl_NewStringObj(optionName, -1);
+	optionNamePtr = Tcl_NewStringObj(optionName, TCL_INDEX_NONE);
         hPtr = Tcl_FindHashEntry(&contextIoPtr->objectOptions,
 	        (char *)optionNamePtr);
         Tcl_DecrRefCount(optionNamePtr);
@@ -2198,27 +2198,27 @@ Itcl_BiInfoOptionCmd(
                 case BOptCgetMethodIdx:
                     if (ioptPtr->cgetMethodPtr) {
                         objPtr = Tcl_NewStringObj(
-			        Tcl_GetString(ioptPtr->cgetMethodPtr), -1);
+			        Tcl_GetString(ioptPtr->cgetMethodPtr), TCL_INDEX_NONE);
                     } else {
-                        objPtr = Tcl_NewStringObj("", -1);
+                        objPtr = Tcl_NewStringObj("", TCL_INDEX_NONE);
                     }
                     break;
 
                 case BOptCgetMethodVarIdx:
                     if (ioptPtr->cgetMethodVarPtr) {
                         objPtr = Tcl_NewStringObj(
-			        Tcl_GetString(ioptPtr->cgetMethodVarPtr), -1);
+			        Tcl_GetString(ioptPtr->cgetMethodVarPtr), TCL_INDEX_NONE);
                     } else {
-                        objPtr = Tcl_NewStringObj("", -1);
+                        objPtr = Tcl_NewStringObj("", TCL_INDEX_NONE);
                     }
                     break;
 
                 case BOptConfigureMethodIdx:
                     if (ioptPtr->configureMethodPtr) {
                         objPtr = Tcl_NewStringObj(
-			        Tcl_GetString(ioptPtr->configureMethodPtr), -1);
+			        Tcl_GetString(ioptPtr->configureMethodPtr), TCL_INDEX_NONE);
                     } else {
-                        objPtr = Tcl_NewStringObj("", -1);
+                        objPtr = Tcl_NewStringObj("", TCL_INDEX_NONE);
                     }
                     break;
 
@@ -2226,18 +2226,18 @@ Itcl_BiInfoOptionCmd(
                     if (ioptPtr->configureMethodVarPtr) {
                         objPtr = Tcl_NewStringObj(
 			        Tcl_GetString(ioptPtr->configureMethodVarPtr),
-				-1);
+				TCL_INDEX_NONE);
                     } else {
-                        objPtr = Tcl_NewStringObj("", -1);
+                        objPtr = Tcl_NewStringObj("", TCL_INDEX_NONE);
                     }
                     break;
 
                 case BOptValidateMethodIdx:
                     if (ioptPtr->validateMethodPtr) {
                         objPtr = Tcl_NewStringObj(
-			        Tcl_GetString(ioptPtr->validateMethodPtr), -1);
+			        Tcl_GetString(ioptPtr->validateMethodPtr), TCL_INDEX_NONE);
                     } else {
-                        objPtr = Tcl_NewStringObj("", -1);
+                        objPtr = Tcl_NewStringObj("", TCL_INDEX_NONE);
                     }
                     break;
 
@@ -2245,47 +2245,47 @@ Itcl_BiInfoOptionCmd(
                     if (ioptPtr->validateMethodVarPtr) {
                         objPtr = Tcl_NewStringObj(
 			        Tcl_GetString(ioptPtr->validateMethodVarPtr),
-				-1);
+				TCL_INDEX_NONE);
                     } else {
-                        objPtr = Tcl_NewStringObj("", -1);
+                        objPtr = Tcl_NewStringObj("", TCL_INDEX_NONE);
                     }
                     break;
 
                 case BOptResourceIdx:
                     if (ioptPtr->resourceNamePtr) {
                         objPtr = Tcl_NewStringObj(
-			        Tcl_GetString(ioptPtr->resourceNamePtr), -1);
+			        Tcl_GetString(ioptPtr->resourceNamePtr), TCL_INDEX_NONE);
                     } else {
-                        objPtr = Tcl_NewStringObj("", -1);
+                        objPtr = Tcl_NewStringObj("", TCL_INDEX_NONE);
                     }
                     break;
 
                 case BOptClassIdx:
                     if (ioptPtr->classNamePtr) {
                         objPtr = Tcl_NewStringObj(
-			        Tcl_GetString(ioptPtr->classNamePtr), -1);
+			        Tcl_GetString(ioptPtr->classNamePtr), TCL_INDEX_NONE);
                     } else {
-                        objPtr = Tcl_NewStringObj("", -1);
+                        objPtr = Tcl_NewStringObj("", TCL_INDEX_NONE);
                     }
                     break;
 
                 case BOptDefaultIdx:
 		    if (ioptPtr->defaultValuePtr != NULL) {
 		        objPtr = Tcl_NewStringObj(
-			        Tcl_GetString(ioptPtr->defaultValuePtr), -1);
+			        Tcl_GetString(ioptPtr->defaultValuePtr), TCL_INDEX_NONE);
                     } else {
-                        objPtr = Tcl_NewStringObj("<undefined>", -1);
+                        objPtr = Tcl_NewStringObj("<undefined>", TCL_INDEX_NONE);
 		    }
                     break;
 
                 case BOptNameIdx:
                     objPtr = Tcl_NewStringObj(
-		            Tcl_GetString(ioptPtr->fullNamePtr), -1);
+		            Tcl_GetString(ioptPtr->fullNamePtr), TCL_INDEX_NONE);
                     break;
 
                 case BOptProtectIdx:
                     val = Itcl_ProtectionStr(ioptPtr->protection);
-                    objPtr = Tcl_NewStringObj((const char *)val, -1);
+                    objPtr = Tcl_NewStringObj((const char *)val, TCL_INDEX_NONE);
                     break;
 
                 case BOptValueIdx:
@@ -2304,7 +2304,7 @@ Itcl_BiInfoOptionCmd(
                     if (val == NULL) {
                         val = "<undefined>";
                     }
-                    objPtr = Tcl_NewStringObj((const char *)val, -1);
+                    objPtr = Tcl_NewStringObj((const char *)val, TCL_INDEX_NONE);
                     break;
             }
 
@@ -2403,7 +2403,7 @@ Itcl_BiInfoComponentCmd(
     if (Itcl_GetContext(interp, &contextIclsPtr, &contextIoPtr) != TCL_OK) {
 	Tcl_SetObjResult(interp, Tcl_NewStringObj(
             "\nget info like this instead: "
-            "\n  namespace eval className { info component ... }", -1));
+            "\n  namespace eval className { info component ... }", TCL_INDEX_NONE));
         return TCL_ERROR;
     }
     if (contextIoPtr != NULL) {
@@ -2440,7 +2440,7 @@ Itcl_BiInfoComponentCmd(
      *  Return info for a specific component.
      */
     if (componentName) {
-	componentNamePtr = Tcl_NewStringObj(componentName, -1);
+	componentNamePtr = Tcl_NewStringObj(componentName, TCL_INDEX_NONE);
 	if (contextIoPtr != NULL) {
 	    Itcl_InitHierIter(&hier, contextIoPtr->iclsPtr);
 	} else {
@@ -2494,7 +2494,7 @@ Itcl_BiInfoComponentCmd(
             switch (icomplist[i]) {
                 case BCompNameIdx:
                     objPtr = Tcl_NewStringObj(
-		            Tcl_GetString(icPtr->ivPtr->fullNamePtr), -1);
+		            Tcl_GetString(icPtr->ivPtr->fullNamePtr), TCL_INDEX_NONE);
                     break;
 
                 case BCompInheritIdx:
@@ -2503,7 +2503,7 @@ Itcl_BiInfoComponentCmd(
 		    } else {
                         val = "0";
 		    }
-                    objPtr = Tcl_NewStringObj((const char *)val, -1);
+                    objPtr = Tcl_NewStringObj((const char *)val, TCL_INDEX_NONE);
                     break;
 
                 case BCompValueIdx:
@@ -2522,7 +2522,7 @@ Itcl_BiInfoComponentCmd(
                     if (val == NULL) {
                         val = "<undefined>";
                     }
-                    objPtr = Tcl_NewStringObj((const char *)val, -1);
+                    objPtr = Tcl_NewStringObj((const char *)val, TCL_INDEX_NONE);
                     break;
             }
 
@@ -2546,7 +2546,7 @@ Itcl_BiInfoComponentCmd(
             while (hPtr) {
                 icPtr = (ItclComponent *)Tcl_GetHashValue(hPtr);
                 objPtr = Tcl_NewStringObj(
-		        Tcl_GetString(icPtr->ivPtr->fullNamePtr), -1);
+		        Tcl_GetString(icPtr->ivPtr->fullNamePtr), TCL_INDEX_NONE);
                 Tcl_ListObjAppendElement(NULL, resultPtr, objPtr);
                 hPtr = Tcl_NextHashEntry(&place);
             }
@@ -2617,7 +2617,7 @@ Itcl_BiInfoWidgetCmd(
 	if ((contextIoPtr == NULL) || (contextIclsPtr == NULL)) {
             Tcl_SetObjResult(interp, Tcl_NewStringObj(
 		    "\nget info like this instead: "
-		    "\n  namespace eval className { info widget ... }", -1));
+		    "\n  namespace eval className { info widget ... }", TCL_INDEX_NONE));
             return TCL_ERROR;
         }
     }
@@ -2644,7 +2644,7 @@ Itcl_BiInfoWidgetCmd(
 	Tcl_AppendResult(interp, "object or class is no widget", NULL);
         return TCL_ERROR;
     }
-    objPtr = Tcl_NewStringObj(name, -1);
+    objPtr = Tcl_NewStringObj(name, TCL_INDEX_NONE);
     Tcl_SetObjResult(interp, objPtr);
     return TCL_OK;
 }
@@ -2708,7 +2708,7 @@ Itcl_BiInfoExtendedClassCmd(
     if (Itcl_GetContext(interp, &contextIclsPtr, &contextIoPtr) != TCL_OK) {
 	Tcl_SetObjResult(interp, Tcl_NewStringObj(
             "\nget info like this instead: "
-            "\n  namespace eval className { info extendedclass ... }", -1));
+            "\n  namespace eval className { info extendedclass ... }", TCL_INDEX_NONE));
         return TCL_ERROR;
     }
     if (contextIoPtr != NULL) {
@@ -2795,7 +2795,7 @@ Itcl_BiInfoDelegatedCmd(
     if (Itcl_GetContext(interp, &contextIclsPtr, &contextIoPtr) != TCL_OK) {
 	Tcl_SetObjResult(interp, Tcl_NewStringObj(
             "\nget info like this instead: "
-            "\n  namespace eval className { info delegated ... }", -1));
+            "\n  namespace eval className { info delegated ... }", TCL_INDEX_NONE));
         return TCL_ERROR;
     }
     if (contextIoPtr != NULL) {
@@ -2881,7 +2881,7 @@ Itcl_BiInfoTypeCmd(
 	if ((contextIoPtr == NULL) || (contextIclsPtr == NULL)) {
 	    Tcl_SetObjResult(interp, Tcl_NewStringObj(
 		    "\nget info like this instead: "
-		    "\n  namespace eval className { info type ...}", -1));
+		    "\n  namespace eval className { info type ...}", TCL_INDEX_NONE));
             return TCL_ERROR;
         }
     }
@@ -2908,7 +2908,7 @@ Itcl_BiInfoTypeCmd(
 	Tcl_AppendResult(interp, "object or class is no type", NULL);
         return TCL_ERROR;
     }
-    objPtr = Tcl_NewStringObj(name, -1);
+    objPtr = Tcl_NewStringObj(name, TCL_INDEX_NONE);
     Tcl_SetObjResult(interp, objPtr);
     return TCL_OK;
 }
@@ -2966,7 +2966,7 @@ Itcl_BiInfoHullTypeCmd(
 	if ((contextIoPtr == NULL) || (contextIclsPtr == NULL)) {
 	    Tcl_SetObjResult(interp, Tcl_NewStringObj(
 		    "\nget info like this instead: "
-		    "\n  namespace eval className { info hulltype ... }", -1));
+		    "\n  namespace eval className { info hulltype ... }", TCL_INDEX_NONE));
             return TCL_ERROR;
         }
     }
@@ -3138,7 +3138,7 @@ Itcl_BiInfoMethodCmd(
     if (Itcl_GetContext(interp, &contextIclsPtr, &contextIoPtr) != TCL_OK) {
         Tcl_SetObjResult(interp, Tcl_NewStringObj(
             "\nget info like this instead: "
-            "\n  namespace eval className { info method ... }", -1));
+            "\n  namespace eval className { info method ... }", TCL_INDEX_NONE));
         return TCL_ERROR;
     }
     if (contextIoPtr != NULL) {
@@ -3162,7 +3162,7 @@ Itcl_BiInfoMethodCmd(
      */
     if (cmdName) {
 	ItclCmdLookup *clookup;
-	objPtr = Tcl_NewStringObj(cmdName, -1);
+	objPtr = Tcl_NewStringObj(cmdName, TCL_INDEX_NONE);
         hPtr = Tcl_FindHashEntry(&contextIclsPtr->resolveCmds, (char *)objPtr);
 	Tcl_DecrRefCount(objPtr);
 	objPtr = NULL;
@@ -3217,22 +3217,22 @@ Itcl_BiInfoMethodCmd(
                     if (mcode && mcode->argListPtr) {
 			if (imPtr->usagePtr == NULL) {
                             objPtr = Tcl_NewStringObj(
-			            Tcl_GetString(mcode->usagePtr), -1);
+			            Tcl_GetString(mcode->usagePtr), TCL_INDEX_NONE);
 			} else {
                             objPtr = Tcl_NewStringObj(
-			            Tcl_GetString(imPtr->usagePtr), -1);
+			            Tcl_GetString(imPtr->usagePtr), TCL_INDEX_NONE);
 		        }
                     } else {
 		        if ((imPtr->flags & ITCL_ARG_SPEC) != 0) {
 			    if (imPtr->usagePtr == NULL) {
                                 objPtr = Tcl_NewStringObj(
-				        Tcl_GetString(mcode->usagePtr), -1);
+				        Tcl_GetString(mcode->usagePtr), TCL_INDEX_NONE);
 			    } else {
 			        objPtr = Tcl_NewStringObj(
-				        Tcl_GetString(imPtr->usagePtr), -1);
+				        Tcl_GetString(imPtr->usagePtr), TCL_INDEX_NONE);
 			    }
                         } else {
-                            objPtr = Tcl_NewStringObj("<undefined>", -1);
+                            objPtr = Tcl_NewStringObj("<undefined>", TCL_INDEX_NONE);
                         }
 		    }
                     break;
@@ -3240,25 +3240,25 @@ Itcl_BiInfoMethodCmd(
                 case BIfBodyIdx:
                     if (mcode && Itcl_IsMemberCodeImplemented(mcode)) {
                         objPtr = Tcl_NewStringObj(
-			        Tcl_GetString(mcode->bodyPtr), -1);
+			        Tcl_GetString(mcode->bodyPtr), TCL_INDEX_NONE);
                     } else {
-                        objPtr = Tcl_NewStringObj("<undefined>", -1);
+                        objPtr = Tcl_NewStringObj("<undefined>", TCL_INDEX_NONE);
                     }
                     break;
 
                 case BIfNameIdx:
                     objPtr = Tcl_NewStringObj(
-		            Tcl_GetString(imPtr->fullNamePtr), -1);
+		            Tcl_GetString(imPtr->fullNamePtr), TCL_INDEX_NONE);
                     break;
 
                 case BIfProtectIdx:
                     val = Itcl_ProtectionStr(imPtr->protection);
-                    objPtr = Tcl_NewStringObj(val, -1);
+                    objPtr = Tcl_NewStringObj(val, TCL_INDEX_NONE);
                     break;
 
                 case BIfTypeIdx:
                     val = "method";
-                    objPtr = Tcl_NewStringObj(val, -1);
+                    objPtr = Tcl_NewStringObj(val, TCL_INDEX_NONE);
                     break;
             }
 
@@ -3288,7 +3288,7 @@ Itcl_BiInfoMethodCmd(
 		}
 		if (useIt) {
                     objPtr = Tcl_NewStringObj(
-		            Tcl_GetString(imPtr->fullNamePtr), -1);
+		            Tcl_GetString(imPtr->fullNamePtr), TCL_INDEX_NONE);
                     Tcl_ListObjAppendElement(NULL,
 		            resultPtr, objPtr);
                 }
@@ -3348,12 +3348,12 @@ Itcl_BiInfoMethodsCmd(
     name = "destroy";
     if ((pattern == NULL) || Tcl_StringCaseMatch((const char *)name, pattern, 0)) {
         Tcl_ListObjAppendElement(interp, listPtr,
-                Tcl_NewStringObj(name, -1));
+                Tcl_NewStringObj(name, TCL_INDEX_NONE));
     }
     name = "info";
     if ((pattern == NULL) || Tcl_StringCaseMatch((const char *)name, pattern, 0)) {
         Tcl_ListObjAppendElement(interp, listPtr,
-                Tcl_NewStringObj(name, -1));
+                Tcl_NewStringObj(name, TCL_INDEX_NONE));
     }
     FOREACH_HASH_VALUE(imPtr, &iclsPtr->functions) {
 	name = Tcl_GetString(imPtr->namePtr);
@@ -3374,7 +3374,7 @@ Itcl_BiInfoMethodsCmd(
 	    if ((pattern == NULL) ||
                      Tcl_StringCaseMatch((const char *)name, pattern, 0)) {
 	        Tcl_ListObjAppendElement(interp, listPtr,
-		        Tcl_NewStringObj(Tcl_GetString(imPtr->namePtr), -1));
+		        Tcl_NewStringObj(Tcl_GetString(imPtr->namePtr), TCL_INDEX_NONE));
 	    }
 	}
     }
@@ -3393,7 +3393,7 @@ Itcl_BiInfoMethodsCmd(
 	    if ((pattern == NULL) ||
                      Tcl_StringCaseMatch((const char *)name, pattern, 0)) {
 	        Tcl_ListObjAppendElement(interp, listPtr,
-		        Tcl_NewStringObj(Tcl_GetString(idmPtr->namePtr), -1));
+		        Tcl_NewStringObj(Tcl_GetString(idmPtr->namePtr), TCL_INDEX_NONE));
 	    }
         }
     }
@@ -3467,7 +3467,7 @@ Itcl_BiInfoOptionsCmd(
 	if ((pattern == NULL) ||
                  Tcl_StringCaseMatch(name, pattern, 0)) {
             Tcl_ListObjAppendElement(interp, listPtr,
-	            Tcl_NewStringObj(Tcl_GetString(ioptPtr->namePtr), -1));
+	            Tcl_NewStringObj(Tcl_GetString(ioptPtr->namePtr), TCL_INDEX_NONE));
         }
     }
     if (ioPtr == NULL) {
@@ -3481,7 +3481,7 @@ Itcl_BiInfoOptionsCmd(
 	    if ((pattern == NULL) ||
                     Tcl_StringCaseMatch(name, pattern, 0)) {
                 Tcl_ListObjAppendElement(interp, listPtr,
-	                Tcl_NewStringObj(Tcl_GetString(idoPtr->namePtr), -1));
+	                Tcl_NewStringObj(Tcl_GetString(idoPtr->namePtr), TCL_INDEX_NONE));
 	    }
         } else {
 	    if (idoPtr->icPtr == NULL) {
@@ -3494,8 +3494,8 @@ Itcl_BiInfoOptionsCmd(
 	            Tcl_GetString(idoPtr->icPtr->namePtr),
 	            NULL, ioPtr, ioPtr->iclsPtr);
             if ((val != NULL) && (strlen(val) != 0)) {
-	        objPtr = Tcl_NewStringObj(val, -1);
-		Tcl_AppendToObj(objPtr, " configure", -1);
+	        objPtr = Tcl_NewStringObj(val, TCL_INDEX_NONE);
+		Tcl_AppendToObj(objPtr, " configure", TCL_INDEX_NONE);
 		result = Tcl_EvalObjEx(interp, objPtr, 0);
 	        if (result != TCL_OK) {
 		    return TCL_ERROR;
@@ -3566,7 +3566,7 @@ Itcl_BiInfoTypesCmd(
 	    if ((pattern == NULL) ||
                      Tcl_StringCaseMatch(name, pattern, 0)) {
                 Tcl_ListObjAppendElement(interp, listPtr,
-		        Tcl_NewStringObj(Tcl_GetString(iclsPtr->namePtr), -1));
+		        Tcl_NewStringObj(Tcl_GetString(iclsPtr->namePtr), TCL_INDEX_NONE));
             }
         }
     }
@@ -3635,7 +3635,7 @@ Itcl_BiInfoComponentsCmd(
             if ((pattern == NULL) ||
                      Tcl_StringCaseMatch(name, pattern, 0)) {
                 Tcl_ListObjAppendElement(interp, listPtr,
-	                Tcl_NewStringObj(Tcl_GetString(icPtr->namePtr), -1));
+	                Tcl_NewStringObj(Tcl_GetString(icPtr->namePtr), TCL_INDEX_NONE));
             }
         }
         iclsPtr2 = Itcl_AdvanceHierIter(&hier);
@@ -3708,7 +3708,7 @@ Itcl_BiInfoTypeMethodCmd(
     if (Itcl_GetContext(interp, &contextIclsPtr, &contextIoPtr) != TCL_OK) {
 	Tcl_SetObjResult(interp, Tcl_NewStringObj(
             "\nget info like this instead: "
-            "\n  namespace eval className { info function ... }", -1));
+            "\n  namespace eval className { info function ... }", TCL_INDEX_NONE));
         return TCL_ERROR;
     }
     if (contextIoPtr != NULL) {
@@ -3732,7 +3732,7 @@ Itcl_BiInfoTypeMethodCmd(
      */
     if (cmdName) {
 	ItclCmdLookup *clookup;
-	objPtr = Tcl_NewStringObj(cmdName, -1);
+	objPtr = Tcl_NewStringObj(cmdName, TCL_INDEX_NONE);
         hPtr = Tcl_FindHashEntry(&contextIclsPtr->resolveCmds, (char *)objPtr);
 	Tcl_DecrRefCount(objPtr);
 	objPtr = NULL;
@@ -3787,22 +3787,22 @@ Itcl_BiInfoTypeMethodCmd(
                     if (mcode && mcode->argListPtr) {
 			if (imPtr->usagePtr == NULL) {
                             objPtr = Tcl_NewStringObj(
-			            Tcl_GetString(mcode->usagePtr), -1);
+			            Tcl_GetString(mcode->usagePtr), TCL_INDEX_NONE);
 			} else {
                             objPtr = Tcl_NewStringObj(
-			            Tcl_GetString(imPtr->usagePtr), -1);
+			            Tcl_GetString(imPtr->usagePtr), TCL_INDEX_NONE);
 		        }
                     } else {
 		        if ((imPtr->flags & ITCL_ARG_SPEC) != 0) {
 			    if (imPtr->usagePtr == NULL) {
                                 objPtr = Tcl_NewStringObj(
-				        Tcl_GetString(mcode->usagePtr), -1);
+				        Tcl_GetString(mcode->usagePtr), TCL_INDEX_NONE);
 			    } else {
 			        objPtr = Tcl_NewStringObj(
-				        Tcl_GetString(imPtr->usagePtr), -1);
+				        Tcl_GetString(imPtr->usagePtr), TCL_INDEX_NONE);
 			    }
                         } else {
-                            objPtr = Tcl_NewStringObj("<undefined>", -1);
+                            objPtr = Tcl_NewStringObj("<undefined>", TCL_INDEX_NONE);
                         }
 		    }
                     break;
@@ -3810,25 +3810,25 @@ Itcl_BiInfoTypeMethodCmd(
                 case BIfBodyIdx:
                     if (mcode && Itcl_IsMemberCodeImplemented(mcode)) {
                         objPtr = Tcl_NewStringObj(
-			        Tcl_GetString(mcode->bodyPtr), -1);
+			        Tcl_GetString(mcode->bodyPtr), TCL_INDEX_NONE);
                     } else {
-                        objPtr = Tcl_NewStringObj("<undefined>", -1);
+                        objPtr = Tcl_NewStringObj("<undefined>", TCL_INDEX_NONE);
                     }
                     break;
 
                 case BIfNameIdx:
                     objPtr = Tcl_NewStringObj(
-		            Tcl_GetString(imPtr->fullNamePtr), -1);
+		            Tcl_GetString(imPtr->fullNamePtr), TCL_INDEX_NONE);
                     break;
 
                 case BIfProtectIdx:
                     val = Itcl_ProtectionStr(imPtr->protection);
-                    objPtr = Tcl_NewStringObj(val, -1);
+                    objPtr = Tcl_NewStringObj(val, TCL_INDEX_NONE);
                     break;
 
                 case BIfTypeIdx:
                     val = "typemethod";
-                    objPtr = Tcl_NewStringObj(val, -1);
+                    objPtr = Tcl_NewStringObj(val, TCL_INDEX_NONE);
                     break;
             }
 
@@ -3858,7 +3858,7 @@ Itcl_BiInfoTypeMethodCmd(
 		}
 		if (useIt) {
                     objPtr = Tcl_NewStringObj(
-		            Tcl_GetString(imPtr->fullNamePtr), -1);
+		            Tcl_GetString(imPtr->fullNamePtr), TCL_INDEX_NONE);
                     Tcl_ListObjAppendElement(NULL,
 		            resultPtr, objPtr);
                 }
@@ -3918,17 +3918,17 @@ Itcl_BiInfoTypeMethodsCmd(
     name = "create";
     if ((pattern == NULL) || Tcl_StringCaseMatch((const char *)name, pattern, 0)) {
         Tcl_ListObjAppendElement(interp, listPtr,
-	        Tcl_NewStringObj(name, -1));
+	        Tcl_NewStringObj(name, TCL_INDEX_NONE));
     }
     name = "destroy";
     if ((pattern == NULL) || Tcl_StringCaseMatch((const char *)name, pattern, 0)) {
         Tcl_ListObjAppendElement(interp, listPtr,
-                Tcl_NewStringObj(name, -1));
+                Tcl_NewStringObj(name, TCL_INDEX_NONE));
     }
     name = "info";
     if ((pattern == NULL) || Tcl_StringCaseMatch((const char *)name, pattern, 0)) {
         Tcl_ListObjAppendElement(interp, listPtr,
-                Tcl_NewStringObj(name, -1));
+                Tcl_NewStringObj(name, TCL_INDEX_NONE));
     }
     FOREACH_HASH_VALUE(imPtr, &iclsPtr->functions) {
 	name = Tcl_GetString(imPtr->namePtr);
@@ -3948,7 +3948,7 @@ Itcl_BiInfoTypeMethodsCmd(
 	    if ((pattern == NULL) ||
                      Tcl_StringCaseMatch((const char *)name, pattern, 0)) {
 	        Tcl_ListObjAppendElement(interp, listPtr,
-		        Tcl_NewStringObj(Tcl_GetString(imPtr->namePtr), -1));
+		        Tcl_NewStringObj(Tcl_GetString(imPtr->namePtr), TCL_INDEX_NONE));
 	    }
 	}
     }
@@ -3970,7 +3970,7 @@ Itcl_BiInfoTypeMethodsCmd(
 	    if ((pattern == NULL) ||
                      Tcl_StringCaseMatch((const char *)name, pattern, 0)) {
 	        Tcl_ListObjAppendElement(interp, listPtr,
-		        Tcl_NewStringObj(Tcl_GetString(idmPtr->namePtr), -1));
+		        Tcl_NewStringObj(Tcl_GetString(idmPtr->namePtr), TCL_INDEX_NONE));
 	    }
         }
     }
@@ -4101,7 +4101,7 @@ Itcl_BiInfoTypeVariableCmd(
     if (Itcl_GetContext(interp, &contextIclsPtr, &contextIoPtr) != TCL_OK) {
 	Tcl_SetObjResult(interp, Tcl_NewStringObj(
             "\nget info like this instead: "
-            "\n  namespace eval className { info typevariable ... }", -1));
+            "\n  namespace eval className { info typevariable ... }", TCL_INDEX_NONE));
         return TCL_ERROR;
     }
     if (contextIoPtr != NULL) {
@@ -4182,32 +4182,32 @@ Itcl_BiInfoTypeVariableCmd(
                                 contextIoPtr->iclsPtr->interp,
                                 contextIoPtr->accessCmd, objPtr);
                         } else {
-                            objPtr = Tcl_NewStringObj("<objectName>", -1);
+                            objPtr = Tcl_NewStringObj("<objectName>", TCL_INDEX_NONE);
                         }
                     } else {
 		        if (vlookup->ivPtr->init) {
 			    objPtr = Tcl_NewStringObj(
-			            Tcl_GetString(vlookup->ivPtr->init), -1);
+			            Tcl_GetString(vlookup->ivPtr->init), TCL_INDEX_NONE);
                         } else {
-                            objPtr = Tcl_NewStringObj("<undefined>", -1);
+                            objPtr = Tcl_NewStringObj("<undefined>", TCL_INDEX_NONE);
 		        }
                     }
                     break;
 
                 case BIvNameIdx:
                     objPtr = Tcl_NewStringObj(
-		            Tcl_GetString(ivPtr->fullNamePtr), -1);
+		            Tcl_GetString(ivPtr->fullNamePtr), TCL_INDEX_NONE);
                     break;
 
                 case BIvProtectIdx:
                     val = Itcl_ProtectionStr(ivPtr->protection);
-                    objPtr = Tcl_NewStringObj((const char *)val, -1);
+                    objPtr = Tcl_NewStringObj((const char *)val, TCL_INDEX_NONE);
                     break;
 
                 case BIvTypeIdx:
                     val = ((ivPtr->flags & ITCL_COMMON) != 0)
                         ? "common" : "variable";
-                    objPtr = Tcl_NewStringObj((const char *)val, -1);
+                    objPtr = Tcl_NewStringObj((const char *)val, TCL_INDEX_NONE);
                     break;
 
                 case BIvValueIdx:
@@ -4235,7 +4235,7 @@ Itcl_BiInfoTypeVariableCmd(
                     if (val == NULL) {
                         val = "<undefined>";
                     }
-                    objPtr = Tcl_NewStringObj((const char *)val, -1);
+                    objPtr = Tcl_NewStringObj((const char *)val, TCL_INDEX_NONE);
                     break;
             }
 
@@ -4264,13 +4264,13 @@ Itcl_BiInfoTypeVariableCmd(
                     if ((ivPtr->flags & ITCL_THIS_VAR) != 0) {
                         if (iclsPtr == contextIclsPtr) {
                             objPtr = Tcl_NewStringObj(
-			            Tcl_GetString(ivPtr->fullNamePtr), -1);
+			            Tcl_GetString(ivPtr->fullNamePtr), TCL_INDEX_NONE);
                             Tcl_ListObjAppendElement(NULL,
                                 resultPtr, objPtr);
                         }
                     } else {
                         objPtr = Tcl_NewStringObj(
-		                Tcl_GetString(ivPtr->fullNamePtr), -1);
+		                Tcl_GetString(ivPtr->fullNamePtr), TCL_INDEX_NONE);
                         Tcl_ListObjAppendElement(NULL,
                             resultPtr, objPtr);
                     }
@@ -4365,7 +4365,7 @@ Itcl_BiInfoWidgetadaptorCmd(
 	if ((contextIoPtr == NULL) || (contextIclsPtr == NULL)) {
 	    Tcl_SetObjResult(interp, Tcl_NewStringObj(
 		    "\nget info like this instead: "
-		    "\n  namespace eval className { info widgetadaptor ... }", -1));
+		    "\n  namespace eval className { info widgetadaptor ... }", TCL_INDEX_NONE));
 	    return TCL_ERROR;
 	}
     }
@@ -4392,7 +4392,7 @@ Itcl_BiInfoWidgetadaptorCmd(
 	Tcl_AppendResult(interp, "object or class is no widgetadaptor", NULL);
         return TCL_ERROR;
     }
-    objPtr = Tcl_NewStringObj(name, -1);
+    objPtr = Tcl_NewStringObj(name, TCL_INDEX_NONE);
     Tcl_SetObjResult(interp, objPtr);
     return TCL_OK;
 }
@@ -4449,7 +4449,7 @@ Itcl_BiInfoInstancesCmd(
 	if (ioPtr->iclsPtr == iclsPtr) {
 	    if (ioPtr->iclsPtr->flags & ITCL_WIDGETADAPTOR) {
 		objPtr = Tcl_NewStringObj(Tcl_GetCommandName(interp,
-		ioPtr->accessCmd), -1);
+		ioPtr->accessCmd), TCL_INDEX_NONE);
 	    } else {
 		objPtr = Tcl_NewObj();
 		Tcl_GetCommandFullName(interp, ioPtr->accessCmd, objPtr);
@@ -4526,7 +4526,7 @@ Itcl_BiInfoDelegatedOptionsCmd(
                     Tcl_ListObjAppendElement(interp, objPtr,
 	                    idoPtr->icPtr->namePtr);
 		} else {
-		    objPtr2 = Tcl_NewStringObj("", -1);
+		    objPtr2 = Tcl_NewStringObj("", TCL_INDEX_NONE);
                     Tcl_ListObjAppendElement(interp, objPtr, objPtr2);
 		}
                 Tcl_ListObjAppendElement(interp, listPtr, objPtr);
@@ -4598,7 +4598,7 @@ Itcl_BiInfoDelegatedMethodsCmd(
                         Tcl_ListObjAppendElement(interp, objPtr,
 	                        idmPtr->icPtr->namePtr);
 		    } else {
-		        objPtr2 = Tcl_NewStringObj("", -1);
+		        objPtr2 = Tcl_NewStringObj("", TCL_INDEX_NONE);
                         Tcl_ListObjAppendElement(interp, objPtr, objPtr2);
 		    }
                     Tcl_ListObjAppendElement(interp, listPtr, objPtr);
@@ -4671,7 +4671,7 @@ Itcl_BiInfoDelegatedTypeMethodsCmd(
                         Tcl_ListObjAppendElement(interp, objPtr,
 	                        idmPtr->icPtr->namePtr);
 		    } else {
-		            objPtr2 = Tcl_NewStringObj("", -1);
+		            objPtr2 = Tcl_NewStringObj("", TCL_INDEX_NONE);
                         Tcl_ListObjAppendElement(interp, objPtr, objPtr2);
 		    }
                     Tcl_ListObjAppendElement(interp, listPtr, objPtr);
@@ -4703,7 +4703,7 @@ Itcl_BiInfoDelegatedUnknownCmd(
     ItclShowArgs(1, "Itcl_BiInfoDelegatedUnknownCmd", objc, objv);
     /* produce usage message */
     objPtr = Tcl_NewStringObj(
-            "wrong # args: should be one of...\n", -1);
+            "wrong # args: should be one of...\n", TCL_INDEX_NONE);
     ItclGetInfoDelegatedUsage(interp, objPtr, (ItclObjectInfo *)clientData);
     Tcl_SetObjResult(interp, objPtr);
     return TCL_ERROR;
@@ -4779,7 +4779,7 @@ Itcl_BiInfoDelegatedOptionCmd(
     if (Itcl_GetContext(interp, &contextIclsPtr, &contextIoPtr) != TCL_OK) {
 	Tcl_SetObjResult(interp, Tcl_NewStringObj(
             "\nget info like this instead: "
-            "\n  namespace eval className { info delegated option ... }", -1));
+            "\n  namespace eval className { info delegated option ... }", TCL_INDEX_NONE));
         return TCL_ERROR;
     }
     if (contextIoPtr != NULL) {
@@ -4819,7 +4819,7 @@ Itcl_BiInfoDelegatedOptionCmd(
 		    "without an object context", NULL);
 	    return TCL_ERROR;
 	}
-	optionNamePtr = Tcl_NewStringObj(optionName, -1);
+	optionNamePtr = Tcl_NewStringObj(optionName, TCL_INDEX_NONE);
         hPtr = Tcl_FindHashEntry(&contextIoPtr->objectDelegatedOptions,
 	        (char *)optionNamePtr);
         Tcl_DecrRefCount(optionNamePtr);
@@ -4863,9 +4863,9 @@ Itcl_BiInfoDelegatedOptionCmd(
                 case BOptAsIdx:
                     if (idoptPtr->asPtr) {
                         objPtr = Tcl_NewStringObj(
-			        Tcl_GetString(idoptPtr->asPtr), -1);
+			        Tcl_GetString(idoptPtr->asPtr), TCL_INDEX_NONE);
                     } else {
-                        objPtr = Tcl_NewStringObj("", -1);
+                        objPtr = Tcl_NewStringObj("", TCL_INDEX_NONE);
                     }
                     break;
 
@@ -4881,33 +4881,33 @@ Itcl_BiInfoDelegatedOptionCmd(
                 case BOptResourceIdx:
                     if (idoptPtr->resourceNamePtr) {
                         objPtr = Tcl_NewStringObj(
-			        Tcl_GetString(idoptPtr->resourceNamePtr), -1);
+			        Tcl_GetString(idoptPtr->resourceNamePtr), TCL_INDEX_NONE);
                     } else {
-                        objPtr = Tcl_NewStringObj("", -1);
+                        objPtr = Tcl_NewStringObj("", TCL_INDEX_NONE);
                     }
                     break;
 
                 case BOptClassIdx:
                     if (idoptPtr->classNamePtr) {
                         objPtr = Tcl_NewStringObj(
-			        Tcl_GetString(idoptPtr->classNamePtr), -1);
+			        Tcl_GetString(idoptPtr->classNamePtr), TCL_INDEX_NONE);
                     } else {
-                        objPtr = Tcl_NewStringObj("", -1);
+                        objPtr = Tcl_NewStringObj("", TCL_INDEX_NONE);
                     }
                     break;
 
                 case BOptComponentIdx:
                     if (idoptPtr->icPtr != NULL) {
                         objPtr = Tcl_NewStringObj(
-			        Tcl_GetString(idoptPtr->icPtr->namePtr), -1);
+			        Tcl_GetString(idoptPtr->icPtr->namePtr), TCL_INDEX_NONE);
                     } else {
-                        objPtr = Tcl_NewStringObj("", -1);
+                        objPtr = Tcl_NewStringObj("", TCL_INDEX_NONE);
                     }
                     break;
 
                 case BOptNameIdx:
                     objPtr = Tcl_NewStringObj(
-		            Tcl_GetString(idoptPtr->namePtr), -1);
+		            Tcl_GetString(idoptPtr->namePtr), TCL_INDEX_NONE);
                     break;
 
             }
@@ -5013,7 +5013,7 @@ Itcl_BiInfoDelegatedMethodCmd(
     if (Itcl_GetContext(interp, &contextIclsPtr, &contextIoPtr) != TCL_OK) {
 	Tcl_SetObjResult(interp, Tcl_NewStringObj(
             "\nget info like this instead: "
-            "\n  namespace eval className { info delegated method ... }", -1));
+            "\n  namespace eval className { info delegated method ... }", TCL_INDEX_NONE));
         return TCL_ERROR;
     }
     if (contextIoPtr != NULL) {
@@ -5038,7 +5038,7 @@ Itcl_BiInfoDelegatedMethodCmd(
      *  Return info for a specific option.
      */
     if (cmdName) {
-	cmdNamePtr = Tcl_NewStringObj(cmdName, -1);
+	cmdNamePtr = Tcl_NewStringObj(cmdName, TCL_INDEX_NONE);
 	if (contextIoPtr != NULL) {
             hPtr = Tcl_FindHashEntry(&contextIoPtr->objectDelegatedFunctions,
 	            (char *)cmdNamePtr);
@@ -5093,9 +5093,9 @@ Itcl_BiInfoDelegatedMethodCmd(
                 case BOptAsIdx:
                     if (idmPtr->asPtr) {
                         objPtr = Tcl_NewStringObj(
-			        Tcl_GetString(idmPtr->asPtr), -1);
+			        Tcl_GetString(idmPtr->asPtr), TCL_INDEX_NONE);
                     } else {
-                        objPtr = Tcl_NewStringObj("", -1);
+                        objPtr = Tcl_NewStringObj("", TCL_INDEX_NONE);
                     }
                     break;
 
@@ -5111,24 +5111,24 @@ Itcl_BiInfoDelegatedMethodCmd(
                 case BOptUsingIdx:
                     if (idmPtr->usingPtr) {
                         objPtr = Tcl_NewStringObj(
-			        Tcl_GetString(idmPtr->usingPtr), -1);
+			        Tcl_GetString(idmPtr->usingPtr), TCL_INDEX_NONE);
                     } else {
-                        objPtr = Tcl_NewStringObj("", -1);
+                        objPtr = Tcl_NewStringObj("", TCL_INDEX_NONE);
                     }
                     break;
 
                 case BOptComponentIdx:
                     if (idmPtr->icPtr != NULL) {
                         objPtr = Tcl_NewStringObj(
-			        Tcl_GetString(idmPtr->icPtr->namePtr), -1);
+			        Tcl_GetString(idmPtr->icPtr->namePtr), TCL_INDEX_NONE);
                     } else {
-                        objPtr = Tcl_NewStringObj("", -1);
+                        objPtr = Tcl_NewStringObj("", TCL_INDEX_NONE);
                     }
                     break;
 
                 case BOptNameIdx:
                     objPtr = Tcl_NewStringObj(
-		            Tcl_GetString(idmPtr->namePtr), -1);
+		            Tcl_GetString(idmPtr->namePtr), TCL_INDEX_NONE);
                     break;
 
             }
@@ -5238,7 +5238,7 @@ Itcl_BiInfoDelegatedTypeMethodCmd(
     if (Itcl_GetContext(interp, &contextIclsPtr, &contextIoPtr) != TCL_OK) {
 	Tcl_SetObjResult(interp, Tcl_NewStringObj(
             "\nget info like this instead: "
-            "\n  namespace eval className { info delegated type method ... }", -1));
+            "\n  namespace eval className { info delegated type method ... }", TCL_INDEX_NONE));
         return TCL_ERROR;
     }
     if (contextIoPtr != NULL) {
@@ -5263,7 +5263,7 @@ Itcl_BiInfoDelegatedTypeMethodCmd(
      *  Return info for a specific option.
      */
     if (cmdName) {
-	cmdNamePtr = Tcl_NewStringObj(cmdName, -1);
+	cmdNamePtr = Tcl_NewStringObj(cmdName, TCL_INDEX_NONE);
 	if (contextIoPtr != NULL) {
             hPtr = Tcl_FindHashEntry(&contextIoPtr->objectDelegatedFunctions,
 	            (char *)cmdNamePtr);
@@ -5320,9 +5320,9 @@ Itcl_BiInfoDelegatedTypeMethodCmd(
                 case BOptAsIdx:
                     if (idmPtr->asPtr) {
                         objPtr = Tcl_NewStringObj(
-			        Tcl_GetString(idmPtr->asPtr), -1);
+			        Tcl_GetString(idmPtr->asPtr), TCL_INDEX_NONE);
                     } else {
-                        objPtr = Tcl_NewStringObj("", -1);
+                        objPtr = Tcl_NewStringObj("", TCL_INDEX_NONE);
                     }
                     break;
 
@@ -5338,24 +5338,24 @@ Itcl_BiInfoDelegatedTypeMethodCmd(
                 case BOptUsingIdx:
                     if (idmPtr->usingPtr) {
                         objPtr = Tcl_NewStringObj(
-			        Tcl_GetString(idmPtr->usingPtr), -1);
+			        Tcl_GetString(idmPtr->usingPtr), TCL_INDEX_NONE);
                     } else {
-                        objPtr = Tcl_NewStringObj("", -1);
+                        objPtr = Tcl_NewStringObj("", TCL_INDEX_NONE);
                     }
                     break;
 
                 case BOptComponentIdx:
                     if (idmPtr->icPtr != NULL) {
                         objPtr = Tcl_NewStringObj(
-			        Tcl_GetString(idmPtr->icPtr->namePtr), -1);
+			        Tcl_GetString(idmPtr->icPtr->namePtr), TCL_INDEX_NONE);
                     } else {
-                        objPtr = Tcl_NewStringObj("", -1);
+                        objPtr = Tcl_NewStringObj("", TCL_INDEX_NONE);
                     }
                     break;
 
                 case BOptNameIdx:
                     objPtr = Tcl_NewStringObj(
-		            Tcl_GetString(idmPtr->namePtr), -1);
+		            Tcl_GetString(idmPtr->namePtr), TCL_INDEX_NONE);
                     break;
 
             }

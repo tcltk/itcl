@@ -49,14 +49,14 @@ _Itcl_WidgetCmd(
     }
 
     /* we handle create by owerselfs !! allow classunknown to handle that */
-    objPtr = Tcl_NewStringObj("oo::objdefine ", -1);
-    Tcl_AppendToObj(objPtr, iclsPtr->nsPtr->fullName, -1);
-    Tcl_AppendToObj(objPtr, " unexport create", -1);
+    objPtr = Tcl_NewStringObj("oo::objdefine ", TCL_INDEX_NONE);
+    Tcl_AppendToObj(objPtr, iclsPtr->nsPtr->fullName, TCL_INDEX_NONE);
+    Tcl_AppendToObj(objPtr, " unexport create", TCL_INDEX_NONE);
     Tcl_IncrRefCount(objPtr);
     result = Tcl_EvalObjEx(interp, objPtr, 0);
     Tcl_DecrRefCount(objPtr);
     objPtr = Tcl_GetObjResult(interp);
-    Tcl_AppendToObj(objPtr, iclsPtr->nsPtr->fullName, -1);
+    Tcl_AppendToObj(objPtr, iclsPtr->nsPtr->fullName, TCL_INDEX_NONE);
     Tcl_SetObjResult(interp, objPtr);
     return result;
 }
@@ -92,7 +92,7 @@ _Itcl_WidgetAdaptorCmd(
         return result;
     }
     /* create the itcl_hull variable */
-    namePtr = Tcl_NewStringObj("itcl_hull", -1);
+    namePtr = Tcl_NewStringObj("itcl_hull", TCL_INDEX_NONE);
     if (ItclCreateComponent(interp, iclsPtr, namePtr, ITCL_COMMON, &icPtr) !=
             TCL_OK) {
         return TCL_ERROR;
@@ -101,14 +101,14 @@ _Itcl_WidgetAdaptorCmd(
     Itcl_BuildVirtualTables(iclsPtr);
 
     /* we handle create by owerselfs !! allow classunknown to handle that */
-    objPtr = Tcl_NewStringObj("oo::objdefine ", -1);
-    Tcl_AppendToObj(objPtr, iclsPtr->nsPtr->fullName, -1);
-    Tcl_AppendToObj(objPtr, " unexport create", -1);
+    objPtr = Tcl_NewStringObj("oo::objdefine ", TCL_INDEX_NONE);
+    Tcl_AppendToObj(objPtr, iclsPtr->nsPtr->fullName, TCL_INDEX_NONE);
+    Tcl_AppendToObj(objPtr, " unexport create", TCL_INDEX_NONE);
     Tcl_IncrRefCount(objPtr);
     result = Tcl_EvalObjEx(interp, objPtr, 0);
     Tcl_DecrRefCount(objPtr);
     objPtr = Tcl_GetObjResult(interp);
-    Tcl_AppendToObj(objPtr, iclsPtr->nsPtr->fullName, -1);
+    Tcl_AppendToObj(objPtr, iclsPtr->nsPtr->fullName, TCL_INDEX_NONE);
     Tcl_SetObjResult(interp, objPtr);
     return result;
 }

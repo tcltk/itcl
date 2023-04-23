@@ -121,7 +121,7 @@ NRBodyCmd(
      */
 
     imPtr = NULL;
-    objPtr = Tcl_NewStringObj(tail, -1);
+    objPtr = Tcl_NewStringObj(tail, TCL_INDEX_NONE);
     entry = Tcl_FindHashEntry(&iclsPtr->resolveCmds, (char *)objPtr);
     Tcl_DecrRefCount(objPtr);
     if (entry) {
@@ -488,15 +488,15 @@ ItclCreateMemberFunc(
     imPtr->iclsPtr    = iclsPtr;
     imPtr->infoPtr    = iclsPtr->infoPtr;
     imPtr->protection = Itcl_Protection(interp, 0);
-    imPtr->namePtr    = Tcl_NewStringObj(Tcl_GetString(namePtr), -1);
+    imPtr->namePtr    = Tcl_NewStringObj(Tcl_GetString(namePtr), TCL_INDEX_NONE);
     Tcl_IncrRefCount(imPtr->namePtr);
     imPtr->fullNamePtr = Tcl_NewStringObj(
-            Tcl_GetString(iclsPtr->fullNamePtr), -1);
+            Tcl_GetString(iclsPtr->fullNamePtr), TCL_INDEX_NONE);
     Tcl_AppendToObj(imPtr->fullNamePtr, "::", 2);
-    Tcl_AppendToObj(imPtr->fullNamePtr, Tcl_GetString(namePtr), -1);
+    Tcl_AppendToObj(imPtr->fullNamePtr, Tcl_GetString(namePtr), TCL_INDEX_NONE);
     Tcl_IncrRefCount(imPtr->fullNamePtr);
     if (arglist != NULL) {
-        imPtr->origArgsPtr = Tcl_NewStringObj(arglist, -1);
+        imPtr->origArgsPtr = Tcl_NewStringObj(arglist, TCL_INDEX_NONE);
         Tcl_IncrRefCount(imPtr->origArgsPtr);
     }
     imPtr->codePtr    = mcode;
@@ -527,7 +527,7 @@ ItclCreateMemberFunc(
 	}
 	if (strcmp(name, "configure") == 0) {
 	    imPtr->argcount = 0;
-	    imPtr->maxargcount = -1;
+	    imPtr->maxargcount = TCL_INDEX_NONE;
 	}
 	if (strcmp(name, "isa") == 0) {
 	}
@@ -626,11 +626,11 @@ ItclCreateMemberFunc(
 	 * Inherited from itcl::Root
 	 */
 
-	Tcl_Obj *newBody = Tcl_NewStringObj("", -1);
+	Tcl_Obj *newBody = Tcl_NewStringObj("", TCL_INDEX_NONE);
 	Tcl_AppendToObj(newBody,
-		"[::info object namespace ${this}]::my ItclConstructBase ", -1);
+		"[::info object namespace ${this}]::my ItclConstructBase ", TCL_INDEX_NONE);
 	Tcl_AppendObjToObj(newBody, iclsPtr->fullNamePtr);
-	Tcl_AppendToObj(newBody, "\n", -1);
+	Tcl_AppendToObj(newBody, "\n", TCL_INDEX_NONE);
 
 	Tcl_AppendObjToObj(newBody, mcode->bodyPtr);
 	Tcl_DecrRefCount(mcode->bodyPtr);
@@ -745,11 +745,11 @@ Itcl_ChangeMemberFunc(
 	 * Inherited from itcl::Root
 	 */
 
-	Tcl_Obj *newBody = Tcl_NewStringObj("", -1);
+	Tcl_Obj *newBody = Tcl_NewStringObj("", TCL_INDEX_NONE);
 	Tcl_AppendToObj(newBody,
-		"[::info object namespace ${this}]::my ItclConstructBase ", -1);
+		"[::info object namespace ${this}]::my ItclConstructBase ", TCL_INDEX_NONE);
 	Tcl_AppendObjToObj(newBody, imPtr->iclsPtr->fullNamePtr);
-	Tcl_AppendToObj(newBody, "\n", -1);
+	Tcl_AppendToObj(newBody, "\n", TCL_INDEX_NONE);
 
 	Tcl_AppendObjToObj(newBody, mcode->bodyPtr);
 	Tcl_DecrRefCount(mcode->bodyPtr);
@@ -842,7 +842,7 @@ ItclCreateMemberCode(
         mcode->argListPtr = argListPtr;
         mcode->usagePtr = usagePtr;
 	Tcl_IncrRefCount(mcode->usagePtr);
-	mcode->argumentPtr = Tcl_NewStringObj((const char *)arglist, -1);
+	mcode->argumentPtr = Tcl_NewStringObj((const char *)arglist, TCL_INDEX_NONE);
 	Tcl_IncrRefCount(mcode->argumentPtr);
 	if (iclsPtr->flags & (ITCL_TYPE|ITCL_WIDGETADAPTOR)) {
 	    haveError = 0;
@@ -893,9 +893,9 @@ ItclCreateMemberCode(
     }
 
     if (body) {
-        mcode->bodyPtr = Tcl_NewStringObj((const char *)body, -1);
+        mcode->bodyPtr = Tcl_NewStringObj((const char *)body, TCL_INDEX_NONE);
     } else {
-        mcode->bodyPtr = Tcl_NewStringObj((const char *)"", -1);
+        mcode->bodyPtr = Tcl_NewStringObj((const char *)"", TCL_INDEX_NONE);
         mcode->flags |= ITCL_IMPLEMENT_NONE;
     }
     Tcl_IncrRefCount(mcode->bodyPtr);
@@ -1145,9 +1145,9 @@ Itcl_GetMemberCode(
         Tcl_DString buf;
 
         Tcl_DStringInit(&buf);
-        Tcl_DStringAppend(&buf, "::auto_load ", -1);
-        Tcl_DStringAppend(&buf, Tcl_GetString(imPtr->fullNamePtr), -1);
-        result = Tcl_EvalEx(interp, Tcl_DStringValue(&buf), -1, 0);
+        Tcl_DStringAppend(&buf, "::auto_load ", TCL_INDEX_NONE);
+        Tcl_DStringAppend(&buf, Tcl_GetString(imPtr->fullNamePtr), TCL_INDEX_NONE);
+        result = Tcl_EvalEx(interp, Tcl_DStringValue(&buf), TCL_INDEX_NONE, 0);
         Tcl_DStringFree(&buf);
         if (result != TCL_OK) {
             Tcl_AppendObjToErrorInfo(interp, Tcl_ObjPrintf(
@@ -1558,7 +1558,7 @@ Itcl_GetMemberFuncUsage(
 
             iclsPtr = (ItclClass*)contextIoPtr->iclsPtr;
             mf = NULL;
-	    objPtr = Tcl_NewStringObj("constructor", -1);
+	    objPtr = Tcl_NewStringObj("constructor", TCL_INDEX_NONE);
             entry = Tcl_FindHashEntry(&iclsPtr->resolveCmds, (char *)objPtr);
 	    Tcl_DecrRefCount(objPtr);
             if (entry) {
@@ -1570,12 +1570,12 @@ Itcl_GetMemberFuncUsage(
             if (mf == imPtr) {
                 Tcl_GetCommandFullName(contextIoPtr->iclsPtr->interp,
                     contextIoPtr->iclsPtr->accessCmd, objPtr);
-                Tcl_AppendToObj(objPtr, " ", -1);
+                Tcl_AppendToObj(objPtr, " ", TCL_INDEX_NONE);
                 name = (char *) Tcl_GetCommandName(
 		    contextIoPtr->iclsPtr->interp, contextIoPtr->accessCmd);
-                Tcl_AppendToObj(objPtr, name, -1);
+                Tcl_AppendToObj(objPtr, name, TCL_INDEX_NONE);
             } else {
-                Tcl_AppendToObj(objPtr, Tcl_GetString(imPtr->fullNamePtr), -1);
+                Tcl_AppendToObj(objPtr, Tcl_GetString(imPtr->fullNamePtr), TCL_INDEX_NONE);
             }
         } else {
 	    if (contextIoPtr && contextIoPtr->accessCmd) {
@@ -1589,7 +1589,7 @@ Itcl_GetMemberFuncUsage(
 	    }
         }
     } else {
-        Tcl_AppendToObj(objPtr, Tcl_GetString(imPtr->fullNamePtr), -1);
+        Tcl_AppendToObj(objPtr, Tcl_GetString(imPtr->fullNamePtr), TCL_INDEX_NONE);
     }
 
     /*
@@ -1610,8 +1610,8 @@ Itcl_GetMemberFuncUsage(
     }
     if (arglist) {
 	if (strlen(arglist) > 0) {
-            Tcl_AppendToObj(objPtr, " ", -1);
-            Tcl_AppendToObj(objPtr, arglist, -1);
+            Tcl_AppendToObj(objPtr, " ", TCL_INDEX_NONE);
+            Tcl_AppendToObj(objPtr, arglist, TCL_INDEX_NONE);
         }
     }
 }
@@ -1870,7 +1870,7 @@ Itcl_ConstructBase(
      *  first.
      */
 
-    objPtr = Tcl_NewStringObj("constructor", -1);
+    objPtr = Tcl_NewStringObj("constructor", TCL_INDEX_NONE);
     Tcl_IncrRefCount(objPtr);
     for (elem = Itcl_LastListElem(&contextClass->bases);
 	    result == TCL_OK && elem != NULL;
@@ -1961,7 +1961,7 @@ Itcl_InvokeMethodIfExists(
     ItclMemberFunc *imPtr;
     Tcl_Size cmdlinec;
     int result = TCL_OK;
-    Tcl_Obj *objPtr = Tcl_NewStringObj(name, -1);
+    Tcl_Obj *objPtr = Tcl_NewStringObj(name, TCL_INDEX_NONE);
 
     ItclShowArgs(1, "Itcl_InvokeMethodIfExists", objc, objv);
     hPtr = Tcl_FindHashEntry(&contextClassPtr->functions, (char *)objPtr);
@@ -2000,7 +2000,7 @@ Itcl_InvokeMethodIfExists(
                     if (contextClassPtr->numOptions == 0) {
 			/* check if all options are delegeted */
 			Tcl_Obj *objPtr;
-			objPtr = Tcl_NewStringObj("*", -1);
+			objPtr = Tcl_NewStringObj("*", TCL_INDEX_NONE);
 			hPtr = Tcl_FindHashEntry(
 			        &contextClassPtr->delegatedOptions,
 				(char *)objPtr);
@@ -2021,9 +2021,9 @@ Itcl_InvokeMethodIfExists(
 				NULL);
                     }
 	            newObjv = (Tcl_Obj **)ckalloc(sizeof(Tcl_Obj *)*(objc + 2));
-		    newObjv[0] = Tcl_NewStringObj("my", -1);
+		    newObjv[0] = Tcl_NewStringObj("my", TCL_INDEX_NONE);
 		    Tcl_IncrRefCount(newObjv[0]);
-		    newObjv[1] = Tcl_NewStringObj("configure", -1);
+		    newObjv[1] = Tcl_NewStringObj("configure", TCL_INDEX_NONE);
 		    Tcl_IncrRefCount(newObjv[1]);
 		    memcpy(newObjv + 2, objv, (objc * sizeof(Tcl_Obj *)));
 		    ItclShowArgs(1, "DEFAULT Constructor", objc + 2, newObjv);
@@ -2102,7 +2102,7 @@ Itcl_CmdAliasProc(
 	return NULL;
     }
     iclsPtr = (ItclClass *)Tcl_GetHashValue(hPtr);
-    objPtr = Tcl_NewStringObj(cmdName, -1);
+    objPtr = Tcl_NewStringObj(cmdName, TCL_INDEX_NONE);
     hPtr = Tcl_FindHashEntry(&iclsPtr->resolveCmds, (char *)objPtr);
     Tcl_DecrRefCount(objPtr);
     if (hPtr == NULL) {
@@ -2625,49 +2625,49 @@ ItclProcErrorProc(
     {
 	imPtr = callContextPtr->imPtr;
         contextIoPtr = callContextPtr->ioPtr;
-        objPtr = Tcl_NewStringObj("\n    ", -1);
+        objPtr = Tcl_NewStringObj("\n    ", TCL_INDEX_NONE);
 
         if (imPtr->flags & ITCL_CONSTRUCTOR) {
 	    currIclsPtr = imPtr->iclsPtr;
-            Tcl_AppendToObj(objPtr, "while constructing object \"", -1);
+            Tcl_AppendToObj(objPtr, "while constructing object \"", TCL_INDEX_NONE);
             Tcl_GetCommandFullName(interp, contextIoPtr->accessCmd, objPtr);
-            Tcl_AppendToObj(objPtr, "\" in ", -1);
-            Tcl_AppendToObj(objPtr, currIclsPtr->nsPtr->fullName, -1);
-            Tcl_AppendToObj(objPtr, "::constructor", -1);
+            Tcl_AppendToObj(objPtr, "\" in ", TCL_INDEX_NONE);
+            Tcl_AppendToObj(objPtr, currIclsPtr->nsPtr->fullName, TCL_INDEX_NONE);
+            Tcl_AppendToObj(objPtr, "::constructor", TCL_INDEX_NONE);
             if ((imPtr->codePtr->flags & ITCL_IMPLEMENT_TCL) != 0) {
-                Tcl_AppendToObj(objPtr, " (", -1);
+                Tcl_AppendToObj(objPtr, " (", TCL_INDEX_NONE);
             }
         }
 	if (imPtr->flags & ITCL_DESTRUCTOR) {
 	    contextIoPtr->flags = 0;
-	    Tcl_AppendToObj(objPtr, "while deleting object \"", -1);
+	    Tcl_AppendToObj(objPtr, "while deleting object \"", TCL_INDEX_NONE);
             Tcl_GetCommandFullName(interp, contextIoPtr->accessCmd, objPtr);
-            Tcl_AppendToObj(objPtr, "\" in ", -1);
-            Tcl_AppendToObj(objPtr, Tcl_GetString(imPtr->fullNamePtr), -1);
+            Tcl_AppendToObj(objPtr, "\" in ", TCL_INDEX_NONE);
+            Tcl_AppendToObj(objPtr, Tcl_GetString(imPtr->fullNamePtr), TCL_INDEX_NONE);
             if ((imPtr->codePtr->flags & ITCL_IMPLEMENT_TCL) != 0) {
-                Tcl_AppendToObj(objPtr, " (", -1);
+                Tcl_AppendToObj(objPtr, " (", TCL_INDEX_NONE);
             }
         }
 	if (!(imPtr->flags & (ITCL_CONSTRUCTOR|ITCL_DESTRUCTOR))) {
-            Tcl_AppendToObj(objPtr, "(", -1);
+            Tcl_AppendToObj(objPtr, "(", TCL_INDEX_NONE);
 
 	    hPtr = Tcl_FindHashEntry(&infoPtr->objects, (char *)contextIoPtr);
 	    if (hPtr != NULL) {
               if ((contextIoPtr != NULL) && (contextIoPtr->accessCmd)) {
-                Tcl_AppendToObj(objPtr, "object \"", -1);
+                Tcl_AppendToObj(objPtr, "object \"", TCL_INDEX_NONE);
                 Tcl_GetCommandFullName(interp, contextIoPtr->accessCmd, objPtr);
-                Tcl_AppendToObj(objPtr, "\" ", -1);
+                Tcl_AppendToObj(objPtr, "\" ", TCL_INDEX_NONE);
               }
             }
 
             if ((imPtr->flags & ITCL_COMMON) != 0) {
-                Tcl_AppendToObj(objPtr, "procedure", -1);
+                Tcl_AppendToObj(objPtr, "procedure", TCL_INDEX_NONE);
             } else {
-                Tcl_AppendToObj(objPtr, "method", -1);
+                Tcl_AppendToObj(objPtr, "method", TCL_INDEX_NONE);
             }
-            Tcl_AppendToObj(objPtr, " \"", -1);
-            Tcl_AppendToObj(objPtr, Tcl_GetString(imPtr->fullNamePtr), -1);
-            Tcl_AppendToObj(objPtr, "\" ", -1);
+            Tcl_AppendToObj(objPtr, " \"", TCL_INDEX_NONE);
+            Tcl_AppendToObj(objPtr, Tcl_GetString(imPtr->fullNamePtr), TCL_INDEX_NONE);
+            Tcl_AppendToObj(objPtr, "\" ", TCL_INDEX_NONE);
         }
 
         if ((imPtr->codePtr->flags & ITCL_IMPLEMENT_TCL) != 0) {
@@ -2676,7 +2676,7 @@ ItclProcErrorProc(
 	    Tcl_Obj *valuePtr;
 	    int lineNo;
 
-	    keyPtr = Tcl_NewStringObj("-errorline", -1);
+	    keyPtr = Tcl_NewStringObj("-errorline", TCL_INDEX_NONE);
             dictPtr = Tcl_GetReturnOptions(interp, TCL_ERROR);
 	    if (Tcl_DictObjGet(interp, dictPtr, keyPtr, &valuePtr) != TCL_OK) {
 	        /* how should we handle an error ? */
@@ -2701,12 +2701,12 @@ ItclProcErrorProc(
 	    }
 	    Tcl_DecrRefCount(dictPtr);
 	    Tcl_DecrRefCount(keyPtr);
-            Tcl_AppendToObj(objPtr, "body line ", -1);
+            Tcl_AppendToObj(objPtr, "body line ", TCL_INDEX_NONE);
             sprintf(num, "%d", lineNo);
-            Tcl_AppendToObj(objPtr, num, -1);
-            Tcl_AppendToObj(objPtr, ")", -1);
+            Tcl_AppendToObj(objPtr, num, TCL_INDEX_NONE);
+            Tcl_AppendToObj(objPtr, ")", TCL_INDEX_NONE);
         } else {
-            Tcl_AppendToObj(objPtr, ")", -1);
+            Tcl_AppendToObj(objPtr, ")", TCL_INDEX_NONE);
         }
 
         Tcl_AppendObjToErrorInfo(interp, objPtr);

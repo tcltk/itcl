@@ -182,13 +182,14 @@ EnsembleErrorProc(
     Tcl_Interp *interp,
     Tcl_Obj *procNameObj)
 {
-    int overflow, limit = 60, nameLen;
+    int overflow, limit = 60;
+    Tcl_Size nameLen;
     const char *procName = Tcl_GetStringFromObj(procNameObj, &nameLen);
 
-    overflow = (nameLen > limit);
+    overflow = (nameLen > (Tcl_Size)limit);
     Tcl_AppendObjToErrorInfo(interp, Tcl_ObjPrintf(
             "\n    (itcl ensemble part \"%.*s%s\" line %d)",
-            (overflow ? limit : nameLen), procName,
+            (overflow ? limit : (int)nameLen), procName,
             (overflow ? "..." : ""), Tcl_GetErrorLine(interp)));
 }
 

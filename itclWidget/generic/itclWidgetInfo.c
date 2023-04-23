@@ -99,7 +99,7 @@ ItclBiInfoHullTypesCmd(
     cPtrPtr = hullTypes;
     while (*cPtrPtr != NULL) {
 	name = *cPtrPtr;
-        objPtr = Tcl_NewStringObj(name, -1);
+        objPtr = Tcl_NewStringObj(name, TCL_INDEX_NONE);
         if ((pattern == NULL) ||
                  Tcl_StringCaseMatch(name, pattern, 0)) {
             Tcl_ListObjAppendElement(interp, listPtr, objPtr);

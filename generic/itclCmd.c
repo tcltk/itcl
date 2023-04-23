@@ -127,11 +127,11 @@ ItclShowArgs(1, "EVAL2", objc - 1, newObjv);
 		} else {
                     newObjv = (Tcl_Obj **)ckalloc(sizeof(Tcl_Obj *) *
 		            (objc + 1));
-		    newObjv[0] = Tcl_NewStringObj("this", -1);
+		    newObjv[0] = Tcl_NewStringObj("this", TCL_INDEX_NONE);
 		    Tcl_IncrRefCount(newObjv[0]);
 		    val = Tcl_GetVar2(interp,
 		            Tcl_GetString(idmPtr->icPtr->namePtr), NULL, 0);
-		    newObjv[1] = Tcl_NewStringObj(val, -1);
+		    newObjv[1] = Tcl_NewStringObj(val, TCL_INDEX_NONE);
 		    Tcl_IncrRefCount(newObjv[1]);
                     memcpy(newObjv+2, objv+1, sizeof(Tcl_Obj *) * (objc -1));
 ItclShowArgs(1, "EVAL2", objc+1, newObjv);
@@ -247,7 +247,7 @@ Itcl_FindClassesCmd(
                     cmdName = Tcl_GetString(objPtr);
                 } else {
                     cmdName = Tcl_GetCommandName(interp, cmd);
-                    objPtr = Tcl_NewStringObj((const char *)cmdName, -1);
+                    objPtr = Tcl_NewStringObj((const char *)cmdName, TCL_INDEX_NONE);
                 }
 
                 if (originalCmd) {
@@ -433,7 +433,7 @@ Itcl_FindObjectsCmd(
 		    cmdName = Tcl_GetString(objPtr);
                 } else {
                     cmdName = Tcl_GetCommandName(interp, cmd);
-                    objPtr = Tcl_NewStringObj((const char *)cmdName, -1);
+                    objPtr = Tcl_NewStringObj((const char *)cmdName, TCL_INDEX_NONE);
                 }
 
                 Tcl_CreateHashEntry(&unique, (char*)cmd, &newEntry);
@@ -761,13 +761,13 @@ Itcl_ScopeCmd(
         if (vlookup->ivPtr->flags & ITCL_COMMON) {
             Tcl_Obj *resultPtr = Tcl_GetObjResult(interp);
 	    if (vlookup->ivPtr->protection != ITCL_PUBLIC) {
-	        Tcl_AppendToObj(resultPtr, ITCL_VARIABLES_NAMESPACE, -1);
+	        Tcl_AppendToObj(resultPtr, ITCL_VARIABLES_NAMESPACE, TCL_INDEX_NONE);
 	    }
 	    Tcl_AppendToObj(resultPtr,
-		    Tcl_GetString(vlookup->ivPtr->fullNamePtr), -1);
+		    Tcl_GetString(vlookup->ivPtr->fullNamePtr), TCL_INDEX_NONE);
             if (openParen) {
                 *openParen = '(';
-                Tcl_AppendToObj(resultPtr, openParen, -1);
+                Tcl_AppendToObj(resultPtr, openParen, TCL_INDEX_NONE);
                 openParen = NULL;
             }
             result = TCL_OK;
@@ -811,22 +811,22 @@ Itcl_ScopeCmd(
 
         objPtr2 = Tcl_NewStringObj(NULL, 0);
         Tcl_IncrRefCount(objPtr2);
-	Tcl_AppendToObj(objPtr2, ITCL_VARIABLES_NAMESPACE, -1);
+	Tcl_AppendToObj(objPtr2, ITCL_VARIABLES_NAMESPACE, TCL_INDEX_NONE);
 	Tcl_AppendToObj(objPtr2,
-		(Tcl_GetObjectNamespace(contextIoPtr->oPtr))->fullName, -1);
+		(Tcl_GetObjectNamespace(contextIoPtr->oPtr))->fullName, TCL_INDEX_NONE);
 
         if (doAppend) {
             Tcl_AppendToObj(objPtr2,
-	            Tcl_GetString(vlookup->ivPtr->fullNamePtr), -1);
+	            Tcl_GetString(vlookup->ivPtr->fullNamePtr), TCL_INDEX_NONE);
         } else {
-            Tcl_AppendToObj(objPtr2, "::", -1);
+            Tcl_AppendToObj(objPtr2, "::", TCL_INDEX_NONE);
             Tcl_AppendToObj(objPtr2,
-	            Tcl_GetString(vlookup->ivPtr->namePtr), -1);
+	            Tcl_GetString(vlookup->ivPtr->namePtr), TCL_INDEX_NONE);
 	}
 
         if (openParen) {
             *openParen = '(';
-            Tcl_AppendToObj(objPtr2, openParen, -1);
+            Tcl_AppendToObj(objPtr2, openParen, TCL_INDEX_NONE);
             openParen = NULL;
         }
         /* fix for SF bug #238 use Tcl_AppendResult instead of Tcl_AppendElement */
@@ -860,7 +860,7 @@ Itcl_ScopeCmd(
         Itcl_GetVariableFullName(interp, var, resultPtr);
         if (openParen) {
             *openParen = '(';
-            Tcl_AppendToObj(resultPtr, openParen, -1);
+            Tcl_AppendToObj(resultPtr, openParen, TCL_INDEX_NONE);
             openParen = NULL;
         }
     }
@@ -960,14 +960,14 @@ Itcl_CodeCmd(
     listPtr = Tcl_NewListObj(0, NULL);
 
     Tcl_ListObjAppendElement(interp, listPtr,
-        Tcl_NewStringObj("namespace", -1));
+        Tcl_NewStringObj("namespace", TCL_INDEX_NONE));
     Tcl_ListObjAppendElement(interp, listPtr,
-        Tcl_NewStringObj("inscope", -1));
+        Tcl_NewStringObj("inscope", TCL_INDEX_NONE));
 
     if (contextNs == Tcl_GetGlobalNamespace(interp)) {
-        objPtr = Tcl_NewStringObj("::", -1);
+        objPtr = Tcl_NewStringObj("::", TCL_INDEX_NONE);
     } else {
-        objPtr = Tcl_NewStringObj(contextNs->fullName, -1);
+        objPtr = Tcl_NewStringObj(contextNs->fullName, TCL_INDEX_NONE);
     }
     Tcl_ListObjAppendElement(interp, listPtr, objPtr);
 
@@ -1192,10 +1192,10 @@ Itcl_FilterAddCmd(
         return TCL_ERROR;
     }
     newObjv = (Tcl_Obj **)ckalloc(sizeof(Tcl_Obj *)*(objc+1));
-    newObjv[0] = Tcl_NewStringObj("::oo::define", -1);
+    newObjv[0] = Tcl_NewStringObj("::oo::define", TCL_INDEX_NONE);
     Tcl_IncrRefCount(newObjv[0]);
     newObjv[1] = objv[1];
-    newObjv[2] = Tcl_NewStringObj("filter", -1);
+    newObjv[2] = Tcl_NewStringObj("filter", TCL_INDEX_NONE);
     Tcl_IncrRefCount(newObjv[2]);
     memcpy(newObjv+3, objv+2, sizeof(Tcl_Obj *)*(objc-2));
     ItclShowArgs(1, "Itcl_FilterAddCmd2", objc+1, newObjv);
@@ -1329,10 +1329,10 @@ Itcl_MixinAddCmd(
         return TCL_ERROR;
     }
     newObjv = (Tcl_Obj **)ckalloc(sizeof(Tcl_Obj *)*(objc+1));
-    newObjv[0] = Tcl_NewStringObj("::oo::define", -1);
+    newObjv[0] = Tcl_NewStringObj("::oo::define", TCL_INDEX_NONE);
     Tcl_IncrRefCount(newObjv[0]);
     newObjv[1] = objv[1];
-    newObjv[2] = Tcl_NewStringObj("mixin", -1);
+    newObjv[2] = Tcl_NewStringObj("mixin", TCL_INDEX_NONE);
     Tcl_IncrRefCount(newObjv[2]);
     memcpy(newObjv+3, objv+2, sizeof(Tcl_Obj *)*(objc-2));
     ItclShowArgs(1, "Itcl_MixinAddCmd2", objc+1, newObjv);
@@ -1551,9 +1551,9 @@ Itcl_AddObjectOptionCmd(
     objPtr = Tcl_NewObj();
     Tcl_GetCommandFullName(interp, ioPtr->accessCmd, objPtr);
     ioptPtr->fullNamePtr = Tcl_NewStringObj(
-            Tcl_GetString(ioPtr->namePtr), -1);
+            Tcl_GetString(ioPtr->namePtr), TCL_INDEX_NONE);
     Tcl_AppendToObj(ioptPtr->fullNamePtr, "::", 2);
-    Tcl_AppendToObj(ioptPtr->fullNamePtr, Tcl_GetString(ioptPtr->namePtr), -1);
+    Tcl_AppendToObj(ioptPtr->fullNamePtr, Tcl_GetString(ioptPtr->namePtr), TCL_INDEX_NONE);
     Tcl_IncrRefCount(ioptPtr->fullNamePtr);
     hPtr = Tcl_CreateHashEntry(&ioPtr->objectOptions,
             (char *)ioptPtr->namePtr, &isNew);
@@ -1694,7 +1694,7 @@ Itcl_AddDelegatedFunctionCmd(
     Itcl_DeleteHierIter(&hier);
     val = Itcl_GetInstanceVar(interp,
             Tcl_GetString(componentNamePtr), ioPtr, iclsPtr);
-    componentNamePtr = Tcl_NewStringObj(val, -1);
+    componentNamePtr = Tcl_NewStringObj(val, TCL_INDEX_NONE);
     Tcl_IncrRefCount(componentNamePtr);
     DelegateFunction(interp, ioPtr, ioPtr->iclsPtr, componentNamePtr, idmPtr);
     hPtr = Tcl_CreateHashEntry(&ioPtr->objectDelegatedFunctions,
@@ -1771,10 +1771,10 @@ Itcl_AddComponentCmd(
     contextIclsPtr->numVariables++;
     Tcl_SetHashValue(hPtr, icPtr);
     Tcl_DStringInit(&buffer);
-    Tcl_DStringAppend(&buffer, ITCL_VARIABLES_NAMESPACE, -1);
+    Tcl_DStringAppend(&buffer, ITCL_VARIABLES_NAMESPACE, TCL_INDEX_NONE);
     Tcl_DStringAppend(&buffer,
-	    (Tcl_GetObjectNamespace(contextIoPtr->oPtr))->fullName, -1);
-    Tcl_DStringAppend(&buffer, contextIclsPtr->nsPtr->fullName, -1);
+	    (Tcl_GetObjectNamespace(contextIoPtr->oPtr))->fullName, TCL_INDEX_NONE);
+    Tcl_DStringAppend(&buffer, contextIclsPtr->nsPtr->fullName, TCL_INDEX_NONE);
     varNsPtr = Tcl_FindNamespace(interp, Tcl_DStringValue(&buffer),
         NULL, 0);
     hPtr = Tcl_FindHashEntry(&contextIclsPtr->variables, (char *)objv[2]);
@@ -1808,7 +1808,7 @@ Itcl_AddComponentCmd(
      *     ...
      */
     Tcl_DStringSetLength(&buffer, 0);
-    Tcl_DStringAppend(&buffer, Tcl_GetString(ivPtr->namePtr), -1);
+    Tcl_DStringAppend(&buffer, Tcl_GetString(ivPtr->namePtr), TCL_INDEX_NONE);
     nsPtr = contextIclsPtr->nsPtr;
 
     Tcl_DStringInit(&buffer2);
@@ -1830,11 +1830,11 @@ Itcl_AddComponentCmd(
             break;
         }
         Tcl_DStringSetLength(&buffer2, 0);
-        Tcl_DStringAppend(&buffer2, Tcl_DStringValue(&buffer), -1);
+        Tcl_DStringAppend(&buffer2, Tcl_DStringValue(&buffer), TCL_INDEX_NONE);
         Tcl_DStringSetLength(&buffer, 0);
-        Tcl_DStringAppend(&buffer, nsPtr->name, -1);
-        Tcl_DStringAppend(&buffer, "::", -1);
-        Tcl_DStringAppend(&buffer, Tcl_DStringValue(&buffer2), -1);
+        Tcl_DStringAppend(&buffer, nsPtr->name, TCL_INDEX_NONE);
+        Tcl_DStringAppend(&buffer, "::", TCL_INDEX_NONE);
+        Tcl_DStringAppend(&buffer, Tcl_DStringValue(&buffer2), TCL_INDEX_NONE);
 
         nsPtr = nsPtr->parentPtr;
     }
@@ -2019,13 +2019,13 @@ Itcl_TypeClassCmd(
         return result;
     }
     /* we handle create by ourself !! */
-    objPtr = Tcl_NewStringObj("oo::objdefine ", -1);
-    Tcl_AppendToObj(objPtr, iclsPtr->nsPtr->fullName, -1);
-    Tcl_AppendToObj(objPtr, " unexport create", -1);
+    objPtr = Tcl_NewStringObj("oo::objdefine ", TCL_INDEX_NONE);
+    Tcl_AppendToObj(objPtr, iclsPtr->nsPtr->fullName, TCL_INDEX_NONE);
+    Tcl_AppendToObj(objPtr, " unexport create", TCL_INDEX_NONE);
     Tcl_IncrRefCount(objPtr);
     result = Tcl_EvalObjEx(interp, objPtr, 0);
     Tcl_DecrRefCount(objPtr);
-    objPtr = Tcl_NewStringObj(iclsPtr->nsPtr->fullName, -1);
+    objPtr = Tcl_NewStringObj(iclsPtr->nsPtr->fullName, TCL_INDEX_NONE);
     Tcl_SetObjResult(interp, objPtr);
     return result;
 }
@@ -2107,7 +2107,7 @@ Itcl_ClassHullTypeCmd(
 		    "ttk::frame|ttk::toplevel|ttk::labelframe", NULL);
             return TCL_ERROR;
         }
-        iclsPtr->hullTypePtr = Tcl_NewStringObj(hullTypeName, -1);
+        iclsPtr->hullTypePtr = Tcl_NewStringObj(hullTypeName, TCL_INDEX_NONE);
 	Tcl_IncrRefCount(iclsPtr->hullTypePtr);
         return TCL_OK;
     }
@@ -2165,7 +2165,7 @@ Itcl_ClassWidgetClassCmd(
 	    Tcl_AppendResult(interp, "too many widgetclass statements", NULL);
 	    return TCL_ERROR;
 	}
-        iclsPtr->widgetClassPtr = Tcl_NewStringObj(widgetClassName, -1);
+        iclsPtr->widgetClassPtr = Tcl_NewStringObj(widgetClassName, TCL_INDEX_NONE);
 	Tcl_IncrRefCount(iclsPtr->widgetClassPtr);
         return TCL_OK;
     }

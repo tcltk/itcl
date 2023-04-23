@@ -61,6 +61,14 @@
 #   endif
 #endif
 
+#ifndef TCL_INDEX_NONE
+# define TCL_INDEX_NONE	(-1)
+#endif
+
+#if (TCL_MAJOR_VERSION == 8) && (TCL_MINOR_VERSION < 7) && !defined(Tcl_Size)
+#    define Tcl_Size int
+#endif
+
 #ifndef JOIN
 #  define JOIN(a,b) JOIN1(a,b)
 #  define JOIN1(a,b) a##b

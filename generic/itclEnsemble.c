@@ -152,8 +152,8 @@ Itcl_EnsembleInit(
         Itcl_EnsembleCmd, NULL, NULL);
 
     Tcl_DStringInit(&buffer);
-    Tcl_DStringAppend(&buffer, ITCL_COMMANDS_NAMESPACE, -1);
-    Tcl_DStringAppend(&buffer, "::ensembles", -1);
+    Tcl_DStringAppend(&buffer, ITCL_COMMANDS_NAMESPACE, TCL_INDEX_NONE);
+    Tcl_DStringAppend(&buffer, "::ensembles", TCL_INDEX_NONE);
     infoPtr->ensembleInfo->ensembleNsPtr = Tcl_CreateNamespace(interp,
             Tcl_DStringValue(&buffer), NULL, NULL);
     Tcl_DStringFree(&buffer);
@@ -632,14 +632,14 @@ GetEnsembleUsage(
 		/* the builtin info command is not reported in [incr tcl] */
 	        continue;
 	    }
-            Tcl_AppendToObj(objPtr, spaces, -1);
+            Tcl_AppendToObj(objPtr, spaces, TCL_INDEX_NONE);
             GetEnsemblePartUsage(interp, ensData, ensPart, objPtr);
             spaces = "\n  ";
         }
     }
     if (isOpenEnded) {
         Tcl_AppendToObj(objPtr,
-            "\n...and others described on the man page", -1);
+            "\n...and others described on the man page", TCL_INDEX_NONE);
     }
 }
 
@@ -704,7 +704,7 @@ GetEnsemblePartUsage(
      */
     if (ensPart->usage && *ensPart->usage != '\0') {
         Tcl_DStringAppend(&buffer, " ", 1);
-        Tcl_DStringAppend(&buffer, ensPart->usage, -1);
+        Tcl_DStringAppend(&buffer, ensPart->usage, TCL_INDEX_NONE);
     } else {
 
         /*
@@ -774,7 +774,7 @@ CreateEnsemble(
     infoPtr->ensembleInfo->numEnsembles++;
     ensData = (Ensemble*)ckalloc(sizeof(Ensemble));
     memset(ensData, 0, sizeof(Ensemble));
-    ensData->namePtr = Tcl_NewStringObj(ensName, -1);
+    ensData->namePtr = Tcl_NewStringObj(ensName, TCL_INDEX_NONE);
     Tcl_IncrRefCount(ensData->namePtr);
     ensData->interp = interp;
     ensData->numParts = 0;
@@ -785,9 +785,9 @@ CreateEnsemble(
     );
     memset(ensData->parts, 0, ensData->maxParts*sizeof(EnsemblePart*));
     Tcl_DStringInit(&buffer);
-    Tcl_DStringAppend(&buffer, ITCL_COMMANDS_NAMESPACE "::ensembles::", -1);
+    Tcl_DStringAppend(&buffer, ITCL_COMMANDS_NAMESPACE "::ensembles::", TCL_INDEX_NONE);
     sprintf(buf, "%" ITCL_Z_MODIFIER "u", ensData->ensembleId);
-    Tcl_DStringAppend(&buffer, buf, -1);
+    Tcl_DStringAppend(&buffer, buf, TCL_INDEX_NONE);
     ensData->nsPtr = Tcl_CreateNamespace(interp, Tcl_DStringValue(&buffer),
             ensData, DeleteEnsemble);
     if (ensData->nsPtr == NULL) {
@@ -813,8 +813,8 @@ CreateEnsemble(
 	    goto finish;
 	}
 	Tcl_SetHashValue(hPtr, ensData);
-	unkObjPtr = Tcl_NewStringObj(ITCL_COMMANDS_NAMESPACE, -1);
-	Tcl_AppendToObj(unkObjPtr, "::ensembles::unknown", -1);
+	unkObjPtr = Tcl_NewStringObj(ITCL_COMMANDS_NAMESPACE, TCL_INDEX_NONE);
+	Tcl_AppendToObj(unkObjPtr, "::ensembles::unknown", TCL_INDEX_NONE);
 	if (Tcl_SetEnsembleUnknownHandler(NULL, ensData->cmdPtr,
 		unkObjPtr) != TCL_OK) {
 	    Tcl_DecrRefCount(unkObjPtr);
@@ -822,7 +822,7 @@ CreateEnsemble(
 	    goto finish;
 	}
 
-	Tcl_SetObjResult(interp, Tcl_NewStringObj(Tcl_DStringValue(&buffer), -1));
+	Tcl_SetObjResult(interp, Tcl_NewStringObj(Tcl_DStringValue(&buffer), TCL_INDEX_NONE));
 	result = TCL_OK;
 	goto finish;
     }
@@ -838,13 +838,13 @@ CreateEnsemble(
         goto finish;
     }
     Tcl_DStringSetLength(&buffer, 0);
-    Tcl_DStringAppend(&buffer, infoPtr->ensembleInfo->ensembleNsPtr->fullName, -1);
-    Tcl_DStringAppend(&buffer, "::subensembles::", -1);
+    Tcl_DStringAppend(&buffer, infoPtr->ensembleInfo->ensembleNsPtr->fullName, TCL_INDEX_NONE);
+    Tcl_DStringAppend(&buffer, "::subensembles::", TCL_INDEX_NONE);
     sprintf(buf, "%" ITCL_Z_MODIFIER "u", parentEnsData->ensembleId);
-    Tcl_DStringAppend(&buffer, buf, -1);
+    Tcl_DStringAppend(&buffer, buf, TCL_INDEX_NONE);
     Tcl_DStringAppend(&buffer, "::", 2);
-    Tcl_DStringAppend(&buffer, ensName, -1);
-    objPtr = Tcl_NewStringObj(Tcl_DStringValue(&buffer), -1);
+    Tcl_DStringAppend(&buffer, ensName, TCL_INDEX_NONE);
+    objPtr = Tcl_NewStringObj(Tcl_DStringValue(&buffer), TCL_INDEX_NONE);
     hPtr = Tcl_CreateHashEntry(&infoPtr->ensembleInfo->subEnsembles,
             (char *)objPtr, &isNew);
     if (isNew) {
@@ -862,8 +862,8 @@ CreateEnsemble(
         goto finish;
     }
     Tcl_SetHashValue(hPtr, ensData);
-    unkObjPtr = Tcl_NewStringObj(ITCL_COMMANDS_NAMESPACE, -1);
-    Tcl_AppendToObj(unkObjPtr, "::ensembles::unknown", -1);
+    unkObjPtr = Tcl_NewStringObj(ITCL_COMMANDS_NAMESPACE, TCL_INDEX_NONE);
+    Tcl_AppendToObj(unkObjPtr, "::ensembles::unknown", TCL_INDEX_NONE);
     if (Tcl_SetEnsembleUnknownHandler(NULL, ensPart->cmdPtr,
             unkObjPtr) != TCL_OK) {
         result = TCL_ERROR;
@@ -874,7 +874,7 @@ CreateEnsemble(
     if (mapDict == NULL) {
         mapDict = Tcl_NewObj();
     }
-    toObjPtr = Tcl_NewStringObj(Tcl_DStringValue(&buffer), -1);
+    toObjPtr = Tcl_NewStringObj(Tcl_DStringValue(&buffer), TCL_INDEX_NONE);
     Tcl_DictObjPut(NULL, mapDict, ensData->namePtr, toObjPtr);
     Tcl_SetEnsembleMappingDict(NULL, parentEnsData->cmdPtr, mapDict);
     ensData->cmdPtr = ensPart->cmdPtr;
@@ -953,9 +953,9 @@ AddEnsemblePart(
         mapDict = Tcl_NewObj();
         ensPart->newMapDict = mapDict;
     }
-    ensPart->mapNamePtr = Tcl_NewStringObj(ensData->nsPtr->fullName, -1);
+    ensPart->mapNamePtr = Tcl_NewStringObj(ensData->nsPtr->fullName, TCL_INDEX_NONE);
     Tcl_AppendToObj(ensPart->mapNamePtr, "::", 2);
-    Tcl_AppendToObj(ensPart->mapNamePtr, partName, -1);
+    Tcl_AppendToObj(ensPart->mapNamePtr, partName, TCL_INDEX_NONE);
     Tcl_IncrRefCount(ensPart->namePtr);
     Tcl_IncrRefCount(ensPart->mapNamePtr);
     Tcl_DictObjPut(NULL, mapDict, ensPart->namePtr, ensPart->mapNamePtr);
@@ -1069,7 +1069,7 @@ FindEnsemble(
      */
     if (nameArgc < 1) {
         Tcl_AppendToObj(Tcl_GetObjResult(interp),
-            "invalid ensemble name \"\"", -1);
+            "invalid ensemble name \"\"", TCL_INDEX_NONE);
         return TCL_ERROR;
     }
 
@@ -1077,7 +1077,7 @@ FindEnsemble(
      *  Use the first name to find the command for the top-level
      *  ensemble.
      */
-    objPtr = Tcl_NewStringObj(nameArgv[0], -1);
+    objPtr = Tcl_NewStringObj(nameArgv[0], TCL_INDEX_NONE);
     cmdPtr = Tcl_FindEnsemble(interp, objPtr, 0);
     Tcl_DecrRefCount(objPtr);
 
@@ -1203,7 +1203,7 @@ CreateEnsemblePart(
     memset(ensPart, 0, sizeof(EnsemblePart));
     ensPart->name = (char*)ckalloc(strlen(partName)+1);
     strcpy(ensPart->name, partName);
-    ensPart->namePtr = Tcl_NewStringObj(ensPart->name, -1);
+    ensPart->namePtr = Tcl_NewStringObj(ensPart->name, TCL_INDEX_NONE);
     ensPart->ensemble = ensData;
     ensPart->interp = interp;
 
@@ -1774,7 +1774,7 @@ Itcl_EnsembleCmd(
             NULL, TCL_GLOBAL_ONLY);
 
         if (errInfo) {
-        	Tcl_AppendObjToErrorInfo(interp, Tcl_NewStringObj(errInfo, -1));
+        	Tcl_AppendObjToErrorInfo(interp, Tcl_NewStringObj(errInfo, TCL_INDEX_NONE));
         }
 
         if (objc == 3) {
@@ -2150,7 +2150,7 @@ EnsembleUnknownCmd(
     if (objc < 3) {
         /* produce usage message */
         Tcl_Obj *objPtr = Tcl_NewStringObj(
-                "wrong # args: should be one of...\n", -1);
+                "wrong # args: should be one of...\n", TCL_INDEX_NONE);
         GetEnsembleUsage(interp, ensData, objPtr);
         Tcl_SetObjResult(interp, objPtr);
         return TCL_ERROR;
@@ -2164,7 +2164,7 @@ EnsembleUnknownCmd(
 
 	listPtr = Tcl_NewListObj(0, NULL);
 	Tcl_ListObjAppendElement(NULL, listPtr, objv[1]);
-	Tcl_ListObjAppendElement(NULL, listPtr, Tcl_NewStringObj("@error", -1));
+	Tcl_ListObjAppendElement(NULL, listPtr, Tcl_NewStringObj("@error", TCL_INDEX_NONE));
 	Tcl_ListObjAppendElement(NULL, listPtr, objv[2]);
 	Tcl_SetObjResult(interp, listPtr);
         return TCL_OK;

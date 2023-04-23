@@ -324,12 +324,12 @@ Itcl_CreateClass(
     Tcl_IncrRefCount(nameObjPtr);
     if ((path[0] != ':') || (path[1] != ':')) {
         Tcl_Namespace *currNsPtr = Tcl_GetCurrentNamespace(interp);
-        Tcl_AppendToObj(nameObjPtr, currNsPtr->fullName, -1);
+        Tcl_AppendToObj(nameObjPtr, currNsPtr->fullName, TCL_INDEX_NONE);
         if (currNsPtr->parentPtr != NULL) {
             Tcl_AppendToObj(nameObjPtr, "::", 2);
         }
     }
-    Tcl_AppendToObj(nameObjPtr, path, -1);
+    Tcl_AppendToObj(nameObjPtr, path, TCL_INDEX_NONE);
     {
 	/*
 	 * TclOO machinery will refuse to overwrite an existing command
@@ -396,10 +396,10 @@ Itcl_CreateClass(
     iclsPtr->nsPtr = classNs;
 
 
-    iclsPtr->namePtr = Tcl_NewStringObj(classNs->name, -1);
+    iclsPtr->namePtr = Tcl_NewStringObj(classNs->name, TCL_INDEX_NONE);
     Tcl_IncrRefCount(iclsPtr->namePtr);
 
-    iclsPtr->fullNamePtr = Tcl_NewStringObj(classNs->fullName, -1);
+    iclsPtr->fullNamePtr = Tcl_NewStringObj(classNs->fullName, TCL_INDEX_NONE);
     Tcl_IncrRefCount(iclsPtr->fullNamePtr);
 
     hPtr = Tcl_CreateHashEntry(&infoPtr->nameClasses,
@@ -430,9 +430,9 @@ Itcl_CreateClass(
      * public variables go directly to the class namespace
      */
     Tcl_DStringInit(&buffer);
-    Tcl_DStringAppend(&buffer, ITCL_VARIABLES_NAMESPACE, -1);
+    Tcl_DStringAppend(&buffer, ITCL_VARIABLES_NAMESPACE, TCL_INDEX_NONE);
     Tcl_DStringAppend(&buffer,
-	    (Tcl_GetObjectNamespace(iclsPtr->oPtr))->fullName, -1);
+	    (Tcl_GetObjectNamespace(iclsPtr->oPtr))->fullName, TCL_INDEX_NONE);
     if ((NULL == Tcl_FindNamespace(interp, Tcl_DStringValue(&buffer), NULL,
 	    TCL_GLOBAL_ONLY)) && (NULL == Tcl_CreateNamespace(interp,
 	    Tcl_DStringValue(&buffer), NULL, 0))) {
@@ -447,8 +447,8 @@ Itcl_CreateClass(
      *  Add the built-in "this" command to the list of function members.
      */
     Tcl_DStringInit(&buffer);
-    Tcl_DStringAppend(&buffer, Tcl_GetString(iclsPtr->fullNamePtr), -1);
-    Tcl_DStringAppend(&buffer, "::this", -1);
+    Tcl_DStringAppend(&buffer, Tcl_GetString(iclsPtr->fullNamePtr), TCL_INDEX_NONE);
+    Tcl_DStringAppend(&buffer, "::this", TCL_INDEX_NONE);
     iclsPtr->thisCmd = Tcl_CreateObjCommand(interp, Tcl_DStringValue(&buffer),
             Itcl_ThisCmd, iclsPtr, NULL);
 
@@ -456,7 +456,7 @@ Itcl_CreateClass(
      *  Add the built-in "type" variable to the list of data members.
      */
     if (iclsPtr->flags & ITCL_TYPE) {
-        namePtr = Tcl_NewStringObj("type", -1);
+        namePtr = Tcl_NewStringObj("type", TCL_INDEX_NONE);
         (void) Itcl_CreateVariable(interp, iclsPtr, namePtr, NULL,
             NULL, &ivPtr);
         ivPtr->protection = ITCL_PROTECTED;  /* always "protected" */
@@ -464,32 +464,32 @@ Itcl_CreateClass(
     }
 
     if (iclsPtr->flags & (ITCL_ECLASS)) {
-        namePtr = Tcl_NewStringObj("win", -1);
+        namePtr = Tcl_NewStringObj("win", TCL_INDEX_NONE);
         (void) Itcl_CreateVariable(interp, iclsPtr, namePtr, NULL,
             NULL, &ivPtr);
         ivPtr->protection = ITCL_PROTECTED;  /* always "protected" */
         ivPtr->flags |= ITCL_WIN_VAR;        /* mark as "win" variable */
     }
     if (iclsPtr->flags & (ITCL_TYPE|ITCL_WIDGET|ITCL_WIDGETADAPTOR)) {
-        namePtr = Tcl_NewStringObj("self", -1);
+        namePtr = Tcl_NewStringObj("self", TCL_INDEX_NONE);
         (void) Itcl_CreateVariable(interp, iclsPtr, namePtr, NULL,
             NULL, &ivPtr);
         ivPtr->protection = ITCL_PROTECTED;  /* always "protected" */
         ivPtr->flags |= ITCL_SELF_VAR;       /* mark as "self" variable */
 
-        namePtr = Tcl_NewStringObj("selfns", -1);
+        namePtr = Tcl_NewStringObj("selfns", TCL_INDEX_NONE);
         (void) Itcl_CreateVariable(interp, iclsPtr, namePtr, NULL,
             NULL, &ivPtr);
         ivPtr->protection = ITCL_PROTECTED;  /* always "protected" */
         ivPtr->flags |= ITCL_SELFNS_VAR;     /* mark as "selfns" variable */
 
-        namePtr = Tcl_NewStringObj("win", -1);
+        namePtr = Tcl_NewStringObj("win", TCL_INDEX_NONE);
         (void) Itcl_CreateVariable(interp, iclsPtr, namePtr, NULL,
             NULL, &ivPtr);
         ivPtr->protection = ITCL_PROTECTED;  /* always "protected" */
         ivPtr->flags |= ITCL_WIN_VAR;        /* mark as "win" variable */
     }
-    namePtr = Tcl_NewStringObj("this", -1);
+    namePtr = Tcl_NewStringObj("this", TCL_INDEX_NONE);
     (void) Itcl_CreateVariable(interp, iclsPtr, namePtr, NULL,
             NULL, &ivPtr);
     ivPtr->protection = ITCL_PROTECTED;  /* always "protected" */
@@ -501,7 +501,7 @@ Itcl_CreateClass(
          *  Add the built-in "itcl_options" variable to the list of
 	 *  data members.
          */
-        namePtr = Tcl_NewStringObj("itcl_options", -1);
+        namePtr = Tcl_NewStringObj("itcl_options", TCL_INDEX_NONE);
         (void) Itcl_CreateVariable(interp, iclsPtr, namePtr, NULL,
                 NULL, &ivPtr);
         ivPtr->protection = ITCL_PROTECTED;  /* always "protected" */
@@ -514,7 +514,7 @@ Itcl_CreateClass(
          *  Add the built-in "itcl_option_components" variable to the list of
 	 *  data members.
          */
-        namePtr = Tcl_NewStringObj("itcl_option_components", -1);
+        namePtr = Tcl_NewStringObj("itcl_option_components", TCL_INDEX_NONE);
         (void) Itcl_CreateVariable(interp, iclsPtr, namePtr, NULL,
                 NULL, &ivPtr);
         ivPtr->protection = ITCL_PROTECTED;  /* always "protected" */
@@ -525,7 +525,7 @@ Itcl_CreateClass(
         /*
          *  Add the built-in "thiswin" variable to the list of data members.
          */
-        namePtr = Tcl_NewStringObj("thiswin", -1);
+        namePtr = Tcl_NewStringObj("thiswin", TCL_INDEX_NONE);
         (void) Itcl_CreateVariable(interp, iclsPtr, namePtr, NULL,
                 NULL, &ivPtr);
         ivPtr->protection = ITCL_PROTECTED;  /* always "protected" */
@@ -895,9 +895,9 @@ ItclDestroyClassNamesp(
 	Tcl_Namespace *nsPtr;
 
 	Tcl_DStringInit(&buffer);
-	Tcl_DStringAppend(&buffer, ITCL_VARIABLES_NAMESPACE, -1);
+	Tcl_DStringAppend(&buffer, ITCL_VARIABLES_NAMESPACE, TCL_INDEX_NONE);
 	Tcl_DStringAppend(&buffer,
-	    (Tcl_GetObjectNamespace(iclsPtr->oPtr))->fullName, -1);
+	    (Tcl_GetObjectNamespace(iclsPtr->oPtr))->fullName, TCL_INDEX_NONE);
 	nsPtr = Tcl_FindNamespace(iclsPtr->interp, Tcl_DStringValue(&buffer), NULL, 0);
 	Tcl_DStringFree(&buffer);
 	if (nsPtr != NULL) {
@@ -1279,9 +1279,9 @@ Itcl_FindClass(
         Tcl_DString buf;
 
         Tcl_DStringInit(&buf);
-        Tcl_DStringAppend(&buf, "::auto_load ", -1);
-        Tcl_DStringAppend(&buf, path, -1);
-        if (Tcl_EvalEx(interp, Tcl_DStringValue(&buf), -1, 0) != TCL_OK) {
+        Tcl_DStringAppend(&buf, "::auto_load ", TCL_INDEX_NONE);
+        Tcl_DStringAppend(&buf, path, TCL_INDEX_NONE);
+        if (Tcl_EvalEx(interp, Tcl_DStringValue(&buf), TCL_INDEX_NONE, 0) != TCL_OK) {
             Tcl_AppendObjToErrorInfo(interp, Tcl_ObjPrintf(
                     "\n    (while attempting to autoload class \"%s\")",
                     path));
@@ -1434,7 +1434,7 @@ Itcl_HandleClass(
 	} else {
 	    Tcl_Namespace *nsPtr = Tcl_GetCurrentNamespace(interp);
 
-	    nsObj = Tcl_NewStringObj(nsPtr->fullName, -1);
+	    nsObj = Tcl_NewStringObj(nsPtr->fullName, TCL_INDEX_NONE);
 	    if (nsEnd) {
 		Tcl_AppendToObj(nsObj, "::", 2);
 		Tcl_AppendToObj(nsObj, token, nsEnd-token);
@@ -1443,7 +1443,7 @@ Itcl_HandleClass(
 
 	fqObj = Tcl_DuplicateObj(nsObj);
 	Tcl_AppendToObj(fqObj, "::", 2);
-	Tcl_AppendToObj(fqObj, tail, -1);
+	Tcl_AppendToObj(fqObj, tail, TCL_INDEX_NONE);
 
 	if (Tcl_GetCommandFromObj(interp, fqObj)) {
 	    Tcl_AppendResult(interp, "command \"", tail,
@@ -1556,9 +1556,9 @@ ItclClassCreateObject(
                     unique[0] = tolower(UCHAR(unique[0]));
 
                     Tcl_DStringSetLength(&buffer, 0);
-                    Tcl_DStringAppend(&buffer, token, -1);
-                    Tcl_DStringAppend(&buffer, unique, -1);
-                    Tcl_DStringAppend(&buffer, start+5, -1);
+                    Tcl_DStringAppend(&buffer, token, TCL_INDEX_NONE);
+                    Tcl_DStringAppend(&buffer, unique, TCL_INDEX_NONE);
+                    Tcl_DStringAppend(&buffer, start+5, TCL_INDEX_NONE);
 
                     objName = Tcl_DStringValue(&buffer);
 
@@ -1599,7 +1599,7 @@ ItclClassCreateObject(
      *  Try to create a new object.  If successful, return the
      *  object name as the result of this command.
      */
-    objNamePtr = Tcl_NewStringObj(objName, -1);
+    objNamePtr = Tcl_NewStringObj(objName, TCL_INDEX_NONE);
     Tcl_IncrRefCount(objNamePtr);
     Tcl_DStringFree(&buffer);
     callbackPtr = Itcl_GetCurrentCallbackPtr(interp);
@@ -1649,7 +1649,7 @@ ItclResolveVarEntry(
 		if (*varName++ == ':') { simpleName = varName; }
 	    };
 	}
-	vnObjPtr = Tcl_NewStringObj(simpleName, -1);
+	vnObjPtr = Tcl_NewStringObj(simpleName, TCL_INDEX_NONE);
 
 	processAncestors = simpleName != lookupName;
 
@@ -1782,7 +1782,7 @@ ItclResolveVarEntry(
 			break;
 		    }
 		    Tcl_DStringSetLength(bufferC, 0);
-		    Tcl_DStringAppend(bufferC, nsPtr->name, -1);
+		    Tcl_DStringAppend(bufferC, nsPtr->name, TCL_INDEX_NONE);
 		    Tcl_DStringAppend(bufferC, "::", 2);
 		    Tcl_DStringAppend(bufferC, varName, varLen);
 		    varName = Tcl_DStringValue(bufferC);
@@ -1894,7 +1894,7 @@ Itcl_BuildVirtualTables(
              *     ...
              */
             Tcl_DStringSetLength(&buffer, 0);
-            Tcl_DStringAppend(&buffer, Tcl_GetString(imPtr->namePtr), -1);
+            Tcl_DStringAppend(&buffer, Tcl_GetString(imPtr->namePtr), TCL_INDEX_NONE);
             bufferC = &buffer; bufferC2 = &buffer2;
             nsPtr = iclsPtr2->nsPtr;
 
@@ -1918,7 +1918,7 @@ Itcl_BuildVirtualTables(
                 }
 
                 Tcl_DStringSetLength(bufferC2, 0);
-                Tcl_DStringAppend(bufferC2, nsPtr->name, -1);
+                Tcl_DStringAppend(bufferC2, nsPtr->name, TCL_INDEX_NONE);
                 Tcl_DStringAppend(bufferC2, "::", 2);
                 Tcl_DStringAppend(bufferC2, Tcl_DStringValue(bufferC),
 				Tcl_DStringLength(bufferC));
@@ -2030,9 +2030,9 @@ Itcl_CreateVariable(
     ivPtr->namePtr      = namePtr;
     Tcl_IncrRefCount(ivPtr->namePtr);
     ivPtr->fullNamePtr = Tcl_NewStringObj(
-            Tcl_GetString(iclsPtr->fullNamePtr), -1);
+            Tcl_GetString(iclsPtr->fullNamePtr), TCL_INDEX_NONE);
     Tcl_AppendToObj(ivPtr->fullNamePtr, "::", 2);
-    Tcl_AppendToObj(ivPtr->fullNamePtr, Tcl_GetString(namePtr), -1);
+    Tcl_AppendToObj(ivPtr->fullNamePtr, Tcl_GetString(namePtr), TCL_INDEX_NONE);
     Tcl_IncrRefCount(ivPtr->fullNamePtr);
 
     if (ivPtr->protection == ITCL_DEFAULT_PROTECT) {
@@ -2040,7 +2040,7 @@ Itcl_CreateVariable(
     }
 
     if (init != NULL) {
-        ivPtr->init = Tcl_NewStringObj(init, -1);
+        ivPtr->init = Tcl_NewStringObj(init, TCL_INDEX_NONE);
         Tcl_IncrRefCount(ivPtr->init);
     } else {
         ivPtr->init = NULL;
@@ -2096,9 +2096,9 @@ Itcl_CreateOption(
     ioptPtr->iclsPtr = iclsPtr;
     ioptPtr->codePtr = NULL;
     ioptPtr->fullNamePtr = Tcl_NewStringObj(
-            Tcl_GetString(iclsPtr->fullNamePtr), -1);
+            Tcl_GetString(iclsPtr->fullNamePtr), TCL_INDEX_NONE);
     Tcl_AppendToObj(ioptPtr->fullNamePtr, "::", 2);
-    Tcl_AppendToObj(ioptPtr->fullNamePtr, Tcl_GetString(ioptPtr->namePtr), -1);
+    Tcl_AppendToObj(ioptPtr->fullNamePtr, Tcl_GetString(ioptPtr->namePtr), TCL_INDEX_NONE);
     Tcl_IncrRefCount(ioptPtr->fullNamePtr);
     Tcl_SetHashValue(hPtr, ioptPtr);
     Itcl_PreserveData(ioptPtr);
@@ -2214,7 +2214,7 @@ Itcl_GetCommonVar(
 	    lastCp = cp + 2;
 	}
     }
-    namePtr = Tcl_NewStringObj(lastCp, -1);
+    namePtr = Tcl_NewStringObj(lastCp, TCL_INDEX_NONE);
     Tcl_IncrRefCount(namePtr);
     hPtr = Tcl_FindHashEntry(&contextIclsPtr->variables, (char *)namePtr);
     Tcl_DecrRefCount(namePtr);
@@ -2269,11 +2269,11 @@ Itcl_GetCommonVar(
 
     Tcl_DStringInit(&buffer);
     if (ivPtr->protection != ITCL_PUBLIC) {
-        Tcl_DStringAppend(&buffer, ITCL_VARIABLES_NAMESPACE, -1);
+        Tcl_DStringAppend(&buffer, ITCL_VARIABLES_NAMESPACE, TCL_INDEX_NONE);
     }
-    Tcl_DStringAppend(&buffer, (Tcl_GetObjectNamespace(oPtr))->fullName, -1);
-    Tcl_DStringAppend(&buffer, "::", -1);
-    Tcl_DStringAppend(&buffer, lastCp, -1);
+    Tcl_DStringAppend(&buffer, (Tcl_GetObjectNamespace(oPtr))->fullName, TCL_INDEX_NONE);
+    Tcl_DStringAppend(&buffer, "::", TCL_INDEX_NONE);
+    Tcl_DStringAppend(&buffer, lastCp, TCL_INDEX_NONE);
 
     val = Tcl_GetVar2(interp, (const char *)Tcl_DStringValue(&buffer),
             NULL, 0);

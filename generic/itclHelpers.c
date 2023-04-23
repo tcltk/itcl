@@ -102,7 +102,7 @@ ItclCreateArgList(
     result = TCL_OK;
     *maxArgcPtr = 0;
     *argcPtr = 0;
-    *usagePtr = Tcl_NewStringObj("", -1);
+    *usagePtr = Tcl_NewStringObj("", TCL_INDEX_NONE);
     if (str) {
         if (Tcl_SplitList(interp, (const char *)str, &argc, &argv)
 	        != TCL_OK) {
@@ -163,7 +163,7 @@ ItclCreateArgList(
 	        Tcl_AppendToObj(*usagePtr, " ", 1);
 	    }
 	    arglistPtr->namePtr =
-	            Tcl_NewStringObj(defaultArgv[0], -1);
+	            Tcl_NewStringObj(defaultArgv[0], TCL_INDEX_NONE);
 	    Tcl_IncrRefCount(arglistPtr->namePtr);
 	    (*maxArgcPtr)++;
 	    if (defaultArgc == 1) {
@@ -172,16 +172,16 @@ ItclCreateArgList(
 		if ((strcmp(defaultArgv[0], "args") == 0) && (i == argc-1)) {
 		    hadArgsArgument = 1;
 		    (*argcPtr)--;
-	            Tcl_AppendToObj(*usagePtr, "?arg arg ...?", -1);
+	            Tcl_AppendToObj(*usagePtr, "?arg arg ...?", TCL_INDEX_NONE);
 		} else {
-	            Tcl_AppendToObj(*usagePtr, defaultArgv[0], -1);
+	            Tcl_AppendToObj(*usagePtr, defaultArgv[0], TCL_INDEX_NONE);
 	        }
 	    } else {
 	        arglistPtr->defaultValuePtr =
-		        Tcl_NewStringObj(defaultArgv[1], -1);
+		        Tcl_NewStringObj(defaultArgv[1], TCL_INDEX_NONE);
 		Tcl_IncrRefCount(arglistPtr->defaultValuePtr);
 	        Tcl_AppendToObj(*usagePtr, "?", 1);
-	        Tcl_AppendToObj(*usagePtr, defaultArgv[0], -1);
+	        Tcl_AppendToObj(*usagePtr, defaultArgv[0], TCL_INDEX_NONE);
 	        Tcl_AppendToObj(*usagePtr, "?", 1);
 	    }
             lastArglistPtr = arglistPtr;
@@ -199,7 +199,7 @@ ItclCreateArgList(
         *arglistPtrPtr = NULL;
     }
     if (hadArgsArgument) {
-        *maxArgcPtr = -1;
+        *maxArgcPtr = TCL_INDEX_NONE;
     }
     return result;
 }
@@ -311,8 +311,8 @@ Itcl_CreateArgs(
 
     ItclShowArgs(1, "Itcl_CreateArgs", objc, objv);
     listPtr = Tcl_NewListObj(objc+2, NULL);
-    Tcl_ListObjAppendElement(NULL, listPtr, Tcl_NewStringObj("my", -1));
-    Tcl_ListObjAppendElement(NULL, listPtr, Tcl_NewStringObj(string, -1));
+    Tcl_ListObjAppendElement(NULL, listPtr, Tcl_NewStringObj("my", TCL_INDEX_NONE));
+    Tcl_ListObjAppendElement(NULL, listPtr, Tcl_NewStringObj(string, TCL_INDEX_NONE));
 
     for (i=0; i < objc; i++) {
         Tcl_ListObjAppendElement(NULL, listPtr, objv[i]);
@@ -343,7 +343,7 @@ ItclEnsembleSubCmd(
 
     newObjv = (Tcl_Obj **)ckalloc(sizeof(Tcl_Obj *)*(objc));
     isRootEnsemble = Itcl_InitRewriteEnsemble(interp, 1, 1, objc, objv);
-    newObjv[0] = Tcl_NewStringObj("::itcl::builtin::Info", -1);
+    newObjv[0] = Tcl_NewStringObj("::itcl::builtin::Info", TCL_INDEX_NONE);
     Tcl_IncrRefCount(newObjv[0]);
     if (objc > 1) {
         memcpy(newObjv+1, objv+1, sizeof(Tcl_Obj *) * (objc-1));
@@ -371,8 +371,8 @@ ItclCapitalize(
 
     sprintf(buf, "%c", toupper(UCHAR(*str)));
     buf[1] = '\0';
-    objPtr = Tcl_NewStringObj(buf, -1);
-    Tcl_AppendToObj(objPtr, str+1, -1);
+    objPtr = Tcl_NewStringObj(buf, TCL_INDEX_NONE);
+    Tcl_AppendToObj(objPtr, str+1, TCL_INDEX_NONE);
     return objPtr;
 }
 /*
@@ -419,7 +419,7 @@ AddDictEntry(
     if (valuePtr == NULL) {
         return TCL_OK;
     }
-    keyPtr = Tcl_NewStringObj(keyStr, -1);
+    keyPtr = Tcl_NewStringObj(keyStr, TCL_INDEX_NONE);
     Tcl_IncrRefCount(keyPtr);
     code = Tcl_DictObjPut(interp, dictPtr, keyPtr, valuePtr);
     Tcl_DecrRefCount(keyPtr);
@@ -640,7 +640,7 @@ ItclAddObjectsDictInfo(
 	        "::internal::dicts::objects", NULL);
 	return TCL_ERROR;
     }
-    keyPtr1 = Tcl_NewStringObj("instances", -1);
+    keyPtr1 = Tcl_NewStringObj("instances", TCL_INDEX_NONE);
     if (Tcl_DictObjGet(interp, dictPtr, keyPtr1, &valuePtr1) != TCL_OK) {
         return TCL_ERROR;
     }
@@ -725,7 +725,7 @@ ItclDeleteObjectsDictInfo(
 	        "::internal::dicts::objects", NULL);
 	return TCL_ERROR;
     }
-    keyPtr1 = Tcl_NewStringObj("instances", -1);
+    keyPtr1 = Tcl_NewStringObj("instances", TCL_INDEX_NONE);
     if (Tcl_DictObjGet(interp, dictPtr, keyPtr1, &valuePtr) != TCL_OK) {
 	Tcl_DecrRefCount(keyPtr1);
         return TCL_ERROR;
@@ -827,7 +827,7 @@ ItclAddOptionDictInfo(
     }
     if (ioptPtr->flags & ITCL_OPTION_READONLY) {
         if (AddDictEntry(interp, valuePtr2, "-readonly",
-	        Tcl_NewStringObj("1", -1)) != TCL_OK) {
+	        Tcl_NewStringObj("1", TCL_INDEX_NONE)) != TCL_OK) {
             return TCL_ERROR;
         }
     }
@@ -1039,13 +1039,13 @@ ItclAddClassComponentDictInfo(
     }
     if (icPtr->flags & ITCL_COMPONENT_INHERIT) {
         if (AddDictEntry(interp, valuePtr2, "-inherit",
-	        Tcl_NewStringObj("1", -1)) != TCL_OK) {
+	        Tcl_NewStringObj("1", TCL_INDEX_NONE)) != TCL_OK) {
             return TCL_ERROR;
         }
     }
     if (icPtr->flags & ITCL_COMPONENT_PUBLIC) {
         if (AddDictEntry(interp, valuePtr2, "-public",
-	        Tcl_NewStringObj("1", -1)) != TCL_OK) {
+	        Tcl_NewStringObj("1", TCL_INDEX_NONE)) != TCL_OK) {
             return TCL_ERROR;
         }
     }
@@ -1142,7 +1142,7 @@ ItclAddClassVariableDictInfo(
         }
     }
     cp = Itcl_ProtectionStr(ivPtr->protection);
-    if (AddDictEntry(interp, valuePtr2, "-protection", Tcl_NewStringObj(cp, -1))
+    if (AddDictEntry(interp, valuePtr2, "-protection", Tcl_NewStringObj(cp, TCL_INDEX_NONE))
              != TCL_OK) {
         return TCL_ERROR;
     }
@@ -1156,7 +1156,7 @@ ItclAddClassVariableDictInfo(
     if (ivPtr->flags & ITCL_TYPE_VARIABLE) {
         cp = "typevariable";
     }
-    if (AddDictEntry(interp, valuePtr2, "-type", Tcl_NewStringObj(cp, -1))
+    if (AddDictEntry(interp, valuePtr2, "-type", Tcl_NewStringObj(cp, TCL_INDEX_NONE))
              != TCL_OK) {
         return TCL_ERROR;
     }
@@ -1164,40 +1164,40 @@ ItclAddClassVariableDictInfo(
     listPtr = Tcl_NewListObj(0, NULL);
     if (ivPtr->flags & ITCL_THIS_VAR) {
         haveFlags = 1;
-        Tcl_ListObjAppendElement(interp, listPtr, Tcl_NewStringObj("this", -1));
+        Tcl_ListObjAppendElement(interp, listPtr, Tcl_NewStringObj("this", TCL_INDEX_NONE));
     }
     if (ivPtr->flags & ITCL_SELF_VAR) {
         haveFlags = 1;
-        Tcl_ListObjAppendElement(interp, listPtr, Tcl_NewStringObj("self", -1));
+        Tcl_ListObjAppendElement(interp, listPtr, Tcl_NewStringObj("self", TCL_INDEX_NONE));
     }
     if (ivPtr->flags & ITCL_SELFNS_VAR) {
         haveFlags = 1;
         Tcl_ListObjAppendElement(interp, listPtr,
-	        Tcl_NewStringObj("selfns", -1));
+	        Tcl_NewStringObj("selfns", TCL_INDEX_NONE));
     }
     if (ivPtr->flags & ITCL_WIN_VAR) {
         haveFlags = 1;
-        Tcl_ListObjAppendElement(interp, listPtr, Tcl_NewStringObj("win", -1));
+        Tcl_ListObjAppendElement(interp, listPtr, Tcl_NewStringObj("win", TCL_INDEX_NONE));
     }
     if (ivPtr->flags & ITCL_COMPONENT_VAR) {
         haveFlags = 1;
         Tcl_ListObjAppendElement(interp, listPtr,
-	        Tcl_NewStringObj("component", -1));
+	        Tcl_NewStringObj("component", TCL_INDEX_NONE));
     }
     if (ivPtr->flags & ITCL_OPTIONS_VAR) {
         haveFlags = 1;
         Tcl_ListObjAppendElement(interp, listPtr,
-	        Tcl_NewStringObj("itcl_options", -1));
+	        Tcl_NewStringObj("itcl_options", TCL_INDEX_NONE));
     }
     if (ivPtr->flags & ITCL_HULL_VAR) {
         haveFlags = 1;
         Tcl_ListObjAppendElement(interp, listPtr,
-	        Tcl_NewStringObj("itcl_hull", -1));
+	        Tcl_NewStringObj("itcl_hull", TCL_INDEX_NONE));
     }
     if (ivPtr->flags & ITCL_OPTION_READONLY) {
         haveFlags = 1;
         Tcl_ListObjAppendElement(interp, listPtr,
-	        Tcl_NewStringObj("option_read_only", -1));
+	        Tcl_NewStringObj("option_read_only", TCL_INDEX_NONE));
     }
     if (haveFlags) {
         if (AddDictEntry(interp, valuePtr2, "-flags", listPtr) != TCL_OK) {
@@ -1292,7 +1292,7 @@ ItclAddClassFunctionDictInfo(
     if (imPtr->protection == ITCL_PRIVATE) {
         cp = "private";
     }
-    if (AddDictEntry(interp, valuePtr2, "-protection", Tcl_NewStringObj(cp, -1))
+    if (AddDictEntry(interp, valuePtr2, "-protection", Tcl_NewStringObj(cp, TCL_INDEX_NONE))
              != TCL_OK) {
         return TCL_ERROR;
     }
@@ -1306,7 +1306,7 @@ ItclAddClassFunctionDictInfo(
     if (imPtr->flags & ITCL_TYPE_METHOD) {
         cp = "typemethod";
     }
-    if (AddDictEntry(interp, valuePtr2, "-type", Tcl_NewStringObj(cp, -1))
+    if (AddDictEntry(interp, valuePtr2, "-type", Tcl_NewStringObj(cp, TCL_INDEX_NONE))
              != TCL_OK) {
         return TCL_ERROR;
     }
@@ -1315,22 +1315,22 @@ ItclAddClassFunctionDictInfo(
     if (imPtr->flags & ITCL_CONSTRUCTOR) {
         haveFlags = 1;
         Tcl_ListObjAppendElement(interp, listPtr,
-	        Tcl_NewStringObj("constructor", -1));
+	        Tcl_NewStringObj("constructor", TCL_INDEX_NONE));
     }
     if (imPtr->flags & ITCL_DESTRUCTOR) {
         haveFlags = 1;
         Tcl_ListObjAppendElement(interp, listPtr,
-	        Tcl_NewStringObj("destructor", -1));
+	        Tcl_NewStringObj("destructor", TCL_INDEX_NONE));
     }
     if (imPtr->flags & ITCL_ARG_SPEC) {
         haveFlags = 1;
         Tcl_ListObjAppendElement(interp, listPtr,
-	        Tcl_NewStringObj("have_args", -1));
+	        Tcl_NewStringObj("have_args", TCL_INDEX_NONE));
     }
     if (imPtr->flags & ITCL_BODY_SPEC) {
         haveFlags = 1;
         Tcl_ListObjAppendElement(interp, listPtr,
-	        Tcl_NewStringObj("have_body", -1));
+	        Tcl_NewStringObj("have_body", TCL_INDEX_NONE));
     }
     if (haveFlags) {
         if (AddDictEntry(interp, valuePtr2, "-flags", listPtr) != TCL_OK) {
@@ -1363,7 +1363,7 @@ ItclAddClassFunctionDictInfo(
         if (imPtr->codePtr->flags & ITCL_BUILTIN) {
 	    haveFlags = 1;
             Tcl_ListObjAppendElement(interp, listPtr,
-	            Tcl_NewStringObj("builtin", -1));
+	            Tcl_NewStringObj("builtin", TCL_INDEX_NONE));
 	}
 	if (haveFlags) {
             if (AddDictEntry(interp, valuePtr2, "-codeflags", listPtr)

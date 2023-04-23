@@ -52,10 +52,10 @@ cArgFunc(
       Tcl_AppendResult(interp, "wrong #args: should be ::itcl::parser::handleClass className className objectName", NULL);
       return TCL_ERROR;
     }
-    objv[0] = Tcl_NewStringObj(argv[0], -1);
-    objv[1] = Tcl_NewStringObj(argv[1], -1); /* class name */
-    objv[2] = Tcl_NewStringObj(argv[2], -1); /* full class name */
-    objv[3] = Tcl_NewStringObj(argv[3], -1); /* object name */
+    objv[0] = Tcl_NewStringObj(argv[0], TCL_INDEX_NONE);
+    objv[1] = Tcl_NewStringObj(argv[1], TCL_INDEX_NONE); /* class name */
+    objv[2] = Tcl_NewStringObj(argv[2], TCL_INDEX_NONE); /* full class name */
+    objv[3] = Tcl_NewStringObj(argv[3], TCL_INDEX_NONE); /* object name */
     Tcl_IncrRefCount(objv[0]);
     Tcl_IncrRefCount(objv[1]);
     Tcl_IncrRefCount(objv[2]);

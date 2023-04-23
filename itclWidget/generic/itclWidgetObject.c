@@ -124,28 +124,28 @@ HullAndOptionsInstall(
 	char buf[2];
 	char *cp;
 	cp = Tcl_GetString(iclsPtr->namePtr);
-        widgetClassPtr = Tcl_NewStringObj("", -1);
+        widgetClassPtr = Tcl_NewStringObj("", TCL_INDEX_NONE);
 	buf[0] = toupper(UCHAR(*cp));
 	buf[1] = '\0';
-	Tcl_AppendToObj(widgetClassPtr, buf, -1);
-	Tcl_AppendToObj(widgetClassPtr, cp+1, -1);
+	Tcl_AppendToObj(widgetClassPtr, buf, TCL_INDEX_NONE);
+	Tcl_AppendToObj(widgetClassPtr, cp+1, TCL_INDEX_NONE);
     }
     hullObjc = 5;
     hullObjv = (Tcl_Obj **)ckalloc(sizeof(Tcl_Obj *)*hullObjc);
-    hullObjv[0] = Tcl_NewStringObj("installhull", -1);
+    hullObjv[0] = Tcl_NewStringObj("installhull", TCL_INDEX_NONE);
     Tcl_IncrRefCount(hullObjv[0]);
-    hullObjv[1] = Tcl_NewStringObj("using", -1);
+    hullObjv[1] = Tcl_NewStringObj("using", TCL_INDEX_NONE);
     Tcl_IncrRefCount(hullObjv[1]);
     if (iclsPtr->hullTypePtr == NULL) {
         hullType = "frame";
     } else {
         hullType = Tcl_GetString(iclsPtr->hullTypePtr);
     }
-    hullObjv[2] = Tcl_NewStringObj(hullType, -1);
+    hullObjv[2] = Tcl_NewStringObj(hullType, TCL_INDEX_NONE);
     Tcl_IncrRefCount(hullObjv[2]);
-    hullObjv[3] = Tcl_NewStringObj("-class", -1);
+    hullObjv[3] = Tcl_NewStringObj("-class", TCL_INDEX_NONE);
     Tcl_IncrRefCount(hullObjv[3]);
-    hullObjv[4] = Tcl_NewStringObj(Tcl_GetString(widgetClassPtr), -1);
+    hullObjv[4] = Tcl_NewStringObj(Tcl_GetString(widgetClassPtr), TCL_INDEX_NONE);
     Tcl_IncrRefCount(hullObjv[4]);
     ItclShowArgs(1, "installhull", hullObjc, hullObjv);
     result = Itcl_BiInstallHullCmd(iclsPtr->infoPtr, interp,
@@ -245,10 +245,10 @@ InstallComponent(
     startIdx = 3;
     if (starOption) {
 
-	objPtr = Tcl_NewStringObj(widgetType, -1);
+	objPtr = Tcl_NewStringObj(widgetType, TCL_INDEX_NONE);
 	Tcl_IncrRefCount(objPtr);
-	Tcl_AppendToObj(objPtr, " ", -1);
-	Tcl_AppendToObj(objPtr, widgetPath, -1);
+	Tcl_AppendToObj(objPtr, " ", TCL_INDEX_NONE);
+	Tcl_AppendToObj(objPtr, widgetPath, TCL_INDEX_NONE);
         result = Tcl_EvalObjEx(interp, objPtr, 0);
 	Tcl_DecrRefCount(objPtr);
 	if (result != TCL_OK) {
@@ -257,8 +257,8 @@ InstallComponent(
 	    return TCL_OK;
 	}
 
-	objPtr = Tcl_NewStringObj(widgetPath, -1);
-	Tcl_AppendToObj(objPtr, " configure", -1);
+	objPtr = Tcl_NewStringObj(widgetPath, TCL_INDEX_NONE);
+	Tcl_AppendToObj(objPtr, " configure", TCL_INDEX_NONE);
         result = Tcl_EvalObjEx(interp, objPtr, 0);
 	startIdx = 5;
         Tcl_SplitList(interp, Tcl_GetString(Tcl_GetObjResult(interp)), &argc, &argv);
@@ -266,7 +266,7 @@ InstallComponent(
                (objc - startIdx + 2 + (argc * 2)));
         /* insert delegated options before any options on the command line */
 	newObjv[0] = objv[startIdx - 1];
-	newObjv[1] = Tcl_NewStringObj("configure", -1);
+	newObjv[1] = Tcl_NewStringObj("configure", TCL_INDEX_NONE);
         for (j = startIdx; j < objc; j++) {
 	    if (*Tcl_GetString(objv[j]) == '-') {
 	       break;
@@ -282,7 +282,7 @@ InstallComponent(
 
 	        val = Tk_GetOption(tkWin, argv2[1], argv2[2]);
 	        if (val != NULL) {
-		    objPtr = Tcl_NewStringObj(argv2[0], -1);
+		    objPtr = Tcl_NewStringObj(argv2[0], TCL_INDEX_NONE);
 		    hPtr = Tcl_FindHashEntry(&ioPtr->objectOptions,
 		            (char *)objPtr);
 		    if(hPtr == NULL) {
@@ -294,9 +294,9 @@ InstallComponent(
 		    if(hPtr == NULL) {
 		        if (strcmp(val, argv2[3]) != 0) {
 			    numUsedOpts++;
-                            newObjv[i] = Tcl_NewStringObj(argv2[0], -1);
+                            newObjv[i] = Tcl_NewStringObj(argv2[0], TCL_INDEX_NONE);
 	                    i++;
-                            newObjv[i] = Tcl_NewStringObj(val, -1);
+                            newObjv[i] = Tcl_NewStringObj(val, TCL_INDEX_NONE);
 	                    i++;
 		        }
 		    }
@@ -338,7 +338,7 @@ InstallComponent(
 	        }
 	        Tcl_IncrRefCount(newObjv[i]);
 	        i++;
-                newObjv[i] = Tcl_NewStringObj(val, -1);
+                newObjv[i] = Tcl_NewStringObj(val, TCL_INDEX_NONE);
 	        Tcl_IncrRefCount(newObjv[i]);
 	        i++;
                 numUsedOpts++;
@@ -364,10 +364,10 @@ InstallComponent(
         componentValue = Tcl_GetString(Tcl_GetObjResult(interp));
     }
     /* FIXME need something like ItclSetInstanceCommonVar here */
-    objPtr = Tcl_NewStringObj(ITCL_VARIABLES_NAMESPACE, -1);
-    Tcl_AppendToObj(objPtr, Tcl_GetString(iclsPtr->fullNamePtr), -1);
-    Tcl_AppendToObj(objPtr, "::", -1);
-    Tcl_AppendToObj(objPtr, componentName, -1);
+    objPtr = Tcl_NewStringObj(ITCL_VARIABLES_NAMESPACE, TCL_INDEX_NONE);
+    Tcl_AppendToObj(objPtr, Tcl_GetString(iclsPtr->fullNamePtr), TCL_INDEX_NONE);
+    Tcl_AppendToObj(objPtr, "::", TCL_INDEX_NONE);
+    Tcl_AppendToObj(objPtr, componentName, TCL_INDEX_NONE);
     Tcl_SetVar2(interp, Tcl_GetString(objPtr), NULL, componentValue, 0);
 
     return TCL_OK;

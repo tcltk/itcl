@@ -109,8 +109,8 @@ Itcl_WidgetBiInit(
     Tcl_DStringInit(&buffer);
     for (i=0; i < BiMethodListLen; i++) {
 	Tcl_DStringSetLength(&buffer, 0);
-	Tcl_DStringAppend(&buffer, "::itcl::builtin::", -1);
-	Tcl_DStringAppend(&buffer, BiMethodList[i].name, -1);
+	Tcl_DStringAppend(&buffer, "::itcl::builtin::", TCL_INDEX_NONE);
+	Tcl_DStringAppend(&buffer, BiMethodList[i].name, TCL_INDEX_NONE);
         Tcl_CreateObjCommand(interp, Tcl_DStringValue(&buffer),
 	        BiMethodList[i].proc, (void *)infoPtr, NULL);
     }
@@ -157,7 +157,7 @@ Itcl_InstallWidgetBiMethods(
     Tcl_Obj *objPtr = Tcl_NewStringObj("", 0);
     for (i=0; i < BiMethodListLen; i++) {
         Itcl_InitHierIter(&hier, iclsPtr);
-	Tcl_SetStringObj(objPtr, BiMethodList[i].name, -1);
+	Tcl_SetStringObj(objPtr, BiMethodList[i].name, TCL_INDEX_NONE);
         superPtr = Itcl_AdvanceHierIter(&hier);
         while (superPtr) {
             hPtr = Tcl_FindHashEntry(&superPtr->functions, (char *)objPtr);
@@ -170,7 +170,7 @@ Itcl_InstallWidgetBiMethods(
 
         if (!hPtr) {
             result = Itcl_CreateMethod(interp, iclsPtr,
-	        Tcl_NewStringObj(BiMethodList[i].name, -1),
+	        Tcl_NewStringObj(BiMethodList[i].name, TCL_INDEX_NONE),
                 BiMethodList[i].usage, BiMethodList[i].registration);
 
             if (result != TCL_OK) {
@@ -297,10 +297,10 @@ Itcl_BiInstallHullCmd(
 	newObjc = 4;
 	newObjv = (Tcl_Obj **)ckalloc(sizeof(Tcl_Obj *) *
 	        (newObjc + numOptArgs));
-	newObjv[0] = Tcl_NewStringObj(widgetType, -1);
-	newObjv[1] = Tcl_NewStringObj(widgetName, -1);
-	newObjv[2] = Tcl_NewStringObj("-class", -1);
-	newObjv[3] = Tcl_NewStringObj(className, -1);
+	newObjv[0] = Tcl_NewStringObj(widgetType, TCL_INDEX_NONE);
+	newObjv[1] = Tcl_NewStringObj(widgetName, TCL_INDEX_NONE);
+	newObjv[2] = Tcl_NewStringObj("-class", TCL_INDEX_NONE);
+	newObjv[3] = Tcl_NewStringObj(className, TCL_INDEX_NONE);
 	i = 4;
 	iOpts = optsStartIdx;
 	for (; iOpts < objc; iOpts++, i++) {
@@ -344,21 +344,21 @@ Itcl_BiInstallHullCmd(
     /* initialize the itcl_hull variable */
     i = 0;
     Tcl_DStringInit(&buffer);
-    Tcl_DStringAppend(&buffer, ITCL_WIDGETS_NAMESPACE"::hull", -1);
+    Tcl_DStringAppend(&buffer, ITCL_WIDGETS_NAMESPACE"::hull", TCL_INDEX_NONE);
     lgth = strlen(Tcl_DStringValue(&buffer));
     while (1) {
 	Tcl_DStringSetLength(&buffer, lgth);
 	i++;
 	char buf[10];
 	sprintf(buf, "%d", i);
-	Tcl_DStringAppend(&buffer, buf, -1);
-        Tcl_DStringAppend(&buffer, Tcl_GetString(contextIoPtr->namePtr), -1);
+	Tcl_DStringAppend(&buffer, buf, TCL_INDEX_NONE);
+        Tcl_DStringAppend(&buffer, Tcl_GetString(contextIoPtr->namePtr), TCL_INDEX_NONE);
 	if (Tcl_FindCommand(interp, Tcl_DStringValue(&buffer), NULL, 0)
 	        == NULL) {
             break;
 	}
     }
-    contextIoPtr->hullWindowNamePtr = Tcl_NewStringObj(widgetName, -1);
+    contextIoPtr->hullWindowNamePtr = Tcl_NewStringObj(widgetName, TCL_INDEX_NONE);
 /*
 fprintf(stderr, "REN!%s!%s!\n", widgetName, Tcl_DStringValue(&buffer));
 */
@@ -368,7 +368,7 @@ fprintf(stderr, "REN!%s!%s!\n", widgetName, Tcl_DStringValue(&buffer));
             TCL_TRACE_RENAME|TCL_TRACE_DELETE,
             ItclHullContentsDeleted, contextIoPtr);
 
-    namePtr = Tcl_NewStringObj("itcl_hull", -1);
+    namePtr = Tcl_NewStringObj("itcl_hull", TCL_INDEX_NONE);
     Tcl_IncrRefCount(namePtr);
     hPtr = Tcl_FindHashEntry(&contextIoPtr->iclsPtr->variables,
             (char *)namePtr);
@@ -431,9 +431,9 @@ fprintf(stderr, "REN!%s!%s!\n", widgetName, Tcl_DStringValue(&buffer));
 		            Tcl_GetString(idoPtr->icPtr->namePtr),
                             contextIoPtr, contextIoPtr->iclsPtr);
 		    if ((component != NULL) && (strlen(component) > 0)) {
-		        newObjv[0] = Tcl_NewStringObj(component, -1);
+		        newObjv[0] = Tcl_NewStringObj(component, TCL_INDEX_NONE);
 		        Tcl_IncrRefCount(newObjv[0]);
-		        newObjv[1] = Tcl_NewStringObj("configure", -1);
+		        newObjv[1] = Tcl_NewStringObj("configure", TCL_INDEX_NONE);
 		        Tcl_IncrRefCount(newObjv[1]);
 		        if (idoPtr->asPtr == NULL) {
 		            newObjv[2] = idoPtr->namePtr;
@@ -441,7 +441,7 @@ fprintf(stderr, "REN!%s!%s!\n", widgetName, Tcl_DStringValue(&buffer));
 		            newObjv[2] = idoPtr->asPtr;
 		        }
 		        Tcl_IncrRefCount(newObjv[2]);
-		        newObjv[3] = Tcl_NewStringObj(val, -1);
+		        newObjv[3] = Tcl_NewStringObj(val, TCL_INDEX_NONE);
 		        Tcl_IncrRefCount(newObjv[3]);
                         ItclShowArgs(1, "SET OPTION", 4, newObjv);
                         result = Tcl_EvalObjv(interp, 4, newObjv, 0);

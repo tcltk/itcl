@@ -177,7 +177,7 @@ ItclHandleStubCmd(
     /*
      *  Try to autoload the real command for this stub.
      */
-    objAutoLoad[0] = Tcl_NewStringObj("::auto_load", -1);
+    objAutoLoad[0] = Tcl_NewStringObj("::auto_load", TCL_INDEX_NONE);
     objAutoLoad[1] = cmdNamePtr;
     result = Tcl_EvalObjv(interp, 2, objAutoLoad, 0);
     if (result != TCL_OK) {
