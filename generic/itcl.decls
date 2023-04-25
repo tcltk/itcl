@@ -42,7 +42,7 @@ declare 9 {
     void *Itcl_PeekStack(Itcl_Stack *stack)
 }
 declare 10 {
-    void *Itcl_GetStackValue(Itcl_Stack *stack, int pos)
+    void *Itcl_GetStackValue(Itcl_Stack *stack, Tcl_Size pos)
 }
 declare 11 {
     void Itcl_InitList(Itcl_List *listPtr)
@@ -94,9 +94,6 @@ declare 26 {
 }
 declare 27 {
     void Itcl_Free(void *ptr)
-}
-declare 28 {
-    void *ItclGetStackValue(Itcl_Stack *stack, size_t pos)
 }
 
 

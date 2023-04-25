@@ -818,7 +818,7 @@ MODULE_SCOPE int ItclAddClassFunctionDictInfo(Tcl_Interp *interp,
 MODULE_SCOPE int ItclAddClassDelegatedFunctionDictInfo(Tcl_Interp *interp,
 	ItclClass *iclsPtr, ItclDelegatedFunction *idmPtr);
 MODULE_SCOPE int ItclClassCreateObject(void *clientData, Tcl_Interp *interp,
-	size_t objc, Tcl_Obj *const objv[]);
+	Tcl_Size objc, Tcl_Obj *const objv[]);
 
 MODULE_SCOPE void ItclRestoreInfoVars(void *clientData);
 

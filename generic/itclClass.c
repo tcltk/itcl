@@ -1464,7 +1464,7 @@ int
 ItclClassCreateObject(
     void *clientData,        /* IclObjectInfo */
     Tcl_Interp *interp,      /* current interpreter */
-    size_t objc,             /* number of arguments */
+    Tcl_Size objc,             /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
 {
     Tcl_DString buffer;  /* buffer used to build object names */
@@ -1640,7 +1640,7 @@ ItclResolveVarEntry(
 	Tcl_Namespace* nsPtr;
 	Tcl_Obj *vnObjPtr;
 	int newEntry, processAncestors;
-	size_t varLen;
+	Tcl_Size varLen;
 
 	/* (de)qualify to simple name */
 	varName = simpleName = lookupName;

@@ -199,7 +199,7 @@ Itcl_InvokeEnsembleMethod(
     Tcl_Namespace *nsPtr,       /* namespace to call the method in */
     Tcl_Obj *namePtr,           /* name of the method */
     Tcl_Proc *procPtr,
-    size_t objc,			/* Number of arguments. */
+    Tcl_Size objc,			/* Number of arguments. */
     Tcl_Obj *const *objv)	/* Arguments as actually seen. */
 {
     ProcedureMethod *pmPtr = (ProcedureMethod *)ckalloc(sizeof(ProcedureMethod));
@@ -233,7 +233,7 @@ Itcl_PublicObjectCmd(
     void *clientData,
     Tcl_Interp *interp,
     Tcl_Class clsPtr,
-    size_t objc,
+    Tcl_Size objc,
     Tcl_Obj *const *objv)
 {
     Tcl_Object oPtr = (Tcl_Object)clientData;

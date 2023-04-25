@@ -1097,8 +1097,8 @@ NRBiChainCmd(
     Tcl_Obj *cmdlinePtr;
     Tcl_Obj **newobjv;
     Tcl_Obj *const *cObjv;
-    size_t cObjc;
-    size_t idx;
+    Tcl_Size cObjc;
+    Tcl_Size idx;
     Tcl_Obj *objPtr;
 
     ItclShowArgs(1, "Itcl_BiChainCmd", objc, objv);

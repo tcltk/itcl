@@ -193,31 +193,16 @@ Itcl_PeekStack(
  *  first value pushed onto the stack.
  * ------------------------------------------------------------------------
  */
-#undef Itcl_GetStackValue
 void *
 Itcl_GetStackValue(
     Itcl_Stack *stack,  /* stack to be examined */
-    int pos)            /* get value at this index */
+    Tcl_Size pos)            /* get value at this index */
 {
-    if (stack->values && (stack->len > 0)) {
-        assert(pos < stack->len);
+    if (stack->values && (pos >= 0) && (pos < stack->len)) {
         return stack->values[pos];
     }
     return NULL;
 }
-
-void *
-ItclGetStackValue(
-    Itcl_Stack *stack,  /* stack to be examined */
-    size_t pos)         /* get value at this index */
-{
-    if (stack->values && (stack->len > 0)) {
-        assert(pos < stack->len);
-        return stack->values[pos];
-    }
-    return NULL;
-}
-
 
 /*
  * ------------------------------------------------------------------------
@@ -680,7 +665,7 @@ void * Itcl_Alloc(
 }
 /*
  * ------------------------------------------------------------------------
- * ItclFree()
+ * Itcl_Free()
  *
  *	Release memory allocated by Itcl_Alloc() that was never preserved.
  *
