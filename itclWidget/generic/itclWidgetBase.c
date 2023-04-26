@@ -36,10 +36,10 @@ Initialize (
     Tcl_Namespace *nsPtr;
     ItclObjectInfo *infoPtr;
 
-    if (Tcl_InitStubs(interp, "8.6", 0) == NULL) {
+    if (Tcl_InitStubs(interp, "8.6-", 0) == NULL) {
         return TCL_ERROR;
     }
-    if (Tk_InitStubs(interp, "8.6", 0) == NULL) {
+    if (Tk_InitStubs(interp, "8.6-", 0) == NULL) {
         return TCL_ERROR;
     }
     if (Itcl_InitStubs(interp, "4.0.0", 0) == NULL) {
