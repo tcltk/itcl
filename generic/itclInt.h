@@ -767,10 +767,10 @@ MODULE_SCOPE int DelegatedOptionsInstall(Tcl_Interp *interp,
 	ItclClass *iclsPtr);
 MODULE_SCOPE int Itcl_HandleDelegateOptionCmd(Tcl_Interp *interp,
 	ItclObject *ioPtr, ItclClass *iclsPtr, ItclDelegatedOption **idoPtrPtr,
-	size_t objc, Tcl_Obj *const objv[]);
+	Tcl_Size objc, Tcl_Obj *const objv[]);
 MODULE_SCOPE int Itcl_HandleDelegateMethodCmd(Tcl_Interp *interp,
 	ItclObject *ioPtr, ItclClass *iclsPtr,
-	ItclDelegatedFunction **idmPtrPtr, size_t objc, Tcl_Obj *const objv[]);
+	ItclDelegatedFunction **idmPtrPtr, Tcl_Size objc, Tcl_Obj *const objv[]);
 MODULE_SCOPE int DelegateFunction(Tcl_Interp *interp, ItclObject *ioPtr,
 	ItclClass *iclsPtr, Tcl_Obj *componentNamePtr,
 	ItclDelegatedFunction *idmPtr);

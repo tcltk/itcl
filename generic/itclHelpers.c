@@ -339,7 +339,7 @@ ItclEnsembleSubCmd(
     Tcl_Obj **newObjv;
     int isRootEnsemble;
 
-    ItclShowArgs(2, functionName, objc, objv);
+    ItclShowArgs(2, "ItclEnsembleSubCmd", objc, objv);
 
     newObjv = (Tcl_Obj **)ckalloc(sizeof(Tcl_Obj *)*(objc));
     isRootEnsemble = Itcl_InitRewriteEnsemble(interp, 1, 1, objc, objv);

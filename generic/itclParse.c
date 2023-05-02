@@ -3307,7 +3307,7 @@ Itcl_HandleDelegateMethodCmd(
     ItclClass *iclsPtr,      /* != NULL for delegate method otherwise NULL */
     ItclDelegatedFunction **idmPtrPtr,
                              /* where to return idoPtr */
-    size_t objc,                /* number of arguments */
+    Tcl_Size objc,           /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
 {
     Tcl_Obj *methodNamePtr;
@@ -3324,7 +3324,7 @@ Itcl_HandleDelegateMethodCmd(
     const char *component;
     const char *token;
     int result;
-    size_t i;
+    Tcl_Size i;
     int foundOpt;
 
     ItclShowArgs(1, "Itcl_HandleDelegateMethodCmd", objc, objv);
@@ -3540,7 +3540,7 @@ Itcl_HandleDelegateOptionCmd(
     ItclClass *iclsPtr,      /* != NULL for delegate option otherwise NULL */
     ItclDelegatedOption **idoPtrPtr,
                              /* where to return idoPtr */
-    size_t objc,                /* number of arguments */
+    Tcl_Size objc,           /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
 
 {
@@ -3565,7 +3565,7 @@ Itcl_HandleDelegateOptionCmd(
     Tcl_Size argc;
     int isStarOption;
     int isNew;
-    size_t i;
+    Tcl_Size i;
     const char *cp;
 
     ItclShowArgs(1, "Itcl_HandleDelegatedOptionCmd", objc, objv);
