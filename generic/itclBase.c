@@ -81,7 +81,7 @@ static const char safeInitScript[] =
 "    set ptr [uplevel [list $class $name] $args]\n"
 "    uplevel [list set itcl-local-$ptr $ptr]\n"
 "    set cmd [uplevel namespace which -command $ptr]\n"
-"    uplevel [list trace variable itcl-local-$ptr u \"::itcl::delete object $cmd; list\"]\n"
+"    uplevel [list trace add variable itcl-local-$ptr unset \"::itcl::delete object $cmd; list\"]\n"
 "    return $ptr\n"
 "}";
 
