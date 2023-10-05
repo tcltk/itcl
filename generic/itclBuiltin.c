@@ -1725,7 +1725,6 @@ ItclUnknownGuts(
     }
     val = NULL;
     if ((idmPtr != NULL) && (idmPtr->icPtr != NULL)) {
-        Tcl_Obj *objPtr;
         /* we cannot use Itcl_GetInstanceVar here as the object is not
          * yet completely built. So use the varNsNamePtr
          */
@@ -2210,7 +2209,6 @@ ItclExtendedConfigure(
     hPtr = Tcl_FindHashEntry(&contextIoPtr->objectDelegatedOptions, (char *)
             objv[1]);
     if (hPtr == NULL) {
-	Tcl_Obj *objPtr;
 	objPtr = Tcl_NewStringObj("*",1);
 	Tcl_IncrRefCount(objPtr);
         /* check if all options are delegated */

@@ -1999,7 +1999,6 @@ Itcl_InvokeMethodIfExists(
                 if (objc > 0) {
                     if (contextClassPtr->numOptions == 0) {
 			/* check if all options are delegeted */
-			Tcl_Obj *objPtr;
 			objPtr = Tcl_NewStringObj("*", TCL_INDEX_NONE);
 			hPtr = Tcl_FindHashEntry(
 			        &contextClassPtr->delegatedOptions,

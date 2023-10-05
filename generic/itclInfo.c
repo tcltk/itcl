@@ -1810,7 +1810,7 @@ Itcl_BiInfoUnknownCmd(
 
     if (usage) {
         /* produce usage message */
-        Tcl_Obj *objPtr = Tcl_NewStringObj(
+        objPtr = Tcl_NewStringObj(
 	        "wrong # args: should be one of...\n", TCL_INDEX_NONE);
         ItclGetInfoUsage(interp, objPtr, (ItclObjectInfo *)clientData, NULL);
 	Tcl_SetObjResult(interp, objPtr);

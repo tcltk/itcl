@@ -803,7 +803,6 @@ CreateEnsemble(
      *  command.
      */
     if (parentEnsData == NULL) {
-	Tcl_Obj *unkObjPtr;
 	ensData->cmdPtr = Tcl_CreateEnsemble(interp, ensName,
 		Tcl_GetCurrentNamespace(interp), TCL_ENSEMBLE_PREFIX);
 	hPtr = Tcl_CreateHashEntry(&infoPtr->ensembleInfo->ensembles,

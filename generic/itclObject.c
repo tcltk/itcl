@@ -637,7 +637,7 @@ ItclCreateObject(
 	}
 
         if (iclsPtr->flags & (ITCL_TYPE|ITCL_WIDGETADAPTOR)) {
-            Tcl_Obj *objPtr = Tcl_NewObj();
+            objPtr = Tcl_NewObj();
             Tcl_GetCommandFullName(interp, ioPtr->accessCmd, objPtr);
             if (iclsPtr->flags & ITCL_WIDGETADAPTOR) {
 	        /* skip over the leading :: */
