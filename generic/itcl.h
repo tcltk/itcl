@@ -132,10 +132,6 @@ ITCL_EXTERN int Itcl_SafeInit(Tcl_Interp *interp);
 #define ITCL_PRIVATE          3
 #define ITCL_DEFAULT_PROTECT  4
 
-#if (TCL_MAJOR_VERSION == 8) && (TCL_MINOR_VERSION < 7) && !defined(Tcl_Size)
-#    define Tcl_Size int
-#endif
-
 /*
  *  Generic stack.
  */

@@ -3129,6 +3129,10 @@ AC_DEFUN([TEA_SETUP_COMPILER], [
 	fi
     fi
 
+    if test "${TCL_MAJOR_VERSION}" -lt 9 -a "${TCL_MINOR_VERSION}" -lt 7; then
+	    AC_DEFINE(Tcl_Size, int, [Is 'Tcl_Size' in <tcl.h>?])
+	fi
+
     #--------------------------------------------------------------------
     # Common compiler flag setup
     #--------------------------------------------------------------------

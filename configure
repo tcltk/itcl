@@ -5208,6 +5208,12 @@ printf "%s\n" "$tcl_cv_cc_pipe" >&6; }
 	fi
     fi
 
+    if test "${TCL_MAJOR_VERSION}" -lt 9 -a "${TCL_MINOR_VERSION}" -lt 7; then
+
+printf "%s\n" "#define Tcl_Size int" >>confdefs.h
+
+	fi
+
     #--------------------------------------------------------------------
     # Common compiler flag setup
     #--------------------------------------------------------------------
