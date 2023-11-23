@@ -137,7 +137,7 @@ TEA_ADD_HEADERS([generic/itcl.h
                 generic/itcl2TclOO.h
                 generic/itclIntDecls.h
 		])
-TEA_ADD_INCLUDES([-I. -I\"`${CYGPATH} ${srcdir}/generic`\"])
+TEA_ADD_INCLUDES([-I. -I\"`${CYGPATH} ${srcdir}/generic`\" -I\"`${CYGPATH} ${srcdir}`\"])
 TEA_ADD_LIBS([])
 TEA_ADD_CFLAGS([])
 TEA_ADD_STUB_SOURCES(itclStubLib.c)
@@ -263,7 +263,7 @@ eval itcl_SRC_DIR="$srcdir"
 itcl_SRC_DIR=`cd "${itcl_SRC_DIR}"; pwd`
 AC_SUBST(itcl_SRC_DIR)
 
-eval itcl_INCLUDE_SPEC="-I${itcl_SRC_DIR}/generic"
+eval itcl_INCLUDE_SPEC="-I${itcl_SRC_DIR}/generic -I${itcl_SRC_DIR}"
 AC_SUBST(itcl_INCLUDE_SPEC)
 
 #--------------------------------------------------------------------
