@@ -263,12 +263,12 @@ gdb:
 
 gdb-test: binaries libraries
 	$(TCLSH_ENV) $(PKG_ENV) $(GDB) \
-	    --args $(TCLSH_PROG) `@CYGPATH@ $(srcdir)/tests/all.tcl` \
+	    --args $(TCLSH_PROG) -encoding utf-8 `@CYGPATH@ $(srcdir)/tests/all.tcl` \
 	    $(TESTFLAGS) -singleproc 1 -load "$(TESTLOADARG)"
 
 valgrind: binaries libraries
 	$(TCLSH_ENV) $(PKG_ENV) $(VALGRIND) $(VALGRINDARGS) $(TCLSH_PROG) \
-	    `@CYGPATH@ $(srcdir)/tests/all.tcl` $(TESTFLAGS)
+	    -encoding utf-8 `@CYGPATH@ $(srcdir)/tests/all.tcl` $(TESTFLAGS)
 
 valgrindshell: binaries libraries
 	$(TCLSH_ENV) $(PKG_ENV) $(VALGRIND) $(VALGRINDARGS) $(TCLSH_PROG) $(SCRIPT)
@@ -276,7 +276,7 @@ valgrindshell: binaries libraries
 depend:
 
 genstubs: $(srcdir)/tools/genStubs.tcl $(srcdir)/generic/itcl.decls
-	$(TCLSH) $(srcdir)/tools/genStubs.tcl $(srcdir)/generic $(srcdir)/generic/itcl.decls
+	$(TCLSH) -encoding utf-8 $(srcdir)/tools/genStubs.tcl $(srcdir)/generic $(srcdir)/generic/itcl.decls
 
 #========================================================================
 # $(PKG_LIB_FILE) should be listed as part of the BINARIES variable

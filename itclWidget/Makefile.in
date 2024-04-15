@@ -235,7 +235,7 @@ install-doc: doc
 	done
 
 test: binaries libraries
-	$(TCLSH) `@CYGPATH@ $(srcdir)/tests/all.tcl` $(TESTFLAGS) -load "package require itcl"
+	$(TCLSH) -encoding utf-8 `@CYGPATH@ $(srcdir)/tests/all.tcl` $(TESTFLAGS) -load "package require itcl"
 
 shell: binaries libraries
 	@$(TCLSH) $(SCRIPT)
@@ -245,7 +245,7 @@ gdb:
 
 gdb-test: binaries libraries
 	$(TCLSH_ENV) $(PKG_ENV) $(GDB) \
-	    --args $(TCLSH_PROG) `@CYGPATH@ $(srcdir)/tests/all.tcl` \
+	    --args $(TCLSH_PROG) -encoding utf-8 `@CYGPATH@ $(srcdir)/tests/all.tcl` \
 	    $(TESTFLAGS) -singleproc 1 -load "$(TESTLOADARG)"
 
 valgrind: binaries libraries
