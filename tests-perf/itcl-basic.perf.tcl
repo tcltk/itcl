@@ -16,7 +16,7 @@
 
 
 if {![namespace exists ::tclTestPerf]} {
-  source [file join [file dirname [info library]] tests-perf test-performance.tcl]
+  source -encoding utf-8 [file join [file dirname [info library]] tests-perf test-performance.tcl]
 }
 
 namespace eval ::itclTestPerf-Basic {
