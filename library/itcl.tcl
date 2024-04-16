@@ -53,7 +53,7 @@ foreach __cmd {itcl::class class itcl::type type ictl::widget widget itcl::widge
 	variable index
 	variable scriptFile
 	append index "set [list auto_index([fullname $name])]"
-	append index " \[list source \[file join \$dir [list $scriptFile]\]\]\n"
+	append index " \[list source -encoding utf-8 \[file join \$dir [list $scriptFile]\]\]\n"
 
 	variable parser
 	variable contextStack
@@ -72,7 +72,7 @@ foreach __cmd {itcl::body body} {
 	variable index
 	variable scriptFile
 	append index "set [list auto_index([fullname $name])]"
-	append index " \[list source \[file join \$dir [list $scriptFile]\]\]\n"
+	append index " \[list source -encoding utf-8 \[file join \$dir [list $scriptFile]\]\]\n"
     }
 }
 
@@ -85,7 +85,7 @@ foreach __cmd {itcl::configbody configbody} {
 	variable index
 	variable scriptFile
 	append index "set [list auto_index([fullname $name])]"
-	append index " \[list source \[file join \$dir [list $scriptFile]\]\]\n"
+	append index " \[list source -encoding utf-8 \[file join \$dir [list $scriptFile]\]\]\n"
     }
 }
 
@@ -98,7 +98,7 @@ foreach __cmd {itcl::ensemble ensemble} {
 	variable index
 	variable scriptFile
 	append index "set [list auto_index([fullname $name])]"
-	append index " \[list source \[file join \$dir [list $scriptFile]\]\]\n"
+	append index " \[list source -encoding utf-8 \[file join \$dir [list $scriptFile]\]\]\n"
     }
 }
 

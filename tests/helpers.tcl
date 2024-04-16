@@ -36,7 +36,7 @@ if {[namespace which -command memory] ne "" && (
       load {} Itcl i
       i eval {set ::tcl::inl_mem_test 0}
       i eval {package require tcltest; @testargv@}
-      i eval [list source @test@]
+      i eval [list source -encoding utf-8 @test@]
       interp delete i
     }]]
     if {$leak} {

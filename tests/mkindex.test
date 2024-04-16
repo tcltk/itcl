@@ -37,9 +37,9 @@ test mkindex-1.2 {build tclIndex based on a test file} {
     file exists tclIndex
 } {1}
 
-set element "{source [file join . mkindex.itcl]}"
+set element "{source *[file join . mkindex.itcl]}"
 
-test mkindex-1.3 {examine tclIndex} {
+test mkindex-1.3 {examine tclIndex} -body {
     namespace eval itcl_mkindex_tmp {
         set dir "."
         variable auto_index
@@ -50,7 +50,7 @@ test mkindex-1.3 {examine tclIndex} {
         }
         set result
     }
-} "{::Simple2::bump $element} {::Simple2::by $element} {::buried::deep::within $element} {::buried::ens $element} {::buried::inside $element} {::buried::inside::bump $element} {::buried::inside::by $element} {::buried::inside::find $element} {::buried::under::neath $element} {::top::find $element} {::top::notice $element} {Simple1 $element} {Simple2 $element} {ens $element} {top $element}"
+} -match glob -result "{::Simple2::bump $element} {::Simple2::by $element} {::buried::deep::within $element} {::buried::ens $element} {::buried::inside $element} {::buried::inside::bump $element} {::buried::inside::by $element} {::buried::inside::find $element} {::buried::under::neath $element} {::top::find $element} {::top::notice $element} {Simple1 $element} {Simple2 $element} {ens $element} {top $element}"
 
 file delete tclIndex
 ::tcltest::cleanupTests

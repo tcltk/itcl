@@ -56,7 +56,7 @@ static const char initScript[] =
 "        }\n"
 "        foreach i $dirs {\n"
 "            set library $i\n"
-"            if {![catch {uplevel #0 [list source [file join $i itcl.tcl]]}]} {\n"
+"            if {![catch {uplevel #0 [list source -encoding utf-8 [file join $i itcl.tcl]]}]} {\n"
 "                set library $i\n"
 "                return\n"
 "            }\n"

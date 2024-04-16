@@ -72,7 +72,7 @@ static char initHullCmdsScript[] =
 "        foreach i $dirs {\n"
 "            set library $i\n"
 "            set itclfile [file join $i itclHullCmds.tcl]\n"
-"            if {![catch {uplevel #0 [list source $itclfile]} msg]} {\n"
+"            if {![catch {uplevel #0 [list source -encoding utf-8 $itclfile]} msg]} {\n"
 "                return\n"
 "            }\n"
 "puts stderr \"MSG!$msg!\"\n"
