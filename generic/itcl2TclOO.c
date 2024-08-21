@@ -156,13 +156,13 @@ Itcl_InvokeProcedureMethod(
     mPtr = (Method *)clientData;
     if (mPtr->declaringClassPtr == NULL) {
 	/* that is the case for typemethods */
-        nsPtr = mPtr->declaringObjectPtr->namespacePtr;
+	nsPtr = mPtr->declaringObjectPtr->namespacePtr;
     } else {
-        nsPtr = mPtr->declaringClassPtr->thisPtr->namespacePtr;
+	nsPtr = mPtr->declaringClassPtr->thisPtr->namespacePtr;
     }
 
     return Tcl_InvokeClassProcedureMethod(interp, mPtr->namePtr, nsPtr,
-            (ProcedureMethod *)mPtr->clientData, objc, objv);
+	    (ProcedureMethod *)mPtr->clientData, objc, objv);
 }
 
 static int
@@ -188,9 +188,9 @@ EnsembleErrorProc(
 
     overflow = (nameLen > (Tcl_Size)limit);
     Tcl_AppendObjToErrorInfo(interp, Tcl_ObjPrintf(
-            "\n    (itcl ensemble part \"%.*s%s\" line %d)",
-            (overflow ? limit : (int)nameLen), procName,
-            (overflow ? "..." : ""), Tcl_GetErrorLine(interp)));
+	    "\n    (itcl ensemble part \"%.*s%s\" line %d)",
+	    (overflow ? limit : (int)nameLen), procName,
+	    (overflow ? "..." : ""), Tcl_GetErrorLine(interp)));
 }
 
 int
@@ -212,7 +212,7 @@ Itcl_InvokeEnsembleMethod(
 
     Tcl_NRAddCallback(interp, FreeProcedureMethod, pmPtr, NULL, NULL, NULL);
     return Tcl_InvokeClassProcedureMethod(interp, namePtr, nsPtr,
-            pmPtr, objc, objv);
+	    pmPtr, objc, objv);
 }
 
 
@@ -241,7 +241,7 @@ Itcl_PublicObjectCmd(
 
     if (oPtr) {
 	result = TclOOInvokeObject(interp, oPtr, clsPtr, PUBLIC_METHOD,
-            objc, objv);
+	    objc, objv);
     } else {
 	Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
 	    "cannot access object-specific info without an object context",
@@ -283,8 +283,8 @@ Itcl_NewProcClassMethod(
     Tcl_Method result;
 
     result = TclOONewProcMethodEx(interp, clsPtr, preCallPtr, postCallPtr,
-           errProc, clientData, nameObj, argsObj, bodyObj,
-           PUBLIC_METHOD | USE_DECLARER_NS, clientData2);
+	   errProc, clientData, nameObj, argsObj, bodyObj,
+	   PUBLIC_METHOD | USE_DECLARER_NS, clientData2);
     return result;
 }
 
@@ -315,8 +315,8 @@ Itcl_NewProcMethod(
     void **clientData2)
 {
     return TclOONewProcInstanceMethodEx(interp, oPtr, preCallPtr, postCallPtr,
-           errProc, clientData, nameObj, argsObj, bodyObj,
-           PUBLIC_METHOD | USE_DECLARER_NS, clientData2);
+	   errProc, clientData, nameObj, argsObj, bodyObj,
+	   PUBLIC_METHOD | USE_DECLARER_NS, clientData2);
 }
 
 /*
@@ -338,7 +338,7 @@ Itcl_NewForwardClassMethod(
     Tcl_Obj *prefixObj)
 {
     return (Tcl_Method)TclOONewForwardMethod(interp, (Class *)clsPtr,
-            flags, nameObj, prefixObj);
+	    flags, nameObj, prefixObj);
 }
 
 
@@ -350,7 +350,7 @@ Itcl_TclOOObjectName(
     Tcl_Obj *namePtr;
 
     if (oPtr->cachedNameObj) {
-        return oPtr->cachedNameObj;
+	return oPtr->cachedNameObj;
     }
     namePtr = Tcl_NewObj();
     Tcl_GetCommandFullName(interp, oPtr->command, namePtr);
@@ -371,16 +371,16 @@ Itcl_SelfCmd(
     CallContext *contextPtr;
 
     if (!Itcl_IsMethodCallFrame(interp)) {
-        Tcl_AppendResult(interp, TclGetString(objv[0]),
-                " may only be called from inside a method", NULL);
-        return TCL_ERROR;
+	Tcl_AppendResult(interp, TclGetString(objv[0]),
+		" may only be called from inside a method", NULL);
+	return TCL_ERROR;
     }
 
     contextPtr = (CallContext *)framePtr->clientData;
 
     if (objc == 1) {
-        Tcl_SetObjResult(interp, Itcl_TclOOObjectName(interp, contextPtr->oPtr));
-        return TCL_OK;
+	Tcl_SetObjResult(interp, Itcl_TclOOObjectName(interp, contextPtr->oPtr));
+	return TCL_OK;
     }
     return TCL_ERROR;
 }
@@ -392,7 +392,7 @@ Itcl_IsMethodCallFrame(
     Interp *iPtr = (Interp *) interp;
     CallFrame *framePtr = iPtr->varFramePtr;
     if (framePtr == NULL || !(framePtr->isProcCallFrame & FRAME_IS_METHOD)) {
-        return 0;
+	return 0;
     }
     return 1;
 }

@@ -184,12 +184,12 @@ Initialize (
     Tcl_CmdInfo info;
 
     if (Tcl_InitStubs(interp, "8.6-", 0) == NULL) {
-        return TCL_ERROR;
+	return TCL_ERROR;
     }
 
     ret = TclOOInitializeStubs(interp, "1.0");
     if (ret == NULL) {
-        return TCL_ERROR;
+	return TCL_ERROR;
     }
 
     objPtr = Tcl_NewStringObj("::oo::class", TCL_INDEX_NONE);
@@ -197,7 +197,7 @@ Initialize (
     clazzObjectPtr = Tcl_GetObjectFromObj(interp, objPtr);
     if (!clazzObjectPtr || !(tclCls = Tcl_GetObjectAsClass(clazzObjectPtr))) {
 	Tcl_DecrRefCount(objPtr);
-        return TCL_ERROR;
+	return TCL_ERROR;
     }
     Tcl_DecrRefCount(objPtr);
 
@@ -206,15 +206,15 @@ Initialize (
     nsPtr = Tcl_CreateNamespace(interp, ITCL_NAMESPACE, infoPtr, FreeItclObjectInfo);
     if (nsPtr == NULL) {
 	Itcl_Free(infoPtr);
-        Tcl_Panic("Itcl: cannot create namespace: \"%s\" \n", ITCL_NAMESPACE);
+	Tcl_Panic("Itcl: cannot create namespace: \"%s\" \n", ITCL_NAMESPACE);
     }
 
     nsPtr = Tcl_CreateNamespace(interp, ITCL_INTDICTS_NAMESPACE,
-            NULL, NULL);
+	    NULL, NULL);
     if (nsPtr == NULL) {
 	Itcl_Free(infoPtr);
-        Tcl_Panic("Itcl: cannot create namespace: \"%s::internal::dicts\" \n",
-	        ITCL_NAMESPACE);
+	Tcl_Panic("Itcl: cannot create namespace: \"%s::internal::dicts\" \n",
+		ITCL_NAMESPACE);
     }
 
     /*
@@ -224,7 +224,7 @@ Initialize (
      */
     infoPtr->interp = interp;
     infoPtr->class_meta_type = (Tcl_ObjectMetadataType *)ckalloc(
-            sizeof(Tcl_ObjectMetadataType));
+	    sizeof(Tcl_ObjectMetadataType));
     infoPtr->class_meta_type->version = TCL_OO_METADATA_VERSION_CURRENT;
     infoPtr->class_meta_type->name = "ItclClass";
     infoPtr->class_meta_type->deleteProc = ItclDeleteClassMetadata;
@@ -258,30 +258,30 @@ Initialize (
     Tcl_SetVar2(interp, ITCL_NAMESPACE"::internal::dicts::objects", NULL, "", 0);
     Tcl_SetVar2(interp, ITCL_NAMESPACE"::internal::dicts::classOptions", NULL, "", 0);
     Tcl_SetVar2(interp,
-            ITCL_NAMESPACE"::internal::dicts::classDelegatedOptions", NULL, "", 0);
+	    ITCL_NAMESPACE"::internal::dicts::classDelegatedOptions", NULL, "", 0);
     Tcl_SetVar2(interp,
-            ITCL_NAMESPACE"::internal::dicts::classComponents", NULL, "", 0);
+	    ITCL_NAMESPACE"::internal::dicts::classComponents", NULL, "", 0);
     Tcl_SetVar2(interp,
-            ITCL_NAMESPACE"::internal::dicts::classVariables", NULL, "", 0);
+	    ITCL_NAMESPACE"::internal::dicts::classVariables", NULL, "", 0);
     Tcl_SetVar2(interp,
-            ITCL_NAMESPACE"::internal::dicts::classFunctions", NULL, "", 0);
+	    ITCL_NAMESPACE"::internal::dicts::classFunctions", NULL, "", 0);
     Tcl_SetVar2(interp,
-            ITCL_NAMESPACE"::internal::dicts::classDelegatedFunctions", NULL, "", 0);
+	    ITCL_NAMESPACE"::internal::dicts::classDelegatedFunctions", NULL, "", 0);
 
     hPtr = Tcl_CreateHashEntry(&infoPtr->classTypes,
-            (char *)Tcl_NewStringObj("class", TCL_INDEX_NONE), &isNew);
+	    (char *)Tcl_NewStringObj("class", TCL_INDEX_NONE), &isNew);
     Tcl_SetHashValue(hPtr, ITCL_CLASS);
     hPtr = Tcl_CreateHashEntry(&infoPtr->classTypes,
-            (char *)Tcl_NewStringObj("type", TCL_INDEX_NONE), &isNew);
+	    (char *)Tcl_NewStringObj("type", TCL_INDEX_NONE), &isNew);
     Tcl_SetHashValue(hPtr, ITCL_TYPE);
     hPtr = Tcl_CreateHashEntry(&infoPtr->classTypes,
-            (char *)Tcl_NewStringObj("widget", TCL_INDEX_NONE), &isNew);
+	    (char *)Tcl_NewStringObj("widget", TCL_INDEX_NONE), &isNew);
     Tcl_SetHashValue(hPtr, ITCL_WIDGET);
     hPtr = Tcl_CreateHashEntry(&infoPtr->classTypes,
-            (char *)Tcl_NewStringObj("widgetadaptor", TCL_INDEX_NONE), &isNew);
+	    (char *)Tcl_NewStringObj("widgetadaptor", TCL_INDEX_NONE), &isNew);
     Tcl_SetHashValue(hPtr, ITCL_WIDGETADAPTOR);
     hPtr = Tcl_CreateHashEntry(&infoPtr->classTypes,
-            (char *)Tcl_NewStringObj("extendedclass", TCL_INDEX_NONE), &isNew);
+	    (char *)Tcl_NewStringObj("extendedclass", TCL_INDEX_NONE), &isNew);
     Tcl_SetHashValue(hPtr, ITCL_ECLASS);
 
     res_option = getenv("ITCL_USE_OLD_RESOLVERS");
@@ -312,7 +312,7 @@ Initialize (
 
     /* first create the Itcl base class as root of itcl classes */
     if (Tcl_EvalEx(interp, clazzClassScript, TCL_INDEX_NONE, 0) != TCL_OK) {
-        Tcl_Panic("cannot create Itcl root class ::itcl::clazz");
+	Tcl_Panic("cannot create Itcl root class ::itcl::clazz");
     }
     resPtr = Tcl_GetObjResult(interp);
     /*
@@ -324,10 +324,10 @@ Initialize (
     Tcl_DecrRefCount(resPtr);
 
     if (clazzObjectPtr == NULL) {
-        Tcl_AppendResult(interp,
-                "ITCL: cannot get Object for ::itcl::clazz for class \"",
-                "::itcl::clazz", "\"", NULL);
-        return TCL_ERROR;
+	Tcl_AppendResult(interp,
+		"ITCL: cannot get Object for ::itcl::clazz for class \"",
+		"::itcl::clazz", "\"", NULL);
+	return TCL_ERROR;
     }
 
     Tcl_ObjectSetMetadata(clazzObjectPtr, &canary, infoPtr);
@@ -341,7 +341,7 @@ Initialize (
      */
 
     if (Itcl_EnsembleInit(interp) != TCL_OK) {
-        return TCL_ERROR;
+	return TCL_ERROR;
     }
 
     Itcl_ParseInit(interp, infoPtr);
@@ -351,7 +351,7 @@ Initialize (
      *  are automatically built into class definitions.
      */
     if (Itcl_BiInit(interp, infoPtr) != TCL_OK) {
-        return TCL_ERROR;
+	return TCL_ERROR;
     }
 
     /*
@@ -359,7 +359,7 @@ Initialize (
      *  can be imported with something like "namespace import itcl::*"
      */
     itclNs = Tcl_FindNamespace(interp, "::itcl", NULL,
-        TCL_LEAVE_ERR_MSG);
+	TCL_LEAVE_ERR_MSG);
 
     /*
      *  This was changed from a glob export (itcl::*) to explicit
@@ -368,28 +368,28 @@ Initialize (
      *  imported might be confusing ("is").
      */
     if (!itclNs ||
-            (Tcl_Export(interp, itclNs, "body", /* reset */ 1) != TCL_OK) ||
-            (Tcl_Export(interp, itclNs, "class", 0) != TCL_OK) ||
-            (Tcl_Export(interp, itclNs, "code", 0) != TCL_OK) ||
-            (Tcl_Export(interp, itclNs, "configbody", 0) != TCL_OK) ||
-            (Tcl_Export(interp, itclNs, "delete", 0) != TCL_OK) ||
-            (Tcl_Export(interp, itclNs, "delete_helper", 0) != TCL_OK) ||
-            (Tcl_Export(interp, itclNs, "ensemble", 0) != TCL_OK) ||
-            (Tcl_Export(interp, itclNs, "filter", 0) != TCL_OK) ||
-            (Tcl_Export(interp, itclNs, "find", 0) != TCL_OK) ||
-            (Tcl_Export(interp, itclNs, "forward", 0) != TCL_OK) ||
-            (Tcl_Export(interp, itclNs, "local", 0) != TCL_OK) ||
-            (Tcl_Export(interp, itclNs, "mixin", 0) != TCL_OK) ||
-            (Tcl_Export(interp, itclNs, "scope", 0) != TCL_OK)) {
-        return TCL_ERROR;
+	    (Tcl_Export(interp, itclNs, "body", /* reset */ 1) != TCL_OK) ||
+	    (Tcl_Export(interp, itclNs, "class", 0) != TCL_OK) ||
+	    (Tcl_Export(interp, itclNs, "code", 0) != TCL_OK) ||
+	    (Tcl_Export(interp, itclNs, "configbody", 0) != TCL_OK) ||
+	    (Tcl_Export(interp, itclNs, "delete", 0) != TCL_OK) ||
+	    (Tcl_Export(interp, itclNs, "delete_helper", 0) != TCL_OK) ||
+	    (Tcl_Export(interp, itclNs, "ensemble", 0) != TCL_OK) ||
+	    (Tcl_Export(interp, itclNs, "filter", 0) != TCL_OK) ||
+	    (Tcl_Export(interp, itclNs, "find", 0) != TCL_OK) ||
+	    (Tcl_Export(interp, itclNs, "forward", 0) != TCL_OK) ||
+	    (Tcl_Export(interp, itclNs, "local", 0) != TCL_OK) ||
+	    (Tcl_Export(interp, itclNs, "mixin", 0) != TCL_OK) ||
+	    (Tcl_Export(interp, itclNs, "scope", 0) != TCL_OK)) {
+	return TCL_ERROR;
     }
 
     Tcl_CreateObjCommand(interp,
-            ITCL_NAMESPACE"::internal::commands::sethullwindowname",
-            ItclSetHullWindowName, infoPtr, NULL);
+	    ITCL_NAMESPACE"::internal::commands::sethullwindowname",
+	    ItclSetHullWindowName, infoPtr, NULL);
     Tcl_CreateObjCommand(interp,
-            ITCL_NAMESPACE"::internal::commands::checksetitclhull",
-            ItclCheckSetItclHull, infoPtr, NULL);
+	    ITCL_NAMESPACE"::internal::commands::checksetitclhull",
+	    ItclCheckSetItclHull, infoPtr, NULL);
 
     /*
      *  Set up the variables containing version info.
@@ -397,7 +397,7 @@ Initialize (
 
     Tcl_SetVar2(interp, "::itcl::version", NULL, ITCL_VERSION, TCL_NAMESPACE_ONLY);
     Tcl_SetVar2(interp, "::itcl::patchLevel", NULL, ITCL_PATCH_LEVEL,
-            TCL_NAMESPACE_ONLY);
+	    TCL_NAMESPACE_ONLY);
 
 
 #ifdef ITCL_DEBUG_C_INTERFACE
@@ -487,7 +487,7 @@ Itcl_Init (
     Tcl_Interp *interp)
 {
     if (Initialize(interp) != TCL_OK) {
-        return TCL_ERROR;
+	return TCL_ERROR;
     }
 
     return  Tcl_EvalEx(interp, initScript, TCL_INDEX_NONE, 0);
@@ -513,7 +513,7 @@ Itcl_SafeInit (
     Tcl_Interp *interp)
 {
     if (Initialize(interp) != TCL_OK) {
-        return TCL_ERROR;
+	return TCL_ERROR;
     }
     return Tcl_EvalEx(interp, safeInitScript, TCL_INDEX_NONE, 0);
 }
@@ -564,8 +564,8 @@ ItclCheckSetItclHull(
     const char *valueStr;
 
     if (objc < 3) {
-        Tcl_AppendResult(interp, "ItclCheckSetItclHull wrong # args should be ",
-	        "<objectName> <value>", NULL);
+	Tcl_AppendResult(interp, "ItclCheckSetItclHull wrong # args should be ",
+		"<objectName> <value>", NULL);
 	return TCL_ERROR;
     }
 
@@ -577,31 +577,31 @@ ItclCheckSetItclHull(
     assert( strlen(Tcl_GetString(objv[1])) == 0);
     infoPtr = (ItclObjectInfo *)clientData;
     {
-        ioPtr = infoPtr->currIoPtr;
+	ioPtr = infoPtr->currIoPtr;
 	if (ioPtr == NULL) {
-            Tcl_AppendResult(interp, "ItclCheckSetItclHull cannot find object",
-	            NULL);
+	    Tcl_AppendResult(interp, "ItclCheckSetItclHull cannot find object",
+		    NULL);
 	    return TCL_ERROR;
-        }
+	}
     }
     objPtr = Tcl_NewStringObj("itcl_hull", TCL_INDEX_NONE);
     hPtr = Tcl_FindHashEntry(&ioPtr->iclsPtr->variables, (char *)objPtr);
     Tcl_DecrRefCount(objPtr);
     if (hPtr == NULL) {
-        Tcl_AppendResult(interp, "ItclCheckSetItclHull cannot find itcl_hull",
-	        " variable for object \"", Tcl_GetString(objv[1]), "\"", NULL);
+	Tcl_AppendResult(interp, "ItclCheckSetItclHull cannot find itcl_hull",
+		" variable for object \"", Tcl_GetString(objv[1]), "\"", NULL);
 	return TCL_ERROR;
     }
     ivPtr = (ItclVariable *)Tcl_GetHashValue(hPtr);
     valueStr = Tcl_GetString(objv[2]);
     if (strcmp(valueStr, "2") == 0) {
-        ivPtr->initted = 2;
+	ivPtr->initted = 2;
     } else {
-        if (strcmp(valueStr, "0") == 0) {
-            ivPtr->initted = 0;
+	if (strcmp(valueStr, "0") == 0) {
+	    ivPtr->initted = 0;
 	} else {
-            Tcl_AppendResult(interp, "ItclCheckSetItclHull bad value \"",
-	            valueStr, "\"", NULL);
+	    Tcl_AppendResult(interp, "ItclCheckSetItclHull bad value \"",
+		    valueStr, "\"", NULL);
 	    return TCL_ERROR;
 	}
     }

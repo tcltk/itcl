@@ -178,22 +178,22 @@ https://core.tcl-lang.org/itcl/timeline
 
 2012-07-12  Arnulf P.Wiedemann  <wiede@users.sourceforge.net>
 	* generic/itclBase.c:   make the info command call in clazzUnknownBody a
-	                        list to avoid problems with class names
-	                        containing spaces. i
+				list to avoid problems with class names
+				containing spaces. i
 				Fix for [incr Tcl] bug  ID: 3536018
 2012-05-17  Arnulf P.Wiedemann  <wiede@users.sourceforge.net>
 	* generic/itclResolve.c: fixed problem with access to protected class
-	                        variables when not from top level context
-	                        reported from Rene Zaumseil for his itk
+				variables when not from top level context
+				reported from Rene Zaumseil for his itk
 				emulation
 2012-03-25  Arnulf P.Wiedemann  <wiede@users.sourceforge.net>
 	* generic/itclInfo.c: fixed problem with info exists command.
-	                        fossil ticket id: d4ee728817f951d0b2aa8e8f9b030ea854e92c9f
+				fossil ticket id: d4ee728817f951d0b2aa8e8f9b030ea854e92c9f
 2012-02-25  Arnulf P.Wiedemann  <wiede@users.sourceforge.net>
 	* generic/itclObject.c: special case: we found the class for the class command,
 				for a relative or absolute class path name
 				but we have no method in that class that fits.
-	        		Problem of Rene Zaumseil when having the object
+				Problem of Rene Zaumseil when having the object
 				for a class in a child namespace of the class
 				fossil ticket id: 36577626c340ad59615f0a0238d67872c009a8c9
 	* generic/itclCmd.c:	typo fix
@@ -294,7 +294,7 @@ https://core.tcl-lang.org/itcl/timeline
 	argument.
 
 2010-08-22  Arnulf P.Wiedemann  <wiede@users.sourceforge.net>
-        * itclInt.h, itclObject.c, itclInfo.c: fix for BiInfoHeritageCmd
+	* itclInt.h, itclObject.c, itclInfo.c: fix for BiInfoHeritageCmd
 	and BiInfoInheritCmd function, if we have no object context
 
 2010-08-17  Jeff Hobbs  <jeffh@ActiveState.com>
@@ -308,17 +308,17 @@ https://core.tcl-lang.org/itcl/timeline
 	Remove unnecessary itcl_INCLUDE_DIR (dup of itcl_INCLUDE_SPEC)
 
 2010-05-17  Arnulf P.Wiedemann  <wiede@users.sourceforge.net>
-        * itclClass.c:          undo change from 2010-05-16
+	* itclClass.c:          undo change from 2010-05-16
 2010-05-16  Arnulf P.Wiedemann  <wiede@users.sourceforge.net>
-        * itclClass.c:          allow variable namespace to exist
+	* itclClass.c:          allow variable namespace to exist
 2010-05-02  Arnulf P.Wiedemann  <wiede@users.sourceforge.net>
-        * itclClass.c:		fix for SF bug #2993540
+	* itclClass.c:		fix for SF bug #2993540
 	* itcl2Tcloo.c:         fix for SF bug #2993648
 	* itcl2Tcloo.h:         fix for SF bug #2993648
 	* itclBuiltin.c:        added an empty line for beautifying
 	* itclCmd.c:            in Itcl_IsObjectCmd if in constructor use the correct ioPtr
 	* itclObject.c:         in Itcl_ObjectIsa check for contextIoPtr == NULL
-	                        to avoid segmentation violation
+				to avoid segmentation violation
 2010-04-21  Arnulf P.Wiedemann  <wiede@users.sourceforge.net>
 	* itclCmd.c:		Add missing Tcl_DStringFree for [itcl Bug 2983809]
 	* itclEnsemble.c:
@@ -327,7 +327,7 @@ https://core.tcl-lang.org/itcl/timeline
 	* itclResolve.c:
 
 	* itclParse.c:          better error message when using: public mthod ...
-	                        instead of public method ...
+				instead of public method ...
 2010-04-08  Don Porter  <dgp@Users.sourceforge.net>
 	* itclInt.h:		Add #ifdef guards to attempt inclusion of
 				a unistd.h header file only where one exists.
@@ -345,11 +345,11 @@ https://core.tcl-lang.org/itcl/timeline
 	* itcl2TclOO.c:
 2010-03-19  Arnulf P. Wiedemann <wiede@users.sourceforge.net>
 	* configure.in:    	add missing include files for install,thanks to Reinhard Max for
-	                        the patch
+				the patch
 	* itclInfo.c:		removed "uplevel 1" in Itcl_BiInfoUnknownCmd.c, which made problems
-	                        with "info complete", reported by Reinhard Max
+				with "info complete", reported by Reinhard Max
 	* itclMethod.c:		fixed bug, which caused core dump in CallItclObjectCmd, thanks to
-	                        Reinhard Max for the patch
+				Reinhard Max for the patch
 2010-03-06  Arnulf P. Wiedemann <wiede@users.sourceforge.net>
 	* itcl.decls:    	changed CONST in declarations to const
 	* itclDecls.h:
@@ -365,7 +365,7 @@ https://core.tcl-lang.org/itcl/timeline
 
 2009-10-24 Arnulf P. Wiedemann <wiede@users.sf.net>
 	* itclMethod.c:          if during call of constructor, when building
-	                         an object there were multiple recursive calls
+				 an object there were multiple recursive calls
 				 on CallItclObjectCmd and errors have not been
 				 propagated. Now hadConstructorError
 				 field in ItclObject struct is used for that
@@ -374,31 +374,31 @@ https://core.tcl-lang.org/itcl/timeline
 	* itclObject.c:
 
 	* itclObject.c:          allow %:var_name substitution in delegate
-	                         method using part for extendedclass
+				 method using part for extendedclass
 
 	* itclObject.c:          allow call of delegated methods in constructor
-	                         of ::itcl::extendedclass
+				 of ::itcl::extendedclass
 	* itclBuiltin.c:
 	* itclMethod.c:
 
 
 2009-10-23 Arnulf P. Wiedemann <wiede@users.sf.net>
-        * generic/itcl.h:        bumped version to 4.0b4
+	* generic/itcl.h:        bumped version to 4.0b4
 	* configure.in:
 	* configure:
 
 	* itclClass.c:           fixed bug which prevented correct error
-	                         reporting when there was a problem when
+				 reporting when there was a problem when
 				 creating an object, also fixed to use correct
 				 NRE calling
 
 2009-10-23  Arnulf P. Wiedemann <wiede@users.sourceforge.net>
 	* itclMigrate2TclCore.c: added Itcl_GetUplevelCallFrame and
-	                         Itcl_ActivateCallFrame functions
-	                         same as in Itcl3.4. They are needed to call
+				 Itcl_ActivateCallFrame functions
+				 same as in Itcl3.4. They are needed to call
 				 the itk_component command with the suitable
 				 call frame as this is needed for access to the
-	                         proc local vars. This was the fix for SF
+				 proc local vars. This was the fix for SF
 				 bug #2840994
 	* itclStubInit.c:
 	* itcl.decls:
@@ -406,7 +406,7 @@ https://core.tcl-lang.org/itcl/timeline
 	* itclIntDecls.h:
 
 	* itclResolve.c:         added special_resolve_vars. Also needed
-	                         for SF bug #2840994
+				 for SF bug #2840994
 
 
 2009-10-22  Arnulf P. Wiedemann <wiede@users.sourceforge.net>
@@ -419,7 +419,7 @@ https://core.tcl-lang.org/itcl/timeline
 	* itclObject.c:     added an empty line (beautifying)
 
 	* itclInfo.c:       no extra method for info exists, use the
-	                    ItclBiInfoUnknownCmd instead
+			    ItclBiInfoUnknownCmd instead
 			    fix for bug # 2738459
 	* itclObject.c:     fix for bug # 2789473
 	* itclResolve.c:    fix for bug # 2495261
@@ -442,7 +442,7 @@ https://core.tcl-lang.org/itcl/timeline
 	* generic/itclInfo.c:	fix for bug  #2830946.
 	* pkgIndex.tcl.in:	fix for bug  #2856166.
 	* itclInt.h:    for linux we need inclusion of unistd.h otherwise
-	                intprt_t type is not defined
+			intprt_t type is not defined
 
 	* itclResolve2.c:       changed CONST in declarations to const
 	* itclTclIntStubsFcn.c:
@@ -477,15 +477,15 @@ https://core.tcl-lang.org/itcl/timeline
 	* generic/itclBase.c: reduce size of initScript to satisfy MSVC6.
 
 2008-02-21 Arnulf P. Wiedemann <wiede@users.sf.net>
-        * fix for SF bug 2595708 itclParse.c and itclBuiltin.c
+	* fix for SF bug 2595708 itclParse.c and itclBuiltin.c
 	* fix for problem with scope command path reported by
 	* Harald Krummeck on c.l.t ItclCmd.c
 2008-02-02 Arnulf P. Wiedemann <wiede@users.sf.net>
-        * generic/itcl.h configure.in:
-	             bumped version to 4.0b3
+	* generic/itcl.h configure.in:
+		     bumped version to 4.0b3
 2008-02-01 Arnulf P. Wiedemann <wiede@users.sf.net>
-        * tests/widgetadaptor.test and tests/widgetclass.test:
-	             removed package require Tk to avoid running the tests
+	* tests/widgetadaptor.test and tests/widgetclass.test:
+		     removed package require Tk to avoid running the tests
 		     always
 2008-01-24 Arnulf P. Wiedemann <wiede@users.sf.net>
 	* generic/itclBase.c:	added *Dict*Info functions to allow fully

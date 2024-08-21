@@ -62,7 +62,7 @@ cArgFunc(
     Tcl_IncrRefCount(objv[3]);
     infoPtr = (ItclObjectInfo *)Tcl_GetAssocData(interp, ITCL_INTERP_DATA, NULL);
     FOREACH_HASH_VALUE(classPtr,&infoPtr->nameClasses) {
-        if (strcmp(Tcl_GetString(objv[1]), Tcl_GetString(classPtr->fullNamePtr)) == 0 ||
+	if (strcmp(Tcl_GetString(objv[1]), Tcl_GetString(classPtr->fullNamePtr)) == 0 ||
                 strcmp(Tcl_GetString(objv[2]), Tcl_GetString(classPtr->fullNamePtr)) == 0) {
            iclsPtr = classPtr;
 	   break;

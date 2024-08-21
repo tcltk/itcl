@@ -19,7 +19,7 @@ dnl	to configure the system for the local environment.
 # so that we create the export library with the dll.
 #-----------------------------------------------------------------------
 
-AC_INIT([itcl],[4.2.5])
+AC_INIT([itcl],[4.2.6])
 
 #--------------------------------------------------------------------
 # Call TEA_INIT as the first TEA_ macro to set up initial vars.
@@ -109,33 +109,33 @@ TEA_SETUP_COMPILER
 
 
 TEA_ADD_SOURCES([
-                itcl2TclOO.c
-	        itclBase.c
-	        itclBuiltin.c
-                itclClass.c
-                itclCmd.c
-                itclEnsemble.c
-                itclHelpers.c
-	        itclInfo.c
-                itclLinkage.c
-                itclMethod.c
-                itclObject.c
-	        itclParse.c
-	        itclStubs.c
-                itclStubInit.c
-	        itclResolve.c
-	        itclTclIntStubsFcn.c
-	        itclUtil.c
-                itclMigrate2TclCore.c
+		itcl2TclOO.c
+		itclBase.c
+		itclBuiltin.c
+		itclClass.c
+		itclCmd.c
+		itclEnsemble.c
+		itclHelpers.c
+		itclInfo.c
+		itclLinkage.c
+		itclMethod.c
+		itclObject.c
+		itclParse.c
+		itclStubs.c
+		itclStubInit.c
+		itclResolve.c
+		itclTclIntStubsFcn.c
+		itclUtil.c
+		itclMigrate2TclCore.c
 		itclTestRegisterC.c
-                ])
+		])
 TEA_ADD_HEADERS([generic/itcl.h
-                generic/itclDecls.h
+		generic/itclDecls.h
 		generic/itclInt.h
-                generic/itclMigrate2TclCore.h
-                generic/itclTclIntStubsFcn.h
-                generic/itcl2TclOO.h
-                generic/itclIntDecls.h
+		generic/itclMigrate2TclCore.h
+		generic/itclTclIntStubsFcn.h
+		generic/itcl2TclOO.h
+		generic/itclIntDecls.h
 		])
 TEA_ADD_INCLUDES([-I. -I\"`${CYGPATH} ${srcdir}/generic`\" -I\"`${CYGPATH} ${srcdir}`\"])
 TEA_ADD_LIBS([])

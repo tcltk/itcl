@@ -112,7 +112,7 @@ Itcl_DeleteStack(
      *  built-in buffer) then free it.
      */
     if (stack->values != stack->space) {
-        ckfree((char*)stack->values);
+	ckfree((char*)stack->values);
     }
     stack->values = NULL;
     stack->len = stack->max = 0;
@@ -134,18 +134,18 @@ Itcl_PushStack(
     void **newStack;
 
     if (stack->len+1 >= stack->max) {
-        stack->max = 2*stack->max;
-        newStack = (void **)
-            ckalloc(stack->max*sizeof(void *));
+	stack->max = 2*stack->max;
+	newStack = (void **)
+	    ckalloc(stack->max*sizeof(void *));
 
-        if (stack->values) {
-            memcpy(newStack, stack->values,
-                stack->len*sizeof(void *));
+	if (stack->values) {
+	    memcpy(newStack, stack->values,
+		stack->len*sizeof(void *));
 
-            if (stack->values != stack->space)
-                ckfree((char*)stack->values);
-        }
-        stack->values = newStack;
+	    if (stack->values != stack->space)
+		ckfree((char*)stack->values);
+	}
+	stack->values = newStack;
     }
     stack->values[stack->len++] = cdata;
 }
@@ -162,8 +162,8 @@ Itcl_PopStack(
     Itcl_Stack *stack)  /* stack to be manipulated */
 {
     if (stack->values && (stack->len > 0)) {
-        stack->len--;
-        return stack->values[stack->len];
+	stack->len--;
+	return stack->values[stack->len];
     }
     return NULL;
 }
@@ -180,7 +180,7 @@ Itcl_PeekStack(
     Itcl_Stack *stack)  /* stack to be examined */
 {
     if (stack->values && (stack->len > 0)) {
-        return stack->values[stack->len-1];
+	return stack->values[stack->len-1];
     }
     return NULL;
 }
@@ -199,7 +199,7 @@ Itcl_GetStackValue(
     Tcl_Size pos)            /* get value at this index */
 {
     if (stack->values && (pos >= 0) && (pos < stack->len)) {
-        return stack->values[pos];
+	return stack->values[pos];
     }
     return NULL;
 }
@@ -242,7 +242,7 @@ Itcl_DeleteList(
 
     elemPtr = listPtr->head;
     while (elemPtr) {
-        elemPtr = Itcl_DeleteListElem(elemPtr);
+	elemPtr = Itcl_DeleteListElem(elemPtr);
     }
     listPtr->validate = 0;
 }
@@ -264,11 +264,11 @@ Itcl_CreateListElem(
     Itcl_ListElem *elemPtr;
 
     if (listPoolLen > 0) {
-        elemPtr = listPool;
-        listPool = elemPtr->next;
-        --listPoolLen;
+	elemPtr = listPool;
+	listPool = elemPtr->next;
+	--listPoolLen;
     } else {
-        elemPtr = (Itcl_ListElem*)ckalloc((unsigned)sizeof(Itcl_ListElem));
+	elemPtr = (Itcl_ListElem*)ckalloc((unsigned)sizeof(Itcl_ListElem));
     }
     elemPtr->owner = listPtr;
     elemPtr->value = NULL;
@@ -297,27 +297,27 @@ Itcl_DeleteListElem(
     nextPtr = elemPtr->next;
 
     if (elemPtr->prev) {
-        elemPtr->prev->next = elemPtr->next;
+	elemPtr->prev->next = elemPtr->next;
     }
     if (elemPtr->next) {
-        elemPtr->next->prev = elemPtr->prev;
+	elemPtr->next->prev = elemPtr->prev;
     }
 
     listPtr = elemPtr->owner;
     if (elemPtr == listPtr->head) {
-        listPtr->head = elemPtr->next;
+	listPtr->head = elemPtr->next;
     }
     if (elemPtr == listPtr->tail) {
-        listPtr->tail = elemPtr->prev;
+	listPtr->tail = elemPtr->prev;
     }
     --listPtr->num;
 
     if (listPoolLen < ITCL_LIST_POOL_SIZE) {
-        elemPtr->next = listPool;
-        listPool = elemPtr;
-        ++listPoolLen;
+	elemPtr->next = listPool;
+	listPool = elemPtr;
+	++listPoolLen;
     } else {
-        ckfree((char*)elemPtr);
+	ckfree((char*)elemPtr);
     }
     return nextPtr;
 }
@@ -345,11 +345,11 @@ Itcl_InsertList(
     elemPtr->next  = listPtr->head;
     elemPtr->prev  = NULL;
     if (listPtr->head) {
-        listPtr->head->prev = elemPtr;
+	listPtr->head->prev = elemPtr;
     }
     listPtr->head  = elemPtr;
     if (listPtr->tail == NULL) {
-        listPtr->tail = elemPtr;
+	listPtr->tail = elemPtr;
     }
     ++listPtr->num;
 
@@ -382,16 +382,16 @@ Itcl_InsertListElem(
 
     elemPtr->prev = pos->prev;
     if (elemPtr->prev) {
-        elemPtr->prev->next = elemPtr;
+	elemPtr->prev->next = elemPtr;
     }
     elemPtr->next = pos;
     pos->prev     = elemPtr;
 
     if (listPtr->head == pos) {
-        listPtr->head = elemPtr;
+	listPtr->head = elemPtr;
     }
     if (listPtr->tail == NULL) {
-        listPtr->tail = elemPtr;
+	listPtr->tail = elemPtr;
     }
     ++listPtr->num;
 
@@ -421,11 +421,11 @@ Itcl_AppendList(
     elemPtr->prev  = listPtr->tail;
     elemPtr->next  = NULL;
     if (listPtr->tail) {
-        listPtr->tail->next = elemPtr;
+	listPtr->tail->next = elemPtr;
     }
     listPtr->tail  = elemPtr;
     if (listPtr->head == NULL) {
-        listPtr->head = elemPtr;
+	listPtr->head = elemPtr;
     }
     ++listPtr->num;
 
@@ -458,16 +458,16 @@ Itcl_AppendListElem(
 
     elemPtr->next = pos->next;
     if (elemPtr->next) {
-        elemPtr->next->prev = elemPtr;
+	elemPtr->next->prev = elemPtr;
     }
     elemPtr->prev = pos;
     pos->next     = elemPtr;
 
     if (listPtr->tail == pos) {
-        listPtr->tail = elemPtr;
+	listPtr->tail = elemPtr;
     }
     if (listPtr->head == NULL) {
-        listPtr->head = elemPtr;
+	listPtr->head = elemPtr;
     }
     ++listPtr->num;
 
@@ -507,10 +507,10 @@ Itcl_FinishList()
 
     listPtr = listPool;
     while (listPtr != NULL) {
-        elemPtr = listPtr;
+	elemPtr = listPtr;
 	listPtr = elemPtr->next;
 	ckfree((char *)elemPtr);
-        elemPtr = NULL;
+	elemPtr = NULL;
     }
     listPool = NULL;
     listPoolLen = 0;
@@ -551,7 +551,7 @@ Itcl_EventuallyFree(
     PresMemoryPrefix *blk;
 
     if (cdata == NULL) {
-        return;
+	return;
     }
 
     /* Itcl memory block to ckalloc block */
@@ -580,7 +580,7 @@ Itcl_PreserveData(
     PresMemoryPrefix *blk;
 
     if (cdata == NULL) {
-        return;
+	return;
     }
 
     /* Itcl memory block to ckalloc block */
@@ -608,7 +608,7 @@ Itcl_ReleaseData(
     Tcl_FreeProc *freeProc;
 
     if (cdata == NULL) {
-        return;
+	return;
     }
 
     /* Itcl memory block to ckalloc block */
@@ -784,17 +784,17 @@ Itcl_Protection(
      *  In any case, return the protection level as it stands right now.
      */
     infoPtr = (ItclObjectInfo*) Tcl_GetAssocData(interp, ITCL_INTERP_DATA,
-        NULL);
+	NULL);
 
     assert(infoPtr != NULL);
     oldVal = infoPtr->protection;
 
     if (newLevel != 0) {
-        assert(newLevel == ITCL_PUBLIC ||
-            newLevel == ITCL_PROTECTED ||
-            newLevel == ITCL_PRIVATE ||
-            newLevel == ITCL_DEFAULT_PROTECT);
-        infoPtr->protection = newLevel;
+	assert(newLevel == ITCL_PUBLIC ||
+	    newLevel == ITCL_PROTECTED ||
+	    newLevel == ITCL_PRIVATE ||
+	    newLevel == ITCL_DEFAULT_PROTECT);
+	infoPtr->protection = newLevel;
     }
     return oldVal;
 }
@@ -838,12 +838,12 @@ Itcl_ParseNamespPath(
     newname = Tcl_DStringValue(buffer);
 
     for (sep=newname; *sep != '\0'; sep++)
-        ;
+	;
 
     while (--sep > newname) {
-        if (*sep == ':' && *(sep-1) == ':') {
-            break;
-        }
+	if (*sep == ':' && *(sep-1) == ':') {
+	    break;
+	}
     }
 
     /*
@@ -852,19 +852,19 @@ Itcl_ParseNamespPath(
      *  behavior, which allows names like "foo:::bar".
      */
     if (sep > newname) {
-        *tail = sep+1;
-        while (sep > newname && *(sep-1) == ':') {
-            sep--;
-        }
-        *sep = '\0';
-        *head = newname;
+	*tail = sep+1;
+	while (sep > newname && *(sep-1) == ':') {
+	    sep--;
+	}
+	*sep = '\0';
+	*head = newname;
     } else {
 
-        /*
-         *  No :: separators--the whole name is treated as a tail.
-         */
-        *tail = newname;
-        *head = NULL;
+	/*
+	 *  No :: separators--the whole name is treated as a tail.
+	 */
+	*tail = newname;
+	*head = NULL;
     }
 }
 
@@ -896,16 +896,16 @@ Itcl_CanAccess2(
      *  answer is known immediately.
      */
     if (protection == ITCL_PUBLIC) {
-        return 1;
+	return 1;
     } else {
-        if (protection == ITCL_PRIVATE) {
+	if (protection == ITCL_PRIVATE) {
 	    entry = Tcl_FindHashEntry(&iclsPtr->infoPtr->namespaceClasses,
 		fromNsPtr);
 	    if (entry == NULL) {
 		return 0;
 	    }
 	    return (iclsPtr == Tcl_GetHashValue(entry));
-        }
+	}
     }
 
     /*
@@ -923,12 +923,12 @@ Itcl_CanAccess2(
 	}
 	fromIclsPtr = (ItclClass *)Tcl_GetHashValue(entry);
 
-        entry = Tcl_FindHashEntry(&fromIclsPtr->heritage,
-	        (char*)iclsPtr);
+	entry = Tcl_FindHashEntry(&fromIclsPtr->heritage,
+		(char*)iclsPtr);
 
-        if (entry) {
-            return 1;
-        }
+	if (entry) {
+	    return 1;
+	}
     }
     return 0;
 }
@@ -984,7 +984,7 @@ Itcl_CanAccessFunc(
      *  Apply the usual rules first.
      */
     if (Itcl_CanAccess(imPtr, fromNsPtr)) {
-        return 1;
+	return 1;
     }
 
     /*
@@ -995,31 +995,31 @@ Itcl_CanAccessFunc(
      *  has access.
      */
     if ((imPtr->flags & ITCL_COMMON) == 0 &&
-            Itcl_IsClassNamespace(fromNsPtr)) {
-        Tcl_HashEntry *hPtr;
+	    Itcl_IsClassNamespace(fromNsPtr)) {
+	Tcl_HashEntry *hPtr;
 
-        iclsPtr = imPtr->iclsPtr;
+	iclsPtr = imPtr->iclsPtr;
 	hPtr = Tcl_FindHashEntry(&iclsPtr->infoPtr->namespaceClasses,
-	        (char *)fromNsPtr);
+		(char *)fromNsPtr);
 	if (hPtr == NULL) {
 	    return 0;
 	}
-        fromIclsPtr = (ItclClass *)Tcl_GetHashValue(hPtr);
+	fromIclsPtr = (ItclClass *)Tcl_GetHashValue(hPtr);
 
-        if (Tcl_FindHashEntry(&iclsPtr->heritage, (char*)fromIclsPtr)) {
-            entry = Tcl_FindHashEntry(&fromIclsPtr->resolveCmds,
-                (char *)imPtr->namePtr);
+	if (Tcl_FindHashEntry(&iclsPtr->heritage, (char*)fromIclsPtr)) {
+	    entry = Tcl_FindHashEntry(&fromIclsPtr->resolveCmds,
+		(char *)imPtr->namePtr);
 
-            if (entry) {
+	    if (entry) {
 		ItclCmdLookup *clookup;
 		clookup = (ItclCmdLookup *)Tcl_GetHashValue(entry);
 		ovlfunc = clookup->imPtr;
-                if ((ovlfunc->flags & ITCL_COMMON) == 0 &&
-                     ovlfunc->protection < ITCL_PRIVATE) {
-                    return 1;
-                }
-            }
-        }
+		if ((ovlfunc->flags & ITCL_COMMON) == 0 &&
+		     ovlfunc->protection < ITCL_PRIVATE) {
+		    return 1;
+		}
+	    }
+	}
     }
     return 0;
 }
@@ -1067,39 +1067,39 @@ Itcl_DecodeScopedCommand(
 	    /* empty body: skip over spaces */
 	}
 	if ((*pos == 'i') && ((pos + 7) <= (name + len))
-	        && (strncmp(pos, "inscope", 7) == 0)) {
+		&& (strncmp(pos, "inscope", 7) == 0)) {
 
-            result = Tcl_SplitList(interp, (const char *)name, &listc,
+	    result = Tcl_SplitList(interp, (const char *)name, &listc,
 		    &listv);
-            if (result == TCL_OK) {
-                if (listc != 4) {
-                    Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
-                        "malformed command \"", name, "\": should be \"",
-                        "namespace inscope namesp command\"",
-                        NULL);
-                    result = TCL_ERROR;
-                } else {
-                    nsPtr = Tcl_FindNamespace(interp, listv[2],
-                        NULL, TCL_LEAVE_ERR_MSG);
+	    if (result == TCL_OK) {
+		if (listc != 4) {
+		    Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+			"malformed command \"", name, "\": should be \"",
+			"namespace inscope namesp command\"",
+			NULL);
+		    result = TCL_ERROR;
+		} else {
+		    nsPtr = Tcl_FindNamespace(interp, listv[2],
+			NULL, TCL_LEAVE_ERR_MSG);
 
-                    if (nsPtr == NULL) {
-                        result = TCL_ERROR;
-                    } else {
-		        ckfree(cmdName);
-                        cmdName = (char *)ckalloc(strlen(listv[3])+1);
-                        strcpy(cmdName, listv[3]);
-                    }
-                }
-            }
-            ckfree((char*)listv);
+		    if (nsPtr == NULL) {
+			result = TCL_ERROR;
+		    } else {
+			ckfree(cmdName);
+			cmdName = (char *)ckalloc(strlen(listv[3])+1);
+			strcpy(cmdName, listv[3]);
+		    }
+		}
+	    }
+	    ckfree((char*)listv);
 
-            if (result != TCL_OK) {
-                Tcl_AppendObjToErrorInfo(interp, Tcl_ObjPrintf(
-                        "\n    (while decoding scoped command \"%s\")",
-                        name));
+	    if (result != TCL_OK) {
+		Tcl_AppendObjToErrorInfo(interp, Tcl_ObjPrintf(
+			"\n    (while decoding scoped command \"%s\")",
+			name));
 		ckfree(cmdName);
-                return TCL_ERROR;
-            }
+		return TCL_ERROR;
+	    }
 	}
     }
 

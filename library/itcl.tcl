@@ -33,7 +33,7 @@ proc ::itcl::local {class name args} {
     uplevel [list set itcl-local-$ptr $ptr]
     set cmd [uplevel namespace which -command $ptr]
     uplevel [list trace add variable itcl-local-$ptr unset \
-        "::itcl::delete_helper $cmd"]
+	"::itcl::delete_helper $cmd"]
     return $ptr
 }
 
@@ -112,8 +112,8 @@ foreach __cmd {itcl::ensemble ensemble} {
 #
 foreach __cmd {public protected private} {
     auto_mkindex_parser::command $__cmd {args} {
-        variable parser
-        $parser eval $args
+	variable parser
+	$parser eval $args
     }
 }
 
@@ -142,10 +142,10 @@ proc auto_import {pattern} {
     auto_load_index
 
     foreach pattern $patternList {
-        foreach name [array names auto_index $pattern] {
-            if {"" == [info commands $name]} {
-                ::itcl::import::stub create $name
-            }
-        }
+	foreach name [array names auto_index $pattern] {
+	    if {"" == [info commands $name]} {
+		::itcl::import::stub create $name
+	    }
+	}
     }
 }
