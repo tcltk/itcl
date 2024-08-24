@@ -652,8 +652,5 @@ FreeItclObjectInfo(
 	infoPtr->class_meta_type = NULL;
     }
 
-    /* clean up list pool */
-    Itcl_FinishList();
-
     Itcl_ReleaseData(infoPtr);
 }

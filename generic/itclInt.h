@@ -790,7 +790,6 @@ MODULE_SCOPE int ItclCreateDelegatedFunction(Tcl_Interp *interp,
 	Tcl_Obj *targetPtr, Tcl_Obj *usingPtr, Tcl_Obj *exceptionsPtr,
 	ItclDelegatedFunction **idmPtrPtr);
 MODULE_SCOPE void ItclDeleteDelegatedOption(char *cdata);
-MODULE_SCOPE void Itcl_FinishList();
 MODULE_SCOPE void ItclDeleteDelegatedFunction(ItclDelegatedFunction *idmPtr);
 MODULE_SCOPE void ItclFinishEnsemble(ItclObjectInfo *infoPtr);
 MODULE_SCOPE int Itcl_EnsembleDeleteCmd(void *clientData,

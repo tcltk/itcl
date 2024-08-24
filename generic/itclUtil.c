@@ -31,14 +31,7 @@
 #include "itclInt.h"
 #include <limits.h>
 
-/*
- *  POOL OF LIST ELEMENTS FOR LINKED LIST
- */
-static Itcl_ListElem *listPool = NULL;
-static int listPoolLen = 0;
-
 #define ITCL_VALID_LIST 0x01face10  /* magic bit pattern for validation */
-#define ITCL_LIST_POOL_SIZE 200     /* max number of elements in listPool */
 
 /*
  *  This structure is used to take a snapshot of the interpreter
@@ -252,9 +245,8 @@ Itcl_DeleteList(
  *  Itcl_CreateListElem()
  *
  *  Low-level routined used by procedures like Itcl_InsertList() and
- *  Itcl_AppendList() to create new list elements.  If elements are
- *  available, one is taken from the list element pool.  Otherwise,
- *  a new one is allocated.
+ *  Itcl_AppendList() to create new list elements.
+ *  This will use threaded-object cache for reuseable list elements.
  * ------------------------------------------------------------------------
  */
 Itcl_ListElem*
@@ -263,11 +255,15 @@ Itcl_CreateListElem(
 {
     Itcl_ListElem *elemPtr;
 
-    if (listPoolLen > 0) {
-	elemPtr = listPool;
-	listPool = elemPtr->next;
-	--listPoolLen;
-    } else {
+    /*
+     * Since size of Itcl_ListElem is always smaller than Tcl_Obj, but very
+     * near on it, we could use threaded-object cache for list elements.
+     */
+    if (sizeof(Itcl_ListElem) <= sizeof(Tcl_Obj)) { /* optimized at compile-time as true */
+	/* TODO: rewrite it once TclThreadAllocObj becomes public */
+	elemPtr = (Itcl_ListElem*)Tcl_NewObj();
+    } else { /* unreachable */
+	assert(0);
 	elemPtr = (Itcl_ListElem*)ckalloc((unsigned)sizeof(Itcl_ListElem));
     }
     elemPtr->owner = listPtr;
@@ -312,12 +308,16 @@ Itcl_DeleteListElem(
     }
     --listPtr->num;
 
-    if (listPoolLen < ITCL_LIST_POOL_SIZE) {
-	elemPtr->next = listPool;
-	listPool = elemPtr;
-	++listPoolLen;
-    } else {
-	ckfree((char*)elemPtr);
+    if (sizeof(Itcl_ListElem) <= sizeof(Tcl_Obj)) { /* optimized at compile-time as true */
+	/* TODO: rewrite it once TclThreadAllocObj/TclThreadFreeObj become public */
+	Tcl_Obj *objPtr = (Tcl_Obj *)elemPtr;
+	objPtr->refCount = 0;
+	objPtr->bytes = NULL;
+	objPtr->typePtr = NULL;
+	Tcl_DecrRefCount(objPtr);
+    } else { /* unreachable */
+	assert(0);
+	ckfree(elemPtr);
     }
     return nextPtr;
 }
@@ -489,31 +489,6 @@ Itcl_SetListValue(
     assert(elemPtr != NULL);
     assert(elemPtr->owner->validate == ITCL_VALID_LIST);
     elemPtr->value = val;
-}
-
-
-/*
- * ------------------------------------------------------------------------
- *  Itcl_FinishList()
- *
- *  free all memory used in the list pool
- * ------------------------------------------------------------------------
- */
-void
-Itcl_FinishList()
-{
-    Itcl_ListElem *listPtr;
-    Itcl_ListElem *elemPtr;
-
-    listPtr = listPool;
-    while (listPtr != NULL) {
-	elemPtr = listPtr;
-	listPtr = elemPtr->next;
-	ckfree((char *)elemPtr);
-	elemPtr = NULL;
-    }
-    listPool = NULL;
-    listPoolLen = 0;
 }
 
 
