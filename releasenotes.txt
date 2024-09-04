@@ -1,4 +1,4 @@
-This is the release 4.2.6 of Itcl.
+This is the release 4.3.0 of Itcl.
 
 It is intended to be script compatible with Itcl 4.0.* and Itcl 3.4.* .
 It very likely presents the same public C interface as Itcl 4.0.* .
@@ -11,6 +11,8 @@ error.
 
 Notes of past releases follow below
 -----------------------------------
+
+Starting with release 4.3.*, Itcl attempts to support multi-thread operations
 
 The difference to 4.0.*: in this release there are only bug fixes from SF and the fossil bug tracker for itcl.
 
