@@ -150,8 +150,9 @@ CallNewObjectInstance(
 
     *oPtr = NULL;
     if (infoPtr->clazzClassPtr) {
-	*oPtr = Tcl_NewObjectInstance(interp, infoPtr->clazzClassPtr,
-                path, path, 0, NULL, 0);
+	*oPtr = Tcl_NewObjectInstance(interp, infoPtr->clazzClassPtr, path,
+		Tcl_FindNamespace(interp, path, NULL, 0) ? NULL : path,
+		0, NULL, 0);
     }
     if (*oPtr == NULL) {
         Tcl_AppendResult(interp,
