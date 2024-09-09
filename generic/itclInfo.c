@@ -1707,12 +1707,10 @@ Itcl_BiInfoVarsCmd(
 		Itcl_List varList;
 		Tcl_Obj *resultListPtr;
 		Tcl_Obj *namePtr;
-		int numElems;
 
 		Itcl_InitList(&varList);
 		iclsPtr = (ItclClass *)Tcl_GetHashValue(hPtr);
 		resultListPtr = Tcl_GetObjResult(interp);
-		numElems = 0;
 /* FIXME !! should perhaps skip ___DO_NOT_DELETE_THIS_VARIABLE here !! */
 		FOREACH_HASH_VALUE(ivPtr, &iclsPtr->variables) {
 		    if ((ivPtr->flags & ITCL_VARIABLE) != 0) {
@@ -1725,7 +1723,6 @@ Itcl_BiInfoVarsCmd(
 		        }
 		        Tcl_ListObjAppendElement(interp, resultListPtr,
 		                namePtr);
-		        numElems++;
 		    }
 		    if ((ivPtr->flags & ITCL_COMMON) != 0) {
 		        if (ivPtr->protection != ITCL_PUBLIC) {
@@ -1738,7 +1735,6 @@ Itcl_BiInfoVarsCmd(
 			    }
 		            Tcl_ListObjAppendElement(interp, resultListPtr,
 			            namePtr);
-			    numElems++;
 		        }
 		    }
 		}
