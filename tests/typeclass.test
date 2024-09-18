@@ -294,7 +294,7 @@ test rename-1.3 {rename to "" deletes an instance} -body {
 
     dog fido
     rename fido ""
-    namespace children ::dog
+    itcl::find objects -class ::dog
 } -cleanup {
     dog destroy
 } -result {}
@@ -305,7 +305,7 @@ test rename-1.4 {rename to "" deletes an instance even after a rename} -body {
     dog fido
     rename fido spot
     rename spot ""
-    namespace children ::dog
+    itcl::find objects -class ::dog
 } -cleanup {
     dog destroy
 } -result {}
@@ -497,7 +497,7 @@ test destroy-1.1 {destroy cleans up the instance} -body {
         option -color golden
     }
 
-    set a [namespace children ::dog::]
+    set a [itcl::find objects -class ::dog]
     dog create spot
     set ns [info object namespace spot]
     set b [namespace children ::itcl::internal::variables$ns]
