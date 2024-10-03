@@ -56,41 +56,41 @@ proc test-var-create {{reptime {3000 10000}}} {
     _test_start $reptime
     foreach clsi {0 1 2} {
       if {$clsi} {
-        set inh ${ns}::timeClass[expr {$clsi-1}]
+	set inh ${ns}::timeClass[expr {$clsi-1}]
       } else {
-        set inh {}
+	set inh {}
       }
       set cls ${ns}::timeClass$clsi
       puts "== ${n}.$clsi) class : $cls == [expr {$inh ne "" ? "inherite $inh" : ""}]"
       if {[info command $cls] ne ""} {
-        itcl::delete class $cls
+	itcl::delete class $cls
       }
       itcl::class $cls [string map [list \$reptime [list $reptime] \$in_inh [list $inh] \$clsi $clsi] {
-        set j 0
-        set inh $in_inh
-        if {$inh ne ""} {
-          puts "% inherit $inh"
-          ::tclTestPerf::_test_iter 2 [timerate {
-            inherit $inh
-          } 1 1]
-        }
-        puts "% declare vars ..."
-        ::tclTestPerf::_test_iter 2 [timerate {
-          public variable pub[incr j] 0
-          protected variable pro$j 1
-          private variable pri$j 2
-          # 10K commons is too slow in Itcl original edition (time grows on each iter), so 1K enough:
-          if {$j <= 1000} {
-            public common com$j ""
-          }
-        } {*}$reptime]
-        public method getv {vn} {set $vn}
-        public method getpub1 {} {set pro1}
-        public method getpro1 {} {set pro1}
-        public method getpri1 {} {set pri1}
-        public method getunknown {} {catch {set novarinthisclass}}
-        # Itcl original edition may be too slow (time grows on each inheritance), so save real max-iters (<= 10K):
-        uplevel [list set j $j]
+	set j 0
+	set inh $in_inh
+	if {$inh ne ""} {
+	  puts "% inherit $inh"
+	  ::tclTestPerf::_test_iter 2 [timerate {
+	    inherit $inh
+	  } 1 1]
+	}
+	puts "% declare vars ..."
+	::tclTestPerf::_test_iter 2 [timerate {
+	  public variable pub[incr j] 0
+	  protected variable pro$j 1
+	  private variable pri$j 2
+	  # 10K commons is too slow in Itcl original edition (time grows on each iter), so 1K enough:
+	  if {$j <= 1000} {
+	    public common com$j ""
+	  }
+	} {*}$reptime]
+	public method getv {vn} {set $vn}
+	public method getpub1 {} {set pro1}
+	public method getpro1 {} {set pro1}
+	public method getpri1 {} {set pri1}
+	public method getunknown {} {catch {set novarinthisclass}}
+	# Itcl original edition may be too slow (time grows on each inheritance), so save real max-iters (<= 10K):
+	uplevel [list set j $j]
       }]
       set maxv($clsi,$ns) $j
     }

@@ -21,9 +21,9 @@ if {[namespace which -command memory] ne "" && (
   proc leaktest {script {iterations 3}} {
       set end [getbytes]
       for {set i 0} {$i < $iterations} {incr i} {
-          uplevel 1 $script
-          set tmp $end
-          set end [getbytes]
+	  uplevel 1 $script
+	  set tmp $end
+	  set end [getbytes]
       }
       return [expr {$end - $tmp}]
   }

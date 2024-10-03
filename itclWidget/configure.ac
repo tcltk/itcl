@@ -10,7 +10,7 @@
 # so you can encode the package version directly into the source files.
 #-----------------------------------------------------------------------
 
-AC_INIT([itclwidget],[4.3.1])
+AC_INIT([itclwidget],[4.3.2])
 
 #--------------------------------------------------------------------
 # Call TEA_INIT as the first TEA_ macro to set up initial vars.
@@ -24,8 +24,8 @@ AC_PROG_LN_S
 CONFIG_CLEAN_FILES=
 if test ! -d $srcdir/tclconfig ; then
     if test -d $srcdir/../tclconfig ; then
-        $LN_S $srcdir/../tclconfig tclconfig
-        CONFIG_CLEAN_FILES=tclconfig
+	$LN_S $srcdir/../tclconfig tclconfig
+	CONFIG_CLEAN_FILES=tclconfig
     fi
 fi
 AC_SUBST(CONFIG_CLEAN_FILES)
@@ -72,16 +72,16 @@ TEA_SETUP_COMPILER
 
 
 TEA_ADD_SOURCES([
-                itclWidgetBase.c
-	        itclWidgetBuiltin.c
-                itclWidgetCmd.c
-                itclWidgetInfo.c
-                itclWidgetObject.c
-	        itclWidgetParse.c
-                itclWidgetStubInit.c
-                ])
+		itclWidgetBase.c
+		itclWidgetBuiltin.c
+		itclWidgetCmd.c
+		itclWidgetInfo.c
+		itclWidgetObject.c
+		itclWidgetParse.c
+		itclWidgetStubInit.c
+		])
 TEA_ADD_HEADERS([
-                generic/itclWidgetInt.h
+		generic/itclWidgetInt.h
 		])
 TEA_ADD_INCLUDES([-I. -I\"`${CYGPATH} ${srcdir}/generic`\"])
 TEA_ADD_LIBS([])

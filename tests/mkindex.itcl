@@ -52,32 +52,32 @@ configbody Simple2::by {if {$by <= 0} {error "bad increment"}}
 #
 namespace eval buried {
     class inside {
-        variable x 0
-        public variable by 1
-        public method bump {}
-        method skip {x y z} {}
-        proc find {args} {}
+	variable x 0
+	public variable by 1
+	public method bump {}
+	method skip {x y z} {}
+	proc find {args} {}
     }
     body inside::bump {} {incr x $by}
     configbody inside::by {if {$by <= 0} {error "bad increment"}}
 
     class ::top {
-        method skip {x y z} {}
-        method ignore {} {}
-        public proc find {args} {}
-        protected proc notice {args} {}
+	method skip {x y z} {}
+	method ignore {} {}
+	public proc find {args} {}
+	protected proc notice {args} {}
     }
 
     ensemble ens {
-        part one {x} {}
-        part two {x y} {}
-        part three {x y z} {}
+	part one {x} {}
+	part two {x y} {}
+	part three {x y z} {}
     }
 
     namespace eval under {
-        itcl::class neath { }
+	itcl::class neath { }
     }
     namespace eval deep {
-        ::itcl::class within { }
+	::itcl::class within { }
     }
 }

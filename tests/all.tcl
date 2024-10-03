@@ -15,7 +15,7 @@ if {[namespace which -command memory] ne "" && "-loadfile" ni $argv} {
     puts "Tests running in sub-interpreters of leaktest circuit"
     # -loadfile overwrites -load, so save it for helper in ::env(TESTFLAGS):
     if {![info exists ::env(TESTFLAGS)] && [llength $argv]} {
-        set ::env(TESTFLAGS) $argv
+	set ::env(TESTFLAGS) $argv
     }
     lappend argv -loadfile [file join [file dirname [info script]] helpers.tcl]
 }

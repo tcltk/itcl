@@ -26,24 +26,24 @@ PRJ_DEFINES = $(PRJ_DEFINES) -I$(TMP_DIR)
 !include "rules-ext.vc"
 
 PRJ_OBJS = \
-        $(TMP_DIR)\itcl2TclOO.obj \
-        $(TMP_DIR)\itclBase.obj \
-        $(TMP_DIR)\itclBuiltin.obj \
-        $(TMP_DIR)\itclClass.obj \
-        $(TMP_DIR)\itclCmd.obj \
-        $(TMP_DIR)\itclEnsemble.obj \
-        $(TMP_DIR)\itclHelpers.obj \
-        $(TMP_DIR)\itclInfo.obj \
-        $(TMP_DIR)\itclLinkage.obj \
-        $(TMP_DIR)\itclMethod.obj \
-        $(TMP_DIR)\itclMigrate2TclCore.obj \
-        $(TMP_DIR)\itclObject.obj \
-        $(TMP_DIR)\itclParse.obj \
-        $(TMP_DIR)\itclResolve.obj \
-        $(TMP_DIR)\itclStubs.obj \
-        $(TMP_DIR)\itclStubInit.obj \
-        $(TMP_DIR)\itclTclIntStubsFcn.obj \
-        $(TMP_DIR)\itclUtil.obj \
+	$(TMP_DIR)\itcl2TclOO.obj \
+	$(TMP_DIR)\itclBase.obj \
+	$(TMP_DIR)\itclBuiltin.obj \
+	$(TMP_DIR)\itclClass.obj \
+	$(TMP_DIR)\itclCmd.obj \
+	$(TMP_DIR)\itclEnsemble.obj \
+	$(TMP_DIR)\itclHelpers.obj \
+	$(TMP_DIR)\itclInfo.obj \
+	$(TMP_DIR)\itclLinkage.obj \
+	$(TMP_DIR)\itclMethod.obj \
+	$(TMP_DIR)\itclMigrate2TclCore.obj \
+	$(TMP_DIR)\itclObject.obj \
+	$(TMP_DIR)\itclParse.obj \
+	$(TMP_DIR)\itclResolve.obj \
+	$(TMP_DIR)\itclStubs.obj \
+	$(TMP_DIR)\itclStubInit.obj \
+	$(TMP_DIR)\itclTclIntStubsFcn.obj \
+	$(TMP_DIR)\itclUtil.obj \
 !if !$(STATIC_BUILD)
 	$(TMP_DIR)\dllEntryPoint.obj \
 !endif
