@@ -86,7 +86,7 @@ if {[package vsatisfies [package provide Tcl] 9.0-]} {
 	    [list load [file join $$dir tcl9itcl$(VERSION).dll] Itcl]
 } else {
     package ifneeded itcl $(DOTVERSION) \
-	    [list load [file join $$dir itcl$(VERSION).dll] Itcl]
+	    [list load [file join $$dir itcl$(VERSION)$(SUFX).dll] Itcl]
 }
 package ifneeded Itcl $(DOTVERSION) [list package require -exact itcl $(DOTVERSION)]
 <<
