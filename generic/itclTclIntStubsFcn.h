@@ -18,14 +18,14 @@ struct Tcl_Resolve;
 #define Tcl_GetOriginalCommand _Tcl_GetOriginalCommand
 #define Tcl_CreateProc _Tcl_CreateProc
 #define Tcl_ProcDeleteProc _Tcl_ProcDeleteProc
-#define Tcl_GetObjInterpProc _Tcl_GetObjInterpProc
+#define Tcl_GetObjInterpProc2 _Tcl_GetObjInterpProc2
 
 MODULE_SCOPE Tcl_Command _Tcl_GetOriginalCommand(Tcl_Command command);
 MODULE_SCOPE int _Tcl_CreateProc(Tcl_Interp *interp, Tcl_Namespace *nsPtr,
 	 const char *procName, Tcl_Obj *argsPtr, Tcl_Obj *bodyPtr,
         Tcl_Proc *procPtrPtr);
 MODULE_SCOPE void _Tcl_ProcDeleteProc(void *clientData);
-MODULE_SCOPE Tcl_ObjCmdProc *_Tcl_GetObjInterpProc(void);
+MODULE_SCOPE Tcl_ObjCmdProc2 *_Tcl_GetObjInterpProc2(void);
 MODULE_SCOPE int Tcl_RenameCommand(Tcl_Interp *interp, const char *oldName,
 	const char *newName);
 MODULE_SCOPE Tcl_HashTable *Itcl_GetNamespaceChildTable(Tcl_Namespace *nsPtr);

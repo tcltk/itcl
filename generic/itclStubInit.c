@@ -115,7 +115,7 @@ static const ItclIntStubs itclIntStubs = {
     0, /* 99 */
     Itcl_EnsembleInit, /* 100 */
     Itcl_CreateEnsemble, /* 101 */
-    Itcl_AddEnsemblePart, /* 102 */
+    0, /* 102 */
     Itcl_GetEnsemblePart, /* 103 */
     Itcl_IsEnsemble, /* 104 */
     Itcl_GetEnsembleUsage, /* 105 */
@@ -131,7 +131,7 @@ static const ItclIntStubs itclIntStubs = {
     Itcl_Assert, /* 115 */
     Itcl_IsObjectCmd, /* 116 */
     Itcl_IsClassCmd, /* 117 */
-    0, /* 118 */
+    Itcl_AddEnsemblePart2, /* 118 */
     0, /* 119 */
     0, /* 120 */
     0, /* 121 */
@@ -212,8 +212,8 @@ const ItclStubs itclStubs = {
     0, /* 0 */
     0, /* 1 */
     Itcl_RegisterC, /* 2 */
-    Itcl_RegisterObjC, /* 3 */
-    Itcl_FindC, /* 4 */
+    0, /* 3 */
+    0, /* 4 */
     Itcl_InitStack, /* 5 */
     Itcl_DeleteStack, /* 6 */
     Itcl_PushStack, /* 7 */
@@ -237,6 +237,8 @@ const ItclStubs itclStubs = {
     Itcl_DiscardInterpState, /* 25 */
     Itcl_Alloc, /* 26 */
     Itcl_Free, /* 27 */
+    Itcl_RegisterObjC2, /* 28 */
+    Itcl_FindC2, /* 29 */
 };
 
 /* !END!: Do not edit above this line. */

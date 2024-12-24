@@ -35,15 +35,8 @@ extern "C" {
 ITCLAPI int		Itcl_RegisterC(Tcl_Interp *interp, const char *name,
 				Tcl_CmdProc *proc, void *clientData,
 				Tcl_CmdDeleteProc *deleteProc);
-/* 3 */
-ITCLAPI int		Itcl_RegisterObjC(Tcl_Interp *interp,
-				const char *name, Tcl_ObjCmdProc *proc,
-				void *clientData,
-				Tcl_CmdDeleteProc *deleteProc);
-/* 4 */
-ITCLAPI int		Itcl_FindC(Tcl_Interp *interp, const char *name,
-				Tcl_CmdProc **argProcPtr,
-				Tcl_ObjCmdProc **objProcPtr, void **cDataPtr);
+/* Slot 3 is reserved */
+/* Slot 4 is reserved */
 /* 5 */
 ITCLAPI void		Itcl_InitStack(Itcl_Stack *stack);
 /* 6 */
@@ -91,6 +84,15 @@ ITCLAPI void		Itcl_DiscardInterpState(Itcl_InterpState state);
 ITCLAPI void *		Itcl_Alloc(size_t size);
 /* 27 */
 ITCLAPI void		Itcl_Free(void *ptr);
+/* 28 */
+ITCLAPI int		Itcl_RegisterObjC2(Tcl_Interp *interp,
+				const char *name, Tcl_ObjCmdProc2 *proc,
+				void *clientData,
+				Tcl_CmdDeleteProc *deleteProc);
+/* 29 */
+ITCLAPI int		Itcl_FindC2(Tcl_Interp *interp, const char *name,
+				Tcl_ObjCmdProc2 **objProcPtr,
+				void **cDataPtr);
 
 typedef struct {
     const struct ItclIntStubs *itclIntStubs;
@@ -105,8 +107,8 @@ typedef struct ItclStubs {
     void (*reserved0)(void);
     void (*reserved1)(void);
     int (*itcl_RegisterC) (Tcl_Interp *interp, const char *name, Tcl_CmdProc *proc, void *clientData, Tcl_CmdDeleteProc *deleteProc); /* 2 */
-    int (*itcl_RegisterObjC) (Tcl_Interp *interp, const char *name, Tcl_ObjCmdProc *proc, void *clientData, Tcl_CmdDeleteProc *deleteProc); /* 3 */
-    int (*itcl_FindC) (Tcl_Interp *interp, const char *name, Tcl_CmdProc **argProcPtr, Tcl_ObjCmdProc **objProcPtr, void **cDataPtr); /* 4 */
+    void (*reserved3)(void);
+    void (*reserved4)(void);
     void (*itcl_InitStack) (Itcl_Stack *stack); /* 5 */
     void (*itcl_DeleteStack) (Itcl_Stack *stack); /* 6 */
     void (*itcl_PushStack) (void *cdata, Itcl_Stack *stack); /* 7 */
@@ -130,6 +132,8 @@ typedef struct ItclStubs {
     void (*itcl_DiscardInterpState) (Itcl_InterpState state); /* 25 */
     void * (*itcl_Alloc) (size_t size); /* 26 */
     void (*itcl_Free) (void *ptr); /* 27 */
+    int (*itcl_RegisterObjC2) (Tcl_Interp *interp, const char *name, Tcl_ObjCmdProc2 *proc, void *clientData, Tcl_CmdDeleteProc *deleteProc); /* 28 */
+    int (*itcl_FindC2) (Tcl_Interp *interp, const char *name, Tcl_ObjCmdProc2 **objProcPtr, void **cDataPtr); /* 29 */
 } ItclStubs;
 
 extern const ItclStubs *itclStubsPtr;
@@ -148,10 +152,8 @@ extern const ItclStubs *itclStubsPtr;
 /* Slot 1 is reserved */
 #define Itcl_RegisterC \
 	(itclStubsPtr->itcl_RegisterC) /* 2 */
-#define Itcl_RegisterObjC \
-	(itclStubsPtr->itcl_RegisterObjC) /* 3 */
-#define Itcl_FindC \
-	(itclStubsPtr->itcl_FindC) /* 4 */
+/* Slot 3 is reserved */
+/* Slot 4 is reserved */
 #define Itcl_InitStack \
 	(itclStubsPtr->itcl_InitStack) /* 5 */
 #define Itcl_DeleteStack \
@@ -198,6 +200,10 @@ extern const ItclStubs *itclStubsPtr;
 	(itclStubsPtr->itcl_Alloc) /* 26 */
 #define Itcl_Free \
 	(itclStubsPtr->itcl_Free) /* 27 */
+#define Itcl_RegisterObjC2 \
+	(itclStubsPtr->itcl_RegisterObjC2) /* 28 */
+#define Itcl_FindC2 \
+	(itclStubsPtr->itcl_FindC2) /* 29 */
 
 #endif /* defined(USE_ITCL_STUBS) */
 

@@ -270,7 +270,7 @@ Itcl_EvalArgs(
     }
 
     /*
-     *  Finally, invoke the command's Tcl_ObjCmdProc.  Be careful
+     *  Finally, invoke the command's Tcl_ObjCmdProc2.  Be careful
      *  to pass in the proper client data.
      */
     Tcl_GetCommandInfoFromToken(cmd, &infoPtr);
@@ -279,7 +279,12 @@ Itcl_EvalArgs(
 	return infoPtr.objProc2(infoPtr.objClientData2, interp, objc, objv);
     }
 #endif
-    return infoPtr.objProc(infoPtr.objClientData, interp, objc, objv);
+#ifndef TCL_NO_DEPRECATED
+    if (infoPtr.isNativeObjectProc == 1) {
+	return infoPtr.objProc(infoPtr.objClientData, interp, objc, objv);
+    }
+#endif
+    return TCL_ERROR;
 }
 
 
@@ -331,7 +336,7 @@ ItclEnsembleSubCmd(
     TCL_UNUSED(void *),
     Tcl_Interp *interp,
     TCL_UNUSED(const char *),
-    int objc,
+    Tcl_Size objc,
     Tcl_Obj *const *objv,
     TCL_UNUSED(const char *))
 {
