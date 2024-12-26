@@ -1552,7 +1552,7 @@ ItclClassCreateObject(
                 do {
 		    Tcl_CmdInfo dummy;
 
-                    sprintf(unique,"%.200s%" ITCL_Z_MODIFIER "u", Tcl_GetString(iclsPtr->namePtr),
+                    sprintf(unique,"%.200s%" TCL_SIZE_MODIFIER "u", Tcl_GetString(iclsPtr->namePtr),
                         iclsPtr->unique++);
                     unique[0] = tolower(UCHAR(unique[0]));
 

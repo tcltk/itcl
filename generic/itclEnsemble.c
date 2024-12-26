@@ -786,7 +786,7 @@ CreateEnsemble(
     memset(ensData->parts, 0, ensData->maxParts*sizeof(EnsemblePart*));
     Tcl_DStringInit(&buffer);
     Tcl_DStringAppend(&buffer, ITCL_COMMANDS_NAMESPACE "::ensembles::", TCL_INDEX_NONE);
-    sprintf(buf, "%" ITCL_Z_MODIFIER "u", ensData->ensembleId);
+    sprintf(buf, "%" TCL_SIZE_MODIFIER "u", ensData->ensembleId);
     Tcl_DStringAppend(&buffer, buf, TCL_INDEX_NONE);
     ensData->nsPtr = Tcl_CreateNamespace(interp, Tcl_DStringValue(&buffer),
             ensData, DeleteEnsemble);
@@ -839,7 +839,7 @@ CreateEnsemble(
     Tcl_DStringSetLength(&buffer, 0);
     Tcl_DStringAppend(&buffer, infoPtr->ensembleInfo->ensembleNsPtr->fullName, TCL_INDEX_NONE);
     Tcl_DStringAppend(&buffer, "::subensembles::", TCL_INDEX_NONE);
-    sprintf(buf, "%" ITCL_Z_MODIFIER "u", parentEnsData->ensembleId);
+    sprintf(buf, "%" TCL_SIZE_MODIFIER "u", parentEnsData->ensembleId);
     Tcl_DStringAppend(&buffer, buf, TCL_INDEX_NONE);
     Tcl_DStringAppend(&buffer, "::", 2);
     Tcl_DStringAppend(&buffer, ensName, TCL_INDEX_NONE);

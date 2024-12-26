@@ -80,10 +80,8 @@
 #   endif
 #endif
 
-#if TCL_MAJOR_VERSION == 8
-#   define ITCL_Z_MODIFIER ""
-#else
-#   define ITCL_Z_MODIFIER TCL_Z_MODIFIER
+#if TCL_MAJOR_VERSION == 8 && defined(TCL_MINOR_VERSION) && TCL_MINOR_VERSION < 7
+# define TCL_SIZE_MODIFIER ""
 #endif
 
 /*
