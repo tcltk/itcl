@@ -80,10 +80,19 @@
 #   endif
 #endif
 
-#if TCL_MAJOR_VERSION == 8
-#   define ITCL_Z_MODIFIER ""
-#else
-#   define ITCL_Z_MODIFIER TCL_Z_MODIFIER
+#if TCL_MAJOR_VERSION == 8 && defined(TCL_MINOR_VERSION) && TCL_MINOR_VERSION < 7
+# define Tcl_MethodType2 Tcl_MethodType
+# define Tcl_MethodCallProc2 Tcl_MethodCallProc
+# define Tcl_NewMethod2 Tcl_NewMethod
+# define Tcl_CreateObjCommand2 Tcl_CreateObjCommand
+# define Tcl_NRCallObjProc2 Tcl_NRCallObjProc
+# define Tcl_NRCreateCommand2 Tcl_NRCreateCommand
+# define objProc2 objProc
+# define objClientData2 objClientData
+# define Tcl_NewInstanceMethod2 Tcl_NewInstanceMethod
+# define TclGetObjInterpProc2 TclGetObjInterpProc
+# define TCL_OO_METHOD_VERSION_2 TCL_OO_METHOD_VERSION_CURRENT
+# define TCL_SIZE_MODIFIER ""
 #endif
 
 /*
