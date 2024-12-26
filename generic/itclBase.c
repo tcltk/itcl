@@ -529,7 +529,7 @@ static int
 ItclSetHullWindowName(
     void *clientData,        /* infoPtr */
     TCL_UNUSED(Tcl_Interp *),/* current interpreter */
-    Tcl_Size objc,                /* number of arguments */
+    Tcl_Size objc,           /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
 {
     ItclObjectInfo *infoPtr;
@@ -551,9 +551,9 @@ ItclSetHullWindowName(
  */
 static int
 ItclCheckSetItclHull(
-    void *clientData,   /* infoPtr */
+    void *clientData,        /* infoPtr */
     Tcl_Interp *interp,      /* current interpreter */
-    Tcl_Size objc,                /* number of arguments */
+    Tcl_Size objc,           /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
 {
     Tcl_HashEntry *hPtr;

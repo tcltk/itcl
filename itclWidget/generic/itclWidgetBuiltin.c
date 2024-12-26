@@ -28,10 +28,10 @@ typedef struct BiMethod {
     char* name;              /* method name */
     char* usage;             /* string describing usage */
     char* registration;      /* registration name for C proc */
-    Tcl_ObjCmdProc *proc;    /* implementation C proc */
+    Tcl_ObjCmdProc2 *proc;    /* implementation C proc */
 } BiMethod;
 
-static BiMethod BiMethodList[] = {
+static const BiMethod BiMethodList[] = {
     { "installhull", "using widgetType ?arg ...?",
                    "@itcl-builtin-installhull",  Itcl_BiInstallHullCmd },
 };
@@ -111,7 +111,7 @@ Itcl_WidgetBiInit(
 	Tcl_DStringSetLength(&buffer, 0);
 	Tcl_DStringAppend(&buffer, "::itcl::builtin::", TCL_INDEX_NONE);
 	Tcl_DStringAppend(&buffer, BiMethodList[i].name, TCL_INDEX_NONE);
-        Tcl_CreateObjCommand(interp, Tcl_DStringValue(&buffer),
+        Tcl_CreateObjCommand2(interp, Tcl_DStringValue(&buffer),
 	        BiMethodList[i].proc, (void *)infoPtr, NULL);
     }
     Tcl_DStringFree(&buffer);
@@ -198,7 +198,7 @@ int
 Itcl_BiInstallHullCmd(
     void *clientData,        /* ItclObjectInfo *Ptr */
     Tcl_Interp *interp,      /* current interpreter */
-    int objc,                /* number of arguments */
+    Tcl_Size objc,                /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
 {
     FOREACH_HASH_DECLS;

@@ -757,8 +757,7 @@ MODULE_SCOPE int Itcl_WidgetParseInit(Tcl_Interp *interp,
 MODULE_SCOPE void ItclDeleteObjectMetadata(void *clientData);
 MODULE_SCOPE void ItclDeleteClassMetadata(void *clientData);
 MODULE_SCOPE void ItclDeleteArgList(ItclArgList *arglistPtr);
-MODULE_SCOPE int Itcl_ClassOptionCmd(void *clientData, Tcl_Interp *interp,
-	Tcl_Size objc, Tcl_Obj *const objv[]);
+MODULE_SCOPE Tcl_ObjCmdProc2 Itcl_ClassOptionCmd;
 MODULE_SCOPE int DelegatedOptionsInstall(Tcl_Interp *interp,
 	ItclClass *iclsPtr);
 MODULE_SCOPE int Itcl_HandleDelegateOptionCmd(Tcl_Interp *interp,
@@ -792,8 +791,7 @@ MODULE_SCOPE int ItclCreateDelegatedFunction(Tcl_Interp *interp,
 MODULE_SCOPE void ItclDeleteDelegatedOption(char *cdata);
 MODULE_SCOPE void ItclDeleteDelegatedFunction(ItclDelegatedFunction *idmPtr);
 MODULE_SCOPE void ItclFinishEnsemble(ItclObjectInfo *infoPtr);
-MODULE_SCOPE int Itcl_EnsembleDeleteCmd(void *clientData,
-	Tcl_Interp *interp, Tcl_Size objc, Tcl_Obj *const objv[]);
+MODULE_SCOPE Tcl_ObjCmdProc2 Itcl_EnsembleDeleteCmd;
 MODULE_SCOPE int ItclAddClassesDictInfo(Tcl_Interp *interp, ItclClass *iclsPtr);
 MODULE_SCOPE int ItclDeleteClassesDictInfo(Tcl_Interp *interp,
 	ItclClass *iclsPtr);
@@ -835,6 +833,60 @@ MODULE_SCOPE Tcl_ObjCmdProc2 Itcl_AddDelegatedFunctionCmd;
 MODULE_SCOPE Tcl_ObjCmdProc2 Itcl_SetComponentCmd;
 MODULE_SCOPE Tcl_ObjCmdProc2 Itcl_ClassHullTypeCmd;
 MODULE_SCOPE Tcl_ObjCmdProc2 Itcl_ClassWidgetClassCmd;
+
+MODULE_SCOPE Tcl_ObjCmdProc2 Itcl_AddComponentCmd2;
+MODULE_SCOPE Tcl_ObjCmdProc2 Itcl_AddOptionCmd2;
+MODULE_SCOPE Tcl_ObjCmdProc2 Itcl_BiCgetCmd2;
+MODULE_SCOPE Tcl_ObjCmdProc2 Itcl_BiChainCmd2;
+MODULE_SCOPE Tcl_ObjCmdProc2 Itcl_BiConfigureCmd2;
+MODULE_SCOPE Tcl_ObjCmdProc2 Itcl_BiInfoArgsCmd2;
+MODULE_SCOPE Tcl_ObjCmdProc2 Itcl_BiInfoBodyCmd2;
+MODULE_SCOPE Tcl_ObjCmdProc2 Itcl_BiInfoClassCmd2;
+MODULE_SCOPE Tcl_ObjCmdProc2 Itcl_BiInfoComponentCmd2;
+MODULE_SCOPE Tcl_ObjCmdProc2 Itcl_BiInfoFunctionCmd2;
+MODULE_SCOPE Tcl_ObjCmdProc2 Itcl_BiInfoHeritageCmd2;
+MODULE_SCOPE Tcl_ObjCmdProc2 Itcl_BiInfoInheritCmd2;
+MODULE_SCOPE Tcl_ObjCmdProc2 Itcl_BiInfoOptionCmd2;
+MODULE_SCOPE Tcl_ObjCmdProc2 Itcl_BiInfoUnknownCmd2;
+MODULE_SCOPE Tcl_ObjCmdProc2 Itcl_BiInfoVariableCmd2;
+MODULE_SCOPE Tcl_ObjCmdProc2 Itcl_BiInfoVarsCmd2;
+MODULE_SCOPE Tcl_ObjCmdProc2 Itcl_BiIsaCmd2;
+MODULE_SCOPE Tcl_ObjCmdProc2 Itcl_BodyCmd2;
+MODULE_SCOPE Tcl_ObjCmdProc2 Itcl_ClassCmd2;
+MODULE_SCOPE Tcl_ObjCmdProc2 Itcl_ClassCommonCmd2;
+MODULE_SCOPE Tcl_ObjCmdProc2 Itcl_ClassConstructorCmd2;
+MODULE_SCOPE Tcl_ObjCmdProc2 Itcl_ClassDestructorCmd2;
+MODULE_SCOPE Tcl_ObjCmdProc2 Itcl_ClassInheritCmd2;
+MODULE_SCOPE Tcl_ObjCmdProc2 Itcl_ClassMethodCmd2;
+MODULE_SCOPE Tcl_ObjCmdProc2 Itcl_ClassProcCmd2;
+MODULE_SCOPE Tcl_ObjCmdProc2 Itcl_ClassProtectionCmd2;
+MODULE_SCOPE Tcl_ObjCmdProc2 Itcl_ClassVariableCmd2;
+MODULE_SCOPE Tcl_ObjCmdProc2 Itcl_CodeCmd2;
+MODULE_SCOPE Tcl_ObjCmdProc2 Itcl_ConfigBodyCmd2;
+MODULE_SCOPE Tcl_ObjCmdProc2 Itcl_DelClassCmd2;
+MODULE_SCOPE Tcl_ObjCmdProc2 Itcl_DelObjectCmd2;
+MODULE_SCOPE Tcl_ObjCmdProc2 Itcl_EnsembleCmd2;
+MODULE_SCOPE Tcl_ObjCmdProc2 Itcl_EnsPartCmd2;
+MODULE_SCOPE Tcl_ObjCmdProc2 Itcl_FilterAddCmd2;
+MODULE_SCOPE Tcl_ObjCmdProc2 Itcl_FilterDeleteCmd2;
+MODULE_SCOPE Tcl_ObjCmdProc2 Itcl_FindClassesCmd2;
+MODULE_SCOPE Tcl_ObjCmdProc2 Itcl_FindObjectsCmd2;
+MODULE_SCOPE Tcl_ObjCmdProc2 Itcl_ForwardAddCmd2;
+MODULE_SCOPE Tcl_ObjCmdProc2 Itcl_ForwardDeleteCmd2;
+MODULE_SCOPE Tcl_ObjCmdProc2 Itcl_HandleClass2;
+MODULE_SCOPE Tcl_ObjCmdProc2 Itcl_IsClassCmd2;
+MODULE_SCOPE Tcl_ObjCmdProc2 Itcl_IsObjectCmd2;
+MODULE_SCOPE Tcl_ObjCmdProc2 Itcl_MixinAddCmd2;
+MODULE_SCOPE Tcl_ObjCmdProc2 Itcl_MixinDeleteCmd2;
+MODULE_SCOPE Tcl_ObjCmdProc2 Itcl_NWidgetCmd2;
+MODULE_SCOPE Tcl_ObjCmdProc2 Itcl_StubCreateCmd2;
+MODULE_SCOPE Tcl_ObjCmdProc2 Itcl_StubExistsCmd2;
+MODULE_SCOPE Tcl_ObjCmdProc2 Itcl_ScopeCmd2;
+
+MODULE_SCOPE int ItclClassBaseCmd2(void *clientData, Tcl_Interp *interp,
+	int flags, Tcl_Size objc, Tcl_Obj *const objv[], ItclClass **iclsPtrPtr);
+MODULE_SCOPE int ItclEnsembleSubCmd2(Tcl_Interp *interp, Tcl_Size objc,
+	Tcl_Obj *const *objv);
 
 typedef int (ItclRootMethodProc)(ItclObject *ioPtr, Tcl_Interp *interp,
 	Tcl_Size objc, Tcl_Obj *const objv[]);

@@ -13,8 +13,7 @@
 #include "itclInt.h"
 
 static void ItclDeleteStub(void *cdata);
-static int ItclHandleStubCmd(void *clientData, Tcl_Interp *interp,
-        Tcl_Size objc, Tcl_Obj *const objv[]);
+static Tcl_ObjCmdProc2 ItclHandleStubCmd;
 
 
 /*
@@ -62,6 +61,16 @@ Itcl_IsStub(
  */
 int
 Itcl_StubCreateCmd(
+    void *clientData,        /* not used */
+    Tcl_Interp *interp,      /* current interpreter */
+    int objc,                /* number of arguments */
+    Tcl_Obj *const objv[])   /* argument objects */
+{
+    return Itcl_StubCreateCmd2(clientData, interp, objc, objv);
+}
+
+int
+Itcl_StubCreateCmd2(
     TCL_UNUSED(void *),      /* not used */
     Tcl_Interp *interp,      /* current interpreter */
     Tcl_Size objc,           /* number of arguments */
@@ -112,9 +121,19 @@ Itcl_StubCreateCmd(
  */
 int
 Itcl_StubExistsCmd(
+    void *clientData,        /* not used */
+    Tcl_Interp *interp,      /* current interpreter */
+    int objc,                /* number of arguments */
+    Tcl_Obj *const objv[])   /* argument objects */
+{
+    return Itcl_StubExistsCmd2(clientData, interp, objc, objv);
+}
+
+int
+Itcl_StubExistsCmd2(
     TCL_UNUSED(void *),      /* not used */
     Tcl_Interp *interp,      /* current interpreter */
-    Tcl_Size objc,                /* number of arguments */
+    Tcl_Size objc,           /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
 {
     Tcl_Command cmdPtr;

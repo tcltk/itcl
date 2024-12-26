@@ -132,8 +132,8 @@ static const ItclIntStubs itclIntStubs = {
     Itcl_IsObjectCmd, /* 116 */
     Itcl_IsClassCmd, /* 117 */
     Itcl_AddEnsemblePart2, /* 118 */
-    0, /* 119 */
-    0, /* 120 */
+    Itcl_ExecMethod2, /* 119 */
+    Itcl_ExecProc2, /* 120 */
     0, /* 121 */
     0, /* 122 */
     0, /* 123 */

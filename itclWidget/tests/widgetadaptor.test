@@ -530,7 +530,7 @@ test install-1.3 {can't install until hull exists} -constraints {
     error
 } -cleanup {
     myframe destroy
-} -result {cannot install "text before "itcl_hull" exists}
+} -result {cannot install "text" before "itcl_hull" exists}
 
 test installhull-1.3 {
     options delegated to a widgetadaptor's itcl_hull frame

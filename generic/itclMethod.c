@@ -66,7 +66,7 @@ static int
 NRBodyCmd(
     TCL_UNUSED(void *),      /*  */
     Tcl_Interp *interp,      /* current interpreter */
-    Tcl_Size objc,                /* number of arguments */
+    Tcl_Size objc,           /* number of arguments */
     Tcl_Obj *const *objv)    /* argument objects */
 {
     Tcl_HashEntry *entry;
@@ -160,6 +160,16 @@ int
 Itcl_BodyCmd(
     void *clientData,
     Tcl_Interp *interp,
+    int objc,
+    Tcl_Obj *const *objv)
+{
+    return Tcl_NRCallObjProc2(interp, NRBodyCmd, clientData, objc, objv);
+}
+
+int
+Itcl_BodyCmd2(
+    void *clientData,
+    Tcl_Interp *interp,
     Tcl_Size objc,
     Tcl_Obj *const *objv)
 {
@@ -191,7 +201,7 @@ static int
 NRConfigBodyCmd(
     TCL_UNUSED(void *),      /* unused */
     Tcl_Interp *interp,      /* current interpreter */
-    Tcl_Size objc,                /* number of arguments */
+    Tcl_Size objc,           /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
 {
     int status = TCL_OK;
@@ -291,6 +301,16 @@ configBodyCmdDone:
 
 int
 Itcl_ConfigBodyCmd(
+    void *clientData,
+    Tcl_Interp *interp,
+    int objc,
+    Tcl_Obj *const *objv)
+{
+    return Tcl_NRCallObjProc2(interp, NRConfigBodyCmd, clientData, objc, objv);
+}
+
+int
+Itcl_ConfigBodyCmd2(
     void *clientData,
     Tcl_Interp *interp,
     Tcl_Size objc,
@@ -1229,8 +1249,8 @@ int
 Itcl_EvalMemberCode(
     Tcl_Interp *interp,       /* current interpreter */
     ItclMemberFunc *imPtr,    /* member func, or NULL (for error messages) */
-    ItclObject *contextIoPtr,   /* object context, or NULL */
-    Tcl_Size objc,                 /* number of arguments */
+    ItclObject *contextIoPtr, /* object context, or NULL */
+    Tcl_Size objc,            /* number of arguments */
     Tcl_Obj *const objv[])    /* argument objects */
 {
     ItclMemberCode *mcode;
@@ -1631,7 +1651,7 @@ static int
 NRExecMethod(
     void *clientData,        /* method definition */
     Tcl_Interp *interp,      /* current interpreter */
-    Tcl_Size objc,                /* number of arguments */
+    Tcl_Size objc,           /* number of arguments */
     Tcl_Obj *const *objv)    /* argument objects */
 {
     ItclMemberFunc *imPtr = (ItclMemberFunc*)clientData;
@@ -1703,6 +1723,16 @@ int
 Itcl_ExecMethod(
     void *clientData,
     Tcl_Interp *interp,
+    int objc,
+    Tcl_Obj *const *objv)
+{
+    return Tcl_NRCallObjProc2(interp, NRExecMethod, clientData, objc, objv);
+}
+
+int
+Itcl_ExecMethod2(
+    void *clientData,
+    Tcl_Interp *interp,
     Tcl_Size objc,
     Tcl_Obj *const *objv)
 {
@@ -1728,7 +1758,7 @@ static int
 NRExecProc(
     void *clientData,        /* proc definition */
     Tcl_Interp *interp,      /* current interpreter */
-    Tcl_Size objc,                /* number of arguments */
+    Tcl_Size objc,           /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
 {
     ItclMemberFunc *imPtr = (ItclMemberFunc*)clientData;
@@ -1789,6 +1819,16 @@ NRExecProc(
 
 int
 Itcl_ExecProc(
+    void *clientData,
+    Tcl_Interp *interp,
+    int objc,
+    Tcl_Obj *const *objv)
+{
+    return Tcl_NRCallObjProc2(interp, NRExecProc, clientData, objc, objv);
+}
+
+int
+Itcl_ExecProc2(
     void *clientData,
     Tcl_Interp *interp,
     Tcl_Size objc,
@@ -1943,7 +1983,7 @@ Itcl_InvokeMethodIfExists(
     const char *name,             /* name of desired method */
     ItclClass *contextClassPtr,   /* current class being constructed */
     ItclObject *contextObjectPtr, /* object being constructed */
-    Tcl_Size objc,               /* number of arguments */
+    Tcl_Size objc,                /* number of arguments */
     Tcl_Obj *const objv[])        /* argument objects */
 {
     Tcl_HashEntry *hPtr;

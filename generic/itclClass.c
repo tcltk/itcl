@@ -1408,7 +1408,17 @@ int
 Itcl_HandleClass(
     void *clientData,        /* class definition */
     Tcl_Interp *interp,      /* current interpreter */
-    Tcl_Size objc,                /* number of arguments */
+    int objc,                /* number of arguments */
+    Tcl_Obj *const objv[])   /* argument objects */
+{
+    return Itcl_HandleClass2(clientData, interp, objc, objv);
+}
+
+int
+Itcl_HandleClass2(
+    void *clientData,        /* class definition */
+    Tcl_Interp *interp,      /* current interpreter */
+    Tcl_Size objc,           /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
 {
     if (objc > 3) {
@@ -1465,7 +1475,7 @@ int
 ItclClassCreateObject(
     void *clientData,        /* IclObjectInfo */
     Tcl_Interp *interp,      /* current interpreter */
-    Tcl_Size objc,             /* number of arguments */
+    Tcl_Size objc,           /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
 {
     Tcl_DString buffer;  /* buffer used to build object names */

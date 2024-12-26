@@ -247,7 +247,7 @@ ItclDeleteArgList(
 int
 Itcl_EvalArgs(
     Tcl_Interp *interp,      /* current interpreter */
-    Tcl_Size objc,          /* number of arguments */
+    Tcl_Size objc,           /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
 {
     Tcl_Command cmd;
@@ -308,7 +308,7 @@ Tcl_Obj*
 Itcl_CreateArgs(
     TCL_UNUSED(Tcl_Interp *),/* current interpreter */
     const char *string,      /* first command word */
-    Tcl_Size objc,          /* number of arguments */
+    Tcl_Size objc,           /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
 {
     Tcl_Size i;
@@ -336,9 +336,18 @@ ItclEnsembleSubCmd(
     TCL_UNUSED(void *),
     Tcl_Interp *interp,
     TCL_UNUSED(const char *),
-    Tcl_Size objc,
+    int objc,
     Tcl_Obj *const *objv,
     TCL_UNUSED(const char *))
+{
+    return ItclEnsembleSubCmd2(interp, objc, objv);
+}
+
+int
+ItclEnsembleSubCmd2(
+    Tcl_Interp *interp,
+    Tcl_Size objc,
+    Tcl_Obj *const *objv)
 {
     int result;
     Tcl_Obj **newObjv;

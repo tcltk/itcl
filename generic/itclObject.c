@@ -149,7 +149,7 @@ Itcl_CreateObject(
     Tcl_Interp *interp,      /* interpreter mananging new object */
     const char* name,        /* name of new object */
     ItclClass *iclsPtr,      /* class for new object */
-    Tcl_Size objc,          /* number of arguments */
+    Tcl_Size objc,           /* number of arguments */
     Tcl_Obj *const objv[],   /* argument objects */
     ItclObject **rioPtr)     /* the created object */
 {
@@ -2891,7 +2891,7 @@ ItclObjectCmd(
 	        INT2PTR(objc+incr), newObjv);
 
     } else {
-	ItclShowArgs(1, "run CallPublicObjectCmd2", objc, objv);
+	ItclShowArgs(1, "run CallPublicObjectCmd", objc, objv);
 	Tcl_NRAddCallback(interp, CallPublicObjectCmd, oPtr, clsPtr,
 		INT2PTR(objc), (void *)objv);
     }
