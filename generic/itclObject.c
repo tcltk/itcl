@@ -1372,7 +1372,7 @@ Itcl_DestructObject(
          *  explicitly or implicitly.
          */
         contextIoPtr->destructed = (Tcl_HashTable*)ckalloc(sizeof(Tcl_HashTable));
-        Tcl_InitObjHashTable(contextIoPtr->destructed);
+        Tcl_InitHashTable(contextIoPtr->destructed, TCL_ONE_WORD_KEYS);
 
         /*
          *  Destruct the object starting from the most-specific class.
@@ -1418,11 +1418,13 @@ ItclDestructBase(
         return TCL_OK;
     }
     /*
-     *  Look for a destructor in this class, and if found,
-     *  invoke it.
+     *  Ensure a destructor for this class is not already invoked yet.
      */
     if (Tcl_FindHashEntry(contextIoPtr->destructed,
-            (char *)contextIclsPtr->namePtr) == NULL) {
+            (char *)contextIclsPtr) == NULL) {
+        /*
+         *  Look for a destructor in this class, and if found, invoke it.
+         */
         result = Itcl_InvokeMethodIfExists(interp, "destructor",
             contextIclsPtr, contextIoPtr, 0, NULL);
         if (result != TCL_OK) {

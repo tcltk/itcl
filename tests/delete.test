@@ -85,9 +85,65 @@ test delete-2.3 {delete the base class--class and all objects go away} {
          [itcl::find objects test_delete*]
 } {{} {} {} {} {} {}}
 
-test delete-2.4 {object destructors get invoked properly} {
+test delete-2.4 {object destructors get invoked properly} -body {
     lsort $test_delete_watch
-} {::test_delete0 ::test_delete1 ::test_delete2 ::test_delete_base0 ::test_delete_base1 ::test_delete_base2}
+} -cleanup {
+    set test_delete_watch {}
+} -result {::test_delete0 ::test_delete1 ::test_delete2 ::test_delete_base0 ::test_delete_base1 ::test_delete_base2}
+
+test delete-2.5 {object constructors and destructors get invoked properly, bug [987067386fa2edae]} -setup {
+    variable ::test_delete_watch {}
+    itcl::class ::test_delete_base {
+        constructor {} {} {
+            global ::test_delete_watch
+            lappend test_delete_watch "++ base $this"
+        }
+        destructor {
+            global ::test_delete_watch
+            lappend test_delete_watch "-- base $this"
+        }
+    }
+    namespace eval itcl_test_ns {
+      # class in NS with different name than base
+      itcl::class test_delete_other {
+        inherit ::test_delete_base
+        constructor {} ::test_delete_base::constructor {
+            global ::test_delete_watch
+            lappend test_delete_watch "++ derivate-other $this"
+        }
+        destructor {
+            global ::test_delete_watch
+            lappend test_delete_watch "-- derivate-other $this"
+        }
+      }
+      # class in NS with different name than base
+      itcl::class test_delete_base {
+        inherit ::test_delete_base
+        constructor {} ::test_delete_base::constructor {
+            global ::test_delete_watch
+            lappend test_delete_watch "++ derivate-same $this"
+        }
+        destructor {
+            global ::test_delete_watch
+            lappend test_delete_watch "-- derivate-same $this"
+        }
+      }
+    }
+} -body {
+    itcl_test_ns::test_delete_other test_del_other
+    itcl_test_ns::test_delete_base test_del_base
+    itcl::delete object test_del_other test_del_base
+    set test_delete_watch
+} -cleanup {
+    set test_delete_watch {}
+    namespace delete itcl_test_ns
+    itcl::delete class ::test_delete_base
+} -result [list {*}{
+  {++ base ::test_del_other} {++ derivate-other ::test_del_other}
+  {++ base ::test_del_base}  {++ derivate-same ::test_del_base}
+  {-- derivate-other ::test_del_other} {-- base ::test_del_other}
+  {-- derivate-same ::test_del_base}   {-- base ::test_del_base}
+}]
 
 # ----------------------------------------------------------------------
 #  Deleting class namespaces
@@ -208,7 +264,7 @@ test delete-5.4 {scoped command names are decoded properly} {
          [catch {itcl::delete object {namespace inscope :: xyzzy}} msg] $msg
 } {1 {unknown namespace "::xyzzy"} 1 {malformed command "namespace inscope :: xxx yyy": should be "namespace inscope namesp command"} 1 {object "namespace inscope :: xyzzy" not found}}
 
-namespace delete test_delete_name test_delete2
+catch { namespace delete test_delete_name test_delete2 }
 
 ::tcltest::cleanupTests
 return
