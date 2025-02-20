@@ -91,29 +91,41 @@ test delete-2.4 {object destructors get invoked properly} -body {
     set test_delete_watch {}
 } -result {::test_delete0 ::test_delete1 ::test_delete2 ::test_delete_base0 ::test_delete_base1 ::test_delete_base2}
 
-test delete-2.5 {object destructors get invoked properly, bug [987067386fa2edae]} -setup {
+test delete-2.5 {object constructors and destructors get invoked properly, bug [987067386fa2edae]} -setup {
     variable ::test_delete_watch {}
     itcl::class ::test_delete_base {
+        constructor {} {} {
+            global ::test_delete_watch
+            lappend test_delete_watch "++ base $this"
+        }
         destructor {
             global ::test_delete_watch
-            lappend test_delete_watch "base $this"
+            lappend test_delete_watch "-- base $this"
         }
     }
     namespace eval itcl_test_ns {
       # class in NS with different name than base
       itcl::class test_delete_other {
         inherit ::test_delete_base
+        constructor {} ::test_delete_base::constructor {
+            global ::test_delete_watch
+            lappend test_delete_watch "++ derivate-other $this"
+        }
         destructor {
             global ::test_delete_watch
-            lappend test_delete_watch "derivate-other $this"
+            lappend test_delete_watch "-- derivate-other $this"
         }
       }
       # class in NS with different name than base
       itcl::class test_delete_base {
         inherit ::test_delete_base
+        constructor {} ::test_delete_base::constructor {
+            global ::test_delete_watch
+            lappend test_delete_watch "++ derivate-same $this"
+        }
         destructor {
             global ::test_delete_watch
-            lappend test_delete_watch "derivate-same $this"
+            lappend test_delete_watch "-- derivate-same $this"
         }
       }
     }
@@ -126,7 +138,12 @@ test delete-2.5 {object destructors get invoked properly, bug [987067386fa2edae]
     set test_delete_watch {}
     namespace delete itcl_test_ns
     itcl::delete class ::test_delete_base
-} -result {{derivate-other ::test_del_other} {base ::test_del_other} {derivate-same ::test_del_base} {base ::test_del_base}}
+} -result [list {*}{
+  {++ base ::test_del_other} {++ derivate-other ::test_del_other}
+  {++ base ::test_del_base}  {++ derivate-same ::test_del_base}
+  {-- derivate-other ::test_del_other} {-- base ::test_del_other}
+  {-- derivate-same ::test_del_base}   {-- base ::test_del_base}
+}]
 
 # ----------------------------------------------------------------------
 #  Deleting class namespaces
