@@ -9,7 +9,7 @@
 .BS
 '\" Note:  do not modify the .SH NAME line immediately below!
 .SH NAME
-Itcl_RegisterC, Itcl_RegisterObjC, Itcl_FindC \- Associate a symbolic name with a C procedure.
+Itcl_RegisterC, Itcl_RegisterObjC, Itcl_RegisterObjC2, Itcl_FindC, Itcl_FindC2 \- Associate a symbolic name with a C procedure.
 .SH SYNOPSIS
 .nf
 \fB#include <itcl.h>\fR
@@ -21,14 +21,18 @@ int
 \fBItcl_RegisterObjC\fR(\fIinterp, cmdName, objProc, clientData, deleteProc\fR)
 
 int
+\fBItcl_RegisterObjC2\fR(\fIinterp, cmdName, objProc2, clientData, deleteProc\fR)
+
+int
 \fBItcl_FindC\fR(\fIinterp, cmdName, argProcPtr, objProcPtr, cDataPtr\fR)
+
+int
+\fBItcl_FindC2\fR(\fIinterp, cmdName, objProc2Ptr, cDataPtr\fR)
 .fi
 .SH ARGUMENTS
 .AP Tcl_Interp *interp in
 Interpreter in which to create new command.
-.VS 8.4
 .AP "const char" *cmdName in
-.VE
 Name of command.
 .AP Tcl_CmdProc *argProc in
 Implementation of new command:  \fIargProc\fR will be called whenever
@@ -36,8 +40,12 @@ Implementation of new command:  \fIargProc\fR will be called whenever
 The Tcl_CmdProc * to receive the pointer.
 .AP Tcl_ObjCmdProc *objProc in
 Implementation of the new command: \fIobjProc\fR will be called whenever
+.AP Tcl_ObjCmdProc2 *objProc2 in
+Implementation of the new command: \fIobjProc2\fR will be called whenever
 .AP Tcl_ObjCmdProc **objProcPtr in/out
 The Tcl_ObjCmdProc * to receive the pointer.
+.AP Tcl_ObjCmdProc2 **objProc2Ptr in/out
+The Tcl_ObjCmdProc2 * to receive the pointer.
 .AP ClientData clientData in
 Arbitrary one-word value to pass to \fIproc\fR and \fIdeleteProc\fR.
 .AP ClientData *cDataPtr in/out
@@ -79,8 +87,9 @@ for public variables.  Any body that starts with "\fB@\fR"
 is treated as the symbolic name for a C procedure.
 .PP
 Symbolic names are established by registering procedures via
-\fBItcl_RegisterC()\fR.  This is usually done in the \fBTcl_AppInit()\fR
-procedure, which is automatically called when the interpreter starts up.
+\fBItcl_RegisterC()\fR or \fBItcl_RegisterC2()\fR.  This is usually done
+in the \fBTcl_AppInit()\fR procedure, which is automatically called when
+the interpreter starts up.
 In the following example, the procedure \fCMy_FooCmd()\fR is registered
 with the symbolic name "foo".  This procedure can be referenced in
 the \fBbody\fR command as "\fC@foo\fR".

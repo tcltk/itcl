@@ -8,7 +8,7 @@
 /* !BEGIN!: Do not edit below this line. */
 
 #define ITCLINT_STUBS_EPOCH 0
-#define ITCLINT_STUBS_REVISION 154
+#define ITCLINT_STUBS_REVISION 157
 
 #ifdef __cplusplus
 extern "C" {
@@ -193,8 +193,13 @@ ITCLAPI int		Itcl_EvalMemberCode(Tcl_Interp *interp,
 				ItclMemberFunc *mfunc,
 				ItclObject *contextObj, Tcl_Size objc,
 				Tcl_Obj *const objv[]);
-/* Slot 62 is reserved */
-/* Slot 63 is reserved */
+/* 62 */
+ITCLAPI int		Itcl_ExecMethod2(void *clientData,
+				Tcl_Interp *interp, Tcl_Size objc,
+				Tcl_Obj *const objv[]);
+/* 63 */
+ITCLAPI int		Itcl_ExecProc2(void *clientData, Tcl_Interp *interp,
+				Tcl_Size objc, Tcl_Obj *const objv[]);
 /* Slot 64 is reserved */
 /* Slot 65 is reserved */
 /* Slot 66 is reserved */
@@ -314,7 +319,12 @@ ITCLAPI int		Itcl_EnsembleInit(Tcl_Interp *interp);
 /* 101 */
 ITCLAPI int		Itcl_CreateEnsemble(Tcl_Interp *interp,
 				const char *ensName);
-/* Slot 102 is reserved */
+/* 102 */
+ITCLAPI int		Itcl_AddEnsemblePart(Tcl_Interp *interp,
+				const char *ensName, const char *partName,
+				const char *usageInfo,
+				Tcl_ObjCmdProc *objProc, void *clientData,
+				Tcl_CmdDeleteProc *deleteProc);
 /* 103 */
 ITCLAPI int		Itcl_GetEnsemblePart(Tcl_Interp *interp,
 				const char *ensName, const char *partName,
@@ -359,13 +369,8 @@ ITCLAPI int		Itcl_AddEnsemblePart2(Tcl_Interp *interp,
 				const char *usageInfo,
 				Tcl_ObjCmdProc2 *objProc, void *clientData,
 				Tcl_CmdDeleteProc *deleteProc);
-/* 119 */
-ITCLAPI int		Itcl_ExecMethod2(void *clientData,
-				Tcl_Interp *interp, Tcl_Size objc,
-				Tcl_Obj *const objv[]);
-/* 120 */
-ITCLAPI int		Itcl_ExecProc2(void *clientData, Tcl_Interp *interp,
-				Tcl_Size objc, Tcl_Obj *const objv[]);
+/* Slot 119 is reserved */
+/* Slot 120 is reserved */
 /* Slot 121 is reserved */
 /* Slot 122 is reserved */
 /* Slot 123 is reserved */
@@ -577,8 +582,8 @@ typedef struct ItclIntStubs {
     int (*itcl_GetMemberCode) (Tcl_Interp *interp, ItclMemberFunc *mfunc); /* 59 */
     void (*reserved60)(void);
     int (*itcl_EvalMemberCode) (Tcl_Interp *interp, ItclMemberFunc *mfunc, ItclObject *contextObj, Tcl_Size objc, Tcl_Obj *const objv[]); /* 61 */
-    void (*reserved62)(void);
-    void (*reserved63)(void);
+    int (*itcl_ExecMethod2) (void *clientData, Tcl_Interp *interp, Tcl_Size objc, Tcl_Obj *const objv[]); /* 62 */
+    int (*itcl_ExecProc2) (void *clientData, Tcl_Interp *interp, Tcl_Size objc, Tcl_Obj *const objv[]); /* 63 */
     void (*reserved64)(void);
     void (*reserved65)(void);
     void (*reserved66)(void);
@@ -617,7 +622,7 @@ typedef struct ItclIntStubs {
     void (*reserved99)(void);
     int (*itcl_EnsembleInit) (Tcl_Interp *interp); /* 100 */
     int (*itcl_CreateEnsemble) (Tcl_Interp *interp, const char *ensName); /* 101 */
-    void (*reserved102)(void);
+    int (*itcl_AddEnsemblePart) (Tcl_Interp *interp, const char *ensName, const char *partName, const char *usageInfo, Tcl_ObjCmdProc *objProc, void *clientData, Tcl_CmdDeleteProc *deleteProc); /* 102 */
     int (*itcl_GetEnsemblePart) (Tcl_Interp *interp, const char *ensName, const char *partName, Tcl_CmdInfo *infoPtr); /* 103 */
     int (*itcl_IsEnsemble) (Tcl_CmdInfo *infoPtr); /* 104 */
     int (*itcl_GetEnsembleUsage) (Tcl_Interp *interp, const char *ensName, Tcl_Obj *objPtr); /* 105 */
@@ -634,8 +639,8 @@ typedef struct ItclIntStubs {
     int (*itcl_IsObjectCmd) (void *clientData, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]); /* 116 */
     int (*itcl_IsClassCmd) (void *clientData, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]); /* 117 */
     int (*itcl_AddEnsemblePart2) (Tcl_Interp *interp, const char *ensName, const char *partName, const char *usageInfo, Tcl_ObjCmdProc2 *objProc, void *clientData, Tcl_CmdDeleteProc *deleteProc); /* 118 */
-    int (*itcl_ExecMethod2) (void *clientData, Tcl_Interp *interp, Tcl_Size objc, Tcl_Obj *const objv[]); /* 119 */
-    int (*itcl_ExecProc2) (void *clientData, Tcl_Interp *interp, Tcl_Size objc, Tcl_Obj *const objv[]); /* 120 */
+    void (*reserved119)(void);
+    void (*reserved120)(void);
     void (*reserved121)(void);
     void (*reserved122)(void);
     void (*reserved123)(void);
@@ -826,8 +831,10 @@ extern const ItclIntStubs *itclIntStubsPtr;
 /* Slot 60 is reserved */
 #define Itcl_EvalMemberCode \
 	(itclIntStubsPtr->itcl_EvalMemberCode) /* 61 */
-/* Slot 62 is reserved */
-/* Slot 63 is reserved */
+#define Itcl_ExecMethod2 \
+	(itclIntStubsPtr->itcl_ExecMethod2) /* 62 */
+#define Itcl_ExecProc2 \
+	(itclIntStubsPtr->itcl_ExecProc2) /* 63 */
 /* Slot 64 is reserved */
 /* Slot 65 is reserved */
 /* Slot 66 is reserved */
@@ -898,7 +905,8 @@ extern const ItclIntStubs *itclIntStubsPtr;
 	(itclIntStubsPtr->itcl_EnsembleInit) /* 100 */
 #define Itcl_CreateEnsemble \
 	(itclIntStubsPtr->itcl_CreateEnsemble) /* 101 */
-/* Slot 102 is reserved */
+#define Itcl_AddEnsemblePart \
+	(itclIntStubsPtr->itcl_AddEnsemblePart) /* 102 */
 #define Itcl_GetEnsemblePart \
 	(itclIntStubsPtr->itcl_GetEnsemblePart) /* 103 */
 #define Itcl_IsEnsemble \
@@ -926,10 +934,8 @@ extern const ItclIntStubs *itclIntStubsPtr;
 	(itclIntStubsPtr->itcl_IsClassCmd) /* 117 */
 #define Itcl_AddEnsemblePart2 \
 	(itclIntStubsPtr->itcl_AddEnsemblePart2) /* 118 */
-#define Itcl_ExecMethod2 \
-	(itclIntStubsPtr->itcl_ExecMethod2) /* 119 */
-#define Itcl_ExecProc2 \
-	(itclIntStubsPtr->itcl_ExecProc2) /* 120 */
+/* Slot 119 is reserved */
+/* Slot 120 is reserved */
 /* Slot 121 is reserved */
 /* Slot 122 is reserved */
 /* Slot 123 is reserved */
@@ -1031,5 +1037,17 @@ extern const ItclIntStubs *itclIntStubsPtr;
 #endif /* defined(USE_ITCL_STUBS) */
 
 /* !END!: Do not edit above this line. */
+
+#if (TCL_MAJOR_VERSION < 9)
+# if defined(TCL_MINOR_VERSION) && (TCL_MINOR_VERSION < 7)
+#   undef Tcl_ObjCmdProc2
+# endif
+# undef Itcl_AddEnsemblePart2
+# define Itcl_AddEnsemblePart2 Itcl_AddEnsemblePart
+# undef Itcl_ExecMethod2
+# define Itcl_ExecMethod2 Itcl_ExecMethod
+# undef Itcl_ExecProc2
+# define Itcl_ExecProc2 Itcl_ExecProc
+#endif
 
 #endif /* _ITCLINTDECLS */

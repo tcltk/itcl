@@ -75,8 +75,8 @@ static const ItclIntStubs itclIntStubs = {
     Itcl_GetMemberCode, /* 59 */
     0, /* 60 */
     Itcl_EvalMemberCode, /* 61 */
-    0, /* 62 */
-    0, /* 63 */
+    Itcl_ExecMethod2, /* 62 */
+    Itcl_ExecProc2, /* 63 */
     0, /* 64 */
     0, /* 65 */
     0, /* 66 */
@@ -115,7 +115,7 @@ static const ItclIntStubs itclIntStubs = {
     0, /* 99 */
     Itcl_EnsembleInit, /* 100 */
     Itcl_CreateEnsemble, /* 101 */
-    0, /* 102 */
+    Itcl_AddEnsemblePart, /* 102 */
     Itcl_GetEnsemblePart, /* 103 */
     Itcl_IsEnsemble, /* 104 */
     Itcl_GetEnsembleUsage, /* 105 */
@@ -132,8 +132,8 @@ static const ItclIntStubs itclIntStubs = {
     Itcl_IsObjectCmd, /* 116 */
     Itcl_IsClassCmd, /* 117 */
     Itcl_AddEnsemblePart2, /* 118 */
-    Itcl_ExecMethod2, /* 119 */
-    Itcl_ExecProc2, /* 120 */
+    0, /* 119 */
+    0, /* 120 */
     0, /* 121 */
     0, /* 122 */
     0, /* 123 */
@@ -209,11 +209,11 @@ const ItclStubs itclStubs = {
     ITCL_STUBS_EPOCH,
     ITCL_STUBS_REVISION,
     &itclStubHooks,
-    0, /* 0 */
-    0, /* 1 */
+    Itcl_RegisterObjC2, /* 0 */
+    Itcl_FindC2, /* 1 */
     Itcl_RegisterC, /* 2 */
-    0, /* 3 */
-    0, /* 4 */
+    Itcl_RegisterObjC, /* 3 */
+    Itcl_FindC, /* 4 */
     Itcl_InitStack, /* 5 */
     Itcl_DeleteStack, /* 6 */
     Itcl_PushStack, /* 7 */
@@ -237,8 +237,6 @@ const ItclStubs itclStubs = {
     Itcl_DiscardInterpState, /* 25 */
     Itcl_Alloc, /* 26 */
     Itcl_Free, /* 27 */
-    Itcl_RegisterObjC2, /* 28 */
-    Itcl_FindC2, /* 29 */
 };
 
 /* !END!: Do not edit above this line. */

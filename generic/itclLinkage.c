@@ -213,17 +213,56 @@ Itcl_RegisterObjC2(
     return TCL_OK;
 }
 
+
+typedef struct {
+    Tcl_ObjCmdProc *objProc;
+    void *clientData;
+    Tcl_CmdDeleteProc *deleteProc;
+} regInfo;
+
+static int regCmdProc(
+    void *clientData,
+    Tcl_Interp *interp,
+    Tcl_Size argc,
+    Tcl_Obj *const *objv)
+{
+    regInfo *info = (regInfo *)clientData;
+    return info->objProc(info->clientData, interp, argc, objv);
+}
+
+static void reg2DeleteProc(
+    void *clientData)
+{
+    regInfo *info = (regInfo *)clientData;
+    info->deleteProc(info->clientData);
+    ckfree(info);
+}
+
+
+int
+Itcl_RegisterObjC(
+    Tcl_Interp *interp,     /* interpreter handling this registration */
+    const char *name,       /* symbolic name for procedure */
+    Tcl_ObjCmdProc *proc,   /* procedure handling Tcl command */
+    void *clientData,       /* client data associated with proc */
+    Tcl_CmdDeleteProc *deleteProc)  /* proc called to free up client data */
+{
+    regInfo *info = (regInfo *)ckalloc(sizeof(regInfo));
+    info->objProc = proc;
+    info->clientData = clientData;
+    info->deleteProc = deleteProc;
+    return Itcl_RegisterObjC2(interp, name, regCmdProc, info, reg2DeleteProc);
+}
 
 /*
  * ------------------------------------------------------------------------
- *  Itcl_FindC()
+ *  Itcl_FindC2()
  *
  *  Used to query a C procedure via its symbolic name.  Looks at the
- *  list of procedures registered previously by either Itcl_RegisterC
- *  or Itcl_RegisterObjC and returns pointers to the appropriate
- *  (argc,argv) or (objc,objv) handlers.  Returns non-zero if the
- *  name is recognized and pointers are returned; returns zero
- *  otherwise.
+ *  list of procedures registered previously by Itcl_RegisterObjC2
+ *  and returns pointers to the appropriate (objc,objv) handler.
+ *  Returns non-zero if the name is recognized and pointers are
+ *  returned; returns zero otherwise.
  * ------------------------------------------------------------------------
  */
 int
@@ -254,6 +293,32 @@ Itcl_FindC2(
         }
     }
     return *objProcPtr != NULL;
+}
+
+int
+Itcl_FindC(
+    Tcl_Interp *interp,           /* interpreter handling this registration */
+    const char *name,             /* symbolic name for procedure */
+    Tcl_CmdProc **argProcPtr,     /* returns (argc,argv) command handler */
+    Tcl_ObjCmdProc **objProcPtr, /* returns (objc,objv) command handler */
+    void **cDataPtr)              /* returns client data */
+{
+    Tcl_ObjCmdProc2 *regProcPtr;
+    void *dataPtr;
+
+    *argProcPtr = NULL;  /* assume info won't be found */
+
+    int result = Itcl_FindC2(interp, name, &regProcPtr, &dataPtr);
+    if (result == TCL_OK) {
+	if (regProcPtr == regCmdProc) {
+	    regInfo *info = (regInfo *)dataPtr;
+	    *objProcPtr = info->objProc;
+	    *cDataPtr = info->clientData;
+	} else {
+	    Tcl_AppendResult(interp, "Error: objProc2 \"", name, "\" not found", (char *)NULL);
+	}
+    }
+    return result;
 }
 
 
