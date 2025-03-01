@@ -357,6 +357,50 @@ ensPartFail:
     return TCL_ERROR;
 }
 
+#if TCL_MAJOR_VERSION > 8
+
+typedef struct {
+	Tcl_ObjCmdProc2 *objProc;
+    void *clientData;
+    Tcl_CmdDeleteProc *deleteProc;
+} ensInfo;
+
+static int ensCmdProc(
+    void *clientData,
+    Tcl_Interp *interp,
+    int argc,
+	Tcl_Obj *const *objv)
+{
+	ensInfo *info = (ensInfo *)clientData;
+    return info->objProc(info->clientData, interp, argc, objv);
+}
+
+static void ens2DeleteProc(
+    void *clientData)
+{
+	ensInfo *info = (ensInfo *)clientData;
+	info->deleteProc(info->clientData);
+	ckfree(info);
+}
+
+int
+Itcl_AddEnsemblePart2(
+    Tcl_Interp *interp,            /* interpreter to be updated */
+    const char *ensName,           /* ensemble containing this part */
+    const char *partName,          /* name of the new part */
+    const char *usageInfo,         /* usage info for argument list */
+    Tcl_ObjCmdProc2 *objProc,       /* handling procedure for part */
+    void *clientData,              /* client data associated with part */
+    Tcl_CmdDeleteProc *deleteProc) /* procedure used to destroy client data */
+{
+	ensInfo *info = (ensInfo *)ckalloc(sizeof(ensInfo));
+	info->objProc = objProc;
+	info->clientData = clientData;
+	info->deleteProc = deleteProc;
+    return Itcl_AddEnsemblePart(interp, ensName, partName, usageInfo, ensCmdProc, info, ens2DeleteProc);
+}
+#endif /* TCL_MAJOR_VERSION */
+
 
 /*
  *----------------------------------------------------------------------

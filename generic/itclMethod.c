@@ -1716,6 +1716,28 @@ Itcl_ExecMethod(
     return Tcl_NRCallObjProc(interp, NRExecMethod, clientData, objc, objv);
 }
 
+#if TCL_MAJOR_VERSION > 8
+static int
+NRExecMethod2(
+    void *clientData,        /* method definition */
+    Tcl_Interp *interp,      /* current interpreter */
+    Tcl_Size objc,           /* number of arguments */
+    Tcl_Obj *const *objv)    /* argument objects */
+{
+    return NRExecMethod(clientData, interp, objc, objv);
+}
+
+int
+Itcl_ExecMethod2(
+    void *clientData,
+    Tcl_Interp *interp,
+    Tcl_Size objc,
+    Tcl_Obj *const *objv)
+{
+    return Tcl_NRCallObjProc2(interp, NRExecMethod2, clientData, objc, objv);
+}
+#endif /* TCL_MAJOR_VERSION */
+
 
 /*
  * ------------------------------------------------------------------------
@@ -1803,7 +1825,29 @@ Itcl_ExecProc(
 {
     return Tcl_NRCallObjProc(interp, NRExecProc, clientData, objc, objv);
 }
-
+
+#if TCL_MAJOR_VERSION > 8
+static int
+NRExecProc2(
+    void *clientData,        /* proc definition */
+    Tcl_Interp *interp,      /* current interpreter */
+    Tcl_Size objc,           /* number of arguments */
+    Tcl_Obj *const objv[])   /* argument objects */
+{
+    return NRExecProc(clientData, interp, objc, objv);
+}
+
+int
+Itcl_ExecProc2(
+    void *clientData,
+    Tcl_Interp *interp,
+    Tcl_Size objc,
+    Tcl_Obj *const *objv)
+{
+    return Tcl_NRCallObjProc2(interp, NRExecProc2, clientData, objc, objv);
+}
+#endif /* TCL_MAJOR_VERSION */
+
 static int
 CallInvokeMethodIfExists(
     void *data[],

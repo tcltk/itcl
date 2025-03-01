@@ -213,6 +213,48 @@ Itcl_RegisterObjC(
     return TCL_OK;
 }
 
+#if TCL_MAJOR_VERSION > 8
+
+typedef struct {
+	Tcl_ObjCmdProc2 *objProc;
+    void *clientData;
+    Tcl_CmdDeleteProc *deleteProc;
+} regInfo;
+
+static int regCmdProc(
+    void *clientData,
+    Tcl_Interp *interp,
+    int argc,
+	Tcl_Obj *const *objv)
+{
+	regInfo *info = (regInfo *)clientData;
+    return info->objProc(info->clientData, interp, argc, objv);
+}
+
+static void reg2DeleteProc(
+    void *clientData)
+{
+	regInfo *info = (regInfo *)clientData;
+	info->deleteProc(info->clientData);
+	ckfree(info);
+}
+
+
+int
+Itcl_RegisterObjC2(
+    Tcl_Interp *interp,     /* interpreter handling this registration */
+    const char *name,       /* symbolic name for procedure */
+    Tcl_ObjCmdProc2 *proc,   /* procedure handling Tcl command */
+    void *clientData,       /* client data associated with proc */
+    Tcl_CmdDeleteProc *deleteProc)  /* proc called to free up client data */
+{
+	regInfo *info = (regInfo *)ckalloc(sizeof(regInfo));
+	info->objProc = proc;
+	info->clientData = clientData;
+	info->deleteProc = deleteProc;
+	return Itcl_RegisterObjC(interp, name, regCmdProc, info, reg2DeleteProc);
+}
+#endif /* TCL_MAJOR_VERSION */
 
 /*
  * ------------------------------------------------------------------------
@@ -258,6 +300,44 @@ Itcl_FindC(
     }
     return (*argProcPtr != NULL || *objProcPtr != NULL);
 }
+
+#if TCL_MAJOR_VERSION > 8
+int
+Itcl_FindC2(
+    Tcl_Interp *interp,           /* interpreter handling this registration */
+    const char *name,             /* symbolic name for procedure */
+    Tcl_ObjCmdProc2 **objProcPtr, /* returns (objc,objv) command handler */
+    void **cDataPtr)              /* returns client data */
+{
+	Tcl_CmdProc *procPtr;
+	Tcl_ObjCmdProc *regProcPtr;
+	void *dataPtr;
+
+    int result = Itcl_FindC(interp, name, &procPtr, &regProcPtr, &dataPtr);
+    if (result == TCL_OK) {
+	if (regProcPtr == regCmdProc) {
+	    regInfo *info = (regInfo *)dataPtr;
+	    *objProcPtr = info->objProc;
+	    *cDataPtr = info->clientData;
+	} else {
+	    Tcl_AppendResult(interp, "Error: objProc2 \"", name, "\" not found", (char *)NULL);
+	}
+    }
+    return result;
+}
+#else
+int
+Itcl_FindC2(
+    Tcl_Interp *interp,           /* interpreter handling this registration */
+    const char *name,             /* symbolic name for procedure */
+    Tcl_ObjCmdProc2 **objProcPtr,  /* returns (objc,objv) command handler */
+    void **cDataPtr)              /* returns client data */
+{
+	Tcl_CmdProc *argProcPtr;
+    return Itcl_FindC(interp, name, &argProcPtr, objProcPtr, cDataPtr);
+}
+
+#endif /* TCL_MAJOR_VERSION */
 
 
 /*

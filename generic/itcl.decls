@@ -11,6 +11,16 @@ scspec ITCLAPI
 # the an index should never be reused for a different function in order
 # to preserve backwards compatibility.
 
+declare 0 {
+    int Itcl_RegisterObjC2(Tcl_Interp *interp, const char *name,
+	Tcl_ObjCmdProc2 *proc, void *clientData,
+	Tcl_CmdDeleteProc *deleteProc)
+}
+declare 1 {
+    int Itcl_FindC2(Tcl_Interp *interp, const char *name,
+	Tcl_ObjCmdProc2 **objProcPtr,
+	void **cDataPtr)
+}
 declare 2 {
     int Itcl_RegisterC(Tcl_Interp *interp, const char *name,
 	Tcl_CmdProc *proc, void *clientData,
@@ -299,6 +309,14 @@ declare 61 {
     int Itcl_EvalMemberCode(Tcl_Interp *interp, ItclMemberFunc *mfunc,
 	ItclObject *contextObj, Tcl_Size objc, Tcl_Obj *const objv[])
 }
+declare 62 {
+    int Itcl_ExecMethod2(void *clientData, Tcl_Interp *interp, Tcl_Size objc,
+	Tcl_Obj *const objv[])
+}
+declare 63 {
+    int Itcl_ExecProc2(void *clientData, Tcl_Interp *interp,
+	Tcl_Size objc, Tcl_Obj *const objv[])
+}
 declare 67 {
     void Itcl_GetMemberFuncUsage(ItclMemberFunc *mfunc,
 	ItclObject *contextObj, Tcl_Obj *objPtr)
@@ -486,6 +504,11 @@ declare 116 {
 declare 117 {
     int Itcl_IsClassCmd(void *clientData, Tcl_Interp *interp,
     int objc, Tcl_Obj *const objv[])
+}
+declare 118 {
+    int Itcl_AddEnsemblePart2(Tcl_Interp *interp, const char *ensName,
+	const char *partName, const char *usageInfo, Tcl_ObjCmdProc2 *objProc,
+	void *clientData, Tcl_CmdDeleteProc *deleteProc)
 }
 
 #

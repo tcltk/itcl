@@ -75,8 +75,8 @@ static const ItclIntStubs itclIntStubs = {
     Itcl_GetMemberCode, /* 59 */
     0, /* 60 */
     Itcl_EvalMemberCode, /* 61 */
-    0, /* 62 */
-    0, /* 63 */
+    Itcl_ExecMethod2, /* 62 */
+    Itcl_ExecProc2, /* 63 */
     0, /* 64 */
     0, /* 65 */
     0, /* 66 */
@@ -131,7 +131,7 @@ static const ItclIntStubs itclIntStubs = {
     Itcl_Assert, /* 115 */
     Itcl_IsObjectCmd, /* 116 */
     Itcl_IsClassCmd, /* 117 */
-    0, /* 118 */
+    Itcl_AddEnsemblePart2, /* 118 */
     0, /* 119 */
     0, /* 120 */
     0, /* 121 */
@@ -209,8 +209,8 @@ const ItclStubs itclStubs = {
     ITCL_STUBS_EPOCH,
     ITCL_STUBS_REVISION,
     &itclStubHooks,
-    0, /* 0 */
-    0, /* 1 */
+    Itcl_RegisterObjC2, /* 0 */
+    Itcl_FindC2, /* 1 */
     Itcl_RegisterC, /* 2 */
     Itcl_RegisterObjC, /* 3 */
     Itcl_FindC, /* 4 */
