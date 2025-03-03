@@ -90,10 +90,10 @@ Itcl_RegisterC(
      *  Make sure that a proc was specified.
      */
     if (!proc) {
-        Tcl_AppendResult(interp, "initialization error: null pointer for ",
-            "C procedure \"", name, "\"",
-            NULL);
-        return TCL_ERROR;
+	Tcl_AppendResult(interp, "initialization error: null pointer for ",
+	    "C procedure \"", name, "\"",
+	    NULL);
+	return TCL_ERROR;
     }
 
     /*
@@ -104,20 +104,20 @@ Itcl_RegisterC(
     procTable = ItclGetRegisteredProcs(interp);
     entry = Tcl_CreateHashEntry(procTable, name, &newEntry);
     if (!newEntry) {
-        cfunc = (ItclCfunc*)Tcl_GetHashValue(entry);
-        if (cfunc->argCmdProc != NULL && cfunc->argCmdProc != proc) {
-            Tcl_AppendResult(interp, "initialization error: C procedure ",
-                "with name \"", name, "\" already defined",
-                NULL);
-            return TCL_ERROR;
-        }
+	cfunc = (ItclCfunc*)Tcl_GetHashValue(entry);
+	if (cfunc->argCmdProc != NULL && cfunc->argCmdProc != proc) {
+	    Tcl_AppendResult(interp, "initialization error: C procedure ",
+		"with name \"", name, "\" already defined",
+		NULL);
+	    return TCL_ERROR;
+	}
 
-        if (cfunc->deleteProc != NULL) {
-            (*cfunc->deleteProc)(cfunc->clientData);
-        }
+	if (cfunc->deleteProc != NULL) {
+	    (*cfunc->deleteProc)(cfunc->clientData);
+	}
     } else {
-        cfunc = (ItclCfunc*)ckalloc(sizeof(ItclCfunc));
-        cfunc->objCmdProc = NULL;
+	cfunc = (ItclCfunc*)ckalloc(sizeof(ItclCfunc));
+	cfunc->objCmdProc = NULL;
     }
 
     cfunc->argCmdProc = proc;
@@ -174,10 +174,10 @@ Itcl_RegisterObjC2(
      *  Make sure that a proc was specified.
      */
     if (!proc) {
-        Tcl_AppendResult(interp, "initialization error: null pointer for ",
-            "C procedure \"", name, "\"",
-            NULL);
-        return TCL_ERROR;
+	Tcl_AppendResult(interp, "initialization error: null pointer for ",
+	    "C procedure \"", name, "\"",
+	    NULL);
+	return TCL_ERROR;
     }
 
     /*
@@ -188,21 +188,21 @@ Itcl_RegisterObjC2(
     procTable = ItclGetRegisteredProcs(interp);
     entry = Tcl_CreateHashEntry(procTable, name, &newEntry);
     if (!newEntry) {
-        cfunc = (ItclCfunc*)Tcl_GetHashValue(entry);
-        if (cfunc->objCmdProc != NULL && cfunc->objCmdProc != proc) {
-            Tcl_AppendResult(interp, "initialization error: C procedure ",
-                "with name \"", name, "\" already defined",
-                NULL);
-            return TCL_ERROR;
-        }
+	cfunc = (ItclCfunc*)Tcl_GetHashValue(entry);
+	if (cfunc->objCmdProc != NULL && cfunc->objCmdProc != proc) {
+	    Tcl_AppendResult(interp, "initialization error: C procedure ",
+		"with name \"", name, "\" already defined",
+		NULL);
+	    return TCL_ERROR;
+	}
 
-        if (cfunc->deleteProc != NULL) {
-            (*cfunc->deleteProc)(cfunc->clientData);
-        }
+	if (cfunc->deleteProc != NULL) {
+	    (*cfunc->deleteProc)(cfunc->clientData);
+	}
     }
     else {
-        cfunc = (ItclCfunc*)ckalloc(sizeof(ItclCfunc));
-        cfunc->argCmdProc = NULL;
+	cfunc = (ItclCfunc*)ckalloc(sizeof(ItclCfunc));
+	cfunc->argCmdProc = NULL;
     }
 
     cfunc->objCmdProc = proc;
@@ -282,17 +282,17 @@ Itcl_FindC2(
     *cDataPtr   = NULL;
 
     if (interp) {
-        procTable = (Tcl_HashTable*)Tcl_GetAssocData(interp,
-            "itcl_RegC", NULL);
+	procTable = (Tcl_HashTable*)Tcl_GetAssocData(interp,
+	    "itcl_RegC", NULL);
 
-        if (procTable) {
-            entry = Tcl_FindHashEntry(procTable, name);
-            if (entry) {
-                cfunc = (ItclCfunc*)Tcl_GetHashValue(entry);
-                *objProcPtr = cfunc->objCmdProc;
-                *cDataPtr   = cfunc->clientData;
-            }
-        }
+	if (procTable) {
+	    entry = Tcl_FindHashEntry(procTable, name);
+	    if (entry) {
+		cfunc = (ItclCfunc*)Tcl_GetHashValue(entry);
+		*objProcPtr = cfunc->objCmdProc;
+		*cDataPtr   = cfunc->clientData;
+	    }
+	}
     }
     return *objProcPtr != NULL;
 }
@@ -314,23 +314,23 @@ Itcl_FindC(
     *cDataPtr   = NULL;
 
     if (interp) {
-        procTable = (Tcl_HashTable*)Tcl_GetAssocData(interp,
-            "itcl_RegC", NULL);
+	procTable = (Tcl_HashTable*)Tcl_GetAssocData(interp,
+	    "itcl_RegC", NULL);
 
-        if (procTable) {
-            entry = Tcl_FindHashEntry(procTable, name);
-            if (entry) {
-                cfunc = (ItclCfunc*)Tcl_GetHashValue(entry);
-                *argProcPtr = cfunc->argCmdProc;
-                if (cfunc->objCmdProc == regCmdProc) {
-            	    regInfo *info = (regInfo *)cfunc->clientData;
-            	    *objProcPtr = info->objProc;
-            	    *cDataPtr = info->clientData;
-                } else if (cfunc->argCmdProc) {
-                	*cDataPtr   = cfunc->clientData;
-                }
-            }
-        }
+	if (procTable) {
+	    entry = Tcl_FindHashEntry(procTable, name);
+	    if (entry) {
+		cfunc = (ItclCfunc*)Tcl_GetHashValue(entry);
+		*argProcPtr = cfunc->argCmdProc;
+		if (cfunc->objCmdProc == regCmdProc) {
+		    regInfo *info = (regInfo *)cfunc->clientData;
+		    *objProcPtr = info->objProc;
+		    *cDataPtr = info->clientData;
+		} else if (cfunc->argCmdProc) {
+			*cDataPtr   = cfunc->clientData;
+		}
+	    }
+	}
     }
     return (*argProcPtr != NULL) || (*objProcPtr != NULL);
 }
@@ -354,13 +354,13 @@ ItclGetRegisteredProcs(
      *  If the registration table does not yet exist, then create it.
      */
     procTable = (Tcl_HashTable*)Tcl_GetAssocData(interp, "itcl_RegC",
-        NULL);
+	NULL);
 
     if (!procTable) {
-        procTable = (Tcl_HashTable*)ckalloc(sizeof(Tcl_HashTable));
-        Tcl_InitHashTable(procTable, TCL_STRING_KEYS);
-        Tcl_SetAssocData(interp, "itcl_RegC", ItclFreeC,
-            procTable);
+	procTable = (Tcl_HashTable*)ckalloc(sizeof(Tcl_HashTable));
+	Tcl_InitHashTable(procTable, TCL_STRING_KEYS);
+	Tcl_SetAssocData(interp, "itcl_RegC", ItclFreeC,
+	    procTable);
     }
     return procTable;
 }
@@ -387,13 +387,13 @@ ItclFreeC(
 
     entry = Tcl_FirstHashEntry(tablePtr, &place);
     while (entry) {
-        cfunc = (ItclCfunc*)Tcl_GetHashValue(entry);
+	cfunc = (ItclCfunc*)Tcl_GetHashValue(entry);
 
-        if (cfunc->deleteProc != NULL) {
-            (*cfunc->deleteProc)(cfunc->clientData);
-        }
-        ckfree ( (char*)cfunc );
-        entry = Tcl_NextHashEntry(&place);
+	if (cfunc->deleteProc != NULL) {
+	    (*cfunc->deleteProc)(cfunc->clientData);
+	}
+	ckfree ( (char*)cfunc );
+	entry = Tcl_NextHashEntry(&place);
     }
 
     Tcl_DeleteHashTable(tablePtr);

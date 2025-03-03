@@ -344,14 +344,14 @@ https://core.tcl-lang.org/itcl/timeline
 	* itclBase.c:
 	* itcl2TclOO.c:
 2010-03-19  Arnulf P. Wiedemann <wiede@users.sourceforge.net>
-	* configure.in:    	add missing include files for install,thanks to Reinhard Max for
+	* configure.in:		add missing include files for install,thanks to Reinhard Max for
 				the patch
 	* itclInfo.c:		removed "uplevel 1" in Itcl_BiInfoUnknownCmd.c, which made problems
 				with "info complete", reported by Reinhard Max
 	* itclMethod.c:		fixed bug, which caused core dump in CallItclObjectCmd, thanks to
 				Reinhard Max for the patch
 2010-03-06  Arnulf P. Wiedemann <wiede@users.sourceforge.net>
-	* itcl.decls:    	changed CONST in declarations to const
+	* itcl.decls:		changed CONST in declarations to const
 	* itclDecls.h:
 	* itclIntDecls.h
 	* itcl2TclOO.c:		adaption to typedef change in TclOO for TclOO_PreCallProc and
