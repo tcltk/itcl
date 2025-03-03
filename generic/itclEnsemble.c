@@ -376,7 +376,9 @@ static void ens2DeleteProc(
     void *clientData)
 {
     ensInfo *info = (ensInfo *)clientData;
-    info->deleteProc(info->clientData);
+    if (info->deleteProc) {
+        info->deleteProc(info->clientData);
+    }
     ckfree(info);
 }
 
@@ -2136,7 +2138,7 @@ CallInvokeEnsembleMethod2(
 {
     EnsemblePart *ensPart = (EnsemblePart *)data[0];
     Tcl_Size objc = PTR2INT(data[1]);
-    Tcl_Obj *const*objv = (Tcl_Obj *const*)data[2];
+    Tcl_Obj *const *objv = (Tcl_Obj *const*)data[2];
     result = (*ensPart->objProc)(ensPart->clientData, interp, objc, objv);
     return result;
 }

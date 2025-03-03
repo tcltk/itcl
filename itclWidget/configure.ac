@@ -37,7 +37,21 @@ AC_CONFIG_AUX_DIR(tclconfig)
 #--------------------------------------------------------------------
 
 TEA_PATH_TCLCONFIG
+if test x"${with_tcl8}" != x; then
+with_tcl8=""
+AC_MSG_WARN([--with-tcl8 option ignored])
+fi
 TEA_LOAD_TCLCONFIG
+
+if test "${TCL_MAJOR_VERSION}" -eq 8; then
+    AC_MSG_ERROR([${PACKAGE_NAME} ${PACKAGE_VERSION} requires Tcl 9.0+
+Found config for Tcl ${TCL_VERSION}])
+fi
+
+#--------------------------------------------------------------------
+# Load the tkConfig.sh file if necessary (Tk extension)
+#--------------------------------------------------------------------
+
 TEA_PATH_TKCONFIG
 TEA_LOAD_TKCONFIG
 

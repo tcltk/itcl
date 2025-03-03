@@ -234,7 +234,9 @@ static void reg2DeleteProc(
     void *clientData)
 {
     regInfo *info = (regInfo *)clientData;
-    info->deleteProc(info->clientData);
+    if (info->deleteProc) {
+	info->deleteProc(info->clientData);
+    }
     ckfree(info);
 }
 
@@ -303,24 +305,35 @@ Itcl_FindC(
     Tcl_ObjCmdProc **objProcPtr, /* returns (objc,objv) command handler */
     void **cDataPtr)              /* returns client data */
 {
-    Tcl_ObjCmdProc2 *regProcPtr;
-    void *dataPtr;
+    Tcl_HashEntry *entry;
+    Tcl_HashTable *procTable;
+    ItclCfunc *cfunc;
 
-    *argProcPtr = NULL;  /* assume info won't be found */
+    *argProcPtr = NULL;
+    *objProcPtr = NULL;
+    *cDataPtr   = NULL;
 
-    int result = Itcl_FindC2(interp, name, &regProcPtr, &dataPtr);
-    if (result == TCL_OK) {
-	if (regProcPtr == regCmdProc) {
-	    regInfo *info = (regInfo *)dataPtr;
-	    *objProcPtr = info->objProc;
-	    *cDataPtr = info->clientData;
-	} else {
-	    Tcl_AppendResult(interp, "Error: objProc2 \"", name, "\" not found", (char *)NULL);
-	}
+    if (interp) {
+        procTable = (Tcl_HashTable*)Tcl_GetAssocData(interp,
+            "itcl_RegC", NULL);
+
+        if (procTable) {
+            entry = Tcl_FindHashEntry(procTable, name);
+            if (entry) {
+                cfunc = (ItclCfunc*)Tcl_GetHashValue(entry);
+                *argProcPtr = cfunc->argCmdProc;
+                if (cfunc->objCmdProc == regCmdProc) {
+            	    regInfo *info = (regInfo *)cfunc->clientData;
+            	    *objProcPtr = info->objProc;
+            	    *cDataPtr = info->clientData;
+                } else if (cfunc->argCmdProc) {
+                	*cDataPtr   = cfunc->clientData;
+                }
+            }
+        }
     }
-    return result;
+    return (*argProcPtr != NULL) || (*objProcPtr != NULL);
 }
-
 
 /*
  * ------------------------------------------------------------------------
