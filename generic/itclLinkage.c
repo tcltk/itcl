@@ -330,7 +330,7 @@ int
 Itcl_FindC2(
     Tcl_Interp *interp,           /* interpreter handling this registration */
     const char *name,             /* symbolic name for procedure */
-    Tcl_ObjCmdProc2 **objProcPtr,  /* returns (objc,objv) command handler */
+    Tcl_ObjCmdProc **objProcPtr,  /* returns (objc,objv) command handler */
     void **cDataPtr)              /* returns client data */
 {
 	Tcl_CmdProc *argProcPtr;
