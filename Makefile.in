@@ -306,7 +306,7 @@ $(PKG_STUB_LIB_FILE): $(PKG_STUB_OBJECTS)
 # you will have to modify the paths to reflect this:
 #
 # sample.$(OBJEXT): $(srcdir)/generic/sample.c
-# 	$(COMPILE) -c `@CYGPATH@ $(srcdir)/generic/sample.c` -o $@
+#	$(COMPILE) -c `@CYGPATH@ $(srcdir)/generic/sample.c` -o $@
 #
 # Setting the VPATH variable to a list of paths will cause the makefile
 # to look into these paths when resolving .c to .obj dependencies.

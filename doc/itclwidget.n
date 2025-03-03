@@ -510,9 +510,9 @@ for public variables.  Any body that starts with "\fB@\fR"
 is treated as the symbolic name for a C procedure.
 .PP
 Symbolic names are established by registering procedures via
-\fBItcl_RegisterC()\fR.  This is usually done in the \fBTcl_AppInit()\fR
+\fBItcl_RegisterObjC()\fR.  This is usually done in the \fBTcl_AppInit()\fR
 procedure, which is automatically called when the interpreter starts up.
-In the following example, the procedure \fCMy_FooCmd()\fR is registered
+In the following example, the procedure \fCMy_FooObjCmd()\fR is registered
 with the symbolic name "foo".  This procedure can be referenced in
 the \fBbody\fR command as "\fC@foo\fR".
 .PP
@@ -525,7 +525,7 @@ Tcl_AppInit(interp)
         return TCL_ERROR;
     }
 
-    if (Itcl_RegisterC(interp, "foo", My_FooCmd) != TCL_OK) {
+    if (Itcl_RegisterObjC(interp, "foo", My_FooObjCmd) != TCL_OK) {
         return TCL_ERROR;
     }
 }
