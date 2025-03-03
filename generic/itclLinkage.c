@@ -216,7 +216,7 @@ Itcl_RegisterObjC(
 #if TCL_MAJOR_VERSION > 8
 
 typedef struct {
-	Tcl_ObjCmdProc2 *objProc;
+    Tcl_ObjCmdProc2 *objProc;
     void *clientData;
     Tcl_CmdDeleteProc *deleteProc;
 } regInfo;
@@ -225,18 +225,20 @@ static int regCmdProc(
     void *clientData,
     Tcl_Interp *interp,
     int argc,
-	Tcl_Obj *const *objv)
+    Tcl_Obj *const *objv)
 {
-	regInfo *info = (regInfo *)clientData;
+    regInfo *info = (regInfo *)clientData;
     return info->objProc(info->clientData, interp, argc, objv);
 }
 
 static void reg2DeleteProc(
     void *clientData)
 {
-	regInfo *info = (regInfo *)clientData;
+    regInfo *info = (regInfo *)clientData;
+    if (info->deleteProc != NULL) {
 	info->deleteProc(info->clientData);
-	ckfree(info);
+    }
+    ckfree(info);
 }
 
 
@@ -248,11 +250,11 @@ Itcl_RegisterObjC2(
     void *clientData,       /* client data associated with proc */
     Tcl_CmdDeleteProc *deleteProc)  /* proc called to free up client data */
 {
-	regInfo *info = (regInfo *)ckalloc(sizeof(regInfo));
-	info->objProc = proc;
-	info->clientData = clientData;
-	info->deleteProc = deleteProc;
-	return Itcl_RegisterObjC(interp, name, regCmdProc, info, reg2DeleteProc);
+    regInfo *info = (regInfo *)ckalloc(sizeof(regInfo));
+    info->objProc = proc;
+    info->clientData = clientData;
+    info->deleteProc = deleteProc;
+    return Itcl_RegisterObjC(interp, name, regCmdProc, info, reg2DeleteProc);
 }
 #endif /* TCL_MAJOR_VERSION */
 
