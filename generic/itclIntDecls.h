@@ -5,6 +5,10 @@
 #ifndef _ITCLINTDECLS
 #define _ITCLINTDECLS
 
+#ifdef TCL_NO_DEPRECATED
+#   define Tcl_ObjCmdProc void
+#endif
+
 /* !BEGIN!: Do not edit below this line. */
 
 #define ITCLINT_STUBS_EPOCH 0
@@ -1038,16 +1042,9 @@ extern const ItclIntStubs *itclIntStubsPtr;
 
 /* !END!: Do not edit above this line. */
 
-#if (TCL_MAJOR_VERSION < 9)
-# if defined(TCL_MINOR_VERSION) && (TCL_MINOR_VERSION < 7)
-#   undef Tcl_ObjCmdProc2
-# endif
-# undef Itcl_AddEnsemblePart2
-# define Itcl_AddEnsemblePart2 Itcl_AddEnsemblePart
-# undef Itcl_ExecMethod2
-# define Itcl_ExecMethod2 Itcl_ExecMethod
-# undef Itcl_ExecProc2
-# define Itcl_ExecProc2 Itcl_ExecProc
+#ifdef TCL_NO_DEPRECATED
+#   undef Tcl_ObjCmdProc
+#   undef Itcl_AddEnsemblePart
 #endif
 
 #endif /* _ITCLINTDECLS */

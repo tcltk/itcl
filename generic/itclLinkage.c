@@ -199,8 +199,7 @@ Itcl_RegisterObjC2(
 	if (cfunc->deleteProc != NULL) {
 	    (*cfunc->deleteProc)(cfunc->clientData);
 	}
-    }
-    else {
+    } else {
 	cfunc = (ItclCfunc*)ckalloc(sizeof(ItclCfunc));
 	cfunc->argCmdProc = NULL;
     }
@@ -214,6 +213,7 @@ Itcl_RegisterObjC2(
 }
 
 
+#ifndef TCL_NO_DEPRECATED
 typedef struct {
     Tcl_ObjCmdProc *objProc;
     void *clientData;
@@ -234,7 +234,7 @@ static void reg2DeleteProc(
     void *clientData)
 {
     regInfo *info = (regInfo *)clientData;
-    if (info->deleteProc) {
+    if (info->deleteProc != NULL) {
 	info->deleteProc(info->clientData);
     }
     ckfree(info);
@@ -255,6 +255,7 @@ Itcl_RegisterObjC(
     info->deleteProc = deleteProc;
     return Itcl_RegisterObjC2(interp, name, regCmdProc, info, reg2DeleteProc);
 }
+#endif /* TCL_NO_DEPRECATED */
 
 /*
  * ------------------------------------------------------------------------
@@ -297,6 +298,7 @@ Itcl_FindC2(
     return *objProcPtr != NULL;
 }
 
+#ifndef TCL_NO_DEPRECATED
 int
 Itcl_FindC(
     Tcl_Interp *interp,           /* interpreter handling this registration */
@@ -308,8 +310,8 @@ Itcl_FindC(
     Tcl_HashEntry *entry;
     Tcl_HashTable *procTable;
     ItclCfunc *cfunc;
+    Tcl_CmdProc *argProc = NULL;  /* assume info won't be found */
 
-    *argProcPtr = NULL;
     *objProcPtr = NULL;
     *cDataPtr   = NULL;
 
@@ -321,7 +323,7 @@ Itcl_FindC(
 	    entry = Tcl_FindHashEntry(procTable, name);
 	    if (entry) {
 		cfunc = (ItclCfunc*)Tcl_GetHashValue(entry);
-		*argProcPtr = cfunc->argCmdProc;
+		argProc = cfunc->argCmdProc;
 		if (cfunc->objCmdProc == regCmdProc) {
 		    regInfo *info = (regInfo *)cfunc->clientData;
 		    *objProcPtr = info->objProc;
@@ -332,8 +334,13 @@ Itcl_FindC(
 	    }
 	}
     }
-    return (*argProcPtr != NULL) || (*objProcPtr != NULL);
+    if (argProcPtr) {
+	*argProcPtr = argProc;
+    }
+    return (((argProcPtr != NULL) && (argProc != NULL)) || (*objProcPtr != NULL));
+
 }
+#endif /* TCL_NO_DEPRECATED */
 
 /*
  * ------------------------------------------------------------------------

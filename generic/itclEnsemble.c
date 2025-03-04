@@ -355,6 +355,7 @@ ensPartFail:
     return TCL_ERROR;
 }
 
+#ifndef TCL_NO_DEPRECATED
 
 typedef struct {
     Tcl_ObjCmdProc *objProc;
@@ -398,7 +399,7 @@ Itcl_AddEnsemblePart(
     info->deleteProc = deleteProc;
     return Itcl_AddEnsemblePart2(interp, ensName, partName, usageInfo, ensCmdProc, info, ens2DeleteProc);
 }
-
+#endif /* TCL_NO_DEPRECATED */
 
 /*
  *----------------------------------------------------------------------

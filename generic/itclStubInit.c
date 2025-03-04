@@ -8,6 +8,12 @@
 MODULE_SCOPE const ItclStubs itclStubs;
 /* !BEGIN!: Do not edit below this line. */
 
+#ifdef TCL_NO_DEPRECATED
+#   define Itcl_RegisterObjC 0
+#   define Itcl_FindC 0
+#   define Itcl_AddEnsemblePart 0
+#endif /* TCL_NO_DEPRECATED */
+
 static const ItclIntStubs itclIntStubs = {
     TCL_STUB_MAGIC,
     ITCLINT_STUBS_EPOCH,

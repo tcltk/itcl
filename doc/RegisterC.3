@@ -37,7 +37,7 @@ Name of command.
 .AP Tcl_CmdProc *argProc in
 Implementation of new command:  \fIargProc\fR will be called whenever
 .AP Tcl_CmdProc **argProcPtr in/out
-The Tcl_CmdProc * to receive the pointer.
+The Tcl_CmdProc * to receive the pointer. Can be NULL.
 .AP Tcl_ObjCmdProc *objProc in
 Implementation of the new command: \fIobjProc\fR will be called whenever
 .AP Tcl_ObjCmdProc2 *objProc2 in
@@ -46,10 +46,10 @@ Implementation of the new command: \fIobjProc2\fR will be called whenever
 The Tcl_ObjCmdProc * to receive the pointer.
 .AP Tcl_ObjCmdProc2 **objProc2Ptr in/out
 The Tcl_ObjCmdProc2 * to receive the pointer.
-.AP ClientData clientData in
+.AP void *clientData in
 Arbitrary one-word value to pass to \fIproc\fR and \fIdeleteProc\fR.
-.AP ClientData *cDataPtr in/out
-The ClientData to receive the pointer.
+.AP void **cDataPtr in/out
+The void * to receive the pointer.
 .AP Tcl_CmdDeleteProc *deleteProc in
 Procedure to call before \fIcmdName\fR is deleted from the interpreter;
 allows for command-specific cleanup.  If NULL, then no procedure is
@@ -87,8 +87,8 @@ for public variables.  Any body that starts with "\fB@\fR"
 is treated as the symbolic name for a C procedure.
 .PP
 Symbolic names are established by registering procedures via
-\fBItcl_RegisterObjC()\fR or \fBItcl_RegisterObjC2()\fR or
-\fBItcl_RegisterC()\fR.  This is usually done in the \fBTcl_AppInit()\fR
+\fBItcl_RegisterObjC2()\fR (or \fBItcl_RegisterObjC()\fR or
+\fBItcl_RegisterC()\fR).  This is usually done in the \fBTcl_AppInit()\fR
 procedure, which is automatically called when the interpreter starts up.
 In the following example, the procedure \fCMy_FooObjCmd()\fR is registered
 with the symbolic name "foo".  This procedure can be referenced in
@@ -102,7 +102,7 @@ Tcl_AppInit(interp)
         return TCL_ERROR;
     }
 
-    if (Itcl_RegisterObjC(interp, "foo", My_FooObjCmd) != TCL_OK) {
+    if (Itcl_RegisterObjC2(interp, "foo", My_FooObjCmd) != TCL_OK) {
         return TCL_ERROR;
     }
 }

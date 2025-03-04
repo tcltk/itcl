@@ -621,12 +621,7 @@ void * Itcl_Alloc(
     size_t numBytes;
     PresMemoryPrefix *blk;
 
-#if TCL_MAJOR_VERSION < 9
-    /* The ckalloc() in Tcl 8 can alloc at most UINT_MAX bytes */
-    assert (size <= UINT_MAX - sizeof(PresMemoryPrefix));
-#else
     assert (size < -sizeof(PresMemoryPrefix));
-#endif
     numBytes = size + sizeof(PresMemoryPrefix);
 
     /* This will panic on allocation failure. No need to check return value. */

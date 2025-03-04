@@ -274,11 +274,9 @@ Itcl_EvalArgs(
      *  to pass in the proper client data.
      */
     Tcl_GetCommandInfoFromToken(cmd, &infoPtr);
-#if TCL_MAJOR_VERSION > 8
     if (infoPtr.isNativeObjectProc == 2) {
 	return infoPtr.objProc2(infoPtr.objClientData2, interp, objc, objv);
     }
-#endif
 #ifndef TCL_NO_DEPRECATED
     if (infoPtr.isNativeObjectProc == 1) {
 	return infoPtr.objProc(infoPtr.objClientData, interp, objc, objv);

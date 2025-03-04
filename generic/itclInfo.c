@@ -392,12 +392,10 @@ ItclInfoGuts(
 
     Tcl_NRAddCallback(interp, InfoGutsFinish, framePtr, infoPtr, cPtr, NULL);
     Tcl_GetCommandInfoFromToken(infoPtr->infoCmd, &info);
-#if TCL_MAJOR_VERSION > 8
     if (info.isNativeObjectProc == 2) {
 	return Tcl_NRCallObjProc2(interp, info.objProc2, info.objClientData2,
 		objc-1, objv+1);
     }
-#endif
 #ifndef TCL_NO_DEPRECATED
     if (info.isNativeObjectProc == 1) {
 	return Tcl_NRCallObjProc(interp, info.objProc, info.objClientData,
@@ -439,12 +437,10 @@ NRInfoWrap(
     /* Have a subcommand.  Pass on to the ensemble */
 
     Tcl_GetCommandInfoFromToken(infoPtr->infoCmd, &info);
-#if TCL_MAJOR_VERSION > 8
     if (info.isNativeObjectProc == 2) {
 	return Tcl_NRCallObjProc2(interp, info.objProc2, info.objClientData2,
 		objc, objv);
     }
-#endif
 #ifndef TCL_NO_DEPRECATED
     if (info.isNativeObjectProc == 1) {
 	return Tcl_NRCallObjProc(interp, info.objProc, info.objClientData,

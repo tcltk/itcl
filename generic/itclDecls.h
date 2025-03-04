@@ -15,8 +15,9 @@ ITCLAPI const char *Itcl_InitStubs(
 
 #endif
 
-#if (TCL_MAJOR_VERSION < 9) && defined(TCL_MINOR_VERSION) && (TCL_MINOR_VERSION < 7)
-# define Tcl_ObjCmdProc2 Tcl_ObjCmdProc
+#ifdef TCL_NO_DEPRECATED
+#   define Tcl_ObjCmdProc void
+#   define Tcl_CmdProc void
 #endif
 
 /* !BEGIN!: Do not edit below this line. */
@@ -215,12 +216,11 @@ extern const ItclStubs *itclStubsPtr;
 
 /* !END!: Do not edit above this line. */
 
-#if (TCL_MAJOR_VERSION < 9)
-# if defined(TCL_MINOR_VERSION) && (TCL_MINOR_VERSION < 7)
-#   undef Tcl_ObjCmdProc2
-# endif
-# undef Itcl_RegisterObjC2
-# define Itcl_RegisterObjC2 Itcl_RegisterObjC
+#ifdef TCL_NO_DEPRECATED
+#   undef Tcl_ObjCmdProc
+#   undef Itcl_RegisterC
+#   undef Itcl_RegisterObjC
+#   undef Itcl_FindC
 #endif
 
 #endif /* _ITCLDECLS */

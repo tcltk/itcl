@@ -80,21 +80,6 @@
 #   endif
 #endif
 
-#if TCL_MAJOR_VERSION == 8 && defined(TCL_MINOR_VERSION) && TCL_MINOR_VERSION < 7
-# define Tcl_MethodType2 Tcl_MethodType
-# define Tcl_MethodCallProc2 Tcl_MethodCallProc
-# define Tcl_NewMethod2 Tcl_NewMethod
-# define Tcl_CreateObjCommand2 Tcl_CreateObjCommand
-# define Tcl_NRCallObjProc2 Tcl_NRCallObjProc
-# define Tcl_NRCreateCommand2 Tcl_NRCreateCommand
-# define objProc2 objProc
-# define objClientData2 objClientData
-# define Tcl_NewInstanceMethod2 Tcl_NewInstanceMethod
-# define TclGetObjInterpProc2 TclGetObjInterpProc
-# define TCL_OO_METHOD_VERSION_2 TCL_OO_METHOD_VERSION_CURRENT
-# define TCL_SIZE_MODIFIER ""
-#endif
-
 /*
  * Since the Tcl/Tk distribution doesn't perform any asserts,
  * dynamic loading can fail to find the __assert function.
@@ -446,9 +431,11 @@ typedef struct ItclMemberCode {
  */
 #define ITCL_IMPLEMENT_NONE    0x001  /* no implementation */
 #define ITCL_IMPLEMENT_TCL     0x002  /* Tcl implementation */
-#define ITCL_IMPLEMENT_ARGCMD  0x004  /* (argc,argv) C implementation */
+#ifndef TCL_NO_DEPRECATED
+#   define ITCL_IMPLEMENT_ARGCMD  0x004  /* (argc,argv) C implementation */
+#   define ITCL_IMPLEMENT_C       0x00c  /* either kind of C implementation */
+#endif
 #define ITCL_IMPLEMENT_OBJCMD  0x008  /* (objc,objv) C implementation */
-#define ITCL_IMPLEMENT_C       0x00c  /* either kind of C implementation */
 
 #define Itcl_IsMemberCodeImplemented(mcode) \
     (((mcode)->flags & ITCL_IMPLEMENT_NONE) == 0)
@@ -621,9 +608,6 @@ typedef struct ItclMethodVariable {
 typedef struct ItclClassCmdInfo {
     int type;
     int protection;
-#if TCL_MAJOR_VERSION == 8
-    int cmdNum; /* not actually used */
-#endif
     Tcl_Namespace *nsPtr;
     Tcl_Namespace *declaringNsPtr;
 } ItclClassCmdInfo;
@@ -649,9 +633,6 @@ typedef struct ItclVarLookup {
  */
 typedef struct ItclCmdLookup {
     ItclMemberFunc* imPtr;    /* function definition */
-#if TCL_MAJOR_VERSION == 8
-    int cmdNum; /* not actually used */
-#endif
     ItclClassCmdInfo *classCmdInfoPtr;
     Tcl_Command cmdPtr;
 } ItclCmdLookup;
