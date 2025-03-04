@@ -221,6 +221,9 @@ extern const ItclStubs *itclStubsPtr;
 # endif
 # undef Itcl_RegisterObjC2
 # define Itcl_RegisterObjC2 Itcl_RegisterObjC
+# undef Itcl_FindC2
+# define Itcl_FindC2(interp, name, objProcPtr, cDataPtr) \
+	Itcl_FindC(interp, name, NULL, objProcPtr, cDataPtr)
 #endif
 
 #endif /* _ITCLDECLS */

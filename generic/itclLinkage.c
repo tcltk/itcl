@@ -273,15 +273,15 @@ int
 Itcl_FindC(
     Tcl_Interp *interp,           /* interpreter handling this registration */
     const char *name,             /* symbolic name for procedure */
-    Tcl_CmdProc **argProcPtr,     /* returns (argc,argv) command handler */
+    Tcl_CmdProc **argProcPtr,     /* returns (argc,argv) command handler, can be NULL */
     Tcl_ObjCmdProc **objProcPtr,  /* returns (objc,objv) command handler */
     void **cDataPtr)              /* returns client data */
 {
     Tcl_HashEntry *entry;
     Tcl_HashTable *procTable;
     ItclCfunc *cfunc;
+    Tcl_CmdProc *argProc = NULL;  /* assume info won't be found */
 
-    *argProcPtr = NULL;  /* assume info won't be found */
     *objProcPtr = NULL;
     *cDataPtr   = NULL;
 
@@ -293,13 +293,16 @@ Itcl_FindC(
 	    entry = Tcl_FindHashEntry(procTable, name);
 	    if (entry) {
 		cfunc = (ItclCfunc*)Tcl_GetHashValue(entry);
-		*argProcPtr = cfunc->argCmdProc;
+		argProc = cfunc->argCmdProc;
 		*objProcPtr = cfunc->objCmdProc;
 		*cDataPtr   = cfunc->clientData;
 	    }
 	}
     }
-    return (*argProcPtr != NULL || *objProcPtr != NULL);
+    if (argProcPtr) {
+	*argProcPtr = argProc;
+    }
+    return (((argProcPtr != NULL) && (argProc != NULL)) || (*objProcPtr != NULL));
 }
 
 #if TCL_MAJOR_VERSION > 8
@@ -310,14 +313,13 @@ Itcl_FindC2(
     Tcl_ObjCmdProc2 **objProcPtr, /* returns (objc,objv) command handler */
     void **cDataPtr)              /* returns client data */
 {
-	Tcl_CmdProc *procPtr;
-	Tcl_ObjCmdProc *regProcPtr;
-	void *dataPtr;
+    Tcl_ObjCmdProc *regProcPtr;
+    void *dataPtr;
 
     *objProcPtr = NULL;  /* assume info won't be found */
     *cDataPtr = NULL;
 
-    if (Itcl_FindC(interp, name, &procPtr, &regProcPtr, &dataPtr) == TCL_OK) {
+    if (Itcl_FindC(interp, name, NULL, &regProcPtr, &dataPtr)) {
 	if (regProcPtr == regCmdProc) {
 	    regInfo *info = (regInfo *)dataPtr;
 	    *objProcPtr = info->objProc;
@@ -326,18 +328,6 @@ Itcl_FindC2(
     }
     return (*objProcPtr != NULL);
 }
-#else
-int
-Itcl_FindC2(
-    Tcl_Interp *interp,           /* interpreter handling this registration */
-    const char *name,             /* symbolic name for procedure */
-    Tcl_ObjCmdProc **objProcPtr,  /* returns (objc,objv) command handler */
-    void **cDataPtr)              /* returns client data */
-{
-	Tcl_CmdProc *argProcPtr;
-    return Itcl_FindC(interp, name, &argProcPtr, objProcPtr, cDataPtr);
-}
-
 #endif /* TCL_MAJOR_VERSION */
 
 

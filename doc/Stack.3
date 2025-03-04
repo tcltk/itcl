@@ -23,13 +23,13 @@ int
 int
 \fBItcl_PushStack\fR(\fIcdata, stack\fR)
 
-ClientData
+void *
 \fBItcl_PopStack\fR(\fIstack\fR)
 
-ClientData
+void *
 \fBItcl_PeekStack\fR(\fIstack\fR)
 
-ClientData
+void *
 \fBItcl_GetStackValue\fR(\fIstack, pos\fR)
 
 int
@@ -40,7 +40,7 @@ int
 Stack info structure.
 .AP int pos in
 position in stack order from the top.
-.AP ClientData clientData in
+.AP void *clientData in
 Arbitrary one-word value to save in the stack.
 .BE
 

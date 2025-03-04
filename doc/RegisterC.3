@@ -37,7 +37,7 @@ Name of command.
 .AP Tcl_CmdProc *argProc in
 Implementation of new command:  \fIargProc\fR will be called whenever
 .AP Tcl_CmdProc **argProcPtr in/out
-The Tcl_CmdProc * to receive the pointer.
+The Tcl_CmdProc * to receive the pointer. Can be NULL.
 .AP Tcl_ObjCmdProc *objProc in
 Implementation of the new command: \fIobjProc\fR will be called whenever
 .AP Tcl_ObjCmdProc2 *objProc2 in
@@ -46,10 +46,10 @@ Implementation of the new command: \fIobjProc2\fR will be called whenever
 The Tcl_ObjCmdProc * to receive the pointer.
 .AP Tcl_ObjCmdProc2 **objProc2Ptr in/out
 The Tcl_ObjCmdProc2 * to receive the pointer.
-.AP ClientData clientData in
+.AP void *clientData in
 Arbitrary one-word value to pass to \fIproc\fR and \fIdeleteProc\fR.
-.AP ClientData *cDataPtr in/out
-The ClientData to receive the pointer.
+.AP void **cDataPtr in/out
+The void * to receive the pointer.
 .AP Tcl_CmdDeleteProc *deleteProc in
 Procedure to call before \fIcmdName\fR is deleted from the interpreter;
 allows for command-specific cleanup.  If NULL, then no procedure is
