@@ -641,7 +641,9 @@ Itcl_ClassCmd2(
  */
 
 static Tcl_MethodCallProc2 ObjCallProc;
+#ifndef TCL_NO_DEPRECATED
 static Tcl_MethodCallProc2 ArgCallProc;
+#endif /* TCL_NO_DEPRECATED */
 static Tcl_CloneProc CloneProc;
 
 static const Tcl_MethodType2 itclObjMethodType = {
@@ -652,6 +654,7 @@ static const Tcl_MethodType2 itclObjMethodType = {
     CloneProc
 };
 
+#ifndef TCL_NO_DEPRECATED
 static const Tcl_MethodType2 itclArgMethodType = {
     TCL_OO_METHOD_VERSION_2,
     "itcl argv method",
@@ -659,6 +662,7 @@ static const Tcl_MethodType2 itclArgMethodType = {
     Itcl_ReleaseData,
     CloneProc
 };
+#endif /* TCL_NO_DEPRECATED */
 
 static int
 CloneProc(
@@ -709,6 +713,7 @@ ObjCallProc(
     }
 }
 
+#ifndef TCL_NO_DEPRECATED
 static int
 ArgCallProc(
     TCL_UNUSED(void *),
@@ -719,6 +724,7 @@ ArgCallProc(
 {
     return TCL_ERROR;
 }
+#endif /* TCL_NO_DEPRECATED */
 
 int
 ItclClassBaseCmd(
