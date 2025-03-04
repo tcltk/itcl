@@ -218,6 +218,7 @@ extern const ItclStubs *itclStubsPtr;
 
 #ifdef TCL_NO_DEPRECATED
 #   undef Tcl_ObjCmdProc
+#   undef Tcl_CmdProc
 #   undef Itcl_RegisterC
 #   undef Itcl_RegisterObjC
 #   undef Itcl_FindC
