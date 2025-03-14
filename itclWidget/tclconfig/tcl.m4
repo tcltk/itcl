@@ -142,16 +142,16 @@ AC_DEFUN([TEA_PATH_TCLCONFIG], [
 			`ls -d /usr/pkg/lib 2>/dev/null` \
 			`ls -d /usr/lib 2>/dev/null` \
 			`ls -d /usr/lib64 2>/dev/null` \
+			`ls -d /usr/lib/tcl9.1 2>/dev/null` \
 			`ls -d /usr/lib/tcl9.0 2>/dev/null` \
-			`ls -d /usr/lib/tcl8.7 2>/dev/null` \
 			`ls -d /usr/lib/tcl8.6 2>/dev/null` \
 			`ls -d /usr/lib/tcl8.5 2>/dev/null` \
+			`ls -d /usr/local/lib/tcl9.1 2>/dev/null` \
 			`ls -d /usr/local/lib/tcl9.0 2>/dev/null` \
-			`ls -d /usr/local/lib/tcl8.7 2>/dev/null` \
 			`ls -d /usr/local/lib/tcl8.6 2>/dev/null` \
 			`ls -d /usr/local/lib/tcl8.5 2>/dev/null` \
+			`ls -d /usr/local/lib/tcl/tcl9.1 2>/dev/null` \
 			`ls -d /usr/local/lib/tcl/tcl9.0 2>/dev/null` \
-			`ls -d /usr/local/lib/tcl/tcl8.7 2>/dev/null` \
 			`ls -d /usr/local/lib/tcl/tcl8.6 2>/dev/null` \
 			`ls -d /usr/local/lib/tcl/tcl8.5 2>/dev/null` \
 			; do
@@ -296,18 +296,18 @@ AC_DEFUN([TEA_PATH_TKCONFIG], [
 			`ls -d /usr/local/lib 2>/dev/null` \
 			`ls -d /usr/contrib/lib 2>/dev/null` \
 			`ls -d /usr/pkg/lib 2>/dev/null` \
+			`ls -d /usr/lib/tk9.1 2>/dev/null` \
 			`ls -d /usr/lib/tk9.0 2>/dev/null` \
-			`ls -d /usr/lib/tk8.7 2>/dev/null` \
 			`ls -d /usr/lib/tk8.6 2>/dev/null` \
 			`ls -d /usr/lib/tk8.5 2>/dev/null` \
 			`ls -d /usr/lib 2>/dev/null` \
 			`ls -d /usr/lib64 2>/dev/null` \
+			`ls -d /usr/local/lib/tk9.1 2>/dev/null` \
 			`ls -d /usr/local/lib/tk9.0 2>/dev/null` \
-			`ls -d /usr/local/lib/tk8.7 2>/dev/null` \
 			`ls -d /usr/local/lib/tk8.6 2>/dev/null` \
 			`ls -d /usr/local/lib/tk8.5 2>/dev/null` \
+			`ls -d /usr/local/lib/tcl/tk9.1 2>/dev/null` \
 			`ls -d /usr/local/lib/tcl/tk9.0 2>/dev/null` \
-			`ls -d /usr/local/lib/tcl/tk8.7 2>/dev/null` \
 			`ls -d /usr/local/lib/tcl/tk8.6 2>/dev/null` \
 			`ls -d /usr/local/lib/tcl/tk8.5 2>/dev/null` \
 			; do
