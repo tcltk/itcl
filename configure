@@ -2541,6 +2541,7 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 
 
+
 #--------------------------------------------------------------------
 # Call TEA_INIT as the first TEA_ macro to set up initial vars.
 # This will define a ${TEA_PLATFORM} variable == "unix" or "windows"
