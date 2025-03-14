@@ -18,6 +18,10 @@ static Tcl_NamespaceDeleteProc FreeItclObjectInfo;
 static Tcl_ObjCmdProc2 ItclSetHullWindowName;
 static Tcl_ObjCmdProc2 ItclCheckSetItclHull;
 
+#if TCL_MAJOR_VERSION < 9
+#   define objProc2 objProc
+#endif
+
 MODULE_SCOPE const ItclStubs itclStubs;
 
 static int Initialize(Tcl_Interp *interp);

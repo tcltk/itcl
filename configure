@@ -2872,16 +2872,16 @@ printf "%s\n" "$as_me: WARNING: --with-tcl argument should refer to directory co
 			`ls -d /usr/pkg/lib 2>/dev/null` \
 			`ls -d /usr/lib 2>/dev/null` \
 			`ls -d /usr/lib64 2>/dev/null` \
+			`ls -d /usr/lib/tcl9.1 2>/dev/null` \
 			`ls -d /usr/lib/tcl9.0 2>/dev/null` \
-			`ls -d /usr/lib/tcl8.7 2>/dev/null` \
 			`ls -d /usr/lib/tcl8.6 2>/dev/null` \
 			`ls -d /usr/lib/tcl8.5 2>/dev/null` \
+			`ls -d /usr/local/lib/tcl9.1 2>/dev/null` \
 			`ls -d /usr/local/lib/tcl9.0 2>/dev/null` \
-			`ls -d /usr/local/lib/tcl8.7 2>/dev/null` \
 			`ls -d /usr/local/lib/tcl8.6 2>/dev/null` \
 			`ls -d /usr/local/lib/tcl8.5 2>/dev/null` \
+			`ls -d /usr/local/lib/tcl/tcl9.1 2>/dev/null` \
 			`ls -d /usr/local/lib/tcl/tcl9.0 2>/dev/null` \
-			`ls -d /usr/local/lib/tcl/tcl8.7 2>/dev/null` \
 			`ls -d /usr/local/lib/tcl/tcl8.6 2>/dev/null` \
 			`ls -d /usr/local/lib/tcl/tcl8.5 2>/dev/null` \
 			; do
@@ -2926,11 +2926,6 @@ printf "%s\n" "found ${TCL_BIN_DIR}/tclConfig.sh" >&6; }
 	fi
     fi
 
-if test x"${with_tcl8}" != x; then
-with_tcl8=""
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING: --with-tcl8 option ignored" >&5
-printf "%s\n" "$as_me: WARNING: --with-tcl8 option ignored" >&2;}
-fi
 
 
 
@@ -4116,9 +4111,19 @@ printf "%s\n" "#define BUILD_${PACKAGE_NAME} /**/" >>confdefs.h
 
 
 
-if test "${TCL_MAJOR_VERSION}" -eq 8; then
-    as_fn_error $? "${PACKAGE_NAME} ${PACKAGE_VERSION} requires Tcl 9.0+
-Found config for Tcl ${TCL_VERSION}" "$LINENO" 5
+#--------------------------------------------------------------------
+# Tcl 8.6+ required.
+#--------------------------------------------------------------------
+
+if test "${TCL_MAJOR_VERSION}" -lt 8; then
+    as_fn_error $? "${TCL_BIN_DIR}/tclConfig.sh is for Tcl ${TCL_VERSION}.
+Itcl ${PACKAGE_VERSION} needs Tcl 8.6 or higher.
+Use --with-tcl= option to indicate location of tclConfig.sh file for Tcl 8.6+." "$LINENO" 5
+fi
+if test "${TCL_MINOR_VERSION}" -lt 6 -a "${TCL_MAJOR_VERSION}" -eq 8; then
+    as_fn_error $? "${TCL_BIN_DIR}/tclConfig.sh is for Tcl ${TCL_VERSION}.
+Itcl ${PACKAGE_VERSION} needs Tcl 8.6 or higher.
+Use --with-tcl= option to indicate location of tclConfig.sh file for Tcl 8.6+." "$LINENO" 5
 fi
 
 #--------------------------------------------------------------------

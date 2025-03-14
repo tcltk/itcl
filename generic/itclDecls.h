@@ -15,7 +15,38 @@ ITCLAPI const char *Itcl_InitStubs(
 
 #endif
 
-#ifdef TCL_NO_DEPRECATED
+#if (TCL_MAJOR_VERSION < 9)
+#   if !defined(Tcl_ObjCmdProc2)
+#	define Tcl_ObjCmdProc2 Tcl_ObjCmdProc
+#   endif
+#   if !defined(Tcl_MethodType2)
+#	define Tcl_MethodType2 Tcl_MethodType
+#   endif
+#   if !defined(Tcl_MethodCallProc2)
+#	define Tcl_MethodCallProc2 Tcl_MethodCallProc
+#   endif
+#   if !defined(Tcl_NewMethod2)
+#	define Tcl_NewMethod2 Tcl_NewMethod
+#   endif
+#   if !defined(Tcl_CreateObjCommand2)
+#	define Tcl_CreateObjCommand2 Tcl_CreateObjCommand
+#   endif
+#   if !defined(Tcl_NRCreateCommand2)
+#	define Tcl_NRCreateCommand2 Tcl_NRCreateCommand
+#   endif
+#   if !defined(Tcl_NRCallObjProc2)
+#	define Tcl_NRCallObjProc2 Tcl_NRCallObjProc
+#   endif
+#   if !defined(Tcl_NewInstanceMethod2)
+#	define Tcl_NewInstanceMethod2 Tcl_NewInstanceMethod
+#   endif
+#   if !defined(TclGetObjInterpProc2)
+#	define TclGetObjInterpProc2 TclGetObjInterpProc
+#   endif
+#   if !defined(TCL_OO_METHOD_VERSION_2)
+#	define TCL_OO_METHOD_VERSION_2 TCL_OO_METHOD_VERSION_CURRENT
+#   endif
+#elif defined(TCL_NO_DEPRECATED)
 #   define Tcl_ObjCmdProc void
 #   define Tcl_CmdProc void
 #endif
@@ -216,12 +247,18 @@ extern const ItclStubs *itclStubsPtr;
 
 /* !END!: Do not edit above this line. */
 
-#ifdef TCL_NO_DEPRECATED
-#   undef Tcl_ObjCmdProc
-#   undef Tcl_CmdProc
-#   undef Itcl_RegisterC
-#   undef Itcl_RegisterObjC
-#   undef Itcl_FindC
+#if (TCL_MAJOR_VERSION < 9)
+# undef Itcl_RegisterObjC2
+# define Itcl_RegisterObjC2 Itcl_RegisterObjC
+# undef Itcl_FindC2
+# define Itcl_FindC2(interp, name, objProcPtr, cDataPtr) \
+	Itcl_FindC(interp, name, NULL, objProcPtr, cDataPtr)
+#elif defined(TCL_NO_DEPRECATED)
+# undef Tcl_ObjCmdProc
+# undef Tcl_CmdProc
+# undef Itcl_RegisterC
+# undef Itcl_RegisterObjC
+# undef Itcl_FindC
 #endif
 
 #endif /* _ITCLDECLS */

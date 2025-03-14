@@ -35,6 +35,10 @@
 #define ITCL_ENSEMBLE_CUSTOM        0x01
 #define ITCL_ENSEMBLE_ENSEMBLE      0x02
 
+#if TCL_MAJOR_VERSION < 9
+#   define objClientData2 objClientData
+#endif
+
 /*
  *  Data used to represent an ensemble:
  */

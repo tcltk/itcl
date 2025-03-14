@@ -57,8 +57,8 @@
 
 #include <tcl.h>
 
-#if (TCL_MAJOR_VERSION < 9)
-#    error Itcl 4 build requires tcl.h from Tcl 9.0 or later
+#if (TCL_MAJOR_VERSION == 8) && defined(TCL_MINOR_VERSION) && (TCL_MINOR_VERSION < 6)
+#    error Itcl 4 build requires tcl.h from Tcl 8.6 or later
 #endif
 
 /*
@@ -67,16 +67,6 @@
 
 #ifdef __cplusplus
 extern "C" {
-#endif
-
-#ifndef TCL_ALPHA_RELEASE
-#   define TCL_ALPHA_RELEASE    0
-#endif
-#ifndef TCL_BETA_RELEASE
-#   define TCL_BETA_RELEASE     1
-#endif
-#ifndef TCL_FINAL_RELEASE
-#   define TCL_FINAL_RELEASE    2
 #endif
 
 #define ITCL_MAJOR_VERSION	4
@@ -131,6 +121,10 @@ ITCL_EXTERN int Itcl_SafeInit(Tcl_Interp *interp);
 #define ITCL_PROTECTED        2
 #define ITCL_PRIVATE          3
 #define ITCL_DEFAULT_PROTECT  4
+
+#if (TCL_MAJOR_VERSION == 8) && (TCL_MINOR_VERSION < 7) && !defined(Tcl_Size)
+#    define Tcl_Size int
+#endif
 
 /*
  *  Generic stack.

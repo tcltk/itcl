@@ -15,6 +15,9 @@
 static void ItclDeleteStub(void *cdata);
 static Tcl_ObjCmdProc2 ItclHandleStubCmd;
 
+#if TCL_MAJOR_VERSION < 9
+#   define objClientData2 objClientData
+#endif
 
 /*
  * ------------------------------------------------------------------------

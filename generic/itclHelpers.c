@@ -13,6 +13,12 @@
 #include "itclInt.h"
 
 void ItclDeleteArgList(ItclArgList *arglistPtr);
+
+#if TCL_MAJOR_VERSION < 9
+#   define objProc2 objProc
+#   define objClientData2 objClientData
+#endif
+
 #ifdef ITCL_DEBUG
 int _itcl_debug_level = 0;
 

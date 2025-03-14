@@ -80,6 +80,10 @@
 #   endif
 #endif
 
+#if TCL_MAJOR_VERSION == 8 && defined(TCL_MINOR_VERSION) && TCL_MINOR_VERSION < 7
+# define TCL_SIZE_MODIFIER ""
+#endif
+
 /*
  * Since the Tcl/Tk distribution doesn't perform any asserts,
  * dynamic loading can fail to find the __assert function.
@@ -608,6 +612,9 @@ typedef struct ItclMethodVariable {
 typedef struct ItclClassCmdInfo {
     int type;
     int protection;
+#if TCL_MAJOR_VERSION == 8
+    int cmdNum; /* not actually used */
+#endif
     Tcl_Namespace *nsPtr;
     Tcl_Namespace *declaringNsPtr;
 } ItclClassCmdInfo;
@@ -633,6 +640,9 @@ typedef struct ItclVarLookup {
  */
 typedef struct ItclCmdLookup {
     ItclMemberFunc* imPtr;    /* function definition */
+#if TCL_MAJOR_VERSION == 8
+    int cmdNum; /* not actually used */
+#endif
     ItclClassCmdInfo *classCmdInfoPtr;
     Tcl_Command cmdPtr;
 } ItclCmdLookup;

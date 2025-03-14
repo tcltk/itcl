@@ -157,6 +157,8 @@ Itcl_RegisterC(
  *  in interp->result) if anything goes wrong.
  * ------------------------------------------------------------------------
  */
+
+#undef Itcl_RegisterObjC2
 int
 Itcl_RegisterObjC2(
     Tcl_Interp *interp,     /* interpreter handling this registration */
@@ -268,6 +270,7 @@ Itcl_RegisterObjC(
  *  returned; returns zero otherwise.
  * ------------------------------------------------------------------------
  */
+#undef Itcl_FindC2
 int
 Itcl_FindC2(
     Tcl_Interp *interp,           /* interpreter handling this registration */

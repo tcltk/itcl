@@ -59,6 +59,11 @@ static Tcl_ObjCmdProc2 Itcl_BiInfoDelegatedTypeMethodCmd;
 static Tcl_ObjCmdProc2 Itcl_BiInfoDelegatedUnknownCmd;
 static Tcl_ObjCmdProc2 Itcl_BiInfoContextCmd;
 
+#if TCL_MAJOR_VERSION < 9
+#   define objProc2 objProc
+#   define objClientData2 objClientData
+#endif
+
 typedef struct InfoMethod {
     const char* name;        /* method name */
     const char* usage;       /* string describing usage */

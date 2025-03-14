@@ -15,6 +15,8 @@ dnl	to configure the system for the local environment.
 # This initializes the environment with PACKAGE_NAME and PACKAGE_VERSION
 # set as provided.  These will also be added as -D defs in your Makefile
 # so you can encode the package version directly into the source files.
+# This will also define a special symbol for Windows (BUILD_<PACKAGE_NAME>
+# so that we create the export library with the dll.
 #-----------------------------------------------------------------------
 
 AC_INIT([itcl],[4.4a0])
@@ -55,15 +57,21 @@ AC_CONFIG_AUX_DIR(tclconfig)
 #--------------------------------------------------------------------
 
 TEA_PATH_TCLCONFIG
-if test x"${with_tcl8}" != x; then
-with_tcl8=""
-AC_MSG_WARN([--with-tcl8 option ignored])
-fi
 TEA_LOAD_TCLCONFIG
 
-if test "${TCL_MAJOR_VERSION}" -eq 8; then
-    AC_MSG_ERROR([${PACKAGE_NAME} ${PACKAGE_VERSION} requires Tcl 9.0+
-Found config for Tcl ${TCL_VERSION}])
+#--------------------------------------------------------------------
+# Tcl 8.6+ required.
+#--------------------------------------------------------------------
+
+if test "${TCL_MAJOR_VERSION}" -lt 8; then
+    AC_MSG_ERROR([${TCL_BIN_DIR}/tclConfig.sh is for Tcl ${TCL_VERSION}.
+Itcl ${PACKAGE_VERSION} needs Tcl 8.6 or higher.
+Use --with-tcl= option to indicate location of tclConfig.sh file for Tcl 8.6+.])
+fi
+if test "${TCL_MINOR_VERSION}" -lt 6 -a "${TCL_MAJOR_VERSION}" -eq 8; then
+    AC_MSG_ERROR([${TCL_BIN_DIR}/tclConfig.sh is for Tcl ${TCL_VERSION}.
+Itcl ${PACKAGE_VERSION} needs Tcl 8.6 or higher.
+Use --with-tcl= option to indicate location of tclConfig.sh file for Tcl 8.6+.])
 fi
 
 #--------------------------------------------------------------------
