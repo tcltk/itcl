@@ -20,7 +20,6 @@ dnl	to configure the system for the local environment.
 #-----------------------------------------------------------------------
 
 AC_INIT([itcl],[4.3.3])
-AC_PREREQ([2.69])
 
 #--------------------------------------------------------------------
 # Call TEA_INIT as the first TEA_ macro to set up initial vars.

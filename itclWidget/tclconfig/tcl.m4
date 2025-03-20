@@ -1380,11 +1380,15 @@ AC_DEFUN([TEA_CONFIG_CFLAGS], [
 	    CC_SEARCH_FLAGS=""
 	    LD_SEARCH_FLAGS=""
 	    ;;
-	CYGWIN_*)
+	CYGWIN_*|MINGW32_*|MINGW64_*|MSYS_*)
 	    SHLIB_CFLAGS=""
 	    SHLIB_LD='${CC} -shared'
 	    SHLIB_SUFFIX=".dll"
-	    SHLIB_LD_LIBS="${SHLIB_LD_LIBS} -Wl,--out-implib,\$[@].a"
+	    if test "${TEA_PLATFORM}" = "unix" -a  "${TCL_MAJOR_VERSION}" -gt 8 -a x"${with_tcl8}" = x; then
+		SHLIB_LD_LIBS="${SHLIB_LD_LIBS} -Wl,--out-implib,\$(patsubst cyg%.dll,lib%.dll.a,\$[@])"
+	    else
+		SHLIB_LD_LIBS="${SHLIB_LD_LIBS} -Wl,--out-implib,\$[@].a"
+	    fi
 	    EXEEXT=".exe"
 	    do64bit_ok=yes
 	    CC_SEARCH_FLAGS=""
@@ -3204,8 +3208,17 @@ print("manifest needed")
     # substituted. (@@@ Might not be necessary anymore)
     #--------------------------------------------------------------------
 
-    PACKAGE_LIB_PREFIX8="${PACKAGE_LIB_PREFIX}"
-    PACKAGE_LIB_PREFIX9="${PACKAGE_LIB_PREFIX}tcl9"
+    if test "$TEA_PLATFORM" = "unix"; then
+	PACKAGE_LIB_PREFIX8="lib"
+	if test "$EXEEXT" = ".exe" -a "$SHARED_BUILD" != "0"; then
+	    PACKAGE_LIB_PREFIX9="cygtcl9"
+	else
+	    PACKAGE_LIB_PREFIX9="libtcl9"
+	fi
+    else
+	PACKAGE_LIB_PREFIX8=""
+	PACKAGE_LIB_PREFIX9="tcl9"
+    fi
     if test "${TCL_MAJOR_VERSION}" -gt 8 -a x"${with_tcl8}" = x; then
 	PACKAGE_LIB_PREFIX="${PACKAGE_LIB_PREFIX9}"
     else
@@ -3256,20 +3269,20 @@ print("manifest needed")
 	    if test x"${TK_BIN_DIR}" != x ; then
 		SHLIB_LD_LIBS="${SHLIB_LD_LIBS} ${TK_STUB_LIB_SPEC}"
 	    fi
-	    eval eval "PKG_LIB_FILE8=lib${PACKAGE_LIB_PREFIX8}${PACKAGE_NAME}${SHARED_LIB_SUFFIX}"
-	    eval eval "PKG_LIB_FILE9=lib${PACKAGE_LIB_PREFIX9}${PACKAGE_NAME}${SHARED_LIB_SUFFIX}"
-	    eval eval "PKG_LIB_FILE=lib${PACKAGE_LIB_PREFIX}${PACKAGE_NAME}${SHARED_LIB_SUFFIX}"
+	    eval eval "PKG_LIB_FILE8=${PACKAGE_LIB_PREFIX8}${PACKAGE_NAME}${SHARED_LIB_SUFFIX}"
+	    eval eval "PKG_LIB_FILE9=${PACKAGE_LIB_PREFIX9}${PACKAGE_NAME}${SHARED_LIB_SUFFIX}"
+	    eval eval "PKG_LIB_FILE=${PACKAGE_LIB_PREFIX}${PACKAGE_NAME}${SHARED_LIB_SUFFIX}"
 	    RANLIB=:
 	else
-	    eval eval "PKG_LIB_FILE8=lib${PACKAGE_LIB_PREFIX8}${PACKAGE_NAME}${UNSHARED_LIB_SUFFIX}"
-	    eval eval "PKG_LIB_FILE9=lib${PACKAGE_LIB_PREFIX9}${PACKAGE_NAME}${UNSHARED_LIB_SUFFIX}"
-	    eval eval "PKG_LIB_FILE=lib${PACKAGE_LIB_PREFIX}${PACKAGE_NAME}${UNSHARED_LIB_SUFFIX}"
+	    eval eval "PKG_LIB_FILE8=${PACKAGE_LIB_PREFIX8}${PACKAGE_NAME}${UNSHARED_LIB_SUFFIX}"
+	    eval eval "PKG_LIB_FILE9=${PACKAGE_LIB_PREFIX9}${PACKAGE_NAME}${UNSHARED_LIB_SUFFIX}"
+	    eval eval "PKG_LIB_FILE=${PACKAGE_LIB_PREFIX}${PACKAGE_NAME}${UNSHARED_LIB_SUFFIX}"
 	fi
 	# Some packages build their own stubs libraries
 	if test "${TCL_MAJOR_VERSION}" -gt 8 -a x"${with_tcl8}" = x; then
-	    eval eval "PKG_STUB_LIB_FILE=lib${PACKAGE_LIB_PREFIX8}${PACKAGE_NAME}stub.a"
+	    eval eval "PKG_STUB_LIB_FILE=${PACKAGE_LIB_PREFIX8}${PACKAGE_NAME}stub.a"
 	else
-	    eval eval "PKG_STUB_LIB_FILE=lib${PACKAGE_LIB_PREFIX8}${PACKAGE_NAME}stub${UNSHARED_LIB_SUFFIX}"
+	    eval eval "PKG_STUB_LIB_FILE=${PACKAGE_LIB_PREFIX8}${PACKAGE_NAME}stub${UNSHARED_LIB_SUFFIX}"
 	fi
     fi
 
