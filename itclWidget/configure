@@ -7425,7 +7425,7 @@ fi
 		fi
 		case "x`echo \${VisualStudioVersion}`" in
 		    x1[4-9]*)
-			lflags="${lflags} -nodefaultlib:libucrt.lib"
+			lflags="${lflags} -nodefaultlib:ucrt.lib"
 
     vars="ucrt.lib"
     for i in $vars; do
