@@ -1385,7 +1385,7 @@ AC_DEFUN([TEA_CONFIG_CFLAGS], [
 	    SHLIB_LD='${CC} -shared'
 	    SHLIB_SUFFIX=".dll"
 	    if test "${TEA_PLATFORM}" = "unix" -a  "${TCL_MAJOR_VERSION}" -gt 8 -a x"${with_tcl8}" = x; then
-		SHLIB_LD_LIBS="${SHLIB_LD_LIBS} -Wl,--out-implib,\$(patsubst cyg%.dll,lib%.dll.a,\$[@])"
+		SHLIB_LD_LIBS="${SHLIB_LD_LIBS} -Wl,--out-implib,\$(patsubst cyg%.dll,lib%.dll,\$[@]).a"
 	    else
 		SHLIB_LD_LIBS="${SHLIB_LD_LIBS} -Wl,--out-implib,\$[@].a"
 	    fi
