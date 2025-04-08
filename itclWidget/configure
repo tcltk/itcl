@@ -782,7 +782,6 @@ enable_option_checking
 with_tcl
 with_tcl8
 with_tk
-with_tk8
 with_itcl
 with_tclinclude
 with_tkinclude
@@ -1438,7 +1437,6 @@ Optional Packages:
                           (tclConfig.sh)
   --with-tcl8             Compile for Tcl8 in Tcl9 environment
   --with-tk               directory containing tk configuration (tkConfig.sh)
-  --with-tk8              Compile for Tk8 in Tk9 environment
   --with-itcl              directory containing itcl configuration (itclConfig.sh)
   --with-tclinclude       directory containing the public Tcl header files
   --with-tkinclude        directory containing the public Tk header files
@@ -4076,13 +4074,6 @@ printf "%s\n" "#define BUILD_${PACKAGE_NAME} /**/" >>confdefs.h
 if test ${with_tk+y}
 then :
   withval=$with_tk; with_tkconfig="${withval}"
-fi
-
-
-# Check whether --with-tk8 was given.
-if test ${with_tk8+y}
-then :
-  withval=$with_tk8; with_tk8="${withval}"
 fi
 
 	{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for Tk configuration" >&5
@@ -9920,8 +9911,6 @@ rm -rf conftest*
 
 printf "%s\n" "#define TCL_MAJOR_VERSION 8" >>confdefs.h
 
-    fi
-    if test "${TCL_MAJOR_VERSION}" -gt 8 -a x"${with_tk8}" != x; then
 
 printf "%s\n" "#define TK_MAJOR_VERSION 8" >>confdefs.h
 

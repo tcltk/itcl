@@ -225,10 +225,6 @@ AC_DEFUN([TEA_PATH_TKCONFIG], [
 	    AS_HELP_STRING([--with-tk],
 		[directory containing tk configuration (tkConfig.sh)]),
 	    [with_tkconfig="${withval}"])
-	AC_ARG_WITH(tk8,
-	    AS_HELP_STRING([--with-tk8],
-		[Compile for Tk8 in Tk9 environment]),
-	    [with_tk8="${withval}"])
 	AC_MSG_CHECKING([for Tk configuration])
 	AC_CACHE_VAL(ac_cv_c_tkconfig,[
 
@@ -3224,8 +3220,6 @@ print("manifest needed")
     else
 	PACKAGE_LIB_PREFIX="${PACKAGE_LIB_PREFIX8}"
 	AC_DEFINE(TCL_MAJOR_VERSION, 8, [Compile for Tcl8?])
-    fi
-    if test "${TCL_MAJOR_VERSION}" -gt 8 -a x"${with_tk8}" != x; then
 	AC_DEFINE(TK_MAJOR_VERSION, 8, [Compile for Tk8?])
     fi
     if test "${TEA_PLATFORM}" = "windows" ; then

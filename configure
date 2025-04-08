@@ -9318,8 +9318,6 @@ rm -rf conftest*
 
 printf "%s\n" "#define TCL_MAJOR_VERSION 8" >>confdefs.h
 
-    fi
-    if test "${TCL_MAJOR_VERSION}" -gt 8 -a x"${with_tk8}" != x; then
 
 printf "%s\n" "#define TK_MAJOR_VERSION 8" >>confdefs.h
 
