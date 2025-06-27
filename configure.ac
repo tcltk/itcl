@@ -263,7 +263,7 @@ eval itcl_SRC_DIR="$srcdir"
 itcl_SRC_DIR=`cd "${itcl_SRC_DIR}"; pwd`
 AC_SUBST(itcl_SRC_DIR)
 
-eval itcl_INCLUDE_SPEC="-I${itcl_SRC_DIR}/generic -I${itcl_SRC_DIR}"
+eval itcl_INCLUDE_SPEC=\"-I${itcl_SRC_DIR}/generic\"
 AC_SUBST(itcl_INCLUDE_SPEC)
 
 #--------------------------------------------------------------------
