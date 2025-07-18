@@ -4042,8 +4042,11 @@ printf "%s\n" "$TEA_PLATFORM" >&6; }
 
     # The BUILD_$pkg is to define the correct extern storage class
     # handling when making this package
+    # To be able to sefely use the package name in a #define, it must not
+    # contain anything other than alphanumeric characters and underscores
+    SAFE_PKG_NAME=itclwidget
 
-printf "%s\n" "#define BUILD_${PACKAGE_NAME} /**/" >>confdefs.h
+printf "%s\n" "#define BUILD_${SAFE_PKG_NAME} /**/" >>confdefs.h
 
     # Do this here as we have fully defined TEA_PLATFORM now
     if test "${TEA_PLATFORM}" = "windows" ; then
@@ -9925,6 +9928,42 @@ printf "%s\n" "#define TK_MAJOR_VERSION 8" >>confdefs.h
 	    SHLIB_LD_LIBS="${SHLIB_LD_LIBS} \"`${CYGPATH} ${TCL_BIN_DIR}/${TCL_STUB_LIB_FILE}`\""
 	    if test "$GCC" = "yes"; then
 		SHLIB_LD_LIBS="${SHLIB_LD_LIBS} -static-libgcc"
+	    fi
+	    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking if the linker understands --disable-high-entropy-va" >&5
+printf %s "checking if the linker understands --disable-high-entropy-va... " >&6; }
+if test ${tcl_cv_ld_high_entropy+y}
+then :
+  printf %s "(cached) " >&6
+else case e in #(
+  e)
+		hold_cflags=$CFLAGS; CFLAGS="$CFLAGS -Wl,--disable-high-entropy-va"
+		cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+int
+main (void)
+{
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"
+then :
+  tcl_cv_ld_high_entropy=yes
+else case e in #(
+  e) tcl_cv_ld_high_entropy=no ;;
+esac
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.beam \
+    conftest$ac_exeext conftest.$ac_ext
+		CFLAGS=$hold_cflags ;;
+esac
+fi
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $tcl_cv_ld_high_entropy" >&5
+printf "%s\n" "$tcl_cv_ld_high_entropy" >&6; }
+	    if test $tcl_cv_ld_high_entropy = yes; then
+		SHLIB_LD_LIBS="${SHLIB_LD_LIBS} -Wl,--disable-high-entropy-va"
 	    fi
 	    eval eval "PKG_LIB_FILE8=${PACKAGE_LIB_PREFIX8}${PACKAGE_NAME}${SHARED_LIB_SUFFIX}"
 	    eval eval "PKG_LIB_FILE9=${PACKAGE_LIB_PREFIX9}${PACKAGE_NAME}${SHARED_LIB_SUFFIX}"
