@@ -1193,6 +1193,7 @@ AC_DEFUN([TEA_CONFIG_CFLAGS], [
 			MACHINE="IA64"
 			;;
 		esac
+		do64bit_ok=yes
 	    fi
 
 	    if test "$GCC" != "yes" ; then
