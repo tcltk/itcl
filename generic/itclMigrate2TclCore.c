@@ -67,7 +67,9 @@ Tcl_NewNamespaceVar(
 
     varPtr = TclVarHashCreateVar(&((Namespace *)nsPtr)->varTable,
             varName, &isNew);
-    TclSetVarNamespaceVar(varPtr);
+    if (varPtr) {
+	TclSetVarNamespaceVar(varPtr);
+    }
     return (Tcl_Var)varPtr;
 }
 

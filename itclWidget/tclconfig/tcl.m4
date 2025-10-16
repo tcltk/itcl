@@ -225,10 +225,6 @@ AC_DEFUN([TEA_PATH_TKCONFIG], [
 	    AS_HELP_STRING([--with-tk],
 		[directory containing tk configuration (tkConfig.sh)]),
 	    [with_tkconfig="${withval}"])
-	AC_ARG_WITH(tk8,
-	    AS_HELP_STRING([--with-tk8],
-		[Compile for Tk8 in Tk9 environment]),
-	    [with_tk8="${withval}"])
 	AC_MSG_CHECKING([for Tk configuration])
 	AC_CACHE_VAL(ac_cv_c_tkconfig,[
 
@@ -457,7 +453,10 @@ AC_DEFUN([TEA_LOAD_TCLCONFIG], [
 
     # The BUILD_$pkg is to define the correct extern storage class
     # handling when making this package
-    AC_DEFINE_UNQUOTED(BUILD_${PACKAGE_NAME}, [],
+    # To be able to sefely use the package name in a #define, it must not
+    # contain anything other than alphanumeric characters and underscores
+    SAFE_PKG_NAME=patsubst(AC_PACKAGE_NAME, [[^A-Za-z0-9_]], [_])
+    AC_DEFINE_UNQUOTED(BUILD_${SAFE_PKG_NAME}, [],
 	    [Building extension source?])
     # Do this here as we have fully defined TEA_PLATFORM now
     if test "${TEA_PLATFORM}" = "windows" ; then
@@ -1194,6 +1193,7 @@ AC_DEFUN([TEA_CONFIG_CFLAGS], [
 			MACHINE="IA64"
 			;;
 		esac
+		do64bit_ok=yes
 	    fi
 
 	    if test "$GCC" != "yes" ; then
@@ -1204,7 +1204,7 @@ AC_DEFUN([TEA_CONFIG_CFLAGS], [
 		fi
 		case "x`echo \${VisualStudioVersion}`" in
 		    x1[[4-9]]*)
-			lflags="${lflags} -nodefaultlib:libucrt.lib"
+			lflags="${lflags} -nodefaultlib:ucrt.lib"
 			TEA_ADD_LIBS([ucrt.lib])
 		    ;;
 		    *)
@@ -1380,11 +1380,15 @@ AC_DEFUN([TEA_CONFIG_CFLAGS], [
 	    CC_SEARCH_FLAGS=""
 	    LD_SEARCH_FLAGS=""
 	    ;;
-	CYGWIN_*)
+	CYGWIN_*|MINGW32_*|MINGW64_*|MSYS_*)
 	    SHLIB_CFLAGS=""
 	    SHLIB_LD='${CC} -shared'
 	    SHLIB_SUFFIX=".dll"
-	    SHLIB_LD_LIBS="${SHLIB_LD_LIBS} -Wl,--out-implib,\$[@].a"
+	    if test "${TEA_PLATFORM}" = "unix" -a  "${TCL_MAJOR_VERSION}" -gt 8 -a x"${with_tcl8}" = x; then
+		SHLIB_LD_LIBS="${SHLIB_LD_LIBS} -Wl,--out-implib,\$(patsubst cyg%.dll,lib%.dll,\$[@]).a"
+	    else
+		SHLIB_LD_LIBS="${SHLIB_LD_LIBS} -Wl,--out-implib,\$[@].a"
+	    fi
 	    EXEEXT=".exe"
 	    do64bit_ok=yes
 	    CC_SEARCH_FLAGS=""
@@ -3204,15 +3208,22 @@ print("manifest needed")
     # substituted. (@@@ Might not be necessary anymore)
     #--------------------------------------------------------------------
 
-    PACKAGE_LIB_PREFIX8="${PACKAGE_LIB_PREFIX}"
-    PACKAGE_LIB_PREFIX9="${PACKAGE_LIB_PREFIX}tcl9"
+    if test "$TEA_PLATFORM" = "unix"; then
+	PACKAGE_LIB_PREFIX8="lib"
+	if test "$EXEEXT" = ".exe" -a "$SHARED_BUILD" != "0"; then
+	    PACKAGE_LIB_PREFIX9="cygtcl9"
+	else
+	    PACKAGE_LIB_PREFIX9="libtcl9"
+	fi
+    else
+	PACKAGE_LIB_PREFIX8=""
+	PACKAGE_LIB_PREFIX9="tcl9"
+    fi
     if test "${TCL_MAJOR_VERSION}" -gt 8 -a x"${with_tcl8}" = x; then
 	PACKAGE_LIB_PREFIX="${PACKAGE_LIB_PREFIX9}"
     else
 	PACKAGE_LIB_PREFIX="${PACKAGE_LIB_PREFIX8}"
 	AC_DEFINE(TCL_MAJOR_VERSION, 8, [Compile for Tcl8?])
-    fi
-    if test "${TCL_MAJOR_VERSION}" -gt 8 -a x"${with_tk8}" != x; then
 	AC_DEFINE(TK_MAJOR_VERSION, 8, [Compile for Tk8?])
     fi
     if test "${TEA_PLATFORM}" = "windows" ; then
@@ -3225,6 +3236,14 @@ print("manifest needed")
 	    SHLIB_LD_LIBS="${SHLIB_LD_LIBS} \"`${CYGPATH} ${TCL_BIN_DIR}/${TCL_STUB_LIB_FILE}`\""
 	    if test "$GCC" = "yes"; then
 		SHLIB_LD_LIBS="${SHLIB_LD_LIBS} -static-libgcc"
+	    fi
+	    AC_CACHE_CHECK([if the linker understands --disable-high-entropy-va],
+		tcl_cv_ld_high_entropy, [
+		hold_cflags=$CFLAGS; CFLAGS="$CFLAGS -Wl,--disable-high-entropy-va"
+		AC_LINK_IFELSE([AC_LANG_PROGRAM([[]], [[]])],[tcl_cv_ld_high_entropy=yes],[tcl_cv_ld_high_entropy=no])
+		CFLAGS=$hold_cflags])
+	    if test $tcl_cv_ld_high_entropy = yes; then
+		SHLIB_LD_LIBS="${SHLIB_LD_LIBS} -Wl,--disable-high-entropy-va"
 	    fi
 	    eval eval "PKG_LIB_FILE8=${PACKAGE_LIB_PREFIX8}${PACKAGE_NAME}${SHARED_LIB_SUFFIX}"
 	    eval eval "PKG_LIB_FILE9=${PACKAGE_LIB_PREFIX9}${PACKAGE_NAME}${SHARED_LIB_SUFFIX}"
@@ -3256,20 +3275,20 @@ print("manifest needed")
 	    if test x"${TK_BIN_DIR}" != x ; then
 		SHLIB_LD_LIBS="${SHLIB_LD_LIBS} ${TK_STUB_LIB_SPEC}"
 	    fi
-	    eval eval "PKG_LIB_FILE8=lib${PACKAGE_LIB_PREFIX8}${PACKAGE_NAME}${SHARED_LIB_SUFFIX}"
-	    eval eval "PKG_LIB_FILE9=lib${PACKAGE_LIB_PREFIX9}${PACKAGE_NAME}${SHARED_LIB_SUFFIX}"
-	    eval eval "PKG_LIB_FILE=lib${PACKAGE_LIB_PREFIX}${PACKAGE_NAME}${SHARED_LIB_SUFFIX}"
+	    eval eval "PKG_LIB_FILE8=${PACKAGE_LIB_PREFIX8}${PACKAGE_NAME}${SHARED_LIB_SUFFIX}"
+	    eval eval "PKG_LIB_FILE9=${PACKAGE_LIB_PREFIX9}${PACKAGE_NAME}${SHARED_LIB_SUFFIX}"
+	    eval eval "PKG_LIB_FILE=${PACKAGE_LIB_PREFIX}${PACKAGE_NAME}${SHARED_LIB_SUFFIX}"
 	    RANLIB=:
 	else
-	    eval eval "PKG_LIB_FILE8=lib${PACKAGE_LIB_PREFIX8}${PACKAGE_NAME}${UNSHARED_LIB_SUFFIX}"
-	    eval eval "PKG_LIB_FILE9=lib${PACKAGE_LIB_PREFIX9}${PACKAGE_NAME}${UNSHARED_LIB_SUFFIX}"
-	    eval eval "PKG_LIB_FILE=lib${PACKAGE_LIB_PREFIX}${PACKAGE_NAME}${UNSHARED_LIB_SUFFIX}"
+	    eval eval "PKG_LIB_FILE8=${PACKAGE_LIB_PREFIX8}${PACKAGE_NAME}${UNSHARED_LIB_SUFFIX}"
+	    eval eval "PKG_LIB_FILE9=${PACKAGE_LIB_PREFIX9}${PACKAGE_NAME}${UNSHARED_LIB_SUFFIX}"
+	    eval eval "PKG_LIB_FILE=${PACKAGE_LIB_PREFIX}${PACKAGE_NAME}${UNSHARED_LIB_SUFFIX}"
 	fi
 	# Some packages build their own stubs libraries
 	if test "${TCL_MAJOR_VERSION}" -gt 8 -a x"${with_tcl8}" = x; then
-	    eval eval "PKG_STUB_LIB_FILE=lib${PACKAGE_LIB_PREFIX8}${PACKAGE_NAME}stub.a"
+	    eval eval "PKG_STUB_LIB_FILE=${PACKAGE_LIB_PREFIX8}${PACKAGE_NAME}stub.a"
 	else
-	    eval eval "PKG_STUB_LIB_FILE=lib${PACKAGE_LIB_PREFIX8}${PACKAGE_NAME}stub${UNSHARED_LIB_SUFFIX}"
+	    eval eval "PKG_STUB_LIB_FILE=${PACKAGE_LIB_PREFIX8}${PACKAGE_NAME}stub${UNSHARED_LIB_SUFFIX}"
 	fi
     fi
 

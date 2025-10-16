@@ -4093,8 +4093,11 @@ printf "%s\n" "$TEA_PLATFORM" >&6; }
 
     # The BUILD_$pkg is to define the correct extern storage class
     # handling when making this package
+    # To be able to sefely use the package name in a #define, it must not
+    # contain anything other than alphanumeric characters and underscores
+    SAFE_PKG_NAME=itcl
 
-printf "%s\n" "#define BUILD_${PACKAGE_NAME} /**/" >>confdefs.h
+printf "%s\n" "#define BUILD_${SAFE_PKG_NAME} /**/" >>confdefs.h
 
     # Do this here as we have fully defined TEA_PLATFORM now
     if test "${TEA_PLATFORM}" = "windows" ; then
@@ -6767,6 +6770,7 @@ fi
 			MACHINE="IA64"
 			;;
 		esac
+		do64bit_ok=yes
 	    fi
 
 	    if test "$GCC" != "yes" ; then
@@ -6777,7 +6781,7 @@ fi
 		fi
 		case "x`echo \${VisualStudioVersion}`" in
 		    x1[4-9]*)
-			lflags="${lflags} -nodefaultlib:libucrt.lib"
+			lflags="${lflags} -nodefaultlib:ucrt.lib"
 
     vars="ucrt.lib"
     for i in $vars; do
@@ -7179,11 +7183,15 @@ fi
 	    CC_SEARCH_FLAGS=""
 	    LD_SEARCH_FLAGS=""
 	    ;;
-	CYGWIN_*)
+	CYGWIN_*|MINGW32_*|MINGW64_*|MSYS_*)
 	    SHLIB_CFLAGS=""
 	    SHLIB_LD='${CC} -shared'
 	    SHLIB_SUFFIX=".dll"
-	    SHLIB_LD_LIBS="${SHLIB_LD_LIBS} -Wl,--out-implib,\$@.a"
+	    if test "${TEA_PLATFORM}" = "unix" -a  "${TCL_MAJOR_VERSION}" -gt 8 -a x"${with_tcl8}" = x; then
+		SHLIB_LD_LIBS="${SHLIB_LD_LIBS} -Wl,--out-implib,\$(patsubst cyg%.dll,lib%.dll,\$@).a"
+	    else
+		SHLIB_LD_LIBS="${SHLIB_LD_LIBS} -Wl,--out-implib,\$@.a"
+	    fi
 	    EXEEXT=".exe"
 	    do64bit_ok=yes
 	    CC_SEARCH_FLAGS=""
@@ -9296,8 +9304,17 @@ rm -rf conftest*
     # substituted. (@@@ Might not be necessary anymore)
     #--------------------------------------------------------------------
 
-    PACKAGE_LIB_PREFIX8="${PACKAGE_LIB_PREFIX}"
-    PACKAGE_LIB_PREFIX9="${PACKAGE_LIB_PREFIX}tcl9"
+    if test "$TEA_PLATFORM" = "unix"; then
+	PACKAGE_LIB_PREFIX8="lib"
+	if test "$EXEEXT" = ".exe" -a "$SHARED_BUILD" != "0"; then
+	    PACKAGE_LIB_PREFIX9="cygtcl9"
+	else
+	    PACKAGE_LIB_PREFIX9="libtcl9"
+	fi
+    else
+	PACKAGE_LIB_PREFIX8=""
+	PACKAGE_LIB_PREFIX9="tcl9"
+    fi
     if test "${TCL_MAJOR_VERSION}" -gt 8 -a x"${with_tcl8}" = x; then
 	PACKAGE_LIB_PREFIX="${PACKAGE_LIB_PREFIX9}"
     else
@@ -9305,8 +9322,6 @@ rm -rf conftest*
 
 printf "%s\n" "#define TCL_MAJOR_VERSION 8" >>confdefs.h
 
-    fi
-    if test "${TCL_MAJOR_VERSION}" -gt 8 -a x"${with_tk8}" != x; then
 
 printf "%s\n" "#define TK_MAJOR_VERSION 8" >>confdefs.h
 
@@ -9321,6 +9336,42 @@ printf "%s\n" "#define TK_MAJOR_VERSION 8" >>confdefs.h
 	    SHLIB_LD_LIBS="${SHLIB_LD_LIBS} \"`${CYGPATH} ${TCL_BIN_DIR}/${TCL_STUB_LIB_FILE}`\""
 	    if test "$GCC" = "yes"; then
 		SHLIB_LD_LIBS="${SHLIB_LD_LIBS} -static-libgcc"
+	    fi
+	    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking if the linker understands --disable-high-entropy-va" >&5
+printf %s "checking if the linker understands --disable-high-entropy-va... " >&6; }
+if test ${tcl_cv_ld_high_entropy+y}
+then :
+  printf %s "(cached) " >&6
+else case e in #(
+  e)
+		hold_cflags=$CFLAGS; CFLAGS="$CFLAGS -Wl,--disable-high-entropy-va"
+		cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+int
+main (void)
+{
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"
+then :
+  tcl_cv_ld_high_entropy=yes
+else case e in #(
+  e) tcl_cv_ld_high_entropy=no ;;
+esac
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.beam \
+    conftest$ac_exeext conftest.$ac_ext
+		CFLAGS=$hold_cflags ;;
+esac
+fi
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $tcl_cv_ld_high_entropy" >&5
+printf "%s\n" "$tcl_cv_ld_high_entropy" >&6; }
+	    if test $tcl_cv_ld_high_entropy = yes; then
+		SHLIB_LD_LIBS="${SHLIB_LD_LIBS} -Wl,--disable-high-entropy-va"
 	    fi
 	    eval eval "PKG_LIB_FILE8=${PACKAGE_LIB_PREFIX8}${PACKAGE_NAME}${SHARED_LIB_SUFFIX}"
 	    eval eval "PKG_LIB_FILE9=${PACKAGE_LIB_PREFIX9}${PACKAGE_NAME}${SHARED_LIB_SUFFIX}"
@@ -9352,20 +9403,20 @@ printf "%s\n" "#define TK_MAJOR_VERSION 8" >>confdefs.h
 	    if test x"${TK_BIN_DIR}" != x ; then
 		SHLIB_LD_LIBS="${SHLIB_LD_LIBS} ${TK_STUB_LIB_SPEC}"
 	    fi
-	    eval eval "PKG_LIB_FILE8=lib${PACKAGE_LIB_PREFIX8}${PACKAGE_NAME}${SHARED_LIB_SUFFIX}"
-	    eval eval "PKG_LIB_FILE9=lib${PACKAGE_LIB_PREFIX9}${PACKAGE_NAME}${SHARED_LIB_SUFFIX}"
-	    eval eval "PKG_LIB_FILE=lib${PACKAGE_LIB_PREFIX}${PACKAGE_NAME}${SHARED_LIB_SUFFIX}"
+	    eval eval "PKG_LIB_FILE8=${PACKAGE_LIB_PREFIX8}${PACKAGE_NAME}${SHARED_LIB_SUFFIX}"
+	    eval eval "PKG_LIB_FILE9=${PACKAGE_LIB_PREFIX9}${PACKAGE_NAME}${SHARED_LIB_SUFFIX}"
+	    eval eval "PKG_LIB_FILE=${PACKAGE_LIB_PREFIX}${PACKAGE_NAME}${SHARED_LIB_SUFFIX}"
 	    RANLIB=:
 	else
-	    eval eval "PKG_LIB_FILE8=lib${PACKAGE_LIB_PREFIX8}${PACKAGE_NAME}${UNSHARED_LIB_SUFFIX}"
-	    eval eval "PKG_LIB_FILE9=lib${PACKAGE_LIB_PREFIX9}${PACKAGE_NAME}${UNSHARED_LIB_SUFFIX}"
-	    eval eval "PKG_LIB_FILE=lib${PACKAGE_LIB_PREFIX}${PACKAGE_NAME}${UNSHARED_LIB_SUFFIX}"
+	    eval eval "PKG_LIB_FILE8=${PACKAGE_LIB_PREFIX8}${PACKAGE_NAME}${UNSHARED_LIB_SUFFIX}"
+	    eval eval "PKG_LIB_FILE9=${PACKAGE_LIB_PREFIX9}${PACKAGE_NAME}${UNSHARED_LIB_SUFFIX}"
+	    eval eval "PKG_LIB_FILE=${PACKAGE_LIB_PREFIX}${PACKAGE_NAME}${UNSHARED_LIB_SUFFIX}"
 	fi
 	# Some packages build their own stubs libraries
 	if test "${TCL_MAJOR_VERSION}" -gt 8 -a x"${with_tcl8}" = x; then
-	    eval eval "PKG_STUB_LIB_FILE=lib${PACKAGE_LIB_PREFIX8}${PACKAGE_NAME}stub.a"
+	    eval eval "PKG_STUB_LIB_FILE=${PACKAGE_LIB_PREFIX8}${PACKAGE_NAME}stub.a"
 	else
-	    eval eval "PKG_STUB_LIB_FILE=lib${PACKAGE_LIB_PREFIX8}${PACKAGE_NAME}stub${UNSHARED_LIB_SUFFIX}"
+	    eval eval "PKG_STUB_LIB_FILE=${PACKAGE_LIB_PREFIX8}${PACKAGE_NAME}stub${UNSHARED_LIB_SUFFIX}"
 	fi
     fi
 
@@ -9483,7 +9534,7 @@ eval itcl_SRC_DIR="$srcdir"
 itcl_SRC_DIR=`cd "${itcl_SRC_DIR}"; pwd`
 
 
-eval itcl_INCLUDE_SPEC="-I${itcl_SRC_DIR}/generic -I${itcl_SRC_DIR}"
+eval itcl_INCLUDE_SPEC=\"\\\"-I${itcl_SRC_DIR}/generic\\\"\"
 
 
 #--------------------------------------------------------------------

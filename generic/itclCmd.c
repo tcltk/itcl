@@ -2030,10 +2030,9 @@ Itcl_AddComponentCmd2(
             Tcl_GetString(ivPtr->namePtr));
     hPtr = Tcl_CreateHashEntry(&contextIoPtr->objectVariables,
             (char *)ivPtr, &isNew);
-    if (isNew) {
+    if (hPtr && isNew) {
 	Itcl_PreserveVar(varPtr);
-        Tcl_SetHashValue(hPtr, varPtr);
-    } else {
+	Tcl_SetHashValue(hPtr, varPtr);
     }
     return result;
 }
