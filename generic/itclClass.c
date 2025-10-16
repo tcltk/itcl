@@ -450,7 +450,7 @@ Itcl_CreateClass(
     Tcl_DStringInit(&buffer);
     Tcl_DStringAppend(&buffer, Tcl_GetString(iclsPtr->fullNamePtr), TCL_INDEX_NONE);
     Tcl_DStringAppend(&buffer, "::this", TCL_INDEX_NONE);
-    iclsPtr->thisCmd = Tcl_CreateObjCommand(interp, Tcl_DStringValue(&buffer),
+    iclsPtr->thisCmd = Tcl_CreateObjCommand2(interp, Tcl_DStringValue(&buffer),
             Itcl_ThisCmd, iclsPtr, NULL);
 
     /*
@@ -1411,6 +1411,16 @@ Itcl_HandleClass(
     int objc,                /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
 {
+    return Itcl_HandleClass2(clientData, interp, objc, objv);
+}
+
+int
+Itcl_HandleClass2(
+    void *clientData,        /* class definition */
+    Tcl_Interp *interp,      /* current interpreter */
+    Tcl_Size objc,           /* number of arguments */
+    Tcl_Obj *const objv[])   /* argument objects */
+{
     if (objc > 3) {
 	const char *token = Tcl_GetString(objv[3]);
 	const char *nsEnd = NULL;
@@ -1465,7 +1475,7 @@ int
 ItclClassCreateObject(
     void *clientData,        /* IclObjectInfo */
     Tcl_Interp *interp,      /* current interpreter */
-    Tcl_Size objc,             /* number of arguments */
+    Tcl_Size objc,           /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
 {
     Tcl_DString buffer;  /* buffer used to build object names */

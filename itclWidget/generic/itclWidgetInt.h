@@ -19,7 +19,7 @@
 #define ITCL_WIDGETS_NAMESPACE "::itcl::internal::widgets"
 
 typedef int (*HullAndOptionsInst)(Tcl_Interp *interp,
-        struct ItclObject *ioPtr, struct ItclClass *iclsPtr, int objc,
+        struct ItclObject *ioPtr, struct ItclClass *iclsPtr, Tcl_Size objc,
         Tcl_Obj *const *objv, int *newObjc, Tcl_Obj **newObjv);
 typedef int (*InitObjectOptions)(Tcl_Interp *interp,
         struct ItclObject *ioPtr, struct ItclClass *iclsPtr, const char *name);
@@ -31,22 +31,22 @@ typedef struct ItclWidgetInfo {
     InitObjectOptions initObjectOpts;
     HullAndOptionsInst hullAndOptsInst;
     DelegationInst delegationInst;
-    Tcl_ObjCmdProc *widgetConfigure;
-    Tcl_ObjCmdProc *widgetCget;
+    Tcl_ObjCmdProc2 *widgetConfigure;
+    Tcl_ObjCmdProc2 *widgetCget;
 } ItclWidgetInfo;
 
 
 MODULE_SCOPE int HullAndOptionsInstall(Tcl_Interp *interp, ItclObject *ioPtr,
-        ItclClass *iclsPtr, int objc, Tcl_Obj * const objv[],
+        ItclClass *iclsPtr, Tcl_Size objc, Tcl_Obj * const objv[],
 	int *newObjc, Tcl_Obj **newObjv);
 MODULE_SCOPE int InstallComponent(Tcl_Interp *interp, ItclObject *ioPtr,
-        ItclClass *iclsPtr, int objc, Tcl_Obj * const objv[]);
+        ItclClass *iclsPtr, Tcl_Size objc, Tcl_Obj * const objv[]);
 MODULE_SCOPE int Itcl_BiInstallHullCmd (void *clientData,
-        Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]);
+        Tcl_Interp *interp, Tcl_Size objc, Tcl_Obj *const objv[]);
 MODULE_SCOPE int ItclWidgetConfigure(void *clientData, Tcl_Interp *interp,
-        int objc, Tcl_Obj *const objv[]);
+        Tcl_Size objc, Tcl_Obj *const objv[]);
 MODULE_SCOPE int ItclWidgetCget(void *clientData, Tcl_Interp *interp,
-        int objc, Tcl_Obj *const objv[]);
+        Tcl_Size objc, Tcl_Obj *const objv[]);
 MODULE_SCOPE int Itcl_WidgetParseInit(Tcl_Interp *interp,
         ItclObjectInfo *infoPtr);
 MODULE_SCOPE int Itcl_WidgetBiInit(Tcl_Interp *interp, ItclObjectInfo *infoPtr);

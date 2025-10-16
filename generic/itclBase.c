@@ -15,8 +15,8 @@
 #include "itclUuid.h"
 
 static Tcl_NamespaceDeleteProc FreeItclObjectInfo;
-static Tcl_ObjCmdProc ItclSetHullWindowName;
-static Tcl_ObjCmdProc ItclCheckSetItclHull;
+static Tcl_ObjCmdProc2 ItclSetHullWindowName;
+static Tcl_ObjCmdProc2 ItclCheckSetItclHull;
 
 MODULE_SCOPE const ItclStubs itclStubs;
 
@@ -126,10 +126,10 @@ static const Tcl_ObjectMetadataType objMDT = {
     NULL
 };
 
-static Tcl_MethodCallProc RootCallProc;
+static Tcl_MethodCallProc2 RootCallProc;
 
-const Tcl_MethodType itclRootMethodType = {
-    TCL_OO_METHOD_VERSION_CURRENT,
+const Tcl_MethodType2 itclRootMethodType = {
+    TCL_OO_METHOD_VERSION_2,
     "itcl root method",
     RootCallProc,
     NULL,
@@ -141,7 +141,7 @@ RootCallProc(
     void *clientData,
     Tcl_Interp *interp,
     Tcl_ObjectContext context,
-    int objc,
+    Tcl_Size objc,
     Tcl_Obj *const *objv)
 {
     Tcl_Object oPtr = Tcl_ObjectContextObject(context);
@@ -353,13 +353,13 @@ Initialize (
     root = Tcl_NewObjectInstance(interp, tclCls, "::itcl::Root",
 	    NULL, 0, NULL, 0);
 
-    Tcl_NewMethod(interp, Tcl_GetObjectAsClass(root),
+    Tcl_NewMethod2(interp, Tcl_GetObjectAsClass(root),
 	    Tcl_NewStringObj("unknown", TCL_INDEX_NONE), 0, &itclRootMethodType,
 	    (void *)ItclUnknownGuts);
-    Tcl_NewMethod(interp, Tcl_GetObjectAsClass(root),
+    Tcl_NewMethod2(interp, Tcl_GetObjectAsClass(root),
 	    Tcl_NewStringObj("ItclConstructBase", TCL_INDEX_NONE), 0,
 	    &itclRootMethodType, (void *)ItclConstructGuts);
-    Tcl_NewMethod(interp, Tcl_GetObjectAsClass(root),
+    Tcl_NewMethod2(interp, Tcl_GetObjectAsClass(root),
 	    Tcl_NewStringObj("info", TCL_INDEX_NONE), 1,
 	    &itclRootMethodType, (void *)ItclInfoGuts);
 
@@ -437,10 +437,10 @@ Initialize (
 	return TCL_ERROR;
     }
 
-    Tcl_CreateObjCommand(interp,
+    Tcl_CreateObjCommand2(interp,
 	    ITCL_NAMESPACE"::internal::commands::sethullwindowname",
 	    ItclSetHullWindowName, infoPtr, NULL);
-    Tcl_CreateObjCommand(interp,
+    Tcl_CreateObjCommand2(interp,
 	    ITCL_NAMESPACE"::internal::commands::checksetitclhull",
 	    ItclCheckSetItclHull, infoPtr, NULL);
 
@@ -537,7 +537,7 @@ static int
 ItclSetHullWindowName(
     void *clientData,        /* infoPtr */
     TCL_UNUSED(Tcl_Interp *),/* current interpreter */
-    int objc,                /* number of arguments */
+    Tcl_Size objc,           /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
 {
     ItclObjectInfo *infoPtr;
@@ -559,9 +559,9 @@ ItclSetHullWindowName(
  */
 static int
 ItclCheckSetItclHull(
-    void *clientData,   /* infoPtr */
+    void *clientData,        /* infoPtr */
     Tcl_Interp *interp,      /* current interpreter */
-    int objc,                /* number of arguments */
+    Tcl_Size objc,           /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
 {
     Tcl_HashEntry *hPtr;

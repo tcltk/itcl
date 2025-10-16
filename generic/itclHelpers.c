@@ -13,6 +13,12 @@
 #include "itclInt.h"
 
 void ItclDeleteArgList(ItclArgList *arglistPtr);
+
+#if TCL_MAJOR_VERSION < 9
+#   define objProc2 objProc
+#   define objClientData2 objClientData
+#endif
+
 #ifdef ITCL_DEBUG
 int _itcl_debug_level = 0;
 
@@ -247,7 +253,7 @@ ItclDeleteArgList(
 int
 Itcl_EvalArgs(
     Tcl_Interp *interp,      /* current interpreter */
-    Tcl_Size objc,          /* number of arguments */
+    Tcl_Size objc,           /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
 {
     Tcl_Command cmd;
@@ -270,16 +276,19 @@ Itcl_EvalArgs(
     }
 
     /*
-     *  Finally, invoke the command's Tcl_ObjCmdProc.  Be careful
+     *  Finally, invoke the command's Tcl_ObjCmdProc2.  Be careful
      *  to pass in the proper client data.
      */
     Tcl_GetCommandInfoFromToken(cmd, &infoPtr);
-#if TCL_MAJOR_VERSION > 8
     if (infoPtr.isNativeObjectProc == 2) {
 	return infoPtr.objProc2(infoPtr.objClientData2, interp, objc, objv);
     }
+#ifndef TCL_NO_DEPRECATED
+    if (infoPtr.isNativeObjectProc == 1) {
+	return infoPtr.objProc(infoPtr.objClientData, interp, objc, objv);
+    }
 #endif
-    return infoPtr.objProc(infoPtr.objClientData, interp, objc, objv);
+    return TCL_ERROR;
 }
 
 
@@ -303,7 +312,7 @@ Tcl_Obj*
 Itcl_CreateArgs(
     TCL_UNUSED(Tcl_Interp *),/* current interpreter */
     const char *string,      /* first command word */
-    Tcl_Size objc,          /* number of arguments */
+    Tcl_Size objc,           /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
 {
     Tcl_Size i;
@@ -334,6 +343,15 @@ ItclEnsembleSubCmd(
     int objc,
     Tcl_Obj *const *objv,
     TCL_UNUSED(const char *))
+{
+    return ItclEnsembleSubCmd2(interp, objc, objv);
+}
+
+int
+ItclEnsembleSubCmd2(
+    Tcl_Interp *interp,
+    Tcl_Size objc,
+    Tcl_Obj *const *objv)
 {
     int result;
     Tcl_Obj **newObjv;

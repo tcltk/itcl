@@ -94,7 +94,7 @@ HullAndOptionsInstall(
     Tcl_Interp *interp,
     ItclObject *ioPtr,
     ItclClass *iclsPtr,
-    int objc,
+    Tcl_Size objc,
     Tcl_Obj * const objv[],
     int *newObjc,
     Tcl_Obj **newObjv)
@@ -171,7 +171,7 @@ InstallComponent(
     Tcl_Interp *interp,
     ItclObject *ioPtr,
     ItclClass *iclsPtr,
-    int objc,
+    Tcl_Size objc,
     Tcl_Obj * const objv[])
 {
     FOREACH_HASH_DECLS;
@@ -191,8 +191,8 @@ InstallComponent(
     const char **argv;
     const char **argv2;
     int numUsedOpts;
-    int argc;
-    int argc2;
+    Tcl_Size argc;
+    Tcl_Size argc2;
     int i;
     int j;
     int startIdx;
@@ -219,7 +219,7 @@ InstallComponent(
     val = Itcl_GetInstanceVar(interp, "itcl_hull", ioPtr, iclsPtr);
     if ((val != NULL) && (strlen(val) == 0)) {
 	Tcl_AppendResult(interp, "cannot install \"", componentName,
-	        " before \"itcl_hull\" exists", NULL);
+	        "\" before \"itcl_hull\" exists", NULL);
         return TCL_ERROR;
     }
     /* check for delegated option and ask the option database for the values */

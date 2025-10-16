@@ -36,7 +36,7 @@
  */
 typedef struct ItclCfunc {
     Tcl_CmdProc *argCmdProc;        /* old-style (argc,argv) command handler */
-    Tcl_ObjCmdProc *objCmdProc;     /* new (objc,objv) command handler */
+    Tcl_ObjCmdProc2 *objCmdProc;     /* new (objc,objv) command handler */
     void *clientData;               /* client data passed into this function */
     Tcl_CmdDeleteProc *deleteProc;  /* proc called to free clientData */
 } ItclCfunc;
@@ -157,11 +157,13 @@ Itcl_RegisterC(
  *  in interp->result) if anything goes wrong.
  * ------------------------------------------------------------------------
  */
+
+#undef Itcl_RegisterObjC2
 int
-Itcl_RegisterObjC(
+Itcl_RegisterObjC2(
     Tcl_Interp *interp,     /* interpreter handling this registration */
     const char *name,       /* symbolic name for procedure */
-    Tcl_ObjCmdProc *proc,   /* procedure handling Tcl command */
+    Tcl_ObjCmdProc2 *proc,   /* procedure handling Tcl command */
     void *clientData,       /* client data associated with proc */
     Tcl_CmdDeleteProc *deleteProc)  /* proc called to free up client data */
 {
@@ -212,10 +214,10 @@ Itcl_RegisterObjC(
     return TCL_OK;
 }
 
-#if TCL_MAJOR_VERSION > 8
 
+#ifndef TCL_NO_DEPRECATED
 typedef struct {
-    Tcl_ObjCmdProc2 *objProc;
+    Tcl_ObjCmdProc *objProc;
     void *clientData;
     Tcl_CmdDeleteProc *deleteProc;
 } regInfo;
@@ -223,7 +225,7 @@ typedef struct {
 static int regCmdProc(
     void *clientData,
     Tcl_Interp *interp,
-    int argc,
+    Tcl_Size argc,
     Tcl_Obj *const *objv)
 {
     regInfo *info = (regInfo *)clientData;
@@ -242,10 +244,10 @@ static void reg2DeleteProc(
 
 
 int
-Itcl_RegisterObjC2(
+Itcl_RegisterObjC(
     Tcl_Interp *interp,     /* interpreter handling this registration */
     const char *name,       /* symbolic name for procedure */
-    Tcl_ObjCmdProc2 *proc,   /* procedure handling Tcl command */
+    Tcl_ObjCmdProc *proc,   /* procedure handling Tcl command */
     void *clientData,       /* client data associated with proc */
     Tcl_CmdDeleteProc *deleteProc)  /* proc called to free up client data */
 {
@@ -253,28 +255,59 @@ Itcl_RegisterObjC2(
     info->objProc = proc;
     info->clientData = clientData;
     info->deleteProc = deleteProc;
-    return Itcl_RegisterObjC(interp, name, regCmdProc, info, reg2DeleteProc);
+    return Itcl_RegisterObjC2(interp, name, regCmdProc, info, reg2DeleteProc);
 }
-#endif /* TCL_MAJOR_VERSION */
+#endif /* TCL_NO_DEPRECATED */
 
 /*
  * ------------------------------------------------------------------------
- *  Itcl_FindC()
+ *  Itcl_FindC2()
  *
  *  Used to query a C procedure via its symbolic name.  Looks at the
- *  list of procedures registered previously by either Itcl_RegisterC
- *  or Itcl_RegisterObjC and returns pointers to the appropriate
- *  (argc,argv) or (objc,objv) handlers.  Returns non-zero if the
- *  name is recognized and pointers are returned; returns zero
- *  otherwise.
+ *  list of procedures registered previously by Itcl_RegisterObjC2
+ *  and returns pointers to the appropriate (objc,objv) handler.
+ *  Returns non-zero if the name is recognized and pointers are
+ *  returned; returns zero otherwise.
  * ------------------------------------------------------------------------
  */
+#undef Itcl_FindC2
+int
+Itcl_FindC2(
+    Tcl_Interp *interp,           /* interpreter handling this registration */
+    const char *name,             /* symbolic name for procedure */
+    Tcl_ObjCmdProc2 **objProcPtr,  /* returns (objc,objv) command handler */
+    void **cDataPtr)              /* returns client data */
+{
+    Tcl_HashEntry *entry;
+    Tcl_HashTable *procTable;
+    ItclCfunc *cfunc;
+
+    *objProcPtr = NULL;
+    *cDataPtr   = NULL;
+
+    if (interp) {
+	procTable = (Tcl_HashTable*)Tcl_GetAssocData(interp,
+	    "itcl_RegC", NULL);
+
+	if (procTable) {
+	    entry = Tcl_FindHashEntry(procTable, name);
+	    if (entry) {
+		cfunc = (ItclCfunc*)Tcl_GetHashValue(entry);
+		*objProcPtr = cfunc->objCmdProc;
+		*cDataPtr   = cfunc->clientData;
+	    }
+	}
+    }
+    return *objProcPtr != NULL;
+}
+
+#ifndef TCL_NO_DEPRECATED
 int
 Itcl_FindC(
     Tcl_Interp *interp,           /* interpreter handling this registration */
     const char *name,             /* symbolic name for procedure */
-    Tcl_CmdProc **argProcPtr,     /* returns (argc,argv) command handler, can be NULL */
-    Tcl_ObjCmdProc **objProcPtr,  /* returns (objc,objv) command handler */
+    Tcl_CmdProc **argProcPtr,     /* returns (argc,argv) command handler */
+    Tcl_ObjCmdProc **objProcPtr, /* returns (objc,objv) command handler */
     void **cDataPtr)              /* returns client data */
 {
     Tcl_HashEntry *entry;
@@ -294,8 +327,13 @@ Itcl_FindC(
 	    if (entry) {
 		cfunc = (ItclCfunc*)Tcl_GetHashValue(entry);
 		argProc = cfunc->argCmdProc;
-		*objProcPtr = cfunc->objCmdProc;
-		*cDataPtr   = cfunc->clientData;
+		if (cfunc->objCmdProc == regCmdProc) {
+		    regInfo *info = (regInfo *)cfunc->clientData;
+		    *objProcPtr = info->objProc;
+		    *cDataPtr = info->clientData;
+		} else if (cfunc->argCmdProc) {
+			*cDataPtr   = cfunc->clientData;
+		}
 	    }
 	}
     }
@@ -303,33 +341,9 @@ Itcl_FindC(
 	*argProcPtr = argProc;
     }
     return (((argProcPtr != NULL) && (argProc != NULL)) || (*objProcPtr != NULL));
+
 }
-
-#if TCL_MAJOR_VERSION > 8
-int
-Itcl_FindC2(
-    Tcl_Interp *interp,           /* interpreter handling this registration */
-    const char *name,             /* symbolic name for procedure */
-    Tcl_ObjCmdProc2 **objProcPtr, /* returns (objc,objv) command handler */
-    void **cDataPtr)              /* returns client data */
-{
-    Tcl_ObjCmdProc *regProcPtr;
-    void *dataPtr;
-
-    *objProcPtr = NULL;  /* assume info won't be found */
-    *cDataPtr = NULL;
-
-    if (Itcl_FindC(interp, name, NULL, &regProcPtr, &dataPtr)) {
-	if (regProcPtr == regCmdProc) {
-	    regInfo *info = (regInfo *)dataPtr;
-	    *objProcPtr = info->objProc;
-	    *cDataPtr = info->clientData;
-	}
-    }
-    return (*objProcPtr != NULL);
-}
-#endif /* TCL_MAJOR_VERSION */
-
+#endif /* TCL_NO_DEPRECATED */
 
 /*
  * ------------------------------------------------------------------------

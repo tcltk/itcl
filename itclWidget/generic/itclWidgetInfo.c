@@ -16,12 +16,12 @@
  */
 #include "itclWidgetInt.h"
 
-Tcl_ObjCmdProc ItclBiInfoHullTypesCmd;
-Tcl_ObjCmdProc ItclBiInfoWidgetClassesCmd;
-Tcl_ObjCmdProc ItclBiInfoWidgetsCmd;
-Tcl_ObjCmdProc ItclBiInfoWidgetAdaptorsCmd;
+Tcl_ObjCmdProc2 ItclBiInfoHullTypesCmd;
+Tcl_ObjCmdProc2 ItclBiInfoWidgetClassesCmd;
+Tcl_ObjCmdProc2 ItclBiInfoWidgetsCmd;
+Tcl_ObjCmdProc2 ItclBiInfoWidgetAdaptorsCmd;
 
-static const char *hullTypes[] = {
+static const char *const hullTypes[] = {
     "frame",
     "toplevel",
     "labelframe",
@@ -31,7 +31,7 @@ static const char *hullTypes[] = {
     NULL
 };
 
-struct NameProcMap { const char *name; Tcl_ObjCmdProc *proc; };
+struct NameProcMap { const char *name; Tcl_ObjCmdProc2 *proc; };
 
 /*
  * List of commands that are used to implement the [info object] subcommands.
@@ -66,7 +66,7 @@ ItclWidgetInfoInit(
     int i;
 
     for (i=0 ; infoCmds2[i].name!=NULL ; i++) {
-        Tcl_CreateObjCommand(interp, infoCmds2[i].name,
+        Tcl_CreateObjCommand2(interp, infoCmds2[i].name,
                 infoCmds2[i].proc, infoPtr, NULL);
     }
     return TCL_OK;
@@ -76,12 +76,12 @@ int
 ItclBiInfoHullTypesCmd(
     void *clientData,        /* info for all known objects */
     Tcl_Interp *interp,      /* current interpreter */
-    int objc,                /* number of arguments */
+    Tcl_Size objc,                /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
 {
     Tcl_Obj *listPtr;
     Tcl_Obj *objPtr;
-    const char **cPtrPtr;
+    const char *const *cPtrPtr;
     const char *name;
     const char *pattern;
 
@@ -114,7 +114,7 @@ int
 ItclBiInfoWidgetClassesCmd(
     void *clientData,        /* info for all known objects */
     Tcl_Interp *interp,      /* current interpreter */
-    int objc,                /* number of arguments */
+    Tcl_Size objc,                /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
 {
     FOREACH_HASH_DECLS;
@@ -166,7 +166,7 @@ int
 ItclBiInfoWidgetsCmd(
     void *clientData,        /* info for all known objects */
     Tcl_Interp *interp,      /* current interpreter */
-    int objc,                /* number of arguments */
+    Tcl_Size objc,                /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
 {
     FOREACH_HASH_DECLS;
@@ -207,7 +207,7 @@ int
 ItclBiInfoWidgetAdaptorsCmd(
     void *clientData,        /* info for all known objects */
     Tcl_Interp *interp,      /* current interpreter */
-    int objc,                /* number of arguments */
+    Tcl_Size objc,                /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
 {
     FOREACH_HASH_DECLS;

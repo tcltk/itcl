@@ -69,23 +69,13 @@
 extern "C" {
 #endif
 
-#ifndef TCL_ALPHA_RELEASE
-#   define TCL_ALPHA_RELEASE    0
-#endif
-#ifndef TCL_BETA_RELEASE
-#   define TCL_BETA_RELEASE     1
-#endif
-#ifndef TCL_FINAL_RELEASE
-#   define TCL_FINAL_RELEASE    2
-#endif
-
 #define ITCL_MAJOR_VERSION	4
-#define ITCL_MINOR_VERSION	3
-#define ITCL_RELEASE_LEVEL      TCL_FINAL_RELEASE
-#define ITCL_RELEASE_SERIAL     4
+#define ITCL_MINOR_VERSION	4
+#define ITCL_RELEASE_LEVEL      TCL_ALPHA_RELEASE
+#define ITCL_RELEASE_SERIAL     0
 
-#define ITCL_VERSION            "4.3"
-#define ITCL_PATCH_LEVEL        "4.3.4"
+#define ITCL_VERSION            "4.4"
+#define ITCL_PATCH_LEVEL        "4.4a0"
 
 
 /*

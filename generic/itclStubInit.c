@@ -6,22 +6,13 @@
 #include "itclInt.h"
 
 MODULE_SCOPE const ItclStubs itclStubs;
-
-#if TCL_MAJOR_VERSION < 9
-#undef Itcl_FindC2
-#define Itcl_FindC2 findC2
-static int Itcl_FindC2(
-    Tcl_Interp *interp,           /* interpreter handling this registration */
-    const char *name,             /* symbolic name for procedure */
-    Tcl_ObjCmdProc **objProcPtr,  /* returns (objc,objv) command handler */
-    void **cDataPtr)              /* returns client data */
-{
-    return Itcl_FindC(interp, name, NULL, objProcPtr, cDataPtr);
-}
-#endif
-
-
 /* !BEGIN!: Do not edit below this line. */
+
+#ifdef TCL_NO_DEPRECATED
+#   define Itcl_RegisterObjC 0
+#   define Itcl_FindC 0
+#   define Itcl_AddEnsemblePart 0
+#endif /* TCL_NO_DEPRECATED */
 
 static const ItclIntStubs itclIntStubs = {
     TCL_STUB_MAGIC,

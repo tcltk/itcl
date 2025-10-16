@@ -149,7 +149,7 @@ Itcl_CreateObject(
     Tcl_Interp *interp,      /* interpreter mananging new object */
     const char* name,        /* name of new object */
     ItclClass *iclsPtr,      /* class for new object */
-    Tcl_Size objc,          /* number of arguments */
+    Tcl_Size objc,           /* number of arguments */
     Tcl_Obj *const objv[],   /* argument objects */
     ItclObject **rioPtr)     /* the created object */
 {
@@ -631,7 +631,7 @@ ItclCreateObject(
 
         if (iclsPtr->flags
 		& (ITCL_ECLASS|ITCL_TYPE|ITCL_WIDGET|ITCL_WIDGETADAPTOR)) {
-	    Tcl_NewInstanceMethod(interp, ioPtr->oPtr,
+	    Tcl_NewInstanceMethod2(interp, ioPtr->oPtr,
 		    Tcl_NewStringObj("unknown", TCL_INDEX_NONE), 0,
 		    &itclRootMethodType, (void *)ItclUnknownGuts);
 	}
@@ -2893,7 +2893,7 @@ ItclObjectCmd(
 	        INT2PTR(objc+incr), newObjv);
 
     } else {
-	ItclShowArgs(1, "run CallPublicObjectCmd2", objc, objv);
+	ItclShowArgs(1, "run CallPublicObjectCmd", objc, objv);
 	Tcl_NRAddCallback(interp, CallPublicObjectCmd, oPtr, clsPtr,
 		INT2PTR(objc), (void *)objv);
     }

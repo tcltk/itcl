@@ -245,7 +245,7 @@ Itcl_PublicObjectCmd(
     } else {
 	Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
 	    "cannot access object-specific info without an object context",
-	    NULL);
+	    (char *)NULL);
 	return TCL_ERROR;
     }
     return result;

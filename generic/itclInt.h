@@ -80,8 +80,9 @@
 #   endif
 #endif
 
-#if TCL_MAJOR_VERSION == 8 && defined(TCL_MINOR_VERSION) && TCL_MINOR_VERSION < 7
+#if TCL_MAJOR_VERSION < 9
 # define TCL_SIZE_MODIFIER ""
+# define Tcl_MethodType2 Tcl_MethodType
 #endif
 
 /*
@@ -425,7 +426,7 @@ typedef struct ItclMemberCode {
     ItclArgList *argListPtr;    /* the parsed arguments */
     union {
 	Tcl_CmdProc *argCmd;    /* (argc,argv) C implementation */
-	Tcl_ObjCmdProc *objCmd; /* (objc,objv) C implementation */
+	Tcl_ObjCmdProc2 *objCmd; /* (objc,objv) C implementation */
     } cfunc;
     void *clientData;           /* client data for C implementations */
 } ItclMemberCode;
@@ -435,9 +436,11 @@ typedef struct ItclMemberCode {
  */
 #define ITCL_IMPLEMENT_NONE    0x001  /* no implementation */
 #define ITCL_IMPLEMENT_TCL     0x002  /* Tcl implementation */
-#define ITCL_IMPLEMENT_ARGCMD  0x004  /* (argc,argv) C implementation */
+#ifndef TCL_NO_DEPRECATED
+#   define ITCL_IMPLEMENT_ARGCMD  0x004  /* (argc,argv) C implementation */
+#   define ITCL_IMPLEMENT_C       0x00c  /* either kind of C implementation */
+#endif
 #define ITCL_IMPLEMENT_OBJCMD  0x008  /* (objc,objv) C implementation */
-#define ITCL_IMPLEMENT_C       0x00c  /* either kind of C implementation */
 
 #define Itcl_IsMemberCodeImplemented(mcode) \
     (((mcode)->flags & ITCL_IMPLEMENT_NONE) == 0)
@@ -681,8 +684,8 @@ MODULE_SCOPE void ItclShowArgs(int level, const char *str, size_t objc,
 #define ItclShowArgs(a,b,c,d) do {(void)(c);(void)(d);} while(0)
 #endif
 
-MODULE_SCOPE Tcl_ObjCmdProc ItclCallCCommand;
-MODULE_SCOPE Tcl_ObjCmdProc ItclObjectUnknownCommand;
+MODULE_SCOPE Tcl_ObjCmdProc2 ItclCallCCommand;
+MODULE_SCOPE Tcl_ObjCmdProc2 ItclObjectUnknownCommand;
 MODULE_SCOPE int ItclCheckCallProc(void *clientData, Tcl_Interp *interp,
 	Tcl_ObjectContext contextPtr, Tcl_CallFrame *framePtr, int *isFinished);
 
@@ -690,7 +693,7 @@ MODULE_SCOPE void ItclPreserveClass(ItclClass *iclsPtr);
 MODULE_SCOPE void ItclReleaseClass(void *iclsPtr);
 
 MODULE_SCOPE ItclFoundation *ItclGetFoundation(Tcl_Interp *interp);
-MODULE_SCOPE Tcl_ObjCmdProc ItclClassCommandDispatcher;
+MODULE_SCOPE Tcl_ObjCmdProc2 ItclClassCommandDispatcher;
 MODULE_SCOPE Tcl_Command Itcl_CmdAliasProc(Tcl_Interp *interp,
 	Tcl_Namespace *nsPtr, const char *cmdName, void *clientData);
 MODULE_SCOPE Tcl_Var Itcl_VarAliasProc(Tcl_Interp *interp,
@@ -755,8 +758,7 @@ MODULE_SCOPE int Itcl_WidgetParseInit(Tcl_Interp *interp,
 MODULE_SCOPE void ItclDeleteObjectMetadata(void *clientData);
 MODULE_SCOPE void ItclDeleteClassMetadata(void *clientData);
 MODULE_SCOPE void ItclDeleteArgList(ItclArgList *arglistPtr);
-MODULE_SCOPE int Itcl_ClassOptionCmd(void *clientData, Tcl_Interp *interp,
-	int objc, Tcl_Obj *const objv[]);
+MODULE_SCOPE Tcl_ObjCmdProc2 Itcl_ClassOptionCmd;
 MODULE_SCOPE int DelegatedOptionsInstall(Tcl_Interp *interp,
 	ItclClass *iclsPtr);
 MODULE_SCOPE int Itcl_HandleDelegateOptionCmd(Tcl_Interp *interp,
@@ -790,8 +792,7 @@ MODULE_SCOPE int ItclCreateDelegatedFunction(Tcl_Interp *interp,
 MODULE_SCOPE void ItclDeleteDelegatedOption(char *cdata);
 MODULE_SCOPE void ItclDeleteDelegatedFunction(ItclDelegatedFunction *idmPtr);
 MODULE_SCOPE void ItclFinishEnsemble(ItclObjectInfo *infoPtr);
-MODULE_SCOPE int Itcl_EnsembleDeleteCmd(void *clientData,
-	Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]);
+MODULE_SCOPE Tcl_ObjCmdProc2 Itcl_EnsembleDeleteCmd;
 MODULE_SCOPE int ItclAddClassesDictInfo(Tcl_Interp *interp, ItclClass *iclsPtr);
 MODULE_SCOPE int ItclDeleteClassesDictInfo(Tcl_Interp *interp,
 	ItclClass *iclsPtr);
@@ -815,29 +816,83 @@ MODULE_SCOPE int ItclClassCreateObject(void *clientData, Tcl_Interp *interp,
 
 MODULE_SCOPE void ItclRestoreInfoVars(void *clientData);
 
-MODULE_SCOPE Tcl_ObjCmdProc Itcl_BiMyProcCmd;
-MODULE_SCOPE Tcl_ObjCmdProc Itcl_BiInstallComponentCmd;
-MODULE_SCOPE Tcl_ObjCmdProc Itcl_BiCallInstanceCmd;
-MODULE_SCOPE Tcl_ObjCmdProc Itcl_BiGetInstanceVarCmd;
-MODULE_SCOPE Tcl_ObjCmdProc Itcl_BiMyTypeMethodCmd;
-MODULE_SCOPE Tcl_ObjCmdProc Itcl_BiMyMethodCmd;
-MODULE_SCOPE Tcl_ObjCmdProc Itcl_BiMyTypeVarCmd;
-MODULE_SCOPE Tcl_ObjCmdProc Itcl_BiMyVarCmd;
-MODULE_SCOPE Tcl_ObjCmdProc Itcl_BiItclHullCmd;
-MODULE_SCOPE Tcl_ObjCmdProc Itcl_ThisCmd;
-MODULE_SCOPE Tcl_ObjCmdProc Itcl_ExtendedClassCmd;
-MODULE_SCOPE Tcl_ObjCmdProc Itcl_TypeClassCmd;
-MODULE_SCOPE Tcl_ObjCmdProc Itcl_AddObjectOptionCmd;
-MODULE_SCOPE Tcl_ObjCmdProc Itcl_AddDelegatedOptionCmd;
-MODULE_SCOPE Tcl_ObjCmdProc Itcl_AddDelegatedFunctionCmd;
-MODULE_SCOPE Tcl_ObjCmdProc Itcl_SetComponentCmd;
-MODULE_SCOPE Tcl_ObjCmdProc Itcl_ClassHullTypeCmd;
-MODULE_SCOPE Tcl_ObjCmdProc Itcl_ClassWidgetClassCmd;
+MODULE_SCOPE Tcl_ObjCmdProc2 Itcl_BiMyProcCmd;
+MODULE_SCOPE Tcl_ObjCmdProc2 Itcl_BiInstallComponentCmd;
+MODULE_SCOPE Tcl_ObjCmdProc2 Itcl_BiCallInstanceCmd;
+MODULE_SCOPE Tcl_ObjCmdProc2 Itcl_BiGetInstanceVarCmd;
+MODULE_SCOPE Tcl_ObjCmdProc2 Itcl_BiMyTypeMethodCmd;
+MODULE_SCOPE Tcl_ObjCmdProc2 Itcl_BiMyMethodCmd;
+MODULE_SCOPE Tcl_ObjCmdProc2 Itcl_BiMyTypeVarCmd;
+MODULE_SCOPE Tcl_ObjCmdProc2 Itcl_BiMyVarCmd;
+MODULE_SCOPE Tcl_ObjCmdProc2 Itcl_BiItclHullCmd;
+MODULE_SCOPE Tcl_ObjCmdProc2 Itcl_ThisCmd;
+MODULE_SCOPE Tcl_ObjCmdProc2 Itcl_ExtendedClassCmd;
+MODULE_SCOPE Tcl_ObjCmdProc2 Itcl_TypeClassCmd;
+MODULE_SCOPE Tcl_ObjCmdProc2 Itcl_AddObjectOptionCmd;
+MODULE_SCOPE Tcl_ObjCmdProc2 Itcl_AddDelegatedOptionCmd;
+MODULE_SCOPE Tcl_ObjCmdProc2 Itcl_AddDelegatedFunctionCmd;
+MODULE_SCOPE Tcl_ObjCmdProc2 Itcl_SetComponentCmd;
+MODULE_SCOPE Tcl_ObjCmdProc2 Itcl_ClassHullTypeCmd;
+MODULE_SCOPE Tcl_ObjCmdProc2 Itcl_ClassWidgetClassCmd;
+
+MODULE_SCOPE Tcl_ObjCmdProc2 Itcl_AddComponentCmd2;
+MODULE_SCOPE Tcl_ObjCmdProc2 Itcl_AddOptionCmd2;
+MODULE_SCOPE Tcl_ObjCmdProc2 Itcl_BiCgetCmd2;
+MODULE_SCOPE Tcl_ObjCmdProc2 Itcl_BiChainCmd2;
+MODULE_SCOPE Tcl_ObjCmdProc2 Itcl_BiConfigureCmd2;
+MODULE_SCOPE Tcl_ObjCmdProc2 Itcl_BiInfoArgsCmd2;
+MODULE_SCOPE Tcl_ObjCmdProc2 Itcl_BiInfoBodyCmd2;
+MODULE_SCOPE Tcl_ObjCmdProc2 Itcl_BiInfoClassCmd2;
+MODULE_SCOPE Tcl_ObjCmdProc2 Itcl_BiInfoComponentCmd2;
+MODULE_SCOPE Tcl_ObjCmdProc2 Itcl_BiInfoFunctionCmd2;
+MODULE_SCOPE Tcl_ObjCmdProc2 Itcl_BiInfoHeritageCmd2;
+MODULE_SCOPE Tcl_ObjCmdProc2 Itcl_BiInfoInheritCmd2;
+MODULE_SCOPE Tcl_ObjCmdProc2 Itcl_BiInfoOptionCmd2;
+MODULE_SCOPE Tcl_ObjCmdProc2 Itcl_BiInfoUnknownCmd2;
+MODULE_SCOPE Tcl_ObjCmdProc2 Itcl_BiInfoVariableCmd2;
+MODULE_SCOPE Tcl_ObjCmdProc2 Itcl_BiInfoVarsCmd2;
+MODULE_SCOPE Tcl_ObjCmdProc2 Itcl_BiIsaCmd2;
+MODULE_SCOPE Tcl_ObjCmdProc2 Itcl_BodyCmd2;
+MODULE_SCOPE Tcl_ObjCmdProc2 Itcl_ClassCmd2;
+MODULE_SCOPE Tcl_ObjCmdProc2 Itcl_ClassCommonCmd2;
+MODULE_SCOPE Tcl_ObjCmdProc2 Itcl_ClassConstructorCmd2;
+MODULE_SCOPE Tcl_ObjCmdProc2 Itcl_ClassDestructorCmd2;
+MODULE_SCOPE Tcl_ObjCmdProc2 Itcl_ClassInheritCmd2;
+MODULE_SCOPE Tcl_ObjCmdProc2 Itcl_ClassMethodCmd2;
+MODULE_SCOPE Tcl_ObjCmdProc2 Itcl_ClassProcCmd2;
+MODULE_SCOPE Tcl_ObjCmdProc2 Itcl_ClassProtectionCmd2;
+MODULE_SCOPE Tcl_ObjCmdProc2 Itcl_ClassVariableCmd2;
+MODULE_SCOPE Tcl_ObjCmdProc2 Itcl_CodeCmd2;
+MODULE_SCOPE Tcl_ObjCmdProc2 Itcl_ConfigBodyCmd2;
+MODULE_SCOPE Tcl_ObjCmdProc2 Itcl_DelClassCmd2;
+MODULE_SCOPE Tcl_ObjCmdProc2 Itcl_DelObjectCmd2;
+MODULE_SCOPE Tcl_ObjCmdProc2 Itcl_EnsembleCmd2;
+MODULE_SCOPE Tcl_ObjCmdProc2 Itcl_EnsPartCmd2;
+MODULE_SCOPE Tcl_ObjCmdProc2 Itcl_FilterAddCmd2;
+MODULE_SCOPE Tcl_ObjCmdProc2 Itcl_FilterDeleteCmd2;
+MODULE_SCOPE Tcl_ObjCmdProc2 Itcl_FindClassesCmd2;
+MODULE_SCOPE Tcl_ObjCmdProc2 Itcl_FindObjectsCmd2;
+MODULE_SCOPE Tcl_ObjCmdProc2 Itcl_ForwardAddCmd2;
+MODULE_SCOPE Tcl_ObjCmdProc2 Itcl_ForwardDeleteCmd2;
+MODULE_SCOPE Tcl_ObjCmdProc2 Itcl_HandleClass2;
+MODULE_SCOPE Tcl_ObjCmdProc2 Itcl_IsClassCmd2;
+MODULE_SCOPE Tcl_ObjCmdProc2 Itcl_IsObjectCmd2;
+MODULE_SCOPE Tcl_ObjCmdProc2 Itcl_MixinAddCmd2;
+MODULE_SCOPE Tcl_ObjCmdProc2 Itcl_MixinDeleteCmd2;
+MODULE_SCOPE Tcl_ObjCmdProc2 Itcl_NWidgetCmd2;
+MODULE_SCOPE Tcl_ObjCmdProc2 Itcl_StubCreateCmd2;
+MODULE_SCOPE Tcl_ObjCmdProc2 Itcl_StubExistsCmd2;
+MODULE_SCOPE Tcl_ObjCmdProc2 Itcl_ScopeCmd2;
+
+MODULE_SCOPE int ItclClassBaseCmd2(void *clientData, Tcl_Interp *interp,
+	int flags, Tcl_Size objc, Tcl_Obj *const objv[], ItclClass **iclsPtrPtr);
+MODULE_SCOPE int ItclEnsembleSubCmd2(Tcl_Interp *interp, Tcl_Size objc,
+	Tcl_Obj *const *objv);
 
 typedef int (ItclRootMethodProc)(ItclObject *ioPtr, Tcl_Interp *interp,
-	int objc, Tcl_Obj *const objv[]);
+	Tcl_Size objc, Tcl_Obj *const objv[]);
 
-MODULE_SCOPE const Tcl_MethodType itclRootMethodType;
+MODULE_SCOPE const Tcl_MethodType2 itclRootMethodType;
 MODULE_SCOPE ItclRootMethodProc ItclUnknownGuts;
 MODULE_SCOPE ItclRootMethodProc ItclConstructGuts;
 MODULE_SCOPE ItclRootMethodProc ItclInfoGuts;
