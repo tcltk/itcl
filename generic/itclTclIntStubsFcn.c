@@ -25,15 +25,15 @@ _Tcl_GetOriginalCommand(
 
 int
 _Tcl_CreateProc(
-    Tcl_Interp *interp,         /* Interpreter containing proc. */
+    Tcl_Interp *interp,	 /* Interpreter containing proc. */
     Tcl_Namespace *nsPtr,       /* Namespace containing this proc. */
     const char *procName,       /* Unqualified name of this proc. */
-    Tcl_Obj *argsPtr,           /* Description of arguments. */
-    Tcl_Obj *bodyPtr,           /* Command body. */
+    Tcl_Obj *argsPtr,	   /* Description of arguments. */
+    Tcl_Obj *bodyPtr,	   /* Command body. */
     Tcl_Proc *procPtrPtr)       /* Returns: pointer to proc data. */
 {
     int code = TclCreateProc(interp, (Namespace *)nsPtr, procName, argsPtr,
-            bodyPtr, (Proc **)procPtrPtr);
+	    bodyPtr, (Proc **)procPtrPtr);
     (*(Proc **)procPtrPtr)->cmdPtr = NULL;
     return code;
 }

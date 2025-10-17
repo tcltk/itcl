@@ -28,10 +28,10 @@ test proc-1.1 {proc args can span multiple lines} -body {
     # arguments were included in a comment in the compile script, and
     # the subsequent lines weren't commented.
     type dog {
-        proc foo {
-            a
-            b
-        } { }
+	proc foo {
+	    a
+	    b
+	} { }
     }
 } -cleanup {
     dog destroy
@@ -42,9 +42,9 @@ test proc-1.1 {proc args can span multiple lines} -body {
 
 test method-1.1 {methods get called} -body {
     type dog {
-        method bark {} {
-            return "$self barks"
-        }
+	method bark {} {
+	    return "$self barks"
+	}
     }
 
     dog create spot
@@ -55,13 +55,13 @@ test method-1.1 {methods get called} -body {
 
 test method-1.2 {methods can call other methods} -body {
     type dog {
-        method bark {} {
-            return "$self barks."
-        }
+	method bark {} {
+	    return "$self barks."
+	}
 
-        method chase {quarry} {
-            return "$self chases $quarry; [$self bark]"
-        }
+	method chase {quarry} {
+	    return "$self chases $quarry; [$self bark]"
+	}
     }
 
     dog create spot
@@ -72,13 +72,13 @@ test method-1.2 {methods can call other methods} -body {
 
 test method-1.3 {instances can call one another} -body {
     type dog {
-        method bark {} {
-            return "$self barks."
-        }
+	method bark {} {
+	    return "$self barks."
+	}
 
-        method chase {quarry} {
-            return "$self chases $quarry; [$quarry bark] [$self bark]"
-        }
+	method chase {quarry} {
+	    return "$self chases $quarry; [$quarry bark] [$self bark]"
+	}
     }
 
     dog create spot
@@ -90,10 +90,10 @@ test method-1.3 {instances can call one another} -body {
 
 test method-1.4 {upvar works in methods} -body {
     type dog {
-        method goodname {varname} {
-            upvar $varname myvar
-            set myvar spot
-        }
+	method goodname {varname} {
+	    upvar $varname myvar
+	    set myvar spot
+	}
     }
 
     dog create fido
@@ -136,12 +136,12 @@ test method-1.7 {info type method returns the object's type} -body {
 
 test method-1.8 {instance method can call type method} -body {
     type dog {
-        typemethod hello {} {
-            return "Hello"
-        }
-        method helloworld {} {
-            return "[$type hello], World!"
-        }
+	typemethod hello {} {
+	    return "Hello"
+	}
+	method helloworld {} {
+	    return "[$type hello], World!"
+	}
     }
 
     dog create spot
@@ -152,12 +152,12 @@ test method-1.8 {instance method can call type method} -body {
 
 test method-1.9 {type methods must be qualified} -body {
     type dog {
-        typemethod hello {} {
-            return "Hello"
-        }
-        method helloworld {} {
-            return "[hello], World!"
-        }
+	typemethod hello {} {
+	    return "Hello"
+	}
+	method helloworld {} {
+	    return "[hello], World!"
+	}
     }
 
     dog create spot
@@ -170,7 +170,7 @@ test method-1.9 {type methods must be qualified} -body {
 
 test method-1.11 {too few arguments} -body {
     type dog {
-        method bark {volume} { }
+	method bark {volume} { }
     }
 
     dog create spot
@@ -183,7 +183,7 @@ test method-1.11 {too few arguments} -body {
 
 test method-1.13 {too many arguments} -body {
     type dog {
-        method bark {volume} { }
+	method bark {volume} { }
     }
 
     dog create spot
@@ -197,7 +197,7 @@ test method-1.13 {too many arguments} -body {
 
 test method-1.14 {method args can't include type} -body {
     type dog {
-        method foo {a type b} { }
+	method foo {a type b} { }
     }
 } -returnCodes {
     error
@@ -205,7 +205,7 @@ test method-1.14 {method args can't include type} -body {
 
 test method-1.15 {method args can't include self} -body {
     type dog {
-        method foo {a self b} { }
+	method foo {a self b} { }
     }
 } -returnCodes {
     error
@@ -216,10 +216,10 @@ test method-1.16 {method args can span multiple lines} -body {
     # arguments were included in a comment in the compile script, and
     # the subsequent lines weren't commented.
     type dog {
-        method foo {
-                    a
-                    b
-                } { }
+	method foo {
+		    a
+		    b
+		} { }
     }
 } -cleanup {
     dog destroy
@@ -230,27 +230,27 @@ test method-1.16 {method args can span multiple lines} -body {
 
 test mymethod-1.1 {run mymethod handler} -body {
     type foo {
-        option -command {}
-        method runcmd {} {
-            eval [linsert $itcl_options(-command) end $self snarf]
-            return
-        }
+	option -command {}
+	method runcmd {} {
+	    eval [linsert $itcl_options(-command) end $self snarf]
+	    return
+	}
     }
     type bar {
-        variable sub
-        constructor {args} {
-            set sub [foo fubar -command [mymethod Handler]]
-            return
-        }
+	variable sub
+	constructor {args} {
+	    set sub [foo fubar -command [mymethod Handler]]
+	    return
+	}
 
-        method Handler {args} {
-            set ::RES $args
-        }
+	method Handler {args} {
+	    set ::RES $args
+	}
 
-        method test {} {
-            $sub runcmd
-            return
-        }
+	method test {} {
+	    $sub runcmd
+	    return
+	}
     }
 
     set ::RES {}
@@ -267,11 +267,11 @@ test mymethod-1.1 {run mymethod handler} -body {
 
 test myproc-1.1 {myproc qualifies proc names} -body {
     type dog {
-        proc foo {} {}
+	proc foo {} {}
 
-        typemethod getit {} {
-            return [myproc foo]
-        }
+	typemethod getit {} {
+	    return [myproc foo]
+	}
     }
 
     dog getit
@@ -281,11 +281,11 @@ test myproc-1.1 {myproc qualifies proc names} -body {
 
 test myproc-1.2 {myproc adds arguments} -body {
     type dog {
-        proc foo {} {}
+	proc foo {} {}
 
-        typemethod getit {} {
-            return [myproc foo "a b"]
-        }
+	typemethod getit {} {
+	    return [myproc foo "a b"]
+	}
     }
 
     dog getit
@@ -295,11 +295,11 @@ test myproc-1.2 {myproc adds arguments} -body {
 
 test myproc-1.3 {myproc adds arguments} -body {
     type dog {
-        proc foo {} {}
+	proc foo {} {}
 
-        typemethod getit {} {
-            return [myproc foo "a b" c d]
-        }
+	typemethod getit {} {
+	    return [myproc foo "a b" c d]
+	}
     }
 
     dog getit
@@ -309,14 +309,14 @@ test myproc-1.3 {myproc adds arguments} -body {
 
 test myproc-1.4 {procs with selfns work} -body {
     type dog {
-        variable datum foo
+	variable datum foo
 
-        method qualify {} {
-            return [myproc getdatum $selfns]
-        }
-        proc getdatum {selfns} {
-            return [set ${selfns}::datum]
-        }
+	method qualify {} {
+	    return [myproc getdatum $selfns]
+	}
+	proc getdatum {selfns} {
+	    return [set ${selfns}::datum]
+	}
     }
     dog create spot
     eval [spot qualify]
@@ -329,20 +329,20 @@ test myproc-1.4 {procs with selfns work} -body {
 
 test mytypemethod-1.1 {mytypemethod qualifies typemethods} -body {
     type dog {
-        typemethod this {} {}
+	typemethod this {} {}
 
-        typemethod a {} {
-            return [mytypemethod this]
-        }
-        typemethod b {} {
-            return [mytypemethod this x]
-        }
-        typemethod c {} {
-            return [mytypemethod this "x y"]
-        }
-        typemethod d {} {
-            return [mytypemethod this x y]
-        }
+	typemethod a {} {
+	    return [mytypemethod this]
+	}
+	typemethod b {} {
+	    return [mytypemethod this x]
+	}
+	typemethod c {} {
+	    return [mytypemethod this "x y"]
+	}
+	typemethod d {} {
+	    return [mytypemethod this x y]
+	}
     }
     list [dog a] [dog b] [dog c] [dog d]
 } -cleanup {

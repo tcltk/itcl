@@ -2,11 +2,11 @@
 # Tests for method/variable protection and access
 # ----------------------------------------------------------------------
 #   AUTHOR:  Michael J. McLennan
-#            Bell Labs Innovations for Lucent Technologies
-#            mmclennan@lucent.com
-#            http://www.tcltk.com/itcl
+#	    Bell Labs Innovations for Lucent Technologies
+#	    mmclennan@lucent.com
+#	    http://www.tcltk.com/itcl
 # ----------------------------------------------------------------------
-#            Copyright (c) 1993-1998  Lucent Technologies, Inc.
+#	    Copyright (c) 1993-1998  Lucent Technologies, Inc.
 # ======================================================================
 # See the file "license.terms" for information on usage and
 # redistribution of this file, and for a DISCLAIMER OF ALL WARRANTIES.
@@ -21,28 +21,28 @@ package require itcl
 # ----------------------------------------------------------------------
 test protect-1.1 {define a class with various protection levels} {
     itcl::class test_pr {
-        public {
-            variable pubv "public var"
-            common pubc "public com"
-            method pubm {} {return "public method"}
-            method ovpubm {} {return "overloaded public method"}
-            proc pubp {} {return "public proc"}
-        }
-        protected {
-            variable prov "protected var"
-            common proc "protected com"
-            method prom {} {return "protected method"}
-            method ovprom {} {return "overloaded protected method"}
-            proc prop {} {return "protected proc"}
-        }
-        private {
-            variable priv "private var"
-            common pric "private com"
-            method prim {} {return "private method"}
-            method ovprim {} {return "overloaded private method"}
-            proc prip {} {return "private proc"}
-        }
-        method do {args} {eval $args}
+	public {
+	    variable pubv "public var"
+	    common pubc "public com"
+	    method pubm {} {return "public method"}
+	    method ovpubm {} {return "overloaded public method"}
+	    proc pubp {} {return "public proc"}
+	}
+	protected {
+	    variable prov "protected var"
+	    common proc "protected com"
+	    method prom {} {return "protected method"}
+	    method ovprom {} {return "overloaded protected method"}
+	    proc prop {} {return "protected proc"}
+	}
+	private {
+	    variable priv "private var"
+	    common pric "private com"
+	    method prim {} {return "private method"}
+	    method ovprim {} {return "overloaded private method"}
+	    proc prip {} {return "private proc"}
+	}
+	method do {args} {eval $args}
     }
 } ""
 
@@ -155,16 +155,16 @@ test protect-1.14b {private variables can be accessed from inside} {
 # ----------------------------------------------------------------------
 test protect-2.1 {define a derived class} {
     itcl::class test_pr_derived {
-        inherit test_pr
-        method do {args} {eval $args}
+	inherit test_pr
+	method do {args} {eval $args}
 
-        public method ovpubm {} {return "specific public method"}
-        protected method ovprom {} {return "specific protected method"}
-        private method ovprim {} {return "specific private method"}
+	public method ovpubm {} {return "specific public method"}
+	protected method ovprom {} {return "specific protected method"}
+	private method ovprim {} {return "specific private method"}
 
-        public method dpubm {} {return "pub (only in derived)"}
-        protected method dprom {} {return "pro (only in derived)"}
-        private method dprim {} {return "pri (only in derived)"}
+	public method dpubm {} {return "pub (only in derived)"}
+	protected method dprom {} {return "pro (only in derived)"}
+	private method dprim {} {return "pri (only in derived)"}
     }
 } ""
 
@@ -302,17 +302,17 @@ eval namespace delete [itcl::find classes test_pr*]
 # ----------------------------------------------------------------------
 test protect-3.1 {define a base class with private variables} {
     itcl::class test_info_base {
-        private variable pribv "pribv-value"
-        private common pribc "pribc-value"
-        protected variable probv "probv-value"
-        protected common probc "probc-value"
-        public variable pubbv "pubbv-value"
-        public common pubbc "pubbc-value"
+	private variable pribv "pribv-value"
+	private common pribc "pribc-value"
+	protected variable probv "probv-value"
+	protected common probc "probc-value"
+	public variable pubbv "pubbv-value"
+	public common pubbc "pubbc-value"
     }
     itcl::class test_info_derived {
-        inherit test_info_base
-        private variable pridv "pridv-value"
-        private common pridc "pridc-value"
+	inherit test_info_base
+	private variable pridv "pridv-value"
+	private common pridc "pridc-value"
     }
 } ""
 
@@ -358,13 +358,13 @@ test protect-3.11 {private derived class commons can be accessed} {
 
 test protect-3.12 {private base class variables can't be accessed from class} {
     list [catch {
-        namespace eval test_info_derived {info variable pribv}
+	namespace eval test_info_derived {info variable pribv}
     } msg] $msg
 } {1 {cannot access object-specific info without an object context}}
 
 test protect-3.13 {private base class commons can be accessed from class} {
     list [catch {
-        namespace eval test_info_derived {info variable pribc}
+	namespace eval test_info_derived {info variable pribc}
     } msg] $msg
 } {0 {private common ::test_info_base::pribc pribc-value pribc-value}}
 

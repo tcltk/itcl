@@ -98,12 +98,12 @@ proc tkbide {{msg "tkbide"} {msec 500}} {
     set ::bideErrorInfo ""
     # It looks like update idletasks does the job.
     if {0} {
-        after $msec {set ::bideVar 1}
-        tkwait variable ::bideVar
+	after $msec {set ::bideVar 1}
+	tkwait variable ::bideVar
     }
     update idletasks
     if {"" != $::bideError} {
-        error "$msg: $::bideError" $::bideErrorInfo
+	error "$msg: $::bideError" $::bideErrorInfo
     }
 }
 

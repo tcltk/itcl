@@ -14,7 +14,7 @@
 
 static void ItclDeleteStub(void *cdata);
 static int ItclHandleStubCmd(void *clientData, Tcl_Interp *interp,
-        int objc, Tcl_Obj *const objv[]);
+	int objc, Tcl_Obj *const objv[]);
 
 
 /*
@@ -39,9 +39,9 @@ Itcl_IsStub(
      *  find it at a higher level.
      */
     if (Tcl_GetCommandInfoFromToken(cmdPtr, &cmdInfo) == 1) {
-        if (cmdInfo.deleteProc == ItclDeleteStub) {
-            return 1;
-        }
+	if (cmdInfo.deleteProc == ItclDeleteStub) {
+	    return 1;
+	}
     }
     return 0;
 }
@@ -64,7 +64,7 @@ int
 Itcl_StubCreateCmd(
     TCL_UNUSED(void *),      /* not used */
     Tcl_Interp *interp,      /* current interpreter */
-    int objc,                /* number of arguments */
+    int objc,		/* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
 {
     Tcl_Command cmdPtr;
@@ -73,8 +73,8 @@ Itcl_StubCreateCmd(
 
     ItclShowArgs(1, "Itcl_StubCreateCmd", objc, objv);
     if (objc != 2) {
-        Tcl_WrongNumArgs(interp, 1, objv, "name");
-        return TCL_ERROR;
+	Tcl_WrongNumArgs(interp, 1, objv, "name");
+	return TCL_ERROR;
     }
     cmdName = Tcl_GetString(objv[1]);
 
@@ -85,8 +85,8 @@ Itcl_StubCreateCmd(
      *  get the full name of this command later on.
      */
     cmdPtr = Tcl_CreateObjCommand(interp, cmdName,
-        ItclHandleStubCmd, NULL,
-        (Tcl_CmdDeleteProc*)ItclDeleteStub);
+	ItclHandleStubCmd, NULL,
+	(Tcl_CmdDeleteProc*)ItclDeleteStub);
 
     Tcl_GetCommandInfoFromToken(cmdPtr, &cmdInfo);
     cmdInfo.objClientData = cmdPtr;
@@ -114,24 +114,24 @@ int
 Itcl_StubExistsCmd(
     TCL_UNUSED(void *),      /* not used */
     Tcl_Interp *interp,      /* current interpreter */
-    int objc,                /* number of arguments */
+    int objc,		/* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
 {
     Tcl_Command cmdPtr;
     char *cmdName;
 
     if (objc != 2) {
-        Tcl_WrongNumArgs(interp, 1, objv, "name");
-        return TCL_ERROR;
+	Tcl_WrongNumArgs(interp, 1, objv, "name");
+	return TCL_ERROR;
     }
     cmdName = Tcl_GetString(objv[1]);
 
     cmdPtr = Tcl_FindCommand(interp, cmdName, NULL, 0);
 
     if ((cmdPtr != NULL) && Itcl_IsStub(cmdPtr)) {
-        Tcl_SetWideIntObj(Tcl_GetObjResult(interp), 1);
+	Tcl_SetWideIntObj(Tcl_GetObjResult(interp), 1);
     } else {
-        Tcl_SetWideIntObj(Tcl_GetObjResult(interp), 0);
+	Tcl_SetWideIntObj(Tcl_GetObjResult(interp), 0);
     }
     return TCL_OK;
 }
@@ -151,9 +151,9 @@ Itcl_StubExistsCmd(
  */
 static int
 ItclHandleStubCmd(
-    void *clientData,        /* command token for this stub */
+    void *clientData,	/* command token for this stub */
     Tcl_Interp *interp,      /* current interpreter */
-    int objc,                /* number of arguments */
+    int objc,		/* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
 {
     Tcl_Command cmdPtr;
@@ -181,18 +181,18 @@ ItclHandleStubCmd(
     objAutoLoad[1] = cmdNamePtr;
     result = Tcl_EvalObjv(interp, 2, objAutoLoad, 0);
     if (result != TCL_OK) {
-        Tcl_DecrRefCount(cmdNamePtr);
-        return TCL_ERROR;
+	Tcl_DecrRefCount(cmdNamePtr);
+	return TCL_ERROR;
     }
 
     objPtr = Tcl_GetObjResult(interp);
     result = Tcl_GetIntFromObj(interp, objPtr, &loaded);
     if ((result != TCL_OK) || !loaded) {
-        Tcl_ResetResult(interp);
-        Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
-            "can't autoload \"", cmdName, "\"", NULL);
-        Tcl_DecrRefCount(cmdNamePtr);
-        return TCL_ERROR;
+	Tcl_ResetResult(interp);
+	Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+	    "can't autoload \"", cmdName, "\"", (char *)NULL);
+	Tcl_DecrRefCount(cmdNamePtr);
+	return TCL_ERROR;
     }
 
     /*
@@ -201,7 +201,7 @@ ItclHandleStubCmd(
      */
     cmdlinePtr = Itcl_CreateArgs(interp, cmdName, objc - 1, objv + 1);
     (void)Tcl_ListObjGetElements(NULL, cmdlinePtr,
-        &cmdlinec, &cmdlinev);
+	&cmdlinec, &cmdlinev);
 
     Tcl_DecrRefCount(cmdNamePtr);
     Tcl_ResetResult(interp);

@@ -79,11 +79,11 @@ test iinfo-2.1 {object info type} -body {
 
 test iinfo-3.1 {object info typevars} -body {
     type dog {
-        typevariable thisvar 1
-        typevariable thatvar 2
+	typevariable thisvar 1
+	typevariable thatvar 2
 
-        constructor {args} {
-        }
+	constructor {args} {
+	}
     }
 
     dog create spot
@@ -94,11 +94,11 @@ test iinfo-3.1 {object info typevars} -body {
 
 test iinfo-3.2 {object info typevars with pattern} -body {
     type dog {
-        typevariable thisvar 1
-        typevariable thatvar 2
+	typevariable thisvar 1
+	typevariable thatvar 2
 
-        constructor {args} {
-        }
+	constructor {args} {
+	}
     }
 
     dog create spot
@@ -109,11 +109,11 @@ test iinfo-3.2 {object info typevars with pattern} -body {
 
 test iinfo-3.1a {object info typevarable} -body {
     type dog {
-        typevariable thisvar 1
-        typevariable thatvar 2
+	typevariable thisvar 1
+	typevariable thatvar 2
 
-        constructor {args} {
-        }
+	constructor {args} {
+	}
     }
 
     dog create spot
@@ -124,12 +124,12 @@ test iinfo-3.1a {object info typevarable} -body {
 
 test iinfo-4.1 {object info vars} -body {
     type dog {
-        variable hisvar 1
+	variable hisvar 1
 
-        constructor {args} {
-            variable hervar
-            set hervar 2
-        }
+	constructor {args} {
+	    variable hervar
+	    set hervar 2
+	}
     }
 
     dog create spot
@@ -140,12 +140,12 @@ test iinfo-4.1 {object info vars} -body {
 
 test iinfo-4.2 {object info vars with pattern} -body {
     type dog {
-        variable hisvar 1
+	variable hisvar 1
 
-        constructor {args} {
-            variable hervar
-            set hervar 2
-        }
+	constructor {args} {
+	    variable hervar
+	    set hervar 2
+	}
     }
 
     dog create spot
@@ -174,8 +174,8 @@ test iinfo-6.1 {info options with no options} -body {
 
 test iinfo-6.2 {info options with only local options} -body {
     type dog {
-        option -foo a
-        option -bar b
+	option -foo a
+	option -bar b
     }
     dog create spot
 
@@ -186,9 +186,9 @@ test iinfo-6.2 {info options with only local options} -body {
 
 test iinfo-6.3 {info options with local and delegated options} -body {
     type dog {
-        option -foo a
-        option -bar b
-        delegate option -quux to sibling
+	option -foo a
+	option -bar b
+	delegate option -quux to sibling
     }
     dog create spot
 
@@ -199,9 +199,9 @@ test iinfo-6.3 {info options with local and delegated options} -body {
 
 test iinfo-6.3a {info option} -body {
     type dog {
-        option -foo a
-        option -bar b
-        delegate option -quux to sibling
+	option -foo a
+	option -bar b
+	delegate option -quux to sibling
     }
     dog create spot
 
@@ -212,9 +212,9 @@ test iinfo-6.3a {info option} -body {
 
 test iinfo-6.3b {info option with options} -body {
     type dog {
-        option -foo -cgetmethod xx -configuremethodvar yy -default a
-        option -bar b
-        delegate option -quux to sibling
+	option -foo -cgetmethod xx -configuremethodvar yy -default a
+	option -bar b
+	delegate option -quux to sibling
     }
     dog create spot
 
@@ -245,11 +245,11 @@ test iinfo-7.2 {info typemethods, with pattern} -body {
 
 test iinfo-7.3 {info typemethods, with explicit typemethods} -body {
     type dog {
-        typemethod foo {} {}
-        typeconstructor {
-            set comp string
-        }
-        delegate typemethod bar to comp
+	typemethod foo {} {}
+	typeconstructor {
+	    set comp string
+	}
+	delegate typemethod bar to comp
     }
 
     dog spot
@@ -261,11 +261,11 @@ test iinfo-7.3 {info typemethods, with explicit typemethods} -body {
 
 test iinfo-7.4 {info typemethods, with implicit typemethods} -body {
     type dog {
-        delegate typemethod * to comp
+	delegate typemethod * to comp
 
-        typeconstructor {
-            set comp string
-        }
+	typeconstructor {
+	    set comp string
+	}
     }
 
     dog create spot
@@ -286,12 +286,12 @@ test iinfo-7.4 {info typemethods, with implicit typemethods} -body {
 
 test iinfo-7.5 {info typemethods, with hierarchical typemethods} -body {
     type dog {
-        delegate typemethod {comp foo} to comp
+	delegate typemethod {comp foo} to comp
 
-        typeconstructor {
-            set comp string
-        }
-        typemethod {comp bar} {} {}
+	typeconstructor {
+	    set comp string
+	}
+	typemethod {comp bar} {} {}
     }
 
     dog create spot
@@ -303,7 +303,7 @@ test iinfo-7.5 {info typemethods, with hierarchical typemethods} -body {
 
 test iinfo-7.5a {info typemethod} -body {
     type dog {
-        typemethod tail {args} { set a b }
+	typemethod tail {args} { set a b }
     }
 
     dog create spot
@@ -315,7 +315,7 @@ test iinfo-7.5a {info typemethod} -body {
 
 test iinfo-7.5b {info typemethod with options} -body {
     type dog {
-        typemethod tail {args} { set a b }
+	typemethod tail {args} { set a b }
     }
 
     dog create spot
@@ -348,7 +348,7 @@ test iinfo-8.2 {info methods, with pattern} -body {
 
 test iinfo-8.1a {info method} -body {
     type dog {
-        method tail {args} { set a b }
+	method tail {args} { set a b }
     }
 
     dog spot
@@ -360,7 +360,7 @@ test iinfo-8.1a {info method} -body {
 
 test iinfo-8.1b {info method with options} -body {
     type dog {
-        method tail {args} { set a b }
+	method tail {args} { set a b }
     }
 
     dog spot
@@ -372,11 +372,11 @@ test iinfo-8.1b {info method with options} -body {
 
 test iinfo-8.3 {info methods, with explicit methods} -body {
     type dog {
-        method foo {} {}
-        typeconstructor {
-            set comp string
-        }
-        delegate method bar to comp
+	method foo {} {}
+	typeconstructor {
+	    set comp string
+	}
+	delegate method bar to comp
     }
 
     dog spot
@@ -388,11 +388,11 @@ test iinfo-8.3 {info methods, with explicit methods} -body {
 
 test iinfo-8.4 {info methods, with implicit methods} -body {
     type dog {
-        delegate method * to comp
+	delegate method * to comp
 
-        constructor {args} {
-            set comp string
-        }
+	constructor {args} {
+	    set comp string
+	}
     }
 
     dog create spot
@@ -413,12 +413,12 @@ test iinfo-8.4 {info methods, with implicit methods} -body {
 
 test iinfo-8.5 {info methods, with hierarchical methods} -body {
     type dog {
-        delegate method {comp foo} to comp
+	delegate method {comp foo} to comp
 
-        constructor {args} {
-            set comp string
-        }
-        method {comp bar} {} {}
+	constructor {args} {
+	    set comp string
+	}
+	method {comp bar} {} {}
     }
 
     dog create spot
@@ -478,9 +478,9 @@ test iinfo-9.4 {info args, unknown method} -body {
 test iinfo-9.5 {info args, delegated method} -body {
     type dog {
 	component x
-        typeconstructor {
+	typeconstructor {
 	    set x string
-        }
+	}
 	delegate method bark to x
     }
 
@@ -672,11 +672,11 @@ test tinfo-1.3 {type info too many args} -body {
 
 test tinfo-2.1 {type info typevars} -body {
     type dog {
-        typevariable thisvar 1
-        typevariable thatvar 2
+	typevariable thisvar 1
+	typevariable thatvar 2
 
-        constructor {args} {
-        }
+	constructor {args} {
+	}
     }
 
     dog create spot
@@ -702,7 +702,7 @@ test tinfo-3.3 {type info instances with non-global namespaces} -body {
     dog create ::spot
 
     namespace eval ::dogs:: {
-        set ::qname [dog create fido]
+	set ::qname [dog create fido]
     }
 
     list $qname [lsort [dog info instances]]
@@ -723,11 +723,11 @@ test tinfo-3.4 {type info instances with pattern} -body {
 
 test tinfo-4.1 {type info typevars with pattern} -body {
     type dog {
-        typevariable thisvar 1
-        typevariable thatvar 2
+	typevariable thisvar 1
+	typevariable thatvar 2
 
-        constructor {args} {
-        }
+	constructor {args} {
+	}
     }
 
     dog create spot
@@ -754,11 +754,11 @@ test tinfo-5.2 {type info typemethods, with pattern} -body {
 
 test tinfo-5.3 {type info typemethods, with explicit typemethods} -body {
     type dog {
-        typemethod foo {} {}
-        typeconstructor {
+	typemethod foo {} {}
+	typeconstructor {
 	    set comp string
 	}
-        delegate typemethod bar to comp
+	delegate typemethod bar to comp
     }
 
     lsort [dog info typemethods]
@@ -768,11 +768,11 @@ test tinfo-5.3 {type info typemethods, with explicit typemethods} -body {
 
 test tinfo-5.4 {type info typemethods, with implicit typemethods} -body {
     type dog {
-        delegate typemethod * to comp
+	delegate typemethod * to comp
 
-        typeconstructor {
-            set comp string
-        }
+	typeconstructor {
+	    set comp string
+	}
     }
 
     set a [lsort [dog info typemethods]]
@@ -791,12 +791,12 @@ test tinfo-5.4 {type info typemethods, with implicit typemethods} -body {
 
 test tinfo-5.5 {info typemethods, with hierarchical typemethods} -body {
     type dog {
-        delegate typemethod {comp foo} to comp
+	delegate typemethod {comp foo} to comp
 
-        typeconstructor {
-            set comp string
-        }
-        typemethod {comp bar} {} {}
+	typeconstructor {
+	    set comp string
+	}
+	typemethod {comp bar} {} {}
     }
 
     lsort [dog info typemethods]
@@ -845,9 +845,9 @@ test tinfo-6.4 {type info args, unknown method} -body {
 
 test tinfo-6.5 {type info args, delegated method} -body {
     type dog {
-        typeconstructor {
-            set x string
-        }
+	typeconstructor {
+	    set x string
+	}
 	delegate typemethod bark to x
     }
 
@@ -897,9 +897,9 @@ test tinfo-7.4 {type info default, unknown method} -body {
 
 test tinfo-7.5 {type info default, delegated method} -body {
     type dog {
-        typeconstructor {
-            set x string
-        }
+	typeconstructor {
+	    set x string
+	}
 	delegate typemethod bark to x
     }
 
@@ -959,9 +959,9 @@ test tinfo-8.4 {type info body, unknown method} -body {
 
 test tinfo-8.5 {type info body, delegated method} -body {
     type dog {
-        typeconstructor {
-            set x string
-        }
+	typeconstructor {
+	    set x string
+	}
 	delegate typemethod bark to x
     }
 
@@ -987,13 +987,13 @@ test tinfo-10.1 {type info types} -body {
 
 test tinfo-10.2 {type info components} -body {
     type dog {
-        component comp1
-        component comp2
+	component comp1
+	component comp2
     }
 
     type cat {
-        component comp1
-        component comp1a
+	component comp1
+	component comp1a
     }
 
     set a [lsort [dog info components]]
@@ -1006,13 +1006,13 @@ test tinfo-10.2 {type info components} -body {
 
 test tinfo-10.2a {type info component} -body {
     type dog {
-        component comp1
-        component comp2
+	component comp1
+	component comp2
     }
 
     type cat {
-        component comp1
-        component comp1a
+	component comp1
+	component comp1a
     }
 
     set a [lsort [dog info component]]
@@ -1025,8 +1025,8 @@ test tinfo-10.2a {type info component} -body {
 
 test tinfo-10.2b {type info component with options} -body {
     type dog {
-        component comp1
-        component comp2
+	component comp1
+	component comp2
     }
 
     dog info component comp1 -name -inherit
@@ -1052,16 +1052,16 @@ test tinfo-10.4 {type info delegated methods} -body {
 
 test tinfo-10.5 {type info delegated methods} -body {
     type dog {
-        component comp1
-        component comp2
-        delegate method wag to comp1
-        delegate method tail to comp2
-        delegate typemethod typewag to comp1
-        delegate typemethod typetail to comp2
-        typeconstructor {
+	component comp1
+	component comp2
+	delegate method wag to comp1
+	delegate method tail to comp2
+	delegate typemethod typewag to comp1
+	delegate typemethod typetail to comp2
+	typeconstructor {
 	    set comp1 string
 	    set comp2 string
-        }
+	}
     }
 
 
@@ -1072,16 +1072,16 @@ test tinfo-10.5 {type info delegated methods} -body {
 
 test tinfo-10.5a {type info delegated method} -body {
     type dog {
-        component comp1
-        component comp2
-        delegate method wag to comp1
-        delegate method tail to comp2
-        delegate typemethod typewag to comp1
-        delegate typemethod typetail to comp2
-        typeconstructor {
+	component comp1
+	component comp2
+	delegate method wag to comp1
+	delegate method tail to comp2
+	delegate typemethod typewag to comp1
+	delegate typemethod typetail to comp2
+	typeconstructor {
 	    set comp1 string
 	    set comp2 string
-        }
+	}
     }
 
 
@@ -1092,16 +1092,16 @@ test tinfo-10.5a {type info delegated method} -body {
 
 test tinfo-10.5b {type info delegated method with options} -body {
     type dog {
-        component comp1
-        component comp2
-        delegate method wag to comp1
-        delegate method tail to comp2
-        delegate typemethod typewag to comp1
-        delegate typemethod typetail to comp2
-        typeconstructor {
+	component comp1
+	component comp2
+	delegate method wag to comp1
+	delegate method tail to comp2
+	delegate typemethod typewag to comp1
+	delegate typemethod typetail to comp2
+	typeconstructor {
 	    set comp1 string
 	    set comp2 string
-        }
+	}
     }
 
 
@@ -1112,16 +1112,16 @@ test tinfo-10.5b {type info delegated method with options} -body {
 
 test tinfo-10.5c {type info delegated typemethod} -body {
     type dog {
-        component comp1
-        component comp2
-        delegate method wag to comp1
-        delegate method tail to comp2
-        delegate typemethod typewag to comp1
-        delegate typemethod typetail to comp2
-        typeconstructor {
+	component comp1
+	component comp2
+	delegate method wag to comp1
+	delegate method tail to comp2
+	delegate typemethod typewag to comp1
+	delegate typemethod typetail to comp2
+	typeconstructor {
 	    set comp1 string
 	    set comp2 string
-        }
+	}
     }
 
 
@@ -1132,16 +1132,16 @@ test tinfo-10.5c {type info delegated typemethod} -body {
 
 test tinfo-10.5d {type info delegated typemethod with options} -body {
     type dog {
-        component comp1
-        component comp2
-        delegate method wag to comp1
-        delegate method tail to comp2
-        delegate typemethod typewag to comp1
-        delegate typemethod typetail to comp2
-        typeconstructor {
+	component comp1
+	component comp2
+	delegate method wag to comp1
+	delegate method tail to comp2
+	delegate typemethod typewag to comp1
+	delegate typemethod typetail to comp2
+	typeconstructor {
 	    set comp1 string
 	    set comp2 string
-        }
+	}
     }
 
 
@@ -1152,16 +1152,16 @@ test tinfo-10.5d {type info delegated typemethod with options} -body {
 
 test tinfo-10.6 {type info delegated typemethods} -body {
     type dog {
-        component comp1
-        component comp2
-        delegate method wag to comp1
-        delegate method tail to comp2
-        delegate typemethod typewag to comp1
-        delegate typemethod typetail to comp2
-        typeconstructor {
+	component comp1
+	component comp2
+	delegate method wag to comp1
+	delegate method tail to comp2
+	delegate typemethod typewag to comp1
+	delegate typemethod typetail to comp2
+	typeconstructor {
 	    set comp1 string
 	    set comp2 string
-        }
+	}
     }
 
 
@@ -1172,17 +1172,17 @@ test tinfo-10.6 {type info delegated typemethods} -body {
 
 test tinfo-10.7 {type info delegated options} -body {
     type dog {
-        component comp1
-        component comp2
-        component comp3
-        delegate option -foo to comp1
-        delegate option -bar to comp2
-        delegate option * to comp3
-        typeconstructor {
+	component comp1
+	component comp2
+	component comp3
+	delegate option -foo to comp1
+	delegate option -bar to comp2
+	delegate option * to comp3
+	typeconstructor {
 	    set comp1 string
 	    set comp2 string
 	    set comp3 string
-        }
+	}
     }
 
 
@@ -1193,8 +1193,8 @@ test tinfo-10.7 {type info delegated options} -body {
 
 test tinfo-11.1 {type info type} -body {
     type dog {
-        typeconstructor {
-        }
+	typeconstructor {
+	}
     }
 
     dog info type

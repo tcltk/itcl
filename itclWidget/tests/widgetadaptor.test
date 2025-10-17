@@ -77,12 +77,12 @@ proc tkbide {{msg "tkbide"} {msec 500}} {
     set ::bideErrorInfo ""
     # It looks like update idletasks does the job.
     if {0} {
-        after $msec {set ::bideVar 1}
-        tkwait variable ::bideVar
+	after $msec {set ::bideVar 1}
+	tkwait variable ::bideVar
     }
     update idletasks
     if {"" != $::bideError} {
-        error "$msg: $::bideError" $::bideErrorInfo
+	error "$msg: $::bideError" $::bideErrorInfo
     }
 }
 
@@ -106,13 +106,13 @@ test widgetadaptor-1.1 {creating a widget: hull hijacking} -constraints {
     tk
 } -body {
     widgetadaptor mylabel {
-        constructor {args} {
-            installhull [label $self]
-            $self configure {*}$args
-        }
+	constructor {args} {
+	    installhull [label $self]
+	    $self configure {*}$args
+	}
 
-        delegate method * to itcl_hull
-        delegate option * to itcl_hull
+	delegate method * to itcl_hull
+	delegate option * to itcl_hull
     }
 
     set xx [mylabel create .label -text "My Label"]
@@ -131,9 +131,9 @@ test widgetadaptor-1.2 {destroying a widget with destroy} -constraints {
     tk
 } -body {
     widgetadaptor mylabel {
-        constructor {} {
-            installhull [label $self]
-        }
+	constructor {} {
+	    installhull [label $self]
+	}
     }
 
     mylabel create .label
@@ -150,9 +150,9 @@ test widgetadaptor-1.3 {destroying two widgets of the same type with destroy} -c
     tk
 } -body {
     widgetadaptor mylabel {
-        constructor {} {
-            installhull [label $self]
-        }
+	constructor {} {
+	    installhull [label $self]
+	}
     }
 
     mylabel create .lab1
@@ -169,9 +169,9 @@ test widgetadaptor-1.3 {destroying two widgets of the same type with destroy} -c
 
 test widgetadaptor-1.4 {destroying a widget with rename, then destroy type} -body {
     widgetadaptor mylabel {
-        constructor {} {
-            installhull [label $self]
-        }
+	constructor {} {
+	    installhull [label $self]
+	}
     }
 
     mylabel create .label
@@ -186,9 +186,9 @@ test widgetadaptor-1.4 {destroying a widget with rename, then destroy type} -bod
 
 test widgetadaptor-1.5 {destroying two widgets of the same type with rename} -body {
     widgetadaptor mylabel {
-        constructor {} {
-            installhull [label $self]
-        }
+	constructor {} {
+	    installhull [label $self]
+	}
     }
 
     mylabel create .lab1
@@ -206,9 +206,9 @@ test widgetadaptor-1.6 {create/destroy twice, with destroy} -constraints {
     tk
 } -body {
     widgetadaptor mylabel {
-        constructor {} {
-            installhull [label $self]
-        }
+	constructor {} {
+	    installhull [label $self]
+	}
     }
 
     mylabel create .lab1
@@ -227,9 +227,9 @@ test widgetadaptor-1.6 {create/destroy twice, with destroy} -constraints {
 
 test widgetadaptor-1.7 {create/destroy twice, with rename} -body {
     widgetadaptor mylabel {
-        constructor {} {
-            installhull [label $self]
-        }
+	constructor {} {
+	    installhull [label $self]
+	}
     }
 
     mylabel create .lab1
@@ -250,10 +250,10 @@ test widgetadaptor-1.8 {"create" is optional} -constraints {
     tk
 } -body {
     widgetadaptor mylabel {
-        constructor {args} {
-            installhull [label $self]
-        }
-        method howdy {} {return "Howdy!"}
+	constructor {args} {
+	    installhull [label $self]
+	}
+	method howdy {} {return "Howdy!"}
     }
 
     mylabel .label
@@ -270,10 +270,10 @@ test widgetadaptor-1.10 {"create" is optional, but must be a valid name} -constr
     tk
 } -body {
     widgetadaptor mylabel {
-        constructor {args} {
-            installhull [label $self]
-        }
-        method howdy {} {return "Howdy!"}
+	constructor {args} {
+	    installhull [label $self]
+	}
+	method howdy {} {return "Howdy!"}
     }
 
     catch {mylabel foo} result
@@ -287,20 +287,20 @@ test widgetadaptor-1.11 {user-defined destructors are called} -constraints {
     tk
 } -body {
     widgetadaptor mylabel {
-        typevariable flag ""
+	typevariable flag ""
 
-        constructor {args} {
-            installhull [label $self]
-            set flag "created $self"
-        }
+	constructor {args} {
+	    installhull [label $self]
+	    set flag "created $self"
+	}
 
-        destructor {
-            set flag "destroyed $self"
-        }
+	destructor {
+	    set flag "destroyed $self"
+	}
 
-        typemethod getflag {} {
-            return $flag
-        }
+	typemethod getflag {} {
+	    return $flag
+	}
     }
 
     mylabel .label
@@ -316,9 +316,9 @@ test widgetadaptor-1.13 {destroy method not defined for widget types} -constrain
     tk
 } -body {
     widgetadaptor mylabel {
-        constructor {args} {
-            installhull [label $self]
-        }
+	constructor {args} {
+	    installhull [label $self]
+	}
     }
 
     mylabel .label
@@ -334,23 +334,23 @@ test widgetadaptor-1.14 {hull can be repeatedly renamed} -constraints {
     tk
 } -body {
     widgetadaptor basetype {
-        constructor {args} {
-            installhull [label $self]
-        }
+	constructor {args} {
+	    installhull [label $self]
+	}
 
-        method basemethod {} { return "basemethod" }
+	method basemethod {} { return "basemethod" }
     }
 
     widgetadaptor w1 {
-        constructor {args} {
-            installhull [basetype create $self]
-        }
+	constructor {args} {
+	    installhull [basetype create $self]
+	}
     }
 
     widgetadaptor w2 {
-        constructor {args} {
-            installhull [w1 $self]
-        }
+	constructor {args} {
+	    installhull [w1 $self]
+	}
     }
 
     set a [w2 .foo]
@@ -367,9 +367,9 @@ test widgetadaptor-1.15 {widget names can be generated} -constraints {
     tk
 } -body {
     widgetadaptor unique {
-        constructor {args} {
-            installhull [label $self]
-        }
+	constructor {args} {
+	    installhull [label $self]
+	}
     }
 
     set w [unique .#auto]
@@ -384,27 +384,27 @@ test widgetadaptor-1.16 {snit::widgetadaptor as hull} -constraints {
     tk
 } -body {
     widgetadaptor mylabel {
-        constructor {args} {
-            installhull [label $self]
+	constructor {args} {
+	    installhull [label $self]
 	    if {[llength $args]} {
-                $self configure {*}$args
+		$self configure {*}$args
 	    }
-        }
-        method method1 {} {
-            return "method1"
-        }
-        delegate option * to itcl_hull
+	}
+	method method1 {} {
+	    return "method1"
+	}
+	delegate option * to itcl_hull
     }
 
     widgetadaptor mylabel2 {
-        constructor {args} {
-            installhull [mylabel $self]
-                $self configure {*}$args
-        }
-        method method2 {} {
-            return "method2: [$itcl_hull method1]"
-        }
-        delegate option * to itcl_hull
+	constructor {args} {
+	    installhull [mylabel $self]
+		$self configure {*}$args
+	}
+	method method2 {} {
+	    return "method2: [$itcl_hull method1]"
+	}
+	delegate option * to itcl_hull
     }
 
     mylabel2 .label -text "Some Text"
@@ -427,25 +427,25 @@ test widgetadaptor-1.16 {snit::widgetadaptor as hull} -constraints {
 
 test widgetadaptor-1.17 {snit::widgetadaptor as hull; use rename} -body {
     widgetadaptor mylabel {
-        constructor {args} {
-            installhull [label $self]
-            $self configure {*}$args
-        }
-        method method1 {} {
-            return "method1"
-        }
-        delegate option * to itcl_hull
+	constructor {args} {
+	    installhull [label $self]
+	    $self configure {*}$args
+	}
+	method method1 {} {
+	    return "method1"
+	}
+	delegate option * to itcl_hull
     }
 
     widgetadaptor mylabel2 {
-        constructor {args} {
-            installhull [mylabel $self]
-            $self configure {*}$args
-        }
-        method method2 {} {
-            return "method2: [$itcl_hull method1]"
-        }
-        delegate option * to itcl_hull
+	constructor {args} {
+	    installhull [mylabel $self]
+	    $self configure {*}$args
+	}
+	method method2 {} {
+	    return "method2: [$itcl_hull method1]"
+	}
+	delegate option * to itcl_hull
     }
 
     mylabel2 .label -text "Some Text"
@@ -470,11 +470,11 @@ test widgetadaptor-1.18 {BWidget Label as hull} -constraints {
     bwidget
 } -body {
     widgetadaptor mylabel {
-        constructor {args} {
-            installhull [Label $win]
-            $self configure {*}$args
-        }
-        delegate option * to itcl_hull
+	constructor {args} {
+	    installhull [Label $win]
+	    $self configure {*}$args
+	}
+	delegate option * to itcl_hull
     }
 
     mylabel .label -text "Some Text"
@@ -499,9 +499,9 @@ test widgetadaptor-1.19 {error in widgetadaptor constructor} -constraints {
     tk
 } -body {
     widgetadaptor mylabel {
-        constructor {args} {
-            error "Simulated Error"
-        }
+	constructor {args} {
+	    error "Simulated Error"
+	}
     }
 
     mylabel .lab
@@ -516,13 +516,13 @@ test install-1.3 {can't install until hull exists} -constraints {
     tk
 } -body {
     widgetadaptor myframe {
-        # Delegate an option just to make sure the component variable
-        # exists.
-        delegate option -font to text
+	# Delegate an option just to make sure the component variable
+	# exists.
+	delegate option -font to text
 
-        constructor {args} {
-            installcomponent text using text $win.text -background green
-        }
+	constructor {args} {
+	    installcomponent text using text $win.text -background green
+	}
     }
 
     myframe .frm
@@ -543,20 +543,20 @@ test installhull-1.3 {
     tk
 } -body {
     widgetadaptor myframe {
-        delegate option -background to itcl_hull
+	delegate option -background to itcl_hull
 
-        typeconstructor {
-            option add *Frame.background red
-            option add *Frame.width 123
-        }
+	typeconstructor {
+	    option add *Frame.background red
+	    option add *Frame.width 123
+	}
 
-        constructor {args} {
-            installhull using frame
-        }
+	constructor {args} {
+	    installhull using frame
+	}
 
-        method getwid {} {
-            $itcl_hull cget -width
-        }
+	method getwid {} {
+	    $itcl_hull cget -width
+	}
     }
 
     myframe .frm
@@ -576,15 +576,15 @@ test installhull-1.4 {
     tk
 } -body {
     widgetadaptor myframe {
-        delegate option -mainbackground to itcl_hull as -background
+	delegate option -mainbackground to itcl_hull as -background
 
-        typeconstructor {
-            option add *Frame.mainbackground red
-        }
+	typeconstructor {
+	    option add *Frame.mainbackground red
+	}
 
-        constructor {args} {
-            installhull using frame
-        }
+	constructor {args} {
+	    installhull using frame
+	}
     }
 
     myframe .frm
@@ -603,20 +603,20 @@ test installhull-1.5 {
     tk
 } -body {
     widgetadaptor myframe {
-        delegate option -mainbackground to itcl_hull as -background
+	delegate option -mainbackground to itcl_hull as -background
 
-        typeconstructor {
-            option add *Frame.mainbackground red
-            option add *Frame.width 123
-        }
+	typeconstructor {
+	    option add *Frame.mainbackground red
+	    option add *Frame.width 123
+	}
 
-        constructor {args} {
-            installhull using frame -background green -width 321
-        }
+	constructor {args} {
+	    installhull using frame -background green -width 321
+	}
 
-        method getwid {} {
-            $itcl_hull cget -width
-        }
+	method getwid {} {
+	    $itcl_hull cget -width
+	}
     }
 
     myframe .frm
@@ -633,14 +633,14 @@ test option-2.5 {configure returns info, unknown options} -constraints {
     tk
 } -body {
     widgetadaptor myframe {
-        option -foo a
-        delegate option -width to itcl_hull
-        delegate option * to itcl_hull
-        constructor {args} {
+	option -foo a
+	delegate option -width to itcl_hull
+	delegate option * to itcl_hull
+	constructor {args} {
 	    # need to reset because of test installhull-1.5
-            option add *Frame.width 0
-            installhull [frame $self]
-        }
+	    option add *Frame.width 0
+	    installhull [frame $self]
+	}
     }
 
     myframe .frm
@@ -660,10 +660,10 @@ test option-2.6 {configure -opt unknown to implicit component} -constraints {
     tk
 } -body {
     widgetadaptor myframe {
-        delegate option * to itcl_hull
-        constructor {args} {
-            installhull [frame $self]
-        }
+	delegate option * to itcl_hull
+	constructor {args} {
+	    installhull [frame $self]
+	}
     }
     myframe .frm
     catch {.frm configure -quux} result
@@ -678,11 +678,11 @@ test iinfo-6.5 {info options with unknown delegated options} -constraints {
     tk
 } -body {
     widgetadaptor myframe {
-        option -foo a
-        delegate option * to itcl_hull
-        constructor {args} {
-            installhull [frame $self]
-        }
+	option -foo a
+	delegate option * to itcl_hull
+	constructor {args} {
+	    installhull [frame $self]
+	}
     }
     myframe .frm
 
@@ -698,11 +698,11 @@ test iinfo-6.7 {info options with exceptions} -constraints {
     tk
 } -body {
     widgetadaptor myframe {
-        option -foo a
-        delegate option * to itcl_hull except -background
-        constructor {args} {
-            installhull [frame $self]
-        }
+	option -foo a
+	delegate option * to itcl_hull except -background
+	constructor {args} {
+	    installhull [frame $self]
+	}
     }
     myframe .frm
 
@@ -718,11 +718,11 @@ test iinfo-6.8 {info options with pattern} -constraints {
     tk
 } -body {
     widgetadaptor myframe {
-        option -foo a
-        delegate option * to itcl_hull
-        constructor {args} {
-            installhull [frame $self]
-        }
+	option -foo a
+	delegate option * to itcl_hull
+	constructor {args} {
+	    installhull [frame $self]
+	}
     }
     myframe .frm
 
@@ -738,9 +738,9 @@ test tinfo-3.2 {widget info instances} -constraints {
     tk
 } -body {
     widgetadaptor mylabel {
-        constructor {args} {
-            installhull [label $self]
-        }
+	constructor {args} {
+	    installhull [label $self]
+	}
     }
 
     mylabel .lab1
@@ -761,7 +761,7 @@ test widgetclass-1.2 {can't set widgetclass for itcl::widgetadaptors} -constrain
     tk
 } -body {
     widgetadaptor dog {
-        widgetclass Dog
+	widgetclass Dog
     }
 } -returnCodes {
     error
@@ -771,7 +771,7 @@ test hulltype-1.2 {can't set hulltype for itcl::widgetadaptors} -constraints {
     tk
 } -body {
     widgetadaptor dog {
-        hulltype Dog
+	hulltype Dog
     }
 } -returnCodes {
     error
@@ -792,13 +792,13 @@ test wainfo-10.1 {widgetadaptor info widgetadaptors} -body {
 
 test wainfo-10.2 {widgetadaptor info components} -body {
     widgetadaptor dog {
-        component comp1
-        component comp2
+	component comp1
+	component comp2
     }
 
     widgetadaptor cat {
-        component comp1
-        component comp1a
+	component comp1
+	component comp1a
     }
 
     set a [lsort [dog info components]]

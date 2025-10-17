@@ -245,7 +245,7 @@ Itcl_PublicObjectCmd(
     } else {
 	Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
 	    "cannot access object-specific info without an object context",
-	    NULL);
+	    (char *)NULL);
 	return TCL_ERROR;
     }
     return result;
@@ -372,7 +372,7 @@ Itcl_SelfCmd(
 
     if (!Itcl_IsMethodCallFrame(interp)) {
 	Tcl_AppendResult(interp, TclGetString(objv[0]),
-		" may only be called from inside a method", NULL);
+		" may only be called from inside a method", (char *)NULL);
 	return TCL_ERROR;
     }
 

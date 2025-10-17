@@ -47,7 +47,7 @@ Itcl_InitStubs(
 	    Tcl_PkgRequireEx(interp, packageName, version, exact, &clientData);
     stubsPtr = (const ItclStubs *)clientData;
     if ((actualVersion == NULL) || (clientData == NULL)) {
-        return NULL;
+	return NULL;
     }
     intStubsPtr = stubsPtr->hooks ?
 	    stubsPtr->hooks->itclIntStubs : NULL;
@@ -64,6 +64,6 @@ Itcl_InitStubs(
     Tcl_ResetResult(interp);
     Tcl_AppendResult(interp, "Error loading ", packageName, " package",
 	    " (requested version '", version, "', loaded version '",
-	    actualVersion, "'): ", errMsg, NULL);
+	    actualVersion, "'): ", errMsg, (char *)NULL);
     return NULL;
 }

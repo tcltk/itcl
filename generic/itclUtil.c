@@ -1051,7 +1051,7 @@ Itcl_DecodeScopedCommand(
 		    Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
 			"malformed command \"", name, "\": should be \"",
 			"namespace inscope namesp command\"",
-			NULL);
+			(char *)NULL);
 		    result = TCL_ERROR;
 		} else {
 		    nsPtr = Tcl_FindNamespace(interp, listv[2],

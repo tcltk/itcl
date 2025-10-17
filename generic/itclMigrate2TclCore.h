@@ -4,11 +4,11 @@
  */
 #define FRAME_HAS_RESOLVER 0x100
 typedef Tcl_Command (Tcl_CmdAliasProc)(Tcl_Interp *interp,
-        Tcl_Namespace *nsPtr, const char *cmdName,
-        void *clientData);
+	Tcl_Namespace *nsPtr, const char *cmdName,
+	void *clientData);
 typedef Tcl_Var (Tcl_VarAliasProc)(Tcl_Interp *interp,
-        Tcl_Namespace *nsPtr, const char *varName,
-        void *clientData);
+	Tcl_Namespace *nsPtr, const char *varName,
+	void *clientData);
 
 #ifndef _TCL_RESOLVE_DEFINED
 typedef struct Tcl_Resolve {
@@ -80,4 +80,4 @@ MODULE_SCOPE size_t Itcl_GetCallVarFrameObjc(Tcl_Interp *interp);
 MODULE_SCOPE Tcl_Obj *const * Itcl_GetCallVarFrameObjv(Tcl_Interp *interp);
 #define Tcl_SetNamespaceResolver _Tcl_SetNamespaceResolver
 MODULE_SCOPE int _Tcl_SetNamespaceResolver(Tcl_Namespace *nsPtr,
-        struct Tcl_Resolve *resolvePtr);
+	struct Tcl_Resolve *resolvePtr);

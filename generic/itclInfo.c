@@ -18,13 +18,13 @@
  *
  * ========================================================================
  *  AUTHOR:  Michael J. McLennan
- *           Bell Labs Innovations for Lucent Technologies
- *           mmclennan@lucent.com
- *           http://www.tcltk.com/itcl
+ *	   Bell Labs Innovations for Lucent Technologies
+ *	   mmclennan@lucent.com
+ *	   http://www.tcltk.com/itcl
  *
  *  overhauled version author: Arnulf Wiedemann
  * ========================================================================
- *           Copyright (c) 1993-1998  Lucent Technologies, Inc.
+ *	   Copyright (c) 1993-1998  Lucent Technologies, Inc.
  * ------------------------------------------------------------------------
  * See the file "license.terms" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
@@ -60,235 +60,235 @@ static Tcl_ObjCmdProc Itcl_BiInfoDelegatedUnknownCmd;
 static Tcl_ObjCmdProc Itcl_BiInfoContextCmd;
 
 typedef struct InfoMethod {
-    const char* name;        /* method name */
+    const char* name;	/* method name */
     const char* usage;       /* string describing usage */
     Tcl_ObjCmdProc *proc;    /* implementation C proc */
-    int flags;               /* which class commands have it */
+    int flags;	       /* which class commands have it */
 } InfoMethod;
 
 static const InfoMethod InfoMethodList[] = {
     { "args",
-        "procname",
+	"procname",
 	Itcl_BiInfoArgsCmd,
 	ITCL_CLASS|ITCL_TYPE|ITCL_WIDGETADAPTOR|ITCL_WIDGET|ITCL_ECLASS
     },
     { "body",
-        "procname",
+	"procname",
 	Itcl_BiInfoBodyCmd,
 	ITCL_CLASS|ITCL_TYPE|ITCL_WIDGETADAPTOR|ITCL_WIDGET|ITCL_ECLASS
     },
     { "class",
-        "",
+	"",
 	Itcl_BiInfoClassCmd,
 	ITCL_CLASS|ITCL_WIDGET|ITCL_ECLASS
     },
     { "classoptions",
-        "?pattern?",
+	"?pattern?",
 	Itcl_BiInfoClassOptionsCmd,
 	ITCL_ECLASS
     },
     { "component",
-        "?name? ?-inherit? ?-value?",
-        Itcl_BiInfoComponentCmd,
+	"?name? ?-inherit? ?-value?",
+	Itcl_BiInfoComponentCmd,
 	ITCL_TYPE|ITCL_WIDGETADAPTOR|ITCL_WIDGET|ITCL_ECLASS
     },
     { "context",
-        "",
-        Itcl_BiInfoContextCmd,
+	"",
+	Itcl_BiInfoContextCmd,
 	ITCL_ECLASS
     },
     { "components",
-        "?pattern?",
+	"?pattern?",
 	Itcl_BiInfoComponentsCmd,
 	ITCL_TYPE|ITCL_WIDGETADAPTOR|ITCL_WIDGET|ITCL_ECLASS
     },
     { "default",
-        "method aname varname",
+	"method aname varname",
 	Itcl_BiInfoDefaultCmd,
 	ITCL_TYPE|ITCL_WIDGETADAPTOR|ITCL_WIDGET|ITCL_ECLASS
     },
     { "delegated",
-        "?name? ?-inherit? ?-value?",
-        Itcl_BiInfoDelegatedCmd,
+	"?name? ?-inherit? ?-value?",
+	Itcl_BiInfoDelegatedCmd,
 	ITCL_TYPE|ITCL_WIDGETADAPTOR|ITCL_WIDGET|ITCL_ECLASS
     },
     { "extendedclass",
-        "",
-        Itcl_BiInfoExtendedClassCmd,
+	"",
+	Itcl_BiInfoExtendedClassCmd,
 	ITCL_ECLASS
     },
     { "function",
-        "?name? ?-protection? ?-type? ?-name? ?-args? ?-body?",
-        Itcl_BiInfoFunctionCmd,
+	"?name? ?-protection? ?-type? ?-name? ?-args? ?-body?",
+	Itcl_BiInfoFunctionCmd,
 	ITCL_CLASS|ITCL_ECLASS
     },
     { "heritage",
-        "",
+	"",
 	Itcl_BiInfoHeritageCmd,
 	ITCL_CLASS|ITCL_WIDGET|ITCL_ECLASS
     },
     { "hulltype",
-        "",
+	"",
 	Itcl_BiInfoHullTypeCmd,
 	ITCL_WIDGET
     },
     { "hulltypes",
-        "?pattern?",
-        Itcl_BiInfoUnknownCmd,
+	"?pattern?",
+	Itcl_BiInfoUnknownCmd,
 	ITCL_WIDGETADAPTOR|ITCL_WIDGET
     },
     { "inherit",
-        "",
+	"",
 	Itcl_BiInfoInheritCmd,
 	ITCL_CLASS|ITCL_WIDGET|ITCL_ECLASS
     },
     { "instances",
-        "?pattern?",
-        Itcl_BiInfoInstancesCmd,
+	"?pattern?",
+	Itcl_BiInfoInstancesCmd,
 	ITCL_TYPE|ITCL_WIDGETADAPTOR|ITCL_WIDGET
     },
     { "method",
-        "?name? ?-protection? ?-type? ?-name? ?-args? ?-body?",
-        Itcl_BiInfoMethodCmd,
+	"?name? ?-protection? ?-type? ?-name? ?-args? ?-body?",
+	Itcl_BiInfoMethodCmd,
 	ITCL_TYPE|ITCL_WIDGETADAPTOR|ITCL_WIDGET|ITCL_ECLASS
     },
     { "methods",
-        "?pattern?",
-        Itcl_BiInfoMethodsCmd,
+	"?pattern?",
+	Itcl_BiInfoMethodsCmd,
 	ITCL_TYPE|ITCL_WIDGETADAPTOR|ITCL_WIDGET|ITCL_ECLASS
     },
     { "option",
-        "?name? ?-protection? ?-resource? ?-class? ?-name? ?-default? \
+	"?name? ?-protection? ?-resource? ?-class? ?-name? ?-default? \
 ?-cgetmethod? ?-configuremethod? ?-validatemethod? \
 ?-cgetmethodvar? ?-configuremethodvar? ?-validatemethodvar? \
 ?-value?",
-        Itcl_BiInfoOptionCmd,
+	Itcl_BiInfoOptionCmd,
 	ITCL_WIDGET|ITCL_ECLASS
     },
     { "options",
-        "?pattern?",
+	"?pattern?",
 	Itcl_BiInfoOptionsCmd,
 	ITCL_TYPE|ITCL_WIDGETADAPTOR|ITCL_WIDGET|ITCL_ECLASS
     },
     { "type",
-        "",
+	"",
 	Itcl_BiInfoTypeCmd,
 	ITCL_TYPE|ITCL_WIDGET|ITCL_ECLASS
     },
     { "typemethod",
-        "?name? ?-protection? ?-type? ?-name? ?-args? ?-body?",
-        Itcl_BiInfoTypeMethodCmd,
+	"?name? ?-protection? ?-type? ?-name? ?-args? ?-body?",
+	Itcl_BiInfoTypeMethodCmd,
 	ITCL_TYPE|ITCL_WIDGETADAPTOR|ITCL_WIDGET|ITCL_ECLASS
     },
     { "typemethods",
-        "?pattern?",
+	"?pattern?",
 	Itcl_BiInfoTypeMethodsCmd,
 	ITCL_TYPE|ITCL_WIDGETADAPTOR|ITCL_WIDGET|ITCL_ECLASS
     },
     { "types",
-        "?pattern?",
+	"?pattern?",
 	Itcl_BiInfoTypesCmd,
 	ITCL_TYPE|ITCL_WIDGETADAPTOR|ITCL_WIDGET|ITCL_ECLASS
     },
     { "typevariable",
-        "?name? ?-protection? ?-type? ?-name? ?-init? ?-value?",
-        Itcl_BiInfoTypeVariableCmd,
+	"?name? ?-protection? ?-type? ?-name? ?-init? ?-value?",
+	Itcl_BiInfoTypeVariableCmd,
 	ITCL_TYPE|ITCL_WIDGETADAPTOR|ITCL_WIDGET|ITCL_ECLASS
     },
     { "typevars",
-        "?pattern?",
+	"?pattern?",
 	Itcl_BiInfoTypeVarsCmd,
 	ITCL_TYPE|ITCL_WIDGETADAPTOR|ITCL_WIDGET|ITCL_ECLASS
     },
     { "variable",
-        "?name? ?-protection? ?-type? ?-name? ?-init? ?-value? ?-config? ?-scope?",
-        Itcl_BiInfoVariableCmd,
+	"?name? ?-protection? ?-type? ?-name? ?-init? ?-value? ?-config? ?-scope?",
+	Itcl_BiInfoVariableCmd,
 	ITCL_CLASS|ITCL_TYPE|ITCL_WIDGETADAPTOR|ITCL_WIDGET|ITCL_ECLASS
     },
     { "variables",
-        "?pattern?",
-        Itcl_BiInfoVariablesCmd,
+	"?pattern?",
+	Itcl_BiInfoVariablesCmd,
 	ITCL_TYPE|ITCL_WIDGETADAPTOR|ITCL_WIDGET|ITCL_ECLASS
     },
     { "vars",
-        "?pattern?",
+	"?pattern?",
 	Itcl_BiInfoVarsCmd,
 	ITCL_CLASS|ITCL_TYPE|ITCL_WIDGETADAPTOR|ITCL_WIDGET|ITCL_ECLASS
     },
     { "widget",
-        "",
-        Itcl_BiInfoWidgetCmd,
+	"",
+	Itcl_BiInfoWidgetCmd,
 	ITCL_WIDGET
     },
     { "widgets",
-        "?pattern?",
-        Itcl_BiInfoUnknownCmd,
+	"?pattern?",
+	Itcl_BiInfoUnknownCmd,
 	ITCL_WIDGET
     },
     { "widgetclasses",
-        "?pattern?",
-        Itcl_BiInfoUnknownCmd,
+	"?pattern?",
+	Itcl_BiInfoUnknownCmd,
 	ITCL_WIDGET
     },
     { "widgetadaptor",
-        "",
-        Itcl_BiInfoWidgetadaptorCmd,
+	"",
+	Itcl_BiInfoWidgetadaptorCmd,
 	ITCL_WIDGETADAPTOR
     },
     { "widgetadaptors",
-        "?pattern?",
-        Itcl_BiInfoUnknownCmd,
+	"?pattern?",
+	Itcl_BiInfoUnknownCmd,
 	ITCL_WIDGETADAPTOR
     },
     { NULL,
-        NULL,
+	NULL,
 	NULL,
 	0
     }
 };
 
 struct NameProcMap2 {
-    const char* name;        /* method name */
+    const char* name;	/* method name */
     const char* usage;       /* string describing usage */
     Tcl_ObjCmdProc *proc;    /* implementation C proc */
-    int flags;               /* which class commands have it */
+    int flags;	       /* which class commands have it */
 };
 
 static const struct NameProcMap2 infoCmdsDelegated2[] = {
     { "::itcl::builtin::Info::delegated::methods",
 	"?pattern?",
-        Itcl_BiInfoDelegatedMethodsCmd,
-        ITCL_TYPE|ITCL_WIDGETADAPTOR|ITCL_WIDGET|ITCL_ECLASS
+	Itcl_BiInfoDelegatedMethodsCmd,
+	ITCL_TYPE|ITCL_WIDGETADAPTOR|ITCL_WIDGET|ITCL_ECLASS
     },
     { "::itcl::builtin::Info::delegated::typemethods",
 	"?pattern?",
-        Itcl_BiInfoDelegatedTypeMethodsCmd,
-        ITCL_TYPE|ITCL_WIDGETADAPTOR|ITCL_WIDGET|ITCL_ECLASS
+	Itcl_BiInfoDelegatedTypeMethodsCmd,
+	ITCL_TYPE|ITCL_WIDGETADAPTOR|ITCL_WIDGET|ITCL_ECLASS
     },
     { "::itcl::builtin::Info::delegated::options",
 	"?pattern?",
-        Itcl_BiInfoDelegatedOptionsCmd,
-        ITCL_TYPE|ITCL_WIDGETADAPTOR|ITCL_WIDGET|ITCL_ECLASS
+	Itcl_BiInfoDelegatedOptionsCmd,
+	ITCL_TYPE|ITCL_WIDGETADAPTOR|ITCL_WIDGET|ITCL_ECLASS
     },
     { "::itcl::builtin::Info::delegated::method",
 	"methodName",
-        Itcl_BiInfoDelegatedMethodCmd,
-        ITCL_ECLASS
+	Itcl_BiInfoDelegatedMethodCmd,
+	ITCL_ECLASS
     },
     { "::itcl::builtin::Info::delegated::typemethod",
 	"methodName",
-        Itcl_BiInfoDelegatedTypeMethodCmd,
-        ITCL_ECLASS
+	Itcl_BiInfoDelegatedTypeMethodCmd,
+	ITCL_ECLASS
     },
     { "::itcl::builtin::Info::delegated::option",
 	"methodName",
-        Itcl_BiInfoDelegatedOptionCmd,
-        ITCL_ECLASS
+	Itcl_BiInfoDelegatedOptionCmd,
+	ITCL_ECLASS
     },
     { "::itcl::builtin::Info::delegated::unknown",
 	"",
-        Itcl_BiInfoDelegatedUnknownCmd,
-        ITCL_TYPE|ITCL_WIDGETADAPTOR|ITCL_WIDGET|ITCL_ECLASS
+	Itcl_BiInfoDelegatedUnknownCmd,
+	ITCL_TYPE|ITCL_WIDGETADAPTOR|ITCL_WIDGET|ITCL_ECLASS
     },
     { NULL, NULL, NULL, 0 }
 };
@@ -482,13 +482,13 @@ ItclInfoInit(
 
     nsPtr = Tcl_CreateNamespace(interp, "::itcl::builtin::Info", NULL, NULL);
     if (nsPtr == NULL) {
-        Tcl_Panic("ITCL: error in creating namespace: ::itcl::builtin::Info \n");
+	Tcl_Panic("ITCL: error in creating namespace: ::itcl::builtin::Info \n");
     }
     if (infoPtr->infoCmd) {
 	Tcl_Panic("Double init of info ensemble");
     }
     token = Tcl_CreateEnsemble(interp, nsPtr->fullName, nsPtr,
-        TCL_ENSEMBLE_PREFIX);
+	TCL_ENSEMBLE_PREFIX);
     infoPtr->infoCmd = token;
     token = Tcl_NRCreateCommand(interp, "::itcl::builtin::info", InfoWrap,
 	    NRInfoWrap, infoPtr, InfoCmdDelete);
@@ -511,20 +511,20 @@ ItclInfoInit(
 
 	Tcl_AppendToObj(cmdObjPtr, "::", 2);
 	Tcl_AppendToObj(cmdObjPtr, InfoMethodList[i].name, TCL_INDEX_NONE);
-        Tcl_CreateObjCommand(interp, Tcl_GetString(cmdObjPtr),
-                InfoMethodList[i].proc, infoPtr,
-                InfoMethodList[i].proc == Itcl_BiInfoVarsCmd ? ItclRestoreInfoVars : NULL);
+	Tcl_CreateObjCommand(interp, Tcl_GetString(cmdObjPtr),
+		InfoMethodList[i].proc, infoPtr,
+		InfoMethodList[i].proc == Itcl_BiInfoVarsCmd ? ItclRestoreInfoVars : NULL);
 	Tcl_DecrRefCount(cmdObjPtr);
     }
     unkObjPtr = Tcl_NewStringObj("::itcl::builtin::Info::unknown", TCL_INDEX_NONE);
     Tcl_CreateObjCommand(interp, Tcl_GetString(unkObjPtr),
 	    Itcl_BiInfoUnknownCmd, infoPtr, NULL);
     if (Tcl_SetEnsembleUnknownHandler(NULL,
-            Tcl_FindEnsemble(interp, ensObjPtr, TCL_LEAVE_ERR_MSG),
+	    Tcl_FindEnsemble(interp, ensObjPtr, TCL_LEAVE_ERR_MSG),
 	    unkObjPtr) != TCL_OK) {
-        Tcl_DecrRefCount(unkObjPtr);
-        Tcl_DecrRefCount(ensObjPtr);
-        return TCL_ERROR;
+	Tcl_DecrRefCount(unkObjPtr);
+	Tcl_DecrRefCount(ensObjPtr);
+	return TCL_ERROR;
     }
     Tcl_DecrRefCount(ensObjPtr);
 
@@ -533,26 +533,26 @@ ItclInfoInit(
      */
 
     nsPtr = Tcl_CreateNamespace(interp, "::itcl::builtin::Info::delegated",
-            NULL, NULL);
+	    NULL, NULL);
     if (nsPtr == NULL) {
-        Tcl_Panic("ITCL: error in creating namespace: ::itcl::builtin::Info::delegated \n");
+	Tcl_Panic("ITCL: error in creating namespace: ::itcl::builtin::Info::delegated \n");
     }
     Tcl_CreateEnsemble(interp, nsPtr->fullName, nsPtr,
-        TCL_ENSEMBLE_PREFIX);
+	TCL_ENSEMBLE_PREFIX);
     Tcl_Export(interp, nsPtr, "[a-z]*", 1);
     for (i=0 ; infoCmdsDelegated2[i].name!=NULL ; i++) {
-        Tcl_CreateObjCommand(interp, infoCmdsDelegated2[i].name,
-                infoCmdsDelegated2[i].proc, infoPtr, NULL);
+	Tcl_CreateObjCommand(interp, infoCmdsDelegated2[i].name,
+		infoCmdsDelegated2[i].proc, infoPtr, NULL);
     }
     ensObjPtr = Tcl_NewStringObj("::itcl::builtin::Info::delegated",
-            TCL_INDEX_NONE);
+	    TCL_INDEX_NONE);
     unkObjPtr = Tcl_NewStringObj(
-            "::itcl::builtin::Info::delegated::unknown", TCL_INDEX_NONE);
+	    "::itcl::builtin::Info::delegated::unknown", TCL_INDEX_NONE);
     result = TCL_OK;
     if (Tcl_SetEnsembleUnknownHandler(NULL,
-            Tcl_FindEnsemble(interp, ensObjPtr, TCL_LEAVE_ERR_MSG),
+	    Tcl_FindEnsemble(interp, ensObjPtr, TCL_LEAVE_ERR_MSG),
 	    unkObjPtr) != TCL_OK) {
-        result = TCL_ERROR;
+	result = TCL_ERROR;
     }
     Tcl_DecrRefCount(ensObjPtr);
     return result;
@@ -588,18 +588,18 @@ ItclGetInfoUsage(
 	    continue;
 	}
 	    if (iclsPtr->flags & InfoMethodList[i].flags) {
-                Tcl_AppendToObj(objPtr, spaces, TCL_INDEX_NONE);
-                Tcl_AppendToObj(objPtr, "info ", TCL_INDEX_NONE);
-                Tcl_AppendToObj(objPtr, InfoMethodList[i].name, TCL_INDEX_NONE);
-	        if (strlen(InfoMethodList[i].usage) > 0) {
-                  Tcl_AppendToObj(objPtr, " ", TCL_INDEX_NONE);
-                  Tcl_AppendToObj(objPtr, InfoMethodList[i].usage, TCL_INDEX_NONE);
-	        }
-                spaces = "\n  ";
+		Tcl_AppendToObj(objPtr, spaces, TCL_INDEX_NONE);
+		Tcl_AppendToObj(objPtr, "info ", TCL_INDEX_NONE);
+		Tcl_AppendToObj(objPtr, InfoMethodList[i].name, TCL_INDEX_NONE);
+		if (strlen(InfoMethodList[i].usage) > 0) {
+		  Tcl_AppendToObj(objPtr, " ", TCL_INDEX_NONE);
+		  Tcl_AppendToObj(objPtr, InfoMethodList[i].usage, TCL_INDEX_NONE);
+		}
+		spaces = "\n  ";
 	    }
     }
-        Tcl_AppendToObj(objPtr,
-            "\n...and others described on the man page", TCL_INDEX_NONE);
+	Tcl_AppendToObj(objPtr,
+	    "\n...and others described on the man page", TCL_INDEX_NONE);
 }
 
 /*
@@ -632,7 +632,7 @@ ItclGetInfoDelegatedUsage(
 	while (name != NULL) {
 	    name = strstr(name, "::");
 	    if (name == NULL) {
-	        break;
+		break;
 	    }
 	    name += 2;
 	    lastName = name;
@@ -643,18 +643,18 @@ ItclGetInfoDelegatedUsage(
 	    continue;
 	}
 	    if (iclsPtr->flags & infoCmdsDelegated2[i].flags) {
-                Tcl_AppendToObj(objPtr, spaces, TCL_INDEX_NONE);
-                Tcl_AppendToObj(objPtr, "info ", TCL_INDEX_NONE);
-                Tcl_AppendToObj(objPtr, name, TCL_INDEX_NONE);
-	        if (strlen(infoCmdsDelegated2[i].usage) > 0) {
-                  Tcl_AppendToObj(objPtr, " ", TCL_INDEX_NONE);
-                  Tcl_AppendToObj(objPtr, infoCmdsDelegated2[i].usage, TCL_INDEX_NONE);
-	        }
-                spaces = "\n  ";
+		Tcl_AppendToObj(objPtr, spaces, TCL_INDEX_NONE);
+		Tcl_AppendToObj(objPtr, "info ", TCL_INDEX_NONE);
+		Tcl_AppendToObj(objPtr, name, TCL_INDEX_NONE);
+		if (strlen(infoCmdsDelegated2[i].usage) > 0) {
+		  Tcl_AppendToObj(objPtr, " ", TCL_INDEX_NONE);
+		  Tcl_AppendToObj(objPtr, infoCmdsDelegated2[i].usage, TCL_INDEX_NONE);
+		}
+		spaces = "\n  ";
 	    }
     }
-        Tcl_AppendToObj(objPtr,
-            "\n...and others described on the man page", TCL_INDEX_NONE);
+	Tcl_AppendToObj(objPtr,
+	    "\n...and others described on the man page", TCL_INDEX_NONE);
 }
 
 /*
@@ -665,7 +665,7 @@ ItclGetInfoDelegatedUsage(
  *  can be invoked with or without an object context:
  *
  *    <objName> info class   <= returns most-specific class name
- *    info class             <= returns active namespace name
+ *    info class	     <= returns active namespace name
  *
  *  Returns a status TCL_OK/TCL_ERROR to indicate success/failure.
  * ------------------------------------------------------------------------
@@ -675,7 +675,7 @@ int
 Itcl_BiInfoClassCmd(
     TCL_UNUSED(void *),    /* ItclObjectInfo Ptr */
     Tcl_Interp *interp,    /* current interpreter */
-    int objc,              /* number of arguments */
+    int objc,	      /* number of arguments */
     Tcl_Obj *const objv[]) /* argument objects */
 {
     Tcl_Namespace *contextNs = NULL;
@@ -688,7 +688,7 @@ Itcl_BiInfoClassCmd(
     if (objc != 1) {
 	/* TODO: convert to NR-enabled fallback to [::info] */
 	Tcl_WrongNumArgs(interp, 1, objv, NULL);
-        return TCL_ERROR;
+	return TCL_ERROR;
     }
 
     /*
@@ -723,16 +723,16 @@ Itcl_BiInfoClassCmd(
      *  name.  Use normal class names when possible.
      */
     if (contextIoPtr) {
-        contextNs = contextIoPtr->iclsPtr->nsPtr;
+	contextNs = contextIoPtr->iclsPtr->nsPtr;
     } else {
-        assert(contextIclsPtr != NULL);
-        assert(contextIclsPtr->nsPtr != NULL);
-        contextNs = contextIclsPtr->nsPtr;
+	assert(contextIclsPtr != NULL);
+	assert(contextIclsPtr->nsPtr != NULL);
+	contextNs = contextIclsPtr->nsPtr;
     }
 
     assert(contextNs);
 
-        name = contextNs->fullName;
+	name = contextNs->fullName;
 
     Tcl_SetObjResult(interp, Tcl_NewStringObj(name, TCL_INDEX_NONE));
     return TCL_OK;
@@ -755,7 +755,7 @@ static int
 Itcl_BiInfoClassOptionsCmd(
     TCL_UNUSED(void *),    /* ItclObjectInfo Ptr */
     Tcl_Interp *interp,    /* current interpreter */
-    int objc,              /* number of arguments */
+    int objc,	      /* number of arguments */
     Tcl_Obj *const objv[]) /* argument objects */
 {
     FOREACH_HASH_DECLS;
@@ -780,47 +780,47 @@ Itcl_BiInfoClassOptionsCmd(
     iclsPtr = NULL;
     pattern = NULL;
     if (Itcl_GetContext(interp, &iclsPtr, &ioPtr) != TCL_OK) {
-        Tcl_AppendResult(interp, "cannot get context ", NULL);
-        return TCL_ERROR;
+	Tcl_AppendResult(interp, "cannot get context ", (char *)NULL);
+	return TCL_ERROR;
     }
     if (objc > 2) {
 	Tcl_AppendResult(interp, "wrong # args should be: info options ",
-	        "?pattern?", NULL);
-        return TCL_ERROR;
+		"?pattern?", (char *)NULL);
+	return TCL_ERROR;
     }
     if (objc == 2) {
-        pattern = Tcl_GetString(objv[1]);
+	pattern = Tcl_GetString(objv[1]);
     }
     listPtr = Tcl_NewListObj(0, NULL);
     tablePtr = &iclsPtr->options;
     FOREACH_HASH_VALUE(ioptPtr, tablePtr) {
 	name = Tcl_GetString(ioptPtr->namePtr);
 	if ((pattern == NULL) ||
-                 Tcl_StringCaseMatch(name, pattern, 0)) {
-            Tcl_ListObjAppendElement(interp, listPtr,
-	            Tcl_NewStringObj(Tcl_GetString(ioptPtr->namePtr), TCL_INDEX_NONE));
-        }
+		 Tcl_StringCaseMatch(name, pattern, 0)) {
+	    Tcl_ListObjAppendElement(interp, listPtr,
+		    Tcl_NewStringObj(Tcl_GetString(ioptPtr->namePtr), TCL_INDEX_NONE));
+	}
     }
     tablePtr = &iclsPtr->delegatedOptions;
     FOREACH_HASH_VALUE(idoPtr, tablePtr) {
-        name = Tcl_GetString(idoPtr->namePtr);
+	name = Tcl_GetString(idoPtr->namePtr);
 	if (strcmp(name, "*") != 0) {
 	    if ((pattern == NULL) ||
-                    Tcl_StringCaseMatch(name, pattern, 0)) {
-                Tcl_ListObjAppendElement(interp, listPtr,
-	                Tcl_NewStringObj(Tcl_GetString(idoPtr->namePtr), TCL_INDEX_NONE));
+		    Tcl_StringCaseMatch(name, pattern, 0)) {
+		Tcl_ListObjAppendElement(interp, listPtr,
+			Tcl_NewStringObj(Tcl_GetString(idoPtr->namePtr), TCL_INDEX_NONE));
 	    }
-        } else {
+	} else {
 	    if (idoPtr->icPtr == NULL) {
 		Tcl_AppendResult(interp, "component \"",
-		        Tcl_GetString(idoPtr->namePtr),
-			"\" is not initialized", NULL);
-	        return TCL_ERROR;
+			Tcl_GetString(idoPtr->namePtr),
+			"\" is not initialized", (char *)NULL);
+		return TCL_ERROR;
 	    }
 	    val = ItclGetInstanceVar(interp,
-	            Tcl_GetString(idoPtr->icPtr->namePtr),
-	            NULL, ioPtr, ioPtr->iclsPtr);
-            if ((val != NULL) && (strlen(val) != 0)) {
+		    Tcl_GetString(idoPtr->icPtr->namePtr),
+		    NULL, ioPtr, ioPtr->iclsPtr);
+	    if ((val != NULL) && (strlen(val) != 0)) {
 		objPtr = Tcl_NewStringObj(val, TCL_INDEX_NONE);
 		Tcl_AppendToObj(objPtr, " configure", TCL_INDEX_NONE);
 		Tcl_IncrRefCount(objPtr);
@@ -829,18 +829,18 @@ Itcl_BiInfoClassOptionsCmd(
 		if (result != TCL_OK) {
 		    return TCL_ERROR;
 		}
-	        listPtr2 = Tcl_GetObjResult(interp);
+		listPtr2 = Tcl_GetObjResult(interp);
 		Tcl_ListObjGetElements(interp, listPtr2, &lObjc, &lObjv);
 		for (i = 0; i < lObjc; i++) {
 		    Tcl_ListObjIndex(interp, lObjv[i], 0, &objPtr);
 		    hPtr2 = Tcl_FindHashEntry(&idoPtr->exceptions,
-		            (char *)objPtr);
+			    (char *)objPtr);
 		    if (hPtr2 == NULL) {
 			name = Tcl_GetString(objPtr);
-	                if ((pattern == NULL) ||
-                                 Tcl_StringCaseMatch(name, pattern, 0)) {
-		            Tcl_ListObjAppendElement(interp, listPtr, objPtr);
-		        }
+			if ((pattern == NULL) ||
+				 Tcl_StringCaseMatch(name, pattern, 0)) {
+			    Tcl_ListObjAppendElement(interp, listPtr, objPtr);
+			}
 		    }
 		}
 	    }
@@ -866,7 +866,7 @@ static int
 Itcl_BiInfoContextCmd(
     TCL_UNUSED(void *),    /* ItclObjectInfo Ptr */
     Tcl_Interp *interp,    /* current interpreter */
-    int objc,              /* number of arguments */
+    int objc,	      /* number of arguments */
     Tcl_Obj *const objv[]) /* argument objects */
 {
     Tcl_Obj *listPtr;
@@ -877,11 +877,11 @@ Itcl_BiInfoContextCmd(
     ItclShowArgs(1, "Itcl_BiInfoContextCmd", objc, objv);
     iclsPtr = NULL;
     if (Itcl_GetContext(interp, &iclsPtr, &ioPtr) != TCL_OK) {
-        return TCL_ERROR;
+	return TCL_ERROR;
     }
     if (ioPtr == NULL) {
-        Tcl_AppendResult(interp, "cannot get object context ", NULL);
-        return TCL_ERROR;
+	Tcl_AppendResult(interp, "cannot get object context ", (char *)NULL);
+	return TCL_ERROR;
     }
     listPtr = Tcl_NewListObj(0, NULL);
     objPtr = Tcl_NewStringObj(Tcl_GetString(iclsPtr->namePtr), TCL_INDEX_NONE);
@@ -905,7 +905,7 @@ int
 Itcl_BiInfoInheritCmd(
     TCL_UNUSED(void *),    /* ItclObjectInfo Ptr */
     Tcl_Interp *interp,    /* current interpreter */
-    int objc,              /* number of arguments */
+    int objc,	      /* number of arguments */
     Tcl_Obj *const objv[]) /* argument objects */
 {
     ItclClass *contextIclsPtr = NULL;
@@ -916,7 +916,7 @@ Itcl_BiInfoInheritCmd(
     ItclShowArgs(2, "Itcl_BiInfoInheritCmd", objc, objv);
     if (objc != 1) {
 	Tcl_WrongNumArgs(interp, 1, objv, NULL);
-        return TCL_ERROR;
+	return TCL_ERROR;
     }
 
     /*
@@ -926,9 +926,9 @@ Itcl_BiInfoInheritCmd(
 
     if (Itcl_GetContext(interp, &contextIclsPtr, &contextIoPtr) != TCL_OK) {
 	Tcl_SetObjResult(interp, Tcl_NewStringObj(
-            "\nget info like this instead: "
-            "\n  namespace eval className { info inherit }", TCL_INDEX_NONE));
-        return TCL_ERROR;
+	    "\nget info like this instead: "
+	    "\n  namespace eval className { info inherit }", TCL_INDEX_NONE));
+	return TCL_ERROR;
     }
 
     /*
@@ -940,9 +940,9 @@ Itcl_BiInfoInheritCmd(
     while (elem) {
 	Tcl_Obj *objPtr;
 	ItclClass *iclsPtr = (ItclClass*)Itcl_GetListValue(elem);
-            objPtr = Tcl_NewStringObj(iclsPtr->nsPtr->fullName, TCL_INDEX_NONE);
-        Tcl_ListObjAppendElement(NULL, listPtr, objPtr);
-        elem = Itcl_NextListElem(elem);
+	    objPtr = Tcl_NewStringObj(iclsPtr->nsPtr->fullName, TCL_INDEX_NONE);
+	Tcl_ListObjAppendElement(NULL, listPtr, objPtr);
+	elem = Itcl_NextListElem(elem);
     }
 
     Tcl_SetObjResult(interp, listPtr);
@@ -965,7 +965,7 @@ int
 Itcl_BiInfoHeritageCmd(
     TCL_UNUSED(void *),    /* ItclObjectInfo Ptr */
     Tcl_Interp *interp,    /* current interpreter */
-    int objc,              /* number of arguments */
+    int objc,	      /* number of arguments */
     Tcl_Obj *const objv[]) /* argument objects */
 {
     ItclClass *contextIclsPtr = NULL;
@@ -978,7 +978,7 @@ Itcl_BiInfoHeritageCmd(
     ItclShowArgs(2, "Itcl_BiInfoHeritageCmd", objc, objv);
     if (objc != 1) {
 	Tcl_WrongNumArgs(interp, 1, objv, NULL);
-        return TCL_ERROR;
+	return TCL_ERROR;
     }
 
     /*
@@ -988,9 +988,9 @@ Itcl_BiInfoHeritageCmd(
     contextIclsPtr = NULL;
     if (Itcl_GetContext(interp, &contextIclsPtr, &contextIoPtr) != TCL_OK) {
 	Tcl_SetObjResult(interp, Tcl_NewStringObj(
-            "\nget info like this instead: "
-            "\n  namespace eval className { info heritage }", TCL_INDEX_NONE));
-        return TCL_ERROR;
+	    "\nget info like this instead: "
+	    "\n  namespace eval className { info heritage }", TCL_INDEX_NONE));
+	return TCL_ERROR;
     }
 
     /*
@@ -1000,13 +1000,13 @@ Itcl_BiInfoHeritageCmd(
     listPtr = Tcl_NewListObj(0, NULL);
     Itcl_InitHierIter(&hier, contextIclsPtr);
     while ((iclsPtr=Itcl_AdvanceHierIter(&hier)) != NULL) {
-        if (iclsPtr->nsPtr == NULL) {
-            Tcl_AppendResult(interp, "ITCL: iclsPtr->nsPtr == NULL",
-	            Tcl_GetString(iclsPtr->fullNamePtr), NULL);
-            return TCL_ERROR;
-        }
-            objPtr = Tcl_NewStringObj(iclsPtr->nsPtr->fullName, TCL_INDEX_NONE);
-        Tcl_ListObjAppendElement(NULL, listPtr, objPtr);
+	if (iclsPtr->nsPtr == NULL) {
+	    Tcl_AppendResult(interp, "ITCL: iclsPtr->nsPtr == NULL",
+		    Tcl_GetString(iclsPtr->fullNamePtr), (char *)NULL);
+	    return TCL_ERROR;
+	}
+	    objPtr = Tcl_NewStringObj(iclsPtr->nsPtr->fullName, TCL_INDEX_NONE);
+	Tcl_ListObjAppendElement(NULL, listPtr, objPtr);
     }
     Itcl_DeleteHierIter(&hier);
 
@@ -1035,7 +1035,7 @@ int
 Itcl_BiInfoFunctionCmd(
     TCL_UNUSED(void *),    /* ItclObjectInfo Ptr */
     Tcl_Interp *interp,    /* current interpreter */
-    int objc,              /* number of arguments */
+    int objc,	      /* number of arguments */
     Tcl_Obj *const objv[]) /* argument objects */
 {
     char *cmdName = NULL;
@@ -1043,19 +1043,19 @@ Itcl_BiInfoFunctionCmd(
     Tcl_Obj *objPtr = NULL;
 
     static const char *options[] = {
-        "-args", "-body", "-name", "-protection", "-type",
-        NULL
+	"-args", "-body", "-name", "-protection", "-type",
+	NULL
     };
     enum BIfIdx {
-        BIfArgsIdx, BIfBodyIdx, BIfNameIdx, BIfProtectIdx, BIfTypeIdx
+	BIfArgsIdx, BIfBodyIdx, BIfNameIdx, BIfProtectIdx, BIfTypeIdx
     } *iflist, iflistStorage[5];
 
     static enum BIfIdx DefInfoFunction[5] = {
-        BIfProtectIdx,
-        BIfTypeIdx,
-        BIfNameIdx,
-        BIfArgsIdx,
-        BIfBodyIdx
+	BIfProtectIdx,
+	BIfTypeIdx,
+	BIfNameIdx,
+	BIfArgsIdx,
+	BIfBodyIdx
     };
 
     ItclClass *contextIclsPtr;
@@ -1079,12 +1079,12 @@ Itcl_BiInfoFunctionCmd(
     contextIclsPtr = NULL;
     if (Itcl_GetContext(interp, &contextIclsPtr, &contextIoPtr) != TCL_OK) {
 	Tcl_SetObjResult(interp, Tcl_NewStringObj(
-            "\nget info like this instead: "
-            "\n  namespace eval className { info function ... }", TCL_INDEX_NONE));
-        return TCL_ERROR;
+	    "\nget info like this instead: "
+	    "\n  namespace eval className { info function ... }", TCL_INDEX_NONE));
+	return TCL_ERROR;
     }
     if (contextIoPtr != NULL) {
-        contextIclsPtr = contextIoPtr->iclsPtr;
+	contextIclsPtr = contextIoPtr->iclsPtr;
     }
 
     /*
@@ -1095,8 +1095,8 @@ Itcl_BiInfoFunctionCmd(
     objc--;
 
     if (objc > 0) {
-        cmdName = Tcl_GetString(*objv);
-        objc--; objv++;
+	cmdName = Tcl_GetString(*objv);
+	objc--; objv++;
     }
 
     /*
@@ -1105,150 +1105,150 @@ Itcl_BiInfoFunctionCmd(
     if (cmdName) {
 	ItclCmdLookup *clookup;
 	objPtr = Tcl_NewStringObj(cmdName, TCL_INDEX_NONE);
-        entry = Tcl_FindHashEntry(&contextIclsPtr->resolveCmds, (char *)objPtr);
+	entry = Tcl_FindHashEntry(&contextIclsPtr->resolveCmds, (char *)objPtr);
 	Tcl_DecrRefCount(objPtr);
 	objPtr = NULL;
-        if (entry == NULL) {
-            Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
-                "\"", cmdName, "\" isn't a member function in class \"",
-                contextIclsPtr->nsPtr->fullName, "\"",
-                NULL);
-            return TCL_ERROR;
-        }
+	if (entry == NULL) {
+	    Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+		"\"", cmdName, "\" isn't a member function in class \"",
+		contextIclsPtr->nsPtr->fullName, "\"",
+		(char *)NULL);
+	    return TCL_ERROR;
+	}
 
 	clookup = (ItclCmdLookup *)Tcl_GetHashValue(entry);
 	imPtr = clookup->imPtr;
-        mcode = imPtr->codePtr;
+	mcode = imPtr->codePtr;
 
-        /*
-         *  By default, return everything.
-         */
-        if (objc == 0) {
-            objc = 5;
-            iflist = DefInfoFunction;
-        } else {
+	/*
+	 *  By default, return everything.
+	 */
+	if (objc == 0) {
+	    objc = 5;
+	    iflist = DefInfoFunction;
+	} else {
 
-            /*
-             *  Otherwise, scan through all remaining flags and
-             *  figure out what to return.
-             */
-            iflist = &iflistStorage[0];
-            for (i=0 ; i < objc; i++) {
-                result = Tcl_GetIndexFromObjStruct(interp, objv[i],
-                    options, sizeof(char *), "option", 0, (int*)(&iflist[i]));
-                if (result != TCL_OK) {
-                    return TCL_ERROR;
-                }
-            }
-        }
+	    /*
+	     *  Otherwise, scan through all remaining flags and
+	     *  figure out what to return.
+	     */
+	    iflist = &iflistStorage[0];
+	    for (i=0 ; i < objc; i++) {
+		result = Tcl_GetIndexFromObjStruct(interp, objv[i],
+		    options, sizeof(char *), "option", 0, (int*)(&iflist[i]));
+		if (result != TCL_OK) {
+		    return TCL_ERROR;
+		}
+	    }
+	}
 
-        if (objc > 1) {
-            resultPtr = Tcl_NewListObj(0, NULL);
-        }
+	if (objc > 1) {
+	    resultPtr = Tcl_NewListObj(0, NULL);
+	}
 
-        for (i=0 ; i < objc; i++) {
-            switch (iflist[i]) {
-                case BIfArgsIdx:
-                    if (mcode && mcode->argListPtr) {
+	for (i=0 ; i < objc; i++) {
+	    switch (iflist[i]) {
+		case BIfArgsIdx:
+		    if (mcode && mcode->argListPtr) {
 			if (imPtr->usagePtr == NULL) {
-                            objPtr = Tcl_NewStringObj(
-			            Tcl_GetString(mcode->usagePtr), TCL_INDEX_NONE);
+			    objPtr = Tcl_NewStringObj(
+				    Tcl_GetString(mcode->usagePtr), TCL_INDEX_NONE);
 			} else {
-                            objPtr = Tcl_NewStringObj(
-			            Tcl_GetString(imPtr->usagePtr), TCL_INDEX_NONE);
-		        }
-                    } else {
-		        if ((imPtr->flags & ITCL_ARG_SPEC) != 0) {
+			    objPtr = Tcl_NewStringObj(
+				    Tcl_GetString(imPtr->usagePtr), TCL_INDEX_NONE);
+			}
+		    } else {
+			if ((imPtr->flags & ITCL_ARG_SPEC) != 0) {
 			    if (imPtr->usagePtr == NULL) {
-                                objPtr = Tcl_NewStringObj(
-				        Tcl_GetString(mcode->usagePtr), TCL_INDEX_NONE);
+				objPtr = Tcl_NewStringObj(
+					Tcl_GetString(mcode->usagePtr), TCL_INDEX_NONE);
 			    } else {
-			        objPtr = Tcl_NewStringObj(
-				        Tcl_GetString(imPtr->usagePtr), TCL_INDEX_NONE);
+				objPtr = Tcl_NewStringObj(
+					Tcl_GetString(imPtr->usagePtr), TCL_INDEX_NONE);
 			    }
-                        } else {
-                            objPtr = Tcl_NewStringObj("<undefined>", TCL_INDEX_NONE);
-                        }
+			} else {
+			    objPtr = Tcl_NewStringObj("<undefined>", TCL_INDEX_NONE);
+			}
 		    }
-                    break;
+		    break;
 
-                case BIfBodyIdx:
-                    if (mcode && Itcl_IsMemberCodeImplemented(mcode)) {
-                        objPtr = Tcl_NewStringObj(
-			        Tcl_GetString(mcode->bodyPtr), TCL_INDEX_NONE);
-                    } else {
-                        objPtr = Tcl_NewStringObj("<undefined>", TCL_INDEX_NONE);
-                    }
-                    break;
+		case BIfBodyIdx:
+		    if (mcode && Itcl_IsMemberCodeImplemented(mcode)) {
+			objPtr = Tcl_NewStringObj(
+				Tcl_GetString(mcode->bodyPtr), TCL_INDEX_NONE);
+		    } else {
+			objPtr = Tcl_NewStringObj("<undefined>", TCL_INDEX_NONE);
+		    }
+		    break;
 
-                case BIfNameIdx:
-                    objPtr = Tcl_NewStringObj(
-		            Tcl_GetString(imPtr->fullNamePtr), TCL_INDEX_NONE);
-                    break;
+		case BIfNameIdx:
+		    objPtr = Tcl_NewStringObj(
+			    Tcl_GetString(imPtr->fullNamePtr), TCL_INDEX_NONE);
+		    break;
 
-                case BIfProtectIdx:
-                    val = Itcl_ProtectionStr(imPtr->protection);
-                    objPtr = Tcl_NewStringObj(val, TCL_INDEX_NONE);
-                    break;
+		case BIfProtectIdx:
+		    val = Itcl_ProtectionStr(imPtr->protection);
+		    objPtr = Tcl_NewStringObj(val, TCL_INDEX_NONE);
+		    break;
 
-                case BIfTypeIdx:
-                    val = ((imPtr->flags & ITCL_COMMON) != 0)
-                        ? "proc" : "method";
-                    objPtr = Tcl_NewStringObj(val, TCL_INDEX_NONE);
-                    break;
-            }
+		case BIfTypeIdx:
+		    val = ((imPtr->flags & ITCL_COMMON) != 0)
+			? "proc" : "method";
+		    objPtr = Tcl_NewStringObj(val, TCL_INDEX_NONE);
+		    break;
+	    }
 
-            if (objc == 1) {
-                resultPtr = objPtr;
-            } else {
-                Tcl_ListObjAppendElement(NULL, resultPtr, objPtr);
-            }
-        }
-        Tcl_SetObjResult(interp, resultPtr);
+	    if (objc == 1) {
+		resultPtr = objPtr;
+	    } else {
+		Tcl_ListObjAppendElement(NULL, resultPtr, objPtr);
+	    }
+	}
+	Tcl_SetObjResult(interp, resultPtr);
     } else {
 
-        /*
-         *  Return the list of available commands.
-         */
-        resultPtr = Tcl_NewListObj(0, NULL);
+	/*
+	 *  Return the list of available commands.
+	 */
+	resultPtr = Tcl_NewListObj(0, NULL);
 
-        Itcl_InitHierIter(&hier, contextIclsPtr);
-        while ((iclsPtr=Itcl_AdvanceHierIter(&hier)) != NULL) {
-            entry = Tcl_FirstHashEntry(&iclsPtr->functions, &place);
-            while (entry) {
-	        int useIt = 1;
+	Itcl_InitHierIter(&hier, contextIclsPtr);
+	while ((iclsPtr=Itcl_AdvanceHierIter(&hier)) != NULL) {
+	    entry = Tcl_FirstHashEntry(&iclsPtr->functions, &place);
+	    while (entry) {
+		int useIt = 1;
 
-                imPtr = (ItclMemberFunc*)Tcl_GetHashValue(entry);
+		imPtr = (ItclMemberFunc*)Tcl_GetHashValue(entry);
 		if (imPtr->codePtr && (imPtr->codePtr->flags & ITCL_BUILTIN)) {
 		    if (strcmp(Tcl_GetString(imPtr->namePtr), "info") == 0) {
-		        useIt = 0;
+			useIt = 0;
 		    }
 		    if (strcmp(Tcl_GetString(imPtr->namePtr), "setget") == 0) {
 			if (!(imPtr->iclsPtr->flags & ITCL_ECLASS)) {
-		            useIt = 0;
-		        }
+			    useIt = 0;
+			}
 		    }
 		    if (strcmp(Tcl_GetString(imPtr->namePtr),
-		            "installcomponent") == 0) {
+			    "installcomponent") == 0) {
 			if (!(imPtr->iclsPtr->flags &
-			        (ITCL_WIDGET|ITCL_WIDGETADAPTOR))) {
-		            useIt = 0;
-		        }
+				(ITCL_WIDGET|ITCL_WIDGETADAPTOR))) {
+			    useIt = 0;
+			}
 		    }
 		}
 		if (useIt) {
-                    objPtr = Tcl_NewStringObj(
-		            Tcl_GetString(imPtr->fullNamePtr), TCL_INDEX_NONE);
-                    Tcl_ListObjAppendElement(NULL,
-		            resultPtr, objPtr);
-                }
+		    objPtr = Tcl_NewStringObj(
+			    Tcl_GetString(imPtr->fullNamePtr), TCL_INDEX_NONE);
+		    Tcl_ListObjAppendElement(NULL,
+			    resultPtr, objPtr);
+		}
 
-                entry = Tcl_NextHashEntry(&place);
-            }
-        }
-        Itcl_DeleteHierIter(&hier);
+		entry = Tcl_NextHashEntry(&place);
+	    }
+	}
+	Itcl_DeleteHierIter(&hier);
 
-        Tcl_SetObjResult(interp, resultPtr);
+	Tcl_SetObjResult(interp, resultPtr);
     }
     return TCL_OK;
 }
@@ -1261,7 +1261,7 @@ Itcl_BiInfoFunctionCmd(
  *  commons).  Handles the following syntax:
  *
  *    info variable ?varName? ?-protection? ?-type? ?-name?
- *        ?-init? ?-config? ?-value?
+ *	?-init? ?-config? ?-value?
  *
  *  If the ?varName? is not specified, then a list of all known
  *  data members is returned.  Otherwise, the information for a
@@ -1275,7 +1275,7 @@ int
 Itcl_BiInfoVariableCmd(
     TCL_UNUSED(void *),    /* ItclObjectInfo Ptr */
     Tcl_Interp *interp,    /* current interpreter */
-    int objc,              /* number of arguments */
+    int objc,	      /* number of arguments */
     Tcl_Obj *const objv[]) /* argument objects */
 {
     Tcl_Obj *resultPtr;
@@ -1299,29 +1299,29 @@ Itcl_BiInfoVariableCmd(
     int doAppend;
 
     static const char *options[] = {
-        "-config", "-init", "-name", "-protection", "-type",
-        "-value", "-scope", NULL
+	"-config", "-init", "-name", "-protection", "-type",
+	"-value", "-scope", NULL
     };
     enum BIvIdx {
-        BIvConfigIdx, BIvInitIdx, BIvNameIdx, BIvProtectIdx,
-        BIvTypeIdx, BIvValueIdx, BIvScopeIdx
+	BIvConfigIdx, BIvInitIdx, BIvNameIdx, BIvProtectIdx,
+	BIvTypeIdx, BIvValueIdx, BIvScopeIdx
     } *ivlist, ivlistStorage[7];
 
     static enum BIvIdx DefInfoVariable[5] = {
-        BIvProtectIdx,
-        BIvTypeIdx,
-        BIvNameIdx,
-        BIvInitIdx,
-        BIvValueIdx
+	BIvProtectIdx,
+	BIvTypeIdx,
+	BIvNameIdx,
+	BIvInitIdx,
+	BIvValueIdx
     };
 
     static enum BIvIdx DefInfoPubVariable[6] = {
-        BIvProtectIdx,
-        BIvTypeIdx,
-        BIvNameIdx,
-        BIvInitIdx,
-        BIvConfigIdx,
-        BIvValueIdx
+	BIvProtectIdx,
+	BIvTypeIdx,
+	BIvNameIdx,
+	BIvInitIdx,
+	BIvConfigIdx,
+	BIvValueIdx
     };
 
     ItclShowArgs(1, "Itcl_BiInfoVariableCmd", objc, objv);
@@ -1335,12 +1335,12 @@ Itcl_BiInfoVariableCmd(
      */
     if (Itcl_GetContext(interp, &contextIclsPtr, &contextIoPtr) != TCL_OK) {
 	Tcl_SetObjResult(interp, Tcl_NewStringObj(
-            "\nget info like this instead: "
-            "\n  namespace eval className { info variable ... }", TCL_INDEX_NONE));
-        return TCL_ERROR;
+	    "\nget info like this instead: "
+	    "\n  namespace eval className { info variable ... }", TCL_INDEX_NONE));
+	return TCL_ERROR;
     }
     if (contextIoPtr != NULL) {
-        contextIclsPtr = contextIoPtr->iclsPtr;
+	contextIclsPtr = contextIoPtr->iclsPtr;
     }
 
     /*
@@ -1351,252 +1351,252 @@ Itcl_BiInfoVariableCmd(
     objc--;
 
     if (objc > 0) {
-        varName = Tcl_GetString(*objv);
-        objc--; objv++;
+	varName = Tcl_GetString(*objv);
+	objc--; objv++;
     }
 
     /*
      *  Return info for a specific variable.
      */
     if (varName) {
-        entry = ItclResolveVarEntry(contextIclsPtr, varName);
-        if (entry == NULL) {
-            Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
-                "\"", varName, "\" isn't a variable in class \"",
-                contextIclsPtr->nsPtr->fullName, "\"",
-                NULL);
-            return TCL_ERROR;
-        }
+	entry = ItclResolveVarEntry(contextIclsPtr, varName);
+	if (entry == NULL) {
+	    Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+		"\"", varName, "\" isn't a variable in class \"",
+		contextIclsPtr->nsPtr->fullName, "\"",
+		(char *)NULL);
+	    return TCL_ERROR;
+	}
 
-        vlookup = (ItclVarLookup*)Tcl_GetHashValue(entry);
-        ivPtr = vlookup->ivPtr;
+	vlookup = (ItclVarLookup*)Tcl_GetHashValue(entry);
+	ivPtr = vlookup->ivPtr;
 
-        /*
-         *  By default, return everything.
-         */
-        if (objc == 0) {
-            if (ivPtr->protection == ITCL_PUBLIC &&
-                    ((ivPtr->flags & ITCL_COMMON) == 0)) {
-                ivlist = DefInfoPubVariable;
-                objc = 6;
-            } else {
-                ivlist = DefInfoVariable;
-                objc = 5;
-            }
-        } else {
+	/*
+	 *  By default, return everything.
+	 */
+	if (objc == 0) {
+	    if (ivPtr->protection == ITCL_PUBLIC &&
+		    ((ivPtr->flags & ITCL_COMMON) == 0)) {
+		ivlist = DefInfoPubVariable;
+		objc = 6;
+	    } else {
+		ivlist = DefInfoVariable;
+		objc = 5;
+	    }
+	} else {
 
-            /*
-             *  Otherwise, scan through all remaining flags and
-             *  figure out what to return.
-             */
-            ivlist = &ivlistStorage[0];
-            for (i=0 ; i < objc; i++) {
-                result = Tcl_GetIndexFromObjStruct(interp, objv[i],
-                    options, sizeof(char *), "option", 0, (int*)(&ivlist[i]));
-                if (result != TCL_OK) {
-                    return TCL_ERROR;
-                }
-            }
-        }
+	    /*
+	     *  Otherwise, scan through all remaining flags and
+	     *  figure out what to return.
+	     */
+	    ivlist = &ivlistStorage[0];
+	    for (i=0 ; i < objc; i++) {
+		result = Tcl_GetIndexFromObjStruct(interp, objv[i],
+		    options, sizeof(char *), "option", 0, (int*)(&ivlist[i]));
+		if (result != TCL_OK) {
+		    return TCL_ERROR;
+		}
+	    }
+	}
 
-        if (objc > 1) {
-            resultPtr = Tcl_NewListObj(0, NULL);
-        }
+	if (objc > 1) {
+	    resultPtr = Tcl_NewListObj(0, NULL);
+	}
 
-        for (i=0 ; i < objc; i++) {
-            switch (ivlist[i]) {
-                case BIvConfigIdx:
-                    if (ivPtr->codePtr &&
-		            Itcl_IsMemberCodeImplemented(ivPtr->codePtr)) {
-                        objPtr = Tcl_NewStringObj(
-			        Tcl_GetString(ivPtr->codePtr->bodyPtr), TCL_INDEX_NONE);
-                    } else {
-                        objPtr = Tcl_NewStringObj("", TCL_INDEX_NONE);
-                    }
-                    break;
+	for (i=0 ; i < objc; i++) {
+	    switch (ivlist[i]) {
+		case BIvConfigIdx:
+		    if (ivPtr->codePtr &&
+			    Itcl_IsMemberCodeImplemented(ivPtr->codePtr)) {
+			objPtr = Tcl_NewStringObj(
+				Tcl_GetString(ivPtr->codePtr->bodyPtr), TCL_INDEX_NONE);
+		    } else {
+			objPtr = Tcl_NewStringObj("", TCL_INDEX_NONE);
+		    }
+		    break;
 
-                case BIvInitIdx:
-                    /*
-                     *  If this is the built-in "this" variable, then
-                     *  report the object name as its initialization string.
-                     */
-                    if ((ivPtr->flags & ITCL_THIS_VAR) != 0) {
-                        if ((contextIoPtr != NULL) &&
-			        (contextIoPtr->accessCmd != NULL)) {
-                            objPtr = Tcl_NewStringObj(NULL, 0);
-                            Tcl_GetCommandFullName(
-                                contextIoPtr->iclsPtr->interp,
-                                contextIoPtr->accessCmd, objPtr);
-                        } else {
-                            objPtr = Tcl_NewStringObj("<objectName>", TCL_INDEX_NONE);
-                        }
-                    } else {
-		        if (vlookup->ivPtr->init) {
+		case BIvInitIdx:
+		    /*
+		     *  If this is the built-in "this" variable, then
+		     *  report the object name as its initialization string.
+		     */
+		    if ((ivPtr->flags & ITCL_THIS_VAR) != 0) {
+			if ((contextIoPtr != NULL) &&
+				(contextIoPtr->accessCmd != NULL)) {
+			    objPtr = Tcl_NewStringObj(NULL, 0);
+			    Tcl_GetCommandFullName(
+				contextIoPtr->iclsPtr->interp,
+				contextIoPtr->accessCmd, objPtr);
+			} else {
+			    objPtr = Tcl_NewStringObj("<objectName>", TCL_INDEX_NONE);
+			}
+		    } else {
+			if (vlookup->ivPtr->init) {
 			    objPtr = Tcl_NewStringObj(
-			            Tcl_GetString(vlookup->ivPtr->init), TCL_INDEX_NONE);
-                        } else {
-                            objPtr = Tcl_NewStringObj("<undefined>", TCL_INDEX_NONE);
-		        }
-                    }
-                    break;
+				    Tcl_GetString(vlookup->ivPtr->init), TCL_INDEX_NONE);
+			} else {
+			    objPtr = Tcl_NewStringObj("<undefined>", TCL_INDEX_NONE);
+			}
+		    }
+		    break;
 
-                case BIvNameIdx:
-                    objPtr = Tcl_NewStringObj(
-		            Tcl_GetString(ivPtr->fullNamePtr), TCL_INDEX_NONE);
-                    break;
+		case BIvNameIdx:
+		    objPtr = Tcl_NewStringObj(
+			    Tcl_GetString(ivPtr->fullNamePtr), TCL_INDEX_NONE);
+		    break;
 
-                case BIvProtectIdx:
-                    val = Itcl_ProtectionStr(ivPtr->protection);
-                    objPtr = Tcl_NewStringObj((const char *)val, TCL_INDEX_NONE);
-                    break;
+		case BIvProtectIdx:
+		    val = Itcl_ProtectionStr(ivPtr->protection);
+		    objPtr = Tcl_NewStringObj((const char *)val, TCL_INDEX_NONE);
+		    break;
 
-                case BIvTypeIdx:
-                    val = ((ivPtr->flags & ITCL_COMMON) != 0)
-                        ? "common" : "variable";
-                    objPtr = Tcl_NewStringObj((const char *)val, TCL_INDEX_NONE);
-                    break;
+		case BIvTypeIdx:
+		    val = ((ivPtr->flags & ITCL_COMMON) != 0)
+			? "common" : "variable";
+		    objPtr = Tcl_NewStringObj((const char *)val, TCL_INDEX_NONE);
+		    break;
 
-                case BIvValueIdx:
-                    if ((ivPtr->flags & ITCL_COMMON) != 0) {
-                        val = Itcl_GetCommonVar(interp,
-			        Tcl_GetString(ivPtr->fullNamePtr),
-                                ivPtr->iclsPtr);
-                    } else {
-		        if (contextIoPtr == NULL) {
-                            if (objc > 1) {
-			        Tcl_DecrRefCount(resultPtr);
+		case BIvValueIdx:
+		    if ((ivPtr->flags & ITCL_COMMON) != 0) {
+			val = Itcl_GetCommonVar(interp,
+				Tcl_GetString(ivPtr->fullNamePtr),
+				ivPtr->iclsPtr);
+		    } else {
+			if (contextIoPtr == NULL) {
+			    if (objc > 1) {
+				Tcl_DecrRefCount(resultPtr);
 			    }
-                            Tcl_ResetResult(interp);
-                            Tcl_AppendResult(interp,
-                                    "cannot access object-specific info ",
-                                    "without an object context",
-                                    NULL);
-                            return TCL_ERROR;
-                        } else {
-                            val = Itcl_GetInstanceVar(interp,
-			            Tcl_GetString(ivPtr->namePtr),
-                                    contextIoPtr, ivPtr->iclsPtr);
-                        }
-                    }
-                    if (val == NULL) {
-                        val = "<undefined>";
-                    }
-                    objPtr = Tcl_NewStringObj((const char *)val, TCL_INDEX_NONE);
-                    break;
+			    Tcl_ResetResult(interp);
+			    Tcl_AppendResult(interp,
+				    "cannot access object-specific info ",
+				    "without an object context",
+				    (char *)NULL);
+			    return TCL_ERROR;
+			} else {
+			    val = Itcl_GetInstanceVar(interp,
+				    Tcl_GetString(ivPtr->namePtr),
+				    contextIoPtr, ivPtr->iclsPtr);
+			}
+		    }
+		    if (val == NULL) {
+			val = "<undefined>";
+		    }
+		    objPtr = Tcl_NewStringObj((const char *)val, TCL_INDEX_NONE);
+		    break;
 
-                case BIvScopeIdx:
-                    entry = Tcl_FindHashEntry(&contextIclsPtr->resolveVars, varName);
-                    if (!entry) {
-                        Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
-                              "variable \"", varName, "\" not found in class \"",
-                              Tcl_GetString(contextIclsPtr->fullNamePtr), "\"",
-                              (char*)NULL);
-                        return TCL_ERROR;
-                    }
-                    vlookup = (ItclVarLookup*)Tcl_GetHashValue(entry);
+		case BIvScopeIdx:
+		    entry = Tcl_FindHashEntry(&contextIclsPtr->resolveVars, varName);
+		    if (!entry) {
+			Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+			      "variable \"", varName, "\" not found in class \"",
+			      Tcl_GetString(contextIclsPtr->fullNamePtr), "\"",
+			      (char*)NULL);
+			return TCL_ERROR;
+		    }
+		    vlookup = (ItclVarLookup*)Tcl_GetHashValue(entry);
 
-                    if (vlookup->ivPtr->flags & ITCL_COMMON) {
-                        objPtr = Tcl_NewStringObj("", TCL_INDEX_NONE);
+		    if (vlookup->ivPtr->flags & ITCL_COMMON) {
+			objPtr = Tcl_NewStringObj("", TCL_INDEX_NONE);
 
-                        if (vlookup->ivPtr->protection != ITCL_PUBLIC) {
-                            Tcl_AppendToObj(objPtr, ITCL_VARIABLES_NAMESPACE, TCL_INDEX_NONE);
-                        }
-                        Tcl_AppendToObj(objPtr,
-                                Tcl_GetString(vlookup->ivPtr->fullNamePtr), TCL_INDEX_NONE);
-                    } else {
-                        /*
-                         *  If this is not a common variable, then we better have
-                         *  an object context.  Return the name as a fully qualified name.
-                         */
-                        infoPtr = contextIclsPtr->infoPtr;
-                        cfClientData = Itcl_GetCallFrameClientData(interp);
-                        if (cfClientData != NULL) {
-                            oPtr = Tcl_ObjectContextObject((Tcl_ObjectContext)cfClientData);
-                            if (oPtr != NULL) {
-                                contextIoPtr = (ItclObject*)Tcl_ObjectGetMetadata(
-                                        oPtr, infoPtr->object_meta_type);
-                            }
-                        }
+			if (vlookup->ivPtr->protection != ITCL_PUBLIC) {
+			    Tcl_AppendToObj(objPtr, ITCL_VARIABLES_NAMESPACE, TCL_INDEX_NONE);
+			}
+			Tcl_AppendToObj(objPtr,
+				Tcl_GetString(vlookup->ivPtr->fullNamePtr), TCL_INDEX_NONE);
+		    } else {
+			/*
+			 *  If this is not a common variable, then we better have
+			 *  an object context.  Return the name as a fully qualified name.
+			 */
+			infoPtr = contextIclsPtr->infoPtr;
+			cfClientData = Itcl_GetCallFrameClientData(interp);
+			if (cfClientData != NULL) {
+			    oPtr = Tcl_ObjectContextObject((Tcl_ObjectContext)cfClientData);
+			    if (oPtr != NULL) {
+				contextIoPtr = (ItclObject*)Tcl_ObjectGetMetadata(
+					oPtr, infoPtr->object_meta_type);
+			    }
+			}
 
-                        if (contextIoPtr == NULL) {
-                            if (infoPtr->currIoPtr != NULL) {
-                                contextIoPtr = infoPtr->currIoPtr;
-                            }
-                        }
+			if (contextIoPtr == NULL) {
+			    if (infoPtr->currIoPtr != NULL) {
+				contextIoPtr = infoPtr->currIoPtr;
+			    }
+			}
 
-                        if (contextIoPtr == NULL) {
-                            Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
-                                "can't scope variable \"", varName,
-                                "\": missing object context",
-                                (char*)NULL);
-                            return TCL_ERROR;
-                        }
+			if (contextIoPtr == NULL) {
+			    Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+				"can't scope variable \"", varName,
+				"\": missing object context",
+				(char*)NULL);
+			    return TCL_ERROR;
+			}
 
-                        doAppend = 1;
-                        if (contextIclsPtr->flags & ITCL_ECLASS) {
-                            if (strcmp(varName, "itcl_options") == 0) {
-                                doAppend = 0;
-                            }
-                        }
+			doAppend = 1;
+			if (contextIclsPtr->flags & ITCL_ECLASS) {
+			    if (strcmp(varName, "itcl_options") == 0) {
+				doAppend = 0;
+			    }
+			}
 
-                        objPtr = Tcl_NewStringObj((char*)NULL, 0);
-                        Tcl_IncrRefCount(objPtr);
-                        Tcl_AppendToObj(objPtr, ITCL_VARIABLES_NAMESPACE, TCL_INDEX_NONE);
-                        Tcl_AppendToObj(objPtr,
-                                (Tcl_GetObjectNamespace(contextIoPtr->oPtr))->fullName, TCL_INDEX_NONE);
+			objPtr = Tcl_NewStringObj((char*)NULL, 0);
+			Tcl_IncrRefCount(objPtr);
+			Tcl_AppendToObj(objPtr, ITCL_VARIABLES_NAMESPACE, TCL_INDEX_NONE);
+			Tcl_AppendToObj(objPtr,
+				(Tcl_GetObjectNamespace(contextIoPtr->oPtr))->fullName, TCL_INDEX_NONE);
 
-                        if (doAppend) {
-                            Tcl_AppendToObj(objPtr,
-                                    Tcl_GetString(vlookup->ivPtr->fullNamePtr), TCL_INDEX_NONE);
-                        } else {
-                            Tcl_AppendToObj(objPtr, "::", TCL_INDEX_NONE);
-                            Tcl_AppendToObj(objPtr,
-                                    Tcl_GetString(vlookup->ivPtr->namePtr), TCL_INDEX_NONE);
-                        }
-                    }
-                    break;
-            }
+			if (doAppend) {
+			    Tcl_AppendToObj(objPtr,
+				    Tcl_GetString(vlookup->ivPtr->fullNamePtr), TCL_INDEX_NONE);
+			} else {
+			    Tcl_AppendToObj(objPtr, "::", TCL_INDEX_NONE);
+			    Tcl_AppendToObj(objPtr,
+				    Tcl_GetString(vlookup->ivPtr->namePtr), TCL_INDEX_NONE);
+			}
+		    }
+		    break;
+	    }
 
-            if (objc == 1) {
-                resultPtr = objPtr;
-            } else {
-                Tcl_ListObjAppendElement(NULL, resultPtr, objPtr);
-            }
-        }
+	    if (objc == 1) {
+		resultPtr = objPtr;
+	    } else {
+		Tcl_ListObjAppendElement(NULL, resultPtr, objPtr);
+	    }
+	}
 	Tcl_ResetResult(interp);
-	Tcl_AppendResult(interp, Tcl_GetString(resultPtr), NULL);
+	Tcl_AppendResult(interp, Tcl_GetString(resultPtr), (char *)NULL);
 	Tcl_DecrRefCount(resultPtr);
     } else {
 
-        /*
-         *  Return the list of available variables.  Report the built-in
-         *  "this" variable only once, for the most-specific class.
-         */
-        resultPtr = Tcl_NewListObj(0, NULL);
-        Itcl_InitHierIter(&hier, contextIclsPtr);
-        while ((iclsPtr=Itcl_AdvanceHierIter(&hier)) != NULL) {
-            entry = Tcl_FirstHashEntry(&iclsPtr->variables, &place);
-            while (entry) {
-                ivPtr = (ItclVariable*)Tcl_GetHashValue(entry);
-                if ((ivPtr->flags & ITCL_THIS_VAR) != 0) {
-                    if (iclsPtr == contextIclsPtr) {
-                        objPtr = Tcl_NewStringObj(
-			        Tcl_GetString(ivPtr->fullNamePtr), TCL_INDEX_NONE);
-                        Tcl_ListObjAppendElement(NULL,
-                            resultPtr, objPtr);
-                    }
-                } else {
-                    objPtr = Tcl_NewStringObj(
-		            Tcl_GetString(ivPtr->fullNamePtr), TCL_INDEX_NONE);
-                    Tcl_ListObjAppendElement(NULL,
-                        resultPtr, objPtr);
-                }
-                entry = Tcl_NextHashEntry(&place);
-            }
-        }
-        Itcl_DeleteHierIter(&hier);
+	/*
+	 *  Return the list of available variables.  Report the built-in
+	 *  "this" variable only once, for the most-specific class.
+	 */
+	resultPtr = Tcl_NewListObj(0, NULL);
+	Itcl_InitHierIter(&hier, contextIclsPtr);
+	while ((iclsPtr=Itcl_AdvanceHierIter(&hier)) != NULL) {
+	    entry = Tcl_FirstHashEntry(&iclsPtr->variables, &place);
+	    while (entry) {
+		ivPtr = (ItclVariable*)Tcl_GetHashValue(entry);
+		if ((ivPtr->flags & ITCL_THIS_VAR) != 0) {
+		    if (iclsPtr == contextIclsPtr) {
+			objPtr = Tcl_NewStringObj(
+				Tcl_GetString(ivPtr->fullNamePtr), TCL_INDEX_NONE);
+			Tcl_ListObjAppendElement(NULL,
+			    resultPtr, objPtr);
+		    }
+		} else {
+		    objPtr = Tcl_NewStringObj(
+			    Tcl_GetString(ivPtr->fullNamePtr), TCL_INDEX_NONE);
+		    Tcl_ListObjAppendElement(NULL,
+			resultPtr, objPtr);
+		}
+		entry = Tcl_NextHashEntry(&place);
+	    }
+	}
+	Itcl_DeleteHierIter(&hier);
 
-        Tcl_SetObjResult(interp, resultPtr);
+	Tcl_SetObjResult(interp, resultPtr);
     }
     return TCL_OK;
 }
@@ -1619,7 +1619,7 @@ int
 Itcl_BiInfoVarsCmd(
     void *clientData, /* ItclObjectInfo Ptr */
     Tcl_Interp *interp,    /* current interpreter */
-    int objc,              /* number of arguments */
+    int objc,	      /* number of arguments */
     Tcl_Obj *const objv[]) /* argument objects */
 {
     FOREACH_HASH_DECLS;
@@ -1652,57 +1652,57 @@ Itcl_BiInfoVarsCmd(
     }
     if (iclsPtr) {
 	    if (iclsPtr->flags & (ITCL_TYPE|ITCL_WIDGETADAPTOR|ITCL_WIDGET)) {
-	        /* don't use the ::tcl::info::vars command */
-	        useGlobalInfo = 0;
-	        if (objc == 2) {
+		/* don't use the ::tcl::info::vars command */
+		useGlobalInfo = 0;
+		if (objc == 2) {
 		    pattern = Tcl_GetString(objv[1]);
 		}
 	    }
     }
     if (useGlobalInfo) {
-        newObjv = (Tcl_Obj **)ckalloc(sizeof(Tcl_Obj *)*(objc));
-        newObjv[0] = Tcl_NewStringObj("::tcl::info::vars", TCL_INDEX_NONE);
-        Tcl_IncrRefCount(newObjv[0]);
-        memcpy(newObjv+1, objv+1, sizeof(Tcl_Obj *)*(objc-1));
-        result = Tcl_EvalObjv(interp, objc, newObjv, 0);
-        Tcl_DecrRefCount(newObjv[0]);
-        ckfree((char *)newObjv);
+	newObjv = (Tcl_Obj **)ckalloc(sizeof(Tcl_Obj *)*(objc));
+	newObjv[0] = Tcl_NewStringObj("::tcl::info::vars", TCL_INDEX_NONE);
+	Tcl_IncrRefCount(newObjv[0]);
+	memcpy(newObjv+1, objv+1, sizeof(Tcl_Obj *)*(objc-1));
+	result = Tcl_EvalObjv(interp, objc, newObjv, 0);
+	Tcl_DecrRefCount(newObjv[0]);
+	ckfree((char *)newObjv);
     } else {
 	listPtr = Tcl_NewListObj(0, NULL);
 	FOREACH_HASH_VALUE(ivPtr, &iclsPtr->variables) {
 	    if ((ivPtr->flags & ITCL_VARIABLE) != 0) {
 		name = Tcl_GetString(ivPtr->namePtr);
-                if ((pattern == NULL) ||
-		        Tcl_StringCaseMatch((const char *)name, pattern, 0)) {
-	            Tcl_ListObjAppendElement(interp, listPtr, ivPtr->namePtr);
-	        }
-            }
+		if ((pattern == NULL) ||
+			Tcl_StringCaseMatch((const char *)name, pattern, 0)) {
+		    Tcl_ListObjAppendElement(interp, listPtr, ivPtr->namePtr);
+		}
+	    }
 	}
 	/* always add the itcl_options variable */
-        Tcl_ListObjAppendElement(interp, listPtr,
-	        Tcl_NewStringObj("itcl_options", TCL_INDEX_NONE));
-        Tcl_SetObjResult(interp, listPtr);
-        return TCL_OK;
+	Tcl_ListObjAppendElement(interp, listPtr,
+		Tcl_NewStringObj("itcl_options", TCL_INDEX_NONE));
+	Tcl_SetObjResult(interp, listPtr);
+	return TCL_OK;
     }
     if (objc < 2) {
-        return result;
+	return result;
     }
     if (result == TCL_OK) {
 	Tcl_DString buffer;
 	const char *head;
 	const char *tail;
-        /* check if the pattern contains a class namespace
+	/* check if the pattern contains a class namespace
 	 * and if yes add the common private and protected vars
 	 * and remove the ___DO_NOT_DELETE_THIS_VARIABLE var
 	 */
 	Itcl_ParseNamespPath(Tcl_GetString(objv[1]), &buffer, &head, &tail);
-        if (head == NULL) {
+	if (head == NULL) {
 	    nsPtr = Tcl_GetCurrentNamespace(interp);
 	} else {
-            nsPtr = Tcl_FindNamespace(interp, head, NULL, 0);
-        }
+	    nsPtr = Tcl_FindNamespace(interp, head, NULL, 0);
+	}
 	    hPtr = Tcl_FindHashEntry(&infoPtr->namespaceClasses,
-	            (char *)nsPtr);
+		    (char *)nsPtr);
 	    if (hPtr != NULL) {
 		Itcl_List varList;
 		Tcl_Obj *resultListPtr;
@@ -1714,28 +1714,28 @@ Itcl_BiInfoVarsCmd(
 /* FIXME !! should perhaps skip ___DO_NOT_DELETE_THIS_VARIABLE here !! */
 		FOREACH_HASH_VALUE(ivPtr, &iclsPtr->variables) {
 		    if ((ivPtr->flags & ITCL_VARIABLE) != 0) {
-		        if (head != NULL) {
-		            namePtr = Tcl_NewStringObj(
-			            Tcl_GetString(ivPtr->fullNamePtr), TCL_INDEX_NONE);
-		        } else {
-		            namePtr = Tcl_NewStringObj(
-			            Tcl_GetString(ivPtr->namePtr), TCL_INDEX_NONE);
-		        }
-		        Tcl_ListObjAppendElement(interp, resultListPtr,
-		                namePtr);
+			if (head != NULL) {
+			    namePtr = Tcl_NewStringObj(
+				    Tcl_GetString(ivPtr->fullNamePtr), TCL_INDEX_NONE);
+			} else {
+			    namePtr = Tcl_NewStringObj(
+				    Tcl_GetString(ivPtr->namePtr), TCL_INDEX_NONE);
+			}
+			Tcl_ListObjAppendElement(interp, resultListPtr,
+				namePtr);
 		    }
 		    if ((ivPtr->flags & ITCL_COMMON) != 0) {
-		        if (ivPtr->protection != ITCL_PUBLIC) {
+			if (ivPtr->protection != ITCL_PUBLIC) {
 			    if (head != NULL) {
-			        namePtr = Tcl_NewStringObj(
-				        Tcl_GetString(ivPtr->fullNamePtr), TCL_INDEX_NONE);
+				namePtr = Tcl_NewStringObj(
+					Tcl_GetString(ivPtr->fullNamePtr), TCL_INDEX_NONE);
 			    } else {
-			        namePtr = Tcl_NewStringObj(
-				        Tcl_GetString(ivPtr->namePtr), TCL_INDEX_NONE);
+				namePtr = Tcl_NewStringObj(
+					Tcl_GetString(ivPtr->namePtr), TCL_INDEX_NONE);
 			    }
-		            Tcl_ListObjAppendElement(interp, resultListPtr,
-			            namePtr);
-		        }
+			    Tcl_ListObjAppendElement(interp, resultListPtr,
+				    namePtr);
+			}
 		    }
 		}
 	    }
@@ -1755,7 +1755,7 @@ int
 Itcl_BiInfoUnknownCmd(
     void *clientData,   /* ItclObjectInfo Ptr */
     Tcl_Interp *interp,      /* current interpreter */
-    int objc,                /* number of arguments */
+    int objc,		/* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
 {
     Tcl_Obj *objPtr, *listObj;
@@ -1805,10 +1805,10 @@ Itcl_BiInfoUnknownCmd(
     Tcl_DecrRefCount(listObj);
 
     if (usage) {
-        /* produce usage message */
-        objPtr = Tcl_NewStringObj(
-	        "wrong # args: should be one of...\n", TCL_INDEX_NONE);
-        ItclGetInfoUsage(interp, objPtr, (ItclObjectInfo *)clientData, NULL);
+	/* produce usage message */
+	objPtr = Tcl_NewStringObj(
+		"wrong # args: should be one of...\n", TCL_INDEX_NONE);
+	ItclGetInfoUsage(interp, objPtr, (ItclObjectInfo *)clientData, NULL);
 	Tcl_SetObjResult(interp, objPtr);
     }
     if (code == TCL_ERROR) {
@@ -1840,7 +1840,7 @@ int
 Itcl_BiInfoBodyCmd(
     TCL_UNUSED(void *),    /* ItclObjectInfo Ptr */
     Tcl_Interp *interp,    /* current interpreter */
-    int objc,              /* number of arguments */
+    int objc,	      /* number of arguments */
     Tcl_Obj *const objv[]) /* argument objects */
 {
     Tcl_HashEntry *hPtr;
@@ -1872,47 +1872,47 @@ Itcl_BiInfoBodyCmd(
 	return code;
     }
     if (contextIoPtr != NULL) {
-        contextIclsPtr = contextIoPtr->iclsPtr;
+	contextIclsPtr = contextIoPtr->iclsPtr;
     }
 
     what = "function";
     if (contextIclsPtr->flags &
-            (ITCL_TYPE|ITCL_WIDGETADAPTOR|ITCL_WIDGET|ITCL_ECLASS)) {
-        what = "method";
+	    (ITCL_TYPE|ITCL_WIDGETADAPTOR|ITCL_WIDGET|ITCL_ECLASS)) {
+	what = "method";
     }
     if (objc != 2) {
 	Tcl_AppendResult(interp,
-	        "wrong # args: should be \"info body ", what, "\"",
-	        NULL);
-        return TCL_ERROR;
+		"wrong # args: should be \"info body ", what, "\"",
+		(char *)NULL);
+	return TCL_ERROR;
     }
 
     hPtr = Tcl_FindHashEntry(&contextIclsPtr->resolveCmds, (char *)objv[1]);
     if (hPtr) {
-        ItclCmdLookup *clookup = (ItclCmdLookup *)Tcl_GetHashValue(hPtr);
+	ItclCmdLookup *clookup = (ItclCmdLookup *)Tcl_GetHashValue(hPtr);
 	ItclMemberFunc *imPtr = clookup->imPtr;
 	ItclMemberCode *mcode = imPtr->codePtr;
 
-        /*
-         *  Return a string describing the implementation.
-         */
-        if (mcode && Itcl_IsMemberCodeImplemented(mcode)) {
-            Tcl_SetObjResult(interp, mcode->bodyPtr);
-        } else {
-            Tcl_SetObjResult(interp, Tcl_NewStringObj("<undefined>", TCL_INDEX_NONE));
-        }
+	/*
+	 *  Return a string describing the implementation.
+	 */
+	if (mcode && Itcl_IsMemberCodeImplemented(mcode)) {
+	    Tcl_SetObjResult(interp, mcode->bodyPtr);
+	} else {
+	    Tcl_SetObjResult(interp, Tcl_NewStringObj("<undefined>", TCL_INDEX_NONE));
+	}
 	return TCL_OK;
     }
 
 	if (contextIclsPtr->flags &
-	        (ITCL_TYPE|ITCL_WIDGETADAPTOR|ITCL_WIDGET|ITCL_ECLASS)) {
+		(ITCL_TYPE|ITCL_WIDGETADAPTOR|ITCL_WIDGET|ITCL_ECLASS)) {
 	    hPtr = Tcl_FindHashEntry(&contextIclsPtr->delegatedFunctions,
-	            (char *)objv[1]);
+		    (char *)objv[1]);
 	}
 
     if (hPtr) {
 	ItclDelegatedFunction *idmPtr = (ItclDelegatedFunction *)Tcl_GetHashValue(hPtr);
-        Tcl_Obj *objPtr = Tcl_NewStringObj("delegated ", TCL_INDEX_NONE);
+	Tcl_Obj *objPtr = Tcl_NewStringObj("delegated ", TCL_INDEX_NONE);
 
 	if (idmPtr->flags & ITCL_TYPE_METHOD) {
 	    what = "typemethod";
@@ -1921,8 +1921,8 @@ Itcl_BiInfoBodyCmd(
 	Tcl_AppendToObj(objPtr, " \"", TCL_INDEX_NONE);
 	Tcl_AppendObjToObj(objPtr, objv[1]);
 	Tcl_AppendToObj(objPtr, "\"", TCL_INDEX_NONE);
-        Tcl_SetObjResult(interp, objPtr);
-        return TCL_ERROR;
+	Tcl_SetObjResult(interp, objPtr);
+	return TCL_ERROR;
     }
     goto fallback;
 }
@@ -1943,7 +1943,7 @@ int
 Itcl_BiInfoArgsCmd(
     TCL_UNUSED(void *),    /* ItclObjectInfo Ptr */
     Tcl_Interp *interp,    /* current interpreter */
-    int objc,              /* number of arguments */
+    int objc,	      /* number of arguments */
     Tcl_Obj *const objv[]) /* argument objects */
 {
     Tcl_HashEntry *hPtr = NULL;
@@ -1976,17 +1976,17 @@ Itcl_BiInfoArgsCmd(
 	return code;
     }
     if (contextIoPtr != NULL) {
-        contextIclsPtr = contextIoPtr->iclsPtr;
+	contextIclsPtr = contextIoPtr->iclsPtr;
     }
     what = "function";
     if ((contextIclsPtr != NULL) && (contextIclsPtr->flags &
-            (ITCL_TYPE|ITCL_WIDGETADAPTOR|ITCL_WIDGET))) {
-        what = "method";
+	    (ITCL_TYPE|ITCL_WIDGETADAPTOR|ITCL_WIDGET))) {
+	what = "method";
     }
     if (objc != 2) {
-        Tcl_SetObjResult(interp, Tcl_ObjPrintf(
-            "wrong # args: should be \"info args %s\"", what));
-        return TCL_ERROR;
+	Tcl_SetObjResult(interp, Tcl_ObjPrintf(
+	    "wrong # args: should be \"info args %s\"", what));
+	return TCL_ERROR;
     }
 
     hPtr = Tcl_FindHashEntry(&contextIclsPtr->resolveCmds, (char *)objv[1]);
@@ -1995,15 +1995,15 @@ Itcl_BiInfoArgsCmd(
 	ItclMemberFunc *imPtr = clookup->imPtr;
 	ItclMemberCode *mcode = imPtr->codePtr;
 
-        /*
-         *  Return a string describing the argument list.
-         */
-        if ((mcode && mcode->argListPtr != NULL)
+	/*
+	 *  Return a string describing the argument list.
+	 */
+	if ((mcode && mcode->argListPtr != NULL)
 		|| ((imPtr->flags & ITCL_ARG_SPEC) != 0)) {
 	    Tcl_SetObjResult(interp, mcode->usagePtr);
-        } else {
+	} else {
 	    Tcl_SetObjResult(interp, Tcl_NewStringObj("<undefined>", TCL_INDEX_NONE));
-        }
+	}
 	return TCL_OK;
     }
 
@@ -2015,7 +2015,7 @@ Itcl_BiInfoArgsCmd(
 
     if (hPtr) {
 	ItclDelegatedFunction *idmPtr = (ItclDelegatedFunction *)Tcl_GetHashValue(hPtr);
-        Tcl_Obj *objPtr = Tcl_NewStringObj("delegated ", TCL_INDEX_NONE);
+	Tcl_Obj *objPtr = Tcl_NewStringObj("delegated ", TCL_INDEX_NONE);
 
 	if (idmPtr->flags & ITCL_TYPE_METHOD) {
 	    what = "typemethod";
@@ -2024,8 +2024,8 @@ Itcl_BiInfoArgsCmd(
 	Tcl_AppendToObj(objPtr, " \"", TCL_INDEX_NONE);
 	Tcl_AppendObjToObj(objPtr, objv[1]);
 	Tcl_AppendToObj(objPtr, "\"", TCL_INDEX_NONE);
-        Tcl_SetObjResult(interp, objPtr);
-        return TCL_ERROR;
+	Tcl_SetObjResult(interp, objPtr);
+	return TCL_ERROR;
     }
     goto fallback;
 }
@@ -2039,7 +2039,7 @@ Itcl_BiInfoArgsCmd(
  *  Handles the following syntax:
  *
  *    info option ?optionName? ?-protection? ?-name? ?-resource? ?-class?
- *        ?-default? ?-configmethod? ?-cgetmethod? ?-validatemethod? ?-value?
+ *	?-default? ?-configmethod? ?-cgetmethod? ?-validatemethod? ?-value?
  *
  *  If the ?optionName? is not specified, then a list of all known
  *  data members is returned.  Otherwise, the information for a
@@ -2052,7 +2052,7 @@ int
 Itcl_BiInfoOptionCmd(
     TCL_UNUSED(void *),    /* ItclObjectInfo Ptr */
     Tcl_Interp *interp,    /* current interpreter */
-    int objc,              /* number of arguments */
+    int objc,	      /* number of arguments */
     Tcl_Obj *const objv[]) /* argument objects */
 {
     char *optionName = NULL;
@@ -2061,16 +2061,16 @@ Itcl_BiInfoOptionCmd(
     Tcl_Obj *optionNamePtr;
 
     static const char *options[] = {
-        "-cgetmethod", "-cgetmethodvar","-class",
+	"-cgetmethod", "-cgetmethodvar","-class",
 	"-configuremethod", "-configuremethodvar",
 	"-default",
 	"-name", "-protection", "-resource",
 	"-validatemethod", "-validatemethodvar",
-        "-value", NULL
+	"-value", NULL
     };
     enum BOptIdx {
-        BOptCgetMethodIdx,
-        BOptCgetMethodVarIdx,
+	BOptCgetMethodIdx,
+	BOptCgetMethodVarIdx,
 	BOptClassIdx,
 	BOptConfigureMethodIdx,
 	BOptConfigureMethodVarIdx,
@@ -2084,18 +2084,18 @@ Itcl_BiInfoOptionCmd(
     } *ioptlist, ioptlistStorage[12];
 
     static enum BOptIdx DefInfoOption[12] = {
-        BOptProtectIdx,
-        BOptNameIdx,
-        BOptResourceIdx,
-        BOptClassIdx,
-        BOptDefaultIdx,
-        BOptCgetMethodIdx,
-        BOptCgetMethodVarIdx,
-        BOptConfigureMethodIdx,
-        BOptConfigureMethodVarIdx,
-        BOptValidateMethodIdx,
-        BOptValidateMethodVarIdx,
-        BOptValueIdx
+	BOptProtectIdx,
+	BOptNameIdx,
+	BOptResourceIdx,
+	BOptClassIdx,
+	BOptDefaultIdx,
+	BOptCgetMethodIdx,
+	BOptCgetMethodVarIdx,
+	BOptConfigureMethodIdx,
+	BOptConfigureMethodVarIdx,
+	BOptValidateMethodIdx,
+	BOptValidateMethodVarIdx,
+	BOptValueIdx
     };
 
     Tcl_HashSearch place;
@@ -2117,12 +2117,12 @@ Itcl_BiInfoOptionCmd(
     contextIclsPtr = NULL;
     if (Itcl_GetContext(interp, &contextIclsPtr, &contextIoPtr) != TCL_OK) {
 	Tcl_SetObjResult(interp, Tcl_NewStringObj(
-            "\nget info like this instead: "
-            "\n  namespace eval className { info option ... }", TCL_INDEX_NONE));
-        return TCL_ERROR;
+	    "\nget info like this instead: "
+	    "\n  namespace eval className { info option ... }", TCL_INDEX_NONE));
+	return TCL_ERROR;
     }
     if (contextIoPtr != NULL) {
-        contextIclsPtr = contextIoPtr->iclsPtr;
+	contextIclsPtr = contextIoPtr->iclsPtr;
     }
 
     /*
@@ -2135,8 +2135,8 @@ Itcl_BiInfoOptionCmd(
     objc--;
 
     if (objc > 0) {
-        optionName = Tcl_GetString(*objv);
-        objc--;
+	optionName = Tcl_GetString(*objv);
+	objc--;
 	objv++;
     }
 
@@ -2147,190 +2147,190 @@ Itcl_BiInfoOptionCmd(
 	if (contextIoPtr == NULL) {
 	    Tcl_ResetResult(interp);
 	    Tcl_AppendResult(interp, "cannot access object-specific info ",
-		    "without an object context", NULL);
+		    "without an object context", (char *)NULL);
 	    return TCL_ERROR;
 	}
 	optionNamePtr = Tcl_NewStringObj(optionName, TCL_INDEX_NONE);
-        hPtr = Tcl_FindHashEntry(&contextIoPtr->objectOptions,
-	        (char *)optionNamePtr);
-        Tcl_DecrRefCount(optionNamePtr);
-        if (hPtr == NULL) {
-            Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
-                 "\"", optionName, "\" isn't a option in object \"",
-                Tcl_GetString(contextIoPtr->namePtr), "\"",
-                NULL);
-            return TCL_ERROR;
-        }
-        ioptPtr = (ItclOption*)Tcl_GetHashValue(hPtr);
+	hPtr = Tcl_FindHashEntry(&contextIoPtr->objectOptions,
+		(char *)optionNamePtr);
+	Tcl_DecrRefCount(optionNamePtr);
+	if (hPtr == NULL) {
+	    Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+		 "\"", optionName, "\" isn't a option in object \"",
+		Tcl_GetString(contextIoPtr->namePtr), "\"",
+		(char *)NULL);
+	    return TCL_ERROR;
+	}
+	ioptPtr = (ItclOption*)Tcl_GetHashValue(hPtr);
 
-        /*
-         *  By default, return everything.
-         */
-        if (objc == 0) {
-            ioptlist = DefInfoOption;
-            objc = 9;
-        } else {
+	/*
+	 *  By default, return everything.
+	 */
+	if (objc == 0) {
+	    ioptlist = DefInfoOption;
+	    objc = 9;
+	} else {
 
-            /*
-             *  Otherwise, scan through all remaining flags and
-             *  figure out what to return.
-             */
-            ioptlist = &ioptlistStorage[0];
-            for (i=0 ; i < objc; i++) {
-                result = Tcl_GetIndexFromObjStruct(interp, objv[i],
-                    options, sizeof(char *), "option", 0, (int*)(&ioptlist[i]));
-                if (result != TCL_OK) {
-                    return TCL_ERROR;
-                }
-            }
-        }
+	    /*
+	     *  Otherwise, scan through all remaining flags and
+	     *  figure out what to return.
+	     */
+	    ioptlist = &ioptlistStorage[0];
+	    for (i=0 ; i < objc; i++) {
+		result = Tcl_GetIndexFromObjStruct(interp, objv[i],
+		    options, sizeof(char *), "option", 0, (int*)(&ioptlist[i]));
+		if (result != TCL_OK) {
+		    return TCL_ERROR;
+		}
+	    }
+	}
 
-        if (objc > 1) {
-            resultPtr = Tcl_NewListObj(0, NULL);
-        }
+	if (objc > 1) {
+	    resultPtr = Tcl_NewListObj(0, NULL);
+	}
 
-        for (i=0 ; i < objc; i++) {
-            switch (ioptlist[i]) {
-                case BOptCgetMethodIdx:
-                    if (ioptPtr->cgetMethodPtr) {
-                        objPtr = Tcl_NewStringObj(
-			        Tcl_GetString(ioptPtr->cgetMethodPtr), TCL_INDEX_NONE);
-                    } else {
-                        objPtr = Tcl_NewStringObj("", TCL_INDEX_NONE);
-                    }
-                    break;
-
-                case BOptCgetMethodVarIdx:
-                    if (ioptPtr->cgetMethodVarPtr) {
-                        objPtr = Tcl_NewStringObj(
-			        Tcl_GetString(ioptPtr->cgetMethodVarPtr), TCL_INDEX_NONE);
-                    } else {
-                        objPtr = Tcl_NewStringObj("", TCL_INDEX_NONE);
-                    }
-                    break;
-
-                case BOptConfigureMethodIdx:
-                    if (ioptPtr->configureMethodPtr) {
-                        objPtr = Tcl_NewStringObj(
-			        Tcl_GetString(ioptPtr->configureMethodPtr), TCL_INDEX_NONE);
-                    } else {
-                        objPtr = Tcl_NewStringObj("", TCL_INDEX_NONE);
-                    }
-                    break;
-
-                case BOptConfigureMethodVarIdx:
-                    if (ioptPtr->configureMethodVarPtr) {
-                        objPtr = Tcl_NewStringObj(
-			        Tcl_GetString(ioptPtr->configureMethodVarPtr),
-				TCL_INDEX_NONE);
-                    } else {
-                        objPtr = Tcl_NewStringObj("", TCL_INDEX_NONE);
-                    }
-                    break;
-
-                case BOptValidateMethodIdx:
-                    if (ioptPtr->validateMethodPtr) {
-                        objPtr = Tcl_NewStringObj(
-			        Tcl_GetString(ioptPtr->validateMethodPtr), TCL_INDEX_NONE);
-                    } else {
-                        objPtr = Tcl_NewStringObj("", TCL_INDEX_NONE);
-                    }
-                    break;
-
-                case BOptValidateMethodVarIdx:
-                    if (ioptPtr->validateMethodVarPtr) {
-                        objPtr = Tcl_NewStringObj(
-			        Tcl_GetString(ioptPtr->validateMethodVarPtr),
-				TCL_INDEX_NONE);
-                    } else {
-                        objPtr = Tcl_NewStringObj("", TCL_INDEX_NONE);
-                    }
-                    break;
-
-                case BOptResourceIdx:
-                    if (ioptPtr->resourceNamePtr) {
-                        objPtr = Tcl_NewStringObj(
-			        Tcl_GetString(ioptPtr->resourceNamePtr), TCL_INDEX_NONE);
-                    } else {
-                        objPtr = Tcl_NewStringObj("", TCL_INDEX_NONE);
-                    }
-                    break;
-
-                case BOptClassIdx:
-                    if (ioptPtr->classNamePtr) {
-                        objPtr = Tcl_NewStringObj(
-			        Tcl_GetString(ioptPtr->classNamePtr), TCL_INDEX_NONE);
-                    } else {
-                        objPtr = Tcl_NewStringObj("", TCL_INDEX_NONE);
-                    }
-                    break;
-
-                case BOptDefaultIdx:
-		    if (ioptPtr->defaultValuePtr != NULL) {
-		        objPtr = Tcl_NewStringObj(
-			        Tcl_GetString(ioptPtr->defaultValuePtr), TCL_INDEX_NONE);
-                    } else {
-                        objPtr = Tcl_NewStringObj("<undefined>", TCL_INDEX_NONE);
+	for (i=0 ; i < objc; i++) {
+	    switch (ioptlist[i]) {
+		case BOptCgetMethodIdx:
+		    if (ioptPtr->cgetMethodPtr) {
+			objPtr = Tcl_NewStringObj(
+				Tcl_GetString(ioptPtr->cgetMethodPtr), TCL_INDEX_NONE);
+		    } else {
+			objPtr = Tcl_NewStringObj("", TCL_INDEX_NONE);
 		    }
-                    break;
+		    break;
 
-                case BOptNameIdx:
-                    objPtr = Tcl_NewStringObj(
-		            Tcl_GetString(ioptPtr->fullNamePtr), TCL_INDEX_NONE);
-                    break;
+		case BOptCgetMethodVarIdx:
+		    if (ioptPtr->cgetMethodVarPtr) {
+			objPtr = Tcl_NewStringObj(
+				Tcl_GetString(ioptPtr->cgetMethodVarPtr), TCL_INDEX_NONE);
+		    } else {
+			objPtr = Tcl_NewStringObj("", TCL_INDEX_NONE);
+		    }
+		    break;
 
-                case BOptProtectIdx:
-                    val = Itcl_ProtectionStr(ioptPtr->protection);
-                    objPtr = Tcl_NewStringObj((const char *)val, TCL_INDEX_NONE);
-                    break;
+		case BOptConfigureMethodIdx:
+		    if (ioptPtr->configureMethodPtr) {
+			objPtr = Tcl_NewStringObj(
+				Tcl_GetString(ioptPtr->configureMethodPtr), TCL_INDEX_NONE);
+		    } else {
+			objPtr = Tcl_NewStringObj("", TCL_INDEX_NONE);
+		    }
+		    break;
 
-                case BOptValueIdx:
+		case BOptConfigureMethodVarIdx:
+		    if (ioptPtr->configureMethodVarPtr) {
+			objPtr = Tcl_NewStringObj(
+				Tcl_GetString(ioptPtr->configureMethodVarPtr),
+				TCL_INDEX_NONE);
+		    } else {
+			objPtr = Tcl_NewStringObj("", TCL_INDEX_NONE);
+		    }
+		    break;
+
+		case BOptValidateMethodIdx:
+		    if (ioptPtr->validateMethodPtr) {
+			objPtr = Tcl_NewStringObj(
+				Tcl_GetString(ioptPtr->validateMethodPtr), TCL_INDEX_NONE);
+		    } else {
+			objPtr = Tcl_NewStringObj("", TCL_INDEX_NONE);
+		    }
+		    break;
+
+		case BOptValidateMethodVarIdx:
+		    if (ioptPtr->validateMethodVarPtr) {
+			objPtr = Tcl_NewStringObj(
+				Tcl_GetString(ioptPtr->validateMethodVarPtr),
+				TCL_INDEX_NONE);
+		    } else {
+			objPtr = Tcl_NewStringObj("", TCL_INDEX_NONE);
+		    }
+		    break;
+
+		case BOptResourceIdx:
+		    if (ioptPtr->resourceNamePtr) {
+			objPtr = Tcl_NewStringObj(
+				Tcl_GetString(ioptPtr->resourceNamePtr), TCL_INDEX_NONE);
+		    } else {
+			objPtr = Tcl_NewStringObj("", TCL_INDEX_NONE);
+		    }
+		    break;
+
+		case BOptClassIdx:
+		    if (ioptPtr->classNamePtr) {
+			objPtr = Tcl_NewStringObj(
+				Tcl_GetString(ioptPtr->classNamePtr), TCL_INDEX_NONE);
+		    } else {
+			objPtr = Tcl_NewStringObj("", TCL_INDEX_NONE);
+		    }
+		    break;
+
+		case BOptDefaultIdx:
+		    if (ioptPtr->defaultValuePtr != NULL) {
+			objPtr = Tcl_NewStringObj(
+				Tcl_GetString(ioptPtr->defaultValuePtr), TCL_INDEX_NONE);
+		    } else {
+			objPtr = Tcl_NewStringObj("<undefined>", TCL_INDEX_NONE);
+		    }
+		    break;
+
+		case BOptNameIdx:
+		    objPtr = Tcl_NewStringObj(
+			    Tcl_GetString(ioptPtr->fullNamePtr), TCL_INDEX_NONE);
+		    break;
+
+		case BOptProtectIdx:
+		    val = Itcl_ProtectionStr(ioptPtr->protection);
+		    objPtr = Tcl_NewStringObj((const char *)val, TCL_INDEX_NONE);
+		    break;
+
+		case BOptValueIdx:
 		    if (contextIoPtr == NULL) {
-                        Tcl_ResetResult(interp);
-                        Tcl_AppendResult(interp,
-                                "cannot access object-specific info ",
-                                "without an object context",
-                                NULL);
-                        return TCL_ERROR;
-                    } else {
-                        val = ItclGetInstanceVar(interp, "itcl_options",
-		                Tcl_GetString(ioptPtr->namePtr),
-                                    contextIoPtr, ioptPtr->iclsPtr);
-                    }
-                    if (val == NULL) {
-                        val = "<undefined>";
-                    }
-                    objPtr = Tcl_NewStringObj((const char *)val, TCL_INDEX_NONE);
-                    break;
-            }
+			Tcl_ResetResult(interp);
+			Tcl_AppendResult(interp,
+				"cannot access object-specific info ",
+				"without an object context",
+				(char *)NULL);
+			return TCL_ERROR;
+		    } else {
+			val = ItclGetInstanceVar(interp, "itcl_options",
+				Tcl_GetString(ioptPtr->namePtr),
+				    contextIoPtr, ioptPtr->iclsPtr);
+		    }
+		    if (val == NULL) {
+			val = "<undefined>";
+		    }
+		    objPtr = Tcl_NewStringObj((const char *)val, TCL_INDEX_NONE);
+		    break;
+	    }
 
-            if (objc == 1) {
-                resultPtr = objPtr;
-            } else {
-                Tcl_ListObjAppendElement(NULL, resultPtr,
-                    objPtr);
-            }
-        }
-        Tcl_SetObjResult(interp, resultPtr);
+	    if (objc == 1) {
+		resultPtr = objPtr;
+	    } else {
+		Tcl_ListObjAppendElement(NULL, resultPtr,
+		    objPtr);
+	    }
+	}
+	Tcl_SetObjResult(interp, resultPtr);
     } else {
 
-        /*
-         *  Return the list of available options.
-         */
-        resultPtr = Tcl_NewListObj(0, NULL);
-        Itcl_InitHierIter(&hier, contextIclsPtr);
-        while ((iclsPtr=Itcl_AdvanceHierIter(&hier)) != NULL) {
-            hPtr = Tcl_FirstHashEntry(&iclsPtr->options, &place);
-            while (hPtr) {
-                ioptPtr = (ItclOption*)Tcl_GetHashValue(hPtr);
-                objPtr = ioptPtr->namePtr;
-                Tcl_ListObjAppendElement(NULL, resultPtr, objPtr);
-                hPtr = Tcl_NextHashEntry(&place);
-            }
-        }
-        Itcl_DeleteHierIter(&hier);
+	/*
+	 *  Return the list of available options.
+	 */
+	resultPtr = Tcl_NewListObj(0, NULL);
+	Itcl_InitHierIter(&hier, contextIclsPtr);
+	while ((iclsPtr=Itcl_AdvanceHierIter(&hier)) != NULL) {
+	    hPtr = Tcl_FirstHashEntry(&iclsPtr->options, &place);
+	    while (hPtr) {
+		ioptPtr = (ItclOption*)Tcl_GetHashValue(hPtr);
+		objPtr = ioptPtr->namePtr;
+		Tcl_ListObjAppendElement(NULL, resultPtr, objPtr);
+		hPtr = Tcl_NextHashEntry(&place);
+	    }
+	}
+	Itcl_DeleteHierIter(&hier);
 
-        Tcl_SetObjResult(interp, resultPtr);
+	Tcl_SetObjResult(interp, resultPtr);
     }
     return TCL_OK;
 }
@@ -2355,7 +2355,7 @@ int
 Itcl_BiInfoComponentCmd(
     TCL_UNUSED(void *),    /* ItclObjectInfo Ptr */
     Tcl_Interp *interp,    /* current interpreter */
-    int objc,              /* number of arguments */
+    int objc,	      /* number of arguments */
     Tcl_Obj *const objv[]) /* argument objects */
 {
     char *componentName = NULL;
@@ -2371,9 +2371,9 @@ Itcl_BiInfoComponentCmd(
     } *icomplist, icomplistStorage[3];
 
     static enum BCompIdx DefInfoComponent[3] = {
-        BCompNameIdx,
-        BCompInheritIdx,
-        BCompValueIdx
+	BCompNameIdx,
+	BCompInheritIdx,
+	BCompValueIdx
     };
 
     ItclClass *contextIclsPtr;
@@ -2398,23 +2398,23 @@ Itcl_BiInfoComponentCmd(
     contextIclsPtr = NULL;
     if (Itcl_GetContext(interp, &contextIclsPtr, &contextIoPtr) != TCL_OK) {
 	Tcl_SetObjResult(interp, Tcl_NewStringObj(
-            "\nget info like this instead: "
-            "\n  namespace eval className { info component ... }", TCL_INDEX_NONE));
-        return TCL_ERROR;
+	    "\nget info like this instead: "
+	    "\n  namespace eval className { info component ... }", TCL_INDEX_NONE));
+	return TCL_ERROR;
     }
     if (contextIoPtr != NULL) {
-        contextIclsPtr = contextIoPtr->iclsPtr;
+	contextIclsPtr = contextIoPtr->iclsPtr;
     }
     nsPtr = Itcl_GetUplevelNamespace(interp, 1);
     if (nsPtr->parentPtr == NULL) {
-        /* :: namespace */
+	/* :: namespace */
 	nsPtr = contextIclsPtr->nsPtr;
     }
     infoPtr = contextIclsPtr->infoPtr;
     hPtr = Tcl_FindHashEntry(&infoPtr->namespaceClasses, (char *)nsPtr);
     if (hPtr == NULL) {
-        Tcl_AppendResult(interp, "cannot find class name for namespace \"",
-	        nsPtr->fullName, "\"", NULL);
+	Tcl_AppendResult(interp, "cannot find class name for namespace \"",
+		nsPtr->fullName, "\"", (char *)NULL);
 	return TCL_ERROR;
     }
     contextIclsPtr = (ItclClass *)Tcl_GetHashValue(hPtr);
@@ -2427,8 +2427,8 @@ Itcl_BiInfoComponentCmd(
     objc--;
 
     if (objc > 0) {
-        componentName = Tcl_GetString(*objv);
-        objc--;
+	componentName = Tcl_GetString(*objv);
+	objc--;
 	objv++;
     }
 
@@ -2444,112 +2444,112 @@ Itcl_BiInfoComponentCmd(
 	}
 	while ((iclsPtr = Itcl_AdvanceHierIter(&hier)) != NULL) {
 	    hPtr = Tcl_FindHashEntry(&iclsPtr->components,
-	            (char *)componentNamePtr);
+		    (char *)componentNamePtr);
 	    if (hPtr != NULL) {
-	        break;
+		break;
 	    }
 	}
 	Tcl_DecrRefCount(componentNamePtr);
 	Itcl_DeleteHierIter(&hier);
-        if (hPtr == NULL) {
-            Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
-                "\"", componentName, "\" isn't a component in class \"",
-                contextIclsPtr->nsPtr->fullName, "\"",
-                NULL);
-            return TCL_ERROR;
-        }
-        icPtr = (ItclComponent *)Tcl_GetHashValue(hPtr);
+	if (hPtr == NULL) {
+	    Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+		"\"", componentName, "\" isn't a component in class \"",
+		contextIclsPtr->nsPtr->fullName, "\"",
+		(char *)NULL);
+	    return TCL_ERROR;
+	}
+	icPtr = (ItclComponent *)Tcl_GetHashValue(hPtr);
 
-        /*
-         *  By default, return everything.
-         */
-        if (objc == 0) {
-            icomplist = DefInfoComponent;
-            objc = 3;
-        } else {
+	/*
+	 *  By default, return everything.
+	 */
+	if (objc == 0) {
+	    icomplist = DefInfoComponent;
+	    objc = 3;
+	} else {
 
-            /*
-             *  Otherwise, scan through all remaining flags and
-             *  figure out what to return.
-             */
-            icomplist = &icomplistStorage[0];
-            for (i=0 ; i < objc; i++) {
-                result = Tcl_GetIndexFromObjStruct(interp, objv[i],
-                    components, sizeof(char *), "component", 0, (int*)(&icomplist[i]));
-                if (result != TCL_OK) {
-                    return TCL_ERROR;
-                }
-            }
-        }
+	    /*
+	     *  Otherwise, scan through all remaining flags and
+	     *  figure out what to return.
+	     */
+	    icomplist = &icomplistStorage[0];
+	    for (i=0 ; i < objc; i++) {
+		result = Tcl_GetIndexFromObjStruct(interp, objv[i],
+		    components, sizeof(char *), "component", 0, (int*)(&icomplist[i]));
+		if (result != TCL_OK) {
+		    return TCL_ERROR;
+		}
+	    }
+	}
 
-        if (objc > 1) {
-            resultPtr = Tcl_NewListObj(0, NULL);
-        }
+	if (objc > 1) {
+	    resultPtr = Tcl_NewListObj(0, NULL);
+	}
 
-        for (i=0 ; i < objc; i++) {
-            switch (icomplist[i]) {
-                case BCompNameIdx:
-                    objPtr = Tcl_NewStringObj(
-		            Tcl_GetString(icPtr->ivPtr->fullNamePtr), TCL_INDEX_NONE);
-                    break;
+	for (i=0 ; i < objc; i++) {
+	    switch (icomplist[i]) {
+		case BCompNameIdx:
+		    objPtr = Tcl_NewStringObj(
+			    Tcl_GetString(icPtr->ivPtr->fullNamePtr), TCL_INDEX_NONE);
+		    break;
 
-                case BCompInheritIdx:
+		case BCompInheritIdx:
 		    if (icPtr->flags & ITCL_COMPONENT_INHERIT) {
-                        val = "1";
+			val = "1";
 		    } else {
-                        val = "0";
+			val = "0";
 		    }
-                    objPtr = Tcl_NewStringObj((const char *)val, TCL_INDEX_NONE);
-                    break;
+		    objPtr = Tcl_NewStringObj((const char *)val, TCL_INDEX_NONE);
+		    break;
 
-                case BCompValueIdx:
+		case BCompValueIdx:
 		    if (contextIoPtr == NULL) {
-                        Tcl_ResetResult(interp);
-                        Tcl_AppendResult(interp,
-                                "cannot access object-specific info ",
-                                "without an object context",
-                                NULL);
-                        return TCL_ERROR;
-                    } else {
-                        val = ItclGetInstanceVar(interp,
-			        Tcl_GetString(icPtr->namePtr), NULL,
-                                    contextIoPtr, icPtr->ivPtr->iclsPtr);
-                    }
-                    if (val == NULL) {
-                        val = "<undefined>";
-                    }
-                    objPtr = Tcl_NewStringObj((const char *)val, TCL_INDEX_NONE);
-                    break;
-            }
+			Tcl_ResetResult(interp);
+			Tcl_AppendResult(interp,
+				"cannot access object-specific info ",
+				"without an object context",
+				(char *)NULL);
+			return TCL_ERROR;
+		    } else {
+			val = ItclGetInstanceVar(interp,
+				Tcl_GetString(icPtr->namePtr), NULL,
+				    contextIoPtr, icPtr->ivPtr->iclsPtr);
+		    }
+		    if (val == NULL) {
+			val = "<undefined>";
+		    }
+		    objPtr = Tcl_NewStringObj((const char *)val, TCL_INDEX_NONE);
+		    break;
+	    }
 
-            if (objc == 1) {
-                resultPtr = objPtr;
-            } else {
-                Tcl_ListObjAppendElement(NULL, resultPtr,
-                    objPtr);
-            }
-        }
-        Tcl_SetObjResult(interp, resultPtr);
+	    if (objc == 1) {
+		resultPtr = objPtr;
+	    } else {
+		Tcl_ListObjAppendElement(NULL, resultPtr,
+		    objPtr);
+	    }
+	}
+	Tcl_SetObjResult(interp, resultPtr);
     } else {
 
-        /*
-         *  Return the list of available components.
-         */
-        resultPtr = Tcl_NewListObj(0, NULL);
-        Itcl_InitHierIter(&hier, contextIclsPtr);
-        while ((iclsPtr=Itcl_AdvanceHierIter(&hier)) != NULL) {
-            hPtr = Tcl_FirstHashEntry(&iclsPtr->components, &place);
-            while (hPtr) {
-                icPtr = (ItclComponent *)Tcl_GetHashValue(hPtr);
-                objPtr = Tcl_NewStringObj(
-		        Tcl_GetString(icPtr->ivPtr->fullNamePtr), TCL_INDEX_NONE);
-                Tcl_ListObjAppendElement(NULL, resultPtr, objPtr);
-                hPtr = Tcl_NextHashEntry(&place);
-            }
-        }
-        Itcl_DeleteHierIter(&hier);
+	/*
+	 *  Return the list of available components.
+	 */
+	resultPtr = Tcl_NewListObj(0, NULL);
+	Itcl_InitHierIter(&hier, contextIclsPtr);
+	while ((iclsPtr=Itcl_AdvanceHierIter(&hier)) != NULL) {
+	    hPtr = Tcl_FirstHashEntry(&iclsPtr->components, &place);
+	    while (hPtr) {
+		icPtr = (ItclComponent *)Tcl_GetHashValue(hPtr);
+		objPtr = Tcl_NewStringObj(
+			Tcl_GetString(icPtr->ivPtr->fullNamePtr), TCL_INDEX_NONE);
+		Tcl_ListObjAppendElement(NULL, resultPtr, objPtr);
+		hPtr = Tcl_NextHashEntry(&place);
+	    }
+	}
+	Itcl_DeleteHierIter(&hier);
 
-        Tcl_SetObjResult(interp, resultPtr);
+	Tcl_SetObjResult(interp, resultPtr);
     }
     return TCL_OK;
 }
@@ -2574,7 +2574,7 @@ static int
 Itcl_BiInfoWidgetCmd(
     TCL_UNUSED(void *),    /* ItclObjectInfo Ptr */
     Tcl_Interp *interp,    /* current interpreter */
-    int objc,              /* number of arguments */
+    int objc,	      /* number of arguments */
     Tcl_Obj *const objv[]) /* argument objects */
 {
     Tcl_Namespace *contextNs = NULL;
@@ -2585,10 +2585,10 @@ Itcl_BiInfoWidgetCmd(
 
     ItclShowArgs(1, "Itcl_BiInfoWidgetCmd", objc, objv);
     if (objc != 1) {
-        Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
-            "wrong # args: should be \"info widget\"",
-            NULL);
-        return TCL_ERROR;
+	Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+	    "wrong # args: should be \"info widget\"",
+	    (char *)NULL);
+	return TCL_ERROR;
     }
 
     /*
@@ -2597,25 +2597,25 @@ Itcl_BiInfoWidgetCmd(
      */
     contextIclsPtr = NULL;
     if (Itcl_GetContext(interp, &contextIclsPtr, &contextIoPtr) != TCL_OK) {
-        /* try it the hard way */
+	/* try it the hard way */
 	void *clientData;
-        ItclObjectInfo *infoPtr;
-        Tcl_Object oPtr;
+	ItclObjectInfo *infoPtr;
+	Tcl_Object oPtr;
 	clientData = Itcl_GetCallFrameClientData(interp);
-        infoPtr = (ItclObjectInfo *)Tcl_GetAssocData(interp,
-                ITCL_INTERP_DATA, NULL);
+	infoPtr = (ItclObjectInfo *)Tcl_GetAssocData(interp,
+		ITCL_INTERP_DATA, NULL);
 	if (clientData != NULL) {
-            oPtr = Tcl_ObjectContextObject((Tcl_ObjectContext)clientData);
-            contextIoPtr = (ItclObject *)Tcl_ObjectGetMetadata(oPtr,
-	            infoPtr->object_meta_type);
-            contextIclsPtr = contextIoPtr->iclsPtr;
+	    oPtr = Tcl_ObjectContextObject((Tcl_ObjectContext)clientData);
+	    contextIoPtr = (ItclObject *)Tcl_ObjectGetMetadata(oPtr,
+		    infoPtr->object_meta_type);
+	    contextIclsPtr = contextIoPtr->iclsPtr;
 	}
 	if ((contextIoPtr == NULL) || (contextIclsPtr == NULL)) {
-            Tcl_SetObjResult(interp, Tcl_NewStringObj(
+	    Tcl_SetObjResult(interp, Tcl_NewStringObj(
 		    "\nget info like this instead: "
 		    "\n  namespace eval className { info widget ... }", TCL_INDEX_NONE));
-            return TCL_ERROR;
-        }
+	    return TCL_ERROR;
+	}
     }
 
     /*
@@ -2624,21 +2624,21 @@ Itcl_BiInfoWidgetCmd(
      *  name.  Use normal class names when possible.
      */
     if (contextIoPtr) {
-        contextNs = contextIoPtr->iclsPtr->nsPtr;
+	contextNs = contextIoPtr->iclsPtr->nsPtr;
     } else {
-        assert(contextIclsPtr != NULL);
-        assert(contextIclsPtr->nsPtr != NULL);
-        if (contextIclsPtr->infoPtr->useOldResolvers) {
-            contextNs = contextIclsPtr->nsPtr;
-        } else {
-            contextNs = contextIclsPtr->nsPtr;
-        }
+	assert(contextIclsPtr != NULL);
+	assert(contextIclsPtr->nsPtr != NULL);
+	if (contextIclsPtr->infoPtr->useOldResolvers) {
+	    contextNs = contextIclsPtr->nsPtr;
+	} else {
+	    contextNs = contextIclsPtr->nsPtr;
+	}
     }
 
-            name = contextNs->fullName;
+	    name = contextNs->fullName;
     if (!(contextIclsPtr->flags & ITCL_WIDGET)) {
-	Tcl_AppendResult(interp, "object or class is no widget", NULL);
-        return TCL_ERROR;
+	Tcl_AppendResult(interp, "object or class is no widget", (char *)NULL);
+	return TCL_ERROR;
     }
     objPtr = Tcl_NewStringObj(name, TCL_INDEX_NONE);
     Tcl_SetObjResult(interp, objPtr);
@@ -2666,7 +2666,7 @@ static int
 Itcl_BiInfoExtendedClassCmd(
     TCL_UNUSED(void *),    /* ItclObjectInfo Ptr */
     Tcl_Interp *interp,    /* current interpreter */
-    int objc,              /* number of arguments */
+    int objc,	      /* number of arguments */
     Tcl_Obj *const objv[]) /* argument objects */
 {
 #ifdef NOTYET
@@ -2678,9 +2678,9 @@ Itcl_BiInfoExtendedClassCmd(
     } *icomplist, icomplistStorage[3];
 
     static enum BCompIdx DefInfoComponent[3] = {
-        BCompNameIdx,
-        BCompInheritIdx,
-        BCompValueIdx
+	BCompNameIdx,
+	BCompInheritIdx,
+	BCompValueIdx
     };
 
     ItclClass *contextIclsPtr;
@@ -2703,23 +2703,23 @@ Itcl_BiInfoExtendedClassCmd(
     contextIclsPtr = NULL;
     if (Itcl_GetContext(interp, &contextIclsPtr, &contextIoPtr) != TCL_OK) {
 	Tcl_SetObjResult(interp, Tcl_NewStringObj(
-            "\nget info like this instead: "
-            "\n  namespace eval className { info extendedclass ... }", TCL_INDEX_NONE));
-        return TCL_ERROR;
+	    "\nget info like this instead: "
+	    "\n  namespace eval className { info extendedclass ... }", TCL_INDEX_NONE));
+	return TCL_ERROR;
     }
     if (contextIoPtr != NULL) {
-        contextIclsPtr = contextIoPtr->iclsPtr;
+	contextIclsPtr = contextIoPtr->iclsPtr;
     }
     nsPtr = Itcl_GetUplevelNamespace(interp, 1);
     if (nsPtr->parentPtr == NULL) {
-        /* :: namespace */
+	/* :: namespace */
 	nsPtr = contextIclsPtr->nsPtr;
     }
     infoPtr = contextIclsPtr->infoPtr;
     hPtr = Tcl_FindHashEntry(&infoPtr->namespaceClasses, (char *)nsPtr);
     if (hPtr == NULL) {
-        Tcl_AppendResult(interp, "cannot find class name for namespace \"",
-	        nsPtr->fullName, "\"", NULL);
+	Tcl_AppendResult(interp, "cannot find class name for namespace \"",
+		nsPtr->fullName, "\"", (char *)NULL);
 	return TCL_ERROR;
     }
     contextIclsPtr = Tcl_GetHashValue(hPtr);
@@ -2753,7 +2753,7 @@ static int
 Itcl_BiInfoDelegatedCmd(
     TCL_UNUSED(void *),    /* ItclObjectInfo Ptr */
     Tcl_Interp *interp,    /* current interpreter */
-    int objc,              /* number of arguments */
+    int objc,	      /* number of arguments */
     Tcl_Obj *const objv[]) /* argument objects */
 {
 #ifdef NOTYET
@@ -2765,9 +2765,9 @@ Itcl_BiInfoDelegatedCmd(
     } *icomplist, icomplistStorage[3];
 
     static enum BCompIdx DefInfoComponent[3] = {
-        BCompNameIdx,
-        BCompInheritIdx,
-        BCompValueIdx
+	BCompNameIdx,
+	BCompInheritIdx,
+	BCompValueIdx
     };
 
     ItclClass *contextIclsPtr;
@@ -2790,23 +2790,23 @@ Itcl_BiInfoDelegatedCmd(
     contextIclsPtr = NULL;
     if (Itcl_GetContext(interp, &contextIclsPtr, &contextIoPtr) != TCL_OK) {
 	Tcl_SetObjResult(interp, Tcl_NewStringObj(
-            "\nget info like this instead: "
-            "\n  namespace eval className { info delegated ... }", TCL_INDEX_NONE));
-        return TCL_ERROR;
+	    "\nget info like this instead: "
+	    "\n  namespace eval className { info delegated ... }", TCL_INDEX_NONE));
+	return TCL_ERROR;
     }
     if (contextIoPtr != NULL) {
-        contextIclsPtr = contextIoPtr->iclsPtr;
+	contextIclsPtr = contextIoPtr->iclsPtr;
     }
     nsPtr = Itcl_GetUplevelNamespace(interp, 1);
     if (nsPtr->parentPtr == NULL) {
-        /* :: namespace */
+	/* :: namespace */
 	nsPtr = contextIclsPtr->nsPtr;
     }
     infoPtr = contextIclsPtr->infoPtr;
     hPtr = Tcl_FindHashEntry(&infoPtr->namespaceClasses, (char *)nsPtr);
     if (hPtr == NULL) {
-        Tcl_AppendResult(interp, "cannot find class name for namespace \"",
-	        nsPtr->fullName, "\"", NULL);
+	Tcl_AppendResult(interp, "cannot find class name for namespace \"",
+		nsPtr->fullName, "\"", (char *)NULL);
 	return TCL_ERROR;
     }
     contextIclsPtr = Tcl_GetHashValue(hPtr);
@@ -2828,7 +2828,7 @@ Itcl_BiInfoDelegatedCmd(
  *  can be invoked with or without an object context:
  *
  *    <objName> info type   <= returns most-specific class name
- *    info type             <= returns active namespace name
+ *    info type	     <= returns active namespace name
  *
  *  Returns a status TCL_OK/TCL_ERROR to indicate success/failure.
  * ------------------------------------------------------------------------
@@ -2838,7 +2838,7 @@ static int
 Itcl_BiInfoTypeCmd(
     TCL_UNUSED(void *),    /* ItclObjectInfo Ptr */
     Tcl_Interp *interp,    /* current interpreter */
-    int objc,              /* number of arguments */
+    int objc,	      /* number of arguments */
     Tcl_Obj *const objv[]) /* argument objects */
 {
     Tcl_Namespace *contextNs = NULL;
@@ -2849,10 +2849,10 @@ Itcl_BiInfoTypeCmd(
 
     ItclShowArgs(1, "Itcl_BiInfoTypeCmd", objc, objv);
     if (objc != 1) {
-        Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
-            "wrong # args: should be \"info type\"",
-            NULL);
-        return TCL_ERROR;
+	Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+	    "wrong # args: should be \"info type\"",
+	    (char *)NULL);
+	return TCL_ERROR;
     }
 
     /*
@@ -2861,25 +2861,25 @@ Itcl_BiInfoTypeCmd(
      */
     contextIclsPtr = NULL;
     if (Itcl_GetContext(interp, &contextIclsPtr, &contextIoPtr) != TCL_OK) {
-        /* try it the hard way */
+	/* try it the hard way */
 	void *clientData;
-        ItclObjectInfo *infoPtr;
-        Tcl_Object oPtr;
+	ItclObjectInfo *infoPtr;
+	Tcl_Object oPtr;
 	clientData = Itcl_GetCallFrameClientData(interp);
-        infoPtr = (ItclObjectInfo *)Tcl_GetAssocData(interp,
-                ITCL_INTERP_DATA, NULL);
+	infoPtr = (ItclObjectInfo *)Tcl_GetAssocData(interp,
+		ITCL_INTERP_DATA, NULL);
 	if (clientData != NULL) {
-            oPtr = Tcl_ObjectContextObject((Tcl_ObjectContext)clientData);
-            contextIoPtr = (ItclObject *)Tcl_ObjectGetMetadata(oPtr,
-	            infoPtr->object_meta_type);
-            contextIclsPtr = contextIoPtr->iclsPtr;
+	    oPtr = Tcl_ObjectContextObject((Tcl_ObjectContext)clientData);
+	    contextIoPtr = (ItclObject *)Tcl_ObjectGetMetadata(oPtr,
+		    infoPtr->object_meta_type);
+	    contextIclsPtr = contextIoPtr->iclsPtr;
 	}
 	if ((contextIoPtr == NULL) || (contextIclsPtr == NULL)) {
 	    Tcl_SetObjResult(interp, Tcl_NewStringObj(
 		    "\nget info like this instead: "
 		    "\n  namespace eval className { info type ...}", TCL_INDEX_NONE));
-            return TCL_ERROR;
-        }
+	    return TCL_ERROR;
+	}
     }
 
     /*
@@ -2888,21 +2888,21 @@ Itcl_BiInfoTypeCmd(
      *  name.  Use normal class names when possible.
      */
     if (contextIoPtr) {
-        contextNs = contextIoPtr->iclsPtr->nsPtr;
+	contextNs = contextIoPtr->iclsPtr->nsPtr;
     } else {
-        assert(contextIclsPtr != NULL);
-        assert(contextIclsPtr->nsPtr != NULL);
-        if (contextIclsPtr->infoPtr->useOldResolvers) {
-            contextNs = contextIclsPtr->nsPtr;
-        } else {
-            contextNs = contextIclsPtr->nsPtr;
-        }
+	assert(contextIclsPtr != NULL);
+	assert(contextIclsPtr->nsPtr != NULL);
+	if (contextIclsPtr->infoPtr->useOldResolvers) {
+	    contextNs = contextIclsPtr->nsPtr;
+	} else {
+	    contextNs = contextIclsPtr->nsPtr;
+	}
     }
 
-            name = contextNs->fullName;
+	    name = contextNs->fullName;
     if (!(contextIclsPtr->flags & ITCL_TYPE)) {
-	Tcl_AppendResult(interp, "object or class is no type", NULL);
-        return TCL_ERROR;
+	Tcl_AppendResult(interp, "object or class is no type", (char *)NULL);
+	return TCL_ERROR;
     }
     objPtr = Tcl_NewStringObj(name, TCL_INDEX_NONE);
     Tcl_SetObjResult(interp, objPtr);
@@ -2926,7 +2926,7 @@ static int
 Itcl_BiInfoHullTypeCmd(
     TCL_UNUSED(void *),    /* ItclObjectInfo Ptr */
     Tcl_Interp *interp,    /* current interpreter */
-    int objc,              /* number of arguments */
+    int objc,	      /* number of arguments */
     Tcl_Obj *const objv[]) /* argument objects */
 {
     ItclClass *contextIclsPtr;
@@ -2934,10 +2934,10 @@ Itcl_BiInfoHullTypeCmd(
 
     ItclShowArgs(1, "Itcl_BiInfoHullTypeCmd", objc, objv);
     if (objc != 1) {
-        Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
-            "wrong # args: should be \"info hulltype\"",
-            NULL);
-        return TCL_ERROR;
+	Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+	    "wrong # args: should be \"info hulltype\"",
+	    (char *)NULL);
+	return TCL_ERROR;
     }
 
     /*
@@ -2946,31 +2946,31 @@ Itcl_BiInfoHullTypeCmd(
      */
     contextIclsPtr = NULL;
     if (Itcl_GetContext(interp, &contextIclsPtr, &contextIoPtr) != TCL_OK) {
-        /* try it the hard way */
+	/* try it the hard way */
 	void *clientData;
-        ItclObjectInfo *infoPtr;
-        Tcl_Object oPtr;
+	ItclObjectInfo *infoPtr;
+	Tcl_Object oPtr;
 	clientData = Itcl_GetCallFrameClientData(interp);
-        infoPtr = (ItclObjectInfo *)Tcl_GetAssocData(interp,
-                ITCL_INTERP_DATA, NULL);
+	infoPtr = (ItclObjectInfo *)Tcl_GetAssocData(interp,
+		ITCL_INTERP_DATA, NULL);
 	if (clientData != NULL) {
-            oPtr = Tcl_ObjectContextObject((Tcl_ObjectContext)clientData);
-            contextIoPtr = (ItclObject *)Tcl_ObjectGetMetadata(oPtr,
-	            infoPtr->object_meta_type);
-            contextIclsPtr = contextIoPtr->iclsPtr;
+	    oPtr = Tcl_ObjectContextObject((Tcl_ObjectContext)clientData);
+	    contextIoPtr = (ItclObject *)Tcl_ObjectGetMetadata(oPtr,
+		    infoPtr->object_meta_type);
+	    contextIclsPtr = contextIoPtr->iclsPtr;
 	}
 	if ((contextIoPtr == NULL) || (contextIclsPtr == NULL)) {
 	    Tcl_SetObjResult(interp, Tcl_NewStringObj(
 		    "\nget info like this instead: "
 		    "\n  namespace eval className { info hulltype ... }", TCL_INDEX_NONE));
-            return TCL_ERROR;
-        }
+	    return TCL_ERROR;
+	}
     }
 
     if (!(contextIclsPtr->flags & ITCL_WIDGET)) {
 	Tcl_AppendResult(interp, "object or class is no widget.",
-	        " Only ::itcl::widget has a hulltype.", NULL);
-        return TCL_ERROR;
+		" Only ::itcl::widget has a hulltype.", (char *)NULL);
+	return TCL_ERROR;
     }
     Tcl_SetObjResult(interp, contextIclsPtr->hullTypePtr);
     return TCL_OK;
@@ -2993,7 +2993,7 @@ static int
 Itcl_BiInfoDefaultCmd(
     TCL_UNUSED(void *),    /* ItclObjectInfo Ptr */
     Tcl_Interp *interp,    /* current interpreter */
-    int objc,              /* number of arguments */
+    int objc,	      /* number of arguments */
     Tcl_Obj *const objv[]) /* argument objects */
 {
     FOREACH_HASH_DECLS;
@@ -3011,64 +3011,64 @@ Itcl_BiInfoDefaultCmd(
     iclsPtr = NULL;
     found = 0;
     if (Itcl_GetContext(interp, &iclsPtr, &ioPtr) != TCL_OK) {
-        return TCL_ERROR;
+	return TCL_ERROR;
     }
     if (ioPtr != NULL) {
-        iclsPtr = ioPtr->iclsPtr;
+	iclsPtr = ioPtr->iclsPtr;
     }
     if (objc != 4) {
 	Tcl_AppendResult(interp, "wrong # args, should be info default ",
-	        "<method> <argName> <varName>", NULL);
-        return TCL_ERROR;
+		"<method> <argName> <varName>", (char *)NULL);
+	return TCL_ERROR;
     }
     methodName = Tcl_GetString(objv[1]);
     argName = Tcl_GetString(objv[2]);
     FOREACH_HASH_VALUE(imPtr, &iclsPtr->functions) {
-        if (strcmp(methodName, Tcl_GetString(imPtr->namePtr)) == 0) {
+	if (strcmp(methodName, Tcl_GetString(imPtr->namePtr)) == 0) {
 	    found = 1;
 	    break;
 	}
     }
     if (found) {
-        argListPtr = imPtr->argListPtr;
+	argListPtr = imPtr->argListPtr;
 	while (argListPtr != NULL) {
 	    if (strcmp(argName, Tcl_GetString(argListPtr->namePtr)) == 0) {
-	        if (argListPtr->defaultValuePtr != NULL) {
+		if (argListPtr->defaultValuePtr != NULL) {
 		    if (NULL == Tcl_ObjSetVar2(interp, objv[3], NULL,
 			    argListPtr->defaultValuePtr, TCL_LEAVE_ERR_MSG)) {
 			return TCL_ERROR;
 		    }
 		    Tcl_SetObjResult(interp, Tcl_NewWideIntObj(1));
 		    return TCL_OK;
-	        } else {
-	            Tcl_AppendResult(interp, "method \"", methodName,
-		            "\" has no default value for argument \"",
-			    argName, "\"", NULL);
+		} else {
+		    Tcl_AppendResult(interp, "method \"", methodName,
+			    "\" has no default value for argument \"",
+			    argName, "\"", (char *)NULL);
 		    return TCL_ERROR;
-	        }
+		}
 	    }
 	    argListPtr = argListPtr->nextPtr;
 	}
     }
     if (! found) {
-        FOREACH_HASH_VALUE(idmPtr, &iclsPtr->delegatedFunctions) {
+	FOREACH_HASH_VALUE(idmPtr, &iclsPtr->delegatedFunctions) {
 	    if (strcmp(methodName, Tcl_GetString(idmPtr->namePtr)) == 0) {
 		what = "method";
 		if (idmPtr->flags & ITCL_TYPE_METHOD) {
 		    what = "typemethod";
 		}
-                Tcl_AppendResult(interp, "delegated ", what, " \"", methodName,
-		        "\"", NULL);
-                return TCL_ERROR;
+		Tcl_AppendResult(interp, "delegated ", what, " \"", methodName,
+			"\"", (char *)NULL);
+		return TCL_ERROR;
 	    }
 	}
     }
     if (! found) {
-        Tcl_AppendResult(interp, "unknown method \"", methodName, "\"", NULL);
-        return TCL_ERROR;
+	Tcl_AppendResult(interp, "unknown method \"", methodName, "\"", (char *)NULL);
+	return TCL_ERROR;
     }
     Tcl_AppendResult(interp, "method \"", methodName, "\" has no argument \"",
-            argName, "\"", NULL);
+	    argName, "\"", (char *)NULL);
     return TCL_ERROR;
 }
 
@@ -3088,7 +3088,7 @@ static int
 Itcl_BiInfoMethodCmd(
     TCL_UNUSED(void *),    /* ItclObjectInfo Ptr */
     Tcl_Interp *interp,    /* current interpreter */
-    int objc,              /* number of arguments */
+    int objc,	      /* number of arguments */
     Tcl_Obj *const objv[]) /* argument objects */
 {
     Tcl_Obj *resultPtr;
@@ -3107,19 +3107,19 @@ Itcl_BiInfoMethodCmd(
     int result;
 
     static const char *options[] = {
-        "-args", "-body", "-name", "-protection", "-type",
-        NULL
+	"-args", "-body", "-name", "-protection", "-type",
+	NULL
     };
     enum BIfIdx {
-        BIfArgsIdx, BIfBodyIdx, BIfNameIdx, BIfProtectIdx, BIfTypeIdx
+	BIfArgsIdx, BIfBodyIdx, BIfNameIdx, BIfProtectIdx, BIfTypeIdx
     } *iflist, iflistStorage[5];
 
     static enum BIfIdx DefInfoFunction[5] = {
-        BIfProtectIdx,
-        BIfTypeIdx,
-        BIfNameIdx,
-        BIfArgsIdx,
-        BIfBodyIdx
+	BIfProtectIdx,
+	BIfTypeIdx,
+	BIfNameIdx,
+	BIfArgsIdx,
+	BIfBodyIdx
     };
 
     ItclShowArgs(1, "Itcl_BiInfoMethodCmd", objc, objv);
@@ -3132,13 +3132,13 @@ Itcl_BiInfoMethodCmd(
      *  signal an error.
      */
     if (Itcl_GetContext(interp, &contextIclsPtr, &contextIoPtr) != TCL_OK) {
-        Tcl_SetObjResult(interp, Tcl_NewStringObj(
-            "\nget info like this instead: "
-            "\n  namespace eval className { info method ... }", TCL_INDEX_NONE));
-        return TCL_ERROR;
+	Tcl_SetObjResult(interp, Tcl_NewStringObj(
+	    "\nget info like this instead: "
+	    "\n  namespace eval className { info method ... }", TCL_INDEX_NONE));
+	return TCL_ERROR;
     }
     if (contextIoPtr != NULL) {
-        contextIclsPtr = contextIoPtr->iclsPtr;
+	contextIclsPtr = contextIoPtr->iclsPtr;
     }
 
     /*
@@ -3149,8 +3149,8 @@ Itcl_BiInfoMethodCmd(
     objc--;
 
     if (objc > 0) {
-        cmdName = Tcl_GetString(*objv);
-        objc--; objv++;
+	cmdName = Tcl_GetString(*objv);
+	objc--; objv++;
     }
 
     /*
@@ -3159,142 +3159,142 @@ Itcl_BiInfoMethodCmd(
     if (cmdName) {
 	ItclCmdLookup *clookup;
 	objPtr = Tcl_NewStringObj(cmdName, TCL_INDEX_NONE);
-        hPtr = Tcl_FindHashEntry(&contextIclsPtr->resolveCmds, (char *)objPtr);
+	hPtr = Tcl_FindHashEntry(&contextIclsPtr->resolveCmds, (char *)objPtr);
 	Tcl_DecrRefCount(objPtr);
 	objPtr = NULL;
-        if (hPtr == NULL) {
-            Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
-                "\"", cmdName, "\" isn't a method in class \"",
-                contextIclsPtr->nsPtr->fullName, "\"",
-                NULL);
-            return TCL_ERROR;
-        }
+	if (hPtr == NULL) {
+	    Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+		"\"", cmdName, "\" isn't a method in class \"",
+		contextIclsPtr->nsPtr->fullName, "\"",
+		(char *)NULL);
+	    return TCL_ERROR;
+	}
 
 	clookup = (ItclCmdLookup *)Tcl_GetHashValue(hPtr);
 	imPtr = clookup->imPtr;
-        mcode = imPtr->codePtr;
-        if (imPtr->flags & ITCL_COMMON) {
-            Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
-                "\"", cmdName, "\" isn't a method in class \"",
-                contextIclsPtr->nsPtr->fullName, "\"",
-                NULL);
-            return TCL_ERROR;
+	mcode = imPtr->codePtr;
+	if (imPtr->flags & ITCL_COMMON) {
+	    Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+		"\"", cmdName, "\" isn't a method in class \"",
+		contextIclsPtr->nsPtr->fullName, "\"",
+		(char *)NULL);
+	    return TCL_ERROR;
 	}
 
-        /*
-         *  By default, return everything.
-         */
-        if (objc == 0) {
-            objc = 5;
-            iflist = DefInfoFunction;
-        } else {
+	/*
+	 *  By default, return everything.
+	 */
+	if (objc == 0) {
+	    objc = 5;
+	    iflist = DefInfoFunction;
+	} else {
 
-            /*
-             *  Otherwise, scan through all remaining flags and
-             *  figure out what to return.
-             */
-            iflist = &iflistStorage[0];
-            for (i=0 ; i < objc; i++) {
-                result = Tcl_GetIndexFromObjStruct(interp, objv[i],
-                    options, sizeof(char *), "option", 0, (int*)(&iflist[i]));
-                if (result != TCL_OK) {
-                    return TCL_ERROR;
-                }
-            }
-        }
+	    /*
+	     *  Otherwise, scan through all remaining flags and
+	     *  figure out what to return.
+	     */
+	    iflist = &iflistStorage[0];
+	    for (i=0 ; i < objc; i++) {
+		result = Tcl_GetIndexFromObjStruct(interp, objv[i],
+		    options, sizeof(char *), "option", 0, (int*)(&iflist[i]));
+		if (result != TCL_OK) {
+		    return TCL_ERROR;
+		}
+	    }
+	}
 
-        if (objc > 1) {
-            resultPtr = Tcl_NewListObj(0, NULL);
-        }
+	if (objc > 1) {
+	    resultPtr = Tcl_NewListObj(0, NULL);
+	}
 
-        for (i=0 ; i < objc; i++) {
-            switch (iflist[i]) {
-                case BIfArgsIdx:
-                    if (mcode && mcode->argListPtr) {
+	for (i=0 ; i < objc; i++) {
+	    switch (iflist[i]) {
+		case BIfArgsIdx:
+		    if (mcode && mcode->argListPtr) {
 			if (imPtr->usagePtr == NULL) {
-                            objPtr = Tcl_NewStringObj(
-			            Tcl_GetString(mcode->usagePtr), TCL_INDEX_NONE);
+			    objPtr = Tcl_NewStringObj(
+				    Tcl_GetString(mcode->usagePtr), TCL_INDEX_NONE);
 			} else {
-                            objPtr = Tcl_NewStringObj(
-			            Tcl_GetString(imPtr->usagePtr), TCL_INDEX_NONE);
-		        }
-                    } else {
-		        if ((imPtr->flags & ITCL_ARG_SPEC) != 0) {
+			    objPtr = Tcl_NewStringObj(
+				    Tcl_GetString(imPtr->usagePtr), TCL_INDEX_NONE);
+			}
+		    } else {
+			if ((imPtr->flags & ITCL_ARG_SPEC) != 0) {
 			    if (imPtr->usagePtr == NULL) {
-                                objPtr = Tcl_NewStringObj(
-				        Tcl_GetString(mcode->usagePtr), TCL_INDEX_NONE);
+				objPtr = Tcl_NewStringObj(
+					Tcl_GetString(mcode->usagePtr), TCL_INDEX_NONE);
 			    } else {
-			        objPtr = Tcl_NewStringObj(
-				        Tcl_GetString(imPtr->usagePtr), TCL_INDEX_NONE);
+				objPtr = Tcl_NewStringObj(
+					Tcl_GetString(imPtr->usagePtr), TCL_INDEX_NONE);
 			    }
-                        } else {
-                            objPtr = Tcl_NewStringObj("<undefined>", TCL_INDEX_NONE);
-                        }
+			} else {
+			    objPtr = Tcl_NewStringObj("<undefined>", TCL_INDEX_NONE);
+			}
 		    }
-                    break;
+		    break;
 
-                case BIfBodyIdx:
-                    if (mcode && Itcl_IsMemberCodeImplemented(mcode)) {
-                        objPtr = Tcl_NewStringObj(
-			        Tcl_GetString(mcode->bodyPtr), TCL_INDEX_NONE);
-                    } else {
-                        objPtr = Tcl_NewStringObj("<undefined>", TCL_INDEX_NONE);
-                    }
-                    break;
+		case BIfBodyIdx:
+		    if (mcode && Itcl_IsMemberCodeImplemented(mcode)) {
+			objPtr = Tcl_NewStringObj(
+				Tcl_GetString(mcode->bodyPtr), TCL_INDEX_NONE);
+		    } else {
+			objPtr = Tcl_NewStringObj("<undefined>", TCL_INDEX_NONE);
+		    }
+		    break;
 
-                case BIfNameIdx:
-                    objPtr = Tcl_NewStringObj(
-		            Tcl_GetString(imPtr->fullNamePtr), TCL_INDEX_NONE);
-                    break;
+		case BIfNameIdx:
+		    objPtr = Tcl_NewStringObj(
+			    Tcl_GetString(imPtr->fullNamePtr), TCL_INDEX_NONE);
+		    break;
 
-                case BIfProtectIdx:
-                    val = Itcl_ProtectionStr(imPtr->protection);
-                    objPtr = Tcl_NewStringObj(val, TCL_INDEX_NONE);
-                    break;
+		case BIfProtectIdx:
+		    val = Itcl_ProtectionStr(imPtr->protection);
+		    objPtr = Tcl_NewStringObj(val, TCL_INDEX_NONE);
+		    break;
 
-                case BIfTypeIdx:
-                    val = "method";
-                    objPtr = Tcl_NewStringObj(val, TCL_INDEX_NONE);
-                    break;
-            }
+		case BIfTypeIdx:
+		    val = "method";
+		    objPtr = Tcl_NewStringObj(val, TCL_INDEX_NONE);
+		    break;
+	    }
 
-            if (objc == 1) {
-                resultPtr = objPtr;
-            } else {
-                Tcl_ListObjAppendElement(NULL, resultPtr, objPtr);
-            }
-        }
-        Tcl_SetObjResult(interp, resultPtr);
+	    if (objc == 1) {
+		resultPtr = objPtr;
+	    } else {
+		Tcl_ListObjAppendElement(NULL, resultPtr, objPtr);
+	    }
+	}
+	Tcl_SetObjResult(interp, resultPtr);
     } else {
 
-        /*
-         *  Return the list of available commands.
-         */
-        resultPtr = Tcl_NewListObj(0, NULL);
+	/*
+	 *  Return the list of available commands.
+	 */
+	resultPtr = Tcl_NewListObj(0, NULL);
 
-        Itcl_InitHierIter(&hier, contextIclsPtr);
-        while ((iclsPtr=Itcl_AdvanceHierIter(&hier)) != NULL) {
-            hPtr = Tcl_FirstHashEntry(&iclsPtr->functions, &place);
-            while (hPtr) {
-	        int useIt = 1;
+	Itcl_InitHierIter(&hier, contextIclsPtr);
+	while ((iclsPtr=Itcl_AdvanceHierIter(&hier)) != NULL) {
+	    hPtr = Tcl_FirstHashEntry(&iclsPtr->functions, &place);
+	    while (hPtr) {
+		int useIt = 1;
 
-                imPtr = (ItclMemberFunc*)Tcl_GetHashValue(hPtr);
+		imPtr = (ItclMemberFunc*)Tcl_GetHashValue(hPtr);
 		if (!(imPtr->flags & ITCL_METHOD)) {
 		    useIt = 0;
 		}
 		if (useIt) {
-                    objPtr = Tcl_NewStringObj(
-		            Tcl_GetString(imPtr->fullNamePtr), TCL_INDEX_NONE);
-                    Tcl_ListObjAppendElement(NULL,
-		            resultPtr, objPtr);
-                }
+		    objPtr = Tcl_NewStringObj(
+			    Tcl_GetString(imPtr->fullNamePtr), TCL_INDEX_NONE);
+		    Tcl_ListObjAppendElement(NULL,
+			    resultPtr, objPtr);
+		}
 
-                hPtr = Tcl_NextHashEntry(&place);
-            }
-        }
-        Itcl_DeleteHierIter(&hier);
+		hPtr = Tcl_NextHashEntry(&place);
+	    }
+	}
+	Itcl_DeleteHierIter(&hier);
 
-        Tcl_SetObjResult(interp, resultPtr);
+	Tcl_SetObjResult(interp, resultPtr);
     }
     return TCL_OK;
 }
@@ -3315,7 +3315,7 @@ static int
 Itcl_BiInfoMethodsCmd(
     TCL_UNUSED(void *),    /* ItclObjectInfo Ptr */
     Tcl_Interp *interp,    /* current interpreter */
-    int objc,              /* number of arguments */
+    int objc,	      /* number of arguments */
     Tcl_Obj *const objv[]) /* argument objects */
 {
     FOREACH_HASH_DECLS;
@@ -3331,67 +3331,67 @@ Itcl_BiInfoMethodsCmd(
     iclsPtr = NULL;
     pattern = NULL;
     if (Itcl_GetContext(interp, &iclsPtr, &ioPtr) != TCL_OK) {
-        Tcl_AppendResult(interp, "cannot get context ", NULL);
-        return TCL_ERROR;
+	Tcl_AppendResult(interp, "cannot get context ", (char *)NULL);
+	return TCL_ERROR;
     }
     if (ioPtr != NULL) {
-        iclsPtr = ioPtr->iclsPtr;
+	iclsPtr = ioPtr->iclsPtr;
     }
     if (objc == 2) {
-        pattern = Tcl_GetString(objv[1]);
+	pattern = Tcl_GetString(objv[1]);
     }
     listPtr = Tcl_NewListObj(0, NULL);
     name = "destroy";
     if ((pattern == NULL) || Tcl_StringCaseMatch((const char *)name, pattern, 0)) {
-        Tcl_ListObjAppendElement(interp, listPtr,
-                Tcl_NewStringObj(name, TCL_INDEX_NONE));
+	Tcl_ListObjAppendElement(interp, listPtr,
+		Tcl_NewStringObj(name, TCL_INDEX_NONE));
     }
     name = "info";
     if ((pattern == NULL) || Tcl_StringCaseMatch((const char *)name, pattern, 0)) {
-        Tcl_ListObjAppendElement(interp, listPtr,
-                Tcl_NewStringObj(name, TCL_INDEX_NONE));
+	Tcl_ListObjAppendElement(interp, listPtr,
+		Tcl_NewStringObj(name, TCL_INDEX_NONE));
     }
     FOREACH_HASH_VALUE(imPtr, &iclsPtr->functions) {
 	name = Tcl_GetString(imPtr->namePtr);
-        if (strcmp(name, "*") == 0) {
+	if (strcmp(name, "*") == 0) {
 	    continue;
 	}
-        if (strcmp(name, "destroy") == 0) {
+	if (strcmp(name, "destroy") == 0) {
 	    continue;
 	}
-        if (strcmp(name, "info") == 0) {
+	if (strcmp(name, "info") == 0) {
 	    continue;
 	}
-        if ((imPtr->flags & ITCL_METHOD) &&
-	        !(imPtr->flags & ITCL_CONSTRUCTOR) &&
-	        !(imPtr->flags & ITCL_DESTRUCTOR) &&
+	if ((imPtr->flags & ITCL_METHOD) &&
+		!(imPtr->flags & ITCL_CONSTRUCTOR) &&
+		!(imPtr->flags & ITCL_DESTRUCTOR) &&
 		!(imPtr->flags & ITCL_COMMON) &&
-	        !(imPtr->codePtr->flags & ITCL_BUILTIN)) {
+		!(imPtr->codePtr->flags & ITCL_BUILTIN)) {
 	    if ((pattern == NULL) ||
-                     Tcl_StringCaseMatch((const char *)name, pattern, 0)) {
-	        Tcl_ListObjAppendElement(interp, listPtr,
-		        Tcl_NewStringObj(Tcl_GetString(imPtr->namePtr), TCL_INDEX_NONE));
+		     Tcl_StringCaseMatch((const char *)name, pattern, 0)) {
+		Tcl_ListObjAppendElement(interp, listPtr,
+			Tcl_NewStringObj(Tcl_GetString(imPtr->namePtr), TCL_INDEX_NONE));
 	    }
 	}
     }
     FOREACH_HASH_VALUE(idmPtr, &iclsPtr->delegatedFunctions) {
 	name = Tcl_GetString(idmPtr->namePtr);
-        if (strcmp(name, "*") == 0) {
+	if (strcmp(name, "*") == 0) {
 	    continue;
 	}
-        if (strcmp(name, "destroy") == 0) {
+	if (strcmp(name, "destroy") == 0) {
 	    continue;
 	}
-        if (strcmp(name, "info") == 0) {
+	if (strcmp(name, "info") == 0) {
 	    continue;
 	}
-        if (idmPtr->flags & ITCL_METHOD) {
+	if (idmPtr->flags & ITCL_METHOD) {
 	    if ((pattern == NULL) ||
-                     Tcl_StringCaseMatch((const char *)name, pattern, 0)) {
-	        Tcl_ListObjAppendElement(interp, listPtr,
-		        Tcl_NewStringObj(Tcl_GetString(idmPtr->namePtr), TCL_INDEX_NONE));
+		     Tcl_StringCaseMatch((const char *)name, pattern, 0)) {
+		Tcl_ListObjAppendElement(interp, listPtr,
+			Tcl_NewStringObj(Tcl_GetString(idmPtr->namePtr), TCL_INDEX_NONE));
 	    }
-        }
+	}
     }
     Tcl_SetObjResult(interp, listPtr);
     return TCL_OK;
@@ -3413,7 +3413,7 @@ static int
 Itcl_BiInfoOptionsCmd(
     TCL_UNUSED(void *),    /* ItclObjectInfo Ptr */
     Tcl_Interp *interp,    /* current interpreter */
-    int objc,              /* number of arguments */
+    int objc,	      /* number of arguments */
     Tcl_Obj *const objv[]) /* argument objects */
 {
     FOREACH_HASH_DECLS;
@@ -3438,76 +3438,76 @@ Itcl_BiInfoOptionsCmd(
     iclsPtr = NULL;
     pattern = NULL;
     if (Itcl_GetContext(interp, &iclsPtr, &ioPtr) != TCL_OK) {
-        Tcl_AppendResult(interp, "cannot get context ", NULL);
-        return TCL_ERROR;
+	Tcl_AppendResult(interp, "cannot get context ", (char *)NULL);
+	return TCL_ERROR;
     }
     if (ioPtr != NULL) {
-        iclsPtr = ioPtr->iclsPtr;
+	iclsPtr = ioPtr->iclsPtr;
     }
     if (objc > 2) {
 	Tcl_AppendResult(interp, "wrong # args should be: info options ",
-	        "?pattern?", NULL);
-        return TCL_ERROR;
+		"?pattern?", (char *)NULL);
+	return TCL_ERROR;
     }
     if (objc == 2) {
-        pattern = Tcl_GetString(objv[1]);
+	pattern = Tcl_GetString(objv[1]);
     }
     listPtr = Tcl_NewListObj(0, NULL);
     if (ioPtr == NULL) {
-        tablePtr = &iclsPtr->options;
+	tablePtr = &iclsPtr->options;
     } else {
-        tablePtr = &ioPtr->objectOptions;
+	tablePtr = &ioPtr->objectOptions;
     }
     FOREACH_HASH_VALUE(ioptPtr, tablePtr) {
 	name = Tcl_GetString(ioptPtr->namePtr);
 	if ((pattern == NULL) ||
-                 Tcl_StringCaseMatch(name, pattern, 0)) {
-            Tcl_ListObjAppendElement(interp, listPtr,
-	            Tcl_NewStringObj(Tcl_GetString(ioptPtr->namePtr), TCL_INDEX_NONE));
-        }
+		 Tcl_StringCaseMatch(name, pattern, 0)) {
+	    Tcl_ListObjAppendElement(interp, listPtr,
+		    Tcl_NewStringObj(Tcl_GetString(ioptPtr->namePtr), TCL_INDEX_NONE));
+	}
     }
     if (ioPtr == NULL) {
-        tablePtr = &iclsPtr->delegatedOptions;
+	tablePtr = &iclsPtr->delegatedOptions;
     } else {
-        tablePtr = &ioPtr->objectDelegatedOptions;
+	tablePtr = &ioPtr->objectDelegatedOptions;
     }
     FOREACH_HASH_VALUE(idoPtr, tablePtr) {
-        name = Tcl_GetString(idoPtr->namePtr);
+	name = Tcl_GetString(idoPtr->namePtr);
 	if (strcmp(name, "*") != 0) {
 	    if ((pattern == NULL) ||
-                    Tcl_StringCaseMatch(name, pattern, 0)) {
-                Tcl_ListObjAppendElement(interp, listPtr,
-	                Tcl_NewStringObj(Tcl_GetString(idoPtr->namePtr), TCL_INDEX_NONE));
+		    Tcl_StringCaseMatch(name, pattern, 0)) {
+		Tcl_ListObjAppendElement(interp, listPtr,
+			Tcl_NewStringObj(Tcl_GetString(idoPtr->namePtr), TCL_INDEX_NONE));
 	    }
-        } else {
+	} else {
 	    if (idoPtr->icPtr == NULL) {
 		Tcl_AppendResult(interp, "component \"",
-		        Tcl_GetString(idoPtr->namePtr),
-			"\" is not initialized", NULL);
-	        return TCL_ERROR;
+			Tcl_GetString(idoPtr->namePtr),
+			"\" is not initialized", (char *)NULL);
+		return TCL_ERROR;
 	    }
 	    val = ItclGetInstanceVar(interp,
-	            Tcl_GetString(idoPtr->icPtr->namePtr),
-	            NULL, ioPtr, ioPtr->iclsPtr);
-            if ((val != NULL) && (strlen(val) != 0)) {
-	        objPtr = Tcl_NewStringObj(val, TCL_INDEX_NONE);
+		    Tcl_GetString(idoPtr->icPtr->namePtr),
+		    NULL, ioPtr, ioPtr->iclsPtr);
+	    if ((val != NULL) && (strlen(val) != 0)) {
+		objPtr = Tcl_NewStringObj(val, TCL_INDEX_NONE);
 		Tcl_AppendToObj(objPtr, " configure", TCL_INDEX_NONE);
 		result = Tcl_EvalObjEx(interp, objPtr, 0);
-	        if (result != TCL_OK) {
+		if (result != TCL_OK) {
 		    return TCL_ERROR;
 		}
-	        listPtr2 = Tcl_GetObjResult(interp);
+		listPtr2 = Tcl_GetObjResult(interp);
 		Tcl_ListObjGetElements(interp, listPtr2, &lObjc, &lObjv);
 		for (i = 0; i < lObjc; i++) {
 		    Tcl_ListObjIndex(interp, lObjv[i], 0, &objPtr);
 		    hPtr2 = Tcl_FindHashEntry(&idoPtr->exceptions,
-		            (char *)objPtr);
+			    (char *)objPtr);
 		    if (hPtr2 == NULL) {
 			name = Tcl_GetString(objPtr);
-	                if ((pattern == NULL) ||
-                                 Tcl_StringCaseMatch(name, pattern, 0)) {
-		            Tcl_ListObjAppendElement(interp, listPtr, objPtr);
-		        }
+			if ((pattern == NULL) ||
+				 Tcl_StringCaseMatch(name, pattern, 0)) {
+			    Tcl_ListObjAppendElement(interp, listPtr, objPtr);
+			}
 		    }
 		}
 	    }
@@ -3533,7 +3533,7 @@ static int
 Itcl_BiInfoTypesCmd(
     void *clientData,      /* ItclObjectInfo Ptr */
     Tcl_Interp *interp,    /* current interpreter */
-    int objc,              /* number of arguments */
+    int objc,	      /* number of arguments */
     Tcl_Obj *const objv[]) /* argument objects */
 {
     FOREACH_HASH_DECLS;
@@ -3549,22 +3549,22 @@ Itcl_BiInfoTypesCmd(
     pattern = NULL;
     if (objc > 2) {
 	Tcl_AppendResult(interp, "wrong # args should be: info types ",
-	        "?pattern?", NULL);
-        return TCL_ERROR;
+		"?pattern?", (char *)NULL);
+	return TCL_ERROR;
     }
     if (objc == 2) {
-        pattern = Tcl_GetString(objv[1]);
+	pattern = Tcl_GetString(objv[1]);
     }
     listPtr = Tcl_NewListObj(0, NULL);
     FOREACH_HASH_VALUE(iclsPtr, &infoPtr->nameClasses) {
 	if (iclsPtr->flags & ITCL_TYPE) {
 	    name = Tcl_GetString(iclsPtr->namePtr);
 	    if ((pattern == NULL) ||
-                     Tcl_StringCaseMatch(name, pattern, 0)) {
-                Tcl_ListObjAppendElement(interp, listPtr,
-		        Tcl_NewStringObj(Tcl_GetString(iclsPtr->namePtr), TCL_INDEX_NONE));
-            }
-        }
+		     Tcl_StringCaseMatch(name, pattern, 0)) {
+		Tcl_ListObjAppendElement(interp, listPtr,
+			Tcl_NewStringObj(Tcl_GetString(iclsPtr->namePtr), TCL_INDEX_NONE));
+	    }
+	}
     }
     Tcl_SetObjResult(interp, listPtr);
     return TCL_OK;
@@ -3586,7 +3586,7 @@ static int
 Itcl_BiInfoComponentsCmd(
     TCL_UNUSED(void *),    /* ItclObjectInfo Ptr */
     Tcl_Interp *interp,    /* current interpreter */
-    int objc,              /* number of arguments */
+    int objc,	      /* number of arguments */
     Tcl_Obj *const objv[]) /* argument objects */
 {
     FOREACH_HASH_DECLS;
@@ -3603,38 +3603,38 @@ Itcl_BiInfoComponentsCmd(
     iclsPtr = NULL;
     pattern = NULL;
     if (Itcl_GetContext(interp, &iclsPtr, &ioPtr) != TCL_OK) {
-        Tcl_AppendResult(interp, "cannot get context ", NULL);
-        return TCL_ERROR;
+	Tcl_AppendResult(interp, "cannot get context ", (char *)NULL);
+	return TCL_ERROR;
     }
     if (ioPtr != NULL) {
-        iclsPtr = ioPtr->iclsPtr;
+	iclsPtr = ioPtr->iclsPtr;
     }
     if (iclsPtr == NULL) {
-        Tcl_AppendResult(interp, "INTERNAL ERROR in Itcl_BiInfoComponentsCmd",
-	        " iclsPtr == NULL", NULL);
-        return TCL_ERROR;
+	Tcl_AppendResult(interp, "INTERNAL ERROR in Itcl_BiInfoComponentsCmd",
+		" iclsPtr == (char *)NULL", NULL);
+	return TCL_ERROR;
     }
     if (objc > 2) {
 	Tcl_AppendResult(interp, "wrong # args should be: info components ",
-	        "?pattern?", NULL);
-        return TCL_ERROR;
+		"?pattern?", (char *)NULL);
+	return TCL_ERROR;
     }
     if (objc == 2) {
-        pattern = Tcl_GetString(objv[1]);
+	pattern = Tcl_GetString(objv[1]);
     }
     listPtr = Tcl_NewListObj(0, NULL);
     Itcl_InitHierIter(&hier, iclsPtr);
     iclsPtr2 = Itcl_AdvanceHierIter(&hier);
     while (iclsPtr2 != NULL) {
-        FOREACH_HASH_VALUE(icPtr, &iclsPtr2->components) {
-            name = Tcl_GetString(icPtr->namePtr);
-            if ((pattern == NULL) ||
-                     Tcl_StringCaseMatch(name, pattern, 0)) {
-                Tcl_ListObjAppendElement(interp, listPtr,
-	                Tcl_NewStringObj(Tcl_GetString(icPtr->namePtr), TCL_INDEX_NONE));
-            }
-        }
-        iclsPtr2 = Itcl_AdvanceHierIter(&hier);
+	FOREACH_HASH_VALUE(icPtr, &iclsPtr2->components) {
+	    name = Tcl_GetString(icPtr->namePtr);
+	    if ((pattern == NULL) ||
+		     Tcl_StringCaseMatch(name, pattern, 0)) {
+		Tcl_ListObjAppendElement(interp, listPtr,
+			Tcl_NewStringObj(Tcl_GetString(icPtr->namePtr), TCL_INDEX_NONE));
+	    }
+	}
+	iclsPtr2 = Itcl_AdvanceHierIter(&hier);
     }
     Itcl_DeleteHierIter(&hier);
     Tcl_SetObjResult(interp, listPtr);
@@ -3657,7 +3657,7 @@ static int
 Itcl_BiInfoTypeMethodCmd(
     TCL_UNUSED(void *),    /* ItclObjectInfo Ptr */
     Tcl_Interp *interp,    /* current interpreter */
-    int objc,              /* number of arguments */
+    int objc,	      /* number of arguments */
     Tcl_Obj *const objv[]) /* argument objects */
 {
     Tcl_Obj *resultPtr;
@@ -3676,19 +3676,19 @@ Itcl_BiInfoTypeMethodCmd(
     int result;
 
     static const char *options[] = {
-        "-args", "-body", "-name", "-protection", "-type",
-        NULL
+	"-args", "-body", "-name", "-protection", "-type",
+	NULL
     };
     enum BIfIdx {
-        BIfArgsIdx, BIfBodyIdx, BIfNameIdx, BIfProtectIdx, BIfTypeIdx
+	BIfArgsIdx, BIfBodyIdx, BIfNameIdx, BIfProtectIdx, BIfTypeIdx
     } *iflist, iflistStorage[5];
 
     static enum BIfIdx DefInfoFunction[5] = {
-        BIfProtectIdx,
-        BIfTypeIdx,
-        BIfNameIdx,
-        BIfArgsIdx,
-        BIfBodyIdx
+	BIfProtectIdx,
+	BIfTypeIdx,
+	BIfNameIdx,
+	BIfArgsIdx,
+	BIfBodyIdx
     };
 
 
@@ -3703,12 +3703,12 @@ Itcl_BiInfoTypeMethodCmd(
      */
     if (Itcl_GetContext(interp, &contextIclsPtr, &contextIoPtr) != TCL_OK) {
 	Tcl_SetObjResult(interp, Tcl_NewStringObj(
-            "\nget info like this instead: "
-            "\n  namespace eval className { info function ... }", TCL_INDEX_NONE));
-        return TCL_ERROR;
+	    "\nget info like this instead: "
+	    "\n  namespace eval className { info function ... }", TCL_INDEX_NONE));
+	return TCL_ERROR;
     }
     if (contextIoPtr != NULL) {
-        contextIclsPtr = contextIoPtr->iclsPtr;
+	contextIclsPtr = contextIoPtr->iclsPtr;
     }
 
     /*
@@ -3719,8 +3719,8 @@ Itcl_BiInfoTypeMethodCmd(
     objc--;
 
     if (objc > 0) {
-        cmdName = Tcl_GetString(*objv);
-        objc--; objv++;
+	cmdName = Tcl_GetString(*objv);
+	objc--; objv++;
     }
 
     /*
@@ -3729,142 +3729,142 @@ Itcl_BiInfoTypeMethodCmd(
     if (cmdName) {
 	ItclCmdLookup *clookup;
 	objPtr = Tcl_NewStringObj(cmdName, TCL_INDEX_NONE);
-        hPtr = Tcl_FindHashEntry(&contextIclsPtr->resolveCmds, (char *)objPtr);
+	hPtr = Tcl_FindHashEntry(&contextIclsPtr->resolveCmds, (char *)objPtr);
 	Tcl_DecrRefCount(objPtr);
 	objPtr = NULL;
-        if (hPtr == NULL) {
-            Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
-                "\"", cmdName, "\" isn't a typemethod in class \"",
-                contextIclsPtr->nsPtr->fullName, "\"",
-                NULL);
-            return TCL_ERROR;
-        }
+	if (hPtr == NULL) {
+	    Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+		"\"", cmdName, "\" isn't a typemethod in class \"",
+		contextIclsPtr->nsPtr->fullName, "\"",
+		(char *)NULL);
+	    return TCL_ERROR;
+	}
 
 	clookup = (ItclCmdLookup *)Tcl_GetHashValue(hPtr);
 	imPtr = clookup->imPtr;
-        mcode = imPtr->codePtr;
+	mcode = imPtr->codePtr;
 	if (!(imPtr->flags & ITCL_TYPE_METHOD)) {
-            Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
-                "\"", cmdName, "\" isn't a typemethod in class \"",
-                contextIclsPtr->nsPtr->fullName, "\"",
-                NULL);
-            return TCL_ERROR;
+	    Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+		"\"", cmdName, "\" isn't a typemethod in class \"",
+		contextIclsPtr->nsPtr->fullName, "\"",
+		(char *)NULL);
+	    return TCL_ERROR;
 	}
 
-        /*
-         *  By default, return everything.
-         */
-        if (objc == 0) {
-            objc = 5;
-            iflist = DefInfoFunction;
-        } else {
+	/*
+	 *  By default, return everything.
+	 */
+	if (objc == 0) {
+	    objc = 5;
+	    iflist = DefInfoFunction;
+	} else {
 
-            /*
-             *  Otherwise, scan through all remaining flags and
-             *  figure out what to return.
-             */
-            iflist = &iflistStorage[0];
-            for (i=0 ; i < objc; i++) {
-                result = Tcl_GetIndexFromObjStruct(interp, objv[i],
-                    options, sizeof(char *), "option", 0, (int*)(&iflist[i]));
-                if (result != TCL_OK) {
-                    return TCL_ERROR;
-                }
-            }
-        }
+	    /*
+	     *  Otherwise, scan through all remaining flags and
+	     *  figure out what to return.
+	     */
+	    iflist = &iflistStorage[0];
+	    for (i=0 ; i < objc; i++) {
+		result = Tcl_GetIndexFromObjStruct(interp, objv[i],
+		    options, sizeof(char *), "option", 0, (int*)(&iflist[i]));
+		if (result != TCL_OK) {
+		    return TCL_ERROR;
+		}
+	    }
+	}
 
-        if (objc > 1) {
-            resultPtr = Tcl_NewListObj(0, NULL);
-        }
+	if (objc > 1) {
+	    resultPtr = Tcl_NewListObj(0, NULL);
+	}
 
-        for (i=0 ; i < objc; i++) {
-            switch (iflist[i]) {
-                case BIfArgsIdx:
-                    if (mcode && mcode->argListPtr) {
+	for (i=0 ; i < objc; i++) {
+	    switch (iflist[i]) {
+		case BIfArgsIdx:
+		    if (mcode && mcode->argListPtr) {
 			if (imPtr->usagePtr == NULL) {
-                            objPtr = Tcl_NewStringObj(
-			            Tcl_GetString(mcode->usagePtr), TCL_INDEX_NONE);
+			    objPtr = Tcl_NewStringObj(
+				    Tcl_GetString(mcode->usagePtr), TCL_INDEX_NONE);
 			} else {
-                            objPtr = Tcl_NewStringObj(
-			            Tcl_GetString(imPtr->usagePtr), TCL_INDEX_NONE);
-		        }
-                    } else {
-		        if ((imPtr->flags & ITCL_ARG_SPEC) != 0) {
+			    objPtr = Tcl_NewStringObj(
+				    Tcl_GetString(imPtr->usagePtr), TCL_INDEX_NONE);
+			}
+		    } else {
+			if ((imPtr->flags & ITCL_ARG_SPEC) != 0) {
 			    if (imPtr->usagePtr == NULL) {
-                                objPtr = Tcl_NewStringObj(
-				        Tcl_GetString(mcode->usagePtr), TCL_INDEX_NONE);
+				objPtr = Tcl_NewStringObj(
+					Tcl_GetString(mcode->usagePtr), TCL_INDEX_NONE);
 			    } else {
-			        objPtr = Tcl_NewStringObj(
-				        Tcl_GetString(imPtr->usagePtr), TCL_INDEX_NONE);
+				objPtr = Tcl_NewStringObj(
+					Tcl_GetString(imPtr->usagePtr), TCL_INDEX_NONE);
 			    }
-                        } else {
-                            objPtr = Tcl_NewStringObj("<undefined>", TCL_INDEX_NONE);
-                        }
+			} else {
+			    objPtr = Tcl_NewStringObj("<undefined>", TCL_INDEX_NONE);
+			}
 		    }
-                    break;
+		    break;
 
-                case BIfBodyIdx:
-                    if (mcode && Itcl_IsMemberCodeImplemented(mcode)) {
-                        objPtr = Tcl_NewStringObj(
-			        Tcl_GetString(mcode->bodyPtr), TCL_INDEX_NONE);
-                    } else {
-                        objPtr = Tcl_NewStringObj("<undefined>", TCL_INDEX_NONE);
-                    }
-                    break;
+		case BIfBodyIdx:
+		    if (mcode && Itcl_IsMemberCodeImplemented(mcode)) {
+			objPtr = Tcl_NewStringObj(
+				Tcl_GetString(mcode->bodyPtr), TCL_INDEX_NONE);
+		    } else {
+			objPtr = Tcl_NewStringObj("<undefined>", TCL_INDEX_NONE);
+		    }
+		    break;
 
-                case BIfNameIdx:
-                    objPtr = Tcl_NewStringObj(
-		            Tcl_GetString(imPtr->fullNamePtr), TCL_INDEX_NONE);
-                    break;
+		case BIfNameIdx:
+		    objPtr = Tcl_NewStringObj(
+			    Tcl_GetString(imPtr->fullNamePtr), TCL_INDEX_NONE);
+		    break;
 
-                case BIfProtectIdx:
-                    val = Itcl_ProtectionStr(imPtr->protection);
-                    objPtr = Tcl_NewStringObj(val, TCL_INDEX_NONE);
-                    break;
+		case BIfProtectIdx:
+		    val = Itcl_ProtectionStr(imPtr->protection);
+		    objPtr = Tcl_NewStringObj(val, TCL_INDEX_NONE);
+		    break;
 
-                case BIfTypeIdx:
-                    val = "typemethod";
-                    objPtr = Tcl_NewStringObj(val, TCL_INDEX_NONE);
-                    break;
-            }
+		case BIfTypeIdx:
+		    val = "typemethod";
+		    objPtr = Tcl_NewStringObj(val, TCL_INDEX_NONE);
+		    break;
+	    }
 
-            if (objc == 1) {
-                resultPtr = objPtr;
-            } else {
-                Tcl_ListObjAppendElement(NULL, resultPtr, objPtr);
-            }
-        }
-        Tcl_SetObjResult(interp, resultPtr);
+	    if (objc == 1) {
+		resultPtr = objPtr;
+	    } else {
+		Tcl_ListObjAppendElement(NULL, resultPtr, objPtr);
+	    }
+	}
+	Tcl_SetObjResult(interp, resultPtr);
     } else {
 
-        /*
-         *  Return the list of available commands.
-         */
-        resultPtr = Tcl_NewListObj(0, NULL);
+	/*
+	 *  Return the list of available commands.
+	 */
+	resultPtr = Tcl_NewListObj(0, NULL);
 
-        Itcl_InitHierIter(&hier, contextIclsPtr);
-        while ((iclsPtr=Itcl_AdvanceHierIter(&hier)) != NULL) {
-            hPtr = Tcl_FirstHashEntry(&iclsPtr->functions, &place);
-            while (hPtr) {
-	        int useIt = 1;
+	Itcl_InitHierIter(&hier, contextIclsPtr);
+	while ((iclsPtr=Itcl_AdvanceHierIter(&hier)) != NULL) {
+	    hPtr = Tcl_FirstHashEntry(&iclsPtr->functions, &place);
+	    while (hPtr) {
+		int useIt = 1;
 
-                imPtr = (ItclMemberFunc*)Tcl_GetHashValue(hPtr);
+		imPtr = (ItclMemberFunc*)Tcl_GetHashValue(hPtr);
 		if (!(imPtr->flags & ITCL_TYPE_METHOD)) {
 		    useIt = 0;
 		}
 		if (useIt) {
-                    objPtr = Tcl_NewStringObj(
-		            Tcl_GetString(imPtr->fullNamePtr), TCL_INDEX_NONE);
-                    Tcl_ListObjAppendElement(NULL,
-		            resultPtr, objPtr);
-                }
+		    objPtr = Tcl_NewStringObj(
+			    Tcl_GetString(imPtr->fullNamePtr), TCL_INDEX_NONE);
+		    Tcl_ListObjAppendElement(NULL,
+			    resultPtr, objPtr);
+		}
 
-                hPtr = Tcl_NextHashEntry(&place);
-            }
-        }
-        Itcl_DeleteHierIter(&hier);
+		hPtr = Tcl_NextHashEntry(&place);
+	    }
+	}
+	Itcl_DeleteHierIter(&hier);
 
-        Tcl_SetObjResult(interp, resultPtr);
+	Tcl_SetObjResult(interp, resultPtr);
     }
     return TCL_OK;
 }
@@ -3885,7 +3885,7 @@ static int
 Itcl_BiInfoTypeMethodsCmd(
     TCL_UNUSED(void *),    /* ItclObjectInfo Ptr */
     Tcl_Interp *interp,    /* current interpreter */
-    int objc,              /* number of arguments */
+    int objc,	      /* number of arguments */
     Tcl_Obj *const objv[]) /* argument objects */
 {
     FOREACH_HASH_DECLS;
@@ -3901,74 +3901,74 @@ Itcl_BiInfoTypeMethodsCmd(
     iclsPtr = NULL;
     pattern = NULL;
     if (Itcl_GetContext(interp, &iclsPtr, &ioPtr) != TCL_OK) {
-        Tcl_AppendResult(interp, "cannot get context ", NULL);
-        return TCL_ERROR;
+	Tcl_AppendResult(interp, "cannot get context ", (char *)NULL);
+	return TCL_ERROR;
     }
     if (ioPtr != NULL) {
-        iclsPtr = ioPtr->iclsPtr;
+	iclsPtr = ioPtr->iclsPtr;
     }
     if (objc > 1) {
-        pattern = Tcl_GetString(objv[1]);
+	pattern = Tcl_GetString(objv[1]);
     }
     listPtr = Tcl_NewListObj(0, NULL);
     name = "create";
     if ((pattern == NULL) || Tcl_StringCaseMatch((const char *)name, pattern, 0)) {
-        Tcl_ListObjAppendElement(interp, listPtr,
-	        Tcl_NewStringObj(name, TCL_INDEX_NONE));
+	Tcl_ListObjAppendElement(interp, listPtr,
+		Tcl_NewStringObj(name, TCL_INDEX_NONE));
     }
     name = "destroy";
     if ((pattern == NULL) || Tcl_StringCaseMatch((const char *)name, pattern, 0)) {
-        Tcl_ListObjAppendElement(interp, listPtr,
-                Tcl_NewStringObj(name, TCL_INDEX_NONE));
+	Tcl_ListObjAppendElement(interp, listPtr,
+		Tcl_NewStringObj(name, TCL_INDEX_NONE));
     }
     name = "info";
     if ((pattern == NULL) || Tcl_StringCaseMatch((const char *)name, pattern, 0)) {
-        Tcl_ListObjAppendElement(interp, listPtr,
-                Tcl_NewStringObj(name, TCL_INDEX_NONE));
+	Tcl_ListObjAppendElement(interp, listPtr,
+		Tcl_NewStringObj(name, TCL_INDEX_NONE));
     }
     FOREACH_HASH_VALUE(imPtr, &iclsPtr->functions) {
 	name = Tcl_GetString(imPtr->namePtr);
-        if (strcmp(name, "*") == 0) {
+	if (strcmp(name, "*") == 0) {
 	    continue;
 	}
-        if (strcmp(name, "create") == 0) {
+	if (strcmp(name, "create") == 0) {
 	    continue;
 	}
-        if (strcmp(name, "destroy") == 0) {
+	if (strcmp(name, "destroy") == 0) {
 	    continue;
 	}
-        if (strcmp(name, "info") == 0) {
+	if (strcmp(name, "info") == 0) {
 	    continue;
 	}
-        if (imPtr->flags & ITCL_TYPE_METHOD) {
+	if (imPtr->flags & ITCL_TYPE_METHOD) {
 	    if ((pattern == NULL) ||
-                     Tcl_StringCaseMatch((const char *)name, pattern, 0)) {
-	        Tcl_ListObjAppendElement(interp, listPtr,
-		        Tcl_NewStringObj(Tcl_GetString(imPtr->namePtr), TCL_INDEX_NONE));
+		     Tcl_StringCaseMatch((const char *)name, pattern, 0)) {
+		Tcl_ListObjAppendElement(interp, listPtr,
+			Tcl_NewStringObj(Tcl_GetString(imPtr->namePtr), TCL_INDEX_NONE));
 	    }
 	}
     }
     FOREACH_HASH_VALUE(idmPtr, &iclsPtr->delegatedFunctions) {
 	name = Tcl_GetString(idmPtr->namePtr);
-        if (strcmp(name, "*") == 0) {
+	if (strcmp(name, "*") == 0) {
 	    continue;
 	}
-        if (strcmp(name, "create") == 0) {
+	if (strcmp(name, "create") == 0) {
 	    continue;
 	}
-        if (strcmp(name, "destroy") == 0) {
+	if (strcmp(name, "destroy") == 0) {
 	    continue;
 	}
-        if (strcmp(name, "info") == 0) {
+	if (strcmp(name, "info") == 0) {
 	    continue;
 	}
-        if (idmPtr->flags & ITCL_TYPE_METHOD) {
+	if (idmPtr->flags & ITCL_TYPE_METHOD) {
 	    if ((pattern == NULL) ||
-                     Tcl_StringCaseMatch((const char *)name, pattern, 0)) {
-	        Tcl_ListObjAppendElement(interp, listPtr,
-		        Tcl_NewStringObj(Tcl_GetString(idmPtr->namePtr), TCL_INDEX_NONE));
+		     Tcl_StringCaseMatch((const char *)name, pattern, 0)) {
+		Tcl_ListObjAppendElement(interp, listPtr,
+			Tcl_NewStringObj(Tcl_GetString(idmPtr->namePtr), TCL_INDEX_NONE));
 	    }
-        }
+	}
     }
     Tcl_SetObjResult(interp, listPtr);
     return TCL_OK;
@@ -3990,7 +3990,7 @@ static int
 Itcl_BiInfoTypeVarsCmd(
     TCL_UNUSED(void *),    /* ItclObjectInfo Ptr */
     Tcl_Interp *interp,    /* current interpreter */
-    int objc,              /* number of arguments */
+    int objc,	      /* number of arguments */
     Tcl_Obj *const objv[]) /* argument objects */
 {
     FOREACH_HASH_DECLS;
@@ -4003,29 +4003,29 @@ Itcl_BiInfoTypeVarsCmd(
     ItclShowArgs(1, "Itcl_BiInfoTypeVarsCmd", objc, objv);
     if (objc > 2) {
 	Tcl_AppendResult(interp,
-	        "wrong # args should be: info typevars ?pattern?", NULL);
-        return TCL_ERROR;
+		"wrong # args should be: info typevars ?pattern?", (char *)NULL);
+	return TCL_ERROR;
     }
     iclsPtr = NULL;
     pattern = NULL;
     if (Itcl_GetContext(interp, &iclsPtr, &ioPtr) != TCL_OK) {
-        Tcl_AppendResult(interp, "cannot get context ", NULL);
-        return TCL_ERROR;
+	Tcl_AppendResult(interp, "cannot get context ", (char *)NULL);
+	return TCL_ERROR;
     }
     if (ioPtr != NULL) {
-        iclsPtr = ioPtr->iclsPtr;
+	iclsPtr = ioPtr->iclsPtr;
     }
     if (objc == 2) {
-        pattern = Tcl_GetString(objv[1]);
+	pattern = Tcl_GetString(objv[1]);
     }
     listPtr = Tcl_NewListObj(0, NULL);
     FOREACH_HASH_VALUE(ivPtr, &iclsPtr->variables) {
-        if ((pattern == NULL) ||
-            Tcl_StringCaseMatch(Tcl_GetString(ivPtr->namePtr), pattern, 0)) {
+	if ((pattern == NULL) ||
+	    Tcl_StringCaseMatch(Tcl_GetString(ivPtr->namePtr), pattern, 0)) {
 	    if (ivPtr->flags & ITCL_TYPE_VARIABLE) {
-                Tcl_ListObjAppendElement(interp, listPtr, ivPtr->fullNamePtr);
+		Tcl_ListObjAppendElement(interp, listPtr, ivPtr->fullNamePtr);
 	    }
-        }
+	}
     }
     Tcl_SetObjResult(interp, listPtr);
     return TCL_OK;
@@ -4047,7 +4047,7 @@ static int
 Itcl_BiInfoTypeVariableCmd(
     TCL_UNUSED(void *),    /* ItclObjectInfo Ptr */
     Tcl_Interp *interp,    /* current interpreter */
-    int objc,              /* number of arguments */
+    int objc,	      /* number of arguments */
     Tcl_Obj *const objv[]) /* argument objects */
 {
     Tcl_Obj *resultPtr;
@@ -4066,23 +4066,23 @@ Itcl_BiInfoTypeVariableCmd(
     int result;
 
     static const char *options[] = {
-        "-init", "-name", "-protection", "-type",
-        "-value", NULL
+	"-init", "-name", "-protection", "-type",
+	"-value", NULL
     };
     enum BIvIdx {
-        BIvInitIdx,
+	BIvInitIdx,
 	BIvNameIdx,
 	BIvProtectIdx,
-        BIvTypeIdx,
+	BIvTypeIdx,
 	BIvValueIdx
     } *ivlist, ivlistStorage[5];
 
     static enum BIvIdx DefInfoVariable[5] = {
-        BIvProtectIdx,
-        BIvTypeIdx,
-        BIvNameIdx,
-        BIvInitIdx,
-        BIvValueIdx
+	BIvProtectIdx,
+	BIvTypeIdx,
+	BIvNameIdx,
+	BIvInitIdx,
+	BIvValueIdx
     };
 
     ItclShowArgs(1, "Itcl_BiInfoTypeVariableCmd", objc, objv);
@@ -4096,12 +4096,12 @@ Itcl_BiInfoTypeVariableCmd(
      */
     if (Itcl_GetContext(interp, &contextIclsPtr, &contextIoPtr) != TCL_OK) {
 	Tcl_SetObjResult(interp, Tcl_NewStringObj(
-            "\nget info like this instead: "
-            "\n  namespace eval className { info typevariable ... }", TCL_INDEX_NONE));
-        return TCL_ERROR;
+	    "\nget info like this instead: "
+	    "\n  namespace eval className { info typevariable ... }", TCL_INDEX_NONE));
+	return TCL_ERROR;
     }
     if (contextIoPtr != NULL) {
-        contextIclsPtr = contextIoPtr->iclsPtr;
+	contextIclsPtr = contextIoPtr->iclsPtr;
     }
 
     /*
@@ -4112,171 +4112,171 @@ Itcl_BiInfoTypeVariableCmd(
     objc--;
 
     if (objc > 0) {
-        varName = Tcl_GetString(*objv);
-        objc--; objv++;
+	varName = Tcl_GetString(*objv);
+	objc--; objv++;
     }
 
     /*
      *  Return info for a specific variable.
      */
     if (varName) {
-        hPtr = ItclResolveVarEntry(contextIclsPtr, varName);
-        if (hPtr == NULL) {
-            Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
-                "\"", varName, "\" isn't a typevariable in class \"",
-                contextIclsPtr->nsPtr->fullName, "\"",
-                NULL);
-            return TCL_ERROR;
-        }
-        vlookup = (ItclVarLookup*)Tcl_GetHashValue(hPtr);
-        ivPtr = vlookup->ivPtr;
-        if (!(ivPtr->flags & ITCL_TYPE_VARIABLE)) {
-            Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
-                "\"", varName, "\" isn't a typevariable in class \"",
-                contextIclsPtr->nsPtr->fullName, "\"",
-                NULL);
-            return TCL_ERROR;
+	hPtr = ItclResolveVarEntry(contextIclsPtr, varName);
+	if (hPtr == NULL) {
+	    Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+		"\"", varName, "\" isn't a typevariable in class \"",
+		contextIclsPtr->nsPtr->fullName, "\"",
+		(char *)NULL);
+	    return TCL_ERROR;
 	}
-        /*
-         *  By default, return everything.
-         */
-        if (objc == 0) {
-            ivlist = DefInfoVariable;
-            objc = 5;
-        } else {
+	vlookup = (ItclVarLookup*)Tcl_GetHashValue(hPtr);
+	ivPtr = vlookup->ivPtr;
+	if (!(ivPtr->flags & ITCL_TYPE_VARIABLE)) {
+	    Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+		"\"", varName, "\" isn't a typevariable in class \"",
+		contextIclsPtr->nsPtr->fullName, "\"",
+		(char *)NULL);
+	    return TCL_ERROR;
+	}
+	/*
+	 *  By default, return everything.
+	 */
+	if (objc == 0) {
+	    ivlist = DefInfoVariable;
+	    objc = 5;
+	} else {
 
-            /*
-             *  Otherwise, scan through all remaining flags and
-             *  figure out what to return.
-             */
-            ivlist = &ivlistStorage[0];
-            for (i=0 ; i < objc; i++) {
-                result = Tcl_GetIndexFromObjStruct(interp, objv[i],
-                    options, sizeof(char *), "option", 0, (int*)(&ivlist[i]));
-                if (result != TCL_OK) {
-                    return TCL_ERROR;
-                }
-            }
-        }
+	    /*
+	     *  Otherwise, scan through all remaining flags and
+	     *  figure out what to return.
+	     */
+	    ivlist = &ivlistStorage[0];
+	    for (i=0 ; i < objc; i++) {
+		result = Tcl_GetIndexFromObjStruct(interp, objv[i],
+		    options, sizeof(char *), "option", 0, (int*)(&ivlist[i]));
+		if (result != TCL_OK) {
+		    return TCL_ERROR;
+		}
+	    }
+	}
 
-        if (objc > 1) {
-            resultPtr = Tcl_NewListObj(0, NULL);
-        }
+	if (objc > 1) {
+	    resultPtr = Tcl_NewListObj(0, NULL);
+	}
 
-        for (i=0 ; i < objc; i++) {
-            switch (ivlist[i]) {
-                case BIvInitIdx:
-                    /*
-                     *  If this is the built-in "this" variable, then
-                     *  report the object name as its initialization string.
-                     */
-                    if ((ivPtr->flags & ITCL_THIS_VAR) != 0) {
-                        if ((contextIoPtr != NULL) &&
-			        (contextIoPtr->accessCmd != NULL)) {
-                            objPtr = Tcl_NewStringObj(NULL, 0);
-                            Tcl_GetCommandFullName(
-                                contextIoPtr->iclsPtr->interp,
-                                contextIoPtr->accessCmd, objPtr);
-                        } else {
-                            objPtr = Tcl_NewStringObj("<objectName>", TCL_INDEX_NONE);
-                        }
-                    } else {
-		        if (vlookup->ivPtr->init) {
+	for (i=0 ; i < objc; i++) {
+	    switch (ivlist[i]) {
+		case BIvInitIdx:
+		    /*
+		     *  If this is the built-in "this" variable, then
+		     *  report the object name as its initialization string.
+		     */
+		    if ((ivPtr->flags & ITCL_THIS_VAR) != 0) {
+			if ((contextIoPtr != NULL) &&
+				(contextIoPtr->accessCmd != NULL)) {
+			    objPtr = Tcl_NewStringObj(NULL, 0);
+			    Tcl_GetCommandFullName(
+				contextIoPtr->iclsPtr->interp,
+				contextIoPtr->accessCmd, objPtr);
+			} else {
+			    objPtr = Tcl_NewStringObj("<objectName>", TCL_INDEX_NONE);
+			}
+		    } else {
+			if (vlookup->ivPtr->init) {
 			    objPtr = Tcl_NewStringObj(
-			            Tcl_GetString(vlookup->ivPtr->init), TCL_INDEX_NONE);
-                        } else {
-                            objPtr = Tcl_NewStringObj("<undefined>", TCL_INDEX_NONE);
-		        }
-                    }
-                    break;
+				    Tcl_GetString(vlookup->ivPtr->init), TCL_INDEX_NONE);
+			} else {
+			    objPtr = Tcl_NewStringObj("<undefined>", TCL_INDEX_NONE);
+			}
+		    }
+		    break;
 
-                case BIvNameIdx:
-                    objPtr = Tcl_NewStringObj(
-		            Tcl_GetString(ivPtr->fullNamePtr), TCL_INDEX_NONE);
-                    break;
+		case BIvNameIdx:
+		    objPtr = Tcl_NewStringObj(
+			    Tcl_GetString(ivPtr->fullNamePtr), TCL_INDEX_NONE);
+		    break;
 
-                case BIvProtectIdx:
-                    val = Itcl_ProtectionStr(ivPtr->protection);
-                    objPtr = Tcl_NewStringObj((const char *)val, TCL_INDEX_NONE);
-                    break;
+		case BIvProtectIdx:
+		    val = Itcl_ProtectionStr(ivPtr->protection);
+		    objPtr = Tcl_NewStringObj((const char *)val, TCL_INDEX_NONE);
+		    break;
 
-                case BIvTypeIdx:
-                    val = ((ivPtr->flags & ITCL_COMMON) != 0)
-                        ? "common" : "variable";
-                    objPtr = Tcl_NewStringObj((const char *)val, TCL_INDEX_NONE);
-                    break;
+		case BIvTypeIdx:
+		    val = ((ivPtr->flags & ITCL_COMMON) != 0)
+			? "common" : "variable";
+		    objPtr = Tcl_NewStringObj((const char *)val, TCL_INDEX_NONE);
+		    break;
 
-                case BIvValueIdx:
-                    if ((ivPtr->flags & ITCL_COMMON) != 0) {
-                        val = Itcl_GetCommonVar(interp,
-			        Tcl_GetString(ivPtr->fullNamePtr),
-                                ivPtr->iclsPtr);
-                    } else {
-		        if (contextIoPtr == NULL) {
-                            if (objc > 1) {
-			        Tcl_DecrRefCount(resultPtr);
+		case BIvValueIdx:
+		    if ((ivPtr->flags & ITCL_COMMON) != 0) {
+			val = Itcl_GetCommonVar(interp,
+				Tcl_GetString(ivPtr->fullNamePtr),
+				ivPtr->iclsPtr);
+		    } else {
+			if (contextIoPtr == NULL) {
+			    if (objc > 1) {
+				Tcl_DecrRefCount(resultPtr);
 			    }
-                            Tcl_ResetResult(interp);
-                            Tcl_AppendResult(interp,
-                                    "cannot access object-specific info ",
-                                    "without an object context",
-                                    NULL);
-                            return TCL_ERROR;
-                        } else {
-                            val = Itcl_GetInstanceVar(interp,
-			            Tcl_GetString(ivPtr->namePtr),
-                                    contextIoPtr, ivPtr->iclsPtr);
-                        }
-                    }
-                    if (val == NULL) {
-                        val = "<undefined>";
-                    }
-                    objPtr = Tcl_NewStringObj((const char *)val, TCL_INDEX_NONE);
-                    break;
-            }
+			    Tcl_ResetResult(interp);
+			    Tcl_AppendResult(interp,
+				    "cannot access object-specific info ",
+				    "without an object context",
+				    (char *)NULL);
+			    return TCL_ERROR;
+			} else {
+			    val = Itcl_GetInstanceVar(interp,
+				    Tcl_GetString(ivPtr->namePtr),
+				    contextIoPtr, ivPtr->iclsPtr);
+			}
+		    }
+		    if (val == NULL) {
+			val = "<undefined>";
+		    }
+		    objPtr = Tcl_NewStringObj((const char *)val, TCL_INDEX_NONE);
+		    break;
+	    }
 
-            if (objc == 1) {
-                resultPtr = objPtr;
-            } else {
-                Tcl_ListObjAppendElement(NULL, resultPtr, objPtr);
-            }
-        }
+	    if (objc == 1) {
+		resultPtr = objPtr;
+	    } else {
+		Tcl_ListObjAppendElement(NULL, resultPtr, objPtr);
+	    }
+	}
 	Tcl_ResetResult(interp);
-	Tcl_AppendResult(interp, Tcl_GetString(resultPtr), NULL);
+	Tcl_AppendResult(interp, Tcl_GetString(resultPtr), (char *)NULL);
 	Tcl_DecrRefCount(resultPtr);
     } else {
 
-        /*
-         *  Return the list of available variables.  Report the built-in
-         *  "this" variable only once, for the most-specific class.
-         */
-        resultPtr = Tcl_NewListObj(0, NULL);
-        Itcl_InitHierIter(&hier, contextIclsPtr);
-        while ((iclsPtr=Itcl_AdvanceHierIter(&hier)) != NULL) {
-            hPtr = Tcl_FirstHashEntry(&iclsPtr->variables, &place);
-            while (hPtr) {
-                ivPtr = (ItclVariable*)Tcl_GetHashValue(hPtr);
+	/*
+	 *  Return the list of available variables.  Report the built-in
+	 *  "this" variable only once, for the most-specific class.
+	 */
+	resultPtr = Tcl_NewListObj(0, NULL);
+	Itcl_InitHierIter(&hier, contextIclsPtr);
+	while ((iclsPtr=Itcl_AdvanceHierIter(&hier)) != NULL) {
+	    hPtr = Tcl_FirstHashEntry(&iclsPtr->variables, &place);
+	    while (hPtr) {
+		ivPtr = (ItclVariable*)Tcl_GetHashValue(hPtr);
 		if (ivPtr->flags & ITCL_TYPE_VAR) {
-                    if ((ivPtr->flags & ITCL_THIS_VAR) != 0) {
-                        if (iclsPtr == contextIclsPtr) {
-                            objPtr = Tcl_NewStringObj(
-			            Tcl_GetString(ivPtr->fullNamePtr), TCL_INDEX_NONE);
-                            Tcl_ListObjAppendElement(NULL,
-                                resultPtr, objPtr);
-                        }
-                    } else {
-                        objPtr = Tcl_NewStringObj(
-		                Tcl_GetString(ivPtr->fullNamePtr), TCL_INDEX_NONE);
-                        Tcl_ListObjAppendElement(NULL,
-                            resultPtr, objPtr);
-                    }
+		    if ((ivPtr->flags & ITCL_THIS_VAR) != 0) {
+			if (iclsPtr == contextIclsPtr) {
+			    objPtr = Tcl_NewStringObj(
+				    Tcl_GetString(ivPtr->fullNamePtr), TCL_INDEX_NONE);
+			    Tcl_ListObjAppendElement(NULL,
+				resultPtr, objPtr);
+			}
+		    } else {
+			objPtr = Tcl_NewStringObj(
+				Tcl_GetString(ivPtr->fullNamePtr), TCL_INDEX_NONE);
+			Tcl_ListObjAppendElement(NULL,
+			    resultPtr, objPtr);
+		    }
 		}
-                hPtr = Tcl_NextHashEntry(&place);
-            }
-        }
-        Itcl_DeleteHierIter(&hier);
+		hPtr = Tcl_NextHashEntry(&place);
+	    }
+	}
+	Itcl_DeleteHierIter(&hier);
 
-        Tcl_SetObjResult(interp, resultPtr);
+	Tcl_SetObjResult(interp, resultPtr);
     }
     return TCL_OK;
 }
@@ -4297,12 +4297,12 @@ static int
 Itcl_BiInfoVariablesCmd(
     TCL_UNUSED(void *),    /* ItclObjectInfo Ptr */
     Tcl_Interp *interp,    /* current interpreter */
-    int objc,              /* number of arguments */
+    int objc,	      /* number of arguments */
     Tcl_Obj *const objv[]) /* argument objects */
 {
     ItclShowArgs(1, "Itcl_BiInfoVariablesCmd", objc, objv);
     Tcl_AppendResult(interp, "Itcl_BiInfoVariablesCmd not yet implemented\n",
-            NULL);
+	    (char *)NULL);
     return TCL_ERROR;
 }
 
@@ -4322,7 +4322,7 @@ static int
 Itcl_BiInfoWidgetadaptorCmd(
     TCL_UNUSED(void *),    /* ItclObjectInfo Ptr */
     Tcl_Interp *interp,    /* current interpreter */
-    int objc,              /* number of arguments */
+    int objc,	      /* number of arguments */
     Tcl_Obj *const objv[]) /* argument objects */
 {
     Tcl_Namespace *contextNs = NULL;
@@ -4333,10 +4333,10 @@ Itcl_BiInfoWidgetadaptorCmd(
 
     ItclShowArgs(1, "Itcl_BiInfoWidgetadaptorCmd", objc, objv);
     if (objc != 1) {
-        Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
-            "wrong # args: should be \"info widgetadaptor\"",
-            NULL);
-        return TCL_ERROR;
+	Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+	    "wrong # args: should be \"info widgetadaptor\"",
+	    (char *)NULL);
+	return TCL_ERROR;
     }
 
     /*
@@ -4372,21 +4372,21 @@ Itcl_BiInfoWidgetadaptorCmd(
      *  name.  Use normal class names when possible.
      */
     if (contextIoPtr) {
-        contextNs = contextIoPtr->iclsPtr->nsPtr;
+	contextNs = contextIoPtr->iclsPtr->nsPtr;
     } else {
-        assert(contextIclsPtr != NULL);
-        assert(contextIclsPtr->nsPtr != NULL);
-        if (contextIclsPtr->infoPtr->useOldResolvers) {
-            contextNs = contextIclsPtr->nsPtr;
-        } else {
-            contextNs = contextIclsPtr->nsPtr;
-        }
+	assert(contextIclsPtr != NULL);
+	assert(contextIclsPtr->nsPtr != NULL);
+	if (contextIclsPtr->infoPtr->useOldResolvers) {
+	    contextNs = contextIclsPtr->nsPtr;
+	} else {
+	    contextNs = contextIclsPtr->nsPtr;
+	}
     }
 
-            name = contextNs->fullName;
+	    name = contextNs->fullName;
     if (!(contextIclsPtr->flags & ITCL_WIDGETADAPTOR)) {
-	Tcl_AppendResult(interp, "object or class is no widgetadaptor", NULL);
-        return TCL_ERROR;
+	Tcl_AppendResult(interp, "object or class is no widgetadaptor", (char *)NULL);
+	return TCL_ERROR;
     }
     objPtr = Tcl_NewStringObj(name, TCL_INDEX_NONE);
     Tcl_SetObjResult(interp, objPtr);
@@ -4409,7 +4409,7 @@ static int
 Itcl_BiInfoInstancesCmd(
     void *clientData,      /* ItclObjectInfo Ptr */
     Tcl_Interp *interp,    /* current interpreter */
-    int objc,              /* number of arguments */
+    int objc,	      /* number of arguments */
     Tcl_Obj *const objv[]) /* argument objects */
 {
     FOREACH_HASH_DECLS;
@@ -4423,13 +4423,13 @@ Itcl_BiInfoInstancesCmd(
     ItclShowArgs(1, "Itcl_BiInfoInstancesCmd", objc, objv);
     if (objc > 2) {
 	Tcl_AppendResult(interp,
-		"wrong # args should be: info instances ?pattern?", NULL);
-        return TCL_ERROR;
+		"wrong # args should be: info instances ?pattern?", (char *)NULL);
+	return TCL_ERROR;
     }
     iclsPtr = NULL;
     pattern = NULL;
     if (Itcl_GetContext(interp, &iclsPtr, &ioPtr) != TCL_OK) {
-	Tcl_AppendResult(interp, "cannot get context ", NULL);
+	Tcl_AppendResult(interp, "cannot get context ", (char *)NULL);
 	return TCL_ERROR;
     }
     if (ioPtr != NULL) {
@@ -4478,7 +4478,7 @@ static int
 Itcl_BiInfoDelegatedOptionsCmd(
     TCL_UNUSED(void *),    /* ItclObjectInfo Ptr */
     Tcl_Interp *interp,    /* current interpreter */
-    int objc,              /* number of arguments */
+    int objc,	      /* number of arguments */
     Tcl_Obj *const objv[]) /* argument objects */
 {
     FOREACH_HASH_DECLS;
@@ -4495,39 +4495,39 @@ Itcl_BiInfoDelegatedOptionsCmd(
     pattern = NULL;
     if (objc > 2) {
 	Tcl_AppendResult(interp, "wrong # args should be: info delegated ",
-	        "options ?pattern?", NULL);
-        return TCL_ERROR;
+		"options ?pattern?", (char *)NULL);
+	return TCL_ERROR;
     }
 
     if (objc == 2) {
-        pattern = Tcl_GetString(objv[1]);
+	pattern = Tcl_GetString(objv[1]);
     }
     if (Itcl_GetContext(interp, &iclsPtr, &ioPtr) != TCL_OK) {
-        return TCL_ERROR;
+	return TCL_ERROR;
     }
     if (ioPtr != NULL) {
-        iclsPtr = ioPtr->iclsPtr;
+	iclsPtr = ioPtr->iclsPtr;
     }
     listPtr = Tcl_NewListObj(0, NULL);
     FOREACH_HASH_VALUE(idoPtr, &iclsPtr->delegatedOptions) {
 	if (iclsPtr->flags &
-	        (ITCL_TYPE|ITCL_WIDGETADAPTOR|ITCL_WIDGET|ITCL_ECLASS)) {
+		(ITCL_TYPE|ITCL_WIDGETADAPTOR|ITCL_WIDGET|ITCL_ECLASS)) {
 	    name = Tcl_GetString(idoPtr->namePtr);
 	    if ((pattern == NULL) ||
-                     Tcl_StringCaseMatch(name, pattern, 0)) {
+		     Tcl_StringCaseMatch(name, pattern, 0)) {
 		objPtr = Tcl_NewListObj(0, NULL);
-                Tcl_ListObjAppendElement(interp, objPtr,
-	                idoPtr->namePtr);
+		Tcl_ListObjAppendElement(interp, objPtr,
+			idoPtr->namePtr);
 		if (idoPtr->icPtr != NULL) {
-                    Tcl_ListObjAppendElement(interp, objPtr,
-	                    idoPtr->icPtr->namePtr);
+		    Tcl_ListObjAppendElement(interp, objPtr,
+			    idoPtr->icPtr->namePtr);
 		} else {
 		    objPtr2 = Tcl_NewStringObj("", TCL_INDEX_NONE);
-                    Tcl_ListObjAppendElement(interp, objPtr, objPtr2);
+		    Tcl_ListObjAppendElement(interp, objPtr, objPtr2);
 		}
-                Tcl_ListObjAppendElement(interp, listPtr, objPtr);
+		Tcl_ListObjAppendElement(interp, listPtr, objPtr);
 	    }
-        }
+	}
     }
     Tcl_SetObjResult(interp, listPtr);
     return TCL_OK;
@@ -4549,7 +4549,7 @@ static int
 Itcl_BiInfoDelegatedMethodsCmd(
     TCL_UNUSED(void *),    /* ItclObjectInfo Ptr */
     Tcl_Interp *interp,    /* current interpreter */
-    int objc,              /* number of arguments */
+    int objc,	      /* number of arguments */
     Tcl_Obj *const objv[]) /* argument objects */
 {
     FOREACH_HASH_DECLS;
@@ -4566,41 +4566,41 @@ Itcl_BiInfoDelegatedMethodsCmd(
     pattern = NULL;
     if (objc > 2) {
 	Tcl_AppendResult(interp, "wrong # args should be: info delegated ",
-	        "methods ?pattern?", NULL);
-        return TCL_ERROR;
+		"methods ?pattern?", (char *)NULL);
+	return TCL_ERROR;
     }
 
     if (objc == 2) {
-        pattern = Tcl_GetString(objv[1]);
+	pattern = Tcl_GetString(objv[1]);
     }
     if (Itcl_GetContext(interp, &iclsPtr, &ioPtr) != TCL_OK) {
-        return TCL_ERROR;
+	return TCL_ERROR;
     }
     if (ioPtr != NULL) {
-        iclsPtr = ioPtr->iclsPtr;
+	iclsPtr = ioPtr->iclsPtr;
     }
     listPtr = Tcl_NewListObj(0, NULL);
     FOREACH_HASH_VALUE(idmPtr, &iclsPtr->delegatedFunctions) {
 	if (iclsPtr->flags &
-	        (ITCL_TYPE|ITCL_WIDGETADAPTOR|ITCL_WIDGET|ITCL_ECLASS)) {
+		(ITCL_TYPE|ITCL_WIDGETADAPTOR|ITCL_WIDGET|ITCL_ECLASS)) {
 	    name = Tcl_GetString(idmPtr->namePtr);
 	    if ((pattern == NULL) ||
-                     Tcl_StringCaseMatch(name, pattern, 0)) {
+		     Tcl_StringCaseMatch(name, pattern, 0)) {
 		if ((idmPtr->flags & ITCL_TYPE_METHOD) == 0) {
 		    objPtr = Tcl_NewListObj(0, NULL);
-                    Tcl_ListObjAppendElement(interp, objPtr,
-	                    idmPtr->namePtr);
+		    Tcl_ListObjAppendElement(interp, objPtr,
+			    idmPtr->namePtr);
 		    if (idmPtr->icPtr != NULL) {
-                        Tcl_ListObjAppendElement(interp, objPtr,
-	                        idmPtr->icPtr->namePtr);
+			Tcl_ListObjAppendElement(interp, objPtr,
+				idmPtr->icPtr->namePtr);
 		    } else {
-		        objPtr2 = Tcl_NewStringObj("", TCL_INDEX_NONE);
-                        Tcl_ListObjAppendElement(interp, objPtr, objPtr2);
+			objPtr2 = Tcl_NewStringObj("", TCL_INDEX_NONE);
+			Tcl_ListObjAppendElement(interp, objPtr, objPtr2);
 		    }
-                    Tcl_ListObjAppendElement(interp, listPtr, objPtr);
+		    Tcl_ListObjAppendElement(interp, listPtr, objPtr);
 	       }
 	    }
-        }
+	}
     }
     Tcl_SetObjResult(interp, listPtr);
     return TCL_OK;
@@ -4622,7 +4622,7 @@ static int
 Itcl_BiInfoDelegatedTypeMethodsCmd(
     TCL_UNUSED(void *),    /* ItclObjectInfo Ptr */
     Tcl_Interp *interp,    /* current interpreter */
-    int objc,              /* number of arguments */
+    int objc,	      /* number of arguments */
     Tcl_Obj *const objv[]) /* argument objects */
 {
     FOREACH_HASH_DECLS;
@@ -4639,41 +4639,41 @@ Itcl_BiInfoDelegatedTypeMethodsCmd(
     pattern = NULL;
     if (objc > 2) {
 	Tcl_AppendResult(interp, "wrong # args should be: info delegated ",
-	        "typemethods ?pattern?", NULL);
-        return TCL_ERROR;
+		"typemethods ?pattern?", (char *)NULL);
+	return TCL_ERROR;
     }
 
     if (objc == 2) {
-        pattern = Tcl_GetString(objv[1]);
+	pattern = Tcl_GetString(objv[1]);
     }
     if (Itcl_GetContext(interp, &iclsPtr, &ioPtr) != TCL_OK) {
-        return TCL_ERROR;
+	return TCL_ERROR;
     }
     if (ioPtr != NULL) {
-        iclsPtr = ioPtr->iclsPtr;
+	iclsPtr = ioPtr->iclsPtr;
     }
     listPtr = Tcl_NewListObj(0, NULL);
     FOREACH_HASH_VALUE(idmPtr, &iclsPtr->delegatedFunctions) {
 	if (iclsPtr->flags &
-	        (ITCL_TYPE|ITCL_WIDGETADAPTOR|ITCL_WIDGET|ITCL_ECLASS)) {
+		(ITCL_TYPE|ITCL_WIDGETADAPTOR|ITCL_WIDGET|ITCL_ECLASS)) {
 	    name = Tcl_GetString(idmPtr->namePtr);
 	    if ((pattern == NULL) ||
-                     Tcl_StringCaseMatch(name, pattern, 0)) {
+		     Tcl_StringCaseMatch(name, pattern, 0)) {
 		if (idmPtr->flags & ITCL_TYPE_METHOD) {
 		    objPtr = Tcl_NewListObj(0, NULL);
-                    Tcl_ListObjAppendElement(interp, objPtr,
-	                    idmPtr->namePtr);
+		    Tcl_ListObjAppendElement(interp, objPtr,
+			    idmPtr->namePtr);
 		    if (idmPtr->icPtr != NULL) {
-                        Tcl_ListObjAppendElement(interp, objPtr,
-	                        idmPtr->icPtr->namePtr);
+			Tcl_ListObjAppendElement(interp, objPtr,
+				idmPtr->icPtr->namePtr);
 		    } else {
-		            objPtr2 = Tcl_NewStringObj("", TCL_INDEX_NONE);
-                        Tcl_ListObjAppendElement(interp, objPtr, objPtr2);
+			    objPtr2 = Tcl_NewStringObj("", TCL_INDEX_NONE);
+			Tcl_ListObjAppendElement(interp, objPtr, objPtr2);
 		    }
-                    Tcl_ListObjAppendElement(interp, listPtr, objPtr);
-	        }
+		    Tcl_ListObjAppendElement(interp, listPtr, objPtr);
+		}
 	    }
-        }
+	}
     }
     Tcl_SetObjResult(interp, listPtr);
     return TCL_OK;
@@ -4689,9 +4689,9 @@ Itcl_BiInfoDelegatedTypeMethodsCmd(
 
 static int
 Itcl_BiInfoDelegatedUnknownCmd(
-    void *clientData,        /* ItclObjectInfo Ptr */
+    void *clientData,	/* ItclObjectInfo Ptr */
     Tcl_Interp *interp,      /* current interpreter */
-    int objc,                /* number of arguments */
+    int objc,		/* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
 {
     Tcl_Obj *objPtr;
@@ -4699,7 +4699,7 @@ Itcl_BiInfoDelegatedUnknownCmd(
     ItclShowArgs(1, "Itcl_BiInfoDelegatedUnknownCmd", objc, objv);
     /* produce usage message */
     objPtr = Tcl_NewStringObj(
-            "wrong # args: should be one of...\n", TCL_INDEX_NONE);
+	    "wrong # args: should be one of...\n", TCL_INDEX_NONE);
     ItclGetInfoDelegatedUsage(interp, objPtr, (ItclObjectInfo *)clientData);
     Tcl_SetObjResult(interp, objPtr);
     return TCL_ERROR;
@@ -4713,7 +4713,7 @@ Itcl_BiInfoDelegatedUnknownCmd(
  *  Handles the following syntax:
  *
  *    info delegated option ?optionName? ?-name? ?-resource? ?-class?
- *        ?-component? ?-as? ?-exceptions?
+ *	?-component? ?-as? ?-exceptions?
  *
  *  If the ?optionName? is not specified, then a list of all known
  *  data members is returned.  Otherwise, the information for a
@@ -4726,7 +4726,7 @@ static int
 Itcl_BiInfoDelegatedOptionCmd(
     TCL_UNUSED(void *),    /* ItclObjectInfo Ptr */
     Tcl_Interp *interp,    /* current interpreter */
-    int objc,              /* number of arguments */
+    int objc,	      /* number of arguments */
     Tcl_Obj *const objv[]) /* argument objects */
 {
     FOREACH_HASH_DECLS;
@@ -4746,21 +4746,21 @@ Itcl_BiInfoDelegatedOptionCmd(
     int result;
 
     static const char *options[] = {
-        "-as", "-class", "-component", "-exceptions",
+	"-as", "-class", "-component", "-exceptions",
 	"-name", "-resource", NULL
     };
     enum BOptIdx {
-        BOptAsIdx, BOptClassIdx, BOptComponentIdx, BOptExceptionsIdx,
+	BOptAsIdx, BOptClassIdx, BOptComponentIdx, BOptExceptionsIdx,
 	BOptNameIdx, BOptResourceIdx
     } *ioptlist, ioptlistStorage[6];
 
     static enum BOptIdx DefInfoOption[6] = {
-        BOptNameIdx,
-        BOptResourceIdx,
-        BOptClassIdx,
-        BOptComponentIdx,
-        BOptAsIdx,
-        BOptExceptionsIdx
+	BOptNameIdx,
+	BOptResourceIdx,
+	BOptClassIdx,
+	BOptComponentIdx,
+	BOptAsIdx,
+	BOptExceptionsIdx
     };
 
     ItclShowArgs(1, "Itcl_BiInfoDelegatedOptionCmd", objc, objv);
@@ -4774,19 +4774,19 @@ Itcl_BiInfoDelegatedOptionCmd(
      */
     if (Itcl_GetContext(interp, &contextIclsPtr, &contextIoPtr) != TCL_OK) {
 	Tcl_SetObjResult(interp, Tcl_NewStringObj(
-            "\nget info like this instead: "
-            "\n  namespace eval className { info delegated option ... }", TCL_INDEX_NONE));
-        return TCL_ERROR;
+	    "\nget info like this instead: "
+	    "\n  namespace eval className { info delegated option ... }", TCL_INDEX_NONE));
+	return TCL_ERROR;
     }
     if (contextIoPtr != NULL) {
-        contextIclsPtr = contextIoPtr->iclsPtr;
+	contextIclsPtr = contextIoPtr->iclsPtr;
     }
     nsPtr = Itcl_GetUplevelNamespace(interp, 1);
     infoPtr = contextIclsPtr->infoPtr;
     hPtr = Tcl_FindHashEntry(&infoPtr->namespaceClasses, (char *)nsPtr);
     if (hPtr == NULL) {
-        Tcl_AppendResult(interp, "cannot find class name for namespace \"",
-	        nsPtr->fullName, "\"", NULL);
+	Tcl_AppendResult(interp, "cannot find class name for namespace \"",
+		nsPtr->fullName, "\"", (char *)NULL);
 	return TCL_ERROR;
     }
     contextIclsPtr = (ItclClass *)Tcl_GetHashValue(hPtr);
@@ -4800,8 +4800,8 @@ Itcl_BiInfoDelegatedOptionCmd(
     objc--;
 
     if (objc > 0) {
-        optionName = Tcl_GetString(*objv);
-        objc--;
+	optionName = Tcl_GetString(*objv);
+	objc--;
 	objv++;
     }
 
@@ -4812,129 +4812,129 @@ Itcl_BiInfoDelegatedOptionCmd(
 	if (contextIoPtr == NULL) {
 	    Tcl_ResetResult(interp);
 	    Tcl_AppendResult(interp, "cannot access object-specific info ",
-		    "without an object context", NULL);
+		    "without an object context", (char *)NULL);
 	    return TCL_ERROR;
 	}
 	optionNamePtr = Tcl_NewStringObj(optionName, TCL_INDEX_NONE);
-        hPtr = Tcl_FindHashEntry(&contextIoPtr->objectDelegatedOptions,
-	        (char *)optionNamePtr);
-        Tcl_DecrRefCount(optionNamePtr);
-        if (hPtr == NULL) {
-            Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
-                 "\"", optionName, "\" isn't an option in object \"",
-                Tcl_GetString(contextIoPtr->namePtr), "\"",
-                NULL);
-            return TCL_ERROR;
-        }
-        idoptPtr = (ItclDelegatedOption*)Tcl_GetHashValue(hPtr);
+	hPtr = Tcl_FindHashEntry(&contextIoPtr->objectDelegatedOptions,
+		(char *)optionNamePtr);
+	Tcl_DecrRefCount(optionNamePtr);
+	if (hPtr == NULL) {
+	    Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+		 "\"", optionName, "\" isn't an option in object \"",
+		Tcl_GetString(contextIoPtr->namePtr), "\"",
+		(char *)NULL);
+	    return TCL_ERROR;
+	}
+	idoptPtr = (ItclDelegatedOption*)Tcl_GetHashValue(hPtr);
 
-        /*
-         *  By default, return everything.
-         */
-        if (objc == 0) {
-            ioptlist = DefInfoOption;
-            objc = 6;
-        } else {
+	/*
+	 *  By default, return everything.
+	 */
+	if (objc == 0) {
+	    ioptlist = DefInfoOption;
+	    objc = 6;
+	} else {
 
-            /*
-             *  Otherwise, scan through all remaining flags and
-             *  figure out what to return.
-             */
-            ioptlist = &ioptlistStorage[0];
-            for (i=0 ; i < objc; i++) {
-                result = Tcl_GetIndexFromObjStruct(interp, objv[i],
-                    options, sizeof(char *), "option", 0, (int*)(&ioptlist[i]));
-                if (result != TCL_OK) {
-                    return TCL_ERROR;
-                }
-            }
-        }
+	    /*
+	     *  Otherwise, scan through all remaining flags and
+	     *  figure out what to return.
+	     */
+	    ioptlist = &ioptlistStorage[0];
+	    for (i=0 ; i < objc; i++) {
+		result = Tcl_GetIndexFromObjStruct(interp, objv[i],
+		    options, sizeof(char *), "option", 0, (int*)(&ioptlist[i]));
+		if (result != TCL_OK) {
+		    return TCL_ERROR;
+		}
+	    }
+	}
 
-        if (objc > 1) {
-            resultPtr = Tcl_NewListObj(0, NULL);
-        }
+	if (objc > 1) {
+	    resultPtr = Tcl_NewListObj(0, NULL);
+	}
 
-        for (i=0 ; i < objc; i++) {
-            switch (ioptlist[i]) {
-                case BOptAsIdx:
-                    if (idoptPtr->asPtr) {
-                        objPtr = Tcl_NewStringObj(
-			        Tcl_GetString(idoptPtr->asPtr), TCL_INDEX_NONE);
-                    } else {
-                        objPtr = Tcl_NewStringObj("", TCL_INDEX_NONE);
-                    }
-                    break;
+	for (i=0 ; i < objc; i++) {
+	    switch (ioptlist[i]) {
+		case BOptAsIdx:
+		    if (idoptPtr->asPtr) {
+			objPtr = Tcl_NewStringObj(
+				Tcl_GetString(idoptPtr->asPtr), TCL_INDEX_NONE);
+		    } else {
+			objPtr = Tcl_NewStringObj("", TCL_INDEX_NONE);
+		    }
+		    break;
 
-                case BOptExceptionsIdx:
+		case BOptExceptionsIdx:
 		    {
 		    Tcl_Obj *entryObj;
 		    objPtr = Tcl_NewListObj(0, NULL);
 		    FOREACH_HASH_VALUE(entryObj, &idoptPtr->exceptions) {
 			Tcl_ListObjAppendElement(interp, objPtr, entryObj);
 		    }
-                    }
-                    break;
-                case BOptResourceIdx:
-                    if (idoptPtr->resourceNamePtr) {
-                        objPtr = Tcl_NewStringObj(
-			        Tcl_GetString(idoptPtr->resourceNamePtr), TCL_INDEX_NONE);
-                    } else {
-                        objPtr = Tcl_NewStringObj("", TCL_INDEX_NONE);
-                    }
-                    break;
+		    }
+		    break;
+		case BOptResourceIdx:
+		    if (idoptPtr->resourceNamePtr) {
+			objPtr = Tcl_NewStringObj(
+				Tcl_GetString(idoptPtr->resourceNamePtr), TCL_INDEX_NONE);
+		    } else {
+			objPtr = Tcl_NewStringObj("", TCL_INDEX_NONE);
+		    }
+		    break;
 
-                case BOptClassIdx:
-                    if (idoptPtr->classNamePtr) {
-                        objPtr = Tcl_NewStringObj(
-			        Tcl_GetString(idoptPtr->classNamePtr), TCL_INDEX_NONE);
-                    } else {
-                        objPtr = Tcl_NewStringObj("", TCL_INDEX_NONE);
-                    }
-                    break;
+		case BOptClassIdx:
+		    if (idoptPtr->classNamePtr) {
+			objPtr = Tcl_NewStringObj(
+				Tcl_GetString(idoptPtr->classNamePtr), TCL_INDEX_NONE);
+		    } else {
+			objPtr = Tcl_NewStringObj("", TCL_INDEX_NONE);
+		    }
+		    break;
 
-                case BOptComponentIdx:
-                    if (idoptPtr->icPtr != NULL) {
-                        objPtr = Tcl_NewStringObj(
-			        Tcl_GetString(idoptPtr->icPtr->namePtr), TCL_INDEX_NONE);
-                    } else {
-                        objPtr = Tcl_NewStringObj("", TCL_INDEX_NONE);
-                    }
-                    break;
+		case BOptComponentIdx:
+		    if (idoptPtr->icPtr != NULL) {
+			objPtr = Tcl_NewStringObj(
+				Tcl_GetString(idoptPtr->icPtr->namePtr), TCL_INDEX_NONE);
+		    } else {
+			objPtr = Tcl_NewStringObj("", TCL_INDEX_NONE);
+		    }
+		    break;
 
-                case BOptNameIdx:
-                    objPtr = Tcl_NewStringObj(
-		            Tcl_GetString(idoptPtr->namePtr), TCL_INDEX_NONE);
-                    break;
+		case BOptNameIdx:
+		    objPtr = Tcl_NewStringObj(
+			    Tcl_GetString(idoptPtr->namePtr), TCL_INDEX_NONE);
+		    break;
 
-            }
+	    }
 
-            if (objc == 1) {
-                resultPtr = objPtr;
-            } else {
-                Tcl_ListObjAppendElement(NULL, resultPtr,
-                    objPtr);
-            }
-        }
-        Tcl_SetObjResult(interp, resultPtr);
+	    if (objc == 1) {
+		resultPtr = objPtr;
+	    } else {
+		Tcl_ListObjAppendElement(NULL, resultPtr,
+		    objPtr);
+	    }
+	}
+	Tcl_SetObjResult(interp, resultPtr);
     } else {
 
-        /*
-         *  Return the list of available options.
-         */
-        resultPtr = Tcl_NewListObj(0, NULL);
-        Itcl_InitHierIter(&hier, contextIclsPtr);
-        while ((iclsPtr=Itcl_AdvanceHierIter(&hier)) != NULL) {
-            hPtr = Tcl_FirstHashEntry(&iclsPtr->delegatedOptions, &place);
-            while (hPtr) {
-                idoptPtr = (ItclDelegatedOption*)Tcl_GetHashValue(hPtr);
-                objPtr = idoptPtr->namePtr;
-                Tcl_ListObjAppendElement(NULL, resultPtr, objPtr);
-                hPtr = Tcl_NextHashEntry(&place);
-            }
-        }
-        Itcl_DeleteHierIter(&hier);
+	/*
+	 *  Return the list of available options.
+	 */
+	resultPtr = Tcl_NewListObj(0, NULL);
+	Itcl_InitHierIter(&hier, contextIclsPtr);
+	while ((iclsPtr=Itcl_AdvanceHierIter(&hier)) != NULL) {
+	    hPtr = Tcl_FirstHashEntry(&iclsPtr->delegatedOptions, &place);
+	    while (hPtr) {
+		idoptPtr = (ItclDelegatedOption*)Tcl_GetHashValue(hPtr);
+		objPtr = idoptPtr->namePtr;
+		Tcl_ListObjAppendElement(NULL, resultPtr, objPtr);
+		hPtr = Tcl_NextHashEntry(&place);
+	    }
+	}
+	Itcl_DeleteHierIter(&hier);
 
-        Tcl_SetObjResult(interp, resultPtr);
+	Tcl_SetObjResult(interp, resultPtr);
     }
     return TCL_OK;
 }
@@ -4947,7 +4947,7 @@ Itcl_BiInfoDelegatedOptionCmd(
  *  Handles the following syntax:
  *
  *    info delegated method ?methodName? ?-name?
- *        ?-component? ?-as? ?-using? ?-exceptions?
+ *	?-component? ?-as? ?-using? ?-exceptions?
  *
  *  If the ?optionName? is not specified, then a list of all known
  *  data members is returned.  Otherwise, the information for a
@@ -4960,7 +4960,7 @@ static int
 Itcl_BiInfoDelegatedMethodCmd(
     TCL_UNUSED(void *),    /* ItclObjectInfo Ptr */
     Tcl_Interp *interp,    /* current interpreter */
-    int objc,              /* number of arguments */
+    int objc,	      /* number of arguments */
     Tcl_Obj *const objv[]) /* argument objects */
 {
     FOREACH_HASH_DECLS;
@@ -4978,11 +4978,11 @@ Itcl_BiInfoDelegatedMethodCmd(
     int result;
 
     static const char *options[] = {
-        "-as", "-component", "-exceptions",
+	"-as", "-component", "-exceptions",
 	"-name", "-using", NULL
     };
     enum BOptIdx {
-        BOptAsIdx,
+	BOptAsIdx,
 	BOptComponentIdx,
 	BOptExceptionsIdx,
 	BOptNameIdx,
@@ -4990,11 +4990,11 @@ Itcl_BiInfoDelegatedMethodCmd(
     } *ioptlist, ioptlistStorage[5];
 
     static enum BOptIdx DefInfoOption[5] = {
-        BOptNameIdx,
-        BOptComponentIdx,
-        BOptAsIdx,
-        BOptUsingIdx,
-        BOptExceptionsIdx
+	BOptNameIdx,
+	BOptComponentIdx,
+	BOptAsIdx,
+	BOptUsingIdx,
+	BOptExceptionsIdx
     };
 
     ItclShowArgs(1, "Itcl_BiInfoDelegatedMethodCmd", objc, objv);
@@ -5008,12 +5008,12 @@ Itcl_BiInfoDelegatedMethodCmd(
      */
     if (Itcl_GetContext(interp, &contextIclsPtr, &contextIoPtr) != TCL_OK) {
 	Tcl_SetObjResult(interp, Tcl_NewStringObj(
-            "\nget info like this instead: "
-            "\n  namespace eval className { info delegated method ... }", TCL_INDEX_NONE));
-        return TCL_ERROR;
+	    "\nget info like this instead: "
+	    "\n  namespace eval className { info delegated method ... }", TCL_INDEX_NONE));
+	return TCL_ERROR;
     }
     if (contextIoPtr != NULL) {
-        contextIclsPtr = contextIoPtr->iclsPtr;
+	contextIclsPtr = contextIoPtr->iclsPtr;
     }
 
     /*
@@ -5025,8 +5025,8 @@ Itcl_BiInfoDelegatedMethodCmd(
     objc--;
 
     if (objc > 0) {
-        cmdName = Tcl_GetString(*objv);
-        objc--;
+	cmdName = Tcl_GetString(*objv);
+	objc--;
 	objv++;
     }
 
@@ -5036,129 +5036,129 @@ Itcl_BiInfoDelegatedMethodCmd(
     if (cmdName) {
 	cmdNamePtr = Tcl_NewStringObj(cmdName, TCL_INDEX_NONE);
 	if (contextIoPtr != NULL) {
-            hPtr = Tcl_FindHashEntry(&contextIoPtr->objectDelegatedFunctions,
-	            (char *)cmdNamePtr);
+	    hPtr = Tcl_FindHashEntry(&contextIoPtr->objectDelegatedFunctions,
+		    (char *)cmdNamePtr);
 	} else {
-            hPtr = Tcl_FindHashEntry(&contextIclsPtr->delegatedFunctions,
-	            (char *)cmdNamePtr);
+	    hPtr = Tcl_FindHashEntry(&contextIclsPtr->delegatedFunctions,
+		    (char *)cmdNamePtr);
 	}
 	Tcl_DecrRefCount(cmdNamePtr);
-        if (hPtr == NULL) {
-            Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
-                 "\"", cmdName, "\" isn't a delegated method in object \"",
-                Tcl_GetString(contextIoPtr->namePtr), "\"",
-                NULL);
-            return TCL_ERROR;
-        }
-        idmPtr = (ItclDelegatedFunction*)Tcl_GetHashValue(hPtr);
-        if (!(idmPtr->flags & ITCL_METHOD)) {
-            Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
-                 "\"", cmdName, "\" isn't a delegated method in object \"",
-                Tcl_GetString(contextIoPtr->namePtr), "\"",
-                NULL);
-            return TCL_ERROR;
+	if (hPtr == NULL) {
+	    Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+		 "\"", cmdName, "\" isn't a delegated method in object \"",
+		Tcl_GetString(contextIoPtr->namePtr), "\"",
+		(char *)NULL);
+	    return TCL_ERROR;
 	}
-        /*
-         *  By default, return everything.
-         */
-        if (objc == 0) {
-            ioptlist = DefInfoOption;
-            objc = 5;
-        } else {
+	idmPtr = (ItclDelegatedFunction*)Tcl_GetHashValue(hPtr);
+	if (!(idmPtr->flags & ITCL_METHOD)) {
+	    Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+		 "\"", cmdName, "\" isn't a delegated method in object \"",
+		Tcl_GetString(contextIoPtr->namePtr), "\"",
+		(char *)NULL);
+	    return TCL_ERROR;
+	}
+	/*
+	 *  By default, return everything.
+	 */
+	if (objc == 0) {
+	    ioptlist = DefInfoOption;
+	    objc = 5;
+	} else {
 
-            /*
-             *  Otherwise, scan through all remaining flags and
-             *  figure out what to return.
-             */
-            ioptlist = &ioptlistStorage[0];
-            for (i=0 ; i < objc; i++) {
-                result = Tcl_GetIndexFromObjStruct(interp, objv[i],
-                    options, sizeof(char *), "option", 0, (int*)(&ioptlist[i]));
-                if (result != TCL_OK) {
-                    return TCL_ERROR;
-                }
-            }
-        }
+	    /*
+	     *  Otherwise, scan through all remaining flags and
+	     *  figure out what to return.
+	     */
+	    ioptlist = &ioptlistStorage[0];
+	    for (i=0 ; i < objc; i++) {
+		result = Tcl_GetIndexFromObjStruct(interp, objv[i],
+		    options, sizeof(char *), "option", 0, (int*)(&ioptlist[i]));
+		if (result != TCL_OK) {
+		    return TCL_ERROR;
+		}
+	    }
+	}
 
-        if (objc > 1) {
-            resultPtr = Tcl_NewListObj(0, NULL);
-        }
+	if (objc > 1) {
+	    resultPtr = Tcl_NewListObj(0, NULL);
+	}
 
-        for (i=0 ; i < objc; i++) {
-            switch (ioptlist[i]) {
-                case BOptAsIdx:
-                    if (idmPtr->asPtr) {
-                        objPtr = Tcl_NewStringObj(
-			        Tcl_GetString(idmPtr->asPtr), TCL_INDEX_NONE);
-                    } else {
-                        objPtr = Tcl_NewStringObj("", TCL_INDEX_NONE);
-                    }
-                    break;
+	for (i=0 ; i < objc; i++) {
+	    switch (ioptlist[i]) {
+		case BOptAsIdx:
+		    if (idmPtr->asPtr) {
+			objPtr = Tcl_NewStringObj(
+				Tcl_GetString(idmPtr->asPtr), TCL_INDEX_NONE);
+		    } else {
+			objPtr = Tcl_NewStringObj("", TCL_INDEX_NONE);
+		    }
+		    break;
 
-                case BOptExceptionsIdx:
+		case BOptExceptionsIdx:
 		    {
 		    Tcl_Obj *entryObj;
 		    objPtr = Tcl_NewListObj(0, NULL);
 		    FOREACH_HASH_VALUE(entryObj, &idmPtr->exceptions) {
 			Tcl_ListObjAppendElement(interp, objPtr, entryObj);
 		    }
-                    }
-                    break;
-                case BOptUsingIdx:
-                    if (idmPtr->usingPtr) {
-                        objPtr = Tcl_NewStringObj(
-			        Tcl_GetString(idmPtr->usingPtr), TCL_INDEX_NONE);
-                    } else {
-                        objPtr = Tcl_NewStringObj("", TCL_INDEX_NONE);
-                    }
-                    break;
+		    }
+		    break;
+		case BOptUsingIdx:
+		    if (idmPtr->usingPtr) {
+			objPtr = Tcl_NewStringObj(
+				Tcl_GetString(idmPtr->usingPtr), TCL_INDEX_NONE);
+		    } else {
+			objPtr = Tcl_NewStringObj("", TCL_INDEX_NONE);
+		    }
+		    break;
 
-                case BOptComponentIdx:
-                    if (idmPtr->icPtr != NULL) {
-                        objPtr = Tcl_NewStringObj(
-			        Tcl_GetString(idmPtr->icPtr->namePtr), TCL_INDEX_NONE);
-                    } else {
-                        objPtr = Tcl_NewStringObj("", TCL_INDEX_NONE);
-                    }
-                    break;
+		case BOptComponentIdx:
+		    if (idmPtr->icPtr != NULL) {
+			objPtr = Tcl_NewStringObj(
+				Tcl_GetString(idmPtr->icPtr->namePtr), TCL_INDEX_NONE);
+		    } else {
+			objPtr = Tcl_NewStringObj("", TCL_INDEX_NONE);
+		    }
+		    break;
 
-                case BOptNameIdx:
-                    objPtr = Tcl_NewStringObj(
-		            Tcl_GetString(idmPtr->namePtr), TCL_INDEX_NONE);
-                    break;
+		case BOptNameIdx:
+		    objPtr = Tcl_NewStringObj(
+			    Tcl_GetString(idmPtr->namePtr), TCL_INDEX_NONE);
+		    break;
 
-            }
+	    }
 
-            if (objc == 1) {
-                resultPtr = objPtr;
-            } else {
-                Tcl_ListObjAppendElement(NULL, resultPtr,
-                    objPtr);
-            }
-        }
-        Tcl_SetObjResult(interp, resultPtr);
+	    if (objc == 1) {
+		resultPtr = objPtr;
+	    } else {
+		Tcl_ListObjAppendElement(NULL, resultPtr,
+		    objPtr);
+	    }
+	}
+	Tcl_SetObjResult(interp, resultPtr);
     } else {
 
-        /*
-         *  Return the list of available options.
-         */
-        resultPtr = Tcl_NewListObj(0, NULL);
-        Itcl_InitHierIter(&hier, contextIclsPtr);
-        while ((iclsPtr=Itcl_AdvanceHierIter(&hier)) != NULL) {
-            hPtr = Tcl_FirstHashEntry(&iclsPtr->delegatedFunctions, &place);
-            while (hPtr) {
-                idmPtr = (ItclDelegatedFunction *)Tcl_GetHashValue(hPtr);
+	/*
+	 *  Return the list of available options.
+	 */
+	resultPtr = Tcl_NewListObj(0, NULL);
+	Itcl_InitHierIter(&hier, contextIclsPtr);
+	while ((iclsPtr=Itcl_AdvanceHierIter(&hier)) != NULL) {
+	    hPtr = Tcl_FirstHashEntry(&iclsPtr->delegatedFunctions, &place);
+	    while (hPtr) {
+		idmPtr = (ItclDelegatedFunction *)Tcl_GetHashValue(hPtr);
 		if (idmPtr->flags & ITCL_METHOD) {
-                    objPtr = idmPtr->namePtr;
-                    Tcl_ListObjAppendElement(NULL, resultPtr,
-		            objPtr);
+		    objPtr = idmPtr->namePtr;
+		    Tcl_ListObjAppendElement(NULL, resultPtr,
+			    objPtr);
 		}
-                hPtr = Tcl_NextHashEntry(&place);
-            }
-        }
-        Itcl_DeleteHierIter(&hier);
+		hPtr = Tcl_NextHashEntry(&place);
+	    }
+	}
+	Itcl_DeleteHierIter(&hier);
 
-        Tcl_SetObjResult(interp, resultPtr);
+	Tcl_SetObjResult(interp, resultPtr);
     }
     return TCL_OK;
 }
@@ -5171,7 +5171,7 @@ Itcl_BiInfoDelegatedMethodCmd(
  *  Handles the following syntax:
  *
  *    info delegated typemethod ?methodName? ?-name?
- *        ?-component? ?-as? ?-exceptions?
+ *	?-component? ?-as? ?-exceptions?
  *
  *  If the ?optionName? is not specified, then a list of all known
  *  data members is returned.  Otherwise, the information for a
@@ -5184,7 +5184,7 @@ static int
 Itcl_BiInfoDelegatedTypeMethodCmd(
     TCL_UNUSED(void *),    /* ItclObjectInfo Ptr */
     Tcl_Interp *interp,    /* current interpreter */
-    int objc,              /* number of arguments */
+    int objc,	      /* number of arguments */
     Tcl_Obj *const objv[]) /* argument objects */
 {
 
@@ -5203,11 +5203,11 @@ Itcl_BiInfoDelegatedTypeMethodCmd(
     int result;
 
     static const char *options[] = {
-        "-as", "-component", "-exceptions",
+	"-as", "-component", "-exceptions",
 	"-name", "-using", NULL
     };
     enum BOptIdx {
-        BOptAsIdx,
+	BOptAsIdx,
 	BOptComponentIdx,
 	BOptExceptionsIdx,
 	BOptNameIdx,
@@ -5215,11 +5215,11 @@ Itcl_BiInfoDelegatedTypeMethodCmd(
     } *ioptlist, ioptlistStorage[5];
 
     static enum BOptIdx DefInfoOption[5] = {
-        BOptNameIdx,
-        BOptComponentIdx,
-        BOptAsIdx,
-        BOptUsingIdx,
-        BOptExceptionsIdx
+	BOptNameIdx,
+	BOptComponentIdx,
+	BOptAsIdx,
+	BOptUsingIdx,
+	BOptExceptionsIdx
     };
 
     ItclShowArgs(1, "Itcl_BiInfoDelegatedTypeMethodCmd", objc, objv);
@@ -5233,12 +5233,12 @@ Itcl_BiInfoDelegatedTypeMethodCmd(
      */
     if (Itcl_GetContext(interp, &contextIclsPtr, &contextIoPtr) != TCL_OK) {
 	Tcl_SetObjResult(interp, Tcl_NewStringObj(
-            "\nget info like this instead: "
-            "\n  namespace eval className { info delegated type method ... }", TCL_INDEX_NONE));
-        return TCL_ERROR;
+	    "\nget info like this instead: "
+	    "\n  namespace eval className { info delegated type method ... }", TCL_INDEX_NONE));
+	return TCL_ERROR;
     }
     if (contextIoPtr != NULL) {
-        contextIclsPtr = contextIoPtr->iclsPtr;
+	contextIclsPtr = contextIoPtr->iclsPtr;
     }
 
     /*
@@ -5250,8 +5250,8 @@ Itcl_BiInfoDelegatedTypeMethodCmd(
     objc--;
 
     if (objc > 0) {
-        cmdName = Tcl_GetString(*objv);
-        objc--;
+	cmdName = Tcl_GetString(*objv);
+	objc--;
 	objv++;
     }
 
@@ -5261,131 +5261,131 @@ Itcl_BiInfoDelegatedTypeMethodCmd(
     if (cmdName) {
 	cmdNamePtr = Tcl_NewStringObj(cmdName, TCL_INDEX_NONE);
 	if (contextIoPtr != NULL) {
-            hPtr = Tcl_FindHashEntry(&contextIoPtr->objectDelegatedFunctions,
-	            (char *)cmdNamePtr);
+	    hPtr = Tcl_FindHashEntry(&contextIoPtr->objectDelegatedFunctions,
+		    (char *)cmdNamePtr);
 	} else {
-            hPtr = Tcl_FindHashEntry(&contextIclsPtr->delegatedFunctions,
-	            (char *)cmdNamePtr);
+	    hPtr = Tcl_FindHashEntry(&contextIclsPtr->delegatedFunctions,
+		    (char *)cmdNamePtr);
 	}
 	Tcl_DecrRefCount(cmdNamePtr);
-        if (hPtr == NULL) {
-            Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
-                 "\"", cmdName, "\" isn't a delegated typemethod in ",
+	if (hPtr == NULL) {
+	    Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+		 "\"", cmdName, "\" isn't a delegated typemethod in ",
 		contextIoPtr ? "object \"" : "class \"",
 		contextIoPtr ?  Tcl_GetString(contextIoPtr->namePtr)
-		: Tcl_GetString(contextIclsPtr->namePtr), "\"", NULL);
-            return TCL_ERROR;
-        }
-        idmPtr = (ItclDelegatedFunction*)Tcl_GetHashValue(hPtr);
-        if (!(idmPtr->flags & ITCL_TYPE_METHOD)) {
-            Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
-                 "\"", cmdName, "\" isn't a delegated typemethod in ",
-		contextIoPtr ? "object \"" : "class \"",
-		contextIoPtr ?  Tcl_GetString(contextIoPtr->namePtr)
-		: Tcl_GetString(contextIclsPtr->namePtr), "\"", NULL);
-            return TCL_ERROR;
+		: Tcl_GetString(contextIclsPtr->namePtr), "\"", (char *)NULL);
+	    return TCL_ERROR;
 	}
-        /*
-         *  By default, return everything.
-         */
-        if (objc == 0) {
-            ioptlist = DefInfoOption;
-            objc = 5;
-        } else {
+	idmPtr = (ItclDelegatedFunction*)Tcl_GetHashValue(hPtr);
+	if (!(idmPtr->flags & ITCL_TYPE_METHOD)) {
+	    Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+		 "\"", cmdName, "\" isn't a delegated typemethod in ",
+		contextIoPtr ? "object \"" : "class \"",
+		contextIoPtr ?  Tcl_GetString(contextIoPtr->namePtr)
+		: Tcl_GetString(contextIclsPtr->namePtr), "\"", (char *)NULL);
+	    return TCL_ERROR;
+	}
+	/*
+	 *  By default, return everything.
+	 */
+	if (objc == 0) {
+	    ioptlist = DefInfoOption;
+	    objc = 5;
+	} else {
 
-            /*
-             *  Otherwise, scan through all remaining flags and
-             *  figure out what to return.
-             */
-            ioptlist = &ioptlistStorage[0];
-            for (i=0 ; i < objc; i++) {
-                result = Tcl_GetIndexFromObjStruct(interp, objv[i],
-                    options, sizeof(char *), "option", 0, (int*)(&ioptlist[i]));
-                if (result != TCL_OK) {
-                    return TCL_ERROR;
-                }
-            }
-        }
+	    /*
+	     *  Otherwise, scan through all remaining flags and
+	     *  figure out what to return.
+	     */
+	    ioptlist = &ioptlistStorage[0];
+	    for (i=0 ; i < objc; i++) {
+		result = Tcl_GetIndexFromObjStruct(interp, objv[i],
+		    options, sizeof(char *), "option", 0, (int*)(&ioptlist[i]));
+		if (result != TCL_OK) {
+		    return TCL_ERROR;
+		}
+	    }
+	}
 
-        if (objc > 1) {
-            resultPtr = Tcl_NewListObj(0, NULL);
-        }
+	if (objc > 1) {
+	    resultPtr = Tcl_NewListObj(0, NULL);
+	}
 
-        for (i=0 ; i < objc; i++) {
-            switch (ioptlist[i]) {
-                case BOptAsIdx:
-                    if (idmPtr->asPtr) {
-                        objPtr = Tcl_NewStringObj(
-			        Tcl_GetString(idmPtr->asPtr), TCL_INDEX_NONE);
-                    } else {
-                        objPtr = Tcl_NewStringObj("", TCL_INDEX_NONE);
-                    }
-                    break;
+	for (i=0 ; i < objc; i++) {
+	    switch (ioptlist[i]) {
+		case BOptAsIdx:
+		    if (idmPtr->asPtr) {
+			objPtr = Tcl_NewStringObj(
+				Tcl_GetString(idmPtr->asPtr), TCL_INDEX_NONE);
+		    } else {
+			objPtr = Tcl_NewStringObj("", TCL_INDEX_NONE);
+		    }
+		    break;
 
-                case BOptExceptionsIdx:
+		case BOptExceptionsIdx:
 		    {
 		    Tcl_Obj *entryObj;
 		    objPtr = Tcl_NewListObj(0, NULL);
 		    FOREACH_HASH_VALUE(entryObj, &idmPtr->exceptions) {
 			Tcl_ListObjAppendElement(interp, objPtr, entryObj);
 		    }
-                    }
-                    break;
-                case BOptUsingIdx:
-                    if (idmPtr->usingPtr) {
-                        objPtr = Tcl_NewStringObj(
-			        Tcl_GetString(idmPtr->usingPtr), TCL_INDEX_NONE);
-                    } else {
-                        objPtr = Tcl_NewStringObj("", TCL_INDEX_NONE);
-                    }
-                    break;
+		    }
+		    break;
+		case BOptUsingIdx:
+		    if (idmPtr->usingPtr) {
+			objPtr = Tcl_NewStringObj(
+				Tcl_GetString(idmPtr->usingPtr), TCL_INDEX_NONE);
+		    } else {
+			objPtr = Tcl_NewStringObj("", TCL_INDEX_NONE);
+		    }
+		    break;
 
-                case BOptComponentIdx:
-                    if (idmPtr->icPtr != NULL) {
-                        objPtr = Tcl_NewStringObj(
-			        Tcl_GetString(idmPtr->icPtr->namePtr), TCL_INDEX_NONE);
-                    } else {
-                        objPtr = Tcl_NewStringObj("", TCL_INDEX_NONE);
-                    }
-                    break;
+		case BOptComponentIdx:
+		    if (idmPtr->icPtr != NULL) {
+			objPtr = Tcl_NewStringObj(
+				Tcl_GetString(idmPtr->icPtr->namePtr), TCL_INDEX_NONE);
+		    } else {
+			objPtr = Tcl_NewStringObj("", TCL_INDEX_NONE);
+		    }
+		    break;
 
-                case BOptNameIdx:
-                    objPtr = Tcl_NewStringObj(
-		            Tcl_GetString(idmPtr->namePtr), TCL_INDEX_NONE);
-                    break;
+		case BOptNameIdx:
+		    objPtr = Tcl_NewStringObj(
+			    Tcl_GetString(idmPtr->namePtr), TCL_INDEX_NONE);
+		    break;
 
-            }
+	    }
 
-            if (objc == 1) {
-                resultPtr = objPtr;
-            } else {
-                Tcl_ListObjAppendElement(NULL, resultPtr,
-                    objPtr);
-            }
-        }
-        Tcl_SetObjResult(interp, resultPtr);
+	    if (objc == 1) {
+		resultPtr = objPtr;
+	    } else {
+		Tcl_ListObjAppendElement(NULL, resultPtr,
+		    objPtr);
+	    }
+	}
+	Tcl_SetObjResult(interp, resultPtr);
     } else {
 
-        /*
-         *  Return the list of available options.
-         */
-        resultPtr = Tcl_NewListObj(0, NULL);
-        Itcl_InitHierIter(&hier, contextIclsPtr);
-        while ((iclsPtr=Itcl_AdvanceHierIter(&hier)) != NULL) {
-            hPtr = Tcl_FirstHashEntry(&iclsPtr->delegatedFunctions, &place);
-            while (hPtr) {
-                idmPtr = (ItclDelegatedFunction *)Tcl_GetHashValue(hPtr);
+	/*
+	 *  Return the list of available options.
+	 */
+	resultPtr = Tcl_NewListObj(0, NULL);
+	Itcl_InitHierIter(&hier, contextIclsPtr);
+	while ((iclsPtr=Itcl_AdvanceHierIter(&hier)) != NULL) {
+	    hPtr = Tcl_FirstHashEntry(&iclsPtr->delegatedFunctions, &place);
+	    while (hPtr) {
+		idmPtr = (ItclDelegatedFunction *)Tcl_GetHashValue(hPtr);
 		if (idmPtr->flags & ITCL_TYPE_METHOD) {
-                    objPtr = idmPtr->namePtr;
-                    Tcl_ListObjAppendElement(NULL, resultPtr,
-		            objPtr);
+		    objPtr = idmPtr->namePtr;
+		    Tcl_ListObjAppendElement(NULL, resultPtr,
+			    objPtr);
 		}
-                hPtr = Tcl_NextHashEntry(&place);
-            }
-        }
-        Itcl_DeleteHierIter(&hier);
+		hPtr = Tcl_NextHashEntry(&place);
+	    }
+	}
+	Itcl_DeleteHierIter(&hier);
 
-        Tcl_SetObjResult(interp, resultPtr);
+	Tcl_SetObjResult(interp, resultPtr);
     }
     return TCL_OK;
 }

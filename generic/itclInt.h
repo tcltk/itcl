@@ -684,7 +684,8 @@ MODULE_SCOPE void ItclShowArgs(int level, const char *str, size_t objc,
 MODULE_SCOPE Tcl_ObjCmdProc ItclCallCCommand;
 MODULE_SCOPE Tcl_ObjCmdProc ItclObjectUnknownCommand;
 MODULE_SCOPE int ItclCheckCallProc(void *clientData, Tcl_Interp *interp,
-	Tcl_ObjectContext contextPtr, Tcl_CallFrame *framePtr, int *isFinished);
+	Tcl_ObjectContext context, Tcl_CallFrame *framePtr, int *isFinished);
+
 
 MODULE_SCOPE void ItclPreserveClass(ItclClass *iclsPtr);
 MODULE_SCOPE void ItclReleaseClass(void *iclsPtr);

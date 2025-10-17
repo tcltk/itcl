@@ -37,25 +37,25 @@ Initialize (
     ItclObjectInfo *infoPtr;
 
     if (Tcl_InitStubs(interp, "8.6-", 0) == NULL) {
-        return TCL_ERROR;
+	return TCL_ERROR;
     }
     if (Tk_InitStubs(interp, "8.6-", 0) == NULL) {
-        return TCL_ERROR;
+	return TCL_ERROR;
     }
     if (Itcl_InitStubs(interp, "4.0.0", 0) == NULL) {
-        return TCL_ERROR;
+	return TCL_ERROR;
     }
 
     infoPtr = (ItclObjectInfo *)Tcl_GetAssocData(interp,
-            ITCL_INTERP_DATA, NULL);
+	    ITCL_INTERP_DATA, NULL);
     nsPtr = Tcl_CreateNamespace(interp, "::itcl::widget", NULL, NULL);
     if (nsPtr == NULL) {
-        Tcl_Panic("Itcl: cannot create namespace: \"%s\" \n", "::itcl::widget");
+	Tcl_Panic("Itcl: cannot create namespace: \"%s\" \n", "::itcl::widget");
     }
     nsPtr = Tcl_CreateNamespace(interp, ITCL_WIDGETS_NAMESPACE, NULL, NULL);
     if (nsPtr == NULL) {
-        Tcl_Panic("Itcl: cannot create namespace: \"%s\" \n",
-	        "::itcl::widget::internal");
+	Tcl_Panic("Itcl: cannot create namespace: \"%s\" \n",
+		"::itcl::widget::internal");
     }
 
 #if 0 /* This doesn't compile ???? */
@@ -71,11 +71,11 @@ Initialize (
      *  are automatically built into class definitions.
      */
     if (Itcl_WidgetBiInit(interp, infoPtr) != TCL_OK) {
-        return TCL_ERROR;
+	return TCL_ERROR;
     }
 
     if (ItclWidgetInfoInit(interp, infoPtr) != TCL_OK) {
-        return TCL_ERROR;
+	return TCL_ERROR;
     }
 
     /*
@@ -84,7 +84,7 @@ Initialize (
 
     Tcl_SetVar2(interp, "::itcl::widget::version", NULL, ITCL_VERSION, TCL_NAMESPACE_ONLY);
     Tcl_SetVar2(interp, "::itcl::widget::patchLevel", NULL, ITCL_PATCH_LEVEL,
-            TCL_NAMESPACE_ONLY);
+	    TCL_NAMESPACE_ONLY);
 
 
     /*
@@ -115,7 +115,7 @@ Itclwidget_Init (
     Tcl_Interp *interp)
 {
     if (Initialize(interp) != TCL_OK) {
-        return TCL_ERROR;
+	return TCL_ERROR;
     }
 
     return  TCL_OK;
@@ -141,7 +141,7 @@ Itclwidget_SafeInit (
     Tcl_Interp *interp)
 {
     if (Initialize(interp) != TCL_OK) {
-        return TCL_ERROR;
+	return TCL_ERROR;
     }
     return TCL_OK;
 }

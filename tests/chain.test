@@ -2,11 +2,11 @@
 # Tests for chaining methods and procs
 # ----------------------------------------------------------------------
 #   AUTHOR:  Michael J. McLennan
-#            Bell Labs Innovations for Lucent Technologies
-#            mmclennan@lucent.com
-#            http://www.tcltk.com/itcl
+#	    Bell Labs Innovations for Lucent Technologies
+#	    mmclennan@lucent.com
+#	    http://www.tcltk.com/itcl
 # ----------------------------------------------------------------------
-#            Copyright (c) 1993-1998  Lucent Technologies, Inc.
+#	    Copyright (c) 1993-1998  Lucent Technologies, Inc.
 # ======================================================================
 # See the file "license.terms" for information on usage and
 # redistribution of this file, and for a DISCLAIMER OF ALL WARRANTIES.
@@ -21,75 +21,75 @@ package require itcl
 # ----------------------------------------------------------------------
 test chain-1.1 {define simple classes with inheritance} {
     itcl::class test_chain_a {
-        constructor {args} {
+	constructor {args} {
 #
-            eval chain $args
-        } {
-            global ::test_chain_status
-            lappend test_chain_status "a::constructor $args"
-        }
-        method show {mesg} {
-            chain $mesg
-            global ::test_chain_status
-            lappend test_chain_status "a::show $mesg"
-        }
-        proc tell {mesg} {
-            global ::test_chain_status
-            lappend test_chain_status "a::tell $mesg"
-            chain $mesg
-        }
+	    eval chain $args
+	} {
+	    global ::test_chain_status
+	    lappend test_chain_status "a::constructor $args"
+	}
+	method show {mesg} {
+	    chain $mesg
+	    global ::test_chain_status
+	    lappend test_chain_status "a::show $mesg"
+	}
+	proc tell {mesg} {
+	    global ::test_chain_status
+	    lappend test_chain_status "a::tell $mesg"
+	    chain $mesg
+	}
     }
     itcl::class test_chain_b {
-        constructor {args} {
+	constructor {args} {
 #
-            eval chain $args
-        } {
-            global ::test_chain_status
-            lappend test_chain_status "b::constructor $args"
-        }
-        method show {mesg} {
-            chain $mesg
-            global ::test_chain_status
-            lappend test_chain_status "b::show $mesg"
-        }
-        proc tell {mesg} {
-            global ::test_chain_status
-            lappend test_chain_status "b::tell $mesg"
-            chain $mesg
-        }
+	    eval chain $args
+	} {
+	    global ::test_chain_status
+	    lappend test_chain_status "b::constructor $args"
+	}
+	method show {mesg} {
+	    chain $mesg
+	    global ::test_chain_status
+	    lappend test_chain_status "b::show $mesg"
+	}
+	proc tell {mesg} {
+	    global ::test_chain_status
+	    lappend test_chain_status "b::tell $mesg"
+	    chain $mesg
+	}
     }
     itcl::class test_chain_c {
-        inherit test_chain_a test_chain_b
-        constructor {args} {
-            eval chain $args
-        } {
-            global ::test_chain_status
-            lappend test_chain_status "c::constructor $args"
-        }
-        proc tell {mesg} {
-            global ::test_chain_status
-            lappend test_chain_status "c::tell $mesg"
-            chain $mesg
-        }
+	inherit test_chain_a test_chain_b
+	constructor {args} {
+	    eval chain $args
+	} {
+	    global ::test_chain_status
+	    lappend test_chain_status "c::constructor $args"
+	}
+	proc tell {mesg} {
+	    global ::test_chain_status
+	    lappend test_chain_status "c::tell $mesg"
+	    chain $mesg
+	}
     }
     itcl::class test_chain_d {
-        inherit test_chain_c
-        constructor {args} {
-            eval chain $args
-        } {
-            global ::test_chain_status
-            lappend test_chain_status "d::constructor $args"
-        }
-        method show {mesg} {
-            chain $mesg
-            global ::test_chain_status
-            lappend test_chain_status "d::show $mesg"
-        }
-        proc tell {mesg} {
-            global ::test_chain_status
-            lappend test_chain_status "d::tell $mesg"
-            chain $mesg
-        }
+	inherit test_chain_c
+	constructor {args} {
+	    eval chain $args
+	} {
+	    global ::test_chain_status
+	    lappend test_chain_status "d::constructor $args"
+	}
+	method show {mesg} {
+	    chain $mesg
+	    global ::test_chain_status
+	    lappend test_chain_status "d::show $mesg"
+	}
+	proc tell {mesg} {
+	    global ::test_chain_status
+	    lappend test_chain_status "d::tell $mesg"
+	    chain $mesg
+	}
     }
 } ""
 

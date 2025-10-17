@@ -2,11 +2,11 @@
 # Tests for "local" command for creating objects local to a proc
 # ----------------------------------------------------------------------
 #   AUTHOR:  Michael J. McLennan
-#            Bell Labs Innovations for Lucent Technologies
-#            mmclennan@lucent.com
-#            http://www.tcltk.com/itcl
+#	    Bell Labs Innovations for Lucent Technologies
+#	    mmclennan@lucent.com
+#	    http://www.tcltk.com/itcl
 # ----------------------------------------------------------------------
-#            Copyright (c) 1993-1998  Lucent Technologies, Inc.
+#	    Copyright (c) 1993-1998  Lucent Technologies, Inc.
 # ======================================================================
 # See the file "license.terms" for information on usage and
 # redistribution of this file, and for a DISCLAIMER OF ALL WARRANTIES.
@@ -21,29 +21,29 @@ package require itcl
 # ----------------------------------------------------------------------
 test local-1.1 {define a class to use for testing} {
     itcl::class test_local {
-        common status ""
-        constructor {} {
-            lappend status "created $this"
-        }
-        destructor {
-            lappend status "deleted $this"
-        }
-        proc clear {} {
-            set status ""
-        }
-        proc check {} {
-            return $status
-        }
-        proc test {} {
-            itcl::local test_local #auto
-            lappend status "processing"
-        }
-        proc test2 {} {
-            itcl::local test_local #auto
-            lappend status "call test..."
-            test
-            lappend status "...back"
-        }
+	common status ""
+	constructor {} {
+	    lappend status "created $this"
+	}
+	destructor {
+	    lappend status "deleted $this"
+	}
+	proc clear {} {
+	    set status ""
+	}
+	proc check {} {
+	    return $status
+	}
+	proc test {} {
+	    itcl::local test_local #auto
+	    lappend status "processing"
+	}
+	proc test2 {} {
+	    itcl::local test_local #auto
+	    lappend status "call test..."
+	    test
+	    lappend status "...back"
+	}
     }
     test_local #auto
 } {test_local0}

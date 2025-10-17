@@ -12,7 +12,7 @@
  *  Author: Arnulf Wiedemann
  *
  * ========================================================================
- *           Copyright (c) 2007 Arnulf Wiedemann
+ *	   Copyright (c) 2007 Arnulf Wiedemann
  * ------------------------------------------------------------------------
  * See the file "license.terms" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
@@ -32,9 +32,9 @@
 
 int
 _Itcl_WidgetCmd(
-    void *clientData,        /* infoPtr */
+    void *clientData,	/* infoPtr */
     Tcl_Interp *interp,      /* current interpreter */
-    int objc,                /* number of arguments */
+    int objc,		/* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
 {
     Tcl_Obj *objPtr;
@@ -43,9 +43,9 @@ _Itcl_WidgetCmd(
 
     ItclShowArgs(1, "Itcl_WidgetCmd", objc-1, objv);
     result = ItclClassBaseCmd(clientData, interp, ITCL_WIDGET, objc, objv,
-            &iclsPtr);
+	    &iclsPtr);
     if (result != TCL_OK) {
-        return result;
+	return result;
     }
 
     /* we handle create by owerselfs !! allow classunknown to handle that */
@@ -74,9 +74,9 @@ _Itcl_WidgetCmd(
 
 int
 _Itcl_WidgetAdaptorCmd(
-    void *clientData,        /* infoPtr */
+    void *clientData,	/* infoPtr */
     Tcl_Interp *interp,      /* current interpreter */
-    int objc,                /* number of arguments */
+    int objc,		/* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
 {
     Tcl_Obj *namePtr;
@@ -87,15 +87,15 @@ _Itcl_WidgetAdaptorCmd(
 
     ItclShowArgs(1, "Itcl_WidgetAdaptorCmd", objc-1, objv);
     result = ItclClassBaseCmd(clientData, interp, ITCL_WIDGETADAPTOR,
-            objc, objv, &iclsPtr);
+	    objc, objv, &iclsPtr);
     if (result != TCL_OK) {
-        return result;
+	return result;
     }
     /* create the itcl_hull variable */
     namePtr = Tcl_NewStringObj("itcl_hull", TCL_INDEX_NONE);
     if (ItclCreateComponent(interp, iclsPtr, namePtr, ITCL_COMMON, &icPtr) !=
-            TCL_OK) {
-        return TCL_ERROR;
+	    TCL_OK) {
+	return TCL_ERROR;
     }
     iclsPtr->numVariables++;
     Itcl_BuildVirtualTables(iclsPtr);
