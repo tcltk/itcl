@@ -73,13 +73,13 @@ Itcl_ClassCmdResolver(
     int isCmdDeleted;
 
     if ((name[0] == 't') && (strcmp(name, "this") == 0)) {
-        return TCL_CONTINUE;
+	return TCL_CONTINUE;
     }
     infoPtr = (ItclObjectInfo *)Tcl_GetAssocData(interp,
-                ITCL_INTERP_DATA, NULL);
+		ITCL_INTERP_DATA, NULL);
     hPtr = Tcl_FindHashEntry(&infoPtr->namespaceClasses, (char *)nsPtr);
     if (hPtr == NULL) {
-        return TCL_CONTINUE;
+	return TCL_CONTINUE;
     }
     iclsPtr = (ItclClass *)Tcl_GetHashValue(hPtr);
     /*
@@ -94,23 +94,23 @@ Itcl_ClassCmdResolver(
 	if ((iclsPtr->flags & ITCL_ECLASS)) {
 	    namePtr = Tcl_NewStringObj(name, TCL_INDEX_NONE);
 	    hPtr = Tcl_FindHashEntry(&iclsPtr->delegatedFunctions,
-	            (char *)namePtr);
+		    (char *)namePtr);
 	    if (hPtr != NULL) {
-                objPtr = Tcl_NewStringObj("unknown", TCL_INDEX_NONE);
-                hPtr = Tcl_FindHashEntry(&iclsPtr->resolveCmds, (char *)objPtr);
-                Tcl_DecrRefCount(objPtr);
+		objPtr = Tcl_NewStringObj("unknown", TCL_INDEX_NONE);
+		hPtr = Tcl_FindHashEntry(&iclsPtr->resolveCmds, (char *)objPtr);
+		Tcl_DecrRefCount(objPtr);
 	    }
 	    Tcl_DecrRefCount(namePtr);
 	}
-        if (hPtr == NULL) {
-            return TCL_CONTINUE;
-        }
-        clookup = (ItclCmdLookup *)Tcl_GetHashValue(hPtr);
-        imPtr = clookup->imPtr;
+	if (hPtr == NULL) {
+	    return TCL_CONTINUE;
+	}
+	clookup = (ItclCmdLookup *)Tcl_GetHashValue(hPtr);
+	imPtr = clookup->imPtr;
     } else {
-        ItclCmdLookup *clookup;
-        clookup = (ItclCmdLookup *)Tcl_GetHashValue(hPtr);
-        imPtr = clookup->imPtr;
+	ItclCmdLookup *clookup;
+	clookup = (ItclCmdLookup *)Tcl_GetHashValue(hPtr);
+	imPtr = clookup->imPtr;
     }
 
     if (iclsPtr->flags & (ITCL_TYPE|ITCL_WIDGET|ITCL_WIDGETADAPTOR)) {
@@ -148,9 +148,9 @@ Itcl_ClassCmdResolver(
 	}
 	if (! isOk) {
 	    if ((imPtr->flags & ITCL_TYPE_METHOD) != 0) {
-	        Tcl_AppendResult(interp, "invalid command name \"", name,
-	                 "\"", NULL);
-                return TCL_ERROR;
+		Tcl_AppendResult(interp, "invalid command name \"", name,
+			 "\"", (char *)NULL);
+		return TCL_ERROR;
 	    }
 	    inOptionHandling = imPtr->iclsPtr->infoPtr->inOptionHandling;
 	    if (((imPtr->flags & ITCL_COMMON) == 0) && !inOptionHandling) {
@@ -159,22 +159,22 @@ Itcl_ClassCmdResolver(
 		 * namespace one level up (i.e. for example ::). If yes
 		 * use that.
 		 */
-                Tcl_Namespace *nsPtr2;
+		Tcl_Namespace *nsPtr2;
 		Tcl_Command cmdPtr;
 		nsPtr2 = Itcl_GetUplevelNamespace(interp, 1);
 		cmdPtr = NULL;
 		if (nsPtr != nsPtr2) {
 		    cmdPtr = Tcl_FindCommand(interp, name, nsPtr2, 0);
-                }
+		}
 		if (cmdPtr != NULL) {
 		    *rPtr = cmdPtr;
 		    return TCL_OK;
 		}
-	        Tcl_AppendResult(interp, "invalid command name \"", name,
-	                 "\"", NULL);
-                return TCL_ERROR;
+		Tcl_AppendResult(interp, "invalid command name \"", name,
+			 "\"", (char *)NULL);
+		return TCL_ERROR;
 	    }
-        }
+	}
     }
     /*
      *  Looks like we found an accessible member function.
@@ -204,7 +204,7 @@ isCmdDeleted = 0;
 	    Tcl_AppendResult(interp,
 		"can't access \"", name, "\": deleted or redefined\n",
 		"(use the \"body\" command to redefine methods/procs)",
-		NULL);
+		(char *)NULL);
 	}
 	return TCL_ERROR;   /* disallow access! */
     }
@@ -238,7 +238,7 @@ Itcl_ClassVarResolver(
     const char* name,	      /* name of the variable being accessed */
     Tcl_Namespace *nsPtr,     /* namespace performing the resolution */
     int flags,                /* TCL_LEAVE_ERR_MSG => leave error messages
-                               *   in interp if anything goes wrong */
+			       *   in interp if anything goes wrong */
     Tcl_Var *rPtr)            /* returns: resolved variable */
 {
     ItclObjectInfo *infoPtr;
@@ -253,7 +253,7 @@ Itcl_ClassVarResolver(
      *  Tcl manner.
      */
     if (flags & TCL_GLOBAL_ONLY) {
-        return TCL_CONTINUE;
+	return TCL_CONTINUE;
     }
 
     /*
@@ -261,15 +261,15 @@ Itcl_ClassVarResolver(
      *  If so, that variable has precedence.
      */
     if ((strstr(name,"::") == NULL) &&
-            Itcl_IsCallFrameArgument(interp, name)) {
-        return TCL_CONTINUE;
+	    Itcl_IsCallFrameArgument(interp, name)) {
+	return TCL_CONTINUE;
     }
 
     infoPtr = (ItclObjectInfo *)Tcl_GetAssocData(interp,
-                ITCL_INTERP_DATA, NULL);
+		ITCL_INTERP_DATA, NULL);
     hPtr = Tcl_FindHashEntry(&infoPtr->namespaceClasses, (char *)nsPtr);
     if (hPtr == NULL) {
-        return TCL_CONTINUE;
+	return TCL_CONTINUE;
     }
     iclsPtr = (ItclClass *)Tcl_GetHashValue(hPtr);
 
@@ -278,12 +278,12 @@ Itcl_ClassVarResolver(
      */
     hPtr = ItclResolveVarEntry(iclsPtr, name);
     if (hPtr == NULL) {
-        return TCL_CONTINUE;
+	return TCL_CONTINUE;
     }
 
     vlookup = (ItclVarLookup*)Tcl_GetHashValue(hPtr);
     if (!vlookup->accessible) {
-        return TCL_CONTINUE;
+	return TCL_CONTINUE;
     }
 
     /*
@@ -292,10 +292,10 @@ Itcl_ClassVarResolver(
      */
     if ((vlookup->ivPtr->flags & ITCL_COMMON) != 0) {
 	hPtr = Tcl_FindHashEntry(&vlookup->ivPtr->iclsPtr->classCommons,
-	        (char *)vlookup->ivPtr);
+		(char *)vlookup->ivPtr);
 	if (hPtr != NULL) {
 	    *rPtr = (Tcl_Var)Tcl_GetHashValue(hPtr);
-            return TCL_OK;
+	    return TCL_OK;
 	}
     }
 
@@ -312,25 +312,25 @@ Itcl_ClassVarResolver(
     if (hPtr == NULL) {
 	return TCL_CONTINUE;
     }
-        if (contextIoPtr->iclsPtr != vlookup->ivPtr->iclsPtr) {
+	if (contextIoPtr->iclsPtr != vlookup->ivPtr->iclsPtr) {
 	    if (strcmp(Tcl_GetString(vlookup->ivPtr->namePtr), "this") == 0) {
-                hPtr = ItclResolveVarEntry(contextIoPtr->iclsPtr,
-                    Tcl_GetString(vlookup->ivPtr->namePtr));
+		hPtr = ItclResolveVarEntry(contextIoPtr->iclsPtr,
+		    Tcl_GetString(vlookup->ivPtr->namePtr));
 
-                if (hPtr != NULL) {
-                    vlookup = (ItclVarLookup*)Tcl_GetHashValue(hPtr);
-                }
-            }
-        }
-        hPtr = Tcl_FindHashEntry(&contextIoPtr->objectVariables,
-                (char *)vlookup->ivPtr);
+		if (hPtr != NULL) {
+		    vlookup = (ItclVarLookup*)Tcl_GetHashValue(hPtr);
+		}
+	    }
+	}
+	hPtr = Tcl_FindHashEntry(&contextIoPtr->objectVariables,
+		(char *)vlookup->ivPtr);
 
     if (hPtr == NULL) {
-        return TCL_CONTINUE;
+	return TCL_CONTINUE;
     }
     if (strcmp(name, "this") == 0) {
-        Tcl_Var varPtr;
-        Tcl_DString buffer;
+	Tcl_Var varPtr;
+	Tcl_DString buffer;
 
 	Tcl_DStringInit(&buffer);
 	Tcl_DStringAppend(&buffer, ITCL_VARIABLES_NAMESPACE, TCL_INDEX_NONE);
@@ -339,21 +339,21 @@ Itcl_ClassVarResolver(
 	if (vlookup->ivPtr->iclsPtr->nsPtr == NULL) {
 	    /* deletion of class is running */
 	    Tcl_DStringAppend(&buffer,
-	             Tcl_GetCurrentNamespace(interp)->fullName, TCL_INDEX_NONE);
-        } else {
+		     Tcl_GetCurrentNamespace(interp)->fullName, TCL_INDEX_NONE);
+	} else {
 	    Tcl_DStringAppend(&buffer,
-	             vlookup->ivPtr->iclsPtr->nsPtr->fullName, TCL_INDEX_NONE);
+		     vlookup->ivPtr->iclsPtr->nsPtr->fullName, TCL_INDEX_NONE);
 	}
 	Tcl_DStringAppend(&buffer, "::this", 6);
 	varPtr = Itcl_FindNamespaceVar(interp, Tcl_DStringValue(&buffer), NULL, 0);
-        if (varPtr != NULL) {
-            *rPtr = varPtr;
+	if (varPtr != NULL) {
+	    *rPtr = varPtr;
 	    return TCL_OK;
-        }
+	}
     }
     if (strcmp(name, "itcl_options") == 0) {
-        Tcl_Var varPtr;
-        Tcl_DString buffer;
+	Tcl_Var varPtr;
+	Tcl_DString buffer;
 
 	Tcl_DStringInit(&buffer);
 	Tcl_DStringAppend(&buffer, ITCL_VARIABLES_NAMESPACE, TCL_INDEX_NONE);
@@ -362,14 +362,14 @@ Itcl_ClassVarResolver(
 	Tcl_DStringAppend(&buffer, "::itcl_options", TCL_INDEX_NONE);
 	varPtr = Itcl_FindNamespaceVar(interp, Tcl_DStringValue(&buffer), NULL, 0);
 	Tcl_DStringFree(&buffer);
-        if (varPtr != NULL) {
-            *rPtr = varPtr;
+	if (varPtr != NULL) {
+	    *rPtr = varPtr;
 	    return TCL_OK;
-        }
+	}
     }
     if (strcmp(name, "itcl_option_components") == 0) {
-        Tcl_Var varPtr;
-        Tcl_DString buffer;
+	Tcl_Var varPtr;
+	Tcl_DString buffer;
 
 	Tcl_DStringInit(&buffer);
 	Tcl_DStringAppend(&buffer, ITCL_VARIABLES_NAMESPACE, TCL_INDEX_NONE);
@@ -378,14 +378,14 @@ Itcl_ClassVarResolver(
 	Tcl_DStringAppend(&buffer, "::itcl_option_components", TCL_INDEX_NONE);
 	varPtr = Itcl_FindNamespaceVar(interp, Tcl_DStringValue(&buffer), NULL, 0);
 	Tcl_DStringFree(&buffer);
-        if (varPtr != NULL) {
-            *rPtr = varPtr;
+	if (varPtr != NULL) {
+	    *rPtr = varPtr;
 	    return TCL_OK;
-        }
+	}
     }
     if (hPtr != NULL) {
-        *rPtr = (Tcl_Var)Tcl_GetHashValue(hPtr);
-        return TCL_OK;
+	*rPtr = (Tcl_Var)Tcl_GetHashValue(hPtr);
+	return TCL_OK;
     }
     return TCL_CONTINUE;
 }
@@ -417,7 +417,7 @@ Itcl_ClassCompiledVarResolver(
     Tcl_Size length,           /* number of characters in name */
     Tcl_Namespace *nsPtr,       /* namespace performing the resolution */
     Tcl_ResolvedVarInfo **rPtr) /* returns: info that makes it possible to
-                                 *   resolve the variable at runtime */
+				 *   resolve the variable at runtime */
 {
     ItclClass *iclsPtr;
     ItclObjectInfo *infoPtr;
@@ -427,10 +427,10 @@ Itcl_ClassCompiledVarResolver(
     char storage[64];
 
     infoPtr = (ItclObjectInfo *)Tcl_GetAssocData(interp,
-                ITCL_INTERP_DATA, NULL);
+		ITCL_INTERP_DATA, NULL);
     hPtr = Tcl_FindHashEntry(&infoPtr->namespaceClasses, (char *)nsPtr);
     if (hPtr == NULL) {
-        return TCL_CONTINUE;
+	return TCL_CONTINUE;
     }
     iclsPtr = (ItclClass *)Tcl_GetHashValue(hPtr);
     /*
@@ -438,9 +438,9 @@ Itcl_ClassCompiledVarResolver(
      *  If the name is long, allocate extra space for it.
      */
     if ((size_t)length < sizeof(storage)) {
-        buffer = storage;
+	buffer = storage;
     } else {
-        buffer = (char*)ckalloc(length+1);
+	buffer = (char*)ckalloc(length+1);
     }
     memcpy(buffer, name, length);
     buffer[length] = '\0';
@@ -448,7 +448,7 @@ Itcl_ClassCompiledVarResolver(
     hPtr = ItclResolveVarEntry(iclsPtr, buffer);
 
     if (buffer != storage) {
-        ckfree(buffer);
+	ckfree(buffer);
     }
 
     /*
@@ -456,12 +456,12 @@ Itcl_ClassCompiledVarResolver(
      *  continue on with the normal Tcl name resolution rules.
      */
     if (hPtr == NULL) {
-        return TCL_CONTINUE;
+	return TCL_CONTINUE;
     }
 
     vlookup = (ItclVarLookup*)Tcl_GetHashValue(hPtr);
     if (!vlookup->accessible) {
-        return TCL_CONTINUE;
+	return TCL_CONTINUE;
     }
 
     /*
@@ -493,7 +493,7 @@ static Tcl_Var
 ItclClassRuntimeVarResolver(
     Tcl_Interp *interp,               /* current interpreter */
     Tcl_ResolvedVarInfo *resVarInfo)  /* contains ItclVarLookup rep
-                                       * for variable */
+				       * for variable */
 {
     ItclVarLookup *vlookup = ((ItclResolvedVarInfo*)resVarInfo)->vlookup;
     ItclClass *iclsPtr;
@@ -506,7 +506,7 @@ ItclClassRuntimeVarResolver(
      */
     if ((vlookup->ivPtr->flags & ITCL_COMMON) != 0) {
 	hPtr = Tcl_FindHashEntry(&vlookup->ivPtr->iclsPtr->classCommons,
-	        (char *)vlookup->ivPtr);
+		(char *)vlookup->ivPtr);
 	if (hPtr != NULL) {
 	    return (Tcl_Var)Tcl_GetHashValue(hPtr);
 	}
@@ -524,46 +524,46 @@ ItclClassRuntimeVarResolver(
 	return NULL;
     }
 
-        if (contextIoPtr->iclsPtr != vlookup->ivPtr->iclsPtr) {
+	if (contextIoPtr->iclsPtr != vlookup->ivPtr->iclsPtr) {
 	    if (strcmp(Tcl_GetString(vlookup->ivPtr->namePtr), "this") == 0) {
-	        /* only for the this variable we need the one of the
+		/* only for the this variable we need the one of the
 		 * contextIoPtr class */
-                hPtr = ItclResolveVarEntry(contextIoPtr->iclsPtr,
-                        Tcl_GetString(vlookup->ivPtr->namePtr));
+		hPtr = ItclResolveVarEntry(contextIoPtr->iclsPtr,
+			Tcl_GetString(vlookup->ivPtr->namePtr));
 
-                if (hPtr != NULL) {
-                    vlookup = (ItclVarLookup*)Tcl_GetHashValue(hPtr);
-	        }
+		if (hPtr != NULL) {
+		    vlookup = (ItclVarLookup*)Tcl_GetHashValue(hPtr);
+		}
 	    }
-        }
-        hPtr = Tcl_FindHashEntry(&contextIoPtr->objectVariables,
-                (char *)vlookup->ivPtr);
-        if (strcmp(Tcl_GetString(vlookup->ivPtr->namePtr), "this") == 0) {
-            Tcl_Var varPtr;
-            Tcl_DString buffer;
+	}
+	hPtr = Tcl_FindHashEntry(&contextIoPtr->objectVariables,
+		(char *)vlookup->ivPtr);
+	if (strcmp(Tcl_GetString(vlookup->ivPtr->namePtr), "this") == 0) {
+	    Tcl_Var varPtr;
+	    Tcl_DString buffer;
 
 	    Tcl_DStringInit(&buffer);
 	    Tcl_DStringAppend(&buffer, ITCL_VARIABLES_NAMESPACE, TCL_INDEX_NONE);
 	    Tcl_DStringAppend(&buffer,
 		    (Tcl_GetObjectNamespace(contextIoPtr->oPtr)->fullName), TCL_INDEX_NONE);
 	    if (vlookup->ivPtr->iclsPtr->nsPtr == NULL) {
-	        Tcl_DStringAppend(&buffer,
-	                Tcl_GetCurrentNamespace(interp)->fullName, TCL_INDEX_NONE);
+		Tcl_DStringAppend(&buffer,
+			Tcl_GetCurrentNamespace(interp)->fullName, TCL_INDEX_NONE);
 	    } else {
-	        Tcl_DStringAppend(&buffer,
-	                vlookup->ivPtr->iclsPtr->nsPtr->fullName, TCL_INDEX_NONE);
+		Tcl_DStringAppend(&buffer,
+			vlookup->ivPtr->iclsPtr->nsPtr->fullName, TCL_INDEX_NONE);
 	    }
 	    Tcl_DStringAppend(&buffer, "::this", 6);
 	    varPtr = Itcl_FindNamespaceVar(interp, Tcl_DStringValue(&buffer),
-	            NULL, 0);
-            if (varPtr != NULL) {
-	        return varPtr;
-            }
-        }
-        if (strcmp(Tcl_GetString(vlookup->ivPtr->namePtr),
-	        "itcl_options") == 0) {
-            Tcl_Var varPtr;
-            Tcl_DString buffer;
+		    NULL, 0);
+	    if (varPtr != NULL) {
+		return varPtr;
+	    }
+	}
+	if (strcmp(Tcl_GetString(vlookup->ivPtr->namePtr),
+		"itcl_options") == 0) {
+	    Tcl_Var varPtr;
+	    Tcl_DString buffer;
 
 	    Tcl_DStringInit(&buffer);
 	    Tcl_DStringAppend(&buffer, ITCL_VARIABLES_NAMESPACE, TCL_INDEX_NONE);
@@ -571,16 +571,16 @@ ItclClassRuntimeVarResolver(
 		    (Tcl_GetObjectNamespace(contextIoPtr->oPtr)->fullName), TCL_INDEX_NONE);
 	    Tcl_DStringAppend(&buffer, "::itcl_options", TCL_INDEX_NONE);
 	    varPtr = Itcl_FindNamespaceVar(interp, Tcl_DStringValue(&buffer),
-	            NULL, 0);
+		    NULL, 0);
 	    Tcl_DStringFree(&buffer);
-            if (varPtr != NULL) {
-	        return varPtr;
-            }
-        }
-        if (strcmp(Tcl_GetString(vlookup->ivPtr->namePtr),
-	        "itcl_option_components") == 0) {
-            Tcl_Var varPtr;
-            Tcl_DString buffer;
+	    if (varPtr != NULL) {
+		return varPtr;
+	    }
+	}
+	if (strcmp(Tcl_GetString(vlookup->ivPtr->namePtr),
+		"itcl_option_components") == 0) {
+	    Tcl_Var varPtr;
+	    Tcl_DString buffer;
 
 	    Tcl_DStringInit(&buffer);
 	    Tcl_DStringAppend(&buffer, ITCL_VARIABLES_NAMESPACE, TCL_INDEX_NONE);
@@ -588,15 +588,15 @@ ItclClassRuntimeVarResolver(
 		    (Tcl_GetObjectNamespace(contextIoPtr->oPtr)->fullName), TCL_INDEX_NONE);
 	    Tcl_DStringAppend(&buffer, "::itcl_option_components", TCL_INDEX_NONE);
 	    varPtr = Itcl_FindNamespaceVar(interp, Tcl_DStringValue(&buffer),
-	            NULL, 0);
+		    NULL, 0);
 	    Tcl_DStringFree(&buffer);
-            if (varPtr != NULL) {
-	        return varPtr;
-            }
-        }
-        if (hPtr != NULL) {
-            return (Tcl_Var)Tcl_GetHashValue(hPtr);
-        }
+	    if (varPtr != NULL) {
+		return varPtr;
+	    }
+	}
+	if (hPtr != NULL) {
+	    return (Tcl_Var)Tcl_GetHashValue(hPtr);
+	}
     return NULL;
 }
 
@@ -641,7 +641,7 @@ Itcl_ParseVarResolver(
     const char* name,          /* name of the variable being accessed */
     Tcl_Namespace *contextNs,  /* namespace context */
     TCL_UNUSED(int),           /* TCL_GLOBAL_ONLY => global variable
-                                * TCL_NAMESPACE_ONLY => namespace variable */
+				* TCL_NAMESPACE_ONLY => namespace variable */
     Tcl_Var* rPtr)             /* returns: Tcl_Var for desired variable */
 {
     ItclObjectInfo *infoPtr = (ItclObjectInfo*)contextNs->clientData;
@@ -665,14 +665,14 @@ Itcl_ParseVarResolver(
 	return TCL_CONTINUE;
     }
     if (!vlookup->accessible) {
-        Tcl_AppendResult(interp,
-            "can't access \"", name, "\": ",
-            Itcl_ProtectionStr(vlookup->ivPtr->protection),
-            " variable", NULL);
-        return TCL_ERROR;
+	Tcl_AppendResult(interp,
+	    "can't access \"", name, "\": ",
+	    Itcl_ProtectionStr(vlookup->ivPtr->protection),
+	    " variable", (char *)NULL);
+	return TCL_ERROR;
     }
     hPtr = Tcl_FindHashEntry(&vlookup->ivPtr->iclsPtr->classCommons,
-        (char *)vlookup->ivPtr);
+	(char *)vlookup->ivPtr);
     if (!hPtr) {
 	return TCL_CONTINUE;
     }
@@ -687,6 +687,6 @@ ItclSetParserResolver(
     Tcl_Namespace *nsPtr)
 {
     Itcl_SetNamespaceResolvers(nsPtr, NULL,
-            Itcl_ParseVarResolver, NULL);
+	    Itcl_ParseVarResolver, NULL);
     return TCL_OK;
 }

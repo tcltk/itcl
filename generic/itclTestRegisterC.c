@@ -49,7 +49,7 @@ cArgFunc(
 
 //fprintf(stderr, "argc: %d\n", argc);
     if (argc != 4) {
-      Tcl_AppendResult(interp, "wrong #args: should be ::itcl::parser::handleClass className className objectName", NULL);
+      Tcl_AppendResult(interp, "wrong #args: should be ::itcl::parser::handleClass className className objectName", (char *)NULL);
       return TCL_ERROR;
     }
     objv[0] = Tcl_NewStringObj(argv[0], TCL_INDEX_NONE);
@@ -63,13 +63,13 @@ cArgFunc(
     infoPtr = (ItclObjectInfo *)Tcl_GetAssocData(interp, ITCL_INTERP_DATA, NULL);
     FOREACH_HASH_VALUE(classPtr,&infoPtr->nameClasses) {
 	if (strcmp(Tcl_GetString(objv[1]), Tcl_GetString(classPtr->fullNamePtr)) == 0 ||
-                strcmp(Tcl_GetString(objv[2]), Tcl_GetString(classPtr->fullNamePtr)) == 0) {
-           iclsPtr = classPtr;
+		strcmp(Tcl_GetString(objv[2]), Tcl_GetString(classPtr->fullNamePtr)) == 0) {
+	   iclsPtr = classPtr;
 	   break;
-        }
+	}
     }
     if (iclsPtr == NULL) {
-      Tcl_AppendResult(interp, "no such class: ", Tcl_GetString(objv[2]), NULL);
+      Tcl_AppendResult(interp, "no such class: ", Tcl_GetString(objv[2]), (char *)NULL);
       return TCL_ERROR;
     }
 
@@ -103,11 +103,11 @@ for(i = 0; i<objc;i++) {
 fprintf(stderr, "IP:%p %p %p !%s!\n",interp, clientData, nsPtr, nsPtr->fullName);
     infoPtr = (ItclObjectInfo *)Tcl_GetAssocData(interp, ITCL_INTERP_DATA, NULL);
     FOREACH_HASH_VALUE(classPtr,&infoPtr->nameClasses) {
-        if (strcmp(Tcl_GetString(objv[1]), Tcl_GetString(classPtr->fullNamePtr)) == 0 ||
-                strcmp(Tcl_GetString(objv[2]), Tcl_GetString(classPtr->fullNamePtr)) == 0) {
-           iclsPtr = classPtr;
+	if (strcmp(Tcl_GetString(objv[1]), Tcl_GetString(classPtr->fullNamePtr)) == 0 ||
+		strcmp(Tcl_GetString(objv[2]), Tcl_GetString(classPtr->fullNamePtr)) == 0) {
+	   iclsPtr = classPtr;
 	   break;
-        }
+	}
     }
 fprintf(stderr, "IP2:%p %p %p\n",interp, clientData, iclsPtr);
     return TCL_OK;

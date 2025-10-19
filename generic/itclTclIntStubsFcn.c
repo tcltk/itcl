@@ -33,7 +33,7 @@ _Tcl_CreateProc(
     Tcl_Proc *procPtrPtr)       /* Returns: pointer to proc data. */
 {
     int code = TclCreateProc(interp, (Namespace *)nsPtr, procName, argsPtr,
-            bodyPtr, (Proc **)procPtrPtr);
+	    bodyPtr, (Proc **)procPtrPtr);
     (*(Proc **)procPtrPtr)->cmdPtr = NULL;
     return code;
 }

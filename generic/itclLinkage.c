@@ -92,7 +92,7 @@ Itcl_RegisterC(
     if (!proc) {
 	Tcl_AppendResult(interp, "initialization error: null pointer for ",
 	    "C procedure \"", name, "\"",
-	    NULL);
+	    (char *)NULL);
 	return TCL_ERROR;
     }
 
@@ -108,7 +108,7 @@ Itcl_RegisterC(
 	if (cfunc->argCmdProc != NULL && cfunc->argCmdProc != proc) {
 	    Tcl_AppendResult(interp, "initialization error: C procedure ",
 		"with name \"", name, "\" already defined",
-		NULL);
+		(char *)NULL);
 	    return TCL_ERROR;
 	}
 
@@ -178,7 +178,7 @@ Itcl_RegisterObjC2(
     if (!proc) {
 	Tcl_AppendResult(interp, "initialization error: null pointer for ",
 	    "C procedure \"", name, "\"",
-	    NULL);
+	    (char *)NULL);
 	return TCL_ERROR;
     }
 
@@ -194,7 +194,7 @@ Itcl_RegisterObjC2(
 	if (cfunc->objCmdProc != NULL && cfunc->objCmdProc != proc) {
 	    Tcl_AppendResult(interp, "initialization error: C procedure ",
 		"with name \"", name, "\" already defined",
-		NULL);
+		(char *)NULL);
 	    return TCL_ERROR;
 	}
 

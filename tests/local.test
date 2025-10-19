@@ -21,29 +21,29 @@ package require itcl
 # ----------------------------------------------------------------------
 test local-1.1 {define a class to use for testing} {
     itcl::class test_local {
-        common status ""
-        constructor {} {
-            lappend status "created $this"
-        }
-        destructor {
-            lappend status "deleted $this"
-        }
-        proc clear {} {
-            set status ""
-        }
-        proc check {} {
-            return $status
-        }
-        proc test {} {
-            itcl::local test_local #auto
-            lappend status "processing"
-        }
-        proc test2 {} {
-            itcl::local test_local #auto
-            lappend status "call test..."
-            test
-            lappend status "...back"
-        }
+	common status ""
+	constructor {} {
+	    lappend status "created $this"
+	}
+	destructor {
+	    lappend status "deleted $this"
+	}
+	proc clear {} {
+	    set status ""
+	}
+	proc check {} {
+	    return $status
+	}
+	proc test {} {
+	    itcl::local test_local #auto
+	    lappend status "processing"
+	}
+	proc test2 {} {
+	    itcl::local test_local #auto
+	    lappend status "call test..."
+	    test
+	    lappend status "...back"
+	}
     }
     test_local #auto
 } {test_local0}

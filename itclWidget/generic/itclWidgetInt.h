@@ -19,12 +19,12 @@
 #define ITCL_WIDGETS_NAMESPACE "::itcl::internal::widgets"
 
 typedef int (*HullAndOptionsInst)(Tcl_Interp *interp,
-        struct ItclObject *ioPtr, struct ItclClass *iclsPtr, Tcl_Size objc,
-        Tcl_Obj *const *objv, int *newObjc, Tcl_Obj **newObjv);
+	struct ItclObject *ioPtr, struct ItclClass *iclsPtr, Tcl_Size objc,
+	Tcl_Obj *const *objv, int *newObjc, Tcl_Obj **newObjv);
 typedef int (*InitObjectOptions)(Tcl_Interp *interp,
-        struct ItclObject *ioPtr, struct ItclClass *iclsPtr, const char *name);
+	struct ItclObject *ioPtr, struct ItclClass *iclsPtr, const char *name);
 typedef int (*DelegationInst)(Tcl_Interp *interp,
-        struct ItclObject *ioPtr, struct ItclClass *iclsPtr);
+	struct ItclObject *ioPtr, struct ItclClass *iclsPtr);
 
 
 typedef struct ItclWidgetInfo {
@@ -37,20 +37,20 @@ typedef struct ItclWidgetInfo {
 
 
 MODULE_SCOPE int HullAndOptionsInstall(Tcl_Interp *interp, ItclObject *ioPtr,
-        ItclClass *iclsPtr, Tcl_Size objc, Tcl_Obj * const objv[],
+	ItclClass *iclsPtr, Tcl_Size objc, Tcl_Obj * const objv[],
 	int *newObjc, Tcl_Obj **newObjv);
 MODULE_SCOPE int InstallComponent(Tcl_Interp *interp, ItclObject *ioPtr,
-        ItclClass *iclsPtr, Tcl_Size objc, Tcl_Obj * const objv[]);
+	ItclClass *iclsPtr, Tcl_Size objc, Tcl_Obj * const objv[]);
 MODULE_SCOPE int Itcl_BiInstallHullCmd (void *clientData,
-        Tcl_Interp *interp, Tcl_Size objc, Tcl_Obj *const objv[]);
+	Tcl_Interp *interp, Tcl_Size objc, Tcl_Obj *const objv[]);
 MODULE_SCOPE int ItclWidgetConfigure(void *clientData, Tcl_Interp *interp,
-        Tcl_Size objc, Tcl_Obj *const objv[]);
+	Tcl_Size objc, Tcl_Obj *const objv[]);
 MODULE_SCOPE int ItclWidgetCget(void *clientData, Tcl_Interp *interp,
-        Tcl_Size objc, Tcl_Obj *const objv[]);
+	Tcl_Size objc, Tcl_Obj *const objv[]);
 MODULE_SCOPE int Itcl_WidgetParseInit(Tcl_Interp *interp,
-        ItclObjectInfo *infoPtr);
+	ItclObjectInfo *infoPtr);
 MODULE_SCOPE int Itcl_WidgetBiInit(Tcl_Interp *interp, ItclObjectInfo *infoPtr);
 MODULE_SCOPE int ItclWidgetInfoInit(Tcl_Interp *interp,
-        ItclObjectInfo *infoPtr);
+	ItclObjectInfo *infoPtr);
 MODULE_SCOPE int ItclWidgetInitObjectOptions(Tcl_Interp *interp,
-        ItclObject *ioPtr, ItclClass *iclsPtr, const char *name);
+	ItclObject *ioPtr, ItclClass *iclsPtr, const char *name);

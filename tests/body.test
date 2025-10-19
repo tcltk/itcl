@@ -21,19 +21,19 @@ package require itcl
 # ----------------------------------------------------------------------
 test body-1.1 {define a class with missing bodies and arg lists} {
     itcl::class test_body {
-        constructor {args} {}
-        destructor {}
+	constructor {args} {}
+	destructor {}
 
-        method any
-        method zero {}
-        method one {x}
-        method two {x y}
-        method defvals {x {y 0} {z 1}}
-        method varargs {x args}
+	method any
+	method zero {}
+	method one {x}
+	method two {x y}
+	method defvals {x {y 0} {z 1}}
+	method varargs {x args}
 
-        method override {mesg} {
-            return "override: $mesg"
-        }
+	method override {mesg} {
+	    return "override: $mesg"
+	}
     }
 } ""
 
@@ -123,8 +123,8 @@ test body-1.10c {preserve argument list:  variable arguments} {
 
 test body-1.11 {redefined body really does change} {
     list [test_body0 override "test #1"] \
-         [itcl::body test_body::override {text} {return "new: $text"}] \
-         [test_body0 override "test #2"]
+	 [itcl::body test_body::override {text} {return "new: $text"}] \
+	 [test_body0 override "test #2"]
 } {{override: test #1} {} {new: test #2}}
 
 
@@ -133,8 +133,8 @@ test body-1.11 {redefined body really does change} {
 # ----------------------------------------------------------------------
 test body-2.1 {inherit from a class with missing bodies} {
     itcl::class test_ibody {
-        inherit test_body
-        method zero {}
+	inherit test_body
+	method zero {}
     }
     test_ibody #auto
 } {test_ibody0}
@@ -142,7 +142,7 @@ test body-2.1 {inherit from a class with missing bodies} {
 test body-2.2 {redefine a method in a derived class} {
     itcl::body test_ibody::zero {} {return "ibody zero"}
     list [test_ibody0 info function zero] \
-         [test_ibody0 info function test_body::zero]
+	 [test_ibody0 info function test_body::zero]
 } {{public method ::test_ibody::zero {} {return "ibody zero"}} {public method ::test_body::zero {} {return "zero"}}}
 
 test body-2.3 {try to redefine a method that was not declared} {
@@ -156,14 +156,14 @@ test body-2.3 {try to redefine a method that was not declared} {
 # ----------------------------------------------------------------------
 test body-3.1 {define a class with public variables} {
     itcl::class test_cbody {
-        private variable priv
-        protected variable prot
+	private variable priv
+	protected variable prot
 
-        public variable option {} {
-            lappend messages "option: $option"
-        }
-        public variable nocode {}
-        public common messages
+	public variable option {} {
+	    lappend messages "option: $option"
+	}
+	public variable nocode {}
+	public common messages
     }
 } ""
 
@@ -190,9 +190,9 @@ test body-3.6 {can use public variables without a body} {
 
 test body-3.7 {redefined body really does change} {
     list [test_cbody0 configure -option "hello"] \
-         [itcl::configbody test_cbody::option {lappend messages "new: $option"}] \
-         [test_cbody0 configure -option "goodbye"] \
-         [set test_cbody::messages] \
+	 [itcl::configbody test_cbody::option {lappend messages "new: $option"}] \
+	 [test_cbody0 configure -option "goodbye"] \
+	 [set test_cbody::messages] \
 } {{} {} {} {{option: hello} {new: goodbye}}}
 
 # ----------------------------------------------------------------------
@@ -200,8 +200,8 @@ test body-3.7 {redefined body really does change} {
 # ----------------------------------------------------------------------
 test body-4.1 {inherit from a class with missing config bodies} {
     itcl::class test_icbody {
-        inherit test_cbody
-        public variable option "icbody"
+	inherit test_cbody
+	public variable option "icbody"
     }
     test_icbody #auto
 } {test_icbody0}
@@ -209,7 +209,7 @@ test body-4.1 {inherit from a class with missing config bodies} {
 test body-4.2 {redefine a body in a derived class} {
     itcl::configbody test_icbody::option {lappend messages "test_icbody: $option"}
     list [test_icbody0 info variable option] \
-         [test_icbody0 info variable test_cbody::option]
+	 [test_icbody0 info variable test_cbody::option]
 } {{public variable ::test_icbody::option icbody {lappend messages "test_icbody: $option"} icbody} {public variable ::test_cbody::option {} {lappend messages "new: $option"} {}}}
 
 test body-4.3 {try to redefine a body for a variable that was not declared} {

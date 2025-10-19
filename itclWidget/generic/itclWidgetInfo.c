@@ -66,8 +66,8 @@ ItclWidgetInfoInit(
     int i;
 
     for (i=0 ; infoCmds2[i].name!=NULL ; i++) {
-        Tcl_CreateObjCommand2(interp, infoCmds2[i].name,
-                infoCmds2[i].proc, infoPtr, NULL);
+	Tcl_CreateObjCommand2(interp, infoCmds2[i].name,
+		infoCmds2[i].proc, infoPtr, NULL);
     }
     return TCL_OK;
 }
@@ -89,22 +89,22 @@ ItclBiInfoHullTypesCmd(
     pattern = NULL;
     if (objc > 2) {
 	Tcl_AppendResult(interp, "wrong # args should be: info hulltypes ",
-	        "?pattern?", NULL);
-        return TCL_ERROR;
+		"?pattern?", (char *)NULL);
+	return TCL_ERROR;
     }
     if (objc == 2) {
-        pattern = Tcl_GetString(objv[1]);
+	pattern = Tcl_GetString(objv[1]);
     }
     listPtr = Tcl_NewListObj(0, NULL);
     cPtrPtr = hullTypes;
     while (*cPtrPtr != NULL) {
 	name = *cPtrPtr;
-        objPtr = Tcl_NewStringObj(name, TCL_INDEX_NONE);
-        if ((pattern == NULL) ||
-                 Tcl_StringCaseMatch(name, pattern, 0)) {
-            Tcl_ListObjAppendElement(interp, listPtr, objPtr);
-        }
-        cPtrPtr++;
+	objPtr = Tcl_NewStringObj(name, TCL_INDEX_NONE);
+	if ((pattern == NULL) ||
+		 Tcl_StringCaseMatch(name, pattern, 0)) {
+	    Tcl_ListObjAppendElement(interp, listPtr, objPtr);
+	}
+	cPtrPtr++;
     }
     Tcl_SetObjResult(interp, listPtr);
     return TCL_OK;
@@ -132,30 +132,30 @@ ItclBiInfoWidgetClassesCmd(
     pattern = NULL;
     if (objc > 2) {
 	Tcl_AppendResult(interp, "wrong # args should be: info widgetclasses ",
-	        "?pattern?", NULL);
-        return TCL_ERROR;
+		"?pattern?", (char *)NULL);
+	return TCL_ERROR;
     }
 
     if (objc == 2) {
-        pattern = Tcl_GetString(objv[1]);
+	pattern = Tcl_GetString(objv[1]);
     }
     Tcl_InitObjHashTable(&wClasses);
     listPtr = Tcl_NewListObj(0, NULL);
     FOREACH_HASH_VALUE(iclsPtr, &infoPtr->classes) {
 	if (iclsPtr->flags & ITCL_WIDGET) {
 	    if (iclsPtr->widgetClassPtr != NULL) {
-	        Tcl_CreateHashEntry(&wClasses,
-	                (char *)iclsPtr->widgetClassPtr, &isNew);
-	        if (isNew) {
-	            name = Tcl_GetString(iclsPtr->widgetClassPtr);
-	            if ((pattern == NULL) ||
-                             Tcl_StringCaseMatch(name, pattern, 0)) {
-                        Tcl_ListObjAppendElement(interp, listPtr,
-		                iclsPtr->widgetClassPtr);
-	            }
-	        }
-            }
-        }
+		Tcl_CreateHashEntry(&wClasses,
+			(char *)iclsPtr->widgetClassPtr, &isNew);
+		if (isNew) {
+		    name = Tcl_GetString(iclsPtr->widgetClassPtr);
+		    if ((pattern == NULL) ||
+			     Tcl_StringCaseMatch(name, pattern, 0)) {
+			Tcl_ListObjAppendElement(interp, listPtr,
+				iclsPtr->widgetClassPtr);
+		    }
+		}
+	    }
+	}
     }
     Tcl_DeleteHashTable(&wClasses);
     Tcl_SetObjResult(interp, listPtr);
@@ -182,11 +182,11 @@ ItclBiInfoWidgetsCmd(
     pattern = NULL;
     if (objc > 2) {
 	Tcl_AppendResult(interp, "wrong # args should be: info widgets ",
-	        "?pattern?", NULL);
-        return TCL_ERROR;
+		"?pattern?", (char *)NULL);
+	return TCL_ERROR;
     }
     if (objc == 2) {
-        pattern = Tcl_GetString(objv[1]);
+	pattern = Tcl_GetString(objv[1]);
     }
     listPtr = Tcl_NewListObj(0, NULL);
     FOREACH_HASH_VALUE(iclsPtr, &infoPtr->classes) {
@@ -194,10 +194,10 @@ ItclBiInfoWidgetsCmd(
 	    name = Tcl_GetString(iclsPtr->namePtr);
 	    Tcl_IncrRefCount(iclsPtr->namePtr);
 	    if ((pattern == NULL) ||
-                     Tcl_StringCaseMatch(name, pattern, 0)) {
-                Tcl_ListObjAppendElement(interp, listPtr, iclsPtr->namePtr);
-            }
-        }
+		     Tcl_StringCaseMatch(name, pattern, 0)) {
+		Tcl_ListObjAppendElement(interp, listPtr, iclsPtr->namePtr);
+	    }
+	}
     }
     Tcl_SetObjResult(interp, listPtr);
     return TCL_OK;
@@ -223,21 +223,21 @@ ItclBiInfoWidgetAdaptorsCmd(
     pattern = NULL;
     if (objc > 2) {
 	Tcl_AppendResult(interp, "wrong # args should be: info widgetadaptors ",
-	        "?pattern?", NULL);
-        return TCL_ERROR;
+		"?pattern?", (char *)NULL);
+	return TCL_ERROR;
     }
     if (objc == 2) {
-        pattern = Tcl_GetString(objv[1]);
+	pattern = Tcl_GetString(objv[1]);
     }
     listPtr = Tcl_NewListObj(0, NULL);
     FOREACH_HASH_VALUE(iclsPtr, &infoPtr->classes) {
 	if (iclsPtr->flags & ITCL_WIDGETADAPTOR) {
 	    name = Tcl_GetString(iclsPtr->namePtr);
 	    if ((pattern == NULL) ||
-                     Tcl_StringCaseMatch(name, pattern, 0)) {
-                Tcl_ListObjAppendElement(interp, listPtr, iclsPtr->namePtr);
-            }
-        }
+		     Tcl_StringCaseMatch(name, pattern, 0)) {
+		Tcl_ListObjAppendElement(interp, listPtr, iclsPtr->namePtr);
+	    }
+	}
     }
     Tcl_SetObjResult(interp, listPtr);
     return TCL_OK;

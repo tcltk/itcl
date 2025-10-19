@@ -37,19 +37,19 @@ catch {interp delete child}
     interp create child
     load "" Itcl child
     child eval {
-        itcl::class Troublemaker {
-            destructor { error "cannot delete this object" }
-        }
-        itcl::class Foo {
-            variable obj ""
-            constructor {} {
-                set obj [Troublemaker #auto]
-            }
-            destructor {
-                delete object $obj
-            }
-        }
-        Foo f
+	itcl::class Troublemaker {
+	    destructor { error "cannot delete this object" }
+	}
+	itcl::class Foo {
+	    variable obj ""
+	    constructor {} {
+		set obj [Troublemaker #auto]
+	    }
+	    destructor {
+		delete object $obj
+	    }
+	}
+	Foo f
     }
     interp delete child
 } {}
@@ -58,28 +58,28 @@ test interp-1.4 {one namespace can cause another to be destroyed} {
     interp create child
     load "" Itcl child
     child eval {
-        namespace eval group {
-            itcl::class base1 {}
-            itcl::class base2 {}
-        }
-        itcl::class TroubleMaker {
-            inherit group::base1 group::base2
-        }
+	namespace eval group {
+	    itcl::class base1 {}
+	    itcl::class base2 {}
+	}
+	itcl::class TroubleMaker {
+	    inherit group::base1 group::base2
+	}
     }
     interp delete child
 } {}
 
 test interp-1.5 {cleanup interp object list, this should not
-        include an object that deletes itself in ctor} {
+	include an object that deletes itself in ctor} {
     interp create child
     load "" Itcl child
     child eval {
-        itcl::class DeleteSelf {
-            constructor {} {
-                itcl::delete object $this
-            }
-        }
-        DeleteSelf ds
+	itcl::class DeleteSelf {
+	    constructor {} {
+		itcl::delete object $this
+	    }
+	}
+	DeleteSelf ds
     }
     interp delete child
 } {}

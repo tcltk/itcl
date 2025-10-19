@@ -372,7 +372,7 @@ Itcl_SelfCmd(
 
     if (!Itcl_IsMethodCallFrame(interp)) {
 	Tcl_AppendResult(interp, TclGetString(objv[0]),
-		" may only be called from inside a method", NULL);
+		" may only be called from inside a method", (char *)NULL);
 	return TCL_ERROR;
     }
 

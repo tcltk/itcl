@@ -203,7 +203,7 @@ Itcl_ParseInit(
     if (!parserNs) {
 	Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
 	    " (cannot initialize itcl parser)",
-	    NULL);
+	    (char *)NULL);
 	return TCL_ERROR;
     }
     Itcl_PreserveData(infoPtr);
@@ -558,7 +558,7 @@ ItclGenericClassCmd(
     ItclShowArgs(1, "ItclGenericClassCmd", objc-1, objv);
     if (objc != 4) {
 	Tcl_AppendResult(interp, "usage: genericclass <classtype> <classname> ",
-		"<body>", NULL);
+		"<body>", (char *)NULL);
 	return TCL_ERROR;
     }
     infoPtr = (ItclObjectInfo *)clientData;
@@ -566,7 +566,7 @@ ItclGenericClassCmd(
     hPtr = Tcl_FindHashEntry(&infoPtr->classTypes, (char *)objv[1]);
     if (hPtr == NULL) {
 	Tcl_AppendResult(interp, "genericclass bad classtype \"", typeStr,
-		"\"", NULL);
+		"\"", (char *)NULL);
 	return TCL_ERROR;
     }
     result = ItclClassBaseCmd2(clientData, interp, PTR2INT(Tcl_GetHashValue(hPtr)),
@@ -584,7 +584,7 @@ ItclGenericClassCmd(
 	iclsPtr->numVariables++;
     }
     Tcl_ResetResult(interp);
-    Tcl_AppendResult(interp, Tcl_GetString(iclsPtr->fullNamePtr), NULL);
+    Tcl_AppendResult(interp, Tcl_GetString(iclsPtr->fullNamePtr), (char *)NULL);
     return result;
 }
 
@@ -1294,7 +1294,7 @@ ItclCheckForInitializedComponents(
 		sepStr, objectStr, " delegates ", startStr, "method \"",
 		Tcl_GetString(idmPtr->namePtr),
 		"\" to undefined ", startStr, "component \"",
-		Tcl_GetString(idmPtr->icPtr->ivPtr->namePtr), "\"", NULL);
+		Tcl_GetString(idmPtr->icPtr->ivPtr->namePtr), "\"", (char *)NULL);
     }
     return result;
 }
@@ -1354,7 +1354,7 @@ Itcl_ClassInheritCmd2(
 
     if (iclsPtr == NULL) {
 	Tcl_AppendResult(interp, "Error: ::itcl::parser::inherit called from",
-		" not within a class", NULL);
+		" not within a class", (char *)NULL);
 	return TCL_ERROR;
     }
     /*
@@ -1368,7 +1368,7 @@ Itcl_ClassInheritCmd2(
 	while (elem) {
 	    cdPtr = (ItclClass*)Itcl_GetListValue(elem);
 	    Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
-		Tcl_GetString(cdPtr->namePtr), " ", NULL);
+		Tcl_GetString(cdPtr->namePtr), " ", (char *)NULL);
 
 	    elem = Itcl_NextListElem(elem);
 	}
@@ -1376,7 +1376,7 @@ Itcl_ClassInheritCmd2(
 	Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
 	    "\" already defined for class \"",
 	    Tcl_GetString(iclsPtr->fullNamePtr), "\"",
-	    NULL);
+	    (char *)NULL);
 	return TCL_ERROR;
     }
 
@@ -1410,11 +1410,11 @@ Itcl_ClassInheritCmd2(
 	    Tcl_ResetResult(interp);
 	    Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
 		"cannot inherit from \"", token, "\"",
-		NULL);
+		(char *)NULL);
 
 	    if (errlen > 0) {
 		Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
-		    " (", errmsg, ")", NULL);
+		    " (", errmsg, ")", (char *)NULL);
 	    }
 	    Tcl_DecrRefCount(resultPtr);
 	    goto inheritError;
@@ -1428,7 +1428,7 @@ Itcl_ClassInheritCmd2(
 	    Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
 		"class \"", Tcl_GetString(iclsPtr->namePtr),
 		"\" cannot inherit from itself",
-		NULL);
+		(char *)NULL);
 	    goto inheritError;
 	}
 
@@ -1450,7 +1450,7 @@ Itcl_ClassInheritCmd2(
 		    "class \"", iclsPtr->fullNamePtr,
 		    "\" cannot inherit base class \"",
 		    cdPtr->fullNamePtr, "\" more than once",
-		    NULL);
+		    (char *)NULL);
 		goto inheritError;
 	    }
 	    elem2 = Itcl_NextListElem(elem2);
@@ -1490,7 +1490,7 @@ Itcl_ClassInheritCmd2(
 	    "class \"", Tcl_GetString(iclsPtr->fullNamePtr),
 	    "\" inherits base class \"",
 	    Tcl_GetString(badCdPtr->fullNamePtr), "\" more than once:",
-	    NULL);
+	    (char *)NULL);
 
 	cdPtr = iclsPtr;
 	Itcl_InitStack(&stack);
@@ -1509,7 +1509,7 @@ Itcl_ClassInheritCmd2(
 			cdPtr = (ItclClass*)Itcl_GetStackValue(&stack, i-1);
 			Tcl_AppendStringsToObj(resultPtr,
 			    Tcl_GetString(cdPtr->namePtr), "->",
-			    NULL);
+			    (char *)NULL);
 		    }
 		}
 		Tcl_AppendToObj(resultPtr,
@@ -1723,7 +1723,7 @@ Itcl_ClassConstructorCmd2(
 
     if (iclsPtr == NULL) {
 	Tcl_AppendResult(interp, "Error: ::itcl::parser::constructor called from",
-		" not within a class", NULL);
+		" not within a class", (char *)NULL);
 	return TCL_ERROR;
     }
     namePtr = objv[0];
@@ -1731,7 +1731,7 @@ Itcl_ClassConstructorCmd2(
 	Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
 	    "\"", Tcl_GetString(namePtr), "\" already defined in class \"",
 	    Tcl_GetString(iclsPtr->fullNamePtr), "\"",
-	    NULL);
+	    (char *)NULL);
 	return TCL_ERROR;
     }
 
@@ -1798,7 +1798,7 @@ Itcl_ClassDestructorCmd2(
 
     if (iclsPtr == NULL) {
 	Tcl_AppendResult(interp, "Error: ::itcl::parser::destructor called from",
-		" not within a class", NULL);
+		" not within a class", (char *)NULL);
 	return TCL_ERROR;
     }
     namePtr = objv[0];
@@ -1808,7 +1808,7 @@ Itcl_ClassDestructorCmd2(
 	Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
 	    "\"", Tcl_GetString(namePtr), "\" already defined in class \"",
 	    Tcl_GetString(iclsPtr->fullNamePtr), "\"",
-	    NULL);
+	    (char *)NULL);
 	return TCL_ERROR;
     }
 
@@ -1864,7 +1864,7 @@ Itcl_ClassMethodCmd2(
 
     if (iclsPtr == NULL) {
 	Tcl_AppendResult(interp, "Error: ::itcl::parser::method called from",
-		" not within a class", NULL);
+		" not within a class", (char *)NULL);
 	return TCL_ERROR;
     }
     namePtr = objv[1];
@@ -1872,7 +1872,7 @@ Itcl_ClassMethodCmd2(
     hPtr = Tcl_FindHashEntry(&iclsPtr->delegatedFunctions, (char *)objv[1]);
     if (hPtr != NULL) {
 	Tcl_AppendResult(interp, "method \"", Tcl_GetString(namePtr),
-		"\" has been delegated", NULL);
+		"\" has been delegated", (char *)NULL);
 	return TCL_ERROR;
     }
     arglist = NULL;
@@ -1951,7 +1951,7 @@ Itcl_ClassProcCmd2(
 
     if (iclsPtr == NULL) {
 	Tcl_AppendResult(interp, "Error: ::itcl::parser::proc called from",
-		" not within a class", NULL);
+		" not within a class", (char *)NULL);
 	return TCL_ERROR;
     }
     if (iclsPtr->flags & (ITCL_TYPE|ITCL_WIDGETADAPTOR)) {
@@ -1960,7 +1960,7 @@ Itcl_ClassProcCmd2(
 	FOREACH_HASH_VALUE(idmPtr, &iclsPtr->delegatedFunctions) {
 	    if (strcmp(Tcl_GetString(idmPtr->namePtr), name) == 0) {
 		Tcl_AppendResult(interp, "Error in \"typemethod ", name,
-			"...\", \"", name, "\" has been delegated", NULL);
+			"...\", \"", name, "\" has been delegated", (char *)NULL);
 		return TCL_ERROR;
 	    }
 	}
@@ -2012,7 +2012,7 @@ Itcl_ClassTypeMethodCmd(
     iclsPtr = (ItclClass*)Itcl_PeekStack(&infoPtr->clsStack);
     if (iclsPtr == NULL) {
 	Tcl_AppendResult(interp, "Error: ::itcl::parser::typemethod called from",
-		" not within a class", NULL);
+		" not within a class", (char *)NULL);
 	return TCL_ERROR;
     }
     namePtr = objv[1];
@@ -2032,7 +2032,7 @@ Itcl_ClassTypeMethodCmd(
 	FOREACH_HASH_VALUE(idmPtr, &iclsPtr->delegatedFunctions) {
 	    if (strcmp(Tcl_GetString(idmPtr->namePtr), name) == 0) {
 		Tcl_AppendResult(interp, "Error in \"typemethod ", name,
-			"...\", \"", name, "\" has been delegated", NULL);
+			"...\", \"", name, "\" has been delegated", (char *)NULL);
 		return TCL_ERROR;
 	    }
 	}
@@ -2099,7 +2099,7 @@ Itcl_ClassVariableCmd2(
     ItclShowArgs(1, "Itcl_ClassVariableCmd", objc, objv);
     if (iclsPtr == NULL) {
 	Tcl_AppendResult(interp, "Error: ::itcl::parser::variable called from",
-		" not within a class", NULL);
+		" not within a class", (char *)NULL);
 	return TCL_ERROR;
     }
     pLevel = Itcl_Protection(interp, 0);
@@ -2142,7 +2142,7 @@ Itcl_ClassVariableCmd2(
     if (strstr(Tcl_GetString(namePtr), "::")) {
 	Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
 	    "bad variable name \"", Tcl_GetString(namePtr), "\"",
-	    NULL);
+	    (char *)NULL);
 	return TCL_ERROR;
     }
 
@@ -2221,7 +2221,7 @@ ItclInitClassCommon(
     if (commonNsPtr == NULL) {
 	Tcl_AppendResult(interp, "ITCL: cannot find common variables namespace",
 		" for class \"", Tcl_GetString(ivPtr->iclsPtr->fullNamePtr),
-		"\"", NULL);
+		"\"", (char *)NULL);
 	return TCL_ERROR;
     }
     varPtr = Tcl_NewNamespaceVar(interp, commonNsPtr,
@@ -2249,7 +2249,7 @@ ItclInitClassCommon(
 	    Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
 		"cannot initialize common variable \"",
 		Tcl_GetString(ivPtr->namePtr), "\"",
-		NULL);
+		(char *)NULL);
 	    return TCL_ERROR;
 	}
     } else {
@@ -2273,7 +2273,7 @@ ItclInitClassCommon(
 		Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
 		    "cannot initialize common variable \"",
 		    Tcl_GetString(ivPtr->namePtr), "\"",
-		    NULL);
+		    (char *)NULL);
 		return TCL_ERROR;
 	    }
 	}
@@ -2324,7 +2324,7 @@ ItclClassCommonCmd(
     ItclShowArgs(2, "Itcl_ClassCommonCmd", objc, objv);
     if (iclsPtr == NULL) {
 	Tcl_AppendResult(interp, "Error: ::itcl::parser::common called from",
-		" not within a class", NULL);
+		" not within a class", (char *)NULL);
 	return TCL_ERROR;
     }
     if (iclsPtr->flags & (ITCL_TYPE|ITCL_WIDGETADAPTOR)) {
@@ -2358,7 +2358,7 @@ ItclClassCommonCmd(
     if (strstr(Tcl_GetString(namePtr), "::")) {
 	Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
 	    "bad variable name \"", Tcl_GetString(namePtr), "\"",
-	    NULL);
+	    (char *)NULL);
 	return TCL_ERROR;
     }
 
@@ -2543,13 +2543,13 @@ Itcl_ClassFilterCmd(
     iclsPtr = (ItclClass*)Itcl_PeekStack(&infoPtr->clsStack);
     if (iclsPtr == NULL) {
 	Tcl_AppendResult(interp, "Error: ::itcl::parser::filter called from",
-		" not within a class", NULL);
+		" not within a class", (char *)NULL);
 	return TCL_ERROR;
     }
     if (iclsPtr->flags & ITCL_CLASS) {
 	Tcl_AppendResult(interp, "\"", Tcl_GetString(iclsPtr->namePtr),
 		" is no ::itcl::widget/::itcl::widgetadaptor/::itcl::type",
-		"/::itcl::extendedclass. Only these can have filters", NULL);
+		"/::itcl::extendedclass. Only these can have filters", (char *)NULL);
 	return TCL_ERROR;
     }
     if (objc < 2) {
@@ -2749,7 +2749,7 @@ ItclParseOption(
 	hPtr = Tcl_FindHashEntry(&iclsPtr->delegatedOptions, (char *)objv[1]);
 	if (hPtr != NULL) {
 	    Tcl_AppendResult(interp, "cannot define option \"", optionName,
-		    "\" locally, it has already been delegated", NULL);
+		    "\" locally, it has already been delegated", (char *)NULL);
 	    result = TCL_ERROR;
 	    goto errorOut;
 	}
@@ -2760,7 +2760,7 @@ ItclParseOption(
 		(char *)objv[1]);
 	if (hPtr != NULL) {
 	    Tcl_AppendResult(interp, "cannot define option \"", optionName,
-		    "\" locally, it has already been delegated", NULL);
+		    "\" locally, it has already been delegated", (char *)NULL);
 	    result = TCL_ERROR;
 	    goto errorOut;
 	}
@@ -2828,7 +2828,7 @@ ItclParseOption(
 	    }
 	    if (!foundOption) {
 		Tcl_AppendResult(interp, "funny option command option: \"",
-		    token, "\"", NULL);
+		    token, "\"", (char *)NULL);
 		return TCL_ERROR;
 	    }
 	}
@@ -2841,7 +2841,7 @@ ItclParseOption(
     if ((cgetMethod != NULL) && (cgetMethodVar != NULL)) {
 	Tcl_AppendResult(interp,
 		"option -cgetmethod and -cgetmethodvar cannot be used both",
-		NULL);
+		(char *)NULL);
 	result = TCL_ERROR;
 	goto errorOut;
     }
@@ -2849,7 +2849,7 @@ ItclParseOption(
 	Tcl_AppendResult(interp,
 		"option -configuremethod and -configuremethodvar",
 		"cannot be used both",
-		NULL);
+		(char *)NULL);
 	result = TCL_ERROR;
 	goto errorOut;
     }
@@ -2857,12 +2857,12 @@ ItclParseOption(
 	Tcl_AppendResult(interp,
 		"option -validatemethod and -validatemethodvar",
 		"cannot be used both",
-		NULL);
+		(char *)NULL);
 	result = TCL_ERROR;
 	goto errorOut;
     }
     if (newObjc < 1) {
-	Tcl_AppendResult(interp, "usage: option ", usage, NULL);
+	Tcl_AppendResult(interp, "usage: option ", usage, (char *)NULL);
 	result = TCL_ERROR;
 	goto errorOut;
     }
@@ -2878,7 +2878,7 @@ ItclParseOption(
     name = argv[0];
     if (*name != '-') {
 	Tcl_AppendResult(interp, "bad option name \"", name,
-		"\", options must start with a \"-\"", NULL);
+		"\", options must start with a \"-\"", (char *)NULL);
 	result = TCL_ERROR;
 	goto errorOut;
     }
@@ -2890,14 +2890,14 @@ ItclParseOption(
     if (strstr(name, "::")) {
 	Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
 		"bad option name \"", name,
-		"\", option names must not contain \"::\"", NULL);
+		"\", option names must not contain \"::\"", (char *)NULL);
 	result = TCL_ERROR;
 	goto errorOut;
     }
     if (strstr(name, " ")) {
 	Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
 		"bad option name \"", name,
-		"\", option names must not contain \" \"", NULL);
+		"\", option names must not contain \" \"", (char *)NULL);
 	result = TCL_ERROR;
 	goto errorOut;
     }
@@ -2905,7 +2905,7 @@ ItclParseOption(
     while (*cp) {
 	if (isupper(UCHAR(*cp))) {
 	    Tcl_AppendResult(interp, "bad option name \"", name, "\" ",
-		    ", options must not contain uppercase characters", NULL);
+		    ", options must not contain uppercase characters", (char *)NULL);
 	    result = TCL_ERROR;
 	    goto errorOut;
 	}
@@ -3016,11 +3016,11 @@ Itcl_ClassOptionCmd(
 
     if (iclsPtr == NULL) {
 	Tcl_AppendResult(interp, "Error: ::itcl::parser::option called from",
-		" not within a class", NULL);
+		" not within a class", (char *)NULL);
 	return TCL_ERROR;
     }
     if (iclsPtr->flags & ITCL_CLASS) {
-	Tcl_AppendResult(interp, "a \"class\" cannot have options", NULL);
+	Tcl_AppendResult(interp, "a \"class\" cannot have options", (char *)NULL);
 	return TCL_ERROR;
     }
 
@@ -3032,7 +3032,7 @@ Itcl_ClassOptionCmd(
 	}
 	if (tkPackage == NULL) {
 	    Tcl_AppendResult(interp, "cannot load package Tk", tkVersion,
-		    NULL);
+		    (char *)NULL);
 	    return TCL_ERROR;
 	}
 	return Tcl_EvalObjv(interp, objc, objv, TCL_EVAL_GLOBAL);
@@ -3150,7 +3150,7 @@ ItclHandleClassComponent(
     iclsPtr = (ItclClass*)Itcl_PeekStack(&infoPtr->clsStack);
     if (iclsPtr == NULL) {
 	Tcl_AppendResult(interp, "Error: ::itcl::parser::component called from",
-		" not within a class", NULL);
+		" not within a class", (char *)NULL);
 	return TCL_ERROR;
     }
     usage = "component ?-public <typemethod>? ?-inherit ?<flag>??";
@@ -3158,11 +3158,11 @@ ItclHandleClassComponent(
 	Tcl_AppendResult(interp, "\"", Tcl_GetString(iclsPtr->namePtr),
 		" is no ::itcl::extendedclass/::itcl::widget",
 		"/::itcl::widgetadaptor/::itcl::type.",
-		" Only these can have components", NULL);
+		" Only these can have components", (char *)NULL);
 	return TCL_ERROR;
     }
     if ((objc < 2) || (objc > 6)) {
-	Tcl_AppendResult(interp, "wrong # args should be: ", usage, NULL);
+	Tcl_AppendResult(interp, "wrong # args should be: ", usage, (char *)NULL);
 	return TCL_ERROR;
     }
     inherit = 0;
@@ -3173,7 +3173,7 @@ ItclHandleClassComponent(
 	if (strcmp(Tcl_GetString(objv[i]), "-inherit") == 0) {
 	    if (haveInherit) {
 		Tcl_AppendResult(interp, "wrong syntax should be: ",
-			usage, NULL);
+			usage, (char *)NULL);
 		return TCL_ERROR;
 	    }
 	    haveValue = 0;
@@ -3202,19 +3202,19 @@ ItclHandleClassComponent(
 	    if (strcmp(Tcl_GetString(objv[i]), "-public") == 0) {
 		if (havePublic) {
 		    Tcl_AppendResult(interp, "wrong syntax should be: ",
-			    usage, NULL);
+			    usage, (char *)NULL);
 		    return TCL_ERROR;
 		}
 		havePublic = 1;
 		if (i >= objc - 1) {
 		    Tcl_AppendResult(interp, "wrong syntax should be: ",
-			    usage, NULL);
+			    usage, (char *)NULL);
 		    return TCL_ERROR;
 		}
 		publ = Tcl_GetString(objv[i + 1]);
 	    } else {
 		Tcl_AppendResult(interp, "wrong syntax should be: ",
-			usage, NULL);
+			usage, (char *)NULL);
 		return TCL_ERROR;
 	    }
 	}
@@ -3443,7 +3443,7 @@ Itcl_HandleDelegateMethodCmd(
 delegate method <methodName> ?to <componentName>? using <pattern>\n\
 delegate method * ?to <componentName>? ?using <pattern>? ?except <methods>?";
     if (objc < 4) {
-	Tcl_AppendResult(interp, "wrong # args should be ", usageStr, NULL);
+	Tcl_AppendResult(interp, "wrong # args should be ", usageStr, (char *)NULL);
 	return TCL_ERROR;
     }
     componentPtr = NULL;
@@ -3456,7 +3456,7 @@ delegate method * ?to <componentName>? ?using <pattern>? ?except <methods>?";
     for(i=2;i<objc;i++) {
 	token = Tcl_GetString(objv[i]);
 	if (i+1 == objc) {
-	    Tcl_AppendResult(interp, "wrong # args should be ", usageStr, NULL);
+	    Tcl_AppendResult(interp, "wrong # args should be ", usageStr, (char *)NULL);
 	    return TCL_ERROR;
 	}
 	foundOpt = 0;
@@ -3483,22 +3483,22 @@ delegate method * ?to <componentName>? ?using <pattern>? ?except <methods>?";
 	}
 	if (!foundOpt) {
 	    Tcl_AppendResult(interp, "bad option \"", token, "\" should be ",
-		    usageStr, NULL);
+		    usageStr, (char *)NULL);
 	    return TCL_ERROR;
 	}
     }
     if ((exceptionsPtr != NULL) && (*methodName != '*')) {
 	Tcl_AppendResult(interp,
-		"can only specify \"except\" with \"delegate method *\"", NULL);
+		"can only specify \"except\" with \"delegate method *\"", (char *)NULL);
 	return TCL_ERROR;
     }
     if ((component == NULL) && (usingPtr == NULL)) {
-	Tcl_AppendResult(interp, "missing to should be: ", usageStr, NULL);
+	Tcl_AppendResult(interp, "missing to should be: ", usageStr, (char *)NULL);
 	return TCL_ERROR;
     }
     if ((*methodName == '*') && (targetPtr != NULL)) {
 	Tcl_AppendResult(interp,
-		"cannot specify \"as\" with \"delegate method *\"", NULL);
+		"cannot specify \"as\" with \"delegate method *\"", (char *)NULL);
 	return TCL_ERROR;
     }
     /* check for already delegated */
@@ -3564,7 +3564,7 @@ delegate method * ?to <componentName>? ?using <pattern>? ?except <methods>?";
 	}
 	if (hPtr != NULL) {
 	    Tcl_AppendResult(interp, "method \"", methodName,
-		    "\" has been defined locally", NULL);
+		    "\" has been defined locally", (char *)NULL);
 	    result = TCL_ERROR;
 	    goto errorOut;
 	}
@@ -3608,14 +3608,14 @@ Itcl_ClassDelegateMethodCmd(
     iclsPtr = (ItclClass*)Itcl_PeekStack(&infoPtr->clsStack);
     if (iclsPtr == NULL) {
 	Tcl_AppendResult(interp, "Error: ::itcl::parser::delegatemethod called from",
-		" not within a class", NULL);
+		" not within a class", (char *)NULL);
 	return TCL_ERROR;
     }
     if (iclsPtr->flags & ITCL_CLASS) {
 	Tcl_AppendResult(interp, "\"", Tcl_GetString(iclsPtr->namePtr),
 		" is no ::itcl::widget/::itcl::widgetadaptor/::itcl::type",
 		"/::itcl::extendedclass.",
-		" Only these can delegate methods", NULL);
+		" Only these can delegate methods", (char *)NULL);
 	return TCL_ERROR;
     }
     result = Itcl_HandleDelegateMethodCmd(interp, NULL, iclsPtr, &idmPtr, objc,
@@ -3682,7 +3682,7 @@ Itcl_HandleDelegateOptionCmd(
     ItclShowArgs(1, "Itcl_HandleDelegatedOptionCmd", objc, objv);
     usageStr = "<optionDef> to <targetDef> ?as <script>? ?except <script>?";
     if (objc < 4) {
-	Tcl_AppendResult(interp, "wrong # args should be ", usageStr, NULL);
+	Tcl_AppendResult(interp, "wrong # args should be ", usageStr, (char *)NULL);
 	return TCL_ERROR;
     }
     componentPtr = NULL;
@@ -3698,19 +3698,19 @@ Itcl_HandleDelegateOptionCmd(
     }
     if ((argc < 1) || (isStarOption && (argc > 1))) {
 	Tcl_AppendResult(interp, "<optionDef> must be either \"*\" or ",
-	       "\"<optionName> <resourceName> <className>\"", NULL);
+	       "\"<optionName> <resourceName> <className>\"", (char *)NULL);
 	ckfree((char *)argv);
 	return TCL_ERROR;
     }
     if (isStarOption && (argc > 3)) {
 	Tcl_AppendResult(interp, "<optionDef> syntax should be: ",
-	       "\"<optionName> <resourceName> <className>\"", NULL);
+	       "\"<optionName> <resourceName> <className>\"", (char *)NULL);
 	ckfree((char *)argv);
 	return TCL_ERROR;
     }
     if ((*option != '-') && !isStarOption) {
 	Tcl_AppendResult(interp, "bad delegated option name \"", option,
-		"\", options must start with a \"-\"", NULL);
+		"\", options must start with a \"-\"", (char *)NULL);
 	ckfree((char *)argv);
 	return TCL_ERROR;
     }
@@ -3721,14 +3721,14 @@ Itcl_HandleDelegateOptionCmd(
     if (strstr(option, "::")) {
 	Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
 		"bad option name \"", option,
-		"\", option names must not contain \"::\"", NULL);
+		"\", option names must not contain \"::\"", (char *)NULL);
 	ckfree((char *)argv);
 	return TCL_ERROR;
     }
     if (strstr(option, " ")) {
 	Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
 		"bad option name \"", option,
-		"\", option names must not contain \" \"", NULL);
+		"\", option names must not contain \" \"", (char *)NULL);
 	ckfree((char *)argv);
 	return TCL_ERROR;
     }
@@ -3736,7 +3736,7 @@ Itcl_HandleDelegateOptionCmd(
     while (*cp) {
 	if (isupper(UCHAR(*cp))) {
 	    Tcl_AppendResult(interp, "bad option name \"", option, "\" ",
-		    ", options must not contain uppercase characters", NULL);
+		    ", options must not contain uppercase characters", (char *)NULL);
 	    ckfree((char *)argv);
 	    return TCL_ERROR;
 	}
@@ -3759,7 +3759,7 @@ Itcl_HandleDelegateOptionCmd(
     for(i=2;i<objc;i++) {
 	token = Tcl_GetString(objv[i]);
 	if (i+1 == objc) {
-	    Tcl_AppendResult(interp, "wrong # args should be ", usageStr, NULL);
+	    Tcl_AppendResult(interp, "wrong # args should be ", usageStr, (char *)NULL);
 	    goto errorOut1;
 	}
 	foundOpt = 0;
@@ -3781,17 +3781,17 @@ Itcl_HandleDelegateOptionCmd(
 	}
 	if (!foundOpt) {
 	    Tcl_AppendResult(interp, "bad option \"", token, "\" should be ",
-		    usageStr, NULL);
+		    usageStr, (char *)NULL);
 	    goto errorOut1;
 	}
     }
     if (component == NULL) {
-	Tcl_AppendResult(interp, "missing to should be: ", usageStr, NULL);
+	Tcl_AppendResult(interp, "missing to should be: ", usageStr, (char *)NULL);
 	goto errorOut1;
     }
     if ((*option == '*') && (targetPtr != NULL)) {
 	Tcl_AppendResult(interp,
-		"cannot specify \"as\" with \"delegate option *\"", NULL);
+		"cannot specify \"as\" with \"delegate option *\"", (char *)NULL);
 	goto errorOut1;
     }
     /* check for already delegated */
@@ -3807,7 +3807,7 @@ Itcl_HandleDelegateOptionCmd(
     Tcl_DecrRefCount(allOptionNamePtr);
     if (hPtr != NULL) {
 	Tcl_AppendResult(interp, "option \"", option,
-		"\" is already delegated", NULL);
+		"\" is already delegated", (char *)NULL);
 	goto errorOut1;
     }
 
@@ -3863,7 +3863,7 @@ Itcl_HandleDelegateOptionCmd(
 	}
 	if (hPtr != NULL) {
 	    Tcl_AppendResult(interp, "option \"", option,
-		    "\" has been defined locally", NULL);
+		    "\" has been defined locally", (char *)NULL);
 	    goto errorOut1;
 	    return TCL_ERROR;
 	}
@@ -3964,21 +3964,21 @@ Itcl_ClassDelegateOptionCmd(
     ItclShowArgs(1, "Itcl_ClassDelegateOptionCmd", objc, objv);
     usageStr = "<optionDef> to <targetDef> ?as <script>? ?except <script>?";
     if (objc < 4) {
-	Tcl_AppendResult(interp, "wrong # args should be ", usageStr, NULL);
+	Tcl_AppendResult(interp, "wrong # args should be ", usageStr, (char *)NULL);
 	return TCL_ERROR;
     }
     infoPtr = (ItclObjectInfo *)clientData;
     iclsPtr = (ItclClass *)Itcl_PeekStack(&infoPtr->clsStack);
     if (iclsPtr == NULL) {
 	Tcl_AppendResult(interp, "Error: ::itcl::parser::delegateoption called from",
-		" not within a class", NULL);
+		" not within a class", (char *)NULL);
 	return TCL_ERROR;
     }
     if (iclsPtr->flags & ITCL_CLASS) {
 	Tcl_AppendResult(interp, "\"", Tcl_GetString(iclsPtr->namePtr),
 		" is no ::itcl::widget/::itcl::widgetadaptor/::itcl::type",
 		"/::itcl::extendedclass.",
-		" Only these can delegate options", NULL);
+		" Only these can delegate options", (char *)NULL);
 	return TCL_ERROR;
     }
     result = Itcl_HandleDelegateOptionCmd(interp, NULL, iclsPtr, &idoPtr,
@@ -4041,18 +4041,18 @@ delegate typemethod * ?to <componentName>? ?using <pattern>? ?except <typemethod
     iclsPtr = (ItclClass*)Itcl_PeekStack(&infoPtr->clsStack);
     if (iclsPtr == NULL) {
 	Tcl_AppendResult(interp, "Error: ::itcl::parser::delegatetypemethod called from",
-		" not within a class", NULL);
+		" not within a class", (char *)NULL);
 	return TCL_ERROR;
     }
     if (iclsPtr->flags & ITCL_CLASS) {
 	Tcl_AppendResult(interp, "\"", Tcl_GetString(iclsPtr->namePtr),
 		" is no ::itcl::widget/::itcl::widgetadaptor/::itcl::type.",
-		" Only these can delegate typemethods", NULL);
+		" Only these can delegate typemethods", (char *)NULL);
 	return TCL_ERROR;
     }
 
     if (objc < 4) {
-	Tcl_AppendResult(interp, "wrong # args should be ", usageStr, NULL);
+	Tcl_AppendResult(interp, "wrong # args should be ", usageStr, (char *)NULL);
 	return TCL_ERROR;
     }
     typeMethodName = Tcl_GetString(objv[1]);
@@ -4064,7 +4064,7 @@ delegate typemethod * ?to <componentName>? ?using <pattern>? ?except <typemethod
     for(i=2;i<objc;i++) {
 	token = Tcl_GetString(objv[i]);
 	if (i+1 == objc) {
-	    Tcl_AppendResult(interp, "wrong # args should be ", usageStr, NULL);
+	    Tcl_AppendResult(interp, "wrong # args should be ", usageStr, (char *)NULL);
 	    return TCL_ERROR;
 	}
 	foundOpt = 0;
@@ -4091,17 +4091,17 @@ delegate typemethod * ?to <componentName>? ?using <pattern>? ?except <typemethod
 	}
 	if (!foundOpt) {
 	    Tcl_AppendResult(interp, "bad option \"", token, "\" should be ",
-		    usageStr, NULL);
+		    usageStr, (char *)NULL);
 	    return TCL_ERROR;
 	}
     }
     if ((component == NULL) && (usingPtr == NULL)) {
-	Tcl_AppendResult(interp, "missing to should be: ", usageStr, NULL);
+	Tcl_AppendResult(interp, "missing to should be: ", usageStr, (char *)NULL);
 	return TCL_ERROR;
     }
     if ((*typeMethodName == '*') && (targetPtr != NULL)) {
 	Tcl_AppendResult(interp,
-		"cannot specify \"as\" with \"delegate typemethod *\"", NULL);
+		"cannot specify \"as\" with \"delegate typemethod *\"", (char *)NULL);
 	return TCL_ERROR;
     }
     if (componentPtr != NULL) {
@@ -4129,7 +4129,7 @@ delegate typemethod * ?to <componentName>? ?using <pattern>? ?except <typemethod
 	if (hPtr != NULL) {
 	    Tcl_AppendResult(interp, "Error in \"delegate typemethod ",
 		    typeMethodName, "...\", \"", typeMethodName,
-		    "\" has been defined locally.", NULL);
+		    "\" has been defined locally.", (char *)NULL);
 	    Tcl_DeleteHashTable(&idmPtr->exceptions);
 	    ckfree((char *)idmPtr);
 	    Tcl_DecrRefCount(typeMethodNamePtr);
@@ -4206,14 +4206,14 @@ Itcl_ClassForwardCmd(
     iclsPtr = (ItclClass*)Itcl_PeekStack(&infoPtr->clsStack);
     if (iclsPtr == NULL) {
 	Tcl_AppendResult(interp, "Error: ::itcl::parser::forward called from",
-		" not within a class", NULL);
+		" not within a class", (char *)NULL);
 	return TCL_ERROR;
     }
     if (iclsPtr->flags & ITCL_CLASS) {
 	Tcl_AppendResult(interp, "\"", Tcl_GetString(iclsPtr->namePtr),
 		" is no ::itcl::widget/::itcl::widgetadaptor/",
 		"::itcl::type/::itcl::extendedclass.",
-		" Only these can forward", NULL);
+		" Only these can forward", (char *)NULL);
 	return TCL_ERROR;
     }
     if (objc < 3) {
@@ -4266,14 +4266,14 @@ Itcl_ClassMethodVariableCmd(
     iclsPtr = (ItclClass*)Itcl_PeekStack(&infoPtr->clsStack);
     if (iclsPtr == NULL) {
 	Tcl_AppendResult(interp, "Error: ::itcl::parser::methodvariable called from",
-		" not within a class", NULL);
+		" not within a class", (char *)NULL);
 	return TCL_ERROR;
     }
     if (iclsPtr->flags & ITCL_CLASS) {
 	Tcl_AppendResult(interp, "\"", Tcl_GetString(iclsPtr->namePtr),
 		" is no ::itcl::widget/::itcl::widgetadaptor/",
 		"::itcl::type/::itcl::extendedclass.",
-		" Only these can have methodvariables", NULL);
+		" Only these can have methodvariables", (char *)NULL);
 	return TCL_ERROR;
     }
     usageStr = "<name> ?-default value? ?-callback script?";
@@ -4290,7 +4290,7 @@ Itcl_ClassMethodVariableCmd(
     if (strstr(Tcl_GetString(namePtr), "::")) {
 	Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
 	    "bad variable name \"", Tcl_GetString(namePtr), "\"",
-	    NULL);
+	    (char *)NULL);
 	return TCL_ERROR;
     }
 
@@ -4374,12 +4374,12 @@ Itcl_ClassTypeConstructorCmd(
 
     if (iclsPtr == NULL) {
 	Tcl_AppendResult(interp, "Error: ::itcl::parser::typeconstructor called from",
-		" not within a class", NULL);
+		" not within a class", (char *)NULL);
 	return TCL_ERROR;
     }
     if (iclsPtr->flags & ITCL_CLASS) {
 	Tcl_AppendResult(interp, "a \"class\" cannot have a typeconstructor",
-		NULL);
+		(char *)NULL);
 	return TCL_ERROR;
     }
 
@@ -4393,7 +4393,7 @@ Itcl_ClassTypeConstructorCmd(
 	Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
 	    "\"", Tcl_GetString(namePtr), "\" already defined in class \"",
 	    Tcl_GetString(iclsPtr->fullNamePtr), "\"",
-	    NULL);
+	    (char *)NULL);
 	return TCL_ERROR;
     }
 

@@ -87,7 +87,7 @@ NRBodyCmd(
 	Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
 	    "wrong # args: should be \"",
 	    token, " class::func arglist body\"",
-	    NULL);
+	    (char *)NULL);
 	return TCL_ERROR;
     }
 
@@ -102,7 +102,7 @@ NRBodyCmd(
     if (!head || *head == '\0') {
 	Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
 	    "missing class specifier for body declaration \"", token, "\"",
-	    NULL);
+	    (char *)NULL);
 	status = TCL_ERROR;
 	goto bodyCmdDone;
     }
@@ -137,7 +137,7 @@ NRBodyCmd(
 	Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
 	    "function \"", tail, "\" is not defined in class \"",
 	    Tcl_GetString(iclsPtr->fullNamePtr), "\"",
-	    NULL);
+	    (char *)NULL);
 	status = TCL_ERROR;
 	goto bodyCmdDone;
     }
@@ -233,7 +233,7 @@ NRConfigBodyCmd(
     if ((head == NULL) || (*head == '\0')) {
 	Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
 	    "missing class specifier for body declaration \"", token, "\"",
-	    NULL);
+	    (char *)NULL);
 	status = TCL_ERROR;
 	goto configBodyCmdDone;
     }
@@ -263,7 +263,7 @@ NRConfigBodyCmd(
 	Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
 	    "option \"", tail, "\" is not defined in class \"",
 	    Tcl_GetString(iclsPtr->fullNamePtr), "\"",
-	    NULL);
+	    (char *)NULL);
 	status = TCL_ERROR;
 	goto configBodyCmdDone;
     }
@@ -273,7 +273,7 @@ NRConfigBodyCmd(
 	Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
 		"option \"", Tcl_GetString(ivPtr->fullNamePtr),
 		"\" is not a public configuration option",
-		NULL);
+		(char *)NULL);
 	status = TCL_ERROR;
 	goto configBodyCmdDone;
     }
@@ -376,7 +376,7 @@ ItclCreateMethod(
     if (strstr(Tcl_GetString(namePtr),"::")) {
 	Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
 	    "bad method name \"", Tcl_GetString(namePtr), "\"",
-	    NULL);
+	    (char *)NULL);
 	Tcl_DecrRefCount(namePtr);
 	return TCL_ERROR;
     }
@@ -425,7 +425,7 @@ Itcl_CreateProc(
     if (strstr(Tcl_GetString(namePtr),"::")) {
 	Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
 	    "bad proc name \"", Tcl_GetString(namePtr), "\"",
-	    NULL);
+	    (char *)NULL);
 	return TCL_ERROR;
     }
 
@@ -486,7 +486,7 @@ ItclCreateMemberFunc(
 	Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
 	    "\"", Tcl_GetString(namePtr), "\" already defined in class \"",
 	    Tcl_GetString(iclsPtr->fullNamePtr), "\"",
-	    NULL);
+	    (char *)NULL);
 	return TCL_ERROR;
     }
 
@@ -751,7 +751,7 @@ Itcl_ChangeMemberFunc(
 	    "argument list changed for function \"",
 	    Tcl_GetString(imPtr->fullNamePtr), "\": should be \"",
 	    argsStr, "\"",
-	    NULL);
+	    (char *)NULL);
 
 	Itcl_PreserveData(mcode);
 	Itcl_ReleaseData(mcode);
@@ -896,7 +896,7 @@ ItclCreateMemberCode(
 				namePtr == NULL ? "??" :
 				Tcl_GetString(namePtr),
 				"'s arglist may not contain \"",
-				*cPtrPtr, "\" explicitly", NULL);
+				*cPtrPtr, "\" explicitly", (char *)NULL);
 			Itcl_PreserveData(mcode);
 			Itcl_ReleaseData(mcode);
 			return TCL_ERROR;
@@ -1013,7 +1013,7 @@ ItclCreateMemberCode(
 			&cdata)) {
 		    Tcl_AppendResult(interp,
 			    "no registered C procedure with name \"",
-			    body+1, "\"", NULL);
+			    body+1, "\"", (char *)NULL);
 		    Itcl_PreserveData(mcode);
 		    Itcl_ReleaseData(mcode);
 		    return TCL_ERROR;
@@ -1186,7 +1186,7 @@ Itcl_GetMemberCode(
 	Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
 	    "member function \"", Tcl_GetString(imPtr->fullNamePtr),
 	    "\" is not defined and cannot be autoloaded",
-	    NULL);
+	    (char *)NULL);
 	return TCL_ERROR;
     }
 
@@ -1599,10 +1599,10 @@ Itcl_GetMemberFuncUsage(
 		name = (char *) Tcl_GetCommandName(
 		    contextIoPtr->iclsPtr->interp, contextIoPtr->accessCmd);
 		Tcl_AppendStringsToObj(objPtr, name, " ",
-			Tcl_GetString(imPtr->namePtr), NULL);
+			Tcl_GetString(imPtr->namePtr), (char *)NULL);
 	    } else {
 		Tcl_AppendStringsToObj(objPtr, "<object> ",
-			Tcl_GetString(imPtr->namePtr), NULL);
+			Tcl_GetString(imPtr->namePtr), (char *)NULL);
 	    }
 	}
     } else {
@@ -1680,7 +1680,7 @@ NRExecMethod(
     if (ioPtr == NULL) {
 	Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
 	    "cannot access object-specific info without an object context",
-	    NULL);
+	    (char *)NULL);
 	return TCL_ERROR;
     }
 
@@ -1784,7 +1784,7 @@ NRExecProc(
 		Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
 			"can't access \"", Tcl_GetString(imPtr->fullNamePtr),
 			"\": ", Itcl_ProtectionStr(imPtr->protection),
-			" function", NULL);
+			" function", (char *)NULL);
 		return TCL_ERROR;
 	    }
 	    hPtr = Tcl_FindHashEntry(&imPtr->iclsPtr->infoPtr->procMethods,
@@ -1797,13 +1797,13 @@ NRExecProc(
 		Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
 			"invalid command name \"",
 			Tcl_GetString(objv[0]),
-			"\"", NULL);
+			"\"", (char *)NULL);
 		return TCL_ERROR;
 	    }
 	    Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
 		    "can't access \"", Tcl_GetString(imPtr->fullNamePtr),
 		    "\": ", Itcl_ProtectionStr(imPtr->protection),
-		    " function", NULL);
+		    " function", (char *)NULL);
 	    return TCL_ERROR;
 	}
     }
@@ -2045,7 +2045,7 @@ Itcl_InvokeMethodIfExists(
 			    Tcl_AppendResult(interp, "type \"",
 				    Tcl_GetString(contextClassPtr->namePtr),
 				    "\" has no options, but constructor has",
-				    " option arguments", NULL);
+				    " option arguments", (char *)NULL);
 			    return TCL_ERROR;
 			}
 		    }
@@ -2054,7 +2054,7 @@ Itcl_InvokeMethodIfExists(
 			    /*isProcCallFrame*/0) != TCL_OK) {
 			Tcl_AppendResult(interp, "INTERNAL ERROR in",
 				"Itcl_InvokeMethodIfExists Itcl_PushCallFrame",
-				NULL);
+				(char *)NULL);
 		    }
 		    newObjv = (Tcl_Obj **)ckalloc(sizeof(Tcl_Obj *)*(objc + 2));
 		    newObjv[0] = Tcl_NewStringObj("my", TCL_INDEX_NONE);
@@ -2375,7 +2375,7 @@ ItclCheckCallMethod(
 	    Tcl_AppendResult(interp,
 		    "ItclCheckCallMethod cannot get context object (NULL)",
 		    " for ", Tcl_GetString(imPtr->fullNamePtr),
-		    NULL);
+		    (char *)NULL);
 	    result = TCL_ERROR;
 	    goto finishReturn;
 	}
@@ -2387,7 +2387,7 @@ ItclCheckCallMethod(
 	    (imPtr->codePtr->flags & ITCL_IMPLEMENT_NONE)) {
 	Tcl_AppendResult(interp, "member function \"",
 		Tcl_GetString(imPtr->fullNamePtr),
-		"\" is not defined and cannot be autoloaded", NULL);
+		"\" is not defined and cannot be autoloaded", (char *)NULL);
 	if (isFinished != NULL) {
 	    *isFinished = 1;
 	}
@@ -2410,7 +2410,7 @@ ItclCheckCallMethod(
     if (min_allowed_args < imPtr->argcount) {
 	Tcl_AppendResult(interp, "wrong # args: should be \"",
 		Tcl_GetString(cObjv[0]), " ", Tcl_GetString(imPtr->namePtr),
-		" ", Tcl_GetString(imPtr->usagePtr), "\"", NULL);
+		" ", Tcl_GetString(imPtr->usagePtr), "\"", (char *)NULL);
 	if (isFinished != NULL) {
 	    *isFinished = 1;
 	}
@@ -2567,7 +2567,7 @@ ItclAfterCallMethod(
 	}
 	Tcl_AppendResult(interp,
 		"ItclAfterCallMethod cannot get context object (NULL)",
-		" for ", Tcl_GetString(imPtr->fullNamePtr), NULL);
+		" for ", Tcl_GetString(imPtr->fullNamePtr), (char *)NULL);
 	result = TCL_ERROR;
 	goto finishReturn;
     }

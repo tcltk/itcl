@@ -41,14 +41,14 @@ set element "{source *[file join . mkindex.itcl]}"
 
 test mkindex-1.3 {examine tclIndex} -body {
     namespace eval itcl_mkindex_tmp {
-        set dir "."
-        variable auto_index
-        source -encoding utf-8 tclIndex
-        set result ""
-        foreach elem [lsort [array names auto_index]] {
-            lappend result [list $elem $auto_index($elem)]
-        }
-        set result
+	set dir "."
+	variable auto_index
+	source -encoding utf-8 tclIndex
+	set result ""
+	foreach elem [lsort [array names auto_index]] {
+	    lappend result [list $elem $auto_index($elem)]
+	}
+	set result
     }
 } -match glob -result "{::Simple2::bump $element} {::Simple2::by $element} {::buried::deep::within $element} {::buried::ens $element} {::buried::inside $element} {::buried::inside::bump $element} {::buried::inside::by $element} {::buried::inside::find $element} {::buried::under::neath $element} {::top::find $element} {::top::notice $element} {Simple1 $element} {Simple2 $element} {ens $element} {top $element}"
 

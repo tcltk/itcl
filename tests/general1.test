@@ -41,7 +41,7 @@ test general1-1.1 {define classes with different protection} {
 		lappend ::test_cd_watch pubmA
 		lappend ::test_cd_watch [set pubv]
 	}
-        public method doA {args} {eval $args}
+	public method doA {args} {eval $args}
     }
 
     itcl::class ClassB {
@@ -70,8 +70,8 @@ test general1-1.1 {define classes with different protection} {
 	    lappend ::test_cd_watch pubmB
 	    lappend ::test_cd_watch [set pubv]
 	}
-        public method doB {args} {eval $args}
-        public method chkThis {} { set prov $this }
+	public method doB {args} {eval $args}
+	public method chkThis {} { set prov $this }
     }
 
     itcl::class ClassC {
@@ -85,7 +85,7 @@ test general1-1.1 {define classes with different protection} {
 	    eval ClassB::constructor $args
 	} {
 	    lappend ::test_cd_watch [list "start constructorC" $args]
-            ClassA::constructor $args
+	    ClassA::constructor $args
 	    lappend ::test_cd_watch [list "end constructorC"]
 	}
 	private method primC {} {
@@ -104,9 +104,9 @@ test general1-1.1 {define classes with different protection} {
 	public method pubmC2 {arg1 {arg2 {}} {arg3 xxx}} {
 	    lappend ::test_cd_watch "orig pubmC2"
 	}
-        public method doC {args} {
-            eval $args
-        }
+	public method doC {args} {
+	    eval $args
+	}
     }
 } {}
 
@@ -118,9 +118,9 @@ test general1-1.2 {constructor of classA should be called twice} {
 test general1-1.3 {body command should not produce error} {
     set ::test_cd_watch ""
     list [catch {
-        itcl::body ClassC::pubmC2 {aarg1 {aarg2 {}} {arg3 {xxx}}} {
-            lappend ::test_cd_watch "new body command for pubmC2 [list $aarg1 $aarg2 $arg3]"
-        }
+	itcl::body ClassC::pubmC2 {aarg1 {aarg2 {}} {arg3 {xxx}}} {
+	    lappend ::test_cd_watch "new body command for pubmC2 [list $aarg1 $aarg2 $arg3]"
+	}
     } msg] $msg [classC0 pubmC2 Hallo]
 } {0 {} {{new body command for pubmC2 Hallo {} xxx}}}
 

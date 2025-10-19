@@ -379,7 +379,7 @@ Initialize (
     if (clazzObjectPtr == NULL) {
 	Tcl_AppendResult(interp,
 		"ITCL: cannot get Object for ::itcl::clazz for class \"",
-		"::itcl::clazz", "\"", NULL);
+		"::itcl::clazz", "\"", (char *)NULL);
 	return TCL_ERROR;
     }
 
@@ -573,7 +573,7 @@ ItclCheckSetItclHull(
 
     if (objc < 3) {
 	Tcl_AppendResult(interp, "ItclCheckSetItclHull wrong # args should be ",
-		"<objectName> <value>", NULL);
+		"<objectName> <value>", (char *)NULL);
 	return TCL_ERROR;
     }
 
@@ -588,7 +588,7 @@ ItclCheckSetItclHull(
 	ioPtr = infoPtr->currIoPtr;
 	if (ioPtr == NULL) {
 	    Tcl_AppendResult(interp, "ItclCheckSetItclHull cannot find object",
-		    NULL);
+		    (char *)NULL);
 	    return TCL_ERROR;
 	}
     }
@@ -597,7 +597,7 @@ ItclCheckSetItclHull(
     Tcl_DecrRefCount(objPtr);
     if (hPtr == NULL) {
 	Tcl_AppendResult(interp, "ItclCheckSetItclHull cannot find itcl_hull",
-		" variable for object \"", Tcl_GetString(objv[1]), "\"", NULL);
+		" variable for object \"", Tcl_GetString(objv[1]), "\"", (char *)NULL);
 	return TCL_ERROR;
     }
     ivPtr = (ItclVariable *)Tcl_GetHashValue(hPtr);
@@ -609,7 +609,7 @@ ItclCheckSetItclHull(
 	    ivPtr->initted = 0;
 	} else {
 	    Tcl_AppendResult(interp, "ItclCheckSetItclHull bad value \"",
-		    valueStr, "\"", NULL);
+		    valueStr, "\"", (char *)NULL);
 	    return TCL_ERROR;
 	}
     }

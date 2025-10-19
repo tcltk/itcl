@@ -25,14 +25,14 @@ interp alias {} type {} ::itcl::type
 
 test typevariable-1.2 {undefined typevariables are OK} -body {
     type dog {
-        typevariable theValue
-        method tset {value} {
-            set theValue $value
-        }
+	typevariable theValue
+	method tset {value} {
+	    set theValue $value
+	}
 
-        method tget {} {
-            return $theValue
-        }
+	method tget {} {
+	    return $theValue
+	}
     }
 
     dog create spot
@@ -46,11 +46,11 @@ test typevariable-1.2 {undefined typevariables are OK} -body {
 
 test typevariable-1.3 {predefined typevariables are OK} -body {
     type dog {
-        typevariable greeting Hello
+	typevariable greeting Hello
 
-        method tget {} {
-            return $greeting
-        }
+	method tget {} {
+	    return $greeting
+	}
     }
 
     dog create spot
@@ -63,12 +63,12 @@ test typevariable-1.3 {predefined typevariables are OK} -body {
 
 test typevariable-1.4 {typevariables can be arrays} -body {
     type dog {
-        typevariable greetings
+	typevariable greetings
 
-        method fill {} {
-            set greetings(a) Hi
-            set greetings(b) Howdy
-        }
+	method fill {} {
+	    set greetings(a) Hi
+	    set greetings(b) Howdy
+	}
     }
 
     dog create spot
@@ -80,11 +80,11 @@ test typevariable-1.4 {typevariables can be arrays} -body {
 
 test typevariable-1.5 {typevariables can used in typemethods} -body {
     type dog {
-        typevariable greetings Howdy
+	typevariable greetings Howdy
 
-        typemethod greet {} {
-            return $greetings
-        }
+	typemethod greet {} {
+	    return $greetings
+	}
     }
 
     dog greet
@@ -94,15 +94,15 @@ test typevariable-1.5 {typevariables can used in typemethods} -body {
 
 test typevariable-1.6 {typevariables can used in procs} -body {
     type dog {
-        typevariable greetings Howdy
+	typevariable greetings Howdy
 
-        method greet {} {
-            return [realGreet]
-        }
+	method greet {} {
+	    return [realGreet]
+	}
 
-        proc realGreet {} {
-            return $greetings
-        }
+	proc realGreet {} {
+	    return $greetings
+	}
     }
 
     dog create spot
@@ -113,9 +113,9 @@ test typevariable-1.6 {typevariables can used in procs} -body {
 
 test typevariable-1.7 {mytypevar qualifies typevariables} -body {
     type dog {
-        method tvname {name} {
-            mytypevar $name
-        }
+	method tvname {name} {
+	    mytypevar $name
+	}
     }
 
     dog create spot
@@ -126,7 +126,7 @@ test typevariable-1.7 {mytypevar qualifies typevariables} -body {
 
 test typevariable-1.8 {typevariable with too many initializers throws an error} -body {
     type dog {
-        typevariable color dark brown
+	typevariable color dark brown
     }
 } -returnCodes {
     error
@@ -134,7 +134,7 @@ test typevariable-1.8 {typevariable with too many initializers throws an error} 
 
 test typevariable-1.9 {typevariable with too many initializers throws an error} -body {
     type dog {
-        typevariable color -array dark brown
+	typevariable color -array dark brown
     }
 
     set result
@@ -144,14 +144,14 @@ test typevariable-1.9 {typevariable with too many initializers throws an error} 
 
 test typevariable-1.10 {typevariable can initialize array variables} -body {
     type dog {
-        typevariable data -array {
-            family jones
-            color brown
-        }
+	typevariable data -array {
+	    family jones
+	    color brown
+	}
 
-        typemethod getdata {item} {
-            return $data($item)
-        }
+	typemethod getdata {item} {
+	    return $data($item)
+	}
     }
 
     list [dog getdata family] [dog getdata color]
@@ -164,9 +164,9 @@ test typevariable-1.10 {typevariable can initialize array variables} -body {
 
 test ivariable-1.1 {myvar qualifies instance variables} -body {
     type dog {
-        method vname {name} {
-            myvar $name
-        }
+	method vname {name} {
+	    myvar $name
+	}
     }
 
     dog create spot
@@ -177,14 +177,14 @@ test ivariable-1.1 {myvar qualifies instance variables} -body {
 
 test ivariable-1.2 {undefined instance variables are OK} -body {
     type dog {
-        variable greeting
-        method setgreeting {value} {
-            set greeting $value
-        }
+	variable greeting
+	method setgreeting {value} {
+	    set greeting $value
+	}
 
-        method getgreeting {} {
-            return $greeting
-        }
+	method getgreeting {} {
+	    return $greeting
+	}
     }
 
     set spot [dog create spot]
@@ -200,10 +200,10 @@ test ivariable-1.2 {undefined instance variables are OK} -body {
 
 test ivariable-1.3 {instance variables are destroyed automatically} -body {
     type dog {
-        variable greeting
-        constructor {args} {
-            set greeting Hi
-        }
+	variable greeting
+	constructor {args} {
+	    set greeting Hi
+	}
     }
 
     dog create spot
@@ -218,15 +218,15 @@ test ivariable-1.3 {instance variables are destroyed automatically} -body {
 
 test ivariable-1.4 {defined instance variables need not be declared} -body {
     type dog {
-        variable greetings
+	variable greetings
 
-        method put {} {
-            set greetings Howdy
-        }
+	method put {} {
+	    set greetings Howdy
+	}
 
-        method get {} {
-            return $greetings
-        }
+	method get {} {
+	    return $greetings
+	}
     }
 
     dog create spot
@@ -238,16 +238,16 @@ test ivariable-1.4 {defined instance variables need not be declared} -body {
 
 test ivariable-1.5 {instance variables can be arrays} -body {
     type dog {
-        variable greetings
+	variable greetings
 
-        method fill {} {
-            set greetings(a) Hi
-            set greetings(b) Howdy
-        }
+	method fill {} {
+	    set greetings(a) Hi
+	    set greetings(b) Howdy
+	}
 
-        method vname {} {
-            return [myvar greetings]
-        }
+	method vname {} {
+	    return [myvar greetings]
+	}
     }
 
     dog create spot
@@ -259,12 +259,12 @@ test ivariable-1.5 {instance variables can be arrays} -body {
 
 test ivariable-1.6 {instance variables can be initialized in the definition} -body {
     type dog {
-        variable greetings {Hi Howdy}
-        variable empty {}
+	variable greetings {Hi Howdy}
+	variable empty {}
 
-        method list {} {
-            list $greetings $empty
-        }
+	method list {} {
+	    list $greetings $empty
+	}
     }
 
     dog create spot
@@ -275,15 +275,15 @@ test ivariable-1.6 {instance variables can be initialized in the definition} -bo
 
 test ivariable-1.9 {procs which define selfns see instance variables} -body {
     type dog {
-        variable greeting Howdy
+	variable greeting Howdy
 
-        method caller {} {
-            return [callee $selfns]
-        }
+	method caller {} {
+	    return [callee $selfns]
+	}
 
-        proc callee {selfns} {
-            return [set ${selfns}::greeting]
-        }
+	proc callee {selfns} {
+	    return [set ${selfns}::greeting]
+	}
     }
 
     dog create spot
@@ -295,7 +295,7 @@ test ivariable-1.9 {procs which define selfns see instance variables} -body {
 
 test ivariable-1.11 {variable with too many initializers throws an error} -body {
     type dog {
-        variable color dark brown
+	variable color dark brown
     }
 } -returnCodes {
     error
@@ -303,7 +303,7 @@ test ivariable-1.11 {variable with too many initializers throws an error} -body 
 
 test ivariable-1.12 {variable with too many initializers throws an error} -body {
     type dog {
-        variable color -array dark brown
+	variable color -array dark brown
     }
 } -returnCodes {
     error
@@ -311,14 +311,14 @@ test ivariable-1.12 {variable with too many initializers throws an error} -body 
 
 test ivariable-1.13 {variable can initialize array variables} -body {
     type dog {
-        variable data -array {
-            family jones
-            color brown
-        }
+	variable data -array {
+	    family jones
+	    color brown
+	}
 
-        method getdata {item} {
-            return $data($item)
-        }
+	method getdata {item} {
+	    return $data($item)
+	}
     }
 
     dog spot

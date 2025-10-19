@@ -24,11 +24,11 @@ loadTestedCommands
 
 test component-1.1 {component defines variable} -body {
     ::itcl::extendedclass dog {
-        protected component mycomp
+	protected component mycomp
 
-        public proc test {} {
-            return $mycomp
-        }
+	public proc test {} {
+	    return $mycomp
+	}
     }
 
     dog fido
@@ -40,11 +40,11 @@ test component-1.1 {component defines variable} -body {
 
 test component-1.2 {component -inherit} -body {
     ::itcl::extendedclass dog {
-        component mycomp -inherit
+	component mycomp -inherit
 
-        constructor {} {
-            set mycomp string
-        }
+	constructor {} {
+	    set mycomp string
+	}
     }
 
     dog fido
@@ -56,16 +56,16 @@ test component-1.2 {component -inherit} -body {
 
 test component-1.3 {component -inherit can only have one of it} -body {
     ::itcl::extendedclass dogbase {
-        component mycompbase -inherit
+	component mycompbase -inherit
     }
 
     ::itcl::extendedclass dog {
 	inherit dogbase
-        component mycomp -inherit
+	component mycomp -inherit
 
-        constructor {} {
-            set mycomp string
-        }
+	constructor {} {
+	    set mycomp string
+	}
     }
 
     dog fido
@@ -84,7 +84,7 @@ test delegatemethod-1.1 {delegate method to non-existent component} -body {
     set result ""
 
     ::itcl::extendedclass dog {
-        delegate method foo to bar
+	delegate method foo to bar
     }
 
     dog fido
@@ -97,11 +97,11 @@ test delegatemethod-1.1 {delegate method to non-existent component} -body {
 test delegatemethod-1.2 {delegating to existing component} -body {
     ::itcl::extendedclass dog {
 	component string
-        delegate method length to string
+	delegate method length to string
 
-        constructor {} {
-            set string string
-        }
+	constructor {} {
+	    set string string
+	}
     }
 
     dog fido
@@ -114,11 +114,11 @@ test delegatemethod-1.2 {delegating to existing component} -body {
 test delegatemethod-1.3 {delegating to existing component with error} -body {
     ::itcl::extendedclass dog {
 #	component string
-        delegate method length to string
+	delegate method length to string
 
-        constructor {} {
-            set string string
-        }
+	constructor {} {
+	    set string string
+	}
     }
 
     dog fido
@@ -132,11 +132,11 @@ test delegatemethod-1.3 {delegating to existing component with error} -body {
 test delegatemethod-1.5 {delegating unknown methods to existing typecomponent} -body {
     ::itcl::extendedclass dog {
 #	component string
-        delegate method * to string
+	delegate method * to string
 
-        constructor {} {
-            set string string
-        }
+	constructor {} {
+	    set string string
+	}
     }
 
     dog fido
@@ -148,12 +148,12 @@ test delegatemethod-1.5 {delegating unknown methods to existing typecomponent} -
 
 test delegatemethod-1.6a {delegating unknown method to existing component with error} -body {
     ::itcl::extendedclass dog {
-        component stringhandler
-        delegate method * to stringhandler
+	component stringhandler
+	delegate method * to stringhandler
 
-        constructor {} {
-            set stringhandler string
-        }
+	constructor {} {
+	    set stringhandler string
+	}
     }
 
     dog fido
@@ -167,9 +167,9 @@ test delegatemethod-1.6a {delegating unknown method to existing component with e
 
 test delegatemethod-1.7 {can't delegate local method: order 1} -body {
     ::itcl::extendedclass dog {
-        component bar
-        method foo {} {}
-        delegate method foo to bar
+	component bar
+	method foo {} {}
+	delegate method foo to bar
     }
 } -returnCodes {
     error
@@ -177,9 +177,9 @@ test delegatemethod-1.7 {can't delegate local method: order 1} -body {
 
 test delegatemethod-1.8 {can't delegate local method: order 2} -body {
     ::itcl::extendedclass dog {
-        component bar
-        delegate method foo to bar
-        method foo {} {}
+	component bar
+	delegate method foo to bar
+	method foo {} {}
     }
 } -returnCodes {
     error
@@ -187,9 +187,9 @@ test delegatemethod-1.8 {can't delegate local method: order 2} -body {
 
 test delegatemethod-1.9 {can't delegate local method: order 2} -body {
     ::itcl::extendedclass dog {
-        component bar
-        delegate method foo to bar
-        method foo {} {}
+	component bar
+	delegate method foo to bar
+	method foo {} {}
     }
 } -cleanup {
 } -returnCodes {
@@ -206,7 +206,7 @@ test delegatemethod-1.1 {delegate method to non-existent component} -body {
     set result ""
 
     ::itcl::extendedclass dog {
-        delegate method foo to bar
+	delegate method foo to bar
     }
 
     dog fido
@@ -219,11 +219,11 @@ test delegatemethod-1.1 {delegate method to non-existent component} -body {
 test delegatemethod-1.2 {delegating to existing component} -body {
     ::itcl::extendedclass dog {
 	component string
-        delegate method length to string
+	delegate method length to string
 
-        constructor {} {
-            set string string
-        }
+	constructor {} {
+	    set string string
+	}
     }
 
     dog fido
@@ -236,11 +236,11 @@ test delegatemethod-1.2 {delegating to existing component} -body {
 test delegatemethod-1.3 {delegating to existing component with error} -body {
     ::itcl::extendedclass dog {
 #	component string
-        delegate method length to string
+	delegate method length to string
 
-        constructor {} {
-            set string string
-        }
+	constructor {} {
+	    set string string
+	}
     }
 
     dog fido
@@ -254,11 +254,11 @@ test delegatemethod-1.3 {delegating to existing component with error} -body {
 test delegatemethod-1.5 {delegating unknown methods to existing typecomponent} -body {
     ::itcl::extendedclass dog {
 #	component string
-        delegate method * to string
+	delegate method * to string
 
-        constructor {} {
-            set string string
-        }
+	constructor {} {
+	    set string string
+	}
     }
 
     dog fido
@@ -270,12 +270,12 @@ test delegatemethod-1.5 {delegating unknown methods to existing typecomponent} -
 
 test delegatemethod-1.6a {delegating unknown method to existing component with error} -body {
     ::itcl::extendedclass dog {
-        component stringhandler
-        delegate method * to stringhandler
+	component stringhandler
+	delegate method * to stringhandler
 
-        constructor {} {
-            set stringhandler string
-        }
+	constructor {} {
+	    set stringhandler string
+	}
     }
 
     dog fido
@@ -289,9 +289,9 @@ test delegatemethod-1.6a {delegating unknown method to existing component with e
 
 test delegatemethod-1.7 {can't delegate local method: order 1} -body {
     ::itcl::extendedclass dog {
-        component bar
-        method foo {} {}
-        delegate method foo to bar
+	component bar
+	method foo {} {}
+	delegate method foo to bar
     }
 } -cleanup {
 } -returnCodes {
@@ -300,9 +300,9 @@ test delegatemethod-1.7 {can't delegate local method: order 1} -body {
 
 test delegatemethod-1.8 {can't delegate local method: order 2} -body {
     ::itcl::extendedclass dog {
-        component bar
-        delegate method foo to bar
-        method foo {} {}
+	component bar
+	delegate method foo to bar
+	method foo {} {}
     }
 } -cleanup {
 } -returnCodes {

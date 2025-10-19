@@ -27,26 +27,26 @@ test basic-1.0 {empty string as class name should fail but not crash
 
 variable setup {
     itcl::class Counter {
-        constructor {args} {
-            incr num
-            eval configure $args
-        }
-        destructor {
-            if {![info exists num]} {
-                lappend ::tcltest::itcl_basic_errors "unexpected: common deleted before destructor got called"
-            }
-            incr num -1
-        }
+	constructor {args} {
+	    incr num
+	    eval configure $args
+	}
+	destructor {
+	    if {![info exists num]} {
+		lappend ::tcltest::itcl_basic_errors "unexpected: common deleted before destructor got called"
+	    }
+	    incr num -1
+	}
 
-        method ++ {} {
-            return [incr val $by]
-        }
-        proc num {} {
-            return $num
-        }
-        public variable by 1
-        protected variable val 0
-        private common num 0
+	method ++ {} {
+	    return [incr val $by]
+	}
+	proc num {} {
+	    return $num
+	}
+	public variable by 1
+	protected variable val 0
+	private common num 0
     }
 }
 
@@ -76,7 +76,7 @@ append setup4 {
 
 proc check_itcl_basic_errors {} {
     if {[info exists ::tcltest::itcl_basic_errors] && [llength $::tcltest::itcl_basic_errors]} {
-        error "following errors occurs during tests:\n  [join $::tcltest::itcl_basic_errors "\n  "]"
+	error "following errors occurs during tests:\n  [join $::tcltest::itcl_basic_errors "\n  "]"
     }
 }
 
@@ -244,9 +244,9 @@ test basic-2.5 {"#auto" with :: at front of name
 test basic-2.6 {"#auto" with :: at front of name inside method
 } -body {
     itcl::class AutoCheck {
-        proc new {} {
-            return [AutoCheck ::#auto]
-        }
+	proc new {} {
+	    return [AutoCheck ::#auto]
+	}
     }
     set result [AutoCheck::new]
     rename AutoCheck {}
@@ -257,9 +257,9 @@ test basic-2.7 {"#auto" with :: at front of name inside method inside namespace
 } -body {
     namespace eval AutoCheckNs {}
     itcl::class AutoCheckNs::AutoCheck {
-        proc new {} {
-            return [AutoCheckNs::AutoCheck ::#auto]
-        }
+	proc new {} {
+	    return [AutoCheckNs::AutoCheck ::#auto]
+	}
     }
     set result [AutoCheckNs::AutoCheck::new]
     namespace delete AutoCheckNs
@@ -322,19 +322,19 @@ Instead, remove the spaces from your procedure invocations:
 test basic-4.1 {classes can be destroyed
 } -setup $setup -body {
     list [itcl::delete class Counter] \
-         [itcl::find classes Counter] \
-         [namespace children :: Counter] \
-         [namespace which -command Counter]
+	 [itcl::find classes Counter] \
+	 [namespace children :: Counter] \
+	 [namespace which -command Counter]
 } -result {{} {} {} {}}
 
 test basic-4.2 {classes can be redefined
 } -body {
     itcl::class Counter {
-        method ++ {} {
-            return [incr val $by]
-        }
-        public variable by 1
-        protected variable val 0
+	method ++ {} {
+	    return [incr val $by]
+	}
+	public variable by 1
+	protected variable val 0
     }
 } -result {}
 
@@ -360,8 +360,8 @@ test basic-4.5 {namespaces for #auto are prepended to the command name
 test basic-4.6 {when a class is destroyed, its objects are deleted
 } -body {
     list [lsort [itcl::find objects counter*]] \
-         [itcl::delete class Counter] \
-         [lsort [itcl::find objects counter*]]
+	 [itcl::delete class Counter] \
+	 [lsort [itcl::find objects counter*]]
 } -result {{counter0 counter1} {} {}}
 
 check_itcl_basic_errors
@@ -397,21 +397,21 @@ test basic-4.7 {clean-up of internal facilities
 test basic-5.1 {define a simple class with variables in the namespace
 } -body {
     itcl::class test_globals {
-        common g1 "global1"
-        proc getval {name} {
-            variable $name
-            return [set [namespace tail $name]]
-        }
-        proc setval {name val} {
-            variable $name
-            return [set [namespace tail $name] $val]
-        }
-        method do {args} {
-            return [eval $args]
-        }
+	common g1 "global1"
+	proc getval {name} {
+	    variable $name
+	    return [set [namespace tail $name]]
+	}
+	proc setval {name val} {
+	    variable $name
+	    return [set [namespace tail $name] $val]
+	}
+	method do {args} {
+	    return [eval $args]
+	}
     }
     namespace eval test_globals {
-        variable g2 "global2"
+	variable g2 "global2"
     }
 } -result {}
 
@@ -449,7 +449,7 @@ test basic-5.7 {variable command will not find vars in other namespaces
 } -body {
     set ::test_global_0 "g0"
     list [catch {test_globals::getval test_global_0} msg] $msg \
-         [catch {test_globals::getval ::test_global_0} msg] $msg \
+	 [catch {test_globals::getval ::test_global_0} msg] $msg \
 } -result {1 {can't read "test_global_0": no such variable} 0 g0}
 
 test basic-5.8 {to create globals in a namespace, use the full path
@@ -476,33 +476,33 @@ if {[namespace which [namespace current]::test_globals] ne {}} {
 test basic-6.1 {set up a class definition with array variables
 } -body {
     proc test_arrays_get {name} {
-        upvar $name x
-        set rlist {}
-        foreach index [lsort [array names x]] {
-            lappend rlist [list $index $x($index)]
-        }
-        return $rlist
+	upvar $name x
+	set rlist {}
+	foreach index [lsort [array names x]] {
+	    lappend rlist [list $index $x($index)]
+	}
+	return $rlist
     }
     itcl::class test_arrays {
-        variable nums
-        common undefined
+	variable nums
+	common undefined
 
-        common colors
-        set colors(red)   #ff0000
-        set colors(green) #00ff00
-        set colors(blue)  #0000ff
+	common colors
+	set colors(red)   #ff0000
+	set colors(green) #00ff00
+	set colors(blue)  #0000ff
 
-        constructor {} {
-            set nums(one) 1
-            set nums(two) 2
-            set nums(three) 3
+	constructor {} {
+	    set nums(one) 1
+	    set nums(two) 2
+	    set nums(three) 3
 
-            set undefined(a) A
-            set undefined(b) B
-        }
-        method do {args} {
-            return [eval $args]
-        }
+	    set undefined(a) A
+	    set undefined(b) B
+	}
+	method do {args} {
+	    return [eval $args]
+	}
     }
     test_arrays #auto
 } -result {test_arrays0}

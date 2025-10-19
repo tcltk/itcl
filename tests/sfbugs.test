@@ -22,7 +22,7 @@ global ::test_status
 
 test sfbug-163 {upvar has to resolve instance variables in caller} -setup {
     itcl::class o1 {
-        public method getValue {name} {
+	public method getValue {name} {
 	    upvar $name val
 	    set val 22
 	}
@@ -49,12 +49,12 @@ test sfbug-187 {upvar with this variable SF bug #187
 } -body {
     ::itcl::class foo {
       method test {} {
-          PopID
+	  PopID
       }
 
       proc PopID {} {
-        upvar 1 this me
-        set me
+	upvar 1 this me
+	set me
       }
     }
     foo bar
@@ -67,25 +67,25 @@ test sfbug-234 {chain with no argument SF bug #234
     set ::test_status ""
     itcl::class One {
 	public method t1 {x} {
-            lappend ::test_status "$this One.t1($x)"
+	    lappend ::test_status "$this One.t1($x)"
 	}
 	public method t2 {} {
-            lappend ::test_status "$this One.t2"
+	    lappend ::test_status "$this One.t2"
 	}
     }
 
     itcl::class Two {
-        inherit One
+	inherit One
 
-        public method t1 {x} {
-            lappend ::test_status "$this Two.t1($x)"
-            chain $x
-        }
+	public method t1 {x} {
+	    lappend ::test_status "$this Two.t1($x)"
+	    chain $x
+	}
 
-        public method t2 {} {
-            lappend ::test_status "$this Two.t2"
-            chain
-        }
+	public method t2 {} {
+	    lappend ::test_status "$this Two.t2"
+	    chain
+	}
     }
     set y [Two #auto]
     $y t1 a
@@ -98,25 +98,25 @@ test sfbug-236 {problem with inheritance of methods SF bug #236
     set ::test_status ""
 
     ::itcl::class c_mem {
-        private method get_ports {}
-        public method get_mem {}
+	private method get_ports {}
+	public method get_mem {}
     }
 
     ::itcl::class c_rom {
-        inherit c_mem
-        private method get_ports {}
+	inherit c_mem
+	private method get_ports {}
     }
 
     ::itcl::body c_rom::get_ports {} {
-        return "toto"
+	return "toto"
     }
 
     ::itcl::body c_mem::get_ports {} {
-        return "tata"
+	return "tata"
     }
 
     ::itcl::body c_mem::get_mem {} {
-        return [concat "titi" [get_ports]]
+	return [concat "titi" [get_ports]]
     }
 
     set ptr [c_rom #auto]
@@ -132,40 +132,40 @@ test sfbug-237 { problem with chain command SF bug #237
     set ::test_status ""
 
     itcl::class main {
-        constructor {} {
-            lappend ::test_status "OK ITCL constructor"
+	constructor {} {
+	    lappend ::test_status "OK ITCL constructor"
 	}
 
-        public method init_OK1 { parm } {
-            lappend ::test_status "OK1 MAIN $parm"
-        }
-        public method init_OK2 {} {
-            lappend ::test_status "OK2 MAIN"
-        }
-        public method init_ERR1 {} {
-            lappend ::test_status "ERR1 MAIN"
-        }
+	public method init_OK1 { parm } {
+	    lappend ::test_status "OK1 MAIN $parm"
+	}
+	public method init_OK2 {} {
+	    lappend ::test_status "OK2 MAIN"
+	}
+	public method init_ERR1 {} {
+	    lappend ::test_status "ERR1 MAIN"
+	}
     }
 
     itcl::class child {
-        inherit main
+	inherit main
 
-        constructor {} {}
+	constructor {} {}
 
-        public method init_OK1 {} {
-            lappend ::test_status "OK1 CHILD"
-            chain TEST
-        }
+	public method init_OK1 {} {
+	    lappend ::test_status "OK1 CHILD"
+	    chain TEST
+	}
 
-        public method init_OK2 {} {
-            lappend ::test_status "OK2 CHILD"
-            next
-        }
+	public method init_OK2 {} {
+	    lappend ::test_status "OK2 CHILD"
+	    next
+	}
 
-        public method init_ERR1 {} {
-            lappend ::test_status "ERR1 CHILD"
-            chain
-        }
+	public method init_ERR1 {} {
+	    lappend ::test_status "ERR1 CHILD"
+	    chain
+	}
     }
 
     set obj [child #auto]
@@ -182,11 +182,11 @@ test sfbug-243 {faulty namespace behaviour SF bug #243
     namespace eval ns {}
 
     itcl::class ns::A {
-        method do {} {nsdo}
+	method do {} {nsdo}
 
-        method nsdo {} {
-            lappend ::test_status "body do: [info function do -body]"
-        }
+	method nsdo {} {
+	    lappend ::test_status "body do: [info function do -body]"
+	}
     }
 
     [ns::A #auto] do
@@ -207,7 +207,7 @@ test sfbug-244 { SF bug 244
     set ::test_status ""
 
     proc foo {body} {
-        uplevel $body
+	uplevel $body
     }
 
     itcl::class A {
@@ -217,8 +217,8 @@ test sfbug-244 { SF bug 244
 
     set y [A #auto]
     $y  do {
-        lappend ::test_status "I'm $this"
-        do2
+	lappend ::test_status "I'm $this"
+	do2
     }
 } -result {{I'm ::a0} done} \
   -cleanup {::itcl::delete class A; rename foo {}}
@@ -228,25 +228,25 @@ test sfbug-250 { SF bug #250
     set ::test_status ""
 
     ::itcl::class A {
-        variable b
+	variable b
 
-        constructor {} {
-            set b [B #auto]
-        }
+	constructor {} {
+	    set b [B #auto]
+	}
 
-        public method m1 {} {
-            $b m3
-        }
+	public method m1 {} {
+	    $b m3
+	}
 
-        public method m2 {} {
-            lappend ::test_status m2
-        }
+	public method m2 {} {
+	    lappend ::test_status m2
+	}
     }
 
     ::itcl::class B {
-        public method m3 {} {
-          uplevel m2
-         }
+	public method m3 {} {
+	  uplevel m2
+	 }
     }
 
     set a [A #auto]
@@ -260,10 +260,10 @@ test sfbug-Schelte {bug with onfo reported from Schelte SF bug xxx
     set ::test_status ""
 
     itcl::class foo {
-        method kerplunk {args} {
-            lappend ::test_status [info level 0]
-            lappend ::test_status [::info level 0]
-            lappend ::test_status [[namespace which info] level 0]
+	method kerplunk {args} {
+	    lappend ::test_status [info level 0]
+	    lappend ::test_status [::info level 0]
+	    lappend ::test_status [[namespace which info] level 0]
        }
     }
 
@@ -282,7 +282,7 @@ test sfbug-254.1 { SF bug #254 + bug [1dc2d851eb]
     if {[catch {
       $interp eval [::tcltest::loadScript]
       $interp eval {
-        package require itcl
+	package require itcl
       }
     } msg]} {
       lappend ::test_status $msg
@@ -304,7 +304,7 @@ test sfbug-254.2 { SF bug #254 + bug [1dc2d851eb]
     lappend ::test_status "::oo::class destroy worked"
     if {[catch {
       $interp eval {
-        ::itcl::class ::test {}
+	::itcl::class ::test {}
       }
     } msg]} {
       lappend ::test_status $msg
@@ -330,14 +330,14 @@ test sfbug-254.3 { delete oo-subsystem should remove all classes + summary of bu
     lappend ::test_status "::oo::class destroy worked"
     if {[catch {
       $interp eval {
-        ::test x
+	::test x
       }
     } msg]} {
       lappend ::test_status $msg
     }
     if {[catch {
       $interp eval {
-        ::itcl::class ::test2 {inherit ::test}
+	::itcl::class ::test2 {inherit ::test}
       }
     } msg]} {
       lappend ::test_status $msg
@@ -350,29 +350,29 @@ test sfbug-255 { SF bug #255
     set ::test_status ""
 
     proc ::sfbug_255_do_uplevel { body } {
-        uplevel 1 $body
+	uplevel 1 $body
     }
 
     proc ::sfbug_255_testclass { pathName args } {
-        uplevel TestClass $pathName $args
+	uplevel TestClass $pathName $args
     }
 
     ::itcl::class TestClass {
-        public variable property "value"
-        constructor {} {
-        }
+	public variable property "value"
+	constructor {} {
+	}
 
-        private method internal-helper {} {
-            return "TestClass::internal-helper"
-        }
+	private method internal-helper {} {
+	    return "TestClass::internal-helper"
+	}
 
-        public method api-call {} {
-            lappend ::test_status "TestClass::api-call"
-            lappend ::test_status [internal-helper]
-            lappend ::test_status [sfbug_255_do_uplevel { internal-helper }]
-            lappend ::test_status [cget -property]
-            sfbug_255_do_uplevel { lappend ::test_status [cget -property] }
-        }
+	public method api-call {} {
+	    lappend ::test_status "TestClass::api-call"
+	    lappend ::test_status [internal-helper]
+	    lappend ::test_status [sfbug_255_do_uplevel { internal-helper }]
+	    lappend ::test_status [cget -property]
+	    sfbug_255_do_uplevel { lappend ::test_status [cget -property] }
+	}
     }
 
     [::sfbug_255_testclass tc] api-call
@@ -382,8 +382,8 @@ test sfbug-255 { SF bug #255
 test fossilbug-8 { fossil bug 2cd667f270b68ef66d668338e09d144e20405e23
 } -body {
     ::itcl::class ::Naughty {
-        private method die {} {
-        }
+	private method die {} {
+	}
     }
     ::Naughty die
 } -cleanup {
@@ -395,30 +395,30 @@ test sfbug-256 { SF bug #256
     set ::test_status ""
 
     proc ::sfbug_256_do_uplevel { body } {
-        uplevel 1 $body
+	uplevel 1 $body
     }
 
     proc ::sfbug_256_testclass { pathName args } {
-        uplevel TestClass256 $pathName $args
+	uplevel TestClass256 $pathName $args
     }
 
     ::itcl::class TestClass256 {
-        public variable property "value"
-        constructor {} {
-        }
+	public variable property "value"
+	constructor {} {
+	}
 
-        private method internal-helper {} {
-            lappend ::test_status "TestClass::internal-helper"
-            sfbug_256_do_uplevel { lappend ::test_status [cget -property] }
-        }
+	private method internal-helper {} {
+	    lappend ::test_status "TestClass::internal-helper"
+	    sfbug_256_do_uplevel { lappend ::test_status [cget -property] }
+	}
 
-        public method api-call {} {
-            lappend ::test_status "TestClass::api-call"
-            lappend ::test_status [internal-helper]
-            lappend ::test_status [sfbug_256_do_uplevel { internal-helper }]
-            lappend ::test_status [cget -property]
-            sfbug_256_do_uplevel { lappend ::test_status [cget -property] }
-        }
+	public method api-call {} {
+	    lappend ::test_status "TestClass::api-call"
+	    lappend ::test_status [internal-helper]
+	    lappend ::test_status [sfbug_256_do_uplevel { internal-helper }]
+	    lappend ::test_status [cget -property]
+	    sfbug_256_do_uplevel { lappend ::test_status [cget -property] }
+	}
     }
 
     [::sfbug_256_testclass tc] api-call
@@ -434,13 +434,13 @@ test sfbug-257 { SF bug #257
       package require itcl
       set ::test_status ""
       ::itcl::class ::cl1 {
-        method m1 {} {
-          ::oo::class destroy
-          lappend ::test_status "method Hello World"
-        }
-        proc p1 {} {
-          lappend ::test_status "proc Hello World"
-        }
+	method m1 {} {
+	  ::oo::class destroy
+	  lappend ::test_status "method Hello World"
+	}
+	proc p1 {} {
+	  lappend ::test_status "proc Hello World"
+	}
       }
       set obj1 [::cl1 #auto]
       ::cl1::p1

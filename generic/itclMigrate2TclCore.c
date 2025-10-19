@@ -42,7 +42,7 @@ _Tcl_SetNamespaceResolver(
     Tcl_Resolve *resolvePtr)
 {
     if (nsPtr == NULL) {
-        return TCL_ERROR;
+	return TCL_ERROR;
     }
 #ifdef ITCL_USE_MODIFIED_TCL_H
     ((Namespace *)nsPtr)->resolvePtr = resolvePtr;
@@ -62,11 +62,11 @@ Tcl_NewNamespaceVar(
     int isNew;
 
     if ((nsPtr == NULL) || (varName == NULL)) {
-        return NULL;
+	return NULL;
     }
 
     varPtr = TclVarHashCreateVar(&((Namespace *)nsPtr)->varTable,
-            varName, &isNew);
+	    varName, &isNew);
     if (varPtr) {
 	TclSetVarNamespaceVar(varPtr);
     }
@@ -99,14 +99,14 @@ Itcl_GetUplevelCallFrame(
 {
     CallFrame *framePtr;
     if (level < 0) {
-        return NULL;
+	return NULL;
     }
     framePtr = ((Interp *)interp)->varFramePtr;
     while ((framePtr != NULL) && (level-- > 0)) {
-        framePtr = framePtr->callerVarPtr;
+	framePtr = framePtr->callerVarPtr;
     }
     if (framePtr == NULL) {
-        return NULL;
+	return NULL;
     }
     return (Tcl_CallFrame *)framePtr;
 }
@@ -132,14 +132,14 @@ Itcl_GetUplevelNamespace(
 {
     CallFrame *framePtr;
     if (level < 0) {
-        return NULL;
+	return NULL;
     }
     framePtr = ((Interp *)interp)->framePtr;
     while ((framePtr != NULL) && (level-- > 0)) {
-        framePtr = framePtr->callerVarPtr;
+	framePtr = framePtr->callerVarPtr;
     }
     if (framePtr == NULL) {
-        return NULL;
+	return NULL;
     }
     return (Tcl_Namespace *)framePtr->nsPtr;
 }
@@ -153,7 +153,7 @@ Itcl_GetCallFrameClientData(
      */
     CallFrame *framePtr = ((Interp *)interp)->varFramePtr;
     if (framePtr == NULL) {
-        return NULL;
+	return NULL;
     }
     return framePtr->clientData;
 }
@@ -165,7 +165,7 @@ Itcl_SetCallFrameNamespace(
 {
     CallFrame *framePtr = ((Interp *)interp)->varFramePtr;
     if (framePtr == NULL) {
-        return TCL_ERROR;
+	return TCL_ERROR;
     }
     ((Interp *)interp)->varFramePtr->nsPtr = (Namespace *)nsPtr;
     return TCL_OK;
@@ -177,7 +177,7 @@ Itcl_GetCallVarFrameObjc(
 {
     CallFrame *framePtr = ((Interp *)interp)->varFramePtr;
     if (framePtr == NULL) {
-        return 0;
+	return 0;
     }
     return framePtr->objc;
 }
@@ -188,7 +188,7 @@ Itcl_GetCallVarFrameObjv(
 {
     CallFrame *framePtr = ((Interp *)interp)->varFramePtr;
     if (framePtr == NULL) {
-        return NULL;
+	return NULL;
     }
     return framePtr->objv;
 }
@@ -199,7 +199,7 @@ Itcl_GetCallFrameObjc(
 {
     CallFrame *framePtr = ((Interp *)interp)->framePtr;
     if (framePtr == NULL) {
-        return 0;
+	return 0;
     }
     return ((Interp *)interp)->framePtr->objc;
 }
@@ -210,7 +210,7 @@ Itcl_GetCallFrameObjv(
 {
     CallFrame *framePtr = ((Interp *)interp)->framePtr;
     if (framePtr == NULL) {
-        return NULL;
+	return NULL;
     }
     return ((Interp *)interp)->framePtr->objv;
 }
@@ -224,29 +224,29 @@ Itcl_IsCallFrameArgument(
     Proc *procPtr;
 
     if (varFramePtr == NULL) {
-        return 0;
+	return 0;
     }
     if (!varFramePtr->isProcCallFrame) {
-        return 0;
+	return 0;
     }
     procPtr = varFramePtr->procPtr;
     /*
      *  Search through compiled locals first...
      */
     if (procPtr) {
-        CompiledLocal *localPtr = procPtr->firstLocalPtr;
-        int nameLen = strlen(name);
+	CompiledLocal *localPtr = procPtr->firstLocalPtr;
+	int nameLen = strlen(name);
 
-        for (;localPtr != NULL; localPtr = localPtr->nextPtr) {
-            if (TclIsVarArgument(localPtr)) {
-                char *localName = localPtr->name;
-                if ((name[0] == localName[0])
-                        && (nameLen == localPtr->nameLength)
-                        && (strcmp(name, localName) == 0)) {
-                    return 1;
-                }
-            }
-        }
+	for (;localPtr != NULL; localPtr = localPtr->nextPtr) {
+	    if (TclIsVarArgument(localPtr)) {
+		char *localName = localPtr->name;
+		if ((name[0] == localName[0])
+			&& (nameLen == localPtr->nameLength)
+			&& (strcmp(name, localName) == 0)) {
+		    return 1;
+		}
+	    }
+	}
     }
     return 0;
 }

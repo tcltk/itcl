@@ -47,7 +47,7 @@ test typedestruction-1.3 {type namespace is deleted} -body {
 
 test typedestruction-1.4 {type proc is destroyed on error} -body {
     catch {type dog {
-        error "Error creating dog"
+	error "Error creating dog"
     }} result
 
     list [namespace exists ::dog] [info command ::dog]
@@ -64,9 +64,9 @@ test type-1.1 {type names get qualified} -body {
 
 test type-1.2 {typemethods can be defined} -body {
     type dog {
-        typemethod foo {a b} {
-            return [list $a $b]
-        }
+	typemethod foo {a b} {
+	    return [list $a $b]
+	}
     }
 
     dog foo 1 2
@@ -76,10 +76,10 @@ test type-1.2 {typemethods can be defined} -body {
 
 test type-1.3 {upvar works in typemethods} -body {
     type dog {
-        typemethod goodname {varname} {
-            upvar $varname myvar
-            set myvar spot
-        }
+	typemethod goodname {varname} {
+	    upvar $varname myvar
+	    set myvar spot
+	}
     }
 
     set thename fido
@@ -92,13 +92,13 @@ test type-1.3 {upvar works in typemethods} -body {
 
 test type-1.4 {typemethod args can't include type} -body {
     type dog {
-        typemethod foo {a type b} { }
+	typemethod foo {a type b} { }
     }
 } -returnCodes error -result {typemethod foo's arglist may not contain "type" explicitly}
 
 test type-1.5 {typemethod args can't include self} -body {
     type dog {
-        typemethod foo {a self b} { }
+	typemethod foo {a self b} { }
     }
 } -returnCodes error -result {typemethod foo's arglist may not contain "self" explicitly}
 
@@ -107,10 +107,10 @@ test type-1.6 {typemethod args can span multiple lines} -body {
     # arguments were included in a comment in the compile script, and
     # the subsequent lines weren't commented.
     type dog {
-        typemethod foo {
-            a
-            b
-        } { }
+	typemethod foo {
+	    a
+	    b
+	} { }
     }
 } -cleanup {
     dog destroy
@@ -121,15 +121,15 @@ test type-1.6 {typemethod args can span multiple lines} -body {
 
 test typeconstructor-1.1 {a typeconstructor can be defined} -body {
     type dog {
-        typevariable a
+	typevariable a
 
-        typeconstructor {
-            set a 1
-        }
+	typeconstructor {
+	    set a 1
+	}
 
-        typemethod aget {} {
-            return $a
-        }
+	typemethod aget {} {
+	    return $a
+	}
     }
 
     dog aget
@@ -139,15 +139,15 @@ test typeconstructor-1.1 {a typeconstructor can be defined} -body {
 
 test typeconstructor-1.2 {only one typeconstructor can be defined} -body {
     type dog {
-        typevariable a
+	typevariable a
 
-        typeconstructor {
-            set a 1
-        }
+	typeconstructor {
+	    set a 1
+	}
 
-        typeconstructor {
-            set a 2
-        }
+	typeconstructor {
+	    set a 2
+	}
     }
 } -returnCodes {
     error
@@ -155,11 +155,11 @@ test typeconstructor-1.2 {only one typeconstructor can be defined} -body {
 
 test typeconstructor-1.3 {type proc is destroyed on error} -body {
     catch {
-        type dog {
-            typeconstructor {
-                error "Error creating dog"
-            }
-        }
+	type dog {
+	    typeconstructor {
+		error "Error creating dog"
+	    }
+	}
     } result
 
     list [namespace exists ::dog] [info command ::dog]
@@ -170,11 +170,11 @@ test typeconstructor-1.3 {type proc is destroyed on error} -body {
 
 test typecomponent-1.1 {typecomponent defines typevariable} -body {
     type dog {
-        typecomponent mycomp
+	typecomponent mycomp
 
-        typemethod test {} {
-            return $mycomp
-        }
+	typemethod test {} {
+	    return $mycomp
+	}
     }
 
     dog test
@@ -185,11 +185,11 @@ test typecomponent-1.1 {typecomponent defines typevariable} -body {
 
 test typecomponent-1.4 {typecomponent -inherit yes} -body {
     type dog {
-        typecomponent mycomp -inherit yes
+	typecomponent mycomp -inherit yes
 
-        typeconstructor {
-            set mycomp string
-        }
+	typeconstructor {
+	    set mycomp string
+	}
     }
 
     dog length foo
@@ -227,7 +227,7 @@ test creation-1.3 {"create" method is optional} -body {
 
 test creation-1.4 {constructor arg can't be type} -body {
     type dog {
-        constructor {type} { }
+	constructor {type} { }
     }
 } -returnCodes {
     error
@@ -235,7 +235,7 @@ test creation-1.4 {constructor arg can't be type} -body {
 
 test creation-1.5 {constructor arg can't be self} -body {
     type dog {
-        constructor {self} { }
+	constructor {self} { }
     }
 } -returnCodes {
     error
@@ -244,9 +244,9 @@ test creation-1.5 {constructor arg can't be self} -body {
 test creation-1.6 {weird names are OK} -body {
     # I.e., names with non-identifier characters
     type confused-dog {
-        method meow {} {
-            return "$self meows."
-        }
+	method meow {} {
+	    return "$self meows."
+	}
     }
 
     confused-dog spot
@@ -260,9 +260,9 @@ test creation-1.6 {weird names are OK} -body {
 
 test typeclass-rename-1.1 {mymethod uses name of instance name variable} -body {
     type dog {
-        method mymethod {} {
-            list [mymethod] [mymethod "A B"] [mymethod A B]
-        }
+	method mymethod {} {
+	    list [mymethod] [mymethod "A B"] [mymethod A B]
+	}
     }
 
     dog fido
@@ -274,9 +274,9 @@ test typeclass-rename-1.1 {mymethod uses name of instance name variable} -body {
 
 test typeclass-rename-1.2 {instances can be renamed} -body {
     type dog {
-        method names {} {
-            list [mymethod] $selfns $win $self
-        }
+	method names {} {
+	    list [mymethod] $selfns $win $self
+	}
     }
 
     dog fido
@@ -312,7 +312,7 @@ test rename-1.4 {rename to "" deletes an instance even after a rename} -body {
 
 test rename-1.5 {creating an object twice destroys the first instance} -body {
     type dog {
-        typemethod x {} {}
+	typemethod x {} {}
     }
 
     dog fido
@@ -332,11 +332,11 @@ test rename-1.5 {creating an object twice destroys the first instance} -body {
 
 test typeclass-component-1.1 {component defines variable} -body {
     type dog {
-        typecomponent mycomp
+	typecomponent mycomp
 
-        public proc test {} {
-            return $mycomp
-        }
+	public proc test {} {
+	    return $mycomp
+	}
     }
 
     dog fido
@@ -348,11 +348,11 @@ test typeclass-component-1.1 {component defines variable} -body {
 
 test typeclass-component-1.2 {component -inherit} -body {
     type dog {
-        component mycomp -inherit
+	component mycomp -inherit
 
-        constructor {} {
-            set mycomp string
-        }
+	constructor {} {
+	    set mycomp string
+	}
     }
 
     dog fido
@@ -364,16 +364,16 @@ test typeclass-component-1.2 {component -inherit} -body {
 
 test typeclass-component-1.3 {component -inherit can only have one of it} -body {
     type dogbase {
-        component mycompbase -inherit
+	component mycompbase -inherit
     }
 
     type dog {
 	inherit dogbase
-        component mycomp -inherit
+	component mycomp -inherit
 
-        constructor {} {
-            set mycomp string
-        }
+	constructor {} {
+	    set mycomp string
+	}
     }
 
     dog fido
@@ -391,15 +391,15 @@ test typeclass-component-1.3 {component -inherit can only have one of it} -body 
 
 test constructor-1.1 {constructor can do things} -body {
     type dog {
-        variable a
-        variable b
-        constructor {args} {
-            set a 1
-            set b 2
-        }
-        method foo {} {
-            list $a $b
-        }
+	variable a
+	variable b
+	constructor {args} {
+	    set a 1
+	    set b 2
+	}
+	method foo {} {
+	    list $a $b
+	}
     }
 
     dog create spot
@@ -410,9 +410,9 @@ test constructor-1.1 {constructor can do things} -body {
 
 test constructor-1.2 {constructor with no configurelist ignores args} -body {
     type dog {
-        constructor {args} { }
-        option -color golden
-        option -akc 0
+	constructor {args} { }
+	option -color golden
+	option -akc 0
     }
 
     dog create spot -color white -akc 1
@@ -423,11 +423,11 @@ test constructor-1.2 {constructor with no configurelist ignores args} -body {
 
 test constructor-1.3 {constructor with configurelist gets args} -body {
     type dog {
-        constructor {args} {
-            $self configure {*}$args
-        }
-        option -color golden
-        option -akc 0
+	constructor {args} {
+	    $self configure {*}$args
+	}
+	option -color golden
+	option -akc 0
     }
 
     dog create spot -color white -akc 1
@@ -438,10 +438,10 @@ test constructor-1.3 {constructor with configurelist gets args} -body {
 
 test constructor-1.4 {constructor with specific args} -body {
     type dog {
-        option -value ""
-        constructor {a b args} {
-            set itcl_options(-value) [list $a $b $args]
-        }
+	option -value ""
+	constructor {a b args} {
+	    set itcl_options(-value) [list $a $b $args]
+	}
     }
 
     dog spot retriever golden -akc 1
@@ -452,10 +452,10 @@ test constructor-1.4 {constructor with specific args} -body {
 
 test constructor-1.5 {constructor with list as one list arg} -body {
     type dog {
-        option -value ""
-        constructor {args} {
-            set itcl_options(-value) $args
-        }
+	option -value ""
+	constructor {args} {
+	    set itcl_options(-value) $args
+	}
     }
 
     dog spot {retriever golden}
@@ -466,8 +466,8 @@ test constructor-1.5 {constructor with list as one list arg} -body {
 
 test constructor-1.6 {default constructor configures options} -body {
     type dog {
-        option -color brown
-        option -breed mutt
+	option -color brown
+	option -breed mutt
     }
 
     dog spot -color golden -breed retriever
@@ -494,7 +494,7 @@ test constructor-1.7 {default constructor takes no args if no options} -body {
 
 test destroy-1.1 {destroy cleans up the instance} -body {
     type dog {
-        option -color golden
+	option -color golden
     }
 
     set a [itcl::find objects -class ::dog]
@@ -512,15 +512,15 @@ test destroy-1.2 {incomplete objects are destroyed} -body {
     array unset ::dog::snit_ivars
 
     type dog {
-        option -color golden
+	option -color golden
 
-        constructor {args} {
-            $self configure {*}$args
+	constructor {args} {
+	    $self configure {*}$args
 
-            if {"red" == [$self cget -color]} {
-                error "No Red Dogs!"
-            }
-        }
+	    if {"red" == [$self cget -color]} {
+		error "No Red Dogs!"
+	    }
+	}
     }
 
     catch {dog create spot -color red} result
@@ -532,19 +532,19 @@ test destroy-1.2 {incomplete objects are destroyed} -body {
 
 test destroy-1.3 {user-defined destructors are called} -body {
     type dog {
-        typevariable flag ""
+	typevariable flag ""
 
-        constructor {args} {
-            set flag "created $self"
-        }
+	constructor {args} {
+	    set flag "created $self"
+	}
 
-        destructor {
-            set flag "destroyed $self"
-        }
+	destructor {
+	    set flag "destroyed $self"
+	}
 
-        typemethod getflag {} {
-            return $flag
-        }
+	typemethod getflag {} {
+	    return $flag
+	}
     }
 
     dog create spot
@@ -558,15 +558,15 @@ test destroy-1.3 {user-defined destructors are called} -body {
 test install-1.7 {install works for itcl::types
 } -body {
     type tail {
-        option -tailcolor black
+	option -tailcolor black
     }
 
     type dog {
-        delegate option -tailcolor to tail
+	delegate option -tailcolor to tail
 
-        constructor {args} {
-            installcomponent tail using tail $self.tail
-        }
+	constructor {args} {
+	    installcomponent tail using tail $self.tail
+	}
     }
 
     dog fido
@@ -581,7 +581,7 @@ test install-1.7 {install works for itcl::types
 
 test widgetclass-1.1 {can't set widgetclass for itcl::types} -body {
     type dog {
-        widgetclass Dog
+	widgetclass Dog
     }
 } -returnCodes {
     error
@@ -592,7 +592,7 @@ test widgetclass-1.1 {can't set widgetclass for itcl::types} -body {
 
 test hulltype-1.1 {can't set hulltype for snit::types} -body {
     type dog {
-        hulltype Dog
+	hulltype Dog
     }
 } -returnCodes {
     error

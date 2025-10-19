@@ -161,7 +161,7 @@ Itcl_EnsembleInit(
     Tcl_DStringFree(&buffer);
     if (infoPtr->ensembleInfo->ensembleNsPtr == NULL) {
 	Tcl_AppendResult(interp, "error in creating namespace: ",
-		Tcl_DStringValue(&buffer), NULL);
+		Tcl_DStringValue(&buffer), (char *)NULL);
 	return TCL_ERROR;
     }
     Tcl_CreateObjCommand2(interp,
@@ -382,7 +382,7 @@ static void ens2DeleteProc(
 {
     ensInfo *info = (ensInfo *)clientData;
     if (info->deleteProc) {
-        info->deleteProc(info->clientData);
+	info->deleteProc(info->clientData);
     }
     ckfree(info);
 }
@@ -1168,10 +1168,10 @@ FindEnsemble(
 	    return TCL_ERROR;
 	}
 	if (!Tcl_IsEnsemble(cmdPtr)) {
-            Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
-                "part \"", nameArgv[i], "\" is not an ensemble",
-                (char *)NULL);
-            return TCL_ERROR;
+	    Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+		"part \"", nameArgv[i], "\" is not an ensemble",
+		(char *)NULL);
+	    return TCL_ERROR;
 	}
 	if (Tcl_GetCommandInfoFromToken(cmdPtr, &cmdInfo) != 1) {
 	    return TCL_ERROR;
@@ -2012,7 +2012,7 @@ Itcl_EnsPartCmd2(
 	    "wrong # args: should be \"",
 	    Tcl_GetString(objv[0]),
 	    " name args body\"",
-	    NULL);
+	    (char *)NULL);
 	return TCL_ERROR;
     }
 
@@ -2104,7 +2104,7 @@ Itcl_EnsembleErrorCmd(
     objPtr = Tcl_NewStringObj(NULL, 0);
     Tcl_AppendStringsToObj(objPtr,
 	"bad option \"", cmdName, "\": should be one of...\n",
-	NULL);
+	(char *)NULL);
     GetEnsembleUsage(interp, ensData, objPtr);
 
     Tcl_SetObjResult(interp, objPtr);
