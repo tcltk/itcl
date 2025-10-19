@@ -1160,7 +1160,7 @@ Itcl_BiInfoFunctionCmd2(
 	Tcl_DecrRefCount(objPtr);
 	objPtr = NULL;
 	if (entry == NULL) {
-	    Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+	    Tcl_AppendResult(interp,
 		"\"", cmdName, "\" isn't a member function in class \"",
 		contextIclsPtr->nsPtr->fullName, "\"",
 		(char *)NULL);
@@ -1422,7 +1422,7 @@ Itcl_BiInfoVariableCmd2(
     if (varName) {
 	entry = ItclResolveVarEntry(contextIclsPtr, varName);
 	if (entry == NULL) {
-	    Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+	    Tcl_AppendResult(interp,
 		"\"", varName, "\" isn't a variable in class \"",
 		contextIclsPtr->nsPtr->fullName, "\"",
 		(char *)NULL);
@@ -1548,7 +1548,7 @@ Itcl_BiInfoVariableCmd2(
 		case BIvScopeIdx:
 		    entry = Tcl_FindHashEntry(&contextIclsPtr->resolveVars, varName);
 		    if (!entry) {
-			Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+			Tcl_AppendResult(interp,
 			      "variable \"", varName, "\" not found in class \"",
 			      Tcl_GetString(contextIclsPtr->fullNamePtr), "\"",
 			      (char*)NULL);
@@ -1586,7 +1586,7 @@ Itcl_BiInfoVariableCmd2(
 			}
 
 			if (contextIoPtr == NULL) {
-			    Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+			    Tcl_AppendResult(interp,
 				"can't scope variable \"", varName,
 				"\": missing object context",
 				(char*)NULL);
@@ -2266,7 +2266,7 @@ Itcl_BiInfoOptionCmd2(
 		(char *)optionNamePtr);
 	Tcl_DecrRefCount(optionNamePtr);
 	if (hPtr == NULL) {
-	    Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+	    Tcl_AppendResult(interp,
 		 "\"", optionName, "\" isn't a option in object \"",
 		Tcl_GetString(contextIoPtr->namePtr), "\"",
 		(char *)NULL);
@@ -2573,7 +2573,7 @@ Itcl_BiInfoComponentCmd2(
 	Tcl_DecrRefCount(componentNamePtr);
 	Itcl_DeleteHierIter(&hier);
 	if (hPtr == NULL) {
-	    Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+	    Tcl_AppendResult(interp,
 		"\"", componentName, "\" isn't a component in class \"",
 		contextIclsPtr->nsPtr->fullName, "\"",
 		(char *)NULL);
@@ -2706,7 +2706,7 @@ Itcl_BiInfoWidgetCmd(
 
     ItclShowArgs(1, "Itcl_BiInfoWidgetCmd", objc, objv);
     if (objc != 1) {
-	Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+	Tcl_AppendResult(interp,
 	    "wrong # args: should be \"info widget\"",
 	    (char *)NULL);
 	return TCL_ERROR;
@@ -2970,7 +2970,7 @@ Itcl_BiInfoTypeCmd(
 
     ItclShowArgs(1, "Itcl_BiInfoTypeCmd", objc, objv);
     if (objc != 1) {
-	Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+	Tcl_AppendResult(interp,
 	    "wrong # args: should be \"info type\"",
 	    (char *)NULL);
 	return TCL_ERROR;
@@ -3055,7 +3055,7 @@ Itcl_BiInfoHullTypeCmd(
 
     ItclShowArgs(1, "Itcl_BiInfoHullTypeCmd", objc, objv);
     if (objc != 1) {
-	Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+	Tcl_AppendResult(interp,
 	    "wrong # args: should be \"info hulltype\"",
 	    (char *)NULL);
 	return TCL_ERROR;
@@ -3284,7 +3284,7 @@ Itcl_BiInfoMethodCmd(
 	Tcl_DecrRefCount(objPtr);
 	objPtr = NULL;
 	if (hPtr == NULL) {
-	    Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+	    Tcl_AppendResult(interp,
 		"\"", cmdName, "\" isn't a method in class \"",
 		contextIclsPtr->nsPtr->fullName, "\"",
 		(char *)NULL);
@@ -3295,7 +3295,7 @@ Itcl_BiInfoMethodCmd(
 	imPtr = clookup->imPtr;
 	mcode = imPtr->codePtr;
 	if (imPtr->flags & ITCL_COMMON) {
-	    Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+	    Tcl_AppendResult(interp,
 		"\"", cmdName, "\" isn't a method in class \"",
 		contextIclsPtr->nsPtr->fullName, "\"",
 		(char *)NULL);
@@ -3854,7 +3854,7 @@ Itcl_BiInfoTypeMethodCmd(
 	Tcl_DecrRefCount(objPtr);
 	objPtr = NULL;
 	if (hPtr == NULL) {
-	    Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+	    Tcl_AppendResult(interp,
 		"\"", cmdName, "\" isn't a typemethod in class \"",
 		contextIclsPtr->nsPtr->fullName, "\"",
 		(char *)NULL);
@@ -3865,7 +3865,7 @@ Itcl_BiInfoTypeMethodCmd(
 	imPtr = clookup->imPtr;
 	mcode = imPtr->codePtr;
 	if (!(imPtr->flags & ITCL_TYPE_METHOD)) {
-	    Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+	    Tcl_AppendResult(interp,
 		"\"", cmdName, "\" isn't a typemethod in class \"",
 		contextIclsPtr->nsPtr->fullName, "\"",
 		(char *)NULL);
@@ -4243,7 +4243,7 @@ Itcl_BiInfoTypeVariableCmd(
     if (varName) {
 	hPtr = ItclResolveVarEntry(contextIclsPtr, varName);
 	if (hPtr == NULL) {
-	    Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+	    Tcl_AppendResult(interp,
 		"\"", varName, "\" isn't a typevariable in class \"",
 		contextIclsPtr->nsPtr->fullName, "\"",
 		(char *)NULL);
@@ -4252,7 +4252,7 @@ Itcl_BiInfoTypeVariableCmd(
 	vlookup = (ItclVarLookup*)Tcl_GetHashValue(hPtr);
 	ivPtr = vlookup->ivPtr;
 	if (!(ivPtr->flags & ITCL_TYPE_VARIABLE)) {
-	    Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+	    Tcl_AppendResult(interp,
 		"\"", varName, "\" isn't a typevariable in class \"",
 		contextIclsPtr->nsPtr->fullName, "\"",
 		(char *)NULL);
@@ -4454,7 +4454,7 @@ Itcl_BiInfoWidgetadaptorCmd(
 
     ItclShowArgs(1, "Itcl_BiInfoWidgetadaptorCmd", objc, objv);
     if (objc != 1) {
-	Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+	Tcl_AppendResult(interp,
 	    "wrong # args: should be \"info widgetadaptor\"",
 	    (char *)NULL);
 	return TCL_ERROR;
@@ -4941,7 +4941,7 @@ Itcl_BiInfoDelegatedOptionCmd(
 		(char *)optionNamePtr);
 	Tcl_DecrRefCount(optionNamePtr);
 	if (hPtr == NULL) {
-	    Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+	    Tcl_AppendResult(interp,
 		 "\"", optionName, "\" isn't an option in object \"",
 		Tcl_GetString(contextIoPtr->namePtr), "\"",
 		(char *)NULL);
@@ -5165,7 +5165,7 @@ Itcl_BiInfoDelegatedMethodCmd(
 	}
 	Tcl_DecrRefCount(cmdNamePtr);
 	if (hPtr == NULL) {
-	    Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+	    Tcl_AppendResult(interp,
 		 "\"", cmdName, "\" isn't a delegated method in object \"",
 		Tcl_GetString(contextIoPtr->namePtr), "\"",
 		(char *)NULL);
@@ -5173,7 +5173,7 @@ Itcl_BiInfoDelegatedMethodCmd(
 	}
 	idmPtr = (ItclDelegatedFunction*)Tcl_GetHashValue(hPtr);
 	if (!(idmPtr->flags & ITCL_METHOD)) {
-	    Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+	    Tcl_AppendResult(interp,
 		 "\"", cmdName, "\" isn't a delegated method in object \"",
 		Tcl_GetString(contextIoPtr->namePtr), "\"",
 		(char *)NULL);
@@ -5390,7 +5390,7 @@ Itcl_BiInfoDelegatedTypeMethodCmd(
 	}
 	Tcl_DecrRefCount(cmdNamePtr);
 	if (hPtr == NULL) {
-	    Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+	    Tcl_AppendResult(interp,
 		 "\"", cmdName, "\" isn't a delegated typemethod in ",
 		contextIoPtr ? "object \"" : "class \"",
 		contextIoPtr ?  Tcl_GetString(contextIoPtr->namePtr)
@@ -5399,7 +5399,7 @@ Itcl_BiInfoDelegatedTypeMethodCmd(
 	}
 	idmPtr = (ItclDelegatedFunction*)Tcl_GetHashValue(hPtr);
 	if (!(idmPtr->flags & ITCL_TYPE_METHOD)) {
-	    Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+	    Tcl_AppendResult(interp,
 		 "\"", cmdName, "\" isn't a delegated typemethod in ",
 		contextIoPtr ? "object \"" : "class \"",
 		contextIoPtr ?  Tcl_GetString(contextIoPtr->namePtr)

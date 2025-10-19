@@ -222,7 +222,7 @@ Itcl_CreateEnsemble(
 	goto ensCreateFail;
     }
     if (nameArgc < 1) {
-	Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+	Tcl_AppendResult(interp,
 	    "invalid ensemble name \"", ensName, "\"",
 	    (char *)NULL);
 	goto ensCreateFail;
@@ -242,7 +242,7 @@ Itcl_CreateEnsemble(
 
 	if (parentEnsData == NULL) {
 	    char *pname = Tcl_Merge(nameArgc-1, nameArgv);
-	    Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+	    Tcl_AppendResult(interp,
 		"invalid ensemble name \"", pname, "\"",
 		(char *)NULL);
 	    ckfree(pname);
@@ -329,7 +329,7 @@ Itcl_AddEnsemblePart2(
 
     if (ensData == NULL) {
 	char *pname = Tcl_Merge(nameArgc, nameArgv);
-	Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+	Tcl_AppendResult(interp,
 	    "invalid ensemble name \"", pname, "\"",
 	    (char *)NULL);
 	ckfree(pname);
@@ -1128,7 +1128,7 @@ FindEnsemble(
     Tcl_DecrRefCount(objPtr);
 
     if (cmdPtr == NULL) {
-	Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+	Tcl_AppendResult(interp,
 	    "command \"", nameArgv[0], "\" is not an ensemble",
 	    (char *)NULL);
 	return TCL_ERROR;
@@ -1136,7 +1136,7 @@ FindEnsemble(
     infoPtr = (ItclObjectInfo *)Tcl_GetAssocData(interp, ITCL_INTERP_DATA, NULL);
     hPtr = Tcl_FindHashEntry(&infoPtr->ensembleInfo->ensembles, (char *)cmdPtr);
     if (hPtr == NULL) {
-	Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+	Tcl_AppendResult(interp,
 	    "command \"", nameArgv[0], "\" is not an ensemble",
 	    (char *)NULL);
 	return TCL_ERROR;
@@ -1153,7 +1153,7 @@ FindEnsemble(
 	}
 	if (ensPart == NULL) {
 	    char *pname = Tcl_Merge(i, nameArgv);
-	    Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+	    Tcl_AppendResult(interp,
 		"invalid ensemble name \"", pname, "\"",
 		(char *)NULL);
 	    ckfree(pname);
@@ -1162,13 +1162,13 @@ FindEnsemble(
 
 	cmdPtr = ensPart->cmdPtr;
 	if (cmdPtr == NULL) {
-	    Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+	    Tcl_AppendResult(interp,
 		"part \"", nameArgv[i], "\" is not an ensemble",
 		(char *)NULL);
 	    return TCL_ERROR;
 	}
 	if (!Tcl_IsEnsemble(cmdPtr)) {
-	    Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+	    Tcl_AppendResult(interp,
 		"part \"", nameArgv[i], "\" is not an ensemble",
 		(char *)NULL);
 	    return TCL_ERROR;
@@ -1219,7 +1219,7 @@ CreateEnsemblePart(
      *  If a matching entry was found, then return an error.
      */
     if (FindEnsemblePartIndex(ensData, partName, &pos)) {
-	Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+	Tcl_AppendResult(interp,
 	    "part \"", partName, "\" already exists in ensemble",
 	    (char *)NULL);
 	return TCL_ERROR;
@@ -1707,7 +1707,7 @@ Itcl_EnsembleCmd2(
      *  Make sure that an ensemble name was specified.
      */
     if (objc < 2) {
-	Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+	Tcl_AppendResult(interp,
 	    "wrong # args: should be \"",
 	    Tcl_GetString(objv[0]),
 	    " name ?command arg arg...?\"",
@@ -1756,7 +1756,7 @@ Itcl_EnsembleCmd2(
 	hPtr = Tcl_FindHashEntry(&infoPtr->ensembleInfo->ensembles,
 		(char *)ensPart->cmdPtr);
 	if (hPtr == NULL) {
-	    Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+	    Tcl_AppendResult(interp,
 		"part \"", Tcl_GetString(objv[1]),
 		"\" is not an ensemble",
 		(char *)NULL);
@@ -1780,7 +1780,7 @@ Itcl_EnsembleCmd2(
 	}
 
 	if (cmd == NULL) {
-	    Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+	    Tcl_AppendResult(interp,
 		"command \"", Tcl_GetString(objv[1]),
 		"\" is not an ensemble",
 		(char *)NULL);
@@ -1789,7 +1789,7 @@ Itcl_EnsembleCmd2(
 	infoPtr = (ItclObjectInfo *)Tcl_GetAssocData(interp, ITCL_INTERP_DATA, NULL);
 	hPtr = Tcl_FindHashEntry(&infoPtr->ensembleInfo->ensembles, (char *)cmd);
 	if (hPtr == NULL) {
-	    Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+	    Tcl_AppendResult(interp,
 		"command \"", Tcl_GetString(objv[1]),
 		"\" is not an ensemble",
 		(char *)NULL);
@@ -2008,7 +2008,7 @@ Itcl_EnsPartCmd2(
 
     ItclShowArgs(1, "Itcl_EnsPartCmd", objc, objv);
     if (objc != 4) {
-	Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+	Tcl_AppendResult(interp,
 	    "wrong # args: should be \"",
 	    Tcl_GetString(objv[0]),
 	    " name args body\"",
@@ -2127,7 +2127,7 @@ CallInvokeEnsembleMethod(
 {
     Tcl_Namespace *nsPtr = (Tcl_Namespace *)data[0];
     EnsemblePart *ensPart = (EnsemblePart *)data[1];
-    size_t objc = PTR2INT(data[2]);
+    Tcl_Size objc = PTR2INT(data[2]);
     Tcl_Obj *const *objv = (Tcl_Obj *const *)data[3];
 
     result = Itcl_InvokeEnsembleMethod(interp, nsPtr, ensPart->namePtr,

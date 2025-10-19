@@ -243,7 +243,7 @@ Itcl_PublicObjectCmd(
 	result = TclOOInvokeObject(interp, oPtr, clsPtr, PUBLIC_METHOD,
 	    objc, objv);
     } else {
-	Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+	Tcl_AppendResult(interp,
 	    "cannot access object-specific info without an object context",
 	    (char *)NULL);
 	return TCL_ERROR;

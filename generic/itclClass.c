@@ -221,7 +221,7 @@ Itcl_CreateClass(
 	    NULL, /* flags */ 0);
 
     if (classNs != NULL && Itcl_IsClassNamespace(classNs)) {
-	Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+	Tcl_AppendResult(interp,
 	    "class \"", path, "\" already exists",
 	    (char *)NULL);
 	return TCL_ERROR;
@@ -238,12 +238,12 @@ Itcl_CreateClass(
 	    NULL, /* flags */ TCL_NAMESPACE_ONLY);
 
     if (cmd != NULL && !Itcl_IsStub(cmd)) {
-	Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+	Tcl_AppendResult(interp,
 	    "command \"", path, "\" already exists",
 	    (char *)NULL);
 
 	if (strstr(path,"::") == NULL) {
-	    Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+	    Tcl_AppendResult(interp,
 		" in namespace \"",
 		Tcl_GetCurrentNamespace(interp)->fullName, "\"",
 		(char *)NULL);
@@ -260,7 +260,7 @@ Itcl_CreateClass(
     Itcl_ParseNamespPath(path, &buffer, &head, &tail);
 
     if (strstr(tail,".")) {
-	Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+	Tcl_AppendResult(interp,
 	    "bad class name \"", tail, "\"",
 	    (char *)NULL);
 	Tcl_DStringFree(&buffer);
@@ -1528,7 +1528,7 @@ ItclClassCreateObject(
 	 *  If this is not an old-style class, then return an error
 	 *  describing the syntax change.
 	 */
-	Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+	Tcl_AppendResult(interp,
 	    "syntax \"class :: proc\" is an anachronism\n",
 	    "[incr Tcl] no longer supports this syntax.\n",
 	    "Instead, remove the spaces from your procedure invocations:\n",
@@ -2006,7 +2006,7 @@ Itcl_CreateVariable(
      */
     hPtr = Tcl_CreateHashEntry(&iclsPtr->variables, (char *)namePtr, &newEntry);
     if (!newEntry) {
-	Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+	Tcl_AppendResult(interp,
 	    "variable name \"", Tcl_GetString(namePtr),
 	    "\" already defined in class \"",
 	    Tcl_GetString(iclsPtr->fullNamePtr), "\"",
@@ -2095,7 +2095,7 @@ Itcl_CreateOption(
     hPtr = Tcl_CreateHashEntry(&iclsPtr->options,
 	    (char *)ioptPtr->namePtr, &newEntry);
     if (!newEntry) {
-	Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+	Tcl_AppendResult(interp,
 	    "option name \"", Tcl_GetString(ioptPtr->namePtr),
 	    "\" already defined in class \"",
 	    Tcl_GetString(iclsPtr->fullNamePtr), "\"",
@@ -2149,7 +2149,7 @@ ItclCreateMethodVariable(
     hPtr = Tcl_CreateHashEntry(&ivPtr->iclsPtr->methodVariables,
 	    (char *)ivPtr->namePtr, &isNew);
     if (!isNew) {
-	Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+	Tcl_AppendResult(interp,
 	    "methdovariable name \"", Tcl_GetString(ivPtr->namePtr),
 	    "\" already defined in class \"",
 	    Tcl_GetString (ivPtr->iclsPtr->fullNamePtr), "\"",

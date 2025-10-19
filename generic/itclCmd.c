@@ -641,7 +641,7 @@ NRDelObjectCmd(
 	}
 
 	if (contextIoPtr == NULL) {
-	    Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+	    Tcl_AppendResult(interp,
 		"object \"", name, "\" not found",
 		(char *)NULL);
 	    return TCL_ERROR;
@@ -799,7 +799,7 @@ Itcl_ScopeCmd2(
 
 	entry = ItclResolveVarEntry(contextIclsPtr, token);
 	if (!entry) {
-	    Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+	    Tcl_AppendResult(interp,
 		"variable \"", token, "\" not found in class \"",
 		Tcl_GetString(contextIclsPtr->fullNamePtr), "\"",
 		(char *)NULL);
@@ -844,7 +844,7 @@ Itcl_ScopeCmd2(
 	    }
 	}
 	if (contextIoPtr == NULL) {
-	    Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+	    Tcl_AppendResult(interp,
 		"can't scope variable \"", token,
 		"\": missing object context",
 		(char *)NULL);
@@ -899,7 +899,7 @@ Itcl_ScopeCmd2(
 	    TCL_NAMESPACE_ONLY);
 
 	if (!var) {
-	    Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+	    Tcl_AppendResult(interp,
 		"variable \"", token, "\" not found in namespace \"",
 		contextNsPtr->fullName, "\"",
 		(char *)NULL);
@@ -998,7 +998,7 @@ Itcl_CodeCmd2(
 		pos++;
 		break;
 	    } else {
-		Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+		Tcl_AppendResult(interp,
 		    "bad option \"", token, "\": should be -namespace or --",
 		    (char *)NULL);
 		return TCL_ERROR;

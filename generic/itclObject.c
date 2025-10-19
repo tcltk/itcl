@@ -199,7 +199,7 @@ ItclCreateObject(
     Tcl_Interp *interp,      /* interpreter mananging new object */
     const char* name,        /* name of new object */
     ItclClass *iclsPtr,        /* class for new object */
-    size_t objc,                /* number of arguments */
+    Tcl_Size objc,                /* number of arguments */
     Tcl_Obj *const objv[])   /* argument objects */
 {
     int result = TCL_OK;
@@ -962,7 +962,7 @@ ItclInitObjectVariables(
 				    Tcl_DStringValue(&buffer3), argv[i],
 				    argv[i + 1], TCL_NAMESPACE_ONLY);
 			    if (!val) {
-				Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+				Tcl_AppendResult(interp,
 				    "cannot initialize variable \"",
 				    Tcl_GetString(ivPtr->namePtr), "\"",
 				    (char *)NULL);
@@ -1354,7 +1354,7 @@ Itcl_DestructObject(
      */
     if (contextIoPtr->destructed) {
 	if ((flags & ITCL_IGNORE_ERRS) == 0) {
-	    Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+	    Tcl_AppendResult(interp,
 		"can't delete an object while it is being destructed",
 		(char *)NULL);
 	    return TCL_ERROR;
@@ -1614,7 +1614,7 @@ ItclGetInstanceVar(
      */
     if (contextIoPtr == NULL) {
 	Tcl_ResetResult(interp);
-	Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+	Tcl_AppendResult(interp,
 	    "cannot access object-specific info without an object context",
 	    (char *)NULL);
 	return NULL;
@@ -1727,7 +1727,7 @@ ItclGetCommonInstanceVar(
      */
     if (contextIoPtr == NULL) {
 	Tcl_ResetResult(interp);
-	Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+	Tcl_AppendResult(interp,
 	    "cannot access object-specific info without an object context",
 	    (char *)NULL);
 	return NULL;
@@ -1832,7 +1832,7 @@ ItclSetInstanceVar(
      */
     if (contextIoPtr == NULL) {
 	Tcl_ResetResult(interp);
-	Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+	Tcl_AppendResult(interp,
 	    "cannot access object-specific info without an object context",
 	    (char *)NULL);
 	return NULL;
@@ -2720,7 +2720,7 @@ CallPublicObjectCmd(
     Tcl_Object *oPtr = (Tcl_Object *)data[0];
     Tcl_Class clsPtr = (Tcl_Class)data[1];
     Tcl_Obj *const *objv = (Tcl_Obj *const *)data[3];
-    size_t objc = PTR2INT(data[2]);
+    Tcl_Size objc = PTR2INT(data[2]);
 
     ItclShowArgs(1, "CallPublicObjectCmd", objc, objv);
     result = Itcl_PublicObjectCmd(oPtr, interp, clsPtr, objc, objv);
@@ -2734,7 +2734,7 @@ ItclObjectCmd(
     Tcl_Interp *interp,
     Tcl_Object oPtr,
     Tcl_Class clsPtr,
-    size_t objc,
+    Tcl_Size objc,
     Tcl_Obj *const *objv)
 {
     Tcl_Obj *methodNamePtr;
@@ -3103,7 +3103,7 @@ ItclMapMethodNameProc(
 		    if ((imPtr->protection & ITCL_PRIVATE) &&
 			    (imPtr2 != NULL) &&
 			    (imPtr->iclsPtr->nsPtr != imPtr2->iclsPtr->nsPtr)) {
-			Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+			Tcl_AppendResult(interp,
 				"invalid command name \"",
 				token,
 				"\"", (char *)NULL);
@@ -3127,7 +3127,7 @@ ItclMapMethodNameProc(
 		    if ((imPtr->protection & ITCL_PRIVATE) &&
 			    (imPtr2 != NULL) &&
 			    (imPtr->iclsPtr->nsPtr == imPtr2->iclsPtr->nsPtr)) {
-			Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+			Tcl_AppendResult(interp,
 				"invalid command name \"",
 				token,
 				"\"", (char *)NULL);

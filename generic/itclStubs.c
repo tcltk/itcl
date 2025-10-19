@@ -211,7 +211,7 @@ ItclHandleStubCmd(
     result = Tcl_GetIntFromObj(interp, objPtr, &loaded);
     if ((result != TCL_OK) || !loaded) {
 	Tcl_ResetResult(interp);
-	Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+	Tcl_AppendResult(interp,
 	    "can't autoload \"", cmdName, "\"", (char *)NULL);
 	Tcl_DecrRefCount(cmdNamePtr);
 	return TCL_ERROR;

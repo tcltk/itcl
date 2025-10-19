@@ -201,7 +201,7 @@ Itcl_ParseInit(
 	infoPtr, Itcl_ReleaseData);
 
     if (!parserNs) {
-	Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+	Tcl_AppendResult(interp,
 	    " (cannot initialize itcl parser)",
 	    (char *)NULL);
 	return TCL_ERROR;
@@ -1367,13 +1367,13 @@ Itcl_ClassInheritCmd2(
 
 	while (elem) {
 	    cdPtr = (ItclClass*)Itcl_GetListValue(elem);
-	    Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+	    Tcl_AppendResult(interp,
 		Tcl_GetString(cdPtr->namePtr), " ", (char *)NULL);
 
 	    elem = Itcl_NextListElem(elem);
 	}
 
-	Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+	Tcl_AppendResult(interp,
 	    "\" already defined for class \"",
 	    Tcl_GetString(iclsPtr->fullNamePtr), "\"",
 	    (char *)NULL);
@@ -1408,12 +1408,12 @@ Itcl_ClassInheritCmd2(
 	    errmsg = Tcl_GetStringFromObj(resultPtr, &errlen);
 
 	    Tcl_ResetResult(interp);
-	    Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+	    Tcl_AppendResult(interp,
 		"cannot inherit from \"", token, "\"",
 		(char *)NULL);
 
 	    if (errlen > 0) {
-		Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+		Tcl_AppendResult(interp,
 		    " (", errmsg, ")", (char *)NULL);
 	    }
 	    Tcl_DecrRefCount(resultPtr);
@@ -1425,7 +1425,7 @@ Itcl_ClassInheritCmd2(
 	 *  class that is being built.
 	 */
 	if (baseClsPtr == iclsPtr) {
-	    Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+	    Tcl_AppendResult(interp,
 		"class \"", Tcl_GetString(iclsPtr->namePtr),
 		"\" cannot inherit from itself",
 		(char *)NULL);
@@ -1446,7 +1446,7 @@ Itcl_ClassInheritCmd2(
 	while (elem2) {
 	    if (Itcl_GetListValue(elem) == Itcl_GetListValue(elem2)) {
 		cdPtr = (ItclClass*)Itcl_GetListValue(elem);
-		Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+		Tcl_AppendResult(interp,
 		    "class \"", iclsPtr->fullNamePtr,
 		    "\" cannot inherit base class \"",
 		    cdPtr->fullNamePtr, "\" more than once",
@@ -1728,7 +1728,7 @@ Itcl_ClassConstructorCmd2(
     }
     namePtr = objv[0];
     if (Tcl_FindHashEntry(&iclsPtr->functions, (char *)objv[0])) {
-	Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+	Tcl_AppendResult(interp,
 	    "\"", Tcl_GetString(namePtr), "\" already defined in class \"",
 	    Tcl_GetString(iclsPtr->fullNamePtr), "\"",
 	    (char *)NULL);
@@ -1805,7 +1805,7 @@ Itcl_ClassDestructorCmd2(
     body = Tcl_GetString(objv[1]);
 
     if (Tcl_FindHashEntry(&iclsPtr->functions, (char *)namePtr)) {
-	Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+	Tcl_AppendResult(interp,
 	    "\"", Tcl_GetString(namePtr), "\" already defined in class \"",
 	    Tcl_GetString(iclsPtr->fullNamePtr), "\"",
 	    (char *)NULL);
@@ -2140,7 +2140,7 @@ Itcl_ClassVariableCmd2(
      */
     namePtr = objv[1];
     if (strstr(Tcl_GetString(namePtr), "::")) {
-	Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+	Tcl_AppendResult(interp,
 	    "bad variable name \"", Tcl_GetString(namePtr), "\"",
 	    (char *)NULL);
 	return TCL_ERROR;
@@ -2246,7 +2246,7 @@ ItclInitClassCommon(
 	val = Tcl_SetVar2(interp, Tcl_GetString(ivPtr->fullNamePtr), NULL,
 		initStr, TCL_NAMESPACE_ONLY);
 	if (!val) {
-	    Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+	    Tcl_AppendResult(interp,
 		"cannot initialize common variable \"",
 		Tcl_GetString(ivPtr->namePtr), "\"",
 		(char *)NULL);
@@ -2270,7 +2270,7 @@ ItclInitClassCommon(
 	    val = Tcl_SetVar2(interp, Tcl_GetString(ivPtr->fullNamePtr), argv[i],
 		    argv[i + 1], TCL_NAMESPACE_ONLY);
 	    if (!val) {
-		Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+		Tcl_AppendResult(interp,
 		    "cannot initialize common variable \"",
 		    Tcl_GetString(ivPtr->namePtr), "\"",
 		    (char *)NULL);
@@ -2356,7 +2356,7 @@ ItclClassCommonCmd(
      */
     namePtr = objv[1];
     if (strstr(Tcl_GetString(namePtr), "::")) {
-	Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+	Tcl_AppendResult(interp,
 	    "bad variable name \"", Tcl_GetString(namePtr), "\"",
 	    (char *)NULL);
 	return TCL_ERROR;
@@ -2671,7 +2671,7 @@ int
 ItclParseOption(
     TCL_UNUSED(ItclObjectInfo *), /* info for all known objects */
     Tcl_Interp *interp,      /* current interpreter */
-    size_t objc,                /* number of arguments */
+    Tcl_Size objc,                /* number of arguments */
     Tcl_Obj *const objv[],   /* argument objects */
     ItclClass *iclsPtr,
     ItclObject *ioPtr,
@@ -2703,7 +2703,7 @@ ItclParseOption(
     int newObjc;
     int foundOption;
     int result;
-    size_t i;
+    Tcl_Size i;
     const char *cp;
 
     ItclShowArgs(1, "ItclParseOption", objc, objv);
@@ -2888,14 +2888,14 @@ ItclParseOption(
      *  goofy like a "::" scope qualifier.
      */
     if (strstr(name, "::")) {
-	Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+	Tcl_AppendResult(interp,
 		"bad option name \"", name,
 		"\", option names must not contain \"::\"", (char *)NULL);
 	result = TCL_ERROR;
 	goto errorOut;
     }
     if (strstr(name, " ")) {
-	Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+	Tcl_AppendResult(interp,
 		"bad option name \"", name,
 		"\", option names must not contain \" \"", (char *)NULL);
 	result = TCL_ERROR;
@@ -3719,14 +3719,14 @@ Itcl_HandleDelegateOptionCmd(
      *  goofy like a "::" scope qualifier.
      */
     if (strstr(option, "::")) {
-	Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+	Tcl_AppendResult(interp,
 		"bad option name \"", option,
 		"\", option names must not contain \"::\"", (char *)NULL);
 	ckfree((char *)argv);
 	return TCL_ERROR;
     }
     if (strstr(option, " ")) {
-	Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+	Tcl_AppendResult(interp,
 		"bad option name \"", option,
 		"\", option names must not contain \" \"", (char *)NULL);
 	ckfree((char *)argv);
@@ -4288,7 +4288,7 @@ Itcl_ClassMethodVariableCmd(
      */
     namePtr = objv[1];
     if (strstr(Tcl_GetString(namePtr), "::")) {
-	Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+	Tcl_AppendResult(interp,
 	    "bad variable name \"", Tcl_GetString(namePtr), "\"",
 	    (char *)NULL);
 	return TCL_ERROR;
@@ -4390,7 +4390,7 @@ Itcl_ClassTypeConstructorCmd(
 
     namePtr = objv[0];
     if (iclsPtr->typeConstructorPtr != NULL) {
-	Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+	Tcl_AppendResult(interp,
 	    "\"", Tcl_GetString(namePtr), "\" already defined in class \"",
 	    Tcl_GetString(iclsPtr->fullNamePtr), "\"",
 	    (char *)NULL);

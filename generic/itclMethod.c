@@ -84,7 +84,7 @@ NRBodyCmd(
     ItclShowArgs(2, "Itcl_BodyCmd", objc, objv);
     if (objc != 4) {
 	token = Tcl_GetString(objv[0]);
-	Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+	Tcl_AppendResult(interp,
 	    "wrong # args: should be \"",
 	    token, " class::func arglist body\"",
 	    (char *)NULL);
@@ -100,7 +100,7 @@ NRBodyCmd(
     Itcl_ParseNamespPath(token, &buffer, &head, &tail);
 
     if (!head || *head == '\0') {
-	Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+	Tcl_AppendResult(interp,
 	    "missing class specifier for body declaration \"", token, "\"",
 	    (char *)NULL);
 	status = TCL_ERROR;
@@ -134,7 +134,7 @@ NRBodyCmd(
     }
 
     if (imPtr == NULL) {
-	Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+	Tcl_AppendResult(interp,
 	    "function \"", tail, "\" is not defined in class \"",
 	    Tcl_GetString(iclsPtr->fullNamePtr), "\"",
 	    (char *)NULL);
@@ -231,7 +231,7 @@ NRConfigBodyCmd(
     Itcl_ParseNamespPath(token, &buffer, &head, &tail);
 
     if ((head == NULL) || (*head == '\0')) {
-	Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+	Tcl_AppendResult(interp,
 	    "missing class specifier for body declaration \"", token, "\"",
 	    (char *)NULL);
 	status = TCL_ERROR;
@@ -260,7 +260,7 @@ NRConfigBodyCmd(
     }
 
     if (vlookup == NULL) {
-	Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+	Tcl_AppendResult(interp,
 	    "option \"", tail, "\" is not defined in class \"",
 	    Tcl_GetString(iclsPtr->fullNamePtr), "\"",
 	    (char *)NULL);
@@ -270,7 +270,7 @@ NRConfigBodyCmd(
     ivPtr = vlookup->ivPtr;
 
     if (ivPtr->protection != ITCL_PUBLIC) {
-	Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+	Tcl_AppendResult(interp,
 		"option \"", Tcl_GetString(ivPtr->fullNamePtr),
 		"\" is not a public configuration option",
 		(char *)NULL);
@@ -374,7 +374,7 @@ ItclCreateMethod(
      *  goofy like a "::" scope qualifier.
      */
     if (strstr(Tcl_GetString(namePtr),"::")) {
-	Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+	Tcl_AppendResult(interp,
 	    "bad method name \"", Tcl_GetString(namePtr), "\"",
 	    (char *)NULL);
 	Tcl_DecrRefCount(namePtr);
@@ -423,7 +423,7 @@ Itcl_CreateProc(
      *  goofy like a "::" scope qualifier.
      */
     if (strstr(Tcl_GetString(namePtr),"::")) {
-	Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+	Tcl_AppendResult(interp,
 	    "bad proc name \"", Tcl_GetString(namePtr), "\"",
 	    (char *)NULL);
 	return TCL_ERROR;
@@ -483,7 +483,7 @@ ItclCreateMemberFunc(
      */
     hPtr = Tcl_CreateHashEntry(&iclsPtr->functions, (char *)namePtr, &newEntry);
     if (!newEntry) {
-	Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+	Tcl_AppendResult(interp,
 	    "\"", Tcl_GetString(namePtr), "\" already defined in class \"",
 	    Tcl_GetString(iclsPtr->fullNamePtr), "\"",
 	    (char *)NULL);
@@ -747,7 +747,7 @@ Itcl_ChangeMemberFunc(
 	} else {
 	    argsStr = "";
 	}
-	Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+	Tcl_AppendResult(interp,
 	    "argument list changed for function \"",
 	    Tcl_GetString(imPtr->fullNamePtr), "\": should be \"",
 	    argsStr, "\"",
@@ -1183,7 +1183,7 @@ Itcl_GetMemberCode(
     assert(mcode != NULL);
 
     if (!Itcl_IsMemberCodeImplemented(mcode)) {
-	Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+	Tcl_AppendResult(interp,
 	    "member function \"", Tcl_GetString(imPtr->fullNamePtr),
 	    "\" is not defined and cannot be autoloaded",
 	    (char *)NULL);
@@ -1678,7 +1678,7 @@ NRExecMethod(
 	return TCL_ERROR;
     }
     if (ioPtr == NULL) {
-	Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+	Tcl_AppendResult(interp,
 	    "cannot access object-specific info without an object context",
 	    (char *)NULL);
 	return TCL_ERROR;
@@ -1781,7 +1781,7 @@ NRExecProc(
 	    Tcl_ObjectContext context;
 	    context = (Tcl_ObjectContext)Itcl_GetCallFrameClientData(interp);
 	    if (context == NULL) {
-		Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+		Tcl_AppendResult(interp,
 			"can't access \"", Tcl_GetString(imPtr->fullNamePtr),
 			"\": ", Itcl_ProtectionStr(imPtr->protection),
 			" function", (char *)NULL);
@@ -1794,13 +1794,13 @@ NRExecProc(
 	    }
 	    if ((imPtr->protection & ITCL_PRIVATE) && (imPtr2 != NULL) &&
 		    (imPtr->iclsPtr->nsPtr != imPtr2->iclsPtr->nsPtr)) {
-		Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+		Tcl_AppendResult(interp,
 			"invalid command name \"",
 			Tcl_GetString(objv[0]),
 			"\"", (char *)NULL);
 		return TCL_ERROR;
 	    }
-	    Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+	    Tcl_AppendResult(interp,
 		    "can't access \"", Tcl_GetString(imPtr->fullNamePtr),
 		    "\": ", Itcl_ProtectionStr(imPtr->protection),
 		    " function", (char *)NULL);

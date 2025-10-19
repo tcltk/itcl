@@ -252,14 +252,14 @@ Itcl_BiInstallHullCmd(
     }
 
     if (contextIoPtr == NULL) {
-	Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+	Tcl_AppendResult(interp,
 	    "cannot installhull without an object context", NULL);
 	return TCL_ERROR;
     }
     if (objc < 3) {
 	if (objc != 2) {
 	    token = Tcl_GetString(objv[0]);
-	    Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+	    Tcl_AppendResult(interp,
 		"wrong # args: should be \"", token,
 		"\" name|using <widgetType> ?arg ...?\"", NULL);
 	    return TCL_ERROR;

@@ -521,14 +521,14 @@ Itcl_BiIsaCmd2(
     }
 
     if (contextIoPtr == NULL) {
-	Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+	Tcl_AppendResult(interp,
 	    "improper usage: should be \"object isa className\"",
 	    (char *)NULL);
 	return TCL_ERROR;
     }
     if (objc != 2) {
 	token = Tcl_GetString(objv[0]);
-	Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+	Tcl_AppendResult(interp,
 	    "wrong # args: should be \"object ", token, " className\"",
 	    (char *)NULL);
 	return TCL_ERROR;
@@ -637,7 +637,7 @@ Itcl_BiConfigureCmd2(
     }
 
     if (contextIoPtr == NULL) {
-	Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+	Tcl_AppendResult(interp,
 	    "improper usage: should be ",
 	    "\"object configure ?-option? ?value -option value...?\"",
 	    (char *)NULL);
@@ -701,7 +701,7 @@ Itcl_BiConfigureCmd2(
 	if (unparsedObjc == 2) {
 	    token = Tcl_GetString(unparsedObjv[1]);
 	    if (*token != '-') {
-		Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+		Tcl_AppendResult(interp,
 		    "improper usage: should be ",
 		    "\"object configure ?-option? ?value -option value...?\"",
 		    (char *)NULL);
@@ -718,7 +718,7 @@ Itcl_BiConfigureCmd2(
 		}
 	    }
 	    if (!vlookup) {
-		Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+		Tcl_AppendResult(interp,
 		    "unknown option \"", token, "\"",
 		    (char *)NULL);
 		return TCL_ERROR;
@@ -897,7 +897,7 @@ Itcl_BiCgetCmd2(
 	return TCL_ERROR;
     }
     if ((contextIoPtr == NULL) || objc != 2) {
-	Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+	Tcl_AppendResult(interp,
 	    "improper usage: should be \"object cget -option\"",
 	    (char *)NULL);
 	return TCL_ERROR;
@@ -925,7 +925,7 @@ Itcl_BiCgetCmd2(
     }
 
     if ((vlookup == NULL) || (vlookup->ivPtr->protection != ITCL_PUBLIC)) {
-	Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+	Tcl_AppendResult(interp,
 	    "unknown option \"", name, "\"",
 	    (char *)NULL);
 	return TCL_ERROR;
@@ -1140,7 +1140,7 @@ NRBiChainCmd(
     contextIclsPtr = NULL;
     if (Itcl_GetContext(interp, &contextIclsPtr, &contextIoPtr) != TCL_OK) {
 	Tcl_ResetResult(interp);
-	Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+	Tcl_AppendResult(interp,
 	    "cannot chain functions outside of a class context",
 	    (char *)NULL);
 	return TCL_ERROR;
@@ -2020,7 +2020,7 @@ ItclExtendedConfigure(
     }
 
     if (contextIoPtr == NULL) {
-	Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+	Tcl_AppendResult(interp,
 	    "improper usage: should be ",
 	    "\"object configure ?-option? ?value -option value...?\"",
 	    (char *)NULL);
@@ -2663,7 +2663,7 @@ ItclExtendedCget(
 	return TCL_ERROR;
     }
     if ((contextIoPtr == NULL) || objc != 2) {
-	Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+	Tcl_AppendResult(interp,
 	    "improper usage: should be \"object cget -option\"",
 	    (char *)NULL);
 	return TCL_ERROR;
@@ -2897,7 +2897,7 @@ ItclExtendedSetGet(
 
     usageStr = "improper usage: should be \"object setget varName ?value?\"";
     if (contextIoPtr == NULL) {
-	Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+	Tcl_AppendResult(interp,
 		usageStr, (char *)NULL);
 	return TCL_ERROR;
     }
@@ -2915,7 +2915,7 @@ ItclExtendedSetGet(
 
     hPtr = NULL;
     if (objc < 2) {
-	Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+	Tcl_AppendResult(interp,
 		usageStr, (char *)NULL);
 	return TCL_ERROR;
     }
@@ -3012,7 +3012,7 @@ Itcl_BiInstallComponentCmd(
     }
 
     if (contextIoPtr == NULL) {
-	Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+	Tcl_AppendResult(interp,
 	    "improper usage: should be \"object installcomponent \"",
 	    (char *)NULL);
 	return TCL_ERROR;
@@ -3020,7 +3020,7 @@ Itcl_BiInstallComponentCmd(
     if (objc < 5) {
 	/* FIXME strip off the :: parts here properly*/
 	token = Tcl_GetString(objv[0])+2;
-	Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+	Tcl_AppendResult(interp,
 	    "wrong # args: should be \"", token, " <componentName> using",
 	    " <widgetClassName> <widgetPathName>",
 	    " ?-option value -option value ...?\"",
@@ -3164,7 +3164,7 @@ Itcl_BiDestroyCmd(
 	return result;
     }
     if (objc != 1) {
-	Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+	Tcl_AppendResult(interp,
 	    "wrong # args: should be \"", Tcl_GetString(objv[0]), (char *)NULL);
 	return TCL_ERROR;
     }
@@ -3221,7 +3221,7 @@ Itcl_BiCallInstanceCmd(
 
     if (objc < 2) {
 	token = Tcl_GetString(objv[0]);
-	Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+	Tcl_AppendResult(interp,
 	    "wrong # args: should be \"", token, " <instanceName>",
 	    (char *)NULL);
 	return TCL_ERROR;
@@ -3288,7 +3288,7 @@ Itcl_BiGetInstanceVarCmd(
 
     if (objc < 2) {
 	token = Tcl_GetString(objv[0]);
-	Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+	Tcl_AppendResult(interp,
 	    "wrong # args: should be \"", token, " <instanceName>",
 	    (char *)NULL);
 	return TCL_ERROR;

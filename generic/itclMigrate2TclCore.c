@@ -171,7 +171,7 @@ Itcl_SetCallFrameNamespace(
     return TCL_OK;
 }
 
-size_t
+Tcl_Size
 Itcl_GetCallVarFrameObjc(
     Tcl_Interp *interp)
 {

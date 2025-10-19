@@ -32,10 +32,10 @@ void
 ItclShowArgs(
     int level,
     const char *str,
-    size_t objc,
+    Tcl_Size objc,
     Tcl_Obj * const* objv)
 {
-    size_t i;
+    Tcl_Size i;
 
     if (level > _itcl_debug_level) {
 	return;
@@ -144,7 +144,7 @@ ItclCreateArgList(
 		break;
 	    }
 	    if (defaultArgc > 2) {
-		Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+		Tcl_AppendResult(interp,
 		    "too many fields in argument specifier \"",
 		    argv[i], "\"",
 		    (char *)NULL);
@@ -153,7 +153,7 @@ ItclCreateArgList(
 		break;
 	    }
 	    if (strstr(defaultArgv[0],"::")) {
-		Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+		Tcl_AppendResult(interp,
 			"bad argument name \"", defaultArgv[0], "\"",
 			(char *)NULL);
 		ckfree((char *) defaultArgv);

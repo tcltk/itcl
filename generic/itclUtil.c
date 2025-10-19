@@ -1029,7 +1029,7 @@ Itcl_DecodeScopedCommand(
 
     nsPtr = NULL;
     len = strlen(name);
-    cmdName = (char *)ckalloc(strlen(name)+1);
+    cmdName = (char *)ckalloc(len+1);
     strcpy(cmdName, name);
 
     if ((*name == 'n') && (len > 17) && (strncmp(name, "namespace", 9) == 0)) {
@@ -1043,7 +1043,7 @@ Itcl_DecodeScopedCommand(
 		    &listv);
 	    if (result == TCL_OK) {
 		if (listc != 4) {
-		    Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+		    Tcl_AppendResult(interp,
 			"malformed command \"", name, "\": should be \"",
 			"namespace inscope namesp command\"",
 			(char *)NULL);
