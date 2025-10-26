@@ -849,4 +849,4 @@ MODULE_SCOPE ItclRootMethodProc ItclInfoGuts;
  * Include all the private API, generated from itcl.decls.
  */
 
-#include "itclIntDecls.h"
+#include "itclIntDecls.h"  /* IWYU pragma: export */
