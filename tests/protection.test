@@ -44,6 +44,26 @@ test protect-1.1 {define a class with various protection levels} {
 	}
 	method do {args} {eval $args}
     }
+
+    # other class to test private/protected methods and procs of test_pr from there (see [3a2e7bf0e2]):
+    itcl::class test_pr_b {
+	public proc testp {} {
+	    set o [test_pr #auto]
+	    set res {}
+	    lappend res [catch { $o prom } v] $v [catch { $o prim } v] $v
+	    lappend res [catch { test_pr::prop } v] $v [catch { test_pr::prip } v] $v
+	    itcl::delete object $o
+	    set res
+	}
+	public method testm {} {
+	    set o [test_pr #auto]
+	    set res {}
+	    lappend res [catch { $o prom } v] $v [catch { $o prim } v] $v
+	    lappend res [catch { test_pr::prop } v] $v [catch { test_pr::prip } v] $v
+	    itcl::delete object $o
+	    set res
+	}
+    }
 } ""
 
 test protect-1.2 {create an object to execute tests} {
@@ -109,6 +129,18 @@ test protect-1.8a {private procs are blocked from outside} {
 test protect-1.8b {private procs can be accessed from inside} {
     list [catch {test_pr0 do prip} msg] $msg
 } {0 {private proc}}
+
+test protect-1.8c {protected/private methods/procs are blocked from outside, also in some itcl proc body, [3a2e7bf0e2]} -body {
+    test_pr_b::testp
+} -match glob -result {1 {bad option "prom"*} 1 {bad option "prim"*} 1 {can't access "::test_pr::prop": protected function} 1 {can't access "::test_pr::prip": private function}}
+
+test protect-1.8d {protected/private methods/procs are blocked from outside, also in some itcl method body, [3a2e7bf0e2]} -body {
+    set b [test_pr_b #auto]
+    set res [$b testm]
+    itcl::delete object $b
+    unset -nocomplain b
+    set res
+} -match glob -result {1 {bad option "prom"*} 1 {bad option "prim"*} 1 {invalid command name "test_pr::prop"} 1 {invalid command name "test_pr::prip"}}
 
 test protect-1.9a {public commons can be accessed from outside} {
     list [catch {set test_pr::pubc} msg] $msg
