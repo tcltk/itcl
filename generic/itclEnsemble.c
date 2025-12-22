@@ -245,7 +245,7 @@ Itcl_CreateEnsemble(
 	    Tcl_AppendResult(interp,
 		"invalid ensemble name \"", pname, "\"",
 		(char *)NULL);
-	    ckfree(pname);
+	    Tcl_Free(pname);
 	    goto ensCreateFail;
 	}
     }
@@ -258,12 +258,12 @@ Itcl_CreateEnsemble(
 	goto ensCreateFail;
     }
 
-    ckfree((char*)nameArgv);
+    Tcl_Free((char*)nameArgv);
     return TCL_OK;
 
 ensCreateFail:
     if (nameArgv) {
-	ckfree((char*)nameArgv);
+	Tcl_Free((char*)nameArgv);
     }
     Tcl_AppendObjToErrorInfo(interp, Tcl_ObjPrintf(
 	    "\n    (while creating ensemble \"%s\")",
@@ -332,7 +332,7 @@ Itcl_AddEnsemblePart2(
 	Tcl_AppendResult(interp,
 	    "invalid ensemble name \"", pname, "\"",
 	    (char *)NULL);
-	ckfree(pname);
+	Tcl_Free(pname);
 	goto ensPartFail;
     }
 
@@ -345,12 +345,12 @@ Itcl_AddEnsemblePart2(
 	goto ensPartFail;
     }
 
-    ckfree((char*)nameArgv);
+    Tcl_Free((char*)nameArgv);
     return TCL_OK;
 
 ensPartFail:
     if (nameArgv) {
-	ckfree((char*)nameArgv);
+	Tcl_Free((char*)nameArgv);
     }
     Tcl_AppendObjToErrorInfo(interp, Tcl_ObjPrintf(
 	    "\n    (while adding to ensemble \"%s\")",
@@ -384,7 +384,7 @@ static void ens2DeleteProc(
     if (info->deleteProc) {
 	info->deleteProc(info->clientData);
     }
-    ckfree(info);
+    Tcl_Free(info);
 }
 
 int
@@ -397,7 +397,7 @@ Itcl_AddEnsemblePart(
     void *clientData,              /* client data associated with part */
     Tcl_CmdDeleteProc *deleteProc) /* procedure used to destroy client data */
 {
-    ensInfo *info = (ensInfo *)ckalloc(sizeof(ensInfo));
+    ensInfo *info = (ensInfo *)Tcl_Alloc(sizeof(ensInfo));
     info->objProc = objProc;
     info->clientData = clientData;
     info->deleteProc = deleteProc;
@@ -468,12 +468,12 @@ Itcl_GetEnsemblePart(
     }
 
     Itcl_DiscardInterpState(state);
-    ckfree((char *)nameArgv);
+    Tcl_Free((char *)nameArgv);
     return 1;
 
 ensGetFail:
     if (nameArgv) {
-	ckfree((char *)nameArgv);
+	Tcl_Free((char *)nameArgv);
     }
     Itcl_RestoreInterpState(interp, state);
     return 0;
@@ -569,12 +569,12 @@ Itcl_GetEnsembleUsage(
     GetEnsembleUsage(interp, ensData, objPtr);
 
     Itcl_DiscardInterpState(state);
-    ckfree((char *)nameArgv);
+    Tcl_Free((char *)nameArgv);
     return 1;
 
 ensUsageFail:
     if (nameArgv) {
-	ckfree((char *)nameArgv);
+	Tcl_Free((char *)nameArgv);
     }
     Itcl_RestoreInterpState(interp, state);
     return 0;
@@ -819,7 +819,7 @@ CreateEnsemble(
      */
     infoPtr = (ItclObjectInfo *)Tcl_GetAssocData(interp, ITCL_INTERP_DATA, NULL);
     infoPtr->ensembleInfo->numEnsembles++;
-    ensData = (Ensemble*)ckalloc(sizeof(Ensemble));
+    ensData = (Ensemble*)Tcl_Alloc(sizeof(Ensemble));
     memset(ensData, 0, sizeof(Ensemble));
     ensData->namePtr = Tcl_NewStringObj(ensName, TCL_INDEX_NONE);
     Tcl_IncrRefCount(ensData->namePtr);
@@ -827,7 +827,7 @@ CreateEnsemble(
     ensData->numParts = 0;
     ensData->maxParts = 10;
     ensData->ensembleId = infoPtr->ensembleInfo->numEnsembles;
-    ensData->parts = (EnsemblePart**)ckalloc(
+    ensData->parts = (EnsemblePart**)Tcl_Alloc(
 	(unsigned)(ensData->maxParts*sizeof(EnsemblePart*))
     );
     memset(ensData->parts, 0, ensData->maxParts*sizeof(EnsemblePart*));
@@ -985,7 +985,7 @@ AddEnsemblePart(
     }
 
     if (usageInfo) {
-	ensPart->usage = (char *)ckalloc(strlen(usageInfo)+1);
+	ensPart->usage = (char *)Tcl_Alloc(strlen(usageInfo)+1);
 	strcpy(ensPart->usage, usageInfo);
     }
     ensPart->objProc = objProc;
@@ -1060,7 +1060,7 @@ DeleteEnsemble(
 	DeleteEnsemblePart(ensData->parts[0]);
     }
     Tcl_DecrRefCount(ensData->namePtr);
-    ckfree((char*)ensData->parts);
+    Tcl_Free((char*)ensData->parts);
     ensData->parts = NULL;
     ensData->numParts = 0;
     infoPtr = (ItclObjectInfo *)Tcl_GetAssocData(ensData->interp, ITCL_INTERP_DATA, NULL);
@@ -1069,7 +1069,7 @@ DeleteEnsemble(
 	    Tcl_DeleteHashEntry(hPtr);
 	}
     }
-    ckfree((char*)ensData);
+    Tcl_Free((char*)ensData);
 }
 
 
@@ -1156,7 +1156,7 @@ FindEnsemble(
 	    Tcl_AppendResult(interp,
 		"invalid ensemble name \"", pname, "\"",
 		(char *)NULL);
-	    ckfree(pname);
+	    Tcl_Free(pname);
 	    return TCL_ERROR;
 	}
 
@@ -1232,9 +1232,9 @@ CreateEnsemblePart(
      */
     if (ensData->numParts >= ensData->maxParts) {
 	size = ensData->maxParts*sizeof(EnsemblePart*);
-	partList = (EnsemblePart**)ckalloc((unsigned)2*size);
+	partList = (EnsemblePart**)Tcl_Alloc((unsigned)2*size);
 	memcpy(partList, ensData->parts, (size_t)size);
-	ckfree((char*)ensData->parts);
+	Tcl_Free((char*)ensData->parts);
 
 	ensData->parts = partList;
 	ensData->maxParts *= 2;
@@ -1245,9 +1245,9 @@ CreateEnsemblePart(
     }
     ensData->numParts++;
 
-    ensPart = (EnsemblePart*)ckalloc(sizeof(EnsemblePart));
+    ensPart = (EnsemblePart*)Tcl_Alloc(sizeof(EnsemblePart));
     memset(ensPart, 0, sizeof(EnsemblePart));
-    ensPart->name = (char*)ckalloc(strlen(partName)+1);
+    ensPart->name = (char*)Tcl_Alloc(strlen(partName)+1);
     strcpy(ensPart->name, partName);
     ensPart->namePtr = Tcl_NewStringObj(ensPart->name, TCL_INDEX_NONE);
     ensPart->ensemble = ensData;
@@ -1378,10 +1378,10 @@ DeleteEnsemblePart(
     }
     Tcl_DecrRefCount(ensPart->namePtr);
     if (ensPart->usage != NULL) {
-	ckfree(ensPart->usage);
+	Tcl_Free(ensPart->usage);
     }
-    ckfree(ensPart->name);
-    ckfree((char*)ensPart);
+    Tcl_Free(ensPart->name);
+    Tcl_Free((char*)ensPart);
 }
 
 
@@ -1887,7 +1887,7 @@ GetEnsembleParser(
      *  Create a child interpreter that can be used to parse
      *  the body of an ensemble definition.
      */
-    ensInfo = (EnsembleParser*)ckalloc(sizeof(EnsembleParser));
+    ensInfo = (EnsembleParser*)Tcl_Alloc(sizeof(EnsembleParser));
     ensInfo->interp = interp;
     ensInfo->parser = Tcl_CreateInterp();
     ensInfo->ensData = NULL;
@@ -1943,7 +1943,7 @@ DeleteEnsParser(
     EnsembleParser* ensInfo = (EnsembleParser*)clientData;
 
     Tcl_DeleteInterp(ensInfo->parser);
-    ckfree((char*)ensInfo);
+    Tcl_Free((char*)ensInfo);
 }
 
 

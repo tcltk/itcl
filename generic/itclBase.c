@@ -161,6 +161,7 @@ RootCallProc(
  * ------------------------------------------------------------------------
  */
 
+#if TCL_MAJOR_VERSION > 8
 #ifndef STRINGIFY
 #  define STRINGIFY(x) STRINGIFY1(x)
 #  define STRINGIFY1(x) #x
@@ -218,6 +219,7 @@ static const char version[] = PACKAGE_VERSION "+" STRINGIFY(ITCL_VERSION_UUID)
     ".static"
 #endif
 ;
+#endif /* TCL_MAJOR_VERSION > 8 */
 
 static int
 Initialize (
@@ -234,7 +236,6 @@ Initialize (
     Tcl_Class tclCls;
     Tcl_Object clazzObjectPtr, root;
     Tcl_Obj *objPtr, *resPtr;
-    Tcl_CmdInfo info;
 
     if (Tcl_InitStubs(interp, "8.6-", 0) == NULL) {
 	return TCL_ERROR;
@@ -276,7 +277,7 @@ Initialize (
      *  it to the itcl namespace for ownership.
      */
     infoPtr->interp = interp;
-    infoPtr->class_meta_type = (Tcl_ObjectMetadataType *)ckalloc(
+    infoPtr->class_meta_type = (Tcl_ObjectMetadataType *)Tcl_Alloc(
 	    sizeof(Tcl_ObjectMetadataType));
     infoPtr->class_meta_type->version = TCL_OO_METADATA_VERSION_CURRENT;
     infoPtr->class_meta_type->name = "ItclClass";
@@ -295,7 +296,7 @@ Initialize (
     Tcl_InitHashTable(&infoPtr->frameContext, TCL_ONE_WORD_KEYS);
     Tcl_InitObjHashTable(&infoPtr->classTypes);
 
-    infoPtr->ensembleInfo = (EnsembleInfo *)ckalloc(sizeof(EnsembleInfo));
+    infoPtr->ensembleInfo = (EnsembleInfo *)Tcl_Alloc(sizeof(EnsembleInfo));
     memset(infoPtr->ensembleInfo, 0, sizeof(EnsembleInfo));
     Tcl_InitHashTable(&infoPtr->ensembleInfo->ensembles, TCL_ONE_WORD_KEYS);
     Tcl_InitHashTable(&infoPtr->ensembleInfo->subEnsembles, TCL_ONE_WORD_KEYS);
@@ -460,16 +461,13 @@ Initialize (
      *  Package is now loaded.
      */
 
-    if (Tcl_GetCommandInfo(interp, "::tcl::build-info", &info)) {
 #if TCL_MAJOR_VERSION > 8
-	if (info.isNativeObjectProc == 2) {
-	    Tcl_CreateObjCommand2(interp, "::itcl::build-info",
-		    info.objProc2, (void *)version, NULL);
-	} else
-#endif
-	Tcl_CreateObjCommand(interp, "::itcl::build-info",
-		info.objProc, (void *)version, NULL);
+    Tcl_CmdInfo info;
+    if (Tcl_GetCommandInfo(interp, "::tcl::build-info", &info)) {
+	Tcl_CreateObjCommand2(interp, "::itcl::build-info",
+		info.objProc2, (void *)version, NULL);
     }
+#endif
     Tcl_PkgProvideEx(interp, "Itcl", ITCL_PATCH_LEVEL, &itclStubs);
     return Tcl_PkgProvideEx(interp, "itcl", ITCL_PATCH_LEVEL, &itclStubs);
 }
@@ -651,12 +649,12 @@ FreeItclObjectInfo(
 	Tcl_DeleteHashTable(&infoPtr->ensembleInfo->ensembles);
 	Tcl_DeleteHashTable(&infoPtr->ensembleInfo->subEnsembles);
 	ItclFinishEnsemble(infoPtr);
-	ckfree((char *)infoPtr->ensembleInfo);
+	Tcl_Free((char *)infoPtr->ensembleInfo);
 	infoPtr->ensembleInfo = NULL;
     }
 
     if (infoPtr->class_meta_type) {
-	ckfree((char *)infoPtr->class_meta_type);
+	Tcl_Free((char *)infoPtr->class_meta_type);
 	infoPtr->class_meta_type = NULL;
     }
 

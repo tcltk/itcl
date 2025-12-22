@@ -59,7 +59,7 @@ Initialize (
     }
 
 #if 0 /* This doesn't compile ???? */
-    infoPtr->windgetInfoPtr = (ItclWidgetInfo *)ckalloc(sizeof(ItclWidgetInfo));
+    infoPtr->windgetInfoPtr = (ItclWidgetInfo *)Tcl_Alloc(sizeof(ItclWidgetInfo));
     infoPtr->windgetInfoPtr->initObjectOpts = ItclWidgetInitObjectOptions;
     infoPtr->windgetInfoPtr->hullAndOptsInst = HullAndOptionsInstall;
     infoPtr->windgetInfoPtr->delegationInst = DelegationInstall;

@@ -1294,7 +1294,7 @@ Itcl_EvalMemberCode(
 	    if ((mcode->flags & ITCL_IMPLEMENT_ARGCMD) != 0) {
 		char **argv;
 		Tcl_Size i;
-		argv = (char**)ckalloc(objc*sizeof(char*));
+		argv = (char**)Tcl_Alloc(objc*sizeof(char*));
 		for (i=0; i < objc; i++) {
 		    argv[i] = Tcl_GetString(objv[i]);
 		}
@@ -1302,7 +1302,7 @@ Itcl_EvalMemberCode(
 		result = (*mcode->cfunc.argCmd)(mcode->clientData,
 		    interp, objc, (const char **)argv);
 
-		ckfree((char*)argv);
+		Tcl_Free((char*)argv);
 	    }
 #endif /* TCL_NO_DEPRECATED */
 	}
@@ -1426,7 +1426,7 @@ Itcl_SetContext(
     Tcl_HashEntry *hPtr = Tcl_CreateHashEntry(&infoPtr->frameContext,
 	    (char *)framePtr, &isNew);
     ItclCallContext *contextPtr
-	    = (ItclCallContext *) ckalloc(sizeof(ItclCallContext));
+	    = (ItclCallContext *) Tcl_Alloc(sizeof(ItclCallContext));
 
     memset(contextPtr, 0, sizeof(ItclCallContext));
     contextPtr->ioPtr = ioPtr;
@@ -1436,7 +1436,7 @@ Itcl_SetContext(
 	Tcl_Panic("frame already has context?!");
     }
 
-    stackPtr = (Itcl_Stack *) ckalloc(sizeof(Itcl_Stack));
+    stackPtr = (Itcl_Stack *) Tcl_Alloc(sizeof(Itcl_Stack));
     Itcl_InitStack(stackPtr);
     Tcl_SetHashValue(hPtr, stackPtr);
 
@@ -1459,12 +1459,12 @@ Itcl_UnsetContext(
 	Tcl_Panic("frame context stack not empty!");
     }
     Itcl_DeleteStack(stackPtr);
-    ckfree((char *) stackPtr);
+    Tcl_Free((char *) stackPtr);
     Tcl_DeleteHashEntry(hPtr);
     if (contextPtr->refCount-- > 1) {
 	Tcl_Panic("frame context ref count not zero!");
     }
-    ckfree((char *)contextPtr);
+    Tcl_Free((char *)contextPtr);
 }
 
 int
@@ -2056,7 +2056,7 @@ Itcl_InvokeMethodIfExists(
 				"Itcl_InvokeMethodIfExists Itcl_PushCallFrame",
 				(char *)NULL);
 		    }
-		    newObjv = (Tcl_Obj **)ckalloc(sizeof(Tcl_Obj *)*(objc + 2));
+		    newObjv = (Tcl_Obj **)Tcl_Alloc(sizeof(Tcl_Obj *)*(objc + 2));
 		    newObjv[0] = Tcl_NewStringObj("my", TCL_INDEX_NONE);
 		    Tcl_IncrRefCount(newObjv[0]);
 		    newObjv[1] = Tcl_NewStringObj("configure", TCL_INDEX_NONE);
@@ -2066,7 +2066,7 @@ Itcl_InvokeMethodIfExists(
 		    result = Tcl_EvalObjv(interp, objc + 2, newObjv, 0);
 		    Tcl_DecrRefCount(newObjv[1]);
 		    Tcl_DecrRefCount(newObjv[0]);
-		    ckfree((char *)newObjv);
+		    Tcl_Free((char *)newObjv);
 		    Itcl_PopCallFrame(interp);
 		}
 	    }
@@ -2442,7 +2442,7 @@ ItclCheckCallMethod(
 	}
     }
     if (callContextPtr == NULL) {
-	callContextPtr = (ItclCallContext *)ckalloc(
+	callContextPtr = (ItclCallContext *)Tcl_Alloc(
 		sizeof(ItclCallContext));
 	if (ioPtr == NULL) {
 	    callContextPtr->objectFlags = 0;
@@ -2468,7 +2468,7 @@ ItclCheckCallMethod(
     hPtr = Tcl_CreateHashEntry(&infoPtr->frameContext,
 	    (char *)framePtr, &isNew);
     if (isNew) {
-	stackPtr = (Itcl_Stack *)ckalloc(sizeof(Itcl_Stack));
+	stackPtr = (Itcl_Stack *)Tcl_Alloc(sizeof(Itcl_Stack));
 	Itcl_InitStack(stackPtr);
 	Tcl_SetHashValue(hPtr, stackPtr);
     } else {
@@ -2482,7 +2482,7 @@ ItclCheckCallMethod(
     hPtr = Tcl_CreateHashEntry(&infoPtr->frameContext,
 	    (char *)contextPtr, &isNew);
     if (isNew) {
-	stackPtr = (Itcl_Stack *)ckalloc(sizeof(Itcl_Stack));
+	stackPtr = (Itcl_Stack *)Tcl_Alloc(sizeof(Itcl_Stack));
 	Itcl_InitStack(stackPtr);
 	Tcl_SetHashValue(hPtr, stackPtr);
     } else {
@@ -2545,7 +2545,7 @@ ItclAfterCallMethod(
     framePtr = (Tcl_CallFrame *)Itcl_PopStack(stackPtr);
     if (Itcl_GetStackSize(stackPtr) == 0) {
 	Itcl_DeleteStack(stackPtr);
-	ckfree((char *) stackPtr);
+	Tcl_Free((char *) stackPtr);
 	Tcl_DeleteHashEntry(hPtr);
     }
 
@@ -2555,7 +2555,7 @@ ItclAfterCallMethod(
     callContextPtr = (ItclCallContext *)Itcl_PopStack(stackPtr);
     if (Itcl_GetStackSize(stackPtr) == 0) {
 	Itcl_DeleteStack(stackPtr);
-	ckfree((char *) stackPtr);
+	Tcl_Free((char *) stackPtr);
 	Tcl_DeleteHashEntry(hPtr);
     }
     }
@@ -2605,10 +2605,10 @@ ItclAfterCallMethod(
 	    hPtr = Tcl_FindHashEntry(&callContextPtr->ioPtr->contextCache,
 		    (char *)callContextPtr->imPtr);
 	    if (hPtr == NULL) {
-		ckfree((char *)callContextPtr);
+		Tcl_Free((char *)callContextPtr);
 	    }
 	} else {
-	    ckfree((char *)callContextPtr);
+	    Tcl_Free((char *)callContextPtr);
 	}
     }
 

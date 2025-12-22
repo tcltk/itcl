@@ -254,7 +254,7 @@ ItclCreateObject(
     ioPtr->infoPtr = infoPtr;
     ItclPreserveClass(iclsPtr);
 
-    ioPtr->constructed = (Tcl_HashTable*)ckalloc(sizeof(Tcl_HashTable));
+    ioPtr->constructed = (Tcl_HashTable*)Tcl_Alloc(sizeof(Tcl_HashTable));
     Tcl_InitObjHashTable(ioPtr->constructed);
 
     ioPtr->oPtr = Tcl_NewObjectInstance(interp, iclsPtr->clsPtr, NULL,
@@ -359,7 +359,7 @@ ItclCreateObject(
     saveCurrIoPtr = infoPtr->currIoPtr;
     infoPtr->currIoPtr = ioPtr;
     if (iclsPtr->flags & ITCL_WIDGET) {
-	newObjv = (Tcl_Obj **)ckalloc(sizeof(Tcl_Obj *) * (objc + 5));
+	newObjv = (Tcl_Obj **)Tcl_Alloc(sizeof(Tcl_Obj *) * (objc + 5));
 	newObjv[0] = Tcl_NewStringObj(
 		"::itcl::internal::commands::hullandoptionsinstall", TCL_INDEX_NONE);
 	newObjv[1] = ioPtr->namePtr;
@@ -385,7 +385,7 @@ ItclCreateObject(
 	Tcl_DecrRefCount(newObjv[2]);
 	Tcl_DecrRefCount(newObjv[3]);
 	Tcl_DecrRefCount(newObjv[4]);
-	ckfree((char *)newObjv);
+	Tcl_Free((char *)newObjv);
 	if (result != TCL_OK) {
 	    ioPtr->hadConstructorError = 15;
 	    goto errorReturn;
@@ -439,10 +439,10 @@ ItclCreateObject(
     cmdInfo.deleteProc = ItclDestroyObject;
     cmdInfo.deleteData = ioPtr;
     Tcl_SetCommandInfoFromToken(ioPtr->accessCmd, &cmdInfo);
-    ioPtr->resolvePtr = (Tcl_Resolve *)ckalloc(sizeof(Tcl_Resolve));
+    ioPtr->resolvePtr = (Tcl_Resolve *)Tcl_Alloc(sizeof(Tcl_Resolve));
     ioPtr->resolvePtr->cmdProcPtr = Itcl_CmdAliasProc;
     ioPtr->resolvePtr->varProcPtr = Itcl_VarAliasProc;
-    resolveInfoPtr = (ItclResolveInfo *)ckalloc(sizeof(ItclResolveInfo));
+    resolveInfoPtr = (ItclResolveInfo *)Tcl_Alloc(sizeof(ItclResolveInfo));
     memset (resolveInfoPtr, 0, sizeof(ItclResolveInfo));
     resolveInfoPtr->flags = ITCL_RESOLVE_OBJECT;
     resolveInfoPtr->ioPtr = ioPtr;
@@ -684,7 +684,7 @@ ItclCreateObject(
     }
     infoPtr->lastIoPtr = ioPtr;
     Tcl_DeleteHashTable(ioPtr->constructed);
-    ckfree((char*)ioPtr->constructed);
+    Tcl_Free((char*)ioPtr->constructed);
     ioPtr->constructed = NULL;
     ItclAddObjectsDictInfo(interp, ioPtr);
     Itcl_ReleaseData(ioPtr);
@@ -708,7 +708,7 @@ errorReturn:
     }
     if (ioPtr->constructed != NULL) {
 	Tcl_DeleteHashTable(ioPtr->constructed);
-	ckfree((char*)ioPtr->constructed);
+	Tcl_Free((char*)ioPtr->constructed);
 	ioPtr->constructed = NULL;
     }
     ItclDeleteObjectVariablesNamespace(interp, ioPtr);
@@ -970,7 +970,7 @@ ItclInitObjectVariables(
 			    }
 			}
 			Tcl_DStringFree(&buffer3);
-			ckfree((char *)argv);
+			Tcl_Free((char *)argv);
 			}
 		      }
 		    }
@@ -1289,7 +1289,7 @@ FinalizeDeleteObject(
     }
 
     Tcl_DeleteHashTable(contextIoPtr->destructed);
-    ckfree((char*)contextIoPtr->destructed);
+    Tcl_Free((char*)contextIoPtr->destructed);
     contextIoPtr->destructed = NULL;
     return result;
 }
@@ -1371,7 +1371,7 @@ Itcl_DestructObject(
 	 *  sure that all base class destructors have been called,
 	 *  explicitly or implicitly.
 	 */
-	contextIoPtr->destructed = (Tcl_HashTable*)ckalloc(sizeof(Tcl_HashTable));
+	contextIoPtr->destructed = (Tcl_HashTable*)Tcl_Alloc(sizeof(Tcl_HashTable));
 	Tcl_InitHashTable(contextIoPtr->destructed, TCL_ONE_WORD_KEYS);
 
 	/*
@@ -1505,7 +1505,7 @@ Itcl_FindObject(
 	*roPtr = NULL;
     }
 
-    ckfree(cmdName);
+    Tcl_Free(cmdName);
 
     return TCL_OK;
 }
@@ -2658,11 +2658,11 @@ FreeObject(
     ItclReleaseClass(ioPtr->iclsPtr);
     if (ioPtr->constructed) {
 	Tcl_DeleteHashTable(ioPtr->constructed);
-	ckfree((char*)ioPtr->constructed);
+	Tcl_Free((char*)ioPtr->constructed);
     }
     if (ioPtr->destructed) {
 	Tcl_DeleteHashTable(ioPtr->destructed);
-	ckfree((char*)ioPtr->destructed);
+	Tcl_Free((char*)ioPtr->destructed);
     }
     ItclDeleteObjectsDictInfo(ioPtr->interp, ioPtr);
     /*
@@ -2675,7 +2675,7 @@ FreeObject(
 	}
 	callContextPtr = (ItclCallContext *)Tcl_GetHashValue(hPtr);
 	Tcl_DeleteHashEntry(hPtr);
-	ckfree((char *)callContextPtr);
+	Tcl_Free((char *)callContextPtr);
     }
     FOREACH_HASH_VALUE(var, &ioPtr->objectVariables) {
 	Itcl_ReleaseVar(var);
@@ -2698,8 +2698,8 @@ FreeObject(
     }
     Tcl_DecrRefCount(ioPtr->varNsNamePtr);
     if (ioPtr->resolvePtr != NULL) {
-	ckfree((char *)ioPtr->resolvePtr->clientData);
-	ckfree((char*)ioPtr->resolvePtr);
+	Tcl_Free((char *)ioPtr->resolvePtr->clientData);
+	Tcl_Free((char*)ioPtr->resolvePtr);
     }
     Itcl_Free(ioPtr);
 }
@@ -2881,7 +2881,7 @@ ItclObjectCmd(
 	    }
 	}
 	incr = 1;
-	newObjv = (Tcl_Obj **)ckalloc(sizeof(Tcl_Obj *)*(objc+incr));
+	newObjv = (Tcl_Obj **)Tcl_Alloc(sizeof(Tcl_Obj *)*(objc+incr));
 	myPtr = Tcl_NewStringObj("my", 2);
 	Tcl_IncrRefCount(myPtr);
 	Tcl_IncrRefCount(methodNamePtr);
@@ -2900,7 +2900,7 @@ ItclObjectCmd(
 
     result = Itcl_NRRunCallbacks(interp, callbackPtr);
     if (methodNamePtr != NULL) {
-	ckfree((char *)newObjv);
+	Tcl_Free((char *)newObjv);
 	Tcl_DecrRefCount(methodNamePtr);
     }
     if (myPtr != NULL) {
@@ -3177,7 +3177,7 @@ ExpandDelegateAs(
 	    Tcl_ListObjAppendElement(interp, listPtr,
 		    Tcl_NewStringObj(argv[j], TCL_INDEX_NONE));
 	}
-	ckfree((char *)argv);
+	Tcl_Free((char *)argv);
     } else {
 	if (idmPtr->usingPtr != NULL) {
 	    char *cp;

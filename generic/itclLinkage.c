@@ -116,7 +116,7 @@ Itcl_RegisterC(
 	    (*cfunc->deleteProc)(cfunc->clientData);
 	}
     } else {
-	cfunc = (ItclCfunc*)ckalloc(sizeof(ItclCfunc));
+	cfunc = (ItclCfunc*)Tcl_Alloc(sizeof(ItclCfunc));
 	cfunc->objCmdProc = NULL;
     }
 
@@ -202,7 +202,7 @@ Itcl_RegisterObjC2(
 	    (*cfunc->deleteProc)(cfunc->clientData);
 	}
     } else {
-	cfunc = (ItclCfunc*)ckalloc(sizeof(ItclCfunc));
+	cfunc = (ItclCfunc*)Tcl_Alloc(sizeof(ItclCfunc));
 	cfunc->argCmdProc = NULL;
     }
 
@@ -239,7 +239,7 @@ static void reg2DeleteProc(
     if (info->deleteProc != NULL) {
 	info->deleteProc(info->clientData);
     }
-    ckfree(info);
+    Tcl_Free(info);
 }
 
 
@@ -251,7 +251,7 @@ Itcl_RegisterObjC(
     void *clientData,       /* client data associated with proc */
     Tcl_CmdDeleteProc *deleteProc)  /* proc called to free up client data */
 {
-    regInfo *info = (regInfo *)ckalloc(sizeof(regInfo));
+    regInfo *info = (regInfo *)Tcl_Alloc(sizeof(regInfo));
     info->objProc = proc;
     info->clientData = clientData;
     info->deleteProc = deleteProc;
@@ -367,7 +367,7 @@ ItclGetRegisteredProcs(
 	NULL);
 
     if (!procTable) {
-	procTable = (Tcl_HashTable*)ckalloc(sizeof(Tcl_HashTable));
+	procTable = (Tcl_HashTable*)Tcl_Alloc(sizeof(Tcl_HashTable));
 	Tcl_InitHashTable(procTable, TCL_STRING_KEYS);
 	Tcl_SetAssocData(interp, "itcl_RegC", ItclFreeC,
 	    procTable);
@@ -402,10 +402,10 @@ ItclFreeC(
 	if (cfunc->deleteProc != NULL) {
 	    (*cfunc->deleteProc)(cfunc->clientData);
 	}
-	ckfree ( (char*)cfunc );
+	Tcl_Free ( (char*)cfunc );
 	entry = Tcl_NextHashEntry(&place);
     }
 
     Tcl_DeleteHashTable(tablePtr);
-    ckfree((char*)tablePtr);
+    Tcl_Free((char*)tablePtr);
 }

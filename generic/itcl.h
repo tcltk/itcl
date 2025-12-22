@@ -173,7 +173,7 @@ typedef struct Itcl_InterpState_ *Itcl_InterpState;
  * Include all the public API, generated from itcl.decls.
  */
 
-#include "itclDecls.h"
+#include "itclDecls.h"  /* IWYU pragma: export */
 
 #endif /* RC_INVOKED */
 
