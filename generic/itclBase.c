@@ -161,6 +161,7 @@ RootCallProc(
  * ------------------------------------------------------------------------
  */
 
+#if TCL_MAJOR_VERSION > 8
 #ifndef STRINGIFY
 #  define STRINGIFY(x) STRINGIFY1(x)
 #  define STRINGIFY1(x) #x
@@ -218,6 +219,7 @@ static const char version[] = PACKAGE_VERSION "+" STRINGIFY(ITCL_VERSION_UUID)
     ".static"
 #endif
 ;
+#endif /* TCL_MAJOR_VERSION > 8 */
 
 static int
 Initialize (
@@ -234,7 +236,6 @@ Initialize (
     Tcl_Class tclCls;
     Tcl_Object clazzObjectPtr, root;
     Tcl_Obj *objPtr, *resPtr;
-    Tcl_CmdInfo info;
 
     if (Tcl_InitStubs(interp, "8.6-", 0) == NULL) {
 	return TCL_ERROR;
@@ -460,16 +461,13 @@ Initialize (
      *  Package is now loaded.
      */
 
-    if (Tcl_GetCommandInfo(interp, "::tcl::build-info", &info)) {
 #if TCL_MAJOR_VERSION > 8
-	if (info.isNativeObjectProc == 2) {
-	    Tcl_CreateObjCommand2(interp, "::itcl::build-info",
-		    info.objProc2, (void *)version, NULL);
-	} else
-#endif
-	Tcl_CreateObjCommand(interp, "::itcl::build-info",
-		info.objProc, (void *)version, NULL);
+    Tcl_CmdInfo info;
+    if (Tcl_GetCommandInfo(interp, "::tcl::build-info", &info)) {
+	Tcl_CreateObjCommand2(interp, "::itcl::build-info",
+		info.objProc2, (void *)version, NULL);
     }
+#endif
     Tcl_PkgProvideEx(interp, "Itcl", ITCL_PATCH_LEVEL, &itclStubs);
     return Tcl_PkgProvideEx(interp, "itcl", ITCL_PATCH_LEVEL, &itclStubs);
 }
