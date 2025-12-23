@@ -5,14 +5,16 @@
 #ifndef _ITCLINTDECLS
 #define _ITCLINTDECLS
 
+#if TCL_MAJOR_VERSION < 9
+# define Tcl_ObjCmdProc2 Tcl_ObjCmdProc
+#elif defined(TCL_NO_DEPRECATED)
+#   define Tcl_ObjCmdProc void
+#endif
+
 /* !BEGIN!: Do not edit below this line. */
 
 #define ITCLINT_STUBS_EPOCH 0
 #define ITCLINT_STUBS_REVISION 159
-
-#if TCL_MAJOR_VERSION < 9
-# define Tcl_ObjCmdProc2 Tcl_ObjCmdProc
-#endif
 
 #ifdef __cplusplus
 extern "C" {
