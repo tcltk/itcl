@@ -10,6 +10,10 @@
 #define ITCLINT_STUBS_EPOCH 0
 #define ITCLINT_STUBS_REVISION 159
 
+#if TCL_MAJOR_VERSION < 9
+# define Tcl_ObjCmdProc2 Tcl_ObjCmdProc
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -1046,7 +1050,7 @@ extern const ItclIntStubs *itclIntStubsPtr;
 
 /* !END!: Do not edit above this line. */
 
-#if (TCL_MAJOR_VERSION < 9)
+#if TCL_MAJOR_VERSION < 9
 # undef Tcl_ObjCmdProc2
 # undef Itcl_AddEnsemblePart2
 # define Itcl_AddEnsemblePart2 Itcl_AddEnsemblePart

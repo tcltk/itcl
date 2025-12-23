@@ -215,7 +215,7 @@ extern const ItclStubs *itclStubsPtr;
 
 /* !END!: Do not edit above this line. */
 
-#if (TCL_MAJOR_VERSION < 9)
+#if TCL_MAJOR_VERSION < 9
 # undef Tcl_ObjCmdProc2
 # undef Itcl_RegisterObjC2
 # define Itcl_RegisterObjC2 Itcl_RegisterObjC
