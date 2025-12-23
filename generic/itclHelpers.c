@@ -366,8 +366,8 @@ ItclEnsembleSubCmd2(
     const char *functionName)
 {
     if ((size_t)objc - 1 > (size_t)INT_MAX) {
-        Tcl_WrongNumArgs(interp, 1, objv, "?args?");
-        return TCL_ERROR;
+	Tcl_WrongNumArgs(interp, 1, objv, "?args?");
+	return TCL_ERROR;
     }
     return ItclEnsembleSubCmd(dummy, interp, ensembleName, (int)objc, objv, functionName);
 }
