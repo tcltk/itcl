@@ -54,7 +54,7 @@ ITCLAPI const char *Itcl_InitStubs(
 /* !BEGIN!: Do not edit below this line. */
 
 #define ITCL_STUBS_EPOCH 0
-#define ITCL_STUBS_REVISION 157
+#define ITCL_STUBS_REVISION 159
 
 #ifdef __cplusplus
 extern "C" {
@@ -247,7 +247,8 @@ extern const ItclStubs *itclStubsPtr;
 
 /* !END!: Do not edit above this line. */
 
-#if (TCL_MAJOR_VERSION < 9)
+#if TCL_MAJOR_VERSION < 9
+# undef Tcl_ObjCmdProc2
 # undef Itcl_RegisterObjC2
 # define Itcl_RegisterObjC2 Itcl_RegisterObjC
 # undef Itcl_FindC2

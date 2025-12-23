@@ -337,21 +337,24 @@ Itcl_CreateArgs(
 
 int
 ItclEnsembleSubCmd(
-    TCL_UNUSED(void *),
+    void *dummy,
     Tcl_Interp *interp,
-    TCL_UNUSED(const char *),
+    const char *ensembleName,
     int objc,
     Tcl_Obj *const *objv,
-    TCL_UNUSED(const char *))
+    const char *functionName)
 {
-    return ItclEnsembleSubCmd2(interp, objc, objv);
+    return ItclEnsembleSubCmd2(dummy, interp, ensembleName, objc, objv, functionName);
 }
 
 int
 ItclEnsembleSubCmd2(
+    TCL_UNUSED(void *),
     Tcl_Interp *interp,
+    TCL_UNUSED(const char *),
     Tcl_Size objc,
-    Tcl_Obj *const *objv)
+    Tcl_Obj *const *objv,
+    TCL_UNUSED(const char *))
 {
     int result;
     Tcl_Obj **newObjv;

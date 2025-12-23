@@ -5,14 +5,16 @@
 #ifndef _ITCLINTDECLS
 #define _ITCLINTDECLS
 
-#ifdef TCL_NO_DEPRECATED
+#if TCL_MAJOR_VERSION < 9
+# define Tcl_ObjCmdProc2 Tcl_ObjCmdProc
+#elif defined(TCL_NO_DEPRECATED)
 #   define Tcl_ObjCmdProc void
 #endif
 
 /* !BEGIN!: Do not edit below this line. */
 
 #define ITCLINT_STUBS_EPOCH 0
-#define ITCLINT_STUBS_REVISION 157
+#define ITCLINT_STUBS_REVISION 159
 
 #ifdef __cplusplus
 extern "C" {
@@ -191,7 +193,9 @@ ITCLAPI void		Itcl_DeleteMemberCode(void *cdata);
 /* 59 */
 ITCLAPI int		Itcl_GetMemberCode(Tcl_Interp *interp,
 				ItclMemberFunc *mfunc);
-/* Slot 60 is reserved */
+/* 60 */
+ITCLAPI int		Itcl_ConfigBodyCmd2(void *dummy, Tcl_Interp *interp,
+				Tcl_Size objc, Tcl_Obj *const objv[]);
 /* 61 */
 ITCLAPI int		Itcl_EvalMemberCode(Tcl_Interp *interp,
 				ItclMemberFunc *mfunc,
@@ -438,7 +442,11 @@ ITCLAPI int		Itcl_CanAccess2(ItclClass *iclsPtr, int protection,
 /* Slot 156 is reserved */
 /* Slot 157 is reserved */
 /* Slot 158 is reserved */
-/* Slot 159 is reserved */
+/* 159 */
+ITCLAPI int		ItclEnsembleSubCmd2(void *clientData,
+				Tcl_Interp *interp, const char *ensembleName,
+				Tcl_Size objc, Tcl_Obj *const *objv,
+				const char *functionName);
 /* 160 */
 ITCLAPI int		Itcl_SetCallFrameResolver(Tcl_Interp *interp,
 				Tcl_Resolve *resolvePtr);
@@ -584,7 +592,7 @@ typedef struct ItclIntStubs {
     int (*itcl_CreateMemberCode) (Tcl_Interp *interp, ItclClass *iclsPtr, const char *arglist, const char *body, ItclMemberCode **mcodePtr); /* 57 */
     void (*itcl_DeleteMemberCode) (void *cdata); /* 58 */
     int (*itcl_GetMemberCode) (Tcl_Interp *interp, ItclMemberFunc *mfunc); /* 59 */
-    void (*reserved60)(void);
+    int (*itcl_ConfigBodyCmd2) (void *dummy, Tcl_Interp *interp, Tcl_Size objc, Tcl_Obj *const objv[]); /* 60 */
     int (*itcl_EvalMemberCode) (Tcl_Interp *interp, ItclMemberFunc *mfunc, ItclObject *contextObj, Tcl_Size objc, Tcl_Obj *const objv[]); /* 61 */
     int (*itcl_ExecMethod2) (void *clientData, Tcl_Interp *interp, Tcl_Size objc, Tcl_Obj *const objv[]); /* 62 */
     int (*itcl_ExecProc2) (void *clientData, Tcl_Interp *interp, Tcl_Size objc, Tcl_Obj *const objv[]); /* 63 */
@@ -683,7 +691,7 @@ typedef struct ItclIntStubs {
     void (*reserved156)(void);
     void (*reserved157)(void);
     void (*reserved158)(void);
-    void (*reserved159)(void);
+    int (*itclEnsembleSubCmd2) (void *clientData, Tcl_Interp *interp, const char *ensembleName, Tcl_Size objc, Tcl_Obj *const *objv, const char *functionName); /* 159 */
     int (*itcl_SetCallFrameResolver) (Tcl_Interp *interp, Tcl_Resolve *resolvePtr); /* 160 */
     int (*itclEnsembleSubCmd) (void *clientData, Tcl_Interp *interp, const char *ensembleName, int objc, Tcl_Obj *const *objv, const char *functionName); /* 161 */
     Tcl_Namespace * (*itcl_GetUplevelNamespace) (Tcl_Interp *interp, int level); /* 162 */
@@ -832,7 +840,8 @@ extern const ItclIntStubs *itclIntStubsPtr;
 	(itclIntStubsPtr->itcl_DeleteMemberCode) /* 58 */
 #define Itcl_GetMemberCode \
 	(itclIntStubsPtr->itcl_GetMemberCode) /* 59 */
-/* Slot 60 is reserved */
+#define Itcl_ConfigBodyCmd2 \
+	(itclIntStubsPtr->itcl_ConfigBodyCmd2) /* 60 */
 #define Itcl_EvalMemberCode \
 	(itclIntStubsPtr->itcl_EvalMemberCode) /* 61 */
 #define Itcl_ExecMethod2 \
@@ -987,7 +996,8 @@ extern const ItclIntStubs *itclIntStubsPtr;
 /* Slot 156 is reserved */
 /* Slot 157 is reserved */
 /* Slot 158 is reserved */
-/* Slot 159 is reserved */
+#define ItclEnsembleSubCmd2 \
+	(itclIntStubsPtr->itclEnsembleSubCmd2) /* 159 */
 #define Itcl_SetCallFrameResolver \
 	(itclIntStubsPtr->itcl_SetCallFrameResolver) /* 160 */
 #define ItclEnsembleSubCmd \

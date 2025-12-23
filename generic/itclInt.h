@@ -862,7 +862,6 @@ MODULE_SCOPE Tcl_ObjCmdProc2 Itcl_ClassProcCmd2;
 MODULE_SCOPE Tcl_ObjCmdProc2 Itcl_ClassProtectionCmd2;
 MODULE_SCOPE Tcl_ObjCmdProc2 Itcl_ClassVariableCmd2;
 MODULE_SCOPE Tcl_ObjCmdProc2 Itcl_CodeCmd2;
-MODULE_SCOPE Tcl_ObjCmdProc2 Itcl_ConfigBodyCmd2;
 MODULE_SCOPE Tcl_ObjCmdProc2 Itcl_DelClassCmd2;
 MODULE_SCOPE Tcl_ObjCmdProc2 Itcl_DelObjectCmd2;
 MODULE_SCOPE Tcl_ObjCmdProc2 Itcl_EnsembleCmd2;
@@ -885,8 +884,6 @@ MODULE_SCOPE Tcl_ObjCmdProc2 Itcl_ScopeCmd2;
 
 MODULE_SCOPE int ItclClassBaseCmd2(void *clientData, Tcl_Interp *interp,
 	int flags, Tcl_Size objc, Tcl_Obj *const objv[], ItclClass **iclsPtrPtr);
-MODULE_SCOPE int ItclEnsembleSubCmd2(Tcl_Interp *interp, Tcl_Size objc,
-	Tcl_Obj *const *objv);
 
 typedef int (ItclRootMethodProc)(ItclObject *ioPtr, Tcl_Interp *interp,
 	Tcl_Size objc, Tcl_Obj *const objv[]);

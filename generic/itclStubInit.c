@@ -5,14 +5,14 @@
 
 #include "itclInt.h"
 
-MODULE_SCOPE const ItclStubs itclStubs;
-/* !BEGIN!: Do not edit below this line. */
-
 #ifdef TCL_NO_DEPRECATED
 #   define Itcl_RegisterObjC 0
 #   define Itcl_FindC 0
 #   define Itcl_AddEnsemblePart 0
 #endif /* TCL_NO_DEPRECATED */
+
+MODULE_SCOPE const ItclStubs itclStubs;
+/* !BEGIN!: Do not edit below this line. */
 
 static const ItclIntStubs itclIntStubs = {
     TCL_STUB_MAGIC,
@@ -79,7 +79,7 @@ static const ItclIntStubs itclIntStubs = {
     Itcl_CreateMemberCode, /* 57 */
     Itcl_DeleteMemberCode, /* 58 */
     Itcl_GetMemberCode, /* 59 */
-    0, /* 60 */
+    Itcl_ConfigBodyCmd2, /* 60 */
     Itcl_EvalMemberCode, /* 61 */
     Itcl_ExecMethod2, /* 62 */
     Itcl_ExecProc2, /* 63 */
@@ -178,7 +178,7 @@ static const ItclIntStubs itclIntStubs = {
     0, /* 156 */
     0, /* 157 */
     0, /* 158 */
-    0, /* 159 */
+    ItclEnsembleSubCmd2, /* 159 */
     Itcl_SetCallFrameResolver, /* 160 */
     ItclEnsembleSubCmd, /* 161 */
     Itcl_GetUplevelNamespace, /* 162 */
