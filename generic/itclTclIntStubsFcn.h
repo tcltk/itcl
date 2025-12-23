@@ -30,8 +30,8 @@ MODULE_SCOPE int Tcl_RenameCommand(Tcl_Interp *interp, const char *oldName,
 	const char *newName);
 MODULE_SCOPE Tcl_HashTable *Itcl_GetNamespaceChildTable(Tcl_Namespace *nsPtr);
 MODULE_SCOPE Tcl_HashTable *Itcl_GetNamespaceCommandTable(Tcl_Namespace *nsPtr);
-MODULE_SCOPE int Itcl_InitRewriteEnsemble(Tcl_Interp *interp, size_t numRemoved,
-	size_t numInserted, size_t objc, Tcl_Obj *const *objv);
+MODULE_SCOPE int Itcl_InitRewriteEnsemble(Tcl_Interp *interp, Tcl_Size numRemoved,
+	Tcl_Size numInserted, Tcl_Size objc, Tcl_Obj *const *objv);
 MODULE_SCOPE void Itcl_ResetRewriteEnsemble(Tcl_Interp *interp,
 	int isRootEnsemble);
 

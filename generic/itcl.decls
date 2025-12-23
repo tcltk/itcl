@@ -305,6 +305,10 @@ declare 58 {
 declare 59 {
     int Itcl_GetMemberCode(Tcl_Interp *interp, ItclMemberFunc *mfunc)
 }
+declare 60 {
+    int Itcl_ConfigBodyCmd2(void *dummy, Tcl_Interp *interp, Tcl_Size objc,
+	Tcl_Obj *const objv[])
+}
 declare 61 {
     int Itcl_EvalMemberCode(Tcl_Interp *interp, ItclMemberFunc *mfunc,
 	ItclObject *contextObj, Tcl_Size objc, Tcl_Obj *const objv[])
@@ -559,6 +563,11 @@ declare 152 {
 declare 153 {
     int Itcl_CanAccess2(ItclClass *iclsPtr, int protection,
 	Tcl_Namespace *fromNsPtr)
+}
+declare 159 {
+    int ItclEnsembleSubCmd2(void *clientData, Tcl_Interp *interp,
+	    const char *ensembleName, Tcl_Size objc, Tcl_Obj *const *objv,
+	    const char *functionName)
 }
 declare 160 {
     int Itcl_SetCallFrameResolver(Tcl_Interp *interp,

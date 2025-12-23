@@ -124,9 +124,9 @@ Itcl_GetNamespaceChildTable(
 int
 Itcl_InitRewriteEnsemble(
     Tcl_Interp *interp,
-    size_t numRemoved,
-    size_t numInserted,
-    TCL_UNUSED(size_t) /* objc */,
+    Tcl_Size numRemoved,
+    Tcl_Size numInserted,
+    TCL_UNUSED(Tcl_Size) /* objc */,
     Tcl_Obj *const *objv)
 {
     return TclInitRewriteEnsemble(interp, numRemoved, numInserted, objv);

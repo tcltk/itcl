@@ -11,6 +11,7 @@
  */
 
 #include "itclInt.h"
+#include <limits.h>
 
 void ItclDeleteArgList(ItclArgList *arglistPtr);
 #ifdef ITCL_DEBUG
@@ -353,6 +354,22 @@ ItclEnsembleSubCmd(
     ckfree((char *)newObjv);
     Itcl_ResetRewriteEnsemble(interp, isRootEnsemble);
     return result;
+}
+
+int
+ItclEnsembleSubCmd2(
+    void *dummy,
+    Tcl_Interp *interp,
+    const char *ensembleName,
+    Tcl_Size objc,
+    Tcl_Obj *const *objv,
+    const char *functionName)
+{
+    if ((size_t)objc - 1 > (size_t)INT_MAX) {
+        Tcl_WrongNumArgs(interp, 1, objv, "?args?");
+        return TCL_ERROR;
+    }
+    return ItclEnsembleSubCmd(dummy, interp, ensembleName, (int)objc, objv, functionName);
 }
 
 

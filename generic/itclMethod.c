@@ -299,6 +299,20 @@ Itcl_ConfigBodyCmd(
     return Tcl_NRCallObjProc(interp, NRConfigBodyCmd, clientData, objc, objv);
 }
 
+int
+Itcl_ConfigBodyCmd2(
+    void *clientData,
+    Tcl_Interp *interp,
+    Tcl_Size objc,
+    Tcl_Obj *const *objv)
+{
+    if (objc != 3) {
+	Tcl_WrongNumArgs(interp, 1, objv, "class::option body");
+	return TCL_ERROR;
+    }
+    return Tcl_NRCallObjProc(interp, NRConfigBodyCmd, clientData, (int)objc, objv);
+}
+
 
 
 /*
