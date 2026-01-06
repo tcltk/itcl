@@ -105,7 +105,7 @@ Itcl_DeleteStack(
      *  built-in buffer) then free it.
      */
     if (stack->values != stack->space) {
-	Tcl_Free((char*)stack->values);
+	Tcl_Free(stack->values);
     }
     stack->values = NULL;
     stack->len = stack->max = 0;
@@ -136,7 +136,7 @@ Itcl_PushStack(
 		stack->len*sizeof(void *));
 
 	    if (stack->values != stack->space)
-		Tcl_Free((char*)stack->values);
+		Tcl_Free(stack->values);
 	}
 	stack->values = newStack;
     }
@@ -1061,7 +1061,7 @@ Itcl_DecodeScopedCommand(
 		    }
 		}
 	    }
-	    Tcl_Free((char*)listv);
+	    Tcl_Free(listv);
 
 	    if (result != TCL_OK) {
 		Tcl_AppendObjToErrorInfo(interp, Tcl_ObjPrintf(

@@ -312,7 +312,7 @@ Itcl_BiInstallHullCmd(
 	for (i = newObjc + numOptArgs - 1; i > 3; i--) {
 	    Tcl_DecrRefCount(newObjv[i]);
 	}
-	Tcl_Free((char *)newObjv);
+	Tcl_Free(newObjv);
 	if (classNamePtr != NULL) {
 	    Tcl_DecrRefCount(classNamePtr);
 	}

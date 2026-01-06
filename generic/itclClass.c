@@ -1004,7 +1004,7 @@ ItclFreeClass(
 	     *  If this is a common variable owned by this class,
 	     *  then release the class's hold on it. FIXME !!!
 	     */
-	    Tcl_Free((char*)vlookup);
+	    Tcl_Free(vlookup);
 	}
     }
 
@@ -1019,7 +1019,7 @@ ItclFreeClass(
 	    break;
 	}
 	clookupPtr = (ItclCmdLookup *)Tcl_GetHashValue(hPtr);
-	Tcl_Free((char *)clookupPtr);
+	Tcl_Free(clookupPtr);
 	Tcl_DeleteHashEntry(hPtr);
     }
     Tcl_DeleteHashTable(&iclsPtr->resolveCmds);
@@ -1175,8 +1175,8 @@ ItclFreeClass(
     Tcl_DecrRefCount(iclsPtr->fullNamePtr);
 
     if (iclsPtr->resolvePtr != NULL) {
-	Tcl_Free((char *)iclsPtr->resolvePtr->clientData);
-	Tcl_Free((char *)iclsPtr->resolvePtr);
+	Tcl_Free(iclsPtr->resolvePtr->clientData);
+	Tcl_Free(iclsPtr->resolvePtr);
     }
     Tcl_Free(iclsPtr);
 }
@@ -1877,7 +1877,7 @@ Itcl_BuildVirtualTables(
 	    break;
 	}
 	clookupPtr = (ItclCmdLookup *)Tcl_GetHashValue(hPtr);
-	Tcl_Free((char *)clookupPtr);
+	Tcl_Free(clookupPtr);
 	Tcl_DeleteHashEntry(hPtr);
     }
     Tcl_DeleteHashTable(&iclsPtr->resolveCmds);
@@ -2528,7 +2528,7 @@ ItclDeleteComponent(
 	}
     }
     Tcl_DeleteHashTable(&icPtr->keptOptions);
-    Tcl_Free((char*)icPtr);
+    Tcl_Free(icPtr);
 }
 
 /*
@@ -2592,5 +2592,5 @@ void ItclDeleteDelegatedFunction(
 	}
     }
     Tcl_DeleteHashTable(&idmPtr->exceptions);
-    Tcl_Free((char *)idmPtr);
+    Tcl_Free(idmPtr);
 }

@@ -302,9 +302,9 @@ InstallComponent(
 		    }
 		}
 	    }
-	    Tcl_Free((char *)argv2);
+	    Tcl_Free(argv2);
 	}
-	Tcl_Free((char *)argv);
+	Tcl_Free(argv);
 	for ( ;j < objc; j++) {
 	    newObjv[i] = objv[j];
 	    i++;
@@ -353,7 +353,7 @@ InstallComponent(
     ItclShowArgs(1, "InstallComponent EVAL", objc - startIdx + (numOpts * 2),
 	    newObjv);
     result = Tcl_EvalObjv(interp, objc - startIdx + (numOpts * 2), newObjv, 0);
-    Tcl_Free((char *)newObjv);
+    Tcl_Free(newObjv);
     if (result != TCL_OK) {
 	return result;
     }

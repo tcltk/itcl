@@ -385,7 +385,7 @@ ItclCreateObject(
 	Tcl_DecrRefCount(newObjv[2]);
 	Tcl_DecrRefCount(newObjv[3]);
 	Tcl_DecrRefCount(newObjv[4]);
-	Tcl_Free((char *)newObjv);
+	Tcl_Free(newObjv);
 	if (result != TCL_OK) {
 	    ioPtr->hadConstructorError = 15;
 	    goto errorReturn;
@@ -684,7 +684,7 @@ ItclCreateObject(
     }
     infoPtr->lastIoPtr = ioPtr;
     Tcl_DeleteHashTable(ioPtr->constructed);
-    Tcl_Free((char*)ioPtr->constructed);
+    Tcl_Free(ioPtr->constructed);
     ioPtr->constructed = NULL;
     ItclAddObjectsDictInfo(interp, ioPtr);
     Itcl_ReleaseData(ioPtr);
@@ -708,7 +708,7 @@ errorReturn:
     }
     if (ioPtr->constructed != NULL) {
 	Tcl_DeleteHashTable(ioPtr->constructed);
-	Tcl_Free((char*)ioPtr->constructed);
+	Tcl_Free(ioPtr->constructed);
 	ioPtr->constructed = NULL;
     }
     ItclDeleteObjectVariablesNamespace(interp, ioPtr);
@@ -970,7 +970,7 @@ ItclInitObjectVariables(
 			    }
 			}
 			Tcl_DStringFree(&buffer3);
-			Tcl_Free((char *)argv);
+			Tcl_Free(argv);
 			}
 		      }
 		    }
@@ -1289,7 +1289,7 @@ FinalizeDeleteObject(
     }
 
     Tcl_DeleteHashTable(contextIoPtr->destructed);
-    Tcl_Free((char*)contextIoPtr->destructed);
+    Tcl_Free(contextIoPtr->destructed);
     contextIoPtr->destructed = NULL;
     return result;
 }
@@ -2658,11 +2658,11 @@ FreeObject(
     ItclReleaseClass(ioPtr->iclsPtr);
     if (ioPtr->constructed) {
 	Tcl_DeleteHashTable(ioPtr->constructed);
-	Tcl_Free((char*)ioPtr->constructed);
+	Tcl_Free(ioPtr->constructed);
     }
     if (ioPtr->destructed) {
 	Tcl_DeleteHashTable(ioPtr->destructed);
-	Tcl_Free((char*)ioPtr->destructed);
+	Tcl_Free(ioPtr->destructed);
     }
     ItclDeleteObjectsDictInfo(ioPtr->interp, ioPtr);
     /*
@@ -2675,7 +2675,7 @@ FreeObject(
 	}
 	callContextPtr = (ItclCallContext *)Tcl_GetHashValue(hPtr);
 	Tcl_DeleteHashEntry(hPtr);
-	Tcl_Free((char *)callContextPtr);
+	Tcl_Free(callContextPtr);
     }
     FOREACH_HASH_VALUE(var, &ioPtr->objectVariables) {
 	Itcl_ReleaseVar(var);
@@ -2698,8 +2698,8 @@ FreeObject(
     }
     Tcl_DecrRefCount(ioPtr->varNsNamePtr);
     if (ioPtr->resolvePtr != NULL) {
-	Tcl_Free((char *)ioPtr->resolvePtr->clientData);
-	Tcl_Free((char*)ioPtr->resolvePtr);
+	Tcl_Free(ioPtr->resolvePtr->clientData);
+	Tcl_Free(ioPtr->resolvePtr);
     }
     Itcl_Free(ioPtr);
 }
@@ -2900,7 +2900,7 @@ ItclObjectCmd(
 
     result = Itcl_NRRunCallbacks(interp, callbackPtr);
     if (methodNamePtr != NULL) {
-	Tcl_Free((char *)newObjv);
+	Tcl_Free(newObjv);
 	Tcl_DecrRefCount(methodNamePtr);
     }
     if (myPtr != NULL) {
@@ -3177,7 +3177,7 @@ ExpandDelegateAs(
 	    Tcl_ListObjAppendElement(interp, listPtr,
 		    Tcl_NewStringObj(argv[j], TCL_INDEX_NONE));
 	}
-	Tcl_Free((char *)argv);
+	Tcl_Free(argv);
     } else {
 	if (idmPtr->usingPtr != NULL) {
 	    char *cp;

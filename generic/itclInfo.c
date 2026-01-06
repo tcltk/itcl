@@ -335,14 +335,14 @@ InfoGutsFinish(
 
     if (Itcl_GetStackSize(stackPtr) == 0) {
 	Itcl_DeleteStack(stackPtr);
-	Tcl_Free((char *)stackPtr);
+	Tcl_Free(stackPtr);
 	Tcl_DeleteHashEntry(hPtr);
     }
 
     if (cPtr != popped) {
 	Tcl_Panic("Context stack mismatch!");
     }
-    Tcl_Free((char *) cPtr);
+    Tcl_Free(cPtr);
 
     return result;
 }
@@ -1737,7 +1737,7 @@ Itcl_BiInfoVarsCmd2(
 	memcpy(newObjv+1, objv+1, sizeof(Tcl_Obj *)*(objc-1));
 	result = Tcl_EvalObjv(interp, objc, newObjv, 0);
 	Tcl_DecrRefCount(newObjv[0]);
-	Tcl_Free((char *)newObjv);
+	Tcl_Free(newObjv);
     } else {
 	listPtr = Tcl_NewListObj(0, NULL);
 	FOREACH_HASH_VALUE(ivPtr, &iclsPtr->variables) {

@@ -117,7 +117,7 @@ Itcl_ThisCmd(
 ItclShowArgs(1, "EVAL2", objc - 1, newObjv);
 			result = Tcl_EvalObjv(interp, objc - 1, newObjv, 0);
 			Tcl_DecrRefCount(newObjv[0]);
-			Tcl_Free((char *)newObjv);
+			Tcl_Free(newObjv);
 		    } else {
 		       Tcl_AppendResult(interp,
 			       "delegate has not yet been implemented in",
@@ -138,7 +138,7 @@ ItclShowArgs(1, "EVAL2", objc+1, newObjv);
 		    result = Tcl_EvalObjv(interp, objc+1, newObjv, 0);
 		    Tcl_DecrRefCount(newObjv[1]);
 		    Tcl_DecrRefCount(newObjv[0]);
-		    Tcl_Free((char *)newObjv);
+		    Tcl_Free(newObjv);
 		}
 		return result;
 	    }
@@ -1135,7 +1135,7 @@ Itcl_IsObjectCmd2(
      */
     if (cmd == NULL || ! Itcl_IsObject(cmd)) {
 	Tcl_SetObjResult(interp, Tcl_NewWideIntObj(0));
-	Tcl_Free((char *)cmdName);
+	Tcl_Free(cmdName);
 	return TCL_OK;
     }
 
@@ -1153,7 +1153,7 @@ Itcl_IsObjectCmd2(
 	}
 	if (! Itcl_ObjectIsa(contextIoPtr, iclsPtr)) {
 	    Tcl_SetObjResult(interp, Tcl_NewWideIntObj(0));
-	    Tcl_Free((char *)cmdName);
+	    Tcl_Free(cmdName);
 	    return TCL_OK;
 	}
 

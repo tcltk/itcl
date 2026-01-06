@@ -1302,7 +1302,7 @@ Itcl_EvalMemberCode(
 		result = (*mcode->cfunc.argCmd)(mcode->clientData,
 		    interp, objc, (const char **)argv);
 
-		Tcl_Free((char*)argv);
+		Tcl_Free(argv);
 	    }
 #endif /* TCL_NO_DEPRECATED */
 	}
@@ -1459,12 +1459,12 @@ Itcl_UnsetContext(
 	Tcl_Panic("frame context stack not empty!");
     }
     Itcl_DeleteStack(stackPtr);
-    Tcl_Free((char *) stackPtr);
+    Tcl_Free(stackPtr);
     Tcl_DeleteHashEntry(hPtr);
     if (contextPtr->refCount-- > 1) {
 	Tcl_Panic("frame context ref count not zero!");
     }
-    Tcl_Free((char *)contextPtr);
+    Tcl_Free(contextPtr);
 }
 
 int
@@ -2066,7 +2066,7 @@ Itcl_InvokeMethodIfExists(
 		    result = Tcl_EvalObjv(interp, objc + 2, newObjv, 0);
 		    Tcl_DecrRefCount(newObjv[1]);
 		    Tcl_DecrRefCount(newObjv[0]);
-		    Tcl_Free((char *)newObjv);
+		    Tcl_Free(newObjv);
 		    Itcl_PopCallFrame(interp);
 		}
 	    }
@@ -2545,7 +2545,7 @@ ItclAfterCallMethod(
     framePtr = (Tcl_CallFrame *)Itcl_PopStack(stackPtr);
     if (Itcl_GetStackSize(stackPtr) == 0) {
 	Itcl_DeleteStack(stackPtr);
-	Tcl_Free((char *) stackPtr);
+	Tcl_Free(stackPtr);
 	Tcl_DeleteHashEntry(hPtr);
     }
 
@@ -2555,7 +2555,7 @@ ItclAfterCallMethod(
     callContextPtr = (ItclCallContext *)Itcl_PopStack(stackPtr);
     if (Itcl_GetStackSize(stackPtr) == 0) {
 	Itcl_DeleteStack(stackPtr);
-	Tcl_Free((char *) stackPtr);
+	Tcl_Free(stackPtr);
 	Tcl_DeleteHashEntry(hPtr);
     }
     }
@@ -2605,10 +2605,10 @@ ItclAfterCallMethod(
 	    hPtr = Tcl_FindHashEntry(&callContextPtr->ioPtr->contextCache,
 		    (char *)callContextPtr->imPtr);
 	    if (hPtr == NULL) {
-		Tcl_Free((char *)callContextPtr);
+		Tcl_Free(callContextPtr);
 	    }
 	} else {
-	    Tcl_Free((char *)callContextPtr);
+	    Tcl_Free(callContextPtr);
 	}
     }
 

@@ -139,7 +139,7 @@ ItclCreateArgList(
 		    Tcl_AppendResult(interp, "argument #", buf,
 			    " has no name", (char *)NULL);
 		}
-		Tcl_Free((char *) defaultArgv);
+		Tcl_Free( defaultArgv);
 		result = TCL_ERROR;
 		break;
 	    }
@@ -148,7 +148,7 @@ ItclCreateArgList(
 		    "too many fields in argument specifier \"",
 		    argv[i], "\"",
 		    (char *)NULL);
-		Tcl_Free((char *) defaultArgv);
+		Tcl_Free( defaultArgv);
 		result = TCL_ERROR;
 		break;
 	    }
@@ -156,7 +156,7 @@ ItclCreateArgList(
 		Tcl_AppendResult(interp,
 			"bad argument name \"", defaultArgv[0], "\"",
 			(char *)NULL);
-		Tcl_Free((char *) defaultArgv);
+		Tcl_Free( defaultArgv);
 		result = TCL_ERROR;
 		break;
 	    }
@@ -192,9 +192,9 @@ ItclCreateArgList(
 	    }
 	    lastArglistPtr = arglistPtr;
 	    i++;
-	    Tcl_Free((char *) defaultArgv);
+	    Tcl_Free( defaultArgv);
 	}
-	Tcl_Free((char *) argv);
+	Tcl_Free( argv);
     }
     /*
      *  If anything went wrong, destroy whatever arguments were
@@ -231,7 +231,7 @@ ItclDeleteArgList(
 	    Tcl_DecrRefCount(currPtr->namePtr);
 	}
 	nextPtr = currPtr->nextPtr;
-	Tcl_Free((char *)currPtr);
+	Tcl_Free(currPtr);
     }
 }
 
@@ -371,7 +371,7 @@ ItclEnsembleSubCmd2(
     }
     result = Tcl_EvalObjv(interp, objc, newObjv, TCL_EVAL_INVOKE);
     Tcl_DecrRefCount(newObjv[0]);
-    Tcl_Free((char *)newObjv);
+    Tcl_Free(newObjv);
     Itcl_ResetRewriteEnsemble(interp, isRootEnsemble);
     return result;
 }

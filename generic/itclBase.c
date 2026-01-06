@@ -649,12 +649,12 @@ FreeItclObjectInfo(
 	Tcl_DeleteHashTable(&infoPtr->ensembleInfo->ensembles);
 	Tcl_DeleteHashTable(&infoPtr->ensembleInfo->subEnsembles);
 	ItclFinishEnsemble(infoPtr);
-	Tcl_Free((char *)infoPtr->ensembleInfo);
+	Tcl_Free(infoPtr->ensembleInfo);
 	infoPtr->ensembleInfo = NULL;
     }
 
     if (infoPtr->class_meta_type) {
-	Tcl_Free((char *)infoPtr->class_meta_type);
+	Tcl_Free(infoPtr->class_meta_type);
 	infoPtr->class_meta_type = NULL;
     }
 

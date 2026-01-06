@@ -258,12 +258,12 @@ Itcl_CreateEnsemble(
 	goto ensCreateFail;
     }
 
-    Tcl_Free((char*)nameArgv);
+    Tcl_Free(nameArgv);
     return TCL_OK;
 
 ensCreateFail:
     if (nameArgv) {
-	Tcl_Free((char*)nameArgv);
+	Tcl_Free(nameArgv);
     }
     Tcl_AppendObjToErrorInfo(interp, Tcl_ObjPrintf(
 	    "\n    (while creating ensemble \"%s\")",
@@ -345,12 +345,12 @@ Itcl_AddEnsemblePart2(
 	goto ensPartFail;
     }
 
-    Tcl_Free((char*)nameArgv);
+    Tcl_Free(nameArgv);
     return TCL_OK;
 
 ensPartFail:
     if (nameArgv) {
-	Tcl_Free((char*)nameArgv);
+	Tcl_Free(nameArgv);
     }
     Tcl_AppendObjToErrorInfo(interp, Tcl_ObjPrintf(
 	    "\n    (while adding to ensemble \"%s\")",
@@ -468,12 +468,12 @@ Itcl_GetEnsemblePart(
     }
 
     Itcl_DiscardInterpState(state);
-    Tcl_Free((char *)nameArgv);
+    Tcl_Free(nameArgv);
     return 1;
 
 ensGetFail:
     if (nameArgv) {
-	Tcl_Free((char *)nameArgv);
+	Tcl_Free(nameArgv);
     }
     Itcl_RestoreInterpState(interp, state);
     return 0;
@@ -569,12 +569,12 @@ Itcl_GetEnsembleUsage(
     GetEnsembleUsage(interp, ensData, objPtr);
 
     Itcl_DiscardInterpState(state);
-    Tcl_Free((char *)nameArgv);
+    Tcl_Free(nameArgv);
     return 1;
 
 ensUsageFail:
     if (nameArgv) {
-	Tcl_Free((char *)nameArgv);
+	Tcl_Free(nameArgv);
     }
     Itcl_RestoreInterpState(interp, state);
     return 0;
@@ -1060,7 +1060,7 @@ DeleteEnsemble(
 	DeleteEnsemblePart(ensData->parts[0]);
     }
     Tcl_DecrRefCount(ensData->namePtr);
-    Tcl_Free((char*)ensData->parts);
+    Tcl_Free(ensData->parts);
     ensData->parts = NULL;
     ensData->numParts = 0;
     infoPtr = (ItclObjectInfo *)Tcl_GetAssocData(ensData->interp, ITCL_INTERP_DATA, NULL);
@@ -1069,7 +1069,7 @@ DeleteEnsemble(
 	    Tcl_DeleteHashEntry(hPtr);
 	}
     }
-    Tcl_Free((char*)ensData);
+    Tcl_Free(ensData);
 }
 
 
@@ -1234,7 +1234,7 @@ CreateEnsemblePart(
 	size = ensData->maxParts*sizeof(EnsemblePart*);
 	partList = (EnsemblePart**)Tcl_Alloc((unsigned)2*size);
 	memcpy(partList, ensData->parts, (size_t)size);
-	Tcl_Free((char*)ensData->parts);
+	Tcl_Free(ensData->parts);
 
 	ensData->parts = partList;
 	ensData->maxParts *= 2;
@@ -1381,7 +1381,7 @@ DeleteEnsemblePart(
 	Tcl_Free(ensPart->usage);
     }
     Tcl_Free(ensPart->name);
-    Tcl_Free((char*)ensPart);
+    Tcl_Free(ensPart);
 }
 
 
@@ -1943,7 +1943,7 @@ DeleteEnsParser(
     EnsembleParser* ensInfo = (EnsembleParser*)clientData;
 
     Tcl_DeleteInterp(ensInfo->parser);
-    Tcl_Free((char*)ensInfo);
+    Tcl_Free(ensInfo);
 }
 
 

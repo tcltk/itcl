@@ -1337,7 +1337,7 @@ PrepareCreateObject(
 	    }
 	}
     }
-    Tcl_Free((char *)newObjv);
+    Tcl_Free(newObjv);
     return result;
 }
 /*
@@ -1430,7 +1430,7 @@ ItclBiClassUnknownCmd(
 		    ItclShowArgs(1, "UK EVAL1", objc, newObjv);
 		    result = Tcl_EvalObjv(interp, objc, newObjv, 0);
 		    Tcl_DecrRefCount(newObjv[0]);
-		    Tcl_Free((char *)newObjv);
+		    Tcl_Free(newObjv);
 		    return result;
 		}
 	    }
@@ -1594,7 +1594,7 @@ ItclBiClassUnknownCmd(
 	    if (useComponent) {
 		Tcl_DecrRefCount(newObjv[0]);
 	    }
-	    Tcl_Free((char *)newObjv);
+	    Tcl_Free(newObjv);
 	    if (listPtr != NULL) {
 		Tcl_DecrRefCount(listPtr);
 	    }
@@ -1696,7 +1696,7 @@ ItclUnknownGuts(
 		    memcpy(newObjv+1, objv+1, sizeof(Tcl_Obj *) * (objc-1));
 		    result = Tcl_EvalObjv(interp, objc, newObjv, 0);
 		    Tcl_DecrRefCount(newObjv[0]);
-		    Tcl_Free((char *)newObjv);
+		    Tcl_Free(newObjv);
 		    return result;
 		}
 	    }
@@ -1893,7 +1893,7 @@ ItclUnknownGuts(
     if (listPtr != NULL) {
 	Tcl_DecrRefCount(listPtr);
     }
-    Tcl_Free((char *)newObjv);
+    Tcl_Free(newObjv);
     if (result == TCL_OK) {
 	return TCL_OK;
     }
@@ -2073,7 +2073,7 @@ ItclExtendedConfigure(
 		result = Tcl_EvalObjv(interp, objc+1, newObjv, TCL_EVAL_DIRECT);
 		Tcl_DecrRefCount(newObjv[0]);
 		Tcl_DecrRefCount(newObjv[1]);
-		Tcl_Free((char *)newObjv);
+		Tcl_Free(newObjv);
 		Tcl_DecrRefCount(objPtr);
 		if (oPtr != NULL) {
 		    infoPtr->currContextIclsPtr = NULL;
@@ -2345,7 +2345,7 @@ ItclExtendedConfigure(
 	    Tcl_DecrRefCount(newObjv[2]);
 	    Tcl_DecrRefCount(newObjv[1]);
 	    Tcl_DecrRefCount(newObjv[0]);
-	    Tcl_Free((char *)newObjv);
+	    Tcl_Free(newObjv);
 	    icPtr->ivPtr->iclsPtr->infoPtr->currIdoPtr = NULL;
 	    if (oPtr != NULL) {
 		infoPtr->currContextIclsPtr = NULL;
@@ -2386,7 +2386,7 @@ ItclExtendedConfigure(
 		for (j = 0; j < objc; j++) {
 		    Tcl_DecrRefCount(newObjv[j]);
 		}
-		Tcl_Free((char *)newObjv);
+		Tcl_Free(newObjv);
 		if (result == TCL_OK) {
 		  return TCL_OK;
 		}
@@ -2424,7 +2424,7 @@ ItclExtendedConfigure(
 		for (j = 0; j < objc; j++) {
 		    Tcl_DecrRefCount(newObjv[j]);
 		}
-		Tcl_Free((char *)newObjv);
+		Tcl_Free(newObjv);
 		if (result == TCL_OK) {
 		  continue;
 		}
@@ -2469,7 +2469,7 @@ ItclExtendedConfigure(
 		    Tcl_DecrRefCount(newObjv[2]);
 		    Tcl_DecrRefCount(newObjv[1]);
 		    Tcl_DecrRefCount(newObjv[0]);
-		    Tcl_Free((char *)newObjv);
+		    Tcl_Free(newObjv);
 		    icPtr->ivPtr->iclsPtr->infoPtr->currIdoPtr = NULL;
 		    if (oPtr != NULL) {
 			infoPtr->currContextIclsPtr = NULL;
@@ -2528,7 +2528,7 @@ ItclExtendedConfigure(
 	    result = Tcl_EvalObjv(interp, 3, newObjv, TCL_EVAL_DIRECT);
 	    Itcl_SetCallFrameNamespace(interp, saveNsPtr);
 	    infoPtr->inOptionHandling = 0;
-	    Tcl_Free((char *)newObjv);
+	    Tcl_Free(newObjv);
 	    if (result != TCL_OK) {
 		break;
 	    }
@@ -2584,7 +2584,7 @@ ItclExtendedConfigure(
 	    Tcl_DecrRefCount(newObjv[0]);
 	    Tcl_DecrRefCount(newObjv[1]);
 	    Tcl_DecrRefCount(newObjv[2]);
-	    Tcl_Free((char *)newObjv);
+	    Tcl_Free(newObjv);
 	    Itcl_SetCallFrameNamespace(interp, saveNsPtr);
 	    Tcl_DecrRefCount(configureMethodPtr);
 	    if (result != TCL_OK) {
@@ -2795,7 +2795,7 @@ ItclExtendedCget(
 	    if (oPtr != NULL) {
 		infoPtr->currContextIclsPtr = NULL;
 	    }
-	    Tcl_Free((char *)newObjv);
+	    Tcl_Free(newObjv);
 	    return result;
 	} else {
 	    Tcl_ResetResult(interp);
@@ -2829,7 +2829,7 @@ ItclExtendedCget(
 	result = Tcl_EvalObjv(interp, objc, newObjv, TCL_EVAL_DIRECT);
 	Tcl_DecrRefCount(newObjv[1]);
 	Tcl_DecrRefCount(newObjv[0]);
-	Tcl_Free((char *)newObjv);
+	Tcl_Free(newObjv);
     } else {
 	val = ItclGetInstanceVar(interp, "itcl_options",
 		Tcl_GetString(ioptPtr->namePtr),
@@ -2953,7 +2953,7 @@ ItclExtendedSetGet(
 	Tcl_DecrRefCount(newObjv[0]);
 	Tcl_DecrRefCount(newObjv[1]);
 	Tcl_DecrRefCount(newObjv[2]);
-	Tcl_Free((char *)newObjv);
+	Tcl_Free(newObjv);
     }
     if (result == TCL_OK) {
 	Tcl_GetIntFromObj(interp, Tcl_GetObjResult(interp), &setValue);
@@ -3077,7 +3077,7 @@ Itcl_BiInstallComponentCmd(
 	memcpy(newObjv, objv + 3, sizeof(Tcl_Obj *) * ((objc - 3)));
 	ItclShowArgs(1, "BiInstallComponent", objc - 3, newObjv);
 	result = Tcl_EvalObjv(interp, objc - 3, newObjv, 0);
-	Tcl_Free((char *)newObjv);
+	Tcl_Free(newObjv);
 	if (result != TCL_OK) {
 	    return result;
 	}
@@ -3098,7 +3098,7 @@ Itcl_BiInstallComponentCmd(
 	memcpy(newObjv, objv + 1, sizeof(Tcl_Obj *) * ((objc - 1)));
 	result = Tcl_EvalObjv(interp, objc, newObjv, 0);
 	Tcl_DecrRefCount(newObjv[0]);
-	Tcl_Free((char *)newObjv);
+	Tcl_Free(newObjv);
 	return result;
     }
     return TCL_OK;
@@ -3244,7 +3244,7 @@ Itcl_BiCallInstanceCmd(
     memcpy(newObjv + 1, objv + 2, sizeof(Tcl_Obj *) * (objc - 2));
     result = Tcl_EvalObjv(interp, objc - 1, newObjv, 0);
     Tcl_DecrRefCount(newObjv[0]);
-    Tcl_Free((char *)newObjv);
+    Tcl_Free(newObjv);
     return result;
 }
 /*

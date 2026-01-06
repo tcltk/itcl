@@ -15,6 +15,10 @@ typedef struct Tcl_Proc_ *Tcl_Proc;
 struct Tcl_Resolve;
 #endif
 
+#if (TCL_MAJOR_VERSION == 8) && !defined(Tcl_ObjCmdProc2)
+#define Tcl_ObjCmdProc2 Tcl_ObjCmdProc
+#endif
+
 #define Tcl_GetOriginalCommand _Tcl_GetOriginalCommand
 #define Tcl_CreateProc _Tcl_CreateProc
 #define Tcl_ProcDeleteProc _Tcl_ProcDeleteProc

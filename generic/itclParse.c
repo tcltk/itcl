@@ -2277,7 +2277,7 @@ ItclInitClassCommon(
 		return TCL_ERROR;
 	    }
 	}
-	Tcl_Free((char *)argv);
+	Tcl_Free(argv);
     }
     Tcl_DStringFree(&buffer);
     return result;
@@ -2569,7 +2569,7 @@ Itcl_ClassFilterCmd(
     Tcl_DecrRefCount(newObjv[0]);
     Tcl_DecrRefCount(newObjv[1]);
     Tcl_DecrRefCount(newObjv[2]);
-    Tcl_Free((char *)newObjv);
+    Tcl_Free(newObjv);
     return result;
 }
 
@@ -2979,10 +2979,10 @@ ItclParseOption(
     result = TCL_OK;
 errorOut:
     if (argv != NULL) {
-	Tcl_Free((char *)argv);
+	Tcl_Free(argv);
     }
     if (newObjv != NULL) {
-	Tcl_Free((char *)newObjv);
+	Tcl_Free(newObjv);
     }
     return result;
 }
@@ -3252,7 +3252,7 @@ ItclHandleClassComponent(
 	Tcl_DecrRefCount(newObjv[1]);
 	Tcl_DecrRefCount(newObjv[2]);
 	Tcl_DecrRefCount(newObjv[3]);
-	Tcl_Free((char *)newObjv);
+	Tcl_Free(newObjv);
     }
     if (publ != NULL) {
 	icPtr->flags |= ITCL_COMPONENT_PUBLIC;
@@ -3275,7 +3275,7 @@ ItclHandleClassComponent(
 	Tcl_DecrRefCount(newObjv[1]);
 	Tcl_DecrRefCount(newObjv[2]);
 	Tcl_DecrRefCount(newObjv[3]);
-	Tcl_Free((char *)newObjv);
+	Tcl_Free(newObjv);
     }
     if (icPtrPtr != NULL) {
 	*icPtrPtr = icPtr;
@@ -3389,7 +3389,7 @@ ItclCreateDelegatedFunction(
 	    Tcl_CreateHashEntry(&idmPtr->exceptions, (char *)objPtr,
 		    &isNew);
 	}
-	Tcl_Free((char *) argv);
+	Tcl_Free(argv);
     }
     if (idmPtrPtr != NULL) {
 	*idmPtrPtr = idmPtr;
@@ -3699,19 +3699,19 @@ Itcl_HandleDelegateOptionCmd(
     if ((argc < 1) || (isStarOption && (argc > 1))) {
 	Tcl_AppendResult(interp, "<optionDef> must be either \"*\" or ",
 	       "\"<optionName> <resourceName> <className>\"", (char *)NULL);
-	Tcl_Free((char *)argv);
+	Tcl_Free(argv);
 	return TCL_ERROR;
     }
     if (isStarOption && (argc > 3)) {
 	Tcl_AppendResult(interp, "<optionDef> syntax should be: ",
 	       "\"<optionName> <resourceName> <className>\"", (char *)NULL);
-	Tcl_Free((char *)argv);
+	Tcl_Free(argv);
 	return TCL_ERROR;
     }
     if ((*option != '-') && !isStarOption) {
 	Tcl_AppendResult(interp, "bad delegated option name \"", option,
 		"\", options must start with a \"-\"", (char *)NULL);
-	Tcl_Free((char *)argv);
+	Tcl_Free(argv);
 	return TCL_ERROR;
     }
     /*
@@ -3722,14 +3722,14 @@ Itcl_HandleDelegateOptionCmd(
 	Tcl_AppendResult(interp,
 		"bad option name \"", option,
 		"\", option names must not contain \"::\"", (char *)NULL);
-	Tcl_Free((char *)argv);
+	Tcl_Free(argv);
 	return TCL_ERROR;
     }
     if (strstr(option, " ")) {
 	Tcl_AppendResult(interp,
 		"bad option name \"", option,
 		"\", option names must not contain \" \"", (char *)NULL);
-	Tcl_Free((char *)argv);
+	Tcl_Free(argv);
 	return TCL_ERROR;
     }
     cp = option;
@@ -3737,7 +3737,7 @@ Itcl_HandleDelegateOptionCmd(
 	if (isupper(UCHAR(*cp))) {
 	    Tcl_AppendResult(interp, "bad option name \"", option, "\" ",
 		    ", options must not contain uppercase characters", (char *)NULL);
-	    Tcl_Free((char *)argv);
+	    Tcl_Free(argv);
 	    return TCL_ERROR;
 	}
 	cp++;
@@ -3899,7 +3899,7 @@ Itcl_HandleDelegateOptionCmd(
 	Tcl_IncrRefCount(idoPtr->asPtr);
     }
     if (exceptionsPtr != NULL) {
-	Tcl_Free((char *)argv);
+	Tcl_Free(argv);
 	argv = NULL;
 	if (Tcl_SplitList(interp, Tcl_GetString(exceptionsPtr), &argc, &argv)
 		!= TCL_OK) {
@@ -3915,7 +3915,7 @@ Itcl_HandleDelegateOptionCmd(
     if (idoPtrPtr != NULL) {
 	*idoPtrPtr = idoPtr;
     }
-    Tcl_Free((char *)argv);
+    Tcl_Free(argv);
     ItclAddDelegatedOptionDictInfo(interp, iclsPtr, idoPtr);
     return TCL_OK;
 errorOut2:
@@ -3929,7 +3929,7 @@ errorOut1:
 	Tcl_DecrRefCount(classNamePtr);
     }
     if (argv) {
-	Tcl_Free((char *)argv);
+	Tcl_Free(argv);
     }
     return TCL_ERROR;
 }
@@ -4131,7 +4131,7 @@ delegate typemethod * ?to <componentName>? ?using <pattern>? ?except <typemethod
 		    typeMethodName, "...\", \"", typeMethodName,
 		    "\" has been defined locally.", (char *)NULL);
 	    Tcl_DeleteHashTable(&idmPtr->exceptions);
-	    Tcl_Free((char *)idmPtr);
+	    Tcl_Free(idmPtr);
 	    Tcl_DecrRefCount(typeMethodNamePtr);
 	    return TCL_ERROR;
 	}
@@ -4155,7 +4155,7 @@ delegate typemethod * ?to <componentName>? ?using <pattern>? ?except <typemethod
 		hPtr = Tcl_CreateHashEntry(&idmPtr->exceptions, (char *)objPtr,
 			&isNew);
 	    }
-	    Tcl_Free((char *) argv);
+	    Tcl_Free(argv);
 	}
     }
     idmPtr->icPtr = icPtr;
