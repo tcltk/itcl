@@ -271,7 +271,7 @@ Itcl_CreateClass(
     /*
      *  Allocate class definition data.
      */
-    iclsPtr = (ItclClass*)ckalloc(sizeof(ItclClass));
+    iclsPtr = (ItclClass*)Tcl_Alloc(sizeof(ItclClass));
     memset(iclsPtr, 0, sizeof(ItclClass));
     iclsPtr->interp = interp;
     iclsPtr->infoPtr = infoPtr;
@@ -294,11 +294,11 @@ Itcl_CreateClass(
     Itcl_InitList(&iclsPtr->bases);
     Itcl_InitList(&iclsPtr->derived);
 
-    resolveInfoPtr = (ItclResolveInfo *) ckalloc(sizeof(ItclResolveInfo));
+    resolveInfoPtr = (ItclResolveInfo *)Tcl_Alloc(sizeof(ItclResolveInfo));
     memset(resolveInfoPtr, 0, sizeof(ItclResolveInfo));
     resolveInfoPtr->flags = ITCL_RESOLVE_CLASS;
     resolveInfoPtr->iclsPtr = iclsPtr;
-    iclsPtr->resolvePtr = (Tcl_Resolve *)ckalloc(sizeof(Tcl_Resolve));
+    iclsPtr->resolvePtr = (Tcl_Resolve *)Tcl_Alloc(sizeof(Tcl_Resolve));
     iclsPtr->resolvePtr->cmdProcPtr = Itcl_CmdAliasProc;
     iclsPtr->resolvePtr->varProcPtr = Itcl_VarAliasProc;
     iclsPtr->resolvePtr->clientData = resolveInfoPtr;
@@ -1004,7 +1004,7 @@ ItclFreeClass(
 	     *  If this is a common variable owned by this class,
 	     *  then release the class's hold on it. FIXME !!!
 	     */
-	    ckfree((char*)vlookup);
+	    Tcl_Free(vlookup);
 	}
     }
 
@@ -1019,7 +1019,7 @@ ItclFreeClass(
 	    break;
 	}
 	clookupPtr = (ItclCmdLookup *)Tcl_GetHashValue(hPtr);
-	ckfree((char *)clookupPtr);
+	Tcl_Free(clookupPtr);
 	Tcl_DeleteHashEntry(hPtr);
     }
     Tcl_DeleteHashTable(&iclsPtr->resolveCmds);
@@ -1175,10 +1175,10 @@ ItclFreeClass(
     Tcl_DecrRefCount(iclsPtr->fullNamePtr);
 
     if (iclsPtr->resolvePtr != NULL) {
-	ckfree((char *)iclsPtr->resolvePtr->clientData);
-	ckfree((char *)iclsPtr->resolvePtr);
+	Tcl_Free(iclsPtr->resolvePtr->clientData);
+	Tcl_Free(iclsPtr->resolvePtr);
     }
-    ckfree(iclsPtr);
+    Tcl_Free(iclsPtr);
 }
 
 
@@ -1726,7 +1726,7 @@ ItclResolveVarEntry(
 		    if (newEntry) {
 			if (!vlookup) {
 			    /* create new (or overwrite) */
-			    vlookup = (ItclVarLookup *)ckalloc(sizeof(ItclVarLookup));
+			    vlookup = (ItclVarLookup *)Tcl_Alloc(sizeof(ItclVarLookup));
 			    vlookup->usage = 0;
 
 			setResVar:
@@ -1867,7 +1867,7 @@ Itcl_BuildVirtualTables(
 	    break;
 	}
 	clookupPtr = (ItclCmdLookup *)Tcl_GetHashValue(hPtr);
-	ckfree((char *)clookupPtr);
+	Tcl_Free(clookupPtr);
 	Tcl_DeleteHashEntry(hPtr);
     }
     Tcl_DeleteHashTable(&iclsPtr->resolveCmds);
@@ -1906,7 +1906,7 @@ Itcl_BuildVirtualTables(
 			(char *)objPtr, &newEntry);
 
 		if (newEntry) {
-		    clookupPtr = (ItclCmdLookup *)ckalloc(sizeof(ItclCmdLookup));
+		    clookupPtr = (ItclCmdLookup *)Tcl_Alloc(sizeof(ItclCmdLookup));
 		    memset(clookupPtr, 0, sizeof(ItclCmdLookup));
 		    clookupPtr->imPtr = imPtr;
 		    Tcl_SetHashValue(hPtr, clookupPtr);
@@ -2150,7 +2150,7 @@ ItclCreateMethodVariable(
     /*
      *  If everything looks good, create the option definition.
      */
-    imvPtr = (ItclMethodVariable*)ckalloc(sizeof(ItclMethodVariable));
+    imvPtr = (ItclMethodVariable*)Tcl_Alloc(sizeof(ItclMethodVariable));
     memset(imvPtr, 0, sizeof(ItclMethodVariable));
     imvPtr->iclsPtr      = ivPtr->iclsPtr;
     imvPtr->protection   = Itcl_Protection(interp, 0);
@@ -2518,7 +2518,7 @@ ItclDeleteComponent(
 	}
     }
     Tcl_DeleteHashTable(&icPtr->keptOptions);
-    ckfree((char*)icPtr);
+    Tcl_Free(icPtr);
 }
 
 /*
@@ -2582,5 +2582,5 @@ void ItclDeleteDelegatedFunction(
 	}
     }
     Tcl_DeleteHashTable(&idmPtr->exceptions);
-    ckfree((char *)idmPtr);
+    Tcl_Free(idmPtr);
 }

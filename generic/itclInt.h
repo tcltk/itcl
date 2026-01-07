@@ -43,6 +43,18 @@
  * quotation marks).
  */
 
+#if (TCL_MAJOR_VERSION == 8)
+#undef Tcl_Free
+#undef Tcl_Realloc
+#if defined(USE_TCL_STUBS)
+#   define Tcl_Free(p) tclStubsPtr->tcl_Free((char *)(p))
+#   define Tcl_Realloc(p,m) tclStubsPtr->tcl_Realloc((char *)(p),(m))
+#else
+#   define Tcl_Free(p) Tcl_Free((char *)(p))
+#   define Tcl_Realloc(p,m) Tcl_Realloc((char *)(p),(m))
+#endif
+#endif
+
 #ifndef STRINGIFY
 #  define STRINGIFY(x) STRINGIFY1(x)
 #  define STRINGIFY1(x) #x

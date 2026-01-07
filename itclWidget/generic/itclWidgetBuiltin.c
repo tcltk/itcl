@@ -295,7 +295,7 @@ Itcl_BiInstallHullCmd(
 	}
 	numOptArgs = objc - optsStartIdx;
 	newObjc = 4;
-	newObjv = (Tcl_Obj **)ckalloc(sizeof(Tcl_Obj *) *
+	newObjv = (Tcl_Obj **)Tcl_Alloc(sizeof(Tcl_Obj *) *
 		(newObjc + numOptArgs));
 	newObjv[0] = Tcl_NewStringObj(widgetType, TCL_INDEX_NONE);
 	newObjv[1] = Tcl_NewStringObj(widgetName, TCL_INDEX_NONE);
@@ -312,7 +312,7 @@ Itcl_BiInstallHullCmd(
 	for (i = newObjc + numOptArgs - 1; i > 3; i--) {
 	    Tcl_DecrRefCount(newObjv[i]);
 	}
-	ckfree((char *)newObjv);
+	Tcl_Free(newObjv);
 	if (classNamePtr != NULL) {
 	    Tcl_DecrRefCount(classNamePtr);
 	}
@@ -426,7 +426,7 @@ fprintf(stderr, "REN!%s!%s!\n", widgetName, Tcl_DStringValue(&buffer));
 			idoPtr->classNamePtr == NULL ? NULL :
 			Tcl_GetString(idoPtr->classNamePtr));
 		if (val != NULL) {
-		    newObjv = (Tcl_Obj **)ckalloc(sizeof(Tcl_Obj *) * 4);
+		    newObjv = (Tcl_Obj **)Tcl_Alloc(sizeof(Tcl_Obj *) * 4);
 		    component = Itcl_GetInstanceVar(interp,
 			    Tcl_GetString(idoPtr->icPtr->namePtr),
 			    contextIoPtr, contextIoPtr->iclsPtr);

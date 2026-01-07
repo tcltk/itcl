@@ -330,14 +330,14 @@ InfoGutsFinish(
 
     if (Itcl_GetStackSize(stackPtr) == 0) {
 	Itcl_DeleteStack(stackPtr);
-	ckfree((char *)stackPtr);
+	Tcl_Free(stackPtr);
 	Tcl_DeleteHashEntry(hPtr);
     }
 
     if (cPtr != popped) {
 	Tcl_Panic("Context stack mismatch!");
     }
-    ckfree((char *) cPtr);
+    Tcl_Free(cPtr);
 
     return result;
 }
@@ -374,14 +374,14 @@ ItclInfoGuts(
 
     hPtr = Tcl_CreateHashEntry(&infoPtr->frameContext, (char *)framePtr, &isNew);
     if (isNew) {
-	stackPtr = (Itcl_Stack *) ckalloc(sizeof(Itcl_Stack));
+	stackPtr = (Itcl_Stack *)Tcl_Alloc(sizeof(Itcl_Stack));
 	Itcl_InitStack(stackPtr);
 	Tcl_SetHashValue(hPtr, stackPtr);
     } else {
 	stackPtr = (Itcl_Stack *) Tcl_GetHashValue(hPtr);
     }
 
-    cPtr = (ItclCallContext *) ckalloc(sizeof(ItclCallContext));
+    cPtr = (ItclCallContext *)Tcl_Alloc(sizeof(ItclCallContext));
     cPtr->objectFlags = ITCL_OBJECT_ROOT_METHOD;
     cPtr->nsPtr = NULL;
     cPtr->ioPtr = ioPtr;
@@ -1660,13 +1660,13 @@ Itcl_BiInfoVarsCmd(
 	    }
     }
     if (useGlobalInfo) {
-	newObjv = (Tcl_Obj **)ckalloc(sizeof(Tcl_Obj *)*(objc));
+	newObjv = (Tcl_Obj **)Tcl_Alloc(sizeof(Tcl_Obj *)*(objc));
 	newObjv[0] = Tcl_NewStringObj("::tcl::info::vars", TCL_INDEX_NONE);
 	Tcl_IncrRefCount(newObjv[0]);
 	memcpy(newObjv+1, objv+1, sizeof(Tcl_Obj *)*(objc-1));
 	result = Tcl_EvalObjv(interp, objc, newObjv, 0);
 	Tcl_DecrRefCount(newObjv[0]);
-	ckfree((char *)newObjv);
+	Tcl_Free(newObjv);
     } else {
 	listPtr = Tcl_NewListObj(0, NULL);
 	FOREACH_HASH_VALUE(ivPtr, &iclsPtr->variables) {

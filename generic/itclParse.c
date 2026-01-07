@@ -223,7 +223,7 @@ Itcl_ParseInit(
     for (i=0 ; protectionCmds[i].name ; i++) {
 	Tcl_DStringAppend(&buffer, "::itcl::parser::", 16);
 	Tcl_DStringAppend(&buffer, protectionCmds[i].name, TCL_INDEX_NONE);
-	pInfoPtr = (ProtectionCmdInfo*)ckalloc(sizeof(ProtectionCmdInfo));
+	pInfoPtr = (ProtectionCmdInfo*)Tcl_Alloc(sizeof(ProtectionCmdInfo));
 	pInfoPtr->pLevel = protectionCmds[i].protection;
 	pInfoPtr->infoPtr = infoPtr;
 	Tcl_CreateObjCommand(interp, Tcl_DStringValue(&buffer),
@@ -2176,7 +2176,7 @@ ItclInitClassCommon(
 		return TCL_ERROR;
 	    }
 	}
-	ckfree((char *)argv);
+	Tcl_Free(argv);
     }
     Tcl_DStringFree(&buffer);
     return result;
@@ -2353,14 +2353,14 @@ Itcl_ClassCommonCmd(
  *  This callback will free() up memory dynamically allocated
  *  and passed as the ClientData argument to Tcl_CreateObjCommand.
  *  This callback is required because one can not simply pass
- *  a pointer to the free() or ckfree() to Tcl_CreateObjCommand.
+ *  a pointer to the free() or Tcl_Free() to Tcl_CreateObjCommand.
  * ------------------------------------------------------------------------
  */
 static void
 ItclFreeParserCommandData(
     void *cdata)  /* client data to be destroyed */
 {
-    ckfree(cdata);
+    Tcl_Free(cdata);
 }
 
 /*
@@ -2445,7 +2445,7 @@ Itcl_ClassFilterCmd(
 	Tcl_WrongNumArgs(interp, 1, objv, "<filterName> ?<filterName> ...?");
 	return TCL_ERROR;
     }
-    newObjv = (Tcl_Obj **)ckalloc(sizeof(Tcl_Obj *)*(objc+2));
+    newObjv = (Tcl_Obj **)Tcl_Alloc(sizeof(Tcl_Obj *)*(objc+2));
     newObjv[0] = Tcl_NewStringObj("::oo::define", TCL_INDEX_NONE);
     Tcl_IncrRefCount(newObjv[0]);
     newObjv[1] = Tcl_NewStringObj(Tcl_GetString(iclsPtr->fullNamePtr), TCL_INDEX_NONE);
@@ -2458,7 +2458,7 @@ ItclShowArgs(1, "Itcl_ClassFilterCmd2", objc+2, newObjv);
     Tcl_DecrRefCount(newObjv[0]);
     Tcl_DecrRefCount(newObjv[1]);
     Tcl_DecrRefCount(newObjv[2]);
-    ckfree((char *)newObjv);
+    Tcl_Free(newObjv);
     return result;
 }
 
@@ -2654,7 +2654,7 @@ ItclParseOption(
 	    goto errorOut;
 	}
     }
-    newObjv = (Tcl_Obj **)ckalloc(sizeof(Tcl_Obj *)*objc);
+    newObjv = (Tcl_Obj **)Tcl_Alloc(sizeof(Tcl_Obj *)*objc);
     newObjv[newObjc] = objv[1];
     newObjc++;
     for (i=2; i<objc; i++) {
@@ -2868,10 +2868,10 @@ ItclParseOption(
     result = TCL_OK;
 errorOut:
     if (argv != NULL) {
-	ckfree((char *)argv);
+	Tcl_Free(argv);
     }
     if (newObjv != NULL) {
-	ckfree((char *)newObjv);
+	Tcl_Free(newObjv);
     }
     return result;
 }
@@ -2982,7 +2982,7 @@ ItclCreateComponent(
 	    }
 	}
 	ivPtr->flags |= ITCL_COMPONENT_VAR;
-	icPtr = (ItclComponent *)ckalloc(sizeof(ItclComponent));
+	icPtr = (ItclComponent *)Tcl_Alloc(sizeof(ItclComponent));
 	memset(icPtr, 0, sizeof(ItclComponent));
 	Tcl_InitObjHashTable(&icPtr->keptOptions);
 	icPtr->namePtr = componentPtr;
@@ -3119,7 +3119,7 @@ ItclHandleClassComponent(
     if (inherit) {
 	icPtr->flags |= ITCL_COMPONENT_INHERIT;
 	newObjc = 4;
-	newObjv = (Tcl_Obj **)ckalloc(sizeof(Tcl_Obj*)*newObjc);
+	newObjv = (Tcl_Obj **)Tcl_Alloc(sizeof(Tcl_Obj*)*newObjc);
 	newObjv[0] = Tcl_NewStringObj("delegate::option", TCL_INDEX_NONE);
 	Tcl_IncrRefCount(newObjv[0]);
 	newObjv[1] = Tcl_NewStringObj("*", TCL_INDEX_NONE);
@@ -3141,12 +3141,12 @@ ItclHandleClassComponent(
 	Tcl_DecrRefCount(newObjv[1]);
 	Tcl_DecrRefCount(newObjv[2]);
 	Tcl_DecrRefCount(newObjv[3]);
-	ckfree((char *)newObjv);
+	Tcl_Free(newObjv);
     }
     if (publ != NULL) {
 	icPtr->flags |= ITCL_COMPONENT_PUBLIC;
 	newObjc = 4;
-	newObjv = (Tcl_Obj **)ckalloc(sizeof(Tcl_Obj*)*newObjc);
+	newObjv = (Tcl_Obj **)Tcl_Alloc(sizeof(Tcl_Obj*)*newObjc);
 	newObjv[0] = Tcl_NewStringObj("delegate::method", TCL_INDEX_NONE);
 	Tcl_IncrRefCount(newObjv[0]);
 	newObjv[1] = Tcl_NewStringObj(publ, TCL_INDEX_NONE);
@@ -3164,7 +3164,7 @@ ItclHandleClassComponent(
 	Tcl_DecrRefCount(newObjv[1]);
 	Tcl_DecrRefCount(newObjv[2]);
 	Tcl_DecrRefCount(newObjv[3]);
-	ckfree((char *)newObjv);
+	Tcl_Free(newObjv);
     }
     if (icPtrPtr != NULL) {
 	*icPtrPtr = icPtr;
@@ -3253,7 +3253,7 @@ ItclCreateDelegatedFunction(
     int isNew;
     Tcl_Size i;
 
-    idmPtr = (ItclDelegatedFunction *)ckalloc(sizeof(ItclDelegatedFunction));
+    idmPtr = (ItclDelegatedFunction *)Tcl_Alloc(sizeof(ItclDelegatedFunction));
     memset(idmPtr, 0, sizeof(ItclDelegatedFunction));
     Tcl_InitObjHashTable(&idmPtr->exceptions);
     idmPtr->namePtr = Tcl_NewStringObj(Tcl_GetString(methodNamePtr), TCL_INDEX_NONE);
@@ -3278,7 +3278,7 @@ ItclCreateDelegatedFunction(
 	    Tcl_CreateHashEntry(&idmPtr->exceptions, (char *)objPtr,
 		    &isNew);
 	}
-	ckfree((char *) argv);
+	Tcl_Free(argv);
     }
     if (idmPtrPtr != NULL) {
 	*idmPtrPtr = idmPtr;
@@ -3588,19 +3588,19 @@ Itcl_HandleDelegateOptionCmd(
     if ((argc < 1) || (isStarOption && (argc > 1))) {
 	Tcl_AppendResult(interp, "<optionDef> must be either \"*\" or ",
 	       "\"<optionName> <resourceName> <className>\"", (char *)NULL);
-	ckfree((char *)argv);
+	Tcl_Free(argv);
 	return TCL_ERROR;
     }
     if (isStarOption && (argc > 3)) {
 	Tcl_AppendResult(interp, "<optionDef> syntax should be: ",
 	       "\"<optionName> <resourceName> <className>\"", (char *)NULL);
-	ckfree((char *)argv);
+	Tcl_Free(argv);
 	return TCL_ERROR;
     }
     if ((*option != '-') && !isStarOption) {
 	Tcl_AppendResult(interp, "bad delegated option name \"", option,
 		"\", options must start with a \"-\"", (char *)NULL);
-	ckfree((char *)argv);
+	Tcl_Free(argv);
 	return TCL_ERROR;
     }
     /*
@@ -3611,14 +3611,14 @@ Itcl_HandleDelegateOptionCmd(
 	Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
 		"bad option name \"", option,
 		"\", option names must not contain \"::\"", (char *)NULL);
-	ckfree((char *)argv);
+	Tcl_Free(argv);
 	return TCL_ERROR;
     }
     if (strstr(option, " ")) {
 	Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
 		"bad option name \"", option,
 		"\", option names must not contain \" \"", (char *)NULL);
-	ckfree((char *)argv);
+	Tcl_Free(argv);
 	return TCL_ERROR;
     }
     cp = option;
@@ -3626,7 +3626,7 @@ Itcl_HandleDelegateOptionCmd(
 	if (isupper(UCHAR(*cp))) {
 	    Tcl_AppendResult(interp, "bad option name \"", option, "\" ",
 		    ", options must not contain uppercase characters", (char *)NULL);
-	    ckfree((char *)argv);
+	    Tcl_Free(argv);
 	    return TCL_ERROR;
 	}
 	cp++;
@@ -3788,7 +3788,7 @@ Itcl_HandleDelegateOptionCmd(
 	Tcl_IncrRefCount(idoPtr->asPtr);
     }
     if (exceptionsPtr != NULL) {
-	ckfree((char *)argv);
+	Tcl_Free(argv);
 	argv = NULL;
 	if (Tcl_SplitList(interp, Tcl_GetString(exceptionsPtr), &argc, &argv)
 		!= TCL_OK) {
@@ -3804,7 +3804,7 @@ Itcl_HandleDelegateOptionCmd(
     if (idoPtrPtr != NULL) {
 	*idoPtrPtr = idoPtr;
     }
-    ckfree((char *)argv);
+    Tcl_Free(argv);
     ItclAddDelegatedOptionDictInfo(interp, iclsPtr, idoPtr);
     return TCL_OK;
 errorOut2:
@@ -3818,7 +3818,7 @@ errorOut1:
 	Tcl_DecrRefCount(classNamePtr);
     }
     if (argv) {
-	ckfree((char *)argv);
+	Tcl_Free(argv);
     }
     return TCL_ERROR;
 }
@@ -4006,7 +4006,7 @@ delegate typemethod * ?to <componentName>? ?using <pattern>? ?except <typemethod
     } else {
 	icPtr = NULL;
     }
-    idmPtr = (ItclDelegatedFunction *)ckalloc(sizeof(ItclDelegatedFunction));
+    idmPtr = (ItclDelegatedFunction *)Tcl_Alloc(sizeof(ItclDelegatedFunction));
     memset(idmPtr, 0, sizeof(ItclDelegatedFunction));
     Tcl_InitObjHashTable(&idmPtr->exceptions);
     typeMethodNamePtr = Tcl_NewStringObj(typeMethodName, TCL_INDEX_NONE);
@@ -4020,7 +4020,7 @@ delegate typemethod * ?to <componentName>? ?using <pattern>? ?except <typemethod
 		    typeMethodName, "...\", \"", typeMethodName,
 		    "\" has been defined locally.", (char *)NULL);
 	    Tcl_DeleteHashTable(&idmPtr->exceptions);
-	    ckfree((char *)idmPtr);
+	    Tcl_Free(idmPtr);
 	    Tcl_DecrRefCount(typeMethodNamePtr);
 	    return TCL_ERROR;
 	}
@@ -4044,7 +4044,7 @@ delegate typemethod * ?to <componentName>? ?using <pattern>? ?except <typemethod
 		hPtr = Tcl_CreateHashEntry(&idmPtr->exceptions, (char *)objPtr,
 			&isNew);
 	    }
-	    ckfree((char *) argv);
+	    Tcl_Free(argv);
 	}
     }
     idmPtr->icPtr = icPtr;

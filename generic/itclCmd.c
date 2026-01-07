@@ -109,7 +109,7 @@ Itcl_ThisCmd(
 	    if (strcmp(Tcl_GetString(idmPtr->namePtr), funcName) == 0) {
 		if (idmPtr->icPtr == NULL) {
 		    if (idmPtr->usingPtr != NULL) {
-			newObjv = (Tcl_Obj **)ckalloc(sizeof(Tcl_Obj *) * objc);
+			newObjv = (Tcl_Obj **)Tcl_Alloc(sizeof(Tcl_Obj *) * objc);
 			newObjv[0] = idmPtr->usingPtr;
 			Tcl_IncrRefCount(newObjv[0]);
 			memcpy(newObjv+1, objv+2, sizeof(Tcl_Obj *) *
@@ -117,7 +117,7 @@ Itcl_ThisCmd(
 ItclShowArgs(1, "EVAL2", objc - 1, newObjv);
 			result = Tcl_EvalObjv(interp, objc - 1, newObjv, 0);
 			Tcl_DecrRefCount(newObjv[0]);
-			ckfree((char *)newObjv);
+			Tcl_Free(newObjv);
 		    } else {
 		       Tcl_AppendResult(interp,
 			       "delegate has not yet been implemented in",
@@ -125,7 +125,7 @@ ItclShowArgs(1, "EVAL2", objc - 1, newObjv);
 		       return TCL_ERROR;
 		    }
 		} else {
-		    newObjv = (Tcl_Obj **)ckalloc(sizeof(Tcl_Obj *) *
+		    newObjv = (Tcl_Obj **)Tcl_Alloc(sizeof(Tcl_Obj *) *
 			    (objc + 1));
 		    newObjv[0] = Tcl_NewStringObj("this", TCL_INDEX_NONE);
 		    Tcl_IncrRefCount(newObjv[0]);
@@ -138,7 +138,7 @@ ItclShowArgs(1, "EVAL2", objc+1, newObjv);
 		    result = Tcl_EvalObjv(interp, objc+1, newObjv, 0);
 		    Tcl_DecrRefCount(newObjv[1]);
 		    Tcl_DecrRefCount(newObjv[0]);
-		    ckfree((char *)newObjv);
+		    Tcl_Free(newObjv);
 		}
 		return result;
 	    }
@@ -1065,7 +1065,7 @@ Itcl_IsObjectCmd(
      */
     if (cmd == NULL || ! Itcl_IsObject(cmd)) {
 	Tcl_SetObjResult(interp, Tcl_NewWideIntObj(0));
-	ckfree((char *)cmdName);
+	Tcl_Free(cmdName);
 	return TCL_OK;
     }
 
@@ -1083,7 +1083,7 @@ Itcl_IsObjectCmd(
 	}
 	if (! Itcl_ObjectIsa(contextIoPtr, iclsPtr)) {
 	    Tcl_SetObjResult(interp, Tcl_NewWideIntObj(0));
-	    ckfree((char *)cmdName);
+	    Tcl_Free(cmdName);
 	    return TCL_OK;
 	}
 
@@ -1093,7 +1093,7 @@ Itcl_IsObjectCmd(
      *    Got this far, so assume that it is a valid object
      */
     Tcl_SetObjResult(interp, Tcl_NewWideIntObj(1));
-    ckfree(cmdName);
+    Tcl_Free(cmdName);
 
     return TCL_OK;
 }
@@ -1157,7 +1157,7 @@ Itcl_IsClassCmd(
 	Tcl_SetObjResult(interp, Tcl_NewWideIntObj(0));
     }
 
-    ckfree(cname);
+    Tcl_Free(cname);
 
     return TCL_OK;
 
@@ -1191,7 +1191,7 @@ Itcl_FilterAddCmd(
 	Tcl_WrongNumArgs(interp, 1, objv, "<className> <filterName> ?<filterName> ...?");
 	return TCL_ERROR;
     }
-    newObjv = (Tcl_Obj **)ckalloc(sizeof(Tcl_Obj *)*(objc+1));
+    newObjv = (Tcl_Obj **)Tcl_Alloc(sizeof(Tcl_Obj *)*(objc+1));
     newObjv[0] = Tcl_NewStringObj("::oo::define", TCL_INDEX_NONE);
     Tcl_IncrRefCount(newObjv[0]);
     newObjv[1] = objv[1];
@@ -1328,7 +1328,7 @@ Itcl_MixinAddCmd(
 	Tcl_WrongNumArgs(interp, 1, objv, "<className> <mixinName> ?<mixinName> ...?");
 	return TCL_ERROR;
     }
-    newObjv = (Tcl_Obj **)ckalloc(sizeof(Tcl_Obj *)*(objc+1));
+    newObjv = (Tcl_Obj **)Tcl_Alloc(sizeof(Tcl_Obj *)*(objc+1));
     newObjv[0] = Tcl_NewStringObj("::oo::define", TCL_INDEX_NONE);
     Tcl_IncrRefCount(newObjv[0]);
     newObjv[1] = objv[1];
@@ -1785,7 +1785,7 @@ Itcl_AddComponentCmd(
     }
     ivPtr = (ItclVariable *)Tcl_GetHashValue(hPtr);
     /* add entry to the virtual tables */
-    vlookup = (ItclVarLookup *)ckalloc(sizeof(ItclVarLookup));
+    vlookup = (ItclVarLookup *)Tcl_Alloc(sizeof(ItclVarLookup));
     vlookup->ivPtr = ivPtr;
     vlookup->usage = 0;
     vlookup->leastQualName = NULL;

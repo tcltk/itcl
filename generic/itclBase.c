@@ -277,7 +277,7 @@ Initialize (
      *  it to the itcl namespace for ownership.
      */
     infoPtr->interp = interp;
-    infoPtr->class_meta_type = (Tcl_ObjectMetadataType *)ckalloc(
+    infoPtr->class_meta_type = (Tcl_ObjectMetadataType *)Tcl_Alloc(
 	    sizeof(Tcl_ObjectMetadataType));
     infoPtr->class_meta_type->version = TCL_OO_METADATA_VERSION_CURRENT;
     infoPtr->class_meta_type->name = "ItclClass";
@@ -296,7 +296,7 @@ Initialize (
     Tcl_InitHashTable(&infoPtr->frameContext, TCL_ONE_WORD_KEYS);
     Tcl_InitObjHashTable(&infoPtr->classTypes);
 
-    infoPtr->ensembleInfo = (EnsembleInfo *)ckalloc(sizeof(EnsembleInfo));
+    infoPtr->ensembleInfo = (EnsembleInfo *)Tcl_Alloc(sizeof(EnsembleInfo));
     memset(infoPtr->ensembleInfo, 0, sizeof(EnsembleInfo));
     Tcl_InitHashTable(&infoPtr->ensembleInfo->ensembles, TCL_ONE_WORD_KEYS);
     Tcl_InitHashTable(&infoPtr->ensembleInfo->subEnsembles, TCL_ONE_WORD_KEYS);
@@ -649,12 +649,12 @@ FreeItclObjectInfo(
 	Tcl_DeleteHashTable(&infoPtr->ensembleInfo->ensembles);
 	Tcl_DeleteHashTable(&infoPtr->ensembleInfo->subEnsembles);
 	ItclFinishEnsemble(infoPtr);
-	ckfree((char *)infoPtr->ensembleInfo);
+	Tcl_Free(infoPtr->ensembleInfo);
 	infoPtr->ensembleInfo = NULL;
     }
 
     if (infoPtr->class_meta_type) {
-	ckfree((char *)infoPtr->class_meta_type);
+	Tcl_Free(infoPtr->class_meta_type);
 	infoPtr->class_meta_type = NULL;
     }
 

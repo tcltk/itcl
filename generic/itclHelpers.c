@@ -112,7 +112,7 @@ ItclCreateArgList(
 	i = 0;
 	if (argc == 0) {
 	   /* signal there are 0 arguments */
-	    arglistPtr = (ItclArgList *)ckalloc(sizeof(ItclArgList));
+	    arglistPtr = (ItclArgList *)Tcl_Alloc(sizeof(ItclArgList));
 	    memset(arglistPtr, 0, sizeof(ItclArgList));
 	    *arglistPtrPtr = arglistPtr;
 	}
@@ -134,7 +134,7 @@ ItclCreateArgList(
 		    Tcl_AppendResult(interp, "argument #", buf,
 			    " has no name", (char *)NULL);
 		}
-		ckfree((char *) defaultArgv);
+		Tcl_Free(defaultArgv);
 		result = TCL_ERROR;
 		break;
 	    }
@@ -143,7 +143,7 @@ ItclCreateArgList(
 		    "too many fields in argument specifier \"",
 		    argv[i], "\"",
 		    (char *)NULL);
-		ckfree((char *) defaultArgv);
+		Tcl_Free(defaultArgv);
 		result = TCL_ERROR;
 		break;
 	    }
@@ -151,11 +151,11 @@ ItclCreateArgList(
 		Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
 			"bad argument name \"", defaultArgv[0], "\"",
 			(char *)NULL);
-		ckfree((char *) defaultArgv);
+		Tcl_Free(defaultArgv);
 		result = TCL_ERROR;
 		break;
 	    }
-	    arglistPtr = (ItclArgList *)ckalloc(sizeof(ItclArgList));
+	    arglistPtr = (ItclArgList *)Tcl_Alloc(sizeof(ItclArgList));
 	    memset(arglistPtr, 0, sizeof(ItclArgList));
 	    if (*arglistPtrPtr == NULL) {
 		 *arglistPtrPtr = arglistPtr;
@@ -187,9 +187,9 @@ ItclCreateArgList(
 	    }
 	    lastArglistPtr = arglistPtr;
 	    i++;
-	    ckfree((char *) defaultArgv);
+	    Tcl_Free(defaultArgv);
 	}
-	ckfree((char *) argv);
+	Tcl_Free(argv);
     }
     /*
      *  If anything went wrong, destroy whatever arguments were
@@ -226,7 +226,7 @@ ItclDeleteArgList(
 	    Tcl_DecrRefCount(currPtr->namePtr);
 	}
 	nextPtr = currPtr->nextPtr;
-	ckfree((char *)currPtr);
+	Tcl_Free(currPtr);
     }
 }
 
@@ -342,7 +342,7 @@ ItclEnsembleSubCmd(
 
     ItclShowArgs(2, "ItclEnsembleSubCmd", objc, objv);
 
-    newObjv = (Tcl_Obj **)ckalloc(sizeof(Tcl_Obj *)*(objc));
+    newObjv = (Tcl_Obj **)Tcl_Alloc(sizeof(Tcl_Obj *)*(objc));
     isRootEnsemble = Itcl_InitRewriteEnsemble(interp, 1, 1, objc, objv);
     newObjv[0] = Tcl_NewStringObj("::itcl::builtin::Info", TCL_INDEX_NONE);
     Tcl_IncrRefCount(newObjv[0]);
@@ -351,7 +351,7 @@ ItclEnsembleSubCmd(
     }
     result = Tcl_EvalObjv(interp, objc, newObjv, TCL_EVAL_INVOKE);
     Tcl_DecrRefCount(newObjv[0]);
-    ckfree((char *)newObjv);
+    Tcl_Free(newObjv);
     Itcl_ResetRewriteEnsemble(interp, isRootEnsemble);
     return result;
 }

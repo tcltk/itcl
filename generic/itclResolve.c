@@ -440,7 +440,7 @@ Itcl_ClassCompiledVarResolver(
     if ((size_t)length < sizeof(storage)) {
 	buffer = storage;
     } else {
-	buffer = (char*)ckalloc(length+1);
+	buffer = (char*)Tcl_Alloc(length+1);
     }
     memcpy(buffer, name, length);
     buffer[length] = '\0';
@@ -448,7 +448,7 @@ Itcl_ClassCompiledVarResolver(
     hPtr = ItclResolveVarEntry(iclsPtr, buffer);
 
     if (buffer != storage) {
-	ckfree(buffer);
+	Tcl_Free(buffer);
     }
 
     /*
@@ -470,7 +470,7 @@ Itcl_ClassCompiledVarResolver(
      *  plug in the appropriate variable for the current object
      *  context.
      */
-    (*rPtr) = (Tcl_ResolvedVarInfo *) ckalloc(sizeof(ItclResolvedVarInfo));
+    (*rPtr) = (Tcl_ResolvedVarInfo *)Tcl_Alloc(sizeof(ItclResolvedVarInfo));
     (*rPtr)->fetchProc = ItclClassRuntimeVarResolver;
     (*rPtr)->deleteProc = NULL;
     ((ItclResolvedVarInfo*)(*rPtr))->vlookup = vlookup;

@@ -131,7 +131,7 @@ HullAndOptionsInstall(
 	Tcl_AppendToObj(widgetClassPtr, cp+1, TCL_INDEX_NONE);
     }
     hullObjc = 5;
-    hullObjv = (Tcl_Obj **)ckalloc(sizeof(Tcl_Obj *)*hullObjc);
+    hullObjv = (Tcl_Obj **)Tcl_Alloc(sizeof(Tcl_Obj *)*hullObjc);
     hullObjv[0] = Tcl_NewStringObj("installhull", TCL_INDEX_NONE);
     Tcl_IncrRefCount(hullObjv[0]);
     hullObjv[1] = Tcl_NewStringObj("using", TCL_INDEX_NONE);
@@ -262,7 +262,7 @@ InstallComponent(
 	result = Tcl_EvalObjEx(interp, objPtr, 0);
 	startIdx = 5;
 	Tcl_SplitList(interp, Tcl_GetString(Tcl_GetObjResult(interp)), &argc, &argv);
-	newObjv = (Tcl_Obj **)ckalloc(sizeof(Tcl_Obj *) *
+	newObjv = (Tcl_Obj **)Tcl_Alloc(sizeof(Tcl_Obj *) *
 	       (objc - startIdx + 2 + (argc * 2)));
 	/* insert delegated options before any options on the command line */
 	newObjv[0] = objv[startIdx - 1];
@@ -302,16 +302,16 @@ InstallComponent(
 		    }
 		}
 	    }
-	    ckfree((char *)argv2);
+	    Tcl_Free(argv2);
 	}
-	ckfree((char *)argv);
+	Tcl_Free(argv);
 	for ( ;j < objc; j++) {
 	    newObjv[i] = objv[j];
 	    i++;
 	}
 	numOpts = numUsedOpts + 1;
     } else {
-	newObjv = (Tcl_Obj **)ckalloc(sizeof(Tcl_Obj *) *
+	newObjv = (Tcl_Obj **)Tcl_Alloc(sizeof(Tcl_Obj *) *
 	       (objc - startIdx + (numOpts * 2)));
 	/* insert delegated options before any options on the command line */
 	for (j = startIdx; j < objc; j++) {
@@ -353,7 +353,7 @@ InstallComponent(
     ItclShowArgs(1, "InstallComponent EVAL", objc - startIdx + (numOpts * 2),
 	    newObjv);
     result = Tcl_EvalObjv(interp, objc - startIdx + (numOpts * 2), newObjv, 0);
-    ckfree((char *)newObjv);
+    Tcl_Free(newObjv);
     if (result != TCL_OK) {
 	return result;
     }

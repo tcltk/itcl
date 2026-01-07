@@ -105,7 +105,7 @@ Itcl_DeleteStack(
      *  built-in buffer) then free it.
      */
     if (stack->values != stack->space) {
-	ckfree((char*)stack->values);
+	Tcl_Free(stack->values);
     }
     stack->values = NULL;
     stack->len = stack->max = 0;
@@ -129,14 +129,14 @@ Itcl_PushStack(
     if (stack->len+1 >= stack->max) {
 	stack->max = 2*stack->max;
 	newStack = (void **)
-	    ckalloc(stack->max*sizeof(void *));
+	   Tcl_Alloc(stack->max*sizeof(void *));
 
 	if (stack->values) {
 	    memcpy(newStack, stack->values,
 		stack->len*sizeof(void *));
 
 	    if (stack->values != stack->space)
-		ckfree((char*)stack->values);
+		Tcl_Free(stack->values);
 	}
 	stack->values = newStack;
     }
@@ -264,7 +264,7 @@ Itcl_CreateListElem(
 	elemPtr = (Itcl_ListElem*)Tcl_NewObj();
     } else { /* unreachable */
 	assert(0);
-	elemPtr = (Itcl_ListElem*)ckalloc((unsigned)sizeof(Itcl_ListElem));
+	elemPtr = (Itcl_ListElem*)Tcl_Alloc((unsigned)sizeof(Itcl_ListElem));
     }
     elemPtr->owner = listPtr;
     elemPtr->value = NULL;
@@ -317,7 +317,7 @@ Itcl_DeleteListElem(
 	Tcl_DecrRefCount(objPtr);
     } else { /* unreachable */
 	assert(0);
-	ckfree(elemPtr);
+	Tcl_Free(elemPtr);
     }
     return nextPtr;
 }
@@ -529,7 +529,7 @@ Itcl_EventuallyFree(
 	return;
     }
 
-    /* Itcl memory block to ckalloc block */
+    /* Itcl memory block toTcl_Alloc block */
     blk = ((PresMemoryPrefix *)cdata)-1;
 
     /* Set new free proc */
@@ -558,7 +558,7 @@ Itcl_PreserveData(
 	return;
     }
 
-    /* Itcl memory block to ckalloc block */
+    /* Itcl memory block toTcl_Alloc block */
     blk = ((PresMemoryPrefix *)cdata)-1;
 
     /* Increment preservation count */
@@ -586,7 +586,7 @@ Itcl_ReleaseData(
 	return;
     }
 
-    /* Itcl memory block to ckalloc block */
+    /* Itcl memory block toTcl_Alloc block */
     blk = ((PresMemoryPrefix *)cdata)-1;
 
     /* Usage sanity check */
@@ -608,7 +608,7 @@ Itcl_ReleaseData(
  * ------------------------------------------------------------------------
  * Itcl_Alloc()
  *
- *	Allocate preservable memory. In opposite to ckalloc the result can be
+ *	Allocate preservable memory. In opposite toTcl_Alloc the result can be
  *	supplied to preservation facilities of Itcl (Itcl_PreserveData).
  *
  * Results:
@@ -622,7 +622,7 @@ void * Itcl_Alloc(
     PresMemoryPrefix *blk;
 
 #if TCL_MAJOR_VERSION < 9
-    /* The ckalloc() in Tcl 8 can alloc at most UINT_MAX bytes */
+    /* TheTcl_Alloc() in Tcl 8 can alloc at most UINT_MAX bytes */
     assert (size <= UINT_MAX - sizeof(PresMemoryPrefix));
 #else
     assert (size < -sizeof(PresMemoryPrefix));
@@ -630,12 +630,12 @@ void * Itcl_Alloc(
     numBytes = size + sizeof(PresMemoryPrefix);
 
     /* This will panic on allocation failure. No need to check return value. */
-    blk = (PresMemoryPrefix *)ckalloc(numBytes);
+    blk = (PresMemoryPrefix *)Tcl_Alloc(numBytes);
 
     /* Itcl_Alloc defined to zero-init memory it allocates */
     memset(blk, 0, numBytes);
 
-    /* ckalloc block to Itcl memory block */
+    /*Tcl_Alloc block to Itcl memory block */
     return blk+1;
 }
 /*
@@ -655,12 +655,12 @@ void Itcl_Free(void *ptr) {
     if (ptr == NULL) {
 	return;
     }
-    /* Itcl memory block to ckalloc block */
+    /* Itcl memory block toTcl_Alloc block */
     blk = ((PresMemoryPrefix *)ptr)-1;
 
     assert(blk->refCount == 0); /* it should be not preserved */
     assert(blk->freeProc == NULL); /* it should be released */
-    ckfree(blk);
+    Tcl_Free(blk);
 }
 
 /*
@@ -1034,7 +1034,7 @@ Itcl_DecodeScopedCommand(
 
     nsPtr = NULL;
     len = strlen(name);
-    cmdName = (char *)ckalloc(strlen(name)+1);
+    cmdName = (char *)Tcl_Alloc(strlen(name)+1);
     strcpy(cmdName, name);
 
     if ((*name == 'n') && (len > 17) && (strncmp(name, "namespace", 9) == 0)) {
@@ -1060,19 +1060,19 @@ Itcl_DecodeScopedCommand(
 		    if (nsPtr == NULL) {
 			result = TCL_ERROR;
 		    } else {
-			ckfree(cmdName);
-			cmdName = (char *)ckalloc(strlen(listv[3])+1);
+			Tcl_Free(cmdName);
+			cmdName = (char *)Tcl_Alloc(strlen(listv[3])+1);
 			strcpy(cmdName, listv[3]);
 		    }
 		}
 	    }
-	    ckfree((char*)listv);
+	    Tcl_Free(listv);
 
 	    if (result != TCL_OK) {
 		Tcl_AppendObjToErrorInfo(interp, Tcl_ObjPrintf(
 			"\n    (while decoding scoped command \"%s\")",
 			name));
-		ckfree(cmdName);
+		Tcl_Free(cmdName);
 		return TCL_ERROR;
 	    }
 	}

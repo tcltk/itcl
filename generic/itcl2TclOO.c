@@ -58,7 +58,7 @@ FreeCommand(
     Command *cmdPtr = (Command *)data[0];
     Proc *procPtr = (Proc *)data[1];
 
-    ckfree(cmdPtr);
+    Tcl_Free(cmdPtr);
     procPtr->cmdPtr = NULL;
 
     return result;
@@ -80,7 +80,7 @@ Tcl_InvokeClassProcedureMethod(
     int result;
 
     if (procPtr->cmdPtr == NULL) {
-	Command *cmdPtr = (Command *)ckalloc(sizeof(Command));
+	Command *cmdPtr = (Command *)Tcl_Alloc(sizeof(Command));
 
 	memset(cmdPtr, 0, sizeof(Command));
 	cmdPtr->nsPtr = (Namespace *) nsPtr;
@@ -173,7 +173,7 @@ FreeProcedureMethod(
 {
     ProcedureMethod *pmPtr = (ProcedureMethod *)data[0];
 
-    ckfree(pmPtr);
+    Tcl_Free(pmPtr);
     return result;
 }
 
@@ -202,7 +202,7 @@ Itcl_InvokeEnsembleMethod(
     Tcl_Size objc,			/* Number of arguments. */
     Tcl_Obj *const *objv)	/* Arguments as actually seen. */
 {
-    ProcedureMethod *pmPtr = (ProcedureMethod *)ckalloc(sizeof(ProcedureMethod));
+    ProcedureMethod *pmPtr = (ProcedureMethod *)Tcl_Alloc(sizeof(ProcedureMethod));
 
     memset(pmPtr, 0, sizeof(ProcedureMethod));
     pmPtr->version = TCLOO_PROCEDURE_METHOD_VERSION;
