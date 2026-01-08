@@ -227,12 +227,12 @@ extern const ItclStubs *itclStubsPtr;
 	Itcl_FindC(interp, name, NULL, objProcPtr, cDataPtr)
 #else
 #if defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 201112L) && (TCL_MAJOR_VERSION > 8)
+#ifdef USE_ITCL_STUBS
 #undef Itcl_RegisterObjC
 #define Itcl_RegisterObjC(interp, name, objProcPtr, clientData, delProc) _Generic( (objProcPtr), \
     Tcl_ObjCmdProc2*: Itcl_RegisterObjC2, \
-    default: (Itcl_RegisterObjC) \
+    default: (itclStubsPtr->itcl_RegisterObjC) \
 ) ((interp), (name), (objProcPtr), (clientData), (delProc))
-#ifdef USE_ITCL_STUBS
 static inline int ItclFindC(Tcl_Interp *interp, const char *name,
 	Tcl_CmdProc **argProcPtr, Tcl_ObjCmdProc2 **objProcPtr, void **cDataPtr) {
     Tcl_ObjCmdProc *objProcPtr1;
@@ -247,6 +247,10 @@ static inline int ItclFindC(Tcl_Interp *interp, const char *name,
     default: (itclStubsPtr->itcl_FindC) \
 ) ((interp), (name), (argProcPtr), (objProcPtr), (cDataPtr))
 #else /* USE_ITCL_STUBS */
+#define Itcl_RegisterObjC(interp, name, objProcPtr, clientData, delProc) _Generic( (objProcPtr), \
+    Tcl_ObjCmdProc2*: Itcl_RegisterObjC2, \
+    default: (Itcl_RegisterObjC) \
+) ((interp), (name), (objProcPtr), (clientData), (delProc))
 static inline int ItclFindC(Tcl_Interp *interp, const char *name,
 	Tcl_CmdProc **argProcPtr, Tcl_ObjCmdProc2 **objProcPtr, void **cDataPtr) {
     Tcl_ObjCmdProc *objProcPtr1;
