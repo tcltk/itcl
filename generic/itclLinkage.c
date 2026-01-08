@@ -243,6 +243,7 @@ static void reg2DeleteProc(
 }
 
 
+#undef Itcl_RegisterObjC
 int
 Itcl_RegisterObjC(
     Tcl_Interp *interp,     /* interpreter handling this registration */
@@ -302,6 +303,7 @@ Itcl_FindC2(
 }
 
 #ifndef TCL_NO_DEPRECATED
+#undef Itcl_FindC
 int
 Itcl_FindC(
     Tcl_Interp *interp,           /* interpreter handling this registration */
