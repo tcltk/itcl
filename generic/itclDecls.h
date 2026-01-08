@@ -225,12 +225,50 @@ extern const ItclStubs *itclStubsPtr;
 # undef Itcl_FindC2
 # define Itcl_FindC2(interp, name, objProcPtr, cDataPtr) \
 	Itcl_FindC(interp, name, NULL, objProcPtr, cDataPtr)
-#elif defined(TCL_NO_DEPRECATED)
+#else
+#if defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 201112L) && (TCL_MAJOR_VERSION > 8)
+#undef Itcl_RegisterObjC
+#define Itcl_RegisterObjC(interp, name, objProcPtr, clientData, delProc) _Generic( (objProcPtr), \
+    Tcl_ObjCmdProc2*: Itcl_RegisterObjC2, \
+    default: (Itcl_RegisterObjC) \
+) ((interp), (name), (objProcPtr), (clientData), (delProc))
+#ifdef USE_ITCL_STUBS
+static inline int ItclFindC(Tcl_Interp *interp, const char *name,
+	Tcl_CmdProc **argProcPtr, Tcl_ObjCmdProc2 **objProcPtr, void **cDataPtr) {
+    Tcl_ObjCmdProc *objProcPtr1;
+    if (argProcPtr) {
+	itclStubsPtr->itcl_FindC(interp, name, argProcPtr, &objProcPtr1, cDataPtr);
+    }
+    return Itcl_FindC2(interp, name, objProcPtr, cDataPtr);
+}
+#undef Itcl_FindC
+#define Itcl_FindC(interp, name, argProcPtr, objProcPtr, cDataPtr) _Generic( (*objProcPtr), \
+    Tcl_ObjCmdProc2*: ItclFindC, \
+    default: (itclStubsPtr->itcl_FindC) \
+) ((interp), (name), (argProcPtr), (objProcPtr), (cDataPtr))
+#else /* USE_ITCL_STUBS */
+static inline int ItclFindC(Tcl_Interp *interp, const char *name,
+	Tcl_CmdProc **argProcPtr, Tcl_ObjCmdProc2 **objProcPtr, void **cDataPtr) {
+    Tcl_ObjCmdProc *objProcPtr1;
+    if (argProcPtr) {
+	Itcl_FindC(interp, name, argProcPtr, &objProcPtr1, cDataPtr);
+    }
+    return Itcl_FindC2(interp, name, objProcPtr, cDataPtr);
+}
+#undef Itcl_FindC
+#define Itcl_FindC(interp, name, argProcPtr, objProcPtr, cDataPtr) _Generic( (*objProcPtr), \
+    Tcl_ObjCmdProc2*: ItclFindC, \
+    default: (Itcl_FindC) \
+) ((interp), (name), (argProcPtr), (objProcPtr), (cDataPtr))
+#endif /* USE_ITCL_STUBS */
+#endif
+#if defined(TCL_NO_DEPRECATED)
 # undef Tcl_ObjCmdProc
 # undef Tcl_CmdProc
 # undef Itcl_RegisterC
 # undef Itcl_RegisterObjC
 # undef Itcl_FindC
+#endif
 #endif
 
 #endif /* _ITCLDECLS */
