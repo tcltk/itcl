@@ -40,7 +40,7 @@ Itcl_IsStub(
      *  is a stub.  If we really want the original command, we'll
      *  find it at a higher level.
      */
-    if (Tcl_GetCommandInfoFromToken(cmdPtr, &cmdInfo) == 1) {
+    if (Tcl_GetCommandInfoFromToken(cmdPtr, &cmdInfo)) {
 	if (cmdInfo.deleteProc == ItclDeleteStub) {
 	    return 1;
 	}
@@ -150,11 +150,8 @@ Itcl_StubExistsCmd2(
 
     cmdPtr = Tcl_FindCommand(interp, cmdName, NULL, 0);
 
-    if ((cmdPtr != NULL) && Itcl_IsStub(cmdPtr)) {
-	Tcl_SetWideIntObj(Tcl_GetObjResult(interp), 1);
-    } else {
-	Tcl_SetWideIntObj(Tcl_GetObjResult(interp), 0);
-    }
+    Tcl_SetBooleanObj(Tcl_GetObjResult(interp),
+	    (cmdPtr != NULL) && Itcl_IsStub(cmdPtr));
     return TCL_OK;
 }
 
