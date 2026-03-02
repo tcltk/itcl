@@ -1064,7 +1064,7 @@ Itcl_IsObjectCmd(
      *    Need the NULL test, or the test will fail if cmd is NULL
      */
     if (cmd == NULL || ! Itcl_IsObject(cmd)) {
-	Tcl_SetObjResult(interp, Tcl_NewWideIntObj(0));
+	Tcl_SetObjResult(interp, Tcl_NewBooleanObj(0));
 	Tcl_Free(cmdName);
 	return TCL_OK;
     }
@@ -1081,8 +1081,8 @@ Itcl_IsObjectCmd(
 	   /* seems that we are in constructor, so look for currIoPtr in info structure */
 	   contextIoPtr = iclsPtr->infoPtr->currIoPtr;
 	}
-	if (! Itcl_ObjectIsa(contextIoPtr, iclsPtr)) {
-	    Tcl_SetObjResult(interp, Tcl_NewWideIntObj(0));
+	if (!Itcl_ObjectIsa(contextIoPtr, iclsPtr)) {
+	    Tcl_SetObjResult(interp, Tcl_NewBooleanObj(0));
 	    Tcl_Free(cmdName);
 	    return TCL_OK;
 	}
@@ -1092,7 +1092,7 @@ Itcl_IsObjectCmd(
     /*
      *    Got this far, so assume that it is a valid object
      */
-    Tcl_SetObjResult(interp, Tcl_NewWideIntObj(1));
+    Tcl_SetObjResult(interp, Tcl_NewBooleanObj(1));
     Tcl_Free(cmdName);
 
     return TCL_OK;
@@ -1151,11 +1151,7 @@ Itcl_IsClassCmd(
      *    If classDefn is NULL, then it wasn't found, hence it
      *    isn't a class
      */
-    if (iclsPtr != NULL) {
-	Tcl_SetObjResult(interp, Tcl_NewWideIntObj(1));
-    } else {
-	Tcl_SetObjResult(interp, Tcl_NewWideIntObj(0));
-    }
+    Tcl_SetObjResult(interp, Tcl_NewBooleanObj(iclsPtr != NULL));
 
     Tcl_Free(cname);
 

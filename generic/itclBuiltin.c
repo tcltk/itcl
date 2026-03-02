@@ -535,11 +535,7 @@ Itcl_BiIsaCmd(
 	return TCL_ERROR;
     }
 
-    if (Itcl_ObjectIsa(contextIoPtr, iclsPtr)) {
-	Tcl_SetWideIntObj(Tcl_GetObjResult(interp), 1);
-    } else {
-	Tcl_SetWideIntObj(Tcl_GetObjResult(interp), 0);
-    }
+    Tcl_SetBooleanObj(Tcl_GetObjResult(interp), Itcl_ObjectIsa(contextIoPtr, iclsPtr));
     return TCL_OK;
 }
 

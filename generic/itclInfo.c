@@ -3038,7 +3038,7 @@ Itcl_BiInfoDefaultCmd(
 			    argListPtr->defaultValuePtr, TCL_LEAVE_ERR_MSG)) {
 			return TCL_ERROR;
 		    }
-		    Tcl_SetObjResult(interp, Tcl_NewWideIntObj(1));
+		    Tcl_SetObjResult(interp, Tcl_NewBooleanObj(1));
 		    return TCL_OK;
 		} else {
 		    Tcl_AppendResult(interp, "method \"", methodName,

@@ -39,7 +39,7 @@ Itcl_IsStub(
      *  find it at a higher level.
      */
     if (Tcl_GetCommandInfoFromToken(cmdPtr, &cmdInfo)) {
-	if (cmdInfo.objProc == ItclHandleStubCmd) {
+	if (cmdInfo.deleteProc == ItclDeleteStub) {
 	    return 1;
 	}
     }
@@ -128,11 +128,8 @@ Itcl_StubExistsCmd(
 
     cmdPtr = Tcl_FindCommand(interp, cmdName, NULL, 0);
 
-    if ((cmdPtr != NULL) && Itcl_IsStub(cmdPtr)) {
-	Tcl_SetWideIntObj(Tcl_GetObjResult(interp), 1);
-    } else {
-	Tcl_SetWideIntObj(Tcl_GetObjResult(interp), 0);
-    }
+    Tcl_SetBooleanObj(Tcl_GetObjResult(interp),
+	    (cmdPtr != NULL) && Itcl_IsStub(cmdPtr));
     return TCL_OK;
 }
 
