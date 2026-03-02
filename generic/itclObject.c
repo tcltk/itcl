@@ -1235,7 +1235,7 @@ Itcl_DeleteObject(
      */
     if ((contextIoPtr->accessCmd != NULL) && (!(contextIoPtr->flags &
 	    (ITCL_OBJECT_IS_RENAMED)))) {
-    if (Tcl_GetCommandInfoFromToken(contextIoPtr->accessCmd, &cmdInfo) == 1) {
+    if (Tcl_GetCommandInfoFromToken(contextIoPtr->accessCmd, &cmdInfo)) {
 	cmdInfo.deleteProc = (Tcl_CmdDeleteProc *)Itcl_ReleaseData;
 	Tcl_SetCommandInfoFromToken(contextIoPtr->accessCmd, &cmdInfo);
 
@@ -1497,7 +1497,7 @@ Itcl_FindObject(
      */
     cmd = Tcl_FindCommand(interp, cmdName, contextNs, /* flags */ 0);
     if (cmd != NULL && Itcl_IsObject(cmd)) {
-	if (Tcl_GetCommandInfoFromToken(cmd, &cmdInfo) != 1) {
+	if (!Tcl_GetCommandInfoFromToken(cmd, &cmdInfo)) {
 	    *roPtr = NULL;
 	}
 	*roPtr = (ItclObject *)cmdInfo.deleteData;
@@ -1525,7 +1525,7 @@ Itcl_IsObject(
 {
     Tcl_CmdInfo cmdInfo;
 
-    if (Tcl_GetCommandInfoFromToken(cmd, &cmdInfo) != 1) {
+    if (!Tcl_GetCommandInfoFromToken(cmd, &cmdInfo)) {
 	return 0;
     }
 
@@ -1539,7 +1539,7 @@ Itcl_IsObject(
      */
     cmd = Tcl_GetOriginalCommand(cmd);
     if (cmd != NULL) {
-	if (Tcl_GetCommandInfoFromToken(cmd, &cmdInfo) != 1) {
+	if (!Tcl_GetCommandInfoFromToken(cmd, &cmdInfo)) {
 	    return 0;
 	}
 

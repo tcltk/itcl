@@ -1213,7 +1213,7 @@ Itcl_IsClass(
 {
     Tcl_CmdInfo cmdInfo;
 
-    if (Tcl_GetCommandInfoFromToken(cmd, &cmdInfo) == 0) {
+    if (!Tcl_GetCommandInfoFromToken(cmd, &cmdInfo)) {
 	return 0;
     }
     if (cmdInfo.deleteProc == ItclDestroyClass) {
@@ -1226,7 +1226,7 @@ Itcl_IsClass(
      */
     cmd = Tcl_GetOriginalCommand(cmd);
     if (cmd != NULL) {
-	if (Tcl_GetCommandInfoFromToken(cmd, &cmdInfo) == 0) {
+	if (!Tcl_GetCommandInfoFromToken(cmd, &cmdInfo)) {
 	    return 0;
 	}
 	if (cmdInfo.deleteProc == ItclDestroyClass) {

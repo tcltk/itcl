@@ -460,7 +460,7 @@ Itcl_GetEnsemblePart(
 	goto ensGetFail;
     }
 
-    if (Tcl_GetCommandInfoFromToken(ensPart->cmdPtr, infoPtr) != 1) {
+    if (!Tcl_GetCommandInfoFromToken(ensPart->cmdPtr, infoPtr)) {
 	goto ensGetFail;
     }
 
@@ -621,7 +621,7 @@ Itcl_GetEnsembleUsageForObj(
 
     if (chainObj) {
 	cmd = Tcl_GetCommandFromObj(interp, chainObj);
-	if (Tcl_GetCommandInfoFromToken(cmd, &infoPtr) != 1) {
+	if (!Tcl_GetCommandInfoFromToken(cmd, &infoPtr)) {
 	    return 0;
 	}
 	if (infoPtr.deleteProc == DeleteEnsemble) {
@@ -1170,7 +1170,7 @@ FindEnsemble(
 		(char *)NULL);
 	    return TCL_ERROR;
 	}
-	if (Tcl_GetCommandInfoFromToken(cmdPtr, &cmdInfo) != 1) {
+	if (!Tcl_GetCommandInfoFromToken(cmdPtr, &cmdInfo)) {
 	    return TCL_ERROR;
 	}
 	ensData = (Ensemble*)cmdInfo.objClientData;
@@ -2006,7 +2006,7 @@ Itcl_EnsPartCmd(
 	result = TCL_ERROR;
 	goto errorOut;
     }
-    if (Tcl_GetCommandInfoFromToken(ensData->cmdPtr, &cmdInfo) != 1) {
+    if (!Tcl_GetCommandInfoFromToken(ensData->cmdPtr, &cmdInfo)) {
 	result = TCL_ERROR;
 	goto errorOut;
     }

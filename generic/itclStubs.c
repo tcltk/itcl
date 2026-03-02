@@ -38,8 +38,8 @@ Itcl_IsStub(
      *  is a stub.  If we really want the original command, we'll
      *  find it at a higher level.
      */
-    if (Tcl_GetCommandInfoFromToken(cmdPtr, &cmdInfo) == 1) {
-	if (cmdInfo.deleteProc == ItclDeleteStub) {
+    if (Tcl_GetCommandInfoFromToken(cmdPtr, &cmdInfo)) {
+	if (cmdInfo.objProc == ItclHandleStubCmd) {
 	    return 1;
 	}
     }
