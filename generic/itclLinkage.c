@@ -73,6 +73,7 @@ static void ItclFreeC(void *clientData, Tcl_Interp *interp);
  *  in interp->result) if anything goes wrong.
  * ------------------------------------------------------------------------
  */
+#ifndef TCL_NO_DEPRECATED
 int
 Itcl_RegisterC(
     Tcl_Interp *interp,             /* interpreter handling this registration */
@@ -127,7 +128,7 @@ Itcl_RegisterC(
     Tcl_SetHashValue(entry, cfunc);
     return TCL_OK;
 }
-
+#endif /* TCL_NO_DEPRECATED */
 
 /*
  * ------------------------------------------------------------------------

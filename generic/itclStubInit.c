@@ -6,6 +6,7 @@
 #include "itclInt.h"
 
 #ifdef TCL_NO_DEPRECATED
+#   define Itcl_RegisterC 0
 #   define Itcl_RegisterObjC 0
 #   define Itcl_FindC 0
 #   define Itcl_AddEnsemblePart 0
