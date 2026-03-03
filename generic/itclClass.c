@@ -868,7 +868,7 @@ ItclDestroyClassNamesp(
 	ioPtr = (ItclObject*)Tcl_GetHashValue(hPtr);
 	if (ioPtr->iclsPtr == iclsPtr) {
 	    if ((ioPtr->accessCmd != NULL) && (!(ioPtr->flags &
-		    (ITCL_OBJECT_IS_DESTRUCTED)))) {
+		    ITCL_OBJECT_IS_DESTRUCTED))) {
 		Itcl_PreserveData(ioPtr);
 		Tcl_DeleteCommandFromToken(iclsPtr->interp, ioPtr->accessCmd);
 		ioPtr->accessCmd = NULL;

@@ -1209,7 +1209,7 @@ CallItclObjectCmd(
 
     ItclShowArgs(1, "CallItclObjectCmd", objc, objv);
     if (ioPtr != NULL) {
-	ioPtr->hadConstructorError = 0;
+	ioPtr->flags = (ItclObjectFlags)(ioPtr->flags & ~ITCL_OBJECT_CONSTRUCT_ERROR);
     }
     if (imPtr->flags & (ITCL_CONSTRUCTOR|ITCL_DESTRUCTOR)) {
 	oPtr = ioPtr->oPtr;
@@ -1223,10 +1223,10 @@ CallItclObjectCmd(
 	result = ItclObjectCmd(imPtr, interp, NULL, NULL, objc, objv);
     }
     if (result != TCL_OK) {
-	if (ioPtr != NULL && ioPtr->hadConstructorError == 0) {
+	if (ioPtr != NULL && !(ioPtr->flags & ITCL_OBJECT_CONSTRUCT_ERROR)) {
 	    /* we are in a constructor call and did not yet have an error */
 	    /* -1 means we are not in a constructor */
-	    ioPtr->hadConstructorError = 1;
+	    ioPtr->flags = (ItclObjectFlags)(ioPtr->flags | ITCL_OBJECT_CONSTRUCT_ERROR);
 	}
     }
     return result;
@@ -1275,7 +1275,7 @@ Itcl_EvalMemberCode(
     Itcl_PreserveData(mcode);
 
     if ((imPtr->flags & ITCL_DESTRUCTOR) && (contextIoPtr != NULL)) {
-	contextIoPtr->destructorHasBeenCalled = 1;
+	contextIoPtr->flags = (ItclObjectFlags)(contextIoPtr->flags | ITCL_OBJECT_DESTRUCTOR_CALLED);
     }
 
     /*
@@ -2445,7 +2445,7 @@ ItclCheckCallMethod(
 	callContextPtr = (ItclCallContext *)Tcl_Alloc(
 		sizeof(ItclCallContext));
 	if (ioPtr == NULL) {
-	    callContextPtr->objectFlags = 0;
+	    callContextPtr->objectFlags = ITCL_OBJECT_DEFAULT;
 	    callContextPtr->ioPtr = NULL;
 	} else {
 	    callContextPtr->objectFlags = ioPtr->flags;
@@ -2675,7 +2675,7 @@ ItclProcErrorProc(
 	    }
 	}
 	if (imPtr->flags & ITCL_DESTRUCTOR) {
-	    contextIoPtr->flags = 0;
+	    contextIoPtr->flags = ITCL_OBJECT_DEFAULT;
 	    Tcl_AppendToObj(objPtr, "while deleting object \"", TCL_INDEX_NONE);
 	    Tcl_GetCommandFullName(interp, contextIoPtr->accessCmd, objPtr);
 	    Tcl_AppendToObj(objPtr, "\" in ", TCL_INDEX_NONE);

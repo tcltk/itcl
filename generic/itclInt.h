@@ -351,15 +351,23 @@ typedef struct ItclHierIter {
     Itcl_Stack stack;             /* stack used for traversal */
 } ItclHierIter;
 
-#define ITCL_OBJECT_IS_DELETED           0x01
-#define ITCL_OBJECT_IS_DESTRUCTED        0x02
-#define ITCL_OBJECT_IS_DESTROYED         0x04
-#define ITCL_OBJECT_IS_RENAMED           0x08
-#define ITCL_OBJECT_CLASS_DESTRUCTED     0x10
-#define ITCL_TCLOO_OBJECT_IS_DELETED     0x20
-#define ITCL_OBJECT_DESTRUCT_ERROR       0x40
-#define ITCL_OBJECT_SHOULD_VARNS_DELETE  0x80
-#define ITCL_OBJECT_ROOT_METHOD          0x8000
+typedef enum {
+    ITCL_OBJECT_DEFAULT              =      0,
+    ITCL_OBJECT_IS_DELETED           =   0x01,
+    ITCL_OBJECT_IS_DESTRUCTED        =   0x02,
+    ITCL_OBJECT_IS_DESTROYED         =   0x04,
+    ITCL_OBJECT_IS_RENAMED           =   0x08,
+    ITCL_OBJECT_CLASS_DESTRUCTED     =   0x10,
+    ITCL_TCLOO_OBJECT_IS_DELETED     =   0x20,
+    ITCL_OBJECT_DESTRUCT_ERROR       =   0x40,
+    ITCL_OBJECT_SHOULD_VARNS_DELETE  =   0x80,
+    ITCL_OBJECT_NO_COMPONENT_TRACE   = 0x1000, /* don't call component traces if
+				   * setting components in DelegationInstall */
+    ITCL_OBJECT_DESTRUCTOR_CALLED    = 0x2000, /* is set when the destructor is called
+				   * to avoid callin destructor twice */
+    ITCL_OBJECT_CONSTRUCT_ERROR      = 0x4000, /* needed for multiple calls of CallItclObjectCmd */
+    ITCL_OBJECT_ROOT_METHOD          = 0x8000
+} ItclObjectFlags;
 
 /*
  *  Representation for each [incr Tcl] object.
@@ -407,15 +415,10 @@ typedef struct ItclObject {
     Tcl_Obj *varNsNamePtr;
     Tcl_Object oPtr;             /* the TclOO object */
     Tcl_Resolve *resolvePtr;
-    int flags;
+    ItclObjectFlags flags;
     Tcl_Size callRefCount;       /* prevent deleting of object if refcount > 1 */
     Tcl_Obj *hullWindowNamePtr;   /* the window path name for the hull
 				   * (before renaming in installhull) */
-    int destructorHasBeenCalled;  /* is set when the destructor is called
-				   * to avoid callin destructor twice */
-    int noComponentTrace;         /* don't call component traces if
-				   * setting components in DelegationInstall */
-    int hadConstructorError;      /* needed for multiple calls of CallItclObjectCmd */
 } ItclObject;
 
 #define ITCL_IGNORE_ERRS  0x002  /* useful for construction/destruction */
@@ -665,7 +668,7 @@ typedef struct ItclCmdLookup {
 } ItclCmdLookup;
 
 typedef struct ItclCallContext {
-    int objectFlags;
+    ItclObjectFlags objectFlags;
     Tcl_Namespace *nsPtr;
     ItclObject *ioPtr;
     ItclMemberFunc *imPtr;

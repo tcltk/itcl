@@ -603,7 +603,7 @@ CallDeleteObject(
     int result)
 {
     ItclObject *contextIoPtr = (ItclObject *)data[0];
-    if (contextIoPtr->destructorHasBeenCalled) {
+    if (contextIoPtr->flags & ITCL_OBJECT_DESTRUCTOR_CALLED) {
 	Tcl_AppendResult(interp, "can't delete an object while it is being ",
 		"destructed", (char *)NULL);
 	return TCL_ERROR;

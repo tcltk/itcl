@@ -124,7 +124,7 @@ ObjectRenamedTrace(
     if (ioPtr->flags & ITCL_OBJECT_CLASS_DESTRUCTED) {
 	return;
     }
-    ioPtr->flags |= ITCL_OBJECT_IS_RENAMED;
+    ioPtr->flags = (ItclObjectFlags)(ioPtr->flags|ITCL_OBJECT_IS_RENAMED);
     if (ioPtr->flags & ITCL_TCLOO_OBJECT_IS_DELETED) {
 	ioPtr->oPtr = NULL;
     }
@@ -135,7 +135,7 @@ ObjectRenamedTrace(
 	istate = Itcl_SaveInterpState(ioPtr->interp, 0);
 	Itcl_DestructObject(ioPtr->interp, ioPtr, ITCL_IGNORE_ERRS);
 	Itcl_RestoreInterpState(ioPtr->interp, istate);
-	ioPtr->flags |= ITCL_OBJECT_CLASS_DESTRUCTED;
+	ioPtr->flags = (ItclObjectFlags)(ioPtr->flags|ITCL_OBJECT_CLASS_DESTRUCTED);
     }
 }
 
@@ -312,13 +312,13 @@ ItclCreateObject(
      */
 
     if (ItclInitObjectVariables(interp, ioPtr, iclsPtr) != TCL_OK) {
-	ioPtr->hadConstructorError = 11;
+	ioPtr->flags = (ItclObjectFlags)(ioPtr->flags | ITCL_OBJECT_CONSTRUCT_ERROR);
 	result = TCL_ERROR;
 	goto errorReturn;
     }
     if (ItclInitObjectCommands(interp, ioPtr, iclsPtr, name) != TCL_OK) {
 	Tcl_AppendResult(interp, "error in ItclInitObjectCommands", (char *)NULL);
-	ioPtr->hadConstructorError = 12;
+	ioPtr->flags = (ItclObjectFlags)(ioPtr->flags | ITCL_OBJECT_CONSTRUCT_ERROR);
 	result = TCL_ERROR;
 	goto errorReturn;
     }
@@ -330,7 +330,7 @@ ItclCreateObject(
 	    if (ItclInitObjectOptions(interp, ioPtr, iclsPtr) != TCL_OK) {
 		Tcl_AppendResult(interp, "error in ItclInitObjectOptions",
 			(char *)NULL);
-		ioPtr->hadConstructorError = 13;
+		ioPtr->flags = (ItclObjectFlags)(ioPtr->flags | ITCL_OBJECT_CONSTRUCT_ERROR);
 		result = TCL_ERROR;
 		goto errorReturn;
 	    }
@@ -339,7 +339,7 @@ ItclCreateObject(
 		!= TCL_OK) {
 	    Tcl_AppendResult(interp,
 		    "error in ItclInitObjectMethodVariables", (char *)NULL);
-	    ioPtr->hadConstructorError = 14;
+	    ioPtr->flags = (ItclObjectFlags)(ioPtr->flags | ITCL_OBJECT_CONSTRUCT_ERROR);
 	    result = TCL_ERROR;
 	    goto errorReturn;
 	}
@@ -387,7 +387,7 @@ ItclCreateObject(
 	Tcl_DecrRefCount(newObjv[4]);
 	Tcl_Free(newObjv);
 	if (result != TCL_OK) {
-	    ioPtr->hadConstructorError = 15;
+	    ioPtr->flags = (ItclObjectFlags)(ioPtr->flags | ITCL_OBJECT_CONSTRUCT_ERROR);
 	    goto errorReturn;
 	}
     }
@@ -477,13 +477,13 @@ ItclCreateObject(
      *  invoked implicitly without arguments.
      */
     ItclShowArgs(1, "OBJECTCONSTRUCTOR", objc, objv);
-    ioPtr->hadConstructorError = 0;
+    ioPtr->flags = (ItclObjectFlags)(ioPtr->flags & ~ITCL_OBJECT_CONSTRUCT_ERROR);
     result = Itcl_InvokeMethodIfExists(interp, "constructor",
 	iclsPtr, ioPtr, objc, objv);
-    if (ioPtr->hadConstructorError) {
+    if ((ioPtr->flags & ITCL_OBJECT_CONSTRUCT_ERROR) != 0) {
 	result = TCL_ERROR;
     }
-    ioPtr->hadConstructorError = TCL_INDEX_NONE;
+    ioPtr->flags = (ItclObjectFlags)(ioPtr->flags | ITCL_OBJECT_CONSTRUCT_ERROR);
     if (result != TCL_OK) {
 	istate = Itcl_SaveInterpState(interp, result);
 	ItclDeleteObjectVariablesNamespace(interp, ioPtr);
@@ -641,17 +641,17 @@ ItclCreateObject(
 	    Tcl_GetCommandFullName(interp, ioPtr->accessCmd, objPtr);
 	    if (iclsPtr->flags & ITCL_WIDGETADAPTOR) {
 		/* skip over the leading :: */
-		char *objName;
+		char *objName2;
 		char *lastObjName;
 		lastObjName = Tcl_GetString(objPtr);
-		objName = lastObjName;
+		objName2 = lastObjName;
 		while (1) {
-		    objName = strstr(objName, "::");
-		    if (objName == NULL) {
+		    objName2 = strstr(objName2, "::");
+		    if (objName2 == NULL) {
 			break;
 		    }
-		    objName += 2;
-		    lastObjName = objName;
+		    objName2 += 2;
+		    lastObjName = objName2;
 		}
 
 		Tcl_AppendResult(interp, lastObjName, (char *)NULL);
@@ -1205,7 +1205,7 @@ Itcl_DeleteObject(
 
     Tcl_GetCommandInfoFromToken(contextIoPtr->accessCmd, &cmdInfo);
 
-    contextIoPtr->flags |= ITCL_OBJECT_IS_DELETED;
+    contextIoPtr->flags = (ItclObjectFlags)(contextIoPtr->flags|ITCL_OBJECT_IS_DELETED);
     Itcl_PreserveData(contextIoPtr);
 
     /*
@@ -1213,8 +1213,8 @@ Itcl_DeleteObject(
      */
     if (Itcl_DestructObject(interp, contextIoPtr, 0) != TCL_OK) {
 	Itcl_ReleaseData(contextIoPtr);
-	contextIoPtr->flags |=
-		ITCL_TCLOO_OBJECT_IS_DELETED|ITCL_OBJECT_DESTRUCT_ERROR;
+	contextIoPtr->flags = (ItclObjectFlags)(contextIoPtr->flags |
+		ITCL_TCLOO_OBJECT_IS_DELETED|ITCL_OBJECT_DESTRUCT_ERROR);
 	return TCL_ERROR;
     }
     /*
@@ -1234,7 +1234,7 @@ Itcl_DeleteObject(
      *  the last use of the object data, the object will die here.
      */
     if ((contextIoPtr->accessCmd != NULL) && (!(contextIoPtr->flags &
-	    (ITCL_OBJECT_IS_RENAMED)))) {
+	    ITCL_OBJECT_IS_RENAMED))) {
     if (Tcl_GetCommandInfoFromToken(contextIoPtr->accessCmd, &cmdInfo)) {
 	cmdInfo.deleteProc = (Tcl_CmdDeleteProc *)Itcl_ReleaseData;
 	Tcl_SetCommandInfoFromToken(contextIoPtr->accessCmd, &cmdInfo);
@@ -1265,14 +1265,14 @@ ItclDeleteObjectVariablesNamespace(
 
     if (ioPtr->callRefCount < 1) {
 	/* free the object's variables namespace and variables in it */
-	ioPtr->flags &= ~ITCL_OBJECT_SHOULD_VARNS_DELETE;
+	ioPtr->flags = (ItclObjectFlags)(ioPtr->flags & ~ITCL_OBJECT_SHOULD_VARNS_DELETE);
 	varNsPtr = Tcl_FindNamespace(interp, Tcl_GetString(ioPtr->varNsNamePtr),
 		NULL, 0);
 	if (varNsPtr != NULL) {
 	    Tcl_DeleteNamespace(varNsPtr);
 	}
     } else {
-	ioPtr->flags |= ITCL_OBJECT_SHOULD_VARNS_DELETE;
+	ioPtr->flags = (ItclObjectFlags)(ioPtr->flags | ITCL_OBJECT_SHOULD_VARNS_DELETE);
     }
 }
 
@@ -1343,10 +1343,10 @@ Itcl_DestructObject(
 {
     int result;
 
-    if ((contextIoPtr->flags & (ITCL_OBJECT_IS_DESTRUCTED))) {
+    if ((contextIoPtr->flags & ITCL_OBJECT_IS_DESTRUCTED)) {
 	    return TCL_OK;
     }
-    contextIoPtr->flags |= ITCL_OBJECT_IS_DESTRUCTED;
+    contextIoPtr->flags = (ItclObjectFlags)(contextIoPtr->flags | ITCL_OBJECT_IS_DESTRUCTED);
     /*
      *  If there is a "destructed" table, then this object is already
      *  being destructed.  Flag an error, unless errors are being
@@ -2439,7 +2439,7 @@ ItclTraceComponentVar(
 	 *  Handle write traces
 	 */
 	if ((flags & TCL_TRACE_WRITES) != 0) {
-	    if (ioPtr->noComponentTrace) {
+	    if ((ioPtr->flags & ITCL_OBJECT_NO_COMPONENT_TRACE) != 0) {
 		return NULL;
 	    }
 	    /* need to redo the delegation for this component !! */
@@ -2593,7 +2593,7 @@ ItclDestroyObject(
     if (contextIoPtr->flags & ITCL_OBJECT_IS_DESTROYED) {
 	return;
     }
-    contextIoPtr->flags |= ITCL_OBJECT_IS_DESTROYED;
+    contextIoPtr->flags = (ItclObjectFlags)(contextIoPtr->flags | ITCL_OBJECT_IS_DESTROYED);
 
     if (!(contextIoPtr->flags & ITCL_OBJECT_IS_DESTRUCTED)) {
 	/*
@@ -3041,7 +3041,7 @@ ItclMapMethodNameProc(
 	 * without namespace
 	 */
 	myNsPtr = Tcl_GetCurrentNamespace(iclsPtr->interp);
-	hPtr = Tcl_FindHashEntry(&infoPtr->namespaceClasses, (char *) myNsPtr);
+	hPtr = Tcl_FindHashEntry(&infoPtr->namespaceClasses, (char *)myNsPtr);
 	if (hPtr) {
 	    iclsPtr2 = (ItclClass *) Tcl_GetHashValue(hPtr);
 	    if (Itcl_IsMethodCallFrame(iclsPtr->interp) > 0) {
@@ -3089,16 +3089,15 @@ ItclMapMethodNameProc(
 	    char *token = Tcl_GetString(imPtr->namePtr);
 	    if ((*token != 'i') || (strcmp(token, "info") != 0)) {
 		/* needed for test protect-2.5 */
-		ItclMemberFunc *imPtr2 = NULL;
-		Tcl_HashEntry *hPtr;
 		Tcl_ObjectContext context;
 		context = (Tcl_ObjectContext)Itcl_GetCallFrameClientData(interp);
 		if (context != NULL) {
-		    hPtr = Tcl_FindHashEntry(
+		    ItclMemberFunc *imPtr2 = NULL;
+		    Tcl_HashEntry *hPtr2 = Tcl_FindHashEntry(
 			    &imPtr->iclsPtr->infoPtr->procMethods,
 			    (char *)Tcl_ObjectContextMethod(context));
-		    if (hPtr != NULL) {
-			imPtr2 = (ItclMemberFunc *)Tcl_GetHashValue(hPtr);
+		    if (hPtr2 != NULL) {
+			imPtr2 = (ItclMemberFunc *)Tcl_GetHashValue(hPtr2);
 		    }
 		    if ((imPtr->protection & ITCL_PRIVATE) &&
 			    (imPtr2 != NULL) &&
@@ -3113,15 +3112,15 @@ ItclMapMethodNameProc(
 		/* END needed for test protect-2.5 */
 		if (ioPtr == NULL) {
 		    /* itcl in fossil ticket: 2cd667f270b68ef66d668338e09d144e20405e23 */
-		    Tcl_HashEntry *hPtr;
+		    Tcl_HashEntry *hPtr2;
 		    Tcl_Obj * objPtr;
 		    ItclMemberFunc *imPtr2 = NULL;
 		    ItclCmdLookup *clookupPtr;
 
 		    objPtr = Tcl_NewStringObj(token, TCL_INDEX_NONE);
-		    hPtr = Tcl_FindHashEntry(&iclsPtr->resolveCmds, (char *)objPtr);
-		    if (hPtr != NULL) {
-			clookupPtr = (ItclCmdLookup *)Tcl_GetHashValue(hPtr);
+		    hPtr2 = Tcl_FindHashEntry(&iclsPtr->resolveCmds, (char *)objPtr);
+		    if (hPtr2 != NULL) {
+			clookupPtr = (ItclCmdLookup *)Tcl_GetHashValue(hPtr2);
 			imPtr2 = clookupPtr->imPtr;
 		    }
 		    if ((imPtr->protection & ITCL_PRIVATE) &&
@@ -3561,7 +3560,7 @@ DelegationInstall(
 
     result = TCL_OK;
     delegateAll = 0;
-    ioPtr->noComponentTrace = 1;
+    ioPtr->flags = (ItclObjectFlags)(ioPtr->flags | ITCL_OBJECT_NO_COMPONENT_TRACE);
     noDelegate = ITCL_CONSTRUCTOR|ITCL_DESTRUCTOR|ITCL_COMPONENT;
     componentValuePtr = NULL;
     FOREACH_HASH_VALUE(idmPtr, &iclsPtr->delegatedFunctions) {
@@ -3604,7 +3603,7 @@ DelegationInstall(
 	    result = DelegateFunction(interp, ioPtr, iclsPtr,
 		    componentValuePtr, idmPtr);
 	    if (result != TCL_OK) {
-		ioPtr->noComponentTrace = 0;
+		ioPtr->flags = (ItclObjectFlags)(ioPtr->flags & ~ITCL_OBJECT_NO_COMPONENT_TRACE);
 		return result;
 	    }
 	} else {
@@ -3680,7 +3679,7 @@ DelegationInstall(
 	    Tcl_DecrRefCount(componentValuePtr);
 	}
     }
-    ioPtr->noComponentTrace = 0;
+    ioPtr->flags = (ItclObjectFlags)(ioPtr->flags & ~ITCL_OBJECT_NO_COMPONENT_TRACE);
     result = DelegatedOptionsInstall(interp, iclsPtr);
     return result;
 }

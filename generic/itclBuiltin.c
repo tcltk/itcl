@@ -1328,8 +1328,8 @@ PrepareCreateObject(
     if (result != TCL_OK) {
 	if (iclsPtr->infoPtr->currIoPtr != NULL) {
 	    /* we are in a constructor call */
-	    if (iclsPtr->infoPtr->currIoPtr->hadConstructorError == 0) {
-		iclsPtr->infoPtr->currIoPtr->hadConstructorError = 1;
+	    if ((iclsPtr->infoPtr->currIoPtr->flags & ITCL_OBJECT_CONSTRUCT_ERROR) != 0) {
+		iclsPtr->infoPtr->currIoPtr->flags = (ItclObjectFlags)(iclsPtr->infoPtr->currIoPtr->flags| ITCL_OBJECT_CONSTRUCT_ERROR);
 	    }
 	}
     }
