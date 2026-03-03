@@ -1328,7 +1328,7 @@ PrepareCreateObject(
     if (result != TCL_OK) {
 	if (iclsPtr->infoPtr->currIoPtr != NULL) {
 	    /* we are in a constructor call */
-	    iclsPtr->infoPtr->currIoPtr->flags = (ItclObjectFlags)(iclsPtr->infoPtr->currIoPtr->flags|ITCL_OBJECT_CONSTRUCT_ERROR);
+	    iclsPtr->infoPtr->currIoPtr->flags = (ItclObjectFlags)(iclsPtr->infoPtr->currIoPtr->flags | ITCL_OBJECT_CONSTRUCT_ERROR);
 	}
     }
     Tcl_Free(newObjv);

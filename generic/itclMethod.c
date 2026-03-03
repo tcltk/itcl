@@ -1209,7 +1209,7 @@ CallItclObjectCmd(
 
     ItclShowArgs(1, "CallItclObjectCmd", objc, objv);
     if (ioPtr != NULL) {
-	ioPtr->flags = (ItclObjectFlags)(ioPtr->flags&~ITCL_OBJECT_CONSTRUCT_ERROR);
+	ioPtr->flags = (ItclObjectFlags)(ioPtr->flags & ~ITCL_OBJECT_CONSTRUCT_ERROR);
     }
     if (imPtr->flags & (ITCL_CONSTRUCTOR|ITCL_DESTRUCTOR)) {
 	oPtr = ioPtr->oPtr;
@@ -1224,7 +1224,7 @@ CallItclObjectCmd(
     }
     if (result != TCL_OK) {
 	if (ioPtr != NULL) {
-	    ioPtr->flags = (ItclObjectFlags)(ioPtr->flags|ITCL_OBJECT_CONSTRUCT_ERROR);
+	    ioPtr->flags = (ItclObjectFlags)(ioPtr->flags | ITCL_OBJECT_CONSTRUCT_ERROR);
 	}
     }
     return result;
@@ -1273,7 +1273,7 @@ Itcl_EvalMemberCode(
     Itcl_PreserveData(mcode);
 
     if ((imPtr->flags & ITCL_DESTRUCTOR) && (contextIoPtr != NULL)) {
-	contextIoPtr->flags = (ItclObjectFlags)(contextIoPtr->flags|ITCL_OBJECT_DESTRUCTOR_CALLED);
+	contextIoPtr->flags = (ItclObjectFlags)(contextIoPtr->flags | ITCL_OBJECT_DESTRUCTOR_CALLED);
     }
 
     /*
