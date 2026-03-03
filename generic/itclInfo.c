@@ -387,7 +387,7 @@ ItclInfoGuts(
     }
 
     cPtr = (ItclCallContext *) Tcl_Alloc(sizeof(ItclCallContext));
-    cPtr->objectFlags = ITCL_OBJECT_ROOT_METHOD;
+    cPtr->flags = ITCL_OBJECT_ROOT_METHOD;
     cPtr->nsPtr = NULL;
     cPtr->ioPtr = ioPtr;
     cPtr->imPtr = NULL;

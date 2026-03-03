@@ -1488,7 +1488,7 @@ Itcl_GetContext(
 
 	assert(contextPtr);
 
-	if (contextPtr->objectFlags & ITCL_OBJECT_ROOT_METHOD) {
+	if (contextPtr->flags & ITCL_OBJECT_ROOT_METHOD) {
 	    ItclObject *ioPtr = contextPtr->ioPtr;
 
 	    *iclsPtrPtr = ioPtr->iclsPtr;
@@ -2425,13 +2425,13 @@ ItclCheckCallMethod(
 	    callContextPtr2 = (ItclCallContext *)Tcl_GetHashValue(hPtr);
 	    if (callContextPtr2->refCount == 0) {
 		callContextPtr = callContextPtr2;
-		callContextPtr->objectFlags = ioPtr->flags;
+		callContextPtr->flags = ioPtr->flags;
 		callContextPtr->nsPtr = Tcl_GetCurrentNamespace(interp);
 		callContextPtr->ioPtr = ioPtr;
 		callContextPtr->imPtr = imPtr;
 		callContextPtr->refCount = 1;
 	    } else {
-	      if ((callContextPtr2->objectFlags == ioPtr->flags)
+	      if ((callContextPtr2->flags == ioPtr->flags)
 		    && (callContextPtr2->nsPtr == currNsPtr)) {
 		callContextPtr = callContextPtr2;
 		callContextPtr->refCount++;
@@ -2443,10 +2443,10 @@ ItclCheckCallMethod(
 	callContextPtr = (ItclCallContext *)Tcl_Alloc(
 		sizeof(ItclCallContext));
 	if (ioPtr == NULL) {
-	    callContextPtr->objectFlags = ITCL_OBJECT_DEFAULT;
+	    callContextPtr->flags = ITCL_OBJECT_DEFAULT;
 	    callContextPtr->ioPtr = NULL;
 	} else {
-	    callContextPtr->objectFlags = ioPtr->flags;
+	    callContextPtr->flags = ioPtr->flags;
 	    callContextPtr->ioPtr = ioPtr;
 	}
 	callContextPtr->nsPtr = Tcl_GetCurrentNamespace(interp);

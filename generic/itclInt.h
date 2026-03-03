@@ -668,7 +668,7 @@ typedef struct ItclCmdLookup {
 } ItclCmdLookup;
 
 typedef struct ItclCallContext {
-    ItclObjectFlags objectFlags;
+    ItclObjectFlags flags;
     Tcl_Namespace *nsPtr;
     ItclObject *ioPtr;
     ItclMemberFunc *imPtr;
