@@ -147,13 +147,13 @@ Itcl_ClassCmdResolver(
 	    isOk = 1;
 	}
 	if (! isOk) {
-	    if ((imPtr->flags & ITCL_TYPE_METHOD) != 0) {
+	    if ((imPtr->flags & ITCL_TYPE_METHOD)) {
 		Tcl_AppendResult(interp, "invalid command name \"", name,
 			 "\"", (char *)NULL);
 		return TCL_ERROR;
 	    }
 	    inOptionHandling = imPtr->iclsPtr->infoPtr->inOptionHandling;
-	    if (((imPtr->flags & ITCL_COMMON) == 0) && !inOptionHandling) {
+	    if (!(imPtr->flags & ITCL_COMMON) && !inOptionHandling) {
 		/* a method cannot be called directly in ITCL_TYPE
 		 * so look, if there is a corresponding proc in the
 		 * namespace one level up (i.e. for example ::). If yes
@@ -200,7 +200,7 @@ isCmdDeleted = 0;
     if (isCmdDeleted) {
 	imPtr->accessCmd = NULL;
 
-	if ((flags & TCL_LEAVE_ERR_MSG) != 0) {
+	if ((flags & TCL_LEAVE_ERR_MSG)) {
 	    Tcl_AppendResult(interp,
 		"can't access \"", name, "\": deleted or redefined\n",
 		"(use the \"body\" command to redefine methods/procs)",
@@ -290,7 +290,7 @@ Itcl_ClassVarResolver(
      * If this is a common data member, then its variable
      * is easy to find.  Return it directly.
      */
-    if ((vlookup->ivPtr->flags & ITCL_COMMON) != 0) {
+    if ((vlookup->ivPtr->flags & ITCL_COMMON)) {
 	hPtr = Tcl_FindHashEntry(&vlookup->ivPtr->iclsPtr->classCommons,
 		(char *)vlookup->ivPtr);
 	if (hPtr != NULL) {
@@ -504,7 +504,7 @@ ItclClassRuntimeVarResolver(
      *  If this is a common data member, then the associated
      *  variable is known directly.
      */
-    if ((vlookup->ivPtr->flags & ITCL_COMMON) != 0) {
+    if ((vlookup->ivPtr->flags & ITCL_COMMON)) {
 	hPtr = Tcl_FindHashEntry(&vlookup->ivPtr->iclsPtr->classCommons,
 		(char *)vlookup->ivPtr);
 	if (hPtr != NULL) {
@@ -661,7 +661,7 @@ Itcl_ParseVarResolver(
 
     vlookup = (ItclVarLookup*)Tcl_GetHashValue(hPtr);
 
-    if ((vlookup->ivPtr->flags & ITCL_COMMON) == 0) {
+    if (!(vlookup->ivPtr->flags & ITCL_COMMON)) {
 	return TCL_CONTINUE;
     }
     if (!vlookup->accessible) {

@@ -1209,7 +1209,7 @@ Itcl_BiInfoFunctionCmd2(
 				    Tcl_GetString(imPtr->usagePtr), TCL_INDEX_NONE);
 			}
 		    } else {
-			if ((imPtr->flags & ITCL_ARG_SPEC) != 0) {
+			if (imPtr->flags & ITCL_ARG_SPEC) {
 			    if (imPtr->usagePtr == NULL) {
 				objPtr = Tcl_NewStringObj(
 					Tcl_GetString(mcode->usagePtr), TCL_INDEX_NONE);
@@ -1243,7 +1243,7 @@ Itcl_BiInfoFunctionCmd2(
 		    break;
 
 		case BIfTypeIdx:
-		    val = ((imPtr->flags & ITCL_COMMON) != 0)
+		    val = (imPtr->flags & ITCL_COMMON)
 			? "proc" : "method";
 		    objPtr = Tcl_NewStringObj(val, TCL_INDEX_NONE);
 		    break;
@@ -1437,7 +1437,7 @@ Itcl_BiInfoVariableCmd2(
 	 */
 	if (objc == 0) {
 	    if (ivPtr->protection == ITCL_PUBLIC &&
-		    ((ivPtr->flags & ITCL_COMMON) == 0)) {
+		    !(ivPtr->flags & ITCL_COMMON)) {
 		ivlist = DefInfoPubVariable;
 		objc = 6;
 	    } else {
@@ -1481,7 +1481,7 @@ Itcl_BiInfoVariableCmd2(
 		     *  If this is the built-in "this" variable, then
 		     *  report the object name as its initialization string.
 		     */
-		    if ((ivPtr->flags & ITCL_THIS_VAR) != 0) {
+		    if (ivPtr->flags & ITCL_THIS_VAR) {
 			if ((contextIoPtr != NULL) &&
 				(contextIoPtr->accessCmd != NULL)) {
 			    objPtr = Tcl_NewStringObj(NULL, 0);
@@ -1512,13 +1512,13 @@ Itcl_BiInfoVariableCmd2(
 		    break;
 
 		case BIvTypeIdx:
-		    val = ((ivPtr->flags & ITCL_COMMON) != 0)
+		    val = (ivPtr->flags & ITCL_COMMON)
 			? "common" : "variable";
 		    objPtr = Tcl_NewStringObj((const char *)val, TCL_INDEX_NONE);
 		    break;
 
 		case BIvValueIdx:
-		    if ((ivPtr->flags & ITCL_COMMON) != 0) {
+		    if (ivPtr->flags & ITCL_COMMON) {
 			val = Itcl_GetCommonVar(interp,
 				Tcl_GetString(ivPtr->fullNamePtr),
 				ivPtr->iclsPtr);
@@ -1639,7 +1639,7 @@ Itcl_BiInfoVariableCmd2(
 	    entry = Tcl_FirstHashEntry(&iclsPtr->variables, &place);
 	    while (entry) {
 		ivPtr = (ItclVariable*)Tcl_GetHashValue(entry);
-		if ((ivPtr->flags & ITCL_THIS_VAR) != 0) {
+		if (ivPtr->flags & ITCL_THIS_VAR) {
 		    if (iclsPtr == contextIclsPtr) {
 			objPtr = Tcl_NewStringObj(
 				Tcl_GetString(ivPtr->fullNamePtr), TCL_INDEX_NONE);
@@ -1741,7 +1741,7 @@ Itcl_BiInfoVarsCmd2(
     } else {
 	listPtr = Tcl_NewListObj(0, NULL);
 	FOREACH_HASH_VALUE(ivPtr, &iclsPtr->variables) {
-	    if ((ivPtr->flags & ITCL_VARIABLE) != 0) {
+	    if (ivPtr->flags & ITCL_VARIABLE) {
 		name = Tcl_GetString(ivPtr->namePtr);
 		if ((pattern == NULL) ||
 			Tcl_StringCaseMatch((const char *)name, pattern, 0)) {
@@ -1784,7 +1784,7 @@ Itcl_BiInfoVarsCmd2(
 		resultListPtr = Tcl_GetObjResult(interp);
 /* FIXME !! should perhaps skip ___DO_NOT_DELETE_THIS_VARIABLE here !! */
 		FOREACH_HASH_VALUE(ivPtr, &iclsPtr->variables) {
-		    if ((ivPtr->flags & ITCL_VARIABLE) != 0) {
+		    if (ivPtr->flags & ITCL_VARIABLE) {
 			if (head != NULL) {
 			    namePtr = Tcl_NewStringObj(
 				    Tcl_GetString(ivPtr->fullNamePtr), TCL_INDEX_NONE);
@@ -1795,7 +1795,7 @@ Itcl_BiInfoVarsCmd2(
 			Tcl_ListObjAppendElement(interp, resultListPtr,
 				namePtr);
 		    }
-		    if ((ivPtr->flags & ITCL_COMMON) != 0) {
+		    if (ivPtr->flags & ITCL_COMMON) {
 			if (ivPtr->protection != ITCL_PUBLIC) {
 			    if (head != NULL) {
 				namePtr = Tcl_NewStringObj(
@@ -2100,7 +2100,7 @@ Itcl_BiInfoArgsCmd2(
 	 *  Return a string describing the argument list.
 	 */
 	if ((mcode && mcode->argListPtr != NULL)
-		|| ((imPtr->flags & ITCL_ARG_SPEC) != 0)) {
+		|| (imPtr->flags & ITCL_ARG_SPEC)) {
 	    Tcl_SetObjResult(interp, mcode->usagePtr);
 	} else {
 	    Tcl_SetObjResult(interp, Tcl_NewStringObj("<undefined>", TCL_INDEX_NONE));
@@ -3340,7 +3340,7 @@ Itcl_BiInfoMethodCmd(
 				    Tcl_GetString(imPtr->usagePtr), TCL_INDEX_NONE);
 			}
 		    } else {
-			if ((imPtr->flags & ITCL_ARG_SPEC) != 0) {
+			if (imPtr->flags & ITCL_ARG_SPEC) {
 			    if (imPtr->usagePtr == NULL) {
 				objPtr = Tcl_NewStringObj(
 					Tcl_GetString(mcode->usagePtr), TCL_INDEX_NONE);
@@ -3910,7 +3910,7 @@ Itcl_BiInfoTypeMethodCmd(
 				    Tcl_GetString(imPtr->usagePtr), TCL_INDEX_NONE);
 			}
 		    } else {
-			if ((imPtr->flags & ITCL_ARG_SPEC) != 0) {
+			if (imPtr->flags & ITCL_ARG_SPEC) {
 			    if (imPtr->usagePtr == NULL) {
 				objPtr = Tcl_NewStringObj(
 					Tcl_GetString(mcode->usagePtr), TCL_INDEX_NONE);
@@ -4291,7 +4291,7 @@ Itcl_BiInfoTypeVariableCmd(
 		     *  If this is the built-in "this" variable, then
 		     *  report the object name as its initialization string.
 		     */
-		    if ((ivPtr->flags & ITCL_THIS_VAR) != 0) {
+		    if (ivPtr->flags & ITCL_THIS_VAR) {
 			if ((contextIoPtr != NULL) &&
 				(contextIoPtr->accessCmd != NULL)) {
 			    objPtr = Tcl_NewStringObj(NULL, 0);
@@ -4322,13 +4322,13 @@ Itcl_BiInfoTypeVariableCmd(
 		    break;
 
 		case BIvTypeIdx:
-		    val = ((ivPtr->flags & ITCL_COMMON) != 0)
+		    val = (ivPtr->flags & ITCL_COMMON)
 			? "common" : "variable";
 		    objPtr = Tcl_NewStringObj((const char *)val, TCL_INDEX_NONE);
 		    break;
 
 		case BIvValueIdx:
-		    if ((ivPtr->flags & ITCL_COMMON) != 0) {
+		    if (ivPtr->flags & ITCL_COMMON) {
 			val = Itcl_GetCommonVar(interp,
 				Tcl_GetString(ivPtr->fullNamePtr),
 				ivPtr->iclsPtr);
@@ -4378,7 +4378,7 @@ Itcl_BiInfoTypeVariableCmd(
 	    while (hPtr) {
 		ivPtr = (ItclVariable*)Tcl_GetHashValue(hPtr);
 		if (ivPtr->flags & ITCL_TYPE_VAR) {
-		    if ((ivPtr->flags & ITCL_THIS_VAR) != 0) {
+		    if (ivPtr->flags & ITCL_THIS_VAR) {
 			if (iclsPtr == contextIclsPtr) {
 			    objPtr = Tcl_NewStringObj(
 				    Tcl_GetString(ivPtr->fullNamePtr), TCL_INDEX_NONE);
@@ -4707,7 +4707,7 @@ Itcl_BiInfoDelegatedMethodsCmd(
 	    name = Tcl_GetString(idmPtr->namePtr);
 	    if ((pattern == NULL) ||
 		     Tcl_StringCaseMatch(name, pattern, 0)) {
-		if ((idmPtr->flags & ITCL_TYPE_METHOD) == 0) {
+		if (!(idmPtr->flags & ITCL_TYPE_METHOD)) {
 		    objPtr = Tcl_NewListObj(0, NULL);
 		    Tcl_ListObjAppendElement(interp, objPtr,
 			    idmPtr->namePtr);

@@ -738,7 +738,7 @@ Itcl_ChangeMemberFunc(
      *  created, compare the arg lists or usage strings to make sure
      *  that the interface is not being redefined.
      */
-    if ((imPtr->flags & ITCL_ARG_SPEC) != 0 &&
+    if ((imPtr->flags & ITCL_ARG_SPEC) &&
 	    (imPtr->argListPtr != NULL) &&
 	    !EquivArgLists(interp, imPtr->argListPtr, mcode->argListPtr)) {
 	const char *argsStr;
@@ -874,7 +874,7 @@ ItclCreateMemberCode(
 			    *cPtrPtr) == 0)) {
 			haveError = 1;
 		    }
-		    if ((flags & ITCL_COMMON) != 0) {
+		    if (flags & ITCL_COMMON) {
 			if (! (iclsPtr->infoPtr->functionFlags &
 				ITCL_TYPE_METHOD)) {
 			    haveError = 0;
@@ -1209,7 +1209,7 @@ CallItclObjectCmd(
 
     ItclShowArgs(1, "CallItclObjectCmd", objc, objv);
     if (ioPtr != NULL) {
-	ioPtr->flags = (ItclObjectFlags)(ioPtr->flags & ~ITCL_OBJECT_CONSTRUCT_ERROR);
+	ioPtr->flags = (ItclObjectFlags)(ioPtr->flags&~ITCL_OBJECT_CONSTRUCT_ERROR);
     }
     if (imPtr->flags & (ITCL_CONSTRUCTOR|ITCL_DESTRUCTOR)) {
 	oPtr = ioPtr->oPtr;
@@ -1223,10 +1223,8 @@ CallItclObjectCmd(
 	result = ItclObjectCmd(imPtr, interp, NULL, NULL, objc, objv);
     }
     if (result != TCL_OK) {
-	if (ioPtr != NULL && !(ioPtr->flags & ITCL_OBJECT_CONSTRUCT_ERROR)) {
-	    /* we are in a constructor call and did not yet have an error */
-	    /* -1 means we are not in a constructor */
-	    ioPtr->flags = (ItclObjectFlags)(ioPtr->flags | ITCL_OBJECT_CONSTRUCT_ERROR);
+	if (ioPtr != NULL) {
+	    ioPtr->flags = (ItclObjectFlags)(ioPtr->flags|ITCL_OBJECT_CONSTRUCT_ERROR);
 	}
     }
     return result;
@@ -1275,23 +1273,23 @@ Itcl_EvalMemberCode(
     Itcl_PreserveData(mcode);
 
     if ((imPtr->flags & ITCL_DESTRUCTOR) && (contextIoPtr != NULL)) {
-	contextIoPtr->flags = (ItclObjectFlags)(contextIoPtr->flags | ITCL_OBJECT_DESTRUCTOR_CALLED);
+	contextIoPtr->flags = (ItclObjectFlags)(contextIoPtr->flags|ITCL_OBJECT_DESTRUCTOR_CALLED);
     }
 
     /*
      *  Execute the code body...
      */
-    if (((mcode->flags & ITCL_IMPLEMENT_OBJCMD) != 0)
+    if (((mcode->flags & ITCL_IMPLEMENT_OBJCMD))
 #ifndef TCL_NO_DEPRECATED
-	    || ((mcode->flags & ITCL_IMPLEMENT_ARGCMD) != 0)
+	    || ((mcode->flags & ITCL_IMPLEMENT_ARGCMD))
 #endif /* TCL_NO_DEPRECATED */
     ) {
-	if ((mcode->flags & ITCL_IMPLEMENT_OBJCMD) != 0) {
+	if ((mcode->flags & ITCL_IMPLEMENT_OBJCMD)) {
 	    result = (*mcode->cfunc.objCmd)(mcode->clientData,
 		    interp, objc, objv);
 	} else {
 #ifndef TCL_NO_DEPRECATED
-	    if ((mcode->flags & ITCL_IMPLEMENT_ARGCMD) != 0) {
+	    if ((mcode->flags & ITCL_IMPLEMENT_ARGCMD)) {
 		char **argv;
 		Tcl_Size i;
 		argv = (char**)Tcl_Alloc(objc*sizeof(char*));
@@ -1307,7 +1305,7 @@ Itcl_EvalMemberCode(
 #endif /* TCL_NO_DEPRECATED */
 	}
     } else {
-	if ((mcode->flags & ITCL_IMPLEMENT_TCL) != 0) {
+	if ((mcode->flags & ITCL_IMPLEMENT_TCL)) {
 	    callbackPtr = Itcl_GetCurrentCallbackPtr(interp);
 	    Tcl_NRAddCallback(interp, CallItclObjectCmd, imPtr, contextIoPtr,
 		    INT2PTR(objc), (void *)objv);
@@ -1569,8 +1567,8 @@ Itcl_GetMemberFuncUsage(
      *  was a constructor, and if the object is being created,
      *  then report the invocation via the class creation command.
      */
-    if ((imPtr->flags & ITCL_COMMON) == 0) {
-	if ((imPtr->flags & ITCL_CONSTRUCTOR) != 0 &&
+    if (!(imPtr->flags & ITCL_COMMON)) {
+	if ((imPtr->flags & ITCL_CONSTRUCTOR) &&
 	    contextIoPtr->constructed) {
 
 	    iclsPtr = (ItclClass*)contextIoPtr->iclsPtr;
@@ -2670,7 +2668,7 @@ ItclProcErrorProc(
 	    Tcl_AppendToObj(objPtr, "\" in ", TCL_INDEX_NONE);
 	    Tcl_AppendToObj(objPtr, currIclsPtr->nsPtr->fullName, TCL_INDEX_NONE);
 	    Tcl_AppendToObj(objPtr, "::constructor", TCL_INDEX_NONE);
-	    if ((imPtr->codePtr->flags & ITCL_IMPLEMENT_TCL) != 0) {
+	    if ((imPtr->codePtr->flags & ITCL_IMPLEMENT_TCL)) {
 		Tcl_AppendToObj(objPtr, " (", TCL_INDEX_NONE);
 	    }
 	}
@@ -2680,7 +2678,7 @@ ItclProcErrorProc(
 	    Tcl_GetCommandFullName(interp, contextIoPtr->accessCmd, objPtr);
 	    Tcl_AppendToObj(objPtr, "\" in ", TCL_INDEX_NONE);
 	    Tcl_AppendToObj(objPtr, Tcl_GetString(imPtr->fullNamePtr), TCL_INDEX_NONE);
-	    if ((imPtr->codePtr->flags & ITCL_IMPLEMENT_TCL) != 0) {
+	    if ((imPtr->codePtr->flags & ITCL_IMPLEMENT_TCL)) {
 		Tcl_AppendToObj(objPtr, " (", TCL_INDEX_NONE);
 	    }
 	}
@@ -2696,7 +2694,7 @@ ItclProcErrorProc(
 	      }
 	    }
 
-	    if ((imPtr->flags & ITCL_COMMON) != 0) {
+	    if ((imPtr->flags & ITCL_COMMON)) {
 		Tcl_AppendToObj(objPtr, "procedure", TCL_INDEX_NONE);
 	    } else {
 		Tcl_AppendToObj(objPtr, "method", TCL_INDEX_NONE);
@@ -2706,7 +2704,7 @@ ItclProcErrorProc(
 	    Tcl_AppendToObj(objPtr, "\" ", TCL_INDEX_NONE);
 	}
 
-	if ((imPtr->codePtr->flags & ITCL_IMPLEMENT_TCL) != 0) {
+	if ((imPtr->codePtr->flags & ITCL_IMPLEMENT_TCL)) {
 	    Tcl_Obj *dictPtr;
 	    Tcl_Obj *keyPtr;
 	    Tcl_Obj *valuePtr;

@@ -706,7 +706,7 @@ ObjCallProc(
     Tcl_NRAddCallback(interp, CallAfterCallMethod, clientData, context,
 	    NULL, NULL);
 
-    if ((imPtr->flags & ITCL_COMMON) == 0) {
+    if (!(imPtr->flags & ITCL_COMMON)) {
 	return Itcl_ExecMethod2(clientData, interp, objc-1, objv+1);
     } else {
 	return Itcl_ExecProc2(clientData, interp, objc-1, objv+1);
@@ -1116,7 +1116,7 @@ if (imPtr->codePtr->flags & ITCL_IMPLEMENT_OBJCMD) {
 		    bodyPtr, &pmPtr);
 	    }
 }
-	    if ((imPtr->flags & ITCL_COMMON) == 0) {
+	    if (!(imPtr->flags & ITCL_COMMON)) {
 		imPtr->accessCmd = Tcl_CreateObjCommand2(interp,
 			Tcl_GetString(imPtr->fullNamePtr),
 			Itcl_ExecMethod2, imPtr, Itcl_ReleaseData);

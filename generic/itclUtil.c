@@ -964,7 +964,7 @@ Itcl_CanAccessFunc(
      *  is one, then this method overrides it, and the base class
      *  has access.
      */
-    if ((imPtr->flags & ITCL_COMMON) == 0 &&
+    if (!(imPtr->flags & ITCL_COMMON) &&
 	    Itcl_IsClassNamespace(fromNsPtr)) {
 	Tcl_HashEntry *hPtr;
 
@@ -984,7 +984,7 @@ Itcl_CanAccessFunc(
 		ItclCmdLookup *clookup;
 		clookup = (ItclCmdLookup *)Tcl_GetHashValue(entry);
 		ovlfunc = clookup->imPtr;
-		if ((ovlfunc->flags & ITCL_COMMON) == 0 &&
+		if (!(ovlfunc->flags & ITCL_COMMON) &&
 		     ovlfunc->protection < ITCL_PRIVATE) {
 		    return 1;
 		}

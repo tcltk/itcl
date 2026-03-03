@@ -1767,10 +1767,10 @@ ItclResolveVarEntry(
 			     *  variable, then its index is "0".  Otherwise,
 			     *  add another slot to the end of the table.
 			     */
-			    if ((ivPtr->flags & ITCL_THIS_VAR) != 0) {
+			    if ((ivPtr->flags & ITCL_THIS_VAR)) {
 				vlookup->varNum = 0;
 			    } else {
-				if ((ivPtr->flags & ITCL_OPTIONS_VAR) != 0) {
+				if ((ivPtr->flags & ITCL_OPTIONS_VAR)) {
 				    vlookup->varNum = 1;
 				} else {
 				    vlookup->varNum = iclsPtr->numInstanceVars++;
