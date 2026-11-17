@@ -577,8 +577,11 @@ ItclGenericClassCmd(
     if (PTR2INT(Tcl_GetHashValue(hPtr)) == ITCL_WIDGETADAPTOR) {
 	/* create the itcl_hull variable */
 	namePtr = Tcl_NewStringObj("itcl_hull", TCL_INDEX_NONE);
-	if (ItclCreateComponent(interp, iclsPtr, namePtr, ITCL_COMMON,
-		&icPtr) != TCL_OK) {
+	Tcl_IncrRefCount(namePtr);
+	result = ItclCreateComponent(interp, iclsPtr, namePtr, ITCL_COMMON,
+		&icPtr);
+	Tcl_DecrRefCount(namePtr);
+	if (result != TCL_OK) {
 	    return TCL_ERROR;
 	}
 	iclsPtr->numVariables++;

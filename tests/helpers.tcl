@@ -38,11 +38,21 @@ if {[namespace which -command memory] ne "" && (
       i eval {package require tcltest; @testargv@}
       i eval [list source -encoding utf-8 @test@]
       interp delete i
+      # Process the window events of a deleted Tk application; until
+      # then they hold memory, which would be counted as leaked.
+      update
     }]]
     if {$leak} {
       puts "LEAKED: $leak bytes"
     }
   }
   itcl_leaktest [info script]
+  # The test file may have loaded Tk in this interpreter (to set its tk
+  # constraint) before calling loadTestedCommands. Destroy its main
+  # window, or the application would wait in the Tk event loop when the
+  # script ends.
+  if {[info commands ::destroy] ne ""} {
+    destroy .
+  }
   return -code return
 }

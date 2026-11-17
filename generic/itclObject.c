@@ -557,7 +557,10 @@ ItclCreateObject(
 	}
 
 	Itcl_RenameCommand(interp, objName, name);
-	ioPtr->createNamePtr = NULL;
+	if (ioPtr->createNamePtr != NULL) {
+	    Tcl_DecrRefCount(ioPtr->createNamePtr);
+	    ioPtr->createNamePtr = NULL;
+	}
 	Tcl_TraceCommand(interp, Tcl_GetString(ioPtr->namePtr),
 		TCL_TRACE_RENAME|TCL_TRACE_DELETE, ObjectRenamedTrace, ioPtr);
     }
@@ -679,6 +682,14 @@ ItclCreateObject(
      *  Destroy the "constructed" table in the object data, since
      *  it is no longer needed.
      */
+    if (saveNsNamePtr) {
+	/*
+	 * A widget keeps the new value of ::itcl::internal::varNsName, only
+	 * release the saved previous one.
+	 */
+	Tcl_DecrRefCount(saveNsNamePtr);
+	saveNsNamePtr = NULL;
+    }
     if (infoPtr != NULL) {
 	infoPtr->currIoPtr = saveCurrIoPtr;
     }
@@ -2265,6 +2276,7 @@ ItclTraceSelfVar(
 		    "itcl_hull", NULL, contextIoPtr,
 		    contextIoPtr->iclsPtr);
 	    if (strlen(objectName) == 0) {
+		Tcl_DecrRefCount(objPtr);
 		objPtr = contextIoPtr->namePtr;
 		Tcl_IncrRefCount(objPtr);
 	    } else {
