@@ -2670,6 +2670,7 @@ ItclExtendedCget(
 		result = Tcl_EvalObjv(interp, objc+1, newObjv, TCL_EVAL_DIRECT);
 		Tcl_DecrRefCount(newObjv[0]);
 		Tcl_DecrRefCount(newObjv[1]);
+		Tcl_Free(newObjv);
 		Tcl_DecrRefCount(objPtr);
 		if (oPtr != NULL) {
 		    infoPtr->currContextIclsPtr = NULL;
@@ -3117,6 +3118,7 @@ Itcl_BiDestroyCmd(
 	Tcl_DecrRefCount(newObjv[2]);
 	Tcl_DecrRefCount(newObjv[1]);
 	Tcl_DecrRefCount(newObjv[0]);
+	Tcl_Free(newObjv);
 	return result;
     }
     if (objc != 1) {
@@ -3267,6 +3269,7 @@ Itcl_BiGetInstanceVarCmd(
     memcpy(newObjv + 1, objv + 2, sizeof(Tcl_Obj *) * (objc - 2));
     result = Tcl_EvalObjv(interp, objc - 1, newObjv, 0);
     Tcl_DecrRefCount(newObjv[0]);
+    Tcl_Free(newObjv);
     return result;
 }
 /*
