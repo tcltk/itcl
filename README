@@ -43,7 +43,7 @@ We are very interested in receiving bug reports, patches, and suggestions
 for improvements.  We prefer that you send this information to us via the
 bug database, rather than emailing us directly.  The bug database is at:
 
-	https://core.tcl.tk/itcl/ticket
+	https://core.tcl-lang.org/itcl/ticket
 
 We will log and follow-up on each bug, although we cannot promise a
 specific turn-around time.  Enhancements, reported via the Feature
